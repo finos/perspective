@@ -1,0 +1,64 @@
+{
+  "name": "@jpmorganchase/perspective",
+  "version": "0.0.0",
+  "description": "Perspective.js",
+  "main": "src/js/perspective.parallel.js",
+  "directories": {
+    "test": "test"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src/config/*",
+    "CMakeLists.txt",
+    "src/*"
+  ],
+  "scripts": {
+    "compile_wasm_async": "cd build/wasm_async; WASM_BUILD=1 emcmake cmake ../..; emmake make -j8; cd ../..",
+    "compile_wasm_sync": "cd build/wasm_sync; SYNC_BUILD=1 WASM_BUILD=1 emcmake cmake ../..; emmake make -j8; cd ../..",
+    "compile_asmjs": "cd build/asmjs; emcmake cmake ../..; emmake make -j8; cd ../..",
+    "compile": "mkdir -p build build/wasm_async build/wasm_sync build/asmjs && WASM_OPTIMIZE=1 npm run compile_asmjs & WASM_OPTIMIZE=1 npm run compile_wasm_sync & WASM_OPTIMIZE=1 npm run compile_wasm_async & wait",
+    "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
+    "start": "npm run compile && (npm run perspective & npm run compile_test & npm run compile_node & wait)",
+    "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config src/config/test_browser.config.js & webpack --config src/config/test_node.config.js & webpack --config src/config/benchmark.config.js & wait",
+    "compile_node": "webpack --config src/config/perspective.node.config.js",
+    "test": "node test/js/run_jasmine.js",
+    "clean": "find build -mindepth 1 -delete"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpmorganchase/perspective"
+  },
+  "author": "",
+  "license": "Apache",
+  "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "codemirror": "^5.30.0",
+    "papaparse": "^4.3.6",
+    "underscore": "^1.8.3",
+    "@jpmorganchase/perspective-common": "^0.0.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-es2015-for-of": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "chart.js": "^2.7.1",
+    "codemirror-javascript": "^0.2.0",
+    "css-loader": "^0.28.7",
+    "d3-array": "^1.2.1",
+    "jasmine": "^2.8.0",
+    "jasmine-core": "^2.8.0",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.5",
+    "moment": "^2.19.1",
+    "@jpmorganchase/perspective-common": "^0.0.0",
+    "style-loader": "^0.18.2",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "webpack": "^3.5.6",
+    "wrap-loader": "^0.2.0"
+  }
+}

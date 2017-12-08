@@ -1,0 +1,218 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@border-color: #ccc;
+
+.selected_indicator() {
+    font-family: Arial;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.bordered() {
+    border: 1px solid @border-color;
+    border-top-width: 0px;
+    border-left-width: 0px;
+}
+
+#top_panel perspective-row {
+    display: inline-block;
+}
+
+perspective-viewer.dragging #top_panel ul {
+    border: 1px solid #1078d1 !important;
+    margin-top: -2px;
+    margin-left: -1px;
+}
+
+perspective-viewer.dragging #top_panel ul.dropping {
+    background-color: rgb(240, 240, 255) !important;
+}
+
+perspective-row {
+    display: block;
+}
+
+perspective-viewer ul {
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+perspective-row li {
+    color: rgb(51, 51, 51);
+    margin-bottom: 2px;
+    margin-right: 5px;
+    display: flex;
+    overflow: hidden;
+    align-items: center;
+    transition: margin-right 0.2s;
+    width: auto !important;
+    height: auto !important;
+    float: none !important;
+}
+
+
+perspective-row li:hover{
+    margin-right: 2px;
+}
+
+#column_names perspective-row div {
+    color: rgb(51, 51, 51);
+    padding: 2px;
+    font-size: 12px;
+    flex-grow: 1;
+    transition: margin 0.2s, padding 0.2s;
+}
+
+#column_names perspective-row div:hover {
+    margin-left: -3px;
+    padding-left: 5px;
+}
+
+#column_names perspective-row:hover div {
+    margin-left: -3px;
+    padding-left: 5px;
+}
+
+#column_names perspective-row:not(.off) div {
+    .bordered();
+    background-color: white;
+}
+
+#column_names perspective-row .is_visible {
+    width: 20px;
+    min-width: 20px;
+    margin-left: 5px;
+    cursor: pointer;
+    color: #999;
+    font-size: 14px;
+}
+
+#column_names perspective-row.off .is_visible::before {
+    content: "\25CB";
+}
+
+#column_names perspective-row .is_visible::before {
+    content: "\25CF";
+}
+
+perspective-row #sort_order {
+    display: none;
+}
+
+#sort perspective-row #sort_order {
+    display: inline-block;
+}
+
+.column_row() {
+    position: relative;
+    display: inline-block;
+    padding-left: 5px;
+    padding-right: 5px;
+    min-width: 18px;
+    font-family: monospace;
+}
+
+#side_panel {
+    padding-top: 5px;
+}
+
+#side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
+    .column_row();
+    content: "123";
+    color: #016bc6;
+}
+
+#side_panel perspective-row .string::before {
+    .column_row();
+    content: "abc";
+    color: #fe9292;
+}
+
+#side_panel perspective-row .boolean::before {
+    .column_row();
+    content: "t/f";
+    color: #999999;
+}
+
+#side_panel perspective-row .date::before {
+    .column_row();
+    content: "mdy";
+    color: #999999;
+}
+
+perspective-row #column_aggregate {
+    display: none;
+    font-size: 10px;
+    font-family: Arial;
+    width: 90px;
+    height: 20px;
+}
+
+#column_names perspective-row span#name {
+    width: 100%;
+    white-space: nowrap;
+}
+
+#top_panel perspective-row .row_draggable {
+    display: inline-block !important;
+}
+
+perspective-row .row_draggable {
+    display: flex;
+    height: 21px;
+    flex-direction: column;
+}
+
+perspective-row .row_draggable select {
+    margin-left: 22px;
+    border: none;
+}
+
+perspective-row .row_draggable select:focus {
+    outline: none;
+}
+
+perspective-viewer[view=scatter], perspective-viewer[view=line], perspective-viewer[view=line] {
+    #column_names {
+        .off .is_visible::before {
+            content: "\25CB";
+        }
+        .visible_1 .is_visible::before {
+            .selected_indicator();
+            content: "X";
+        }
+        .visible_2 .is_visible::before {
+            .selected_indicator();
+            content: "Y";
+        }
+        .visible_3 .is_visible::before {
+            .selected_indicator();
+            content: "C";
+        }
+        .visible_4 .is_visible::before {
+            .selected_indicator();
+            content: "S";
+        }
+    }
+}
+
+perspective-viewer:not([row-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate,
+perspective-viewer:not([column-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate {
+    display: inline-block;
+}
+
+perspective-viewer:not([row-pivots='[]']) #column_names,
+perspective-viewer:not([column-pivots='[]']) #column_names {
+    perspective-row .row_draggable {
+        height: 41px;
+    }
+    perspective-row.off .row_draggable {
+        height: 21px;
+    }
+}

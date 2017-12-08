@@ -1,0 +1,282 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@border-color: #ccc;
+
+.bordered() {
+    border: 1px solid @border-color;
+    border-top-width: 0px;
+    border-left-width: 0px;
+}
+
+perspective-viewer:hover #config_button {
+    background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(255,255,255,0.01) 100%);
+    opacity: 1;
+}
+
+[settings=true] #config_button {
+    background: none !important;
+    opacity: 1 !important;
+}
+
+[settings=true] #app {
+    border-top: 1px solid #ccc;
+}
+
+perspective-viewer {
+
+    * {
+        box-sizing: border-box;
+        line-height: 1.42857143;
+    }
+
+    font-family: Arial;
+
+    .noselect {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+    }
+    svg text {
+        font-family: Arial !important;
+    }
+
+    input.error {
+        color: red !important;
+    }
+
+    #app {
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
+    svg text { 
+        font-family: Arial !important;
+
+    }
+    svg .highcharts-axis-title, svg .highcharts-axis-title {
+        font-family: Arial !important;
+    }
+    svg .highcharts-legend-box {
+        fill: rgb(255,255,255);
+        opacity: 0.85;
+    }
+    .chart {
+        flex-grow: 1;
+        height: calc(~"100% - 10px");
+        width: calc(~"100% - 20px");
+        position: absolute;
+        margin-right: 20px;
+        margin-top: 10px;
+    }
+    #pivot_chart {
+        position: relative;
+        display: flex;
+        flex-grow: 1;
+        margin: 0px;
+        background-color: white;
+    }
+    .config {
+        display: flex;
+    }
+    #row_pivots li, #column_pivots li, #sort li {
+        display: inline;
+    }
+    ul {
+        min-height: 20px;
+        position: static !important;
+
+    }
+    #column_names {
+        list-style: none;
+        padding: 5px;
+        width: 100%;
+        border: none !important;
+        flex-grow: 1;
+        margin-top: 8px;
+        overflow-y: auto;
+    }
+    .column {
+        display: flex;
+        list-style: none;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    .rrow {
+        display: flex;
+        flex-grow: 1;
+        align-items: center;
+        max-width: 400px;
+        height: 24px;
+        list-style: none;
+        min-width: 140px;
+        margin: 5px 10px 0px 0px;
+    }
+
+    .rrow > * {
+        height: 100%;
+    }
+
+    #top_panel > .rrow > * {
+        width: 100%;
+    }
+
+    .rrow li {
+        white-space: nowrap;
+    }
+
+    .fixed {
+        max-width: 180px;
+    }
+
+    #top_panel perspective-row + perspective-row:before {
+        content: ",";
+        padding: 0px 10px 0px 0px;
+    }
+
+    label {
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    #drop_target {
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        right: 0px;
+        bottom: 0px;
+        background: white;
+        padding: 30px;
+    }
+    #drop_target_inner {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+    #drop_target_inner h3 {
+        color: #aaa;
+        font-weight: 300;
+    }
+    #config_button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 32px;
+        height: 44px;
+        font-weight: normal;
+        font-family: Arial;
+        font-size: 16px;
+        color: #999;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: opacity 0.3s;
+    }
+
+    ul label {
+        color: #ccc;
+        font-weight: normal;
+        margin-bottom: 0px;
+        margin-left: 0px;
+    }
+    
+    ul {
+        padding: 0px 10px 0px 10px;
+        margin: 0;
+        .bordered();
+        height: 30px;
+        font-size: 12px;
+    }
+    select {
+        height: 24px;
+        padding-left: 6px;
+        font-size: 12px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        border-radius: 0;
+        background-color: white;
+        .bordered();
+    }
+    select:focus {
+        outline: none;
+    }
+    input {
+        .bordered();
+        padding: 0 10px 0 10px;
+    }
+    input::placeholder {
+        color: #ccc;
+    }
+    rect {
+        opacity: 0.5;
+    }
+    path, circle {
+        opacity: 0.8;
+    }
+
+    option[value=""] {
+        color: white !important;
+    }
+    .centered {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    select:focus {
+        color: #000 !important;
+    }
+    #top_panel {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding-bottom: 10px;
+        padding-top: 5px;
+        max-width: 1000px;
+    }
+    #top_panel ul {
+        padding-top: 3px;
+    }
+    #app {
+        background-color: #eee;
+    }
+    
+    #top_panel ul {
+        background-color: white;
+    }
+
+    #side_panel > div {
+        display: flex;
+    }
+
+    #vis_selector {
+        flex-grow: 1;
+        margin-top: 5px;
+        margin-right: 10px;
+    }
+
+    ::-webkit-scrollbar, ::shadow ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb, ::shadow ::-webkit-scrollbar-thumb {
+        background: #ccc;
+    }
+
+    ::-webkit-scrollbar-track, ::shadow ::-webkit-scrollbar-track {
+        background: none;
+    }
+}
