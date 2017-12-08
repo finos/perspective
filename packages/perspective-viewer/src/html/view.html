@@ -1,0 +1,55 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<template id="perspective-viewer">
+
+    <div id="app">
+        <div id='side_panel' class="column fixed noselect">
+            <div>
+                <div style="width:25px;margin-left:5px"></div>
+                <select id="vis_selector">
+                </select>
+            </div>
+            <ul id='column_names'></ul>
+        </div>
+        <div class="column noselect">
+            <div id='top_panel'>
+                <div class="rrow">
+                    <ul id="row_pivots" name="Row Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <label for="row_pivots">Row Pivots</label>
+                    </ul>
+                </div>
+                <span class="rrow centered" style="min-width:5px;max-width:5px;flex-grow:0;color:#999;font-family:Arial;font-size:12px">&#x2715;</span>
+                <div class="rrow">
+                    <ul id="column_pivots" name="Column Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <label for="column_pivots">Column Pivots</label>
+                    </ul>
+                </div>
+                <div class="rrow">
+                    <ul id="sort" name="Sort" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <label for="sort">Sort</label>
+                    </ul>
+                </div>
+                <div class="rrow" style='flex-grow:3'>
+                    <input id="filter_input" placeholder="Filter"></input>
+                </div>
+            </div>
+            <div id="pivot_chart"></div>
+        </div>
+
+        <div id="config_button" class="noselect">&#x1f527;</div>
+
+        <div id='drop_target' ondragover="allowDrop(event)">
+            <div id='drop_target_inner'>
+
+            </div>
+        </div>
+    </div>
+
+</template>
