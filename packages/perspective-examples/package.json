@@ -7,9 +7,8 @@
     "test": "test"
   },
   "files": [
-    "src/config/*",
-    "CMakeLists.txt",
-    "src/*"
+     "src/*",
+     "build/*"
   ],
   "publishConfig": {
     "access": "public"

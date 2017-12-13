@@ -4,7 +4,8 @@
   "description": "Perspective.js",
   "main": "src/js/view.js",
   "files": [
-    "src/*"
+    "src/*",
+    "build/*"
   ],
   "scripts": {
     "view": "webpack --config src/config/view.config.js",

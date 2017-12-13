@@ -7,7 +7,8 @@
     "test": "test"
   },
   "files": [
-    "src/*"
+     "src/*",
+     "build/*"
   ],
   "scripts": {
     "hypergrid": "webpack --config src/config/hypergrid.plugin.config.js",

@@ -4,7 +4,7 @@
   "description": "Perspective.js",
   "main": "index.js",
   "files": [
-    "src/*"
+    "*.js"
   ],
   "publishConfig": {
     "access": "public"

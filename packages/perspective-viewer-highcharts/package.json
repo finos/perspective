@@ -7,7 +7,8 @@
     "test": "test"
   },
   "files": [
-    "src/*"
+     "src/*",
+     "build/*"
   ],
   "scripts": {
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
