@@ -2,17 +2,13 @@
   "name": "@jpmorganchase/perspective",
   "version": "0.0.0",
   "description": "Perspective.js",
-  "main": "src/js/perspective.parallel.js",
-  "directories": {
-    "test": "test"
-  },
+  "main": "src/js/perspective.parallel.js",  
   "publishConfig": {
     "access": "public"
   },
   "files": [
-    "src/config/*",
-    "CMakeLists.txt",
-    "src/*"
+    "src/*",
+    "build/*"
   ],
   "scripts": {
     "compile_wasm_async": "cd build/wasm_async; WASM_BUILD=1 emcmake cmake ../..; emmake make -j8; cd ../..",
@@ -23,6 +19,7 @@
     "start": "npm run compile && (npm run perspective & npm run compile_test & npm run compile_node & wait)",
     "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config src/config/test_browser.config.js & webpack --config src/config/test_node.config.js & webpack --config src/config/benchmark.config.js & wait",
     "compile_node": "webpack --config src/config/perspective.node.config.js",
+    "docs": "documentation build src/js/perspective.js -f html -o docs --shallow",
     "test": "node test/js/run_jasmine.js",
     "clean": "find build -mindepth 1 -delete"
   },
@@ -40,6 +37,7 @@
     "@jpmorganchase/perspective-common": "^0.0.0"
   },
   "devDependencies": {
+    "documentation": "^5.3.3",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
