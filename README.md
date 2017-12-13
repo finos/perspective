@@ -1,10 +1,12 @@
 # Perspective
 
+[![Build Status](https://travis-ci.org/jpmorganchase/perspective.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
+
 A streaming data pivot, aggregation and filter engine for Javascript and C++.
 Perspective features:
 
 - A fast, memory efficient implementation written principally in C++ and
-  compiled to both WebAssmebly and asm.js via the
+  compiled to both WebAssembly and asm.js via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
 - A Web Component based, embeddable UI for user engine configuration, as well as 
@@ -14,7 +16,7 @@ Perspective features:
 
 - Runtimes for single process, Web Worker and Node.js
 
-Try out in interactive [demo](demo.html), or keep reading to learn how to use
+Try out an interactive [demo](https://jpmorganchase.github.io/perspective/examples/superstore.html), or keep reading to learn how to use
 Perspective in your own project.
 
 ## Installation
@@ -34,10 +36,10 @@ npm install
 If everything is successful, you should find a few built example assets in the 
 `packages/perspective-examples/build` directory:
 
-* [superstore.html](demo.html) A static `superstore.csv` demo page.
-* [streaming.html](streaming.html) A streaming random data demo page.
-* [test.html](test.html) The test suite.
-* [benchmark.html](benchmark.html) Some simple in-browser benchmarks.
+* [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore.html) A static `superstore.csv` demo page.
+* [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
+* [test.html](https://jpmorganchase.github.io/perspective/examples/test.html) The test suite.
+* [benchmark.html](https://jpmorganchase.github.io/perspective/examples/benchmark.html) Some simple in-browser benchmarks.
 
 You can run a simple test server on port 8081 by running:
 

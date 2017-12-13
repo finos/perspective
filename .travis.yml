@@ -1,0 +1,30 @@
+
+dist: trusty
+language: node_js
+node_js:
+  - "7"
+
+env:
+  global:
+    - EM_USE_GLOBAL_CACHE=1
+
+addons:
+  apt:
+    packages: &trusty_pocl_packages
+      - libboost-all-dev
+
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
+
+script:
+  - npm install
+  - mkdir boost_includes
+  - cp -r /usr/include/boost boost_includes/
+  - ./node_modules/.bin/lerna bootstrap --hoist
+  - docker exec -it emscripten ./node_modules/.bin/lerna run start --stream
+  - ./node_modules/.bin/lerna run test

@@ -13,6 +13,8 @@ list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 include_directories("/usr/local/include")
+include_directories("/src/boost_includes")
+
 
 set(EXTENDED_FLAGS " \
 	--bind \
