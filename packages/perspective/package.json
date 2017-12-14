@@ -19,7 +19,7 @@
     "start": "npm run compile && (npm run perspective & npm run compile_test & npm run compile_node & wait)",
     "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config src/config/test_browser.config.js & webpack --config src/config/test_node.config.js & webpack --config src/config/benchmark.config.js & wait",
     "compile_node": "webpack --config src/config/perspective.node.config.js",
-    "docs": "documentation build src/js/perspective.js -f html -o docs --shallow",
+    "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
     "test": "node test/js/run_jasmine.js",
     "clean": "find build -mindepth 1 -delete"
   },

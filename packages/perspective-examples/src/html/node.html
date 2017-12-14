@@ -10,25 +10,16 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <script src='http://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
-        <script src="perspective.js"></script>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+
+        <script src="mobile_fix.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
         <script src="perspective.view.js"></script>
         <script src="hypergrid.plugin.js"></script>
         <script src="highcharts.plugin.js"></script>
 
-        <title>Streaming Test</title>
-
-        <style>
-
-            perspective-viewer {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-            }
-          
-        </style>
+        <link rel='stylesheet' href="demo.css">
 
     </head>
     <body>
@@ -49,10 +40,6 @@
             }
 
             window.addEventListener('WebComponentsReady', function () {
-                var firstMove;
-                window.addEventListener('touchstart', function (e) { firstMove = true; });
-                window.addEventListener('touchmove', function (e) { if (firstMove) {e.preventDefault();firstMove = false;} });
-
                 var elem = document.getElementById('view1');
                 elem.load(perspective.worker().table(schema, {"index": "name"}));
                 var socket = new WebSocket('ws://' + location.hostname + ':8080/');               

@@ -1,16 +1,15 @@
 # Perspective
 
-[![Build Status](https://travis-ci.org/jpmorganchase/perspective.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
+Features:
 
-A streaming data pivot, aggregation and filter engine for Javascript and C++.
-Perspective features:
-
-- A fast, memory efficient implementation written principally in C++ and
+- A fast, memory efficient streaming data engine written principally in C++ and
   compiled to both WebAssembly and asm.js via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
-- A Web Component based, embeddable UI for user engine configuration, as well as 
-  simple visualization plugins for some common Javascript libraries such as
+- An embeddable UI framework for user engine configuration & visualization, based
+  on [Web Components](https://www.webcomponents.org/).
+
+- A suite of simple visualization plugins for some common Javascript libraries such as
   [HighCharts](https://github.com/highcharts/highcharts) and 
   [Hypergrid](https://github.com/fin-hypergrid/core).
 
@@ -116,14 +115,20 @@ or in a Web Worker (browser only)
 
 #### In the browser
 
+Via ES6 module and/or Babel:
+
 ```javascript
 import perspective from 'perspective';
 ```
+
 or
 
 ```javascript
 const perpective = require('perpective');
 ```
+
+Perspective can also be referenced via the global `perspective` module name in vanilla
+Javascript.
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()` 
 method.  This will create a new WebWorker (browser) or Process (node.js), and 
@@ -136,6 +141,12 @@ const worker = perspective.worker();
 
 #### In Node.js
 
+```javascript
+const perspective = require('perspective/build/perspective.node.js');
+```
+
+See [perspective-examples/node_server.js](https://github.com/jpmorganchase/perspective/blob/master/packages/perspective-examples/src/js/node_server.js)
+for an example.
 
 #### Usage
 
@@ -237,5 +248,4 @@ document.addEventListener("WebComponentsReady", function () {
 });
 ```
 
-<perspective-viewer data='[{"x": 1, "y":"a", "z": true},{"x": 2, "y":"b", "z": false},{"x": 3, "y":"c", "z": true},{"x": 4, "y":"d", "z": false}]'></perspective-viewer>
-
+See [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective]) for more details.

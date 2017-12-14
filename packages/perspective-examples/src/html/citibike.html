@@ -24,21 +24,15 @@
     </head>
     <body>
 
-        <perspective-viewer 
-            view="vertical" 
-            row-pivots='["Category","Region","Segment"]' 
-            column-pivots='["Sub-Category"]'
-            columns='["Sales"]'>
-                
-        </perspective-viewer>
+        <perspective-viewer view='scatter' columns='["longitude","latitude","availableBikes"]'></perspective-viewer>
 
         <script>
 
             window.addEventListener('WebComponentsReady', function () {
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'superstore.csv', true);
+                xhr.open('GET', 'citibike.json', true);
                 xhr.onload = function () { 
-                    document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
+                    document.getElementsByTagName('perspective-viewer')[0].load(JSON.parse(xhr.response).stationBeanList); 
                 }
                 xhr.send(null);
             });

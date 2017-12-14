@@ -19,28 +19,28 @@
         <script src="hypergrid.plugin.js"></script>
         <script src="highcharts.plugin.js"></script>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+
         <link rel='stylesheet' href="demo.css">
 
     </head>
     <body>
 
         <perspective-viewer 
-            view="vertical" 
-            row-pivots='["Category","Region","Segment"]' 
-            column-pivots='["Sub-Category"]'
-            columns='["Sales"]'>
+            index="long" 
+            sort='["mktcap"]'
+            row-pivots='["long"]'
+            columns='["mktcap","price","vwapData","supply","volume","perc","shapeshift"]'>
                 
         </perspective-viewer>
 
         <script>
 
             window.addEventListener('WebComponentsReady', function () {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'superstore.csv', true);
-                xhr.onload = function () { 
-                    document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
-                }
-                xhr.send(null);
+                var socket = io.connect('https://coincap.io');
+                socket.on('trades', function (tradeMsg) {
+                    document.getElementsByTagName('perspective-viewer')[0].update([tradeMsg.msg]);
+                })
             });
 
         </script>
