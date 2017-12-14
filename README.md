@@ -64,7 +64,7 @@ Instead of `latest`, you'll need to install and activate an older version:
 
 ```bash
 ./emsdk install sdk-1.37.21-64bit
-./emsdk active sdk-1.37.21-64bit
+./emsdk activate sdk-1.37.21-64bit
 ```
 
 You'll also need Boost and CMake, which can be installed from Homebrew:
