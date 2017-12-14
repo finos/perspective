@@ -1,5 +1,7 @@
 # Perspective
 
+[![Build Status](https://travis-ci.org/jpmorganchase/perspective.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
+
 A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
 & user configurable analytics entirely in the browser.
 
