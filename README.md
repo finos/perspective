@@ -1,29 +1,44 @@
 # Perspective
 
+A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
+& user configurable analytics entirely in the browser.
+
 Features:
 
 - A fast, memory efficient streaming data engine written principally in C++ and
   compiled to both WebAssembly and asm.js via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
-- An embeddable UI framework for user engine configuration & visualization, based
-  on [Web Components](https://www.webcomponents.org/).
+- An embeddable, framework-agnostic UI for user engine configuration & visualization, based
+  on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for
+  responsive UIs no matter the update frequency.
 
 - A suite of simple visualization plugins for some common Javascript libraries such as
   [HighCharts](https://github.com/highcharts/highcharts) and 
   [Hypergrid](https://github.com/fin-hypergrid/core).
 
-- Runtimes for single process, Web Worker and Node.js
+- Runtimes for the Browser and Node.js.
 
-Try out an interactive [demo](https://jpmorganchase.github.io/perspective/examples/superstore.html), or keep reading to learn how to use
-Perspective in your own project.
+## Examples
+
+* [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore.html) A static `superstore.csv` demo page.
+* [citibike.html](https://jpmorganchase.github.io/perspective/examples/citibike.html) NYC Citibike availability map.
+* [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
+* [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming cryptocurrency prices via [Coincap.io](http://coincap.io/).
+* [test.html](https://jpmorganchase.github.io/perspective/examples/test.html) The test suite.
+* [benchmark.html](https://jpmorganchase.github.io/perspective/examples/benchmark.html) Some simple in-browser benchmarks.
 
 ## Installation
 
 ### From source
 
 You'll need [emscripten](https://github.com/kripken/emscripten) installed and 
-resolveable on your PATH (via the `emsdk_env.sh`) in order to build from source.
+resolveable on your PATH in order to build from source, for example via `emsdk_env.sh`:
+
+```bash
+source emsdk/emsdk_env.sh
+```
+
 Once installed, you can build perspective via:
 
 ```bash
@@ -34,11 +49,6 @@ npm install
 
 If everything is successful, you should find a few built example assets in the 
 `packages/perspective-examples/build` directory:
-
-* [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore.html) A static `superstore.csv` demo page.
-* [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
-* [test.html](https://jpmorganchase.github.io/perspective/examples/test.html) The test suite.
-* [benchmark.html](https://jpmorganchase.github.io/perspective/examples/benchmark.html) Some simple in-browser benchmarks.
 
 You can run a simple test server on port 8081 by running:
 
