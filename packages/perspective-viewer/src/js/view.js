@@ -137,10 +137,16 @@ function column_aggregate_clicked() {
  *
  */
 
-const __WORKER__ = perspective.worker();;
+let __WORKER__;
+
+function get_worker() {
+    if (__WORKER__ === undefined) {
+        __WORKER__ = perspective.worker();
+    } 
+    return __WORKER__;
+} 
 
 function load(csv) {
-    this.worker = __WORKER__;
     try {
         csv = csv.trim();
     } catch (e) {}
@@ -152,7 +158,7 @@ function load(csv) {
     if (csv.hasOwnProperty("_name")) {
         table = csv;
     } else {
-        table = this.worker.table(csv, options);
+        table = get_worker().table(csv, options);
     }
     loadTable.call(this, table);
     for (let slave of this.slaves) {
@@ -329,7 +335,11 @@ registerElement(template, {
 
     update: {
         value: function (json) {
-            this._table.update(json);
+            if (this._table === undefined) {
+                this.load(json);
+            } else {
+                this._table.update(json);
+            }
         }
     },
 
@@ -418,6 +428,11 @@ registerElement(template, {
         }
     },
 
+    /**
+     * The set of visibile columns.
+     *
+     * @param {array} columns An array of strings, the names of visible columns
+     */
     columns: {
         set: function () {
             let show = JSON.parse(this.getAttribute('columns'));
@@ -426,6 +441,16 @@ registerElement(template, {
         }
     },
 
+    /**
+     * The set of column aggregate configurations.
+     *
+     * @param {array} aggregates An arry of aggregate config objects, which
+     *     specify what aggregate settings to use when the associated column
+     *     is visible, and at least one `row-pivot` is defined.  An aggregate
+     *     config object has two properties:
+     *         `name`: The column name.
+     *         `op`: The aggregate type as a string.  See {@link perspective/src/js/defaults.js}
+     */
     aggregates: {
         set: function () {
             let show = JSON.parse(this.getAttribute('aggregates'));
