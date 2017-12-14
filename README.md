@@ -26,7 +26,7 @@ Features:
 * [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore.html) A static `superstore.csv` demo page.
 * [citibike.html](https://jpmorganchase.github.io/perspective/examples/citibike.html) NYC Citibike availability map.
 * [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
-* [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming cryptocurrency prices via [Coincap.io](http://coincap.io/).
+* [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
 * [test.html](https://jpmorganchase.github.io/perspective/examples/test.html) The test suite.
 * [benchmark.html](https://jpmorganchase.github.io/perspective/examples/benchmark.html) Some simple in-browser benchmarks.
 
@@ -88,7 +88,7 @@ all available via NPM, are:
   implementation.
 
 - `@jpmorganchase/perspective-viewer`  
-  A configuration and visualizaiton (via plugins) UI, bundled as a [Web Component](https://www.webcomponents.org/introduction).
+  A configuration and visualization (via plugins) UI, bundled as a [Web Component](https://www.webcomponents.org/introduction).
 
 - `@jpmorganchase/perspective-viewer-hypergrid`  
   A perspective-viewer plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
@@ -136,7 +136,7 @@ import perspective from 'perspective';
 or
 
 ```javascript
-const perpective = require('perpective');
+const perspective = require('perspective');
 ```
 
 Perspective can also be referenced via the global `perspective` module name in vanilla
@@ -216,16 +216,16 @@ imported first in order to use it - e.g., from a CDN:
 
 If you are using babel or another build environment which supports ES6 modules,
 you need only import the `perspective-viewer` libraries somewhere in your
-application - these modules export nothing, but rather register the compoonents
+application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
 
 ```javascript
-import "prespective-viewer";
+import "perspective-viewer";
 import "perspective-viewer-hypergrid";
 import "perspective-viewer-highcharts";
 ```
 
-Alternatively, you can just import the pre-bundled assets from the relevent NPM 
+Alternatively, you can just import the pre-bundled assets from the relevant NPM 
 packages' `build/` directories:
 
 ```html 
@@ -260,4 +260,4 @@ document.addEventListener("WebComponentsReady", function () {
 });
 ```
 
-See [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective]) for more details.
+See [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective) for more details.
