@@ -942,20 +942,22 @@ if (typeof self !== "undefined" && self.addEventListener) {
             case 'table_method': {
                 let obj = _tables[msg.name];
                 let result = obj[msg.method].apply(obj, msg.args);
-                if (result.then) {
-                    result.then(data => {
-                        if (data) {
-                            self.postMessage({
-                                id: msg.id,
-                                data: data
-                            });
-                        }
-                    });
-                } else if (result) {
-                    self.postMessage({
-                        id: msg.id,
-                        data: result
-                    });
+                if (result) {
+                    if (result.then) {
+                        result.then(data => {
+                            if (data) {
+                                self.postMessage({
+                                    id: msg.id,
+                                    data: data
+                                });
+                            }
+                        });
+                    } else {
+                        self.postMessage({
+                            id: msg.id,
+                            data: result
+                        });
+                    }
                 }
                 break;
             }
