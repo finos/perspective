@@ -7,13 +7,19 @@
     "test": "test"
   },
   "files": [
-     "src/*",
-     "build/*"
+    "src/*",
+    "build/*"
   ],
   "scripts": {
     "hypergrid": "webpack --config src/config/hypergrid.plugin.config.js",
-    "start": "npm run hypergrid",
-    "clean": "find build -mindepth 1 -delete"    
+    "start": "npm run hypergrid && npm run compile_test",
+    "compile_test": "cp test/html/* build",
+    "test": "jest 2>&1",
+    "clean": "find build -mindepth 1 -delete"
+  },
+  "jest": {
+    "roots": ["test/js"],
+    "verbose": true
   },
   "publishConfig": {
     "access": "public"
@@ -31,20 +37,26 @@
     "@jpmorganchase/perspective-common": "^0.0.0"
   },
   "devDependencies": {
+    "@jpmorganchase/perspective": "^0.0.0",
+    "@jpmorganchase/perspective-common": "^0.0.0",
+    "@jpmorganchase/perspective-viewer": "^0.0.0",
     "babel-core": "^6.26.0",
+    "babel-jest": "^22.0.4",
     "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "chart.js": "^2.7.1",
     "css-loader": "^0.28.7",
     "html-loader": "^0.5.1",
+    "http-server": "^0.10.0",
+    "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
+    "puppeteer": "^0.13.0",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6",
-    "@jpmorganchase/perspective-common": "^0.0.0"
+    "webpack": "^3.5.6"
   }
 }

@@ -494,7 +494,7 @@ export function draw(mode) {
 }
 
 function resize(immediate) {
-    if (immediate) {
+    if (immediate && this._chart) {
         this._chart.reflow();
     } else {
         if (this.resize_timer) {
