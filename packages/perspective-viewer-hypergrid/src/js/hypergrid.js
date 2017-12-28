@@ -869,7 +869,6 @@ registerElement(TEMPLATE, {
 
 
 async function grid(div, view, hidden) {
-    let t = performance.now();
     let [json, schema] = await Promise.all([view.to_json(), view.schema()]);
     if (hidden.length > 0) {
         let first = json[0];
@@ -898,10 +897,6 @@ async function grid(div, view, hidden) {
     }
     this.grid.set_data(json, schema);
     setTimeout(() => this.grid.grid.canvas.resize());
-    if (!this.hasAttribute('render_time')) {
-        this.dispatchEvent(new Event('loaded', {bubbles: true}));
-    }
-    this.setAttribute('render_time', performance.now() - t);
 }
 
 global.registerPlugin("hypergrid", {

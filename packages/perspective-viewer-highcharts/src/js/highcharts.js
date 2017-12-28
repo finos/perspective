@@ -224,8 +224,6 @@ export function draw(mode) {
         var col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
         var aggregates = this._get_view_aggregates();
 
-        var t = performance.now();
-
         let [js, schema] = await Promise.all([view.to_json(), view.schema()]);
 
         let [series, top, colorRange] = _make_series.call(this, js, row_pivots, col_pivots, mode, hidden);
@@ -484,12 +482,6 @@ export function draw(mode) {
             for (let e of Array.prototype.slice.call(el.children)) { el.removeChild(e); }
             el.appendChild(this._chart.renderTo);
         }
-
-        if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('loaded', {bubbles: true}));
-        }
-
-        this.setAttribute('render_time', performance.now() - t);
     };
 }
 

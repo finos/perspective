@@ -100,7 +100,7 @@ beforeAll(async () => {
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
-        fs.writeFileSync('test/results/results.json', JSON.stringify(results));
+        fs.writeFileSync('test/results/results.json', JSON.stringify(results, null, 4));
     }
 });
 
@@ -119,7 +119,7 @@ describe.page = (_url, body) => {
 const cons = require('console');
 const private_console = new cons.Console(process.stdout, process.stderr);
 
-test.capture = function capture(name, body, timeout = 20000) {
+test.capture = function capture(name, body, timeout = 60000) {
     test(name, async () => {
         let errors = [];
         if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
@@ -135,10 +135,15 @@ test.capture = function capture(name, body, timeout = 20000) {
                 private_console.error(msg.message);
             }
         });
+        
         await page.goto(`http://127.0.0.1:${__PORT__}/${url || 'superstore.html'}`);
         await page.waitForSelector('perspective-viewer[render_time]');
         await body(page);
-        await page.waitFor(1000)
+
+        // let animation run;
+        await page.waitForSelector('perspective-viewer:not([updating])');
+        await page.waitFor(300);
+
         const screenshot = await page.screenshot();
         const hash = crypto.createHash('md5').update(screenshot).digest("hex");
         if (process.env.WRITE_TESTS) {

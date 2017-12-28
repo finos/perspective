@@ -1,1 +1,10 @@
-{"shows a grid without any settings applied.":"b09dc5301dbfe6afbfcd2dc58843a475","pivots by a row.":"f18630a48e467efdd117c6d841252c45","pivots by two rows.":"1c4492fea4bd86452d1d57f2edc8a1f5","pivots by a row and a column.":"6f2bcf16c9d16555b513012970dbfe20","pivots by two rows and two columns.":"385fcd2c7d3fd47289915089a6f2b9cd","sorts by a numeric column.":"fc5cf3111c3420656cb5ba0bc416f258","sorts by an alpha column.":"70ba30a61b3f01e898ed292a1d366c12","displays visible columns.":"dc8be6c71b48675390915715d057544c"}
+{
+    "shows a grid without any settings applied.": "b09dc5301dbfe6afbfcd2dc58843a475",
+    "pivots by a row.": "f18630a48e467efdd117c6d841252c45",
+    "pivots by two rows.": "1c4492fea4bd86452d1d57f2edc8a1f5",
+    "pivots by a row and a column.": "65e1ae5ede0dbd4c554622d64a3837cd",
+    "pivots by two rows and two columns.": "66806dd55dfa3702f17782589b158994",
+    "sorts by a numeric column.": "fc5cf3111c3420656cb5ba0bc416f258",
+    "sorts by an alpha column.": "70ba30a61b3f01e898ed292a1d366c12",
+    "displays visible columns.": "dc8be6c71b48675390915715d057544c"
+}

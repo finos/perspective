@@ -274,7 +274,21 @@ function update() {
         }
     });
     this._drop_target.style.display = 'none';
-    this._plugin.create.call(this, this._datavis, this._view, hidden, true);
+
+    const t = performance.now();
+    this._render_count = (this._render_count || 0) + 1;
+    this.setAttribute('updating', true);
+
+    this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
+        if (!this.hasAttribute('render_time')) {
+            this.dispatchEvent(new Event('loaded', {bubbles: true}));
+        }
+        this.setAttribute('render_time', performance.now() - t);
+        this._render_count--;
+        if (this._render_count === 0) {
+            this.removeAttribute('updating');
+        }
+    });
 }
 
 /******************************************************************************
@@ -663,20 +677,19 @@ registerElement(template, {
             if (Object.keys(RENDERERS).length === 0) {
                 RENDERERS['debug'] = {
                     name: "Debug", 
-                    create: div => { 
-                        this._view.to_json().then(json => {
-                            var t = performance.now();
-                            let csv = "";
-                            if (json.length > 0) {
-                                let columns = Object.keys(json[0]);
-                                csv += columns.join('|') + '\n';
-                                for (let row of json) {
-                                    csv += Object.values(row).join('|') + "\n";                                    
-                                }
+                    create: async div => { 
+                        let json = await this._view.to_json();
+                        var t = performance.now();
+                        let csv = "";
+                        if (json.length > 0) {
+                            let columns = Object.keys(json[0]);
+                            csv += columns.join('|') + '\n';
+                            for (let row of json) {
+                                csv += Object.values(row).join('|') + "\n";                                    
                             }
-                            div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`
-                            this.setAttribute('render_time', performance.now() - t);
-                        });
+                        }
+                        div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`
+                        this.setAttribute('render_time', performance.now() - t);
                     },
                     selectMode: "toggle",
                     resize: function () {
