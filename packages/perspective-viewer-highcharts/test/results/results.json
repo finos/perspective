@@ -1,0 +1,10 @@
+{
+    "shows a grid without any settings applied.": "9880a0fc261c00dc0a210eeeba7d06f6",
+    "pivots by a row.": "4711f455d5c9d5d3bc8c177b92da725f",
+    "pivots by two rows.": "53f0c27ba47a5df2974c30289fe02a78",
+    "pivots by a row and a column.": "8546e4942f755673794abce6d584b6b6",
+    "pivots by two rows and two columns.": "ff17b69cef7bfc90ec21b56729a4256f",
+    "sorts by a numeric column.": "375062fbd50e09afa7b6df7e6b4a3a5f",
+    "sorts by an alpha column.": "2643e0b5787b6e8e85f122b1713d01cd",
+    "displays visible columns.": "1da296527f149393be8f3f99e34b3e4a"
+}

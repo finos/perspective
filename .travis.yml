@@ -1,12 +1,17 @@
 
 dist: trusty
+
 language: node_js
+
 node_js:
-  - "7"
+  - "8"
 
 env:
   global:
     - EM_USE_GLOBAL_CACHE=1
+    - CACHE_DIR=$HOME/.cache/docker
+    - CACHE_FILE_EMSCRIPTEN=$CACHE_DIR/emscripten.tar.gz
+    - CACHE_FILE_PUPPETEER=$CACHE_DIR/puppeteer.tar.gz
 
 addons:
   apt:
@@ -18,13 +23,24 @@ sudo: required
 services:
   - docker
 
-before_install:
-  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
+cache:
+  directories:
+    - $CACHE_DIR
 
-script:
-  - npm install
+before_install:
   - mkdir boost_includes
   - cp -r /usr/include/boost boost_includes/
-  - ./node_modules/.bin/lerna bootstrap --hoist
+  - if [ -f ${CACHE_FILE_EMSCRIPTEN} ]; then gunzip -c ${CACHE_FILE_EMSCRIPTEN} | docker load; fi
+  - if [ -f ${CACHE_FILE_PUPPETEER} ]; then gunzip -c ${CACHE_FILE_PUPPETEER} | docker load; fi
+  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
+
+install:
+  - npm install
+
+script:
   - docker exec -it emscripten ./node_modules/.bin/lerna run start --stream
-  - ./node_modules/.bin/lerna run test
+  - npm test
+
+after_script:
+  - if [ ! -f ${CACHE_FILE_EMSCRIPTEN} ]; then docker save trzeci/emscripten:sdk-incoming-64bit | gzip > ${CACHE_FILE_EMSCRIPTEN}; fi
+  - if [ ! -f ${CACHE_FILE_PUPPETEER} ]; then docker save zenato/puppeteer | gzip > ${CACHE_FILE_PUPPETEER}; fi

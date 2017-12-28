@@ -85,3 +85,8 @@ compile_commands.json
 node_modules
 *.mem
 ftpsync.settings
+*.log
+*.png
+Gemfile
+Gemfile.lock
+Vagrantfile

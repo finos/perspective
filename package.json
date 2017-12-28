@@ -1,5 +1,11 @@
 {
 	"devDependencies": {
 		"lerna": "^2.5.1"
+	},
+	"scripts": {
+		"start": "lerna run start",
+		"postinstall": "lerna bootstrap --hoist",
+		"test": "docker run -it --rm -u root -v $(pwd):/src -w /src zenato/puppeteer ./node_modules/.bin/lerna run test",
+		"write_tests": "docker run -it --rm -u root -e WRITE_TESTS=1 -v $(pwd):/src -w /src zenato/puppeteer ./node_modules/.bin/lerna run test"
 	}
 }

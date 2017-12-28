@@ -229,12 +229,11 @@ async function loadTable(table) {
     }
 
     this._filter_input.innerHTML = "";
-
-    update.call(this);
+    this._update();
 }
 
-
 function update() {
+    if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
     let column_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
     let filters = JSON.parse(this.getAttribute('filters'));
@@ -275,7 +274,19 @@ function update() {
         }
     });
     this._drop_target.style.display = 'none';
-    this._plugin.create.call(this, this._datavis, this._view, hidden, true);
+
+    const t = performance.now();
+    this._render_count = (this._render_count || 0) + 1;
+    this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
+        if (!this.hasAttribute('render_time')) {
+            this.dispatchEvent(new Event('loaded', {bubbles: true}));
+        }
+        this.setAttribute('render_time', performance.now() - t);
+        this._render_count--;
+        if (this._render_count === 0) {
+            this.removeAttribute('updating');
+        }
+    });
 }
 
 /******************************************************************************
@@ -438,6 +449,7 @@ registerElement(template, {
             let show = JSON.parse(this.getAttribute('columns'));
             this._update_column_view(show);
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 
@@ -509,6 +521,7 @@ registerElement(template, {
                 }.bind(this));
             }
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 
@@ -530,6 +543,7 @@ registerElement(template, {
                 }.bind(this));
             }
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 
@@ -567,6 +581,7 @@ registerElement(template, {
                 }.bind(this));
             }
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 
@@ -603,7 +618,11 @@ registerElement(template, {
 
     attachedCallback: {
         value: function() {
-            this._update = _.throttle(update.bind(this), 10);
+            let _update = _.debounce(update.bind(this), 10);
+            this._update = () => {
+                this.setAttribute('updating', true);
+                _update();
+            }
 
             this.slaves = [];
             this._aggregate_selector = this.querySelector('#aggregate_selector');
@@ -644,18 +663,44 @@ registerElement(template, {
                 let new_filters = JSON.stringify(this._get_view_filters());
                 if (filters !== new_filters) {
                     this.setAttribute('filters', new_filters);
-                    update.call(this);
+                    this._update();
                 }
             }, 200));
 
             this._vis_selector.addEventListener('change', event => {
                 this.setAttribute('view', this._vis_selector.value);
-                update.call(this);
+                this._update();
             });
 
             this.addEventListener('close', () => {
                 console.info("Closing");
             });
+
+            if (Object.keys(RENDERERS).length === 0) {
+                RENDERERS['debug'] = {
+                    name: "Debug", 
+                    create: async div => { 
+                        let json = await this._view.to_json();
+                        var t = performance.now();
+                        let csv = "";
+                        if (json.length > 0) {
+                            let columns = Object.keys(json[0]);
+                            csv += columns.join('|') + '\n';
+                            for (let row of json) {
+                                csv += Object.values(row).join('|') + "\n";                                    
+                            }
+                        }
+                        div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`
+                        this.setAttribute('render_time', performance.now() - t);
+                    },
+                    selectMode: "toggle",
+                    resize: function () {
+                       
+                    },
+                    delete: function () {
+                    }
+                };
+            }
 
             for (let name in RENDERERS) {
                 let display_name = RENDERERS[name].name || name;

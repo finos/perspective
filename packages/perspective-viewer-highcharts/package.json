@@ -12,8 +12,14 @@
   ],
   "scripts": {
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
-    "start": "npm run highcharts",
+    "start": "npm run highcharts && npm run compile_test",
+    "compile_test": "cp test/html/* build",
+    "test": "jest 2>&1",
     "clean": "find build -mindepth 1 -delete"    
+  },
+  "jest": {
+    "roots": ["test/js"],
+    "verbose": true
   },
   "publishConfig": {
     "access": "public"
@@ -30,10 +36,12 @@
     "highcharts": "5.0.14",
     "highcharts-grouped-categories": "1.1.2",
     "highcharts-more": "^0.1.2",
-    "highcharts-heatmap": "^0.1.2",
-    "@jpmorganchase/perspective-common": "^0.0.0"
+    "highcharts-heatmap": "^0.1.2"
   },
   "devDependencies": {
+    "@jpmorganchase/perspective": "^0.0.0",
+    "@jpmorganchase/perspective-viewer": "^0.0.0",
+    "@jpmorganchase/perspective-common": "^0.0.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-polyfill": "^6.26.0",
