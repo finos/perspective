@@ -277,8 +277,6 @@ function update() {
 
     const t = performance.now();
     this._render_count = (this._render_count || 0) + 1;
-    this.setAttribute('updating', true);
-
     this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
@@ -620,7 +618,11 @@ registerElement(template, {
 
     attachedCallback: {
         value: function() {
-            this._update = _.throttle(update.bind(this), 10, {leading: false});
+            let _update = _.debounce(update.bind(this), 10);
+            this._update = () => {
+                this.setAttribute('updating', true);
+                _update();
+            }
 
             this.slaves = [];
             this._aggregate_selector = this.querySelector('#aggregate_selector');

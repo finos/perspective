@@ -896,7 +896,11 @@ async function grid(div, view, hidden) {
         div.appendChild(this.grid);
     }
     this.grid.set_data(json, schema);
-    setTimeout(() => this.grid.grid.canvas.resize());
+
+    // TODO this resolves a bug in the TreeRenderer, the calculated tree column
+    // width is 0 initially.
+    this.grid.grid.canvas.resize();
+    this.grid.grid.canvas.resize();
 }
 
 global.registerPlugin("hypergrid", {
