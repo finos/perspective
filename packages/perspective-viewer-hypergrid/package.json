@@ -54,7 +54,6 @@
     "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
-    "puppeteer": "^0.13.0",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.6"

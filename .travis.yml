@@ -27,4 +27,4 @@ script:
   - cp -r /usr/include/boost boost_includes/
   - ./node_modules/.bin/lerna bootstrap --hoist
   - docker exec -it emscripten ./node_modules/.bin/lerna run start --stream
-  - ./node_modules/.bin/lerna run test
+  - docker run -it --rm -u root -v $(pwd):/src -w /src zenato/puppeteer ./node_modules/.bin/lerna run test

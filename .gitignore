@@ -87,3 +87,6 @@ node_modules
 ftpsync.settings
 *.log
 *.png
+Gemfile
+Gemfile.lock
+Vagrantfile

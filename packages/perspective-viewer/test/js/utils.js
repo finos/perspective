@@ -11,6 +11,8 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
+let __PORT__;
+
 function serve(response, contentType, filePath, paths) {
     if (paths.length === 0) {
         throw 'file not found';
@@ -26,8 +28,13 @@ function serve(response, contentType, filePath, paths) {
     });
 }
 
-exports.run_server = function run_server(paths = []) {
+const DEFAULT = [
+    'node_modules/@jpmorganchase/perspective/', 
+    'node_modules/@jpmorganchase/perspective-viewer/'
+];
 
+exports.with_server = function with_server({paths = DEFAULT, port = 8252}, body) {
+   
     const server = http.createServer(function (request, response) {
 
         var filePath = 'build' + request.url;
@@ -59,9 +66,14 @@ exports.run_server = function run_server(paths = []) {
 
     })
 
-    server.listen(8125);
+    beforeAll(() => server.listen(0, () => {
+        __PORT__ = server.address().port;
 
-    return server;
+    }));
+
+    afterAll(() => server.close());
+
+    body();
 }
 
 const results = (() => {
@@ -82,7 +94,7 @@ let browser;
 var crypto = require('crypto');
 
 beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
 });
 
 afterAll(() => {
@@ -107,7 +119,7 @@ describe.page = (_url, body) => {
 const cons = require('console');
 const private_console = new cons.Console(process.stdout, process.stderr);
 
-test.capture = function capture(name, body, timeout = 10000) {
+test.capture = function capture(name, body, timeout = 20000) {
     test(name, async () => {
         let errors = [];
         if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
@@ -123,7 +135,7 @@ test.capture = function capture(name, body, timeout = 10000) {
                 private_console.error(msg.message);
             }
         });
-        await page.goto('http://127.0.0.1:8125/' + (url || 'superstore.html'));
+        await page.goto(`http://127.0.0.1:${__PORT__}/${url || 'superstore.html'}`);
         await page.waitForSelector('perspective-viewer[render_time]');
         await body(page);
         await page.waitFor(1000)

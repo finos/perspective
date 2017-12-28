@@ -7,62 +7,17 @@
  *
  */
 
-const server = require('./utils.js').run_server(['node_modules/@jpmorganchase/perspective/', 'node_modules/@jpmorganchase/perspective-viewer/']);
+const utils = require('./utils.js');
 
-afterAll(() => server.close());
+const simple_tests = require('./simple_tests.js');
 
-describe.page("superstore.html", () => {
 
-    test.capture("shows a grid without any settings applied.", async page => {        
-    });
+utils.with_server({}, () => {
 
-    test.capture("pivots by a row.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('row-pivots', '["State"]'), viewer);
-    });
+    describe.page("superstore.html", () => {
 
-    test.capture("pivots by two rows.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('row-pivots', '["Category","Sub-Category"]'), viewer);
-    });
+        simple_tests.default();
 
-    test.capture("pivots by a row and a column.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('row-pivots', '["State"]'), viewer);
-        await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
-    });
-
-    test.capture("pivots by two rows and two columns.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('row-pivots', '["Region","State"]'), viewer);
-        await page.evaluate(element => element.setAttribute('column-pivots', '["Category","Sub-Category"]'), viewer);
-    });
-
-    test.capture("sorts by a numeric column.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('sort', '["Sales"]'), viewer);
-    });
-
-    test.capture("sorts by an alpha column.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('sort', '["State"]'), viewer);
-    });
-
-    test.capture("displays visible columns.", async page => {        
-        await page.click('#config_button');
-        const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('columns', '["State","City","Sales"]'), viewer);
-    });
-
-    test.skip("pivots by row when drag-and-dropped.", async page => {        
-        await page.click('#config_button');
-        await dragDrop(page, 'perspective-row[name=Category]', '#row_pivots');
     });
 
 });

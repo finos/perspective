@@ -11,7 +11,6 @@
 <html>
     <head>
 
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
         <script src="perspective.view.js"></script>
         <script src="highcharts.plugin.js"></script>
 
@@ -27,14 +26,12 @@
 
         <script>
 
-            window.addEventListener('WebComponentsReady', function () {
-                var xhr = new XMLHttpRequest();
-                xhr.open('GET', 'superstore.csv', true);
-                xhr.onload = function () { 
-                    document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
-                }
-                xhr.send(null);
-            });
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'superstore.csv', true);
+            xhr.onload = function () { 
+                document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
+            }
+            xhr.send(null);
 
         </script>
 
