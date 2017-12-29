@@ -1,17 +1,21 @@
 
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
+const plugins = []
+
+if (!process.env.PSP_FASTCOMP) {
+    plugins.push(new UglifyJSPlugin({
+        sourceMap: true,
+        uglifyOptions: {
+            sourceMap: true,
+            ecma: 5
+        }
+    }));
+}
+
 module.exports = function() {
     return {
-        plugins: [
-            new UglifyJSPlugin({
-                sourceMap: true,
-                uglifyOptions: {
-                    sourceMap: true,
-                    ecma: 5
-                }
-            })
-        ],
+        plugins: plugins,
         devtool: 'source-map',
         node: {
             fs: "empty"
