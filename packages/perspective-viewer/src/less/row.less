@@ -46,18 +46,20 @@ perspective-viewer ul {
 perspective-row li {
     color: rgb(51, 51, 51);
     margin-bottom: 2px;
-    margin-right: 5px;
     display: flex;
     overflow: hidden;
     align-items: center;
-    transition: margin-right 0.2s;
     width: auto !important;
     height: auto !important;
     float: none !important;
 }
 
+#column_names perspective-row li {
+    margin-right: 5px;
+    transition: margin-right 0.2s;    
+}
 
-perspective-row li:hover{
+#column_names perspective-row li:hover{
     margin-right: 2px;
 }
 
@@ -66,7 +68,7 @@ perspective-row li:hover{
     padding: 2px;
     font-size: 12px;
     flex-grow: 1;
-    transition: margin 0.2s, padding 0.2s;
+    transition: margin 0.2s, padding 0.2s, height 0.2s;
 }
 
 #column_names perspective-row div:hover {
