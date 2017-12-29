@@ -118,6 +118,7 @@ describe.page = (_url, body) => {
 
 const cons = require('console');
 const private_console = new cons.Console(process.stdout, process.stderr);
+const cp = require('child_process');
 
 test.capture = function capture(name, body, timeout = 60000) {
     test(name, async () => {
@@ -149,7 +150,16 @@ test.capture = function capture(name, body, timeout = 60000) {
         if (process.env.WRITE_TESTS) {
             results[name] = hash;
         }
-        fs.writeFileSync('screenshots/' + name.replace(/ /g, '_').replace(/\./g, '') + ".png", screenshot);
+        const filename = 'screenshots/' + name.replace(/ /g, '_').replace(/\./g, '');
+        if (hash === results[name]) {
+            fs.writeFileSync(filename + ".png", screenshot);
+        } else {
+            fs.writeFileSync(filename + ".failed.png", screenshot);
+            if (fs.existsSync(filename + ".png")) {
+                cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
+                cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
+            }
+        }
         expect(hash).toBe(results[name]);
         expect(errors).toEqual([]);
     }, timeout);
