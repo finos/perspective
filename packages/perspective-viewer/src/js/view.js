@@ -174,10 +174,10 @@ async function loadTable(table) {
         this._table.delete();
     }
 
-    this._table = table;
     this._column_names.innerHTML = "";
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
+    this._table = table;
 
     if (!this.hasAttribute('columns')) {
         this.setAttribute('columns', JSON.stringify(cols));
