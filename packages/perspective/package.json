@@ -20,7 +20,7 @@
     "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config test/config/test_browser.config.js & webpack --config test/config/test_node.config.js & webpack --config test/config/benchmark.config.js & wait",
     "compile_node": "webpack --config src/config/perspective.node.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
-    "test": "jest 2>&1",
+    "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"
   },
   "jest": {

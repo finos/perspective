@@ -11,6 +11,7 @@
 		"test_viewer": "PACKAGE=perspective-viewer npm run puppeteer",
 		"test_hypergrid": "PACKAGE=perspective-viewer-hypergrid npm run puppeteer",
 		"test_highcharts": "PACKAGE=perspective-viewer-highcharts npm run puppeteer",
-		"write_tests": "WRITE_TESTS=1 npm run test"
+		"write_tests": "WRITE_TESTS=1 npm run test",
+		"travis_test": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/ zenato/puppeteer ./node_modules/.bin/lerna run test"
 	}
 }

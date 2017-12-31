@@ -14,7 +14,7 @@
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
     "start": "npm run highcharts && npm run compile_test",
     "compile_test": "cp test/html/* build",
-    "test": "jest 2>&1",
+    "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"    
   },
   "jest": {

@@ -11,7 +11,7 @@
     "view": "webpack --config src/config/view.config.js",
     "start": "npm run view && npm run compile_test",
     "compile_test": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
-    "test": "jest 2>&1",
+    "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"
   },
   "publishConfig": {
