@@ -14,7 +14,7 @@
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
     "start": "npm run highcharts && npm run compile_test",
     "compile_test": "cp test/html/* build",
-    "test": "jest 2>&1",
+    "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"    
   },
   "jest": {
@@ -36,7 +36,8 @@
     "highcharts": "5.0.14",
     "highcharts-grouped-categories": "1.1.2",
     "highcharts-more": "^0.1.2",
-    "highcharts-heatmap": "^0.1.2"
+    "highcharts-heatmap": "^0.1.2",
+    "@jpmorganchase/perspective-common": "^0.0.0"
   },
   "devDependencies": {
     "@jpmorganchase/perspective": "^0.0.0",
@@ -48,14 +49,13 @@
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
-    "chart.js": "^2.7.1",
     "css-loader": "^0.28.7",
+    "jest": "^22.0.4",
     "html-loader": "^0.5.1",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6",
-    "@jpmorganchase/perspective-common": "^0.0.0"
+    "webpack": "^3.5.6"
   }
 }

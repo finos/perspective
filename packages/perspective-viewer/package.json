@@ -11,7 +11,7 @@
     "view": "webpack --config src/config/view.config.js",
     "start": "npm run view && npm run compile_test",
     "compile_test": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
-    "test": "jest 2>&1",
+    "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"
   },
   "publishConfig": {
@@ -29,7 +29,9 @@
   "license": "Apache",
   "dependencies": {
     "babel-runtime": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
     "mobile-drag-drop": "^2.2.0",
+    "d3-array": "^1.2.1",
     "@jpmorganchase/perspective": "^0.0.0",
     "@jpmorganchase/perspective-common": "^0.0.0",
     "underscore": "^1.8.3"
@@ -37,14 +39,13 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
     "css-loader": "^0.28.7",
-    "d3-array": "^1.2.1",
     "html-loader": "^0.5.1",
     "less": "^2.7.2",
+    "jest": "^22.0.4",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",

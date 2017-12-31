@@ -7,11 +7,17 @@
  *
  */
 
-var Jasmine = require('jasmine');
-var jasmine = new Jasmine();
+const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
 
-jasmine.configureDefaultReporter({
-    showColors: true
+const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
+
+
+utils.with_server({}, () => {
+
+    describe.page("line.html", () => {
+
+        simple_tests.default();
+
+    });
+
 });
-
-jasmine.execute(['./build/test_node.js']);

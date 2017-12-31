@@ -38,9 +38,9 @@ install:
   - npm install
 
 script:
-  - docker exec -it emscripten ./node_modules/.bin/lerna run start --stream
-  - npm test
+  - docker exec -it emscripten npm run start
+  - npm travis_test
 
-after_script:
+before_cache:
   - if [ ! -f ${CACHE_FILE_EMSCRIPTEN} ]; then docker save trzeci/emscripten:sdk-incoming-64bit | gzip > ${CACHE_FILE_EMSCRIPTEN}; fi
   - if [ ! -f ${CACHE_FILE_PUPPETEER} ]; then docker save zenato/puppeteer | gzip > ${CACHE_FILE_PUPPETEER}; fi

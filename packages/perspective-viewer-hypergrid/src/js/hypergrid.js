@@ -189,40 +189,38 @@ function setPSP(payload) {
         }
 
         for (i = 0; i < this.schema.length; i++) {
+            let props = this.grid.getColumnProperties(i);
             if (this.schema[i].type === 'number' || this.schema[i].type === 'float') {
-                this.grid.behavior.setColumnProperties(i, {
+                Object.assign(props, {
                     halign: 'right',
                     columnHeaderHalign: 'right',
                     format: 'FinanceFloat'
                 });
             } else if (this.schema[i].type === 'integer') {
-                this.grid.behavior.setColumnProperties(i, {
+                Object.assign(props, {
                     halign: 'right',
                     columnHeaderHalign: 'right',
                     format: 'FinanceInteger'
                 });
             } else if (this.schema[i].type === 'date') {
-                this.grid.behavior.setColumnProperties(i, {
+                Object.assign(props, {
                     format: 'FinanceDate'
                 });
             }
-        }
 
-        // restore column widths;
-        for (let c = 0; c < this.grid.getColumnCount(); c++) {
-            let header = this.grid.getColumnProperties(c).header;
+            // restore column widths;
+            let header = props.header;
             let name = header.split("|")
             name = name[name.length - 1];
             if (header in widths) {
-                this.grid.setColumnWidth(c, widths[header]);
+                props.width = widths[header];
             } else if (name in widths) {
-                this.grid.setColumnWidth(c, widths[name]);
+                props.width = widths[name];
             } else {
-                this.grid.setColumnWidth(c, 50);
+                props.width = 50;
             }
-            let props = this.grid.getColumnProperties(c);
             props.columnAutosizing = true;
-            this.grid.setColumnProperties(c, props);
+            this.grid.behavior.setColumnProperties(i, props);
         }
     }
     this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: this.grid } }));
