@@ -3,7 +3,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const plugins = []
 
-if (!process.env.PSP_FASTCOMP) {
+if (!process.env.PSP_NO_MINIFY) {
     plugins.push(new UglifyJSPlugin({
         sourceMap: true,
         uglifyOptions: {
