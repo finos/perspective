@@ -36,7 +36,8 @@
     "highcharts": "5.0.14",
     "highcharts-grouped-categories": "1.1.2",
     "highcharts-more": "^0.1.2",
-    "highcharts-heatmap": "^0.1.2"
+    "highcharts-heatmap": "^0.1.2",
+    "@jpmorganchase/perspective-common": "^0.0.0"
   },
   "devDependencies": {
     "@jpmorganchase/perspective": "^0.0.0",
@@ -50,6 +51,7 @@
     "babel-preset-env": "^1.6.0",
     "chart.js": "^2.7.1",
     "css-loader": "^0.28.7",
+    "jest": "^22.0.4",
     "html-loader": "^0.5.1",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",

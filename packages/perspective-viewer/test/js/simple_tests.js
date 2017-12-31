@@ -53,7 +53,7 @@ exports.default = function() {
     test.capture("displays visible columns.", async page => {        
         await page.click('#config_button');
         const viewer = await page.$('perspective-viewer');
-        await page.evaluate(element => element.setAttribute('columns', '["State","City","Sales"]'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Discount","Profit","Sales","Quantity"]'), viewer);
     });
 
     test.skip("pivots by row when drag-and-dropped.", async page => {        

@@ -15,7 +15,7 @@ let __PORT__;
 
 function serve(response, contentType, filePath, paths) {
     if (paths.length === 0) {
-        throw 'file not found';
+        throw `file not found ${filePath}`;
     }
     fs.readFile(paths.shift() + filePath, function(error, content) {
         if (error) {
@@ -29,8 +29,8 @@ function serve(response, contentType, filePath, paths) {
 }
 
 const DEFAULT = [
-    'node_modules/@jpmorganchase/perspective/', 
-    'node_modules/@jpmorganchase/perspective-viewer/'
+    'node_modules/@jpmorganchase/perspective-viewer/',
+    'node_modules/@jpmorganchase/perspective/'
 ];
 
 exports.with_server = function with_server({paths = DEFAULT, port = 8252}, body) {
@@ -68,7 +68,6 @@ exports.with_server = function with_server({paths = DEFAULT, port = 8252}, body)
 
     beforeAll(() => server.listen(0, () => {
         __PORT__ = server.address().port;
-
     }));
 
     afterAll(() => server.close());
@@ -107,6 +106,9 @@ afterAll(() => {
 let url;
 
 describe.page = (_url, body) => {
+    if (!fs.existsSync('screenshots/' + _url.replace('.html', ''))) {
+        fs.mkdirSync('screenshots/' + _url.replace('.html', ''));
+    }
     describe(_url, () => { 
         let old = url;
         url = _url;
@@ -121,6 +123,7 @@ const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require('child_process');
 
 test.capture = function capture(name, body, timeout = 60000) {
+    let _url = url;
     test(name, async () => {
         let errors = [];
         if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
@@ -137,8 +140,9 @@ test.capture = function capture(name, body, timeout = 60000) {
             }
         });
         
-        await page.goto(`http://127.0.0.1:${__PORT__}/${url || 'superstore.html'}`);
+        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
         await page.waitForSelector('perspective-viewer[render_time]');
+        await page.waitForSelector('perspective-viewer:not([updating])');
         await body(page);
 
         // let animation run;
@@ -146,12 +150,13 @@ test.capture = function capture(name, body, timeout = 60000) {
         await page.waitFor(300);
 
         const screenshot = await page.screenshot();
+        await page.close();
         const hash = crypto.createHash('md5').update(screenshot).digest("hex");
         if (process.env.WRITE_TESTS) {
-            results[name] = hash;
+            results[_url + '/' + name] = hash;
         }
-        const filename = 'screenshots/' + name.replace(/ /g, '_').replace(/\./g, '');
-        if (hash === results[name]) {
+        const filename = `screenshots/${_url.replace('.html', '')}/${name.replace(/ /g, '_').replace(/\./g, '')}`;
+        if (hash === results[_url + '/' + name]) {
             fs.writeFileSync(filename + ".png", screenshot);
         } else {
             fs.writeFileSync(filename + ".failed.png", screenshot);
@@ -160,7 +165,7 @@ test.capture = function capture(name, body, timeout = 60000) {
                 cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
             }
         }
-        expect(hash).toBe(results[name]);
+        expect(hash).toBe(results[_url + '/' + name]);
         expect(errors).toEqual([]);
     }, timeout);
 }

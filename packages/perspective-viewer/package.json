@@ -45,6 +45,7 @@
     "d3-array": "^1.2.1",
     "html-loader": "^0.5.1",
     "less": "^2.7.2",
+    "jest": "^22.0.4",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",

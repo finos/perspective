@@ -38,7 +38,7 @@ install:
   - npm install
 
 script:
-  - docker exec -it emscripten ./node_modules/.bin/lerna run start --stream
+  - docker exec -it emscripten npm run start
   - npm test
 
 before_cache:
