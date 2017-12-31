@@ -39,7 +39,7 @@ install:
 
 script:
   - docker exec -it emscripten npm run start
-  - npm travis_test
+  - npm run travis_test
 
 before_cache:
   - if [ ! -f ${CACHE_FILE_EMSCRIPTEN} ]; then docker save trzeci/emscripten:sdk-incoming-64bit | gzip > ${CACHE_FILE_EMSCRIPTEN}; fi

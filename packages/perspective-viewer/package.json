@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-viewer",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Perspective.js",
   "main": "src/js/view.js",
   "files": [
@@ -18,7 +18,9 @@
     "access": "public"
   },
   "jest": {
-    "roots": ["test/js"],
+    "roots": [
+      "test/js"
+    ],
     "verbose": true
   },
   "repository": {
@@ -28,15 +30,16 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "babel-runtime": "^6.26.0",
+    "@jpmorganchase/perspective": "^0.0.1",
+    "@jpmorganchase/perspective-common": "^0.0.1",
     "babel-polyfill": "^6.26.0",
-    "mobile-drag-drop": "^2.2.0",
+    "babel-runtime": "^6.26.0",
     "d3-array": "^1.2.1",
-    "@jpmorganchase/perspective": "^0.0.0",
-    "@jpmorganchase/perspective-common": "^0.0.0",
+    "mobile-drag-drop": "^2.2.0",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "@jpmorganchase/perspective-common": "^0.0.1",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
@@ -44,12 +47,11 @@
     "babel-preset-env": "^1.6.0",
     "css-loader": "^0.28.7",
     "html-loader": "^0.5.1",
-    "less": "^2.7.2",
     "jest": "^22.0.4",
+    "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6",
-    "@jpmorganchase/perspective-common": "^0.0.0"
+    "webpack": "^3.5.6"
   }
 }

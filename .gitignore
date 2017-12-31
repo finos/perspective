@@ -90,3 +90,4 @@ ftpsync.settings
 Gemfile
 Gemfile.lock
 Vagrantfile
+packages/sigma

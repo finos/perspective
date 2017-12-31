@@ -1,22 +1,21 @@
 {
   "name": "@jpmorganchase/perspective-examples",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Perspective.js",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "files": [
-     "src/*",
-     "build/*"
+    "src/*",
+    "build/*"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "npm run copy && npm run remove",
+    "start": "npm run copy",
     "copy": "mkdir -p build && cp -r node_modules/@jpmorganchase/perspective/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer-hypergrid/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer-highcharts/build/* build && cp src/html/* build && cp src/json/* build && cp src/csv/* build && cp src/css/* build && cp src/js/* build",
-    "remove": "find build \\( -name \"CMake*\" -o -name \"Makefile\" -o -name \"cmake_install.cmake\" -o -name \"compile_commands.json\" -o -name \"psp.js\" \\) -d -exec rm -r \"{}\" \\;",
     "host": "http-server build/",
     "clean": "find build -mindepth 1 -delete"
   },
@@ -27,11 +26,11 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
+    "@jpmorganchase/perspective": "^0.0.1",
+    "@jpmorganchase/perspective-viewer": "^0.0.1",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.0.1",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.0.1",
     "babel-runtime": "^6.26.0",
-    "@jpmorganchase/perspective": "^0.0.0",
-    "@jpmorganchase/perspective-viewer": "^0.0.0",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.0.0",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.0.0",
     "query-string": "^5.0.1",
     "rectangular": "1.0.1",
     "ws": "^3.3.2"

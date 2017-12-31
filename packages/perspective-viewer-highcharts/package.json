@@ -1,24 +1,26 @@
 {
   "name": "@jpmorganchase/perspective-viewer-highcharts",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Perspective.js",
   "main": "src/js/highcharts.js",
   "directories": {
     "test": "test"
   },
   "files": [
-     "src/*",
-     "build/*"
+    "src/*",
+    "build/*"
   ],
   "scripts": {
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
     "start": "npm run highcharts && npm run compile_test",
     "compile_test": "cp test/html/* build",
     "test": "jest --runInBand 2>&1",
-    "clean": "find build -mindepth 1 -delete"    
+    "clean": "find build -mindepth 1 -delete"
   },
   "jest": {
-    "roots": ["test/js"],
+    "roots": [
+      "test/js"
+    ],
     "verbose": true
   },
   "publishConfig": {
@@ -31,27 +33,27 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
+    "@jpmorganchase/perspective-common": "^0.0.1",
     "babel-runtime": "^6.26.0",
     "chroma-js": "^1.3.4",
     "highcharts": "5.0.14",
     "highcharts-grouped-categories": "1.1.2",
-    "highcharts-more": "^0.1.2",
     "highcharts-heatmap": "^0.1.2",
-    "@jpmorganchase/perspective-common": "^0.0.0"
+    "highcharts-more": "^0.1.2"
   },
   "devDependencies": {
-    "@jpmorganchase/perspective": "^0.0.0",
-    "@jpmorganchase/perspective-viewer": "^0.0.0",
-    "@jpmorganchase/perspective-common": "^0.0.0",
+    "@jpmorganchase/perspective": "^0.0.1",
+    "@jpmorganchase/perspective-common": "^0.0.1",
+    "@jpmorganchase/perspective-viewer": "^0.0.1",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "css-loader": "^0.28.7",
-    "jest": "^22.0.4",
     "html-loader": "^0.5.1",
+    "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
