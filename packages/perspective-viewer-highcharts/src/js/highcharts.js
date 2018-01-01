@@ -133,7 +133,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                     for (let prop of columns) {
                         var sname = prop.split(',');
                         var gname = sname[sname.length - 1];
-                        sname = sname.slice(0, sname.length - 1).join(", ") || gname;
+                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
                         var s;
                         if (prev === undefined) prev = sname;
                         for (var sidx = 0; sidx < series.length; sidx++) {
@@ -170,7 +170,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                     if (is_stacked) {
                         sname = sname.join(", ") || gname;
                     } else {
-                        sname = sname.slice(0, sname.length - 1).join(", ") || gname;
+                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
                     }
                     var s;
                     for (var sidx=0; sidx<series.length; sidx++) {
