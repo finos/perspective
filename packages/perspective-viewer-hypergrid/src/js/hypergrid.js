@@ -738,47 +738,47 @@ function psp2hypergrid(data, schema) {
         }
     }
     var is_tree = data[0].hasOwnProperty('__ROW_PATH__');
-    var row_paths = data.map(function(row) {
-        if (is_tree) {
-            return ["ROOT"].concat(row.__ROW_PATH__) || ["ROOT"];
-        } else {
-            return [];
-        }
-    });
-    var columnPaths = Object.keys(data[0]).filter(function(row) {
-        return row !== "__ROW_PATH__";
-    }).map(function(row) {
-        return row.split(',');
-    });
+
+    var columnPaths = Object.keys(data[0])
+        .filter(row => row !== "__ROW_PATH__")
+        .map(row => row.split(','));
+
     let flat_columns = columnPaths.map(col => col.join(","));
-    let rows = data.map(function(row, idx) {
+
+    let row_paths = [];
+    let rows = [];
+    let row_leaves = [];
+    for (const idx in data) {
+        const row = data[idx];
+        let new_row = [];
         if (is_tree) {
+            row_paths.push(["ROOT"].concat(row.__ROW_PATH__) || ["ROOT"]);
             let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
             if (name === undefined && idx === 0) name = "TOTAL"
-            var new_row = [name];
+            new_row = [name];
+            row_leaves.push(row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0));
         } else {
-            new_row = [];
+            row_paths.push([]);
         }
-
         for (var col of flat_columns) {
             new_row.push(row[col]);
         }
-        return new_row;
-    })
+        rows.push(new_row);
+    }
+
     var hg_data = {
         rowPaths: row_paths,
         data: rows,
         isTree: is_tree,
         configuration: {},
         columnPaths: (is_tree ? [[" "]] : []).concat(columnPaths),
-        columnTypes: (is_tree ? ["str"] : []).concat(columnPaths.map(function(col) { return conv[schema[col[col.length - 1]]] }))
+        columnTypes: (is_tree ? ["str"] : []).concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
     };
 
     if (is_tree) {
-        hg_data['rowLeaf'] = data.map(function(row, idx) {
-            return row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
-        })
+        hg_data['rowLeaf'] = row_leaves;
     }
+
     return hg_data
 }
 
