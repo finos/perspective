@@ -67,6 +67,7 @@ const DATE_PARSE_CANDIDATES = [
     'MM-DD-YYYY', 
     'MM/DD/YYYY', 
     'M/D/YYYY', 
+    'M/D/YY', 
     'DD MMM YYYY'
 ];
 
@@ -439,7 +440,15 @@ view.prototype.to_json = async function(options) {
     let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
     let start_col = options.start_col || (viewport.left ? viewport.left : 0);
     let end_col = options.end_col || (viewport.width ? start_row + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
-    let slice = this.ctx.get_data(start_row, end_row, start_col, end_col);
+    let slice;
+    if (this.sides() === 0) {
+        slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
+    } else if (this.sides() === 1) {
+        slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
+    } else {
+        slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
+    }
+
     let data;
 
     if (options.format && options.format === "table") {
@@ -452,7 +461,7 @@ view.prototype.to_json = async function(options) {
     let row, prev_row;
     let depth = [];
     let ridx = -1;
-    for (let idx = 0; idx < slice.size(); idx++) {
+    for (let idx = 0; idx < slice.length; idx++) {
         let cidx = idx % (end_col - start_col);
         if (cidx === 0) {
             if (row) {
@@ -463,12 +472,12 @@ view.prototype.to_json = async function(options) {
         }
         if (this.sides() === 0) {
             let col_name = col_names[start_col + cidx + 1];
-            row[col_name] = __MODULE__.scalar_to_val(slice, idx);
+            row[col_name] = slice[idx];
         } else {
             if (cidx === 0) {
                 let col_name = "__ROW_PATH__";
                 let new_depth = this.ctx.unity_get_row_depth(ridx);
-                let row_name = __MODULE__.scalar_to_val(slice, idx);
+                let row_name = slice[idx];
                 if (new_depth === 0) {
                     row[col_name] = [];
                 } else if (new_depth > depth.length + 1) {
@@ -486,11 +495,11 @@ view.prototype.to_json = async function(options) {
                 prev_row = row_name;
             } else {
                 let col_name = col_names[start_col + cidx];
-                row[col_name] = __MODULE__.scalar_to_val(slice, idx);
+                row[col_name] = slice[idx];
             }
         }
     }
-    slice.delete();
+
     if (row) data.push(row);
     return data;
 }
