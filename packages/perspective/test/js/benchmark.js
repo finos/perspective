@@ -190,7 +190,13 @@ function _run_tests() {
 window.addEventListener("perspective-ready", function() {
 
     get_csv('flight_small.csv', function(csv) {
-        var table = perspective.table(csv);
+
+        let table = perspective.table(csv);
+
+        test(50, function(resolve) {
+             perspective.table(csv);
+             resolve();
+        });
 
         test(500, function(resolve) {
             var view = table.view({

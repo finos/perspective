@@ -206,12 +206,17 @@ _fill_data(t_table_sptr tbl,
 			break;
             default:
             {
-                std::vector<std::string> dcol2 =
-                    vecFromJSArray<std::string>(data_cols[cidx]);
-                col->fill_vector(dcol2);
-                if (name == index)
+                auto dcol = data_cols[cidx];
+                t_uint32 size = dcol["length"].as<t_uint32>();
+                auto fill_index === name == index;
+                for (auto i = 0; i < size; ++i)
                 {
-                    key_col->fill_vector(dcol2);
+                    auto elem = dcol[i].as<std::string>();
+                    col->set_nth(i, elem);
+                    if (fill_index)
+                    {
+                        key_col->set_nth(i, elem);
+                    }
                 }
             }
         }

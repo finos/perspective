@@ -1027,7 +1027,6 @@ const perspective = {
                 data = "_" + data;
             }
             let js = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
-            //let js = csv2json(data);
             return perspective.table(js, options);
         }
         let pdata = parse_data(data);
