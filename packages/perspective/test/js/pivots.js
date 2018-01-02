@@ -136,6 +136,27 @@ module.exports = (perspective) => {
             expect(answer).toEqual(result2);
         });
 
+
+        it("['x', 'z'] windowed", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['x', 'z']
+            });
+
+            var answer = [
+                { __ROW_PATH__: [ 1, true ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 2 ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 2, false ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 3 ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 3, true ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 4 ], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [ 4, false ], x: 1, y: 1, z: 1}
+            ];
+
+            let result2 = await view.to_json({start_row: 2});
+            expect(answer).toEqual(result2);
+        });
+
         it("['x', 'z'], pivot_depth = 1", async function () {
             var table = perspective.table(data);
             var view = table.view({
