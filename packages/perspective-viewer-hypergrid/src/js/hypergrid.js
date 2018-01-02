@@ -748,7 +748,7 @@ function psp2hypergrid(data, schema) {
     let row_paths = [];
     let rows = [];
     let row_leaves = [];
-    for (const idx in data) {
+    for (let idx = 0; idx < data.length; idx++) {
         const row = data[idx];
         let new_row = [];
         if (is_tree) {
