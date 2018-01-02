@@ -7,6 +7,8 @@
  *
  */
 
+require('bluebird').config({cancellation: true});
+
 /**
  * Detect Internet Explorer.
  *

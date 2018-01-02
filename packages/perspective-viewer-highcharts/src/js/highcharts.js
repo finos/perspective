@@ -7,6 +7,8 @@
  *
  */
 
+import '@jpmorganchase/perspective-common';
+
 import highcharts from 'highcharts';
 
 const Highcharts = highcharts;

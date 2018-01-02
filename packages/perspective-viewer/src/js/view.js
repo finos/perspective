@@ -277,7 +277,10 @@ function update() {
 
     const t = performance.now();
     this._render_count = (this._render_count || 0) + 1;
-    this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
+    if (this._task) {
+        this._task.cancel();
+    }
+    this._task = this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
         }
