@@ -118,8 +118,8 @@ function generateGridProperties(overrides) {
 
 function setPSP(payload) {
     if (payload.data.length === 0) {
-        this.grid.setData({data: []})
-        return
+        this.grid.setData({data: []});
+        return;
     };
     if (payload.isTree) {
         this.grid.renderer.properties.fixedColumnCount = 1;
@@ -229,8 +229,6 @@ function setPSP(payload) {
 
 function GridUIFixPlugin(grid) {
 
-
-
     grid.canvas.resize = function() {
         var box = this.size = this.div.getBoundingClientRect();
 
@@ -269,6 +267,24 @@ function GridUIFixPlugin(grid) {
         this.component.setBounds(this.bounds);
         this.resizeNotification();
         this.paintNow();
+    }
+
+    grid.canvas._tickPaint = grid.canvas.tickPaint;
+    grid.canvas.tickPaint = async function (t) {
+        let range = this.component.grid.getVisibleRows();
+        let s = range[1];
+        let e = range[range.length - 1];
+        if (range.length > 1 && (this.dirty || this.__cached_start !== s || this.__cached_end !== e)) {
+            if (this._updating_cache) {
+                this._updating_cache.cancel();
+            }
+            this._updating_cache = this.component.grid._cache_update(s, e);
+            await this._updating_cache;
+            this._updateing_cache = undefined;
+            this.__cached_start = s;
+            this.__cached_end = e;
+        }
+        this.component.grid.canvas._tickPaint(t);
     }
 
     grid._getGridCellFromMousePoint = grid.getGridCellFromMousePoint;
@@ -618,6 +634,14 @@ function PerspectiveDataModel(grid) {
 
         // Returns the number of rows for this dataset
         getRowCount: function () {
+            // let range = this.grid.getVisibleRows();
+            // let s = range[1];
+            // let e = range[range.length - 1];
+            // if (range.length > 1 && (this.__cached_start !== s || this.__cached_end !== e)) {
+            //     this.__cached_start = s;
+            //     this.__cached_end = e;
+            //     this.grid._cache_update(s, e);
+            // }
             return this.dataSource.data.length;
         },
 
@@ -925,12 +949,16 @@ async function grid(div, view, hidden) {
         div.innerHTML = "";
         div.appendChild(this.grid);
     }
+    this.grid.grid._cache_update = async (s, e) => {
+        json = await fill_page(view, json, hidden, s, e + 1);        
+        this.grid.set_data(json, schema);
+    }
     if (visible_rows.length > 0) {
         this.grid.set_data(json, schema);
         this.grid.grid.canvas.resize();
         this.grid.grid.canvas.resize();
     }
-    await load_incrementally.call(this, view, schema, hidden, json, nrows, 0);
+   // await load_incrementally.call(this, view, schema, hidden, json, nrows, 0);
 }
 
 global.registerPlugin("hypergrid", {
