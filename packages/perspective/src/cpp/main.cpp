@@ -491,6 +491,30 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
 }
 
 /**
+ *
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
+template<typename T>
+val
+get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint32 end_col)
+{
+    auto slice = ctx->get_data(start_row, end_row, start_col, end_col);
+    val arr = val::array();
+    for (auto idx = 0; idx < slice.size(); ++idx)
+    {
+        arr.set(idx, scalar_to_val(slice, idx));
+    }
+    return arr;
+}
+
+/**
  * Main
  */
 int
@@ -761,4 +785,7 @@ EMSCRIPTEN_BINDINGS(perspective)
     function("make_context_one", &make_context_one);
     function("make_context_two", &make_context_two);
     function("scalar_to_val", &scalar_to_val);
+    function("get_data_zero", &get_data<t_ctx0_sptr>);
+    function("get_data_one", &get_data<t_ctx1_sptr>);
+    function("get_data_two", &get_data<t_ctx2_sptr>);
 }

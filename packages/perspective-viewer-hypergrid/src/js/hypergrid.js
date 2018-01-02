@@ -568,7 +568,7 @@ function PerspectiveDataModel(grid) {
     grid.mixIn.call(grid.behavior.dataModel, {
 
         // Override setData
-        setData: function (dataPayload, schema) {
+        setData: function (dataPayload, schema, cache_update) {
             this.viewData = dataPayload;
             this.source.setData(dataPayload, schema);
         },
@@ -738,47 +738,50 @@ function psp2hypergrid(data, schema) {
         }
     }
     var is_tree = data[0].hasOwnProperty('__ROW_PATH__');
-    var row_paths = data.map(function(row) {
-        if (is_tree) {
-            return ["ROOT"].concat(row.__ROW_PATH__) || ["ROOT"];
-        } else {
-            return [];
-        }
-    });
-    var columnPaths = Object.keys(data[0]).filter(function(row) {
-        return row !== "__ROW_PATH__";
-    }).map(function(row) {
-        return row.split(',');
-    });
+
+    var columnPaths = Object.keys(data[0])
+        .filter(row => row !== "__ROW_PATH__")
+        .map(row => row.split(','));
+
     let flat_columns = columnPaths.map(col => col.join(","));
-    let rows = data.map(function(row, idx) {
+
+    let row_paths = [];
+    let rows = [];
+    let row_leaves = [];
+    for (let idx = 0; idx < data.length; idx++) {
+        const row = data[idx] || {};
+        let new_row = [];
         if (is_tree) {
+            if (row.__ROW_PATH__ === undefined) {
+                row.__ROW_PATH__ = [];
+            }
+            row_paths.push(["ROOT"].concat(row.__ROW_PATH__));
             let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
             if (name === undefined && idx === 0) name = "TOTAL"
-            var new_row = [name];
+            new_row = [name];
+            row_leaves.push(row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0));
         } else {
-            new_row = [];
+            row_paths.push([]);
         }
-
         for (var col of flat_columns) {
             new_row.push(row[col]);
         }
-        return new_row;
-    })
+        rows.push(new_row);
+    }
+
     var hg_data = {
         rowPaths: row_paths,
         data: rows,
         isTree: is_tree,
         configuration: {},
         columnPaths: (is_tree ? [[" "]] : []).concat(columnPaths),
-        columnTypes: (is_tree ? ["str"] : []).concat(columnPaths.map(function(col) { return conv[schema[col[col.length - 1]]] }))
+        columnTypes: (is_tree ? ["str"] : []).concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
     };
 
     if (is_tree) {
-        hg_data['rowLeaf'] = data.map(function(row, idx) {
-            return row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
-        })
+        hg_data['rowLeaf'] = row_leaves;
     }
+
     return hg_data
 }
 
@@ -865,11 +868,12 @@ registerElement(TEMPLATE, {
 
 });
 
+const PAGE_SIZE = 1000;
 
-async function grid(div, view, hidden) {
-    let [json, schema] = await Promise.all([view.to_json(), view.schema()]);
+async function fill_page(view, json, hidden, start_row, end_row) {
+    let next_page = await view.to_json({start_row: start_row, end_row: end_row});
     if (hidden.length > 0) {
-        let first = json[0];
+        let first = next_page[0];
         let to_delete = [];
         for (let key in first) {
             let split_key = key.split(',');
@@ -877,28 +881,56 @@ async function grid(div, view, hidden) {
                 to_delete.push(key);
             }
         }
-        for (let row of json) {
+        for (let row of next_page) {
             for (let h of to_delete) {
                 delete row[h];
             }
         }
     }
+    for (let idx = 0; idx < next_page.length; idx++) {
+        json[start_row + idx] = next_page[idx];
+    }
+    return json;
+}
 
+async function load_incrementally(view, schema, hidden, json, total, page) {
+    json = await fill_page(view, json, hidden, page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    this.grid.set_data(json, schema);
+    this.grid.grid.canvas.resize();
+    this.grid.grid.canvas.resize();
+    if ((page + 1) * PAGE_SIZE < total) {
+        await load_incrementally.call(this, view, schema, hidden, json, total, page + 1);
+    }
+}
+
+async function grid(div, view, hidden) {
+    let [nrows, json, schema] = await Promise.all([
+        view.num_rows(), 
+        view.to_json({end_row: 1}), 
+        view.schema()
+    ]);
+    let visible_rows = [];
     if (!this.grid) {
         this.grid = document.createElement('perspective-hypergrid');
+        visible_rows = [0, 0, 100];
     } else if (this.grid.grid) {
         this.grid.grid.canvas.stopResizing();
+        visible_rows = this.grid.grid.getVisibleRows();
+    }
+    json.length = nrows;
+    if (visible_rows.length > 0) {
+        json = await fill_page(view, json, hidden, visible_rows[1], visible_rows[visible_rows.length - 1] + 1);        
     }
     if (!(document.contains ? document.contains(this.grid) : false)) {
         div.innerHTML = "";
         div.appendChild(this.grid);
     }
-    this.grid.set_data(json, schema);
-
-    // TODO this resolves a bug in the TreeRenderer, the calculated tree column
-    // width is 0 initially.
-    this.grid.grid.canvas.resize();
-    this.grid.grid.canvas.resize();
+    if (visible_rows.length > 0) {
+        this.grid.set_data(json, schema);
+        this.grid.grid.canvas.resize();
+        this.grid.grid.canvas.resize();
+    }
+    await load_incrementally.call(this, view, schema, hidden, json, nrows, 0);
 }
 
 global.registerPlugin("hypergrid", {
