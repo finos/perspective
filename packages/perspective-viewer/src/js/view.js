@@ -175,9 +175,9 @@ async function loadTable(table) {
     }
 
     this._column_names.innerHTML = "";
+    this._table = table;
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
-    this._table = table;
 
     if (!this.hasAttribute('columns')) {
         this.setAttribute('columns', JSON.stringify(cols));
@@ -238,6 +238,7 @@ function update() {
     let column_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
     let filters = JSON.parse(this.getAttribute('filters'));
     let aggregates = this._get_view_aggregates();
+    if (aggregates.length === 0) return;
     if (row_pivots.length === 0 && column_pivots.length > 0) {
         row_pivots = column_pivots;
         column_pivots = [];
@@ -269,7 +270,10 @@ function update() {
             timeout = Math.min(10000, Math.max(0, timeout));
             this._debounced = setTimeout(() => {
                 this._debounced = undefined;
-                this._plugin.create.call(this, this._datavis, this._view, hidden, false);
+                const t = performance.now();
+                this._plugin.create.call(this, this._datavis, this._view, hidden, false).then(() => {
+                    this.setAttribute('render_time', performance.now() - t);
+                });
             }, timeout || 0);
         }
     });
