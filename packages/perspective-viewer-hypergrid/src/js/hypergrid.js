@@ -146,9 +146,11 @@ function setPSP(payload) {
         col_settings['type'] = payload.columnTypes[i] === 'str' ? 'string' : payload.columnTypes[i];
         processed_schema.push(col_settings);
     }
+
     var old_schema = this.grid.behavior.subgrids.lookup.data.schema;
     this.schema_loaded = this.schema_loaded && _.isEqual(processed_schema, old_schema);
     this.schema = processed_schema;
+
     if (this.schema_loaded) {
         this.grid.setData({
             data: payload.rows,
@@ -169,7 +171,7 @@ function setPSP(payload) {
             }
         }
         console.log('Setting up initial schema and data load into HyperGrid');
-        this.grid.behavior.setData({
+        this.grid.setData({
             data: payload.rows,
             schema: this.schema
         });
@@ -279,7 +281,7 @@ function PerspectiveDataModel(grid) {
         // Override setData
         setData: function (dataPayload, schema) {
             this.viewData = dataPayload;
-            this.source.setData(dataPayload, schema);
+            this.source.setData(dataPayload, schema);     
         },
 
         // Is the grid view a tree
@@ -422,7 +424,7 @@ var conv = {
     'date': 'date'
 }
 
-function psp2hypergrid(data, schema) {
+function psp2hypergrid(data, schema, start = 0, end = undefined, length = undefined) {
     if (data.length === 0) {
         return {
             rowPaths: [],
@@ -443,7 +445,10 @@ function psp2hypergrid(data, schema) {
     let flat_columns = columnPaths.map(col => col.join(","));
 
     let rows = [];
-    for (let idx = 0; idx < data.length; idx++) {
+    if (length) {
+        rows.length = length;
+    }
+    for (let idx = start; idx < (end || data.length); idx++) {
         const row = data[idx] || {};
         let new_row = [];
         let row_path = [];
@@ -461,11 +466,11 @@ function psp2hypergrid(data, schema) {
         for (var col of flat_columns) {
             new_row.push(row[col]);
         }
-        rows.push({
+        rows[idx] ={
             rowPath: row_path,
             rowData: new_row,
-            rowLeaf: row_leaf
-        });
+            isLeaf: row_leaf
+        };
     }
 
     var hg_data = {
@@ -610,8 +615,10 @@ async function grid(div, view, hidden) {
         div.appendChild(this.grid);
     }
     this.grid.grid._cache_update = async (s, e) => {
-        json = await fill_page(view, json, hidden, s, e + 1);  
-        this.grid.set_data(json, schema);
+        json = await fill_page(view, json, hidden, s, e + 10);  
+        let rows = psp2hypergrid(json, schema, s, Math.min(e + 10, nrows), nrows).rows;
+        rows[0] = this.grid.grid.behavior.dataModel.viewData[0];
+        this.grid.grid.setData({data: rows});
     }
     if (visible_rows.length > 0) {
         this.grid.set_data(json, schema);

@@ -3,7 +3,7 @@
 		"lerna": "^2.5.1"
 	},
 	"scripts": {
-		"start": "lerna run start ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
+		"start": "lerna run start ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/packages/${PACKAGE} zenato/puppeteer ./node_modules/.bin/jest --runInBand",
 		"postinstall": "lerna bootstrap --hoist",
 		"test": "npm run test_perspective && npm run test_viewer && npm run test_hypergrid && npm run test_highcharts",

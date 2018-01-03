@@ -56,7 +56,7 @@ export function GridUIFixPlugin(grid) {
         let range = this.component.grid.getVisibleRows();
         let s = range[1];
         let e = range[range.length - 1];
-        if (range.length > 1 && this.dirty && (this.__cached_start !== s || this.__cached_end !== e)) {
+        if (this.component.grid._cache_update && range.length > 1 && this.dirty && (this.__cached_start !== s || this.__cached_end !== e)) {
             if (this._updating_cache) {
                 this._updating_cache.cancel();
             }
