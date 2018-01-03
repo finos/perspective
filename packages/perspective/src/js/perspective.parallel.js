@@ -229,13 +229,15 @@ worker.prototype._start_same_origin = function() {
     this._worker.postMessage({cmd: 'init', path: __SCRIPT_PATH__.path()});
 };
 
+let _initialized = false;
+
 worker.prototype._handle = function(e) {
     if (!this._worker.initialized.value) {
-        if (!module.exports._initialized) {
+        if (_initialized) {
             var event = document.createEvent("Event");
             event.initEvent("perspective-ready", false, true);
             window.dispatchEvent(event);
-            module.exports._initialized = true;
+            _initialized = true;
         }
         for (var m in this._worker.messages) {
             if (this._worker.messages.hasOwnProperty(m)) {
@@ -265,7 +267,7 @@ worker.prototype.terminate = function() {
     this._worker = undefined;
 };
 
-module.exports = {
+export default {
     worker: function() {
         if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
             return perspective;
