@@ -233,7 +233,7 @@ let _initialized = false;
 
 worker.prototype._handle = function(e) {
     if (!this._worker.initialized.value) {
-        if (_initialized) {
+        if (!_initialized) {
             var event = document.createEvent("Event");
             event.initEvent("perspective-ready", false, true);
             window.dispatchEvent(event);
