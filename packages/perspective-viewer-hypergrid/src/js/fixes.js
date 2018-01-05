@@ -50,23 +50,41 @@ export function GridUIFixPlugin(grid) {
         this.resizeNotification();
         this.paintNow();
     }
+   
+    function is_subrange(sub, sup) {
+        return !sup || (sup[0] <= sub[0] && sup[1] >= sub[1]);
+    }
+
+    function estimate_range(grid) {
+        let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
+        return [parseInt(range[0]), parseInt(range[range.length - 1])];
+    }
 
     grid.canvas._tickPaint = grid.canvas.tickPaint;
     grid.canvas.tickPaint = async function (t) {
-        let range = this.component.grid.getVisibleRows();
-        let s = range[1];
-        let e = range[range.length - 1];
-        if (this.component.grid._cache_update && range.length > 1 && this.dirty && (this.__cached_start !== s || this.__cached_end !== e)) {
-            if (this._updating_cache) {
-                this._updating_cache.cancel();
+        if (this.component.grid._lazy_load) {
+            let range = estimate_range(this.component.grid);
+            if (
+                this.component.grid._cache_update 
+                && this.dirty 
+                && !(this._updating_cache && is_subrange(range, this._updating_cache.range))
+            ) {
+                this._updating_cache = this.component.grid._cache_update(...range);
+                this._updating_cache.range = range
+                await this._updating_cache;
+                let new_range = estimate_range(this.component.grid);
+                if (!is_subrange(new_range, range)) {
+                    return;
+                }
+                this._cached_range = range;
+                this._updating_cache = undefined;
+                this.component.grid.canvas._tickPaint(t);
+            } else if (is_subrange(range, this._cached_range)) {
+                this.component.grid.canvas._tickPaint(t);
             }
-            this._updating_cache = this.component.grid._cache_update(s, e);
-            await this._updating_cache;
-            this._updateing_cache = undefined;
-            this.__cached_start = s;
-            this.__cached_end = e;
+        } else {
+            this.component.grid.canvas._tickPaint(t);
         }
-        this.component.grid.canvas._tickPaint(t);
     }
 
     grid._getGridCellFromMousePoint = grid.getGridCellFromMousePoint;

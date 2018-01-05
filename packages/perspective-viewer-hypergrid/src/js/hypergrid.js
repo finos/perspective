@@ -97,11 +97,11 @@ var light_theme_overrides = {
     ],
     hoverCellHighlight: {
         enabled: true,
-        backgroundColor: 'rgba(211, 221, 232, 0.85)'
+        backgroundColor: '#eeeeee'
     },
     hoverRowHighlight: {
         enabled: true,
-        backgroundColor: 'rgba(211, 221, 232, 0.50)'
+        backgroundColor: '#f6f6f6'
     },
 };
 
@@ -569,10 +569,9 @@ registerElement(TEMPLATE, {
 
 const PAGE_SIZE = 1000;
 
-async function fill_page(view, json, hidden, start_row, end_row) {
-    let next_page = await view.to_json({start_row: start_row, end_row: end_row});
+function filter_hidden(hidden, json) {
     if (hidden.length > 0) {
-        let first = next_page[0];
+        let first = json[0];
         let to_delete = [];
         for (let key in first) {
             let split_key = key.split(',');
@@ -580,17 +579,25 @@ async function fill_page(view, json, hidden, start_row, end_row) {
                 to_delete.push(key);
             }
         }
-        for (let row of next_page) {
+        for (let row of json) {
             for (let h of to_delete) {
                 delete row[h];
             }
         }
     }
+    return json
+}
+
+async function fill_page(view, json, hidden, start_row, end_row) {
+    let next_page = await view.to_json({start_row: start_row, end_row: end_row});
+    next_page = filter_hidden(hidden, next_page);
     for (let idx = 0; idx < next_page.length; idx++) {
         json[start_row + idx] = next_page[idx];
     }
     return json;
 }
+
+const LAZY_THRESHOLD = 10000;
 
 async function grid(div, view, hidden) {
     let [nrows, json, schema] = await Promise.all([
@@ -599,32 +606,43 @@ async function grid(div, view, hidden) {
         view.schema()
     ]);
     let visible_rows = [];
+
     if (!this.grid) {
         this.grid = document.createElement('perspective-hypergrid');
         visible_rows = [0, 0, 100];
     } else if (this.grid.grid) {
-        this.grid.grid.canvas.stopResizing();
         visible_rows = this.grid.grid.getVisibleRows();
     }
+
     json.length = nrows;
-    if (visible_rows.length > 0) {
-        json = await fill_page(view, json, hidden, visible_rows[1], visible_rows[visible_rows.length - 1] + 2);        
+    let lazy_load = nrows > LAZY_THRESHOLD;
+    if (lazy_load) {
+        json = await fill_page(view, json, hidden, visible_rows[1], visible_rows[visible_rows.length - 1] + 2); 
+    } else if (visible_rows.length > 0) {
+        json = await view.to_json();
+        json = filter_hidden(hidden, json);       
     }
     if (!(document.contains ? document.contains(this.grid) : false)) {
         div.innerHTML = "";
         div.appendChild(this.grid);
     }
+
+    await Promise.resolve();
+
+    this.grid.grid._lazy_load = false;
+
     this.grid.grid._cache_update = async (s, e) => {
         json = await fill_page(view, json, hidden, s, e + 10);  
         let rows = psp2hypergrid(json, schema, s, Math.min(e + 10, nrows), nrows).rows;
         rows[0] = this.grid.grid.behavior.dataModel.viewData[0];
         this.grid.grid.setData({data: rows});
     }
-    if (visible_rows.length > 0) {
-        this.grid.set_data(json, schema);
-        this.grid.grid.canvas.resize();
-        this.grid.grid.canvas.resize();
-    }
+    
+    this.grid.set_data(json, schema);
+    this.grid.grid.canvas.resize();
+    this.grid.grid.canvas.resize();
+
+    this.grid.grid._lazy_load = lazy_load;
 }
 
 global.registerPlugin("hypergrid", {
