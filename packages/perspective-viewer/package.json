@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer",
   "version": "0.0.1",
   "description": "Perspective.js",
-  "main": "src/js/view.js",
+  "main": "build/perspective.view.js",
   "files": [
     "src/*",
     "build/*"

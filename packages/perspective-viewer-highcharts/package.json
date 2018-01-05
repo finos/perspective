@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer-highcharts",
   "version": "0.0.1",
   "description": "Perspective.js",
-  "main": "src/js/highcharts.js",
+  "main": "build/highcharts.plugin.js",
   "directories": {
     "test": "test"
   },

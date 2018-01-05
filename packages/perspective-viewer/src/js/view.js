@@ -10,7 +10,7 @@
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import {registerElement, importTemplate} from "@jpmorganchase/perspective-common";
 
 import template from "../html/view.html";
