@@ -123,12 +123,12 @@ function column_visibility_clicked(ev) {
     }
     let cols = this._view_columns('#column_names perspective-row:not(.off)');
     this.setAttribute('columns', JSON.stringify(cols));
-    update.call(this);
+    this._update();
 }
 
 function column_aggregate_clicked() {
     this.setAttribute('aggregates', JSON.stringify(this._get_view_aggregates()));
-    update.call(this);
+    this._update();
 }
 
 /******************************************************************************
@@ -271,7 +271,11 @@ function update() {
             this._debounced = setTimeout(() => {
                 this._debounced = undefined;
                 const t = performance.now();
-                this._plugin.create.call(this, this._datavis, this._view, hidden, false).then(() => {
+                if (this._task) {
+                    this._task.cancelled = true;
+                }
+                this._task = {cancelled: false}
+                this._plugin.create.call(this, this._datavis, this._view, hidden, false, this._task).then(() => {
                     this.setAttribute('render_time', performance.now() - t);
                 });
             }, timeout || 0);
@@ -282,9 +286,10 @@ function update() {
     const t = performance.now();
     this._render_count = (this._render_count || 0) + 1;
     if (this._task) {
-        this._task.cancel();
+        this._task.cancelled = true;
     }
-    this._task = this._plugin.create.call(this, this._datavis, this._view, hidden, true).then(() => {
+    this._task = {cancelled: false}
+    this._plugin.create.call(this, this._datavis, this._view, hidden, true, this._task).then(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
         }
