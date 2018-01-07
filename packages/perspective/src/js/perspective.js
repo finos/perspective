@@ -949,6 +949,11 @@ if (typeof self !== "undefined" && self.addEventListener) {
                                     data: data
                                 });
                             }
+                        }).catch(error => {
+                            self.postMessage({
+                                id: msg.id,
+                                error: error
+                            });
                         });
                     } else {
                         self.postMessage({
@@ -973,6 +978,11 @@ if (typeof self !== "undefined" && self.addEventListener) {
                         self.postMessage({
                             id: msg.id,
                             data: result
+                        });
+                    }).catch(error => {
+                        self.postMessage({
+                            id: msg.id,
+                            error: error
                         });
                     });
                 }
