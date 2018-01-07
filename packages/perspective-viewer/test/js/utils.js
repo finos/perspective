@@ -130,7 +130,7 @@ test.capture = function capture(name, body, timeout = 60000) {
         const page = await browser.newPage();
         page.on('console', msg => {
             if (msg.type === 'error') {
-                errors.push(msg.message);
+                errors.push(msg.text);
             }
             if (process.env.DEBUG) {
                 private_console.log(msg.text);
