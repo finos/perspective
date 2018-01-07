@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer",
   "version": "0.0.1",
   "description": "Perspective.js",
-  "main": "src/js/view.js",
+  "main": "build/perspective.view.js",
   "files": [
     "src/*",
     "build/*"
@@ -43,7 +43,6 @@
     "@jpmorganchase/perspective-common": "^0.0.1",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "babel-plugin-transform-async-to-bluebird": "^1.1.1",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",

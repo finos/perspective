@@ -145,6 +145,33 @@ _get_aggspecs(val j_aggs)
  * -------
  *
  */
+template<typename T>
+void
+_fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
+{
+    t_uint32 size = dcol["length"].as<t_uint32>();
+    for (auto i = 0; i < size; ++i)
+    {
+        auto elem = dcol[i].as<T>();
+        col->set_nth(i, elem);
+        if (fill_index)
+        {
+            key_col->set_nth(i, elem);
+        }
+    }
+}
+
+/**
+ *
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
 void
 _fill_data(t_table_sptr tbl,
            t_svec ocolnames,
@@ -161,17 +188,12 @@ _fill_data(t_table_sptr tbl,
         auto name = ocolnames[cidx];
         auto col = tbl->get_column(name);
         auto col_type = odt[cidx];
+        auto fill_index = name == index;                
         switch (col_type)
         {
             case DTYPE_INT32:
             {
-                std::vector<t_int32> dcol =
-                    vecFromJSArray<t_int32>(data_cols[cidx]);
-                col->fill_vector(dcol);
-                if (name == index)
-                {
-                    key_col->fill_vector(dcol);
-                }
+                _fill_col<t_int32>(data_cols[cidx], col, key_col, fill_index);
             }
             break;
             case DTYPE_BOOL:
@@ -183,13 +205,7 @@ _fill_data(t_table_sptr tbl,
             break;
             case DTYPE_FLOAT64:
             {
-                std::vector<t_float64> dcol =
-                    vecFromJSArray<t_float64>(data_cols[cidx]);
-                col->fill_vector(dcol);
-                if (name == index)
-                {
-                    key_col->fill_vector(dcol);
-                }
+                _fill_col<t_float64>(data_cols[cidx], col, key_col, fill_index);
             }
             break;
 			case DTYPE_TIME:
@@ -206,13 +222,7 @@ _fill_data(t_table_sptr tbl,
 			break;
             default:
             {
-                std::vector<std::string> dcol2 =
-                    vecFromJSArray<std::string>(data_cols[cidx]);
-                col->fill_vector(dcol2);
-                if (name == index)
-                {
-                    key_col->fill_vector(dcol2);
-                }
+                _fill_col<std::string>(data_cols[cidx], col, key_col, fill_index);
             }
         }
     }

@@ -129,6 +129,9 @@ test.capture = function capture(name, body, timeout = 60000) {
         if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
         const page = await browser.newPage();
         page.on('console', msg => {
+            if (msg.type === 'error') {
+                errors.push(msg.text);
+            }
             if (process.env.DEBUG) {
                 private_console.log(msg.text);
             }
@@ -147,7 +150,7 @@ test.capture = function capture(name, body, timeout = 60000) {
 
         // let animation run;
         await page.waitForSelector('perspective-viewer:not([updating])');
-        await page.waitFor(300);
+        await page.waitFor(500);
 
         const screenshot = await page.screenshot();
         await page.close();

@@ -39,10 +39,9 @@ if (detectIE() && window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1) {
 
 function subscribe(method, cmd) {
     return function() {
-        var handler = arguments[arguments.length - 1];
+        var resolve = arguments[arguments.length - 1];
         var args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
-        handler.keep_alive = true;
-        this._worker.handlers[++this._worker.msg_id] = handler;
+        this._worker.handlers[++this._worker.msg_id] = {resolve, reject: () => {}, keep_alive: true};
         var msg = {
             id: this._worker.msg_id,
             cmd: cmd || 'view_method',
@@ -62,8 +61,8 @@ function subscribe(method, cmd) {
 function async_queue(method, cmd) {
     return function() {
         var args = Array.prototype.slice.call(arguments, 0, arguments.length);
-        return new Promise(function(resolve) {
-            this._worker.handlers[++this._worker.msg_id] = resolve;
+        return new Promise(function(resolve, reject) {
+            this._worker.handlers[++this._worker.msg_id] = {resolve, reject};
             var msg = {
                 id: this._worker.msg_id,
                 cmd: cmd || 'view_method',
@@ -233,7 +232,7 @@ let _initialized = false;
 
 worker.prototype._handle = function(e) {
     if (!this._worker.initialized.value) {
-        if (_initialized) {
+        if (!_initialized) {
             var event = document.createEvent("Event");
             event.initEvent("perspective-ready", false, true);
             window.dispatchEvent(event);
@@ -250,7 +249,11 @@ worker.prototype._handle = function(e) {
     if (e.data.id) {
         var handler = this._worker.handlers[e.data.id];
         if (handler) {
-            handler(e.data.data);
+            if (e.data.error) {
+                handler.reject(e.data.error);
+            } else {
+                handler.resolve(e.data.data);
+            }
             if (!handler.keep_alive) {
                 delete this._worker.handlers[e.data.id];
             }

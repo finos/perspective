@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective",
   "version": "0.0.1",
   "description": "Perspective.js",
-  "main": "src/js/perspective.parallel.js",
+  "main": "build/perspective.js",
   "publishConfig": {
     "access": "public"
   },

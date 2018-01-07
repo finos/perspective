@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer-hypergrid",
   "version": "0.0.1",
   "description": "Perspective.js",
-  "main": "src/js/hypergrid.js",
+  "main": "build/hypergrid.plugin.js",
   "directories": {
     "test": "test"
   },

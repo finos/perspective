@@ -6,9 +6,8 @@ const plugins = []
 if (!process.env.PSP_NO_MINIFY) {
     plugins.push(new UglifyJSPlugin({
         sourceMap: true,
-        uglifyOptions: {
-            sourceMap: true,
-            ecma: 5
+        output: {
+            ascii_only: true
         }
     }));
 }
@@ -53,7 +52,7 @@ module.exports = function() {
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],
-                    plugins: ['transform-promise-to-bluebird', 'transform-async-to-bluebird', 'transform-runtime', ["transform-es2015-for-of", {
+                    plugins: ['transform-runtime', ["transform-es2015-for-of", {
                         "loose": true
                     }]]
                 }
