@@ -221,12 +221,16 @@ function* visible_rows(json, hidden) {
 }
 
 export function draw(mode) {
-    return async function(el, view, hidden, redraw) {
+    return async function(el, view, hidden, redraw, task) {
         var row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
         var col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
         var aggregates = this._get_view_aggregates();
 
         let [js, schema] = await Promise.all([view.to_json(), view.schema()]);
+
+        if (task.cancelled) {
+            return;
+        }
 
         let [series, top, colorRange] = _make_series.call(this, js, row_pivots, col_pivots, mode, hidden);
 
