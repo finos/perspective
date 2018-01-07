@@ -50,42 +50,6 @@ export function GridUIFixPlugin(grid) {
         this.resizeNotification();
         this.paintNow();
     }
-   
-    function is_subrange(sub, sup) {
-        return !sup || (sup[0] <= sub[0] && sup[1] >= sub[1]);
-    }
-
-    function estimate_range(grid) {
-        let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
-        return [parseInt(range[0]), parseInt(range[range.length - 1])];
-    }
-
-    grid.canvas._tickPaint = grid.canvas.tickPaint;
-    grid.canvas.tickPaint = async function (t) {
-        if (this.component.grid._lazy_load) {
-            let range = estimate_range(this.component.grid);
-            if (
-                this.component.grid._cache_update 
-                && this.dirty 
-                && !(this._updating_cache && is_subrange(range, this._updating_cache.range))
-            ) {
-                this._updating_cache = this.component.grid._cache_update(...range);
-                this._updating_cache.range = range
-                await this._updating_cache;
-                let new_range = estimate_range(this.component.grid);
-                if (!is_subrange(new_range, range)) {
-                    return;
-                }
-                this._cached_range = range;
-                this._updating_cache = undefined;
-                this.component.grid.canvas._tickPaint(t);
-            } else if (is_subrange(range, this._cached_range)) {
-                this.component.grid.canvas._tickPaint(t);
-            }
-        } else {
-            this.component.grid.canvas._tickPaint(t);
-        }
-    }
 
     grid._getGridCellFromMousePoint = grid.getGridCellFromMousePoint;
     grid.getGridCellFromMousePoint = function(mouse) {
@@ -100,7 +64,6 @@ export function GridUIFixPlugin(grid) {
             }
         }
     };
-
 
     grid.renderer._paintGridlines = grid.renderer.paintGridlines;
     grid.renderer.paintGridlines = function(gc) {

@@ -39,6 +39,15 @@ utils.with_server({}, () => {
 				await page.evaluate(element => element.setAttribute('row-pivots', '["City"]'), viewer);
 		    });
 
+            test.capture("resets viewable area when the physical size expands.", async page => {        
+                await set_lazy(page);
+                await page.click('#config_button');
+                const viewer = await page.$('perspective-viewer');
+                await page.evaluate(element => element.setAttribute('row-pivots', '["Category"]'), viewer);
+                await page.waitForSelector('perspective-viewer:not([updating])');
+                await page.evaluate(element => element.setAttribute('row-pivots', '[]'), viewer);
+                await page.click('#config_button');
+            });
 		});
 
     });

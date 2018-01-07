@@ -501,6 +501,47 @@ function null_formatter(formatter, null_value = '') {
     }
     return formatter
 }
+  
+function is_subrange(sub, sup) {
+    if (!sup) {
+        return false;
+    }
+    return sup[0] <= sub[0] && sup[1] >= sub[1];
+}
+
+function estimate_range(grid) {
+    let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
+    return [parseInt(range[0]), parseInt(range[range.length - 1]) + 2];
+}
+
+function CachedRendererPlugin(grid) {
+    grid.canvas._paintNow = grid.canvas.paintNow;
+    grid.canvas.paintNow = async function (t) {
+        if (this.component.grid._lazy_load) {
+            let range = estimate_range(this.component.grid);
+            if (
+                this.component.grid._cache_update 
+                && (
+                    (this.component.grid._updating_cache && !is_subrange(range, this.component.grid._updating_cache.range)) 
+                    || (!this.component.grid._updating_cache && !is_subrange(range, this.component.grid._cached_range))
+                )
+            ) {
+                this.component.grid._updating_cache = this.component.grid._cache_update(...range);
+                this.component.grid._updating_cache.range = range
+                let updated = await this.component.grid._updating_cache;
+                if (updated) {
+                    this.component.grid._updating_cache = undefined;
+                    this.component.grid._cached_range = range;
+                    this.component.grid.canvas._paintNow(t);
+                }
+            } else if (is_subrange(range, this.component.grid._cached_range)) {
+                this.component.grid.canvas._paintNow(t);
+            }
+        } else {
+            this.component.grid.canvas._paintNow(t);
+        }
+    }
+}
 
 registerElement(TEMPLATE, {
 
@@ -530,7 +571,13 @@ registerElement(TEMPLATE, {
                 host.setAttribute('hidden', true);
                 this.grid = new Hypergrid(host, { Behavior: Behaviors.JSON });
                 host.removeAttribute('hidden');
-                this.grid.installPlugins([GridUIFixPlugin, PerspectiveDataModel, CheckboxTrackingPlugin ]);
+
+                this.grid.installPlugins([
+                    GridUIFixPlugin,
+                    PerspectiveDataModel,
+                    CheckboxTrackingPlugin,
+                    CachedRendererPlugin
+                ]);
 
                 var grid_properties = generateGridProperties(light_theme_overrides);
                 grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
@@ -599,50 +646,65 @@ async function fill_page(view, json, hidden, start_row, end_row) {
 
 const LAZY_THRESHOLD = 10000;
 
-async function grid(div, view, hidden) {
+async function grid(div, view, hidden, redraw, task) {
+
     let [nrows, json, schema] = await Promise.all([
         view.num_rows(), 
         view.to_json({end_row: 1}), 
         view.schema()
     ]);
-    let visible_rows = [];
+
+    let visible_rows;
 
     if (!this.grid) {
         this.grid = document.createElement('perspective-hypergrid');
-        visible_rows = [0, 0, 100];
-    } else if (this.grid.grid) {
-        visible_rows = this.grid.grid.getVisibleRows();
     }
 
     json.length = nrows;
+
     let lazy_load = nrows > LAZY_THRESHOLD;
-    if (lazy_load) {
-        json = await fill_page(view, json, hidden, visible_rows[1], visible_rows[visible_rows.length - 1] + 2); 
-    } else if (visible_rows.length > 0) {
-        json = await view.to_json();
-        json = filter_hidden(hidden, json);       
+
+    if (!lazy_load) {
+        json = view.to_json().then(json => filter_hidden(hidden, json));
+    } else {
+        json = Promise.resolve(json);
     }
+
     if (!(document.contains ? document.contains(this.grid) : false)) {
         div.innerHTML = "";
         div.appendChild(this.grid);
+        await new Promise(resolve => setTimeout(resolve));
     }
 
-    await Promise.resolve();
+    json = await json;
+    if (task.cancelled) {
+        return;
+    }
 
-    this.grid.grid._lazy_load = false;
+
+    this.grid.grid._lazy_load = lazy_load;
+    this.grid.grid._cached_range = undefined;
 
     this.grid.grid._cache_update = async (s, e) => {
-        json = await fill_page(view, json, hidden, s, e + 10);  
-        let rows = psp2hypergrid(json, schema, s, Math.min(e + 10, nrows), nrows).rows;
-        rows[0] = this.grid.grid.behavior.dataModel.viewData[0];
-        this.grid.grid.setData({data: rows});
+        json = await fill_page(view, json, hidden, s, e); 
+        let new_range = estimate_range(this.grid.grid);
+        if (is_subrange(new_range, [s, e])) {
+            let rows = psp2hypergrid(json, schema, s, Math.min(e, nrows), nrows).rows;
+            rows[0] = this.grid.grid.behavior.dataModel.viewData[0];
+            this.grid.grid.setData({data: rows});
+            return true;
+        } else {
+            return false;
+        }
     }
-    
+   
     this.grid.set_data(json, schema);
     this.grid.grid.canvas.resize();
     this.grid.grid.canvas.resize();
 
-    this.grid.grid._lazy_load = lazy_load;
+    if (this._updating_cache) {
+        await this._updating_cache;
+    }
 }
 
 global.registerPlugin("hypergrid", {
