@@ -39,10 +39,9 @@ if (detectIE() && window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1) {
 
 function subscribe(method, cmd) {
     return function() {
-        var handler = arguments[arguments.length - 1];
+        var resolve = arguments[arguments.length - 1];
         var args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
-        handler.keep_alive = true;
-        this._worker.handlers[++this._worker.msg_id] = handler;
+        this._worker.handlers[++this._worker.msg_id] = {resolve, reject: () => {}, keep_alive: true};
         var msg = {
             id: this._worker.msg_id,
             cmd: cmd || 'view_method',

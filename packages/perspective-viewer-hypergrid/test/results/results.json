@@ -7,7 +7,7 @@
     "superstore.html/sorts by a numeric column.": "2eb4a45b85bedbdd2cef8bb8c712ed5c",
     "superstore.html/sorts by an alpha column.": "f99960fb04d633f96a190df6f55ed000",
     "superstore.html/displays visible columns.": "95ea7a90e503ed69e4cc87b9f71adbb4",
-    "superstore.html/resets viewable area when the logical size expands.": "6b8f4fa0dc02fe60f6fc14c4c648a66d",
+    "superstore.html/resets viewable area when the logical size expands.": "a7933b107656467730a115cec818d625",
     "superstore.html/selecting a column does not log a context deleted error.": "2563581d3556c4576745443c8498bea9",
-    "superstore.html/resets viewable area when the physical size expands.": "60689232fd5405439ef4d3f2e8dc68e2"
+    "superstore.html/resets viewable area when the physical size expands.": "75b1b246d3c2612c45fc6c5bc7c3660a"
 }

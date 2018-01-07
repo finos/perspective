@@ -681,7 +681,6 @@ async function grid(div, view, hidden, redraw, task) {
         return;
     }
 
-
     this.grid.grid._lazy_load = lazy_load;
     this.grid.grid._cached_range = undefined;
 
@@ -699,12 +698,10 @@ async function grid(div, view, hidden, redraw, task) {
     }
    
     this.grid.set_data(json, schema);
-    this.grid.grid.canvas.resize();
-    this.grid.grid.canvas.resize();
-
-    if (this._updating_cache) {
-        await this._updating_cache;
-    }
+    await this.grid.grid.canvas.resize();
+    await this.grid.grid._updating_cache;
+    await this.grid.grid.canvas.resize();
+    await this.grid.grid._updating_cache;
 }
 
 global.registerPlugin("hypergrid", {

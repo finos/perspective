@@ -11,7 +11,7 @@ import rectangular from 'rectangular';
 
 export function GridUIFixPlugin(grid) {
 
-    grid.canvas.resize = function() {
+    grid.canvas.resize = async function() {
         var box = this.size = this.div.getBoundingClientRect();
 
         this.width = Math.floor(this.div.clientWidth);
