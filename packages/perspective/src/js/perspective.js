@@ -1046,18 +1046,28 @@ const perspective = {
         } else {
             tindex = __MODULE__.t_dtype.DTYPE_UINT32;
         }
-        let gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
-        let pool = new __MODULE__.t_pool({_update_callback: function() {} } );
-        let id = pool.register_gnode(gnode);
+
+        let tbl, gnode, pool;
+
         try {
-            let tbl = __MODULE__.make_table(data.length || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+            gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
+            pool = new __MODULE__.t_pool({_update_callback: function() {} } );
+            let id = pool.register_gnode(gnode);
+            tbl = __MODULE__.make_table(data.length || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
             __MODULE__.fill(id, tbl, gnode, pool);
-            tbl.delete();
             return new table(id, gnode, pool, options.index, tindex);
         } catch (e) {
-            console.error("Failed to create table");
-            console.error(pdata);
-            return;
+            if (gnode) {
+                gnode.delete();
+            }
+            if (pool) {
+                pool.delete();
+            }
+            throw e;
+        } finally {
+            if (tbl) {
+                tbl.delete();
+            }
         }
     }
 }

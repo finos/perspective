@@ -83,10 +83,6 @@ _get_fterms(t_schema schema, val j_filters)
             case DTYPE_FLOAT64:
                 term = mktscalar(filter[2].as<t_float64>());
                 break;
-            // case DTYPE_STR:
-            //     term =
-            //     mktscalar(filter[2].as<std::string>().c_str());
-            //     break;
             case DTYPE_BOOL:
                 term = mktscalar(filter[2].as<bool>());
                 break;
@@ -161,6 +157,22 @@ _fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
     }
 }
 
+template<>
+void
+_fill_col<t_int64>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
+{
+    t_uint32 size = dcol["length"].as<t_uint32>();
+    for (auto i = 0; i < size; ++i)
+    {
+        auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
+        col->set_nth(i, elem);
+        if (fill_index)
+        {
+            key_col->set_nth(i, elem);
+        }
+    }
+}
+
 /**
  *
  *
@@ -198,9 +210,7 @@ _fill_data(t_table_sptr tbl,
             break;
             case DTYPE_BOOL:
             {
-                std::vector<bool> dcol =
-                    vecFromJSArray<bool>(data_cols[cidx]);
-                col->fill_vector(dcol);
+                _fill_col<bool>(data_cols[cidx], col, key_col, fill_index);
             }
             break;
             case DTYPE_FLOAT64:
@@ -210,14 +220,7 @@ _fill_data(t_table_sptr tbl,
             break;
 			case DTYPE_TIME:
 			{
-				auto dcol_ = vecFromJSArray<t_float64>(data_cols[cidx]);
-				std::vector<t_int64> dcol(dcol_.size());
-				t_uindex count = 0;
-				for (t_uindex count=0; count < dcol_.size(); ++count)
-				{
-					dcol[count] = dcol_[count];
-				}
-				col->fill_vector(dcol);
+                _fill_col<t_int64>(data_cols[cidx], col, key_col, fill_index);
 			}
 			break;
             default:
