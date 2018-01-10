@@ -317,6 +317,10 @@ registerElement(template, {
         }
     },
 
+    worker: {
+        get: get_worker()
+    },
+
     _plugin: {
         get: function () {
             return RENDERERS[this._vis_selector.value];
