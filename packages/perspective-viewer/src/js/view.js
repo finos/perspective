@@ -231,6 +231,9 @@ function load(csv) {
     if (this.getAttribute('index')) {
         options.index = this.getAttribute('index');
     }
+    if (this.getAttribute('binary')) {
+        options.binary = true;
+    }
     let table;
     if (csv.hasOwnProperty("_name")) {
         table = csv;

@@ -9,6 +9,7 @@
 
 import papaparse from "papaparse";
 import moment from "moment";
+import * as Arrow from "@apache-arrow/es5-esm";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -119,6 +120,8 @@ function parse_data(data, names, types) {
     }
     let cdata = [];
 
+    let row_count = 0;
+
     if (Array.isArray(data)) {
 
         // Row oriented
@@ -213,6 +216,7 @@ function parse_data(data, names, types) {
                 }
             }
             cdata.push(col);
+            row_count = col.length;
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
@@ -223,6 +227,7 @@ function parse_data(data, names, types) {
             types.push(infer_type(data[name][0]));
             let transformed = transform_data(types[types.length - 1], data[name]);
             cdata.push(transformed);
+            row_count = transformed.length
         }
 
     } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
@@ -253,6 +258,7 @@ function parse_data(data, names, types) {
     }
 
     return {
+        row_count: row_count,
         names: names,
         types: types,
         cdata: cdata
@@ -371,11 +377,11 @@ view.prototype.schema = async function() {
     for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
         let col_name = col_names[key].split(',');
         col_name = col_name[col_name.length - 1];
-        if (types[col_name] === 2) {
+        if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
         } else if (types[col_name] === 19) {
             new_schema[col_name] = "string";
-        } else if (types[col_name] === 9) {
+        } else if (types[col_name] === 9 || types[col_name] === 10) {
             new_schema[col_name] = "float";
         } else if (types[col_name] === 11) {
             new_schema[col_name] = "boolean";
@@ -617,11 +623,11 @@ table.prototype.schema = async function() {
     let types = schema.types();
     let new_schema = {};
     for (let key = 0; key < columns.size(); key++) {
-        if (types.get(key).value === 2) {
+        if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
             new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 9) {
+        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
             new_schema[columns.get(key)] = "float";
         } else if (types.get(key).value === 11) {
             new_schema[columns.get(key)] = "boolean";
@@ -837,9 +843,9 @@ table.prototype.view = function(config) {
  * @see {@link table}
  */ 
 table.prototype.update = function (data) {
-    let {names, types, cdata} = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
+    let {row_count, names, types, cdata} = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
     this.initialized = true;
-    let tbl = __MODULE__.make_table(data.length || 0, names, types, cdata, this.gnode.get_table().size(), this.index, this.tindex);
+    let tbl = __MODULE__.make_table(row_count || 0, names, types, cdata, this.gnode.get_table().size(), this.index, this.tindex);
     __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
     tbl.delete();
 }
@@ -1023,14 +1029,66 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        if (typeof data === "string") {
-            if (data[0] === ",") {
-                data = "_" + data;
+        options.binary = options.binary || false;
+        let pdata;
+
+        if (options.binary) {
+            // Arrow data
+            var arr = new Uint8Array(data)
+            var arrow = Arrow.Table.from([arr]);
+
+            let names = [];
+            let types = [];
+            let cdata = [];
+            for (let column of arrow.columns) {
+                switch (column.type) {
+                    case 'Utf8':
+                        types.push(__MODULE__.t_dtype.DTYPE_STR);
+                        break;
+                    case 'FloatingPoint':
+                        types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                        break;
+                    case 'Int':
+                        let width = (column.data.length / column.length);
+                        if (width === 1) {
+                            types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                        } else if (width === 2) {
+                            continue   // Don't handle INT64 yet
+                            //types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                        }
+                        break;
+                    case 'Bool':
+                        types.push(__MODULE__.t_dtype.DTYPE_BOOL);
+                        break;
+                    /*case 'Timestamp':
+                        types.push(__MODULE__.t_dtype.DTYPE_TIME);
+                        break;
+                    */
+                    default:
+                        continue;
+                        break;
+                }
+                switch (column.type) {
+                    //case 'Utf8':
+                    //    cdata.push(column.values);
+                    //    break;
+                    default:
+                        cdata.push(column.slice());
+                        break;
+                }
+                names.push(column.name);
             }
-            let js = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
-            return perspective.table(js, options);
+            pdata = {row_count: arrow.length, names: names, types: types, cdata: cdata};
+        } else {
+            if (typeof data === "string") {
+                if (data[0] === ",") {
+                    data = "_" + data;
+                }
+                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
+            }
+            pdata = parse_data(data);
         }
-        let pdata = parse_data(data);
+
         let tindex;
         if (options.index) {
             tindex = pdata.types[pdata.names.indexOf(options.index)]
@@ -1044,7 +1102,7 @@ const perspective = {
             gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
             let id = pool.register_gnode(gnode);
-            tbl = __MODULE__.make_table(data.length || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
             __MODULE__.fill(id, tbl, gnode, pool);
             return new table(id, gnode, pool, options.index, tindex);
         } catch (e) {
