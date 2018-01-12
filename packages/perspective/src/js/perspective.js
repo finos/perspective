@@ -1046,32 +1046,45 @@ const perspective = {
                         types.push(__MODULE__.t_dtype.DTYPE_STR);
                         break;
                     case 'FloatingPoint':
-                        types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                        switch (column.data.BYTES_PER_ELEMENT) {
+                            case 4:
+                                types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
+                                break;
+                            case 8:
+                                types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                                break;
+                        }
                         break;
                     case 'Int':
-                        let width = (column.data.length / column.length);
-                        if (width === 1) {
-                            types.push(__MODULE__.t_dtype.DTYPE_INT32);
-                        } else if (width === 2) {
-                            continue   // Don't handle INT64 yet
-                            //types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                        switch (column.data.BYTES_PER_ELEMENT) {
+                            case 1:
+                                types.push(__MODULE__.t_dtype.DTYPE_INT8);
+                                break;
+                            case 2:
+                                types.push(__MODULE__.t_dtype.DTYPE_INT16);
+                                break;
+                            case 4:
+                                types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                                break;
+                            case 8:
+                                types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                                break;
                         }
                         break;
                     case 'Bool':
                         types.push(__MODULE__.t_dtype.DTYPE_BOOL);
                         break;
-                    /*case 'Timestamp':
+                    case 'Timestamp':
                         types.push(__MODULE__.t_dtype.DTYPE_TIME);
                         break;
-                    */
                     default:
                         continue;
                         break;
                 }
                 switch (column.type) {
-                    //case 'Utf8':
-                    //    cdata.push(column.values);
-                    //    break;
+                    case 'Utf8':
+                        cdata.push(column);
+                        break;
                     default:
                         cdata.push(column.slice());
                         break;
