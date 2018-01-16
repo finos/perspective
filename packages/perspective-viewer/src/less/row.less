@@ -54,16 +54,16 @@ perspective-row li {
     float: none !important;
 }
 
-#column_names perspective-row li {
+#side_panel perspective-row li {
     margin-right: 5px;
     transition: margin-right 0.2s;    
 }
 
-#column_names perspective-row li:hover{
+#side_panel perspective-row li:hover{
     margin-right: 2px;
 }
 
-#column_names perspective-row div {
+#side_panel perspective-row div {
     color: rgb(51, 51, 51);
     padding: 2px;
     font-size: 12px;
@@ -71,22 +71,22 @@ perspective-row li {
     transition: margin 0.2s, padding 0.2s, height 0.2s;
 }
 
-#column_names perspective-row div:hover {
+#side_panel perspective-row div:hover {
     margin-left: -3px;
     padding-left: 5px;
 }
 
-#column_names perspective-row:hover div {
+#side_panel perspective-row:hover div {
     margin-left: -3px;
     padding-left: 5px;
 }
 
-#column_names perspective-row:not(.off) div {
+#side_panel perspective-row:not(.off) div {
     .bordered();
     background-color: white;
 }
 
-#column_names perspective-row .is_visible {
+#side_panel perspective-row .is_visible {
     width: 20px;
     min-width: 20px;
     margin-left: 5px;
@@ -95,11 +95,11 @@ perspective-row li {
     font-size: 14px;
 }
 
-#column_names perspective-row.off .is_visible::before {
+#side_panel perspective-row.off .is_visible::before {
     content: "\25CB";
 }
 
-#column_names perspective-row .is_visible::before {
+#side_panel perspective-row .is_visible::before {
     content: "\25CF";
 }
 
@@ -156,7 +156,7 @@ perspective-row #column_aggregate {
     height: 20px;
 }
 
-#column_names perspective-row span#name {
+#active_columns perspective-row span#name {
     width: 100%;
     white-space: nowrap;
 }
@@ -180,37 +180,37 @@ perspective-row .row_draggable select:focus {
     outline: none;
 }
 
-perspective-viewer[view=scatter], perspective-viewer[view=line], perspective-viewer[view=line] {
-    #column_names {
+perspective-viewer[view=scatter], perspective-viewer[view=line] {
+    #active_columns {
         .off .is_visible::before {
             content: "\25CB";
         }
-        .visible_1 .is_visible::before {
+        :nth-child(1) .is_visible::before {
             .selected_indicator();
             content: "X";
         }
-        .visible_2 .is_visible::before {
+        :nth-child(2) .is_visible::before {
             .selected_indicator();
             content: "Y";
         }
-        .visible_3 .is_visible::before {
+        :nth-child(3) .is_visible::before {
             .selected_indicator();
             content: "C";
         }
-        .visible_4 .is_visible::before {
+        :nth-child(4) .is_visible::before {
             .selected_indicator();
             content: "S";
         }
     }
 }
 
-perspective-viewer:not([row-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate,
-perspective-viewer:not([column-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate {
+perspective-viewer:not([row-pivots='[]']) #side_panel perspective-row:not(.off) #column_aggregate,
+perspective-viewer:not([column-pivots='[]']) #side_panel perspective-row:not(.off) #column_aggregate {
     display: inline-block;
 }
 
-perspective-viewer:not([row-pivots='[]']) #column_names,
-perspective-viewer:not([column-pivots='[]']) #column_names {
+perspective-viewer:not([row-pivots='[]']) #side_panel,
+perspective-viewer:not([column-pivots='[]']) #side_panel {
     perspective-row .row_draggable {
         height: 41px;
     }

@@ -84,11 +84,13 @@ function drop(ev) {
     // Deselect the dropped column
     let isToggleMode = this._plugin.selectMode === "toggle";
     if (isToggleMode && this._visible_column_count() > 1 && name !== "sort") {
-        for (let x of this.querySelectorAll("#column_names perspective-row")) {
+        for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data) {
-                 x.className = 'off';
+                 this._active_columns.removeChild(x);
+                 break;
             }
         }
+        this._update_column_view(this._view_columns('#active_columns perspective-row'));
     }
 
     this._update();
@@ -101,33 +103,36 @@ function drop(ev) {
  */
 
 function column_visibility_clicked(ev) {
-    let isSelect = this._plugin.selectMode === 'select'
-    let mode = (isSelect && !ev.detail.shiftKey) || (!isSelect && ev.detail.shiftKey);
     let className = `visible_${this._visible_column_count() + 1}`;
     let parent = ev.currentTarget;
-    if (mode) {
-        for (let x of this.querySelectorAll("#column_names perspective-row")) {
-            x.className = 'off';
-        }
-        parent.classList.remove('off');
-        if (parent.classList.length === 0) {
-            parent.classList.add(className);
-        }
-    } else if (parent.classList.contains("off")) {
-        parent.classList.remove("off");
-        if (parent.classList.length === 0) {
-            parent.classList.add(className);
-        }
+    let is_active = parent.parentElement.getAttribute('id') === 'active_columns';;
+    if (is_active) {
+        this._active_columns.removeChild(parent);
     } else {
-        parent.className = 'off';
+        let row = new_row.call(
+            this, 
+            parent.getAttribute('name'), 
+            parent.getAttribute('type'), 
+            JSON.parse(this.getAttribute('aggregates')).find(x => x.column === parent.getAttribute('name')).op
+        );
+        this._active_columns.appendChild(row);
     }
-    let cols = this._view_columns('#column_names perspective-row:not(.off)');
+    let cols = this._view_columns('#active_columns perspective-row:not(.off)');
     this.setAttribute('columns', JSON.stringify(cols));
+    this._update_column_view(cols);
     this._update();
 }
 
 function column_aggregate_clicked() {
-    this.setAttribute('aggregates', JSON.stringify(this._get_view_aggregates()));
+    let aggregates = JSON.parse(this.getAttribute('aggregates'));
+    let new_aggregates = this._get_view_aggregates();
+    for (let aggregate of aggregates) {
+        let updated_agg = new_aggregates.find(x => x.column === aggregate.column);
+        if (updated_agg) {
+            aggregate.op = updated_agg.op;
+        }
+    }
+    this.setAttribute('aggregates', JSON.stringify(aggregates));
     this._update();
 }
 
@@ -174,7 +179,7 @@ async function loadTable(table) {
         this._table.delete();
     }
 
-    this._column_names.innerHTML = "";
+    this._active_columns.innerHTML = "";
     this._table = table;
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
@@ -210,26 +215,36 @@ async function loadTable(table) {
         let aggregate = aggregates
             .filter(a => a.column === x)
             .map(a => a.op)[0];
-        let row = document.createElement('perspective-row');
-        row.setAttribute('type', schema[x]);
-        row.setAttribute('name', x);
-        if (aggregate) {
-            row.setAttribute('aggregate', aggregate);
+        let row = new_row.call(this, x, schema[x], aggregate);
+        row.className = 'off';
+        this._inactive_columns.appendChild(row);
+        if (shown.indexOf(x) !== -1) {
+            row.style.display = 'none';
+            let active_row = new_row.call(this, x, schema[x], aggregate);
+            active_row.className = 'visible_' + (shown.indexOf(x) + 1);
+            this._active_columns.appendChild(active_row);
         }
-        row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
-        row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
-        row.addEventListener('row-drag', () => this.classList.add('dragging'));
-        row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
-        if (shown.indexOf(x) === -1) {
-            row.className = 'off';
-        } else {
-            row.className = 'visible_' + (shown.indexOf(x) + 1);
-        }
-        this._column_names.appendChild(row);
     }
 
     this._filter_input.innerHTML = "";
     this._update();
+}
+
+function new_row(name, type, aggregate) {
+    let row = document.createElement('perspective-row');
+    if (!aggregate) {
+        aggregate = JSON.parse(this.getAttribute('aggregates')).find(x => x.column === name).op;
+    }
+    row.setAttribute('type', type);
+    row.setAttribute('name', name);
+    if (aggregate) {
+        row.setAttribute('aggregate', aggregate);
+    }
+    row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
+    row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
+    row.addEventListener('row-drag', () => this.classList.add('dragging'));
+    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+    return row;
 }
 
 function update() {
@@ -247,7 +262,7 @@ function update() {
     let sort = this._view_columns("#sort perspective-row:not(.off)");
     for (let s of sort) {
         if (aggregates.map(function(agg) { return agg.column }).indexOf(s) === -1) {
-            let all = this._get_view_aggregates('#column_names perspective-row');
+            let all = this._get_view_aggregates('#inactive_columns perspective-row');
             aggregates.push(all.reduce((obj, y) => y.column === s ? y : obj));
             hidden.push(s);
         }
@@ -318,7 +333,7 @@ registerElement(template, {
     },
 
     worker: {
-        get: get_worker()
+        get: get_worker
     },
 
     _plugin: {
@@ -374,7 +389,7 @@ registerElement(template, {
         value: function () {
             let filters = [];
             let filter = this._filter_input.value.trim();
-            let cols = this._view_columns('#column_names perspective-row');
+            let cols = this._view_columns('#active_columns perspective-row');
             for (let col of cols) {
                 filter = filter.split("`" + col.trim() + "`").join(col + "||||");
             }
@@ -406,7 +421,7 @@ registerElement(template, {
 
     _get_view_aggregates: {
         value: function (selector) {
-            selector = selector || '#column_names perspective-row:not(.off)';
+            selector = selector || '#active_columns perspective-row:not(.off)';
             return this._view_columns(selector, true);
         }
     },
@@ -414,12 +429,7 @@ registerElement(template, {
     _view_columns: {
         value: function (selector, types) {
             let selection = this.querySelectorAll(selector);
-            let sorted = Array.prototype.slice.call(selection).sort((x, y) => {
-                if (x.className === "") return 0;
-                if (x.className === y.className) return 0;
-                if (x.className < y.className) return -1;
-                return 1;
-            })
+            let sorted = Array.prototype.slice.call(selection);
             return sorted.map(s => {
                 let name = s.getAttribute('name');
                 if (types) {
@@ -434,24 +444,37 @@ registerElement(template, {
 
     _visible_column_count: {
         value: function() {
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            let off_cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row.off"));
+            let cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
+            let off_cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row.off"));
             return (cols.length - off_cols.length);
         }
     },
 
     _update_column_view: {
-        value: function (columns) {
+        value: function (columns, reset = false) {
             let idx = 1;
-            const lis = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            lis.map((x) => {
+            const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+            lis.forEach(x => {
                 const index = columns.indexOf(x.getAttribute('name'));
                 if (index === -1) {
-                    x.className = 'off';
+                    x.style.display = 'block';
                 } else {
-                    x.className = 'visible_' + (index + 1);
+                    x.style.display = 'none';
                 }
             });
+            if (reset) {
+                this._active_columns.innerHTML = "";
+                columns.map(y => {
+                    let ref = lis.find(x => x.getAttribute('name') === y);
+                    if (ref) {
+                        this._active_columns.appendChild(new_row.call(
+                            this, 
+                            ref.getAttribute('name'), 
+                            ref.getAttribute('type')
+                        ));
+                    }
+                });
+            }
         }
     },
 
@@ -463,7 +486,7 @@ registerElement(template, {
     columns: {
         set: function () {
             let show = JSON.parse(this.getAttribute('columns'));
-            this._update_column_view(show);
+            this._update_column_view(show, true);
             this.dispatchEvent(new Event('config-update'));
             this._update();
         }
@@ -482,8 +505,7 @@ registerElement(template, {
     aggregates: {
         set: function () {
             let show = JSON.parse(this.getAttribute('aggregates'));
-            let lis = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            let idx = this._visible_column_count();
+            let lis = Array.prototype.slice.call(this.querySelectorAll("#side_panel perspective-row"));
             lis.map((x, ix) => {
                 let agg = show[x.getAttribute('name')];
                 if (agg) {
@@ -507,7 +529,7 @@ registerElement(template, {
     view: {
         set: function () {
             this._vis_selector.value = this.getAttribute('view');
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
+            let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             if (cols.length > 0) {
                 if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
@@ -647,7 +669,8 @@ registerElement(template, {
             this._row_pivots = this.querySelector('#row_pivots');
             this._column_pivots = this.querySelector('#column_pivots');
             this._datavis = this.querySelector('#pivot_chart');
-            this._column_names = this.querySelector('#column_names');
+            this._active_columns = this.querySelector('#active_columns');
+            this._inactive_columns = this.querySelector('#inactive_columns');
             this._inner_drop_target = this.querySelector('#drop_target_inner');
             this._drop_target = this.querySelector('#drop_target');
             this._config_button = this.querySelector('#config_button');
