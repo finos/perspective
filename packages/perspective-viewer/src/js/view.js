@@ -52,7 +52,6 @@ global.registerPlugin = function registerPlugin(name, plugin) {
  *
  */
 
-
 function undrag(event) {
     let div = event.target.parentElement;
     if (div) {
@@ -64,6 +63,33 @@ function undrag(event) {
         this.setAttribute(attr_name, JSON.stringify(pivots));
         this._update();
     }
+}
+
+function column_undrag(event) {
+    let data = event.target.parentElement.parentElement;
+    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
+        this._active_columns.removeChild(data);
+    }
+    this._update_column_view();
+    this._update();
+}
+
+function column_drop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('dropping');
+    let data = ev.dataTransfer.getData('text');
+    if (!data) return;
+
+    let index = Math.floor((ev.clientY - this._active_columns.offsetTop) / this._active_columns.children[0].offsetHeight);
+    let target = this._active_columns.children[index];
+    let old = Array.prototype.slice.call(this.querySelectorAll('#active_columns perspective-row')).find(x => x.getAttribute('name') === data);
+    let newr = new_row.call(this, data);
+    this._active_columns.insertBefore(newr, target);
+    if (old) {
+        this._active_columns.removeChild(old);
+    }
+    this._update_column_view();    
+    this._update();
 }
 
 function drop(ev) {
@@ -82,15 +108,14 @@ function drop(ev) {
     this.setAttribute(name, JSON.stringify(columns.concat([data])));
 
     // Deselect the dropped column
-    let isToggleMode = this._plugin.selectMode === "toggle";
-    if (isToggleMode && this._visible_column_count() > 1 && name !== "sort") {
+    if (this._visible_column_count() > 1 && name !== "sort") {
         for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data) {
                  this._active_columns.removeChild(x);
                  break;
             }
         }
-        this._update_column_view(this._view_columns('#active_columns perspective-row'));
+        this._update_column_view();
     }
 
     this._update();
@@ -107,6 +132,9 @@ function column_visibility_clicked(ev) {
     let parent = ev.currentTarget;
     let is_active = parent.parentElement.getAttribute('id') === 'active_columns';;
     if (is_active) {
+        if (this._visible_column_count() === 1  ) {
+            return;
+        }
         this._active_columns.removeChild(parent);
     } else {
         let row = new_row.call(
@@ -234,6 +262,10 @@ function new_row(name, type, aggregate) {
     let row = document.createElement('perspective-row');
     if (!aggregate) {
         aggregate = JSON.parse(this.getAttribute('aggregates')).find(x => x.column === name).op;
+    }
+    if (!type) {
+        let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
+        type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
     }
     row.setAttribute('type', type);
     row.setAttribute('name', name);
@@ -452,6 +484,9 @@ registerElement(template, {
 
     _update_column_view: {
         value: function (columns, reset = false) {
+            if (!columns) {
+                columns = this._view_columns('#active_columns perspective-row');
+            }
             let idx = 1;
             const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             lis.forEach(x => {
@@ -684,6 +719,8 @@ registerElement(template, {
             this._row_pivots.addEventListener('dragend', undrag.bind(this));
             this._column_pivots.addEventListener('drop', drop.bind(this));
             this._column_pivots.addEventListener('dragend', undrag.bind(this));
+            this._active_columns.addEventListener('drop', column_drop.bind(this));
+            this._active_columns.addEventListener('dragend', column_undrag.bind(this));
 
             this.setAttribute('settings', true);
             this._show_config = true;

@@ -16,7 +16,7 @@
                 <select id="vis_selector">
                 </select>
             </div>
-            <ul id='active_columns'></ul>
+            <ul id='active_columns' ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)"></ul>
             <div id='divider'></div>
             <ul id='inactive_columns'></ul>
         </div>

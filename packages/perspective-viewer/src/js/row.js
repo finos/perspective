@@ -26,6 +26,7 @@ global.dragEnter = function dragEnter(ev) {
 
 global.allowDrop = function allowDrop(ev) {
     ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'move';
     ev.currentTarget.classList.add('dropping')
 }
 
