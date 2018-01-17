@@ -22,12 +22,13 @@ import "../less/row.less";
 
 global.dragEnter = function dragEnter(ev) {
     ev.preventDefault();
+    ev.currentTarget.classList.add('dropping');
 }
 
 global.allowDrop = function allowDrop(ev) {
     ev.preventDefault();
-    ev.dataTransfer.dropEffect = 'move';
-    ev.currentTarget.classList.add('dropping')
+    ev.dataTransfer.dropEffect = 'all';
+    ev.currentTarget.classList.add('dropping');
 }
 
 global.disallowDrop = function disallowDrop(ev) {
@@ -92,7 +93,7 @@ registerElement(template, {
                 this.dispatchEvent(new CustomEvent('row-drag'));
             });
             li.addEventListener('dragend', ev => {
-                ev.currentTarget.classList.remove('dropping');
+                //ev.currentTarget.classList.remove('dropping');
                 this.dispatchEvent(new CustomEvent('row-dragend'));
             });
             let visible = this.querySelector('.is_visible');

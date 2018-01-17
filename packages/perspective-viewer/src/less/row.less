@@ -43,6 +43,18 @@ perspective-viewer ul {
     transition: background-color 0.2s, border-color 0.2s;
 }
 
+.dropping perspective-row.inserting {
+    margin-top: 25px;
+}
+
+.dropping perspective-row.postserting {
+    margin-bottom: 25px;
+}
+
+.dropping * {
+    pointer-events: none;
+}
+
 perspective-row li {
     color: rgb(51, 51, 51);
     margin-bottom: 2px;

@@ -59,28 +59,60 @@ function undrag(event) {
         let idx = Array.prototype.slice.call(parent.children).indexOf(div);
         let attr_name = parent.getAttribute('id').replace('_', '-');
         let pivots = JSON.parse(this.getAttribute(attr_name));
-        pivots.splice(idx, 1)
+        pivots.splice(idx, 1);
         this.setAttribute(attr_name, JSON.stringify(pivots));
         this._update();
     }
 }
 
+function calc_index(event) {
+    return Math.floor(event.offsetY / this._active_columns.children[0].offsetHeight);
+}
+
 function column_undrag(event) {
     let data = event.target.parentElement.parentElement;
-    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
+    Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
+    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'all') {
         this._active_columns.removeChild(data);
     }
     this._update_column_view();
     this._update();
 }
 
+function column_dragleave(event) {
+    if (!this._skip_drag) {
+        this._active_columns.classList.remove('dropping');
+    } 
+    this._skip_drag = false;
+}
+
+function column_dragover(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'all';
+    if (event.currentTarget.className !== 'dropping') {
+        this._skip_drag = true;
+        event.currentTarget.classList.add('dropping');
+    }
+    let index = calc_index.call(this, event);
+    if (this._active_columns.children[index]) {
+        if (this._active_columns.children[index].className !== 'inserting') {
+            Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
+            this._active_columns.children[index].className = 'inserting';
+        }  
+    } else {
+        Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
+        this._active_columns.children[this._active_columns.children.length - 1].className = "postserting";
+    }
+}
+
 function column_drop(ev) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('dropping');
+    Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
     let data = ev.dataTransfer.getData('text');
     if (!data) return;
 
-    let index = Math.floor((ev.clientY - this._active_columns.offsetTop) / this._active_columns.children[0].offsetHeight);
+    let index = calc_index.call(this, ev);
     let target = this._active_columns.children[index];
     let old = Array.prototype.slice.call(this.querySelectorAll('#active_columns perspective-row')).find(x => x.getAttribute('name') === data);
     let newr = new_row.call(this, data);
@@ -108,7 +140,8 @@ function drop(ev) {
     this.setAttribute(name, JSON.stringify(columns.concat([data])));
 
     // Deselect the dropped column
-    if (this._visible_column_count() > 1 && name !== "sort") {
+    let isToggleMode = this._plugin.selectMode === "toggle";
+    if (isToggleMode && this._visible_column_count() > 1 && name !== "sort") {
         for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data) {
                  this._active_columns.removeChild(x);
@@ -274,7 +307,12 @@ function new_row(name, type, aggregate) {
     }
     row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
     row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
-    row.addEventListener('row-drag', () => this.classList.add('dragging'));
+    row.addEventListener('row-drag', () => {
+        this.classList.add('dragging');
+        // if (row.parentElement.getAttribute('id') === "active_columns") {
+        //     setTimeout(() => row.parentElement.removeChild(row));
+        // }
+    });
     row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
     return row;
 }
@@ -715,12 +753,17 @@ registerElement(template, {
 
             this._sort.addEventListener('drop', drop.bind(this));
             this._sort.addEventListener('dragend', undrag.bind(this));
+
             this._row_pivots.addEventListener('drop', drop.bind(this));
             this._row_pivots.addEventListener('dragend', undrag.bind(this));
+
             this._column_pivots.addEventListener('drop', drop.bind(this));
             this._column_pivots.addEventListener('dragend', undrag.bind(this));
+
             this._active_columns.addEventListener('drop', column_drop.bind(this));
             this._active_columns.addEventListener('dragend', column_undrag.bind(this));
+            this._active_columns.addEventListener('dragover', column_dragover.bind(this));
+            this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
 
             this.setAttribute('settings', true);
             this._show_config = true;
