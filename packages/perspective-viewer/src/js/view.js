@@ -66,60 +66,68 @@ function undrag(event) {
 }
 
 function calc_index(event) {
-    return Math.floor(event.offsetY / this._active_columns.children[0].offsetHeight);
+    return Math.floor((event.offsetY + this._active_columns.scrollTop) / this._active_columns.children[0].offsetHeight);
 }
 
 function column_undrag(event) {
     let data = event.target.parentElement.parentElement;
     Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
-    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'all') {
+    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
+
         this._active_columns.removeChild(data);
     }
+    this._active_columns.classList.remove('dropping');        
     this._update_column_view();
     this._update();
 }
 
 function column_dragleave(event) {
-    if (!this._skip_drag) {
-        this._active_columns.classList.remove('dropping');
-    } 
-    this._skip_drag = false;
+    let src = event.relatedTarget;
+    while (src && src !== this._active_columns) {
+        src = src.parentElement;
+    }
+    if (src) {
+        return;
+    }
+    this._active_columns.classList.remove('dropping');
+    if (this._drop_target_hover.parentElement === this._active_columns) { 
+        this._active_columns.removeChild(this._drop_target_hover);
+    }
+    if (this._original_index !== -1) {
+        this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
+    }
+    this._drop_target_hover.removeAttribute('drop-target');
 }
 
 function column_dragover(event) {
     event.preventDefault();
-    event.dataTransfer.dropEffect = 'all';
+    event.dataTransfer.dropEffect = 'move';
     if (event.currentTarget.className !== 'dropping') {
-        this._skip_drag = true;
         event.currentTarget.classList.add('dropping');
+    }
+    if (!this._drop_target_hover.hasAttribute('drop-target')) {
+        this._drop_target_hover.setAttribute('drop-target', true);
     }
     let index = calc_index.call(this, event);
     if (this._active_columns.children[index]) {
-        if (this._active_columns.children[index].className !== 'inserting') {
-            Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
-            this._active_columns.children[index].className = 'inserting';
+        if (!this._active_columns.children[index].hasAttribute('drop-target')) {
+            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[index]);
         }  
     } else {
-        Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
-        this._active_columns.children[this._active_columns.children.length - 1].className = "postserting";
+        this._active_columns.appendChild(this._drop_target_hover);
     }
 }
 
 function column_drop(ev) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('dropping');
+    if (this._drop_target_hover.parentElement === this._active_columns) {
+        this._drop_target_hover.removeAttribute('drop-target');
+    }
     Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
     let data = ev.dataTransfer.getData('text');
     if (!data) return;
-
-    let index = calc_index.call(this, ev);
-    let target = this._active_columns.children[index];
-    let old = Array.prototype.slice.call(this.querySelectorAll('#active_columns perspective-row')).find(x => x.getAttribute('name') === data);
-    let newr = new_row.call(this, data);
-    this._active_columns.insertBefore(newr, target);
-    if (old) {
-        this._active_columns.removeChild(old);
-    }
+    
     this._update_column_view();    
     this._update();
 }
@@ -293,27 +301,44 @@ async function loadTable(table) {
 
 function new_row(name, type, aggregate) {
     let row = document.createElement('perspective-row');
-    if (!aggregate) {
-        aggregate = JSON.parse(this.getAttribute('aggregates')).find(x => x.column === name).op;
+    if (name) {
+        if (!aggregate) {
+            let aggregates = JSON.parse(this.getAttribute('aggregates'));
+            if (aggregates) {
+                aggregate = aggregates.find(x => x.column === name).op;
+            } else {
+                aggregate = '';
+            }
+        }
+        if (!type) {
+            let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
+            if (all.length > 0) {
+                type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
+            } else {
+                type = '';
+            }
+        }
+        row.setAttribute('type', type);
+        row.setAttribute('name', name);
+        if (aggregate) {
+            row.setAttribute('aggregate', aggregate);
+        }
+        row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
+        row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
+        row.addEventListener('row-drag', () => {
+            this.classList.add('dragging');
+            this._original_index = Array.prototype.slice.call(this._active_columns.children).indexOf(row);
+            if (this._original_index !== -1) {
+                this._drop_target_hover = row;
+                setTimeout(() => row.setAttribute('drop-target', true));
+            } else {
+                this._drop_target_hover = new_row.call(this, name, type, aggregate);
+            }
+        });
+        row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+    } else {
+        row.setAttribute('drop-target', true);
     }
-    if (!type) {
-        let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
-        type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
-    }
-    row.setAttribute('type', type);
-    row.setAttribute('name', name);
-    if (aggregate) {
-        row.setAttribute('aggregate', aggregate);
-    }
-    row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
-    row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
-    row.addEventListener('row-drag', () => {
-        this.classList.add('dragging');
-        // if (row.parentElement.getAttribute('id') === "active_columns") {
-        //     setTimeout(() => row.parentElement.removeChild(row));
-        // }
-    });
-    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
     return row;
 }
 
@@ -624,10 +649,7 @@ registerElement(template, {
                 this._column_pivots.appendChild(label);
             } else {
                 pivots.map(function(pivot) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', pivot);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, pivot);
                     this._column_pivots.appendChild(row);
                 }.bind(this));
             }
@@ -646,10 +668,7 @@ registerElement(template, {
                 this._row_pivots.appendChild(label);
             } else {
                 pivots.map(function(pivot) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', pivot);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, pivot);
                     this._row_pivots.appendChild(row);
                 }.bind(this));
             }
@@ -684,10 +703,7 @@ registerElement(template, {
                 this._sort.appendChild(label);
             } else {
                 sort.map(function(s) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', s);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, s);
                     this._sort.appendChild(row);
                 }.bind(this));
             }

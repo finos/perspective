@@ -25,6 +25,16 @@
     display: inline-block;
 }
 
+#side_panel perspective-row[drop-target]:not(.off) {
+    .row_draggable {
+        background: none;
+        border: 1px solid rgba(0,0,0,0);
+        * {
+            display: none !important;
+        }
+    }
+}
+
 perspective-viewer.dragging #top_panel ul {
     border: 1px solid #1078d1 !important;
     margin-top: -2px;
