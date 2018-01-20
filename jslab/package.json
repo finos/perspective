@@ -1,6 +1,6 @@
 {
-  "name": "perspective",
-  "version": "0.1.1",
+  "name": "@jpmorganchase/perspective-jupyterlab",
+  "version": "0.0.1",
   "description": "psp",
   "files": [
     "lib/*.d.ts",
