@@ -1,0 +1,37 @@
+{
+  "name": "perspective",
+  "version": "0.1.1",
+  "description": "psp",
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "lib/*.wasm",
+    "style/*.css"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib/"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf lib",
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jpmorganchase/perspective-viewer": "^0.0.2",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.0.2",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.0.2",
+    "@jupyterlab/rendermime-interfaces": "^1.0.0",
+    "@phosphor/widgets": "^1.5.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.6.2"
+  },
+  "jupyterlab": {
+    "mimeExtension": true
+  }
+}
