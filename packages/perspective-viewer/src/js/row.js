@@ -93,7 +93,6 @@ registerElement(template, {
                 this.dispatchEvent(new CustomEvent('row-drag'));
             });
             li.addEventListener('dragend', ev => {
-                //ev.currentTarget.classList.remove('dropping');
                 this.dispatchEvent(new CustomEvent('row-dragend'));
             });
             let visible = this.querySelector('.is_visible');

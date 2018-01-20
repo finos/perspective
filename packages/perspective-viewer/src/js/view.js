@@ -53,14 +53,14 @@ global.registerPlugin = function registerPlugin(name, plugin) {
  */
 
 function undrag(event) {
-    let div = event.target.parentElement;
-    if (div) {
-        let parent = div.parentElement.parentElement;
-        let idx = Array.prototype.slice.call(parent.children).indexOf(div);
-        let attr_name = parent.getAttribute('id').replace('_', '-');
-        let pivots = JSON.parse(this.getAttribute(attr_name));
-        pivots.splice(idx, 1);
-        this.setAttribute(attr_name, JSON.stringify(pivots));
+    let div = event.target.parentElement.parentElement;
+    let parent = div.parentElement;
+    let idx = Array.prototype.slice.call(parent.children).indexOf(div);
+    let attr_name = parent.getAttribute('id').replace('_', '-');
+    let pivots = JSON.parse(this.getAttribute(attr_name));
+    pivots.splice(idx, 1);
+    this.setAttribute(attr_name, JSON.stringify(pivots));
+    if (event.dataTransfer.dropEffect !== 'move') {
         this._update();
     }
 }
@@ -73,12 +73,11 @@ function column_undrag(event) {
     let data = event.target.parentElement.parentElement;
     Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
     if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
-
         this._active_columns.removeChild(data);
+        this._update_column_view();
+        this._update();
     }
     this._active_columns.classList.remove('dropping');        
-    this._update_column_view();
-    this._update();
 }
 
 function column_dragleave(event) {
@@ -86,17 +85,16 @@ function column_dragleave(event) {
     while (src && src !== this._active_columns) {
         src = src.parentElement;
     }
-    if (src) {
-        return;
+    if (src === null) {
+        this._active_columns.classList.remove('dropping');
+        if (this._drop_target_hover.parentElement === this._active_columns) { 
+            this._active_columns.removeChild(this._drop_target_hover);
+        }
+        if (this._original_index !== -1) {
+            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
+        }
+        this._drop_target_hover.removeAttribute('drop-target');
     }
-    this._active_columns.classList.remove('dropping');
-    if (this._drop_target_hover.parentElement === this._active_columns) { 
-        this._active_columns.removeChild(this._drop_target_hover);
-    }
-    if (this._original_index !== -1) {
-        this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
-    }
-    this._drop_target_hover.removeAttribute('drop-target');
 }
 
 function column_dragover(event) {
@@ -186,7 +184,7 @@ function column_visibility_clicked(ev) {
         );
         this._active_columns.appendChild(row);
     }
-    let cols = this._view_columns('#active_columns perspective-row:not(.off)');
+    let cols = this._view_columns('#active_columns perspective-row');
     this.setAttribute('columns', JSON.stringify(cols));
     this._update_column_view(cols);
     this._update();
@@ -285,12 +283,10 @@ async function loadTable(table) {
             .filter(a => a.column === x)
             .map(a => a.op)[0];
         let row = new_row.call(this, x, schema[x], aggregate);
-        row.className = 'off';
         this._inactive_columns.appendChild(row);
         if (shown.indexOf(x) !== -1) {
             row.style.display = 'none';
             let active_row = new_row.call(this, x, schema[x], aggregate);
-            active_row.className = 'visible_' + (shown.indexOf(x) + 1);
             this._active_columns.appendChild(active_row);
         }
     }
@@ -344,8 +340,8 @@ function new_row(name, type, aggregate) {
 
 function update() {
     if (!this._table) return;
-    let row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
-    let column_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
+    let row_pivots = this._view_columns('#row_pivots perspective-row');
+    let column_pivots = this._view_columns('#column_pivots perspective-row');
     let filters = JSON.parse(this.getAttribute('filters'));
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
@@ -354,7 +350,7 @@ function update() {
         column_pivots = [];
     }
     let hidden = [];
-    let sort = this._view_columns("#sort perspective-row:not(.off)");
+    let sort = this._view_columns("#sort perspective-row");
     for (let s of sort) {
         if (aggregates.map(function(agg) { return agg.column }).indexOf(s) === -1) {
             let all = this._get_view_aggregates('#inactive_columns perspective-row');
@@ -516,7 +512,7 @@ registerElement(template, {
 
     _get_view_aggregates: {
         value: function (selector) {
-            selector = selector || '#active_columns perspective-row:not(.off)';
+            selector = selector || '#active_columns perspective-row';
             return this._view_columns(selector, true);
         }
     },
@@ -540,8 +536,7 @@ registerElement(template, {
     _visible_column_count: {
         value: function() {
             let cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
-            let off_cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row.off"));
-            return (cols.length - off_cols.length);
+            return cols.length;
         }
     },
 
