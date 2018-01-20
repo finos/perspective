@@ -17,6 +17,7 @@
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
+    "prepublish": "npm run build",
     "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
