@@ -41,14 +41,16 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   }
 
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    console.log('\n\n\n\n\n\nFUUUUUUCK\n\n\n\n\n');
-    let data2 = [   
-        {'x': 1, 'y':'a', 'z': true},
-        {'x': 2, 'y':'b', 'z': false},
-        {'x': 3, 'y':'c', 'z': true},
-        {'x': 4, 'y':'d', 'z': false}
-    ];
-    this.data = data2;
+    this.data = JSON.parse(model.data[MIME_TYPE] as any);
+    console.log(this.data);
+    if(Object.keys(this.data).length === 0){
+      this.data = [   
+          {'x': 1, 'y':'a', 'z': true},
+          {'x': 2, 'y':'b', 'z': false},
+          {'x': 3, 'y':'c', 'z': true},
+          {'x': 4, 'y':'d', 'z': false}
+      ];
+    }
     return Promise.resolve();
   }
 
