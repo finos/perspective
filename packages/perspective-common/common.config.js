@@ -6,6 +6,7 @@ const plugins = []
 if (!process.env.PSP_NO_MINIFY) {
     plugins.push(new UglifyJSPlugin({
         sourceMap: true,
+        exclude: /node_modules\/\@apache-arrow/,
         output: {
             ascii_only: true
         }
@@ -48,7 +49,7 @@ module.exports = function() {
                 }
             }, {
                 test: /\.js$/,
-                exclude: /node_modules|psp\.js/,
+                exclude: /node_modules\/(?!\@apache-arrow)|psp\.js/,
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],
