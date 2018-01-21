@@ -25,10 +25,22 @@
     display: inline-block;
 }
 
+@keyframes fadein {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 #side_panel #active_columns perspective-row[drop-target] {
     .row_draggable {
-        background: none;
-        border: 1px solid rgba(0,0,0,0);
+        animation-duration: 0.5s;
+        animation-name: fadein;
+        background-color: rgb(240, 240, 255) !important;
+        border: 1px solid #1078d1 !important;
         * {
             display: none !important;
         }
