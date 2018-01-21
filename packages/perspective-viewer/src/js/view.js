@@ -107,12 +107,14 @@ function column_dragover(event) {
         this._drop_target_hover.setAttribute('drop-target', true);
     }
     let index = calc_index.call(this, event);
-    if (this._active_columns.children[index]) {
-        if (!this._active_columns.children[index].hasAttribute('drop-target')) {
+    if (index < this._active_columns.children.length) {
+        if (!this._active_columns.children[Math.max(index - 1, 0)].hasAttribute('drop-target') && !this._active_columns.children[index].hasAttribute('drop-target')) {
             this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[index]);
         }  
     } else {
-        this._active_columns.appendChild(this._drop_target_hover);
+        if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute('drop-target')) {
+            this._active_columns.appendChild(this._drop_target_hover);
+        }
     }
 }
 
