@@ -1,0 +1,54 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+
+        <script src="mobile_fix.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
+        <script src="perspective.view.js"></script>
+        <script src="hypergrid.plugin.js"></script>
+        <script src="highcharts.plugin.js"></script>
+
+        <link rel='stylesheet' href="demo.css">
+
+    </head>
+    <body>
+
+        <perspective-viewer
+            binary="true"
+            view="vertical"
+            row-pivots='["Category","Region","Segment"]'
+            column-pivots='["Sub-Category"]'
+            columns='["Sales"]'
+         >
+                
+        </perspective-viewer>
+
+        <script>
+
+            window.addEventListener('WebComponentsReady', function () {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'superstore.arrow', true);
+                xhr.responseType = "arraybuffer"
+                xhr.onload = function () { 
+                    var arr = new Uint8Array(xhr.response);
+                    var el = document.getElementsByTagName('perspective-viewer')[0];
+                    el.load(arr); 
+                }
+                xhr.send(null);
+            });
+
+        </script>
+
+    </body>
+</html>
