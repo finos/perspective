@@ -716,6 +716,7 @@ global.registerPlugin("hypergrid", {
     name: "Grid", 
     create: grid,
     selectMode: "toggle",
+    deselectMode: "pivots",
     resize: function () {
         if (this.hypergrid) {
             this.hypergrid.canvas.resize();

@@ -66,7 +66,8 @@ function undrag(event) {
 }
 
 function calc_index(event) {
-    return Math.floor((event.offsetY + this._active_columns.scrollTop) / this._active_columns.children[0].offsetHeight);
+    let height = this._active_columns.children[0].offsetHeight;
+    return Math.round((event.offsetY + this._active_columns.scrollTop) / height);
 }
 
 function column_undrag(event) {
@@ -75,7 +76,6 @@ function column_undrag(event) {
     if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
         this._active_columns.removeChild(data);
         this._update_column_view();
-        this._update();
     }
     this._active_columns.classList.remove('dropping');        
 }
@@ -127,7 +127,6 @@ function column_drop(ev) {
     if (!data) return;
     
     this._update_column_view();    
-    this._update();
 }
 
 function drop(ev) {
@@ -146,8 +145,7 @@ function drop(ev) {
     this.setAttribute(name, JSON.stringify(columns.concat([data])));
 
     // Deselect the dropped column
-    let isToggleMode = this._plugin.selectMode === "toggle";
-    if (isToggleMode && this._visible_column_count() > 1 && name !== "sort") {
+    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort") {
         for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data) {
                  this._active_columns.removeChild(x);
@@ -167,27 +165,32 @@ function drop(ev) {
  */
 
 function column_visibility_clicked(ev) {
-    let className = `visible_${this._visible_column_count() + 1}`;
     let parent = ev.currentTarget;
-    let is_active = parent.parentElement.getAttribute('id') === 'active_columns';;
+    let is_active = parent.parentElement.getAttribute('id') === 'active_columns';
     if (is_active) {
-        if (this._visible_column_count() === 1  ) {
+        if (this._visible_column_count() === 1) {
             return;
         }
-        this._active_columns.removeChild(parent);
+        if (ev.detail.shiftKey) {
+            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+                if (child !== parent) {
+                    this._active_columns.removeChild(child);
+                }
+            }
+        } else {
+            this._active_columns.removeChild(parent);
+        }
     } else {
-        let row = new_row.call(
-            this, 
-            parent.getAttribute('name'), 
-            parent.getAttribute('type'), 
-            JSON.parse(this.getAttribute('aggregates')).find(x => x.column === parent.getAttribute('name')).op
-        );
+        if (ev.detail.shiftKey && this._plugin.selectMode === 'toggle' || !ev.detail.shiftKey && this._plugin.selectMode === 'select') {
+            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+                this._active_columns.removeChild(child);
+            }
+        }
+        let row = new_row.call(this, parent.getAttribute('name'), parent.getAttribute('type'));
         this._active_columns.appendChild(row);
     }
     let cols = this._view_columns('#active_columns perspective-row');
-    this.setAttribute('columns', JSON.stringify(cols));
     this._update_column_view(cols);
-    this._update();
 }
 
 function column_aggregate_clicked() {
@@ -404,6 +407,8 @@ function update() {
         if (this._render_count === 0) {
             this.removeAttribute('updating');
         }
+    }).catch(() => {
+        console.debug("View cancelled");
     });
 }
 
@@ -545,6 +550,7 @@ registerElement(template, {
             if (!columns) {
                 columns = this._view_columns('#active_columns perspective-row');
             }
+            this.setAttribute('columns', JSON.stringify(columns));
             let idx = 1;
             const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             lis.forEach(x => {
@@ -620,11 +626,30 @@ registerElement(template, {
     },
 
     view: {
-        set: function () {
+        set: async function () {
             this._vis_selector.value = this.getAttribute('view');
             let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             if (cols.length > 0) {
-                if (this._plugin.selectMode === 'select') {
+                if (this._plugin.initial) {
+                    let pref = [];
+                    let count = this._plugin.initial.count || 2;
+                    if (this._plugin.initial.type === 'number') {
+                        for (let col of cols) {
+                            let type = col.getAttribute('type');
+                            if (['float', 'integer'].indexOf(type) > -1) {
+                                pref.push(col.getAttribute('name'));
+                            }
+                        }
+                        if (pref.length < count) {
+                            for (let col of cols) {
+                                if (pref.indexOf(col.getAttribute('name')) === -1) {
+                                    pref.push(col.getAttribute('name'));
+                                }
+                            }                            
+                        }
+                    }
+                    this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
+                } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
                 } else {
                     this.setAttribute('columns', JSON.stringify(cols.map(x => x.getAttribute('name'))));
