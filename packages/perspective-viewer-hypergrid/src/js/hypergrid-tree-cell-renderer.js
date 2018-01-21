@@ -160,7 +160,7 @@ export function treeLineRendererPaint(gc, config) {
 
     // render message text
     var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
-    config.minWidth = cellTextOffset + gc.getTextWidth(value);
+    config.minWidth = cellTextOffset + gc.getTextWidth(value) + 15;
     var metrics = gc.getTextWidthTruncated(value, width - cellTextOffset + (x - 3), true);
     var yOffset = y + height / 2;
 

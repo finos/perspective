@@ -372,6 +372,9 @@ export function draw(mode) {
                 });
             }
             Object.assign(config, {
+                colors: [
+                    colors[0]
+                ],
                 xAxis: {
                     type: xaxis_type === "date" ? "datetime" : undefined,
                     startOnTick: false,
@@ -518,6 +521,10 @@ global.registerPlugin("vertical", {
     name: "Bar Chart", 
     create: draw("vertical_bar"), 
     resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
     selectMode: "select",
     delete: delete_chart
 });
@@ -526,6 +533,10 @@ global.registerPlugin("horizontal", {
     name: "Bar Chart (inverted)", 
     create: draw("horizontal_bar"), 
     resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
     selectMode: "select",
     delete: delete_chart
 });
@@ -534,7 +545,11 @@ global.registerPlugin("line", {
     name: "Line Chart", 
     create: draw("line"), 
     resize: resize, 
-    selectMode: "select",
+    initial: {
+        "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
     delete: delete_chart
 });
 
@@ -542,7 +557,11 @@ global.registerPlugin("scatter", {
     name: "Scatter Chart", 
     create: draw('scatter'), 
     resize: resize, 
-    selectMode: "select",
+    initial: {
+        "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
     delete: delete_chart
 });
 
