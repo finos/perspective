@@ -295,6 +295,11 @@ async function loadTable(table) {
             this._active_columns.appendChild(active_row);
         }
     }
+    if (cols.length === shown.length) {
+        this._inactive_columns.style.display = 'none';
+    } else {
+        this._inactive_columns.style.display = 'block';
+    }
 
     this._filter_input.innerHTML = "";
     this._update();
@@ -555,6 +560,11 @@ registerElement(template, {
             this.setAttribute('columns', JSON.stringify(columns));
             let idx = 1;
             const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+            if (columns.length === lis.length) {
+                this._inactive_columns.style.display = 'none';
+            } else {
+                this._inactive_columns.style.display = 'block';
+            }
             lis.forEach(x => {
                 const index = columns.indexOf(x.getAttribute('name'));
                 if (index === -1) {

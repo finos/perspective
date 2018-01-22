@@ -1,13 +1,13 @@
 {
     "superstore.html/shows a grid without any settings applied.": "45055f06b933226373579c5e3b03608f",
-    "superstore.html/pivots by a row.": "95ffdf460138b9f2aab4d9e0362d281b",
-    "superstore.html/pivots by two rows.": "2f5f9fe6a82fca7e5320d9996eeae559",
-    "superstore.html/pivots by a row and a column.": "8b46d8d101f643e1caeb21286bb88e32",
-    "superstore.html/pivots by two rows and two columns.": "570d8ffd63c3c2c7ebdd0b13e0aa5543",
+    "superstore.html/pivots by a row.": "02d1622170029c721ef995904e13330c",
+    "superstore.html/pivots by two rows.": "fd0b7398c8d49d790ffcf04f9902f3a8",
+    "superstore.html/pivots by a row and a column.": "88656add4d88bd3abf76496f4ec2f9d7",
+    "superstore.html/pivots by two rows and two columns.": "e987eee39602ed26060cbb60f7de0618",
     "superstore.html/sorts by a numeric column.": "b1cab634c6f028aadca4cb80d45da0d2",
     "superstore.html/sorts by an alpha column.": "75f2524a106af8f9f5a032561cf8ffbd",
     "superstore.html/displays visible columns.": "5e92e91cfbfa7dd864e3381bd834dfab",
-    "superstore.html/resets viewable area when the logical size expands.": "4f9d1618cff5784f37df5b2df59cb6f4",
+    "superstore.html/resets viewable area when the logical size expands.": "cde73369571f2d991f683add8b894ae3",
     "superstore.html/selecting a column does not log a context deleted error.": "2563581d3556c4576745443c8498bea9",
     "superstore.html/resets viewable area when the physical size expands.": "b5e7dffa2272e6b6daf465a9af34e2bc"
 }

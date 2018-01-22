@@ -104,8 +104,15 @@ perspective-viewer {
         margin-top: 8px;
         overflow-y: auto;
     }
+
+    #inactive_columns {
+        min-height: 20%;
+        flex-shrink: 1000;
+    }
+
     #divider {
         background-color: #CCC;
+        min-height: 2px;
         height: 2px;
         margin: 15px 13px 15px 13px;
         margin-bottom: 5px;
@@ -264,6 +271,10 @@ perspective-viewer {
 
     #side_panel > div {
         display: flex;
+    }
+
+    #vis_selector_container {
+        min-height: 29px;
     }
 
     #vis_selector {
