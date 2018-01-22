@@ -6,7 +6,7 @@ const plugins = []
 if (!process.env.PSP_NO_MINIFY) {
     plugins.push(new UglifyJSPlugin({
         sourceMap: true,
-        exclude: /node_modules\/\@apache-arrow/,
+        mangle: false,
         output: {
             ascii_only: true
         }
