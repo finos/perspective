@@ -1029,10 +1029,9 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        options.binary = options.binary || false;
         let pdata;
 
-        if (options.binary) {
+        if (data instanceof ArrayBuffer) {
             // Arrow data
             var arr = new Uint8Array(data)
             var arrow = Arrow.Table.from([arr]);

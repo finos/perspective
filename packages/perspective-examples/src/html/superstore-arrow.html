@@ -25,7 +25,6 @@
     <body>
 
         <perspective-viewer
-            binary="true"
             view="vertical"
             row-pivots='["Category","Region","Segment"]'
             column-pivots='["Sub-Category"]'
@@ -41,9 +40,8 @@
                 xhr.open('GET', 'superstore.arrow', true);
                 xhr.responseType = "arraybuffer"
                 xhr.onload = function () { 
-                    var arr = new Uint8Array(xhr.response);
                     var el = document.getElementsByTagName('perspective-viewer')[0];
-                    el.load(arr); 
+                    el.load(xhr.response); 
                 }
                 xhr.send(null);
             });
