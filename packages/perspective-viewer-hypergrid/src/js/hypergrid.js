@@ -707,9 +707,7 @@ async function grid(div, view, hidden, redraw, task) {
    
     this[PRIVATE].grid.set_data(json, schema);
     await this.hypergrid.canvas.resize();
-    await this.hypergrid._updating_cache;
     await this.hypergrid.canvas.resize();
-    await this.hypergrid._updating_cache;
 }
 
 global.registerPlugin("hypergrid", {
