@@ -283,8 +283,9 @@ function parse_data(data, names, types) {
  * @class
  * @hideconstructor
  */
- function view(pool, ctx, gnode, config, id, name, callbacks) {
+ function view(pool, ctx, sides, gnode, config, id, name, callbacks) {
     this.ctx = ctx;
+    this.nsides = sides;
     this.gnode = gnode;
     this.config = config || {};
     this.pool = pool;
@@ -318,20 +319,7 @@ function parse_data(data, names, types) {
  * @returns {number} sides The number of sides of this `View`.
  */
  view.prototype.sides = function() {
-    let name;
-    if (this.ctx.constructor.name) {
-        name = this.ctx.constructor.name;
-    } else {
-        name = this.ctx.constructor.toString().match(/function ([^\(]+)/)[1];
-    }
-    switch (name) {
-        case 't_ctx1':
-            return 1;
-        case 't_ctx2':
-            return 2;
-        default:
-            return 0;
-    }
+    return this.nsides;
 }
 
 view.prototype._column_names = function() {
@@ -784,6 +772,7 @@ table.prototype.view = function(config) {
     }
 
     let context;
+    let sides = 0;
     if ((config.row_pivot && config.row_pivot.length > 0) || (config.column_pivot && config.column_pivot.length > 0)) {
         if (config.column_pivot && config.column_pivot.length > 0) {
             config.row_pivot = config.row_pivot || [];
@@ -796,6 +785,7 @@ table.prototype.view = function(config) {
                 aggregates,
                 sort
             );
+            sides = 2;
             this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
@@ -818,6 +808,7 @@ table.prototype.view = function(config) {
                 aggregates,
                 sort
             );
+            sides = 1;
             this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
@@ -831,7 +822,7 @@ table.prototype.view = function(config) {
         this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
     }
 
-    return new view(this.pool, context, this.gnode, config, this.id, name, this.callbacks);
+    return new view(this.pool, context, sides, this.gnode, config, this.id, name, this.callbacks);
 }
 
 /**
