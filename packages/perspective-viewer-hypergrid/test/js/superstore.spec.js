@@ -14,8 +14,8 @@ const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_t
 async function set_lazy(page) {
 	const viewer = await page.$('perspective-viewer');
     await page.evaluate(element => { 
-    	element.grid.grid.properties.repaintIntervalRate = 1;
-    	Object.defineProperty(element.grid.grid, '_lazy_load', {
+    	element.hypergrid.properties.repaintIntervalRate = 1;
+    	Object.defineProperty(element.hypergrid, '_lazy_load', {
     		set: () => {},
     		get: () => true
     	});

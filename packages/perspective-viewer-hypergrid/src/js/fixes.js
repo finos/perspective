@@ -48,7 +48,7 @@ export function GridUIFixPlugin(grid) {
         this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
         this.component.setBounds(this.bounds);
         this.resizeNotification();
-        this.paintNow();
+        await this.paintNow();
     }
 
     grid._getGridCellFromMousePoint = grid.getGridCellFromMousePoint;
