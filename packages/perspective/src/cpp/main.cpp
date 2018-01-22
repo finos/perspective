@@ -143,7 +143,6 @@ _get_aggspecs(val j_aggs)
  */
 
 
-template<typename T>
 void
 vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
     val memory = val::module_property("buffer");
@@ -158,9 +157,9 @@ _fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
     t_int32 nrows = dcol["length"].as<t_int32>();
 
-    if (internal::typeSupportsMemoryView<T>()) {
+    if (!dcol["buffer"].isUndefined()) {
         t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray<T>(dcol, lstore->get_ptr(0), nrows);
+        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
         col->valid_raw_fill(true);
     } else {
         for (auto i = 0; i < nrows; ++i)
@@ -181,9 +180,9 @@ _fill_col<t_int64>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index
 {
     t_int32 nrows = dcol["length"].as<t_int32>();
 
-    if (internal::typeSupportsMemoryView<t_int32>()) {
+    if (dcol["constructor"]["name"].as<t_str>() == "Int32Array") {
         t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray<t_int64>(dcol, lstore->get_ptr(0), nrows);
+        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
         col->valid_raw_fill(true);
     } else {
         throw std::logic_error("Unreachable");
@@ -196,9 +195,9 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
     t_int32 nrows = dcol["length"].as<t_int32>();
 
-    if (internal::typeSupportsMemoryView<t_int32>()) {
+    if (dcol["constructor"]["name"].as<t_str>() == "Int32Array") {
         t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray<t_int64>(dcol, lstore->get_ptr(0), nrows);
+        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
         col->valid_raw_fill(true);
     } else {
         for (auto i = 0; i < nrows; ++i)
@@ -237,7 +236,7 @@ _fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
     std::vector<T> keys;
     keys.reserve(ksize);
     keys.resize(ksize);
-    vecFromTypedArray<T>(vkeys, keys.data(), ksize);
+    vecFromTypedArray(vkeys, keys.data(), ksize);
 
     val values = dcol["data"]["values"];
     val vdata = values["data"];
@@ -245,14 +244,14 @@ _fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
     std::vector<t_uchar> data;
     data.reserve(vsize);
     data.resize(vsize);
-    vecFromTypedArray<t_uchar>(vdata, data.data(), vsize);
+    vecFromTypedArray(vdata, data.data(), vsize);
 
     val voffsets = values["offsets"];
     t_int32 osize = voffsets["length"].as<t_int32>();
     std::vector<t_int32> offsets;
     offsets.reserve(osize);
     offsets.resize(osize);
-    vecFromTypedArray<t_int32>(voffsets, offsets.data(), osize);
+    vecFromTypedArray(voffsets, offsets.data(), osize);
 
     t_str elem;
 
@@ -303,14 +302,14 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_i
         std::vector<t_uint8> data;
         data.reserve(vsize);
         data.resize(vsize);
-        vecFromTypedArray<t_uint8>(vdata, data.data(), vsize);
+        vecFromTypedArray(vdata, data.data(), vsize);
 
         val voffsets = values["offsets"];
         t_int32 osize = voffsets["length"].as<t_int32>();
         std::vector<t_int32> offsets;
         offsets.reserve(osize);
         offsets.resize(osize);
-        vecFromTypedArray<t_int32>(voffsets, offsets.data(), osize);
+        vecFromTypedArray(voffsets, offsets.data(), osize);
 
         t_str elem;
 
