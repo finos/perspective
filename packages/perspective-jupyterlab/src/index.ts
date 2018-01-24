@@ -36,25 +36,59 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   onAfterAttach(msg: Message) : void{
       if (this._loaded) return;
       let x = (<any>(this.node.querySelector('perspective-viewer')));
-      x.load(this.data);
+      if(this.datatype === 'static'){
+        x.load(this.data);
+      } else if (this.datatype === 'ws' || this.datatype === 'wss'){
+        let socket = new WebSocket(this.datasrc);
+        socket.onopen = function (event: any) {
+          console.log('connected to ' + this.datasrc);
+        }.bind(this);
+        socket.onmessage = function (event: any) {
+          console.log(event.data);
+        }.bind(this);
+      }
       this._loaded = true;
   }
 
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    this.data = JSON.parse(model.data[MIME_TYPE] as any);
-    console.log(this.data);
-    if(Object.keys(this.data).length === 0){
-      this.data = [   
-          {'x': 1, 'y':'a', 'z': true},
-          {'x': 2, 'y':'b', 'z': false},
-          {'x': 3, 'y':'c', 'z': true},
-          {'x': 4, 'y':'d', 'z': false}
-      ];
-    }
+    let data = model.data[MIME_TYPE] as string;
+    console.log(data);
+    try {
+      this.data = JSON.parse(data) as object;
+      this.datatype = 'static';
+      this.datasrc = '';
+
+      if(Object.keys(this.data).length === 0){
+        this.data = [   
+            {'x': 1, 'y':'a', 'z': true},
+            {'x': 2, 'y':'b', 'z': false},
+            {'x': 3, 'y':'c', 'z': true},
+            {'x': 4, 'y':'d', 'z': false}
+        ];
+      }
+
+
     return Promise.resolve();
+    } catch (e) {
+      this.datasrc = data;
+      if(data.indexOf('ws://') !== -1){
+        this.datatype = 'ws';
+      } else if(data.indexOf('wss://') !== -1){
+        this.datatype = 'wss';
+      } else if(data.indexOf('http://') !== -1){
+        this.datatype = 'http';
+      } else if(data.indexOf('https://') !== -1){
+        this.datatype = 'http';
+      } else{
+        throw e;
+      }
+      return Promise.resolve();
+    }
   }
 
   data: object;
+  datatype: string;
+  datasrc: string;
   private _loaded: boolean;
 }
 
