@@ -308,20 +308,25 @@ async function loadTable(table) {
 function new_row(name, type, aggregate) {
     let row = document.createElement('perspective-row');
     if (name) {
-        if (!aggregate) {
-            let aggregates = JSON.parse(this.getAttribute('aggregates'));
-            if (aggregates) {
-                aggregate = aggregates.find(x => x.column === name).op;
-            } else {
-                aggregate = '';
-            }
-        }
         if (!type) {
             let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
             if (all.length > 0) {
                 type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
             } else {
                 type = '';
+            }
+        }
+        if (!aggregate) {
+            let aggregates = JSON.parse(this.getAttribute('aggregates'));
+            if (aggregates) {
+                aggregate = aggregates.find(x => x.column === name);
+                if (aggregate) {
+                    aggregate = aggregate.op;
+                } else {
+                    aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                }
+            } else {
+                aggregate = perspective.AGGREGATE_DEFAULTS[type];
             }
         }
         row.setAttribute('type', type);
@@ -492,7 +497,7 @@ registerElement(template, {
         value: function () {
             let filters = [];
             let filter = this._filter_input.value.trim();
-            let cols = this._view_columns('#active_columns perspective-row');
+            let cols = this._view_columns('#inactive_columns perspective-row');
             for (let col of cols) {
                 filter = filter.split("`" + col.trim() + "`").join(col + "||||");
             }
