@@ -110,6 +110,7 @@ view.prototype.delete = async_queue('delete');
 view.prototype.on_update = subscribe('on_update', 'view_method', true);
 
 function table(worker, data, options) {
+    options = options || {};
     options.binary = options.binary || false;
     this._name = Math.random() + "";
     this._worker = worker;
