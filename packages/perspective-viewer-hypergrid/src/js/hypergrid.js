@@ -514,31 +514,84 @@ function estimate_range(grid) {
     return [parseInt(range[0]), parseInt(range[range.length - 1]) + 2];
 }
 
+import rectangular from 'rectangular';
+
 function CachedRendererPlugin(grid) {
-    grid.canvas._paintNow = grid.canvas.paintNow;
-    grid.canvas.paintNow = async function (t) {
-        if (this.component.grid._lazy_load) {
-            let range = estimate_range(this.component.grid);
-            if (
-                !(Number.isNaN(range[0]) || Number.isNaN(range[1]))
-                && (
-                    (this.component.grid._updating_cache && !is_subrange(range, this.component.grid._updating_cache.range)) 
-                    || (!this.component.grid._updating_cache && !is_subrange(range, this.component.grid._cached_range))
-                )
-            ) {
-                this.component.grid._updating_cache = this.component.grid._cache_update(...range);
-                this.component.grid._updating_cache.range = range
-                let updated = await this.component.grid._updating_cache;
+
+    async function update_cache() {
+        if (grid._lazy_load) {
+            let range = estimate_range(grid);
+            let is_valid_range = Number.isNaN(range[0]) || Number.isNaN(range[1]);
+            let is_processing_range = grid._updating_cache && !is_subrange(range, grid._updating_cache.range);
+            let is_range_changed = !grid._updating_cache && !is_subrange(range, grid._cached_range);
+            if (!is_valid_range && (is_processing_range || is_range_changed)) {
+                grid._updating_cache = grid._cache_update(...range);
+                grid._updating_cache.range = range
+                let updated = await grid._updating_cache;
                 if (updated) {
-                    this.component.grid._updating_cache = undefined;
-                    this.component.grid._cached_range = range;
-                    this.component.grid.canvas._paintNow(t);
+                    grid._updating_cache = undefined;
+                    grid._cached_range = range;  
                 }
-            } else if (is_subrange(range, this.component.grid._cached_range)) {
-                this.component.grid.canvas._paintNow(t);
+                return updated;
+            } else if (!is_subrange(range, grid._cached_range)) {
+                return false; 
             }
-        } else {
-            this.component.grid.canvas._paintNow(t);
+        }
+        return true;
+    }
+
+    grid.canvas._paintNow = grid.canvas.paintNow;
+
+    grid.canvas.resize = async function() {
+        var box = this.size = this.div.getBoundingClientRect();
+
+        let width = this.width = Math.floor(this.div.clientWidth);
+        let height = this.height = Math.floor(this.div.clientHeight);
+
+        //fix ala sir spinka, see
+        //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
+        //just add 'hdpi' as an attribute to the fin-canvas tag
+        var ratio = 1;
+        var isHIDPI = window.devicePixelRatio && this.component.properties.useHiDPI;
+        if (isHIDPI) {
+            var devicePixelRatio = window.devicePixelRatio || 1;
+            var backingStoreRatio = this.gc.webkitBackingStorePixelRatio ||
+                this.gc.mozBackingStorePixelRatio ||
+                this.gc.msBackingStorePixelRatio ||
+                this.gc.oBackingStorePixelRatio ||
+                this.gc.backingStorePixelRatio || 1;
+
+            ratio = devicePixelRatio / backingStoreRatio;
+            //this.canvasCTX.scale(ratio, ratio);
+        }
+
+
+        this.bounds = new rectangular.Rectangle(0, 0, width, height);
+        this.component.setBounds(this.bounds);
+        this.resizeNotification();
+
+        let render = await update_cache();
+
+        if (render) {
+            this.buffer.width = this.canvas.width = width * ratio;
+            this.buffer.height = this.canvas.height = height * ratio;
+
+            this.canvas.style.width = this.buffer.style.width = width + 'px';
+            this.canvas.style.height = this.buffer.style.height = height + 'px';
+
+            this.bc.scale(ratio, ratio);
+            if (isHIDPI && !this.component.properties.useBitBlit) {
+                this.gc.scale(ratio, ratio);
+            }
+
+            grid.canvas._paintNow();
+        }
+    }
+
+    grid.canvas.paintNow = async function () {
+        let render = await update_cache();
+        if (render) {
+            grid.canvas._paintNow();
         }
     }
 }
@@ -672,16 +725,21 @@ async function grid(div, view, hidden, redraw, task) {
 
     let lazy_load = nrows > LAZY_THRESHOLD;
 
-    if (!lazy_load) {
-        json = view.to_json().then(json => filter_hidden(hidden, json));
-    } else {
-        json = fill_page(view, json, hidden, 0, 1000);
-    }
-
     if (!(document.contains ? document.contains(this[PRIVATE].grid) : false)) {
         div.innerHTML = "";
         div.appendChild(this[PRIVATE].grid);
         await new Promise(resolve => setTimeout(resolve));
+    }
+
+    if (!lazy_load) {
+        json = view.to_json().then(json => filter_hidden(hidden, json));
+    } else {
+        let range = estimate_range(this.hypergrid);
+        if (Number.isNaN(range[0]) || Number.isNaN(range[1])) {
+            range = [0, 100];
+        }
+        json = fill_page(view, json, hidden, ...range);
+        this.hypergrid._cached_range = range;
     }
 
     json = await json;
@@ -690,7 +748,6 @@ async function grid(div, view, hidden, redraw, task) {
     }
 
     this.hypergrid._lazy_load = lazy_load;
-    this.hypergrid._cached_range = undefined;
 
     this.hypergrid._cache_update = async (s, e) => {
         json = await fill_page(view, json, hidden, s, e); 

@@ -7,49 +7,7 @@
  *
  */
 
-import rectangular from 'rectangular';
-
 export function GridUIFixPlugin(grid) {
-
-    grid.canvas.resize = async function() {
-        var box = this.size = this.div.getBoundingClientRect();
-
-        this.width = Math.floor(this.div.clientWidth);
-        this.height = Math.floor(this.div.clientHeight);
-
-        //fix ala sir spinka, see
-        //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
-        //just add 'hdpi' as an attribute to the fin-canvas tag
-        var ratio = 1;
-        var isHIDPI = window.devicePixelRatio && this.component.properties.useHiDPI;
-        if (isHIDPI) {
-            var devicePixelRatio = window.devicePixelRatio || 1;
-            var backingStoreRatio = this.gc.webkitBackingStorePixelRatio ||
-                this.gc.mozBackingStorePixelRatio ||
-                this.gc.msBackingStorePixelRatio ||
-                this.gc.oBackingStorePixelRatio ||
-                this.gc.backingStorePixelRatio || 1;
-
-            ratio = devicePixelRatio / backingStoreRatio;
-            //this.canvasCTX.scale(ratio, ratio);
-        }
-
-        this.buffer.width = this.canvas.width = this.width * ratio;
-        this.buffer.height = this.canvas.height = this.height * ratio;
-
-        this.canvas.style.width = this.buffer.style.width = this.width + 'px';
-        this.canvas.style.height = this.buffer.style.height = this.height + 'px';
-
-        this.bc.scale(ratio, ratio);
-        if (isHIDPI && !this.component.properties.useBitBlit) {
-            this.gc.scale(ratio, ratio);
-        }
-
-        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
-        this.component.setBounds(this.bounds);
-        this.resizeNotification();
-        await this.paintNow();
-    }
 
     grid._getGridCellFromMousePoint = grid.getGridCellFromMousePoint;
     grid.getGridCellFromMousePoint = function(mouse) {
