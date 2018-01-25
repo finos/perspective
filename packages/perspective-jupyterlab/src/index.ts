@@ -9,6 +9,10 @@ import {
 } from '@phosphor/messaging';
 
 import {
+  Session
+} from '@jupyterlab/services';
+
+import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
@@ -35,10 +39,13 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
   onAfterAttach(msg: Message) : void{
       if (this._loaded) return;
-      let x = (<any>(this.node.querySelector('perspective-viewer')));
+      let psp = (<any>(this.node.querySelector('perspective-viewer')));
+
       if(this.datatype === 'static'){
-        x.load(this.data);
+        psp.load(this.data);
+
       } else if (this.datatype === 'ws' || this.datatype === 'wss'){
+        // TODO finish this part eventually
         let socket = new WebSocket(this.datasrc);
         socket.onopen = function (event: any) {
           console.log('connected to ' + this.datasrc);
@@ -46,6 +53,46 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         socket.onmessage = function (event: any) {
           console.log(event.data);
         }.bind(this);
+
+      } else if (this.datatype === 'http' || this.datatype === 'https'){
+        // TODO
+
+      } else if (this.datatype === 'comm'){
+        //grab session id 
+        let els = this.datasrc.replace('comm://', '').split('/');
+        let kernelId = els[0];
+        let target = els[1];
+
+        Session.listRunning().then(sessionModels => {
+          for(let i=0; i<sessionModels.length; i++){
+            console.log(sessionModels[i]);
+            if(sessionModels[i].kernel.id === kernelId){
+              Session.connectTo(sessionModels[i]).then((session) => {
+                session.kernel.registerCommTarget(target, (comm: any, commMsg:any) => {
+                  if (commMsg.content.target_name !== target) {
+                    return;
+                  }
+
+                  comm.onMsg = (msg: any) => {
+                    console.log(msg);  // 'hello'
+                    let dat = msg['content']['data'];
+                    let tmp = JSON.parse(dat);
+                    tmp = [   
+                        {'x': 1, 'y':'a', 'z': true},
+                        {'x': 2, 'y':'b', 'z': false},
+                        {'x': 3, 'y':'c', 'z': true},
+                        {'x': 4, 'y':'d', 'z': false}
+                    ];
+                    psp.load(tmp);
+                  };
+                  comm.onClose = (msg: any) => {
+                    console.log(msg);  // 'bye'
+                  };
+                });
+              });
+            }
+          }
+        });
       }
       this._loaded = true;
   }
@@ -79,6 +126,8 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         this.datatype = 'http';
       } else if(data.indexOf('https://') !== -1){
         this.datatype = 'http';
+      } else if(data.indexOf('comm://') !== -1){
+        this.datatype = 'comm';
       } else{
         throw e;
       }
@@ -118,12 +167,11 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
       primaryFileType: 'psp',
       fileTypes: ['psp'],
       defaultFor: ['psp']
-    }
+    },
   }
 ];
 
 export default extensions;
-
 
 namespace Private {
   export
@@ -139,6 +187,4 @@ namespace Private {
     node.appendChild(psp);
     return node;
   }
-
 }
-
