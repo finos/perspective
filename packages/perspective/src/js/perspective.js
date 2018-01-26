@@ -1045,29 +1045,25 @@ const perspective = {
                         types.push(__MODULE__.t_dtype.DTYPE_STR);
                         break;
                     case 'FloatingPoint':
-                        switch (column.data.BYTES_PER_ELEMENT) {
-                            case 4:
-                                types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
-                                break;
-                            case 8:
-                                types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
-                                break;
+                        if (column instanceof Arrow.Float64Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                        }
+                        else if (column instanceof Arrow.Float32Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
                         }
                         break;
                     case 'Int':
-                        switch (column.data.BYTES_PER_ELEMENT) {
-                            case 1:
-                                types.push(__MODULE__.t_dtype.DTYPE_INT8);
-                                break;
-                            case 2:
-                                types.push(__MODULE__.t_dtype.DTYPE_INT16);
-                                break;
-                            case 4:
-                                types.push(__MODULE__.t_dtype.DTYPE_INT32);
-                                break;
-                            case 8:
-                                types.push(__MODULE__.t_dtype.DTYPE_INT64);
-                                break;
+                        if (column instanceof Arrow.Int64Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                        }
+                        else if (column instanceof Arrow.Int32Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                        }
+                        else if (column instanceof Arrow.Int16Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_INT16);
+                        }
+                        else if (column instanceof Arrow.Int8Vector) {
+                            types.push(__MODULE__.t_dtype.DTYPE_INT8);
                         }
                         break;
                     case 'Bool':
