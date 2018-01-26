@@ -44,10 +44,12 @@
     "d3-array": "^1.2.1",
     "moment": "^2.19.1",
     "papaparse": "^4.3.6",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "@apache-arrow/es5-esm": "^0.2.0"
   },
   "devDependencies": {
     "@jpmorganchase/perspective-common": "^0.0.2",
+    "arraybuffer-loader": "^1.0.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-async-to-bluebird": "^1.1.1",

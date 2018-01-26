@@ -9,6 +9,7 @@
 
 import papaparse from "papaparse";
 import moment from "moment";
+import * as Arrow from "@apache-arrow/es5-esm";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -119,6 +120,8 @@ function parse_data(data, names, types) {
     }
     let cdata = [];
 
+    let row_count = 0;
+
     if (Array.isArray(data)) {
 
         // Row oriented
@@ -213,6 +216,7 @@ function parse_data(data, names, types) {
                 }
             }
             cdata.push(col);
+            row_count = col.length;
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
@@ -223,6 +227,7 @@ function parse_data(data, names, types) {
             types.push(infer_type(data[name][0]));
             let transformed = transform_data(types[types.length - 1], data[name]);
             cdata.push(transformed);
+            row_count = transformed.length
         }
 
     } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
@@ -253,6 +258,82 @@ function parse_data(data, names, types) {
     }
 
     return {
+        row_count: row_count,
+        names: names,
+        types: types,
+        cdata: cdata
+    };
+}
+
+/**
+ * Converts arrow data into a canonical representation for
+ * interfacing with perspective.
+ *
+ * @private
+ * @param {object} data Array buffer
+ * @returns An object with 3 properties:
+ *    names - the column names.
+ *    types - the column t_dtypes.
+ */
+function load_arrow_buffer(data, names, types) {
+
+    // TODO Need to validate that the names/types passed in match those in the buffer
+
+    var arrow = Arrow.Table.from([new Uint8Array(data)]);
+
+    names = [];
+    types = [];
+    let cdata = [];
+    for (let column of arrow.columns) {
+        switch (column.type) {
+            case 'Utf8':
+                types.push(__MODULE__.t_dtype.DTYPE_STR);
+                break;
+            case 'FloatingPoint':
+                if (column instanceof Arrow.Float64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                }
+                else if (column instanceof Arrow.Float32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
+                }
+                break;
+            case 'Int':
+                if (column instanceof Arrow.Int64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                }
+                else if (column instanceof Arrow.Int32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                }
+                else if (column instanceof Arrow.Int16Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT16);
+                }
+                else if (column instanceof Arrow.Int8Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT8);
+                }
+                break;
+            case 'Bool':
+                types.push(__MODULE__.t_dtype.DTYPE_BOOL);
+                break;
+            case 'Timestamp':
+                types.push(__MODULE__.t_dtype.DTYPE_TIME);
+                break;
+            default:
+                continue;
+                break;
+        }
+        switch (column.type) {
+            case 'Utf8':
+                cdata.push(column);
+                break;
+            default:
+                cdata.push(column.slice());
+                break;
+        }
+        names.push(column.name);
+    }
+
+    return {
+        row_count: arrow.length,
         names: names,
         types: types,
         cdata: cdata
@@ -371,11 +452,11 @@ view.prototype.schema = async function() {
     for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
         let col_name = col_names[key].split(',');
         col_name = col_name[col_name.length - 1];
-        if (types[col_name] === 2) {
+        if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
         } else if (types[col_name] === 19) {
             new_schema[col_name] = "string";
-        } else if (types[col_name] === 9) {
+        } else if (types[col_name] === 9 || types[col_name] === 10) {
             new_schema[col_name] = "float";
         } else if (types[col_name] === 11) {
             new_schema[col_name] = "boolean";
@@ -617,11 +698,11 @@ table.prototype.schema = async function() {
     let types = schema.types();
     let new_schema = {};
     for (let key = 0; key < columns.size(); key++) {
-        if (types.get(key).value === 2) {
+        if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
             new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 9) {
+        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
             new_schema[columns.get(key)] = "float";
         } else if (types.get(key).value === 11) {
             new_schema[columns.get(key)] = "boolean";
@@ -837,11 +918,26 @@ table.prototype.view = function(config) {
  * @see {@link table}
  */ 
 table.prototype.update = function (data) {
-    let {names, types, cdata} = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
-    this.initialized = true;
-    let tbl = __MODULE__.make_table(data.length || 0, names, types, cdata, this.gnode.get_table().size(), this.index, this.tindex);
-    __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
-    tbl.delete();
+    let pdata;
+
+    if (data instanceof ArrayBuffer) {
+        pdata = load_arrow_buffer(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+    else {
+        pdata = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+
+    let tbl;
+    try{
+        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index, this.tindex);
+        __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
+        this.initialized = true;
+    } catch (e) {
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
+    }
 }
 
 /**
@@ -1023,14 +1119,21 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        if (typeof data === "string") {
-            if (data[0] === ",") {
-                data = "_" + data;
+        let pdata;
+
+        if (data instanceof ArrayBuffer) {
+            // Arrow data
+            pdata = load_arrow_buffer(data);
+        } else {
+            if (typeof data === "string") {
+                if (data[0] === ",") {
+                    data = "_" + data;
+                }
+                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
             }
-            let js = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
-            return perspective.table(js, options);
+            pdata = parse_data(data);
         }
-        let pdata = parse_data(data);
+
         let tindex;
         if (options.index) {
             tindex = pdata.types[pdata.names.indexOf(options.index)]
@@ -1044,7 +1147,7 @@ const perspective = {
             gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
             let id = pool.register_gnode(gnode);
-            tbl = __MODULE__.make_table(data.length || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
             __MODULE__.fill(id, tbl, gnode, pool);
             return new table(id, gnode, pool, options.index, tindex);
         } catch (e) {
