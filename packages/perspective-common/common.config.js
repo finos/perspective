@@ -48,6 +48,12 @@ module.exports = function() {
                     after: ';return Module;}'
                 }
             }, {
+                test: /\.(arrow)$/,
+                use: {
+                    loader: "arraybuffer-loader",
+                    options: {}
+                }
+            }, {
                 test: /\.js$/,
                 exclude: /node_modules\/(?!\@apache-arrow)|psp\.js/,
                 loader: "babel-loader",
