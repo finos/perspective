@@ -265,6 +265,81 @@ function parse_data(data, names, types) {
     };
 }
 
+/**
+ * Converts arrow data into a canonical representation for
+ * interfacing with perspective.
+ *
+ * @private
+ * @param {object} data Array buffer
+ * @returns An object with 3 properties:
+ *    names - the column names.
+ *    types - the column t_dtypes.
+ */
+function load_arrow_buffer(data, names, types) {
+
+    // TODO Need to validate that the names/types passed in match those in the buffer
+
+    var arrow = Arrow.Table.from([new Uint8Array(data)]);
+
+    names = [];
+    types = [];
+    let cdata = [];
+    for (let column of arrow.columns) {
+        switch (column.type) {
+            case 'Utf8':
+                types.push(__MODULE__.t_dtype.DTYPE_STR);
+                break;
+            case 'FloatingPoint':
+                if (column instanceof Arrow.Float64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                }
+                else if (column instanceof Arrow.Float32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
+                }
+                break;
+            case 'Int':
+                if (column instanceof Arrow.Int64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                }
+                else if (column instanceof Arrow.Int32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                }
+                else if (column instanceof Arrow.Int16Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT16);
+                }
+                else if (column instanceof Arrow.Int8Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT8);
+                }
+                break;
+            case 'Bool':
+                types.push(__MODULE__.t_dtype.DTYPE_BOOL);
+                break;
+            case 'Timestamp':
+                types.push(__MODULE__.t_dtype.DTYPE_TIME);
+                break;
+            default:
+                continue;
+                break;
+        }
+        switch (column.type) {
+            case 'Utf8':
+                cdata.push(column);
+                break;
+            default:
+                cdata.push(column.slice());
+                break;
+        }
+        names.push(column.name);
+    }
+
+    return {
+        row_count: arrow.length,
+        names: names,
+        types: types,
+        cdata: cdata
+    };
+}
+
 /******************************************************************************
  *
  * View
@@ -843,11 +918,26 @@ table.prototype.view = function(config) {
  * @see {@link table}
  */ 
 table.prototype.update = function (data) {
-    let {row_count, names, types, cdata} = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
-    this.initialized = true;
-    let tbl = __MODULE__.make_table(row_count || 0, names, types, cdata, this.gnode.get_table().size(), this.index, this.tindex);
-    __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
-    tbl.delete();
+    let pdata;
+
+    if (data instanceof ArrayBuffer) {
+        pdata = load_arrow_buffer(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+    else {
+        pdata = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+
+    let tbl;
+    try{
+        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index, this.tindex);
+        __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
+        this.initialized = true;
+    } catch (e) {
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
+    }
 }
 
 /**
@@ -1033,60 +1123,7 @@ const perspective = {
 
         if (data instanceof ArrayBuffer) {
             // Arrow data
-            var arr = new Uint8Array(data)
-            var arrow = Arrow.Table.from([arr]);
-
-            let names = [];
-            let types = [];
-            let cdata = [];
-            for (let column of arrow.columns) {
-                switch (column.type) {
-                    case 'Utf8':
-                        types.push(__MODULE__.t_dtype.DTYPE_STR);
-                        break;
-                    case 'FloatingPoint':
-                        if (column instanceof Arrow.Float64Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
-                        }
-                        else if (column instanceof Arrow.Float32Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
-                        }
-                        break;
-                    case 'Int':
-                        if (column instanceof Arrow.Int64Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_INT64);
-                        }
-                        else if (column instanceof Arrow.Int32Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_INT32);
-                        }
-                        else if (column instanceof Arrow.Int16Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_INT16);
-                        }
-                        else if (column instanceof Arrow.Int8Vector) {
-                            types.push(__MODULE__.t_dtype.DTYPE_INT8);
-                        }
-                        break;
-                    case 'Bool':
-                        types.push(__MODULE__.t_dtype.DTYPE_BOOL);
-                        break;
-                    case 'Timestamp':
-                        types.push(__MODULE__.t_dtype.DTYPE_TIME);
-                        break;
-                    default:
-                        continue;
-                        break;
-                }
-                switch (column.type) {
-                    case 'Utf8':
-                        cdata.push(column);
-                        break;
-                    default:
-                        cdata.push(column.slice());
-                        break;
-                }
-                names.push(column.name);
-            }
-            pdata = {row_count: arrow.length, names: names, types: types, cdata: cdata};
+            pdata = load_arrow_buffer(data);
         } else {
             if (typeof data === "string") {
                 if (data[0] === ",") {
