@@ -672,10 +672,14 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
 		{
 			return val(scalar.to_double());
 		}
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
         case DTYPE_UINT32:
         case DTYPE_UINT64:
-        case DTYPE_INT64:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
         case DTYPE_INT32:
+        case DTYPE_INT64:
         {
             return val(static_cast<t_int32>(scalar.to_int64()));
         }
