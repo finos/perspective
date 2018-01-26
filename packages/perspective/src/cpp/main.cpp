@@ -649,6 +649,16 @@ make_context_two(t_gnode_sptr gnode,
     return ctx2;
 }
 
+void
+sort(t_ctx2_sptr ctx2, val j_sortby)
+{
+    auto svec = _get_sort(j_sortby);
+    if (svec.size() > 0) {
+        ctx2->sort_by(svec);
+    }
+
+}
+
 /**
  *
  *
@@ -1001,6 +1011,7 @@ EMSCRIPTEN_BINDINGS(perspective)
 		.value("TOTALS_HIDDEN", TOTALS_HIDDEN)
 		.value("TOTALS_AFTER", TOTALS_AFTER);
 
+    function("sort", &sort);
     function("make_table", &make_table);
     function("make_gnode", &make_gnode);
     function("fill", &fill, allow_raw_pointers());

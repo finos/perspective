@@ -864,7 +864,7 @@ table.prototype.view = function(config) {
                 filter_op,
                 filters,
                 aggregates,
-                sort
+                []
             );
             sides = 2;
             this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
@@ -879,6 +879,16 @@ table.prototype.view = function(config) {
                 context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot_depth - 1);
             } else {
                 context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
+            }
+            const groups = context.unity_get_column_count() / aggregates.length;
+            const new_sort = [];
+            for (let z = 0; z < groups; z ++) {
+                for (let s of sort) {
+                    new_sort.push([s[0] + (z * aggregates.length), s[1]]);
+                }
+            }
+            if (sort.length > 0) {
+                __MODULE__.sort(context, new_sort);
             }
         } else {
             context = __MODULE__.make_context_one(
