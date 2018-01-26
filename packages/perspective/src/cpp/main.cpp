@@ -215,14 +215,25 @@ template<>
 void
 _fill_col<t_bool>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
-    t_int32 nrows = dcol["length"].as<t_int32>();
-    for (auto i = 0; i < nrows; ++i)
-    {
-        auto elem = dcol[i].as<t_bool>();
-        col->set_nth(i, elem);
-        if (fill_index)
+    t_uindex nrows = col->size();
+
+    if (dcol["constructor"]["name"].as<t_str>() == "Uint8Array") {
+        // arrow packs bools into a bitmap
+        for (auto i = 0; i < nrows; ++i)
         {
-            key_col->set_nth(i, elem);
+            t_uint8 elem = dcol[i / 8].as<t_uint8>();
+            t_bool v = elem & (1 << (i % 8));
+            col->set_nth(i, v);
+        }
+    } else {
+        for (auto i = 0; i < nrows; ++i)
+        {
+            auto elem = dcol[i].as<t_bool>();
+            col->set_nth(i, elem);
+            if (fill_index)
+            {
+                key_col->set_nth(i, elem);
+            }
         }
     }
 }
