@@ -147,7 +147,7 @@ void
 vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
     val memory = val::module_property("buffer");
     val memoryView = typedArray["constructor"].new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
-    memoryView.call<void>("set", typedArray);
+    memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
 }
 
 
@@ -155,7 +155,7 @@ template<typename T>
 void
 _fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
-    t_int32 nrows = dcol["length"].as<t_int32>();
+    t_uindex nrows = col->size();
 
     if (!dcol["buffer"].isUndefined()) {
         t_lstore* lstore = col->_get_data_lstore();
@@ -178,11 +178,12 @@ template<>
 void
 _fill_col<t_int64>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
-    t_int32 nrows = dcol["length"].as<t_int32>();
+    t_uindex nrows = col->size();
 
     if (dcol["constructor"]["name"].as<t_str>() == "Int32Array") {
         t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
+        // arrow packs 64 bit into two 32 bit ints
+        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows * 2);
         col->valid_raw_fill(true);
     } else {
         throw std::logic_error("Unreachable");
@@ -193,11 +194,12 @@ template<>
 void
 _fill_col<t_time>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
-    t_int32 nrows = dcol["length"].as<t_int32>();
+    t_uindex nrows = col->size();
 
-    if (dcol["constructor"]["name"].as<t_str>() == "Int32Array") {
+    if (dcol["constructor"]["name"].as<t_str>() == "Uint32Array") {
         t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
+        // arrow packs 64 bit into two 32 bit ints
+        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows*2);
         col->valid_raw_fill(true);
     } else {
         for (auto i = 0; i < nrows; ++i)
@@ -209,7 +211,8 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
                 key_col->set_nth(i, elem);
             }
         }
-    }}
+    }
+}
 
 template<>
 void
@@ -285,7 +288,7 @@ void
 _fill_col<std::string>(val dcol, t_col_sptr col, t_col_sptr key_col, bool fill_index)
 {
 
-    t_uint32 nrows = dcol["length"].as<t_uint32>();
+    t_uindex nrows = col->size();
 
     if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
         val vkeys = dcol["keys"]["data"];
