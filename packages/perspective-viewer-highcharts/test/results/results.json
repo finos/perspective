@@ -30,5 +30,8 @@
     "line.html/sorts by a numeric column.": "5c87dd9ff1f99bc0f050e247bc31b297",
     "line.html/sorts by an alpha column.": "81eaf4a5de51953b7ec28250d5b050d9",
     "line.html/displays visible columns.": "80d6712db433c15efe24d43d32987b9c",
-    "bar.html/displays visible columns.": "0a602ffdcb9bb75fcfd0fddf96ce4adc"
+    "bar.html/displays visible columns.": "0a602ffdcb9bb75fcfd0fddf96ce4adc",
+    "scatter.html/sorts by a hidden column.": "f28f2b3cb748438296e56e7f7d1194e5",
+    "line.html/sorts by a hidden column.": "424ee1c719f12ca430c3f196102a34df",
+    "bar.html/sorts by a hidden column.": "0c692b799b194594a619d2f91253e213"
 }

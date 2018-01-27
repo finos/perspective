@@ -205,6 +205,7 @@ function column_aggregate_clicked() {
         }
     }
     this.setAttribute('aggregates', JSON.stringify(aggregates));
+    this._update_column_view();
     this._update();
 }
 

@@ -6,5 +6,6 @@
     "superstore.html/pivots by two rows and two columns.": "94eb636829716456a6f3d578b66d5ab6",
     "superstore.html/sorts by a numeric column.": "d6c7644f33430b2292d9e8d59eb5604c",
     "superstore.html/sorts by an alpha column.": "449a90651fdb2b551a1bf1836c9f4b85",
-    "superstore.html/displays visible columns.": "5c93ab09c5949037fda5314c56c85295"
+    "superstore.html/displays visible columns.": "5c93ab09c5949037fda5314c56c85295",
+    "superstore.html/sorts by a hidden column.": "b024cbe3d4ec01593ebde6743ad75298"
 }
