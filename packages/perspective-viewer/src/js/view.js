@@ -339,9 +339,9 @@ function new_row(name, type, aggregate) {
         row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
         row.addEventListener('row-drag', () => {
             this.classList.add('dragging');
-            this._original_index = Array.prototype.slice.call(this._active_columns.children).indexOf(row);
+            this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute('name') === name);
             if (this._original_index !== -1) {
-                this._drop_target_hover = row;
+                this._drop_target_hover = this._active_columns.children[this._original_index];
                 setTimeout(() => row.setAttribute('drop-target', true));
             } else {
                 this._drop_target_hover = new_row.call(this, name, type, aggregate);
