@@ -66,8 +66,8 @@ function undrag(event) {
 }
 
 function calc_index(event) {
-    let height = this._active_columns.children[0].offsetHeight;
-    return Math.round((event.offsetY + this._active_columns.scrollTop) / height);
+    let height = this._active_columns.children[0].offsetHeight + 2;
+    return Math.floor((event.offsetY + this._active_columns.scrollTop) / height);
 }
 
 function column_undrag(event) {
@@ -94,7 +94,7 @@ function column_dragleave(event) {
             this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
         }
         this._drop_target_hover.removeAttribute('drop-target');
-    }
+    }    
 }
 
 function column_dragover(event) {
@@ -106,10 +106,12 @@ function column_dragover(event) {
     if (!this._drop_target_hover.hasAttribute('drop-target')) {
         this._drop_target_hover.setAttribute('drop-target', true);
     }
-    let index = calc_index.call(this, event);
-    if (index < this._active_columns.children.length) {
-        if (!this._active_columns.children[Math.max(index - 1, 0)].hasAttribute('drop-target') && !this._active_columns.children[index].hasAttribute('drop-target')) {
-            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[index]);
+    let new_index = calc_index.call(this, event);
+    let current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
+    if (current_index < new_index) new_index += 1;
+    if (new_index < this._active_columns.children.length) {
+        if (!this._active_columns.children[new_index].hasAttribute('drop-target')) {
+            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[new_index]);
         }  
     } else {
         if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute('drop-target')) {
@@ -134,6 +136,9 @@ function column_drop(ev) {
 function drop(ev) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('dropping');
+    if (this._drop_target_hover) {
+        this._drop_target_hover.removeAttribute('drop-target');
+    }
     let data = ev.dataTransfer.getData('text');
     if (!data) return;
 
