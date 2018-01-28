@@ -53,16 +53,16 @@ global.registerPlugin = function registerPlugin(name, plugin) {
  */
 
 function undrag(event) {
-    let div = event.target.parentElement.parentElement;
+    let div = event.target;
+    while (div && div.tagName !== 'PERSPECTIVE-ROW') {
+        div = div.parentElement;
+    }
     let parent = div.parentElement;
     let idx = Array.prototype.slice.call(parent.children).indexOf(div);
     let attr_name = parent.getAttribute('id').replace('_', '-');
     let pivots = JSON.parse(this.getAttribute(attr_name));
     pivots.splice(idx, 1);
     this.setAttribute(attr_name, JSON.stringify(pivots));
-    if (event.dataTransfer.dropEffect !== 'move') {
-        this._update();
-    }
 }
 
 function calc_index(event) {
@@ -313,49 +313,48 @@ async function loadTable(table) {
 
 function new_row(name, type, aggregate) {
     let row = document.createElement('perspective-row');
-    if (name) {
-        if (!type) {
-            let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
-            if (all.length > 0) {
-                type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
-            } else {
-                type = '';
-            }
+
+    if (!type) {
+        let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
+        if (all.length > 0) {
+            type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
+        } else {
+            type = '';
         }
-        if (!aggregate) {
-            let aggregates = JSON.parse(this.getAttribute('aggregates'));
-            if (aggregates) {
-                aggregate = aggregates.find(x => x.column === name);
-                if (aggregate) {
-                    aggregate = aggregate.op;
-                } else {
-                    aggregate = perspective.AGGREGATE_DEFAULTS[type];
-                }
+    }
+
+    if (!aggregate) {
+        let aggregates = JSON.parse(this.getAttribute('aggregates'));
+        if (aggregates) {
+            aggregate = aggregates.find(x => x.column === name);
+            if (aggregate) {
+                aggregate = aggregate.op;
             } else {
                 aggregate = perspective.AGGREGATE_DEFAULTS[type];
             }
+        } else {
+            aggregate = perspective.AGGREGATE_DEFAULTS[type];
         }
-        row.setAttribute('type', type);
-        row.setAttribute('name', name);
-        if (aggregate) {
-            row.setAttribute('aggregate', aggregate);
-        }
-        row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
-        row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
-        row.addEventListener('row-drag', () => {
-            this.classList.add('dragging');
-            this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute('name') === name);
-            if (this._original_index !== -1) {
-                this._drop_target_hover = this._active_columns.children[this._original_index];
-                setTimeout(() => row.setAttribute('drop-target', true));
-            } else {
-                this._drop_target_hover = new_row.call(this, name, type, aggregate);
-            }
-        });
-        row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
-    } else {
-        row.setAttribute('drop-target', true);
     }
+
+    row.setAttribute('type', type);
+    row.setAttribute('name', name);
+    row.setAttribute('aggregate', aggregate);
+
+    row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
+    row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
+    row.addEventListener('close-clicked', event => undrag.bind(this)(event.detail));
+    row.addEventListener('row-drag', () => {
+        this.classList.add('dragging');
+        this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute('name') === name);
+        if (this._original_index !== -1) {
+            this._drop_target_hover = this._active_columns.children[this._original_index];
+            setTimeout(() => row.setAttribute('drop-target', true));
+        } else {
+            this._drop_target_hover = new_row.call(this, name, type, aggregate);
+        }
+    });
+    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
     return row;
 }
 

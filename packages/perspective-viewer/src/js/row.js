@@ -97,6 +97,7 @@ registerElement(template, {
             });
             let visible = this.querySelector('.is_visible');
             visible.addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('visibility-clicked', {detail: event})));
+            this.querySelector('#row_close').addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('close-clicked', {detail: event})));
             let agg_dropdown = this.querySelector('#column_aggregate');
             agg_dropdown.addEventListener('change', event => {
                 let agg_dropdown = this.querySelector('#column_aggregate');
