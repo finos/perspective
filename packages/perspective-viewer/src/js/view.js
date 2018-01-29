@@ -317,7 +317,12 @@ function new_row(name, type, aggregate) {
     if (!type) {
         let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
         if (all.length > 0) {
-            type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
+            type = all.find(x => x.getAttribute('name') === name)
+            if (type) {
+                type = type.getAttribute('type');
+            } else {
+                type = "integer";
+            }
         } else {
             type = '';
         }
@@ -365,10 +370,6 @@ function update() {
     let filters = JSON.parse(this.getAttribute('filters'));
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
-    if (row_pivots.length === 0 && column_pivots.length > 0) {
-        row_pivots = column_pivots;
-        column_pivots = [];
-    }
     let hidden = [];
     let sort = this._view_columns("#sort perspective-row");
     for (let s of sort) {

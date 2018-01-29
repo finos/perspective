@@ -243,13 +243,11 @@ perspective-viewer[view=scatter], perspective-viewer[view=line] {
     }
 }
 
-perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate,
-perspective-viewer:not([column-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
+perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
     display: inline-block;
 }
 
-perspective-viewer:not([row-pivots='[]']) #side_panel,
-perspective-viewer:not([column-pivots='[]']) #side_panel {
+perspective-viewer:not([row-pivots='[]']) #side_panel {
     #active_columns perspective-row .row_draggable {
         height: 41px;
     }

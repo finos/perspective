@@ -11,6 +11,8 @@ import papaparse from "papaparse";
 import moment from "moment";
 import * as Arrow from "@apache-arrow/es5-esm";
 
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS} from "./defaults.js";
+
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
     global.performance || {now: Date.now};
@@ -113,7 +115,7 @@ function parse_data(data, names, types) {
         types = []
     } else {
         let _types = [];
-        for (let t = 0; t < types.size(); t++) {
+        for (let t = 0; t < types.size() - 1; t++) {
             _types.push(types.get(t));
         }
         types = _types;
@@ -407,17 +409,24 @@ view.prototype._column_names = function() {
     let col_names = [];
     let aggs = this.ctx.get_column_names();
     for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
-    	let col_name;
+        let col_name;
         if (this.sides() === 0) {
             col_name = aggs.get(key);
+            if (col_name === "psp_okey") {
+                continue;
+            }
         } else {
+            let name = aggs.get(key % aggs.size()).name();
+            if (name === "psp_okey") {
+                continue;
+            }
             let col_path = this.ctx.unity_get_column_path(key + 1);
             col_name = [];
             for (let cnix = 0; cnix < col_path.size(); cnix++) {
                 col_name.push(__MODULE__.scalar_to_val(col_path, cnix));
             }
             col_name = col_name.reverse();
-            col_name.push(aggs.get(key % aggs.size()).name());
+            col_name.push(name);
             col_name = col_name.join(",");
             col_path.delete();
         }
@@ -449,8 +458,8 @@ view.prototype.schema = async function() {
     }
     let new_schema = {};
     let col_names = this._column_names();
-    for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
-        let col_name = col_names[key].split(',');
+    for (let col_name of col_names) {
+        col_name = col_name.split(',');
         col_name = col_name[col_name.length - 1];
         if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
@@ -544,13 +553,15 @@ view.prototype.to_json = async function(options) {
             row[col_name] = slice[idx];
         } else {
             if (cidx === 0) {
-                let col_name = "__ROW_PATH__";
-                let row_path = this.ctx.unity_get_row_path(start_row + ridx);
-                row[col_name] = [];
-                for (let i = 0; i < row_path.size(); i++) {
-                    row[col_name].unshift(__MODULE__.scalar_to_val(row_path, i));
+                if (this.config.row_pivot[0] !== 'psp_okey') {
+                    let col_name = "__ROW_PATH__";
+                    let row_path = this.ctx.unity_get_row_path(start_row + ridx);
+                    row[col_name] = [];
+                    for (let i = 0; i < row_path.size(); i++) {
+                        row[col_name].unshift(__MODULE__.scalar_to_val(row_path, i));
+                    }
+                    row_path.delete();
                 }
-                row_path.delete();
             } else {
                 let col_name = col_names[start_col + cidx];
                 row[col_name] = slice[idx];
@@ -559,7 +570,11 @@ view.prototype.to_json = async function(options) {
     }
 
     if (row) data.push(row);
-    return data;
+    if (this.config.row_pivot[0] === 'psp_okey') {
+        return data.slice(this.config.column_pivot.length);
+    } else {
+        return data;
+    }
 }
 
 /**
@@ -602,8 +617,8 @@ view.prototype.on_update = function(callback) {
         view: this,
         callback: () => {
             if (this.ctx.get_step_delta) {
-                let delta = this.ctx.get_step_delta(0, 2147483647);
-                if (delta.cells.size() === 0) {
+               let delta = this.ctx.get_step_delta(0, 2147483647);
+               if (delta.cells.size() === 0) {
                     this.to_json().then(callback);
                 } else {
                     let rows = {};
@@ -698,6 +713,9 @@ table.prototype.schema = async function() {
     let types = schema.types();
     let new_schema = {};
     for (let key = 0; key < columns.size(); key++) {
+        if (columns.get(key) === "psp_okey") {
+            continue;
+        }
         if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
@@ -799,6 +817,15 @@ table.prototype.view = function(config) {
 
     let name = Math.random() + "";
 
+    config.row_pivot = config.row_pivot || [];
+    config.column_pivot = config.column_pivot || [];
+
+    // Column only mode 
+    if (config.row_pivot.length === 0 && config.column_pivot.length > 0) {
+        config.row_pivot = ['psp_okey'];
+        config.column_only = true;
+    }
+
     // Filters
     let filters = [];
     let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
@@ -815,19 +842,26 @@ table.prototype.view = function(config) {
     // Sort
     let sort = [];
     if (config.sort) {
-        sort = config.sort.map(function(x) {
-            return [config.aggregate.map(function(agg) { return agg.column }).indexOf(x), 1];
-        });
+        if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
+            config.sort = config.sort.filter(x => config.row_pivot.indexOf(x) === -1);
+        } 
+        sort = config.sort.map(x => [config.aggregate.map(agg => agg.column).indexOf(x), 1]);
     }
 
     // Row Pivots
     let aggregates = [];
     if (typeof config.aggregate === "string") {
         let agg_op = _string_to_aggtype[config.aggregate];
+        if (config.column_only) {
+            agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+        }
         let schema = this.gnode.get_tblschema();
         let t_aggs = schema.columns();
         for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-            aggregates.push([t_aggs.get(aidx), agg_op, t_aggs.get(aidx)]);
+            let name = t_aggs.get(aidx);
+            if (name !== "psp_okey") {
+                aggregates.push([name, agg_op, name]);
+            }
         }
         schema.delete();
         t_aggs.delete();
@@ -835,18 +869,23 @@ table.prototype.view = function(config) {
         for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
             let agg = config.aggregate[aidx];
             let agg_op = _string_to_aggtype[agg.op];
+            if (config.column_only) {
+                agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+            }
             aggregates.push([agg.column, agg_op]);
         }
     } else {
         let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
+        if (config.column_only) {
+            agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+        }
         let schema = this.gnode.get_tblschema()
         let t_aggs = schema.columns();
-        for (let aidx = 0; aidx < t_aggs.size(); aidx++){
-            aggregates.push([
-                t_aggs.get(aidx),
-                agg_op,
-                t_aggs.get(aidx)
-            ]);
+        for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
+            let name = t_aggs.get(aidx);
+            if (name !== "psp_okey") {
+                aggregates.push([name, agg_op, name]);
+            }
         }
         schema.delete();
         t_aggs.delete();
@@ -854,7 +893,7 @@ table.prototype.view = function(config) {
 
     let context;
     let sides = 0;
-    if ((config.row_pivot && config.row_pivot.length > 0) || (config.column_pivot && config.column_pivot.length > 0)) {
+    if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
         if (config.column_pivot && config.column_pivot.length > 0) {
             config.row_pivot = config.row_pivot || [];
             context = __MODULE__.make_context_two(
@@ -929,25 +968,46 @@ table.prototype.view = function(config) {
  */ 
 table.prototype.update = function (data) {
     let pdata;
-
+    let cols = this._columns();
+    let schema = this.gnode.get_tblschema();
+    let types = schema.types();
+    
     if (data instanceof ArrayBuffer) {
-        pdata = load_arrow_buffer(data, this.columns(), this.gnode.get_tblschema().types());
+        pdata = load_arrow_buffer(data, cols, types);
     }
     else {
-        pdata = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
+        pdata = parse_data(data, cols, types);
     }
 
     let tbl;
-    try{
-        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index, this.tindex);
+    try {
+        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex);
         __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
         this.initialized = true;
     } catch (e) {
+        console.error(e);
     } finally {
         if (tbl) {
             tbl.delete();
         }
+        schema.delete();
+        types.delete();
     }
+}
+
+table.prototype._columns = function () {
+    let schema = this.gnode.get_tblschema();
+    let cols = schema.columns();
+    let names = []
+    for (let cidx = 0; cidx < cols.size(); cidx++) {
+        let name = cols.get(cidx);
+        if (name !== "psp_okey") {
+            names.push(name);
+        }
+    }
+  //  schema.delete();
+  //  cols.delete();
+    return names;
 }
 
 /**
@@ -958,12 +1018,7 @@ table.prototype.update = function (data) {
  * @returns {Array<string>} An array of column names for this table.
  */
 table.prototype.columns = async function () {
-    let cols = this.gnode.get_tblschema().columns();
-    let names = []
-    for (let cidx = 0; cidx < cols.size(); cidx++) {
-        names.push(cols.get(cidx));
-    }
-    return names;
+    return this._columns();
 }
 
 table.prototype.execute = function (f) {
@@ -1099,6 +1154,10 @@ if (typeof self !== "undefined" && self.addEventListener) {
 
 const perspective = {
 
+    TYPE_AGGREGATES: TYPE_AGGREGATES,
+
+    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
+
     worker: function () {},
 
     /**
@@ -1148,7 +1207,7 @@ const perspective = {
         if (options.index) {
             tindex = pdata.types[pdata.names.indexOf(options.index)]
         } else {
-            tindex = __MODULE__.t_dtype.DTYPE_UINT32;
+            tindex = __MODULE__.t_dtype.DTYPE_INT32;
         }
 
         let tbl, gnode, pool;
