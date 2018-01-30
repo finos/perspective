@@ -177,6 +177,8 @@ struct PERSPECTIVE_EXPORT t_agg_update_info
     t_colcptrvec m_src;
     t_colptrvec m_dst;
     t_aggspecvec m_aggspecs;
+
+    std::vector< t_uindex > m_dst_topo_sorted;
 };
 
 struct t_tree_unify_rec

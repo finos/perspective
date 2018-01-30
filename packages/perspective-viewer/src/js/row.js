@@ -22,11 +22,13 @@ import "../less/row.less";
 
 global.dragEnter = function dragEnter(ev) {
     ev.preventDefault();
+    ev.currentTarget.classList.add('dropping');
 }
 
 global.allowDrop = function allowDrop(ev) {
     ev.preventDefault();
-    ev.currentTarget.classList.add('dropping')
+    ev.currentTarget.classList.add('dropping');
+    ev.dataTransfer.dropEffect = 'move';
 }
 
 global.disallowDrop = function disallowDrop(ev) {
@@ -91,11 +93,11 @@ registerElement(template, {
                 this.dispatchEvent(new CustomEvent('row-drag'));
             });
             li.addEventListener('dragend', ev => {
-                ev.currentTarget.classList.remove('dropping');
                 this.dispatchEvent(new CustomEvent('row-dragend'));
             });
             let visible = this.querySelector('.is_visible');
             visible.addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('visibility-clicked', {detail: event})));
+            this.querySelector('#row_close').addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('close-clicked', {detail: event})));
             let agg_dropdown = this.querySelector('#column_aggregate');
             agg_dropdown.addEventListener('change', event => {
                 let agg_dropdown = this.querySelector('#column_aggregate');

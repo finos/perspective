@@ -159,16 +159,16 @@ export function treeLineRendererPaint(gc, config) {
     gc.closePath();
 
     // render message text
-    var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
-    config.minWidth = cellTextOffset + gc.getTextWidth(value);
-    var metrics = gc.getTextWidthTruncated(value, width - cellTextOffset + (x - 3), true);
-    var yOffset = y + height / 2;
 
     gc.globalAlpha = 1.0;
     gc.fillStyle = config.isSelected ? config.foregroundSelectionColor : config.color;
     gc.textAlign = 'start';
     gc.textBaseline = 'middle';
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
+    var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
+    config.minWidth = cellTextOffset + gc.getTextWidth(value) + 15;
+    var metrics = gc.getTextWidthTruncated(value, width - cellTextOffset + (x - 3), true);
+    var yOffset = y + height / 2;
     gc.fillText(metrics.string ? metrics.string : value, cellTextOffset, yOffset);
     gc.restore();
 }

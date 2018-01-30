@@ -96,14 +96,26 @@ perspective-viewer {
         position: static !important;
 
     }
-    #column_names {
+    #active_columns, #inactive_columns {
         list-style: none;
         padding: 5px;
         width: 100%;
         border: none !important;
-        flex-grow: 1;
         margin-top: 8px;
         overflow-y: auto;
+    }
+
+    #inactive_columns {
+        min-height: 20%;
+        flex-shrink: 1000;
+    }
+
+    #divider {
+        background-color: #CCC;
+        min-height: 2px;
+        height: 2px;
+        margin: 15px 13px 15px 13px;
+        margin-bottom: 5px;
     }
     .column {
         display: flex;
@@ -198,7 +210,6 @@ perspective-viewer {
         padding: 0px 10px 0px 10px;
         margin: 0;
         .bordered();
-        height: 30px;
         font-size: 12px;
     }
     select {
@@ -260,6 +271,10 @@ perspective-viewer {
 
     #side_panel > div {
         display: flex;
+    }
+
+    #vis_selector_container {
+        min-height: 29px;
     }
 
     #vis_selector {

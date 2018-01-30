@@ -52,23 +52,93 @@ global.registerPlugin = function registerPlugin(name, plugin) {
  *
  */
 
-
 function undrag(event) {
-    let div = event.target.parentElement;
-    if (div) {
-        let parent = div.parentElement.parentElement;
-        let idx = Array.prototype.slice.call(parent.children).indexOf(div);
-        let attr_name = parent.getAttribute('id').replace('_', '-');
-        let pivots = JSON.parse(this.getAttribute(attr_name));
-        pivots.splice(idx, 1)
-        this.setAttribute(attr_name, JSON.stringify(pivots));
-        this._update();
+    let div = event.target;
+    while (div && div.tagName !== 'PERSPECTIVE-ROW') {
+        div = div.parentElement;
     }
+    let parent = div.parentElement;
+    let idx = Array.prototype.slice.call(parent.children).indexOf(div);
+    let attr_name = parent.getAttribute('id').replace('_', '-');
+    let pivots = JSON.parse(this.getAttribute(attr_name));
+    pivots.splice(idx, 1);
+    this.setAttribute(attr_name, JSON.stringify(pivots));
+}
+
+function calc_index(event) {
+    let height = this._active_columns.children[0].offsetHeight + 2;
+    return Math.floor((event.offsetY + this._active_columns.scrollTop) / height);
+}
+
+function column_undrag(event) {
+    let data = event.target.parentElement.parentElement;
+    Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
+    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== 'move') {
+        this._active_columns.removeChild(data);
+        this._update_column_view();
+    }
+    this._active_columns.classList.remove('dropping');        
+}
+
+function column_dragleave(event) {
+    let src = event.relatedTarget;
+    while (src && src !== this._active_columns) {
+        src = src.parentElement;
+    }
+    if (src === null) {
+        this._active_columns.classList.remove('dropping');
+        if (this._drop_target_hover.parentElement === this._active_columns) { 
+            this._active_columns.removeChild(this._drop_target_hover);
+        }
+        if (this._original_index !== -1) {
+            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[this._original_index]);
+        }
+        this._drop_target_hover.removeAttribute('drop-target');
+    }    
+}
+
+function column_dragover(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (event.currentTarget.className !== 'dropping') {
+        event.currentTarget.classList.add('dropping');
+    }
+    if (!this._drop_target_hover.hasAttribute('drop-target')) {
+        this._drop_target_hover.setAttribute('drop-target', true);
+    }
+    let new_index = calc_index.call(this, event);
+    let current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
+    if (current_index < new_index) new_index += 1;
+    if (new_index < this._active_columns.children.length) {
+        if (!this._active_columns.children[new_index].hasAttribute('drop-target')) {
+            this._active_columns.insertBefore(this._drop_target_hover, this._active_columns.children[new_index]);
+        }  
+    } else {
+        if (!this._active_columns.children[this._active_columns.children.length - 1].hasAttribute('drop-target')) {
+            this._active_columns.appendChild(this._drop_target_hover);
+        }
+    }
+}
+
+function column_drop(ev) {
+    ev.preventDefault();
+    ev.currentTarget.classList.remove('dropping');
+    if (this._drop_target_hover.parentElement === this._active_columns) {
+        this._drop_target_hover.removeAttribute('drop-target');
+    }
+    Array.prototype.slice.call(this._active_columns.children).map(x => {x.className = '';});
+    let data = ev.dataTransfer.getData('text');
+    if (!data) return;
+    
+    this._update_column_view();    
 }
 
 function drop(ev) {
     ev.preventDefault();
     ev.currentTarget.classList.remove('dropping');
+    if (this._drop_target_hover) {
+        this._drop_target_hover.removeAttribute('drop-target');
+    }
     let data = ev.dataTransfer.getData('text');
     if (!data) return;
 
@@ -82,13 +152,14 @@ function drop(ev) {
     this.setAttribute(name, JSON.stringify(columns.concat([data])));
 
     // Deselect the dropped column
-    let isToggleMode = this._plugin.selectMode === "toggle";
-    if (isToggleMode && this._visible_column_count() > 1 && name !== "sort") {
-        for (let x of this.querySelectorAll("#column_names perspective-row")) {
+    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort") {
+        for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data) {
-                 x.className = 'off';
+                 this._active_columns.removeChild(x);
+                 break;
             }
         }
+        this._update_column_view();
     }
 
     this._update();
@@ -101,33 +172,45 @@ function drop(ev) {
  */
 
 function column_visibility_clicked(ev) {
-    let isSelect = this._plugin.selectMode === 'select'
-    let mode = (isSelect && !ev.detail.shiftKey) || (!isSelect && ev.detail.shiftKey);
-    let className = `visible_${this._visible_column_count() + 1}`;
     let parent = ev.currentTarget;
-    if (mode) {
-        for (let x of this.querySelectorAll("#column_names perspective-row")) {
-            x.className = 'off';
+    let is_active = parent.parentElement.getAttribute('id') === 'active_columns';
+    if (is_active) {
+        if (this._visible_column_count() === 1) {
+            return;
         }
-        parent.classList.remove('off');
-        if (parent.classList.length === 0) {
-            parent.classList.add(className);
-        }
-    } else if (parent.classList.contains("off")) {
-        parent.classList.remove("off");
-        if (parent.classList.length === 0) {
-            parent.classList.add(className);
+        if (ev.detail.shiftKey) {
+            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+                if (child !== parent) {
+                    this._active_columns.removeChild(child);
+                }
+            }
+        } else {
+            this._active_columns.removeChild(parent);
         }
     } else {
-        parent.className = 'off';
+        if (ev.detail.shiftKey && this._plugin.selectMode === 'toggle' || !ev.detail.shiftKey && this._plugin.selectMode === 'select') {
+            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
+                this._active_columns.removeChild(child);
+            }
+        }
+        let row = new_row.call(this, parent.getAttribute('name'), parent.getAttribute('type'));
+        this._active_columns.appendChild(row);
     }
-    let cols = this._view_columns('#column_names perspective-row:not(.off)');
-    this.setAttribute('columns', JSON.stringify(cols));
-    this._update();
+    let cols = this._view_columns('#active_columns perspective-row');
+    this._update_column_view(cols);
 }
 
 function column_aggregate_clicked() {
-    this.setAttribute('aggregates', JSON.stringify(this._get_view_aggregates()));
+    let aggregates = JSON.parse(this.getAttribute('aggregates'));
+    let new_aggregates = this._get_view_aggregates();
+    for (let aggregate of aggregates) {
+        let updated_agg = new_aggregates.find(x => x.column === aggregate.column);
+        if (updated_agg) {
+            aggregate.op = updated_agg.op;
+        }
+    }
+    this.setAttribute('aggregates', JSON.stringify(aggregates));
+    this._update_column_view();
     this._update();
 }
 
@@ -174,7 +257,7 @@ async function loadTable(table) {
         this._table.delete();
     }
 
-    this._column_names.innerHTML = "";
+    this._active_columns.innerHTML = "";
     this._table = table;
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
@@ -210,32 +293,75 @@ async function loadTable(table) {
         let aggregate = aggregates
             .filter(a => a.column === x)
             .map(a => a.op)[0];
-        let row = document.createElement('perspective-row');
-        row.setAttribute('type', schema[x]);
-        row.setAttribute('name', x);
-        if (aggregate) {
-            row.setAttribute('aggregate', aggregate);
+        let row = new_row.call(this, x, schema[x], aggregate);
+        this._inactive_columns.appendChild(row);
+        if (shown.indexOf(x) !== -1) {
+            row.style.display = 'none';
+            let active_row = new_row.call(this, x, schema[x], aggregate);
+            this._active_columns.appendChild(active_row);
         }
-        row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
-        row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
-        row.addEventListener('row-drag', () => this.classList.add('dragging'));
-        row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
-        if (shown.indexOf(x) === -1) {
-            row.className = 'off';
-        } else {
-            row.className = 'visible_' + (shown.indexOf(x) + 1);
-        }
-        this._column_names.appendChild(row);
+    }
+    if (cols.length === shown.length) {
+        this._inactive_columns.style.display = 'none';
+    } else {
+        this._inactive_columns.style.display = 'block';
     }
 
     this._filter_input.innerHTML = "";
     this._update();
 }
 
+function new_row(name, type, aggregate) {
+    let row = document.createElement('perspective-row');
+
+    if (!type) {
+        let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
+        if (all.length > 0) {
+            type = all.find(x => x.getAttribute('name') === name).getAttribute('type');
+        } else {
+            type = '';
+        }
+    }
+
+    if (!aggregate) {
+        let aggregates = JSON.parse(this.getAttribute('aggregates'));
+        if (aggregates) {
+            aggregate = aggregates.find(x => x.column === name);
+            if (aggregate) {
+                aggregate = aggregate.op;
+            } else {
+                aggregate = perspective.AGGREGATE_DEFAULTS[type];
+            }
+        } else {
+            aggregate = perspective.AGGREGATE_DEFAULTS[type];
+        }
+    }
+
+    row.setAttribute('type', type);
+    row.setAttribute('name', name);
+    row.setAttribute('aggregate', aggregate);
+
+    row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
+    row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
+    row.addEventListener('close-clicked', event => undrag.bind(this)(event.detail));
+    row.addEventListener('row-drag', () => {
+        this.classList.add('dragging');
+        this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute('name') === name);
+        if (this._original_index !== -1) {
+            this._drop_target_hover = this._active_columns.children[this._original_index];
+            setTimeout(() => row.setAttribute('drop-target', true));
+        } else {
+            this._drop_target_hover = new_row.call(this, name, type, aggregate);
+        }
+    });
+    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+    return row;
+}
+
 function update() {
     if (!this._table) return;
-    let row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
-    let column_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
+    let row_pivots = this._view_columns('#row_pivots perspective-row');
+    let column_pivots = this._view_columns('#column_pivots perspective-row');
     let filters = JSON.parse(this.getAttribute('filters'));
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
@@ -244,10 +370,10 @@ function update() {
         column_pivots = [];
     }
     let hidden = [];
-    let sort = this._view_columns("#sort perspective-row:not(.off)");
+    let sort = this._view_columns("#sort perspective-row");
     for (let s of sort) {
         if (aggregates.map(function(agg) { return agg.column }).indexOf(s) === -1) {
-            let all = this._get_view_aggregates('#column_names perspective-row');
+            let all = this._get_view_aggregates('#inactive_columns perspective-row');
             aggregates.push(all.reduce((obj, y) => y.column === s ? y : obj));
             hidden.push(s);
         }
@@ -298,6 +424,8 @@ function update() {
         if (this._render_count === 0) {
             this.removeAttribute('updating');
         }
+    }).catch(() => {
+        console.debug("View cancelled");
     });
 }
 
@@ -315,6 +443,10 @@ registerElement(template, {
                 this._plugin.resize.call(this);
             }
         }
+    },
+
+    worker: {
+        get: get_worker
     },
 
     _plugin: {
@@ -370,7 +502,7 @@ registerElement(template, {
         value: function () {
             let filters = [];
             let filter = this._filter_input.value.trim();
-            let cols = this._view_columns('#column_names perspective-row');
+            let cols = this._view_columns('#inactive_columns perspective-row');
             for (let col of cols) {
                 filter = filter.split("`" + col.trim() + "`").join(col + "||||");
             }
@@ -402,7 +534,7 @@ registerElement(template, {
 
     _get_view_aggregates: {
         value: function (selector) {
-            selector = selector || '#column_names perspective-row:not(.off)';
+            selector = selector || '#active_columns perspective-row';
             return this._view_columns(selector, true);
         }
     },
@@ -410,12 +542,7 @@ registerElement(template, {
     _view_columns: {
         value: function (selector, types) {
             let selection = this.querySelectorAll(selector);
-            let sorted = Array.prototype.slice.call(selection).sort((x, y) => {
-                if (x.className === "") return 0;
-                if (x.className === y.className) return 0;
-                if (x.className < y.className) return -1;
-                return 1;
-            })
+            let sorted = Array.prototype.slice.call(selection);
             return sorted.map(s => {
                 let name = s.getAttribute('name');
                 if (types) {
@@ -430,24 +557,45 @@ registerElement(template, {
 
     _visible_column_count: {
         value: function() {
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            let off_cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row.off"));
-            return (cols.length - off_cols.length);
+            let cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
+            return cols.length;
         }
     },
 
     _update_column_view: {
-        value: function (columns) {
+        value: function (columns, reset = false) {
+            if (!columns) {
+                columns = this._view_columns('#active_columns perspective-row');
+            }
+            this.setAttribute('columns', JSON.stringify(columns));
             let idx = 1;
-            const lis = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            lis.map((x) => {
+            const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+            if (columns.length === lis.length) {
+                this._inactive_columns.style.display = 'none';
+            } else {
+                this._inactive_columns.style.display = 'block';
+            }
+            lis.forEach(x => {
                 const index = columns.indexOf(x.getAttribute('name'));
                 if (index === -1) {
-                    x.className = 'off';
+                    x.style.display = 'block';
                 } else {
-                    x.className = 'visible_' + (index + 1);
+                    x.style.display = 'none';
                 }
             });
+            if (reset) {
+                this._active_columns.innerHTML = "";
+                columns.map(y => {
+                    let ref = lis.find(x => x.getAttribute('name') === y);
+                    if (ref) {
+                        this._active_columns.appendChild(new_row.call(
+                            this, 
+                            ref.getAttribute('name'), 
+                            ref.getAttribute('type')
+                        ));
+                    }
+                });
+            }
         }
     },
 
@@ -459,7 +607,7 @@ registerElement(template, {
     columns: {
         set: function () {
             let show = JSON.parse(this.getAttribute('columns'));
-            this._update_column_view(show);
+            this._update_column_view(show, true);
             this.dispatchEvent(new Event('config-update'));
             this._update();
         }
@@ -478,8 +626,7 @@ registerElement(template, {
     aggregates: {
         set: function () {
             let show = JSON.parse(this.getAttribute('aggregates'));
-            let lis = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
-            let idx = this._visible_column_count();
+            let lis = Array.prototype.slice.call(this.querySelectorAll("#side_panel perspective-row"));
             lis.map((x, ix) => {
                 let agg = show[x.getAttribute('name')];
                 if (agg) {
@@ -501,11 +648,30 @@ registerElement(template, {
     },
 
     view: {
-        set: function () {
+        set: async function () {
             this._vis_selector.value = this.getAttribute('view');
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#column_names perspective-row"));
+            let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             if (cols.length > 0) {
-                if (this._plugin.selectMode === 'select') {
+                if (this._plugin.initial) {
+                    let pref = [];
+                    let count = this._plugin.initial.count || 2;
+                    if (this._plugin.initial.type === 'number') {
+                        for (let col of cols) {
+                            let type = col.getAttribute('type');
+                            if (['float', 'integer'].indexOf(type) > -1) {
+                                pref.push(col.getAttribute('name'));
+                            }
+                        }
+                        if (pref.length < count) {
+                            for (let col of cols) {
+                                if (pref.indexOf(col.getAttribute('name')) === -1) {
+                                    pref.push(col.getAttribute('name'));
+                                }
+                            }                            
+                        }
+                    }
+                    this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
+                } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
                 } else {
                     this.setAttribute('columns', JSON.stringify(cols.map(x => x.getAttribute('name'))));
@@ -525,10 +691,7 @@ registerElement(template, {
                 this._column_pivots.appendChild(label);
             } else {
                 pivots.map(function(pivot) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', pivot);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, pivot);
                     this._column_pivots.appendChild(row);
                 }.bind(this));
             }
@@ -547,10 +710,7 @@ registerElement(template, {
                 this._row_pivots.appendChild(label);
             } else {
                 pivots.map(function(pivot) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', pivot);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, pivot);
                     this._row_pivots.appendChild(row);
                 }.bind(this));
             }
@@ -585,10 +745,7 @@ registerElement(template, {
                 this._sort.appendChild(label);
             } else {
                 sort.map(function(s) {
-                    let row = document.createElement('perspective-row');
-                    row.setAttribute('name', s);
-                    row.addEventListener('row-drag', () => this.classList.add('dragging'));
-                    row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+                    let row = new_row.call(this, s);
                     this._sort.appendChild(row);
                 }.bind(this));
             }
@@ -643,7 +800,8 @@ registerElement(template, {
             this._row_pivots = this.querySelector('#row_pivots');
             this._column_pivots = this.querySelector('#column_pivots');
             this._datavis = this.querySelector('#pivot_chart');
-            this._column_names = this.querySelector('#column_names');
+            this._active_columns = this.querySelector('#active_columns');
+            this._inactive_columns = this.querySelector('#inactive_columns');
             this._inner_drop_target = this.querySelector('#drop_target_inner');
             this._drop_target = this.querySelector('#drop_target');
             this._config_button = this.querySelector('#config_button');
@@ -653,10 +811,17 @@ registerElement(template, {
 
             this._sort.addEventListener('drop', drop.bind(this));
             this._sort.addEventListener('dragend', undrag.bind(this));
+
             this._row_pivots.addEventListener('drop', drop.bind(this));
             this._row_pivots.addEventListener('dragend', undrag.bind(this));
+
             this._column_pivots.addEventListener('drop', drop.bind(this));
             this._column_pivots.addEventListener('dragend', undrag.bind(this));
+
+            this._active_columns.addEventListener('drop', column_drop.bind(this));
+            this._active_columns.addEventListener('dragend', column_undrag.bind(this));
+            this._active_columns.addEventListener('dragover', column_dragover.bind(this));
+            this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
 
             this.setAttribute('settings', true);
             this._show_config = true;

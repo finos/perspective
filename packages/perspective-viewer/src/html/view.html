@@ -11,12 +11,14 @@
 
     <div id="app">
         <div id='side_panel' class="column fixed noselect">
-            <div>
+            <div id="vis_selector_container">
                 <div style="width:25px;margin-left:5px"></div>
                 <select id="vis_selector">
                 </select>
             </div>
-            <ul id='column_names'></ul>
+            <ul id='active_columns' ondragenter="dragEnter(event)"></ul>
+            <div id='divider'></div>
+            <ul id='inactive_columns'></ul>
         </div>
         <div class="column noselect">
             <div id='top_panel'>

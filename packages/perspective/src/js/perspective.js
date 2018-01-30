@@ -9,6 +9,7 @@
 
 import papaparse from "papaparse";
 import moment from "moment";
+import * as Arrow from "@apache-arrow/es5-esm";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -119,6 +120,8 @@ function parse_data(data, names, types) {
     }
     let cdata = [];
 
+    let row_count = 0;
+
     if (Array.isArray(data)) {
 
         // Row oriented
@@ -213,6 +216,7 @@ function parse_data(data, names, types) {
                 }
             }
             cdata.push(col);
+            row_count = col.length;
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
@@ -223,6 +227,7 @@ function parse_data(data, names, types) {
             types.push(infer_type(data[name][0]));
             let transformed = transform_data(types[types.length - 1], data[name]);
             cdata.push(transformed);
+            row_count = transformed.length
         }
 
     } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
@@ -253,6 +258,82 @@ function parse_data(data, names, types) {
     }
 
     return {
+        row_count: row_count,
+        names: names,
+        types: types,
+        cdata: cdata
+    };
+}
+
+/**
+ * Converts arrow data into a canonical representation for
+ * interfacing with perspective.
+ *
+ * @private
+ * @param {object} data Array buffer
+ * @returns An object with 3 properties:
+ *    names - the column names.
+ *    types - the column t_dtypes.
+ */
+function load_arrow_buffer(data, names, types) {
+
+    // TODO Need to validate that the names/types passed in match those in the buffer
+
+    var arrow = Arrow.Table.from([new Uint8Array(data)]);
+
+    names = [];
+    types = [];
+    let cdata = [];
+    for (let column of arrow.columns) {
+        switch (column.type) {
+            case 'Utf8':
+                types.push(__MODULE__.t_dtype.DTYPE_STR);
+                break;
+            case 'FloatingPoint':
+                if (column instanceof Arrow.Float64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+                }
+                else if (column instanceof Arrow.Float32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
+                }
+                break;
+            case 'Int':
+                if (column instanceof Arrow.Int64Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT64);
+                }
+                else if (column instanceof Arrow.Int32Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                }
+                else if (column instanceof Arrow.Int16Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT16);
+                }
+                else if (column instanceof Arrow.Int8Vector) {
+                    types.push(__MODULE__.t_dtype.DTYPE_INT8);
+                }
+                break;
+            case 'Bool':
+                types.push(__MODULE__.t_dtype.DTYPE_BOOL);
+                break;
+            case 'Timestamp':
+                types.push(__MODULE__.t_dtype.DTYPE_TIME);
+                break;
+            default:
+                continue;
+                break;
+        }
+        switch (column.type) {
+            case 'Utf8':
+                cdata.push(column);
+                break;
+            default:
+                cdata.push(column.slice());
+                break;
+        }
+        names.push(column.name);
+    }
+
+    return {
+        row_count: arrow.length,
         names: names,
         types: types,
         cdata: cdata
@@ -283,8 +364,9 @@ function parse_data(data, names, types) {
  * @class
  * @hideconstructor
  */
- function view(pool, ctx, gnode, config, id, name, callbacks) {
+ function view(pool, ctx, sides, gnode, config, id, name, callbacks) {
     this.ctx = ctx;
+    this.nsides = sides;
     this.gnode = gnode;
     this.config = config || {};
     this.pool = pool;
@@ -318,20 +400,7 @@ function parse_data(data, names, types) {
  * @returns {number} sides The number of sides of this `View`.
  */
  view.prototype.sides = function() {
-    let name;
-    if (this.ctx.constructor.name) {
-        name = this.ctx.constructor.name;
-    } else {
-        name = this.ctx.constructor.toString().match(/function ([^\(]+)/)[1];
-    }
-    switch (name) {
-        case 't_ctx1':
-            return 1;
-        case 't_ctx2':
-            return 2;
-        default:
-            return 0;
-    }
+    return this.nsides;
 }
 
 view.prototype._column_names = function() {
@@ -383,11 +452,11 @@ view.prototype.schema = async function() {
     for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
         let col_name = col_names[key].split(',');
         col_name = col_name[col_name.length - 1];
-        if (types[col_name] === 2) {
+        if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
         } else if (types[col_name] === 19) {
             new_schema[col_name] = "string";
-        } else if (types[col_name] === 9) {
+        } else if (types[col_name] === 9 || types[col_name] === 10) {
             new_schema[col_name] = "float";
         } else if (types[col_name] === 11) {
             new_schema[col_name] = "boolean";
@@ -629,11 +698,11 @@ table.prototype.schema = async function() {
     let types = schema.types();
     let new_schema = {};
     for (let key = 0; key < columns.size(); key++) {
-        if (types.get(key).value === 2) {
+        if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
             new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 9) {
+        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
             new_schema[columns.get(key)] = "float";
         } else if (types.get(key).value === 11) {
             new_schema[columns.get(key)] = "boolean";
@@ -784,6 +853,7 @@ table.prototype.view = function(config) {
     }
 
     let context;
+    let sides = 0;
     if ((config.row_pivot && config.row_pivot.length > 0) || (config.column_pivot && config.column_pivot.length > 0)) {
         if (config.column_pivot && config.column_pivot.length > 0) {
             config.row_pivot = config.row_pivot || [];
@@ -794,8 +864,9 @@ table.prototype.view = function(config) {
                 filter_op,
                 filters,
                 aggregates,
-                sort
+                []
             );
+            sides = 2;
             this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
@@ -809,6 +880,16 @@ table.prototype.view = function(config) {
             } else {
                 context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
             }
+            const groups = context.unity_get_column_count() / aggregates.length;
+            const new_sort = [];
+            for (let z = 0; z < groups; z ++) {
+                for (let s of sort) {
+                    new_sort.push([s[0] + (z * aggregates.length), s[1]]);
+                }
+            }
+            if (sort.length > 0) {
+                __MODULE__.sort(context, new_sort);
+            }
         } else {
             context = __MODULE__.make_context_one(
                 this.gnode,
@@ -818,6 +899,7 @@ table.prototype.view = function(config) {
                 aggregates,
                 sort
             );
+            sides = 1;
             this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
@@ -831,7 +913,7 @@ table.prototype.view = function(config) {
         this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
     }
 
-    return new view(this.pool, context, this.gnode, config, this.id, name, this.callbacks);
+    return new view(this.pool, context, sides, this.gnode, config, this.id, name, this.callbacks);
 }
 
 /**
@@ -846,11 +928,26 @@ table.prototype.view = function(config) {
  * @see {@link table}
  */ 
 table.prototype.update = function (data) {
-    let {names, types, cdata} = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
-    this.initialized = true;
-    let tbl = __MODULE__.make_table(data.length || 0, names, types, cdata, this.gnode.get_table().size(), this.index, this.tindex);
-    __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
-    tbl.delete();
+    let pdata;
+
+    if (data instanceof ArrayBuffer) {
+        pdata = load_arrow_buffer(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+    else {
+        pdata = parse_data(data, this.columns(), this.gnode.get_tblschema().types());
+    }
+
+    let tbl;
+    try{
+        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index, this.tindex);
+        __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
+        this.initialized = true;
+    } catch (e) {
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
+    }
 }
 
 /**
@@ -1032,14 +1129,21 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        if (typeof data === "string") {
-            if (data[0] === ",") {
-                data = "_" + data;
+        let pdata;
+
+        if (data instanceof ArrayBuffer) {
+            // Arrow data
+            pdata = load_arrow_buffer(data);
+        } else {
+            if (typeof data === "string") {
+                if (data[0] === ",") {
+                    data = "_" + data;
+                }
+                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
             }
-            let js = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
-            return perspective.table(js, options);
+            pdata = parse_data(data);
         }
-        let pdata = parse_data(data);
+
         let tindex;
         if (options.index) {
             tindex = pdata.types[pdata.names.indexOf(options.index)]
@@ -1053,7 +1157,7 @@ const perspective = {
             gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
             let id = pool.register_gnode(gnode);
-            tbl = __MODULE__.make_table(data.length || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
             __MODULE__.fill(id, tbl, gnode, pool);
             return new table(id, gnode, pool, options.index, tindex);
         } catch (e) {

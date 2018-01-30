@@ -44,6 +44,16 @@ var meta_3 = {
     'z': "boolean"
 };
 
+import arrow_buffer from "../arrow/test.arrow";
+
+var arrow_result = [
+    {"f32": 1.5, "f64": 1.5, "i64": 1, "i32": 1, "i16": 1, "i8": 1, "bool": true,  "char": "a", "dict": "a", "datetime": +(new Date("2018-01-25"))},
+    {"f32": 2.5, "f64": 2.5, "i64": 2, "i32": 2, "i16": 2, "i8": 2, "bool": false, "char": "b", "dict": "b", "datetime": +(new Date("2018-01-26"))},
+    {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c", "datetime": +(new Date("2018-01-27"))},
+    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d", "datetime": +(new Date("2018-01-28"))},
+    {"f32": 5.5, "f64": 5.5, "i64": 5, "i32": 5, "i16": 5, "i8": 5, "bool": true,  "char": "d", "dict": "d", "datetime": +(new Date("2018-01-29"))}
+];
+
 var dt = new Date();
 var data_4 = [
    {'v': dt}
@@ -93,6 +103,13 @@ module.exports = (perspective) => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+        });
+
+        it("Arrow constructor", async function () {
+            var table = perspective.table(arrow_buffer);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(arrow_result).toEqual(result);
         });
 
         it("CSV constructor", async function () {
