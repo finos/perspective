@@ -23,7 +23,7 @@ import {
   IRenderMime
 } from '@jupyterlab/rendermime-interfaces';
 
-import '../style/index.css';
+import '../src/css/index.css';
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
