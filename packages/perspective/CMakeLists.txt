@@ -34,8 +34,9 @@ if(DEFINED ENV{WASM_OPTIMIZE})
 else()
 	set(OPT_FLAGS " \
 		-Os \
-		-g3 \
+		-g4 \
 	    -s SAFE_HEAP=1 \
+		-s DISABLE_EXCEPTION_CATCHING=0 \
 		-s ALLOW_MEMORY_GROWTH=1 \
 	    -s ASSERTIONS=2 \
 		-s DEMANGLE_SUPPORT=1 \

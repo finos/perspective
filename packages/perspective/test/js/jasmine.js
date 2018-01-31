@@ -36,7 +36,7 @@ var noopTimer = {
 };
 
 function ConsoleReporter() {
-    var print = console.log,
+    var print = console.log.bind(console),
         showColors = false,
         onComplete = function() {},
         timer = noopTimer,
