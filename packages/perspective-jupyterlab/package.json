@@ -7,7 +7,7 @@
     "lib/*.js.map",
     "lib/*.js",
     "lib/*.wasm",
-    "style/*.css"
+    "src/css/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -15,10 +15,8 @@
     "lib": "lib/"
   },
   "scripts": {
-    "build": "tsc",
+    "start": "tsc",
     "clean": "rimraf lib",
-    "prepublish": "npm run build",
-    "prepublishOnly": "npm run build",
     "watch": "tsc -w"
   },
   "dependencies": {
