@@ -297,9 +297,11 @@ async function loadTable(table) {
         this._inactive_columns.appendChild(row);
         if (shown.indexOf(x) !== -1) {
             row.style.display = 'none';
-            let active_row = new_row.call(this, x, schema[x], aggregate);
-            this._active_columns.appendChild(active_row);
         }
+    }
+    for (let x of shown) {
+        let active_row = new_row.call(this, x, schema[x]);
+        this._active_columns.appendChild(active_row);
     }
     if (cols.length === shown.length) {
         this._inactive_columns.style.display = 'none';
