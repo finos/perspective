@@ -7,7 +7,7 @@ A streaming data visualization engine for Javascript, Perspective makes it simpl
 
 Features:
 
-- A fast, memory efficient streaming data engine written principally in C++ and
+- A fast, memory efficient streaming pivot engine written principally in C++ and
   compiled to both WebAssembly and asm.js via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
@@ -27,8 +27,6 @@ Features:
 * [citibike.html](https://jpmorganchase.github.io/perspective/examples/citibike.html) NYC Citibike availability map.
 * [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
 * [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
-* [test.html](https://jpmorganchase.github.io/perspective/examples/test.html) The test suite.
-* [benchmark.html](https://jpmorganchase.github.io/perspective/examples/benchmark.html) Some simple in-browser benchmarks.
 
 ## Installation
 
@@ -256,6 +254,9 @@ document.addEventListener("WebComponentsReady", function () {
 
     var viewer = document.getElementById('view1');
     viewer.load(data);
+
+    // Add new row
+    viewer.update([{'x': 5, 'y': 'e', 'z': true}]);
 
 });
 ```
