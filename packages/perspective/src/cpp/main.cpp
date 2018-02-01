@@ -520,7 +520,7 @@ make_table(
  *
  */
 void
-fill(val j_id, t_table_sptr table, t_gnode_sptr gnode, t_pool* pool)
+fill(val j_id, t_table_sptr table, t_pool* pool)
 {
     t_uint32 id = j_id.as<t_uint32>();
     pool->send(id, 0, *table);
@@ -814,6 +814,7 @@ EMSCRIPTEN_BINDINGS(perspective)
                      const t_schemavec&,
                      const t_ccol_vec&>()
         .smart_ptr<std::shared_ptr<t_gnode>>("shared_ptr<t_gnode>")
+        .function<t_uindex>("get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
         .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
         .function<t_table*>(
             "get_table", &t_gnode::get_table, allow_raw_pointers());

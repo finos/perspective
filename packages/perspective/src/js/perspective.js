@@ -366,14 +366,13 @@ function load_arrow_buffer(data, names, types) {
  * @class
  * @hideconstructor
  */
- function view(pool, ctx, sides, gnode, config, id, name, callbacks) {
+ function view(pool, ctx, sides, gnode, config, name, callbacks) {
     this.ctx = ctx;
     this.nsides = sides;
     this.gnode = gnode;
     this.config = config || {};
     this.pool = pool;
     this.callbacks = callbacks;
-    this.id = id;
     this.name = name
  }
 
@@ -383,7 +382,7 @@ function load_arrow_buffer(data, names, types) {
  * they are garbage collected - you must call this method to reclaim these.
  */
  view.prototype.delete = async function() {
-    this.pool.unregister_context(this.id, this.name);
+    this.pool.unregister_context(this.gnode.get_id(), this.name);
     this.ctx.delete();
     let i = 0, j = 0;
     while (i < this.callbacks.length) {
@@ -657,10 +656,9 @@ view.prototype.on_update = function(callback) {
  * @class
  * @hideconstructor
  */
-function table(id, gnode, pool, index, tindex) {
+function table(gnode, pool, index, tindex) {
     this.gnode = gnode;
     this.pool = pool;
-    this.id = id;
     this.name = Math.random() + "";
     this.initialized = false;
     this.index = index;
@@ -906,7 +904,7 @@ table.prototype.view = function(config) {
                 []
             );
             sides = 2;
-            this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
+            this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
                 context.expand_to_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
@@ -939,7 +937,7 @@ table.prototype.view = function(config) {
                 sort
             );
             sides = 1;
-            this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
+            this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
             if (config.row_pivot_depth !== undefined) {
                 context.expand_to_depth(config.row_pivot_depth - 1);
@@ -949,10 +947,10 @@ table.prototype.view = function(config) {
         }
     } else {
         context = __MODULE__.make_context_zero(this.gnode, filter_op, filters, aggregates.map(function(x) { return x[0]; }), sort);
-        this.pool.register_context(this.id, name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
+        this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
     }
 
-    return new view(this.pool, context, sides, this.gnode, config, this.id, name, this.callbacks);
+    return new view(this.pool, context, sides, this.gnode, config, name, this.callbacks);
 }
 
 /**
@@ -982,7 +980,7 @@ table.prototype.update = function (data) {
     let tbl;
     try {
         tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex);
-        __MODULE__.fill(this.id, tbl, this.gnode, this.pool);
+        __MODULE__.fill(this.gnode.get_id(), tbl, this.pool);
         this.initialized = true;
     } catch (e) {
         console.error(e);
@@ -1215,10 +1213,10 @@ const perspective = {
         try {
             gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
-            let id = pool.register_gnode(gnode);
+            pool.register_gnode(gnode);
             tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
-            __MODULE__.fill(id, tbl, gnode, pool);
-            return new table(id, gnode, pool, options.index, tindex);
+            __MODULE__.fill(gnode.get_id(), tbl, pool);
+            return new table(gnode, pool, options.index, tindex);
         } catch (e) {
             if (gnode) {
                 gnode.delete();
