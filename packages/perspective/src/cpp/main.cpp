@@ -153,7 +153,7 @@ vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
 
 template<typename T>
 void
-_fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, bool fill_index)
+_fill_col(val dcol, t_col_sptr col)
 {
     t_uindex nrows = col->size();
 
@@ -166,18 +166,13 @@ _fill_col(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, boo
         {
             auto elem = dcol[i].as<T>();
             col->set_nth(i, elem);
-            if (fill_index)
-            {
-                key_col->set_nth(i, elem);
-                okey_col->set_nth(i, elem);
-            }
         }
     }
 }
 
 template<>
 void
-_fill_col<t_int64>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, bool fill_index)
+_fill_col<t_int64>(val dcol, t_col_sptr col)
 {
     t_uindex nrows = col->size();
 
@@ -193,7 +188,7 @@ _fill_col<t_int64>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey
 
 template<>
 void
-_fill_col<t_time>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, bool fill_index)
+_fill_col<t_time>(val dcol, t_col_sptr col)
 {
     t_uindex nrows = col->size();
 
@@ -207,18 +202,13 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_
         {
             auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
             col->set_nth(i, elem);
-            if (fill_index)
-            {
-                key_col->set_nth(i, elem);
-                okey_col->set_nth(i, elem);
-            }
         }
     }
 }
 
 template<>
 void
-_fill_col<t_bool>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, bool fill_index)
+_fill_col<t_bool>(val dcol, t_col_sptr col)
 {
     t_uindex nrows = col->size();
 
@@ -235,11 +225,6 @@ _fill_col<t_bool>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_
         {
             auto elem = dcol[i].as<t_bool>();
             col->set_nth(i, elem);
-            if (fill_index)
-            {
-                key_col->set_nth(i, elem);
-                okey_col->set_nth(i, elem);
-            }
         }
     }
 }
@@ -288,7 +273,7 @@ _fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
 
 template<>
 void
-_fill_col<std::string>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr okey_col, bool fill_index)
+_fill_col<std::string>(val dcol, t_col_sptr col)
 {
 
     t_uindex nrows = col->size();
@@ -345,11 +330,6 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_col_sptr key_col, t_col_sptr 
         {
             auto elem = dcol[i].as<std::string>();
             col->set_nth(i, elem);
-            if (fill_index)
-            {
-               key_col->set_nth(i, elem);
-               okey_col->set_nth(i, elem);
-            }
         }
     }
 }
@@ -370,83 +350,65 @@ _fill_data(t_table_sptr tbl,
            t_svec ocolnames,
            val j_data,
            std::vector<t_dtype> odt,
-           t_uint32 offset,
-           t_str index)
+           t_uint32 offset)
 {
     std::vector<val> data_cols = vecFromJSArray<val>(j_data);
-    auto op_col = tbl->get_column("psp_op");
-    auto key_col = tbl->get_column("psp_pkey");
-    auto okey_col = tbl->get_column("psp_okey");
     for (auto cidx = 0; cidx < ocolnames.size(); ++cidx)
     {
         auto name = ocolnames[cidx];
-        if (name == "psp_okey")
-        {
-            continue;
-        }
         auto col = tbl->get_column(name);
         auto col_type = odt[cidx];
-        auto fill_index = name == index;
         auto dcol = data_cols[cidx];
 
         switch (col_type)
         {
             case DTYPE_INT8:
             {
-                _fill_col<t_int8>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_int8>(dcol, col);
             }
             break;
             case DTYPE_INT16:
             {
-                _fill_col<t_int16>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_int16>(dcol, col);
             }
             break;
             case DTYPE_INT32:
             {
-                _fill_col<t_int32>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_int32>(dcol, col);
             }
             break;
             case DTYPE_INT64:
             {
-                _fill_col<t_int64>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_int64>(dcol, col);
             }
             break;
             case DTYPE_BOOL:
             {
-                _fill_col<t_bool>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_bool>(dcol, col);
             }
             break;
             case DTYPE_FLOAT32:
             {
-                _fill_col<t_float32>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_float32>(dcol, col);
             }
             break;
             case DTYPE_FLOAT64:
             {
-                _fill_col<t_float64>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_float64>(dcol, col);
             }
             break;
 			case DTYPE_TIME:
 			{
-                _fill_col<t_time>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<t_time>(dcol, col);
 			}
 			break;
             case DTYPE_STR:
             {
-                _fill_col<std::string>(dcol, col, key_col, okey_col, fill_index);
+                _fill_col<std::string>(dcol, col);
             }
             break;
             default:
             break;
-        }
-    }
-    for (auto ridx = 0; ridx < tbl->size(); ++ridx)
-    {
-        op_col->set_nth<t_uint8>(ridx, OP_INSERT);
-        if (index == "")
-        {
-            key_col->set_nth<t_int32>(ridx, ridx + offset);
-            okey_col->set_nth<t_int32>(ridx, ridx + offset);
         }
     }
 }
@@ -480,30 +442,37 @@ make_table(
     t_dtype tindex
 ) {
     // Create the input and port schemas
-    t_svec ocolnames = vecFromJSArray<std::string>(j_colnames);
-    t_svec icolnames = ocolnames;
-    icolnames.push_back("psp_okey");
-    icolnames.push_back("psp_op");
-    icolnames.push_back("psp_pkey");
-    ocolnames.push_back("psp_okey");
-
-    t_dtypevec idt = vecFromJSArray<t_dtype>(j_dtypes);
-    t_dtypevec odt = idt;
-    idt.push_back(tindex);
-    idt.push_back(DTYPE_UINT8);
-    idt.push_back(tindex);
-    odt.push_back(tindex);
-
-    t_schema iscm(icolnames, idt);
-    t_schema oscm(ocolnames, odt);
+    t_svec colnames = vecFromJSArray<std::string>(j_colnames);
+    t_dtypevec dtypes = vecFromJSArray<t_dtype>(j_dtypes);
 
     // Create the table
     // TODO assert size > 0
-    auto tbl = std::make_shared<t_table>(iscm);
+    auto tbl = std::make_shared<t_table>(t_schema(colnames, dtypes));
     tbl->init();
     tbl->extend(size);
 
-    _fill_data(tbl, ocolnames, j_data, odt, offset, index);
+    _fill_data(tbl, colnames, j_data, dtypes, offset);
+
+    // Set up pkey and op columns
+    auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+    op_col->raw_fill<t_uint8>(OP_INSERT);
+
+    if (index == "")
+    {
+        // If user doesn't specify an column to use as the pkey index, just use
+        // row number
+        auto key_col = tbl->add_column("psp_pkey", tindex, false);
+        auto okey_col = tbl->add_column("psp_okey", tindex, false);
+
+        for (auto ridx = 0; ridx < tbl->size(); ++ridx)
+        {
+            key_col->set_nth<t_int32>(ridx, ridx + offset);
+            okey_col->set_nth<t_int32>(ridx, ridx + offset);
+        }
+    } else {
+        tbl->clone_column(index, "psp_pkey");
+        tbl->clone_column(index, "psp_okey");
+    }
 
     return tbl;
 }
