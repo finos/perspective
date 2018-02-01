@@ -980,7 +980,7 @@ table.prototype.update = function (data) {
     let tbl;
     try {
         tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex);
-        __MODULE__.fill(this.gnode.get_id(), tbl, this.pool);
+        __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
     } catch (e) {
         console.error(e);
@@ -1211,18 +1211,21 @@ const perspective = {
         let tbl, gnode, pool;
 
         try {
-            gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
+            // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
+
+            gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
             pool.register_gnode(gnode);
+
             tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
-            __MODULE__.fill(gnode.get_id(), tbl, pool);
+            __MODULE__.fill(pool, gnode, tbl);
             return new table(gnode, pool, options.index, tindex);
         } catch (e) {
-            if (gnode) {
-                gnode.delete();
-            }
             if (pool) {
                 pool.delete();
+            }
+            if (gnode) {
+                gnode.delete();
             }
             throw e;
         } finally {
