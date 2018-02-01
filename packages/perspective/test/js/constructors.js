@@ -9,6 +9,7 @@
 
 import _  from "underscore";
 import papaparse from "papaparse";
+import moment from "moment";
 
 var data = [
     {'x': 1, 'y':'a', 'z': true},
@@ -179,7 +180,7 @@ module.exports = (perspective) => {
         it("Handles date strings", async function () {
             var table = perspective.table(data_5);
             let result2 = await table.view({}).to_json();
-            expect([{'v': +(new Date(data_5[0]['v']))}]).toEqual(result2);
+            expect([{'v': +(moment(data_5[0]['v'], "MM-DD-YYYY"))}]).toEqual(result2);
         });
 
 
