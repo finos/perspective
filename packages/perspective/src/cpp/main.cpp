@@ -539,24 +539,25 @@ fill(t_pool* pool, t_gnode_sptr gnode, t_table_sptr table)
  * A gnode.
  */
 t_gnode_sptr
-make_gnode(val j_colnames, val j_dtypes, t_dtype tindex)
+make_gnode(t_table_sptr table)
 {
-    // Create the input and port schemas
-    t_svec ocolnames = vecFromJSArray<std::string>(j_colnames);
-    t_svec icolnames = ocolnames;
-    icolnames.push_back("psp_okey");
-    icolnames.push_back("psp_op");
-    icolnames.push_back("psp_pkey");
-    ocolnames.push_back("psp_okey");
+    auto iscm = table->get_schema();
 
-    t_dtypevec idt = vecFromJSArray<t_dtype>(j_dtypes);
-    t_dtypevec odt = idt;
-    idt.push_back(tindex);
-    idt.push_back(DTYPE_UINT8);
-    idt.push_back(tindex);
-    odt.push_back(tindex);
+    t_svec ocolnames(iscm.columns());
+    t_dtypevec odt(iscm.types());
 
-    t_schema iscm(icolnames, idt);
+    if (iscm.has_column("psp_pkey")) {
+        t_uindex idx = iscm.get_colidx("psp_pkey");
+        ocolnames.erase(ocolnames.begin()+idx);
+        odt.erase(odt.begin()+idx);
+    }
+
+    if (iscm.has_column("psp_op")) {
+        t_uindex idx = iscm.get_colidx("psp_op");
+        ocolnames.erase(ocolnames.begin()+idx);
+        odt.erase(odt.begin()+idx);
+    }
+
     t_schema oscm(ocolnames, odt);
 
     // Create a gnode

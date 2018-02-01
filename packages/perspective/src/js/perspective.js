@@ -1214,11 +1214,13 @@ const perspective = {
             // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
 
-            gnode = __MODULE__.make_gnode(pdata.names, pdata.types, tindex);
-            pool.register_gnode(gnode);
-
+            // Fill t_table with data
             tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+
+            gnode = __MODULE__.make_gnode(tbl);
+            pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
+
             return new table(gnode, pool, options.index, tindex);
         } catch (e) {
             if (pool) {
