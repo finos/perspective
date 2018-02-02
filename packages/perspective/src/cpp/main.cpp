@@ -217,8 +217,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         val data = dcol["data"];
-        t_lstore* lstore = col->_get_data_lstore();
-        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows);
+        arrow::vecFromTypedArray(data, col->get_nth<T>(0), nrows);
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
@@ -236,9 +235,8 @@ _fill_col<t_int64>(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         val data = dcol["data"];
-        t_lstore* lstore = col->_get_data_lstore();
         // arrow packs 64 bit into two 32 bit ints
-        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows * 2);
+        arrow::vecFromTypedArray(data, col->get_nth<t_int64>(0), nrows * 2);
     } else {
         throw std::logic_error("Unreachable - can't have DTYPE_INT64 column from non-arrow data");
     }
@@ -252,9 +250,8 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         val data = dcol["data"];
-        t_lstore* lstore = col->_get_data_lstore();
         // arrow packs 64 bit into two 32 bit ints
-        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows*2);
+        arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows*2);
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
