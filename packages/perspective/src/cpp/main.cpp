@@ -143,165 +143,44 @@ _get_aggspecs(val j_aggs)
  */
 
 
-void
-vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
-    val memory = val::module_property("buffer");
-    val memoryView = typedArray["constructor"].new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
-    memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
-}
+namespace arrow {
 
-
-template<typename T>
-void
-_fill_col(val dcol, t_col_sptr col)
-{
-    t_uindex nrows = col->size();
-
-    if (!dcol["buffer"].isUndefined()) {
-        t_lstore* lstore = col->_get_data_lstore();
-        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows);
-        col->valid_raw_fill(true);
-    } else {
-        for (auto i = 0; i < nrows; ++i)
-        {
-            auto elem = dcol[i].as<T>();
-            col->set_nth(i, elem);
-        }
+    void
+    vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
+        val memory = val::module_property("buffer");
+        val memoryView = typedArray["constructor"].new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
+        memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
     }
-}
 
-template<>
-void
-_fill_col<t_int64>(val dcol, t_col_sptr col)
-{
-    t_uindex nrows = col->size();
+    void
+    fill_col_valid(val dcol, t_col_sptr col)
+    {
+        //dcol should be the Uint8Array containing the null bitmap
+        t_uindex nrows = col->size();
 
-    if (dcol["constructor"]["name"].as<t_str>() == "Int32Array") {
-        t_lstore* lstore = col->_get_data_lstore();
-        // arrow packs 64 bit into two 32 bit ints
-        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows * 2);
-        col->valid_raw_fill(true);
-    } else {
-        throw std::logic_error("Unreachable");
-    }
-}
-
-template<>
-void
-_fill_col<t_time>(val dcol, t_col_sptr col)
-{
-    t_uindex nrows = col->size();
-
-    if (dcol["constructor"]["name"].as<t_str>() == "Uint32Array") {
-        t_lstore* lstore = col->_get_data_lstore();
-        // arrow packs 64 bit into two 32 bit ints
-        vecFromTypedArray(dcol, lstore->get_ptr(0), nrows*2);
-        col->valid_raw_fill(true);
-    } else {
-        for (auto i = 0; i < nrows; ++i)
-        {
-            auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
-            col->set_nth(i, elem);
-        }
-    }
-}
-
-template<>
-void
-_fill_col<t_bool>(val dcol, t_col_sptr col)
-{
-    t_uindex nrows = col->size();
-
-    if (dcol["constructor"]["name"].as<t_str>() == "Uint8Array") {
         // arrow packs bools into a bitmap
         for (auto i = 0; i < nrows; ++i)
         {
             t_uint8 elem = dcol[i / 8].as<t_uint8>();
             t_bool v = elem & (1 << (i % 8));
-            col->set_nth(i, v);
-        }
-    } else {
-        for (auto i = 0; i < nrows; ++i)
-        {
-            auto elem = dcol[i].as<t_bool>();
-            col->set_nth(i, elem);
+            col->set_valid(i, v);
         }
     }
-}
 
+    template<typename T>
+    void
+    fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
+    {
+        t_int32 ksize = vkeys["length"].as<t_int32>();
+        std::vector<T> keys;
+        keys.reserve(ksize);
+        keys.resize(ksize);
+        vecFromTypedArray(vkeys, keys.data(), ksize);
 
-template<typename T>
-void
-_fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
-{
-    t_int32 ksize = vkeys["length"].as<t_int32>();
-    std::vector<T> keys;
-    keys.reserve(ksize);
-    keys.resize(ksize);
-    vecFromTypedArray(vkeys, keys.data(), ksize);
-
-    val values = dcol["data"]["values"];
-    val vdata = values["data"];
-    t_int32 vsize = vdata["length"].as<t_int32>();
-    std::vector<t_uchar> data;
-    data.reserve(vsize);
-    data.resize(vsize);
-    vecFromTypedArray(vdata, data.data(), vsize);
-
-    val voffsets = values["offsets"];
-    t_int32 osize = voffsets["length"].as<t_int32>();
-    std::vector<t_int32> offsets;
-    offsets.reserve(osize);
-    offsets.resize(osize);
-    vecFromTypedArray(voffsets, offsets.data(), osize);
-
-    t_str elem;
-
-    for (t_int32 i = 0; i < nrows; ++i) {
-        T idx = keys[i];
-
-        if (idx == -1) {
-            col->clear(i);
-        } else {
-            t_int32 bidx = offsets[idx];
-            std::size_t s = offsets[idx+1] - bidx;
-            elem.assign(reinterpret_cast<char*>(data.data())+bidx, s);
-            col->set_nth(i, elem);
-        }
-    }
-}
-
-template<>
-void
-_fill_col<std::string>(val dcol, t_col_sptr col)
-{
-
-    t_uindex nrows = col->size();
-
-    if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
-        val vkeys = dcol["keys"]["data"];
-
-        auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
-        switch (width) {
-            case 1:
-                _fill_col_dict<t_int8>(nrows, dcol, vkeys, col);
-                break;
-            case 2:
-                _fill_col_dict<t_int16>(nrows, dcol, vkeys, col);
-                break;
-            case 4:
-                _fill_col_dict<t_int32>(nrows, dcol, vkeys, col);
-                break;
-            default:
-                break;
-        }
-
-    } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
-        val values = dcol["values"];
-
+        val values = dcol["data"]["values"];
         val vdata = values["data"];
         t_int32 vsize = vdata["length"].as<t_int32>();
-        std::vector<t_uint8> data;
+        std::vector<t_uchar> data;
         data.reserve(vsize);
         data.resize(vsize);
         vecFromTypedArray(vdata, data.data(), vsize);
@@ -316,13 +195,153 @@ _fill_col<std::string>(val dcol, t_col_sptr col)
         t_str elem;
 
         for (t_int32 i = 0; i < nrows; ++i) {
-            t_int32 bidx = offsets[i];
-            std::size_t es = offsets[i+1] - bidx;
-            if (es > 0) {
-                elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
-                col->set_nth(i, elem);
-            } else {
+            T idx = keys[i];
+
+            if (idx == -1) {
                 col->clear(i);
+            } else {
+                t_int32 bidx = offsets[idx];
+                std::size_t s = offsets[idx+1] - bidx;
+                elem.assign(reinterpret_cast<char*>(data.data())+bidx, s);
+                col->set_nth(i, elem);
+            }
+        }
+    }
+}
+
+template<typename T>
+void
+_fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
+{
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        val data = dcol["data"];
+        t_lstore* lstore = col->_get_data_lstore();
+        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows);
+    } else {
+        for (auto i = 0; i < nrows; ++i)
+        {
+            auto elem = dcol[i].as<T>();
+            col->set_nth(i, elem);
+        }
+    }
+}
+
+template<>
+void
+_fill_col<t_int64>(val dcol, t_col_sptr col, t_bool is_arrow)
+{
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        val data = dcol["data"];
+        t_lstore* lstore = col->_get_data_lstore();
+        // arrow packs 64 bit into two 32 bit ints
+        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows * 2);
+    } else {
+        throw std::logic_error("Unreachable - can't have DTYPE_INT64 column from non-arrow data");
+    }
+}
+
+template<>
+void
+_fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
+{
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        val data = dcol["data"];
+        t_lstore* lstore = col->_get_data_lstore();
+        // arrow packs 64 bit into two 32 bit ints
+        arrow::vecFromTypedArray(data, lstore->get_ptr(0), nrows*2);
+    } else {
+        for (auto i = 0; i < nrows; ++i)
+        {
+            auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
+            col->set_nth(i, elem);
+        }
+    }
+}
+
+template<>
+void
+_fill_col<t_bool>(val dcol, t_col_sptr col, t_bool is_arrow)
+{
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        // arrow packs bools into a bitmap
+        val data = dcol["data"];
+        for (auto i = 0; i < nrows; ++i)
+        {
+            t_uint8 elem = data[i / 8].as<t_uint8>();
+            t_bool v = elem & (1 << (i % 8));
+            col->set_nth(i, v);
+        }
+    } else {
+        for (auto i = 0; i < nrows; ++i)
+        {
+            auto elem = dcol[i].as<t_bool>();
+            col->set_nth(i, elem);
+        }
+    }
+}
+
+
+template<>
+void
+_fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
+{
+
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
+            val vkeys = dcol["keys"]["data"];
+
+            auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
+            switch (width) {
+                case 1:
+                    arrow::fill_col_dict<t_int8>(nrows, dcol, vkeys, col);
+                    break;
+                case 2:
+                    arrow::fill_col_dict<t_int16>(nrows, dcol, vkeys, col);
+                    break;
+                case 4:
+                    arrow::fill_col_dict<t_int32>(nrows, dcol, vkeys, col);
+                    break;
+                default:
+                    break;
+            }
+        } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
+            val values = dcol["values"];
+
+            val vdata = values["data"];
+            t_int32 vsize = vdata["length"].as<t_int32>();
+            std::vector<t_uint8> data;
+            data.reserve(vsize);
+            data.resize(vsize);
+            arrow::vecFromTypedArray(vdata, data.data(), vsize);
+
+            val voffsets = values["offsets"];
+            t_int32 osize = voffsets["length"].as<t_int32>();
+            std::vector<t_int32> offsets;
+            offsets.reserve(osize);
+            offsets.resize(osize);
+            arrow::vecFromTypedArray(voffsets, offsets.data(), osize);
+
+            t_str elem;
+
+            for (t_int32 i = 0; i < nrows; ++i) {
+                t_int32 bidx = offsets[i];
+                std::size_t es = offsets[i+1] - bidx;
+                if (es > 0) {
+                    elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
+                    col->set_nth(i, elem);
+                } else {
+                    col->clear(i);
+                }
             }
         }
     } else {
@@ -350,7 +369,8 @@ _fill_data(t_table_sptr tbl,
            t_svec ocolnames,
            val j_data,
            std::vector<t_dtype> odt,
-           t_uint32 offset)
+           t_uint32 offset,
+           t_bool is_arrow)
 {
     std::vector<val> data_cols = vecFromJSArray<val>(j_data);
     for (auto cidx = 0; cidx < ocolnames.size(); ++cidx)
@@ -364,51 +384,67 @@ _fill_data(t_table_sptr tbl,
         {
             case DTYPE_INT8:
             {
-                _fill_col<t_int8>(dcol, col);
+                _fill_col<t_int8>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_INT16:
             {
-                _fill_col<t_int16>(dcol, col);
+                _fill_col<t_int16>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_INT32:
             {
-                _fill_col<t_int32>(dcol, col);
+                _fill_col<t_int32>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_INT64:
             {
-                _fill_col<t_int64>(dcol, col);
+                _fill_col<t_int64>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_BOOL:
             {
-                _fill_col<t_bool>(dcol, col);
+                _fill_col<t_bool>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_FLOAT32:
             {
-                _fill_col<t_float32>(dcol, col);
+                _fill_col<t_float32>(dcol, col, is_arrow);
             }
             break;
             case DTYPE_FLOAT64:
             {
-                _fill_col<t_float64>(dcol, col);
+                _fill_col<t_float64>(dcol, col, is_arrow);
             }
             break;
 			case DTYPE_TIME:
 			{
-                _fill_col<t_time>(dcol, col);
+                _fill_col<t_time>(dcol, col, is_arrow);
 			}
 			break;
             case DTYPE_STR:
             {
-                _fill_col<std::string>(dcol, col);
+                _fill_col<std::string>(dcol, col, is_arrow);
             }
             break;
             default:
             break;
+        }
+        if (is_arrow) {
+            // Fill validity bitmap
+            t_uint32 null_count = dcol["nullCount"].as<t_uint32>();
+
+            if (null_count == 0) {
+                col->valid_raw_fill(true);
+            } else {
+                val validity = dcol;
+                if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
+                    validity = dcol["values"]["validity"]["data"];
+                } else {
+                    validity = dcol["validity"]["data"];
+                }
+                arrow::fill_col_valid(validity, col);
+            }
         }
     }
 }
@@ -439,7 +475,8 @@ make_table(
     val j_data,
     t_uint32 offset,
     t_str index,
-    t_dtype tindex
+    t_dtype tindex,
+    t_bool is_arrow
 ) {
     // Create the input and port schemas
     t_svec colnames = vecFromJSArray<std::string>(j_colnames);
@@ -451,7 +488,7 @@ make_table(
     tbl->init();
     tbl->extend(size);
 
-    _fill_data(tbl, colnames, j_data, dtypes, offset);
+    _fill_data(tbl, colnames, j_data, dtypes, offset, is_arrow);
 
     // Set up pkey and op columns
     auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
@@ -700,7 +737,7 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
         }
         case DTYPE_NONE:
         {
-            return val::undefined();
+            return val::null();
         }
         case DTYPE_STR:
         default:
