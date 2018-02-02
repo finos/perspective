@@ -261,6 +261,7 @@ function parse_data(data, names, types) {
 
     return {
         row_count: row_count,
+        is_arrow: false,
         names: names,
         types: types,
         cdata: cdata
@@ -323,19 +324,13 @@ function load_arrow_buffer(data, names, types) {
                 continue;
                 break;
         }
-        switch (column.type) {
-            case 'Utf8':
-                cdata.push(column);
-                break;
-            default:
-                cdata.push(column.slice());
-                break;
-        }
+        cdata.push(column);
         names.push(column.name);
     }
 
     return {
         row_count: arrow.length,
+        is_arrow: true,
         names: names,
         types: types,
         cdata: cdata
@@ -979,7 +974,9 @@ table.prototype.update = function (data) {
 
     let tbl;
     try {
-        tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex);
+        tbl = __MODULE__.make_table(pdata.row_count || 0, 
+            pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex, 
+            pdata.is_arrow);
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
     } catch (e) {
@@ -1215,7 +1212,9 @@ const perspective = {
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
 
             // Fill t_table with data
-            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex);
+            tbl = __MODULE__.make_table(pdata.row_count || 0,
+                pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex,
+                pdata.is_arrow);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
