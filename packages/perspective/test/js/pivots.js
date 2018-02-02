@@ -188,10 +188,10 @@ module.exports = (perspective) => {
             });
             var answer =  [
                 {"__ROW_PATH__":[],"a,x":1,"a,y":1,"a,z":1,"b,x":1,"b,y":1,"b,z":1,"c,x":1,"c,y":1,"c,z":1,"d,x":1,"d,y":1,"d,z":1},
-                {"__ROW_PATH__":[1],"a,x":1,"a,y":1,"a,z":1,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[2],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":1,"b,y":1,"b,z":1,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[3],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":1,"c,y":1,"c,z":1,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[4],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":1,"d,y":1,"d,z":1}
+                {"__ROW_PATH__":[1],"a,x":1,"a,y":1,"a,z":1,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[2],"a,x":null,"a,y":null,"a,z":null,"b,x":1,"b,y":1,"b,z":1,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[3],"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":1,"c,y":1,"c,z":1,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[4],"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":1,"d,y":1,"d,z":1}
             ];
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);
