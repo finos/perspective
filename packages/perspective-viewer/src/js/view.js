@@ -201,7 +201,7 @@ function column_visibility_clicked(ev) {
 }
 
 function column_aggregate_clicked() {
-    let aggregates = JSON.parse(this.getAttribute('aggregates'));
+    let aggregates = get_aggregate_attribute.call(this);
     let new_aggregates = this._get_view_aggregates();
     for (let aggregate of aggregates) {
         let updated_agg = new_aggregates.find(x => x.column === aggregate.column);
@@ -209,7 +209,7 @@ function column_aggregate_clicked() {
             aggregate.op = updated_agg.op;
         }
     }
-    this.setAttribute('aggregates', JSON.stringify(aggregates));
+    set_aggregate_attribute.call(this, aggregates);
     this._update_column_view();
     this._update();
 }
@@ -249,6 +249,18 @@ function load(csv) {
     }
 }
 
+function get_aggregate_attribute() {
+    const aggs = JSON.parse(this.getAttribute('aggregates')) || {};
+    return Object.keys(aggs).map(col => ({column: col, op: aggs[col]}));
+}
+
+function set_aggregate_attribute(aggs) {
+    this.setAttribute('aggregates', JSON.stringify(aggs.reduce((obj, agg) => {
+        obj[agg.column] = agg.op;
+        return obj;
+    }, {})));
+}
+
 async function loadTable(table) {
     if (this._view) {
         this._view.delete();
@@ -272,7 +284,7 @@ async function loadTable(table) {
 
         // Double check that the persisted aggregates actually match the 
         // expected types.
-        aggregates = JSON.parse(this.getAttribute('aggregates')).map(col => {
+        aggregates = get_aggregate_attribute.call(this).map(col => {
             let _type = schema[col.column];
             if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
                 col.op = perspective.AGGREGATE_DEFAULTS[_type]
@@ -285,7 +297,7 @@ async function loadTable(table) {
             op: perspective.AGGREGATE_DEFAULTS[schema[col]]
         }));
     }
-    this.setAttribute('aggregates', JSON.stringify(aggregates));
+    set_aggregate_attribute.call(this, aggregates);
 
     // Update column rows.
     let shown = JSON.parse(this.getAttribute('columns'));
@@ -331,7 +343,7 @@ function new_row(name, type, aggregate) {
     }
 
     if (!aggregate) {
-        let aggregates = JSON.parse(this.getAttribute('aggregates'));
+        let aggregates = get_aggregate_attribute.call(this);
         if (aggregates) {
             aggregate = aggregates.find(x => x.column === name);
             if (aggregate) {
@@ -537,13 +549,13 @@ registerElement(template, {
 
     _get_view_aggregates: {
         value: function (selector) {
-            selector = selector || '#active_columns perspective-row';
             return this._view_columns(selector, true);
         }
     },
 
     _view_columns: {
         value: function (selector, types) {
+            selector = selector || '#active_columns perspective-row';
             let selection = this.querySelectorAll(selector);
             let sorted = Array.prototype.slice.call(selection);
             return sorted.map(s => {
@@ -628,7 +640,7 @@ registerElement(template, {
      */
     aggregates: {
         set: function () {
-            let show = JSON.parse(this.getAttribute('aggregates'));
+            let show = JSON.stringify(this.getAttribute('aggregates'));
             let lis = Array.prototype.slice.call(this.querySelectorAll("#side_panel perspective-row"));
             lis.map((x, ix) => {
                 let agg = show[x.getAttribute('name')];
