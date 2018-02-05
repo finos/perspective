@@ -1,32 +1,33 @@
 {
   "name": "@jpmorganchase/perspective-jupyterlab",
   "version": "0.1.0",
-  "description": "psp",
+  "description": "Perspective.js",
   "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "lib/*.wasm",
+    "build/*.d.ts",
+    "build/*.js.map",
+    "build/*.js",
+    "build/*.wasm",
     "src/css/*.css"
   ],
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
   "directories": {
-    "lib": "lib/"
+    "build": "build/"
   },
   "scripts": {
     "start": "tsc",
-    "clean": "rimraf lib",
+    "clean": "rimraf build",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jpmorganchase/perspective-viewer": "^0.0.2",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.0.2",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.0.2",
+    "@jpmorganchase/perspective-viewer": "^0.1.0",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.0",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.0",
     "@jupyterlab/application": "^0.15.0",
     "@jupyterlab/rendermime-interfaces": "^1.0.0",
     "@jupyterlab/services": "^1.1.1-0",
-    "@phosphor/widgets": "^1.5.0"
+    "@phosphor/widgets": "^1.5.0",
+    "@phosphor/messaging": "^1.2.2"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",

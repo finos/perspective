@@ -11,7 +11,7 @@ jupyter labextension install @jpmorganchase/perspective-jupyterlab
 From inside the jlab directory:
 ```bash
 npm install
-npm run build
+npm start
 jupyter labextension install .
 ```
 
