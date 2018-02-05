@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-jupyterlab",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Perspective.js",
   "files": [
     "build/*.d.ts",
@@ -14,20 +14,23 @@
   "directories": {
     "build": "build/"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "tsc",
     "clean": "rimraf build",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jpmorganchase/perspective-viewer": "^0.1.0",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.0",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.0",
+    "@jpmorganchase/perspective-viewer": "^0.1.1",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.1",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.1",
     "@jupyterlab/application": "^0.15.0",
     "@jupyterlab/rendermime-interfaces": "^1.0.0",
     "@jupyterlab/services": "^1.1.1-0",
-    "@phosphor/widgets": "^1.5.0",
-    "@phosphor/messaging": "^1.2.2"
+    "@phosphor/messaging": "^1.2.2",
+    "@phosphor/widgets": "^1.5.0"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
