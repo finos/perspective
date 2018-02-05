@@ -229,6 +229,10 @@ function get_worker() {
     return __WORKER__;
 } 
 
+if (document.currentScript && document.currentScript.hasAttribute('preload')) {
+    get_worker();
+}
+
 function load(csv) {
     try {
         csv = csv.trim();

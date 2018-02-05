@@ -5,6 +5,8 @@
 A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
 & user configurable analytics entirely in the browser.
 
+![](https://jpmorganchase.github.io/perspective/examples/demo.gif)
+
 Features:
 
 - A fast, memory efficient streaming pivot engine written principally in C++ and
