@@ -7,5 +7,6 @@
     "superstore.html/sorts by a numeric column.": "ea9da7833c7ab95738112cb97cd1dfdf",
     "superstore.html/sorts by an alpha column.": "2567ac561879b88cf80230f03b12ff74",
     "superstore.html/displays visible columns.": "5c93ab09c5949037fda5314c56c85295",
-    "superstore.html/sorts by a hidden column.": "e612ca52f4abb31c9f8c972f971eb2c2"
+    "superstore.html/sorts by a hidden column.": "e612ca52f4abb31c9f8c972f971eb2c2",
+    "superstore.html/filters by a numeric column.": "e009ee1934400a0ff51b9900db20255d"
 }

@@ -659,6 +659,7 @@ registerElement(template, {
                 this._filter_input.value = filters.map(x => `\`${x[0]}\` ${x[1]} ${x[2]}`).join(' & ');
             }
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 

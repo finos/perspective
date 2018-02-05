@@ -33,5 +33,8 @@
     "bar.html/displays visible columns.": "0a602ffdcb9bb75fcfd0fddf96ce4adc",
     "scatter.html/sorts by a hidden column.": "ce1e56024b97ba6739b1b97f23414939",
     "line.html/sorts by a hidden column.": "80db1e392602e53a502b97ab8f573249",
-    "bar.html/sorts by a hidden column.": "73a2f920448908ad25f6e0d6770f1638"
+    "bar.html/sorts by a hidden column.": "73a2f920448908ad25f6e0d6770f1638",
+    "scatter.html/filters by a numeric column.": "1b2ab6ae89954e2ab9847b339e1cdef0",
+    "line.html/filters by a numeric column.": "d31caeb32416183156202bd7033c5a1b",
+    "bar.html/filters by a numeric column.": "cf01072c9e326a20d22eb908eed1263c"
 }

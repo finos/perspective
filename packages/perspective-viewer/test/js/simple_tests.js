@@ -53,6 +53,12 @@ exports.default = function() {
         await page.evaluate(element => element.setAttribute('sort', '["Sales"]'), viewer);
     });
 
+    test.capture("filters by a numeric column.", async page => {        
+        await page.click('#config_button');
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('filters', '[["Sales", ">", 500]]'), viewer);
+    });
+
     test.capture("sorts by an alpha column.", async page => {        
         await page.click('#config_button');
         const viewer = await page.$('perspective-viewer');
