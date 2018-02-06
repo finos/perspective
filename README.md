@@ -238,7 +238,7 @@ packages' `build/` directories:
 <script src="highcharts.plugin.js"></script>
 ```
 
-Once imported, the `<perspective viewer>` Web Component will be available in 
+Once imported, the `<perspective-viewer>` Web Component will be available in 
 any standard HTML on your site.  A simple example:
 
 ```html
