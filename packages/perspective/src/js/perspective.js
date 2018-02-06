@@ -289,6 +289,7 @@ function load_arrow_buffer(data, names, types) {
     let cdata = [];
     for (let column of arrow.columns) {
         switch (column.type) {
+            case 'Binary':
             case 'Utf8':
                 types.push(__MODULE__.t_dtype.DTYPE_STR);
                 break;

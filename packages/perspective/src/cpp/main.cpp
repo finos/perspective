@@ -311,17 +311,20 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
                 default:
                     break;
             }
-        } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
-            val values = dcol["values"];
+        } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector" || 
+                   dcol["constructor"]["name"].as<t_str>() == "BinaryVector") {
+            if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
+                dcol = dcol["values"];
+            }
 
-            val vdata = values["data"];
+            val vdata = dcol["data"];
             t_int32 vsize = vdata["length"].as<t_int32>();
             std::vector<t_uint8> data;
             data.reserve(vsize);
             data.resize(vsize);
             arrow::vecFromTypedArray(vdata, data.data(), vsize);
 
-            val voffsets = values["offsets"];
+            val voffsets = dcol["offsets"];
             t_int32 osize = voffsets["length"].as<t_int32>();
             std::vector<t_int32> offsets;
             offsets.reserve(osize);
