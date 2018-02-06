@@ -19,6 +19,7 @@
   },
   "scripts": {
     "start": "tsc",
+    "prepublish": "npm run start",
     "clean": "rimraf build",
     "watch": "tsc -w"
   },
