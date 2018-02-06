@@ -5,7 +5,9 @@
 A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
 & user configurable analytics entirely in the browser.
 
-![](https://jpmorganchase.github.io/perspective/examples/demo.gif)
+<p align="center">
+<img src="https://jpmorganchase.github.io/perspective/examples/demo.gif">
+</p>
 
 Features:
 
@@ -123,7 +125,9 @@ site bundle from:
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate, filter
 and sort operations for tabular data.  The engine can be instantiated in process,
-or in a Web Worker (browser only)
+or in a Web Worker (browser only).
+
+[API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective)
 
 #### In the browser
 
