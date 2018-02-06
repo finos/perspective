@@ -219,8 +219,13 @@ worker.prototype._start_cross_origin_wasm = function() {
     wasmXHR.send(null);
 }
 
+// https://github.com/kripken/emscripten/issues/6042
+function detect_iphone() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 worker.prototype._start_same_origin = function() {
-    var dir = (typeof WebAssembly === "undefined" ? 'asmjs' : 'wasm_async');
+    var dir = (typeof WebAssembly === "undefined" || detect_iphone() ? 'asmjs' : 'wasm_async');
     var w =  new Worker(__SCRIPT_PATH__.path() + dir + '/perspective.js');
     for (var key in this._worker) {
         w[key] = this._worker[key];
