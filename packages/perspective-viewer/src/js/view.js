@@ -420,7 +420,7 @@ function update() {
                     this._task.cancelled = true;
                 }
                 this._task = {cancelled: false}
-                this._plugin.create.call(this, this._datavis, this._view, hidden, false, this._task).then(() => {
+                this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
                     this.setAttribute('render_time', performance.now() - t);
                 });
             }, timeout || 0);
@@ -433,8 +433,8 @@ function update() {
     if (this._task) {
         this._task.cancelled = true;
     }
-    this._task = {cancelled: false}
-    this._plugin.create.call(this, this._datavis, this._view, hidden, true, this._task).then(() => {
+    this._task = {cancelled: false};
+    this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
         }

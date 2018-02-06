@@ -702,7 +702,7 @@ const LAZY_THRESHOLD = 10000;
 
 const PRIVATE = Symbol("Hypergrid private");
 
-async function grid(div, view, hidden, redraw, task) {
+async function grid(div, view, hidden, task) {
 
     this[PRIVATE] = this[PRIVATE] || {};
 

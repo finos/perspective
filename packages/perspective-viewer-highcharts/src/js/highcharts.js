@@ -220,8 +220,10 @@ function* visible_rows(json, hidden) {
     }
 }
 
+
+
 export function draw(mode) {
-    return async function(el, view, hidden, redraw, task) {
+    return async function(el, view, hidden, task) {
         var row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
         var col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
         var aggregates = this._get_view_aggregates();
@@ -442,7 +444,7 @@ export function draw(mode) {
             });
         }
 
-        if (redraw && this._chart) {
+        if (this.hasAttribute('updating') && this._chart) {
             chart = this._chart
             this._chart = undefined;
             try {
