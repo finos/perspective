@@ -47,7 +47,6 @@ Once installed, you can build perspective via:
 
 ```bash
 npm install
-./node_modules/.bin/lerna bootstrap --hoist
 ./node_modules/.bin/lerna run start --stream
 ```
 
