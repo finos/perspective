@@ -37,7 +37,7 @@ Features:
 ### From source
 
 You'll need [emscripten](https://github.com/kripken/emscripten) installed and 
-resolvable on your PATH in order to build from source, for example via `emsdk_env.sh`:
+resolveable on your PATH in order to build from source, for example via [`emsdk_env.sh`](https://github.com/juj/emsdk):
 
 ```bash
 source emsdk/emsdk_env.sh
