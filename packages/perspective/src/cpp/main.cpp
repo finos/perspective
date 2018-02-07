@@ -21,6 +21,7 @@
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include <perspective/sym_table.h>
+#include <codecvt>
 
 using namespace perspective;
 using namespace emscripten;
@@ -347,7 +348,10 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
-            auto elem = dcol[i].as<std::string>();
+            std::wstring welem = dcol[i].as<std::wstring>();
+            typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
+            std::wstring_convert<utf16convert_type, wchar_t> converter;
+            std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);
         }
     }
@@ -742,7 +746,9 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
         case DTYPE_STR:
         default:
         {
-            return val(scalar.to_string());
+            typedef std::codecvt_utf8<wchar_t> utf8convert_type;
+            std::wstring_convert<utf8convert_type, wchar_t> converter;
+            return val(converter.from_bytes(scalar.to_string()));
         }
     }
 }

@@ -68,6 +68,10 @@ var meta_4 = {'v' : 'date'};
 
 var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
+var data_6 = [
+    {'x':'š'}
+]
+
 module.exports = (perspective) => {
 
  describe("Execute", function () {
@@ -183,6 +187,11 @@ module.exports = (perspective) => {
             expect([{'v': +(moment(data_5[0]['v'], "MM-DD-YYYY"))}]).toEqual(result2);
         });
 
+        it("Handles utf16", async function () {
+            var table = perspective.table(data_6);
+            let result = await table.view({}).to_json();
+            expect(data_6).toEqual(result);
+        });
 
     });
 
