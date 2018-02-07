@@ -68,7 +68,7 @@ export function detectChrome() {
  *
  * Returns
  * -------
- * An instnace of a SCriptPath object.  Interesting methods on this object
+ * An instance of a ScriptPath object.  Interesting methods on this object
  * include:
  *     fullPath : The complete path of this script.
  *     path : The path (no host).
@@ -87,7 +87,7 @@ export function ScriptPath() {
             callerIndex = Number(i);
             break;
         }
-        pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))):/);
+        pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/);
     }
     this.fullPath = function() {
         return pathParts[1];
