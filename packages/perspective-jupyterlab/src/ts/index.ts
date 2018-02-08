@@ -68,7 +68,8 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         //grab session id 
         let els = this.datasrc.replace('comm://', '').split('/');
         let kernelId = els[0];
-        let channel = els[1];
+        let name = els[1];
+        let channel = els[2];
 
         Session.listRunning().then(sessionModels => {
           for(let i=0; i<sessionModels.length; i++){
@@ -76,7 +77,7 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
             if(sessionModels[i].kernel.id === kernelId){
               Session.connectTo(sessionModels[i]).then((session) => {
 
-                let comm = session.kernel.connectToComm('lantern.live.' + channel);
+                let comm = session.kernel.connectToComm(name + '/' + channel);
                 comm.open('ack');
                 comm.onMsg = (msg: any) => {
                   console.log(msg);  // 'hello'
