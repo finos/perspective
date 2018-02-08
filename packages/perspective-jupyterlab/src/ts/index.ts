@@ -38,6 +38,11 @@ const PSP_CLASS = 'jp-PSPViewer';
 export
 const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
 
+interface PerspectiveSpec {
+  data: string,
+  layout: string
+}
+
 export
 class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   constructor() {
@@ -47,13 +52,24 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   onAfterAttach(msg: Message) : void{
       if (this._loaded) return;
       let psp = (<any>(this.node.querySelector('perspective-viewer')));
+      
+      let layout = JSON.parse(this._lyt);
+      for(let key in layout){
+        if(layout[key]){
+          if(key !== 'view'){
+            psp.setAttribute(key, JSON.stringify(layout[key]));
+          } else {
+            psp.setAttribute(key, layout[key]);
+          }
+        }
+      }
 
-      if(this.datatype === 'static'){
-        psp.load(this.data);
+      if(this._datatype === 'static'){
+        psp.load(this._data);
 
-      } else if (this.datatype === 'ws' || this.datatype === 'wss'){
+      } else if (this._datatype === 'ws' || this._datatype === 'wss'){
         // TODO finish this part eventually
-        let socket = new WebSocket(this.datasrc);
+        let socket = new WebSocket(this._datasrc);
         socket.onopen = function (event: any) {
           // console.log('connected to ' + this.datasrc);
         }.bind(this);
@@ -61,12 +77,12 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
           // console.log(event.data);
         }.bind(this);
 
-      } else if (this.datatype === 'http' || this.datatype === 'https'){
+      } else if (this._datatype === 'http' || this._datatype === 'https'){
         // TODO
 
-      } else if (this.datatype === 'comm'){
+      } else if (this._datatype === 'comm'){
         //grab session id 
-        let els = this.datasrc.replace('comm://', '').split('/');
+        let els = this._datasrc.replace('comm://', '').split('/');
         let kernelId = els[0];
         let name = els[1];
         let channel = els[2];
@@ -94,14 +110,16 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   }
 
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    let data = model.data[MIME_TYPE] as string;
-    try {
-      this.data = JSON.parse(data) as object;
-      this.datatype = 'static';
-      this.datasrc = '';
+    const { data, layout } = model.data[MIME_TYPE] as any|PerspectiveSpec;
+    this._lyt = layout;
 
-      if(Object.keys(this.data).length === 0){
-        this.data = [   
+    try {
+      this._data = JSON.parse(data) as object;
+      this._datatype = 'static';
+      this._datasrc = '';
+
+      if(Object.keys(this._data).length === 0){
+        this._data = [   
             {'x': 1, 'y':'a', 'z': true},
             {'x': 2, 'y':'b', 'z': false},
             {'x': 3, 'y':'c', 'z': true},
@@ -112,17 +130,17 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
     return Promise.resolve();
     } catch (e) {
-      this.datasrc = data;
+      this._datasrc = data;
       if(data.indexOf('ws://') !== -1){
-        this.datatype = 'ws';
+        this._datatype = 'ws';
       } else if(data.indexOf('wss://') !== -1){
-        this.datatype = 'wss';
+        this._datatype = 'wss';
       } else if(data.indexOf('http://') !== -1){
-        this.datatype = 'http';
+        this._datatype = 'http';
       } else if(data.indexOf('https://') !== -1){
-        this.datatype = 'http';
+        this._datatype = 'http';
       } else if(data.indexOf('comm://') !== -1){
-        this.datatype = 'comm';
+        this._datatype = 'comm';
       } else{
         throw e;
       }
@@ -130,9 +148,10 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
     }
   }
 
-  data: object;
-  datatype: string;
-  datasrc: string;
+  private _data: object;
+  private _datatype: string;
+  private _datasrc: string;
+  private _lyt: string;
   private _loaded: boolean;
 }
 
