@@ -250,6 +250,8 @@ export function draw(mode) {
             } else {
                 type = 'bubble';
             }
+        } else if (mode === 'heatmap') {
+            type = 'heatmap';
         }
 
         let new_radius = 0;
@@ -397,6 +399,51 @@ export function draw(mode) {
                     labels: {overflow: 'justify'}
                 }
             });
+        } else if (mode == 'heatmap') {
+            // Need to slightly repivot data
+            let data = [];
+            for (var i=0; i<series.length; ++i) {
+                for (var j=0; j<series[i].data.length; ++j) {
+                    data.push([j, i, series[i].data[j]]);
+                }
+            }
+            Object.assign(config, {
+                chart: {
+                    marginRight: 150
+                },
+                series: [{
+                        data: data,
+                        nullColor: '#999'
+                }],
+                colorAxis: {
+                    min: colorRange[0],
+                    max: colorRange[1],
+                    minColor: '#3060cf',
+                    maxColor: '#c4463a',
+                    stops: [
+                        [0, '#3060cf'],
+                        [0.5, '#fffbbc'],
+                        [0.9, '#c4463a'],
+                        [1, '#c4463a']
+                    ],
+                    startOnTick: false,
+                    endOnTick: false,
+                },
+                xAxis: {
+                    categories: top.categories,
+                    labels: {
+                        enabled: (top.categories.length > 0),
+                        padding: 0,
+                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                    },
+                },
+                yAxis: {
+                    categories: series.map(function (s) { return s.name; }),
+                    title: null,
+                    reversed: true,
+                    labels: {overflow: 'justify'}
+                }
+            });
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
                 colors: colors,
@@ -537,6 +584,18 @@ global.registerPlugin("horizontal", {
     resize: resize, 
     initial: {
         "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("heatmap", {
+    name: "Heatmap",
+    create: draw("heatmap"),
+    resize: resize,
+    initial: {
+        "type": "number",
         "count": 1
     },
     selectMode: "select",
