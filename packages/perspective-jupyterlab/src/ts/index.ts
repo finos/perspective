@@ -55,10 +55,10 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         // TODO finish this part eventually
         let socket = new WebSocket(this.datasrc);
         socket.onopen = function (event: any) {
-          console.log('connected to ' + this.datasrc);
+          // console.log('connected to ' + this.datasrc);
         }.bind(this);
         socket.onmessage = function (event: any) {
-          console.log(event.data);
+          // console.log(event.data);
         }.bind(this);
 
       } else if (this.datatype === 'http' || this.datatype === 'https'){
@@ -73,20 +73,17 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
         Session.listRunning().then(sessionModels => {
           for(let i=0; i<sessionModels.length; i++){
-            console.log(sessionModels[i]);
             if(sessionModels[i].kernel.id === kernelId){
               Session.connectTo(sessionModels[i]).then((session) => {
 
                 let comm = session.kernel.connectToComm(name + '/' + channel);
                 comm.open('ack');
                 comm.onMsg = (msg: any) => {
-                  console.log(msg);  // 'hello'
                   let dat = msg['content']['data'];
                   let tmp = JSON.parse(dat);
                   psp.update(tmp);
                 };
                 comm.onClose = (msg: any) => {
-                  console.log(msg);  // 'bye'
                 };
 
               });
@@ -98,7 +95,6 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     let data = model.data[MIME_TYPE] as string;
-    console.log(data);
     try {
       this.data = JSON.parse(data) as object;
       this.datatype = 'static';
