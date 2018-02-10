@@ -11,7 +11,7 @@
     "build/*"
   ],
   "scripts": {
-    "compile": "mkdir -p build build/wasm_async build/wasm_sync build/asmjs && WASM_OPTIMIZE=1 (cd build/; emcmake cmake ../; emmake make -j8; cd ..)",
+    "compile": "mkdir -p build build/wasm_async build/wasm_sync build/asmjs && (cd build/; emcmake cmake ../; emmake make -j8; cd ..)",
     "remove": "find build \\( -name \"CMake*\" -o -name \"Makefile\" -o -name \"cmake_install.cmake\" -o -name \"compile_commands.json\" -o -name \"psp.js\" \\) -d -exec rm -r \"{}\" \\;",
     "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
     "start": "npm run compile && (npm run perspective & npm run compile_test & npm run compile_node & wait)",

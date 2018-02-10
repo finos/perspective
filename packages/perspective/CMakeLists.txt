@@ -26,12 +26,7 @@ set(EXTENDED_FLAGS " \
 	-s EXPORTED_FUNCTIONS=\"['_main']\" \
 ")
 
-if(DEFINED ENV{WASM_OPTIMIZE})
-    set(OPT_FLAGS " \
-		-O3 \
-		-g0 \
-	")
-else()
+if(DEFINED ENV{WASM_DEBUG})
 	set(OPT_FLAGS " \
 		-Os \
 		-g4 \
@@ -39,6 +34,11 @@ else()
 		-s DISABLE_EXCEPTION_CATCHING=0 \
 	    -s ASSERTIONS=2 \
 		-s DEMANGLE_SUPPORT=1 \
+	")
+else()
+    set(OPT_FLAGS " \
+		-O3 \
+		-g0 \
 	")
 endif()
 

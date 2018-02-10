@@ -3,7 +3,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 
 const plugins = []
 
-if (!process.env.PSP_NO_MINIFY) {
+if (!process.env.PSP_NO_MINIFY && !process.env.WASM_DEBUG) {
     plugins.push(new UglifyJSPlugin({
         sourceMap: true,
         mangle: false,
@@ -13,7 +13,7 @@ if (!process.env.PSP_NO_MINIFY) {
     }));
 }
 
-module.exports = function() {
+module.exports = function () {
     return {
         plugins: plugins,
         devtool: 'source-map',
