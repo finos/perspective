@@ -413,6 +413,33 @@ export function draw(mode) {
             let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
             colorRange = [-cmax, cmax];
 
+            // Calculate ylabel nesting
+            let ylabels = series.map(function (s) { return s.name.split(','); })
+            let ytop = {name: null, depth: 0, categories: []};
+
+            let maxdepth = ylabels[0].length;
+
+            for (let i=0; i<ylabels.length; ++i) {
+                let ylabel = ylabels[i];
+                let parent = ytop;
+
+                for (let depth=0; depth<ylabel.length; ++depth) {
+                    let label = ylabel[depth]
+                    if (depth === maxdepth - 1) {
+                        parent.categories.push(label);
+                    } else {
+                        let l = parent.categories.length;
+                        if (l > 0 && parent.categories[l-1].name == label) {
+                            parent = parent.categories[l-1];
+                        } else {
+                            let cat = {name: label, depth: depth+1, categories: []};
+                            parent.categories.push(cat);
+                            parent = cat;
+                        }
+                    }
+                }
+            }
+
             Object.assign(config, {
                 series: [{
                     name: null,
@@ -442,12 +469,17 @@ export function draw(mode) {
                     },
                 },
                 yAxis: {
-                    categories: series.map(function (s) { return s.name; }),
+                    categories: ytop.categories,
                     title: null,
+                    tickWidth: 1,
                     reversed: true,
-                    labels: {overflow: 'justify'}
+                    labels: {
+                        padding: 0,
+                        step: 1
+                    }
                 }
             });
+            config['chart']['marginRight'] = 0;
             delete config["legend"]["width"];
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
