@@ -479,7 +479,7 @@ export function draw(mode) {
                     }
                 }
             });
-            config['chart']['marginRight'] = 0;
+            config['chart']['marginRight'] = 75;
             delete config["legend"]["width"];
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
