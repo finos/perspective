@@ -21,7 +21,8 @@ set(EXTENDED_FLAGS " \
 	--memory-init-file 1 \
 	-s NO_EXIT_RUNTIME=1 \
 	-s NO_FILESYSTEM=1 \
-        -s NO_DYNAMIC_EXECUTION=1 \
+    -s NO_DYNAMIC_EXECUTION=1 \
+	-s ALLOW_MEMORY_GROWTH=1 \
 	-s EXPORTED_FUNCTIONS=\"['_main']\" \
 ")
 
@@ -29,7 +30,6 @@ if(DEFINED ENV{WASM_OPTIMIZE})
     set(OPT_FLAGS " \
 		-O3 \
 		-g0 \
-		-s ALLOW_MEMORY_GROWTH=1 \
 	")
 else()
 	set(OPT_FLAGS " \
@@ -37,30 +37,20 @@ else()
 		-g4 \
 	    -s SAFE_HEAP=1 \
 		-s DISABLE_EXCEPTION_CATCHING=0 \
-		-s ALLOW_MEMORY_GROWTH=1 \
 	    -s ASSERTIONS=2 \
 		-s DEMANGLE_SUPPORT=1 \
 	")
 endif()
 
-if(DEFINED ENV{WASM_BUILD})
-	if(DEFINED ENV{SYNC_BUILD})
-		set(MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
-	else()
-		set(MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=1 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
-	endif()
-else()
-	set(MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"asmjs\"' -Wno-almost-asm")
-endif()
+set(SYNC_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
+set(ASYNC_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=1 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
+set(ASMJS_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"asmjs\"' -Wno-almost-asm")
 
 set(CMAKE_C_FLAGS " \
 	${CMAKE_C_FLAGS} \
 	${EXTENDED_FLAGS} \
 	${OPT_FLAGS} \
-	${MODE_FLAGS} \
 ")
-
-set(CMAKE_CXX_FLAGS " -std=c++0x ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 
 set (SOURCE_FILES
 src/cpp/aggregate.cpp
@@ -96,7 +86,6 @@ src/cpp/gnode.cpp
 src/cpp/gnode_state.cpp
 src/cpp/histogram.cpp
 src/cpp/logtime.cpp
-src/cpp/main.cpp
 src/cpp/mask.cpp
 src/cpp/min_max.cpp
 src/cpp/multi_sort.cpp
@@ -133,4 +122,28 @@ src/cpp/update_task.cpp
 src/cpp/vocab.cpp
 )
 
-add_executable(psp ${SOURCE_FILES})
+set(CMAKE_CXX_FLAGS " -std=c++0x ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+
+add_library(psp ${SOURCE_FILES})
+set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
+
+add_executable(perspective.async src/cpp/main.cpp)
+target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
+set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
+set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "wasm_async/")
+set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp")
+
+add_executable(perspective.sync src/cpp/main.cpp)
+target_link_libraries(perspective.sync psp "${SYNC_MODE_FLAGS}")
+set_target_properties(perspective.sync PROPERTIES COMPILE_FLAGS "${SYNC_MODE_FLAGS}")
+set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "wasm_sync/")
+set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp")
+add_dependencies(perspective.sync perspective.async)
+
+add_executable(perspective.asm src/cpp/main.cpp)
+target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
+set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
+set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "asmjs/")
+set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp")
+add_dependencies(perspective.asm perspective.sync)
+
