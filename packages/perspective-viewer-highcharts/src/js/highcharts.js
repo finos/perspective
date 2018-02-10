@@ -402,29 +402,33 @@ export function draw(mode) {
         } else if (mode == 'heatmap') {
             // Need to slightly repivot data
             let data = [];
-            for (var i=0; i<series.length; ++i) {
-                for (var j=0; j<series[i].data.length; ++j) {
-                    data.push([j, i, series[i].data[j]]);
+            for (let i=0; i<series[0].data.length; ++i) {
+                for (let j=0; j<series.length; ++j) {
+                    let val = series[j].data[i];
+                    data.push([i, j, val]);
+                    colorRange[0] = Math.min(colorRange[0], val);
+                    colorRange[1] = Math.max(colorRange[1], val);
                 }
             }
+            let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+            colorRange = [-cmax, cmax];
+
             Object.assign(config, {
-                chart: {
-                    marginRight: 150
-                },
                 series: [{
-                        data: data,
-                        nullColor: '#999'
+                    name: null,
+                    data: data,
+                    nullColor: '#999'
                 }],
                 colorAxis: {
                     min: colorRange[0],
                     max: colorRange[1],
-                    minColor: '#3060cf',
-                    maxColor: '#c4463a',
+                    minColor: '#c4463a',
+                    maxColor: '#3060cf',
                     stops: [
-                        [0, '#3060cf'],
+                        [0, '#c4463a'],
+                        [0.1, '#c4463a'],
                         [0.5, '#fffbbc'],
-                        [0.9, '#c4463a'],
-                        [1, '#c4463a']
+                        [1, '#3060cf']
                     ],
                     startOnTick: false,
                     endOnTick: false,
@@ -444,6 +448,7 @@ export function draw(mode) {
                     labels: {overflow: 'justify'}
                 }
             });
+            delete config["legend"]["width"];
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
                 colors: colors,
