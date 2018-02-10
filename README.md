@@ -53,7 +53,7 @@ npm install
 If everything is successful, you should find a few built example assets in the 
 `packages/perspective-examples/build` directory:
 
-You can run a simple test server on port 8081 by running:
+You can run a simple test server on port 8080 by running:
 
 ```bash
 ./node_modules/.bin/lerna run host --stream
