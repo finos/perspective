@@ -253,6 +253,21 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
         val data = dcol["data"];
         // arrow packs 64 bit into two 32 bit ints
         arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows*2);
+
+        t_str unit = dcol["unit"].as<t_str>();
+        if (unit != "MILLISECOND") {
+            // Slow path - need to convert each value
+            t_int64 factor = 1;
+            if (unit == "NANOSECOND") {
+                factor = 1e6;
+            } else if (unit == "MICROSECOND") {
+                factor = 1e3;
+            }
+            for (auto i = 0; i < nrows; ++i)
+            {
+                col->set_nth<t_int64>(i, *(col->get_nth<t_int64>(i))/factor);
+            }
+        }
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
