@@ -53,7 +53,7 @@ function subscribe(method, cmd) {
         if (this._worker.initialized.value) {
             this._worker.postMessage(msg);
         } else {
-            this._worker.messages.push(msg);
+            this._worker.messages.push(() => this._worker.postMessage(msg));
         }
     }
 }
@@ -74,7 +74,7 @@ function async_queue(method, cmd) {
             if (this._worker.initialized.value) {
                 this._worker.postMessage(msg);
             } else {
-                this._worker.messages.push(msg);
+                this._worker.messages.push(() => this._worker.postMessage(msg));
             }
         }.bind(this));
     };
@@ -93,7 +93,7 @@ function view(table_name, worker, config) {
     if (this._worker.initialized.value) {
         this._worker.postMessage(msg);
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(() => this._worker.postMessage(msg));
     }
 }
 
@@ -127,7 +127,13 @@ function table(worker, data, options) {
             this._worker.postMessage(msg);
         }
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(() => {
+            if (this._worker.transferable && data instanceof ArrayBuffer) {
+                this._worker.postMessage(msg, [data]);
+            } else {
+                this._worker.postMessage(msg);
+            }
+        });
     }
 }
 
@@ -152,7 +158,7 @@ table.prototype.execute = function (f) {
     if (this._worker.initialized.value) {
         this._worker.postMessage(msg);
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(() => this._worker.postMessage(msg));
     }
 }
 
@@ -268,7 +274,7 @@ worker.prototype._handle = function(e) {
         }
         for (var m in this._worker.messages) {
             if (this._worker.messages.hasOwnProperty(m)) {
-                this._worker.postMessage(this._worker.messages[m]);
+                this._worker.messages[m]();
             }
         }
         this._worker.initialized.value = true;
