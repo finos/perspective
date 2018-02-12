@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "hypergrid": "webpack --config src/config/hypergrid.plugin.config.js",
-    "start": "npm run hypergrid && npm run compile_test",
+    "start": "npm run hypergrid",
     "compile_test": "cp test/html/* build",
     "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"

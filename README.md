@@ -77,6 +77,13 @@ brew install cmake
 brew install boost
 ```
 
+#### Options
+
+The build script respects a few environment flags:
+
+* `PSP_DEBUG` will run a debug build of the C++ source.
+* `PSP_NO_MINIFY` will skip Javascript minification.
+
 ### From NPM
 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 

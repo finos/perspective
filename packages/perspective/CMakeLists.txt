@@ -26,7 +26,7 @@ set(EXTENDED_FLAGS " \
 	-s EXPORTED_FUNCTIONS=\"['_main']\" \
 ")
 
-if(DEFINED ENV{WASM_DEBUG})
+if(DEFINED ENV{PSP_DEBUG})
 	set(OPT_FLAGS " \
 		-Os \
 		-g4 \
@@ -130,20 +130,20 @@ set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 add_executable(perspective.async src/cpp/main.cpp)
 target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
-set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "wasm_async/")
+set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../build/wasm_async/")
 set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp")
 
 add_executable(perspective.sync src/cpp/main.cpp)
 target_link_libraries(perspective.sync psp "${SYNC_MODE_FLAGS}")
 set_target_properties(perspective.sync PROPERTIES COMPILE_FLAGS "${SYNC_MODE_FLAGS}")
-set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "wasm_sync/")
+set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../build/wasm_sync/")
 set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp")
 add_dependencies(perspective.sync perspective.async)
 
 add_executable(perspective.asm src/cpp/main.cpp)
 target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
 set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
-set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "asmjs/")
+set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../build/asmjs/")
 set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp")
 add_dependencies(perspective.asm perspective.sync)
 

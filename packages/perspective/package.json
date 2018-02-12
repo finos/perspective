@@ -11,15 +11,14 @@
     "build/*"
   ],
   "scripts": {
-    "compile": "mkdir -p build build/wasm_async build/wasm_sync build/asmjs && (cd build/; emcmake cmake ../; emmake make -j8; cd ..)",
-    "remove": "find build \\( -name \"CMake*\" -o -name \"Makefile\" -o -name \"cmake_install.cmake\" -o -name \"compile_commands.json\" -o -name \"psp.js\" \\) -d -exec rm -r \"{}\" \\;",
+    "compile": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs && (cd obj/; emcmake cmake ../; emmake make -j8; cd ..)",
     "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
-    "start": "npm run compile && (npm run perspective & npm run compile_test & npm run compile_node & wait)",
+    "start": "npm run compile && (npm run perspective & npm run compile_node & wait)",
     "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config test/config/test_browser.config.js & webpack --config test/config/test_node.config.js & webpack --config test/config/benchmark.config.js & wait",
     "compile_node": "webpack --config src/config/perspective.node.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
     "test": "jest --runInBand 2>&1",
-    "clean": "find build -mindepth 1 -delete"
+    "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
   },
   "jest": {
     "roots": [
