@@ -3,6 +3,7 @@ const common = require('@jpmorganchase/perspective-common/common.config.js');
 
 module.exports = Object.assign({}, common(), {
     entry: ["babel-polyfill", './src/js/perspective.asmjs.js'],
+    plugins: [],
     output: {
         filename: 'perspective.js',
         path: path.resolve(__dirname, '../../build/asmjs')

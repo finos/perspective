@@ -4,6 +4,7 @@ const common = require('@jpmorganchase/perspective-common/common.config.js');
 module.exports = Object.assign({}, common(), {
     entry: './test/js/perspective.spec.js',
     target: "node",
+    plugins: [],
     node: {},
     output: {
         filename: 'perspective.spec.js',
