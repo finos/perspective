@@ -121,7 +121,11 @@ function table(worker, data, options) {
         options: options
     }
     if (this._worker.initialized.value) {
-        this._worker.postMessage(msg);
+        if (this._worker.transferable && data instanceof ArrayBuffer) {
+            this._worker.postMessage(msg, [data]);
+        } else {
+            this._worker.postMessage(msg);
+        }
     } else {
         this._worker.messages.push(msg);
     }
@@ -169,6 +173,7 @@ function XHRWorker(url, ready, scope) {
 function worker() {
     this._worker = {
         initialized: {value: false},
+        transferable: false,
         msg_id: 0,
         handlers: {},
         messages: []
@@ -177,6 +182,16 @@ function worker() {
         this._start_same_origin();
     } else {
         this._start_cross_origin();
+    }
+    this._detect_transferable();
+}
+
+worker.prototype._detect_transferable = function() {
+    var ab = new ArrayBuffer(1);
+    this._worker.postMessage(ab, [ab]);
+    this._worker.transferable = (ab.byteLength === 0);
+    if (!this._worker.transferable) {
+        console.warn('Transferables are not supported in your browser!');
     }
 }
 
