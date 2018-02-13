@@ -78,8 +78,8 @@ module.exports = (perspective) => {
         });
 
         it("Arrow `update()`s", async function () {
-            var table = perspective.table(arrow);
-            table.update(arrow);
+            var table = perspective.table(arrow.slice());
+            table.update(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result.concat(arrow_result)).toEqual(result);
@@ -166,21 +166,21 @@ module.exports = (perspective) => {
         });
 
         it("Arrow with {index: 'i64'} (int)", async function () {
-            var table = perspective.table(arrow, {index: 'i64'});
+            var table = perspective.table(arrow.slice(), {index: 'i64'});
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);
         });
 
         it("Arrow with {index: 'char'} (char)", async function () {
-            var table = perspective.table(arrow, {index: 'char'});
+            var table = perspective.table(arrow.slice(), {index: 'char'});
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_indexed_result).toEqual(result);
         });
 
         it("Arrow with {index: 'dict'} (dict)", async function () {
-            var table = perspective.table(arrow, {index: 'dict'});
+            var table = perspective.table(arrow.slice(), {index: 'dict'});
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_indexed_result).toEqual(result);
