@@ -111,7 +111,7 @@ module.exports = (perspective) => {
         });
 
         it("Arrow constructor", async function () {
-            var table = perspective.table(arrow);
+            var table = perspective.table(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);

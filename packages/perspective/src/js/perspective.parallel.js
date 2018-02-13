@@ -120,20 +120,17 @@ function table(worker, data, options) {
         data: data,
         options: options
     }
-    if (this._worker.initialized.value) {
+    let post = () => {
         if (this._worker.transferable && data instanceof ArrayBuffer) {
             this._worker.postMessage(msg, [data]);
         } else {
             this._worker.postMessage(msg);
         }
+    };
+    if (this._worker.initialized.value) {
+        post();
     } else {
-        this._worker.messages.push(() => {
-            if (this._worker.transferable && data instanceof ArrayBuffer) {
-                this._worker.postMessage(msg, [data]);
-            } else {
-                this._worker.postMessage(msg);
-            }
-        });
+        this._worker.messages.push(post);
     }
 }
 
@@ -145,9 +142,34 @@ table.prototype.schema = async_queue('schema', 'table_method');
 
 table.prototype.size = async_queue('size', 'table_method');
 
-table.prototype.update = async_queue('update', 'table_method');
-
 table.prototype.columns = async_queue('columns', 'table_method');
+
+
+table.prototype.update = function(data) {
+    return new Promise( (resolve, reject) => {
+        this._worker.handlers[++this._worker.msg_id] = {resolve, reject};
+        var msg = {
+            id: this._worker.msg_id,
+            name: this._name,
+            cmd: 'table_method',
+            method: 'update',
+            args: [data],
+        };
+        let post = () => {
+            if (this._worker.transferable && data instanceof ArrayBuffer) {
+                this._worker.postMessage(msg, [data]);
+            } else {
+                this._worker.postMessage(msg);
+            }
+        };
+        if (this._worker.initialized.value) {
+            post();
+        } else {
+            this._worker.messages.push(post);
+        }
+    });
+}
+
 
 table.prototype.execute = function (f) {
     var msg = {
