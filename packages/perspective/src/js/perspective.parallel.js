@@ -120,20 +120,17 @@ function table(worker, data, options) {
         data: data,
         options: options
     }
-    if (this._worker.initialized.value) {
+    let post = () => {
         if (this._worker.transferable && data instanceof ArrayBuffer) {
             this._worker.postMessage(msg, [data]);
         } else {
             this._worker.postMessage(msg);
         }
+    };
+    if (this._worker.initialized.value) {
+        post();
     } else {
-        this._worker.messages.push(() => {
-            if (this._worker.transferable && data instanceof ArrayBuffer) {
-                this._worker.postMessage(msg, [data]);
-            } else {
-                this._worker.postMessage(msg);
-            }
-        });
+        this._worker.messages.push(post);
     }
 }
 
@@ -158,20 +155,17 @@ table.prototype.update = function(data) {
             method: 'update',
             args: [data],
         };
-        if (this._worker.initialized.value) {
+        let post = () => {
             if (this._worker.transferable && data instanceof ArrayBuffer) {
                 this._worker.postMessage(msg, [data]);
             } else {
                 this._worker.postMessage(msg);
             }
+        };
+        if (this._worker.initialized.value) {
+            post();
         } else {
-            this._worker.messages.push(() => {
-                if (this._worker.transferable && data instanceof ArrayBuffer) {
-                    this._worker.postMessage(msg, [data]);
-                } else {
-                    this._worker.postMessage(msg);
-                }
-            });
+            this._worker.messages.push(post);
         }
     });
 }
