@@ -30,7 +30,7 @@ import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 
 export
-const MIME_TYPE = 'application/psp';
+const MIME_TYPE = 'application/psp+json';
 
 export
 const PSP_CLASS = 'jp-PSPViewer';
