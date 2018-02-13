@@ -48,12 +48,19 @@ var meta_3 = {
 import arrow from "../arrow/test-null.arrow";
 
 var arrow_result = [
-    {"f32": 1.5, "f64": 1.5, "i64": 1, "i32": 1, "i16": 1, "i8": 1, "bool": true,  "char": "a", "dict": "a", "datetime": +(new Date("2018-01-25"))},
-    {"f32": 2.5, "f64": 2.5, "i64": 2, "i32": 2, "i16": 2, "i8": 2, "bool": false, "char": "b", "dict": "b", "datetime": +(new Date("2018-01-26"))},
-    {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c", "datetime": +(new Date("2018-01-27"))},
-    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d", "datetime": +(new Date("2018-01-28"))},
-    {"f32": null, "f64": null, "i64": null, "i32": null, "i16": null, "i8": null, "bool": null,  "char": null, "dict": null, "datetime": null}
+    {"f32": 1.5, "f64": 1.5, "i64": 1, "i32": 1, "i16": 1, "i8": 1, "bool": true,  "char": "a", "dict": "a",
+     "datetime(ms)": +(new Date("2018-01-25")), "datetime(us)": +(new Date("2018-01-25")), "datetime(ns)": +(new Date("2018-01-25"))},
+    {"f32": 2.5, "f64": 2.5, "i64": 2, "i32": 2, "i16": 2, "i8": 2, "bool": false, "char": "b", "dict": "b",
+     "datetime(ms)": +(new Date("2018-01-26")), "datetime(us)": +(new Date("2018-01-26")), "datetime(ns)": +(new Date("2018-01-26"))},
+    {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c",
+     "datetime(ms)": +(new Date("2018-01-27")), "datetime(us)": +(new Date("2018-01-27")), "datetime(ns)": +(new Date("2018-01-27"))},
+    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d",
+     "datetime(ms)": +(new Date("2018-01-28")), "datetime(us)": +(new Date("2018-01-28")), "datetime(ns)": +(new Date("2018-01-28"))},
+    {"f32": null, "f64": null, "i64": null, "i32": null, "i16": null, "i8": null, "bool": null,  "char": null, "dict": null,
+     "datetime(ms)": null, "datetime(us)": null, "datetime(ns)": null}
 ];
+
+var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
 var dt = new Date();
 var data_4 = [
@@ -115,6 +122,29 @@ module.exports = (perspective) => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);
+        });
+
+        it("Arrow schema", async function () {
+            // This only works for non parallel
+            var table = perspective.table(arrow);
+            let schema, stypes;
+            let types = [];
+            try{
+                schema = table.gnode.get_tblschema();
+                stypes = schema.types();
+
+                for (let i = 0; i < stypes.size(); i ++) {
+                    types.push(stypes.get(i).value);
+                }
+                expect(arrow_psp_internal_schema).toEqual(types);
+            } finally {
+                if (schema) {
+                    schema.delete();
+                }
+                if (stypes) {
+                    stypes.delete();
+                }
+            }
         });
 
         it("CSV constructor", async function () {
