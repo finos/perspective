@@ -17,6 +17,7 @@ const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
 const update_tests = require("./updates.js");
 const filter_tests = require("./filters.js");
+const internal_tests = require('./internal.js');
 
 const RUNTIMES = {
     'WASM': perspective_wasm,
@@ -35,6 +36,9 @@ describe("perspective.js", function() {
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
 
+            if (mode !== 'Parallel') {
+                internal_tests(RUNTIMES[mode]);
+            }
         });
 
     });

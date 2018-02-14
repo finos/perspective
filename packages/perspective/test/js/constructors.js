@@ -124,29 +124,6 @@ module.exports = (perspective) => {
             expect(arrow_result).toEqual(result);
         });
 
-        it("Arrow schema", async function () {
-            // This only works for non parallel
-            var table = perspective.table(arrow);
-            let schema, stypes;
-            let types = [];
-            try{
-                schema = table.gnode.get_tblschema();
-                stypes = schema.types();
-
-                for (let i = 0; i < stypes.size(); i ++) {
-                    types.push(stypes.get(i).value);
-                }
-                expect(arrow_psp_internal_schema).toEqual(types);
-            } finally {
-                if (schema) {
-                    schema.delete();
-                }
-                if (stypes) {
-                    stypes.delete();
-                }
-            }
-        });
-
         it("CSV constructor", async function () {
             var table = perspective.table(csv);
             var view = table.view();
