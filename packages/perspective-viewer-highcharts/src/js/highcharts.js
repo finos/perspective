@@ -255,6 +255,8 @@ export function draw(mode) {
         var type = 'scatter';
         if (mode.indexOf('bar') > -1) {
             type = 'column';
+        } else if (mode == 'treemap') {
+            type = 'treemap';
         } else if (mode === 'scatter') {
             if (aggregates.length <= 3) {
                 type = 'scatter';
@@ -543,6 +545,49 @@ export function draw(mode) {
             });
             config['chart']['marginRight'] = 75;
             delete config["legend"]["width"];
+        } else if (mode === "treemap") {
+            let data = [];
+            let agg = aggregates[0]['column'];
+
+            for (let row of js.slice(1)) {
+                let rp = row['__ROW_PATH__'];
+                let id = rp.join("_");
+                let name = rp.slice(-1)[0];
+                let parent = rp.slice(0, -1).join("_");
+                let value  = row[agg];
+
+                data.push({
+                    id: id, name: name, value: value, parent: parent}
+                );
+            }
+            let levels = [];
+            for (let i = 0; i < row_pivots.length; i++) {
+                levels.push({
+                    level: i+1,
+                    borderWidth: (row_pivots.length - i)*2,
+                    dataLabels: {
+                        enabled: true, //(i == 0)?true:false,
+                        allowOverlap: true,
+                        //align: 'left',
+                        //verticalAlign: 'top',
+                        style: {
+                            color: (i === 0)?'#333333':'#666666',
+                            fontSize: `${14 - (i * 2)}px`,
+                            textOutline: null
+                        }
+                    },
+                });
+            }
+            Object.assign(config, {
+                series: [{
+                    layoutAlgorithm: 'squarified',
+                    allowDrillToNode: true,
+                    alternateStartingDirection: true,
+                    data: data,
+                    levels: levels
+                }],
+            });
+            config['plotOptions']['series']['borderWidth'] = 2;
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
                 colors: colors,
@@ -717,3 +762,14 @@ global.registerPlugin("scatter", {
     delete: delete_chart
 });
 
+global.registerPlugin("treemap", {
+    name: "Treemap", 
+    create: draw('treemap'), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "toggle",
+    delete: delete_chart
+});

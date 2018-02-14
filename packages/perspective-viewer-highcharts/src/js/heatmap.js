@@ -11,6 +11,7 @@ import highcharts from 'highcharts';
 import highchartsMore from 'highcharts-more';
 import heatmap from 'highcharts/modules/heatmap';
 import boost from 'highcharts/modules/boost';
+import treemap from 'highcharts/modules/treemap';
 import grouped_categories from 'highcharts-grouped-categories';
 import chroma from 'chroma-js';
 
@@ -27,6 +28,7 @@ let axisProto = Highcharts.Axis.prototype,
 
 highchartsMore(highcharts);
 heatmap(highcharts);
+treemap(highcharts);
 grouped_categories(highcharts);
 boost(highcharts);
 
