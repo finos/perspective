@@ -547,17 +547,43 @@ export function draw(mode) {
             delete config["legend"]["width"];
         } else if (mode === "treemap") {
             let data = [];
-            let agg = aggregates[0]['column'];
+            let size = aggregates[0]['column'];
+            let color, colorAxis;
+            if (aggregates.length >= 2) {
+                color = aggregates[1]['column'];
+
+                let colorvals = series[1]['data'];
+                let cmax = -Infinity;
+                for (let i = 0; i< colorvals.length; ++i) {
+                    cmax = Math.max(cmax, colorvals[i]);
+                }
+                colorRange = [-cmax, cmax];
+                colorAxis = {
+                    min: colorRange[0],
+                    max: colorRange[1],
+                    minColor: '#c4463a',
+                    maxColor: '#3060cf',
+                    stops: [
+                        [0, '#c4463a'],
+                        [0.1, '#c4463a'],
+                        [0.5, '#fffbbc'],
+                        [1, '#3060cf']
+                    ],
+                    startOnTick: false,
+                    endOnTick: false,
+                }
+            }
 
             for (let row of js.slice(1)) {
                 let rp = row['__ROW_PATH__'];
                 let id = rp.join("_");
                 let name = rp.slice(-1)[0];
                 let parent = rp.slice(0, -1).join("_");
-                let value  = row[agg];
+                let value  = row[size];
+                let colorValue = row[color];
 
                 data.push({
-                    id: id, name: name, value: value, parent: parent}
+                    id: id, name: name, value: value, colorValue: colorValue, parent: parent}
                 );
             }
             let levels = [];
@@ -586,8 +612,11 @@ export function draw(mode) {
                     data: data,
                     levels: levels
                 }],
+                colorAxis: colorAxis
             });
             config['plotOptions']['series']['borderWidth'] = 2;
+            config['chart']['marginRight'] = 75;
+            delete config["legend"]["width"];
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
                 colors: colors,
@@ -768,7 +797,7 @@ global.registerPlugin("treemap", {
     resize: resize, 
     initial: {
         "type": "number",    
-        "count": 1
+        "count": 2
     },
     selectMode: "toggle",
     delete: delete_chart
