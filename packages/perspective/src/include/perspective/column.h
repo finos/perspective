@@ -176,6 +176,8 @@ class PERSPECTIVE_EXPORT t_column
     t_lstore* _get_extents_lstore();
     t_lstore* _get_valid_lstore();
 
+    t_vocab* _get_vocab();
+
     const t_lstore* _get_data_lstore() const;
     const t_lstore* _get_vlendata_lstore() const;
     const t_lstore* _get_extents_lstore() const;

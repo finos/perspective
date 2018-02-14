@@ -135,7 +135,7 @@ t_vocab::init(t_bool from_recipe)
     {
         rebuild_map();
     }
-    get_interned("");
+    //get_interned("");
 }
 
 t_uindex
