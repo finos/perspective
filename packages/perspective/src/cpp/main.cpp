@@ -147,10 +147,15 @@ _get_aggspecs(val j_aggs)
 namespace arrow {
 
     void
-    vecFromTypedArray(const val &typedArray, void* data, t_int32 length) {
+    vecFromTypedArray(const val &typedArray, void* data, t_int32 length, const char* destType = nullptr) {
         val memory = val::module_property("buffer");
-        val memoryView = typedArray["constructor"].new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
-        memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
+        if (destType == nullptr) {
+            val memoryView = typedArray["constructor"].new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
+            memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
+        } else {
+            val memoryView = val::global(destType).new_(memory, reinterpret_cast<std::uintptr_t>(data), length);
+            memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
+        }
     }
 
     void
@@ -170,14 +175,10 @@ namespace arrow {
 
     template<typename T>
     void
-    fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col)
+    fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col, const char* destType)
     {
-        t_int32 ksize = vkeys["length"].as<t_int32>();
-        std::vector<T> keys;
-        keys.reserve(ksize);
-        keys.resize(ksize);
-        vecFromTypedArray(vkeys, keys.data(), ksize);
 
+        // Copy out dictionary encoded data
         val values = dcol["data"]["values"];
         val vdata = values["data"];
         t_int32 vsize = vdata["length"].as<t_int32>();
@@ -193,20 +194,21 @@ namespace arrow {
         offsets.resize(osize);
         vecFromTypedArray(voffsets, offsets.data(), osize);
 
+        t_vocab* vocab = col->_get_vocab();
         t_str elem;
 
-        for (t_int32 i = 0; i < nrows; ++i) {
-            T idx = keys[i];
-
-            if (idx == -1) {
-                col->clear(i);
-            } else {
-                t_int32 bidx = offsets[idx];
-                std::size_t s = offsets[idx+1] - bidx;
-                elem.assign(reinterpret_cast<char*>(data.data())+bidx, s);
-                col->set_nth(i, elem);
-            }
+        t_int32 dsize = dcol["data"]["length"].as<t_int32>();
+        for (t_int32 i = 0; i < dsize; ++i) {
+            t_int32 bidx = offsets[i];
+            std::size_t es = offsets[i+1] - bidx;
+            assert(es > 0);
+            elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
+            t_uint32 idx = vocab->get_interned(elem);
+            assert(idx == i);
         }
+
+        // Now process index keys into dictionary
+        arrow::vecFromTypedArray(vkeys, col->get_nth<T>(0), nrows, destType);
     }
 }
 
@@ -313,16 +315,18 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
         if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
             val vkeys = dcol["keys"]["data"];
 
+            // Perspective stores string indices in a 32bit unsigned array
+            // Javascript's typed arrays handle copying from various bitwidth arrays properly
             auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
             switch (width) {
                 case 1:
-                    arrow::fill_col_dict<t_int8>(nrows, dcol, vkeys, col);
+                    arrow::fill_col_dict<t_int8>(nrows, dcol, vkeys, col, "Uint32Array");
                     break;
                 case 2:
-                    arrow::fill_col_dict<t_int16>(nrows, dcol, vkeys, col);
+                    arrow::fill_col_dict<t_int16>(nrows, dcol, vkeys, col, "Uint32Array");
                     break;
                 case 4:
-                    arrow::fill_col_dict<t_int32>(nrows, dcol, vkeys, col);
+                    arrow::fill_col_dict<t_int32>(nrows, dcol, vkeys, col, "Uint32Array");
                     break;
                 default:
                     break;

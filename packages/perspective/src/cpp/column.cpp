@@ -481,6 +481,12 @@ t_column::_get_valid_lstore()
     return m_valid.get();
 }
 
+t_vocab*
+t_column::_get_vocab()
+{
+    return m_vocab.get();
+}
+
 const t_lstore*
 t_column::_get_data_lstore() const
 {
