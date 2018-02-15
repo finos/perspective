@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "npm run copy",
+    "compile_test": "npm run copy",
     "copy": "mkdir -p build && cp -r node_modules/@jpmorganchase/perspective/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer-hypergrid/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer-highcharts/build/* build && cp src/html/* build && cp src/json/* build && cp src/csv/* build && cp src/css/* build && cp src/js/* build",
     "host": "http-server build/",
     "clean": "find build -mindepth 1 -delete"
