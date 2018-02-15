@@ -135,7 +135,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                     for (let prop of columns) {
                         var sname = prop.split(',');
                         var gname = sname[sname.length - 1];
-                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
+                        sname = sname.slice(0, sname.length - 1).join(",") || " ";
                         var s;
                         if (prev === undefined) prev = sname;
                         for (var sidx = 0; sidx < series.length; sidx++) {
@@ -250,6 +250,8 @@ export function draw(mode) {
             } else {
                 type = 'bubble';
             }
+        } else if (mode === 'heatmap') {
+            type = 'heatmap';
         }
 
         let new_radius = 0;
@@ -397,6 +399,88 @@ export function draw(mode) {
                     labels: {overflow: 'justify'}
                 }
             });
+        } else if (mode == 'heatmap') {
+            // Need to slightly repivot data
+            let data = [];
+            for (let i=0; i<series[0].data.length; ++i) {
+                for (let j=0; j<series.length; ++j) {
+                    let val = series[j].data[i];
+                    data.push([i, j, val]);
+                    colorRange[0] = Math.min(colorRange[0], val);
+                    colorRange[1] = Math.max(colorRange[1], val);
+                }
+            }
+            let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+            colorRange = [-cmax, cmax];
+
+            // Calculate ylabel nesting
+            let ylabels = series.map(function (s) { return s.name.split(','); })
+            let ytop = {name: null, depth: 0, categories: []};
+
+            let maxdepth = ylabels[0].length;
+
+            for (let i=0; i<ylabels.length; ++i) {
+                let ylabel = ylabels[i];
+                let parent = ytop;
+
+                for (let depth=0; depth<ylabel.length; ++depth) {
+                    let label = ylabel[depth]
+                    if (depth === maxdepth - 1) {
+                        parent.categories.push(label);
+                    } else {
+                        let l = parent.categories.length;
+                        if (l > 0 && parent.categories[l-1].name == label) {
+                            parent = parent.categories[l-1];
+                        } else {
+                            let cat = {name: label, depth: depth+1, categories: []};
+                            parent.categories.push(cat);
+                            parent = cat;
+                        }
+                    }
+                }
+            }
+
+            Object.assign(config, {
+                series: [{
+                    name: null,
+                    data: data,
+                    nullColor: '#999'
+                }],
+                colorAxis: {
+                    min: colorRange[0],
+                    max: colorRange[1],
+                    minColor: '#c4463a',
+                    maxColor: '#3060cf',
+                    stops: [
+                        [0, '#c4463a'],
+                        [0.1, '#c4463a'],
+                        [0.5, '#fffbbc'],
+                        [1, '#3060cf']
+                    ],
+                    startOnTick: false,
+                    endOnTick: false,
+                },
+                xAxis: {
+                    categories: top.categories,
+                    labels: {
+                        enabled: (top.categories.length > 0),
+                        padding: 0,
+                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                    },
+                },
+                yAxis: {
+                    categories: ytop.categories,
+                    title: null,
+                    tickWidth: 1,
+                    reversed: true,
+                    labels: {
+                        padding: 0,
+                        step: 1
+                    }
+                }
+            });
+            config['chart']['marginRight'] = 75;
+            delete config["legend"]["width"];
         } else if (mode.indexOf('line') !== -1) {
             Object.assign(config, {
                 colors: colors,
@@ -537,6 +621,18 @@ global.registerPlugin("horizontal", {
     resize: resize, 
     initial: {
         "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("heatmap", {
+    name: "Heatmap",
+    create: draw("heatmap"),
+    resize: resize,
+    initial: {
+        "type": "number",
         "count": 1
     },
     selectMode: "select",

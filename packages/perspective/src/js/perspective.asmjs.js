@@ -14,9 +14,12 @@ if (global.document !== undefined) {
 	const Module = load_perspective({
 	    wasmJSMethod: "asmjs",
 	    memoryInitializerPrefixURL: 'asmjs/',
-	    asmjsCodeFile: "asmjs/psp.js"
+	    asmjsCodeFile: "asmjs/psp.js",
+	    printErr: (x) => console.warn(x),
+	    print: (x) => console.warn(x)
 	});
 	module.exports = perspective(Module);
 } else {
 	module.exports = perspective(load_perspective);
 }
+

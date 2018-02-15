@@ -53,7 +53,7 @@ function subscribe(method, cmd) {
         if (this._worker.initialized.value) {
             this._worker.postMessage(msg);
         } else {
-            this._worker.messages.push(msg);
+            this._worker.messages.push(() => this._worker.postMessage(msg));
         }
     }
 }
@@ -74,7 +74,7 @@ function async_queue(method, cmd) {
             if (this._worker.initialized.value) {
                 this._worker.postMessage(msg);
             } else {
-                this._worker.messages.push(msg);
+                this._worker.messages.push(() => this._worker.postMessage(msg));
             }
         }.bind(this));
     };
@@ -93,7 +93,7 @@ function view(table_name, worker, config) {
     if (this._worker.initialized.value) {
         this._worker.postMessage(msg);
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(() => this._worker.postMessage(msg));
     }
 }
 
@@ -120,10 +120,17 @@ function table(worker, data, options) {
         data: data,
         options: options
     }
+    let post = () => {
+        if (this._worker.transferable && data instanceof ArrayBuffer) {
+            this._worker.postMessage(msg, [data]);
+        } else {
+            this._worker.postMessage(msg);
+        }
+    };
     if (this._worker.initialized.value) {
-        this._worker.postMessage(msg);
+        post();
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(post);
     }
 }
 
@@ -135,9 +142,34 @@ table.prototype.schema = async_queue('schema', 'table_method');
 
 table.prototype.size = async_queue('size', 'table_method');
 
-table.prototype.update = async_queue('update', 'table_method');
-
 table.prototype.columns = async_queue('columns', 'table_method');
+
+
+table.prototype.update = function(data) {
+    return new Promise( (resolve, reject) => {
+        this._worker.handlers[++this._worker.msg_id] = {resolve, reject};
+        var msg = {
+            id: this._worker.msg_id,
+            name: this._name,
+            cmd: 'table_method',
+            method: 'update',
+            args: [data],
+        };
+        let post = () => {
+            if (this._worker.transferable && data instanceof ArrayBuffer) {
+                this._worker.postMessage(msg, [data]);
+            } else {
+                this._worker.postMessage(msg);
+            }
+        };
+        if (this._worker.initialized.value) {
+            post();
+        } else {
+            this._worker.messages.push(post);
+        }
+    });
+}
+
 
 table.prototype.execute = function (f) {
     var msg = {
@@ -148,7 +180,7 @@ table.prototype.execute = function (f) {
     if (this._worker.initialized.value) {
         this._worker.postMessage(msg);
     } else {
-        this._worker.messages.push(msg);
+        this._worker.messages.push(() => this._worker.postMessage(msg));
     }
 }
 
@@ -169,6 +201,7 @@ function XHRWorker(url, ready, scope) {
 function worker() {
     this._worker = {
         initialized: {value: false},
+        transferable: false,
         msg_id: 0,
         handlers: {},
         messages: []
@@ -177,6 +210,15 @@ function worker() {
         this._start_same_origin();
     } else {
         this._start_cross_origin();
+    }
+}
+
+worker.prototype._detect_transferable = function() {
+    var ab = new ArrayBuffer(1);
+    this._worker.postMessage(ab, [ab]);
+    this._worker.transferable = (ab.byteLength === 0);
+    if (!this._worker.transferable) {
+        console.warn('Transferables are not supported in your browser!');
     }
 }
 
@@ -189,6 +231,7 @@ worker.prototype._start_cross_origin = function() {
         this._worker.postMessage = worker.postMessage.bind(worker);
         this._worker.terminate = worker.terminate.bind(worker);
         this._worker = worker;
+        this._detect_transferable();
         this._worker.addEventListener('message', this._handle.bind(this));
         if (typeof WebAssembly === 'undefined') {
             this._start_cross_origin_asmjs();
@@ -209,13 +252,18 @@ worker.prototype._start_cross_origin_wasm = function() {
     var wasmXHR = new XMLHttpRequest();
     wasmXHR.open('GET', __SCRIPT_PATH__.path() + 'wasm_async/psp.wasm', true);
     wasmXHR.responseType = 'arraybuffer';
-    wasmXHR.onload = function() {
-        this._worker.postMessage({
+    wasmXHR.onload = () => {
+        let msg = {
             cmd: 'init',
             data: wasmXHR.response,
             path: __SCRIPT_PATH__.path()
-        });
-    }.bind(this);
+        };
+        if (this._worker.transferable) {
+            this._worker.postMessage(msg, [wasmXHR.response]);
+        } else {
+            this._worker.postMessage(msg);
+        }
+    };
     wasmXHR.send(null);
 }
 
@@ -233,6 +281,7 @@ worker.prototype._start_same_origin = function() {
     this._worker = w;
     this._worker.addEventListener('message', this._handle.bind(this));
     this._worker.postMessage({cmd: 'init', path: __SCRIPT_PATH__.path()});
+    this._detect_transferable();
 };
 
 let _initialized = false;
@@ -247,7 +296,7 @@ worker.prototype._handle = function(e) {
         }
         for (var m in this._worker.messages) {
             if (this._worker.messages.hasOwnProperty(m)) {
-                this._worker.postMessage(this._worker.messages[m]);
+                this._worker.messages[m]();
             }
         }
         this._worker.initialized.value = true;

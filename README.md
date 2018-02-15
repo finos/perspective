@@ -53,7 +53,7 @@ npm install
 If everything is successful, you should find a few built example assets in the 
 `packages/perspective-examples/build` directory:
 
-You can run a simple test server on port 8081 by running:
+You can run a simple test server on port 8080 by running:
 
 ```bash
 ./node_modules/.bin/lerna run host --stream
@@ -76,6 +76,13 @@ You'll also need Boost and CMake, which can be installed from Homebrew:
 brew install cmake
 brew install boost
 ```
+
+#### Options
+
+The build script respects a few environment flags:
+
+* `PSP_DEBUG` will run a debug build of the C++ source.
+* `PSP_NO_MINIFY` will skip Javascript minification.
 
 ### From NPM
 

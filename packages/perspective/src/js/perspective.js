@@ -1040,6 +1040,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     __MODULE__ = __MODULE__({
                         wasmJSMethod: "asmjs",
                         memoryInitializerPrefixURL: msg.path + 'asmjs/',
+                        printErr: (x) => console.warn(x),
+                        print: (x) => console.log(x)
                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
                     });
                } else {

@@ -9,10 +9,10 @@
 
 import highcharts from 'highcharts';
 import highchartsMore from 'highcharts-more';
-import highchartsHeatmap from 'highcharts-heatmap';
+import heatmap from 'highcharts/modules/heatmap';
+import grouped_categories from 'highcharts-grouped-categories';
+import chroma from 'chroma-js';
 
-highchartsHeatmap(highcharts);
-highchartsMore(highcharts);
 const Highcharts = highcharts;
 
 // cache prototypes
@@ -24,9 +24,9 @@ let axisProto = Highcharts.Axis.prototype,
     protoAxisRender = axisProto.render,
     UNDEFINED = void 0;
 
-
-require('highcharts-grouped-categories')(Highcharts);
-const chroma = require('chroma-js');
+highchartsMore(highcharts);
+heatmap(highcharts);
+grouped_categories(highcharts);
 
 export const COLORS_10 = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
 export const COLORS_20 = [
