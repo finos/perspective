@@ -290,11 +290,15 @@ async function loadTable(table) {
         // expected types.
         aggregates = get_aggregate_attribute.call(this).map(col => {
             let _type = schema[col.column];
-            if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
-                col.op = perspective.AGGREGATE_DEFAULTS[_type]
+            if (_type) {
+                if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
+                    col.op = perspective.AGGREGATE_DEFAULTS[_type]
+                }
+                return col;
+            } else {
+                console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
             }
-            return col;
-        });
+        }).filter(x => x);
     } else {
         aggregates = cols.map(col => ({
             column: col,
