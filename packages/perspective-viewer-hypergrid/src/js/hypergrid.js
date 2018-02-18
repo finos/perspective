@@ -602,7 +602,6 @@ registerElement(TEMPLATE, {
     set_data: { value: function(data, schema) {
         if (this._detached) {
             this._detached = false;
-            this.grid.delegateCanvasEvents();
         }
         var hg_data = psp2hypergrid(data, schema);
         if (this.grid) {
@@ -613,8 +612,7 @@ registerElement(TEMPLATE, {
     }},
 
     detachedCallback: { value: function() {
-       this.grid.removeAllEventListeners(true);
-       this._detached = true;
+        this._detached = true;
     }},
 
     attachedCallback: {
@@ -661,7 +659,6 @@ registerElement(TEMPLATE, {
 
             } else {
                 this._detached = false;
-                this.grid.delegateCanvasEvents();
             }
         }
     },
