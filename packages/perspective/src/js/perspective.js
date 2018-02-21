@@ -64,13 +64,13 @@ function infer_type(x) {
 }
 
 const DATE_PARSE_CANDIDATES = [
-    moment.ISO_8601, 
-    moment.RFC_2822, 
-    'YYYY-MM-DD\\DHH:mm:ss.SSSS', 
-    'MM-DD-YYYY', 
-    'MM/DD/YYYY', 
-    'M/D/YYYY', 
-    'M/D/YY', 
+    moment.ISO_8601,
+    moment.RFC_2822,
+    'YYYY-MM-DD\\DHH:mm:ss.SSSS',
+    'MM-DD-YYYY',
+    'MM/DD/YYYY',
+    'M/D/YYYY',
+    'M/D/YY',
     'DD MMM YYYY'
 ];
 
@@ -78,7 +78,7 @@ const DATE_PARSE_CANDIDATES = [
  * Do any necessary data transforms on columns. Currently it does the following
  * transforms
  * 1. Date objects are converted into float millis since epoch
- * 
+ *
  * @private
  * @param {string} type type of column
  * @param {array} data array of columnar data
@@ -191,7 +191,7 @@ function parse_data(data, names, types) {
                         col.push(-1);
                     } else {
                         let val = data[x][name];
-                        if (typeof val === "string") {                                 
+                        if (typeof val === "string") {
                             val = moment(data[x][name], date_types, true);
                             if (!val.isValid() || date_types.length === 0) {
                                 let found = false;
@@ -279,63 +279,98 @@ function parse_data(data, names, types) {
  *    types - the column t_dtypes.
  */
 function load_arrow_buffer(data, names, types) {
-
     // TODO Need to validate that the names/types passed in match those in the buffer
-
-    var arrow = Arrow.Table.from([new Uint8Array(data)]);
-
-    names = [];
-    types = [];
-    let cdata = [];
-    for (let column of arrow.columns) {
-        switch (column.type) {
-            case 'Binary':
-            case 'Utf8':
-                types.push(__MODULE__.t_dtype.DTYPE_STR);
-                break;
-            case 'FloatingPoint':
-                if (column instanceof Arrow.Float64Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
-                }
-                else if (column instanceof Arrow.Float32Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
-                }
-                break;
-            case 'Int':
-                if (column instanceof Arrow.Int64Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_INT64);
-                }
-                else if (column instanceof Arrow.Int32Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_INT32);
-                }
-                else if (column instanceof Arrow.Int16Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_INT16);
-                }
-                else if (column instanceof Arrow.Int8Vector) {
-                    types.push(__MODULE__.t_dtype.DTYPE_INT8);
-                }
-                break;
-            case 'Bool':
-                types.push(__MODULE__.t_dtype.DTYPE_BOOL);
-                break;
-            case 'Timestamp':
-                types.push(__MODULE__.t_dtype.DTYPE_TIME);
-                break;
-            default:
-                continue;
-                break;
-        }
-        cdata.push(column);
-        names.push(column.name);
-    }
-
+    let arrow = Arrow.Table.from([new Uint8Array(data)]);
+    let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
+        return loader.loadColumn(field, arrow.getColumnAt(colIdx));
+    }, new ArrowColumnLoader());
     return {
         row_count: arrow.length,
         is_arrow: true,
-        names: names,
-        types: types,
-        cdata: cdata
+        names: loader.names,
+        types: loader.types,
+        cdata: loader.cdata
     };
+}
+
+/**
+ *
+ * @private
+ */
+class ArrowColumnLoader extends Arrow.visitor.TypeVisitor {
+    constructor(cdata, names, types) {
+        super();
+        this.cdata = cdata || [];
+        this.names = names || [];
+        this.types = types || [];
+    }
+    loadColumn(field/*: Arrow.type.Field*/, column/*: Arrow.Vector*/) {
+        if (this.visit(field.type)) {
+            this.cdata.push(column);
+            this.names.push(field.name);
+        }
+        return this;
+    }
+    // visitNull(type/*: Arrow.type.Null*/) {}
+    visitBool(type/*: Arrow.type.Bool*/) {
+        this.types.push(__MODULE__.t_dtype.DTYPE_BOOL);
+        return true;
+    }
+    visitInt(type/*: Arrow.type.Int*/) {
+        const bitWidth = type.bitWidth;
+        if (bitWidth === 64) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_INT64);
+        }
+        else if (bitWidth === 32) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_INT32);
+        }
+        else if (bitWidth === 16) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_INT16);
+        }
+        else if (bitWidth === 8) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_INT8);
+        }
+        return true;
+    }
+    visitFloat(type/*: Arrow.type.Float*/) {
+        const precision = type.precision;
+        if (precision === Arrow.enum_.Precision.DOUBLE) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
+        }
+        else if (precision === Arrow.enum_.Precision.SINGLE) {
+            this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
+        }
+        // todo?
+        // else if (type.precision === Arrow.enum_.Precision.HALF) {
+        //     this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT16);
+        // }
+        return true;
+    }
+    visitUtf8(type/*: Arrow.type.Utf8 */) {
+        this.types.push(__MODULE__.t_dtype.DTYPE_STR);
+        return true;
+    }
+    visitBinary(type/*: Arrow.type.Binary */) {
+        this.types.push(__MODULE__.t_dtype.DTYPE_STR);
+        return true;
+    }
+    // visitFixedSizeBinary(type/*: Arrow.type.FixedSizeBinary*/) {}
+    // visitDate(type/*: Arrow.type.Date_*/) {}
+    visitTimestamp(type/*: Arrow.type.Timestamp*/) {
+        this.types.push(__MODULE__.t_dtype.DTYPE_TIME);
+        return true;
+    }
+    // visitTime(type/*: Arrow.type.Time*/) {}
+    // visitDecimal(type/*: Arrow.type.Decimal*/) {}
+    // visitList(type/*: Arrow.type.List*/) {}
+    // visitStruct(type/*: Arrow.type.Struct*/) {}
+    // visitUnion(type/*: Arrow.type.Union<any>*/) {}
+    visitDictionary(type/*: Arrow.type.Dictionary*/) {
+        return this.visit(type.dictionary);
+    }
+    // visitInterval(type/*: Arrow.type.Interval*/) {}
+    // visitFixedSizeList(type/*: Arrow.type.FixedSizeList*/) {}
+    // visitMap(type/*: Arrow.type.Map_*/) {}
 }
 
 /******************************************************************************
@@ -345,16 +380,16 @@ function load_arrow_buffer(data, names, types) {
  */
 
 /**
- * A View object represents a specific transform (configuration or pivot, 
+ * A View object represents a specific transform (configuration or pivot,
  * filter, sort, etc) configuration on an underlying {@link table}. A View
  * receives all updates from the {@link table} from which it is derived, and
- * can be serialized to JSON or trigger a callback when it is updated.  View 
- * objects are immutable, and will remain in memory and actively process 
+ * can be serialized to JSON or trigger a callback when it is updated.  View
+ * objects are immutable, and will remain in memory and actively process
  * updates until its {@link view#delete} method is called.
  *
  * <strong>Note</strong> This constructor is not public - Views are created
- * by invoking the {@link table#view} method. 
- * 
+ * by invoking the {@link table#view} method.
+ *
  * @example
  * // Returns a new View, pivoted in the row space by the "name" column.
  * table.view({row_pivots: ["name"]});
@@ -435,7 +470,7 @@ view.prototype._column_names = function() {
  * The schema of this {@link view}.  A schema is an Object, the keys of which
  * are the columns of this {@link view}, and the values are their string type names.
  * If this {@link view} is aggregated, theses will be the aggregated types;
- * otherwise these types will be the same as the columns in the underlying 
+ * otherwise these types will be the same as the columns in the underlying
  * {@link table}
  *
  * @async
@@ -495,12 +530,12 @@ view.prototype.schema = async function() {
  * @param {number} options.start_col The starting column index from which
  * to serialize.
  * @param {number} options.end_col The ending column index from which
- * to serialize. 
- * 
- * @returns {Promise<Array>} A Promise resolving to An array of Objects 
+ * to serialize.
+ *
+ * @returns {Promise<Array>} A Promise resolving to An array of Objects
  * representing the rows of this {@link view}.  If this {@link view} had a
  * "row_pivots" config parameter supplied when constructed, each row Object
- * will have a "__ROW_PATH__" key, whose value specifies this row's 
+ * will have a "__ROW_PATH__" key, whose value specifies this row's
  * aggregated path.  If this {@link view} had a "column_pivots" config
  * parameter supplied, the keys of this object will be comma-prepended with
  * their comma-separated column paths.
@@ -603,8 +638,8 @@ view.prototype.num_columns = async function() {
  * underlying table emits an update, this callback will be invoked with the
  * aggregated row deltas.
  *
- * @param {function} callback A callback function invoked on update.  The 
- * parameter to this callback shares a structure with the return type of 
+ * @param {function} callback A callback function invoked on update.  The
+ * parameter to this callback shares a structure with the return type of
  * {@link view#to_json}.
  */
 view.prototype.on_update = function(callback) {
@@ -643,11 +678,11 @@ view.prototype.on_update = function(callback) {
 /**
  * A Table object is the basic data container in Perspective.  Tables are
  * typed - they have an immutable set of column names, and a known type for
- * each. 
- * 
+ * each.
+ *
  * <strong>Note</strong> This constructor is not public - Tables are created
- * by invoking the {@link table} factory method, either on the perspective 
- * module object, or an a {@link worker} instance. 
+ * by invoking the {@link table} factory method, either on the perspective
+ * module object, or an a {@link worker} instance.
  *
  * @class
  * @hideconstructor
@@ -730,16 +765,16 @@ table.prototype.schema = async function() {
  * configuration.
  *
  * @param {Object} [config] The configuration object for this {@link view}.
- * @param {Array<string>} [config.row_pivot] An array of column names 
+ * @param {Array<string>} [config.row_pivot] An array of column names
  * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
- * @param {Array<string>} [config.column_pivot] An array of column names 
+ * @param {Array<string>} [config.column_pivot] An array of column names
  * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
  * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
- * each of which should provide an "name" and "op" property, repsresnting the string 
+ * each of which should provide an "name" and "op" property, repsresnting the string
  * aggregation type and associated column name, respectively.  Aggregates not provided
  * will use their type defaults
  * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
- * apply.  A filter configuration is an array of 3 elements:  A column name, 
+ * apply.  A filter configuration is an array of 3 elements:  A column name,
  * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
  * @param {Array<string>} [config.sort] An Array of column names by which to sort.
  *
@@ -814,7 +849,7 @@ table.prototype.view = function(config) {
     config.row_pivot = config.row_pivot || [];
     config.column_pivot = config.column_pivot || [];
 
-    // Column only mode 
+    // Column only mode
     if (config.row_pivot.length === 0 && config.column_pivot.length > 0) {
         config.row_pivot = ['psp_okey'];
         config.column_only = true;
@@ -838,7 +873,7 @@ table.prototype.view = function(config) {
     if (config.sort) {
         if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
             config.sort = config.sort.filter(x => config.row_pivot.indexOf(x) === -1);
-        } 
+        }
         sort = config.sort.map(x => [config.aggregate.map(agg => agg.column).indexOf(x), 1]);
     }
 
@@ -953,19 +988,19 @@ table.prototype.view = function(config) {
  * Updates the rows of a {@link table}.  Updated rows are pushed down to any
  * derived {@link view} objects.
  *
- * @param {Object<string, Array>|Array<Object>|string} data The input data 
+ * @param {Object<string, Array>|Array<Object>|string} data The input data
  * for this table.  The supported input types mirror the constructor options, minus
- * the ability to pass a schema (Object<string, string>) as this table has. 
+ * the ability to pass a schema (Object<string, string>) as this table has.
  * already been constructed, thus its types are set in stone.
- * 
+ *
  * @see {@link table}
- */ 
+ */
 table.prototype.update = function (data) {
     let pdata;
     let cols = this._columns();
     let schema = this.gnode.get_tblschema();
     let types = schema.types();
-    
+
     if (data instanceof ArrayBuffer) {
         pdata = load_arrow_buffer(data, cols, types);
     }
@@ -975,8 +1010,8 @@ table.prototype.update = function (data) {
 
     let tbl;
     try {
-        tbl = __MODULE__.make_table(pdata.row_count || 0, 
-            pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex, 
+        tbl = __MODULE__.make_table(pdata.row_count || 0,
+            pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex,
             pdata.is_arrow);
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
@@ -1159,8 +1194,8 @@ const perspective = {
     worker: function () {},
 
     /**
-     * A factory method for constructing {@link table}s.  
-     * 
+     * A factory method for constructing {@link table}s.
+     *
      * @example
      * // Creating a table directly from node
      * var table = perspective.table([{x: 1}, {x: 2}]);
@@ -1169,12 +1204,12 @@ const perspective = {
      * // Creating a table from a Web Worker (instantiated via the worker() method).
      * var table = worker.table([{x: 1}, {x: 2}]);
      *
-     * @param {Object<string, Array>|Object<string, string>|Array<Object>|string} data The input data 
-     *     for this table.  When supplied an Object with string values, an empty 
-     *     table is returned using this Object as a schema.  When an Object with 
-     *     Array values is supplied, a table is returned using this object's 
+     * @param {Object<string, Array>|Object<string, string>|Array<Object>|string} data The input data
+     *     for this table.  When supplied an Object with string values, an empty
+     *     table is returned using this Object as a schema.  When an Object with
+     *     Array values is supplied, a table is returned using this object's
      *     key/value pairs as name/columns respectively.  When an Array is supplied,
-     *     a table is constructed using this Array's objects as rows.  When 
+     *     a table is constructed using this Array's objects as rows.  When
      *     a string is supplied, the parameter as parsed as a CSV.
      * @param {Object} [options] An optional options dictionary.
      * @param {string} options.index The name of the column in the resulting

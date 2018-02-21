@@ -34,7 +34,7 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@apache-arrow/es5-esm": "^0.2.0",
+    "@apache-arrow/es5-esm": "^0.3.0",
     "@jpmorganchase/perspective-common": "^0.1.0",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.1",
