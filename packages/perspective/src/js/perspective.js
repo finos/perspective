@@ -1208,6 +1208,10 @@ const perspective = {
             tindex = __MODULE__.t_dtype.DTYPE_INT32;
         }
 
+        if (options.index && pdata.names.indexOf(options.index) === -1) {
+            throw `Specified index '${options.index}' does not exist in data.`;
+        }
+
         let tbl, gnode, pool;
 
         try {
