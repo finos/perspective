@@ -385,6 +385,27 @@ function new_row(name, type, aggregate) {
     return row;
 }
 
+class CancelTask {
+
+    constructor(on_cancel) {
+        this._on_cancel = on_cancel;
+        this._cancelled = false;
+    }
+
+    cancel() {
+        if (!this._cancelled && this._on_cancel) {
+            this._on_cancel();
+        }
+        this._cancelled = true;
+    }
+
+    get cancelled() {
+        return this._cancelled;
+    }
+
+}
+
+
 function update() {
     if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row');
@@ -421,11 +442,12 @@ function update() {
                 this._debounced = undefined;
                 const t = performance.now();
                 if (this._task) {
-                    this._task.cancelled = true;
+                    this._task.cancel();
                 }
-                this._task = {cancelled: false}
+                this._task = new CancelTask();
                 this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
                     this.setAttribute('render_time', performance.now() - t);
+                    this._task.cancel();
                 });
             }, timeout || 0);
         }
@@ -435,15 +457,17 @@ function update() {
     const t = performance.now();
     this._render_count = (this._render_count || 0) + 1;
     if (this._task) {
-        this._task.cancelled = true;
+        this._task.cancel();
     }
-    this._task = {cancelled: false};
+    this._task = new CancelTask(() => {
+        this._render_count--;
+    });
     this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
         }
         this.setAttribute('render_time', performance.now() - t);
-        this._render_count--;
+        this._task.cancel();
         if (this._render_count === 0) {
             this.removeAttribute('updating');
         }
