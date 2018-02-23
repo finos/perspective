@@ -175,19 +175,16 @@ namespace arrow {
 
     template<typename T>
     void
-    fill_col_dict(t_uint32 nrows, val dcol, val vkeys, t_col_sptr col, const char* destType)
+    fill_col_dict(t_uint32 nrows, t_uint32 dsize, val dcol, val vkeys, t_col_sptr col, const char* destType)
     {
-
-        // Copy out dictionary encoded data
-        val values = dcol["data"]["values"];
-        val vdata = values["data"];
+        val vdata = dcol["data"];
         t_int32 vsize = vdata["length"].as<t_int32>();
         std::vector<t_uchar> data;
         data.reserve(vsize);
         data.resize(vsize);
         vecFromTypedArray(vdata, data.data(), vsize);
 
-        val voffsets = values["offsets"];
+        val voffsets = dcol["offsets"];
         t_int32 osize = voffsets["length"].as<t_int32>();
         std::vector<t_int32> offsets;
         offsets.reserve(osize);
@@ -197,13 +194,12 @@ namespace arrow {
         t_vocab* vocab = col->_get_vocab();
         t_str elem;
 
-        t_int32 dsize = dcol["data"]["length"].as<t_int32>();
-        for (t_int32 i = 0; i < dsize; ++i) {
+        for (t_uint32 i = 0; i < dsize; ++i) {
             t_int32 bidx = offsets[i];
             std::size_t es = offsets[i+1] - bidx;
             assert(es > 0);
             elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
-            t_uint32 idx = vocab->get_interned(elem);
+            t_uindex idx = vocab->get_interned(elem);
             assert(idx == i);
         }
 
@@ -313,20 +309,31 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
+            val dictvec = dcol["data"];
+
+            // Get number of dictionary entries
+            t_uint32 dsize = dictvec["length"].as<t_uint32>();
+            
+            // UTF-8 dictionaries have an extra level of js object!
+            if (dictvec["constructor"]["name"].as<t_str>() == "Utf8Vector") {
+                dictvec = dictvec["values"];
+            }
+
             val vkeys = dcol["keys"]["data"];
 
             // Perspective stores string indices in a 32bit unsigned array
             // Javascript's typed arrays handle copying from various bitwidth arrays properly
             auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
+
             switch (width) {
                 case 1:
-                    arrow::fill_col_dict<t_int8>(nrows, dcol, vkeys, col, "Uint32Array");
+                    arrow::fill_col_dict<t_int8>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
                     break;
                 case 2:
-                    arrow::fill_col_dict<t_int16>(nrows, dcol, vkeys, col, "Uint32Array");
+                    arrow::fill_col_dict<t_int16>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
                     break;
                 case 4:
-                    arrow::fill_col_dict<t_int32>(nrows, dcol, vkeys, col, "Uint32Array");
+                    arrow::fill_col_dict<t_int32>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
                     break;
                 default:
                     break;
