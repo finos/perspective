@@ -59,6 +59,13 @@ perspective-viewer {
         width: 100%;
         height: 100%;
     }
+
+    #app.hide_message {
+        #drop_target {
+            display:none;
+        }
+    }
+
     svg text { 
         font-family: Arial !important;
 
@@ -197,6 +204,10 @@ perspective-viewer {
         justify-content: center;
         cursor: pointer;
         transition: opacity 0.3s;
+    }
+
+    #config_button:before {
+        content: '\1f527';
     }
 
     ul label {
