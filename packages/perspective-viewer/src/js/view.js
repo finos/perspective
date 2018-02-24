@@ -266,6 +266,8 @@ function set_aggregate_attribute(aggs) {
 }
 
 async function loadTable(table) {
+    this.querySelector('#app').classList.add('hide_message');
+
     if (this._view) {
         this._view.delete();
     }
@@ -452,7 +454,6 @@ function update() {
             }, timeout || 0);
         }
     });
-    this._drop_target.style.display = 'none';
 
     const t = performance.now();
     this._render_count = (this._render_count || 0) + 1;
@@ -522,15 +523,14 @@ registerElement(template, {
         set: function(msg) {
             if (!this._inner_drop_target) return;
             this._inner_drop_target.innerHTML = msg;
+            for (let slave of this.slaves) {
+                slave.setAttribute('message', msg);
+            }
         }
     },
 
     load: {
         value: function (json) {
-            this._inner_drop_target.innerHTML = "<h3>Loading ...</h3>";
-            for (let slave of this.slaves) {
-                slave._inner_drop_target.innerHTML = "<h3>Loading ...</h3>";
-            }
             load.bind(this)(json);
         }
     },
@@ -774,7 +774,7 @@ registerElement(template, {
             }
             widget.slaves.push(this);
             if (this._inner_drop_target) {
-                this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML + "<h3>*</h3>";
+                this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
             }
 
             if (widget._table) {
