@@ -528,8 +528,8 @@ make_table(
     {
         // If user doesn't specify an column to use as the pkey index, just use
         // row number
-        auto key_col = tbl->add_column("psp_pkey", tindex, false);
-        auto okey_col = tbl->add_column("psp_okey", tindex, false);
+        auto key_col = tbl->add_column("psp_pkey", DTYPE_INT32, true);
+        auto okey_col = tbl->add_column("psp_okey", DTYPE_INT32, true);
 
         for (auto ridx = 0; ridx < tbl->size(); ++ridx)
         {
