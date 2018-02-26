@@ -748,6 +748,14 @@ registerElement(template, {
         }
     },
 
+    'index': {
+        set: function () {
+            if (this._table) {
+                console.error(`Setting 'index' attribute after initialization has no effect`);
+            }
+        }
+    },
+
     'row-pivots': {
         set: function () {
             let pivots = JSON.parse(this.getAttribute('row-pivots'));

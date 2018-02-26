@@ -581,19 +581,21 @@ export function draw(mode) {
 }
 
 function resize(immediate) {
-    if (immediate && this._chart) {
+    if (this._chart && !this._resize_timer) {
         this._chart.reflow();
-    } else {
-        if (this.resize_timer) {
-            clearTimeout(this.resize_timer);
-        }
-        this.resize_timer = setTimeout(() => {
-            if (this._chart && !document.hidden && this.offsetParent && document.contains(this)) {
-                this.resize_timer = undefined;
-                this._chart.reflow();
-            }
-        }, 50);
+    } 
+    if (this._resize_timer) {
+        clearTimeout(this._resize_timer);
+        this._debounce_resize = true;
     }
+    this._resize_timer = setTimeout(() => {
+        if (this._chart && !document.hidden && this.offsetParent && document.contains(this) && this._debounce_resize) {
+            this._chart.reflow();
+        }
+        this._resize_timer = undefined;
+        this._debounce_resize = false;
+    }, 50);
+    
 }
 
 function delete_chart() {

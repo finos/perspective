@@ -23,7 +23,7 @@ services:
 before_install:
   - mkdir boost_includes
   - cp -r /usr/include/boost boost_includes/
-  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-incoming-64bit bash
+  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-tag-1.37.33-64bit bash
 
 install:
   - npm install
