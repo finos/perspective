@@ -290,7 +290,12 @@ export function draw(mode) {
                 }
             },
             plotOptions: {
-                coloredScatter: {marker: {radius: new_radius}},
+                coloredScatter: {
+                    marker: {radius: new_radius},
+                    tooltip: {
+                        headerFormat: '<span>{point.key}</span><br/><span>{series.name}</span><br/>'
+                    }
+                },
                 scatter: {
                     marker: {radius: new_radius},
                     tooltip: {
