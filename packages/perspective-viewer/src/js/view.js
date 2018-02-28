@@ -280,6 +280,21 @@ async function loadTable(table) {
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
 
+    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+
+    // Sort columns by type and then name
+    cols.sort((a, b) => {
+        let s1 = type_order[schema[a]], s2 = type_order[schema[b]];
+        let r = 0;
+        if (s1 == s2) {
+            let a1 = a.toLowerCase(), b1=b.toLowerCase();
+            r = (a1 < b1)?-1:1;
+        } else {
+            r = (s1 < s2)?-1:1;
+        }
+        return r;
+    });
+
     if (!this.hasAttribute('columns')) {
         this.setAttribute('columns', JSON.stringify(cols));
     }
