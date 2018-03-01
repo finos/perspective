@@ -1,0 +1,42 @@
+{
+  "name": "@jpmorganchase/perspective-utils",
+  "version": "0.1.0",
+  "description": "Perspective.js",
+  "files": [
+    "build/*.d.ts",
+    "build/*.js.map",
+    "build/*.js",
+    "build/*.wasm",
+    "src/css/*.css"
+  ],
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "directories": {
+    "build": "build/"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "tsc",
+    "prepublish": "npm run start",
+    "clean": "rimraf build",
+    "watch": "tsc -w"
+  },
+  "dependencies": {
+    "@jpmorganchase/perspective-viewer": "^0.1.1",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.1",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.1",
+    "@phosphor/messaging": "^1.2.2",
+    "@types/socket.io-client": "^1.4.0",
+    "socket.io": "*",
+    "@phosphor/widgets": "^1.5.0"
+  },
+  "devDependencies": {
+    "rimraf": "~2.6.2",
+    "typescript": "~2.6.2"
+  },
+  "jupyterlab": {
+    "mimeExtension": true
+  }
+}
