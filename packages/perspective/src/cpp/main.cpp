@@ -505,7 +505,6 @@ make_table(
     val j_data,
     t_uint32 offset,
     t_str index,
-    t_dtype tindex,
     t_bool is_arrow
 ) {
     // Create the input and port schemas
