@@ -18,24 +18,29 @@ interface PSPHelper {
 
 export
 class PSPWebsocketHelper implements PSPHelper {
-  constructor(url:string, send:string) {
+  constructor(url: string, send: string, records: boolean) {
     this.url = url;
-    this.send = JSON.parse(send);
+    this.send = send;
   }
 
   start(psp: any): void {
     let socket = new WebSocket(this.url);
+    let to_send = this.send;
+    let as_record = this.records;
     socket.onopen = function (event: any) {
-
-    }.bind(this);
+      if (to_send){
+        socket.send(to_send);
+      }
+    };
 
     socket.onmessage = function (event: any) {
-      psp.update(event.msg);
-    }.bind(this);
+      if (as_record){
+        psp.update([event.data]);
+      } else {
+        psp.update(event.data);
+      }
+    };
 
-    if (this.send){
-      socket.send(this.send);
-    }
   }
 
   getUrl(): string {
@@ -43,20 +48,27 @@ class PSPWebsocketHelper implements PSPHelper {
   }
 
   private url:string;
-  private send:JSON;
+  private send:string;
+  private records:boolean;
 }
 
 export
 class PSPSocketIOHelper implements PSPHelper {
-  constructor(url: string, channel: string) {
+  constructor(url: string, channel: string, records: boolean) {
     this.url = url;
     this.channel = channel;
+    this.records = records;
   }
 
   start(psp: any): void {
     let socket = io.connect(this.url);
+    let as_record = this.records;
     socket.on(this.channel, function (msg: any) {
-      psp.update([msg.msg]);
+      if (as_record){
+        psp.update([msg.msg]);
+      } else {
+        psp.update(msg.msg);
+      }
     })
   }
 
@@ -66,27 +78,46 @@ class PSPSocketIOHelper implements PSPHelper {
 
   private url:string;
   private channel:string;
+  private records:boolean;
 }
 
 export
 class PSPHttpHelper implements PSPHelper {
-  constructor(url:string, field: string) {
+  constructor(url:string, field: string, records: boolean, repeat: number) {
     this.url = url;
     this.field = field;
+    this.records = records;
+    this.repeat = repeat;
   }
 
-  start(psp: any): void {
+
+  sendAndLoad(psp: any){
     let xhr = new XMLHttpRequest();
     let field = this.field;
+    let as_record = this.records;
+
     xhr.open('GET', this.url, true);
     xhr.onload = function () { 
         let data = JSON.parse(xhr.response);
         if (field !== ''){
           data = data[field];
         }
-        psp.update(data);
+
+        if (as_record){
+          psp.update([data]);
+        } else {
+          psp.update(data);
+        }
     }
     xhr.send(null);
+  }
+
+  start(psp: any): void {
+    if(this.repeat){
+      setInterval( () => this.sendAndLoad(psp), this.repeat);
+    } else {
+      this.sendAndLoad(psp);
+    }
   }
 
   getUrl(): string {
@@ -95,4 +126,6 @@ class PSPHttpHelper implements PSPHelper {
 
   private url:string;
   private field:string;
+  private records:boolean;
+  private repeat:number;
 }

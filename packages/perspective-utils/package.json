@@ -24,13 +24,8 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jpmorganchase/perspective-viewer": "^0.1.1",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.1",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.1",
-    "@phosphor/messaging": "^1.2.2",
     "@types/socket.io-client": "^1.4.0",
-    "socket.io": "*",
-    "@phosphor/widgets": "^1.5.0"
+    "socket.io": "*"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
