@@ -280,8 +280,12 @@ async function loadTable(table) {
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
 
-    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+    this._initial_col_order = cols.slice();
+    if (!this.hasAttribute('columns')) {
+        this.setAttribute('columns', JSON.stringify(this._initial_col_order));
+    }
 
+    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
     // Sort columns by type and then name
     cols.sort((a, b) => {
         let s1 = type_order[schema[a]], s2 = type_order[schema[b]];
@@ -294,10 +298,6 @@ async function loadTable(table) {
         }
         return r;
     });
-
-    if (!this.hasAttribute('columns')) {
-        this.setAttribute('columns', JSON.stringify(cols));
-    }
 
     // Update Aggregates, 
     let aggregates = [];
@@ -738,7 +738,7 @@ registerElement(template, {
                 } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
                 } else {
-                    this.setAttribute('columns', JSON.stringify(cols.map(x => x.getAttribute('name'))));
+                    this.setAttribute('columns', JSON.stringify(this._initial_col_order)); //JSON.stringify(cols.map(x => x.getAttribute('name'))));
                 }
             }
             this.dispatchEvent(new Event('config-update'));
