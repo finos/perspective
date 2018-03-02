@@ -25,6 +25,10 @@ import {
 
 import '../src/css/index.css';
 
+import {
+  PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper
+} from '@jpmorganchase/perspective-utils';
+
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
@@ -40,7 +44,8 @@ const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
 
 interface PerspectiveSpec {
   data: string,
-  layout: string
+  layout: string,
+  config: string;
 }
 
 export
@@ -66,19 +71,28 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
       if(this._datatype === 'static'){
         psp.load(this._data);
-
       } else if (this._datatype === 'ws' || this._datatype === 'wss'){
-        // TODO finish this part eventually
-        let socket = new WebSocket(this._datasrc);
-        socket.onopen = function (event: any) {
-          // console.log('connected to ' + this.datasrc);
-        }.bind(this);
-        socket.onmessage = function (event: any) {
-          // console.log(event.data);
-        }.bind(this);
+        let config = JSON.parse(this._config);
+        let send = config.send || '';
+        let records = config.records || false;
+        this._helper = new PSPWebsocketHelper(this._datasrc, send, records);
+        this._helper.start(psp);
 
       } else if (this._datatype === 'http' || this._datatype === 'https'){
-        // TODO
+        let config = JSON.parse(this._config);
+        let field = config.field || '';
+        let records = config.records || false;
+        let repeat = config.repeat || 1;
+        this._helper = new PSPHttpHelper(this._datasrc, field, records, repeat);
+        this._helper.start(psp);
+
+      } else if (this._datatype === 'sio'){
+        let config = JSON.parse(this._config);
+        let channel = config.channel || '';
+        let records = config.records || false;
+        let addr = this._datasrc.replace('sio://', '');
+        this._helper = new PSPSocketIOHelper(addr, channel, records);
+        this._helper.start(psp);
 
       } else if (this._datatype === 'comm'){
         //grab session id 
@@ -110,13 +124,14 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   }
 
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const { data, layout } = model.data[MIME_TYPE] as any|PerspectiveSpec;
+    const { data, layout, config } = model.data[MIME_TYPE] as any|PerspectiveSpec;
     this._lyt = layout;
 
     try {
       this._data = JSON.parse(data) as object;
       this._datatype = 'static';
       this._datasrc = '';
+      this._config = '';
 
       if(Object.keys(this._data).length === 0){
         this._data = [   
@@ -131,7 +146,10 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
     return Promise.resolve();
     } catch (e) {
       this._datasrc = data;
-      if(data.indexOf('ws://') !== -1){
+      this._config = config;
+      if(data.indexOf('sio://') !== -1){
+        this._datatype = 'sio';
+      } else if(data.indexOf('ws://') !== -1){
         this._datatype = 'ws';
       } else if(data.indexOf('wss://') !== -1){
         this._datatype = 'wss';
@@ -151,8 +169,10 @@ class RenderedPSP extends Widget implements IRenderMime.IRenderer {
   private _data: object;
   private _datatype: string;
   private _datasrc: string;
-  private _lyt: string;
+  private _lyt: string; // not widget layout
+  private _config: string;
   private _loaded: boolean;
+  private _helper: PSPHelper;
 }
 
 
