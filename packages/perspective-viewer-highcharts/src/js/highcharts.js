@@ -50,7 +50,7 @@ function _make_scatter_tick(row, columns, is_string, colorRange) {
     if (columns.length > 3) {
         tick.z = isNaN(row[columns[3]]) ? 1 : row[columns[3]];
     }
-    tick.name = row['__ROW_PATH__'].slice(-1)[0];
+    tick.name = row['__ROW_PATH__'].join(", ");
     return tick;
 }
 
