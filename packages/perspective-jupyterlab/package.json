@@ -31,7 +31,9 @@
     "@jupyterlab/rendermime-interfaces": "^1.0.0",
     "@jupyterlab/services": "^1.1.1-0",
     "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.5.0"
+    "@phosphor/widgets": "^1.5.0",
+    "@types/socket.io-client": "^1.4.0",
+    "socket.io": "2.0.3"
   },
   "devDependencies": {
     "rimraf": "~2.6.2",
