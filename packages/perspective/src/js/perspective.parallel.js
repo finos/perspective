@@ -109,6 +109,8 @@ view.prototype.delete = async_queue('delete');
 
 view.prototype.on_update = subscribe('on_update', 'view_method', true);
 
+view.prototype.on_delete = subscribe('on_delete', 'view_method', true);
+
 function table(worker, data, options) {
     options = options || {};
     options.binary = options.binary || false;
@@ -144,6 +146,9 @@ table.prototype.size = async_queue('size', 'table_method');
 
 table.prototype.columns = async_queue('columns', 'table_method');
 
+table.prototype.delete = async_queue('delete', "table_method");
+
+table.prototype.on_delete = subscribe('on_delete', 'table_method', true);
 
 table.prototype.update = function(data) {
     return new Promise( (resolve, reject) => {

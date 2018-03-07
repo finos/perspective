@@ -251,6 +251,7 @@ function load(csv) {
     for (let slave of this.slaves) {
         loadTable.call(slave, table);
     }
+    this.slaves = [];
 }
 
 function get_aggregate_attribute() {
@@ -267,18 +268,18 @@ function set_aggregate_attribute(aggs) {
 
 async function loadTable(table) {
     this.querySelector('#app').classList.add('hide_message');
+    this.setAttribute('updating', true);
+    
+    await this._clear_state();
 
-    if (this._view) {
-        this._view.delete();
-    }
-    if (this._table) {
-        this._table.delete();
-    }
-
+    this._inactive_columns.innerHTML = "";
     this._active_columns.innerHTML = "";
     this._table = table;
-    
-    let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
+
+    let [cols, schema] = await Promise.all([
+        table.columns(),
+        table.schema()
+    ]);
 
     this._initial_col_order = cols.slice();
     if (!this.hasAttribute('columns')) {
@@ -286,6 +287,7 @@ async function loadTable(table) {
     }
 
     let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+
     // Sort columns by type and then name
     cols.sort((a, b) => {
         let s1 = type_order[schema[a]], s2 = type_order[schema[b]];
@@ -299,14 +301,17 @@ async function loadTable(table) {
         return r;
     });
 
-    // Update Aggregates, 
+    // Update Aggregates.
     let aggregates = [];
+    const found = {};
+
     if (this.hasAttribute('aggregates')) {
 
         // Double check that the persisted aggregates actually match the 
         // expected types.
         aggregates = get_aggregate_attribute.call(this).map(col => {
             let _type = schema[col.column];
+            found[col.column] = true;
             if (_type) {
                 if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
                     col.op = perspective.AGGREGATE_DEFAULTS[_type]
@@ -316,30 +321,56 @@ async function loadTable(table) {
                 console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
             }
         }).filter(x => x);
-    } else {
-        aggregates = cols.map(col => ({
-            column: col,
-            op: perspective.AGGREGATE_DEFAULTS[schema[col]]
-        }));
     }
+
+    // Add columns detected from dataset.
+    for (let col of cols) {
+        if (!found[col]) {
+            aggregates.push({
+                column: col,
+                op: perspective.AGGREGATE_DEFAULTS[schema[col]]
+            });
+        }
+    }
+
     set_aggregate_attribute.call(this, aggregates);
 
     // Update column rows.
-    let shown = JSON.parse(this.getAttribute('columns'));
-    for (let x of cols) {
-        let aggregate = aggregates
-            .filter(a => a.column === x)
-            .map(a => a.op)[0];
-        let row = new_row.call(this, x, schema[x], aggregate);
-        this._inactive_columns.appendChild(row);
-        if (shown.indexOf(x) !== -1) {
-            row.style.display = 'none';
+    let shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
+
+    if (!this.hasAttribute('columns') || shown.length === 0) {
+        for (let x of cols) {
+            let aggregate = aggregates
+                .filter(a => a.column === x)
+                .map(a => a.op)[0];
+            let row = new_row.call(this, x, schema[x], aggregate);
+            this._inactive_columns.appendChild(row);
+        }
+        this._set_column_defaults()
+        shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
+        for (let x in cols) {
+            if (shown.indexOf(x) !== -1) {
+                this._inactive_columns.children[x].style.display = 'none';
+            }
+        }
+    } else {
+        for (let x of cols) {
+            let aggregate = aggregates
+                .filter(a => a.column === x)
+                .map(a => a.op)[0];
+            let row = new_row.call(this, x, schema[x], aggregate);
+            this._inactive_columns.appendChild(row);
+            if (shown.indexOf(x) !== -1) {
+                row.style.display = 'none';
+            }
+        }
+
+        for (let x of shown) {
+            let active_row = new_row.call(this, x, schema[x]);
+            this._active_columns.appendChild(active_row);
         }
     }
-    for (let x of shown) {
-        let active_row = new_row.call(this, x, schema[x]);
-        this._active_columns.appendChild(active_row);
-    }
+
     if (cols.length === shown.length) {
         this._inactive_columns.style.display = 'none';
     } else {
@@ -443,6 +474,7 @@ function update() {
 
     if (this._view) {
         this._view.delete();
+        this._view = undefined;
     }
     this._view = this._table.view({
         filter:  filters,
@@ -466,6 +498,8 @@ function update() {
                 this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
                     this.setAttribute('render_time', performance.now() - t);
                     this._task.cancel();
+                }).catch(err => {
+                    console.error("Error rendering plugin.", err);
                 });
             }, timeout || 0);
         }
@@ -537,7 +571,12 @@ registerElement(template, {
 
     message: {
         set: function(msg) {
+            if (this.getAttribute('message') !== msg) {
+                this.setAttribute('message', msg);
+                return;
+            }
             if (!this._inner_drop_target) return;
+            this.querySelector('#app').classList.remove('hide_message');
             this._inner_drop_target.innerHTML = msg;
             for (let slave of this.slaves) {
                 slave.setAttribute('message', msg);
@@ -711,9 +750,8 @@ registerElement(template, {
         }
     },
 
-    view: {
-        set: async function () {
-            this._vis_selector.value = this.getAttribute('view');
+    _set_column_defaults: {
+        value: function () {
             let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
             if (cols.length > 0) {
                 if (this._plugin.initial) {
@@ -741,6 +779,13 @@ registerElement(template, {
                     this.setAttribute('columns', JSON.stringify(this._initial_col_order)); //JSON.stringify(cols.map(x => x.getAttribute('name'))));
                 }
             }
+        }
+    },
+
+    view: {
+        set: async function () {
+            this._vis_selector.value = this.getAttribute('view');
+            this._set_column_defaults();
             this.dispatchEvent(new Event('config-update'));
         }
     },
@@ -796,13 +841,14 @@ registerElement(template, {
             if (widget.hasAttribute('index')) {
                 this.setAttribute('index', widget.getAttribute('index'));
             }
-            widget.slaves.push(this);
             if (this._inner_drop_target) {
                 this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
             }
 
             if (widget._table) {
                 loadTable.call(this, widget._table);
+            } else {
+                widget.slaves.push(this);
             }
         }
     },
@@ -826,10 +872,31 @@ registerElement(template, {
         }
     },
 
+    _clear_state: {
+        value: async function () {
+            if (this._task) {
+                this._task.cancel();
+            }
+            if (this._view) {
+                let view = this._view;
+                this._view = undefined;
+                await view.delete();
+            };
+            if (this._table) {
+                try {
+                    let table = this._table;
+                    this._table = undefined;
+                    await table.delete();
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+        }
+    },
+
     delete: {
-        value: function () {
-            if (this._view) this._view.delete();
-            if (this._table) this._table.delete();
+        value: async function () {
+            await this._clear_state();
             if (this._plugin.delete) {
                 this._plugin.delete.call(this);
             }
