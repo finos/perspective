@@ -166,6 +166,11 @@ perspective-row #sort_order {
     padding-top: 5px;
 }
 
+#side_panel perspective-row .column_name {
+    white-space: nowrap;
+    text-overflow: ellipsis; 
+}
+
 #side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
     .column_row();
     content: "123";

@@ -280,9 +280,24 @@ async function loadTable(table) {
     
     let [cols, schema] = await Promise.all([table.columns(), table.schema()]);
 
+    this._initial_col_order = cols.slice();
     if (!this.hasAttribute('columns')) {
-        this.setAttribute('columns', JSON.stringify(cols));
+        this.setAttribute('columns', JSON.stringify(this._initial_col_order));
     }
+
+    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+    // Sort columns by type and then name
+    cols.sort((a, b) => {
+        let s1 = type_order[schema[a]], s2 = type_order[schema[b]];
+        let r = 0;
+        if (s1 == s2) {
+            let a1 = a.toLowerCase(), b1=b.toLowerCase();
+            r = (a1 < b1)?-1:1;
+        } else {
+            r = (s1 < s2)?-1:1;
+        }
+        return r;
+    });
 
     // Update Aggregates, 
     let aggregates = [];
@@ -368,6 +383,7 @@ function new_row(name, type, aggregate) {
 
     row.setAttribute('type', type);
     row.setAttribute('name', name);
+    row.setAttribute('title', name);
     row.setAttribute('aggregate', aggregate);
 
     row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
@@ -722,7 +738,7 @@ registerElement(template, {
                 } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
                 } else {
-                    this.setAttribute('columns', JSON.stringify(cols.map(x => x.getAttribute('name'))));
+                    this.setAttribute('columns', JSON.stringify(this._initial_col_order)); //JSON.stringify(cols.map(x => x.getAttribute('name'))));
                 }
             }
             this.dispatchEvent(new Event('config-update'));
