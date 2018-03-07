@@ -652,13 +652,12 @@ view.prototype.on_update = function(callback) {
  * @class
  * @hideconstructor
  */
-function table(gnode, pool, index, tindex) {
+function table(gnode, pool, index) {
     this.gnode = gnode;
     this.pool = pool;
     this.name = Math.random() + "";
     this.initialized = false;
     this.index = index;
-    this.tindex = tindex;
     this.pool.set_update_delegate(this);
     this.callbacks = [];
 }
@@ -976,8 +975,8 @@ table.prototype.update = function (data) {
     let tbl;
     try {
         tbl = __MODULE__.make_table(pdata.row_count || 0, 
-            pdata.names, pdata.types, pdata.cdata, this.gnode.get_table().size(), this.index || "", this.tindex, 
-            pdata.is_arrow);
+            pdata.names, pdata.types, pdata.cdata,
+            this.gnode.get_table().size(), this.index || "", pdata.is_arrow);
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
     } catch (e) {
@@ -1201,13 +1200,6 @@ const perspective = {
             pdata = parse_data(data);
         }
 
-        let tindex;
-        if (options.index) {
-            tindex = pdata.types[pdata.names.indexOf(options.index)]
-        } else {
-            tindex = __MODULE__.t_dtype.DTYPE_INT32;
-        }
-
         if (options.index && pdata.names.indexOf(options.index) === -1) {
             throw `Specified index '${options.index}' does not exist in data.`;
         }
@@ -1220,14 +1212,14 @@ const perspective = {
 
             // Fill t_table with data
             tbl = __MODULE__.make_table(pdata.row_count || 0,
-                pdata.names, pdata.types, pdata.cdata, 0, options.index, tindex,
-                pdata.is_arrow);
+                pdata.names, pdata.types, pdata.cdata,
+                0, options.index, pdata.is_arrow);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
 
-            return new table(gnode, pool, options.index, tindex);
+            return new table(gnode, pool, options.index);
         } catch (e) {
             if (pool) {
                 pool.delete();
