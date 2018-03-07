@@ -50,6 +50,9 @@ function _make_scatter_tick(row, columns, is_string, colorRange) {
     if (columns.length > 3) {
         tick.z = isNaN(row[columns[3]]) ? 1 : row[columns[3]];
     }
+    if ('__ROW_PATH__' in row) {
+    tick.name = row['__ROW_PATH__'].join(", ");
+    }
     return tick;
 }
 
@@ -110,7 +113,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
             label.categories.push(sname);
             if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
                 if (col_pivots.length === 0) {
-                    var sname = 'x';
+                    var sname = ' ';
                     var s;
                     for (var sidx = 0; sidx < series.length; sidx++) {
                         if (series[sidx].name == sname) {
@@ -289,8 +292,18 @@ export function draw(mode) {
                 }
             },
             plotOptions: {
-                coloredScatter: {marker: {radius: new_radius}},
-                scatter: {marker: {radius: new_radius}},
+                coloredScatter: {
+                    marker: {radius: new_radius},
+                    tooltip: {
+                        headerFormat: '<span>{point.key}</span><br/><span>{series.name}</span><br/>'
+                    }
+                },
+                scatter: {
+                    marker: {radius: new_radius},
+                    tooltip: {
+                        headerFormat: '<span>{point.key}</span><br/><span>{series.name}</span><br/>'
+                    }
+                },
                 column: {
                     stacking: 'normal',
                     states: {
