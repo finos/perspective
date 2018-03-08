@@ -362,14 +362,15 @@ function load_arrow_buffer(data, names, types) {
  * @class
  * @hideconstructor
  */
- function view(pool, ctx, sides, gnode, config, name, callbacks) {
+ function view(pool, ctx, sides, gnode, config, name, callbacks, table) {
     this.ctx = ctx;
     this.nsides = sides;
     this.gnode = gnode;
     this.config = config || {};
     this.pool = pool;
     this.callbacks = callbacks;
-    this.name = name
+    this.name = name;
+    this.table = table;
  }
 
 /**
@@ -377,9 +378,11 @@ function load_arrow_buffer(data, names, types) {
  * View objects do not stop consuming resources or processing updates when
  * they are garbage collected - you must call this method to reclaim these.
  */
- view.prototype.delete = async function() {
+view.prototype.delete = async function() {
     this.pool.unregister_context(this.gnode.get_id(), this.name);
-    this.ctx.delete();
+    this.ctx.delete(); 
+    this.table.views.splice(this.table.views.indexOf(this), 1);
+    this.table = undefined;
     let i = 0, j = 0;
     while (i < this.callbacks.length) {
         let val = this.callbacks[i];
@@ -387,7 +390,10 @@ function load_arrow_buffer(data, names, types) {
         i++;
     }
     this.callbacks.length = j;
- }
+    if (this._delete_callback) {
+        this._delete_callback();
+    }
+}
 
 /**
  * How many pivoted sides does this view have?
@@ -396,7 +402,7 @@ function load_arrow_buffer(data, names, types) {
  *
  * @returns {number} sides The number of sides of this `View`.
  */
- view.prototype.sides = function() {
+view.prototype.sides = function() {
     return this.nsides;
 }
 
@@ -607,7 +613,7 @@ view.prototype.num_columns = async function() {
  * parameter to this callback shares a structure with the return type of 
  * {@link view#to_json}.
  */
-view.prototype.on_update = function(callback) {
+view.prototype.on_update = function (callback) {
     this.callbacks.push({
         view: this,
         callback: () => {
@@ -632,6 +638,18 @@ view.prototype.on_update = function(callback) {
             }
         }
     });
+}
+
+/**
+ * Register a callback with this {@link view}.  Whenever the {@link view}
+ * is deleted, this callback will be invoked.
+ *
+ * @param {function} callback A callback function invoked on update.  The 
+ *     parameter to this callback shares a structure with the return type of 
+ *     {@link view#to_json}.
+ */
+view.prototype.on_delete = function (callback) {
+    this._delete_callback = callback;
 }
 
 /******************************************************************************
@@ -660,9 +678,10 @@ function table(gnode, pool, index) {
     this.index = index;
     this.pool.set_update_delegate(this);
     this.callbacks = [];
+    this.views = [];
 }
 
-table.prototype._update_callback = function() {
+table.prototype._update_callback = function () {
     for (let e in this.callbacks) {
         this.callbacks[e].callback();
     }
@@ -674,9 +693,27 @@ table.prototype._update_callback = function() {
  * they are garbage collected - you must call this method to reclaim these.
  */
 table.prototype.delete = function() {
-    this.pool.unregister_gnode(this.gnode);
-    this.pool.delete();
+    if (this.views.length > 0) {
+        throw "Table still has contexts - refusing to delete.";
+    }
+    this.pool.unregister_gnode(this.gnode.get_id());
     this.gnode.delete();
+    this.pool.delete();
+    if (this._delete_callback) {
+        this._delete_callback();
+    }
+}
+
+/**
+ * Register a callback with this {@link table}.  Whenever the {@link view}
+ * is deleted, this callback will be invoked.
+ *
+ * @param {function} callback A callback function invoked on update.  The 
+ *     parameter to this callback shares a structure with the return type of 
+ *     {@link table#to_json}.
+ */
+table.prototype.on_delete = function (callback) {
+    this._delete_callback = callback;
 }
 
 /**
@@ -912,16 +949,20 @@ table.prototype.view = function(config) {
             } else {
                 context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
             }
+
             const groups = context.unity_get_column_count() / aggregates.length;
             const new_sort = [];
+
             for (let z = 0; z < groups; z ++) {
                 for (let s of sort) {
                     new_sort.push([s[0] + (z * aggregates.length), s[1]]);
                 }
             }
+
             if (sort.length > 0) {
                 __MODULE__.sort(context, new_sort);
             }
+
         } else {
             context = __MODULE__.make_context_one(
                 this.gnode,
@@ -945,7 +986,9 @@ table.prototype.view = function(config) {
         this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
     }
 
-    return new view(this.pool, context, sides, this.gnode, config, name, this.callbacks);
+    let v = new view(this.pool, context, sides, this.gnode, config, name, this.callbacks, this);
+    this.views.push(v);
+    return v;
 }
 
 /**
@@ -1088,9 +1131,20 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             case 'table_method': {
                 let obj = _tables[msg.name];
-                let result = obj[msg.method].apply(obj, msg.args);
-                if (result) {
-                    if (result.then) {
+                let result;
+
+                try {
+
+                    if (msg.subscribe) {
+                        obj[msg.method](e => {
+                    self.postMessage({
+                        id: msg.id,
+                                data: e
+                    });
+                        });
+                    } else {
+                        result = obj[msg.method].apply(obj, msg.args);   
+                        if (result && result.then) {
                         result.then(data => {
                             if (data) {
                                 self.postMessage({
@@ -1111,12 +1165,21 @@ if (typeof self !== "undefined" && self.addEventListener) {
                         });
                     }
                 }
+
+                } catch (e) {
+                    self.postMessage({
+                        id: msg.id,
+                        error: e
+                    });
+                    return;
+                }
+               
                 break;
             }
             case 'view_method': {
                 let obj = _views[msg.name];
                 if (msg.subscribe) {
-                    obj[msg.method](function(e) {
+                    obj[msg.method](e => {
                         self.postMessage({
                             id: msg.id,
                             data: e
@@ -1216,7 +1279,7 @@ const perspective = {
                 0, options.index, pdata.is_arrow);
 
             gnode = __MODULE__.make_gnode(tbl);
-            pool.register_gnode(gnode);
+            gnode._id = pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
 
             return new table(gnode, pool, options.index);
