@@ -857,6 +857,18 @@ registerElement(template, {
         }
     },
 
+    'reset': {
+        value: function() {
+            this.setAttribute('row-pivots', JSON.stringify([]));
+            this.setAttribute('column-pivots', JSON.stringify([]));
+            this.setAttribute('filters', JSON.stringify([]));
+            this.setAttribute('sort', JSON.stringify([]));
+            this.setAttribute('columns', JSON.stringify(this._initial_col_order));
+            this.setAttribute('view', Object.keys(RENDERERS)[0]);
+            this.dispatchEvent(new Event('config-update'));
+        }
+    },
+
     attachedCallback: {
         value: function() {
             let _update = _.debounce(update.bind(this), 10);
