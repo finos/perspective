@@ -71,7 +71,7 @@ function calc_index(event) {
     } else {
         let {offsetHeight, offsetTop} = this._active_columns.children[0];
         let column_offset = offsetTop - this._active_columns.offsetTop;
-        return Math.floor((event.offsetY + this._active_columns.scrollTop - column_offset) / offsetHeight);
+        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - column_offset) / offsetHeight));
     }
 }
 
@@ -355,7 +355,7 @@ async function loadTable(table) {
         shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
         for (let x in cols) {
             if (shown.indexOf(x) !== -1) {
-                this._inactive_columns.children[x].style.display = 'none';
+                this._inactive_columns.children[x].classList.add('active');
             }
         }
     } else {
@@ -366,7 +366,7 @@ async function loadTable(table) {
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
             if (shown.indexOf(x) !== -1) {
-                row.style.display = 'none';
+                row.classList.add('active');
             }
         }
 
@@ -687,9 +687,9 @@ registerElement(template, {
             lis.forEach(x => {
                 const index = columns.indexOf(x.getAttribute('name'));
                 if (index === -1) {
-                    x.style.display = 'block';
+                    x.classList.remove('active');
                 } else {
-                    x.style.display = 'none';
+                    x.classList.add('active');
                 }
             });
             if (reset) {

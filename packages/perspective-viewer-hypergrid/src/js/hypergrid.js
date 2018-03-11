@@ -510,9 +510,20 @@ function is_subrange(sub, sup) {
     return sup[0] <= sub[0] && sup[1] >= sub[1];
 }
 
+
+// How many rows to pad the cache by;  TODO this should really be calculated
+// from the parameters of the theme.
+const OFFSET_SETTINGS = 5;
+
+/**
+ * Estimate the visible range of a Hypergrid.
+ * 
+ * @param {any} grid 
+ * @returns 
+ */
 function estimate_range(grid) {
     let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
-    return [parseInt(range[0]), parseInt(range[range.length - 1]) + 2];
+    return [parseInt(range[0]), parseInt(range[range.length - 1]) + OFFSET_SETTINGS];
 }
 
 import rectangular from 'rectangular';
@@ -776,6 +787,12 @@ global.registerPlugin("hypergrid", {
         }
     },
     delete: function () {
+        if (this.hypergrid) {
+           // this.hypergrid.clearState();
+            this.hypergrid.behavior.reset();
+            this.hypergrid.renderer.reset();
+            this.hypergrid.canvas.resize();
+        }
     }
 });
 
