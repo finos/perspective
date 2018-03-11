@@ -597,11 +597,13 @@ registerElement(template, {
 
     update: {
         value: function (json) {
+            setTimeout(() => {
                 if (this._table === undefined) {
                     this.load(json);
                 } else {
                     this._table.update(json);
                 }
+            }, 0);
         }
     },
 
