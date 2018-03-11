@@ -66,8 +66,13 @@ function undrag(event) {
 }
 
 function calc_index(event) {
-    let height = this._active_columns.children[0].offsetHeight + 2;
-    return Math.floor((event.offsetY + this._active_columns.scrollTop) / height);
+    if (this._active_columns.children.length == 0) {
+        return 0;
+    } else {
+        let {offsetHeight, offsetTop} = this._active_columns.children[0];
+        let column_offset = offsetTop - this._active_columns.offsetTop;
+        return Math.floor((event.offsetY + this._active_columns.scrollTop - column_offset) / offsetHeight);
+    }
 }
 
 function column_undrag(event) {
@@ -592,11 +597,11 @@ registerElement(template, {
 
     update: {
         value: function (json) {
-            if (this._table === undefined) {
-                this.load(json);
-            } else {
-                this._table.update(json);
-            }
+                if (this._table === undefined) {
+                    this.load(json);
+                } else {
+                    this._table.update(json);
+                }
         }
     },
 
