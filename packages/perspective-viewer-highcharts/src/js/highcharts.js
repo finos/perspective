@@ -423,7 +423,7 @@ export function draw(mode) {
                     colorRange[1] = Math.max(colorRange[1], val);
                 }
             }
-            if (coloRange[0] * colorRange[1] < 0) {
+            if (colorRange[0] * colorRange[1] < 0) {
                 let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
                 colorRange = [-cmax, cmax];
             }
