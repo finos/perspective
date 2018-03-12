@@ -291,7 +291,7 @@ async function loadTable(table) {
         this.setAttribute('columns', JSON.stringify(this._initial_col_order));
     }
 
-    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+    let type_order = {integer: 2, string: 0, float: 3, boolean: 4, date: 1};
 
     // Sort columns by type and then name
     cols.sort((a, b) => {
