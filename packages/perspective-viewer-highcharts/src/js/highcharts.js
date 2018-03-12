@@ -223,8 +223,6 @@ function* visible_rows(json, hidden) {
     }
 }
 
-
-
 export function draw(mode) {
     return async function(el, view, hidden, task) {
         var row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
@@ -232,6 +230,16 @@ export function draw(mode) {
         var aggregates = this._get_view_aggregates();
 
         let [js, schema] = await Promise.all([view.to_json(), view.schema()]);
+
+        if (this.hasAttribute('updating') && this._chart) {
+            chart = this._chart
+            this._chart = undefined;
+            try {
+                chart.destroy();
+            } catch (e) {
+                console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+            }
+        }
 
         if (task.cancelled) {
             return;
@@ -541,16 +549,6 @@ export function draw(mode) {
                 }
 
             });
-        }
-
-        if (this.hasAttribute('updating') && this._chart) {
-            chart = this._chart
-            this._chart = undefined;
-            try {
-                chart.destroy();
-            } catch (e) {
-                console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
-            }
         }
 
         if (this._chart) {

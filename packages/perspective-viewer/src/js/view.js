@@ -507,7 +507,7 @@ function update() {
                     }).catch(err => {
                         console.error("Error rendering plugin.", err);
                     });
-                })(task);
+                })(this._task);
             }, timeout || 0);
         }
     });
