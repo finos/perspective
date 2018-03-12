@@ -554,7 +554,7 @@ registerElement(template, {
 
     _plugin: {
         get: function () {
-            return RENDERERS[this._vis_selector.value];
+            return RENDERERS[this._vis_selector.value || this.getAttribute('view') || Object.apply.keys(RENDERERS)[0] ];
         }
     },
 
@@ -935,7 +935,12 @@ registerElement(template, {
             this.setAttribute('column-pivots', JSON.stringify([]));
             this.setAttribute('filters', JSON.stringify([]));
             this.setAttribute('sort', JSON.stringify([]));
-            this.setAttribute('columns', JSON.stringify(this._initial_col_order));
+            this.removeAttribute('index');
+            if (this._initial_col_order) {
+                this.setAttribute('columns', JSON.stringify(this._initial_col_order || []));
+            } else {
+                this.removeAttribute('columns');
+            }
             this.setAttribute('view', Object.keys(RENDERERS)[0]);
             this.dispatchEvent(new Event('config-update'));
         }
