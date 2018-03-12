@@ -500,12 +500,14 @@ function update() {
                     this._task.cancel();
                 }
                 this._task = new CancelTask();
-                this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
-                    this.setAttribute('render_time', performance.now() - t);
-                    this._task.cancel();
-                }).catch(err => {
-                    console.error("Error rendering plugin.", err);
-                });
+                (task => {
+                    this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+                        this.setAttribute('render_time', performance.now() - t);
+                        task.cancel();
+                    }).catch(err => {
+                        console.error("Error rendering plugin.", err);
+                    });
+                })(task);
             }, timeout || 0);
         }
     });
@@ -518,18 +520,21 @@ function update() {
     this._task = new CancelTask(() => {
         this._render_count--;
     });
-    this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
-        if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('loaded', {bubbles: true}));
-        }
-        this.setAttribute('render_time', performance.now() - t);
-        this._task.cancel();
-        if (this._render_count === 0) {
-            this.removeAttribute('updating');
-        }
-    }).catch(() => {
-        console.debug("View cancelled");
-    });
+
+    (task => {
+        this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+            if (!this.hasAttribute('render_time')) {
+                this.dispatchEvent(new Event('loaded', {bubbles: true}));
+            }
+            this.setAttribute('render_time', performance.now() - t);
+            task.cancel();
+            if (this._render_count === 0) {
+                this.removeAttribute('updating');
+            }
+        }).catch(() => {
+            console.debug("View cancelled");
+        });
+    })(this._task);
 }
 
 /******************************************************************************
