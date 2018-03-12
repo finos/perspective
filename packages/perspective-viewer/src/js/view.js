@@ -737,8 +737,6 @@ registerElement(template, {
                     this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
                 } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
-                } else {
-                    this.setAttribute('columns', JSON.stringify(this._initial_col_order)); //JSON.stringify(cols.map(x => x.getAttribute('name'))));
                 }
             }
             this.dispatchEvent(new Event('config-update'));
