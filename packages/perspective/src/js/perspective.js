@@ -71,7 +71,8 @@ const DATE_PARSE_CANDIDATES = [
     'MM/DD/YYYY', 
     'M/D/YYYY', 
     'M/D/YY', 
-    'DD MMM YYYY'
+    'DD MMM YYYY',
+    'HH:mm:ss.SSS',
 ];
 
 /**

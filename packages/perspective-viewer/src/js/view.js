@@ -66,8 +66,13 @@ function undrag(event) {
 }
 
 function calc_index(event) {
-    let height = this._active_columns.children[0].offsetHeight + 2;
-    return Math.floor((event.offsetY + this._active_columns.scrollTop) / height);
+    if (this._active_columns.children.length == 0) {
+        return 0;
+    } else {
+        let {offsetHeight, offsetTop} = this._active_columns.children[0];
+        let column_offset = offsetTop - this._active_columns.offsetTop;
+        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - column_offset) / offsetHeight));
+    }
 }
 
 function column_undrag(event) {
@@ -286,7 +291,7 @@ async function loadTable(table) {
         this.setAttribute('columns', JSON.stringify(this._initial_col_order));
     }
 
-    let type_order = {integer: 2, string: 0, float: 2, boolean: 1, date: 3};
+    let type_order = {integer: 2, string: 0, float: 3, boolean: 4, date: 1};
 
     // Sort columns by type and then name
     cols.sort((a, b) => {
@@ -350,7 +355,7 @@ async function loadTable(table) {
         shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
         for (let x in cols) {
             if (shown.indexOf(x) !== -1) {
-                this._inactive_columns.children[x].style.display = 'none';
+                this._inactive_columns.children[x].classList.add('active');
             }
         }
     } else {
@@ -361,7 +366,7 @@ async function loadTable(table) {
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
             if (shown.indexOf(x) !== -1) {
-                row.style.display = 'none';
+                row.classList.add('active');
             }
         }
 
@@ -495,12 +500,14 @@ function update() {
                     this._task.cancel();
                 }
                 this._task = new CancelTask();
-                this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
-                    this.setAttribute('render_time', performance.now() - t);
-                    this._task.cancel();
-                }).catch(err => {
-                    console.error("Error rendering plugin.", err);
-                });
+                (task => {
+                    this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+                        this.setAttribute('render_time', performance.now() - t);
+                        task.cancel();
+                    }).catch(err => {
+                        console.error("Error rendering plugin.", err);
+                    });
+                })(this._task);
             }, timeout || 0);
         }
     });
@@ -513,18 +520,21 @@ function update() {
     this._task = new CancelTask(() => {
         this._render_count--;
     });
-    this._plugin.create.call(this, this._datavis, this._view, hidden, this._task).then(() => {
-        if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('loaded', {bubbles: true}));
-        }
-        this.setAttribute('render_time', performance.now() - t);
-        this._task.cancel();
-        if (this._render_count === 0) {
-            this.removeAttribute('updating');
-        }
-    }).catch(() => {
-        console.debug("View cancelled");
-    });
+
+    (task => {
+        this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+            if (!this.hasAttribute('render_time')) {
+                this.dispatchEvent(new Event('loaded', {bubbles: true}));
+            }
+            this.setAttribute('render_time', performance.now() - t);
+            task.cancel();
+            if (this._render_count === 0) {
+                this.removeAttribute('updating');
+            }
+        }).catch(() => {
+            console.debug("View cancelled");
+        });
+    })(this._task);
 }
 
 /******************************************************************************
@@ -549,7 +559,7 @@ registerElement(template, {
 
     _plugin: {
         get: function () {
-            return RENDERERS[this._vis_selector.value];
+            return RENDERERS[this._vis_selector.value || this.getAttribute('view') || Object.apply.keys(RENDERERS)[0] ];
         }
     },
 
@@ -592,11 +602,13 @@ registerElement(template, {
 
     update: {
         value: function (json) {
-            if (this._table === undefined) {
-                this.load(json);
-            } else {
-                this._table.update(json);
-            }
+            setTimeout(() => {
+                if (this._table === undefined) {
+                    this.load(json);
+                } else {
+                    this._table.update(json);
+                }
+            }, 0);
         }
     },
 
@@ -680,9 +692,9 @@ registerElement(template, {
             lis.forEach(x => {
                 const index = columns.indexOf(x.getAttribute('name'));
                 if (index === -1) {
-                    x.style.display = 'block';
+                    x.classList.remove('active');
                 } else {
-                    x.style.display = 'none';
+                    x.classList.add('active');
                 }
             });
             if (reset) {
@@ -928,7 +940,12 @@ registerElement(template, {
             this.setAttribute('column-pivots', JSON.stringify([]));
             this.setAttribute('filters', JSON.stringify([]));
             this.setAttribute('sort', JSON.stringify([]));
-            this.setAttribute('columns', JSON.stringify(this._initial_col_order));
+            this.removeAttribute('index');
+            if (this._initial_col_order) {
+                this.setAttribute('columns', JSON.stringify(this._initial_col_order || []));
+            } else {
+                this.removeAttribute('columns');
+            }
             this.setAttribute('view', Object.keys(RENDERERS)[0]);
             this.dispatchEvent(new Event('config-update'));
         }

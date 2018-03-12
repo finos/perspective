@@ -79,11 +79,11 @@ perspective-viewer {
     }
     .chart {
         flex-grow: 1;
-        height: calc(~"100% - 10px");
+        height: calc(~"100% - 15px");
         width: calc(~"100% - 20px");
         position: absolute;
         margin-right: 20px;
-        margin-top: 10px;
+        margin-top: 15px;
     }
     #pivot_chart {
         position: relative;
@@ -92,17 +92,20 @@ perspective-viewer {
         margin: 0px;
         background-color: white;
     }
+
     .config {
         display: flex;
     }
+
     #row_pivots li, #column_pivots li, #sort li {
         display: inline;
     }
+
     ul {
         min-height: 20px;
         position: static !important;
-
     }
+
     #active_columns, #inactive_columns {
         list-style: none;
         padding: 5px;
@@ -113,8 +116,12 @@ perspective-viewer {
     }
 
     #inactive_columns {
-        min-height: 20%;
+        min-height: 33.3%;
         flex-shrink: 1000;
+
+        .active {
+            display: none;
+        }
     }
 
     #divider {
