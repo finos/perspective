@@ -775,8 +775,6 @@ registerElement(template, {
                     this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
                 } else if (this._plugin.selectMode === 'select') {
                     this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
-                } else {
-                    this.setAttribute('columns', JSON.stringify(this._initial_col_order)); //JSON.stringify(cols.map(x => x.getAttribute('name'))));
                 }
             }
         }
@@ -921,6 +919,18 @@ registerElement(template, {
             for (let key in x) {
                 this.setAttribute(key, x[key]);
             }
+        }
+    },
+
+    'reset': {
+        value: function() {
+            this.setAttribute('row-pivots', JSON.stringify([]));
+            this.setAttribute('column-pivots', JSON.stringify([]));
+            this.setAttribute('filters', JSON.stringify([]));
+            this.setAttribute('sort', JSON.stringify([]));
+            this.setAttribute('columns', JSON.stringify(this._initial_col_order));
+            this.setAttribute('view', Object.keys(RENDERERS)[0]);
+            this.dispatchEvent(new Event('config-update'));
         }
     },
 
