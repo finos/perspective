@@ -764,7 +764,9 @@ registerElement(template, {
 
     _set_column_defaults: {
         value: function () {
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+            let active = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
+            let inactive = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+            let cols = active.concat(inactive);
             if (cols.length > 0) {
                 if (this._plugin.initial) {
                     let pref = [];
