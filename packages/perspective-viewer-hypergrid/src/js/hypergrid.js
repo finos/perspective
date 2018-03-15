@@ -7,10 +7,9 @@
  *
  */
 
-import {GridUIFixPlugin} from "./fixes.js";
-
 const Hypergrid = require("fin-hypergrid");
-const Behaviors = require("fin-hypergrid/src/behaviors");
+const images = require('fin-hypergrid/images');
+const JSONBehavior = require("fin-hypergrid/src/behaviors/JSON.js");
 const Base = require("fin-hypergrid/src/Base.js");
 
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer.js").treeLineRendererPaint;
@@ -30,7 +29,7 @@ var base_grid_properties = {
     cellSelection: false,
     columnSelection: false,
     rowSelection: false,
-    checkboxOnlyRowSelections: false,
+    checkboxOnlyRowSelections: true,
     columnClip: true,
     columnHeaderFont: '12px amplitude-regular, Helvetica, sans-serif',
     columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
@@ -44,6 +43,8 @@ var base_grid_properties = {
     enableContinuousRepaint: false,
     fixedColumnCount: 0,
     fixedRowCount: 0,
+    fixedLinesHWidth: 1,
+    fixedLinesVWidth: 1,
     font: '12px "Arial", Helvetica, sans-serif',
     foregroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     gridLinesH: false,
@@ -59,14 +60,14 @@ var base_grid_properties = {
     rowHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     rowResize: true,
     scrollbarHoverOff: 'visible',
-    showCheckboxes: false,
+    rowHeaderCheckboxes: false,
+    rowHeaderNumbers: false,
     showFilterRow: true,
     showHeaderRow: true,
-    showRowNumbers: false,
     showTreeColumn: false,
     singleRowSelectionMode: false,
     sortColumns: [],
-    treeColumn: '',
+    treeRenderer: 'TreeCell',
     treeHeaderFont: '12px Arial, Helvetica, sans-serif',
     treeHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     useBitBlit: false,
@@ -94,6 +95,10 @@ var light_theme_overrides = {
     columnHeaderBackgroundNumberPositive: '#1078d1',
     columnHeaderBackgroundNumberNegative: "#de3838",
     rowHeaderForegroundSelectionFont: '12px Arial, Helvetica, sans-serif',
+    treeHeaderColor: '#666',
+    treeHeaderBackgroundColor: '#fff',
+    treeHeaderForegroundSelectionColor: '#333',
+    treeHeaderBackgroundSelectionColor: '#40536d',
     rowProperties: [
         { color: '#666', backgroundColor: '#fff' },
     ],
@@ -107,6 +112,37 @@ var light_theme_overrides = {
     },
 };
 
+
+var dark_theme_images = {
+    'checked': {
+        type: 'image/png',
+        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABESURBVChTY1x6/j8DIcAEpfECyhTVpDpDWbgUIasAAoQiuASE0TJ7L4QLBCxQGgzg6pBVAAHCJLgEmgogGCzhhAAMDAAAPBIjYAlOrAAAAABJRU5ErkJggg=='
+    },
+    'unchecked': {
+        type: 'image/png',
+        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA+SURBVChTY5wzaw4DQQBSxMKABwEVAGkGAQEBDhYOiB408OPPDyDJBMRAFZwcnFgRRDNIEUEwvBURES0MDACrSwuvUImJzAAAAABJRU5ErkJggg=='
+    }
+};
+
+var light_theme_images = {
+    'checked': {
+        type: 'image/png',
+        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB6SURBVChTY2TMPsZACDBBabyAEkWaiucadfo0oTxsijSVr6VJGPCxSHCyQwRgioBa2wzmAbWCVIhpMHxfMOtC1LmfEEmoInlOFg5OzoQ003cwFUnXITIgAFX08NxtrVmvbjCwCGCoAALUcNIUT2d4ORNVBRDQNTAZGACd+iUaw4Ve6QAAAABJRU5ErkJggg=='
+    },
+    'unchecked': {
+        type: 'image/png',
+        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA6SURBVChTY0gjAoAUPX78+AkOAJSCKvr48eN3HAAoBVUE5PzHAYBSpCj69u0bVAwDAKWGuiICIC0NAFctWZR3QfcoAAAAAElFTkSuQmCC'
+    }
+}
+
+
+_(light_theme_images).each(function (image, key) {
+    var element = new Image();
+    element.src = 'data:' + image.type + ';base64,' + image.data;
+    images.add(key, element);
+});
+
+
 function generateGridProperties(overrides) {
     var full_properties = {};
     for (var propname in base_grid_properties) {
@@ -119,26 +155,26 @@ function generateGridProperties(overrides) {
 }
 
 function setPSP(payload) {
-    if (payload.isTree) {
-        this.grid.renderer.properties.fixedColumnCount = 1;
+    /*if (payload.isTree) {
+        this.grid.properties.fixedColumnCount = 1;
     } else {
-        this.grid.renderer.properties.fixedColumnCount = 0;
-    }
+        this.grid.properties.fixedColumnCount = 0;
+    }*/
     var processed_schema = [];
-    var treecolumnIndex = 0;
+    //var treecolumnIndex = 0;
     var col_name, col_header, col_settings;
 
     if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === "") {
         payload.columnPaths[0] = [' '];
     }
 
-    for (var i = 0; i < payload.columnPaths.length; i++) {
+    for (var i = (payload.isTree?1:0); i < payload.columnPaths.length; i++) {
         col_name = payload.columnPaths[i].join('|');
         var aliases = payload.configuration.columnAliases;
         col_header = aliases ? (aliases[col_name] || col_name) : col_name;
-        if (this.grid.properties.treeColumn === col_name) {
-            treecolumnIndex = i;
-        }
+        //if (this.grid.properties.treeColumn === col_name) {
+        //    treecolumnIndex = i;
+        //}
 
         col_settings = { name: i.toString(), header: col_header };
         if (payload.columnTypes[i] === 'str') {
@@ -179,16 +215,20 @@ function setPSP(payload) {
         });
         this.schema_loaded = true;
 
-        this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: this.grid } }));
+        if (payload.isTree) {
+            this.grid.properties.showTreeColumn = true;
+            /*this.grid.properties.treeColumnIndex = 0;
+            let props = this.grid.getColumnProperties(0);
+            props.renderer = "TreeCell";
+            this.grid.properties.fixedColumnCount = 1;*/
+        }
 
-        this.grid.properties.treeColumnIndex = 0;
-        this.grid.installPlugins([GroupedHeader]);
         this.grid.behavior.setHeaders();
 
-        let old = this.grid.renderer.computeCellsBounds;
-        this.grid.renderer.computeCellsBounds = function() {
-            old.call(this);
-        }
+        //let old = this.grid.renderer.computeCellsBounds;
+        //this.grid.renderer.computeCellsBounds = function() {
+        //    old.call(this);
+        //}
 
         for (i = 0; i < this.schema.length; i++) {
             let props = this.grid.getColumnProperties(i);
@@ -228,59 +268,20 @@ function setPSP(payload) {
             props.columnAutosizing = true;
             this.grid.behavior.setColumnProperties(i, props);
         }
+
+        this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: this.grid } }));
+
     }
     this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: this.grid } }));
 
 }
 
 
-function CheckboxTrackingPlugin(grid) {
-
-    grid.selectionModel.checkedRows = {};
-
-    grid._clearSelections = grid._clearSelections;
-    grid._clearSelections = function () {
-        grid.clearCheckedRows();
-        grid._clearSelections();
-    };
-
-    grid.clearCheckedRows = function () {
-        grid.selectionModel.checkedRows = {};
-    };
-
-
-    grid.isRowChecked = function (rowIdx) {
-        var row = grid.getRow(rowIdx);
-        if (row) {
-            return (grid.selectionModel.checkedRows && (JSON.stringify(row.rowPath) in grid.selectionModel.checkedRows));
-        }
-    };
-
-    grid.getCheckedRows = function () {
-        return grid.selectionModel.checkedRows;
-    };
-
-    grid.getRowIdx = function (rowPath) {
-        var path = Array.isArray(rowPath) ? JSON.stringify(rowPath) : rowPath;
-        for (let i = 0; i < grid.getRowCount(); i ++) {
-            if (JSON.stringify(grid.getRow(i).rowPath) === path) {
-                return i;
-            }
-        }
-    };
-
-}
-
 function PerspectiveDataModel(grid) {
-    Behaviors.JSON.prototype.setPSP = setPSP;
+    grid.behavior.__proto__.setPSP = setPSP;
 
-    var treeLineRenderer = Base.extend({ paint: treeLineRendererPaint });
-    grid.cellRenderers.add('TreeLines', treeLineRenderer);
-    grid.behavior.dataModel.configuration = {};
-    grid.behavior.dataModel.configuration['expandedRows'] = [];
-
-    this.grid = grid;
-    this.viewData = [];
+    //grid.behavior.dataModel.configuration = {};
+    //grid.behavior.dataModel.configuration['expandedRows'] = [];
 
     grid.mixIn.call(grid.behavior.dataModel, {
 
@@ -304,10 +305,6 @@ function PerspectiveDataModel(grid) {
             return x === this.grid.properties.treeColumnIndex && this.isTree();
         },
 
-        isLeafNode: function (y) {
-            return this.viewData[y].isLeaf;
-        },
-
         // Custom API to check if a given row path and any children are expanded
         matchedRowExpansions: function( rowPath ) {
             var currentExpandedRows = this.configuration['expandedRows'];
@@ -325,7 +322,8 @@ function PerspectiveDataModel(grid) {
 
         // Return the value for a given cell based on (x,y) coordinates
         getValue: function(x, y) {
-            return this.dataSource.data[y].rowData[x];
+            var offset = this.grid.behavior.hasTreeColumn() ? 1 : 0;
+            return this.dataSource.data[y].rowData[x+offset];
         },
 
         // Process a value entered in a cell within the grid
@@ -339,10 +337,10 @@ function PerspectiveDataModel(grid) {
         },
 
         // Return the number of columns, allowing for the tree column
-        getColumnCount: function() {
+        /*getColumnCount: function() {
             var offset = this.grid.behavior.hasTreeColumn() ? -1 : 0;
             return this.dataSource.getColumnCount() + offset;
-        },
+        },*/
 
         // Called when clickong on a row group expand
         toggleRow: function (y, expand, event) {
@@ -378,24 +376,17 @@ function PerspectiveDataModel(grid) {
 
         // Return the cell renderer
         getCell: function (config, rendererName) {
-            // if in single row selection mode, hide the header row checkbox
-            if (this.grid.properties.singleRowSelectionMode && config.isHandleColumn && config.isHeaderRow) {
-                config.value = [];
-            }
-            else if (this.grid.properties.showCheckboxes && config.isHandleColumn && config.isDataRow) {
-                var icon = Hypergrid.images[ this.grid.isRowChecked( config.dataCell.y) ? 'checked' : 'unchecked'];
-                config.value = [icon];
-            } else if (config.isUserDataArea) {
+            if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
-                if (this.isTreeCol(config.dataCell.x)) {
-                    config.depth = config.dataRow.rowPath.length-1;
-                    config.leaf = config.dataRow.isLeaf;
-                    var lastChild = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
+            } else {
+                if (config.dataCell.x == -1 && !config.isHeaderRow) {
+                    config.last = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
+
                     var next_row = this.dataSource.data[config.dataCell.y + 1];
                     config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
-                    config.last = lastChild;
-                    config._type = this.schema[0].type[config.depth - 1];
-                    return grid.cellRenderers.get('TreeLines');
+                } else {
+                    rendererName = 'SimpleCell';
+                    config.value = '';
                 }
             }
             return grid.cellRenderers.get(rendererName);
@@ -638,19 +629,20 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             var host = this.querySelector('#mainGrid');
 
             host.setAttribute('hidden', true);
-            this.grid = new Hypergrid(host, { Behavior: Behaviors.JSON });
+            this.grid = new Hypergrid(host, { Behavior: JSONBehavior });
             host.removeAttribute('hidden');
 
             this.grid.installPlugins([
-                GridUIFixPlugin,
                 PerspectiveDataModel,
-                CheckboxTrackingPlugin,
-                CachedRendererPlugin
+                CachedRendererPlugin,
+                [GroupedHeader, {CellRenderer: 'SimpleCell'}]
             ]);
 
-            var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
-            grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
+            let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             this.grid.addProperties(grid_properties);
+
+            // Add tree cell renderer
+            this.grid.cellRenderers.add('TreeCell', Base.extend({ paint: treeLineRendererPaint }));
 
             const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
                 minimumFractionDigits: 2,
@@ -691,7 +683,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
                 this.grid.behavior.setPSP(this._hg_data);
                 delete this._hgdata;
             }
-
+            
         } else {
             this._detached = false;
         }
