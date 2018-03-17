@@ -35,6 +35,7 @@
   "license": "Apache",
   "dependencies": {
     "@jpmorganchase/perspective-common": "^0.1.2",
+    "@apache-arrow/es5-esm": "^0.3.1",
     "d3-array": "^1.2.1",
     "moment": "^2.19.1",
     "papaparse": "^4.3.6",

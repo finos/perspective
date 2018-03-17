@@ -177,14 +177,15 @@ namespace arrow {
     void
     fill_col_dict(t_uint32 nrows, t_uint32 dsize, val dcol, val vkeys, t_col_sptr col, const char* destType)
     {
-        val vdata = dcol["data"];
+        // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it support other Vector types?
+        val vdata = dcol["values"];
         t_int32 vsize = vdata["length"].as<t_int32>();
         std::vector<t_uchar> data;
         data.reserve(vsize);
         data.resize(vsize);
         vecFromTypedArray(vdata, data.data(), vsize);
 
-        val voffsets = dcol["offsets"];
+        val voffsets = dcol["valueOffsets"];
         t_int32 osize = voffsets["length"].as<t_int32>();
         std::vector<t_int32> offsets;
         offsets.reserve(osize);
@@ -215,7 +216,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
     t_uindex nrows = col->size();
 
     if (is_arrow) {
-        val data = dcol["data"];
+        val data = dcol["values"];
         arrow::vecFromTypedArray(data, col->get_nth<T>(0), nrows);
     } else {
         for (auto i = 0; i < nrows; ++i)
@@ -233,7 +234,7 @@ _fill_col<t_int64>(val dcol, t_col_sptr col, t_bool is_arrow)
     t_uindex nrows = col->size();
 
     if (is_arrow) {
-        val data = dcol["data"];
+        val data = dcol["values"];
         // arrow packs 64 bit into two 32 bit ints
         arrow::vecFromTypedArray(data, col->get_nth<t_int64>(0), nrows * 2);
     } else {
@@ -248,17 +249,17 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
     t_uindex nrows = col->size();
 
     if (is_arrow) {
-        val data = dcol["data"];
+        val data = dcol["values"];
         // arrow packs 64 bit into two 32 bit ints
         arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows*2);
 
-        t_str unit = dcol["unit"].as<t_str>();
-        if (unit != "MILLISECOND") {
+        t_int8 unit = dcol["type"]["unit"].as<t_int8>();
+        if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
             // Slow path - need to convert each value
             t_int64 factor = 1;
-            if (unit == "NANOSECOND") {
+            if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
                 factor = 1e6;
-            } else if (unit == "MICROSECOND") {
+            } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
                 factor = 1e3;
             }
             for (auto i = 0; i < nrows; ++i)
@@ -283,7 +284,7 @@ _fill_col<t_bool>(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         // arrow packs bools into a bitmap
-        val data = dcol["data"];
+        val data = dcol["values"];
         for (auto i = 0; i < nrows; ++i)
         {
             t_uint8 elem = data[i / 8].as<t_uint8>();
@@ -309,17 +310,13 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
 
     if (is_arrow) {
         if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
-            val dictvec = dcol["data"];
+
+            val dictvec = dcol["dictionary"];
 
             // Get number of dictionary entries
             t_uint32 dsize = dictvec["length"].as<t_uint32>();
             
-            // UTF-8 dictionaries have an extra level of js object!
-            if (dictvec["constructor"]["name"].as<t_str>() == "Utf8Vector") {
-                dictvec = dictvec["values"];
-            }
-
-            val vkeys = dcol["keys"]["data"];
+            val vkeys = dcol["indices"]["values"];
 
             // Perspective stores string indices in a 32bit unsigned array
             // Javascript's typed arrays handle copying from various bitwidth arrays properly
@@ -340,18 +337,15 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
             }
         } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector" || 
                    dcol["constructor"]["name"].as<t_str>() == "BinaryVector") {
-            if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
-                dcol = dcol["values"];
-            }
 
-            val vdata = dcol["data"];
+            val vdata = dcol["values"];
             t_int32 vsize = vdata["length"].as<t_int32>();
             std::vector<t_uint8> data;
             data.reserve(vsize);
             data.resize(vsize);
             arrow::vecFromTypedArray(vdata, data.data(), vsize);
 
-            val voffsets = dcol["offsets"];
+            val voffsets = dcol["valueOffsets"];
             t_int32 osize = voffsets["length"].as<t_int32>();
             std::vector<t_int32> offsets;
             offsets.reserve(osize);
@@ -467,12 +461,7 @@ _fill_data(t_table_sptr tbl,
             if (null_count == 0) {
                 col->valid_raw_fill(true);
             } else {
-                val validity = dcol;
-                if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector") {
-                    validity = dcol["values"]["validity"]["data"];
-                } else {
-                    validity = dcol["validity"]["data"];
-                }
+                val validity = dcol["nullBitmap"];
                 arrow::fill_col_valid(validity, col);
             }
         }
