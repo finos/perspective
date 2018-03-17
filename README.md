@@ -273,4 +273,21 @@ document.addEventListener("WebComponentsReady", function () {
 });
 ```
 
+Views can share a table by instancing it separately and passing it to the
+`load()` method.
+
+```javascript
+var view1 = document.getElementById('view1');
+var view2 = document.getElementById('view2');
+
+// Use the default Web Worker instance
+var tbl = view1.worker.table(data);
+
+view1.load(tbl);
+view2.load(tbl);
+
+tbl.update([{'x': 5, 'y': 'e', 'z': true}]);
+```
+
+
 See [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective) for more details.
