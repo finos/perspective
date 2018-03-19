@@ -10,6 +10,7 @@
 import highcharts from 'highcharts';
 import highchartsMore from 'highcharts-more';
 import heatmap from 'highcharts/modules/heatmap';
+import boost from 'highcharts/modules/boost';
 import grouped_categories from 'highcharts-grouped-categories';
 import chroma from 'chroma-js';
 
@@ -27,6 +28,7 @@ let axisProto = Highcharts.Axis.prototype,
 highchartsMore(highcharts);
 heatmap(highcharts);
 grouped_categories(highcharts);
+boost(highcharts);
 
 export const COLORS_10 = ['#1f77b4','#ff7f0e','#2ca02c','#d62728','#9467bd','#8c564b','#e377c2','#7f7f7f','#bcbd22','#17becf'];
 export const COLORS_20 = [
