@@ -70,8 +70,7 @@ function calc_index(event) {
         return 0;
     } else {
         let {offsetHeight, offsetTop} = this._active_columns.children[0];
-        let column_offset = offsetTop - this._active_columns.offsetTop;
-        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - column_offset) / offsetHeight));
+        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - offsetTop) / offsetHeight));
     }
 }
 
