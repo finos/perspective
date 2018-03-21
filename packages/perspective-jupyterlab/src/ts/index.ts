@@ -11,10 +11,10 @@ import {Widget} from '@phosphor/widgets';
 import {Message} from '@phosphor/messaging';
 import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
-
+import {Clipboard} from '@jupyterlab/apputils';
 import '../src/css/index.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.js';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, convertToCSV} from './utils.js';
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
@@ -34,6 +34,42 @@ interface PerspectiveSpec {
     layout: string,
     config: string;
 }
+
+
+function createCopy(psp: any) : HTMLElement {
+    let button = document.createElement('button');
+    button.textContent = 'copy';
+
+    var data: any;
+
+    button.onmousedown = () => {
+        psp._view.to_json().then((dat: Array<Object>) => {
+            data = dat;
+        });
+    }
+
+    button.onclick = () => {
+        let copied = false;
+        let timeout = 100;
+        while (!copied){
+            setTimeout(() => {
+                if (data) {
+                    Clipboard.copyToSystem(convertToCSV(data));
+                    copied = true;
+                }
+            }, timeout);
+            timeout *= 2;
+
+            if(timeout >= 16000){
+                console.error('Timeout waiting for perspective!');
+                copied = true;
+            }
+        }
+    };
+
+    return button;
+}
+
 
 export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
@@ -199,7 +235,11 @@ namespace Private {
         let psp = document.createElement('perspective-viewer');
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
+
+        let btn = createCopy(psp);
+
         node.appendChild(psp);
+        node.appendChild(btn);
         return node;
     }
 }

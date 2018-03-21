@@ -125,3 +125,33 @@ export class PSPHttpHelper implements PSPHelper {
     private records:boolean;
     private repeat:number;
 }
+
+export function convertToCSV(objArray: Array<Object>): string {
+    //https://medium.com/@danny.pule/export-json-to-csv-file-using-javascript-a0b7bc5b00d2
+    var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+    var str = '';
+
+    for (var i = 0; i < array.length; i++) {
+        var header = '';
+        var line = '';
+        for (var index in array[i]) {
+            if (i === 0){
+                if (header != ''){
+                    header += ',';
+                }
+                header += index;
+            }
+            if (line != ''){
+                line += ',';
+            }
+            line += array[i][index];
+        }
+
+        if (i === 0){
+            str += header + '\r\n';
+        }
+        str += line + '\r\n';
+    }
+
+    return str;
+}
