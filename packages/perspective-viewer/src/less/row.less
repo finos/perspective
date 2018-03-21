@@ -228,6 +228,11 @@ perspective-row .row_draggable select:focus {
 }
 
 perspective-viewer[view=scatter], perspective-viewer[view=line] {
+    
+    svg image {
+        opacity: 0.8;
+    }
+
     #active_columns {
         :nth-child(1) .is_visible::before {
             .selected_indicator();

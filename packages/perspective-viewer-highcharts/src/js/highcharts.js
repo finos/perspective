@@ -323,6 +323,7 @@ export function draw(mode) {
                 },
                 series: {
                     animation: false,
+                    boostThreshold: Infinity,
                     'turboThreshold': 60000,
                     borderWidth: 0,
                     connectNulls: true,
@@ -396,6 +397,16 @@ export function draw(mode) {
                     }
                 });
             }
+            if (aggregates.length < 3) {
+                Object.assign(config, {
+                    boost: {
+                        useGPUTranslations: true,
+                        usePreAllocated: true
+                    }
+                });
+                config.plotOptions.series.boostThreshold = 5000;
+                config.plotOptions.series.turboThreshiold = Infinity;
+            }
             Object.assign(config, {
                 colors: [
                     colors[0]
@@ -436,6 +447,15 @@ export function draw(mode) {
                 colorRange = [-cmax, cmax];
             }
 
+            Object.assign(config, {
+                boost: {
+                    useGPUTranslations: true,
+                    usePreAllocated: true
+                }
+            });
+            config.plotOptions.series.boostThreshold = 5000;
+            config.plotOptions.series.turboThreshiold = Infinity;
+
             // Calculate ylabel nesting
             let ylabels = series.map(function (s) { return s.name.split(','); })
             let ytop = {name: null, depth: 0, categories: []};
@@ -469,6 +489,11 @@ export function draw(mode) {
                     data: data,
                     nullColor: '#999'
                 }],
+
+                boost: {
+                    useGPUTranslations: true
+                },
+
                 colorAxis: {
                     min: colorRange[0],
                     max: colorRange[1],
