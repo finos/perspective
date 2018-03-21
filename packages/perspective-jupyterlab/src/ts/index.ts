@@ -38,32 +38,78 @@ interface PerspectiveSpec {
 
 function createCopy(psp: any) : HTMLElement {
     let button = document.createElement('button');
-    button.textContent = 'copy';
+    button.textContent = 'copy/dl';
 
-    var data: any;
+    let viewtype: string;
+    let data: any;
+    let height: number;
+    let width: number;
 
     button.onmousedown = () => {
-        psp._view.to_json().then((dat: Array<Object>) => {
-            data = dat;
-        });
+        viewtype = psp.getAttribute('view');
+        if (viewtype === 'hypergrid') {
+            psp._view.to_json().then((dat: Array<Object>) => {
+                data = dat;
+            });
+        } else if (viewtype === 'vertical' || 
+                   viewtype === 'horizontal' || 
+                   viewtype === 'heatmap' || 
+                   viewtype === 'line' || 
+                   viewtype === 'scatter'
+            ) {
+            let svg = psp.querySelector('svg') as SVGSVGElement;
+            height = svg.height.baseVal.value;
+            width = svg.width.baseVal.value;
+
+            data = new XMLSerializer().serializeToString(svg);
+        }
     }
 
     button.onclick = () => {
         let copied = false;
         let timeout = 100;
-        while (!copied){
+        while (timeout<=16000){
             setTimeout(() => {
+                if(copied){
+                    return;
+                }
                 if (data) {
-                    Clipboard.copyToSystem(convertToCSV(data));
+                    if(viewtype === 'hypergrid'){
+                        Clipboard.copyToSystem(convertToCSV(data));
+                    } else if (viewtype === 'vertical' || 
+                       viewtype === 'horizontal' || 
+                       viewtype === 'heatmap' || 
+                       viewtype === 'line' || 
+                       viewtype === 'scatter') {
+
+                        let canvas = document.createElement('canvas') as HTMLCanvasElement;
+                        let ctx = canvas.getContext("2d");
+                        let DOMURL = window.URL || (window as any).webkitURL || window;
+                        let img = new Image();
+                        let svg = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+
+                        let url = DOMURL.createObjectURL(svg);
+                        img.onload = function() {
+                            ctx.drawImage(img, 0, 0, width, height);
+                            let png = canvas.toDataURL("image/png");
+                            var a = document.createElement('a');
+                            a.download = 'psp.png';
+                            a.target = "_blank";
+                            a.href = png;
+                            document.body.appendChild(a);
+                            a.click();
+                            a.remove();
+                            DOMURL.revokeObjectURL(png);
+                        };
+                        img.src = url;
+                        Clipboard.copyToSystem(data);
+                    }
                     copied = true;
+                } else if (timeout == 16000){
+                    console.error('Timeout waiting for perspective!');
                 }
             }, timeout);
             timeout *= 2;
-
-            if(timeout >= 16000){
-                console.error('Timeout waiting for perspective!');
-                copied = true;
-            }
         }
     };
 
