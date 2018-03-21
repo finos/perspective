@@ -164,9 +164,12 @@ perspective-row #sort_order {
 
 #side_panel {
     padding-top: 5px;
+    flex: 0 1 auto;
 }
 
 #side_panel perspective-row .column_name {
+    overflow: hidden;
+    max-width: 180px;
     white-space: nowrap;
     text-overflow: ellipsis; 
 }
