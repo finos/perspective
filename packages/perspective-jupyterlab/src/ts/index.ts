@@ -83,6 +83,9 @@ function createCopy(psp: any) : HTMLElement {
                        viewtype === 'scatter') {
 
                         let canvas = document.createElement('canvas') as HTMLCanvasElement;
+                        canvas.height = height;
+                        canvas.width = width;
+
                         let ctx = canvas.getContext("2d");
                         let DOMURL = window.URL || (window as any).webkitURL || window;
                         let img = new Image();
