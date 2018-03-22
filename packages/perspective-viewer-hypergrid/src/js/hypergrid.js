@@ -118,10 +118,6 @@ function generateGridProperties(overrides) {
 }
 
 function setPSP(payload) {
-    if (payload.rows.length === 0) {
-        this.grid.setData({data: []});
-        return;
-    };
     if (payload.isTree) {
         this.grid.renderer.properties.fixedColumnCount = 1;
     } else {
@@ -427,13 +423,15 @@ var conv = {
 
 function psp2hypergrid(data, schema, start = 0, end = undefined, length = undefined) {
     if (data.length === 0) {
+        let columns = Object.keys(schema);
         return {
+            rows: [],
             rowPaths: [],
             data: [],
             isTree: false,
             configuration: {},
-            columnPaths: [],
-            columnTypes: []
+            columnPaths: columns.map(col => [col]),
+            columnTypes: columns.map(col => conv[schema[col]])
         }
     }
 
