@@ -405,7 +405,7 @@ export function draw(mode) {
                     }
                 });
                 config.plotOptions.series.boostThreshold = 5000;
-                config.plotOptions.series.turboThreshiold = Infinity;
+                config.plotOptions.series.turboThreshold = Infinity;
             }
             Object.assign(config, {
                 colors: [
@@ -454,7 +454,7 @@ export function draw(mode) {
                 }
             });
             config.plotOptions.series.boostThreshold = 5000;
-            config.plotOptions.series.turboThreshiold = Infinity;
+            config.plotOptions.series.turboThreshold = Infinity;
 
             // Calculate ylabel nesting
             let ylabels = series.map(function (s) { return s.name.split(','); })
