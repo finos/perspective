@@ -1,7 +1,10 @@
 
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const webpack = require('webpack');
 
-const plugins = []
+const plugins = [
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)
+];
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     plugins.push(new UglifyJSPlugin({
