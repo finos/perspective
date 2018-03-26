@@ -5,7 +5,7 @@
 	"scripts": {
 		"start": "lerna run start ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"travis_start": "lerna run start ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream && lerna run compile_test --stream",
-		"puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/packages/${PACKAGE} perspective/puppeteer ./node_modules/.bin/jest --silent --runInBand",
+		"puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/packages/${PACKAGE} perspective/puppeteer ./node_modules/.bin/jest --silent",
 		"postinstall": "lerna bootstrap --hoist",
 		"test": "lerna run compile_test --stream && npm run test_perspective && npm run test_viewer && npm run test_hypergrid && npm run test_highcharts",
 		"test_perspective": "PACKAGE=perspective npm run puppeteer",
