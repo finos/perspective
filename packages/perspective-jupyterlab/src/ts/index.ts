@@ -48,10 +48,14 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         let layout = JSON.parse(this._lyt);
         for(let key in layout){
             if(layout[key]){
-                if(key !== 'view'){
-                    psp.setAttribute(key, JSON.stringify(layout[key]));
-                } else {
+                if(key === 'view'){
                     psp.setAttribute(key, layout[key]);
+                } else if (key === 'colorscheme'){
+                    if(layout[key]==='dark'){
+                        this.node.style.filter = 'invert(100%) hue-rotate(180deg)';
+                    }
+                } else {
+                    psp.setAttribute(key, JSON.stringify(layout[key]));
                 }
             }
         }
