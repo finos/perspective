@@ -269,6 +269,14 @@ export function draw(mode) {
         if (mode === 'scatter') {
             new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, series[0].data.length / 3))));
         }
+
+        // Stops for color axis
+        let divergent_stops = [[0, '#c4463a'],
+                           [0.1, '#c4463a'],
+                           [0.5, '#fffbbc'],
+                           [1, '#3060cf']];
+        let sequential_stops = [[0, '#fffbbc'],
+                           [1, '#3060cf']];
         
         var config = {
             chart: {
@@ -379,19 +387,23 @@ export function draw(mode) {
                 } else {
                     config.chart.type = 'coloredBubble';
                 }
+
+                let stops;
+                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                if (colorRange[0] * colorRange[1] < 0) {
+                    colorRange = [-cmax, cmax];
+                    stops = divergent_stops;
+                } else {
+                    colorRange = [0, cmax];
+                    stops = sequential_stops;
+                }
+
                 Object.assign(config, {
                     colorAxis: {
                         min: colorRange[0],
                         max: colorRange[1],
-                        minColor: '#3060cf',
-                        maxColor: '#c4463a',
                         showInLegend: false,
-                        stops: [
-                            [0, '#3060cf'],
-                            [0.5, '#fffbbc'],
-                            [0.9, '#c4463a'],
-                            [1, '#c4463a']
-                        ],
+                        stops: stops,
                         startOnTick: false,
                         endOnTick: false,
                     }
@@ -442,9 +454,14 @@ export function draw(mode) {
                     colorRange[1] = Math.max(colorRange[1], val);
                 }
             }
+            let stops;
+            let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
             if (colorRange[0] * colorRange[1] < 0) {
-                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
                 colorRange = [-cmax, cmax];
+                stops = divergent_stops;
+            } else {
+                colorRange = [0, cmax];
+                stops = sequential_stops;
             }
 
             Object.assign(config, {
@@ -497,14 +514,7 @@ export function draw(mode) {
                 colorAxis: {
                     min: colorRange[0],
                     max: colorRange[1],
-                    minColor: '#c4463a',
-                    maxColor: '#3060cf',
-                    stops: [
-                        [0, '#c4463a'],
-                        [0.1, '#c4463a'],
-                        [0.5, '#fffbbc'],
-                        [1, '#3060cf']
-                    ],
+                    stops: stops,
                     startOnTick: false,
                     endOnTick: false,
                 },
