@@ -563,7 +563,12 @@ registerElement(template, {
 
     _plugin: {
         get: function () {
-            return RENDERERS[this._vis_selector.value || this.getAttribute('view') || Object.apply.keys(RENDERERS)[0] ];
+            let view = this.getAttribute('view');
+            if (!view) {
+                view = Object.keys(RENDERERS)[0];
+            }
+            this.setAttribute('view', view);
+            return RENDERERS[ view ];
         }
     },
 
@@ -572,7 +577,7 @@ registerElement(template, {
             if (this._show_config) {
                 this._side_panel.style.display = 'none';
                 this._top_panel.style.display = 'none';
-                this.removeAttribute('settings')
+                this.removeAttribute('settings');
             } else {
                 this._side_panel.style.display = 'flex';
                 this._top_panel.style.display = 'flex';
