@@ -69,8 +69,13 @@ function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
     } else {
-        let {offsetHeight, offsetTop} = this._active_columns.children[0];
-        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - offsetTop) / offsetHeight));
+        for (let cidx in this._active_columns.children) {
+            let child = this._active_columns.children[cidx];
+            if (child.offsetTop + child.offsetHeight > event.offsetY + this._active_columns.scrollTop) {
+                return cidx;
+            }
+        }
+        return this._active_columns.children.length;
     }
 }
 
