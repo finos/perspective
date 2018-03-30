@@ -174,8 +174,15 @@ function parse_data(data, names, types) {
             const date_exclusions = [];
             for (let x = 0; x < data.length; x ++) {
                 if (!(name in data[x]) || data[x][name] === undefined) continue;
-                if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value || inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
+                if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
                     col.push(Number(data[x][name]));
+                } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
+                    const val = Number(data[x][name]);
+                    if (val <= 2147483647 && val >= -2147483648) {
+                        col.push(val);
+                    } else {
+                        types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
+                    }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_BOOL.value) {
                     let cell = data[x][name];
                     if ((typeof cell) === "string") {

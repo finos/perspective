@@ -69,8 +69,13 @@ function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
     } else {
-        let {offsetHeight, offsetTop} = this._active_columns.children[0];
-        return Math.max(0, Math.floor((event.offsetY + this._active_columns.scrollTop - offsetTop) / offsetHeight));
+        for (let cidx in this._active_columns.children) {
+            let child = this._active_columns.children[cidx];
+            if (child.offsetTop + child.offsetHeight > event.offsetY + this._active_columns.scrollTop) {
+                return cidx;
+            }
+        }
+        return this._active_columns.children.length;
     }
 }
 
@@ -558,7 +563,12 @@ registerElement(template, {
 
     _plugin: {
         get: function () {
-            return RENDERERS[this._vis_selector.value || this.getAttribute('view') || Object.apply.keys(RENDERERS)[0] ];
+            let view = this.getAttribute('view');
+            if (!view) {
+                view = Object.keys(RENDERERS)[0];
+            }
+            this.setAttribute('view', view);
+            return RENDERERS[ view ];
         }
     },
 
@@ -567,7 +577,7 @@ registerElement(template, {
             if (this._show_config) {
                 this._side_panel.style.display = 'none';
                 this._top_panel.style.display = 'none';
-                this.removeAttribute('settings')
+                this.removeAttribute('settings');
             } else {
                 this._side_panel.style.display = 'flex';
                 this._top_panel.style.display = 'flex';

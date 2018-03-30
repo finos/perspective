@@ -7,9 +7,15 @@
  *
  */
 
-var http = require('http');
-var fs = require('fs');
-var path = require('path');
+const http = require('http');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
+const puppeteer = require('puppeteer');
+
+const cons = require('console');
+const private_console = new cons.Console(process.stdout, process.stderr);
+const cp = require('child_process');
 
 let __PORT__;
 
@@ -87,13 +93,29 @@ if (!fs.existsSync('screenshots')) {
     fs.mkdirSync('screenshots');
 }
 
-const puppeteer = require('puppeteer');
-let browser;
-
-var crypto = require('crypto');
+let browser, page, url, errors = [];
 
 beforeAll(async () => {
     browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    page = await browser.newPage();
+
+    // CSS Animations break our screenshot tests, so set the
+    // animation playback rate to something extreme.
+    await page._client.send('Animation.setPlaybackRate', { playbackRate: 100.0 });
+    page.on('console', msg => {
+        if (msg.type === 'error') {
+            errors.push(msg.text);
+        }
+        if (process.env.DEBUG) {
+            private_console.log(msg.text);
+        }
+    });
+    page.on('pageerror', msg => {
+        errors.push(msg.message);
+        if (process.env.DEBUG) {
+            private_console.error(msg.message);
+        }
+    });
 });
 
 afterAll(() => {
@@ -102,8 +124,6 @@ afterAll(() => {
         fs.writeFileSync('test/results/results.json', JSON.stringify(results, null, 4));
     }
 });
-
-let url;
 
 describe.page = (_url, body) => {
     if (!fs.existsSync('screenshots/' + _url.replace('.html', ''))) {
@@ -118,42 +138,23 @@ describe.page = (_url, body) => {
     });
 }
 
-const cons = require('console');
-const private_console = new cons.Console(process.stdout, process.stderr);
-const cp = require('child_process');
-
 test.capture = function capture(name, body, timeout = 60000) {
     let _url = url;
     test(name, async () => {
-        let errors = [];
+        errors = [];
         if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
-        const page = await browser.newPage();
-        page.on('console', msg => {
-            if (msg.type === 'error') {
-                errors.push(msg.text);
-            }
-            if (process.env.DEBUG) {
-                private_console.log(msg.text);
-            }
-        });
-        page.on('pageerror', msg => {
-            errors.push(msg.message);
-            if (process.env.DEBUG) {
-                private_console.error(msg.message);
-            }
-        });
-        
+
+        await new Promise(setTimeout);
         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
-        await page.waitForSelector('perspective-viewer[render_time]');
         await page.waitForSelector('perspective-viewer:not([updating])');
+
         await body(page);
 
         // let animation run;
         await page.waitForSelector('perspective-viewer:not([updating])');
-        await page.waitFor(500);
 
         const screenshot = await page.screenshot();
-        await page.close();
+       // await page.close();
         const hash = crypto.createHash('md5').update(screenshot).digest("hex");
         if (process.env.WRITE_TESTS) {
             results[_url + '/' + name] = hash;

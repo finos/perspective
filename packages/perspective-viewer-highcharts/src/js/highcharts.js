@@ -267,7 +267,7 @@ export function draw(mode) {
 
         let new_radius = 0;
         if (mode === 'scatter') {
-            new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / 240)));
+            new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, series[0].data.length / 3))));
         }
         
         var config = {
@@ -405,7 +405,7 @@ export function draw(mode) {
                     }
                 });
                 config.plotOptions.series.boostThreshold = 5000;
-                config.plotOptions.series.turboThreshiold = Infinity;
+                config.plotOptions.series.turboThreshold = Infinity;
             }
             Object.assign(config, {
                 colors: [
@@ -454,7 +454,7 @@ export function draw(mode) {
                 }
             });
             config.plotOptions.series.boostThreshold = 5000;
-            config.plotOptions.series.turboThreshiold = Infinity;
+            config.plotOptions.series.turboThreshold = Infinity;
 
             // Calculate ylabel nesting
             let ylabels = series.map(function (s) { return s.name.split(','); })
@@ -578,7 +578,7 @@ export function draw(mode) {
 
         if (this._chart) {
             if (mode === 'scatter') {
-                let new_radius = Math.min(8, Math.max(4, Math.floor((this._chart.chartWidth + this._chart.chartHeight) / 240)));
+                let new_radius = Math.min(6, Math.max(2, Math.floor((this._chart.chartWidth + this._chart.chartHeight) / Math.max(300, config.series[0].data.length / 3))));
                 this._chart.update({
                     series: config.series,
                     plotOptions: {
