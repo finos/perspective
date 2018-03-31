@@ -131,6 +131,18 @@ module.exports = (perspective) => {
 
         });
 
+        describe("in", function() {
+            it("y in ['a', 'b']", async function () {
+                var table = perspective.table(data);
+                var view = table.view({
+                    filter: [['y', 'in', ['a', 'b']]]
+                });
+                let json = await view.to_json();
+                expect(data.slice(0, 2)).toEqual(json);
+            });
+
+        });
+
         describe("contains", function() {
 
             it("y contains 'a'", async function () {
