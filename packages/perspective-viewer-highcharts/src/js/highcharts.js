@@ -229,7 +229,7 @@ export function draw(mode) {
         var col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
         var aggregates = this._get_view_aggregates();
 
-        let [js, schema] = await Promise.all([view.to_json(), view.schema()]);
+        let [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
 
         if (this.hasAttribute('updating') && this._chart) {
             chart = this._chart
@@ -432,29 +432,6 @@ export function draw(mode) {
                 }
             });
         } else if (mode == 'heatmap') {
-            // Need to slightly repivot data
-            let data = [];
-            for (let i=0; i<series[0].data.length; ++i) {
-                for (let j=0; j<series.length; ++j) {
-                    let val = series[j].data[i];
-                    data.push([i, j, val]);
-                    colorRange[0] = Math.min(colorRange[0], val);
-                    colorRange[1] = Math.max(colorRange[1], val);
-                }
-            }
-            if (colorRange[0] * colorRange[1] < 0) {
-                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
-                colorRange = [-cmax, cmax];
-            }
-
-            Object.assign(config, {
-                boost: {
-                    useGPUTranslations: true,
-                    usePreAllocated: true
-                }
-            });
-            config.plotOptions.series.boostThreshold = 5000;
-            config.plotOptions.series.turboThreshold = Infinity;
 
             // Calculate ylabel nesting
             let ylabels = series.map(function (s) { return s.name.split(','); })
@@ -481,6 +458,43 @@ export function draw(mode) {
                         }
                     }
                 }
+            }
+
+            // Need to slightly repivot data
+            let data = [];
+            for (let i=0; i<series[0].data.length; ++i) {
+                for (let j=0; j<series.length; ++j) {
+                    let val = series[j].data[i];
+                    data.push([i, j, val]);
+                    colorRange[0] = Math.min(colorRange[0], val);
+                    colorRange[1] = Math.max(colorRange[1], val);
+                }
+            }
+            if (colorRange[0] * colorRange[1] < 0) {
+                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                colorRange = [-cmax, cmax];
+            }
+
+            Object.assign(config, {
+                boost: {
+                    useGPUTranslations: true,
+                    usePreAllocated: true
+                }
+            });
+            config.plotOptions.series.boostThreshold = 5000;
+            config.plotOptions.series.turboThreshold = Infinity;
+
+            xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
+            xaxis_type = tschema[xaxis_name];
+            yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
+            yaxis_type = tschema[yaxis_name];
+
+            if (xaxis_type === 'date') {
+                top.categories = top.categories.map(x => new Date(x));
+            }
+
+            if (yaxis_type === 'date') {
+                ytop.categories = ytop.categories.map(x => new Date(x));
             }
 
             Object.assign(config, {

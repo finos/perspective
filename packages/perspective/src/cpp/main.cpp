@@ -74,33 +74,50 @@ _get_fterms(t_schema schema, val j_filters)
     {
         std::vector<val> filter = vecFromJSArray<val>(filters[fidx]);
         std::string coln = filter[0].as<std::string>();
+        t_filter_op comp = filter[1].as<t_filter_op>();
 
-        t_tscalar term;
-        switch (schema.get_dtype(coln))
+        switch(comp)
         {
-            case DTYPE_INT32:
-                term = mktscalar(filter[2].as<t_int32>());
-                break;
-            case DTYPE_FLOAT64:
-                term = mktscalar(filter[2].as<t_float64>());
-                break;
-            case DTYPE_BOOL:
-                term = mktscalar(filter[2].as<bool>());
-                break;
-			case DTYPE_TIME:
-			{
-				std::cout << "Date filters not handled yet" << std::endl;
-			}
-			break;
+            case FILTER_OP_IN:
+            {
+                t_tscalvec terms{};
+                std::vector<std::string> j_terms = vecFromJSArray<std::string>(filter[2]);
+                for (auto jidx = 0; jidx < j_terms.size(); ++jidx)
+                {
+                    terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
+                }
+                fvec.push_back(t_fterm(coln, comp, mktscalar(0), terms));
+            }
+            break;
             default:
             {
-                //std::cout << filter[2].as<std::string>().c_str() << std::endl;
-                term = mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str()));
+                t_tscalar term;
+                switch (schema.get_dtype(coln))
+                {
+                    case DTYPE_INT32:
+                        term = mktscalar(filter[2].as<t_int32>());
+                        break;
+                    case DTYPE_FLOAT64:
+                        term = mktscalar(filter[2].as<t_float64>());
+                        break;
+                    case DTYPE_BOOL:
+                        term = mktscalar(filter[2].as<bool>());
+                        break;
+                    case DTYPE_TIME:
+                    {
+                        std::cout << "Date filters not handled yet" << std::endl;
+                    }
+                    break;
+                    default:
+                    {
+                        //std::cout << filter[2].as<std::string>().c_str() << std::endl;
+                        term = mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str()));
+                    }
+                }
+
+                fvec.push_back(t_fterm(coln, comp, term, t_tscalvec()));
             }
         }
-
-        t_filter_op comp = filter[1].as<t_filter_op>();
-        fvec.push_back(t_fterm(coln, comp, term, t_tscalvec()));
     }
     return fvec;
 }

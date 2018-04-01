@@ -180,6 +180,30 @@ module.exports = (perspective) => {
 
     describe("Column pivot", function() {
 
+        it("['x'] only, schema", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ['y']
+            });
+            let result2 = await view.schema();
+            expect(meta).toEqual(result2);
+        });
+
+        it("['x'] only", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ['y']
+            });
+            var answer =  [
+                {"a,x":1,"a,y":"a","a,z":true,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":2,"b,y":"b","b,z":false,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":3,"c,y":"c","c,z":true,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":4,"d,y":"d","d,z":false}
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
         it("['x']", async function () {
             var table = perspective.table(data);
             var view = table.view({
