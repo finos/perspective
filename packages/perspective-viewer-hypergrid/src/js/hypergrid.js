@@ -140,7 +140,11 @@ function setPSP(payload) {
         }
 
         col_settings = { name: i.toString(), header: col_header };
-        col_settings['type'] = payload.columnTypes[i] === 'str' ? 'string' : payload.columnTypes[i];
+        if (payload.columnTypes[i] === 'str') {
+            col_settings['type'] = 'string';
+        } else {
+            col_settings['type'] = payload.columnTypes[i];
+        }
         processed_schema.push(col_settings);
     }
 
@@ -202,6 +206,10 @@ function setPSP(payload) {
             } else if (this.schema[i].type === 'date') {
                 Object.assign(props, {
                     format: 'FinanceDate'
+                });
+            } else if (Array.isArray(this.schema[i].type)) {
+                Object.assign(props, {
+                    format: 'FinanceTree'
                 });
             }
 
@@ -388,6 +396,7 @@ function PerspectiveDataModel(grid) {
                     var next_row = this.dataSource.data[config.dataCell.y + 1];
                     config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
                     config.last = lastChild;
+                    config._type = this.schema[0].type[config.depth - 1];
                     return grid.cellRenderers.get('TreeLines');
                 }
             }
@@ -421,7 +430,7 @@ var conv = {
     'date': 'date'
 }
 
-function psp2hypergrid(data, schema, start = 0, end = undefined, length = undefined) {
+function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undefined, length = undefined) {
     if (data.length === 0) {
         let columns = Object.keys(schema);
         return {
@@ -477,7 +486,7 @@ function psp2hypergrid(data, schema, start = 0, end = undefined, length = undefi
         isTree: is_tree,
         configuration: {},
         columnPaths: (is_tree ? [[" "]] : []).concat(columnPaths),
-        columnTypes: (is_tree ? ["str"] : []).concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
+        columnTypes: (is_tree ? [row_pivots.map(x => tschema[x])] : []).concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
     };
 
     return hg_data
@@ -608,11 +617,11 @@ function CachedRendererPlugin(grid) {
 
 registerElement(TEMPLATE, {
 
-    set_data: { value: function(data, schema) {
+    set_data: { value: function(data, schema, tschema, row_pivots) {
         if (this._detached) {
             this._detached = false;
         }
-        var hg_data = psp2hypergrid(data, schema);
+        var hg_data = psp2hypergrid(data, schema, tschema, row_pivots);
         if (this.grid) {
             this.grid.behavior.setPSP(hg_data);
         } else {
@@ -644,14 +653,16 @@ registerElement(TEMPLATE, {
                 grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
                 this.grid.addProperties(grid_properties);
 
-                this.grid.localization.add('FinanceFloat', null_formatter(new this.grid.localization.NumberFormatter('en-US', {
+                const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
-                })));
+                }));
+                this.grid.localization.add('FinanceFloat', float_formatter);
 
-                this.grid.localization.add('FinanceInteger', null_formatter(new this.grid.localization.NumberFormatter('en-US', {})));
+                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {}));
+                this.grid.localization.add('FinanceInteger', integer_formatter);
 
-                this.grid.localization.add('FinanceDate', null_formatter(new this.grid.localization.DateFormatter('en-us', {
+                const date_formatter = null_formatter(new this.grid.localization.DateFormatter('en-us', {
                     week: 'numeric',
                     year: 'numeric',
                     month: 'numeric',
@@ -659,7 +670,23 @@ registerElement(TEMPLATE, {
                     hour: 'numeric',
                     minute: 'numeric',
                     second: 'numeric'
-                }), -1));
+                }), -1);
+                this.grid.localization.add('FinanceDate', date_formatter);
+
+                this.grid.localization.add('FinanceTree', {
+                    format: function (val, type) {
+                        let f = {
+                            'date': date_formatter,
+                            'integer': integer_formatter,
+                            'float': float_formatter,
+                        }[type];
+                        if (f) {
+                            return f.format(val);
+                        }
+                        return val;
+                    },
+                    parse: x => x
+                })
 
                 if (this._hg_data) {
                     this.grid.behavior.setPSP(this._hg_data);
@@ -712,10 +739,11 @@ async function grid(div, view, hidden, task) {
 
     this[PRIVATE] = this[PRIVATE] || {};
 
-    let [nrows, json, schema] = await Promise.all([
+    let [nrows, json, schema, tschema] = await Promise.all([
         view.num_rows(), 
         view.to_json({end_row: 1}), 
-        view.schema()
+        view.schema(),
+        this._table.schema()
     ]);
 
     let visible_rows;
@@ -760,7 +788,7 @@ async function grid(div, view, hidden, task) {
         json = await fill_page(view, json, hidden, s, e); 
         let new_range = estimate_range(this.hypergrid);
         if (is_subrange(new_range, [s, e])) {
-            let rows = psp2hypergrid(json, schema, s, Math.min(e, nrows), nrows).rows;
+            let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), s, Math.min(e, nrows), nrows).rows;
             rows[0] = this.hypergrid.behavior.dataModel.viewData[0];
             this.hypergrid.setData({data: rows});
             return true;
@@ -769,7 +797,7 @@ async function grid(div, view, hidden, task) {
         }
     }
    
-    this[PRIVATE].grid.set_data(json, schema);
+    this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')));
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
