@@ -178,9 +178,8 @@ function parse_data(data, names, types) {
                     col.push(Number(data[x][name]));
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
                     const val = Number(data[x][name]);
-                    if (val <= 2147483647 && val >= -2147483648) {
                         col.push(val);
-                    } else {
+                    if (val > 2147483647 || val < -2147483648) {
                         types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_BOOL.value) {
@@ -834,7 +833,7 @@ table.prototype.schema = async function() {
  * bound to this table
  */
 table.prototype.view = function(config) {
-    config = config || {};
+    config = {...config};
 
     const _string_to_filter_op = {
         "&": __MODULE__.t_filter_op.FILTER_OP_AND,
@@ -927,6 +926,7 @@ table.prototype.view = function(config) {
         let agg_op = _string_to_aggtype[config.aggregate];
         if (config.column_only) {
             agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+            config.aggregate = "any";
         }
         let schema = this.gnode.get_tblschema();
         let t_aggs = schema.columns();
@@ -944,6 +944,7 @@ table.prototype.view = function(config) {
             let agg_op = _string_to_aggtype[agg.op];
             if (config.column_only) {
                 agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                config.aggregate[aidx].op= "any";
             }
             aggregates.push([agg.column, agg_op]);
         }
