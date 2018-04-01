@@ -77,6 +77,26 @@ brew install cmake
 brew install boost
 ```
 
+#### Windows 10 specific instructions
+
+You need to use bash in order to build Perspective packages. To successfully build on Windows 10, enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) and install the linux distribution
+of your choice. 
+
+Create symbolic link to easily access Windows directories and projects modified via Windows. This way you can modify any of the Perspective files using your favorite editors on Windows 
+and build via Linux.
+
+Follow the Linux specific instructions to install Emscripten and all prerequisite tools.
+
+#### Linux specific instructions
+
+When installing Emscripten, make sure to follow [Linux specific instructions](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux).  
+
+Linking to boost libraries with CMake:
+- You might need to apply a workaround to correctly link boost libraries as described [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html).
+  ```bash
+  cp -r /usr/include/boost ./packages/perspective/src/include/
+  ```
+
 #### Options
 
 The build script respects a few environment flags:
