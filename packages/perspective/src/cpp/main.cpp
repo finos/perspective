@@ -138,12 +138,22 @@ _get_aggspecs(val j_aggs)
 {
     std::vector<val> aggs = vecFromJSArray<val>(j_aggs);
     t_aggspecvec aggspecs;
-    for (auto cidx = 0; cidx < aggs.size(); ++cidx)
+    for (auto idx = 0; idx < aggs.size(); ++idx)
     {
-        std::vector<val> agg_row = vecFromJSArray<val>(aggs[cidx]);
+        std::vector<val> agg_row = vecFromJSArray<val>(aggs[idx]);
         std::string name = agg_row[0].as<std::string>();
         t_aggtype aggtype = agg_row[1].as<t_aggtype>();
-        aggspecs.push_back(t_aggspec(name, aggtype, name));
+
+        t_depvec dependencies;
+        std::vector<val> deps = vecFromJSArray<val>(agg_row[2]);
+        for (auto didx = 0; didx < deps.size(); ++didx) {
+            if (deps[didx].isUndefined()) {
+                continue;
+            }
+            std::string dep = deps[didx].as<std::string>();
+            dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
+        }
+        aggspecs.push_back(t_aggspec(name, aggtype, dependencies));
     }
     return aggspecs;
 }

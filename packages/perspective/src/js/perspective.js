@@ -922,23 +922,7 @@ table.prototype.view = function(config) {
 
     // Row Pivots
     let aggregates = [];
-    if (typeof config.aggregate === "string") {
-        let agg_op = _string_to_aggtype[config.aggregate];
-        if (config.column_only) {
-            agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
-            config.aggregate = "any";
-        }
-        let schema = this.gnode.get_tblschema();
-        let t_aggs = schema.columns();
-        for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-            let name = t_aggs.get(aidx);
-            if (name !== "psp_okey") {
-                aggregates.push([name, agg_op, name]);
-            }
-        }
-        schema.delete();
-        t_aggs.delete();
-    } else if (typeof config.aggregate === 'object') {
+    if (typeof config.aggregate === 'object') {
         for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
             let agg = config.aggregate[aidx];
             let agg_op = _string_to_aggtype[agg.op];
@@ -946,7 +930,16 @@ table.prototype.view = function(config) {
                 agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
                 config.aggregate[aidx].op= "any";
             }
-            aggregates.push([agg.column, agg_op]);
+            if (typeof agg.column === 'string') {
+                agg.column = [agg.column];
+            } else {
+                let dep_length = agg.column.length;
+                if ((agg.op === "weighted mean" && dep_length != 2) ||
+                    (agg.op !== "weighted mean" && dep_length != 1)) {
+                    throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
+                }
+            }
+            aggregates.push([agg.name || agg.column.join(","), agg_op, agg.column]);
         }
     } else {
         let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
@@ -956,9 +949,9 @@ table.prototype.view = function(config) {
         let schema = this.gnode.get_tblschema()
         let t_aggs = schema.columns();
         for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-            let name = t_aggs.get(aidx);
-            if (name !== "psp_okey") {
-                aggregates.push([name, agg_op, name]);
+            let column = t_aggs.get(aidx);
+            if (column !== "psp_okey") {
+                aggregates.push([column, agg_op, [column]]);
             }
         }
         schema.delete();
