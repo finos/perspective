@@ -9,7 +9,7 @@
     "superstore.html/displays visible columns.": "8dae6bbeb52605a40119f9bbb616845f",
     "superstore.html/resets viewable area when the logical size expands.": "a95ac6396bf6788b8bd6e86d8df3584d",
     "superstore.html/selecting a column does not log a context deleted error.": "2563581d3556c4576745443c8498bea9",
-    "superstore.html/resets viewable area when the physical size expands.": "b5e7dffa2272e6b6daf465a9af34e2bc",
+    "superstore.html/resets viewable area when the physical size expands.": "7d43db42a2ee3d8c9e7e454a08c7dc7c",
     "superstore.html/sorts by a hidden column.": "73a6207f32938dadb9d9493f860594d2",
     "superstore.html/filters by a numeric column.": "afc5b9594776711cfc948bd92ab901f1"
 }

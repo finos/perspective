@@ -649,7 +649,7 @@ registerElement(TEMPLATE, {
                     CachedRendererPlugin
                 ]);
 
-                var grid_properties = generateGridProperties(light_theme_overrides);
+                var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
                 grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
                 this.grid.addProperties(grid_properties);
 

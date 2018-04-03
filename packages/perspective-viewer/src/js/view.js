@@ -568,7 +568,7 @@ registerElement(template, {
                 view = Object.keys(RENDERERS)[0];
             }
             this.setAttribute('view', view);
-            return RENDERERS[ view ];
+            return RENDERERS[view] || RENDERERS[Object.keys(RENDERERS)[0]];
         }
     },
 
