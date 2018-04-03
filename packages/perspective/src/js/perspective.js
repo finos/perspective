@@ -518,7 +518,7 @@ view.prototype.schema = async function() {
         if (this.sides() > 0) {
             for (let agg in this.config.aggregate) {
                 agg = this.config.aggregate[agg];
-                if (agg.column === col_name) {
+                if (agg.column.join(',') === col_name) {
                     if (["distinct count", "distinctcount", "distinct", "count"].indexOf(agg.op) > -1) {
                         new_schema[col_name] = "integer";
                     }
