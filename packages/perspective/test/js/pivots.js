@@ -20,6 +20,15 @@ var meta = {
     'z': "boolean"
 };
 
+
+var data2 = [
+    {'x': 1, 'y':1, 'z': true},
+    {'x': 2, 'y':1, 'z': false},
+    {'x': 3, 'y':2, 'z': true},
+    {'x': 4, 'y':2, 'z': false}
+];
+
+
 module.exports = (perspective) => {
 
     describe("Aggregate", function() {
@@ -38,6 +47,39 @@ module.exports = (perspective) => {
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);
         });
+
+        it("['z'], sum with new column syntax", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'sum', column:['x']}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 10},
+                {__ROW_PATH__: [ false ], x: 6},
+                {__ROW_PATH__: [ true ], x: 4},
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
+        it("['z'], weighted_mean", async function () {
+            var table = perspective.table(data2);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'mean', column:['x']},
+                            {op: 'weighted mean', column:['x', 'y']}
+                            ],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 2.5, "x,y": 2.8333333333333335},
+                {__ROW_PATH__: [ false ], x: 3, "x,y": 3.3333333333333335},
+                {__ROW_PATH__: [ true ], x: 2, "x,y": 2.3333333333333335},
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
 
         it("['z'], mean", async function () {
             var table = perspective.table(data);
