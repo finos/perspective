@@ -748,8 +748,8 @@ registerElement(template, {
      */
     aggregates: {
         set: function () {
-            let show = JSON.stringify(this.getAttribute('aggregates'));
-            let lis = Array.prototype.slice.call(this.querySelectorAll("#side_panel perspective-row"));
+            let show = JSON.parse(this.getAttribute('aggregates'));
+            let lis = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
             lis.map((x, ix) => {
                 let agg = show[x.getAttribute('name')];
                 if (agg) {
@@ -757,6 +757,7 @@ registerElement(template, {
                 }
             });
             this.dispatchEvent(new Event('config-update'));
+            this._update();
         }
     },
 
