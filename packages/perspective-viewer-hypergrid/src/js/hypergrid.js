@@ -379,14 +379,16 @@ function PerspectiveDataModel(grid) {
             if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
             } else {
-                if (config.dataCell.x == -1 && !config.isHeaderRow) {
+                if (config.dataCell.x == -1) {
+                    if (!config.isHeaderRow) {
                     config.last = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
 
                     var next_row = this.dataSource.data[config.dataCell.y + 1];
                     config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
-                } else {
-                    rendererName = 'SimpleCell';
-                    config.value = '';
+                    } else {
+                        rendererName = 'SimpleCell';
+                        config.value = '';
+                    }
                 }
             }
             return grid.cellRenderers.get(rendererName);
