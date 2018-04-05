@@ -526,7 +526,9 @@ function update() {
     });
 
     (task => {
-        this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+        this._plugin.create.call(this, this._datavis, this._view, hidden, task).catch(err => {
+            console.debug("View cancelled");
+        }).finally(() => {
             if (!this.hasAttribute('render_time')) {
                 this.dispatchEvent(new Event('loaded', {bubbles: true}));
             }
@@ -535,8 +537,6 @@ function update() {
             if (this._render_count === 0) {
                 this.removeAttribute('updating');
             }
-        }).catch(() => {
-            console.debug("View cancelled");
         });
     })(this._task);
 }
