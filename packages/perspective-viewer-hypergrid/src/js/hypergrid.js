@@ -361,14 +361,11 @@ function PerspectiveDataModel(grid) {
 
         cellStyle: function (gridCellConfig, rendererName) {
             if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
-                gridCellConfig.color = "#666";
                 gridCellConfig.value = '-';
             } else if (['number', 'float', 'integer'].indexOf(this.schema[gridCellConfig.dataCell.x.toString()].type) > -1) {
                 if (gridCellConfig.value === 0) {
-                    gridCellConfig.color = '#666';
                     gridCellConfig.value = this.schema[gridCellConfig.dataCell.x.toString()].type === 'float' ? '0.00' : '0';
                 } else if (isNaN(gridCellConfig.value))  {
-                    gridCellConfig.color = '#666';
                     gridCellConfig.value = '-';
                 } else {
                     gridCellConfig.color = gridCellConfig.value >= 0 ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)') : (gridCellConfig.columnHeaderBackgroundNumberNegative ||'rgb(255,136,136)');

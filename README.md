@@ -250,9 +250,9 @@ application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
 
 ```javascript
-import "perspective-viewer";
-import "perspective-viewer-hypergrid";
-import "perspective-viewer-highcharts";
+import "@jpmorganchase/perspective-viewer";
+import "@jpmorganchase/perspective-viewer-hypergrid";
+import "@jpmorganchase/perspective-viewer-highcharts";
 ```
 
 Alternatively, you can just import the pre-bundled assets from the relevant NPM 

@@ -36,7 +36,7 @@
     "@jpmorganchase/perspective-common": "^0.1.6",
     "babel-runtime": "^6.26.0",
     "chroma-js": "^1.3.4",
-    "highcharts": "5.0.14",
+    "highcharts": "6.0.7",
     "highcharts-grouped-categories": "1.1.2",
     "highcharts-more": "^0.1.2"
   },

@@ -230,32 +230,6 @@ perspective-row .row_draggable select:focus {
     outline: none;
 }
 
-perspective-viewer[view=scatter], perspective-viewer[view=line] {
-    
-    svg image {
-        opacity: 0.8;
-    }
-
-    #active_columns {
-        :nth-child(1) .is_visible::before {
-            .selected_indicator();
-            content: "X";
-        }
-        :nth-child(2) .is_visible::before {
-            .selected_indicator();
-            content: "Y";
-        }
-        :nth-child(3) .is_visible::before {
-            .selected_indicator();
-            content: "C";
-        }
-        :nth-child(4) .is_visible::before {
-            .selected_indicator();
-            content: "S";
-        }
-    }
-}
-
 perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
     display: inline-block;
 }
