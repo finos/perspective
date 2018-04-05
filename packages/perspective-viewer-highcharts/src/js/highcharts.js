@@ -11,6 +11,8 @@ import '@jpmorganchase/perspective-common';
 
 import highcharts from 'highcharts';
 
+import "../less/highcharts.less";
+
 const Highcharts = highcharts;
 
 import {COLORS_10, COLORS_20} from "./heatmap.js";
@@ -253,7 +255,11 @@ export function draw(mode) {
         }
 
         var type = 'scatter';
-        if (mode.indexOf('bar') > -1) {
+        if (mode === 'y_line') {
+            type = 'line';
+        } else if (mode === 'y_area') {
+            type = 'area';
+        } else if (mode.indexOf('bar') > -1) {
             type = 'column';
         } else if (mode == 'treemap') {
             type = 'treemap';
@@ -277,7 +283,6 @@ export function draw(mode) {
                 type: type,
                 inverted: mode.indexOf('horizontal') > -1,
                 animation: false,
-                marginRight: (series.length > 20) ? 150 : 0,
                 zoomType: mode === 'scatter' ? 'xy' : 'x',
             },
             navigation: {
@@ -293,8 +298,8 @@ export function draw(mode) {
                 align: 'right',
                 verticalAlign: 'top',
                 y: 10,
-                width: mode === "scatter" ? 30 : 140,
                 layout: 'vertical',
+                floating: series.length <= 20,
                 enabled: Object.keys(js[0]).length > 2 && mode !== 'scatter',
 
                 itemStyle: {
@@ -302,6 +307,9 @@ export function draw(mode) {
                 }
             },
             plotOptions: {
+                line: {
+                    marker: {enabled: false, radius: 0}
+                },
                 coloredScatter: {
                     marker: {radius: new_radius},
                     tooltip: {
@@ -492,11 +500,51 @@ export function draw(mode) {
             yaxis_type = tschema[yaxis_name];
 
             if (xaxis_type === 'date') {
-                top.categories = top.categories.map(x => new Date(x));
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });         
+            } else {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: xaxis_type === 'date' ? top.categories.map(x => new Date(x)) : top.categories,
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            padding: 0,
+                            autoRotation: xaxis_type === 'date' ? [0] : [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                        },
+                    }
+                });      
             }
 
             if (yaxis_type === 'date') {
-                ytop.categories = ytop.categories.map(x => new Date(x));
+                Object.assign(config, {
+                    yAxis: {
+                        categories: ytop.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (ytop.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });      
+            } else {
+                Object.assign(config, {
+                    yAxis: {
+                        categories: ytop.categories,
+                        title: null,
+                        tickWidth: 1,
+                        reversed: true,
+                        labels: {
+                            padding: 0,
+                            step: 1
+                        }
+                    }
+                });
             }
 
             Object.assign(config, {
@@ -523,25 +571,9 @@ export function draw(mode) {
                     ],
                     startOnTick: false,
                     endOnTick: false,
-                },
-                xAxis: {
-                    categories: top.categories,
-                    labels: {
-                        enabled: (top.categories.length > 0),
-                        padding: 0,
-                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
-                    },
-                },
-                yAxis: {
-                    categories: ytop.categories,
-                    title: null,
-                    tickWidth: 1,
-                    reversed: true,
-                    labels: {
-                        padding: 0,
-                        step: 1
-                    }
                 }
+              
+               
             });
             config['chart']['marginRight'] = 75;
             delete config["legend"]["width"];
@@ -617,7 +649,7 @@ export function draw(mode) {
             config['plotOptions']['series']['borderWidth'] = 2;
             config['chart']['marginRight'] = 75;
             delete config["legend"]["width"];
-        } else if (mode.indexOf('line') !== -1) {
+        } else if (mode === 'line') {
             Object.assign(config, {
                 colors: colors,
                 xAxis: {
@@ -641,27 +673,50 @@ export function draw(mode) {
                 }
             });
         } else {
+            xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
+            xaxis_type = tschema[xaxis_name];
+            yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
+            yaxis_type = tschema[yaxis_name];
+
+            if (xaxis_type === 'date') {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });             
+            } else {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories,
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            padding: 0,
+                            autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                        }
+                    }
+                });
+            }
             Object.assign(config, {
                 colors: colors,
-                xAxis: {
-                    categories: top.categories,
-                    labels: {
-                        enabled: (top.categories.length > 0),
-                        padding: 0,
-                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
-                    },
-                },
                 yAxis: {
                     startOnTick: false,
                     endOnTick: false,
                     title: {
-                        text: aggregates.map(function (x) { return x.column; }).join(",  "),
+                        text: aggregates.map(x => x.column).join(",  "),
                         style: {'color': '#666666', 'fontSize': "14px"}
                     },
                     labels: {overflow: 'justify'}
                 }
-
             });
+
+            config.plotOptions.series.dataLabels = {
+                allowOverlap: false,
+                padding: 10
+            }
         }
 
         if (this._chart) {
@@ -731,8 +786,8 @@ function delete_chart() {
     }
 }
 
-global.registerPlugin("vertical", {
-    name: "Bar Chart", 
+global.registerPlugin("y_bar", {
+    name: "Y Bar Chart", 
     create: draw("vertical_bar"), 
     resize: resize, 
     initial: {
@@ -743,8 +798,8 @@ global.registerPlugin("vertical", {
     delete: delete_chart
 });
 
-global.registerPlugin("horizontal", {
-    name: "Bar Chart (inverted)", 
+global.registerPlugin("x_bar", {
+    name: "X Bar Chart", 
     create: draw("horizontal_bar"), 
     resize: resize, 
     initial: {
@@ -755,20 +810,32 @@ global.registerPlugin("horizontal", {
     delete: delete_chart
 });
 
-global.registerPlugin("heatmap", {
-    name: "Heatmap",
-    create: draw("heatmap"),
-    resize: resize,
+global.registerPlugin("y_line", {
+    name: "Y Line Chart", 
+    create: draw("y_line"), 
+    resize: resize, 
     initial: {
-        "type": "number",
+        "type": "number",    
         "count": 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
-global.registerPlugin("line", {
-    name: "Line Chart", 
+global.registerPlugin("y_area", {
+    name: "Y Area Chart", 
+    create: draw("y_area"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("xy_line", {
+    name: "X/Y Line Chart", 
     create: draw("line"), 
     resize: resize, 
     initial: {
@@ -779,8 +846,8 @@ global.registerPlugin("line", {
     delete: delete_chart
 });
 
-global.registerPlugin("scatter", {
-    name: "Scatter Chart", 
+global.registerPlugin("xy_scatter", {
+    name: "X/Y Scatter Chart", 
     create: draw('scatter'), 
     resize: resize, 
     initial: {
@@ -800,5 +867,17 @@ global.registerPlugin("treemap", {
         "count": 2
     },
     selectMode: "toggle",
+    delete: function () {}
+});
+
+global.registerPlugin("heatmap", {
+    name: "Heatmap",
+    create: draw("heatmap"),
+    resize: resize,
+    initial: {
+        "type": "number",
+        "count": 1
+    },
+    selectMode: "select",
     delete: delete_chart
 });

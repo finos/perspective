@@ -423,7 +423,6 @@ function new_row(name, type, aggregate) {
 
     row.setAttribute('type', type);
     row.setAttribute('name', name);
-    row.setAttribute('title', name);
     row.setAttribute('aggregate', aggregate);
 
     row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));

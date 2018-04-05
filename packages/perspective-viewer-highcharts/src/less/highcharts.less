@@ -1,0 +1,40 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+ .selected_indicator() {
+    font-family: Arial;
+    font-weight: 500;
+    font-size: 12px;
+}
+
+perspective-viewer[view=xy_scatter], perspective-viewer[view=xy_line] {
+    
+    svg image {
+        opacity: 0.8;
+    }
+
+    #active_columns {
+        :nth-child(1) .is_visible::before {
+            .selected_indicator();
+            content: "X";
+        }
+        :nth-child(2) .is_visible::before {
+            .selected_indicator();
+            content: "Y";
+        }
+        :nth-child(3) .is_visible::before {
+            .selected_indicator();
+            content: "C";
+        }
+        :nth-child(4) .is_visible::before {
+            .selected_indicator();
+            content: "S";
+        }
+    }
+}
