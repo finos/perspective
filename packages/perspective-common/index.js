@@ -89,17 +89,19 @@ export function ScriptPath() {
         }
         pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/);
     }
+
     this.fullPath = function() {
-        return pathParts[1];
+        return pathParts ? pathParts[1] : window.location.origin + window.location.pathname;
     };
     this.path = function() {
-        return pathParts[2];
+        return pathParts ? pathParts[2] : window.location.pathname;
     };
     this.host = function() {
-        return this.path().match(/.+?\/\/.+?\//)[0];
+        let x = this.path().match(/.+?\/\/.+?\//);
+        return x ? x[0] : window.location.hostname;
     }
     this.file = function() {
-        return pathParts[3];
+        return pathParts ? pathParts[3] : "";
     };
 }
 
