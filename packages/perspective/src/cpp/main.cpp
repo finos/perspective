@@ -833,6 +833,13 @@ get_column_data(t_table_sptr table,
 }
 
 void set_column_nth(t_column* col, t_uindex idx, val value) {
+
+    // Check if the value is a javascript null
+    if (value.isNull()) {
+        col->set_valid(idx, false);
+        return;
+    }
+
     switch (col->get_dtype())
     {
         case DTYPE_BOOL:
@@ -868,11 +875,6 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
         case DTYPE_INT64:
         {
             col->set_nth<t_int64>(idx, value.as<t_int64>(), true);
-            break;
-        }
-        case DTYPE_NONE:
-        {
-            col->set_valid(idx, false);
             break;
         }
         case DTYPE_STR:
