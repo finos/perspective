@@ -899,6 +899,87 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
 }
 
 /**
+ * Helper function for computed columns
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
+
+void
+table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype,
+    val func, val inputs) {
+
+    // Get list of input column names
+    auto icol_names = vecFromJSArray<std::string>(inputs);
+
+    // Get t_column* for all input columns
+    t_colcptrvec icols;
+    for (const auto& cc : icol_names) {
+        icols.push_back(table->_get_column(cc));
+    }
+
+    int arity = icols.size();
+
+    // Add new column
+    t_column* out = table->add_column(name, dtype, true);
+
+    val i1 = val::undefined(),
+        i2 = val::undefined(),
+        i3 = val::undefined(),
+        i4 = val::undefined();
+
+    t_uindex size = table->size();
+    for (t_uindex ridx = 0; ridx < size; ++ridx) {
+        val value = val::null();
+
+        switch (arity) {
+            case 0: {
+                value = func();
+                break;
+            }
+            case 1: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                value = func(i1);
+                break;
+            }
+            case 2: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                value = func(i1, i2);
+                break;
+            }
+            case 3: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                value = func(i1, i2, i3);
+                break;
+            }
+            case 4: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                i4 = scalar_to_val(icols[3]->get_scalar(ridx));
+                value = func(i1, i2, i3, i4);
+                break;
+            }
+            default: {
+                // Don't handle other arity values
+                break;
+            }
+        }
+
+        set_column_nth(out, ridx, value);
+    }
+
+}
+
+/**
  *
  *
  * Params
@@ -1201,7 +1282,7 @@ EMSCRIPTEN_BINDINGS(perspective)
     function("make_context_two", &make_context_two);
     function("scalar_to_val", &scalar_to_val);
     function("scalar_vec_to_val", &scalar_vec_to_val);
-    function("get_column_data", &get_column_data);
+    function("table_add_computed_column", &table_add_computed_column);
     function("set_column_nth", &set_column_nth, allow_raw_pointers());
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);

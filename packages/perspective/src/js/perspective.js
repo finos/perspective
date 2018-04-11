@@ -755,36 +755,7 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
                 break;
         }
 
-        let out = tbl.add_column(name, dtype, true);
-
-        // temporarily pull out the data from input columns
-        let columns = [];
-        for (let colidx = 0; colidx < inputs.length; ++colidx) {
-            columns.push(__MODULE__.get_column_data(tbl, inputs[colidx]));
-        }
-
-        let size = tbl.size();
-        // Input arity
-        let arity = columns.length;
-        let val, i1, i2, i3, i4, i5;
-        for (let ridx = 0; ridx < size; ++ridx) {
-            switch (arity) {
-                case 4:
-                    i4 = columns[3][ridx];
-                case 3:
-                    i3 = columns[2][ridx];
-                case 2:
-                    i2 = columns[1][ridx];
-                case 1:
-                    i1 = columns[0][ridx];
-                case 0:
-                    val = f(i1, i2, i3, i4);
-                    break;
-                default:
-                    // Use apply
-            }
-            __MODULE__.set_column_nth(out, ridx, val);
-        }
+        __MODULE__.table_add_computed_column(tbl, name, dtype, f, inputs);
     }
 }
 
