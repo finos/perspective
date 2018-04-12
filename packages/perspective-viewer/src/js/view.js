@@ -279,16 +279,17 @@ async function loadTable(table) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
     
-    await this._clear_state();
+    this._clear_state();
 
-    this._inactive_columns.innerHTML = "";
-    this._active_columns.innerHTML = "";
     this._table = table;
 
     let [cols, schema] = await Promise.all([
         table.columns(),
         table.schema()
     ]);
+
+    this._inactive_columns.innerHTML = "";
+    this._active_columns.innerHTML = "";
 
     this._initial_col_order = cols.slice();
     if (!this.hasAttribute('columns')) {
@@ -610,13 +611,11 @@ registerElement(template, {
 
     update: {
         value: function (json) {
-            setTimeout(() => {
-                if (this._table === undefined) {
-                    this.load(json);
-                } else {
-                    this._table.update(json);
-                }
-            }, 0);
+            if (this._table === undefined) {
+                this.load(json);
+            } else {
+                this._table.update(json);
+            }
         }
     },
 
@@ -892,33 +891,32 @@ registerElement(template, {
     },
 
     _clear_state: {
-        value: async function () {
+        value: function () {
             if (this._task) {
                 this._task.cancel();
             }
+            let all = [];
             if (this._view) {
                 let view = this._view;
                 this._view = undefined;
-                await view.delete();
+                all.push(view.delete());
             };
             if (this._table) {
-                try {
-                    let table = this._table;
-                    this._table = undefined;
-                    await table.delete();
-                } catch (e) {
-                    console.warn(e);
-                }
+                let table = this._table;
+                this._table = undefined;
+                all.push(table.delete());
             }
+            return Promise.all(all);
         }
     },
 
     delete: {
-        value: async function () {
-            await this._clear_state();
+        value: function () {
+            let x = this._clear_state();
             if (this._plugin.delete) {
                 this._plugin.delete.call(this);
             }
+            return x;
         }
     },
 
