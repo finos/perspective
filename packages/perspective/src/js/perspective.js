@@ -1120,12 +1120,17 @@ table.prototype.add_computed = function(computed) {
         // Pull out the t_table from the current gnode
         tbl = __MODULE__.clone_gnode_table(this.gnode);
 
-        // Add computed columns in place to tbl
+        // Add new computed columns in place to tbl
         this._calculate_computed(tbl, computed);
 
         gnode = __MODULE__.make_gnode(tbl);
         pool.register_gnode(gnode);
         __MODULE__.fill(pool, gnode, tbl);
+
+        // Merge in definition of previous computed columns
+        if (this.computed.length > 0) {
+            computed = this.computed.concat(computed);
+        }
 
         return new table(gnode, pool, this.index, computed);
     } catch (e) {
