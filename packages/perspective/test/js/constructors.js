@@ -200,6 +200,50 @@ module.exports = (perspective) => {
             expect(data_6).toEqual(result);
         });
 
+        it("Computed column of arity 0", async function () {
+            var table = perspective.table(data);
+
+            let table2 = table.add_computed([
+                {column: "const",
+                 type: "integer",
+                 func: () => 1,
+                 inputs: [],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'const'}]}).to_json();
+            let expected = [{const: 1}, {const: 1}, {const: 1}, {const: 1}];
+            expect(expected).toEqual(result);
+        });
+
+        it("Computed column of arity 2", async function () {
+            var table = perspective.table(data_3);
+
+            let table2 = table.add_computed([
+                {column: "ratio",
+                 type: "float",
+                 func: (w, x) => w/x,
+                 inputs: ["w", "x"],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'ratio'}]}).to_json();
+            let expected = [{ratio: 1.5},{ratio: 1.25},{ratio: 1.1666666666666667},{ratio: 1.125}];
+            expect(expected).toEqual(result);
+        });
+
+        it("String computed column of arity 1", async function () {
+            var table = perspective.table(data);
+
+            let table2 = table.add_computed([
+                {column: "yes/no",
+                 type: "string",
+                 func: (z) => (z === true)?"yes":"no",
+                 inputs: ["z"],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'yes/no'}]}).to_json();
+            let expected = [{"yes/no": "yes"},{"yes/no": "no"},{"yes/no": "yes"},{"yes/no": "no"}];
+            expect(expected).toEqual(result);
+        });
     });
 
 
