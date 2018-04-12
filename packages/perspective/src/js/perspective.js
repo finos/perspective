@@ -743,7 +743,10 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
 
         let dtype;
         switch (type) {
-            case 'number':
+            case 'integer':
+                dtype = __MODULE__.t_dtype.DTYPE_INT32;
+                break;
+            case 'float':
                 dtype = __MODULE__.t_dtype.DTYPE_FLOAT64;
                 break;
             case 'boolean':
