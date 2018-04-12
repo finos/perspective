@@ -111,29 +111,35 @@ view.prototype.on_update = subscribe('on_update', 'view_method', true);
 
 view.prototype.on_delete = subscribe('on_delete', 'view_method', true);
 
-function table(worker, data, options) {
-    options = options || {};
-    options.binary = options.binary || false;
-    this._name = Math.random() + "";
+
+function table(worker, name) {
+    this._name = name;
     this._worker = worker;
-    var msg = {
-        cmd: 'table',
-        name: this._name,
-        data: data,
-        options: options
-    }
-    let post = () => {
-        if (this._worker.transferable && data instanceof ArrayBuffer) {
-            this._worker.postMessage(msg, [data]);
-        } else {
-            this._worker.postMessage(msg);
+}
+
+table.prototype.add_computed = function(computed) {
+    let name = Math.random() + "";
+    let original = this._name;
+    // serialize functions
+    for (let i = 0; i < computed.length; ++i) {
+        let column = computed[i];
+        let func = column['func'];
+        if (typeof func == "function") {
+            column['func'] = func.toString();
         }
+    }
+    var msg = {
+        cmd: 'add_computed',
+        original: original,
+        name: name,
+        computed: computed
     };
     if (this._worker.initialized.value) {
-        post();
+        this._worker.postMessage(msg);
     } else {
-        this._worker.messages.push(post);
+        this._worker.messages.push(() => this._worker.postMessage(msg));
     }
+    return new table(this._worker, name);
 }
 
 table.prototype.view = function(config) {
@@ -323,7 +329,27 @@ worker.prototype._handle = function(e) {
 };
 
 worker.prototype.table = function(data, options) {
-    return new table(this._worker, data, options);
+    // Set up msg
+    name = Math.random() + "";
+    var msg = {
+        cmd: 'table',
+        name: name,
+        data: data,
+        options: options || {}
+    };
+    let post = () => {
+        if (this._worker.transferable && data instanceof ArrayBuffer) {
+            this._worker.postMessage(msg, [data]);
+        } else {
+            this._worker.postMessage(msg);
+        }
+    };
+    if (this._worker.initialized.value) {
+        post();
+    } else {
+        this._worker.messages.push(post);
+    }
+    return new table(this._worker, name);
 };
 
 worker.prototype.terminate = function() {

@@ -737,7 +737,7 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
     for (let i = 0; i < computed_defs.length; ++i) {
         let coldef = computed_defs[i];
         let name = coldef['column'];
-        let f = coldef['f'];
+        let func = coldef['func'];
         let inputs = coldef['inputs'];
         let type = coldef['type'] || 'string';
 
@@ -758,7 +758,7 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
                 break;
         }
 
-        __MODULE__.table_add_computed_column(tbl, name, dtype, f, inputs);
+        __MODULE__.table_add_computed_column(tbl, name, dtype, func, inputs);
     }
 }
 
@@ -1219,6 +1219,16 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             case 'table':
                 _tables[msg.name] = perspective.table(msg.data, msg.options);
+                break;
+            case 'add_computed':
+                let table = _tables[msg.original];
+                let computed = msg.computed;
+                // rehydrate computed column functions
+                for (let i = 0; i < computed.length; ++i) {
+                    let column = computed[i];
+                    eval("column.func = " + column.func);
+                }
+                _tables[msg.name] = table.add_computed(computed);
                 break;
             case 'table_generate':
                 let g;
