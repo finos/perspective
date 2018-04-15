@@ -262,6 +262,7 @@ function color_axis(config, colorRange) {
             endOnTick: false,
         }
     });
+    config.legend.floating = false;
 }
 
 export function draw(mode) {
