@@ -50,6 +50,7 @@
 #side_panel perspective-row {
     #row_close {
         display: none;
+        cursor: pointer;
     }
 }
 
@@ -64,6 +65,16 @@ perspective-viewer.dragging #top_panel ul.dropping {
 }
 
 perspective-row {
+    #row_close {
+        min-width:5px;
+        max-width:5px;
+        margin-right:3px;
+        flex-grow:0;
+        color:#999;
+        font-family:Arial;
+        font-size:10px;
+        cursor: pointer;
+    }
     display: block;
     border: 0px solid rgba(0,0,0,0);
 }
