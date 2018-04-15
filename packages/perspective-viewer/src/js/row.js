@@ -7,6 +7,8 @@
  *
  */
 
+import _ from "underscore";
+
 import {registerElement, importTemplate} from "@jpmorganchase/perspective-common";
 
 import perspective from "@jpmorganchase/perspective";
@@ -107,17 +109,18 @@ registerElement(template, {
 
     filter: {
         set: function () {
-            let filter_dropdown = this.querySelector('#filter_operator');
-            let filter = JSON.parse(this.getAttribute('filter'));
+            const filter_dropdown = this.querySelector('#filter_operator');
+            const filter = JSON.parse(this.getAttribute('filter'));
             if (filter_dropdown.value !== filter.operator) {
                 filter_dropdown.value = filter.operator || perspective.FILTER_DEFAULTS[this.getAttribute('type')];
             }
             filter_dropdown.style.width = get_text_width(filter_dropdown.value);
-            let filter_input = this.querySelector('#filter_operand');
-            if (filter_input.value !== filter.operand) {
-                filter_input.value = filter.operand;
+            const filter_input = this.querySelector('#filter_operand');
+            const operand = filter.operand.toString();
+            if (!this._initialized) {
+                filter_input.value = operand;
             }
-            filter_input.style.width = get_text_width(filter.operand, 30);
+            filter_input.style.width = get_text_width(operand, 30);
         }
     },
 
@@ -185,11 +188,12 @@ registerElement(template, {
 
             let filter_operand = this.querySelector('#filter_operand');
             let filter_operator = this.querySelector('#filter_operator');
+            let debounced_filter = _.debounce(event => this._update_filter(event), 50);
             filter_operator.addEventListener('change', event => {
                 filter_operator.style.width = get_text_width(filter_operator.value);
-                this._update_filter(event);
+                debounced_filter();
             });
-            filter_operand.addEventListener('keyup',  event => this._update_filter(event));
+            filter_operand.addEventListener('keyup', event => this._update_filter(event));
         }
     }
 

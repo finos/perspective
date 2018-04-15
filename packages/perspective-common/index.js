@@ -152,7 +152,7 @@ export function registerElement(template, proto) {
                     this.setAttribute(key, val);
                     return;
                 }
-                if (!this._initialized) {
+                if (!this._initializing && !this._initialized) {
                     return;
                 }
                 old.bind(this)(val);
@@ -165,7 +165,7 @@ export function registerElement(template, proto) {
             if (this._initialized) {
                 return;
             }
-            this._initialized = true;
+            this._initializing= true;
             this._old_children = [];
             while (this.hasChildNodes()) {
                 if (this.lastChild.nodeType === 1) {
@@ -184,6 +184,8 @@ export function registerElement(template, proto) {
                     if (this.getAttribute(key) && key[0] !== "_") this[key] = this.getAttribute(key);
                 }
             }
+            this._initializing = false;
+            this._initialized = true;
         }
     };
     let name = template.getAttribute('id');
