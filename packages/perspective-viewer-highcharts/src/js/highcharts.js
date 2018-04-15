@@ -60,9 +60,10 @@ function _make_scatter_tick(row, columns, is_string, colorRange) {
     return tick;
 }
 
-function* visible_rows(json, hidden) {
+function* visible_rows(depth, top, json, hidden) {
     const first = json[0];
     const to_delete = [];
+    let label = top;
     for (let key in first) {
         let split_key = key.split(',');
         if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
@@ -73,33 +74,6 @@ function* visible_rows(json, hidden) {
         for (let h of to_delete) {
             delete row[h];
         }
-        yield row;
-    }
-}
-
-function _make_series(js, pivots, col_pivots, mode, hidden) {
-    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
-    var top = {name: "", depth:0, categories: []};
-    var label = top;
-
-    var series = [], leaf_size = 0;
-    let colorRange = [Infinity, -Infinity];
-    let is_string = {};
-    let columns, is_stacked;
-
-    let scale = chroma.scale('RdYlBu');
-
-    for (let row of visible_rows(js, hidden)) {
-
-        // If this is the first row, record some structural properties from it.
-        if (!columns || !is_stacked) {
-            columns = Object.keys(js[0]).filter(prop => prop !== "__ROW_PATH__");
-            is_stacked = columns.map(value =>
-                value.substr(value.lastIndexOf(',') + 1, value.length)
-            ).filter((value, index, self) =>
-                self.indexOf(value) === index
-            ).length > 1;
-        }
 
         var path = row.__ROW_PATH__;
         if (!path) {
@@ -107,9 +81,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
         }
 
         var d = path.length;
-        if (d == 0) {
-            // Skip the root
-        } else if (d < depth) {
+        if (d > 0 && d < depth) {
 
             // Add new label
             label = {
@@ -129,99 +101,117 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                 }
             }
             parent.categories.push(label);
-        } else {
+        } else if (d >= depth) {
             var sname = path[d-1];
             label.categories.push(sname);
-            if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
-                if (col_pivots.length === 0) {
-                    var sname = ' ';
-                    var s;
-                    for (var sidx = 0; sidx < series.length; sidx++) {
-                        if (series[sidx].name == sname) {
-                            s = series[sidx];
-                            break;
-                        }
+ 
+            yield row;
+        }
+    }
+}
+
+function _make_series(js, pivots, col_pivots, mode, hidden) {
+    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
+    var top = {name: "", depth:0, categories: []};
+
+    var series = [], leaf_size = 0;
+    let colorRange = [Infinity, -Infinity];
+    let is_string = {};
+    let columns, is_stacked;
+
+    let scale = chroma.scale('RdYlBu');
+
+    for (let row of visible_rows(depth, top, js, hidden)) {
+
+        if (columns === undefined) {
+            columns = Object.keys(row).filter(prop => prop !== "__ROW_PATH__");
+            is_stacked = columns.map(value =>
+                value.substr(value.lastIndexOf(',') + 1, value.length)
+            ).filter((value, index, self) =>
+                self.indexOf(value) === index
+            ).length > 1;
+        }
+ 
+        if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
+            if (col_pivots.length === 0) {
+                var sname = ' ';
+                var s;
+                for (var sidx = 0; sidx < series.length; sidx++) {
+                    if (series[sidx].name == sname) {
+                        s = series[sidx];
+                        break;
                     }
-                    if (sidx == series.length) {
-                        s = {
-                            name: sname,
-                            connectNulls: true,
-                            data: [],
-                        };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
-                        series.push(s)
-                    }
-                    s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
-                } else {
-                    let prev, group = [];
-                    for (let prop of columns) {
-                        var sname = prop.split(',');
-                        var gname = sname[sname.length - 1];
-                        sname = sname.slice(0, sname.length - 1).join(",") || " ";
-                        var s;
-                        if (prev === undefined) prev = sname;
-                        for (var sidx = 0; sidx < series.length; sidx++) {
-                            if (series[sidx].name == prev) {
-                                s = series[sidx];
-                                break;
-                            }
-                        }
-                        if (sidx == series.length) {
-                            s = {
-                                name: prev,
-                                connectNulls: true,
-                                data: [],
-                            };
-                            while (s.data.length < leaf_size) {
-                                s.data.push(0);
-                            }
-                            series.push(s)
-                        }
-                        if (prev === sname) {
-                            group.push(prop);
-                        } else {
-                            prev = sname;
-                            s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
-                            group = [prop];
-                        }
-                    }
-                    s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
                 }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
             } else {
-                columns.map(prop => {
+                let prev, group = [];
+                for (let prop of columns) {
                     var sname = prop.split(',');
                     var gname = sname[sname.length - 1];
-                    if (is_stacked) {
-                        sname = sname.join(", ") || gname;
-                    } else {
-                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
-                    }
+                    sname = sname.slice(0, sname.length - 1).join(",") || " ";
                     var s;
-                    for (var sidx=0; sidx<series.length; sidx++) {
-                        if (series[sidx].name == sname && series[sidx].stack == gname) {
+                    if (prev === undefined) prev = sname;
+                    for (var sidx = 0; sidx < series.length; sidx++) {
+                        if (series[sidx].name == prev) {
                             s = series[sidx];
                             break;
                         }
                     }
                     if (sidx == series.length) {
                         s = {
-                            name: sname,
-                            stack: gname,
+                            name: prev,
                             connectNulls: true,
                             data: [],
                         };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
                         series.push(s)
                     }
-                    var val = row[prop];
-                    val = (val === undefined || val === "" ? null : val)
-                    s.data.push(val);
-                });
+                    if (prev === sname) {
+                        group.push(prop);
+                    } else {
+                        prev = sname;
+                        s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
+                        group = [prop];
+                    }
+                }
+                s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
             }
+        } else {
+            columns.map(prop => {
+                var sname = prop.split(',');
+                var gname = sname[sname.length - 1];
+                if (is_stacked) {
+                    sname = sname.join(", ") || gname;
+                } else {
+                    sname = sname.slice(0, sname.length - 1).join(", ") || " ";
+                }
+                var s;
+                for (var sidx=0; sidx<series.length; sidx++) {
+                    if (series[sidx].name == sname && series[sidx].stack == gname) {
+                        s = series[sidx];
+                        break;
+                    }
+                }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        stack: gname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                var val = row[prop];
+                val = (val === undefined || val === "" ? null : val)
+                s.data.push(val);
+            });
         }
     }
     return [series, top, colorRange];
@@ -353,6 +343,9 @@ export function draw(mode) {
                 itemStyle: {
                     fontWeight: 'normal'
                 }
+            },
+            boost: {
+                enabled: false
             },
             plotOptions: {
                 line: {
