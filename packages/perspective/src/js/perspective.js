@@ -1215,13 +1215,27 @@ if (typeof self !== "undefined" && self.addEventListener) {
             }
             case 'view_method': {
                 let obj = _views[msg.name];
+                if (!obj) {
+                    self.postMessage({
+                        id: msg.id,
+                        error: "View is not initialized"
+                    });
+                    return;
+                }
                 if (msg.subscribe) {
-                    obj[msg.method](e => {
+                    try {
+                        obj[msg.method](e => {
+                            self.postMessage({
+                                id: msg.id,
+                                data: e
+                            });
+                        });
+                    } catch (error) {
                         self.postMessage({
                             id: msg.id,
-                            data: e
+                            error: error + ""
                         });
-                    });
+                    }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
                         self.postMessage({
