@@ -9,7 +9,7 @@
 
 import {detectIE, ScriptPath} from "@jpmorganchase/perspective-common";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
 
 /******************************************************************************
  *
@@ -341,5 +341,9 @@ export default {
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
-    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS
+    TYPE_FILTERS: TYPE_FILTERS,
+
+    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
+
+    FILTER_DEFAULTS: FILTER_DEFAULTS,
 };

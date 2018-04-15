@@ -70,3 +70,56 @@ export const AGGREGATE_DEFAULTS = {
     'date': 'distinct count'
 };
 
+const BOOLEAN_FILTERS = [
+    "&",
+    "|",
+    "==",
+    "!=",
+    "or",
+    "and"
+];
+
+const NUMBER_FILTERS = [
+    "<",
+    ">",
+    "==",
+    "<=",
+    ">=",
+    "!=",
+    "is nan",
+    "is not nan"
+];
+
+const STRING_FILTERS = [
+    "==",
+    "contains",
+    "!=",
+    "begins with",
+    "ends with"
+];
+
+const DATE_FILTERS = [
+    "<",
+    ">",
+    "==",
+    "<=",
+    ">=",
+    "!="
+];
+
+export const TYPE_FILTERS = {
+    'string': STRING_FILTERS,
+    'float': NUMBER_FILTERS,
+    'integer': NUMBER_FILTERS,
+    'boolean': BOOLEAN_FILTERS,
+    'date': DATE_FILTERS
+};
+
+export const FILTER_DEFAULTS = {
+    'string': '==',
+    'float': '==',
+    'integer': '==',
+    'boolean': '==',
+    'date': '=='
+};
+
