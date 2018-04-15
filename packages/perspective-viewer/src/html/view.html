@@ -24,13 +24,13 @@
             <div id='top_panel'>
                 <div class="rrow">
                     <ul id="row_pivots" name="Row Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="row_pivots">Row Pivots</label>
+                        <label for="row_pivots">Group by</label>
                     </ul>
                 </div>
                 <span class="rrow centered" style="min-width:5px;max-width:5px;flex-grow:0;color:#999;font-family:Arial;font-size:12px">&#x2715;</span>
                 <div class="rrow">
                     <ul id="column_pivots" name="Column Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="column_pivots">Column Pivots</label>
+                        <label for="column_pivots">Split by</label>
                     </ul>
                 </div>
                 <div class="rrow">
@@ -39,7 +39,9 @@
                     </ul>
                 </div>
                 <div class="rrow" style='flex-grow:3'>
-                    <input id="filter_input" placeholder="Filter"></input>
+                    <ul id="filters" name="Filter" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <label for="sort">Filter</label>
+                    </ul>
                 </div>
             </div>
             <div id="pivot_chart"></div>

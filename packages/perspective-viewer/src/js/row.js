@@ -35,6 +35,19 @@ global.disallowDrop = function disallowDrop(ev) {
     ev.currentTarget.classList.remove('dropping');
 }
 
+function get_text_width(text, max = 0) {
+    let span = document.createElement('span');
+    // FIXME get these values form the stylesheet
+    span.style.visibility = 'hidden';
+    span.style.fontFamily = 'monospace';
+    span.style.fontSize = '12px';
+    span.innerHTML = text;
+    document.body.appendChild(span);
+    let width = `${Math.max(max, span.offsetWidth) + 20}px`;
+    document.body.removeChild(span);
+    return width;
+}
+
 registerElement(template, {
 
     name: {
@@ -50,10 +63,14 @@ registerElement(template, {
             let type = this.getAttribute('type');
             elem.classList.add(type);
             let agg_dropdown = this.querySelector('#column_aggregate');
+            let filter_dropdown = this.querySelector('#filter_operator');
             switch (type) {
                 case "float":
                 case "integer":
                     agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.float.map(agg => 
+                        `<option value="${agg}">${agg}</option>`
+                    ).join('');
+                    filter_dropdown.innerHTML = perspective.TYPE_FILTERS.float.map(agg => 
                         `<option value="${agg}">${agg}</option>`
                     ).join('');
                     break;
@@ -61,10 +78,23 @@ registerElement(template, {
                     agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.boolean.map(agg => 
                         `<option value="${agg}">${agg}</option>`
                     ).join('');
+                    filter_dropdown.innerHTML = perspective.TYPE_FILTERS.boolean.map(agg => 
+                        `<option value="${agg}">${agg}</option>`
+                    ).join('');
                     break;
                 case 'date':
+                    agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.date.map(agg => 
+                        `<option value="${agg}">${agg}</option>`
+                    ).join('');
+                    filter_dropdown.innerHTML = perspective.TYPE_FILTERS.date.map(agg => 
+                        `<option value="${agg}">${agg}</option>`
+                    ).join('');
+                    break;
                 case "string":
                     agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.string.map(agg => 
+                        `<option value="${agg}">${agg}</option>`
+                    ).join('');
+                    filter_dropdown.innerHTML = perspective.TYPE_FILTERS.string.map(agg => 
                         `<option value="${agg}">${agg}</option>`
                     ).join('');
                 default:
@@ -72,6 +102,22 @@ registerElement(template, {
             if (!this.hasAttribute('aggregate')) {
                 this.setAttribute('aggregate', perspective.AGGREGATE_DEFAULTS[type]);
             }
+        }
+    },
+
+    filter: {
+        set: function () {
+            let filter_dropdown = this.querySelector('#filter_operator');
+            let filter = JSON.parse(this.getAttribute('filter'));
+            if (filter_dropdown.value !== filter.operator) {
+                filter_dropdown.value = filter.operator || perspective.FILTER_DEFAULTS[this.getAttribute('type')];
+            }
+            filter_dropdown.style.width = get_text_width(filter_dropdown.value);
+            let filter_input = this.querySelector('#filter_operand');
+            if (filter_input.value !== filter.operand) {
+                filter_input.value = filter.operand;
+            }
+            filter_input.style.width = get_text_width(filter.operand, 30);
         }
     },
 
@@ -85,11 +131,43 @@ registerElement(template, {
         }
     },
 
+    _update_filter: {
+        value: function () {
+            let filter_operand = this.querySelector('#filter_operand');
+            let filter_operator = this.querySelector('#filter_operator');
+            let val = filter_operand.value;
+            let type = this.getAttribute('type');
+            switch (type) {
+                case "float":
+                    val = parseFloat(val);
+                    break;
+                case "integer":
+                    val = parseInt(val);
+                    break;
+                case "boolean":
+                    val = val.toLowerCase().indexOf('true') > -1; //FIXME
+                    break;
+                case 'date':
+                    val = ''
+                    break;
+                case "string":
+                default:
+            }
+            this.setAttribute('filter', JSON.stringify({operator: filter_operator.value, operand: val}));
+            this.dispatchEvent(new CustomEvent('filter-selected', {detail: event}));   
+        }
+    },
+
     attachedCallback: {
         value: function () {
             let li = this.querySelector('.row_draggable');
             li.addEventListener('dragstart', ev => {
-                ev.dataTransfer.setData("text", this.getAttribute('name'));
+                if (this.hasAttribute('filter')) {
+                    let {operator, operand} = JSON.parse(this.getAttribute('filter'));
+                    ev.dataTransfer.setData("text", JSON.stringify([this.getAttribute('name'), operator, operand]));
+                } else {
+                    ev.dataTransfer.setData("text", JSON.stringify([this.getAttribute('name'), perspective.FILTER_DEFAULTS[this.getAttribute('type')], undefined]));
+                }
                 this.dispatchEvent(new CustomEvent('row-drag'));
             });
             li.addEventListener('dragend', ev => {
@@ -98,12 +176,20 @@ registerElement(template, {
             let visible = this.querySelector('.is_visible');
             visible.addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('visibility-clicked', {detail: event})));
             this.querySelector('#row_close').addEventListener('mousedown', event => this.dispatchEvent(new CustomEvent('close-clicked', {detail: event})));
+
             let agg_dropdown = this.querySelector('#column_aggregate');
             agg_dropdown.addEventListener('change', event => {
-                let agg_dropdown = this.querySelector('#column_aggregate');
                 this.setAttribute('aggregate', agg_dropdown.value);
                 this.dispatchEvent(new CustomEvent('aggregate-selected', {detail: event}));
             });
+
+            let filter_operand = this.querySelector('#filter_operand');
+            let filter_operator = this.querySelector('#filter_operator');
+            filter_operator.addEventListener('change', event => {
+                filter_operator.style.width = get_text_width(filter_operator.value);
+                this._update_filter(event);
+            });
+            filter_operand.addEventListener('keyup',  event => this._update_filter(event));
         }
     }
 

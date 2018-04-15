@@ -149,6 +149,39 @@ perspective-row #sort_order {
     display: none;
 }
 
+perspective-row {
+    #filter_operand, #filter_operator {
+        display: none;
+        margin: 0;
+    }
+}
+
+#filters {
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+
+}
+
+#filters perspective-row {
+    select {
+        margin-left: 15px;
+        padding-right: 15px;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        cursor: pointer;
+    }
+    #filter_operator {
+        display: inline-block;
+        height: 14px;
+        font-family: monospace;
+    }
+    #filter_operand {
+        display: inline-block;
+    }
+}
+
 #sort perspective-row #sort_order {
     display: inline-block;
 }
