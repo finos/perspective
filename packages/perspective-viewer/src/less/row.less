@@ -54,13 +54,13 @@
     }
 }
 
-perspective-viewer.dragging #top_panel ul {
+perspective-viewer.dragging #top_panel .rrow > * {
     border: 1px solid #1078d1 !important;
     margin-top: -2px;
     margin-left: -1px;
 }
 
-perspective-viewer.dragging #top_panel ul.dropping {
+perspective-viewer.dragging #top_panel .rrow > .dropping {
     background-color: rgb(240, 240, 255) !important;
 }
 
@@ -74,6 +74,7 @@ perspective-row {
         font-family:Arial;
         font-size:10px;
         cursor: pointer;
+        margin-left: 3px;
     }
     display: block;
     border: 0px solid rgba(0,0,0,0);
@@ -95,9 +96,12 @@ perspective-viewer ul {
     pointer-events: none;
 }
 
+#side_panel perspective-row li {
+    margin-bottom: 2px;
+}
+
 perspective-row li {
     color: rgb(51, 51, 51);
-    margin-bottom: 2px;
     display: flex;
     overflow: hidden;
     align-items: center;
@@ -164,17 +168,40 @@ perspective-row {
     #filter_operand, #filter_operator {
         display: none;
         margin: 0;
+        background: none !important;
+    }
+
+    #filter_operand {
+        padding: 0px;
+        height: 19px;
     }
 }
 
-#filters {
-    white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-
+perspective-viewer {
+    #filters {
+        white-space: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding-top: 3px;
+        border-bottom: 1px solid #ccc;
+        color: #ccc;
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 12px;
+        label {
+            height: 21px;
+            margin-bottom: 2px;
+        }
+    }
 }
 
 #filters perspective-row {
+    margin-right: 24px;
+
+    &:before {
+        content: none !important;
+    }
+
     select {
         margin-left: 15px;
         padding-right: 15px;

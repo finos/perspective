@@ -211,14 +211,24 @@ perspective-viewer {
         content: '\1f527';
     }
 
-    ul label {
+    #filters {
+        background-color: white;
+        label {
+            padding-top: 3px;
+        }
+        perspective-row {
+            padding-top: 2px;
+        }
+    }
+
+    ul label, #filters label {
         color: #ccc;
         font-weight: normal;
         margin-bottom: 0px;
         margin-left: 0px;
     }
     
-    ul {
+    ul, #filters {
         padding: 0px 10px 0px 10px;
         margin: 0;
         .bordered();

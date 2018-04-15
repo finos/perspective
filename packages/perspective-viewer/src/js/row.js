@@ -116,7 +116,7 @@ registerElement(template, {
             }
             filter_dropdown.style.width = get_text_width(filter_dropdown.value);
             const filter_input = this.querySelector('#filter_operand');
-            const operand = filter.operand.toString();
+            const operand = filter.operand ? filter.operand.toString() : "";
             if (!this._initialized) {
                 filter_input.value = operand;
             }
@@ -135,7 +135,7 @@ registerElement(template, {
     },
 
     _update_filter: {
-        value: function () {
+        value: function (event) {
             let filter_operand = this.querySelector('#filter_operand');
             let filter_operator = this.querySelector('#filter_operator');
             let val = filter_operand.value;
@@ -191,6 +191,8 @@ registerElement(template, {
             let debounced_filter = _.debounce(event => this._update_filter(event), 50);
             filter_operator.addEventListener('change', event => {
                 filter_operator.style.width = get_text_width(filter_operator.value);
+                const filter_input = this.querySelector('#filter_operand');
+                filter_input.style.width = get_text_width("" + filter_operand.value, 30);    
                 debounced_filter();
             });
             filter_operand.addEventListener('keyup', event => this._update_filter(event));

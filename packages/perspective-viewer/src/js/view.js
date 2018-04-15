@@ -159,10 +159,10 @@ function drop(ev) {
     if (data_index !== -1) {
         columns.splice(data_index, 1);
     }
-    if (name.indexOf('pivot') > -1) {
-        this.setAttribute(name, JSON.stringify(columns.concat([data[0]])));
-    } else {
+    if (name.indexOf('filter') > -1) {
         this.setAttribute(name, JSON.stringify(columns.concat([data])));
+    } else {
+        this.setAttribute(name, JSON.stringify(columns.concat([data[0]])));
     }
 
     // Deselect the dropped column
@@ -409,12 +409,7 @@ async function loadTable(table) {
         this._inactive_columns.style.display = 'block';
     }
 
-
     this.filters = this.getAttribute('filters');
-    this.row_pivots = this.getAttribute('row_pivots');
-    this.column_pivots = this.getAttribute('column_pivots');
-    this.sort = this.getAttribute('sort');
-
 
     this._update();
 }
@@ -987,7 +982,6 @@ registerElement(template, {
             this.slaves = [];
             this._aggregate_selector = this.querySelector('#aggregate_selector');
             this._vis_selector = this.querySelector('#vis_selector');
-           // this._filter_input = this.querySelector('#filter_input'); FIXME\
             this._filters = this.querySelector('#filters');
             this._row_pivots = this.querySelector('#row_pivots');
             this._column_pivots = this.querySelector('#column_pivots');
@@ -1033,16 +1027,6 @@ registerElement(template, {
             if (!this.hasAttribute('filters')) {
                 this.setAttribute('filters', "[]");
             }
-
-            // FIXME
-            // this._filter_input.addEventListener('keyup', _.debounce(event => {
-            //     let filters = this.getAttribute('filters');
-            //     let new_filters = JSON.stringify(this._get_view_filters());
-            //     if (filters !== new_filters) {
-            //         this.setAttribute('filters', new_filters);
-            //         this._update();
-            //     }
-            // }, 200));
 
             this._vis_selector.addEventListener('change', event => {
                 this.setAttribute('view', this._vis_selector.value);
