@@ -94,6 +94,7 @@ const STRING_FILTERS = [
     "==",
     "contains",
     "!=",
+    "in",
     "begins with",
     "ends with"
 ];

@@ -104,6 +104,40 @@ registerElement(template, {
             if (!this.hasAttribute('aggregate')) {
                 this.setAttribute('aggregate', perspective.AGGREGATE_DEFAULTS[type]);
             }
+            let filter_operand = this.querySelector('#filter_operand');
+            this._callback = event => this._update_filter(event);
+            filter_operand.addEventListener('keyup', event => {
+                if (filter_operand.value !== 'in') {
+                    this._callback(event);
+                }
+            });
+        }
+    },
+
+    choices: {
+        value: function (choices) {
+            let filter_operand = this.querySelector('#filter_operand');
+            let filter_operator = this.querySelector('#filter_operator');
+            new Awesomplete(filter_operand, {
+                label: this.getAttribute('name'),
+                list: choices,
+                minChars: 0,
+                filter: function(text, input) {
+                    return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]);
+                },
+                item: function(text, input) {
+                    return Awesomplete.ITEM(text, input.match(/[^,]*$/)[0]);
+                },
+                replace: function(text) {
+                    let before = this.input.value.match(/^.+,\s*|/)[0];
+                    if (filter_operator.value === 'in') {            
+                        this.input.value = before + text + ", ";
+                    } else {
+                        this.input.value = before + text;
+                    }
+                }
+            });
+            filter_operand.addEventListener('awesomplete-selectcomplete', this._callback);
         }
     },
 
@@ -156,6 +190,9 @@ registerElement(template, {
                 case "string":
                 default:
             }
+            if (filter_operator.value === "in") {
+                val = val.split(',').map(x => x.trim());
+            }
             this.setAttribute('filter', JSON.stringify({operator: filter_operator.value, operand: val}));
             this.dispatchEvent(new CustomEvent('filter-selected', {detail: event}));   
         }
@@ -195,7 +232,6 @@ registerElement(template, {
                 filter_input.style.width = get_text_width("" + filter_operand.value, 30);    
                 debounced_filter();
             });
-            filter_operand.addEventListener('keyup', event => this._update_filter(event));
         }
     }
 

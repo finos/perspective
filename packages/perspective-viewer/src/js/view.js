@@ -9,6 +9,8 @@
 
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
+import "awesomplete";
+import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import {registerElement, importTemplate} from "@jpmorganchase/perspective-common";
@@ -447,6 +449,13 @@ function new_row(name, type, aggregate, filter) {
 
     if (filter) {
         row.setAttribute('filter', filter);
+        if (type === 'string') {
+            const v = this._table.view({row_pivot:[name], aggregate: []});
+            v.to_json().then(json => {
+                row.choices(json.slice(1, json.length - 1).map(x => x.__ROW_PATH__));
+                v.delete();
+            })
+        }
     }
 
     row.setAttribute('type', type);
