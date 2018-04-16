@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Perspective.js",
   "main": "build/perspective.js",
   "publishConfig": {
@@ -35,7 +35,7 @@
   "license": "Apache",
   "dependencies": {
     "@apache-arrow/es5-esm": "^0.3.1",
-    "@jpmorganchase/perspective-common": "^0.1.7",
+    "@jpmorganchase/perspective-common": "^0.1.8",
     "d3-array": "^1.2.1",
     "moment": "^2.19.1",
     "papaparse": "^4.3.6",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@apache-arrow/es5-esm": "^0.2.0",
-    "@jpmorganchase/perspective-common": "^0.1.7",
+    "@jpmorganchase/perspective-common": "^0.1.8",
     "arraybuffer-loader": "^1.0.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
