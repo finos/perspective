@@ -8,5 +8,6 @@
     "superstore.html/sorts by an alpha column.": "f8f7c8cbc7ffe2108edb84e66bce65a9",
     "superstore.html/displays visible columns.": "a698a6063577b49a258bdaee4629a6d3",
     "superstore.html/sorts by a hidden column.": "8679ec3776ce2712059177dbfe96afed",
-    "superstore.html/filters by a numeric column.": "57b2610d402a65ac44239438ad6cc963"
+    "superstore.html/filters by a numeric column.": "57b2610d402a65ac44239438ad6cc963",
+    "blank.html/Handles reloading with a schema.": "bff00d756537558a60cb5bbc9fc81a3a"
 }
