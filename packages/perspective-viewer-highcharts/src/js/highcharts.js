@@ -11,6 +11,8 @@ import '@jpmorganchase/perspective-common';
 
 import highcharts from 'highcharts';
 
+import * as gparser from 'gradient-parser';
+
 import "../less/highcharts.less";
 
 const Highcharts = highcharts;
@@ -58,28 +60,19 @@ function _make_scatter_tick(row, columns, is_string, colorRange) {
     return tick;
 }
 
-function _make_series(js, pivots, col_pivots, mode, hidden) {
-    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
-    var top = {name: "", depth:0, categories: []};
-    var label = top;
-
-    var series = [], leaf_size = 0;
-    let colorRange = [Infinity, -Infinity];
-    let is_string = {};
-    let columns, is_stacked;
-
-    let scale = chroma.scale('RdYlBu');
-
-    for (let row of visible_rows(js, hidden)) {
-
-        // If this is the first row, record some structural properties from it.
-        if (!columns || !is_stacked) {
-            columns = Object.keys(js[0]).filter(prop => prop !== "__ROW_PATH__");
-            is_stacked = columns.map(value =>
-                value.substr(value.lastIndexOf(',') + 1, value.length)
-            ).filter((value, index, self) =>
-                self.indexOf(value) === index
-            ).length > 1;
+function* visible_rows(depth, top, json, hidden) {
+    const first = json[0];
+    const to_delete = [];
+    let label = top;
+    for (let key in first) {
+        let split_key = key.split(',');
+        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
+            to_delete.push(key);
+        }
+    }
+    for (let row of json) {
+        for (let h of to_delete) {
+            delete row[h];
         }
 
         var path = row.__ROW_PATH__;
@@ -88,9 +81,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
         }
 
         var d = path.length;
-        if (d == 0) {
-            // Skip the root
-        } else if (d < depth) {
+        if (d > 0 && d < depth) {
 
             // Add new label
             label = {
@@ -102,7 +93,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
             // Find the correct parent
             var parent = top;
             for (var lidx=0; lidx < (d-1); lidx++) {
-                for (var cidx=0; cidx<parent.categories.length; cidx++) {
+                for (var cidx = 0; cidx < parent.categories.length; cidx++) {
                     if (parent.categories[cidx].name == path[lidx]) {
                         parent = parent.categories[cidx];
                         break;
@@ -110,119 +101,167 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                 }
             }
             parent.categories.push(label);
-        } else {
+        } else if (d >= depth) {
             var sname = path[d-1];
             label.categories.push(sname);
-            if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
-                if (col_pivots.length === 0) {
-                    var sname = ' ';
-                    var s;
-                    for (var sidx = 0; sidx < series.length; sidx++) {
-                        if (series[sidx].name == sname) {
-                            s = series[sidx];
-                            break;
-                        }
+ 
+            yield row;
+        }
+    }
+}
+
+function _make_series(js, pivots, col_pivots, mode, hidden) {
+    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
+    var top = {name: "", depth:0, categories: []};
+
+    var series = [], leaf_size = 0;
+    let colorRange = [Infinity, -Infinity];
+    let is_string = {};
+    let columns, is_stacked;
+
+    let scale = chroma.scale('RdYlBu');
+
+    for (let row of visible_rows(depth, top, js, hidden)) {
+
+        if (columns === undefined) {
+            columns = Object.keys(row).filter(prop => prop !== "__ROW_PATH__");
+            is_stacked = columns.map(value =>
+                value.substr(value.lastIndexOf(',') + 1, value.length)
+            ).filter((value, index, self) =>
+                self.indexOf(value) === index
+            ).length > 1;
+        }
+ 
+        if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
+            if (col_pivots.length === 0) {
+                var sname = ' ';
+                var s;
+                for (var sidx = 0; sidx < series.length; sidx++) {
+                    if (series[sidx].name == sname) {
+                        s = series[sidx];
+                        break;
                     }
-                    if (sidx == series.length) {
-                        s = {
-                            name: sname,
-                            connectNulls: true,
-                            data: [],
-                        };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
-                        series.push(s)
-                    }
-                    s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
-                } else {
-                    let prev, group = [];
-                    for (let prop of columns) {
-                        var sname = prop.split(',');
-                        var gname = sname[sname.length - 1];
-                        sname = sname.slice(0, sname.length - 1).join(",") || " ";
-                        var s;
-                        if (prev === undefined) prev = sname;
-                        for (var sidx = 0; sidx < series.length; sidx++) {
-                            if (series[sidx].name == prev) {
-                                s = series[sidx];
-                                break;
-                            }
-                        }
-                        if (sidx == series.length) {
-                            s = {
-                                name: prev,
-                                connectNulls: true,
-                                data: [],
-                            };
-                            while (s.data.length < leaf_size) {
-                                s.data.push(0);
-                            }
-                            series.push(s)
-                        }
-                        if (prev === sname) {
-                            group.push(prop);
-                        } else {
-                            prev = sname;
-                            s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
-                            group = [prop];
-                        }
-                    }
-                    s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
                 }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
             } else {
-                columns.map(prop => {
+                let prev, group = [];
+                for (let prop of columns) {
                     var sname = prop.split(',');
                     var gname = sname[sname.length - 1];
-                    if (is_stacked) {
-                        sname = sname.join(", ") || gname;
-                    } else {
-                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
-                    }
+                    sname = sname.slice(0, sname.length - 1).join(",") || " ";
                     var s;
-                    for (var sidx=0; sidx<series.length; sidx++) {
-                        if (series[sidx].name == sname && series[sidx].stack == gname) {
+                    if (prev === undefined) prev = sname;
+                    for (var sidx = 0; sidx < series.length; sidx++) {
+                        if (series[sidx].name == prev) {
                             s = series[sidx];
                             break;
                         }
                     }
                     if (sidx == series.length) {
                         s = {
-                            name: sname,
-                            stack: gname,
+                            name: prev,
                             connectNulls: true,
                             data: [],
                         };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
                         series.push(s)
                     }
-                    var val = row[prop];
-                    val = (val === undefined || val === "" ? null : val)
-                    s.data.push(val);
-                });
+                    if (prev === sname) {
+                        group.push(prop);
+                    } else {
+                        prev = sname;
+                        s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
+                        group = [prop];
+                    }
+                }
+                s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
             }
+        } else {
+            columns.map(prop => {
+                var sname = prop.split(',');
+                var gname = sname[sname.length - 1];
+                if (is_stacked) {
+                    sname = sname.join(", ") || gname;
+                } else {
+                    sname = sname.slice(0, sname.length - 1).join(", ") || " ";
+                }
+                var s;
+                for (var sidx=0; sidx<series.length; sidx++) {
+                    if (series[sidx].name == sname && series[sidx].stack == gname) {
+                        s = series[sidx];
+                        break;
+                    }
+                }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        stack: gname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                var val = row[prop];
+                val = (val === undefined || val === "" ? null : val)
+                s.data.push(val);
+            });
         }
     }
     return [series, top, colorRange];
 }
 
-function* visible_rows(json, hidden) {
-    let first = json[0];
-    let to_delete = [];
-    for (let key in first) {
-        let split_key = key.split(',');
-        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
-            to_delete.push(key);
+function _get_gradient(type) {
+    const thermometer = document.createElement('rect');
+    thermometer.style.display = 'none';
+    thermometer.className = `highcharts-heatmap-gradient-${type}`;
+    const chart = this.querySelector('#pivot_chart');
+    chart.appendChild(thermometer);
+    const gradient = window.getComputedStyle(thermometer).getPropertyValue('background-image');
+    chart.removeChild(thermometer);
+    return gparser.parse(gradient)[0].colorStops.map(x => [
+        Number.parseFloat(x.length.value) / 100, 
+        `rgb(${x.value.join(',')})`
+    ]);
+}
+
+const _get_gradients = (() => {
+    let gradients;
+    return function () {
+        if (gradients === undefined) {
+            gradients = {};
+            for (let type of ['positive', 'negative', 'full']) {
+                gradients[type] = _get_gradient.bind(this)(type);
+            }
         }
-    }
-    for (let row of json) {
-        for (let h of to_delete) {
-            delete row[h];
+        return gradients;
+    };
+})();
+
+function color_axis(config, colorRange) {
+    let gradient, {positive, negative, full} = _get_gradients.bind(this)();
+    if (colorRange[0] >= 0) {
+        gradient = positive;
+    } else if (colorRange[1] <= 0) {
+        gradient = negative;
+    } else {
+        gradient = full;
+    };
+    Object.assign(config, {
+        colorAxis: {
+            min: colorRange[0],
+            max: colorRange[1],
+            stops: gradient,
+            startOnTick: false,
+            endOnTick: false,
         }
-        yield row;
-    }
+    });
 }
 
 export function draw(mode) {
@@ -300,11 +339,13 @@ export function draw(mode) {
                 y: 10,
                 layout: 'vertical',
                 floating: series.length <= 20,
-                enabled: Object.keys(js[0]).length > 2 && mode !== 'scatter',
-
+                enabled: mode === 'scatter' ? Object.keys(js[0]).length > 3 || col_pivots.length > 0 : Object.keys(js[0]).length > 2,
                 itemStyle: {
                     fontWeight: 'normal'
                 }
+            },
+            boost: {
+                enabled: false
             },
             plotOptions: {
                 line: {
@@ -331,8 +372,12 @@ export function draw(mode) {
                         }
                     }
                 },
+                heatmap: {
+                    nullColor: "rgba(0,0,0,0)"
+                },
                 series: {
                     animation: false,
+                    nullColor: "rgba(0,0,0,0)",
                     boostThreshold: Infinity,
                     'turboThreshold': 60000,
                     borderWidth: 0,
@@ -389,23 +434,7 @@ export function draw(mode) {
                 } else {
                     config.chart.type = 'coloredBubble';
                 }
-                Object.assign(config, {
-                    colorAxis: {
-                        min: colorRange[0],
-                        max: colorRange[1],
-                        minColor: '#3060cf',
-                        maxColor: '#c4463a',
-                        showInLegend: false,
-                        stops: [
-                            [0, '#3060cf'],
-                            [0.5, '#fffbbc'],
-                            [0.9, '#c4463a'],
-                            [1, '#c4463a']
-                        ],
-                        startOnTick: false,
-                        endOnTick: false,
-                    }
-                });
+                color_axis.bind(this)(config, colorRange);
             }
             if (aggregates.length < 3) {
                 Object.assign(config, {
@@ -551,59 +580,33 @@ export function draw(mode) {
                 series: [{
                     name: null,
                     data: data,
-                    nullColor: '#999'
+                    nullColor: 'none'
                 }],
 
                 boost: {
                     useGPUTranslations: true
-                },
-
-                colorAxis: {
-                    min: colorRange[0],
-                    max: colorRange[1],
-                    minColor: '#c4463a',
-                    maxColor: '#3060cf',
-                    stops: [
-                        [0, '#c4463a'],
-                        [0.1, '#c4463a'],
-                        [0.5, '#fffbbc'],
-                        [1, '#3060cf']
-                    ],
-                    startOnTick: false,
-                    endOnTick: false,
                 }
-              
-               
             });
-            config['chart']['marginRight'] = 75;
-            delete config["legend"]["width"];
+
+            color_axis.bind(this)(config, colorRange)
+            config.legend.floating = false;
         } else if (mode === "treemap") {
             let data = [];
             let size = aggregates[0]['column'];
-            let color, colorAxis;
+            let color, colorAxis, colorRange;
             if (aggregates.length >= 2) {
                 color = aggregates[1]['column'];
-
                 let colorvals = series[1]['data'];
-                let cmax = -Infinity;
-                for (let i = 0; i< colorvals.length; ++i) {
-                    cmax = Math.max(cmax, colorvals[i]);
+                colorRange = [Infinity, -Infinity];
+                for (let i = 0; i < colorvals.length; ++i) {
+                    colorRange[0] = Math.min(colorRange[0], colorvals[i]);
+                    colorRange[1] = Math.max(colorRange[1], colorvals[i]);
                 }
-                colorRange = [-cmax, cmax];
-                colorAxis = {
-                    min: colorRange[0],
-                    max: colorRange[1],
-                    minColor: '#c4463a',
-                    maxColor: '#3060cf',
-                    stops: [
-                        [0, '#c4463a'],
-                        [0.1, '#c4463a'],
-                        [0.5, '#fffbbc'],
-                        [1, '#3060cf']
-                    ],
-                    startOnTick: false,
-                    endOnTick: false,
+                if (colorRange[0] * colorRange[1] < 0) {
+                    let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                    colorRange = [-cmax, cmax];
                 }
+                color_axis.bind(this)(config, colorRange);
             }
 
             for (let row of js.slice(1)) {
@@ -622,15 +625,13 @@ export function draw(mode) {
             for (let i = 0; i < row_pivots.length; i++) {
                 levels.push({
                     level: i+1,
-                    borderWidth: (row_pivots.length - i)*2,
+                    borderWidth: (row_pivots.length - i) *2,
                     dataLabels: {
                         enabled: true, //(i == 0)?true:false,
                         allowOverlap: true,
-                        //align: 'left',
-                        //verticalAlign: 'top',
                         style: {
-                            color: (i === 0)?'#333333':'#666666',
-                            fontSize: `${14 - (i * 2)}px`,
+                            opacity: [1, 0.3][i] || 0,
+                            fontSize: `${[14, 10][i] || 0}px`,
                             textOutline: null
                         }
                     },
@@ -644,11 +645,9 @@ export function draw(mode) {
                     data: data,
                     levels: levels
                 }],
-                colorAxis: colorAxis
             });
-            config['plotOptions']['series']['borderWidth'] = 2;
-            config['chart']['marginRight'] = 75;
-            delete config["legend"]["width"];
+            config['plotOptions']['series']['borderWidth'] = 1;
+            config.legend.floating = false;
         } else if (mode === 'line') {
             Object.assign(config, {
                 colors: colors,
