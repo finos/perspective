@@ -9,6 +9,8 @@
 
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
+import "awesomplete";
+import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import {registerElement, importTemplate} from "@jpmorganchase/perspective-common";
@@ -150,15 +152,20 @@ function drop(ev) {
     }
     let data = ev.dataTransfer.getData('text');
     if (!data) return;
+    data = JSON.parse(data);
 
     // Update the columns attribute
     let name = ev.currentTarget.getAttribute('id').replace('_', '-');
     let columns = JSON.parse(this.getAttribute(name) || "[]");
-    let data_index = columns.indexOf(data);
+    let data_index = columns.indexOf(data[0]);
     if (data_index !== -1) {
         columns.splice(data_index, 1);
     }
-    this.setAttribute(name, JSON.stringify(columns.concat([data])));
+    if (name.indexOf('filter') > -1) {
+        this.setAttribute(name, JSON.stringify(columns.concat([data])));
+    } else {
+        this.setAttribute(name, JSON.stringify(columns.concat([data[0]])));
+    }
 
     // Deselect the dropped column
     if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort") {
@@ -220,6 +227,23 @@ function column_aggregate_clicked() {
     }
     set_aggregate_attribute.call(this, aggregates);
     this._update_column_view();
+    this._update();
+}
+
+
+function column_filter_clicked() {
+    let filters = JSON.parse(this.getAttribute('filters'));
+    let new_filters = this._get_view_filters();
+    for (let filter of filters) {
+        let updated_filter = new_filters.find(x => x[0] === filter[0]);
+        if (updated_filter) {
+            filter[1] = updated_filter[1];
+            filter[2] = updated_filter[2];
+        }
+    }
+    this._updating_filter = true;
+    this.setAttribute('filters', JSON.stringify(filters));
+    this._updating_filter = false;
     this._update();
 }
 
@@ -387,11 +411,12 @@ async function loadTable(table) {
         this._inactive_columns.style.display = 'block';
     }
 
-    this._filter_input.innerHTML = "";
+    this.filters = this.getAttribute('filters');
+
     this._update();
 }
 
-function new_row(name, type, aggregate) {
+function new_row(name, type, aggregate, filter) {
     let row = document.createElement('perspective-row');
 
     if (!type) {
@@ -422,12 +447,24 @@ function new_row(name, type, aggregate) {
         }
     }
 
+    if (filter) {
+        row.setAttribute('filter', filter);
+        if (type === 'string') {
+            const v = this._table.view({row_pivot:[name], aggregate: []});
+            v.to_json().then(json => {
+                row.choices(json.slice(1, json.length - 1).map(x => x.__ROW_PATH__));
+                v.delete();
+            })
+        }
+    }
+
     row.setAttribute('type', type);
     row.setAttribute('name', name);
     row.setAttribute('aggregate', aggregate);
 
     row.addEventListener('visibility-clicked', column_visibility_clicked.bind(this));
     row.addEventListener('aggregate-selected', column_aggregate_clicked.bind(this));
+    row.addEventListener('filter-selected', column_filter_clicked.bind(this));
     row.addEventListener('close-clicked', event => undrag.bind(this)(event.detail));
     row.addEventListener('row-drag', () => {
         this.classList.add('dragging');
@@ -468,7 +505,7 @@ function update() {
     if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row');
     let column_pivots = this._view_columns('#column_pivots perspective-row');
-    let filters = JSON.parse(this.getAttribute('filters'));
+    let filters = this._get_view_filters();
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
     let hidden = [];
@@ -620,36 +657,8 @@ registerElement(template, {
     },
 
     _get_view_filters: {
-        value: function () {
-            let filters = [];
-            let filter = this._filter_input.value.trim();
-            let cols = this._view_columns('#inactive_columns perspective-row');
-            for (let col of cols) {
-                filter = filter.split("`" + col.trim() + "`").join(col + "||||");
-            }
-            try {
-                let terms = filter.split('&');
-                let filters = [];
-                for (let term of terms) {
-                    term = term.split('||||');
-                    let col = term[0].trim();
-                    term = term[1].trim().split(' ');
-                    let op = term[0];
-                    let val = term.slice(1).join(' ').trim();
-                    let t = parseFloat(val);
-                    if (!isNaN(t)) val = t;
-                    if (!col || !op || (!val && val !== 0)) {
-                        this._filter_input.classList.add('error');
-                        return [];
-                    }
-                    filters.push([col, op, val]);
-                }
-                this._filter_input.classList.remove('error');
-                return filters;
-            } catch (e) {
-                this._filter_input.classList.add('error');
-                return []
-            }
+        value: function (selector) {
+             return this._view_columns('#filters perspective-row', false, true);
         }
     },
 
@@ -660,7 +669,7 @@ registerElement(template, {
     },
 
     _view_columns: {
-        value: function (selector, types) {
+        value: function (selector, types, filters) {
             selector = selector || '#active_columns perspective-row';
             let selection = this.querySelectorAll(selector);
             let sorted = Array.prototype.slice.call(selection);
@@ -669,6 +678,9 @@ registerElement(template, {
                 if (types) {
                     let agg = s.getAttribute('aggregate');
                     return {op: agg, column: name};
+                } else if (filters) {
+                    let {operator, operand} = JSON.parse(s.getAttribute('filter'));
+                    return [name, operator, operand];
                 } else {
                     return name;
                 }
@@ -761,9 +773,19 @@ registerElement(template, {
 
     filters: {
         set: function () {
-            let filters = JSON.parse(this.getAttribute('filters'));
-            if (filters.length > 0) {
-                this._filter_input.value = filters.map(x => `\`${x[0]}\` ${x[1]} ${x[2]}`).join(' & ');
+            if (!this._updating_filter) {
+                let filters = JSON.parse(this.getAttribute('filters'));
+                this._filters.innerHTML = "";
+                if (filters.length === 0) {
+                    let label = document.createElement('label');
+                    label.innerHTML = this._filters.getAttribute('name');
+                    this._filters.appendChild(label);
+                } else {
+                    filters.map(function(pivot) {
+                        let row = new_row.call(this, pivot[0], undefined, undefined, JSON.stringify({operator: pivot[1], operand: pivot[2]}));
+                        this._filters.appendChild(row);
+                    }.bind(this));
+                }
             }
             this.dispatchEvent(new Event('config-update'));
             this._update();
@@ -969,7 +991,7 @@ registerElement(template, {
             this.slaves = [];
             this._aggregate_selector = this.querySelector('#aggregate_selector');
             this._vis_selector = this.querySelector('#vis_selector');
-            this._filter_input = this.querySelector('#filter_input');
+            this._filters = this.querySelector('#filters');
             this._row_pivots = this.querySelector('#row_pivots');
             this._column_pivots = this.querySelector('#column_pivots');
             this._datavis = this.querySelector('#pivot_chart');
@@ -991,6 +1013,9 @@ registerElement(template, {
             this._column_pivots.addEventListener('drop', drop.bind(this));
             this._column_pivots.addEventListener('dragend', undrag.bind(this));
 
+            this._filters.addEventListener('drop', drop.bind(this));
+            this._filters.addEventListener('dragend', undrag.bind(this));
+
             this._active_columns.addEventListener('drop', column_drop.bind(this));
             this._active_columns.addEventListener('dragend', column_undrag.bind(this));
             this._active_columns.addEventListener('dragover', column_dragover.bind(this));
@@ -1008,14 +1033,9 @@ registerElement(template, {
                 this.setAttribute('column-pivots', "[]");
             }
 
-            this._filter_input.addEventListener('keyup', _.debounce(event => {
-                let filters = this.getAttribute('filters');
-                let new_filters = JSON.stringify(this._get_view_filters());
-                if (filters !== new_filters) {
-                    this.setAttribute('filters', new_filters);
-                    this._update();
-                }
-            }, 200));
+            if (!this.hasAttribute('filters')) {
+                this.setAttribute('filters', "[]");
+            }
 
             this._vis_selector.addEventListener('change', event => {
                 this.setAttribute('view', this._vis_selector.value);

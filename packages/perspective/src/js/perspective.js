@@ -11,7 +11,7 @@ import papaparse from "papaparse";
 import moment from "moment";
 import * as Arrow from "@apache-arrow/es5-esm";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -1215,13 +1215,27 @@ if (typeof self !== "undefined" && self.addEventListener) {
             }
             case 'view_method': {
                 let obj = _views[msg.name];
+                if (!obj) {
+                    self.postMessage({
+                        id: msg.id,
+                        error: "View is not initialized"
+                    });
+                    return;
+                }
                 if (msg.subscribe) {
-                    obj[msg.method](e => {
+                    try {
+                        obj[msg.method](e => {
+                            self.postMessage({
+                                id: msg.id,
+                                data: e
+                            });
+                        });
+                    } catch (error) {
                         self.postMessage({
                             id: msg.id,
-                            data: e
+                            error: error + ""
                         });
-                    });
+                    }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
                         self.postMessage({
@@ -1253,7 +1267,11 @@ const perspective = {
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
+    TYPE_FILTERS: TYPE_FILTERS,
+
     AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
+
+    FILTER_DEFAULTS: FILTER_DEFAULTS,
 
     worker: function () {},
 

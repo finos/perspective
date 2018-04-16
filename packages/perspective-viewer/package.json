@@ -54,6 +54,7 @@
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6"
+    "webpack": "^3.5.6",
+    "awesomplete": "^1.1.2"
   }
 }

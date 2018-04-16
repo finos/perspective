@@ -262,6 +262,7 @@ function color_axis(config, colorRange) {
             endOnTick: false,
         }
     });
+    config.legend.floating = false;
 }
 
 export function draw(mode) {
@@ -272,6 +273,10 @@ export function draw(mode) {
 
         let [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
 
+        if (task.cancelled) {
+            return;
+        }
+
         if (this.hasAttribute('updating') && this._chart) {
             chart = this._chart
             this._chart = undefined;
@@ -280,10 +285,6 @@ export function draw(mode) {
             } catch (e) {
                 console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
             }
-        }
-
-        if (task.cancelled) {
-            return;
         }
 
         let [series, top, colorRange] = _make_series.call(this, js, row_pivots, col_pivots, mode, hidden);
