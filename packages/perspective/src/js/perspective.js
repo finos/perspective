@@ -466,7 +466,7 @@ view.prototype._column_names = function() {
             let col_path = this.ctx.unity_get_column_path(key + 1);
             col_name = [];
             for (let cnix = 0; cnix < col_path.size(); cnix++) {
-                col_name.push(__MODULE__.scalar_to_val(col_path, cnix));
+                col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
             }
             col_name = col_name.reverse();
             col_name.push(name);
@@ -601,7 +601,7 @@ view.prototype.to_json = async function(options) {
                     let row_path = this.ctx.unity_get_row_path(start_row + ridx);
                     row[col_name] = [];
                     for (let i = 0; i < row_path.size(); i++) {
-                        row[col_name].unshift(__MODULE__.scalar_to_val(row_path, i));
+                        row[col_name].unshift(__MODULE__.scalar_vec_to_val(row_path, i));
                     }
                     row_path.delete();
                 }
@@ -712,13 +712,14 @@ view.prototype.on_delete = function (callback) {
  * @class
  * @hideconstructor
  */
-function table(gnode, pool, index) {
+function table(gnode, pool, index, computed) {
     this.gnode = gnode;
     this.pool = pool;
     this.name = Math.random() + "";
     this.initialized = false;
     this.index = index;
     this.pool.set_update_delegate(this);
+    this.computed = computed || [];
     this.callbacks = [];
     this.views = [];
 }
@@ -728,6 +729,38 @@ table.prototype._update_callback = function () {
         this.callbacks[e].callback();
     }
  }
+
+
+table.prototype._calculate_computed = function(tbl, computed_defs) {
+    // tbl is the pointer to the C++ t_table
+
+    for (let i = 0; i < computed_defs.length; ++i) {
+        let coldef = computed_defs[i];
+        let name = coldef['column'];
+        let func = coldef['func'];
+        let inputs = coldef['inputs'];
+        let type = coldef['type'] || 'string';
+
+        let dtype;
+        switch (type) {
+            case 'integer':
+                dtype = __MODULE__.t_dtype.DTYPE_INT32;
+                break;
+            case 'float':
+                dtype = __MODULE__.t_dtype.DTYPE_FLOAT64;
+                break;
+            case 'boolean':
+                dtype = __MODULE__.t_dtype.DTYPE_BOOL;
+                break;
+            case 'string':
+            default:
+                dtype = __MODULE__.t_dtype.DTYPE_STR;
+                break;
+        }
+
+        __MODULE__.table_add_computed_column(tbl, name, dtype, func, inputs);
+    }
+}
 
 /**
  * Delete this {@link table} and clean up all resources associated with it.
@@ -1057,6 +1090,10 @@ table.prototype.update = function (data) {
         tbl = __MODULE__.make_table(pdata.row_count || 0, 
             pdata.names, pdata.types, pdata.cdata,
             this.gnode.get_table().size(), this.index || "", pdata.is_arrow);
+
+        // Add any computed columns
+        this._calculate_computed(tbl, this.computed);
+
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
     } catch (e) {
@@ -1067,6 +1104,47 @@ table.prototype.update = function (data) {
         }
         schema.delete();
         types.delete();
+    }
+}
+
+/**
+ * Create a new table with the addition of new computed columns (defined as javascript functions)
+ */
+table.prototype.add_computed = function(computed) {
+    let pool, gnode, tbl;
+
+    try {
+        // Create perspective pool
+        pool = new __MODULE__.t_pool({_update_callback: function() {} } );
+
+        // Pull out the t_table from the current gnode
+        tbl = __MODULE__.clone_gnode_table(this.gnode);
+
+        // Add new computed columns in place to tbl
+        this._calculate_computed(tbl, computed);
+
+        gnode = __MODULE__.make_gnode(tbl);
+        pool.register_gnode(gnode);
+        __MODULE__.fill(pool, gnode, tbl);
+
+        // Merge in definition of previous computed columns
+        if (this.computed.length > 0) {
+            computed = this.computed.concat(computed);
+        }
+
+        return new table(gnode, pool, this.index, computed);
+    } catch (e) {
+        if (pool) {
+            pool.delete();
+        }
+        if (gnode) {
+            gnode.delete();
+        }
+        throw e;
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
     }
 }
 
@@ -1146,6 +1224,16 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             case 'table':
                 _tables[msg.name] = perspective.table(msg.data, msg.options);
+                break;
+            case 'add_computed':
+                let table = _tables[msg.original];
+                let computed = msg.computed;
+                // rehydrate computed column functions
+                for (let i = 0; i < computed.length; ++i) {
+                    let column = computed[i];
+                    eval("column.func = " + column.func);
+                }
+                _tables[msg.name] = table.add_computed(computed);
                 break;
             case 'table_generate':
                 let g;
@@ -1334,7 +1422,7 @@ const perspective = {
                 0, options.index, pdata.is_arrow);
 
             gnode = __MODULE__.make_gnode(tbl);
-            gnode._id = pool.register_gnode(gnode);
+            pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
 
             return new table(gnode, pool, options.index);

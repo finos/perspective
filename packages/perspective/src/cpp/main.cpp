@@ -27,6 +27,10 @@ using namespace perspective;
 using namespace emscripten;
 
 
+typedef std::codecvt_utf8<wchar_t> utf8convert_type;
+typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
+
+
 /******************************************************************************
  *
  * Data Loading
@@ -396,7 +400,6 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
         for (auto i = 0; i < nrows; ++i)
         {
             std::wstring welem = dcol[i].as<std::wstring>();
-            typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);
@@ -618,6 +621,24 @@ make_gnode(t_table_sptr table)
     return gnode;
 }
 
+
+/**
+ * Copies the internal table from a gnode
+ *
+ * Params
+ * ------
+ *
+ * Returns
+ * -------
+ * A table.
+ */
+t_table_sptr
+clone_gnode_table(t_gnode_sptr gnode)
+{
+    // This creates a copy of the table
+    return t_table_sptr(gnode->_get_pkeyed_table());
+}
+
 /**
  *
  *
@@ -740,9 +761,8 @@ sort(t_ctx2_sptr ctx2, val j_sortby)
  *
  */
 val
-scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
+scalar_to_val(const t_tscalar scalar)
 {
-    auto scalar = scalars[idx];
     switch (scalar.get_dtype())
     {
         case DTYPE_BOOL:
@@ -787,11 +807,176 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
         case DTYPE_STR:
         default:
         {
-            typedef std::codecvt_utf8<wchar_t> utf8convert_type;
             std::wstring_convert<utf8convert_type, wchar_t> converter;
             return val(converter.from_bytes(scalar.to_string()));
         }
     }
+}
+
+val
+scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx)
+{
+    return scalar_to_val(scalars[idx]);
+}
+
+val
+get_column_data(t_table_sptr table,
+                t_str colname)
+{
+    val arr = val::array();
+    auto col = table->get_column(colname);
+    for (auto idx = 0; idx < col->size(); ++idx)
+    {
+        arr.set(idx, scalar_to_val(col->get_scalar(idx)));
+    }
+    return arr;
+}
+
+void set_column_nth(t_column* col, t_uindex idx, val value) {
+
+    // Check if the value is a javascript null
+    if (value.isNull()) {
+        col->set_valid(idx, false);
+        return;
+    }
+
+    switch (col->get_dtype())
+    {
+        case DTYPE_BOOL:
+        {
+            col->set_nth<t_bool>(idx, value.as<t_bool>(), true);
+            break;
+        }
+        case DTYPE_FLOAT64:
+        {
+            col->set_nth<t_float64>(idx, value.as<t_float64>(), true);
+            break;
+        }
+        case DTYPE_FLOAT32:
+        {
+            col->set_nth<t_float32>(idx, value.as<t_float32>(), true);
+            break;
+        }
+        case DTYPE_UINT32:
+        {
+            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), true);
+            break;
+        }
+        case DTYPE_UINT64:
+        {
+            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), true);
+            break;
+        }
+        case DTYPE_INT32:
+        {
+            col->set_nth<t_int32>(idx, value.as<t_int32>(), true);
+            break;
+        }
+        case DTYPE_INT64:
+        {
+            col->set_nth<t_int64>(idx, value.as<t_int64>(), true);
+            break;
+        }
+        case DTYPE_STR:
+        {
+            std::wstring welem = value.as<std::wstring>();
+
+            std::wstring_convert<utf16convert_type, wchar_t> converter;
+            std::string elem = converter.to_bytes(welem);
+            col->set_nth(idx, elem, true);
+            break;
+        }
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_TIME:
+        default:
+        {
+            // Other types not implemented
+        }
+    }
+}
+
+/**
+ * Helper function for computed columns
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
+
+void
+table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype,
+    val func, val inputs) {
+
+    // Get list of input column names
+    auto icol_names = vecFromJSArray<std::string>(inputs);
+
+    // Get t_column* for all input columns
+    t_colcptrvec icols;
+    for (const auto& cc : icol_names) {
+        icols.push_back(table->_get_column(cc));
+    }
+
+    int arity = icols.size();
+
+    // Add new column
+    t_column* out = table->add_column(name, dtype, true);
+
+    val i1 = val::undefined(),
+        i2 = val::undefined(),
+        i3 = val::undefined(),
+        i4 = val::undefined();
+
+    t_uindex size = table->size();
+    for (t_uindex ridx = 0; ridx < size; ++ridx) {
+        val value = val::null();
+
+        switch (arity) {
+            case 0: {
+                value = func();
+                break;
+            }
+            case 1: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                value = func(i1);
+                break;
+            }
+            case 2: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                value = func(i1, i2);
+                break;
+            }
+            case 3: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                value = func(i1, i2, i3);
+                break;
+            }
+            case 4: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                i4 = scalar_to_val(icols[3]->get_scalar(ridx));
+                value = func(i1, i2, i3, i4);
+                break;
+            }
+            default: {
+                // Don't handle other arity values
+                break;
+            }
+        }
+
+        set_column_nth(out, ridx, value);
+    }
+
 }
 
 /**
@@ -813,7 +998,7 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
     val arr = val::array();
     for (auto idx = 0; idx < slice.size(); ++idx)
     {
-        arr.set(idx, scalar_to_val(slice, idx));
+        arr.set(idx, scalar_to_val(slice[idx]));
     }
     return arr;
 }
@@ -846,10 +1031,14 @@ main(int argc, char** argv)
 
 EMSCRIPTEN_BINDINGS(perspective)
 {
+    class_<t_column>("t_column")
+        .smart_ptr<std::shared_ptr<t_column>>("shared_ptr<t_column>")
+        .function<void>("set_scalar", &t_column::set_scalar);
 
     class_<t_table>("t_table")
         .constructor<t_schema, t_uindex>()
         .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
+        .function<t_column*>("add_column", &t_table::add_column, allow_raw_pointers())
         .function<void>("pprint", &t_table::pprint)
         .function<unsigned long>(
             "size",
@@ -1086,11 +1275,15 @@ EMSCRIPTEN_BINDINGS(perspective)
     function("sort", &sort);
     function("make_table", &make_table);
     function("make_gnode", &make_gnode);
+    function("clone_gnode_table", &clone_gnode_table);
     function("fill", &fill, allow_raw_pointers());
     function("make_context_zero", &make_context_zero);
     function("make_context_one", &make_context_one);
     function("make_context_two", &make_context_two);
     function("scalar_to_val", &scalar_to_val);
+    function("scalar_vec_to_val", &scalar_vec_to_val);
+    function("table_add_computed_column", &table_add_computed_column);
+    function("set_column_nth", &set_column_nth, allow_raw_pointers());
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
