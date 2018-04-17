@@ -8,8 +8,8 @@
  */
 
 import papaparse from "papaparse";
-import moment from "moment";
 import * as Arrow from "@apache-arrow/es5-esm";
+import {is_valid_date, DateParser} from "./date_parser.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
 
@@ -50,7 +50,7 @@ function infer_type(x) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (!isNaN(Number(x)) && x !== '') {
         t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-    } else if (typeof x === "string" && moment(x, DATE_PARSE_CANDIDATES, true).isValid()) {
+    } else if (typeof x === "string" && is_valid_date(x)) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (typeof x === "string") {
         let lower = x.toLowerCase();
@@ -62,18 +62,6 @@ function infer_type(x) {
     }
     return t;
 }
-
-const DATE_PARSE_CANDIDATES = [
-    moment.ISO_8601, 
-    moment.RFC_2822, 
-    'YYYY-MM-DD\\DHH:mm:ss.SSSS', 
-    'MM-DD-YYYY', 
-    'MM/DD/YYYY', 
-    'M/D/YYYY', 
-    'M/D/YY', 
-    'DD MMM YYYY',
-    'HH:mm:ss.SSS',
-];
 
 /**
  * Do any necessary data transforms on columns. Currently it does the following
@@ -169,9 +157,7 @@ function parse_data(data, names, types) {
                 inferredType = __MODULE__.t_dtype.DTYPE_STR;
             }
             col = [];
-            const date_types = [];
-            const date_candidates = DATE_PARSE_CANDIDATES.slice();
-            const date_exclusions = [];
+            const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
                 if (!(name in data[x]) || data[x][name] === undefined) continue;
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
@@ -194,32 +180,8 @@ function parse_data(data, names, types) {
                         col.push(cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
-                    if (date_exclusions.indexOf(data[x][name]) > -1) {
-                        col.push(-1);
-                    } else {
-                        let val = data[x][name];
-                        if (typeof val === "string") {
-                            val = moment(data[x][name], date_types, true);
-                            if (!val.isValid() || date_types.length === 0) {
-                                let found = false;
-                                for (let candidate of date_candidates) {
-                                    val = moment(data[x][name], candidate, true);
-                                    if (val.isValid()) {
-                                        date_types.push(candidate);
-                                        date_candidates.splice(date_candidates.indexOf(candidate), 1);
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    date_exclusions.push(data[x][name]);
-                                    col.push(-1);
-                                    continue;
-                                }
-                            }
-                        }
-                        col.push(+val);
-                    }
+                    let val = data[x][name];
+                    col.push(parser.parse(val));
                 } else {
                     col.push(data[x][name] === null ? (types[types.length - 1].value === 19 ? "" : 0) : "" + data[x][name]); // TODO this is not right - might not be a string.  Need a data cleaner
                 }
@@ -804,15 +766,7 @@ table.prototype.size = async function() {
     return this.gnode.get_table().size();
 }
 
-/**
- * The schema of this {@link table}.  A schema is an Object, the keys of which
- * are the columns of this {@link table}, and the values are their string type names.
- *
- * @async
- *
- * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
- */
-table.prototype.schema = async function() {
+table.prototype._schema = function () {
     let schema = this.gnode.get_tblschema();
     let columns = schema.columns();
     let types = schema.types();
@@ -833,7 +787,22 @@ table.prototype.schema = async function() {
             new_schema[columns.get(key)] = "date";
         }
     }
+    schema.delete();
+    columns.delete();
+    types.delete();
     return new_schema;
+}
+
+/**
+ * The schema of this {@link table}.  A schema is an Object, the keys of which
+ * are the columns of this {@link table}, and the values are their string type names.
+ *
+ * @async
+ *
+ * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
+ */
+table.prototype.schema = async function() {
+    return this._schema();
 }
 
 /**
@@ -936,8 +905,13 @@ table.prototype.view = function(config) {
     let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
 
     if (config.filter) {
+        let schema = this._schema();
         filters = config.filter.map(function(filter) {
-            return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            if (schema[filter[0]] === "date") {
+                return [filter[0], _string_to_filter_op[filter[1]], +new DateParser().parse(filter[2])];
+            } else {
+                return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            }
         });
         if (config.filter_op) {
             filter_op = _string_to_filter_op[config.filter_op];

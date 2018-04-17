@@ -108,13 +108,10 @@ _get_fterms(t_schema schema, val j_filters)
                         term = mktscalar(filter[2].as<bool>());
                         break;
                     case DTYPE_TIME:
-                    {
-                        std::cout << "Date filters not handled yet" << std::endl;
-                    }
-                    break;
+                        term = mktscalar(t_time(static_cast<t_int64>(filter[2].as<t_float64>())));
+                        break;
                     default:
                     {
-                        //std::cout << filter[2].as<std::string>().c_str() << std::endl;
                         term = mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str()));
                     }
                 }

@@ -7,11 +7,22 @@
  *
  */
 
+var yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+var now = new Date();
+
 var data = [
-    {'x': 1, 'y':'a', 'z': true},
-    {'x': 2, 'y':'b', 'z': false},
-    {'x': 3, 'y':'c', 'z': true},
-    {'x': 4, 'y':'d', 'z': false}
+    {'w': now, 'x': 1, 'y':'a', 'z': true},
+    {'w': now, 'x': 2, 'y':'b', 'z': false},
+    {'w': now, 'x': 3, 'y':'c', 'z': true},
+    {'w': yesterday, 'x': 4, 'y':'d', 'z': false}
+];
+
+var rdata = [
+    {'w': +now, 'x': 1, 'y':'a', 'z': true},
+    {'w': +now, 'x': 2, 'y':'b', 'z': false},
+    {'w': +now, 'x': 3, 'y':'c', 'z': true},
+    {'w': +yesterday, 'x': 4, 'y':'d', 'z': false}
 ];
 
 module.exports = (perspective) => {
@@ -41,7 +52,7 @@ module.exports = (perspective) => {
                     filter: [['x', '>', 2.0]]
                 });
                 let json = await view.to_json();
-                expect(data.slice(2)).toEqual(json);
+                expect(rdata.slice(2)).toEqual(json);
             });
 
             it("x < 3", async function () {
@@ -50,7 +61,7 @@ module.exports = (perspective) => {
                     filter: [['x', '<', 3.0]]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 2)).toEqual(json);
+                expect(rdata.slice(0, 2)).toEqual(json);
             });
 
             it("x > 4", async function () {
@@ -81,7 +92,7 @@ module.exports = (perspective) => {
                     filter: [['x', '==', 1]]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 1)).toEqual(json);
+                expect(rdata.slice(0, 1)).toEqual(json);
             });
 
             it("x == 5", async function () {
@@ -99,7 +110,7 @@ module.exports = (perspective) => {
                     filter: [['y', '==', 'a']]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 1)).toEqual(json);
+                expect(rdata.slice(0, 1)).toEqual(json);
             });
 
             it("y == 'e'", async function () {
@@ -117,7 +128,7 @@ module.exports = (perspective) => {
                     filter: [['z', '==', true]]
                 });
                 let json = await view.to_json();
-                expect([data[0], data[2]]).toEqual(json);
+                expect([rdata[0], rdata[2]]).toEqual(json);
             });
 
             it("z == false", async function () {
@@ -126,9 +137,26 @@ module.exports = (perspective) => {
                     filter: [['z', '==', false]]
                 });
                 let json = await view.to_json();
-                expect([data[1], data[3]]).toEqual(json);
+                expect([rdata[1], rdata[3]]).toEqual(json);
             });
 
+            it("w == yesterday", async function () {
+                var table = perspective.table(data);
+                var view = table.view({
+                    filter: [['w', '==', yesterday]]
+                });
+                let json = await view.to_json();
+                expect([rdata[3]]).toEqual(json);
+            });
+
+            it("w != yesterday", async function () {
+                var table = perspective.table(data);
+                var view = table.view({
+                    filter: [['w', '!=', yesterday]]
+                });
+                let json = await view.to_json();
+                expect(rdata.slice(0, 3)).toEqual(json);
+            });
         });
 
         describe("in", function() {
@@ -138,7 +166,7 @@ module.exports = (perspective) => {
                     filter: [['y', 'in', ['a', 'b']]]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 2)).toEqual(json);
+                expect(rdata.slice(0, 2)).toEqual(json);
             });
 
         });
@@ -151,7 +179,7 @@ module.exports = (perspective) => {
                     filter: [['y', 'contains', 'a']]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 1)).toEqual(json);
+                expect(rdata.slice(0, 1)).toEqual(json);
             });
 
         });
@@ -167,7 +195,7 @@ module.exports = (perspective) => {
                     ]
                 });
                 let json = await view.to_json();
-                expect(data.slice(1, 3)).toEqual(json);
+                expect(rdata.slice(1, 3)).toEqual(json);
             });
 
             it("y contains 'a' | y contains 'b'", async function () {
@@ -180,7 +208,7 @@ module.exports = (perspective) => {
                     ]
                 });
                 let json = await view.to_json();
-                expect(data.slice(0, 2)).toEqual(json);
+                expect(rdata.slice(0, 2)).toEqual(json);
             });
 
         });
