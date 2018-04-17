@@ -180,7 +180,7 @@ function parse_data(data, names, types) {
                         col.push(cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
-                        let val = data[x][name];
+                    let val = data[x][name];
                     col.push(parser.parse(val));
                 } else {
                     col.push(data[x][name] === null ? (types[types.length - 1].value === 19 ? "" : 0) : "" + data[x][name]); // TODO this is not right - might not be a string.  Need a data cleaner
@@ -766,15 +766,7 @@ table.prototype.size = async function() {
     return this.gnode.get_table().size();
 }
 
-/**
- * The schema of this {@link table}.  A schema is an Object, the keys of which
- * are the columns of this {@link table}, and the values are their string type names.
- *
- * @async
- *
- * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
- */
-table.prototype.schema = async function() {
+table.prototype._schema = function () {
     let schema = this.gnode.get_tblschema();
     let columns = schema.columns();
     let types = schema.types();
@@ -795,7 +787,22 @@ table.prototype.schema = async function() {
             new_schema[columns.get(key)] = "date";
         }
     }
+    schema.delete();
+    columns.delete();
+    types.delete();
     return new_schema;
+}
+
+/**
+ * The schema of this {@link table}.  A schema is an Object, the keys of which
+ * are the columns of this {@link table}, and the values are their string type names.
+ *
+ * @async
+ *
+ * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
+ */
+table.prototype.schema = async function() {
+    return this._schema();
 }
 
 /**
@@ -898,8 +905,13 @@ table.prototype.view = function(config) {
     let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
 
     if (config.filter) {
+        let schema = this._schema();
         filters = config.filter.map(function(filter) {
-            return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            if (schema[filter[0]] === "date") {
+                return [filter[0], _string_to_filter_op[filter[1]], +new DateParser().parse(filter[2])];
+            } else {
+                return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            }
         });
         if (config.filter_op) {
             filter_op = _string_to_filter_op[config.filter_op];
