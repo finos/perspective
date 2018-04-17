@@ -8,8 +8,8 @@
  */
 
 import papaparse from "papaparse";
-import moment from "moment";
 import * as Arrow from "@apache-arrow/es5-esm";
+import {is_valid_date, DateParser} from "./date_parser.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
 
@@ -50,7 +50,7 @@ function infer_type(x) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (!isNaN(Number(x)) && x !== '') {
         t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-    } else if (typeof x === "string" && moment(x, DATE_PARSE_CANDIDATES, true).isValid()) {
+    } else if (typeof x === "string" && is_valid_date(x)) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (typeof x === "string") {
         let lower = x.toLowerCase();
@@ -62,18 +62,6 @@ function infer_type(x) {
     }
     return t;
 }
-
-const DATE_PARSE_CANDIDATES = [
-    moment.ISO_8601, 
-    moment.RFC_2822, 
-    'YYYY-MM-DD\\DHH:mm:ss.SSSS', 
-    'MM-DD-YYYY', 
-    'MM/DD/YYYY', 
-    'M/D/YYYY', 
-    'M/D/YY', 
-    'DD MMM YYYY',
-    'HH:mm:ss.SSS',
-];
 
 /**
  * Do any necessary data transforms on columns. Currently it does the following
@@ -169,9 +157,7 @@ function parse_data(data, names, types) {
                 inferredType = __MODULE__.t_dtype.DTYPE_STR;
             }
             col = [];
-            const date_types = [];
-            const date_candidates = DATE_PARSE_CANDIDATES.slice();
-            const date_exclusions = [];
+            const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
                 if (!(name in data[x]) || data[x][name] === undefined) continue;
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
@@ -194,32 +180,8 @@ function parse_data(data, names, types) {
                         col.push(cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
-                    if (date_exclusions.indexOf(data[x][name]) > -1) {
-                        col.push(-1);
-                    } else {
                         let val = data[x][name];
-                        if (typeof val === "string") {
-                            val = moment(data[x][name], date_types, true);
-                            if (!val.isValid() || date_types.length === 0) {
-                                let found = false;
-                                for (let candidate of date_candidates) {
-                                    val = moment(data[x][name], candidate, true);
-                                    if (val.isValid()) {
-                                        date_types.push(candidate);
-                                        date_candidates.splice(date_candidates.indexOf(candidate), 1);
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    date_exclusions.push(data[x][name]);
-                                    col.push(-1);
-                                    continue;
-                                }
-                            }
-                        }
-                        col.push(+val);
-                    }
+                    col.push(parser.parse(val));
                 } else {
                     col.push(data[x][name] === null ? (types[types.length - 1].value === 19 ? "" : 0) : "" + data[x][name]); // TODO this is not right - might not be a string.  Need a data cleaner
                 }
