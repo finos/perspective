@@ -182,10 +182,7 @@ registerElement(template, {
                     val = parseInt(val);
                     break;
                 case "boolean":
-                    val = val.toLowerCase().indexOf('true') > -1; //FIXME
-                    break;
-                case 'date':
-                    val = ''
+                    val = val.toLowerCase().indexOf('true') > -1;
                     break;
                 case "string":
                 default:
