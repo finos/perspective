@@ -29,7 +29,7 @@ var base_grid_properties = {
     cellSelection: false,
     columnSelection: false,
     rowSelection: false,
-    checkboxOnlyRowSelections: true,
+    checkboxOnlyRowSelections: false,
     columnClip: true,
     columnHeaderFont: '12px amplitude-regular, Helvetica, sans-serif',
     columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
@@ -112,37 +112,6 @@ var light_theme_overrides = {
     },
 };
 
-
-var dark_theme_images = {
-    'checked': {
-        type: 'image/png',
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAABESURBVChTY1x6/j8DIcAEpfECyhTVpDpDWbgUIasAAoQiuASE0TJ7L4QLBCxQGgzg6pBVAAHCJLgEmgogGCzhhAAMDAAAPBIjYAlOrAAAAABJRU5ErkJggg=='
-    },
-    'unchecked': {
-        type: 'image/png',
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA+SURBVChTY5wzaw4DQQBSxMKABwEVAGkGAQEBDhYOiB408OPPDyDJBMRAFZwcnFgRRDNIEUEwvBURES0MDACrSwuvUImJzAAAAABJRU5ErkJggg=='
-    }
-};
-
-var light_theme_images = {
-    'checked': {
-        type: 'image/png',
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB6SURBVChTY2TMPsZACDBBabyAEkWaiucadfo0oTxsijSVr6VJGPCxSHCyQwRgioBa2wzmAbWCVIhpMHxfMOtC1LmfEEmoInlOFg5OzoQ003cwFUnXITIgAFX08NxtrVmvbjCwCGCoAALUcNIUT2d4ORNVBRDQNTAZGACd+iUaw4Ve6QAAAABJRU5ErkJggg=='
-    },
-    'unchecked': {
-        type: 'image/png',
-        data: 'iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAA6SURBVChTY0gjAoAUPX78+AkOAJSCKvr48eN3HAAoBVUE5PzHAYBSpCj69u0bVAwDAKWGuiICIC0NAFctWZR3QfcoAAAAAElFTkSuQmCC'
-    }
-}
-
-
-_(light_theme_images).each(function (image, key) {
-    var element = new Image();
-    element.src = 'data:' + image.type + ';base64,' + image.data;
-    images.add(key, element);
-});
-
-
 function generateGridProperties(overrides) {
     var full_properties = {};
     for (var propname in base_grid_properties) {
@@ -155,13 +124,7 @@ function generateGridProperties(overrides) {
 }
 
 function setPSP(payload) {
-    /*if (payload.isTree) {
-        this.grid.properties.fixedColumnCount = 1;
-    } else {
-        this.grid.properties.fixedColumnCount = 0;
-    }*/
     var processed_schema = [];
-    //var treecolumnIndex = 0;
     var col_name, col_header, col_settings;
 
     if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === "") {
@@ -172,9 +135,6 @@ function setPSP(payload) {
         col_name = payload.columnPaths[i].join('|');
         var aliases = payload.configuration.columnAliases;
         col_header = aliases ? (aliases[col_name] || col_name) : col_name;
-        //if (this.grid.properties.treeColumn === col_name) {
-        //    treecolumnIndex = i;
-        //}
 
         col_settings = { name: i.toString(), header: col_header };
         if (payload.columnTypes[i] === 'str') {
@@ -217,18 +177,9 @@ function setPSP(payload) {
 
         if (payload.isTree) {
             this.grid.properties.showTreeColumn = true;
-            /*this.grid.properties.treeColumnIndex = 0;
-            let props = this.grid.getColumnProperties(0);
-            props.renderer = "TreeCell";
-            this.grid.properties.fixedColumnCount = 1;*/
         }
 
         this.grid.behavior.setHeaders();
-
-        //let old = this.grid.renderer.computeCellsBounds;
-        //this.grid.renderer.computeCellsBounds = function() {
-        //    old.call(this);
-        //}
 
         for (i = 0; i < this.schema.length; i++) {
             let props = this.grid.getColumnProperties(i);
@@ -280,9 +231,6 @@ function setPSP(payload) {
 function PerspectiveDataModel(grid) {
     grid.behavior.__proto__.setPSP = setPSP;
 
-    //grid.behavior.dataModel.configuration = {};
-    //grid.behavior.dataModel.configuration['expandedRows'] = [];
-
     grid.mixIn.call(grid.behavior.dataModel, {
 
         // Override setData
@@ -305,21 +253,6 @@ function PerspectiveDataModel(grid) {
             return x === this.grid.properties.treeColumnIndex && this.isTree();
         },
 
-        // Custom API to check if a given row path and any children are expanded
-        matchedRowExpansions: function( rowPath ) {
-            var currentExpandedRows = this.configuration['expandedRows'];
-            var matchedRowPathIndices = [];
-            for (var i = 0; i < currentExpandedRows.length; i++) {
-                if (_.isEqual(currentExpandedRows[i], rowPath)) {
-                    matchedRowPathIndices.push(i);
-                }
-                if (rowPath.length < currentExpandedRows[i].length && _.isEqual(rowPath, currentExpandedRows[i].slice(0, rowPath.length))) {
-                    matchedRowPathIndices.push(i);
-                }
-            }
-            return matchedRowPathIndices;
-        },
-
         // Return the value for a given cell based on (x,y) coordinates
         getValue: function(x, y) {
             var offset = this.grid.behavior.hasTreeColumn() ? 1 : 0;
@@ -334,28 +267,6 @@ function PerspectiveDataModel(grid) {
         // Returns the number of rows for this dataset
         getRowCount: function () {
             return this.dataSource.data.length;
-        },
-
-        // Return the number of columns, allowing for the tree column
-        /*getColumnCount: function() {
-            var offset = this.grid.behavior.hasTreeColumn() ? -1 : 0;
-            return this.dataSource.getColumnCount() + offset;
-        },*/
-
-        // Called when clickong on a row group expand
-        toggleRow: function (y, expand, event) {
-            if (this.isTreeCol(event.dataCell.x)) {
-                var adjusted_path = this.dataSource.data[y].rowPath.slice();
-                var existingRowExpansionIndices = this.matchedRowExpansions(adjusted_path);
-                if (existingRowExpansionIndices.length > 0) {
-                    existingRowExpansionIndices.sort();
-                    for (var i = 0; i < existingRowExpansionIndices.length; i++) {
-                        this.configuration['expandedRows'].splice(existingRowExpansionIndices[i]-i, 1);
-                    }
-                } else {
-                    this.configuration['expandedRows'].push(adjusted_path);
-                }
-            }
         },
 
         cellStyle: function (gridCellConfig, rendererName) {
