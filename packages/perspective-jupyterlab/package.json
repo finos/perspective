@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-jupyterlab",
-  "version": "0.1.9",
+  "version": "0.1.8",
   "description": "Perspective.js",
   "files": [
     "build/*.d.ts",
