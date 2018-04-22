@@ -132,36 +132,17 @@ export function importTemplate(template) {
  * proto : The new Web Component's prototype object, as per spec.
  */
 export function registerElement(template, proto) {
-    proto.attributeChangedCallback = {
-        value: function (name, old, value) {
-            if (name[0] !== "_") {
+
+    template = importTemplate(template);
+    const _perspective_element = class extends proto {
+
+        attributeChangedCallback(name, old, value) {
+            if (name[0] !== "_" && old != value) {
                 this[name] = value;
             }
         }
-    };
 
-    template = importTemplate(template);
-    var attached = proto.attachedCallback;
-
-    // Prevent setters bound to attribtues from firing until the component is attached
-    for (let key in proto) {
-        if (proto[key].set) {
-            let old = proto[key].set;
-            proto[key].set = function(val) {
-                if( this.getAttribute(key) !== val) {
-                    this.setAttribute(key, val);
-                    return;
-                }
-                if (!this._initializing && !this._initialized) {
-                    return;
-                }
-                old.bind(this)(val);
-            }
-        }
-    }
-
-    proto.attachedCallback = {
-        value: function () {
+        connectedCallback() {
             if (this._initialized) {
                 return;
             }
@@ -176,22 +157,53 @@ export function registerElement(template, proto) {
             this._old_children = this._old_children.reverse();
             var node = document.importNode(template.content, true);
             this.appendChild(node);
-            attached.value.bind(this)();
 
+            if (super.connectedCallback) {
+                super.connectedCallback();
+            }
+    
             // Call all attributes bound to setters on the proto
-            for (let key in proto) {
-                if (key !== "attachedCallback") {
-                    if (this.getAttribute(key) && key[0] !== "_") this[key] = this.getAttribute(key);
+            for (let key of Object.getOwnPropertyNames(proto.prototype)) {
+                if (key !== "connectedCallback") {
+                    if (this.hasAttribute(key) && key[0] !== "_") this[key] = this.getAttribute(key);
                 }
             }
             this._initializing = false;
             this._initialized = true;
+        };
+
+        static get observedAttributes() {
+            return Object.getOwnPropertyNames(proto.prototype);
         }
-    };
+    }
+
+    for (let key of Object.getOwnPropertyNames(proto.prototype)) {
+        let descriptor = Object.getOwnPropertyDescriptor(proto.prototype, key);
+        if (descriptor && descriptor.set) {
+            let old = descriptor.set;
+            descriptor.set = function(val) {
+                if( this.getAttribute(key) !== val) {
+                    this.setAttribute(key, val);
+                    return;
+                }
+                if (!this._initializing && !this._initialized) {
+                    return;
+                }
+                old.bind(this)(val);
+            }
+            Object.defineProperty(proto.prototype, key, descriptor);
+        }
+    }
+
+    
     let name = template.getAttribute('id');
     console.log(`Registered ${name}`);
 
-    document.registerElement(name, {
-        prototype: Object.create(HTMLElement.prototype, proto)
-    });
+    window.customElements.define(name, _perspective_element)
+}
+
+export function bindTemplate(template) { 
+    return function (cls) {
+        return registerElement(template, cls);
+    }
 }

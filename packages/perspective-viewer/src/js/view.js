@@ -6,14 +6,14 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
+import "@webcomponents/webcomponentsjs";
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 import "awesomplete";
 import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
-import {registerElement, importTemplate} from "@jpmorganchase/perspective-common";
+import {bindTemplate} from "@jpmorganchase/perspective-common";
 
 import template from "../html/view.html";
 
@@ -583,168 +583,143 @@ function update() {
  * <perspective-viewer> Component
  *
  */
+bindTemplate(template)(class View extends HTMLElement {
 
-registerElement(template, {
-
-    notifyResize: {
-        value: function() {
-            if (!document.hidden && this.offsetParent && document.contains(this)) {
-                this._plugin.resize.call(this);
-            }
+    notifyResize() {
+        if (!document.hidden && this.offsetParent && document.contains(this)) {
+            this._plugin.resize.call(this);
         }
-    },
+    }
 
-    worker: {
-        get: get_worker
-    },
+    get worker() {
+        return get_worker();
+    }
 
-    _plugin: {
-        get: function () {
-            let view = this.getAttribute('view');
-            if (!view) {
-                view = Object.keys(RENDERERS)[0];
-            }
-            this.setAttribute('view', view);
-            return RENDERERS[view] || RENDERERS[Object.keys(RENDERERS)[0]];
+    get _plugin() {
+        let view = this.getAttribute('view');
+        if (!view) {
+            view = Object.keys(RENDERERS)[0];
         }
-    },
+        this.setAttribute('view', view);
+        return RENDERERS[view] || RENDERERS[Object.keys(RENDERERS)[0]];
+    }
 
-    _toggle_config: {
-        value: function () {
-            if (this._show_config) {
-                this._side_panel.style.display = 'none';
-                this._top_panel.style.display = 'none';
-                this.removeAttribute('settings');
+    _toggle_config() {
+        if (this._show_config) {
+            this._side_panel.style.display = 'none';
+            this._top_panel.style.display = 'none';
+            this.removeAttribute('settings');
+        } else {
+            this._side_panel.style.display = 'flex';
+            this._top_panel.style.display = 'flex';
+            this.setAttribute('settings', true);
+        }
+        this._show_config = !this._show_config;
+        this._plugin.resize.call(this, true);
+    }
+
+    set message(msg) {
+        if (this.getAttribute('message') !== msg) {
+            this.setAttribute('message', msg);
+            return;
+        }
+        if (!this._inner_drop_target) return;
+        this.querySelector('#app').classList.remove('hide_message');
+        this._inner_drop_target.innerHTML = msg;
+        for (let slave of this.slaves) {
+            slave.setAttribute('message', msg);
+        }
+    }
+
+    load(json) {
+        load.bind(this)(json);
+    }
+
+    update(json) {
+        if (this._table === undefined) {
+            this.load(json);
+        } else {
+            this._table.update(json);
+        }
+    }
+
+    _get_view_filters(selector) {
+            return this._view_columns('#filters perspective-row', false, true);
+    }
+
+    _get_view_aggregates(selector) {
+        return this._view_columns(selector, true);
+    }
+
+    _view_columns(selector, types, filters) {
+        selector = selector || '#active_columns perspective-row';
+        let selection = this.querySelectorAll(selector);
+        let sorted = Array.prototype.slice.call(selection);
+        return sorted.map(s => {
+            let name = s.getAttribute('name');
+            if (types) {
+                let agg = s.getAttribute('aggregate');
+                return {op: agg, column: name};
+            } else if (filters) {
+                let {operator, operand} = JSON.parse(s.getAttribute('filter'));
+                return [name, operator, operand];
             } else {
-                this._side_panel.style.display = 'flex';
-                this._top_panel.style.display = 'flex';
-                this.setAttribute('settings', true);
+                return name;
             }
-            this._show_config = !this._show_config;
-            this._plugin.resize.call(this, true);
-        }
-    },
+        });
+    }
 
-    message: {
-        set: function(msg) {
-            if (this.getAttribute('message') !== msg) {
-                this.setAttribute('message', msg);
-                return;
-            }
-            if (!this._inner_drop_target) return;
-            this.querySelector('#app').classList.remove('hide_message');
-            this._inner_drop_target.innerHTML = msg;
-            for (let slave of this.slaves) {
-                slave.setAttribute('message', msg);
-            }
+    _visible_column_count() {
+        let cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
+        return cols.length;
+    }
+  
+    _update_column_view(columns, reset = false) {
+        if (!columns) {
+            columns = this._view_columns('#active_columns perspective-row');
         }
-    },
-
-    load: {
-        value: function (json) {
-            load.bind(this)(json);
+        this.setAttribute('columns', JSON.stringify(columns));
+        let idx = 1;
+        const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+        if (columns.length === lis.length) {
+            this._inactive_columns.style.display = 'none';
+        } else {
+            this._inactive_columns.style.display = 'block';
         }
-    },
-
-    update: {
-        value: function (json) {
-            if (this._table === undefined) {
-                this.load(json);
+        lis.forEach(x => {
+            const index = columns.indexOf(x.getAttribute('name'));
+            if (index === -1) {
+                x.classList.remove('active');
             } else {
-                this._table.update(json);
+                x.classList.add('active');
             }
-        }
-    },
-
-    _get_view_filters: {
-        value: function (selector) {
-             return this._view_columns('#filters perspective-row', false, true);
-        }
-    },
-
-    _get_view_aggregates: {
-        value: function (selector) {
-            return this._view_columns(selector, true);
-        }
-    },
-
-    _view_columns: {
-        value: function (selector, types, filters) {
-            selector = selector || '#active_columns perspective-row';
-            let selection = this.querySelectorAll(selector);
-            let sorted = Array.prototype.slice.call(selection);
-            return sorted.map(s => {
-                let name = s.getAttribute('name');
-                if (types) {
-                    let agg = s.getAttribute('aggregate');
-                    return {op: agg, column: name};
-                } else if (filters) {
-                    let {operator, operand} = JSON.parse(s.getAttribute('filter'));
-                    return [name, operator, operand];
-                } else {
-                    return name;
+        });
+        if (reset) {
+            this._active_columns.innerHTML = "";
+            columns.map(y => {
+                let ref = lis.find(x => x.getAttribute('name') === y);
+                if (ref) {
+                    this._active_columns.appendChild(new_row.call(
+                        this, 
+                        ref.getAttribute('name'), 
+                        ref.getAttribute('type')
+                    ));
                 }
             });
         }
-    },
-
-    _visible_column_count: {
-        value: function() {
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
-            return cols.length;
-        }
-    },
-
-    _update_column_view: {
-        value: function (columns, reset = false) {
-            if (!columns) {
-                columns = this._view_columns('#active_columns perspective-row');
-            }
-            this.setAttribute('columns', JSON.stringify(columns));
-            let idx = 1;
-            const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
-            if (columns.length === lis.length) {
-                this._inactive_columns.style.display = 'none';
-            } else {
-                this._inactive_columns.style.display = 'block';
-            }
-            lis.forEach(x => {
-                const index = columns.indexOf(x.getAttribute('name'));
-                if (index === -1) {
-                    x.classList.remove('active');
-                } else {
-                    x.classList.add('active');
-                }
-            });
-            if (reset) {
-                this._active_columns.innerHTML = "";
-                columns.map(y => {
-                    let ref = lis.find(x => x.getAttribute('name') === y);
-                    if (ref) {
-                        this._active_columns.appendChild(new_row.call(
-                            this, 
-                            ref.getAttribute('name'), 
-                            ref.getAttribute('type')
-                        ));
-                    }
-                });
-            }
-        }
-    },
+    }
 
     /**
      * The set of visibile columns.
      *
      * @param {array} columns An array of strings, the names of visible columns
      */
-    columns: {
-        set: function () {
-            let show = JSON.parse(this.getAttribute('columns'));
-            this._update_column_view(show, true);
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
+    set columns(c) {
+        let show = JSON.parse(this.getAttribute('columns'));
+        this._update_column_view(show, true);
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
 
     /**
      * The set of column aggregate configurations.
@@ -756,340 +731,320 @@ registerElement(template, {
      *         `name`: The column name.
      *         `op`: The aggregate type as a string.  See {@link perspective/src/js/defaults.js}
      */
-    aggregates: {
-        set: function () {
-            let show = JSON.parse(this.getAttribute('aggregates'));
-            let lis = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
-            lis.map((x, ix) => {
-                let agg = show[x.getAttribute('name')];
-                if (agg) {
-                    x.setAttribute('aggregate', agg);
-                }
-            });
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
-
-    filters: {
-        set: function () {
-            if (!this._updating_filter) {
-                let filters = JSON.parse(this.getAttribute('filters'));
-                this._filters.innerHTML = "";
-                if (filters.length === 0) {
-                    let label = document.createElement('label');
-                    label.innerHTML = this._filters.getAttribute('name');
-                    this._filters.appendChild(label);
-                } else {
-                    filters.map(function(pivot) {
-                        let row = new_row.call(this, pivot[0], undefined, undefined, JSON.stringify({operator: pivot[1], operand: pivot[2]}));
-                        this._filters.appendChild(row);
-                    }.bind(this));
-                }
+    set aggregates(a) {
+        let show = JSON.parse(this.getAttribute('aggregates'));
+        let lis = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
+        lis.map((x, ix) => {
+            let agg = show[x.getAttribute('name')];
+            if (agg) {
+                x.setAttribute('aggregate', agg);
             }
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
+        });
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
 
-    _set_column_defaults: {
-        value: function () {
-            let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
-            if (cols.length > 0) {
-                if (this._plugin.initial) {
-                    let pref = [];
-                    let count = this._plugin.initial.count || 2;
-                    if (this._plugin.initial.type === 'number') {
+    /**
+     * The set of column filter configurations.
+     *
+     * @param {array} filters An arry of filter config objects.  A filter
+     *     config object is an array of three elements:
+     *         * The column name.
+     *         * The filter operation as a string.  See {@link perspective/src/js/defaults.js}
+     *         * THe filter argument, as a string, float or Array<string> as the filter operation demands.
+     */
+    set filters(f) {
+        if (!this._updating_filter) {
+            let filters = JSON.parse(this.getAttribute('filters'));
+            this._filters.innerHTML = "";
+            if (filters.length === 0) {
+                let label = document.createElement('label');
+                label.innerHTML = this._filters.getAttribute('name');
+                this._filters.appendChild(label);
+            } else {
+                filters.map(function(pivot) {
+                    let row = new_row.call(this, pivot[0], undefined, undefined, JSON.stringify({operator: pivot[1], operand: pivot[2]}));
+                    this._filters.appendChild(row);
+                }.bind(this));
+            }
+        }
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
+
+    _set_column_defaults() {
+        let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+        if (cols.length > 0) {
+            if (this._plugin.initial) {
+                let pref = [];
+                let count = this._plugin.initial.count || 2;
+                if (this._plugin.initial.type === 'number') {
+                    for (let col of cols) {
+                        let type = col.getAttribute('type');
+                        if (['float', 'integer'].indexOf(type) > -1) {
+                            pref.push(col.getAttribute('name'));
+                        }
+                    }
+                    if (pref.length < count) {
                         for (let col of cols) {
-                            let type = col.getAttribute('type');
-                            if (['float', 'integer'].indexOf(type) > -1) {
+                            if (pref.indexOf(col.getAttribute('name')) === -1) {
                                 pref.push(col.getAttribute('name'));
                             }
-                        }
-                        if (pref.length < count) {
-                            for (let col of cols) {
-                                if (pref.indexOf(col.getAttribute('name')) === -1) {
-                                    pref.push(col.getAttribute('name'));
-                                }
-                            }                            
-                        }
+                        }                            
                     }
-                    this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
-                } else if (this._plugin.selectMode === 'select') {
-                    this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
                 }
+                this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
+            } else if (this._plugin.selectMode === 'select') {
+                this.setAttribute('columns', JSON.stringify([cols[0].getAttribute('name')]));
             }
-        }
-    },
-
-    view: {
-        set: async function () {
-            this._vis_selector.value = this.getAttribute('view');
-            this._set_column_defaults();
-            this.dispatchEvent(new Event('config-update'));
-        }
-    },
-
-    'column-pivots': {
-        set: function () {
-            let pivots = JSON.parse(this.getAttribute('column-pivots'));
-            this._column_pivots.innerHTML = "";
-            if (pivots.length === 0) {
-                let label = document.createElement('label');
-                label.innerHTML = this._column_pivots.getAttribute('name');
-                this._column_pivots.appendChild(label);
-            } else {
-                pivots.map(function(pivot) {
-                    let row = new_row.call(this, pivot);
-                    this._column_pivots.appendChild(row);
-                }.bind(this));
-            }
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
-
-    'index': {
-        set: function () {
-            if (this._table) {
-                console.error(`Setting 'index' attribute after initialization has no effect`);
-            }
-        }
-    },
-
-    'row-pivots': {
-        set: function () {
-            let pivots = JSON.parse(this.getAttribute('row-pivots'));
-            this._row_pivots.innerHTML = "";
-            if (pivots.length === 0) {
-                let label = document.createElement('label');
-                label.innerHTML = this._row_pivots.getAttribute('name');
-                this._row_pivots.appendChild(label);
-            } else {
-                pivots.map(function(pivot) {
-                    let row = new_row.call(this, pivot);
-                    this._row_pivots.appendChild(row);
-                }.bind(this));
-            }
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
-
-    'copy': {
-        value: function (widget) {
-            if (widget.hasAttribute('index')) {
-                this.setAttribute('index', widget.getAttribute('index'));
-            }
-            if (this._inner_drop_target) {
-                this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
-            }
-
-            if (widget._table) {
-                loadTable.call(this, widget._table);
-            } else {
-                widget.slaves.push(this);
-            }
-        }
-    },
-
-    'sort': {
-        set: function () {
-            let sort = JSON.parse(this.getAttribute('sort'));
-            this._sort.innerHTML = "";
-            if (sort.length === 0) {
-                let label = document.createElement('label');
-                label.innerHTML = this._sort.getAttribute('name');
-                this._sort.appendChild(label);
-            } else {
-                sort.map(function(s) {
-                    let row = new_row.call(this, s);
-                    this._sort.appendChild(row);
-                }.bind(this));
-            }
-            this.dispatchEvent(new Event('config-update'));
-            this._update();
-        }
-    },
-
-    _clear_state: {
-        value: function () {
-            if (this._task) {
-                this._task.cancel();
-            }
-            let all = [];
-            if (this._view) {
-                let view = this._view;
-                this._view = undefined;
-                all.push(view.delete());
-            };
-            if (this._table) {
-                let table = this._table;
-                this._table = undefined;
-                all.push(table.delete());
-            }
-            return Promise.all(all);
-        }
-    },
-
-    delete: {
-        value: function () {
-            let x = this._clear_state();
-            if (this._plugin.delete) {
-                this._plugin.delete.call(this);
-            }
-            return x;
-        }
-    },
-
-    'save': {
-        value: function () {
-            let obj = {};
-            for (let key = 0; key < this.attributes.length; key++) {
-                let attr = this.attributes[key];
-                if (['id'].indexOf(attr.name) === -1) {
-                    obj[attr.name] = attr.value;
-                }
-            }
-            return obj;
-        }
-    },
-
-    'restore': {
-        value: function(x) {
-            for (let key in x) {
-                this.setAttribute(key, x[key]);
-            }
-        }
-    },
-
-    'reset': {
-        value: function() {
-            this.setAttribute('row-pivots', JSON.stringify([]));
-            this.setAttribute('column-pivots', JSON.stringify([]));
-            this.setAttribute('filters', JSON.stringify([]));
-            this.setAttribute('sort', JSON.stringify([]));
-            this.removeAttribute('index');
-            if (this._initial_col_order) {
-                this.setAttribute('columns', JSON.stringify(this._initial_col_order || []));
-            } else {
-                this.removeAttribute('columns');
-            }
-            this.setAttribute('view', Object.keys(RENDERERS)[0]);
-            this.dispatchEvent(new Event('config-update'));
-        }
-    },
-
-    attachedCallback: {
-        value: function() {
-            let _update = _.debounce(update.bind(this), 10);
-            this._update = () => {
-                this.setAttribute('updating', true);
-                _update();
-            }
-
-            this.slaves = [];
-            this._aggregate_selector = this.querySelector('#aggregate_selector');
-            this._vis_selector = this.querySelector('#vis_selector');
-            this._filters = this.querySelector('#filters');
-            this._row_pivots = this.querySelector('#row_pivots');
-            this._column_pivots = this.querySelector('#column_pivots');
-            this._datavis = this.querySelector('#pivot_chart');
-            this._active_columns = this.querySelector('#active_columns');
-            this._inactive_columns = this.querySelector('#inactive_columns');
-            this._inner_drop_target = this.querySelector('#drop_target_inner');
-            this._drop_target = this.querySelector('#drop_target');
-            this._config_button = this.querySelector('#config_button');
-            this._side_panel = this.querySelector('#side_panel');
-            this._top_panel = this.querySelector('#top_panel');
-            this._sort = this.querySelector('#sort');
-
-            this._sort.addEventListener('drop', drop.bind(this));
-            this._sort.addEventListener('dragend', undrag.bind(this));
-
-            this._row_pivots.addEventListener('drop', drop.bind(this));
-            this._row_pivots.addEventListener('dragend', undrag.bind(this));
-
-            this._column_pivots.addEventListener('drop', drop.bind(this));
-            this._column_pivots.addEventListener('dragend', undrag.bind(this));
-
-            this._filters.addEventListener('drop', drop.bind(this));
-            this._filters.addEventListener('dragend', undrag.bind(this));
-
-            this._active_columns.addEventListener('drop', column_drop.bind(this));
-            this._active_columns.addEventListener('dragend', column_undrag.bind(this));
-            this._active_columns.addEventListener('dragover', column_dragover.bind(this));
-            this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
-
-            this.setAttribute('settings', true);
-            this._show_config = true;
-            this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
-
-            if (!this.hasAttribute('row-pivots')) {
-                this.setAttribute('row-pivots', "[]");
-            }
-
-            if (!this.hasAttribute('column-pivots')) {
-                this.setAttribute('column-pivots', "[]");
-            }
-
-            if (!this.hasAttribute('filters')) {
-                this.setAttribute('filters', "[]");
-            }
-
-            this._vis_selector.addEventListener('change', event => {
-                this.setAttribute('view', this._vis_selector.value);
-                this._update();
-            });
-
-            this.addEventListener('close', () => {
-                console.info("Closing");
-            });
-
-            if (Object.keys(RENDERERS).length === 0) {
-                RENDERERS['debug'] = {
-                    name: "Debug", 
-                    create: async div => { 
-                        let json = await this._view.to_json();
-                        var t = performance.now();
-                        let csv = "";
-                        if (json.length > 0) {
-                            let columns = Object.keys(json[0]);
-                            csv += columns.join('|') + '\n';
-                            for (let row of json) {
-                                csv += Object.values(row).join('|') + "\n";                                    
-                            }
-                        }
-                        div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`
-                        this.setAttribute('render_time', performance.now() - t);
-                    },
-                    selectMode: "toggle",
-                    resize: function () {
-                       
-                    },
-                    delete: function () {
-                    }
-                };
-            }
-
-            for (let name in RENDERERS) {
-                let display_name = RENDERERS[name].name || name;
-                this._vis_selector.innerHTML += `<option value="${name}">${display_name}</option>`;
-            }
-
-            this._modified = false;
-
-            if (this.getAttribute('data')) {
-                let data = this.getAttribute('data');
-                try {
-                    data = JSON.parse(data);
-                } catch (e) {
-
-                }
-                load.bind(this)(data)
-                this._modified = true;
-            }
-            this._toggle_config();
         }
     }
-})
+
+    set view(v) {
+        this._vis_selector.value = this.getAttribute('view');
+        this._set_column_defaults();
+        this.dispatchEvent(new Event('config-update'));
+    }
+
+    set ['column-pivots'](c) {
+        let pivots = JSON.parse(this.getAttribute('column-pivots'));
+        this._column_pivots.innerHTML = "";
+        if (pivots.length === 0) {
+            let label = document.createElement('label');
+            label.innerHTML = this._column_pivots.getAttribute('name');
+            this._column_pivots.appendChild(label);
+        } else {
+            pivots.map(function(pivot) {
+                let row = new_row.call(this, pivot);
+                this._column_pivots.appendChild(row);
+            }.bind(this));
+        }
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
+
+    set ['index'](i) {
+        if (this._table) {
+            console.error(`Setting 'index' attribute after initialization has no effect`);
+        }
+    }
+
+    set ['row-pivots'](r) {
+        let pivots = JSON.parse(this.getAttribute('row-pivots'));
+        this._row_pivots.innerHTML = "";
+        if (pivots.length === 0) {
+            let label = document.createElement('label');
+            label.innerHTML = this._row_pivots.getAttribute('name');
+            this._row_pivots.appendChild(label);
+        } else {
+            pivots.map(function(pivot) {
+                let row = new_row.call(this, pivot);
+                this._row_pivots.appendChild(row);
+            }.bind(this));
+        }
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
+
+    copy(widget) {
+        if (widget.hasAttribute('index')) {
+            this.setAttribute('index', widget.getAttribute('index'));
+        }
+        if (this._inner_drop_target) {
+            this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
+        }
+
+        if (widget._table) {
+            loadTable.call(this, widget._table);
+        } else {
+            widget.slaves.push(this);
+        }
+    }
+
+    set sort(s) {
+        let sort = JSON.parse(this.getAttribute('sort'));
+        this._sort.innerHTML = "";
+        if (sort.length === 0) {
+            let label = document.createElement('label');
+            label.innerHTML = this._sort.getAttribute('name');
+            this._sort.appendChild(label);
+        } else {
+            sort.map(function(s) {
+                let row = new_row.call(this, s);
+                this._sort.appendChild(row);
+            }.bind(this));
+        }
+        this.dispatchEvent(new Event('config-update'));
+        this._update();
+    }
+
+    _clear_state() {
+        if (this._task) {
+            this._task.cancel();
+        }
+        let all = [];
+        if (this._view) {
+            let view = this._view;
+            this._view = undefined;
+            all.push(view.delete());
+        };
+        if (this._table) {
+            let table = this._table;
+            this._table = undefined;
+            all.push(table.delete());
+        }
+        return Promise.all(all);
+    }
+
+    delete() {
+        let x = this._clear_state();
+        if (this._plugin.delete) {
+            this._plugin.delete.call(this);
+        }
+        return x;
+    }
+    
+    save() {
+        let obj = {};
+        for (let key = 0; key < this.attributes.length; key++) {
+            let attr = this.attributes[key];
+            if (['id'].indexOf(attr.name) === -1) {
+                obj[attr.name] = attr.value;
+            }
+        }
+        return obj;
+    }
+
+    restore(x) {
+        for (let key in x) {
+            this.setAttribute(key, x[key]);
+        }
+    }
+
+    reset() {
+        this.setAttribute('row-pivots', JSON.stringify([]));
+        this.setAttribute('column-pivots', JSON.stringify([]));
+        this.setAttribute('filters', JSON.stringify([]));
+        this.setAttribute('sort', JSON.stringify([]));
+        this.removeAttribute('index');
+        if (this._initial_col_order) {
+            this.setAttribute('columns', JSON.stringify(this._initial_col_order || []));
+        } else {
+            this.removeAttribute('columns');
+        }
+        this.setAttribute('view', Object.keys(RENDERERS)[0]);
+        this.dispatchEvent(new Event('config-update'));
+    }
+
+    connectedCallback() {
+        let _update = _.debounce(update.bind(this), 10);
+        this._update = () => {
+            this.setAttribute('updating', true);
+            _update();
+        }
+
+        this.slaves = [];
+        this._aggregate_selector = this.querySelector('#aggregate_selector');
+        this._vis_selector = this.querySelector('#vis_selector');
+        this._filters = this.querySelector('#filters');
+        this._row_pivots = this.querySelector('#row_pivots');
+        this._column_pivots = this.querySelector('#column_pivots');
+        this._datavis = this.querySelector('#pivot_chart');
+        this._active_columns = this.querySelector('#active_columns');
+        this._inactive_columns = this.querySelector('#inactive_columns');
+        this._inner_drop_target = this.querySelector('#drop_target_inner');
+        this._drop_target = this.querySelector('#drop_target');
+        this._config_button = this.querySelector('#config_button');
+        this._side_panel = this.querySelector('#side_panel');
+        this._top_panel = this.querySelector('#top_panel');
+        this._sort = this.querySelector('#sort');
+
+        this._sort.addEventListener('drop', drop.bind(this));
+        this._sort.addEventListener('dragend', undrag.bind(this));
+
+        this._row_pivots.addEventListener('drop', drop.bind(this));
+        this._row_pivots.addEventListener('dragend', undrag.bind(this));
+
+        this._column_pivots.addEventListener('drop', drop.bind(this));
+        this._column_pivots.addEventListener('dragend', undrag.bind(this));
+
+        this._filters.addEventListener('drop', drop.bind(this));
+        this._filters.addEventListener('dragend', undrag.bind(this));
+
+        this._active_columns.addEventListener('drop', column_drop.bind(this));
+        this._active_columns.addEventListener('dragend', column_undrag.bind(this));
+        this._active_columns.addEventListener('dragover', column_dragover.bind(this));
+        this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
+
+        this.setAttribute('settings', true);
+        this._show_config = true;
+        this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
+
+        if (!this.hasAttribute('row-pivots')) {
+            this.setAttribute('row-pivots', "[]");
+        }
+
+        if (!this.hasAttribute('column-pivots')) {
+            this.setAttribute('column-pivots', "[]");
+        }
+
+        if (!this.hasAttribute('filters')) {
+            this.setAttribute('filters', "[]");
+        }
+
+        this._vis_selector.addEventListener('change', event => {
+            this.setAttribute('view', this._vis_selector.value);
+            this._update();
+        });
+
+        this.addEventListener('close', () => {
+            console.info("Closing");
+        });
+
+        if (Object.keys(RENDERERS).length === 0) {
+            RENDERERS['debug'] = {
+                name: "Debug", 
+                create: async div => { 
+                    let json = await this._view.to_json();
+                    var t = performance.now();
+                    let csv = "";
+                    if (json.length > 0) {
+                        let columns = Object.keys(json[0]);
+                        csv += columns.join('|') + '\n';
+                        for (let row of json) {
+                            csv += Object.values(row).join('|') + "\n";                                    
+                        }
+                    }
+                    div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`
+                    this.setAttribute('render_time', performance.now() - t);
+                },
+                selectMode: "toggle",
+                resize: function () {
+                    
+                },
+                delete: function () {
+                }
+            };
+        }
+
+        for (let name in RENDERERS) {
+            let display_name = RENDERERS[name].name || name;
+            this._vis_selector.innerHTML += `<option value="${name}">${display_name}</option>`;
+        }
+
+        this._modified = false;
+
+        if (this.getAttribute('data')) {
+            let data = this.getAttribute('data');
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+
+            }
+            load.bind(this)(data)
+            this._modified = true;
+        }
+        this._toggle_config();
+    }
+
+});

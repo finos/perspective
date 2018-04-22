@@ -18,7 +18,7 @@ const GroupedHeader = require("./grouped-header.js");
 
 const _ = require("underscore");
 
-import {registerElement, detectChrome} from "@jpmorganchase/perspective-common";
+import {bindTemplate, detectChrome} from "@jpmorganchase/perspective-common";
 
 var TEMPLATE = require('../html/hypergrid.html');
 import "../less/hypergrid.less";
@@ -612,9 +612,9 @@ function CachedRendererPlugin(grid) {
     }
 }
 
-registerElement(TEMPLATE, {
+bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
-    set_data: { value: function(data, schema, tschema, row_pivots) {
+    set_data(data, schema, tschema, row_pivots) {
         if (this._detached) {
             this._detached = false;
         }
@@ -624,77 +624,75 @@ registerElement(TEMPLATE, {
         } else {
             this._hg_data = hg_data;
         }
-    }},
+    }
 
-    detachedCallback: { value: function() {
+    detachedCallback() {
         this._detached = true;
-    }},
+    }
 
-    attachedCallback: {
-        value: function () {
-            if (!this.grid) {
-                var host = this.querySelector('#mainGrid');
+    connectedCallback() {
+        if (!this.grid) {
+            var host = this.querySelector('#mainGrid');
 
-                host.setAttribute('hidden', true);
-                this.grid = new Hypergrid(host, { Behavior: Behaviors.JSON });
-                host.removeAttribute('hidden');
+            host.setAttribute('hidden', true);
+            this.grid = new Hypergrid(host, { Behavior: Behaviors.JSON });
+            host.removeAttribute('hidden');
 
-                this.grid.installPlugins([
-                    GridUIFixPlugin,
-                    PerspectiveDataModel,
-                    CheckboxTrackingPlugin,
-                    CachedRendererPlugin
-                ]);
+            this.grid.installPlugins([
+                GridUIFixPlugin,
+                PerspectiveDataModel,
+                CheckboxTrackingPlugin,
+                CachedRendererPlugin
+            ]);
 
-                var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
-                grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
-                this.grid.addProperties(grid_properties);
+            var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
+            grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
+            this.grid.addProperties(grid_properties);
 
-                const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }));
-                this.grid.localization.add('FinanceFloat', float_formatter);
+            const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }));
+            this.grid.localization.add('FinanceFloat', float_formatter);
 
-                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {}));
-                this.grid.localization.add('FinanceInteger', integer_formatter);
+            const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {}));
+            this.grid.localization.add('FinanceInteger', integer_formatter);
 
-                const date_formatter = null_formatter(new this.grid.localization.DateFormatter('en-us', {
-                    week: 'numeric',
-                    year: 'numeric',
-                    month: 'numeric',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: 'numeric',
-                    second: 'numeric'
-                }), -1);
-                this.grid.localization.add('FinanceDate', date_formatter);
+            const date_formatter = null_formatter(new this.grid.localization.DateFormatter('en-us', {
+                week: 'numeric',
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+            }), -1);
+            this.grid.localization.add('FinanceDate', date_formatter);
 
-                this.grid.localization.add('FinanceTree', {
-                    format: function (val, type) {
-                        let f = {
-                            'date': date_formatter,
-                            'integer': integer_formatter,
-                            'float': float_formatter,
-                        }[type];
-                        if (f) {
-                            return f.format(val);
-                        }
-                        return val;
-                    },
-                    parse: x => x
-                })
+            this.grid.localization.add('FinanceTree', {
+                format: function (val, type) {
+                    let f = {
+                        'date': date_formatter,
+                        'integer': integer_formatter,
+                        'float': float_formatter,
+                    }[type];
+                    if (f) {
+                        return f.format(val);
+                    }
+                    return val;
+                },
+                parse: x => x
+            })
 
-                if (this._hg_data) {
-                    this.grid.behavior.setPSP(this._hg_data);
-                    delete this._hgdata;
-                }
-
-            } else {
-                this._detached = false;
+            if (this._hg_data) {
+                this.grid.behavior.setPSP(this._hg_data);
+                delete this._hgdata;
             }
+
+        } else {
+            this._detached = false;
         }
-    },
+    }
 
 });
 
