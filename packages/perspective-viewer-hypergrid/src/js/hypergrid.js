@@ -454,24 +454,26 @@ function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undef
         rows.length = length;
     }
     for (let idx = start; idx < (end || data.length); idx++) {
-        const row = data[idx] || {};
+        const row = data[idx];
         let new_row = [];
         let row_path = [];
         let row_leaf = true;
-        if (is_tree) {
-            if (row.__ROW_PATH__ === undefined) {
-                row.__ROW_PATH__ = [];
+        if (row) {
+            if (is_tree) {
+                if (row.__ROW_PATH__ === undefined) {
+                    row.__ROW_PATH__ = [];
+                }
+                row_path = ["ROOT"].concat(row.__ROW_PATH__);
+                let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
+                if (name === undefined && idx === 0) name = "TOTAL"
+                new_row = [name];
+                row_leaf = row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
             }
-            row_path = ["ROOT"].concat(row.__ROW_PATH__);
-            let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
-            if (name === undefined && idx === 0) name = "TOTAL"
-            new_row = [name];
-            row_leaf = row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
+            for (var col of flat_columns) {
+                new_row.push(row[col]);
+            }
         }
-        for (var col of flat_columns) {
-            new_row.push(row[col]);
-        }
-        rows[idx] ={
+        rows[idx] = {
             rowPath: row_path,
             rowData: new_row,
             isLeaf: row_leaf
@@ -792,7 +794,7 @@ async function grid(div, view, hidden, task) {
         }
     }
    
-    this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')));
+    this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
