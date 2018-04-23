@@ -33,7 +33,6 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective-common": "^0.1.8",
     "babel-runtime": "^6.26.0",
     "chroma-js": "^1.3.4",
     "gradient-parser": "0.1.5",
@@ -43,8 +42,8 @@
   },
   "devDependencies": {
     "@jpmorganchase/perspective": "^0.1.8",
-    "@jpmorganchase/perspective-common": "^0.1.8",
     "@jpmorganchase/perspective-viewer": "^0.1.8",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",

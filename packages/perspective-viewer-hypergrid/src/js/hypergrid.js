@@ -18,7 +18,8 @@ const GroupedHeader = require("./grouped-header.js");
 
 const _ = require("underscore");
 
-import {bindTemplate, detectChrome} from "@jpmorganchase/perspective-common";
+import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
+import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
 var TEMPLATE = require('../html/hypergrid.html');
 import "../less/hypergrid.less";

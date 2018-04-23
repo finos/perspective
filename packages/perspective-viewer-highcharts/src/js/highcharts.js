@@ -7,8 +7,6 @@
  *
  */
 
-import '@jpmorganchase/perspective-common';
-
 import highcharts from 'highcharts';
 
 import * as gparser from 'gradient-parser';
