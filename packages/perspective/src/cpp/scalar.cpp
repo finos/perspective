@@ -801,9 +801,11 @@ t_tscalar::operator bool() const
         break;
         default:
         {
+#ifdef PSP_DEBUG
             std::cout << __FILE__ << ":" << __LINE__
                       << " Reached unknown type " << m_type
                       << std::endl;
+#endif
         }
     }
     return false;

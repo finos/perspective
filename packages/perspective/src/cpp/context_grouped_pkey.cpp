@@ -58,7 +58,7 @@ t_index
 t_ctx_grouped_pkey::get_row_count() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_traversal->size();
 }
 
@@ -66,7 +66,7 @@ t_index
 t_ctx_grouped_pkey::get_column_count() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_num_columns() + 1;
 }
 
@@ -75,7 +75,7 @@ t_ctx_grouped_pkey::get_view_nodes(t_tvidx start_row,
                                    t_tvidx end_row) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_traversal->get_view_nodes(start_row, end_row);
 }
 
@@ -83,7 +83,7 @@ t_index
 t_ctx_grouped_pkey::open(t_header header, t_tvidx idx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return open(idx);
 }
 
@@ -99,7 +99,7 @@ t_index
 t_ctx_grouped_pkey::open(t_tvidx idx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
@@ -111,7 +111,7 @@ t_index
 t_ctx_grouped_pkey::close(t_tvidx idx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
@@ -126,7 +126,7 @@ t_ctx_grouped_pkey::get_data(t_tvidx start_row,
                              t_tvidx end_col) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto ext = sanitize_get_data_extents(
         *this, start_row, end_row, start_col, end_col);
 
@@ -215,7 +215,7 @@ t_ctx_grouped_pkey::notify(const t_table& flattened,
                            const t_table& existed)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     rebuild();
 }
 
@@ -223,7 +223,7 @@ void
 t_ctx_grouped_pkey::step_begin()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     reset_step_state();
 }
 
@@ -231,7 +231,7 @@ void
 t_ctx_grouped_pkey::step_end()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_minmax = m_tree->get_min_max();
 }
 
@@ -239,7 +239,7 @@ t_depth
 t_ctx_grouped_pkey::get_num_levels() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_num_rpivots() + 1;
 }
 
@@ -247,7 +247,7 @@ t_aggspec
 t_ctx_grouped_pkey::get_aggregate(t_uindex idx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (idx >= m_config.get_num_aggregates())
         return t_aggspec();
     return m_config.get_aggregates()[idx];
@@ -257,7 +257,7 @@ t_aggspecvec
 t_ctx_grouped_pkey::get_aggregates() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_aggregates();
 }
 
@@ -265,7 +265,7 @@ t_pivotvec
 t_ctx_grouped_pkey::get_row_pivots() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_row_pivots();
 }
 
@@ -273,7 +273,7 @@ t_pivotvec
 t_ctx_grouped_pkey::get_column_pivots() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_column_pivots();
 }
 
@@ -281,7 +281,7 @@ t_tscalvec
 t_ctx_grouped_pkey::get_row_path(t_tvidx idx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return ctx_get_path(m_tree, m_traversal, idx);
 }
 
@@ -289,7 +289,7 @@ void
 t_ctx_grouped_pkey::reset_sortby()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = t_sortsvec();
 }
 
@@ -297,7 +297,7 @@ t_pathvec
 t_ctx_grouped_pkey::get_expansion_state() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return ctx_get_expansion_state(m_tree, m_traversal);
 }
 
@@ -305,7 +305,7 @@ void
 t_ctx_grouped_pkey::set_expansion_state(const t_pathvec& paths)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     ctx_set_expansion_state(
         *this, HEADER_ROW, m_tree, m_traversal, paths);
 }
@@ -314,7 +314,7 @@ void
 t_ctx_grouped_pkey::expand_path(const t_tscalvec& path)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     ctx_expand_path(*this, HEADER_ROW, m_tree, m_traversal, path);
 }
 
@@ -322,7 +322,7 @@ t_stree*
 t_ctx_grouped_pkey::_get_tree()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree.get();
 }
 
@@ -330,7 +330,7 @@ t_tscalar
 t_ctx_grouped_pkey::get_tree_value(t_ptidx nidx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->get_value(nidx);
 }
 
@@ -339,7 +339,7 @@ t_ctx_grouped_pkey::get_flattened_tree(t_tvidx idx,
                                        t_depth stop_depth)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return ctx_get_flattened_tree(
         idx, stop_depth, *(m_traversal.get()), m_config, m_sortby);
 }
@@ -348,7 +348,7 @@ t_trav_csptr
 t_ctx_grouped_pkey::get_traversal() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_traversal;
 }
 
@@ -356,7 +356,7 @@ void
 t_ctx_grouped_pkey::sort_by(const t_sortsvec& sortby)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + " sort_by.enter");
     m_sortby = sortby;
     if (m_sortby.empty())
@@ -371,7 +371,7 @@ void
 t_ctx_grouped_pkey::expand_to_depth(t_depth depth)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_depth expand_depth =
         std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
     m_traversal->expand_to_depth(m_sortby, expand_depth);
@@ -381,7 +381,7 @@ void
 t_ctx_grouped_pkey::collapse_to_depth(t_depth depth)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_traversal->collapse_to_depth(depth);
 }
 
@@ -389,7 +389,7 @@ t_tscalvec
 t_ctx_grouped_pkey::get_pkeys(const t_uidxpvec& cells) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_traversal->validate_cells(cells))
     {
@@ -441,7 +441,7 @@ t_ctx_grouped_pkey::get_pkeys_without_descendents(
     const t_uidxpvec& cells) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_traversal->validate_cells(cells))
     {
@@ -477,7 +477,7 @@ t_tscalvec
 t_ctx_grouped_pkey::get_cell_data(const t_uidxpvec& cells) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (!m_traversal->validate_cells(cells))
     {
         t_tscalvec rval;
@@ -549,7 +549,7 @@ t_minmaxvec
 t_ctx_grouped_pkey::get_min_max() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_minmax;
 }
 
@@ -557,7 +557,7 @@ t_stepdelta
 t_ctx_grouped_pkey::get_step_delta(t_tvidx bidx, t_tvidx eidx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     bidx = std::min(bidx, t_tvidx(m_traversal->size()));
     eidx = std::min(eidx, t_tvidx(m_traversal->size()));
 
@@ -572,7 +572,7 @@ t_cellupdvec
 t_ctx_grouped_pkey::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     eidx = std::min(eidx, t_tvidx(m_traversal->size()));
     t_cellupdvec rval;
     const auto& deltas = m_tree->get_deltas();
@@ -614,7 +614,7 @@ t_streeptr_vec
 t_ctx_grouped_pkey::get_trees()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_streeptr_vec rval(1);
     rval[0] = m_tree.get();
     return rval;
@@ -624,7 +624,7 @@ t_uindex
 t_ctx_grouped_pkey::get_leaf_count(const t_depth depth) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->get_num_leaves(depth);
 }
 
@@ -636,7 +636,7 @@ t_ctx_grouped_pkey::get_leaf_data(t_uindex depth,
                                   t_uindex end_col) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     PSP_COMPLAIN_AND_ABORT("Not supported yet");
     return t_tscalvec();
@@ -647,7 +647,7 @@ t_ctx_grouped_pkey::iter_leaf_data(const t_idxvec& idxs,
                                    t_uindex row_depth) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return t_leaf_data_iter<t_ctx_grouped_pkey>(
         m_tree, idxs, row_depth);
 }
@@ -656,7 +656,7 @@ t_bool
 t_ctx_grouped_pkey::has_deltas() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return true;
 }
 
@@ -664,7 +664,7 @@ t_float64
 t_ctx_grouped_pkey::get_min(t_uindex aggidx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->get_min_max().at(aggidx).m_min.to_double();
 }
 
@@ -672,7 +672,7 @@ t_float64
 t_ctx_grouped_pkey::get_max(t_uindex aggidx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->get_min_max().at(aggidx).m_max.to_double();
 }
 
@@ -681,7 +681,7 @@ t_ctx_grouped_pkey::get_agg_min_max(t_uindex aggidx,
                                     t_depth depth) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->get_agg_min_max(aggidx, depth);
 }
 
@@ -938,7 +938,7 @@ void
 t_ctx_grouped_pkey::notify(const t_table& flattened)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + " notify.enter");
     rebuild();
     psp_log_time(repr() + " notify.exit");

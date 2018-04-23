@@ -365,9 +365,11 @@ t_tscalar::compare_common(const t_tscalar& rhs) const
         break;
         default:
         {
+#ifdef PSP_DEBUG
             std::cout << __FILE__ << ":" << __LINE__
                       << " Reached unknown type " << m_type
                       << std::endl;
+#endif                      
             return false;
         }
     }

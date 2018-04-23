@@ -8,7 +8,9 @@
  */
 
 import papaparse from "papaparse";
-import * as Arrow from "@apache-arrow/es5-esm";
+import {Table} from "@apache-arrow/es5-esm/table";
+import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Precision} from "@apache-arrow/es5-esm/type";
 import {is_valid_date, DateParser} from "./date_parser.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
@@ -249,7 +251,7 @@ function parse_data(data, names, types) {
  */
 function load_arrow_buffer(data, names, types) {
     // TODO Need to validate that the names/types passed in match those in the buffer
-    let arrow = Arrow.Table.from([new Uint8Array(data)]);
+    let arrow = Table.from([new Uint8Array(data)]);
     let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
         return loader.loadColumn(field, arrow.getColumnAt(colIdx));
     }, new ArrowColumnLoader());
@@ -266,7 +268,7 @@ function load_arrow_buffer(data, names, types) {
  *
  * @private
  */
-class ArrowColumnLoader extends Arrow.visitor.TypeVisitor {
+class ArrowColumnLoader extends TypeVisitor {
     constructor(cdata, names, types) {
         super();
         this.cdata = cdata || [];
@@ -303,10 +305,10 @@ class ArrowColumnLoader extends Arrow.visitor.TypeVisitor {
     }
     visitFloat(type/*: Arrow.type.Float*/) {
         const precision = type.precision;
-        if (precision === Arrow.enum_.Precision.DOUBLE) {
+        if (precision === Precision.DOUBLE) {
             this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
         }
-        else if (precision === Arrow.enum_.Precision.SINGLE) {
+        else if (precision === Precision.SINGLE) {
             this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
         }
         // todo?

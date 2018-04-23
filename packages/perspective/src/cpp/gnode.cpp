@@ -215,7 +215,7 @@ void
 t_gnode::_send(t_uindex portid, const t_table& fragments)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(portid == 0,
                        "Only simple dataflows supported currently");
 
@@ -339,7 +339,7 @@ void
 t_gnode::clear_deltas()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     for (auto& kv : m_contexts)
     {
@@ -379,7 +379,7 @@ void
 t_gnode::_process()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_was_updated = false;
     PSP_VERBOSE_ASSERT(m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
                        "Only simple dataflows supported currently");
@@ -951,7 +951,7 @@ t_table*
 t_gnode::_get_otable(t_uindex portidx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(portidx < m_oports.size(),
                        "Invalid port number");
     return m_oports[portidx]->get_table().get();
@@ -961,7 +961,7 @@ t_table*
 t_gnode::_get_itable(t_uindex portidx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(portidx < m_iports.size(),
                        "Invalid port number");
     return m_iports[portidx]->get_table().get();
@@ -971,7 +971,7 @@ t_table*
 t_gnode::get_table()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_state->get_table().get();
 }
 
@@ -979,7 +979,7 @@ const t_table*
 t_gnode::get_table() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_state->get_table().get();
 }
 
@@ -987,7 +987,7 @@ void
 t_gnode::pprint() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_state->pprint();
 }
 
@@ -996,7 +996,7 @@ PyObject*
 t_gnode::get_mask() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_state->get_mask();
 }
 #endif
@@ -1006,7 +1006,7 @@ void
 t_gnode::set_ctx_state(void* ptr)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     CTX_T* ctx = static_cast<CTX_T*>(ptr);
     ctx->set_state(m_state);
 }
@@ -1015,7 +1015,7 @@ void
 t_gnode::_update_contexts_from_state(const t_table& tbl)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     for (auto& kv : m_contexts)
     {
@@ -1116,7 +1116,7 @@ void
 t_gnode::_update_contexts_from_state()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto flattened = m_state->get_pkeyed_table();
     _update_contexts_from_state(*flattened);
 }
@@ -1127,7 +1127,7 @@ t_gnode::_register_context(const t_str& name,
                            t_int64 ptr)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     void* ptr_ = reinterpret_cast<void*>(ptr);
     t_ctx_handle ch(ptr_, type);
     m_contexts[name] = ch;
@@ -1242,7 +1242,7 @@ void
 t_gnode::_unregister_context(const t_str& name)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if ((m_contexts.find(name) == m_contexts.end()))
         return;
 
@@ -1255,7 +1255,7 @@ void
 t_gnode::notify_contexts(const t_table& flattened)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + "notify_contexts.enter");
     t_index num_ctx = m_contexts.size();
     t_sctxhvec ctxhvec(num_ctx);
@@ -1333,7 +1333,7 @@ t_pivotvec
 t_gnode::get_pivots() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     t_pivotvec rval;
 
@@ -1393,7 +1393,7 @@ t_gnode::get_trees()
 {
 
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     t_streeptr_vec rval;
 

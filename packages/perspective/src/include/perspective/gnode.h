@@ -263,7 +263,7 @@ t_gnode::update_context_from_state(CTX_T* ctx,
                                    const t_table& flattened)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW,
                        "Only simple dataflows supported currently");
 

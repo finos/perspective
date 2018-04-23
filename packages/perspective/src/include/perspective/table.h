@@ -289,7 +289,7 @@ void
 t_table::flatten_body(FLATTENED_T flattened) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
     switch (get_const_column("psp_pkey")->get_dtype())
