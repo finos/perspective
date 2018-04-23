@@ -62,7 +62,7 @@ module.exports = function () {
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],
-                    plugins: ['transform-runtime', 'transform-object-rest-spread', ["transform-es2015-for-of", {
+                    plugins: ["transform-custom-element-classes", 'transform-runtime', 'transform-object-rest-spread', ["transform-es2015-for-of", {
                         "loose": true
                     }]]
                 }

@@ -65,7 +65,7 @@ const t_index INVALID_INDEX = -1;
 #endif
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
-
+#ifdef PSP_DEBUG
 #define PSP_VERBOSE_ASSERT(COND, MSG)                                \
     {                                                                \
         if (!(COND))                                                 \
@@ -106,6 +106,14 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
     std::cout << "initing L: " << __LINE__ << " " << (X) << " <"     \
               << this << ">" << std::endl;
 #else
+#define LOG_CONSTRUCTOR(X)
+#define LOG_DESTRUCTOR(X)
+#define LOG_INIT(X)
+#endif
+#else
+#define PSP_VERBOSE_ASSERT(COND, MSG)   
+#define PSP_COMPLAIN_AND_ABORT(X) 
+#define PSP_ASSERT_SIMPLE_TYPE(X) 
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)

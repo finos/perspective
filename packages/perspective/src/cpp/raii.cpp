@@ -11,7 +11,9 @@
 #include <perspective/base.h>
 #include <perspective/raii.h>
 #ifndef WIN32
+#ifdef PSP_DEBUG
 #include <sys/mman.h>
+#endif
 #endif
 
 namespace perspective

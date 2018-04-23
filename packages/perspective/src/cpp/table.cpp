@@ -99,7 +99,7 @@ const t_str&
 t_table::name() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_name;
 }
 
@@ -164,7 +164,7 @@ t_uindex
 t_table::num_columns() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema.size();
 }
 
@@ -172,7 +172,7 @@ t_uindex
 t_table::num_rows() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_size;
 }
 
@@ -180,7 +180,7 @@ t_uindex
 t_table::size() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return num_rows();
 }
 
@@ -188,7 +188,7 @@ t_uindex
 t_table::num_rows(const t_mask& q) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(q.size() == size(), "Mismatch in mask size.")
     return q.count();
 }
@@ -197,7 +197,7 @@ t_dtype
 t_table::get_dtype(const t_str& colname) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema.get_dtype(colname);
 }
 
@@ -205,7 +205,7 @@ t_col_sptr
 t_table::get_column(const t_str& colname)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx];
 }
@@ -214,7 +214,7 @@ t_col_csptr
 t_table::get_const_column(const t_str& colname) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx];
 }
@@ -223,7 +223,7 @@ t_col_sptr
 t_table::get_column(t_uindex idx)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
 }
 
@@ -231,7 +231,7 @@ t_col_csptr
 t_table::get_const_column(t_uindex idx) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
 }
 
@@ -265,7 +265,7 @@ void
 t_table::extend(t_uindex nelems)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_init, "Table not inited");
     for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
          ++idx)
@@ -292,7 +292,7 @@ void
 t_table::reserve(t_uindex capacity)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
          ++idx)
     {
@@ -305,7 +305,7 @@ t_column*
 t_table::_get_column(const t_str& colname)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx].get();
 }
@@ -314,7 +314,7 @@ const t_schema&
 t_table::get_schema() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema;
 }
 
@@ -323,7 +323,7 @@ t_table::_flatten() const
 {
 
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
     auto flattened = new t_table("",
@@ -341,7 +341,7 @@ t_table_sptr
 t_table::flatten() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
     t_table_sptr flattened =
@@ -362,7 +362,7 @@ t_table::flatten_common(const t_tscalvec& row,
                         std::vector<t_column*>& columns) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
     {
         columns[colidx]->push_back(row[colidx]);
@@ -374,7 +374,7 @@ t_bool
 t_table::is_pkey_table() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema.is_pkey();
 }
 
@@ -382,7 +382,7 @@ t_bool
 t_table::is_same_shape(t_table& tbl) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema == tbl.m_schema;
 }
 
@@ -390,7 +390,7 @@ t_table_sptr
 t_table::empty_like() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_schema schema = m_schema;
     return std::make_shared<t_table>(
         "", "", schema, num_rows(), BACKING_STORE_MEMORY);
@@ -400,7 +400,7 @@ void
 t_table::pprint() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     pprint(size(), &std::cout);
 }
 
@@ -409,7 +409,7 @@ t_table::pprint(const t_str& fname) const
 {
 
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     std::ofstream file;
     file.open(fname);
     pprint(size(), &file);
@@ -419,7 +419,7 @@ void
 t_table::pprint(t_uindex nrows, std::ostream* os) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!os)
         os = &std::cout;
@@ -454,7 +454,7 @@ void
 t_table::pprint(const t_uidxvec& vec) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex nrows = vec.size();
     t_uindex ncols = num_columns();
 
@@ -482,7 +482,7 @@ void
 t_table::append(const t_table& other)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     t_uindex cursize = size();
 
@@ -533,7 +533,7 @@ void
 t_table::clear()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     for (t_uindex idx = 0, loop_end = m_columns.size();
          idx < loop_end;
          ++idx)
@@ -547,7 +547,7 @@ t_table_recipe
 t_table::get_recipe() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_table_recipe rval;
     rval.m_name = m_name;
     rval.m_dirname = m_dirname;
@@ -1268,7 +1268,7 @@ t_table*
 t_table::clone_(const t_mask& mask) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_schema schema = m_schema;
 
     t_table* rval =
@@ -1288,7 +1288,7 @@ t_table_sptr
 t_table::clone(const t_mask& mask) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto tbl = clone_(mask);
     return t_table_sptr(tbl);
 }
@@ -1299,7 +1299,7 @@ t_table::add_column(const t_str& name,
                     t_bool valid_enabled)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
         !m_from_recipe,
         "Adding columns to recipe based tables not supported yet.");
@@ -1393,7 +1393,7 @@ t_table::clone_column(const t_str& existing_col,
                       const t_str& new_colname)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     PSP_VERBOSE_ASSERT(
         !m_from_recipe,

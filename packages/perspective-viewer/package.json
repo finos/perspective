@@ -32,6 +32,7 @@
   "dependencies": {
     "@jpmorganchase/perspective": "^0.1.8",
     "@jpmorganchase/perspective-common": "^0.1.8",
+    "@webcomponents/webcomponentsjs": "~1.2.0",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.1",
