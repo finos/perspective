@@ -9,7 +9,7 @@
 
 import _ from "underscore";
 
-import {bindTemplate} from "@jpmorganchase/perspective-common";
+import {bindTemplate} from "./utils.js";
 
 import perspective from "@jpmorganchase/perspective";
 import template from "../html/row.html";

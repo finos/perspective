@@ -7,7 +7,7 @@
  *
  */
 
-import {detectIE, ScriptPath} from "@jpmorganchase/perspective-common";
+import {detectIE, ScriptPath} from "./utils.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
 

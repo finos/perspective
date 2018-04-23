@@ -33,7 +33,6 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective-common": "^0.1.8",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "fin-hypergrid": "2.0.2",
@@ -41,8 +40,9 @@
   },
   "devDependencies": {
     "@jpmorganchase/perspective": "^0.1.8",
-    "@jpmorganchase/perspective-common": "^0.1.8",
     "@jpmorganchase/perspective-viewer": "^0.1.8",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "babel-polyfill": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-jest": "^22.0.4",
     "babel-loader": "^7.1.2",
