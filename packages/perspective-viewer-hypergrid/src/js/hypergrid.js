@@ -7,16 +7,15 @@
  *
  */
 
-const Hypergrid = require("fin-hypergrid");
-const images = require('fin-hypergrid/images');
-const JSONBehavior = require("fin-hypergrid/src/behaviors/JSON.js");
-const Base = require("fin-hypergrid/src/Base.js");
+const Hypergrid = require('fin-hypergrid');
+const JSONBehavior = require('fin-hypergrid/src/behaviors/JSON');
+const Base = require('fin-hypergrid/src/Base');
 
 const Range = require('./Range');
-const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer.js").treeLineRendererPaint;
-const GroupedHeader = require("./grouped-header.js");
+const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
+const GroupedHeader = require('./grouped-header');
 
-const _ = require("underscore");
+const _ = require('underscore');
 
 import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
@@ -39,7 +38,6 @@ var base_grid_properties = {
     columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     columnsReorderable: false,
     defaultRowHeight: 24,
-    doubleClickDelay: 30,
     editable: false,
     editOnKeydown: true,
     editor: 'textfield',
@@ -81,7 +79,7 @@ var base_grid_properties = {
 
 var light_theme_overrides = {
     backgroundColor: '#ffffff',
-    color: "#666",
+    color: '#666',
     lineColor: '#AAA',
     // font: '12px Arial, Helvetica, sans-serif',
     font: '12px "Open Sans", Helvetica, sans-serif',
@@ -90,22 +88,18 @@ var light_theme_overrides = {
     backgroundSelectionColor: 'rgba(162, 183, 206, 0.3)',
     selectionRegionOutlineColor: 'rgb(45, 64, 85)',
     columnHeaderColor: '#666',
-    paintBackground: function(gc, config) {
-    },
+    paintBackground: function(gc, config) {},
     columnHeaderBackgroundColor: '#fff',
     columnHeaderHalign: 'left',
     columnHeaderForegroundSelectionColor: '#333',
     columnHeaderBackgroundSelectionColor: '#40536d',
     columnHeaderBackgroundNumberPositive: '#1078d1',
-    columnHeaderBackgroundNumberNegative: "#de3838",
+    columnHeaderBackgroundNumberNegative: '#de3838',
     rowHeaderForegroundSelectionFont: '12px Arial, Helvetica, sans-serif',
     treeHeaderColor: '#666',
     treeHeaderBackgroundColor: '#fff',
     treeHeaderForegroundSelectionColor: '#333',
     treeHeaderBackgroundSelectionColor: '#40536d',
-    rowProperties: [
-        { color: '#666', backgroundColor: '#fff' },
-    ],
     hoverCellHighlight: {
         enabled: true,
         backgroundColor: '#eeeeee'
@@ -128,44 +122,45 @@ function generateGridProperties(overrides) {
 }
 
 function setPSP(payload) {
+    var grid = this.grid;
     var processed_schema = [];
     var col_name, col_header, col_settings;
 
-    if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === "") {
+    if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === '') {
         payload.columnPaths[0] = [' '];
     }
 
-    for (var i = (payload.isTree?1:0); i < payload.columnPaths.length; i++) {
+    for (var i = (payload.isTree ? 1 : 0); i < payload.columnPaths.length; i++) {
         col_name = payload.columnPaths[i].join('|');
         var aliases = payload.configuration.columnAliases;
         col_header = aliases ? (aliases[col_name] || col_name) : col_name;
 
         col_settings = { name: i.toString(), header: col_header };
         if (payload.columnTypes[i] === 'str') {
-            col_settings['type'] = 'string';
+            col_settings.type = 'string';
         } else {
-            col_settings['type'] = payload.columnTypes[i];
+            col_settings.type = payload.columnTypes[i];
         }
         processed_schema.push(col_settings);
     }
 
-    var old_schema = this.grid.behavior.subgrids.lookup.data.schema;
+    var old_schema = grid.behavior.dataModel.schema;
     this.schema_loaded = this.schema_loaded && _.isEqual(processed_schema, old_schema);
     this.schema = processed_schema;
 
     if (this.schema_loaded) {
-        this.grid.setData({
+        grid.setData({
             data: payload.rows,
         });
     } else {
 
         // Memoize column widths;
         const widths = {};
-        for (let w = 0; w < this.grid.getColumnCount(); w ++) {
-            let header = this.grid.getColumnProperties(w).header;
-            let name = header.split("|");
+        for (let w = 0, W = grid.getColumnCount(); w < W; w++) {
+            let header = grid.getColumnProperties(w).header;
+            let name = header.split('|');
             name = name[name.length - 1];
-            let width = this.grid.getColumnWidth(w);
+            let width = grid.getColumnWidth(w);
             if (name in widths) {
                 widths[header] = width;
             } else {
@@ -173,45 +168,45 @@ function setPSP(payload) {
             }
         }
         console.log('Setting up initial schema and data load into HyperGrid');
-        this.grid.setData({
+        grid.setData({
             data: payload.rows,
             schema: this.schema
         });
         this.schema_loaded = true;
 
         if (payload.isTree) {
-            this.grid.properties.showTreeColumn = true;
+            grid.properties.showTreeColumn = true;
         }
 
-        this.grid.behavior.setHeaders();
+        this.setHeaders();
 
         for (i = 0; i < this.schema.length; i++) {
-            let props = this.grid.getColumnProperties(i);
-            if (this.schema[i].type === 'number' || this.schema[i].type === 'float') {
-                Object.assign(props, {
-                    halign: 'right',
-                    columnHeaderHalign: 'right',
-                    format: 'FinanceFloat'
-                });
-            } else if (this.schema[i].type === 'integer') {
-                Object.assign(props, {
-                    halign: 'right',
-                    columnHeaderHalign: 'right',
-                    format: 'FinanceInteger'
-                });
-            } else if (this.schema[i].type === 'date') {
-                Object.assign(props, {
-                    format: 'FinanceDate'
-                });
-            } else if (Array.isArray(this.schema[i].type)) {
-                Object.assign(props, {
-                    format: 'FinanceTree'
-                });
+            let props = grid.getColumnProperties(i);
+
+            switch (this.schema[i].type) {
+                case 'number':
+                case 'float':
+                    props.halign = 'right';
+                    props.columnHeaderHalign = 'right';
+                    props.format = 'FinanceFloat';
+                    break;
+                case 'integer':
+                    props.halign = 'right';
+                    props.columnHeaderHalign = 'right';
+                    props.format = 'FinanceInteger';
+                    break;
+                case 'date':
+                    props.format = 'FinanceDate';
+                    break;
+                default:
+                    if (Array.isArray(this.schema[i].type)) {
+                        props.format = 'FinanceTree';
+                    }
             }
 
             // restore column widths;
             let header = props.header;
-            let name = header.split("|")
+            let name = header.split('|')
             name = name[name.length - 1];
             if (header in widths) {
                 props.width = widths[header];
@@ -221,30 +216,29 @@ function setPSP(payload) {
                 props.width = 50;
             }
             props.columnAutosizing = true;
-            this.grid.behavior.setColumnProperties(i, props);
         }
 
-        this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: this.grid } }));
+        grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: grid } }));
 
     }
-    this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: this.grid } }));
+    grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: grid } }));
 
 }
 
 
 function PerspectiveDataModel(grid) {
-    grid.behavior.__proto__.setPSP = setPSP;
+    Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
 
-    grid.mixIn.call(grid.behavior.dataModel, {
+    grid.behavior.dataModel.mixIn({
 
         // Override setData
-        setData: function (dataPayload, schema) {
+        setData: function(dataPayload, schema) {
             this.viewData = dataPayload;
             this.source.setData(dataPayload, schema);
         },
 
         // Is the grid view a tree
-        isTree: function () {
+        isTree: function() {
             if (this.grid.behavior.dataModel.viewData) {
                 let data = this.grid.behavior.dataModel.viewData;
                 return data.length === 0 || data[0][TREE] && data[0][TREE].rowPath.length;
@@ -253,7 +247,7 @@ function PerspectiveDataModel(grid) {
         },
 
         // Is this column the 'tree' column
-        isTreeCol: function (x) {
+        isTreeCol: function(x) {
             return x === this.grid.properties.treeColumnIndex && this.isTree();
         },
 
@@ -269,11 +263,11 @@ function PerspectiveDataModel(grid) {
         },
 
         // Returns the number of rows for this dataset
-        getRowCount: function () {
+        getRowCount: function() {
             return this.dataSource.data.length;
         },
 
-        cellStyle: function (gridCellConfig, rendererName) {
+        cellStyle: function(gridCellConfig, rendererName) {
             if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
                 gridCellConfig.value = '-';
             } else if (['number', 'float', 'integer'].indexOf(this.schema[gridCellConfig.dataCell.x.toString()].type) > -1) {
@@ -282,7 +276,7 @@ function PerspectiveDataModel(grid) {
                 } else if (isNaN(gridCellConfig.value))  {
                     gridCellConfig.value = '-';
                 } else {
-                    gridCellConfig.color = gridCellConfig.value >= 0 ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)') : (gridCellConfig.columnHeaderBackgroundNumberNegative ||'rgb(255,136,136)');
+                    gridCellConfig.color = gridCellConfig.value >= 0 ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)') : (gridCellConfig.columnHeaderBackgroundNumberNegative || 'rgb(255,136,136)');
                 }
             } else if (this.schema[gridCellConfig.dataCell.x.toString()].type === 'boolean') {
                 gridCellConfig.value = String(gridCellConfig.value);
@@ -290,7 +284,7 @@ function PerspectiveDataModel(grid) {
         },
 
         // Return the cell renderer
-        getCell: function (config, rendererName) {
+        getCell: function(config, rendererName) {
             if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
             } else if (config.dataCell.x === -1) {
@@ -308,8 +302,7 @@ function PerspectiveDataModel(grid) {
         },
 
         // Return the cell editor for a given (x,y) cell coordinate
-        getCellEditorAt: function (x, y, declaredEditorName, cellEvent) {
-
+        getCellEditorAt: function(x, y, declaredEditorName, cellEvent) {
             if (declaredEditorName) {
                 var cellEditor = grid.cellEditors.create(declaredEditorName, cellEvent);
                 if (declaredEditorName === 'combobox') {
@@ -327,11 +320,11 @@ function convertToType(typ, val) {
 }
 
 var conv = {
-    'integer': 'integer',
-    'float': 'float',
-    'string': 'str',
-    'boolean': 'boolean',
-    'date': 'date'
+    integer: 'integer',
+    float: 'float',
+    string: 'str',
+    boolean: 'boolean',
+    date: 'date'
 }
 
 function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undefined, length = undefined) {
@@ -345,16 +338,16 @@ function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undef
             configuration: {},
             columnPaths: columns.map(col => [col]),
             columnTypes: columns.map(col => conv[schema[col]])
-        }
+        };
     }
 
     var is_tree = data[0].hasOwnProperty('__ROW_PATH__');
 
     var columnPaths = Object.keys(data[0])
-        .filter(row => row !== "__ROW_PATH__")
+        .filter(row => row !== '__ROW_PATH__')
         .map(row => row.split(','));
 
-    let flat_columns = columnPaths.map(col => col.join(","));
+    let flat_columns = columnPaths.map(col => col.join(','));
 
     let rows = [];
     if (length) {
@@ -394,15 +387,14 @@ function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undef
         }
     }
 
-    var hg_data = {
+    return {
         rows: rows,
         isTree: is_tree,
         configuration: {},
-        columnPaths: (is_tree ? [[" "]] : []).concat(columnPaths),
-        columnTypes: (is_tree ? [row_pivots.map(x => tschema[x])] : []).concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
+        columnPaths: (is_tree ? [[' ']] : []).concat(columnPaths),
+        columnTypes: (is_tree ? [row_pivots.map(x => tschema[x])] : [])
+            .concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
     };
-
-    return hg_data
 }
 
 function null_formatter(formatter, null_value = '') {
@@ -419,11 +411,12 @@ function null_formatter(formatter, null_value = '') {
             return '-';
         }
         return x;
-    }
-    return formatter
+    };
+
+    return formatter;
 }
 
-import rectangular from 'rectangular';
+const rectangular = require('rectangular');
 
 function CachedRendererPlugin(grid) {
 
@@ -458,7 +451,7 @@ function CachedRendererPlugin(grid) {
         let width = this.width = Math.floor(this.div.clientWidth);
         let height = this.height = Math.floor(this.div.clientHeight);
 
-        //fix ala sir spinka, see
+        //fix à la sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
         //just add 'hdpi' as an attribute to the fin-canvas tag
         var ratio = 1;
@@ -496,14 +489,14 @@ function CachedRendererPlugin(grid) {
 
             grid.canvas._paintNow();
         }
-    }
+    };
 
-    grid.canvas.paintNow = async function () {
+    grid.canvas.paintNow = async function() {
         let render = await update_cache();
         if (render) {
             grid.canvas._paintNow();
         }
-    }
+    };
 }
 
 bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
@@ -565,11 +558,11 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             this.grid.localization.add('FinanceDate', date_formatter);
 
             this.grid.localization.add('FinanceTree', {
-                format: function (val, type) {
+                format: function(val, type) {
                     let f = {
-                        'date': date_formatter,
-                        'integer': integer_formatter,
-                        'float': float_formatter,
+                        date: date_formatter,
+                        integer: integer_formatter,
+                        float: float_formatter,
                     }[type];
                     if (f) {
                         return f.format(val);
@@ -577,7 +570,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
                     return val;
                 },
                 parse: x => x
-            })
+            });
 
             if (this._hg_data) {
                 this.grid.behavior.setPSP(this._hg_data);
@@ -609,7 +602,7 @@ function filter_hidden(hidden, json) {
             }
         }
     }
-    return json
+    return json;
 }
 
 async function fill_page(view, json, hidden, range) {
@@ -623,7 +616,7 @@ async function fill_page(view, json, hidden, range) {
 
 const LAZY_THRESHOLD = 10000;
 
-const PRIVATE = Symbol("Hypergrid private");
+const PRIVATE = Symbol('Hypergrid private');
 
 async function grid(div, view, hidden, task) {
 
@@ -635,8 +628,6 @@ async function grid(div, view, hidden, task) {
         view.schema(),
         this._table.schema()
     ]);
-
-    let visible_rows;
 
     if (!this.hypergrid) {
         let grid = document.createElement('perspective-hypergrid');
@@ -651,7 +642,7 @@ async function grid(div, view, hidden, task) {
     let lazy_load = nrows > LAZY_THRESHOLD;
 
     if (!(document.contains ? document.contains(this[PRIVATE].grid) : false)) {
-        div.innerHTML = "";
+        div.innerHTML = '';
         div.appendChild(this[PRIVATE].grid);
         await new Promise(resolve => setTimeout(resolve));
     }
@@ -685,24 +676,24 @@ async function grid(div, view, hidden, task) {
         } else {
             return false;
         }
-    }
+    };
 
     this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
 
-global.registerPlugin("hypergrid", {
-    name: "Grid",
+global.registerPlugin('hypergrid', {
+    name: 'Grid',
     create: grid,
-    selectMode: "toggle",
-    deselectMode: "pivots",
-    resize: function () {
+    selectMode: 'toggle',
+    deselectMode: 'pivots',
+    resize: function() {
         if (this.hypergrid) {
             this.hypergrid.canvas.resize();
         }
     },
-    delete: function () {
+    delete: function() {
         if (this.hypergrid) {
            // this.hypergrid.clearState();
             this.hypergrid.behavior.reset();
