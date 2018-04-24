@@ -2,11 +2,10 @@ const path = require('path');
 const common = require('@jpmorganchase/perspective/src/config/common.config.js');
 
 module.exports = Object.assign({}, common(), {
-    entry: './src/js/view.js',
-    externals: [/^[a-z0-9\@].*$/],
+    entry: './src/js/hypergrid.js',
     output: {
-        filename: 'perspective.view.umd.js',
-        library: "perspective-view",
+        filename: 'hypergrid.plugin.js',
+        library: "perspective-view-hypergrid",
         libraryTarget: "umd",
         path: path.resolve(__dirname, '../../build')
     }
