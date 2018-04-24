@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-examples",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Perspective.js",
   "main": "index.js",
   "directories": {
@@ -31,17 +31,17 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective": "^0.1.8",
-    "@jpmorganchase/perspective-viewer": "^0.1.8",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.8",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.8",
+    "@jpmorganchase/perspective": "^0.1.9",
+    "@jpmorganchase/perspective-viewer": "^0.1.9",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.9",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.9",
     "babel-runtime": "^6.26.0",
     "query-string": "^5.0.1",
     "rectangular": "1.0.1",
     "ws": "^3.3.2"
   },
   "devDependencies": {
-    "npm-run-all": "^4.1.2",
-    "http-server": "^0.10.0"
+    "http-server": "^0.10.0",
+    "npm-run-all": "^4.1.2"
   }
 }
