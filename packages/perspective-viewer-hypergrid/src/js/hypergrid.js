@@ -433,8 +433,9 @@ const OFFSET_SETTINGS = 5;
  * @returns 
  */
 function estimate_range(grid) {
-    let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
-    return [parseInt(range[0]), parseInt(range[range.length - 1]) + OFFSET_SETTINGS];
+    var dataRowIndex = grid.renderer.getScrollTop(),
+        dataRowCount = Math.ceil(grid.canvas.height / grid.properties.defaultRowHeight);
+    return [dataRowIndex, dataRowIndex + dataRowCount + OFFSET_SETTINGS];
 }
 
 import rectangular from 'rectangular';
@@ -444,10 +445,10 @@ function CachedRendererPlugin(grid) {
     async function update_cache() {
         if (grid._lazy_load) {
             let range = estimate_range(grid);
-            let is_valid_range = Number.isNaN(range[0]) || Number.isNaN(range[1]);
+            let is_valid_range = !(Number.isNaN(range[0]) || Number.isNaN(range[1]));
             let is_processing_range = grid._updating_cache && !is_subrange(range, grid._updating_cache.range);
             let is_range_changed = !grid._updating_cache && !is_subrange(range, grid._cached_range);
-            if (!is_valid_range && (is_processing_range || is_range_changed)) {
+            if (is_valid_range && (is_processing_range || is_range_changed)) {
                 grid._updating_cache = grid._cache_update(...range);
                 grid._updating_cache.range = range
                 let updated = await grid._updating_cache;
