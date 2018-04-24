@@ -236,14 +236,6 @@ As a component, `perspective-viewer` provides a complete graphical UI for
 configuring the `perspective` library and formatting its output to the
 provided visualization plugins.
 
-The `perspective-viewer` widget is packaged as a Web Component, and you'll need 
-the [webcomponents.js polyfill](https://www.webcomponents.org/polyfills)
-imported first in order to use it - e.g., from a CDN:
-
-```html
-<script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
-```    
-
 If you are using babel or another build environment which supports ES6 modules,
 you need only import the `perspective-viewer` libraries somewhere in your
 application - these modules export nothing, but rather register the components
@@ -255,8 +247,8 @@ import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 ```
 
-Alternatively, you can just import the pre-bundled assets from the relevant NPM 
-packages' `build/` directories:
+Alternatively, you can just import the pre-bundled assets from the `perspective-examples` 
+module's `build/` directory:
 
 ```html 
 <script src="perspective.view.js"></script>

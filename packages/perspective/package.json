@@ -41,12 +41,11 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "@apache-arrow/es5-esm": "^0.2.0",
-    "@jpmorganchase/perspective-common": "^0.1.8",
     "arraybuffer-loader": "^1.0.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",

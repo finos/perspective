@@ -34,15 +34,14 @@
     "@webcomponents/webcomponentsjs": "~1.2.0",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "bluebird": "^3.5.1",
     "d3-array": "^1.2.1",
+    "awesomplete": "^1.1.2",
     "mobile-drag-drop": "^2.2.0",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-polyfill": "^6.26.0",
-    "awesomplete": "^1.1.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
