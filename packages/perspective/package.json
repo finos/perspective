@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective",
   "version": "0.1.8",
   "description": "Perspective.js",
-  "main": "build/perspective.js",
+  "main": "build/perspective.umd.js",
   "publishConfig": {
     "access": "public"
   },

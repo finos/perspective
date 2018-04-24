@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer",
   "version": "0.1.8",
   "description": "Perspective.js",
-  "main": "build/perspective.view.js",
+  "main": "build/perspective.view.umd.js",
   "files": [
     "src/*",
     "build/*"
@@ -10,7 +10,7 @@
   "scripts": {
     "view": "webpack --config src/config/view.config.js",
     "start": "npm run view",
-    "compile_test": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
+    "compile_test": "cp test/html/* build && cp test/csv/* build && cp test/css/* build && webpack --config test/config/view.config.js",
     "test": "jest --silent --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"
   },
