@@ -13,9 +13,9 @@ function treeArrowRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
-    var value = config.value;
-    var leaf = config.dataRow.isLeaf;
-    var depth = config.dataRow.rowPath.length-1;
+    var value = config.value.rollup;
+    var leaf = config.value.isLeaf;
+    var depth = config.value.rowPath.length-1;
     var parent = config.expanded;
     var lastChild = config.last;
 
@@ -84,9 +84,9 @@ export function treeLineRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
-    var value = config.value;
-    var leaf = config.dataRow.isLeaf;
-    var depth = config.dataRow.rowPath.length-1;
+    var value = config.value.rollup;
+    var leaf = config.value.isLeaf;
+    var depth = config.value.rowPath.length-1;
     var parent = config.expanded;
     var lastChild = config.last;
 
@@ -166,7 +166,7 @@ export function treeLineRendererPaint(gc, config) {
     gc.textBaseline = 'middle';
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
     var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
-    let formatted_value = config.formatValue(config.value, config._type);
+    let formatted_value = config.formatValue(value, config._type);
     config.minWidth = cellTextOffset + gc.getTextWidth(formatted_value) + 15;
     var metrics = gc.getTextWidthTruncated(formatted_value, width - cellTextOffset + (x - 3), true);
     var yOffset = y + height / 2;

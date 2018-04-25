@@ -23,6 +23,8 @@ import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 var TEMPLATE = require('../html/hypergrid.html');
 import "../less/hypergrid.less";
 
+const TREE = JSONBehavior.prototype.treeColumnIndex;
+
 var base_grid_properties = {
     autoSelectRows: false,
     cellPadding: 5,
@@ -236,14 +238,14 @@ function PerspectiveDataModel(grid) {
         // Override setData
         setData: function (dataPayload, schema) {
             this.viewData = dataPayload;
-            this.source.setData(dataPayload, schema);     
+            this.source.setData(dataPayload, schema);
         },
 
         // Is the grid view a tree
         isTree: function () {
             if (this.grid.behavior.dataModel.viewData) {
                 let data = this.grid.behavior.dataModel.viewData;
-                return (data.length === 0) || data[0].rowPath.length !== 0;
+                return data.length === 0 || data[0][TREE] && data[0][TREE].rowPath.length;
             }
             return false;
         },
@@ -255,8 +257,8 @@ function PerspectiveDataModel(grid) {
 
         // Return the value for a given cell based on (x,y) coordinates
         getValue: function(x, y) {
-            var offset = this.grid.behavior.hasTreeColumn() ? 1 : 0;
-            return this.dataSource.data[y].rowData[x+offset];
+            var row = this.dataSource.data[y];
+            return row ? row[x] : null;
         },
 
         // Process a value entered in a cell within the grid
@@ -289,17 +291,15 @@ function PerspectiveDataModel(grid) {
         getCell: function (config, rendererName) {
             if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
-            } else {
-                if (config.dataCell.x == -1) {
-                    if (!config.isHeaderRow) {
-                    config.last = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
-
-                    var next_row = this.dataSource.data[config.dataCell.y + 1];
-                    config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
-                    } else {
-                        rendererName = 'SimpleCell';
-                        config.value = '';
-                    }
+            } else if (config.dataCell.x === -1) {
+                if (config.isHeaderRow) {
+                    rendererName = 'SimpleCell';
+                    config.value = '';
+                } else {
+                    var nextRow = this.dataSource.getRow(config.dataCell.y + 1),
+                        depthDiff = nextRow ? config.value.rowPath.length - nextRow[TREE].rowPath.length : -1;
+                    config.last = depthDiff !== 0;
+                    config.expanded = depthDiff < 0;
                 }
             }
             return grid.cellRenderers.get(rendererName);
@@ -360,29 +360,36 @@ function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undef
     }
     for (let idx = start; idx < (end || data.length); idx++) {
         const row = data[idx];
-        let new_row = [];
-        let row_path = [];
-        let row_leaf = true;
         if (row) {
+            // `dataRow` (element of `dataModel.data`) keys will be `index` here rather than
+            // `columnName` because pivoted data have obscure column names of little use to developer.
+            // This also allows us to override `dataModel.getValue` with a slightly more efficient version
+            // that doesn't require mapping the name through `dataModel.dataSource.schema` to get the index.
+            let dataRow = flat_columns.reduce(function(dataRow, columnName, index) {
+                dataRow[index] = row[columnName];
+                return dataRow;
+            }, {});
+
             if (is_tree) {
                 if (row.__ROW_PATH__ === undefined) {
                     row.__ROW_PATH__ = [];
                 }
-                row_path = ["ROOT"].concat(row.__ROW_PATH__);
-                let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
-                if (name === undefined && idx === 0) name = "TOTAL"
-                new_row = [name];
-                row_leaf = row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
+
+                let name = row.__ROW_PATH__[row.__ROW_PATH__.length - 1];
+                if (name === undefined && idx === 0) {
+                    name = 'TOTAL';
+                }
+
+                // Following stores the tree column under [-1] rather than ['Tree'] so our `getValue`
+                // override can access it using the tree column index rather than the tree column name.
+                dataRow[TREE] = {
+                    rollup: name,
+                    rowPath: ['ROOT'].concat(row.__ROW_PATH__),
+                    isLeaf: row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0)
+                };
             }
-            for (var col of flat_columns) {
-                new_row.push(row[col]);
-            }
+            rows[idx] = dataRow;
         }
-        rows[idx] = {
-            rowPath: row_path,
-            rowData: new_row,
-            isLeaf: row_leaf
-        };
     }
 
     var hg_data = {
@@ -413,7 +420,7 @@ function null_formatter(formatter, null_value = '') {
     }
     return formatter
 }
-  
+
 function is_subrange(sub, sup) {
     if (!sup) {
         return false;
@@ -428,9 +435,9 @@ const OFFSET_SETTINGS = 5;
 
 /**
  * Estimate the visible range of a Hypergrid.
- * 
- * @param {any} grid 
- * @returns 
+ *
+ * @param {any} grid
+ * @returns
  */
 function estimate_range(grid) {
     var dataRowIndex = grid.renderer.getScrollTop(),
@@ -454,11 +461,11 @@ function CachedRendererPlugin(grid) {
                 let updated = await grid._updating_cache;
                 if (updated) {
                     grid._updating_cache = undefined;
-                    grid._cached_range = range;  
+                    grid._cached_range = range;
                 }
                 return updated;
             } else if (!is_subrange(range, grid._cached_range)) {
-                return false; 
+                return false;
             }
         }
         return true;
@@ -597,7 +604,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
                 this.grid.behavior.setPSP(this._hg_data);
                 delete this._hgdata;
             }
-            
+
         } else {
             this._detached = false;
         }
@@ -644,8 +651,8 @@ async function grid(div, view, hidden, task) {
     this[PRIVATE] = this[PRIVATE] || {};
 
     let [nrows, json, schema, tschema] = await Promise.all([
-        view.num_rows(), 
-        view.to_json({end_row: 1}), 
+        view.num_rows(),
+        view.to_json({end_row: 1}),
         view.schema(),
         this._table.schema()
     ]);
@@ -689,7 +696,7 @@ async function grid(div, view, hidden, task) {
     this.hypergrid._lazy_load = lazy_load;
 
     this.hypergrid._cache_update = async (s, e) => {
-        json = await fill_page(view, json, hidden, s, e); 
+        json = await fill_page(view, json, hidden, s, e);
         let new_range = estimate_range(this.hypergrid);
         if (is_subrange(new_range, [s, e])) {
             let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), s, Math.min(e, nrows), nrows).rows;
@@ -700,14 +707,14 @@ async function grid(div, view, hidden, task) {
             return false;
         }
     }
-   
+
     this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
 
 global.registerPlugin("hypergrid", {
-    name: "Grid", 
+    name: "Grid",
     create: grid,
     selectMode: "toggle",
     deselectMode: "pivots",
