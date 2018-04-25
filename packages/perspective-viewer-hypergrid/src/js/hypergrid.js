@@ -23,6 +23,8 @@ import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 var TEMPLATE = require('../html/hypergrid.html');
 import "../less/hypergrid.less";
 
+const TREE = JSONBehavior.prototype.treeColumnIndex;
+
 var base_grid_properties = {
     autoSelectRows: false,
     cellPadding: 5,
@@ -240,7 +242,7 @@ function PerspectiveDataModel(grid) {
         isTree: function () {
             if (this.grid.behavior.dataModel.viewData) {
                 let data = this.grid.behavior.dataModel.viewData;
-                return (data.length === 0) || data[0].rowPath.length !== 0;
+                return data.length === 0 || data[0][TREE] && data[0][TREE].rowPath.length;
             }
             return false;
         },
@@ -252,8 +254,8 @@ function PerspectiveDataModel(grid) {
 
         // Return the value for a given cell based on (x,y) coordinates
         getValue: function(x, y) {
-            var offset = this.grid.behavior.hasTreeColumn() ? 1 : 0;
-            return this.dataSource.data[y].rowData[x+offset];
+            var row = this.dataSource.data[y];
+            return row ? row[x] : null;
         },
 
         // Process a value entered in a cell within the grid
@@ -286,17 +288,15 @@ function PerspectiveDataModel(grid) {
         getCell: function (config, rendererName) {
             if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
-            } else {
-                if (config.dataCell.x == -1) {
-                    if (!config.isHeaderRow) {
-                    config.last = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
-
-                    var next_row = this.dataSource.data[config.dataCell.y + 1];
-                    config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
-                    } else {
-                        rendererName = 'SimpleCell';
-                        config.value = '';
-                    }
+            } else if (config.dataCell.x === -1) {
+                if (config.isHeaderRow) {
+                    rendererName = 'SimpleCell';
+                    config.value = '';
+                } else {
+                    var nextRow = this.dataSource.getRow(config.dataCell.y + 1),
+                        depthDiff = nextRow ? config.value.rowPath.length - nextRow[TREE].rowPath.length : -1;
+                    config.last = depthDiff !== 0;
+                    config.expanded = depthDiff < 0;
                 }
             }
             return grid.cellRenderers.get(rendererName);
@@ -357,29 +357,36 @@ function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undef
     }
     for (let idx = start; idx < (end || data.length); idx++) {
         const row = data[idx];
-        let new_row = [];
-        let row_path = [];
-        let row_leaf = true;
         if (row) {
+            // `dataRow` (element of `dataModel.data`) keys will be `index` here rather than
+            // `columnName` because pivoted data have obscure column names of little use to developer.
+            // This also allows us to override `dataModel.getValue` with a slightly more efficient version
+            // that doesn't require mapping the name through `dataModel.dataSource.schema` to get the index.
+            let dataRow = flat_columns.reduce(function(dataRow, columnName, index) {
+                dataRow[index] = row[columnName];
+                return dataRow;
+            }, {});
+
             if (is_tree) {
                 if (row.__ROW_PATH__ === undefined) {
                     row.__ROW_PATH__ = [];
                 }
-                row_path = ["ROOT"].concat(row.__ROW_PATH__);
-                let name = row['__ROW_PATH__'][row['__ROW_PATH__'].length - 1];
-                if (name === undefined && idx === 0) name = "TOTAL"
-                new_row = [name];
-                row_leaf = row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0);
+
+                let name = row.__ROW_PATH__[row.__ROW_PATH__.length - 1];
+                if (name === undefined && idx === 0) {
+                    name = 'TOTAL';
+                }
+
+                // Following stores the tree column under [-1] rather than ['Tree'] so our `getValue`
+                // override can access it using the tree column index rather than the tree column name.
+                dataRow[TREE] = {
+                    rollup: name,
+                    rowPath: ['ROOT'].concat(row.__ROW_PATH__),
+                    isLeaf: row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0)
+                };
             }
-            for (var col of flat_columns) {
-                new_row.push(row[col]);
-            }
+            rows[idx] = dataRow;
         }
-        rows[idx] = {
-            rowPath: row_path,
-            rowData: new_row,
-            isLeaf: row_leaf
-        };
     }
 
     var hg_data = {
