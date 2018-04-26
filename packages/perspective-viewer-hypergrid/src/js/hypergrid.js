@@ -12,6 +12,7 @@ const images = require('fin-hypergrid/images');
 const JSONBehavior = require("fin-hypergrid/src/behaviors/JSON.js");
 const Base = require("fin-hypergrid/src/Base.js");
 
+const Range = require('./Range');
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer.js").treeLineRendererPaint;
 const GroupedHeader = require("./grouped-header.js");
 
@@ -20,7 +21,8 @@ const _ = require("underscore");
 import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
-var TEMPLATE = require('../html/hypergrid.html');
+const TEMPLATE = require('../html/hypergrid.html');
+
 import "../less/hypergrid.less";
 
 const TREE = JSONBehavior.prototype.treeColumnIndex;
@@ -418,50 +420,27 @@ function null_formatter(formatter, null_value = '') {
     return formatter
 }
 
-function is_subrange(sub, sup) {
-    if (!sup) {
-        return false;
-    }
-    return sup[0] <= sub[0] && sup[1] >= sub[1];
-}
-
-
-// How many rows to pad the cache by;  TODO this should really be calculated
-// from the parameters of the theme.
-const OFFSET_SETTINGS = 5;
-
-/**
- * Estimate the visible range of a Hypergrid.
- *
- * @param {any} grid
- * @returns
- */
-function estimate_range(grid) {
-    var dataRowIndex = grid.renderer.getScrollTop(),
-        dataRowCount = Math.ceil(grid.canvas.height / grid.properties.defaultRowHeight);
-    return [dataRowIndex, dataRowIndex + dataRowCount + OFFSET_SETTINGS];
-}
-
 import rectangular from 'rectangular';
 
 function CachedRendererPlugin(grid) {
 
     async function update_cache() {
         if (grid._lazy_load) {
-            let range = estimate_range(grid);
-            let is_valid_range = !(Number.isNaN(range[0]) || Number.isNaN(range[1]));
-            let is_processing_range = grid._updating_cache && !is_subrange(range, grid._updating_cache.range);
-            let is_range_changed = !grid._updating_cache && !is_subrange(range, grid._cached_range);
-            if (is_valid_range && (is_processing_range || is_range_changed)) {
-                grid._updating_cache = grid._cache_update(...range);
-                grid._updating_cache.range = range
+            let range = Range.estimate(grid);
+            if (!range.isInvalid()) {
+                var is_processing_range = grid._updating_cache && !range.within(grid._updating_cache.range);
+                var is_range_changed = !grid._updating_cache && !range.within(grid._cached_range);
+            }
+            if (is_processing_range || is_range_changed) {
+                grid._updating_cache = grid._cache_update(range);
+                grid._updating_cache.range = range;
                 let updated = await grid._updating_cache;
                 if (updated) {
                     grid._updating_cache = undefined;
                     grid._cached_range = range;
                 }
                 return updated;
-            } else if (!is_subrange(range, grid._cached_range)) {
+            } else if (!range.within(grid._cached_range)) {
                 return false;
             }
         }
@@ -630,11 +609,11 @@ function filter_hidden(hidden, json) {
     return json
 }
 
-async function fill_page(view, json, hidden, start_row, end_row) {
-    let next_page = await view.to_json({start_row: start_row, end_row: end_row});
+async function fill_page(view, json, hidden, range) {
+    let next_page = await view.to_json(range);
     next_page = filter_hidden(hidden, next_page);
     for (let idx = 0; idx < next_page.length; idx++) {
-        json[start_row + idx] = next_page[idx];
+        json[range.start_row + idx] = next_page[idx];
     }
     return json;
 }
@@ -678,11 +657,11 @@ async function grid(div, view, task) {
     if (!lazy_load) {
         json = view.to_json().then(json => filter_hidden(hidden, json));
     } else {
-        let range = estimate_range(this.hypergrid);
-        if (Number.isNaN(range[0]) || Number.isNaN(range[1])) {
-            range = [0, 100];
+        let range = Range.estimate(this.hypergrid);
+        if (range.isInvalid()) {
+            range.reset(0, 100);
         }
-        json = fill_page(view, json, hidden, ...range);
+        json = fill_page(view, json, hidden, range);
         this.hypergrid._cached_range = range;
     }
 
@@ -693,11 +672,11 @@ async function grid(div, view, task) {
 
     this.hypergrid._lazy_load = lazy_load;
 
-    this.hypergrid._cache_update = async (s, e) => {
-        json = await fill_page(view, json, hidden, s, e);
-        let new_range = estimate_range(this.hypergrid);
-        if (is_subrange(new_range, [s, e])) {
-            let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), s, Math.min(e, nrows), nrows).rows;
+    this.hypergrid._cache_update = async (range) => {
+        json = await fill_page(view, json, hidden, range);
+        let new_range = Range.estimate(this.hypergrid);
+        if (new_range.within(range)) {
+            let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), range.start_row, Math.min(range.end_row, nrows), nrows).rows;
             rows[0] = this.hypergrid.behavior.dataModel.viewData[0];
             this.hypergrid.setData({data: rows});
             return true;
