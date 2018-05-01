@@ -149,11 +149,11 @@ site bundle from:
 
 ### Perspective library
 
+[API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective)
+
 As a library, `perspective` provides a suite of streaming pivot, aggregate, filter
 and sort operations for tabular data.  The engine can be instantiated in process,
 or in a Web Worker (browser only).
-
-[API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective)
 
 #### In the browser
 
@@ -232,6 +232,8 @@ const table3 = worker.table(data, {index: 'x'});
 
 ### Perspective-viewer web component
 
+[API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer)
+
 As a component, `perspective-viewer` provides a complete graphical UI for
 configuring the `perspective` library and formatting its output to the
 provided visualization plugins.
@@ -302,4 +304,3 @@ tbl.update([{'x': 5, 'y': 'e', 'z': true}]);
 ```
 
 
-See [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective) for more details.

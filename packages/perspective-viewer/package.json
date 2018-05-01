@@ -12,7 +12,8 @@
     "start": "npm run view",
     "compile_test": "cp test/html/* build && cp test/csv/* build && cp test/css/* build && webpack --config test/config/view.config.js",
     "test": "jest --silent --runInBand 2>&1",
-    "clean": "find build -mindepth 1 -delete"
+    "clean": "find build -mindepth 1 -delete",
+    "docs": "documentation build src/js/view.js -f md --shallow > README.md"
   },
   "publishConfig": {
     "access": "public"
@@ -46,6 +47,7 @@
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",
+    "documentation": "^5.3.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "css-loader": "^0.28.7",

@@ -92,3 +92,4 @@ Gemfile.lock
 Vagrantfile
 packages/sigma
 packages/perspective/obj
+package-lock.json

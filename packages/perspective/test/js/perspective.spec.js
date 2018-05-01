@@ -9,6 +9,7 @@
 
 const perspective = require('../../src/js/perspective.js');
 const load_asmjs = require("../../build/asmjs/psp.js").load_perspective;
+const node_perspective = require("../../src/js/perspective.node.js");
 const fs = require('fs');
 
 const RUNTIMES = {
@@ -18,17 +19,11 @@ const RUNTIMES = {
         asmjsCodeFile: "asmjs/psp.js",
         ENVIRONMENT: "NODE"
     })),
-    WASM: {}
+    NODE: node_perspective
 }
 
 if (typeof WebAssembly !== "undefined") {
-    const load_wasm = require("../../build/wasm_sync/psp.js").load_perspective;
-    const wasm = fs.readFileSync('./build/wasm_sync/psp.wasm');
-    RUNTIMES["WASM"] = perspective(load_wasm({
-        wasmBinary: wasm,
-        wasmJSMethod: 'native-wasm',
-        ENVIRONMENT: "NODE"
-    }));
+    RUNTIMES["WASM"] = perspective(require("../../build/wasm_sync/psp.js"));
 }
 
 const constructor_tests = require("./constructors.js");

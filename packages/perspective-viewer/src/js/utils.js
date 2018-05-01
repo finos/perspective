@@ -91,7 +91,7 @@ export function registerElement(template, proto) {
                 if (!this._initializing && !this._initialized) {
                     return;
                 }
-                old.bind(this)(val);
+                old.call(this, val);
             }
             Object.defineProperty(proto.prototype, key, descriptor);
         }

@@ -41,7 +41,6 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "@apache-arrow/es5-esm": "^0.2.0",
     "arraybuffer-loader": "^1.0.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
