@@ -96,7 +96,7 @@ if (!fs.existsSync('screenshots')) {
 let browser, page, url, errors = [];
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
     page = await browser.newPage();
 
     // CSS Animations break our screenshot tests, so set the

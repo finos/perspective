@@ -19,7 +19,6 @@ const RUNTIMES = {
         asmjsCodeFile: "asmjs/psp.js",
         ENVIRONMENT: "NODE"
     })),
-    WASM: {},
     NODE: node_perspective
 }
 
