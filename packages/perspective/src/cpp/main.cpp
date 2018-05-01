@@ -201,24 +201,26 @@ namespace arrow {
         }
     }
 
-    template<typename T>
     void
-    fill_col_dict(t_uint32 nrows, t_uint32 dsize, val dcol, val vkeys, t_col_sptr col, const char* destType)
+    fill_col_dict(val dictvec, t_col_sptr col)
     {
         // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it support other Vector types?
-        val vdata = dcol["values"];
+        val vdata = dictvec["values"];
         t_int32 vsize = vdata["length"].as<t_int32>();
         std::vector<t_uchar> data;
         data.reserve(vsize);
         data.resize(vsize);
         vecFromTypedArray(vdata, data.data(), vsize);
 
-        val voffsets = dcol["valueOffsets"];
+        val voffsets = dictvec["valueOffsets"];
         t_int32 osize = voffsets["length"].as<t_int32>();
         std::vector<t_int32> offsets;
         offsets.reserve(osize);
         offsets.resize(osize);
         vecFromTypedArray(voffsets, offsets.data(), osize);
+
+        // Get number of dictionary entries
+        t_uint32 dsize = dictvec["length"].as<t_uint32>();
 
         t_vocab* vocab = col->_get_vocab();
         t_str elem;
@@ -231,9 +233,6 @@ namespace arrow {
             // Make sure there are no duplicates in the arrow dictionary
             assert(idx == i);
         }
-
-        // Now process index keys into dictionary
-        arrow::vecFromTypedArray(vkeys, col->get_nth<T>(0), nrows, destType);
     }
 }
 
@@ -340,29 +339,15 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
         if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
 
             val dictvec = dcol["dictionary"];
+            arrow::fill_col_dict(dictvec, col);
 
-            // Get number of dictionary entries
-            t_uint32 dsize = dictvec["length"].as<t_uint32>();
-            
-            val vkeys = dcol["indices"]["values"];
+            // Now process index into dictionary
 
             // Perspective stores string indices in a 32bit unsigned array
             // Javascript's typed arrays handle copying from various bitwidth arrays properly
-            auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
+            val vkeys = dcol["indices"]["values"];
+            arrow::vecFromTypedArray(vkeys, col->get_nth<t_uindex>(0), nrows, "Uint32Array");
 
-            switch (width) {
-                case 1:
-                    arrow::fill_col_dict<t_int8>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                case 2:
-                    arrow::fill_col_dict<t_int16>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                case 4:
-                    arrow::fill_col_dict<t_int32>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                default:
-                    break;
-            }
         } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector" || 
                    dcol["constructor"]["name"].as<t_str>() == "BinaryVector") {
 
