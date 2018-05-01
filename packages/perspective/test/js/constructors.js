@@ -54,7 +54,7 @@ var arrow_result = [
      "datetime(ms)": +(new Date("2018-01-26")), "datetime(us)": +(new Date("2018-01-26")), "datetime(ns)": +(new Date("2018-01-26"))},
     {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c",
      "datetime(ms)": +(new Date("2018-01-27")), "datetime(us)": +(new Date("2018-01-27")), "datetime(ns)": +(new Date("2018-01-27"))},
-    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d",
+    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "", "dict": "",
      "datetime(ms)": +(new Date("2018-01-28")), "datetime(us)": +(new Date("2018-01-28")), "datetime(ns)": +(new Date("2018-01-28"))},
     {"f32": null, "f64": null, "i64": null, "i32": null, "i16": null, "i8": null, "bool": null,  "char": null, "dict": null,
      "datetime(ms)": null, "datetime(us)": null, "datetime(ns)": null}

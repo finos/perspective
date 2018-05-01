@@ -226,9 +226,9 @@ namespace arrow {
         for (t_uint32 i = 0; i < dsize; ++i) {
             t_int32 bidx = offsets[i];
             std::size_t es = offsets[i+1] - bidx;
-            assert(es > 0);
             elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
             t_uindex idx = vocab->get_interned(elem);
+            // Make sure there are no duplicates in the arrow dictionary
             assert(idx == i);
         }
 
@@ -385,12 +385,8 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
             for (t_int32 i = 0; i < nrows; ++i) {
                 t_int32 bidx = offsets[i];
                 std::size_t es = offsets[i+1] - bidx;
-                if (es > 0) {
-                    elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
-                    col->set_nth(i, elem);
-                } else {
-                    col->clear(i);
-                }
+                elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
+                col->set_nth(i, elem);
             }
         }
     } else {
