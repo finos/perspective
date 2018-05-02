@@ -10,10 +10,10 @@
 const Hypergrid = require('fin-hypergrid');
 const JSONBehavior = require('fin-hypergrid/src/behaviors/JSON');
 const Base = require('fin-hypergrid/src/Base');
+const groupedHeaderPlugin = require('fin-hypergrid-grouped-header-plugin');
 
 const Range = require('./Range');
 const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
-const GroupedHeader = require('./grouped-header');
 
 const _ = require('underscore');
 
@@ -50,7 +50,7 @@ var base_grid_properties = {
     font: '12px "Arial", Helvetica, sans-serif',
     foregroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     gridLinesH: false,
-    gridLinesV: true, // but note below GroupedHeader `clipRuleLines` is true so only header row will have rule lines
+    gridLinesV: true, // except: due to groupedHeaderPlugin's `clipRuleLines: true` option, only header row displays these lines
     halign: 'left',
     headerTextWrapping: false,
     hoverColumnHighlight: { enabled: false },
@@ -88,6 +88,7 @@ var light_theme_overrides = {
     backgroundSelectionColor: 'rgba(162, 183, 206, 0.3)',
     selectionRegionOutlineColor: 'rgb(45, 64, 85)',
     columnHeaderColor: '#666',
+    columnHeaderHalign: 'left', // except: group header labels always 'center'; numbers always 'right' per `setPSP`
     columnHeaderBackgroundColor: '#fff',
     columnHeaderForegroundSelectionColor: '#333',
     columnHeaderBackgroundSelectionColor: '#40536d',
@@ -527,7 +528,10 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             this.grid.installPlugins([
                 PerspectiveDataModel,
                 CachedRendererPlugin,
-                [GroupedHeader, { clipRuleLines: true, paintBackground: null }]
+                [groupedHeaderPlugin, {
+                    clipRuleLines: true, // restricts vertical rule line rendering to header row only
+                    paintBackground: null // no group header label decoration
+                }]
             ]);
 
             let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
