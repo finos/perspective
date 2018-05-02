@@ -50,7 +50,7 @@ var base_grid_properties = {
     font: '12px "Arial", Helvetica, sans-serif',
     foregroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     gridLinesH: false,
-    gridLinesV: false,
+    gridLinesV: true, // but note below GroupedHeader `clipRuleLines` is true so only header row will have rule lines
     halign: 'left',
     headerTextWrapping: false,
     hoverColumnHighlight: { enabled: false },
@@ -89,7 +89,6 @@ var light_theme_overrides = {
     selectionRegionOutlineColor: 'rgb(45, 64, 85)',
     columnHeaderColor: '#666',
     columnHeaderBackgroundColor: '#fff',
-    columnHeaderHalign: 'left',
     columnHeaderForegroundSelectionColor: '#333',
     columnHeaderBackgroundSelectionColor: '#40536d',
     columnHeaderBackgroundNumberPositive: '#1078d1',
@@ -522,12 +521,13 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             host.setAttribute('hidden', true);
             this.grid = new Hypergrid(host, { Behavior: JSONBehavior });
+            window.g = this.grid; window.p = g.properties;
             host.removeAttribute('hidden');
 
             this.grid.installPlugins([
                 PerspectiveDataModel,
                 CachedRendererPlugin,
-                [GroupedHeader, {CellRenderer: 'SimpleCell'}]
+                [GroupedHeader, { clipRuleLines: true, paintBackground: null }]
             ]);
 
             let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
