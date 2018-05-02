@@ -67,14 +67,14 @@ var groupedHeader;
  * Required when group config's (or cell renderer's) `paintBackground` is set to {@link groupedHeader.decorateBackgroundWithLinearGradient}.
  */
 
-var prototypeAdditions = {
+var prototypeGroupedHeader = {
     /**
      * @summary The grouped header paint function.
      * @desc This is the heart of the cell renderer.
      *
      * If you feel the urge to override this, you are on the wrong path! Write a new cell renderer instead.
      * @implements paintFunction
-     * @default {@link groupedHeader.paintHeaderGroups}
+     * @default
      * @memberOf groupedHeader.mixInTo~GroupedHeader#
      */
     paint: paintHeaderGroups,
@@ -85,7 +85,7 @@ var prototypeAdditions = {
      * @summary Group header delimiter.
      * @desc String used within header strings to concatenate group label(s), always ending with actual header.
      * @type {string}
-     * @default '|' (the vertical bar character)
+     * @default
      * @memberOf groupedHeader.mixInTo~GroupedHeader#
      */
     delimiter: '|',
@@ -95,17 +95,48 @@ var prototypeAdditions = {
      * @desc This is called by the `paint` function to paint the background before it calls the superclass's paint function to paint the foreground.
      * This will be overridden by similar definition in `groupConfig` for the current nesting level.
      * @implements paintFunction
-     * @default {@link groupedHeader.decorateBackgroundWithLinearGradient}
+     * @default
      * @memberOf groupedHeader.mixInTo~GroupedHeader#
      */
     paintBackground: decorateBackgroundWithBottomBorder,
+
+    /**
+     * Height of header when flat (when there are no grouped columns).
+     *
+     * If the value is a string that ends with a `%` char, it is applied as a factor to the font size to get row height.
+     * Otherwise it is assumed to be an integer row height.
+     * In either case, the value is clamped to a minimum equal to 125% of the font size.
+     * @type {string|number}
+     * @default
+     */
+    flatHeight: '250%',
+
+    /**
+     * Height of each nested row in a grouped header.
+     *
+     * The total header height therefore is this amount multiplied by the header group with the deepest nesting level.
+     * (For header groups with fewer levels, the height of each level will actually be taller because they expand to fill the total header height.)
+     *
+     * If the value is a string that ends with a `%` char, it is applied as a factor to the font size to get row height.
+     * Otherwise it is assumed to be an integer row height.
+     * In either case, the value is clamped to a minimum equal to 125% of the font size.
+     * @type {string|number}
+     * @default
+     */
+    nestedHeight: '160%',
+
+    /**
+     * If truthy, rule lines are clipped to bottom of header row.
+     * @type {boolean}
+     */
+    clipRuleLines: false,
 
     /**
      * @summary Grouped header configuration overrides.
      * @desc This array is a list of {@link groupConfigObject} objects, one for each nesting level, each of which may contain:
      * * An override for the background decorator
      * * Properties of proprietary interest to the background decorator
-     * * Miscellaneous overrides for the cell renderer's `paint` function's regular `config` object properties (`color` in the above example)
+     * * Miscellaneous overrides for the cell renderer's `paint` function's regular `config` object properties (_e.g.,_ `color`)
      *
      * The properties contained in each `config` object pertain to the group labels and their background decorators only. They do not pertain to the actual column headers. Those appear below all the nested group headers and are rendered using the unaltered paint function's config object.
      *
@@ -118,32 +149,49 @@ var prototypeAdditions = {
      * * `color` - A new color 50% lighter than `config.color` (the cell's "foreground" color).
      * * `gradientStops` - A gradient, 0% at top to 35% at bottom, of the above derived color.
      * @type {groupConfigObject[]}
-     * @default A single-element array (see above)
+     * @default
      * @memberOf groupedHeader.mixInTo~GroupedHeader#
      */
     groupConfig: [{
+
+        halign: 'center',
+
+        thickness: undefined, // used only by decorateBackgroundWithBottomBorder
+
         color: function(gc, config) {
-            return config.color; //lighterColor(gc, config.color, 0.0);
+            var color = config.color;
+            switch (this.paintBackground) {
+                case decorateBackgroundWithBottomBorder:
+                case decorateBackgroundWithLinearGradient:
+                    color = lighterColor(gc, config.color, 0.5);
+            }
+            return color;
         },
-        gradientStops: function(gc, config) {
+
+        gradientStops: function(gc, config) { // used only by decorateBackgroundWithLinearGradient
             return [
                 [0, lighterColor(gc, config.color, 0.5, 0)],
                 [1, lighterColor(gc, config.color, 0.5, .35)]
             ];
         }
+
     }]
 };
+
+var REGEX_BOLD_PRECEDES_FONT_SIZE = /\bbold .* \d/;
 
 /**
  * @summary Mix in the code necessary to support grouped column headers.
  * @desc Performs the following mix ins:
- * 1. Creates a new renderer and adds it to the grid.
- * 2. Extend the behavior's {@link behaviors/JSON#setHeaders|setHeaders} method.
- * 3. Sets the data model's {@link dataModel#groupHeaderDelimiter|groupHeaderDelimiter} property, which tells the data model to prepend the up and down sort arrows to the last item (actual column header) of the header string rather than the start of the header string (which is the highest-order group label).
+ * 1. Creates a new `GroupedHeader` cell renderer and registers it with the grid.
+ * 2. Set all active header cells to use the GroupHeader cell renderer.
+ * 3. Extend the behavior's {@link Behavior#setHeaders|setHeaders} method.
+ * 4. Extend the behavior's {@link Behavior#isColumnReorderable} method, which tells the behavior not to allow dragging grouped columns.
+ * 5. Sets the data model's {@link dataModel#groupHeaderDelimiter|groupHeaderDelimiter} property, which tells the data model to prepend the up and down sort arrows to the last item (actual column header) of the header string rather than the start of the header string (which is the highest-order group label).
  * @function
  * @param {Hypergrid} grid - Your instantiated grid object.
  * @param {object} options - Additions/overrides for the grid's singleton {@link groupedHeader.mixInTo~GroupedHeader|GroupedHeader} instance.
- * @param {function} [options.CellRenderer] - Extend from this constructor.
+ * @param {function|string} [options.CellRenderer='SimpleCell'] - Cell renderer superclass to extend from OR name of a registered cell renderer to extend from.
  * If omitted, uses the constructor of the cell renderer being used by the first currently active header cell.
  * @memberOf groupedHeader
  */
@@ -151,19 +199,21 @@ function mixInTo(grid, options) {
     options = options || {};
 
     // 1. Creates a new renderer and adds it to the grid.
-    var CellRenderer = options.CellRenderer;
+    var CellRenderer = options.CellRenderer || 'SimpleCell';
 
-    if (!CellRenderer || typeof CellRenderer === 'string') {
-        var cellRendererName = CellRenderer || grid.behavior.getActiveColumn(0).getCellProperty(0, 'renderer'),
-            cellRenderer = grid.cellRenderers.get(cellRendererName);
-        CellRenderer = Object.getPrototypeOf(cellRenderer).constructor;
+    if (typeof CellRenderer === 'string') {
+        CellRenderer = grid.cellRenderers.get(CellRenderer).constructor;
+    }
+
+    if (typeof CellRenderer !== 'function') {
+        throw new grid.HypergridError('Expected `options.CellRenderer` to be a constructor or a registered cell redenderer.');
     }
 
     /**
      * This is the cell renderer.
      *
      * For the API containing the mix-in and set-up code, see {@link groupedHeader}.
-     *
+     *gridLinesVWidth
      * This cell renderer extends {@link CellRenderer} or a descendant class (usually {@link SimpleCell}).
      *
      * _Note:_
@@ -172,24 +222,28 @@ function mixInTo(grid, options) {
      *
      * @constructor
      */
-    var GroupedHeader = CellRenderer.extend(CLASS_NAME, prototypeAdditions);
+    var GroupedHeader = CellRenderer.extend(CLASS_NAME, prototypeGroupedHeader);
 
-    // Create a special cell renderer to be used by the grouped header cells.
-    var renderer = grid.cellRenderers.add(GroupedHeader);
+    // Register the GroupedHeader cell renderer, which also instantiates it
+    var cellRenderer = grid.cellRenderers.add(GroupedHeader);
 
     // Set instance variables from `options` object, overriding values in above prototype
-    Object.getOwnPropertyNames(options).forEach(function(key) {
-        renderer[key] = options[key];
-    });
+    Object.assign(cellRenderer, options);
+    delete cellRenderer.CellRenderer;
 
-    // Extend the behavior's `setHeaders` method.
+    cellRenderer.visibleColumns = grid.renderer.visibleColumns;
+
+    // 2. Set all column headers to use the GroupedHeader cell renderer
+    grid.properties.columnHeaderRenderer = CLASS_NAME;
+
+    // 3. Extend the behavior's `setHeaders` method.
     grid.behavior.setHeaders = setHeaders; // This override calls the superclass's implementation
 
-    // Extend the behavior's `isColumnReorderable` method.
+    // 4. Extend the behavior's `isColumnReorderable` method.
     grid.behavior.isColumnReorderable = isColumnReorderable;
 
-    // Set the data model's `groupHeaderDelimiter` property
-    grid.behavior.dataModel.groupHeaderDelimiter = renderer.delimiter;
+    // 5. Set the data model's `groupHeaderDelimiter` property
+    grid.behavior.dataModel.groupHeaderDelimiter = cellRenderer.delimiter;
 }
 
 /**
@@ -197,7 +251,6 @@ function mixInTo(grid, options) {
  * @desc Convenience function to:
  * 1. Call the underlying {@link behaviors/JSON#setHeaders|setHeaders} method.
  * 2. Set the header row height based on the maximum group depth.
- * 3. Set all active header cells to use the GroupHeader cell renderer.
  * @this {Behavior}
  * @param {string[]|object} headers - The header labels. One of:
  * * _If an array:_ Must contain all headers in column order.
@@ -206,31 +259,35 @@ function mixInTo(grid, options) {
  */
 function setHeaders(headers) {
     var originalMethodFromPrototype = Object.getPrototypeOf(this).setHeaders,
-        groupedHeaderCellRendererInstance = this.grid.cellRenderers.get(CLASS_NAME),
-        delimiter = groupedHeaderCellRendererInstance.delimiter;
+        groupedHeaderCellRenderer = this.grid.cellRenderers.get(CLASS_NAME),
+        delimiter = groupedHeaderCellRenderer.delimiter,
+        levels = this.columns.reduce(function(max, column) {
+            return Math.max(column.header.split(delimiter).length, max);
+        }, 0),
+        headerRowHeight = getRowHeight(groupedHeaderCellRenderer, this.grid.properties, levels),
+        headerDataModel = this.grid.behavior.subgrids.lookup.header;
 
     // 1. Call the original implementation to actually set the headers
     originalMethodFromPrototype.call(this, headers);
 
     // 2. Set the header row height based on the maximum group depth among all active columns.
-    var levels = this.columns.reduce(function(max, column) {
-        return Math.max(column.header.split(delimiter).length, max);
-    }, 0);
-
-    var headerDataModel = this.grid.behavior.subgrids.lookup.header,
-        headerRowHeight = 5 / 4 * this.grid.properties.defaultRowHeight;
-
-    if (levels > 1) {
-        headerRowHeight = levels * 4 / 5 * this.grid.properties.defaultRowHeight; 
-    }
-
     this.grid.setRowHeight(0, headerRowHeight, headerDataModel);
+}
 
-    // 3. Set all active header cells to use the GroupHeader cell renderer
-    this.columns.forEach(function(column) {
-        column.properties.columnHeader.renderer = CLASS_NAME;
-        // column.setCellProperty(0, 'renderer', CLASS_NAME, headerDataModel);
-    });
+var REGEX_EXTRACT_PX_VALUE = /\b(\d+(\.\d+)?)px\b/;
+function getRowHeight(groupedHeaderCellRenderer, gridProps, levels) {
+    var m = gridProps.columnHeaderFont.match(REGEX_EXTRACT_PX_VALUE),
+        fontHeight = m && m[1] || 4 / 5 * gridProps.defaultRowHeight;
+
+    return levels === 1
+        ? getHeight(groupedHeaderCellRenderer.flatHeight, fontHeight)
+        : getHeight(groupedHeaderCellRenderer.nestedHeight, fontHeight) * levels;
+}
+
+var REGEX_EXTRACT_PER_CENTAGE = /^(\d+(\.\d+)?)%$/;
+function getHeight(factor, multiplicand) {
+    var m = factor.match(REGEX_EXTRACT_PER_CENTAGE);
+    return m ? m[1] / 100 * multiplicand : factor;
 }
 
 /**
@@ -242,8 +299,8 @@ function setHeaders(headers) {
 function isColumnReorderable() {
     var originalMethodFromPrototype = Object.getPrototypeOf(this).isColumnReorderable,
         isReorderable = originalMethodFromPrototype.call(this),
-        groupedHeaderCellRendererInstance = this.grid.cellRenderers.get(CLASS_NAME),
-        delimiter = groupedHeaderCellRendererInstance.delimiter;
+        groupedHeaderCellRenderer = this.grid.cellRenderers.get(CLASS_NAME),
+        delimiter = groupedHeaderCellRenderer.delimiter;
 
     return (
         isReorderable &&
@@ -273,10 +330,12 @@ function isColumnReorderable() {
  */
 function paintHeaderGroups(gc, config) {
     var paint = this.super.paint,
-        colIndex = config.dataCell.x;
-
-    var values = config.value.split(this.delimiter), // each group header including column header
-        groupCount = values.length - 1; // group header levels above column header
+        colIndex = config.dataCell.x,
+        values = config.value.split(this.delimiter), // each group header including column header
+        groupCount = values.length - 1, // group header levels above column header
+        prevVisCol = this.visibleColumns.find(function(visCol) {
+            return visCol.columnIndex === config.gridCell.x - 1;
+        });
 
     if (groupCount === 0 || colIndex === 0) { // no group headers OR first column
         this.groups = []; // start out with no groups defined
@@ -286,7 +345,6 @@ function paintHeaderGroups(gc, config) {
         var group,
             groups = this.groups,
             rect = config.bounds,
-            new_group = false,
             bounds = Object.assign({}, rect), // save bounds for final column header render and resetting
 
             // save cosmetic properties for final column header render that follows this if-block
@@ -294,7 +352,6 @@ function paintHeaderGroups(gc, config) {
                 isColumnHovered: config.isColumnHovered,
                 isSelected: config.isSelected,
                 font: config.font,
-                columnHeaderHalign: config.columnHeaderHalign,
                 backgroundColor: config.backgroundColor
             };
 
@@ -317,14 +374,21 @@ function paintHeaderGroups(gc, config) {
                     font: config.font,
                     backgroundColor: config.backgroundColor
                 };
-                new_group = true;
+
                 // Stash config values that will be overridden and save overrides in `group` from config of first column in group
-                group.config = this.groupConfig[g % this.groupConfig.length]; // wrap if not enough elements
-                Object.keys(group.config).forEach(stash);
+                var gcfg = this.groupConfig;
+                if (Array.isArray(gcfg) && gcfg.length) {
+                    group.config = gcfg[g % gcfg.length]; // wrap if not enough elements
+                    Object.keys(group.config).forEach(stash, this);
+                }
             } else {
                 // Continuation of same group level, so just repaint but with increased width
                 group = groups[g];
-                group.width += config.lineWidth + bounds.width;
+                group.width += config.gridLinesVWidth + bounds.width;
+
+                if (prevVisCol) {
+                    prevVisCol.top = y + rect.height;
+                }
             }
 
             rect.x = group.left;
@@ -340,17 +404,14 @@ function paintHeaderGroups(gc, config) {
                 this.groupCount = groupCount;
                 // Suppress hover and selection effects for group headers
                 config.isColumnHovered = config.isSelected = false;
-                config.columnHeaderHalign = 'center';
 
-                // Make group headers bold & grey
-                config.value = group.value;
-                config.font = '12px Arial'; //'bold ' + config.font;
-                // config.backgroundColor = 'transparent';
+                // Make group headers bold
+                if (config.bold && !REGEX_BOLD_PRECEDES_FONT_SIZE.test(config.font)) {
+                    config.font = 'bold ' + config.font;
+                }
 
                 // Paint the group header foreground
                 paint.call(this, gc, config);
-              //  gc.cache.fillStyle = "#999"; //config.columnHeaderColor;
-              //  gc.fillRect(bounds.x - 1, bounds.y, 1, bounds.y + bounds.height);
 
                 var decorator = config.paintBackground || this.paintBackground;
                 if (decorator) {
@@ -379,15 +440,15 @@ function paintHeaderGroups(gc, config) {
         Object.assign(config, columnConfigStash);
     }
 
+    if (this.clipRuleLines && prevVisCol) {
+        prevVisCol.bottom = config.bounds.y + config.bounds.height;
+    }
+
     // Render the actual column header
     paint.call(this, gc, config);
 
     // Restore to original shape for next render
     if (groupCount) {
-        if (new_group) {
-            gc.cache.fillStyle = "#AAA"; //config.columnHeaderColor;
-            gc.fillRect(bounds.x-1, bounds.y, 1, bounds.y + bounds.height);
-        }
         Object.assign(rect, bounds);
     }
 
@@ -448,10 +509,10 @@ function decorateBackgroundWithLinearGradient(gc, config) {
  */
 function decorateBackgroundWithBottomBorder(gc, config) {
     var bounds = config.bounds,
-        thickness = 1 || config.thickness ||
+        thickness = config.thickness ||
             this.groupCount - this.groupIndex; // when `thickness` undefined, higher-order groups get progressively thicker borders
 
-    gc.cache.fillStyle = config.columnHeaderSeparatorColor || "#fff"; // config.color;
+    gc.cache.fillStyle = config.color;
     gc.fillRect(bounds.x + 3, bounds.y + bounds.height - thickness, bounds.width - 6, thickness);
 }
 
