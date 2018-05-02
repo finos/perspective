@@ -142,7 +142,11 @@ table.prototype.add_computed = function(computed) {
     return new table(this._worker, name);
 }
 
-table.prototype.view = function(config) {
+table.prototype.worker = function () {
+    return this._worker;
+}
+
+table.prototype.view = function (config) {
     return new view(this._name, this._worker, config);
 }
 

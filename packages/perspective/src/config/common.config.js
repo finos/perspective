@@ -64,6 +64,7 @@ module.exports = function () {
                 options: {
                     presets: ['env'],
                     plugins: [
+                        "transform-decorators-legacy",
                         "transform-custom-element-classes", 
                         'transform-runtime', 
                         'transform-object-rest-spread', 

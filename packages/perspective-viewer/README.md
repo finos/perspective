@@ -3,23 +3,23 @@
 ### Table of Contents
 
 -   [registerPlugin][1]
--   [Params][2]
--   [notifyResize][3]
--   [worker][4]
--   [message][5]
--   [load][6]
--   [update][7]
--   [columns][8]
--   [aggregates][9]
--   [filters][10]
--   [view][11]
--   [index][12]
--   [copy][13]
--   [sort][14]
--   [delete][15]
--   [save][16]
--   [restore][17]
--   [reset][18]
+-   [View][2]
+    -   [notifyResize][3]
+    -   [worker][4]
+    -   [message][5]
+    -   [load][6]
+    -   [update][7]
+    -   [columns][8]
+    -   [aggregates][9]
+    -   [filters][10]
+    -   [view][11]
+    -   [index][12]
+    -   [copy][13]
+    -   [sort][14]
+    -   [delete][15]
+    -   [save][16]
+    -   [restore][17]
+    -   [reset][18]
 -   [column-pivots][19]
 -   [row-pivots][20]
 
@@ -27,38 +27,53 @@
 
 Register a plugin with the <perspective-viewer> component.
 
-## Params
-
-name : The logical unique name of the plugin.  This will be used to set the
-    component's `view` attribute.
-plugin : An object with this plugin's prototype.  Valid keys are:
-    name : The display name for this plugin.
-    create (required) : The creation function - may return a `Promise`.
-    delete : The deletion function.
-    mode : The selection mode - may be "toggle" or "select".
-
 **Parameters**
 
--   `name`  
--   `plugin`  
+-   `name` **[string][21]** The logical unique name of the plugin.  This will be 
+    used to set the component's `view` attribute.
+-   `plugin` **[object][22]** An object with this plugin's prototype.  Valid keys are:
+        name : The display name for this plugin.
+        create (required) : The creation function - may return a `Promise`.
+        delete : The deletion function.
+        mode : The selection mode - may be "toggle" or "select".
 
-## notifyResize
+## View
 
-Invalidate this element's dimensions and redraw.
+**Extends ViewPrivate**
 
-## worker
+HTMLElement class for `<perspective-viewer` custom element.
 
-This element's `perspective` worker instance.
+### notifyResize
 
-## message
+Invalidate this element's dimensions and redraw (if the element is
+visible).
 
-When set, hide the data visualization and display the message.
+### worker
+
+This element's `perspective` worker instance.  This property is not 
+reflected as an HTML attribute, and is readonly;  it can be effectively 
+set however by calliong the `load() method with a`perspective.table\` 
+instance from the preferred worker.
+
+**Examples**
+
+```javascript
+let elem = document.getElementById('my_viewer');
+let table = elem.worker.table([{x:1, y:2}]);
+elem.load(table);
+```
+
+### message
+
+When set, hide the data visualization and display the message.  Setting
+`message` does not clear the internal `perspective.table`, but it does
+render it hidden until the message is removed.
 
 **Parameters**
 
 -   `msg` **[string][21]** The message. This can be HTML - it is not sanitized.
 
-## load
+### load
 
 Load data.  If `load` or `update` have already been called on this
 element, its internal `perspective.table` will also be deleted.
@@ -68,7 +83,26 @@ element, its internal `perspective.table` will also be deleted.
 -   `data` **any** The data to load.  Works with the same input types
     supported by `perspective.table`.
 
-## update
+**Examples**
+
+_Load JSON_
+
+```javascript
+const my_viewer = document.getElementById('#my_viewer');
+my_viewer.load([
+    {x: 1, y: 'a'},
+    {x: 2, y: 'b'}
+]);
+```
+
+_Load CSV_
+
+```javascript
+const my_viewer = document.getElementById('#my_viewer');
+my_viewer.load("x,y\n1,a\n2,b");
+```
+
+### update
 
 Updates this element's `perspective.table` with new data.
 
@@ -77,30 +111,55 @@ Updates this element's `perspective.table` with new data.
 -   `data` **any** The data to load.  Works with the same input types
     supported by `perspective.table.update`.
 
-## columns
+**Examples**
+
+```javascript
+const my_viewer = document.getElementById('#my_viewer');
+my_viewer.update([
+    {x: 1, y: 'a'},
+    {x: 2, y: 'b'}
+]);
+```
+
+### columns
 
 The set of visibile columns.
 
 **Parameters**
 
 -   `c`  
--   `columns` **[array][22]** An array of strings, the names of visible columns
+-   `columns` **[array][23]** An array of strings, the names of visible columns.
 
-## aggregates
+**Examples**
+
+_via Javascript DOM_
+
+```javascript
+let elem = document.getElementById('my_viewer');
+elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
+```
+
+_via HTML_
+
+```javascript
+<perspective-viewer columns='["x", "y"]'></perspective-viewer>
+```
+
+### aggregates
 
 The set of column aggregate configurations.
 
 **Parameters**
 
 -   `a`  
--   `aggregates` **[array][22]** An arry of aggregate config objects, which
+-   `aggregates` **[array][23]** An arry of aggregate config objects, which
         specify what aggregate settings to use when the associated column
         is visible, and at least one `row-pivot` is defined.  An aggregate
         config object has two properties:
             `name`: The column name.
-            `op`: The aggregate type as a string.  See [perspective/src/js/defaults.js][23]
+            `op`: The aggregate type as a string.  See [perspective/src/js/defaults.js][24]
 
-## filters
+### filters
 
 The set of column filter configurations.
 
@@ -108,7 +167,7 @@ The set of column filter configurations.
 
 -   `f`  
 
-## view
+### view
 
 Sets the currently selected plugin, via its `name` field.
 
@@ -116,7 +175,7 @@ Sets the currently selected plugin, via its `name` field.
 
 -   `v`  
 
-## index
+### index
 
 The column name to index by.  Due to the mutable nature of 
 `perspective.table`, `index` cannot be modified once `load` or `update`
@@ -126,7 +185,7 @@ has been called.
 
 -   `i`  
 
-## copy
+### copy
 
 Duplicate an existing `<perspective-element>`, including data and view
 settings.  The underlying `perspective.table` will be shared between both
@@ -134,41 +193,41 @@ elements
 
 **Parameters**
 
--   `widget` **any** 
+-   `widget` **any** A `<perspective-viewer>` instance to copy.
 
-## sort
+### sort
 
 Sets this `perspective.table.view`'s `sort` property.
 
 **Parameters**
 
--   `sort`  
+-   `s`  
 
-## delete
+### delete
 
 Deletes this element's data and clears it's internal state (but not its
 user state).  This (or the underlying `perspective.table`'s equivalent
 method) must be called in order for its memory to be reclaimed.
 
-Returns **[Promise][24]&lt;bool>** Whether or not this call resulted in the underlying
-`perspective.table` actually being deleted.
+Returns **[Promise][25]&lt;bool>** Whether or not this call resulted in the 
+underlying `perspective.table` actually being deleted.
 
-## save
+### save
 
 Serialize this element's attribute/interaction state.
 
-Returns **[object][25]** a serialized element.
+Returns **[object][22]** a serialized element.
 
-## restore
+### restore
 
 Resotre this element to a state as generated by a reciprocal call to
 `save`.
 
 **Parameters**
 
--   `x` **[object][25]** returned by `save`.
+-   `x` **[object][22]** returned by `save`.
 
-## reset
+### reset
 
 Reset's this element's view state and attributes to default.  Does not
 delete this element's `perspective.table` or otherwise modify the data
@@ -184,7 +243,7 @@ Sets this `perspective.table.view`'s `row_pivots` property.
 
 [1]: #registerplugin
 
-[2]: #params
+[2]: #view
 
 [3]: #notifyresize
 
@@ -202,7 +261,7 @@ Sets this `perspective.table.view`'s `row_pivots` property.
 
 [10]: #filters
 
-[11]: #view
+[11]: #view-1
 
 [12]: #index
 
@@ -224,10 +283,10 @@ Sets this `perspective.table.view`'s `row_pivots` property.
 
 [21]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[22]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[22]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[23]: perspective/src/js/defaults.js
+[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[24]: perspective/src/js/defaults.js
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
