@@ -51,6 +51,7 @@ var base_grid_properties = {
     foregroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     gridLinesH: false,
     gridLinesV: true, // except: due to groupedHeaderPlugin's `clipRuleLines: true` option, only header row displays these lines
+    gridLinesUserDataArea: false, // restricts vertical rule line rendering to header row only
     halign: 'left',
     headerTextWrapping: false,
     hoverColumnHighlight: { enabled: false },
@@ -522,16 +523,14 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             host.setAttribute('hidden', true);
             this.grid = new Hypergrid(host, { Behavior: JSONBehavior });
-            window.g = this.grid; window.p = g.properties;
             host.removeAttribute('hidden');
+
+            // window.g = this.grid; window.p = g.properties; // for debugging convenience
 
             this.grid.installPlugins([
                 PerspectiveDataModel,
                 CachedRendererPlugin,
-                [groupedHeaderPlugin, {
-                    clipRuleLines: true, // restricts vertical rule line rendering to header row only
-                    paintBackground: null // no group header label decoration
-                }]
+                [groupedHeaderPlugin, { paintBackground: null }] // no group header label decoration
             ]);
 
             let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
