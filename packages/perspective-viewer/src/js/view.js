@@ -13,7 +13,7 @@ import "awesomplete";
 import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
-import {bindTemplate} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute} from "./utils.js";
 
 import template from "../html/view.html";
 
@@ -792,55 +792,12 @@ function update() {
  }
 
 /**
- * A decorator for declaring a setter property of an HTMLElement descendent
- * class as serialized JSON.  Handles converting these types before invoking
- * the underlying function/
- * 
- * @param {object} _default the default value to supply the setter when
- * undefined, removed or invalid.
- */
-function _attribute(_default) {
-    return function(cls, name, desc) {
-        const old_set = desc.set;
-        desc.set = function (x) {
-            let attr = this.getAttribute(name);
-            try {
-                if (x === null || x === undefined) {
-                    x = _default();
-                }
-                if (typeof x !== "string") {
-                    x = JSON.stringify(x);
-                }
-                if (x !== attr) {
-                    this.setAttribute(name, x);
-                    attr = x;
-                    return;
-                }
-                attr = JSON.parse(attr);
-            } catch (e) {
-                console.error(`Invalid value for attribute "${name}": ${x}`);
-                attr = _default();
-            }
-            old_set.call(this, attr);    
-        }
-        desc.get = function () {
-            if (this.hasAttribute(name)) {
-                return JSON.parse(this.getAttribute(name));
-            }
-        }
-        return desc;
-    }
-}
-
-const json_attribute = _attribute(() => ({}));
-const array_attribute = _attribute(() => []);
-
-/**
  * HTMLElement class for `<perspective-viewer` custom element.
  * 
  * @class View
  * @extends {ViewPrivate}
  */
+@bindTemplate(template)
 class View extends ViewPrivate {
 
     constructor() {
@@ -1279,5 +1236,3 @@ class View extends ViewPrivate {
         this.dispatchEvent(new Event('config-update'));
     }
 }
-
-bindTemplate(template)(View);

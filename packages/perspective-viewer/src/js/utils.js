@@ -109,3 +109,48 @@ export function bindTemplate(template) {
         return registerElement(template, cls);
     }
 }
+
+
+/**
+ * A decorator for declaring a setter property of an HTMLElement descendent
+ * class as serialized JSON.  Handles converting these types before invoking
+ * the underlying function/
+ * 
+ * @param {object} _default the default value to supply the setter when
+ * undefined, removed or invalid.
+ */
+function _attribute(_default) {
+    return function(cls, name, desc) {
+        const old_set = desc.set;
+        desc.set = function (x) {
+            let attr = this.getAttribute(name);
+            try {
+                if (x === null || x === undefined) {
+                    x = _default();
+                }
+                if (typeof x !== "string") {
+                    x = JSON.stringify(x);
+                }
+                if (x !== attr) {
+                    this.setAttribute(name, x);
+                    attr = x;
+                    return;
+                }
+                attr = JSON.parse(attr);
+            } catch (e) {
+                console.error(`Invalid value for attribute "${name}": ${x}`);
+                attr = _default();
+            }
+            old_set.call(this, attr);    
+        }
+        desc.get = function () {
+            if (this.hasAttribute(name)) {
+                return JSON.parse(this.getAttribute(name));
+            }
+        }
+        return desc;
+    }
+}
+
+export const json_attribute = _attribute(() => ({}));
+export const array_attribute = _attribute(() => []);
