@@ -13,7 +13,7 @@ import "awesomplete";
 import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
-import {bindTemplate} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute} from "./utils.js";
 
 import template from "../html/view.html";
 
@@ -34,11 +34,9 @@ const RENDERERS = {};
 /**
  * Register a plugin with the <perspective-viewer> component.
  *
- * Params
- * ------
- * name : The logical unique name of the plugin.  This will be used to set the
- *     component's `view` attribute.
- * plugin : An object with this plugin's prototype.  Valid keys are:
+ * @param {string} name The logical unique name of the plugin.  This will be 
+ * used to set the component's `view` attribute.
+ * @param {object} plugin An object with this plugin's prototype.  Valid keys are:
  *     name : The display name for this plugin.
  *     create (required) : The creation function - may return a `Promise`.
  *     delete : The deletion function.
@@ -204,7 +202,7 @@ function drop(ev) {
         this._update_column_view();
     }
 
-    this._update();
+    this._debounce_update();
 }
 
 /******************************************************************************
@@ -253,7 +251,7 @@ function column_aggregate_clicked() {
     }
     set_aggregate_attribute.call(this, aggregates);
     this._update_column_view();
-    this._update();
+    this._debounce_update();
 }
 
 
@@ -270,7 +268,7 @@ function column_filter_clicked() {
     this._updating_filter = true;
     this.setAttribute('filters', JSON.stringify(filters));
     this._updating_filter = false;
-    this._update();
+    this._debounce_update();
 }
 
 /******************************************************************************
@@ -290,27 +288,6 @@ function get_worker() {
 
 if (document.currentScript && document.currentScript.hasAttribute('preload')) {
     get_worker();
-}
-
-function load(csv) {
-    try {
-        csv = csv.trim();
-    } catch (e) {}
-    let options = {};
-    if (this.getAttribute('index')) {
-        options.index = this.getAttribute('index');
-    }
-    let table;
-    if (csv.hasOwnProperty("_name")) {
-        table = csv;
-    } else {
-        table = get_worker().table(csv, options);
-    }
-    loadTable.call(this, table);
-    for (let slave of this.slaves) {
-        loadTable.call(slave, table);
-    }
-    this.slaves = [];
 }
 
 function get_aggregate_attribute() {
@@ -439,7 +416,7 @@ async function loadTable(table) {
 
     this.filters = this.getAttribute('filters');
 
-    this._update();
+    this._debounce_update();
 }
 
 function new_row(name, type, aggregate, filter) {
@@ -780,7 +757,7 @@ function update() {
         
         this._vis_selector.addEventListener('change', () => {
             this.setAttribute('view', this._vis_selector.value);
-            this._update();
+            this._debounce_update();
         });
     }
 
@@ -801,9 +778,17 @@ function update() {
             } catch (e) {
 
             }
-            load.call(this, data)
+            this.load(data)
         }
-    }    
+    }
+
+    _register_debounce_instance() {
+        const _update = _.debounce(update.bind(this), 10);
+        this._debounce_update = () => {
+            this.setAttribute('updating', true);
+            _update();
+        }
+    }
  }
 
 /**
@@ -812,94 +797,103 @@ function update() {
  * @class View
  * @extends {ViewPrivate}
  */
+@bindTemplate(template)
 class View extends ViewPrivate {
 
-    /**
-     * Invalidate this element's dimensions and redraw.
-     * 
-     */
-    notifyResize() {
-        if (!document.hidden && this.offsetParent && document.contains(this)) {
-            this._plugin.resize.call(this);
+    constructor() {
+        super();
+        this._register_debounce_instance();
+        this._slaves = [];
+        this._show_config = true;
+    }
+
+    connectedCallback() {
+        if (Object.keys(RENDERERS).length === 0) {
+            _register_debug_plugin();
+        }
+
+        this.setAttribute('settings', true);
+
+        this._register_ids();
+        this._register_callbacks();
+        this._register_view_options();
+        this._register_data_attribute();
+        this._toggle_config();
+
+        for (let attr of ['row-pivots', 'column-pivots', 'filters']) {
+            if (!this.hasAttribute(attr)) {
+                this.setAttribute(attr, "[]");
+            }
         }
     }
-
+   
     /**
-     * This element's `perspective` worker instance.
+     * Sets this `perspective.table.view`'s `sort` property, an array of column
+     * names.
      * 
-     * @readonly
+     * @name sort
+     * @memberof View.prototype
+     * @type {array<string>} Array of column names
+     * @example <caption>via Javascript DOM</caption>
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('sort', JSON.stringify(["x"]));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer sort='["x"]'></perspective-viewer>
      */
-    get worker() {
-        return get_worker();
-    }
-
-    /**
-     * When set, hide the data visualization and display the message.
-     * 
-     * @param {string} msg The message. This can be HTML - it is not sanitized.
-     */
-    set message(msg) {
-        if (this.getAttribute('message') !== msg) {
-            this.setAttribute('message', msg);
-            return;
-        }
-        if (!this._inner_drop_target) return;
-        this.querySelector('#app').classList.remove('hide_message');
-        this._inner_drop_target.innerHTML = msg;
-        for (let slave of this.slaves) {
-            slave.setAttribute('message', msg);
-        }
-    }
-
-    /**
-     * Load data.  If `load` or `update` have already been called on this
-     * element, its internal `perspective.table` will also be deleted.
-     * 
-     * @param {any} data The data to load.  Works with the same input types
-     * supported by `perspective.table`.
-     */
-    load(data) {
-        load.call(this, data);
-    }
-
-    /**
-     * Updates this element's `perspective.table` with new data.
-     * 
-     * @param {any} data The data to load.  Works with the same input types
-     * supported by `perspective.table.update`.
-     */
-    update(data) {
-        if (this._table === undefined) {
-            this.load(data);
+    @array_attribute
+    set sort(sort) {
+        this._sort.innerHTML = "";
+        if (sort.length === 0) {
+            let label = document.createElement('label');
+            label.innerHTML = this._sort.getAttribute('name');
+            this._sort.appendChild(label);
         } else {
-            this._table.update(data);
+            sort.map(function(s) {
+                let row = new_row.call(this, s);
+                this._sort.appendChild(row);
+            }.bind(this));
         }
+        this.dispatchEvent(new Event('config-update'));
+        this._debounce_update();
     }
-
+    
     /**
-     * The set of visibile columns.
+     * The set of visible columns.
      *
-     * @param {array} columns An array of strings, the names of visible columns
+     * @name columns
+     * @memberof View.prototype
+     * @param {array} columns An array of strings, the names of visible columns.
+     * @example <caption>via Javascript DOM</caption>
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer columns='["x", "y"]'></perspective-viewer>
      */
-    set columns(c) {
-        let show = JSON.parse(this.getAttribute('columns'));
+    @array_attribute
+    set columns(show) {
         this._update_column_view(show, true);
         this.dispatchEvent(new Event('config-update'));
-        this._update();
+        this._debounce_update();
     }
 
     /**
      * The set of column aggregate configurations.
      *
-     * @param {array} aggregates An arry of aggregate config objects, which
-     *     specify what aggregate settings to use when the associated column
-     *     is visible, and at least one `row-pivot` is defined.  An aggregate
-     *     config object has two properties:
-     *         `name`: The column name.
-     *         `op`: The aggregate type as a string.  See {@link perspective/src/js/defaults.js}
+     * @name aggregates
+     * @memberof View.prototype
+     * @param {object} aggregates A dictionary whose keys are column names, and
+     * values are valid aggregations.  The `aggergates` attribute works as an
+     * override;  in lieu of a key for a column supplied by the developers, a
+     * default will be selected and reflected to the attribute based on the
+     * column's type.  See {@link perspective/src/js/defaults.js}
+     * @example <caption>via Javascript DOM</caption>
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
      */
-    set aggregates(a) {
-        let show = JSON.parse(this.getAttribute('aggregates'));
+    @json_attribute
+    set aggregates(show) {
         let lis = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
         lis.map(x => {
             let agg = show[x.getAttribute('name')];
@@ -908,12 +902,14 @@ class View extends ViewPrivate {
             }
         });
         this.dispatchEvent(new Event('config-update'));
-        this._update();
+        this._debounce_update();
     }
 
     /**
      * The set of column filter configurations.
-     *
+     * 
+     * @name filters
+     * @memberof View.prototype
      * @type {array} filters An arry of filter config objects.  A filter
      * config object is an array of three elements:
      *     * The column name.
@@ -921,10 +917,19 @@ class View extends ViewPrivate {
      *       {@link perspective/src/js/defaults.js}
      *     * The filter argument, as a string, float or Array<string> as the 
      *       filter operation demands.
+     * @example <caption>via Javascript DOM</caption>
+     * let filters = [
+     *     ["x", "<", 3], 
+     *     ["y", "contains", "abc"]
+     * ];
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('filters', JSON.stringify(filters));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
      */
-    set filters(f) {
+    @array_attribute
+    set filters(filters) {
         if (!this._updating_filter) {
-            let filters = JSON.parse(this.getAttribute('filters'));
             this._filters.innerHTML = "";
             if (filters.length === 0) {
                 let label = document.createElement('label');
@@ -948,7 +953,7 @@ class View extends ViewPrivate {
             }
         }
         this.dispatchEvent(new Event('config-update'));
-        this._update();
+        this._debounce_update();
     }
 
     /**
@@ -966,10 +971,11 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `column_pivots` property.
      * 
      * @name column-pivots
+     * @memberof View.prototype
      * @type {array<string>} Array of column names
      */
-    set ['column-pivots'](c) {
-        let pivots = JSON.parse(this.getAttribute('column-pivots'));
+    @array_attribute
+    set 'column-pivots'(pivots) {
         this._column_pivots.innerHTML = "";
         if (pivots.length === 0) {
             let label = document.createElement('label');
@@ -982,7 +988,7 @@ class View extends ViewPrivate {
             }.bind(this));
         }
         this.dispatchEvent(new Event('config-update'));
-        this._update();
+        this._debounce_update();
     }
 
     /**
@@ -990,9 +996,9 @@ class View extends ViewPrivate {
      * `perspective.table`, `index` cannot be modified once `load` or `update`
      * has been called.
      * 
-     * @type {string} A valid column name.
+     * @type {string}
      */
-    set index(i) {
+    set index(index) {
         if (this._table) {
             console.error(`Setting 'index' attribute after initialization has no effect`);
         }
@@ -1002,10 +1008,11 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `row_pivots` property.
      * 
      * @name row-pivots
+     * @memberof View.prototype
      * @type {array<string>} Array of column names
      */
-    set ['row-pivots'](row_pivots) {
-        let pivots = JSON.parse(this.getAttribute('row-pivots'));
+    @array_attribute
+    set 'row-pivots'(pivots) {
         this._row_pivots.innerHTML = "";
         if (pivots.length === 0) {
             let label = document.createElement('label');
@@ -1018,7 +1025,120 @@ class View extends ViewPrivate {
             }.bind(this));
         }
         this.dispatchEvent(new Event('config-update'));
-        this._update();
+        this._debounce_update();
+    }
+
+    /**
+     * When set, hide the data visualization and display the message.  Setting
+     * `message` does not clear the internal `perspective.table`, but it does
+     * render it hidden until the message is removed.
+     * 
+     * @param {string} msg The message. This can be HTML - it is not sanitized.
+     * @example
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('message', '<h1>Loading</h1>');
+     */
+    set message(msg) {
+        if (this.getAttribute('message') !== msg) {
+            this.setAttribute('message', msg);
+            return;
+        }
+        if (!this._inner_drop_target) return;
+        this.querySelector('#app').classList.remove('hide_message');
+        this._inner_drop_target.innerHTML = msg;
+        for (let slave of this._slaves) {
+            slave.setAttribute('message', msg);
+        }
+    }
+    
+    /**
+     * This element's `perspective` worker instance.  This property is not 
+     * reflected as an HTML attribute, and is readonly;  it can be effectively 
+     * set however by calliong the `load() method with a `perspective.table` 
+     * instance from the preferred worker.
+     * 
+     * @readonly
+     * @example
+     * let elem = document.getElementById('my_viewer');
+     * let table = elem.worker.table([{x:1, y:2}]);
+     * elem.load(table);
+     */
+    get worker() {
+        if (this._table) {
+            return this._table.worker;
+        }
+        return get_worker();
+    }
+    
+    /**
+     * Load data.  If `load` or `update` have already been called on this
+     * element, its internal `perspective.table` will also be deleted.
+     * 
+     * @param {any} data The data to load.  Works with the same input types
+     * supported by `perspective.table`.
+     * @example <caption>Load JSON</caption>
+     * const my_viewer = document.getElementById('#my_viewer');
+     * my_viewer.load([
+     *     {x: 1, y: 'a'},
+     *     {x: 2, y: 'b'}
+     * ]);
+     * @example <caption>Load CSV</caption>
+     * const my_viewer = document.getElementById('#my_viewer');
+     * my_viewer.load("x,y\n1,a\n2,b");
+     * @example <caption>Load perspective.table</caption>
+     * const my_viewer = document.getElementById('#my_viewer');
+     * const tbl = perspective.table("x,y\n1,a\n2,b");
+     * my_viewer.load(tbl);
+     */
+    load(data) {
+        try {
+            data = data.trim();
+        } catch (e) {}
+        let options = {};
+        if (this.getAttribute('index')) {
+            options.index = this.getAttribute('index');
+        }
+        let table;
+        if (data.hasOwnProperty("_name")) {
+            table = data;
+        } else {
+            table = get_worker().table(data, options);
+        }
+        loadTable.call(this, table);
+        for (let slave of this._slaves) {
+            loadTable.call(slave, table);
+        }
+        this._slaves = [];
+    }
+
+    /**
+     * Updates this element's `perspective.table` with new data.
+     * 
+     * @param {any} data The data to load.  Works with the same input types
+     * supported by `perspective.table.update`.
+     * @example
+     * const my_viewer = document.getElementById('#my_viewer');
+     * my_viewer.update([
+     *     {x: 1, y: 'a'},
+     *     {x: 2, y: 'b'}
+     * ]);
+     */
+    update(data) {
+        if (this._table === undefined) {
+            this.load(data);
+        } else {
+            this._table.update(data);
+        }
+    }
+      
+    /**
+     * Invalidate this element's dimensions and redraw.
+     * 
+     */
+    notifyResize() {
+        if (!document.hidden && this.offsetParent && document.contains(this)) {
+            this._plugin.resize.call(this);
+        }
     }
 
     /**
@@ -1026,7 +1146,7 @@ class View extends ViewPrivate {
      * settings.  The underlying `perspective.table` will be shared between both
      * elements
      * 
-     * @param {any} widget 
+     * @param {any} widget A `<perspective-viewer>` instance to copy.
      */
     copy(widget) {
         if (widget.hasAttribute('index')) {
@@ -1039,30 +1159,8 @@ class View extends ViewPrivate {
         if (widget._table) {
             loadTable.call(this, widget._table);
         } else {
-            widget.slaves.push(this);
+            widget._slaves.push(this);
         }
-    }
-
-    /**
-     * Sets this `perspective.table.view`'s `sort` property.
-     * 
-     * @type {array<string>} Array of column names
-     */
-    set sort(s) {
-        const sort = JSON.parse(this.getAttribute('sort'));
-        this._sort.innerHTML = "";
-        if (sort.length === 0) {
-            let label = document.createElement('label');
-            label.innerHTML = this._sort.getAttribute('name');
-            this._sort.appendChild(label);
-        } else {
-            sort.map(function(s) {
-                let row = new_row.call(this, s);
-                this._sort.appendChild(row);
-            }.bind(this));
-        }
-        this.dispatchEvent(new Event('config-update'));
-        this._update();
     }
 
     /**
@@ -1070,7 +1168,7 @@ class View extends ViewPrivate {
      * user state).  This (or the underlying `perspective.table`'s equivalent
      * method) must be called in order for its memory to be reclaimed.
      * 
-     * @returns {Promise<bool>} Whether or not this call resulted in the 
+     * @returns {Promise<boolean>} Whether or not this call resulted in the 
      * underlying `perspective.table` actually being deleted.
      */
     delete() {
@@ -1129,41 +1227,4 @@ class View extends ViewPrivate {
         this.setAttribute('view', Object.keys(RENDERERS)[0]);
         this.dispatchEvent(new Event('config-update'));
     }
-
-    connectedCallback() {
-        const _update = _.debounce(update.bind(this), 10);
-        this._update = () => {
-            this.setAttribute('updating', true);
-            _update();
-        }
-
-        this.slaves = [];
-        this._register_ids();
-        this._register_callbacks();
-
-        this.setAttribute('settings', true);
-        this._show_config = true;
-
-        if (!this.hasAttribute('row-pivots')) {
-            this.setAttribute('row-pivots', "[]");
-        }
-
-        if (!this.hasAttribute('column-pivots')) {
-            this.setAttribute('column-pivots', "[]");
-        }
-
-        if (!this.hasAttribute('filters')) {
-            this.setAttribute('filters', "[]");
-        }
-
-        if (Object.keys(RENDERERS).length === 0) {
-            _register_debug_plugin();
-        }
-
-        this._register_view_options();
-        this._register_data_attribute();
-        this._toggle_config();
-    }
 }
-
-bindTemplate(template)(View);
