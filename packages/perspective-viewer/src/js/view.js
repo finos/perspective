@@ -874,6 +874,7 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `sort` property, an array of column
      * names.
      * 
+     * @name sort
      * @type {array<string>} Array of column names
      * 
      * @example <caption>via Javascript DOM</caption>
@@ -903,6 +904,7 @@ class View extends ViewPrivate {
     /**
      * The set of visible columns.
      *
+     * @name columns
      * @param {array} columns An array of strings, the names of visible columns.
      * 
      * @example <caption>via Javascript DOM</caption>
@@ -922,6 +924,7 @@ class View extends ViewPrivate {
     /**
      * The set of column aggregate configurations.
      *
+     * @name aggregates
      * @param {object} aggregates A dictionary whose keys are column names, and
      * values are valid aggregations.  The `aggergates` attribute works as an
      * override;  in lieu of a key for a column supplied by the developers, a
@@ -950,7 +953,8 @@ class View extends ViewPrivate {
 
     /**
      * The set of column filter configurations.
-     *
+     * 
+     * @name filters
      * @type {array} filters An arry of filter config objects.  A filter
      * config object is an array of three elements:
      *     * The column name.
