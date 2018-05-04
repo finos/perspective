@@ -832,12 +832,11 @@ class View extends ViewPrivate {
      * names.
      * 
      * @name sort
+     * @memberof View.prototype
      * @type {array<string>} Array of column names
-     * 
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('sort', JSON.stringify(["x"]));
-     *
      * @example <caption>via HTML</caption>
      * <perspective-viewer sort='["x"]'></perspective-viewer>
      */
@@ -862,12 +861,11 @@ class View extends ViewPrivate {
      * The set of visible columns.
      *
      * @name columns
+     * @memberof View.prototype
      * @param {array} columns An array of strings, the names of visible columns.
-     * 
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
-     *
      * @example <caption>via HTML</caption>
      * <perspective-viewer columns='["x", "y"]'></perspective-viewer>
      */
@@ -882,16 +880,15 @@ class View extends ViewPrivate {
      * The set of column aggregate configurations.
      *
      * @name aggregates
+     * @memberof View.prototype
      * @param {object} aggregates A dictionary whose keys are column names, and
      * values are valid aggregations.  The `aggergates` attribute works as an
      * override;  in lieu of a key for a column supplied by the developers, a
      * default will be selected and reflected to the attribute based on the
      * column's type.  See {@link perspective/src/js/defaults.js}
-     * 
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
-
      * @example <caption>via HTML</caption>
      * <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
      */
@@ -912,6 +909,7 @@ class View extends ViewPrivate {
      * The set of column filter configurations.
      * 
      * @name filters
+     * @memberof View.prototype
      * @type {array} filters An arry of filter config objects.  A filter
      * config object is an array of three elements:
      *     * The column name.
@@ -919,7 +917,6 @@ class View extends ViewPrivate {
      *       {@link perspective/src/js/defaults.js}
      *     * The filter argument, as a string, float or Array<string> as the 
      *       filter operation demands.
-     * 
      * @example <caption>via Javascript DOM</caption>
      * let filters = [
      *     ["x", "<", 3], 
@@ -927,7 +924,6 @@ class View extends ViewPrivate {
      * ];
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('filters', JSON.stringify(filters));
-     *
      * @example <caption>via HTML</caption>
      * <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
      */
@@ -975,6 +971,7 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `column_pivots` property.
      * 
      * @name column-pivots
+     * @memberof View.prototype
      * @type {array<string>} Array of column names
      */
     @array_attribute
@@ -1011,6 +1008,7 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `row_pivots` property.
      * 
      * @name row-pivots
+     * @memberof View.prototype
      * @type {array<string>} Array of column names
      */
     @array_attribute
@@ -1036,7 +1034,6 @@ class View extends ViewPrivate {
      * render it hidden until the message is removed.
      * 
      * @param {string} msg The message. This can be HTML - it is not sanitized.
-     * 
      * @example
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('message', '<h1>Loading</h1>');
@@ -1061,7 +1058,6 @@ class View extends ViewPrivate {
      * instance from the preferred worker.
      * 
      * @readonly
-     * 
      * @example
      * let elem = document.getElementById('my_viewer');
      * let table = elem.worker.table([{x:1, y:2}]);
@@ -1080,18 +1076,15 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
-     * 
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.load([
      *     {x: 1, y: 'a'},
      *     {x: 2, y: 'b'}
      * ]);
-     * 
      * @example <caption>Load CSV</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.load("x,y\n1,a\n2,b");
-     * 
      * @example <caption>Load perspective.table</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * const tbl = perspective.table("x,y\n1,a\n2,b");
@@ -1123,7 +1116,6 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table.update`.
-     * 
      * @example
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.update([
