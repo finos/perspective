@@ -101,6 +101,7 @@ _get_fterms(t_schema schema, val j_filters)
                     case DTYPE_INT32:
                         term = mktscalar(filter[2].as<t_int32>());
                         break;
+                    case DTYPE_INT64:
                     case DTYPE_FLOAT64:
                         term = mktscalar(filter[2].as<t_float64>());
                         break;
