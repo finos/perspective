@@ -93,7 +93,7 @@ if (!fs.existsSync('screenshots')) {
     fs.mkdirSync('screenshots');
 }
 
-let browser, page, url, errors = [];
+let browser, page, url, errors = [], __name = "";
 
 beforeAll(async () => {
     browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
@@ -103,18 +103,20 @@ beforeAll(async () => {
     // animation playback rate to something extreme.
     await page._client.send('Animation.setPlaybackRate', { playbackRate: 100.0 });
     page.on('console', msg => {
-        if (msg.type === 'error') {
-            errors.push(msg.text);
+        let text;
+        if ({}.toString.call(msg.text) === '[object Function]') {
+            text = msg.text();
+        } else {
+            text = msg.text;
         }
-        if (process.env.DEBUG) {
-            private_console.log(msg.text);
+        if (msg.type === 'error') {
+            errors.push(text);
+            private_console.log(`${__name}: ${text}`);
         }
     });
     page.on('pageerror', msg => {
         errors.push(msg.message);
-        if (process.env.DEBUG) {
-            private_console.error(msg.message);
-        }
+        private_console.log(`${__name}: ${msg.message}`);
     });
 });
 
@@ -142,8 +144,7 @@ test.capture = function capture(name, body, timeout = 60000) {
     let _url = url;
     test(name, async () => {
         errors = [];
-        if (process.env.DEBUG) private_console.log("---- " + name + " -----------------------------");
-
+        __name = name;
         await new Promise(setTimeout);
         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
         await page.waitForSelector('perspective-viewer:not([updating])');
