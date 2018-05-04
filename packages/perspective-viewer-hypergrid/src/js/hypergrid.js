@@ -26,6 +26,9 @@ import "../less/hypergrid.less";
 
 const TREE = JSONBehavior.prototype.treeColumnIndex;
 
+const COLUMN_HEADER_FONT = '12px amplitude-regular, Helvetica, sans-serif';
+const GROUP_LABEL_FONT = '12px open sans, sans-serif'; // overrides COLUMN_HEADER_FONT for group labels
+
 var base_grid_properties = {
     autoSelectRows: false,
     cellPadding: 5,
@@ -34,7 +37,7 @@ var base_grid_properties = {
     rowSelection: false,
     checkboxOnlyRowSelections: false,
     columnClip: true,
-    columnHeaderFont: '12px amplitude-regular, Helvetica, sans-serif',
+    columnHeaderFont: COLUMN_HEADER_FONT,
     columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     columnsReorderable: false,
     defaultRowHeight: 24,
@@ -530,8 +533,16 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             this.grid.installPlugins([
                 PerspectiveDataModel,
                 CachedRendererPlugin,
-                [groupedHeaderPlugin, { paintBackground: null }] // no group header label decoration
+                [groupedHeaderPlugin, {
+                    paintBackground: null, // no group header label decoration
+                    columnHeaderLines: false, // only draw vertical rule lines between group labels
+                    groupConfig: [{
+                        halign: 'center', // center group labels
+                        font: GROUP_LABEL_FONT
+                    }]
+                }]
             ]);
+
 
             let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             this.grid.addProperties(grid_properties);
