@@ -187,6 +187,8 @@ function drop(ev) {
     }
     if (name.indexOf('filter') > -1) {
         this.setAttribute(name, JSON.stringify(columns.concat([data])));
+    } else if (name.indexOf('sort') > -1) {
+        this.setAttribute(name, JSON.stringify(columns.concat([[data[0], "asc"]])));
     } else {
         this.setAttribute(name, JSON.stringify(columns.concat([data[0]])));
     }
@@ -269,6 +271,18 @@ function column_filter_clicked() {
     this.setAttribute('filters', JSON.stringify(filters));
     this._updating_filter = false;
     this._debounce_update();
+}
+
+function sort_order_clicked() {
+    let sort = JSON.parse(this.getAttribute('sort'));
+    let new_sort = this._get_view_sorts();
+    for (let s of sort) {
+        let updated_sort = new_sort.find(x => x[0] === s[0]);
+        if (updated_sort) {
+            s[1] = updated_sort[1];
+        }
+    }
+    this.setAttribute('sort', JSON.stringify(sort));
 }
 
 /******************************************************************************
@@ -419,7 +433,7 @@ async function loadTable(table) {
     this._debounce_update();
 }
 
-function new_row(name, type, aggregate, filter) {
+function new_row(name, type, aggregate, filter, sort) {
     let row = document.createElement('perspective-row');
 
     if (!type) {
@@ -461,6 +475,12 @@ function new_row(name, type, aggregate, filter) {
         }
     }
 
+    if (sort) {
+        row.setAttribute('sort-order', sort);
+    } else {
+        row.setAttribute('sort-order', "asc");
+    }
+
     row.setAttribute('type', type);
     row.setAttribute('name', name);
     row.setAttribute('aggregate', aggregate);
@@ -479,6 +499,7 @@ function new_row(name, type, aggregate, filter) {
             this._drop_target_hover = new_row.call(this, name, type, aggregate);
         }
     });
+    row.addEventListener('sort-order', sort_order_clicked.bind(this));
     row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
     return row;
 }
@@ -511,7 +532,7 @@ function update() {
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
     let hidden = [];
-    let sort = this._view_columns("#sort perspective-row");
+    let sort = this._get_view_sorts("#sort perspective-row");
     for (let s of sort) {
         if (aggregates.map(agg => agg.column).indexOf(s) === -1) {
             let all = this._get_view_aggregates('#inactive_columns perspective-row');
@@ -648,7 +669,11 @@ function update() {
         return this._view_columns(selector, true);
     }
 
-    _view_columns(selector, types, filters) {
+    _get_view_sorts() {
+        return this._view_columns('#sort perspective-row', false, false, true);
+    }
+
+    _view_columns(selector, types, filters, sort) {
         selector = selector || '#active_columns perspective-row';
         let selection = this.querySelectorAll(selector);
         let sorted = Array.prototype.slice.call(selection);
@@ -660,6 +685,9 @@ function update() {
             } else if (filters) {
                 let {operator, operand} = JSON.parse(s.getAttribute('filter'));
                 return [name, operator, operand];
+            } else if (sort) {
+                let order = s.getAttribute('sort-order') || "asc";
+                return [name, order];
             } else {
                 return name;
             }
@@ -820,7 +848,7 @@ class View extends ViewPrivate {
         this._register_data_attribute();
         this._toggle_config();
 
-        for (let attr of ['row-pivots', 'column-pivots', 'filters']) {
+        for (let attr of ['row-pivots', 'column-pivots', 'filters', 'sort']) {
             if (!this.hasAttribute(attr)) {
                 this.setAttribute(attr, "[]");
             }
@@ -849,7 +877,12 @@ class View extends ViewPrivate {
             this._sort.appendChild(label);
         } else {
             sort.map(function(s) {
-                let row = new_row.call(this, s);
+                let dir = "asc";
+                if (Array.isArray(s)) {
+                    dir = s[1];
+                    s = s[0];
+                }
+                let row = new_row.call(this, s, false, false, false, dir);
                 this._sort.appendChild(row);
             }.bind(this));
         }

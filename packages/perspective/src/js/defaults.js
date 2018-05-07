@@ -54,6 +54,14 @@ const BOOLEAN_AGGREGATES = [
     "or"
 ];
 
+export const SORT_ORDERS = [
+    "asc",
+    "desc",
+    "none",
+    "asc abs",
+    "desc abs"
+]
+
 export const TYPE_AGGREGATES = {
     'string': STRING_AGGREGATES,
     'float': NUMBER_AGGREGATES,

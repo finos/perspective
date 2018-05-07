@@ -13,7 +13,7 @@ import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
 import {Precision} from "@apache-arrow/es5-esm/type";
 import {is_valid_date, DateParser} from "./date_parser.js";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -923,10 +923,16 @@ table.prototype.view = function(config) {
     // Sort
     let sort = [];
     if (config.sort) {
+        sort = config.sort.map(x => {
+            if (!Array.isArray(x)) {
+                return [config.aggregate.map(agg => agg.column).indexOf(x), 1];
+            } else {
+                return [config.aggregate.map(agg => agg.column).indexOf(x[0]), SORT_ORDERS.indexOf(x[1])];
+            }
+        });
         if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
-            config.sort = config.sort.filter(x => config.row_pivot.indexOf(x) === -1);
+            config.sort = config.sort.filter(x => config.row_pivot.indexOf(x[0]) === -1);
         }
-        sort = config.sort.map(x => [config.aggregate.map(agg => agg.column).indexOf(x), 1]);
     }
 
     // Row Pivots
@@ -1336,6 +1342,8 @@ const perspective = {
     AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
 
     FILTER_DEFAULTS: FILTER_DEFAULTS,
+
+    SORT_ORDERS: SORT_ORDERS,
 
     worker: function () {},
 
