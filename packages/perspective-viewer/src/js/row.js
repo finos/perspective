@@ -50,7 +50,16 @@ function get_text_width(text, max = 0) {
     return width;
 }
 
-bindTemplate(template)(class Row extends HTMLElement {
+const ICONS = {
+    "asc": "&#x2191;",
+    "desc": "&#x2193;",
+    "none": "-",
+    "asc abs": "&#x2B06;",
+    "desc abs": "&#x2B07;"
+};
+
+@bindTemplate(template)
+class Row extends HTMLElement {
 
     set name(n) {
         let elem = this.querySelector('#name');
@@ -159,6 +168,11 @@ bindTemplate(template)(class Row extends HTMLElement {
         }
     }
 
+    set 'sort-order'(sort_dir) {
+        const icon = ICONS[sort_dir];
+        this.querySelector('#sort_order').innerHTML = icon;
+    }
+
     _update_filter(event) {
         let filter_operand = this.querySelector('#filter_operand');
         let filter_operator = this.querySelector('#filter_operator');
@@ -208,6 +222,14 @@ bindTemplate(template)(class Row extends HTMLElement {
             this.dispatchEvent(new CustomEvent('aggregate-selected', {detail: event}));
         });
 
+        let sort_order = this.querySelector('#sort_order');
+        sort_order.addEventListener('click', event => {
+            const current = this.getAttribute('sort-order');
+            const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % 5;
+            this.setAttribute('sort-order', perspective.SORT_ORDERS[order]);
+            this.dispatchEvent(new CustomEvent('sort-order', {detail: event}));
+        });
+
         let filter_operand = this.querySelector('#filter_operand');
         let filter_operator = this.querySelector('#filter_operator');
         let debounced_filter = _.debounce(event => this._update_filter(event), 50);
@@ -218,6 +240,6 @@ bindTemplate(template)(class Row extends HTMLElement {
             debounced_filter();
         });
     }
-});
+};
 
 
