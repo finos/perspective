@@ -46,7 +46,6 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         if (this._loaded) return;
         let psp = (<any>(this.node.querySelector('perspective-viewer')));
         
-        let schema = JSON.parse(this._schema);
         let layout = JSON.parse(this._lyt);
 
         for(let key in layout){
@@ -59,7 +58,8 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
             }
         }
 
-        if (schema) {
+        if (this._schema !== '') {
+            let schema = JSON.parse(this._schema);
             psp.load(schema);
         }
 
