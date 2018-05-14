@@ -37,7 +37,8 @@
     "@jpmorganchase/perspective-viewer": "^0.1.14",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "fin-hypergrid": "2.1.10",
+    "datasaur-local": "github:fin-hypergrid/datasaur-local#3.0.0",
+    "fin-hypergrid": "github:fin-hypergrid/alpha#3.0.0",
     "fin-hypergrid-grouped-header-plugin": "^1.1.2",
     "rectangular": "1.0.1",
     "underscore": "^1.8.3"
