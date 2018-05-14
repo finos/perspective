@@ -8,23 +8,24 @@
  */
 
 const Hypergrid = require('fin-hypergrid');
-const JSONBehavior = require('fin-hypergrid/src/behaviors/JSON');
 const Base = require('fin-hypergrid/src/Base');
 const groupedHeaderPlugin = require('fin-hypergrid-grouped-header-plugin');
 
 const Range = require('./Range');
+const CachedRendererPlugin = require('./CachedRendererPlugin');
+const perspectivePlugin = require('./perspective-plugin');
+const PerspectiveDataModel = require('./PerspectiveDataModel');
 const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
+const psp2hypergrid = require('./psp-to-hypergrid');
 
-const _ = require('underscore');
-
-import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
+// import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
 const TEMPLATE = require('../html/hypergrid.html');
 
 import "../less/hypergrid.less";
 
-const TREE = JSONBehavior.prototype.treeColumnIndex;
+const TREE = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 const COLUMN_HEADER_FONT = '12px amplitude-regular, Helvetica, sans-serif';
 const GROUP_LABEL_FONT = '12px open sans, sans-serif'; // overrides COLUMN_HEADER_FONT for group labels
@@ -114,290 +115,7 @@ var light_theme_overrides = {
 };
 
 function generateGridProperties(overrides) {
-    var full_properties = {};
-    for (var propname in base_grid_properties) {
-        full_properties[propname] = base_grid_properties[propname];
-    }
-    for (propname in overrides) {
-        full_properties[propname] = overrides[propname];
-    }
-    return full_properties;
-}
-
-function setPSP(payload) {
-    var grid = this.grid;
-    var processed_schema = [];
-    var col_name, col_header, col_settings;
-
-    if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === '') {
-        payload.columnPaths[0] = [' '];
-    }
-
-    for (var i = (payload.isTree ? 1 : 0); i < payload.columnPaths.length; i++) {
-        col_name = payload.columnPaths[i].join('|');
-        var aliases = payload.configuration.columnAliases;
-        col_header = aliases ? (aliases[col_name] || col_name) : col_name;
-
-        col_settings = { name: i.toString(), header: col_header };
-        if (payload.columnTypes[i] === 'str') {
-            col_settings.type = 'string';
-        } else {
-            col_settings.type = payload.columnTypes[i];
-        }
-        processed_schema.push(col_settings);
-    }
-
-    var old_schema = grid.behavior.dataModel.schema;
-    this.schema_loaded = this.schema_loaded && _.isEqual(processed_schema, old_schema);
-    this.schema = processed_schema;
-
-    if (this.schema_loaded) {
-        grid.setData({
-            data: payload.rows,
-        });
-    } else {
-
-        // Memoize column widths;
-        const widths = {};
-        for (let w = 0, W = grid.getColumnCount(); w < W; w++) {
-            let header = grid.getColumnProperties(w).header;
-            let name = header.split('|');
-            name = name[name.length - 1];
-            let width = grid.getColumnWidth(w);
-            if (name in widths) {
-                widths[header] = width;
-            } else {
-                widths[name] = width;
-            }
-        }
-        console.log('Setting up initial schema and data load into HyperGrid');
-        grid.setData({
-            data: payload.rows,
-            schema: this.schema
-        });
-        this.schema_loaded = true;
-
-        if (payload.isTree) {
-            grid.properties.showTreeColumn = true;
-        }
-
-        this.setHeaders();
-
-        for (i = 0; i < this.schema.length; i++) {
-            let props = grid.getColumnProperties(i);
-
-            switch (this.schema[i].type) {
-                case 'number':
-                case 'float':
-                    props.halign = 'right';
-                    props.columnHeaderHalign = 'right';
-                    props.format = 'FinanceFloat';
-                    break;
-                case 'integer':
-                    props.halign = 'right';
-                    props.columnHeaderHalign = 'right';
-                    props.format = 'FinanceInteger';
-                    break;
-                case 'date':
-                    props.format = 'FinanceDate';
-                    break;
-                default:
-                    if (Array.isArray(this.schema[i].type)) {
-                        props.format = 'FinanceTree';
-                    }
-            }
-
-            // restore column widths;
-            let header = props.header;
-            let name = header.split('|')
-            name = name[name.length - 1];
-            if (header in widths) {
-                props.width = widths[header];
-            } else if (name in widths) {
-                props.width = widths[name];
-            } else {
-                props.width = 50;
-            }
-            props.columnAutosizing = true;
-        }
-
-        grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: grid } }));
-
-    }
-    grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: grid } }));
-
-}
-
-
-function PerspectiveDataModel(grid) {
-    Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
-
-    grid.behavior.dataModel.mixIn({
-
-        // Override setData
-        setData: function(dataPayload, schema) {
-            this.viewData = dataPayload;
-            this.source.setData(dataPayload, schema);
-        },
-
-        // Is the grid view a tree
-        isTree: function() {
-            if (this.grid.behavior.dataModel.viewData) {
-                let data = this.grid.behavior.dataModel.viewData;
-                return data.length === 0 || data[0][TREE] && data[0][TREE].rowPath.length;
-            }
-            return false;
-        },
-
-        // Is this column the 'tree' column
-        isTreeCol: function(x) {
-            return x === this.grid.properties.treeColumnIndex && this.isTree();
-        },
-
-        // Return the value for a given cell based on (x,y) coordinates
-        getValue: function(x, y) {
-            var row = this.dataSource.data[y];
-            return row ? row[x] : null;
-        },
-
-        // Process a value entered in a cell within the grid
-        setValue: function(x, r, value) {
-            this.dataSource.setValue(x, r, value);
-        },
-
-        // Returns the number of rows for this dataset
-        getRowCount: function() {
-            return this.dataSource.data.length;
-        },
-
-        cellStyle: function(gridCellConfig, rendererName) {
-            if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
-                gridCellConfig.value = '-';
-            } else if (['number', 'float', 'integer'].indexOf(this.schema[gridCellConfig.dataCell.x.toString()].type) > -1) {
-                if (gridCellConfig.value === 0) {
-                    gridCellConfig.value = this.schema[gridCellConfig.dataCell.x.toString()].type === 'float' ? '0.00' : '0';
-                } else if (isNaN(gridCellConfig.value))  {
-                    gridCellConfig.value = '-';
-                } else {
-                    gridCellConfig.color = gridCellConfig.value >= 0 ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)') : (gridCellConfig.columnHeaderBackgroundNumberNegative || 'rgb(255,136,136)');
-                }
-            } else if (this.schema[gridCellConfig.dataCell.x.toString()].type === 'boolean') {
-                gridCellConfig.value = String(gridCellConfig.value);
-            }
-        },
-
-        // Return the cell renderer
-        getCell: function(config, rendererName) {
-            if (config.isUserDataArea) {
-                this.cellStyle(config, rendererName);
-            } else if (config.dataCell.x === -1) {
-                if (config.isHeaderRow) {
-                    rendererName = 'SimpleCell';
-                    config.value = '';
-                } else {
-                    var nextRow = this.dataSource.getRow(config.dataCell.y + 1),
-                        depthDiff = nextRow ? config.value.rowPath.length - nextRow[TREE].rowPath.length : -1;
-                    config.last = depthDiff !== 0;
-                    config.expanded = depthDiff < 0;
-                }
-            }
-            return grid.cellRenderers.get(rendererName);
-        },
-
-        // Return the cell editor for a given (x,y) cell coordinate
-        getCellEditorAt: function(x, y, declaredEditorName, cellEvent) {
-            if (declaredEditorName) {
-                var cellEditor = grid.cellEditors.create(declaredEditorName, cellEvent);
-                if (declaredEditorName === 'combobox') {
-                    cellEditor.modes[0].appendOptions = testingDropdownItems;
-                }
-                return cellEditor;
-            }
-            return declaredEditorName;
-        }
-    });
-}
-
-function convertToType(typ, val) {
-    return ['object', 'boolean'].indexOf(typeof (typ)) > -1 ? JSON.parse(val) : (typ.constructor)(val);
-}
-
-var conv = {
-    integer: 'integer',
-    float: 'float',
-    string: 'str',
-    boolean: 'boolean',
-    date: 'date'
-}
-
-function psp2hypergrid(data, schema, tschema, row_pivots, start = 0, end = undefined, length = undefined) {
-    if (data.length === 0) {
-        let columns = Object.keys(schema);
-        return {
-            rows: [],
-            rowPaths: [],
-            data: [],
-            isTree: false,
-            configuration: {},
-            columnPaths: columns.map(col => [col]),
-            columnTypes: columns.map(col => conv[schema[col]])
-        };
-    }
-
-    var is_tree = data[0].hasOwnProperty('__ROW_PATH__');
-
-    var columnPaths = Object.keys(data[0])
-        .filter(row => row !== '__ROW_PATH__')
-        .map(row => row.split(','));
-
-    let flat_columns = columnPaths.map(col => col.join(','));
-
-    let rows = [];
-    if (length) {
-        rows.length = length;
-    }
-    for (let idx = start; idx < (end || data.length); idx++) {
-        const row = data[idx];
-        if (row) {
-            // `dataRow` (element of `dataModel.data`) keys will be `index` here rather than
-            // `columnName` because pivoted data have obscure column names of little use to developer.
-            // This also allows us to override `dataModel.getValue` with a slightly more efficient version
-            // that doesn't require mapping the name through `dataModel.dataSource.schema` to get the index.
-            let dataRow = flat_columns.reduce(function(dataRow, columnName, index) {
-                dataRow[index] = row[columnName];
-                return dataRow;
-            }, {});
-
-            if (is_tree) {
-                if (row.__ROW_PATH__ === undefined) {
-                    row.__ROW_PATH__ = [];
-                }
-
-                let name = row.__ROW_PATH__[row.__ROW_PATH__.length - 1];
-                if (name === undefined && idx === 0) {
-                    name = 'TOTAL';
-                }
-
-                // Following stores the tree column under [-1] rather than ['Tree'] so our `getValue`
-                // override can access it using the tree column index rather than the tree column name.
-                dataRow[TREE] = {
-                    rollup: name,
-                    rowPath: ['ROOT'].concat(row.__ROW_PATH__),
-                    isLeaf: row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0)
-                };
-            }
-            rows[idx] = dataRow;
-        }
-    }
-
-    return {
-        rows: rows,
-        isTree: is_tree,
-        configuration: {},
-        columnPaths: (is_tree ? [[' ']] : []).concat(columnPaths),
-        columnTypes: (is_tree ? [row_pivots.map(x => tschema[x])] : [])
-            .concat(columnPaths.map(col => conv[schema[col[col.length - 1]]]))
-    };
+    return Object.assign({}, base_grid_properties, overrides);
 }
 
 function null_formatter(formatter, null_value = '') {
@@ -417,89 +135,6 @@ function null_formatter(formatter, null_value = '') {
     };
 
     return formatter;
-}
-
-const rectangular = require('rectangular');
-
-function CachedRendererPlugin(grid) {
-
-    async function update_cache() {
-        if (grid._lazy_load) {
-            let range = Range.estimate(grid);
-            if (!range.isInvalid()) {
-                var is_processing_range = grid._updating_cache && !range.within(grid._updating_cache.range);
-                var is_range_changed = !grid._updating_cache && !range.within(grid._cached_range);
-            }
-            if (is_processing_range || is_range_changed) {
-                grid._updating_cache = grid._cache_update(range);
-                grid._updating_cache.range = range;
-                let updated = await grid._updating_cache;
-                if (updated) {
-                    grid._updating_cache = undefined;
-                    grid._cached_range = range;
-                }
-                return updated;
-            } else if (!range.within(grid._cached_range)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    grid.canvas._paintNow = grid.canvas.paintNow;
-
-    grid.canvas.resize = async function() {
-        var box = this.size = this.div.getBoundingClientRect();
-
-        let width = this.width = Math.floor(this.div.clientWidth);
-        let height = this.height = Math.floor(this.div.clientHeight);
-
-        //fix à la sir spinka, see
-        //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
-        //just add 'hdpi' as an attribute to the fin-canvas tag
-        var ratio = 1;
-        var isHIDPI = window.devicePixelRatio && this.component.properties.useHiDPI;
-        if (isHIDPI) {
-            var devicePixelRatio = window.devicePixelRatio || 1;
-            var backingStoreRatio = this.gc.webkitBackingStorePixelRatio ||
-                this.gc.mozBackingStorePixelRatio ||
-                this.gc.msBackingStorePixelRatio ||
-                this.gc.oBackingStorePixelRatio ||
-                this.gc.backingStorePixelRatio || 1;
-
-            ratio = devicePixelRatio / backingStoreRatio;
-            //this.canvasCTX.scale(ratio, ratio);
-        }
-
-
-        this.bounds = new rectangular.Rectangle(0, 0, width, height);
-        this.component.setBounds(this.bounds);
-        this.resizeNotification();
-
-        let render = await update_cache();
-
-        if (render) {
-            this.buffer.width = this.canvas.width = width * ratio;
-            this.buffer.height = this.canvas.height = height * ratio;
-
-            this.canvas.style.width = this.buffer.style.width = width + 'px';
-            this.canvas.style.height = this.buffer.style.height = height + 'px';
-
-            this.bc.scale(ratio, ratio);
-            if (isHIDPI && !this.component.properties.useBitBlit) {
-                this.gc.scale(ratio, ratio);
-            }
-
-            grid.canvas._paintNow();
-        }
-    };
-
-    grid.canvas.paintNow = async function() {
-        let render = await update_cache();
-        if (render) {
-            grid.canvas._paintNow();
-        }
-    };
 }
 
 bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
@@ -525,13 +160,13 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             var host = this.querySelector('#mainGrid');
 
             host.setAttribute('hidden', true);
-            this.grid = new Hypergrid(host, { Behavior: JSONBehavior });
+            this.grid = new Hypergrid(host, { DataModel: PerspectiveDataModel });
             host.removeAttribute('hidden');
 
-            // window.g = this.grid; window.p = g.properties; // for debugging convenience
+            // window.g = this.grid; window.p = g.properties; // for debugging convenience in console
 
             this.grid.installPlugins([
-                PerspectiveDataModel,
+                perspectivePlugin,
                 CachedRendererPlugin,
                 [groupedHeaderPlugin, {
                     paintBackground: null, // no group header label decoration
@@ -644,8 +279,7 @@ async function grid(div, view, task) {
     ]);
 
     if (!this.hypergrid) {
-        let grid = document.createElement('perspective-hypergrid');
-        this[PRIVATE].grid = grid;
+        this[PRIVATE].grid = document.createElement('perspective-hypergrid');
         Object.defineProperty(this, 'hypergrid', {
             get: () => this[PRIVATE].grid.grid
         });
