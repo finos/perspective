@@ -50,30 +50,6 @@ var arrow_indexed_result = [
 
 module.exports = (perspective) => {
 
-
-    describe("Removes", function() {
-
-        it("after an `update()`", async function () {
-            var table = perspective.table(meta, {index: "x"});
-            table.update(data);
-            var view = table.view();
-            table.remove([1, 2]);
-            let result = await view.to_json();
-            expect(result.length).toEqual(2);
-            expect(data.slice(2, 4)).toEqual(result);
-        });
-
-        it("after an regular data load`", async function () {
-            var table = perspective.table(data, {index: "x"});
-            var view = table.view();
-            table.remove([1, 2]);
-            let result = await view.to_json();
-            expect(result.length).toEqual(2);
-            expect(data.slice(2, 4)).toEqual(result);
-        });
-
-    });
-
     describe("Updates", function() {
 
         it("Meta constructor then `update()`", async function () {

@@ -301,6 +301,8 @@ export function draw(mode) {
             type = 'column';
         } else if (mode == 'treemap') {
             type = 'treemap';
+        } else if (mode == 'sunburst') {
+            type = 'sunburst';
         } else if (mode === 'scatter') {
             if (aggregates.length <= 3) {
                 type = 'scatter';
@@ -589,7 +591,7 @@ export function draw(mode) {
 
             color_axis.bind(this)(config, colorRange)
             config.legend.floating = false;
-        } else if (mode === "treemap") {
+        } else if (mode === "treemap" || mode === "sunburst") {
             let data = [];
             let size = aggregates[0]['column'];
             let color, colorAxis, colorRange;
@@ -862,6 +864,18 @@ global.registerPlugin("treemap", {
     resize: resize, 
     initial: {
         "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
+    delete: function () {}
+});
+
+global.registerPlugin("sunburst", {
+    name: "Sunburst",
+    create: draw('sunburst'),
+    resize: resize,
+    initial: {
+        "type": "number",
         "count": 2
     },
     selectMode: "toggle",

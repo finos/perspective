@@ -1071,52 +1071,10 @@ table.prototype.update = function (data) {
     try {
         tbl = __MODULE__.make_table(pdata.row_count || 0, 
             pdata.names, pdata.types, pdata.cdata,
-            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, false);
+            this.gnode.get_table().size(), this.index || "", pdata.is_arrow);
 
         // Add any computed columns
         this._calculate_computed(tbl, this.computed);
-
-        __MODULE__.fill(this.pool, this.gnode, tbl);
-        this.initialized = true;
-    } catch (e) {
-        console.error(e);
-    } finally {
-        if (tbl) {
-            tbl.delete();
-        }
-        schema.delete();
-        types.delete();
-    }
-}
-
-/**
- * Removes the rows of a {@link table}.  Removed rows are pushed down to any
- * derived {@link view} objects.
- *
- * @param {Array<Object>} data An array of primary keys to remove.
- *
- * @see {@link table}
- */
-table.prototype.remove = function (data) {
-    let pdata;
-    let cols = this._columns();
-    let schema = this.gnode.get_tblschema();
-    let types = schema.types();
-
-    data = data.map(idx => ({[this.index]: idx}));
-
-    if (data instanceof ArrayBuffer) {
-        pdata = load_arrow_buffer(data, [this.index], types);
-    }
-    else {
-        pdata = parse_data(data, [this.index], types);
-    }
-
-    let tbl;
-    try {
-        tbl = __MODULE__.make_table(pdata.row_count || 0, 
-            pdata.names, pdata.types, pdata.cdata,
-            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, true);
 
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
@@ -1445,7 +1403,7 @@ const perspective = {
             // Fill t_table with data
             tbl = __MODULE__.make_table(pdata.row_count || 0,
                 pdata.names, pdata.types, pdata.cdata,
-                0, options.index, pdata.is_arrow, false);
+                0, options.index, pdata.is_arrow);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
