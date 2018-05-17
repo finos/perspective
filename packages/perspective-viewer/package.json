@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-viewer",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Perspective.js",
   "main": "build/perspective.view.umd.js",
   "files": [
@@ -31,7 +31,7 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective": "^0.1.9",
+    "@jpmorganchase/perspective": "^0.1.10",
     "@webcomponents/webcomponentsjs": "~1.2.0",
     "awesomplete": "^1.1.2",
     "babel-polyfill": "^6.26.0",
@@ -47,10 +47,10 @@
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
     "babel-plugin-transform-runtime": "^6.23.0",
-    "documentation": "^5.3.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "css-loader": "^0.28.7",
+    "documentation": "^5.3.3",
     "html-loader": "^0.5.1",
     "jest": "^22.0.4",
     "less": "^2.7.2",

@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-viewer-highcharts",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Perspective.js",
   "main": "build/highcharts.plugin.umd.js",
   "directories": {
@@ -33,8 +33,8 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective": "^0.1.9",
-    "@jpmorganchase/perspective-viewer": "^0.1.9",
+    "@jpmorganchase/perspective": "^0.1.10",
+    "@jpmorganchase/perspective-viewer": "^0.1.10",
     "babel-runtime": "^6.26.0",
     "chroma-js": "^1.3.4",
     "gradient-parser": "0.1.5",
