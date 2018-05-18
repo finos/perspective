@@ -37,7 +37,9 @@
     "@jpmorganchase/perspective-viewer": "^0.1.12",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "fin-hypergrid": "2.0.2",
+    "fin-hypergrid": "2.1.10",
+    "fin-hypergrid-grouped-header-plugin": "^1.1.2",
+    "rectangular": "1.0.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
