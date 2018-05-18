@@ -106,7 +106,36 @@ module.exports = (perspective) => {
             ]);
         });
 
-    });   
+    }); 
+
+
+    describe("Destructors", function() {
+
+        it("calls delete() on table with no views", async function () {
+            let table = perspective.table(data);
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+        it("calls delete on a view, then a table", async function () {
+            var table = perspective.table(data);
+            var view = table.view();
+            await view.delete();
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+        it("calls delete on multiple views, then a table", async function () {
+            var table = perspective.table(data);
+            var view1 = table.view();
+            var view2 = table.view();
+            await view1.delete();
+            await view2.delete();
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+    });  
 
     describe("Constructors", function() {
 
