@@ -29,5 +29,5 @@ install:
   - npm install
 
 script:
-  - docker exec -it emscripten npm run travis_start
+  - docker exec -it emscripten npm run docker_start
   - npm run travis_test
