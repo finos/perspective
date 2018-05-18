@@ -24,6 +24,18 @@ export function importTemplate(template) {
     return Array.prototype.slice.call(div.children)[0];
 }
 
+function setTemplateContent(template) {
+    // return early in browsers that have template tag support
+    if (template.content) {
+        return;
+    }
+    template.content = document.createDocumentFragment();
+    let child;
+    while ((child = template.firstChild)) {
+        Node.prototype.appendChild.call(template.content, child);
+    }
+}
+
 /**
  * A simple tool for creating Web Components v0.
  *
@@ -33,9 +45,11 @@ export function importTemplate(template) {
  *     attribute which will become the new Web Component's tag name.
  * proto : The new Web Component's prototype object, as per spec.
  */
-export function registerElement(template, proto) {
+export function registerElement(templateString, proto) {
 
-    template = importTemplate(template);
+    const template = importTemplate(templateString);
+    setTemplateContent(template);
+
     const _perspective_element = class extends proto {
 
         attributeChangedCallback(name, old, value) {
