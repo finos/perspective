@@ -160,6 +160,8 @@ table.prototype.delete = async_queue('delete', "table_method");
 
 table.prototype.on_delete = subscribe('on_delete', 'table_method', true);
 
+table.prototype.remove = async_queue('remove', "table_method");
+
 table.prototype.update = function(data) {
     return new Promise( (resolve, reject) => {
         this._worker.handlers[++this._worker.msg_id] = {resolve, reject};

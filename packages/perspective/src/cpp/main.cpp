@@ -503,7 +503,8 @@ make_table(
     val j_data,
     t_uint32 offset,
     t_str index,
-    t_bool is_arrow
+    t_bool is_arrow,
+    t_bool is_delete
 ) {
     // Create the input and port schemas
     t_svec colnames = vecFromJSArray<std::string>(j_colnames);
@@ -518,8 +519,13 @@ make_table(
     _fill_data(tbl, colnames, j_data, dtypes, offset, is_arrow);
 
     // Set up pkey and op columns
-    auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
-    op_col->raw_fill<t_uint8>(OP_INSERT);
+    if (is_delete) {
+        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_DELETE);
+    } else {
+        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_INSERT);
+    }
 
     if (index == "")
     {
