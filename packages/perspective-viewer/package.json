@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-viewer",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Perspective.js",
   "main": "build/perspective.view.umd.js",
   "files": [
