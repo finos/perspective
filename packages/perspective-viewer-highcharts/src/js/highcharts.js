@@ -256,10 +256,12 @@ function color_axis(config, colorRange) {
             min: colorRange[0],
             max: colorRange[1],
             stops: gradient,
+            reversed: false,
             startOnTick: false,
             endOnTick: false,
         }
     });
+    config.legend.reversed = true;
     config.legend.floating = false;
 }
 
