@@ -534,10 +534,10 @@ function update() {
     let hidden = [];
     let sort = this._get_view_sorts("#sort perspective-row");
     for (let s of sort) {
-        if (aggregates.map(agg => agg.column).indexOf(s) === -1) {
+        if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
             let all = this._get_view_aggregates('#inactive_columns perspective-row');
-            aggregates.push(all.reduce((obj, y) => y.column === s ? y : obj));
-            hidden.push(s);
+            aggregates.push(all.reduce((obj, y) => y.column === s[0] ? y : obj));
+            hidden.push(s[0]);
         }
     }
 
