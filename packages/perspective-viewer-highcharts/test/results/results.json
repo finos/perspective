@@ -14,7 +14,7 @@
     "scatter.html/pivots by two rows and two columns.": "1b0adfde4093d64650bdee3e7f97003b",
     "scatter.html/sorts by a numeric column.": "60184ea906bf709b610a1a957e639ab5",
     "scatter.html/sorts by an alpha column.": "3fb425464dd645d9b4e491a0a5aa0485",
-    "scatter.html/displays visible columns.": "4c4d85adf8e55efd153d67684a466385",
+    "scatter.html/displays visible columns.": "64d20f1498f9c9a441060786046ec824",
     "bar.html/shows a grid without any settings applied.": "eae083c7c079ea5ef3e8fc0b2605c4f5",
     "bar.html/pivots by a row.": "d33b3e19e9d0658bc7be04466c3156ea",
     "bar.html/pivots by two rows.": "a810a5930babed83e255185f28ab73d5",
@@ -40,11 +40,11 @@
     "heatmap.html/shows a grid without any settings applied.": "1acec18abdaff3ea0bf8f59234f918a2",
     "heatmap.html/pivots by a row.": "051f15c9e251afb0bddbe91a35f3cfbb",
     "heatmap.html/pivots by two rows.": "5a3417c6f1b4627c95d3c115ae850724",
-    "heatmap.html/pivots by a row and a column.": "c97a94eaa5f92d48c4ba36eaedbc94b9",
-    "heatmap.html/pivots by two rows and two columns.": "66978cdcf13966b80be2b366b77a89c2",
-    "heatmap.html/sorts by a hidden column.": "9ae32417056c3ce1b7567ff85cf44d8a",
+    "heatmap.html/pivots by a row and a column.": "170f4d2e4e4825bee8c8dfe441bffee1",
+    "heatmap.html/pivots by two rows and two columns.": "3381ac158d3d95a61a232070bc20c800",
+    "heatmap.html/sorts by a hidden column.": "81cc31727c4e2c23301cdd1808cfe0c0",
     "heatmap.html/sorts by a numeric column.": "01ab0ba573fd4f16d83b0529ff8cc095",
     "heatmap.html/filters by a numeric column.": "42857ddca80e27de8c4064adcb989211",
     "heatmap.html/sorts by an alpha column.": "4a114740f310062086c73e874e3f179f",
-    "heatmap.html/displays visible columns.": "2ec2c52d9886ac50cfeb9299994987d8"
+    "heatmap.html/displays visible columns.": "f3424bc92bcebea476cde5bae9ea83a1"
 }
