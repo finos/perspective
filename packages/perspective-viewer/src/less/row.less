@@ -37,8 +37,6 @@
 
 #side_panel #active_columns perspective-row[drop-target] {
     .row_draggable {
-        animation-duration: 0.5s;
-        animation-name: fadein;
         background-color: rgb(240, 240, 255) !important;
         border: 1px solid #1078d1 !important;
         * {
@@ -112,11 +110,6 @@ perspective-row li {
 
 #side_panel perspective-row li {
     margin-right: 5px;
-    transition: margin-right 0.2s;    
-}
-
-#side_panel perspective-row li:hover{
-    margin-right: 2px;
 }
 
 #side_panel perspective-row div {
@@ -124,17 +117,7 @@ perspective-row li {
     padding: 2px;
     font-size: 12px;
     flex-grow: 1;
-    transition: margin 0.2s, padding 0.2s, height 0.2s;
-}
-
-#side_panel perspective-row div:hover {
-    margin-left: -3px;
-    padding-left: 5px;
-}
-
-#side_panel perspective-row:hover div {
-    margin-left: -3px;
-    padding-left: 5px;
+    transition: height 0.2s;
 }
 
 #side_panel #active_columns perspective-row div {
