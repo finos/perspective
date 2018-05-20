@@ -4,12 +4,12 @@
     "superstore.html/pivots by two rows.": "a32dd45c4b623d29d80ef2070dbb8f4f",
     "superstore.html/pivots by a row and a column.": "bce52e9688ef5fedeb95e0e383784685",
     "superstore.html/pivots by two rows and two columns.": "08726cfdfaeaec69822df1e3d616da4c",
-    "superstore.html/sorts by a numeric column.": "e761bba104df9bb995f701a82dfbdc2e",
-    "superstore.html/sorts by an alpha column.": "5ba1ce2333395d4cd66fb73546221476",
+    "superstore.html/sorts by a numeric column.": "ff8ab81c87eebdc8690d7c89371ef537",
+    "superstore.html/sorts by an alpha column.": "1b2c1cda87bd58876383f38ac63734f1",
     "superstore.html/displays visible columns.": "20e2396707d3b779806082c43951abf1",
     "superstore.html/resets viewable area when the logical size expands.": "0519163799221eab93197af968153c9e",
     "superstore.html/selecting a column does not log a context deleted error.": "2563581d3556c4576745443c8498bea9",
     "superstore.html/resets viewable area when the physical size expands.": "7d43db42a2ee3d8c9e7e454a08c7dc7c",
-    "superstore.html/sorts by a hidden column.": "7c86bc8a203e29bf90770f188d1ebb86",
+    "superstore.html/sorts by a hidden column.": "b2f63269d8f928553c806e75b9d533bd",
     "superstore.html/filters by a numeric column.": "fcf2fec04defec7c270b893aefd3cf5c"
 }
