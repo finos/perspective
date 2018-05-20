@@ -18,6 +18,7 @@ import {bindTemplate, json_attribute, array_attribute} from "./utils.js";
 import template from "../html/view.html";
 
 import "../less/view.less";
+import "../less/default.less";
 
 import "./row.js";
 

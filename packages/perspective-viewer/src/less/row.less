@@ -7,38 +7,16 @@
  *
  */
 
-@border-color: #ccc;
-
 .selected_indicator() {
-    font-family: Arial;
-    font-weight: 500;
     font-size: 12px;
-}
-
-.bordered() {
-    border: 1px solid @border-color;
-    border-top-width: 0px;
-    border-left-width: 0px;
 }
 
 #top_panel perspective-row {
     display: inline-block;
 }
 
-@keyframes fadein {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
 #side_panel #active_columns perspective-row[drop-target] {
     .row_draggable {
-        background-color: rgb(240, 240, 255) !important;
-        border: 1px solid #1078d1 !important;
         * {
             display: none !important;
         }
@@ -53,13 +31,8 @@
 }
 
 perspective-viewer.dragging #top_panel .rrow > * {
-    border: 1px solid #1078d1 !important;
-    margin-top: -2px;
+   // margin-top: -2px;
     margin-left: -1px;
-}
-
-perspective-viewer.dragging #top_panel .rrow > .dropping {
-    background-color: rgb(240, 240, 255) !important;
 }
 
 perspective-row {
@@ -68,38 +41,22 @@ perspective-row {
         max-width:5px;
         margin-right:3px;
         flex-grow:0;
-        color:#999;
-        font-family:Arial;
         font-size:10px;
         cursor: pointer;
         margin-left: 3px;
     }
     display: block;
-    border: 0px solid rgba(0,0,0,0);
-}
-
-perspective-viewer ul {
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-.dropping perspective-row.inserting {
-    border-top: 25px solid rgba(0,0,0,0);
-}
-
-.dropping perspective-row.postserting {
-    border-bottom: 25px solid rgba(0,0,0,0);
 }
 
 .dropping * {
     pointer-events: none;
 }
 
-#side_panel perspective-row li {
+#side_panel perspective-row #psp_row {
     margin-bottom: 2px;
 }
 
-perspective-row li {
-    color: rgb(51, 51, 51);
+perspective-row #psp_row {
     display: flex;
     overflow: visible;
     align-items: center;
@@ -108,21 +65,14 @@ perspective-row li {
     float: none !important;
 }
 
-#side_panel perspective-row li {
+#side_panel perspective-row #psp_row {
     margin-right: 5px;
 }
 
-#side_panel perspective-row div {
-    color: rgb(51, 51, 51);
+#side_panel perspective-row .row_draggable {
     padding: 2px;
     font-size: 12px;
     flex-grow: 1;
-    transition: height 0.2s;
-}
-
-#side_panel #active_columns perspective-row div {
-    .bordered();
-    background-color: white;
 }
 
 #side_panel perspective-row .is_visible {
@@ -130,7 +80,6 @@ perspective-row li {
     min-width: 20px;
     margin-left: 6px;
     cursor: pointer;
-    color: #999;
     font-size: 14px;
     margin-top: -2px;
 }
@@ -151,7 +100,6 @@ perspective-row {
     #filter_operand, #filter_operator {
         display: none;
         margin: 0;
-        background: none !important;
     }
 
     #filter_operand {
@@ -168,15 +116,15 @@ perspective-row {
 perspective-viewer {
     #filters {
         white-space: nowrap;
-        padding-top: 3px;
-        border-bottom: 1px solid #ccc;
+        padding-top: 2px;
         color: #ccc;
         display: flex;
         flex-wrap: wrap;
         font-size: 12px;
+        height: 24px;
+
         label {
             height: 21px;
-            margin-bottom: 2px;
         }
     }
 }
@@ -191,15 +139,11 @@ perspective-viewer {
     select {
         margin-left: 15px;
         padding-right: 15px;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
         cursor: pointer;
     }
     #filter_operator {
         display: inline-block;
-        height: 14px;
-        font-family: monospace;
+        height: 17px;
     }
     #filter_operand {
         display: inline-block;
@@ -208,6 +152,7 @@ perspective-viewer {
 
 #sort perspective-row #sort_order {
     display: inline-block;
+    paddinf-left: 10px;
 }
 
 .column_row() {
@@ -216,7 +161,6 @@ perspective-viewer {
     padding-left: 5px;
     padding-right: 5px;
     min-width: 18px;
-    font-family: monospace;
 }
 
 #side_panel {
@@ -234,25 +178,21 @@ perspective-viewer {
 #side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
     .column_row();
     content: "123";
-    color: #016bc6;
 }
 
 #side_panel perspective-row .string::before {
     .column_row();
     content: "abc";
-    color: #fe9292;
 }
 
 #side_panel perspective-row .boolean::before {
     .column_row();
     content: "t/f";
-    color: #999999;
 }
 
 #side_panel perspective-row .date::before {
     .column_row();
     content: "mdy";
-    color: #999999;
 }
 
 perspective-row #column_aggregate {
@@ -280,11 +220,6 @@ perspective-row .row_draggable {
 
 perspective-row .row_draggable select {
     margin: 0px 0px 0px 22px;
-    border: none;
-}
-
-perspective-row .row_draggable select:focus {
-    outline: none;
 }
 
 perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
