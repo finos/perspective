@@ -25,11 +25,11 @@ A streaming data visualization engine for Javascript, Perspective makes it simpl
 
 ## Examples
 
-* [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore-arrow.html) A static `superstore.csv` demo.
-* [citibike.html](https://jpmorganchase.github.io/perspective/examples/citibike.html) NYC Citibike availability map.
-* [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo.
-* [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
-* [theme-material.html](https://jpmorganchase.github.io/perspective/examples/theme-material.html) Material theme example.
+* [superstore.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/superstore-arrow.html) A static `superstore.csv` demo.
+* [citibike.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/citibike.html) NYC Citibike availability map.
+* [streaming.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/streaming.html) A streaming random data demo.
+* [coincap.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
+* [theme-material.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/theme-material.html) Material theme example.
 
 ## Installation
 
