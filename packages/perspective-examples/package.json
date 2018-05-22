@@ -20,7 +20,7 @@
     "build:hypergrid": "webpack --config ../perspective-viewer-hypergrid/test/config/hypergrid.config.js --context ../perspective-viewer-hypergrid/ --output-path ../perspective-examples/build",
     "build:highcharts": "webpack --config ../perspective-viewer-highcharts/test/config/highcharts.config.js --context ../perspective-viewer-highcharts/ --output-path ../perspective-examples/build",
     "compile_test": "npm run copy",
-    "copy": "mkdir -p build && cp -r node_modules/@jpmorganchase/perspective/build/* build && cp src/html/* build && cp src/json/* build && cp src/csv/* build && cp src/css/* build && cp src/js/* build",
+    "copy": "mkdir -p build && cp -r node_modules/@jpmorganchase/perspective/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer/build/*.css build && cp src/html/* build && cp src/json/* build && cp src/csv/* build && cp src/css/* build && cp src/js/* build",
     "host": "http-server build/",
     "clean": "find build -mindepth 1 -delete"
   },
