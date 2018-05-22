@@ -5,19 +5,17 @@
 A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
 & user configurable analytics entirely in the browser.
 
-<p align="center">
 <img src="https://jpmorganchase.github.io/perspective/examples/demo.gif">
-</p>
 
-Features:
+## Features
 
 - A fast, memory efficient streaming pivot engine written principally in C++ and
   compiled to both WebAssembly and asm.js via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
-- An embeddable, framework-agnostic UI for user engine configuration & visualization, based
+- An embeddable, framework-agnostic configuration UI, based
   on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for
-  responsive UIs no matter the update frequency.
+  responsiveness at high frequency.
 
 - A suite of simple visualization plugins for some common Javascript libraries such as
   [HighCharts](https://github.com/highcharts/highcharts) and 
@@ -27,17 +25,52 @@ Features:
 
 ## Examples
 
-* [superstore.html](https://jpmorganchase.github.io/perspective/examples/superstore.html) A static `superstore.csv` demo page.
-* [citibike.html](https://jpmorganchase.github.io/perspective/examples/citibike.html) NYC Citibike availability map.
-* [streaming.html](https://jpmorganchase.github.io/perspective/examples/streaming.html) A streaming random data demo page.
-* [coincap.html](https://jpmorganchase.github.io/perspective/examples/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
+* [superstore.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/superstore-arrow.html) A static `superstore.csv` demo.
+* [citibike.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/citibike.html) NYC Citibike availability map.
+* [streaming.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/streaming.html) A streaming random data demo.
+* [coincap.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
+* [theme-material.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/theme-material.html) Material theme example.
 
 ## Installation
 
+### From CDN
+
+Perspective can be used direct from [unpkg.com](https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js),
+though for production you'll ultimately want to install this via another 
+option below:
+
+```html
+<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/hypergrid.plugin.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/highcharts.plugin.js"></script>
+```
+
+### From NPM
+
+The main modules available via NPM:
+
+- `@jpmorganchase/perspective`   
+  The main library, as both a browser ES6 and Node.js module.  Provides an
+  asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
+  implementation.
+
+- `@jpmorganchase/perspective-viewer`  
+  A configuration and visualization (via plugins) UI, bundled as a [Web Component](https://www.webcomponents.org/introduction).
+
+- `@jpmorganchase/perspective-viewer-hypergrid`  
+  A perspective-viewer plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
+
+- `@jpmorganchase/perspective-viewer-highcharts`  
+  A perspective-viewer plugin for [HighCharts](https://github.com/highcharts/highcharts).
+
+- `@jpmorganchase/perspective-examples`  
+  All perspective modules, bundled with their dependencies as standalone 
+  Javascript files.
+
 ### From source
 
-You'll need [emscripten](https://github.com/kripken/emscripten) installed and 
-resolveable on your PATH in order to build from source, for example via [`emsdk_env.sh`](https://github.com/juj/emsdk):
+Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 
+and uses [lerna](https://lernajs.io/) to manage dependencies.  `@jpmorganchase/perspective` depends on an additional enviornment dependency, [emscripten](https://github.com/kripken/emscripten), to compile the core C++ engine.  You'll need to install the emscripten SDK, then activate and export the latest `emsdk` environment via [`emsdk_env.sh`](https://github.com/juj/emsdk):
 
 ```bash
 source emsdk/emsdk_env.sh
@@ -61,13 +94,11 @@ You can run a simple test server on port 8080 by running:
 
 #### OSX specific instructions
 
-As of this writing, the latest version of Emscripten does not correctly build on
-OSX due to a [bug](https://github.com/kripken/emscripten/issues/5418) in `1.37.22`.
-Instead of `latest`, you'll need to install and activate an older version: 
+Installing and activating the latest [emscriptn SDK]((https://github.com/kripken/emscripten)): 
 
 ```bash
-./emsdk install sdk-1.37.21-64bit
-./emsdk activate sdk-1.37.21-64bit
+./emsdk install latest
+./emsdk activate latest
 ```
 
 You'll also need Boost and CMake, which can be installed from Homebrew:
@@ -93,9 +124,10 @@ When installing Emscripten, make sure to follow [Linux specific instructions](ht
 
 Linking to boost libraries with CMake:
 - You might need to apply a workaround to correctly link boost libraries as described [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html).
-  ```bash
-  cp -r /usr/include/boost ./packages/perspective/src/include/
-  ```
+
+```bash
+cp -r /usr/include/boost ./packages/perspective/src/include/
+```
 
 #### Options
 
@@ -104,29 +136,7 @@ The build script respects a few environment flags:
 * `PSP_DEBUG` will run a debug build of the C++ source.
 * `PSP_NO_MINIFY` will skip Javascript minification.
 
-### From NPM
-
-Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 
-and uses [lerna](https://lernajs.io/) to manage dependencies.  The main modules, 
-all available via NPM, are:
-
-- `@jpmorganchase/perspective`   
-  The main library, as both a browser ES6 and Node.js module.  Provides an
-  asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
-  implementation.
-
-- `@jpmorganchase/perspective-viewer`  
-  A configuration and visualization (via plugins) UI, bundled as a [Web Component](https://www.webcomponents.org/introduction).
-
-- `@jpmorganchase/perspective-viewer-hypergrid`  
-  A perspective-viewer plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
-
-- `@jpmorganchase/perspective-viewer-highcharts`  
-  A perspective-viewer plugin for [HighCharts](https://github.com/highcharts/highcharts).
-
-## Usage
-
-### A note on WebAssembly/asm.js in the browser
+### Hosting
 
 Whether you use just the `perspective` engine itself, or the 
 `perspective-viewer` web component, your browser will need to
@@ -146,6 +156,14 @@ site bundle from:
            perspective.js
            perspective.asm.js
            perspective.js.mem
+
+In node, this can be achieved by hosting the contents of a packages `/build`:
+
+```javascript
+cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/
+```
+
+## Usage
 
 ### Perspective library
 
@@ -184,13 +202,13 @@ const worker = perspective.worker();
 #### In Node.js
 
 ```javascript
-const perspective = require('perspective/build/perspective.node.js');
+const perspective = require('@jpmorganchase/perspective/build/perspective.node.js');
 ```
 
 See [perspective-examples/node_server.js](https://github.com/jpmorganchase/perspective/blob/master/packages/perspective-examples/src/js/node_server.js)
 for an example.
 
-#### Usage
+#### `table()`
 
 The basic data primitive of `perspective` is the `table`, which you can
 instantiate via the `table()` method on a `worker`.  Further data can be
@@ -229,8 +247,25 @@ primary key on the `table`, replacing `update`d rows instead of appending them.
 // Use the 'x' column as a primary key
 const table3 = worker.table(data, {index: 'x'});
 ```
+#### `view()`
 
-### Perspective-viewer web component
+In order to query the table, you must then create a `view()`, an immutable set
+of transformations for an associated `table()`.  A `view()` is created from a
+`table()` via a configuration object, and a `view()` instance can return data
+from queries to its various methods (see the [API](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective)).
+
+```javascript
+const table = worker.table(data);
+
+const view = table.view({
+    aggregate: [{column: "Sales", op: "sum"}],
+    row_pivot: ["Region", "Country"],
+    filter: [["Category", "in", ["Furniture", "Technology"]]]
+});
+
+view.to_json().then(json => console.log(json));
+```
+### <perspective-viewer> web component
 
 [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer)
 
@@ -249,7 +284,15 @@ import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 ```
 
-Alternatively, you can just import the pre-bundled assets from the `perspective-examples` 
+You must also import a theme when bundling perspective-viewer.  Even though there
+are only 2 of them.
+
+```javascript
+import "@jpmorganchase/perspective-viewer/build/material.css"; // or default.css
+```
+
+Alternatively, if you're fine with a default theme and don't want to bundle yourself,
+you can just import the pre-bundled assets from the `perspective-examples` 
 module's `build/` directory:
 
 ```html 

@@ -7,12 +7,6 @@
  *
  */
 
-.selected_indicator() {
-    font-family: Arial;
-    font-weight: 500;
-    font-size: 12px;
-}
-
 perspective-viewer {
 
     tspan, text {
@@ -34,31 +28,17 @@ perspective-viewer {
     .highcharts-heatmap-gradient-negative {
         background: linear-gradient(#feeb65 100%, #e4521b 70%, #4D342F 0%);
     }
-
 }
 
-perspective-viewer[view=xy_scatter], perspective-viewer[view=xy_line] {
-    
-    svg image {
-        opacity: 0.8;
-    }
 
-    #active_columns {
-        :nth-child(1) .is_visible::before {
-            .selected_indicator();
-            content: "X";
-        }
-        :nth-child(2) .is_visible::before {
-            .selected_indicator();
-            content: "Y";
-        }
-        :nth-child(3) .is_visible::before {
-            .selected_indicator();
-            content: "C";
-        }
-        :nth-child(4) .is_visible::before {
-            .selected_indicator();
-            content: "S";
-        }
+perspective-viewer[view=sunburst] {
+    path {
+        stroke: #fff;
+    }
+}
+
+perspective-viewer[view=treemap] {
+    rect {
+        stroke: #fff;
     }
 }
