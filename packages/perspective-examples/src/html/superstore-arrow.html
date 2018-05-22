@@ -25,11 +25,10 @@
     <body>
 
         <perspective-viewer
-            view="y_bar"
-            row-pivots='["Category","Region","Segment"]'
-            column-pivots='["Sub-Category"]'
-            columns='["Sales"]'
-         >
+            view="sunburst"
+            row-pivots='["Sub-Category","Region","Segment"]'
+            sort='[["Profit","desc"]]'
+            columns='["Sales", "Profit"]'>
                 
         </perspective-viewer>
 
@@ -41,7 +40,8 @@
                 xhr.responseType = "arraybuffer"
                 xhr.onload = function () { 
                     var el = document.getElementsByTagName('perspective-viewer')[0];
-                    el.load(xhr.response); 
+                    el.load(xhr.response);
+                    el._toggle_config(); 
                 }
                 xhr.send(null);
             });
