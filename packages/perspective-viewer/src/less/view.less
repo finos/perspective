@@ -23,6 +23,9 @@ perspective-viewer:hover #config_button {
 
 perspective-viewer {
 
+    position: relative;
+    display: inline-block;
+
     * {
         box-sizing: border-box;
         line-height: 1.42857143;
@@ -184,7 +187,7 @@ perspective-viewer {
     }
     
     ul, #filters {
-        padding: 0px 10px 0px 10px;
+        padding: 0px;
         margin: 0;
         font-size: 12px;
     }
@@ -218,8 +221,13 @@ perspective-viewer {
         display: flex;
     }
 
+    #side_panel perspective-row .row_draggable {
+        cursor: move;
+    }
+
     #vis_selector_container {
         min-height: 29px;
+        margin-left: 30px;
     }
 
     #vis_selector {
