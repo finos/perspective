@@ -13,6 +13,7 @@ import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
 
 import '../src/css/index.css';
+import '../src/css/material.dark.css';
 
 import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.js';
 
@@ -28,6 +29,9 @@ const PSP_CLASS = 'jp-PSPViewer';
 
 export
 const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
+
+export
+const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
 
 interface PerspectiveSpec {
     data: string,
@@ -54,7 +58,7 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
                     psp.setAttribute(key, layout[key]);
                 } else if (key === 'colorscheme'){
                     if(layout[key]==='dark'){
-                        this.node.style.filter = 'invert(100%) hue-rotate(180deg)';
+                        this.node.classList.add(PSP_CONTAINER_CLASS_DARK)
                     }
                 } else {
                     psp.setAttribute(key, JSON.stringify(layout[key]));
