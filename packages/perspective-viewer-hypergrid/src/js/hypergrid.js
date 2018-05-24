@@ -84,19 +84,19 @@ var light_theme_overrides = {
     foregroundSelectionColor: '#666',
     backgroundSelectionColor: 'rgba(162, 183, 206, 0.3)',
     selectionRegionOutlineColor: 'rgb(45, 64, 85)',
-    columnHeaderColor: '#666',
-    paintBackground: function(gc, config) {
-    },
-    columnHeaderBackgroundColor: '#fff',
+    //columnHeaderColor: '#666',
+    // paintBackground: function(gc, config) {
+    // },
+    columnHeaderBackgroundColor: 'none',
     columnHeaderHalign: 'left',
     columnHeaderForegroundSelectionColor: '#333',
     columnHeaderBackgroundSelectionColor: '#40536d',
     columnHeaderBackgroundNumberPositive: '#1078d1',
     columnHeaderBackgroundNumberNegative: "#de3838",
     rowHeaderForegroundSelectionFont: '12px Arial, Helvetica, sans-serif',
-    rowProperties: [
-        { color: '#666', backgroundColor: '#fff' },
-    ],
+    //rowProperties: [
+    //    { color: '#666', backgroundColor: '#fff' },
+    //],
     hoverCellHighlight: {
         enabled: true,
         backgroundColor: '#eeeeee'
@@ -649,7 +649,13 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             ]);
 
             var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
+            const style = window.getComputedStyle(this, null);
+            const header = window.getComputedStyle(this.querySelector('th'), null);
             grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
+            grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
+            grid_properties['color'] = style.getPropertyValue('color');
+            grid_properties['columnHeaderBackgroundColor'] = header.getPropertyValue('background-color');
+            grid_properties['columnHeaderColor'] = header.getPropertyValue('color');
             this.grid.addProperties(grid_properties);
 
             const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
