@@ -1,0 +1,270 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "./material.less";
+
+@border-color: #3B3F46;
+
+@coolgrey800: #2A2C2F;
+@coolgrey900: #242526;
+@coolgrey700: #2F3136;
+@coolgrey600: #3B3F46;
+
+@blue800: #1A7DA1;
+@blue900: #135D78;
+
+
+perspective-viewer {
+    
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: none;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #666;
+    }
+
+}
+
+perspective-viewer.dragging {
+    #top_panel .dropping {
+        background-color: @blue900 !important;
+        color: white !important;
+    }
+
+    #side_panel #active_columns perspective-row[drop-target] .row_draggable {
+        background-color: @blue900 !important;
+        color: white !important;
+    }
+}
+
+perspective-viewer[view=heatmap] image.highcharts-boost-canvas {
+    opacity: 0.8 !important;
+}
+
+perspective-viewer[view=treemap] {
+    rect {
+        stroke: @coolgrey700 !important;
+    }
+}
+
+
+perspective-viewer[view=sunburst] {
+    path {
+        stroke: @coolgrey700 !important;
+    }
+}
+
+perspective-viewer[view=treemap], perspective-viewer[view=heatmap] {
+    rect {
+        stroke: @coolgrey700 !important;
+    }
+}
+
+perspective-viewer image.highcharts-boost-canvas {
+    opacity: 1 !important;
+}
+
+perspective-viewer #app {
+    background-color: @coolgrey800;
+    border-top-color: @coolgrey900 !important;
+
+    select:focus {
+        color: #FFF !important;
+    }
+
+    .highcharts-heatmap-gradient-full {
+        background: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4D342F 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
+    }
+
+    .highcharts-heatmap-gradient-positive {
+        background: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+    }
+
+    .highcharts-heatmap-gradient-negative {
+        background: linear-gradient(#feeb65 0%, #e4521b 35%, #4D342F 70%, #222222 100%);
+    }
+
+
+    svg .highcharts-axis tspan {
+        fill: #AAA !important;
+    }
+
+    svg .highcharts-button-box {
+        fill: @coolgrey900;
+    }
+
+    svg g.highcharts-axis-labels text {
+        fill: #FFF !important;
+    }
+
+    rect.highcharts-background {
+        fill: none;
+    }
+
+    svg .highcharts-tooltip-box {
+        fill: @coolgrey900;
+    }
+
+    svg .highcharts-legend-box {
+        fill: none !important;
+    }
+    .highcharts-yaxis-grid path.highcharts-grid-line {
+        stroke: @coolgrey600;
+    }
+
+    #pivot_chart {
+        background-color: @coolgrey700;
+
+        tspan, text {
+            fill: #FFF !important;
+        }
+
+        rect, image {
+            opacity: 0.85;
+        }
+    }
+
+    #drop_target {
+        background-color: @coolgrey700;
+    }
+
+    input, select, ul, #filters {
+        border-right: 0px;
+        background-color: @coolgrey800;
+        color: #fff;
+        border-color: #666;
+    }
+
+    input::placeholder {
+        color: #666;
+    }
+
+    label {
+        color: #666;
+    }
+
+    #filters {
+        border-bottom: 1px solid #666;
+        color: #666
+    }                
+
+    perspective-row {
+
+        #psp_row {
+            color: #fff;
+        }
+    }
+
+    #side_panel {
+      
+        #active_columns, #inactive_columns {
+            perspective-row {
+                .float:before, .integer:before {
+                    color: #22A0CE;
+                }
+
+                .row_draggable {                            
+                    border-color: #666;
+                    color: #fff;
+                }
+            }
+        }
+
+        #active_columns {
+
+            perspective-row {
+                .is_visible:before {
+                    color: #22A0CE;
+                }
+            }
+
+            perspective-row:last-child .row_draggable {
+                border-bottom: 0px solid @coolgrey800;
+            }
+        }
+
+        #inactive_columns {
+            padding-top: 24px;
+
+            perspective-row {
+                margin-top: 0px;
+            }
+
+            perspective-row:hover {
+                .is_visible:before {
+                    color: #22A0CE;
+                }
+            }
+
+            perspective-row.active {
+                display: block;
+                height: 0px;
+                max-height: 0px;
+                overflow: hidden;
+            }
+
+            perspective-row {
+             
+                #name {
+                    color: #666;
+                }
+            }
+
+            perspective-row:hover {
+
+                &.active {
+                    #name {
+                        color: #eee;
+                    }
+                }
+
+                .is_visible {
+                    opacity: 1;
+                }
+
+                #name {
+                    color: #fff;
+                }
+
+                #name:before {
+                    opacity: 1 !important;
+                }
+            }
+        }
+    }
+
+    #divider {
+        height: 1px;
+        min-height: 1px;
+        max-height: 1px;
+    }
+
+    #top_panel {
+        padding: 24px 0px 12px 0px;
+        .rrow ul {
+            padding: 3px 0px 0px 0px;
+        }
+    }
+
+    perspective-hypergrid {
+        color: #eee;
+        background-color: @coolgrey700;
+    }
+
+
+    .rrow {
+        margin: 0px 24px 12px 0px;
+    }
+}

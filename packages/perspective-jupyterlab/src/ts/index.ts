@@ -31,6 +31,7 @@ const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
 
 interface PerspectiveSpec {
     data: string,
+    schema: string,
     layout: string,
     config: string;
 }
@@ -46,6 +47,7 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         let psp = (<any>(this.node.querySelector('perspective-viewer')));
         
         let layout = JSON.parse(this._lyt);
+
         for(let key in layout){
             if(layout[key]){
                 if(key === 'view'){
@@ -60,8 +62,13 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
             }
         }
 
+        if (this._schema !== '') {
+            let schema = JSON.parse(this._schema);
+            psp.load(schema);
+        }
+
         if (this._datatype === 'static') {
-            psp.load(this._data);
+            psp.update(this._data);
         } else if (this._datatype === 'ws' || this._datatype === 'wss') {
             let config = JSON.parse(this._config);
             let send = config.send || '';
@@ -97,14 +104,15 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
                     if (sessionModels[i].kernel.id === kernelId) {
                         Session.connectTo(sessionModels[i]).then(session => {
 
-                            let comm = session.kernel.connectToComm(name + '/' + channel);
-                            comm.open('ack');
-                            comm.onMsg = (msg: any) => {
-                                let dat = msg['content']['data'];
-                                let tmp = JSON.parse(dat);
-                                psp.update(tmp);
-                            };
-                            comm.onClose = (msg: any) => {};
+                            session.kernel.connectToComm(name + '/' + channel).then(comm => {
+                                comm.open('ack');
+                                comm.onMsg = (msg: any) => {
+                                    let dat = msg['content']['data'];
+                                    let tmp = JSON.parse(dat);
+                                    psp.update(tmp);
+                                };
+                                comm.onClose = (msg: any) => {};
+                            });
 
                         });
                     }
@@ -114,8 +122,9 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
     }
 
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-        const {data, layout, config} = model.data[MIME_TYPE] as any | PerspectiveSpec;
+        const {data, schema, layout, config} = model.data[MIME_TYPE] as any | PerspectiveSpec;
         this._lyt = layout;
+        this._schema = schema;
 
         try {
             this._data = JSON.parse(data) as object;
@@ -159,6 +168,7 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
     private _data: object;
     private _datatype: string;
     private _datasrc: string;
+    private _schema: string;
     private _lyt: string; // not widget layout
     private _config: string;
     private _loaded: boolean;

@@ -7,9 +7,11 @@
  *
  */
 
-import '@jpmorganchase/perspective-common';
-
 import highcharts from 'highcharts';
+
+import * as gparser from 'gradient-parser';
+
+import "../less/highcharts.less";
 
 const Highcharts = highcharts;
 
@@ -56,28 +58,19 @@ function _make_scatter_tick(row, columns, is_string, colorRange) {
     return tick;
 }
 
-function _make_series(js, pivots, col_pivots, mode, hidden) {
-    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
-    var top = {name: "", depth:0, categories: []};
-    var label = top;
-
-    var series = [], leaf_size = 0;
-    let colorRange = [Infinity, -Infinity];
-    let is_string = {};
-    let columns, is_stacked;
-
-    let scale = chroma.scale('RdYlBu');
-
-    for (let row of visible_rows(js, hidden)) {
-
-        // If this is the first row, record some structural properties from it.
-        if (!columns || !is_stacked) {
-            columns = Object.keys(js[0]).filter(prop => prop !== "__ROW_PATH__");
-            is_stacked = columns.map(value =>
-                value.substr(value.lastIndexOf(',') + 1, value.length)
-            ).filter((value, index, self) =>
-                self.indexOf(value) === index
-            ).length > 1;
+function* visible_rows(depth, top, json, hidden) {
+    const first = json[0];
+    const to_delete = [];
+    let label = top;
+    for (let key in first) {
+        let split_key = key.split(',');
+        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
+            to_delete.push(key);
+        }
+    }
+    for (let row of json) {
+        for (let h of to_delete) {
+            delete row[h];
         }
 
         var path = row.__ROW_PATH__;
@@ -86,9 +79,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
         }
 
         var d = path.length;
-        if (d == 0) {
-            // Skip the root
-        } else if (d < depth) {
+        if (d > 0 && d < depth) {
 
             // Add new label
             label = {
@@ -100,7 +91,7 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
             // Find the correct parent
             var parent = top;
             for (var lidx=0; lidx < (d-1); lidx++) {
-                for (var cidx=0; cidx<parent.categories.length; cidx++) {
+                for (var cidx = 0; cidx < parent.categories.length; cidx++) {
                     if (parent.categories[cidx].name == path[lidx]) {
                         parent = parent.categories[cidx];
                         break;
@@ -108,119 +99,170 @@ function _make_series(js, pivots, col_pivots, mode, hidden) {
                 }
             }
             parent.categories.push(label);
-        } else {
+        } else if (d >= depth) {
             var sname = path[d-1];
             label.categories.push(sname);
-            if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
-                if (col_pivots.length === 0) {
-                    var sname = ' ';
-                    var s;
-                    for (var sidx = 0; sidx < series.length; sidx++) {
-                        if (series[sidx].name == sname) {
-                            s = series[sidx];
-                            break;
-                        }
+ 
+            yield row;
+        }
+    }
+}
+
+function _make_series(js, pivots, col_pivots, mode, hidden) {
+    var depth = pivots.length; //(color[0] === '' ? 1 : 0);
+    var top = {name: "", depth:0, categories: []};
+
+    var series = [], leaf_size = 0;
+    let colorRange = [Infinity, -Infinity];
+    let is_string = {};
+    let columns, is_stacked;
+
+    let scale = chroma.scale('RdYlBu');
+
+    for (let row of visible_rows(depth, top, js, hidden)) {
+
+        if (columns === undefined) {
+            columns = Object.keys(row).filter(prop => prop !== "__ROW_PATH__");
+            is_stacked = columns.map(value =>
+                value.substr(value.lastIndexOf(',') + 1, value.length)
+            ).filter((value, index, self) =>
+                self.indexOf(value) === index
+            ).length > 1;
+        }
+ 
+        if ((mode === 'scatter' || mode === 'line') && columns.length > 0) {
+            if (col_pivots.length === 0) {
+                var sname = ' ';
+                var s;
+                for (var sidx = 0; sidx < series.length; sidx++) {
+                    if (series[sidx].name == sname) {
+                        s = series[sidx];
+                        break;
                     }
-                    if (sidx == series.length) {
-                        s = {
-                            name: sname,
-                            connectNulls: true,
-                            data: [],
-                        };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
-                        series.push(s)
-                    }
-                    s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
-                } else {
-                    let prev, group = [];
-                    for (let prop of columns) {
-                        var sname = prop.split(',');
-                        var gname = sname[sname.length - 1];
-                        sname = sname.slice(0, sname.length - 1).join(",") || " ";
-                        var s;
-                        if (prev === undefined) prev = sname;
-                        for (var sidx = 0; sidx < series.length; sidx++) {
-                            if (series[sidx].name == prev) {
-                                s = series[sidx];
-                                break;
-                            }
-                        }
-                        if (sidx == series.length) {
-                            s = {
-                                name: prev,
-                                connectNulls: true,
-                                data: [],
-                            };
-                            while (s.data.length < leaf_size) {
-                                s.data.push(0);
-                            }
-                            series.push(s)
-                        }
-                        if (prev === sname) {
-                            group.push(prop);
-                        } else {
-                            prev = sname;
-                            s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
-                            group = [prop];
-                        }
-                    }
-                    s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
                 }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                s.data.push(_make_scatter_tick(row, columns, is_string, colorRange));
             } else {
-                columns.map(prop => {
+                let prev, group = [];
+                for (let prop of columns) {
                     var sname = prop.split(',');
                     var gname = sname[sname.length - 1];
-                    if (is_stacked) {
-                        sname = sname.join(", ") || gname;
-                    } else {
-                        sname = sname.slice(0, sname.length - 1).join(", ") || " ";
-                    }
+                    sname = sname.slice(0, sname.length - 1).join(",") || " ";
                     var s;
-                    for (var sidx=0; sidx<series.length; sidx++) {
-                        if (series[sidx].name == sname && series[sidx].stack == gname) {
+                    if (prev === undefined) prev = sname;
+                    for (var sidx = 0; sidx < series.length; sidx++) {
+                        if (series[sidx].name == prev) {
                             s = series[sidx];
                             break;
                         }
                     }
                     if (sidx == series.length) {
                         s = {
-                            name: sname,
-                            stack: gname,
+                            name: prev,
                             connectNulls: true,
                             data: [],
                         };
-                        while (s.data.length < leaf_size) {
-                            s.data.push(0);
-                        }
                         series.push(s)
                     }
-                    var val = row[prop];
-                    val = (val === undefined || val === "" ? null : val)
-                    s.data.push(val);
-                });
+                    if (prev === sname) {
+                        group.push(prop);
+                    } else {
+                        prev = sname;
+                        s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
+                        group = [prop];
+                    }
+                }
+                s.data.push(_make_scatter_tick(row, group, is_string, colorRange));
             }
+        } else {
+            columns.map(prop => {
+                var sname = prop.split(',');
+                var gname = sname[sname.length - 1];
+                if (is_stacked) {
+                    sname = sname.join(", ") || gname;
+                } else {
+                    sname = sname.slice(0, sname.length - 1).join(", ") || " ";
+                }
+                var s;
+                for (var sidx=0; sidx<series.length; sidx++) {
+                    if (series[sidx].name == sname && series[sidx].stack == gname) {
+                        s = series[sidx];
+                        break;
+                    }
+                }
+                if (sidx == series.length) {
+                    s = {
+                        name: sname,
+                        stack: gname,
+                        connectNulls: true,
+                        data: [],
+                    };
+                    series.push(s)
+                }
+                var val = row[prop];
+                val = (val === undefined || val === "" ? null : val)
+                s.data.push(val);
+            });
         }
     }
     return [series, top, colorRange];
 }
 
-function* visible_rows(json, hidden) {
-    let first = json[0];
-    let to_delete = [];
-    for (let key in first) {
-        let split_key = key.split(',');
-        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
-            to_delete.push(key);
+function _get_gradient(type) {
+    const thermometer = document.createElement('rect');
+    thermometer.style.display = 'none';
+    thermometer.className = `highcharts-heatmap-gradient-${type}`;
+    const chart = this.querySelector('#pivot_chart');
+    chart.appendChild(thermometer);
+    const gradient = window.getComputedStyle(thermometer).getPropertyValue('background-image');
+    chart.removeChild(thermometer);
+    return gparser.parse(gradient)[0].colorStops.map(x => [
+        Number.parseFloat(x.length.value) / 100, 
+        `rgb(${x.value.join(',')})`
+    ]);
+}
+
+const _get_gradients = (() => {
+    let gradients;
+    return function () {
+        if (gradients === undefined) {
+            gradients = {};
+            for (let type of ['positive', 'negative', 'full']) {
+                gradients[type] = _get_gradient.bind(this)(type);
+            }
         }
-    }
-    for (let row of json) {
-        for (let h of to_delete) {
-            delete row[h];
+        return gradients;
+    };
+})();
+
+function color_axis(config, colorRange) {
+    let gradient, {positive, negative, full} = _get_gradients.bind(this)();
+    if (colorRange[0] >= 0) {
+        gradient = positive;
+    } else if (colorRange[1] <= 0) {
+        gradient = negative;
+    } else {
+        gradient = full;
+    };
+    Object.assign(config, {
+        colorAxis: {
+            min: colorRange[0],
+            max: colorRange[1],
+            stops: gradient,
+            reversed: false,
+            startOnTick: false,
+            endOnTick: false,
         }
-        yield row;
-    }
+    });
+    config.legend.reversed = true;
+    config.legend.floating = false;
 }
 
 export function draw(mode) {
@@ -229,7 +271,11 @@ export function draw(mode) {
         var col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
         var aggregates = this._get_view_aggregates();
 
-        let [js, schema] = await Promise.all([view.to_json(), view.schema()]);
+        let [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
+
+        if (task.cancelled) {
+            return;
+        }
 
         if (this.hasAttribute('updating') && this._chart) {
             chart = this._chart
@@ -241,10 +287,6 @@ export function draw(mode) {
             }
         }
 
-        if (task.cancelled) {
-            return;
-        }
-
         let [series, top, colorRange] = _make_series.call(this, js, row_pivots, col_pivots, mode, hidden);
 
         var colors = COLORS_20;
@@ -253,8 +295,16 @@ export function draw(mode) {
         }
 
         var type = 'scatter';
-        if (mode.indexOf('bar') > -1) {
+        if (mode === 'y_line') {
+            type = 'line';
+        } else if (mode === 'y_area') {
+            type = 'area';
+        } else if (mode.indexOf('bar') > -1) {
             type = 'column';
+        } else if (mode == 'treemap') {
+            type = 'treemap';
+        } else if (mode == 'sunburst') {
+            type = 'sunburst';
         } else if (mode === 'scatter') {
             if (aggregates.length <= 3) {
                 type = 'scatter';
@@ -267,7 +317,7 @@ export function draw(mode) {
 
         let new_radius = 0;
         if (mode === 'scatter') {
-            new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / 240)));
+            new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, series[0].data.length / 3))));
         }
         
         var config = {
@@ -275,7 +325,6 @@ export function draw(mode) {
                 type: type,
                 inverted: mode.indexOf('horizontal') > -1,
                 animation: false,
-                marginRight: (series.length > 20) ? 150 : 0,
                 zoomType: mode === 'scatter' ? 'xy' : 'x',
             },
             navigation: {
@@ -291,15 +340,20 @@ export function draw(mode) {
                 align: 'right',
                 verticalAlign: 'top',
                 y: 10,
-                width: mode === "scatter" ? 30 : 140,
                 layout: 'vertical',
-                enabled: Object.keys(js[0]).length > 2 && mode !== 'scatter',
-
+                floating: series.length <= 20,
+                enabled: mode === 'scatter' ? Object.keys(js[0]).length > 3 || col_pivots.length > 0 : Object.keys(js[0]).length > 2,
                 itemStyle: {
                     fontWeight: 'normal'
                 }
             },
+            boost: {
+                enabled: false
+            },
             plotOptions: {
+                line: {
+                    marker: {enabled: false, radius: 0}
+                },
                 coloredScatter: {
                     marker: {radius: new_radius},
                     tooltip: {
@@ -321,8 +375,12 @@ export function draw(mode) {
                         }
                     }
                 },
+                heatmap: {
+                    nullColor: "rgba(0,0,0,0)"
+                },
                 series: {
                     animation: false,
+                    nullColor: "rgba(0,0,0,0)",
                     boostThreshold: Infinity,
                     'turboThreshold': 60000,
                     borderWidth: 0,
@@ -379,23 +437,7 @@ export function draw(mode) {
                 } else {
                     config.chart.type = 'coloredBubble';
                 }
-                Object.assign(config, {
-                    colorAxis: {
-                        min: colorRange[0],
-                        max: colorRange[1],
-                        minColor: '#3060cf',
-                        maxColor: '#c4463a',
-                        showInLegend: false,
-                        stops: [
-                            [0, '#3060cf'],
-                            [0.5, '#fffbbc'],
-                            [0.9, '#c4463a'],
-                            [1, '#c4463a']
-                        ],
-                        startOnTick: false,
-                        endOnTick: false,
-                    }
-                });
+                color_axis.bind(this)(config, colorRange);
             }
             if (aggregates.length < 3) {
                 Object.assign(config, {
@@ -405,7 +447,7 @@ export function draw(mode) {
                     }
                 });
                 config.plotOptions.series.boostThreshold = 5000;
-                config.plotOptions.series.turboThreshiold = Infinity;
+                config.plotOptions.series.turboThreshold = Infinity;
             }
             Object.assign(config, {
                 colors: [
@@ -432,29 +474,6 @@ export function draw(mode) {
                 }
             });
         } else if (mode == 'heatmap') {
-            // Need to slightly repivot data
-            let data = [];
-            for (let i=0; i<series[0].data.length; ++i) {
-                for (let j=0; j<series.length; ++j) {
-                    let val = series[j].data[i];
-                    data.push([i, j, val]);
-                    colorRange[0] = Math.min(colorRange[0], val);
-                    colorRange[1] = Math.max(colorRange[1], val);
-                }
-            }
-            if (colorRange[0] * colorRange[1] < 0) {
-                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
-                colorRange = [-cmax, cmax];
-            }
-
-            Object.assign(config, {
-                boost: {
-                    useGPUTranslations: true,
-                    usePreAllocated: true
-                }
-            });
-            config.plotOptions.series.boostThreshold = 5000;
-            config.plotOptions.series.turboThreshiold = Infinity;
 
             // Calculate ylabel nesting
             let ylabels = series.map(function (s) { return s.name.split(','); })
@@ -483,53 +502,156 @@ export function draw(mode) {
                 }
             }
 
+            // Need to slightly repivot data
+            let data = [];
+            for (let i=0; i<series[0].data.length; ++i) {
+                for (let j=0; j<series.length; ++j) {
+                    let val = series[j].data[i];
+                    data.push([i, j, val]);
+                    colorRange[0] = Math.min(colorRange[0], val);
+                    colorRange[1] = Math.max(colorRange[1], val);
+                }
+            }
+            if (colorRange[0] * colorRange[1] < 0) {
+                let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                colorRange = [-cmax, cmax];
+            }
+
+            Object.assign(config, {
+                boost: {
+                    useGPUTranslations: true,
+                    usePreAllocated: true
+                }
+            });
+            config.plotOptions.series.boostThreshold = 5000;
+            config.plotOptions.series.turboThreshold = Infinity;
+
+            xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
+            xaxis_type = tschema[xaxis_name];
+            yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
+            yaxis_type = tschema[yaxis_name];
+
+            if (xaxis_type === 'date') {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });         
+            } else {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: xaxis_type === 'date' ? top.categories.map(x => new Date(x)) : top.categories,
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            padding: 0,
+                            autoRotation: xaxis_type === 'date' ? [0] : [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                        },
+                    }
+                });      
+            }
+
+            if (yaxis_type === 'date') {
+                Object.assign(config, {
+                    yAxis: {
+                        categories: ytop.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (ytop.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });      
+            } else {
+                Object.assign(config, {
+                    yAxis: {
+                        categories: ytop.categories,
+                        title: null,
+                        tickWidth: 1,
+                        reversed: true,
+                        labels: {
+                            padding: 0,
+                            step: 1
+                        }
+                    }
+                });
+            }
+
             Object.assign(config, {
                 series: [{
                     name: null,
                     data: data,
-                    nullColor: '#999'
+                    nullColor: 'none'
                 }],
 
                 boost: {
                     useGPUTranslations: true
-                },
-
-                colorAxis: {
-                    min: colorRange[0],
-                    max: colorRange[1],
-                    minColor: '#c4463a',
-                    maxColor: '#3060cf',
-                    stops: [
-                        [0, '#c4463a'],
-                        [0.1, '#c4463a'],
-                        [0.5, '#fffbbc'],
-                        [1, '#3060cf']
-                    ],
-                    startOnTick: false,
-                    endOnTick: false,
-                },
-                xAxis: {
-                    categories: top.categories,
-                    labels: {
-                        enabled: (top.categories.length > 0),
-                        padding: 0,
-                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
-                    },
-                },
-                yAxis: {
-                    categories: ytop.categories,
-                    title: null,
-                    tickWidth: 1,
-                    reversed: true,
-                    labels: {
-                        padding: 0,
-                        step: 1
-                    }
                 }
             });
-            config['chart']['marginRight'] = 75;
-            delete config["legend"]["width"];
-        } else if (mode.indexOf('line') !== -1) {
+
+            color_axis.bind(this)(config, colorRange)
+            config.legend.floating = false;
+        } else if (mode === "treemap" || mode === "sunburst") {
+            let data = [];
+            let size = aggregates[0]['column'];
+            let color, colorAxis, colorRange;
+            if (aggregates.length >= 2) {
+                color = aggregates[1]['column'];
+                let colorvals = series[1]['data'];
+                colorRange = [Infinity, -Infinity];
+                for (let i = 0; i < colorvals.length; ++i) {
+                    colorRange[0] = Math.min(colorRange[0], colorvals[i]);
+                    colorRange[1] = Math.max(colorRange[1], colorvals[i]);
+                }
+                if (colorRange[0] * colorRange[1] < 0) {
+                    let cmax = Math.max(Math.abs(colorRange[0]), Math.abs(colorRange[1]));
+                    colorRange = [-cmax, cmax];
+                }
+                color_axis.bind(this)(config, colorRange);
+            }
+
+            for (let row of js.slice(1)) {
+                let rp = row['__ROW_PATH__'];
+                let id = rp.join("_");
+                let name = rp.slice(-1)[0];
+                let parent = rp.slice(0, -1).join("_");
+                let value  = row[size];
+                let colorValue = row[color];
+
+                data.push({
+                    id: id, name: name, value: value, colorValue: colorValue, parent: parent}
+                );
+            }
+            let levels = [];
+            for (let i = 0; i < row_pivots.length; i++) {
+                levels.push({
+                    level: i+1,
+                    borderWidth: (row_pivots.length - i) *2,
+                    dataLabels: {
+                        enabled: true, //(i == 0)?true:false,
+                        allowOverlap: true,
+                        style: {
+                            opacity: [1, 0.3][i] || 0,
+                            fontSize: `${[14, 10][i] || 0}px`,
+                            textOutline: null
+                        }
+                    },
+                });
+            }
+            Object.assign(config, {
+                series: [{
+                    layoutAlgorithm: 'squarified',
+                    allowDrillToNode: true,
+                    alternateStartingDirection: true,
+                    data: data,
+                    levels: levels
+                }],
+            });
+            config['plotOptions']['series']['borderWidth'] = 1;
+            config.legend.floating = false;
+        } else if (mode === 'line') {
             Object.assign(config, {
                 colors: colors,
                 xAxis: {
@@ -553,32 +675,55 @@ export function draw(mode) {
                 }
             });
         } else {
+            xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
+            xaxis_type = tschema[xaxis_name];
+            yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
+            yaxis_type = tschema[yaxis_name];
+
+            if (xaxis_type === 'date') {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            autoRotation: [-5]
+                        },
+                    }
+                });             
+            } else {
+                Object.assign(config, {
+                    xAxis: {
+                        categories: top.categories,
+                        labels: {
+                            enabled: (top.categories.length > 0),
+                            padding: 0,
+                            autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                        }
+                    }
+                });
+            }
             Object.assign(config, {
                 colors: colors,
-                xAxis: {
-                    categories: top.categories,
-                    labels: {
-                        enabled: (top.categories.length > 0),
-                        padding: 0,
-                        autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
-                    },
-                },
                 yAxis: {
                     startOnTick: false,
                     endOnTick: false,
                     title: {
-                        text: aggregates.map(function (x) { return x.column; }).join(",  "),
+                        text: aggregates.map(x => x.column).join(",  "),
                         style: {'color': '#666666', 'fontSize': "14px"}
                     },
                     labels: {overflow: 'justify'}
                 }
-
             });
+
+            config.plotOptions.series.dataLabels = {
+                allowOverlap: false,
+                padding: 10
+            }
         }
 
         if (this._chart) {
             if (mode === 'scatter') {
-                let new_radius = Math.min(8, Math.max(4, Math.floor((this._chart.chartWidth + this._chart.chartHeight) / 240)));
+                let new_radius = Math.min(6, Math.max(2, Math.floor((this._chart.chartWidth + this._chart.chartHeight) / Math.max(300, config.series[0].data.length / 3))));
                 this._chart.update({
                     series: config.series,
                     plotOptions: {
@@ -643,8 +788,8 @@ function delete_chart() {
     }
 }
 
-global.registerPlugin("vertical", {
-    name: "Bar Chart", 
+global.registerPlugin("y_bar", {
+    name: "Y Bar Chart", 
     create: draw("vertical_bar"), 
     resize: resize, 
     initial: {
@@ -655,8 +800,8 @@ global.registerPlugin("vertical", {
     delete: delete_chart
 });
 
-global.registerPlugin("horizontal", {
-    name: "Bar Chart (inverted)", 
+global.registerPlugin("x_bar", {
+    name: "X Bar Chart", 
     create: draw("horizontal_bar"), 
     resize: resize, 
     initial: {
@@ -665,6 +810,78 @@ global.registerPlugin("horizontal", {
     },
     selectMode: "select",
     delete: delete_chart
+});
+
+global.registerPlugin("y_line", {
+    name: "Y Line Chart", 
+    create: draw("y_line"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("y_area", {
+    name: "Y Area Chart", 
+    create: draw("y_area"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("xy_line", {
+    name: "X/Y Line Chart", 
+    create: draw("line"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
+    delete: delete_chart
+});
+
+global.registerPlugin("xy_scatter", {
+    name: "X/Y Scatter Chart", 
+    create: draw('scatter'), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
+    delete: delete_chart
+});
+
+global.registerPlugin("treemap", {
+    name: "Treemap", 
+    create: draw('treemap'), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 2
+    },
+    selectMode: "toggle",
+    delete: function () {}
+});
+
+global.registerPlugin("sunburst", {
+    name: "Sunburst",
+    create: draw('sunburst'),
+    resize: resize,
+    initial: {
+        "type": "number",
+        "count": 2
+    },
+    selectMode: "toggle",
+    delete: function () {}
 });
 
 global.registerPlugin("heatmap", {
@@ -678,28 +895,3 @@ global.registerPlugin("heatmap", {
     selectMode: "select",
     delete: delete_chart
 });
-
-global.registerPlugin("line", {
-    name: "Line Chart", 
-    create: draw("line"), 
-    resize: resize, 
-    initial: {
-        "type": "number",    
-        "count": 2
-    },
-    selectMode: "toggle",
-    delete: delete_chart
-});
-
-global.registerPlugin("scatter", {
-    name: "Scatter Chart", 
-    create: draw('scatter'), 
-    resize: resize, 
-    initial: {
-        "type": "number",    
-        "count": 2
-    },
-    selectMode: "toggle",
-    delete: delete_chart
-});
-

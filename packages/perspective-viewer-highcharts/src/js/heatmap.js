@@ -11,6 +11,8 @@ import highcharts from 'highcharts';
 import highchartsMore from 'highcharts-more';
 import heatmap from 'highcharts/modules/heatmap';
 import boost from 'highcharts/modules/boost';
+import treemap from 'highcharts/modules/treemap';
+import sunburst from 'highcharts/modules/sunburst';
 import grouped_categories from 'highcharts-grouped-categories';
 import chroma from 'chroma-js';
 
@@ -27,6 +29,8 @@ let axisProto = Highcharts.Axis.prototype,
 
 highchartsMore(highcharts);
 heatmap(highcharts);
+treemap(highcharts);
+sunburst(highcharts);
 grouped_categories(highcharts);
 boost(highcharts);
 
@@ -72,6 +76,40 @@ Highcharts.setOptions({
         type: 'coloredBubble',
         axisTypes: ['xAxis', 'yAxis', 'colorAxis']
     }));
+
+    // draw points and add setting colors
+    H.wrap(H.seriesTypes.sunburst.prototype, "translate", function(p, positions) {
+      p.call(this, positions);
+      this.translateColors();
+    });
+
+    // copy method from heatmap for color mixin
+    H.seriesTypes.sunburst.prototype.translateColors = function() {
+      var series = this,
+        nullColor = this.options.nullColor,
+        colorAxis = this.colorAxis,
+        colorKey = this.colorKey;
+
+      H.each(this.data, function(point) {
+        var value = point[colorKey],
+          color;
+
+        color = point.options.color ||
+          (!point.value ? // LINE CHANGED
+            nullColor :
+            (colorAxis && value !== undefined) ?
+            colorAxis.toColor(value, point) :
+            point.color || series.color
+          );
+
+        if (color) {
+          point.color = color;
+        }
+      });
+    }
+
+    // use "colorValue" to calculate color
+    H.seriesTypes.sunburst.prototype.colorKey = 'colorValue';
 
     // Pushes part of grid to path
     function addGridPart(path, d, width) {

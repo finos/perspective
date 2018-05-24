@@ -1,7 +1,11 @@
 
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const webpack = require('webpack');
 
-const plugins = []
+const plugins = [
+    new webpack.IgnorePlugin(/vertx/),
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)
+];
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     plugins.push(new UglifyJSPlugin({
@@ -59,9 +63,13 @@ module.exports = function () {
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],
-                    plugins: ['transform-runtime', ["transform-es2015-for-of", {
-                        "loose": true
-                    }]]
+                    plugins: [
+                        "transform-decorators-legacy",
+                        "transform-custom-element-classes", 
+                        'transform-runtime', 
+                        'transform-object-rest-spread', 
+                        ["transform-es2015-for-of", {"loose": true}]
+                    ]
                 }
             }]
         }

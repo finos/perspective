@@ -347,7 +347,7 @@ void
 t_ctx2::sort_by(const t_sortsvec& sortby)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = sortby;
     if (m_sortby.empty())
     {
@@ -360,7 +360,7 @@ void
 t_ctx2::reset_sortby()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = t_sortsvec();
 }
 

@@ -92,3 +92,7 @@ Gemfile.lock
 Vagrantfile
 packages/sigma
 packages/perspective/obj
+package-lock.json
+jsconfig.json
+
+\.DS_Store

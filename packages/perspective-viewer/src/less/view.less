@@ -7,51 +7,30 @@
  *
  */
 
-@border-color: #ccc;
-
-.bordered() {
-    border: 1px solid @border-color;
-    border-top-width: 0px;
-    border-left-width: 0px;
-}
+ @import "./column_labels.less";
 
 perspective-viewer:hover #config_button {
-    background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%,rgba(255,255,255,0.01) 100%);
     opacity: 1;
 }
 
-[settings=true] #config_button {
-    background: none !important;
+#config_button {
+    background: none;
     opacity: 1 !important;
 }
 
-[settings=true] #app {
-    border-top: 1px solid #ccc;
+[settings=true] #config_button {
+    opacity: 1 !important;
 }
 
+
 perspective-viewer {
+
+    position: relative;
+    display: inline-block;
 
     * {
         box-sizing: border-box;
         line-height: 1.42857143;
-    }
-
-    font-family: Arial;
-
-    .noselect {
-        -webkit-touch-callout: none; /* iOS Safari */
-        -webkit-user-select: none; /* Safari */
-        -khtml-user-select: none; /* Konqueror HTML */
-        -moz-user-select: none; /* Firefox */
-        -ms-user-select: none; /* Internet Explorer/Edge */
-        user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
-    }
-    svg text {
-        font-family: Arial !important;
-    }
-
-    input.error {
-        color: red !important;
     }
 
     #app {
@@ -66,53 +45,39 @@ perspective-viewer {
         }
     }
 
-    svg text { 
-        font-family: Arial !important;
-
-    }
-    svg .highcharts-axis-title, svg .highcharts-axis-title {
-        font-family: Arial !important;
-    }
-    svg .highcharts-legend-box {
-        fill: rgb(255,255,255);
-        opacity: 0.85;
-    }
     .chart {
         flex-grow: 1;
-        height: calc(~"100% - 15px");
-        width: calc(~"100% - 20px");
+        height: 100%;
+        width: 100%;
         position: absolute;
-        margin-right: 20px;
-        margin-top: 15px;
+        padding: 15px;    
     }
     #pivot_chart {
         position: relative;
         display: flex;
         flex-grow: 1;
         margin: 0px;
-        background-color: white;
     }
 
     .config {
         display: flex;
     }
 
-    #row_pivots li, #column_pivots li, #sort li {
+    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row {
         display: inline;
     }
 
     ul {
         min-height: 20px;
-        position: static !important;
     }
 
     #active_columns, #inactive_columns {
         list-style: none;
         padding: 5px;
         width: 100%;
-        border: none !important;
         margin-top: 8px;
         overflow-y: auto;
+        position: relative;
     }
 
     #inactive_columns {
@@ -125,7 +90,6 @@ perspective-viewer {
     }
 
     #divider {
-        background-color: #CCC;
         min-height: 2px;
         height: 2px;
         margin: 15px 13px 15px 13px;
@@ -156,7 +120,7 @@ perspective-viewer {
         width: 100%;
     }
 
-    .rrow li {
+    .rrow #psp_row {
         white-space: nowrap;
     }
 
@@ -169,6 +133,8 @@ perspective-viewer {
         white-space: nowrap;
         display: inline-block;
         vertical-align: middle;
+        margin-bottom: 0px;
+        
     }
 
     #drop_target {
@@ -177,7 +143,6 @@ perspective-viewer {
         top: 0px;
         right: 0px;
         bottom: 0px;
-        background: white;
         padding: 30px;
     }
     #drop_target_inner {
@@ -188,7 +153,6 @@ perspective-viewer {
         justify-content: center
     }
     #drop_target_inner h3 {
-        color: #aaa;
         font-weight: 300;
     }
     #config_button {
@@ -200,69 +164,47 @@ perspective-viewer {
         font-weight: normal;
         font-family: Arial;
         font-size: 16px;
-        color: #999;
         opacity: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: opacity 0.3s;
     }
 
     #config_button:before {
         content: '\1f527';
     }
 
-    ul label {
-        color: #ccc;
+    #filters {
+        label {
+            padding-top: 3px;
+            margin-top: -2px;
+        }
+    }
+
+    ul label, #filters label {
         font-weight: normal;
-        margin-bottom: 0px;
         margin-left: 0px;
     }
     
-    ul {
-        padding: 0px 10px 0px 10px;
+    ul, #filters {
+        padding: 0px;
         margin: 0;
-        .bordered();
         font-size: 12px;
     }
     select {
         height: 24px;
         padding: 0px 0px 0px 6px;
         font-size: 12px;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        border-radius: 0;
-        background-color: white;
-        .bordered();
-    }
-    select:focus {
-        outline: none;
     }
     input {
-        .bordered();
         padding: 0 10px 0 10px;
     }
-    input::placeholder {
-        color: #ccc;
-    }
-    rect, svg image {
-        opacity: 0.5;
-    }
-    path, circle {
-        opacity: 0.8;
-    }
 
-    option[value=""] {
-        color: white !important;
-    }
     .centered {
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-    select:focus {
-        color: #000 !important;
     }
     #top_panel {
         display: flex;
@@ -275,20 +217,18 @@ perspective-viewer {
     #top_panel ul {
         padding-top: 3px;
     }
-    #app {
-        background-color: #eee;
-    }
-    
-    #top_panel ul {
-        background-color: white;
-    }
 
     #side_panel > div {
         display: flex;
     }
 
+    #side_panel perspective-row .row_draggable {
+        cursor: move;
+    }
+
     #vis_selector_container {
         min-height: 29px;
+        margin-left: 30px;
     }
 
     #vis_selector {
@@ -297,15 +237,4 @@ perspective-viewer {
         margin-right: 10px;
     }
 
-    ::-webkit-scrollbar, ::shadow ::-webkit-scrollbar {
-        width: 12px;
-    }
-
-    ::-webkit-scrollbar-thumb, ::shadow ::-webkit-scrollbar-thumb {
-        background: #ccc;
-    }
-
-    ::-webkit-scrollbar-track, ::shadow ::-webkit-scrollbar-track {
-        background: none;
-    }
 }

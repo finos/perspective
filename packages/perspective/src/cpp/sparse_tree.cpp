@@ -323,7 +323,7 @@ t_stree::build_strand_table_common(const t_table& flattened,
                                    const t_config& config) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     t_build_strand_table_common_rval rv;
 
@@ -402,7 +402,7 @@ t_stree::build_strand_table(const t_table& flattened,
 {
 
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 
@@ -648,7 +648,7 @@ t_stree::build_strand_table(const t_table& flattened,
                             const t_config& config) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 

@@ -166,10 +166,11 @@ export function treeLineRendererPaint(gc, config) {
     gc.textBaseline = 'middle';
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
     var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
-    config.minWidth = cellTextOffset + gc.getTextWidth(value) + 15;
-    var metrics = gc.getTextWidthTruncated(value, width - cellTextOffset + (x - 3), true);
+    let formatted_value = config.formatValue(config.value, config._type);
+    config.minWidth = cellTextOffset + gc.getTextWidth(formatted_value) + 15;
+    var metrics = gc.getTextWidthTruncated(formatted_value, width - cellTextOffset + (x - 3), true);
     var yOffset = y + height / 2;
-    gc.fillText(metrics.string ? metrics.string : value, cellTextOffset, yOffset);
+    gc.fillText(metrics.string ? metrics.string : formatted_value, cellTextOffset, yOffset);
     gc.restore();
 }
 

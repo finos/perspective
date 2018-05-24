@@ -54,7 +54,7 @@ var arrow_result = [
      "datetime(ms)": +(new Date("2018-01-26")), "datetime(us)": +(new Date("2018-01-26")), "datetime(ns)": +(new Date("2018-01-26"))},
     {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c",
      "datetime(ms)": +(new Date("2018-01-27")), "datetime(us)": +(new Date("2018-01-27")), "datetime(ns)": +(new Date("2018-01-27"))},
-    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d",
+    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "", "dict": "",
      "datetime(ms)": +(new Date("2018-01-28")), "datetime(us)": +(new Date("2018-01-28")), "datetime(ns)": +(new Date("2018-01-28"))},
     {"f32": null, "f64": null, "i64": null, "i32": null, "i16": null, "i8": null, "bool": null,  "char": null, "dict": null,
      "datetime(ms)": null, "datetime(us)": null, "datetime(ns)": null}
@@ -106,7 +106,36 @@ module.exports = (perspective) => {
             ]);
         });
 
-    });   
+    }); 
+
+
+    describe("Destructors", function() {
+
+        it("calls delete() on table with no views", async function () {
+            let table = perspective.table(data);
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+        it("calls delete on a view, then a table", async function () {
+            var table = perspective.table(data);
+            var view = table.view();
+            await view.delete();
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+        it("calls delete on multiple views, then a table", async function () {
+            var table = perspective.table(data);
+            var view1 = table.view();
+            var view2 = table.view();
+            await view1.delete();
+            await view2.delete();
+            await table.delete();
+            expect(true).toEqual(true);
+        });
+
+    });  
 
     describe("Constructors", function() {
 
@@ -200,6 +229,50 @@ module.exports = (perspective) => {
             expect(data_6).toEqual(result);
         });
 
+        it("Computed column of arity 0", async function () {
+            var table = perspective.table(data);
+
+            let table2 = table.add_computed([
+                {column: "const",
+                 type: "integer",
+                 func: () => 1,
+                 inputs: [],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'const'}]}).to_json();
+            let expected = [{const: 1}, {const: 1}, {const: 1}, {const: 1}];
+            expect(expected).toEqual(result);
+        });
+
+        it("Computed column of arity 2", async function () {
+            var table = perspective.table(data_3);
+
+            let table2 = table.add_computed([
+                {column: "ratio",
+                 type: "float",
+                 func: (w, x) => w/x,
+                 inputs: ["w", "x"],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'ratio'}]}).to_json();
+            let expected = [{ratio: 1.5},{ratio: 1.25},{ratio: 1.1666666666666667},{ratio: 1.125}];
+            expect(expected).toEqual(result);
+        });
+
+        it("String computed column of arity 1", async function () {
+            var table = perspective.table(data);
+
+            let table2 = table.add_computed([
+                {column: "yes/no",
+                 type: "string",
+                 func: (z) => (z === true)?"yes":"no",
+                 inputs: ["z"],
+                },
+            ]);
+            let result = await table2.view({aggregate: [{op: 'count', column: 'yes/no'}]}).to_json();
+            let expected = [{"yes/no": "yes"},{"yes/no": "no"},{"yes/no": "yes"},{"yes/no": "no"}];
+            expect(expected).toEqual(result);
+        });
     });
 
 
