@@ -51,7 +51,6 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         let psp = (<any>(this.node.querySelector('perspective-viewer')));
         
         let layout = JSON.parse(this._lyt);
-
         for(let key in layout){
             if(layout[key]){
                 if(key === 'view'){
@@ -59,6 +58,19 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
                 } else if (key === 'colorscheme'){
                     if(layout[key]==='dark'){
                         this.node.classList.add(PSP_CONTAINER_CLASS_DARK)
+                        psp.addEventListener('loaded', ()=>{
+                            // Call once rendered
+                            let grid = this.node.querySelector('perspective-hypergrid');
+                            if (grid){
+                                (<any>grid).grid.addProperties({
+                                    columnHeaderBackgroundColor:'#2a2c2f',
+                                    columnHeaderColor:'#eee',
+                                    rowProperties: [
+                                        { color: '#eee', backgroundColor: '#2a2c2f' },
+                                    ],
+                                });
+                            }
+                        });
                     }
                 } else {
                     psp.setAttribute(key, JSON.stringify(layout[key]));
