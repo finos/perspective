@@ -13,11 +13,11 @@
 
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
 
-        <script src="mobile_fix.js"></script>
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/0.7.24/webcomponents.min.js'></script>
-        <script src="perspective.view.js"></script>
+        <script src="perspective.view.js" preload></script>
         <script src="hypergrid.plugin.js"></script>
         <script src="highcharts.plugin.js"></script>
+
+        <script src="mobile_fix.js"></script>
 
         <link rel='stylesheet' href="demo.css">
 
@@ -25,11 +25,10 @@
     <body>
 
         <perspective-viewer
-            view="vertical"
-            row-pivots='["Category","Region","Segment"]'
-            column-pivots='["Sub-Category"]'
-            columns='["Sales"]'
-         >
+            view="sunburst"
+            row-pivots='["Sub-Category","Region","Segment"]'
+            sort='[["Profit","desc"]]'
+            columns='["Sales", "Profit"]'>
                 
         </perspective-viewer>
 
@@ -41,7 +40,8 @@
                 xhr.responseType = "arraybuffer"
                 xhr.onload = function () { 
                     var el = document.getElementsByTagName('perspective-viewer')[0];
-                    el.load(xhr.response); 
+                    el.load(xhr.response);
+                    el._toggle_config(); 
                 }
                 xhr.send(null);
             });

@@ -7,9 +7,9 @@
  *
  */
 
-import {detectIE, ScriptPath} from "@jpmorganchase/perspective-common";
+import {detectIE, ScriptPath} from "./utils.js";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
 /******************************************************************************
  *
@@ -111,32 +111,42 @@ view.prototype.on_update = subscribe('on_update', 'view_method', true);
 
 view.prototype.on_delete = subscribe('on_delete', 'view_method', true);
 
-function table(worker, data, options) {
-    options = options || {};
-    options.binary = options.binary || false;
-    this._name = Math.random() + "";
+
+function table(worker, name) {
+    this._name = name;
     this._worker = worker;
-    var msg = {
-        cmd: 'table',
-        name: this._name,
-        data: data,
-        options: options
-    }
-    let post = () => {
-        if (this._worker.transferable && data instanceof ArrayBuffer) {
-            this._worker.postMessage(msg, [data]);
-        } else {
-            this._worker.postMessage(msg);
-        }
-    };
-    if (this._worker.initialized.value) {
-        post();
-    } else {
-        this._worker.messages.push(post);
-    }
 }
 
-table.prototype.view = function(config) {
+table.prototype.add_computed = function(computed) {
+    let name = Math.random() + "";
+    let original = this._name;
+    // serialize functions
+    for (let i = 0; i < computed.length; ++i) {
+        let column = computed[i];
+        let func = column['func'];
+        if (typeof func == "function") {
+            column['func'] = func.toString();
+        }
+    }
+    var msg = {
+        cmd: 'add_computed',
+        original: original,
+        name: name,
+        computed: computed
+    };
+    if (this._worker.initialized.value) {
+        this._worker.postMessage(msg);
+    } else {
+        this._worker.messages.push(() => this._worker.postMessage(msg));
+    }
+    return new table(this._worker, name);
+}
+
+table.prototype.worker = function () {
+    return this._worker;
+}
+
+table.prototype.view = function (config) {
     return new view(this._name, this._worker, config);
 }
 
@@ -149,6 +159,8 @@ table.prototype.columns = async_queue('columns', 'table_method');
 table.prototype.delete = async_queue('delete', "table_method");
 
 table.prototype.on_delete = subscribe('on_delete', 'table_method', true);
+
+table.prototype.remove = async_queue('remove', "table_method");
 
 table.prototype.update = function(data) {
     return new Promise( (resolve, reject) => {
@@ -323,7 +335,27 @@ worker.prototype._handle = function(e) {
 };
 
 worker.prototype.table = function(data, options) {
-    return new table(this._worker, data, options);
+    // Set up msg
+    name = Math.random() + "";
+    var msg = {
+        cmd: 'table',
+        name: name,
+        data: data,
+        options: options || {}
+    };
+    let post = () => {
+        if (this._worker.transferable && data instanceof ArrayBuffer) {
+            this._worker.postMessage(msg, [data]);
+        } else {
+            this._worker.postMessage(msg);
+        }
+    };
+    if (this._worker.initialized.value) {
+        post();
+    } else {
+        this._worker.messages.push(post);
+    }
+    return new table(this._worker, name);
 };
 
 worker.prototype.terminate = function() {
@@ -341,5 +373,11 @@ export default {
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
-    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS
+    TYPE_FILTERS: TYPE_FILTERS,
+
+    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
+
+    FILTER_DEFAULTS: FILTER_DEFAULTS,
+
+    SORT_ORDERS: SORT_ORDERS
 };

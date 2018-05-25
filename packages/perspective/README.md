@@ -2,33 +2,36 @@
 
 ### Table of Contents
 
--   [view](#view)
-    -   [delete](#delete)
-    -   [schema](#schema)
-    -   [to_json](#to_json)
-    -   [num_rows](#num_rows)
-    -   [num_columns](#num_columns)
-    -   [on_update](#on_update)
--   [table](#table)
-    -   [delete](#delete-1)
-    -   [size](#size)
-    -   [schema](#schema-1)
-    -   [view](#view-1)
-    -   [update](#update)
-    -   [columns](#columns)
--   [table](#table-1)
+-   [view][1]
+    -   [delete][2]
+    -   [schema][3]
+    -   [to_json][4]
+    -   [num_rows][5]
+    -   [num_columns][6]
+    -   [on_update][7]
+    -   [on_delete][8]
+-   [table][9]
+    -   [delete][10]
+    -   [on_delete][11]
+    -   [size][12]
+    -   [schema][13]
+    -   [view][14]
+    -   [update][15]
+    -   [add_computed][16]
+    -   [columns][17]
+-   [table][18]
 
 ## view
 
-A View object represents a specific transform (configuration or pivot, 
-filter, sort, etc) configuration on an underlying [table](#table). A View
-receives all updates from the [table](#table) from which it is derived, and
-can be serialized to JSON or trigger a callback when it is updated.  View 
-objects are immutable, and will remain in memory and actively process 
-updates until its [view#delete](#viewdelete) method is called.
+A View object represents a specific transform (configuration or pivot,
+filter, sort, etc) configuration on an underlying [table][9]. A View
+receives all updates from the [table][9] from which it is derived, and
+can be serialized to JSON or trigger a callback when it is updated.  View
+objects are immutable, and will remain in memory and actively process
+updates until its [view#delete][19] method is called.
 
 <strong>Note</strong> This constructor is not public - Views are created
-by invoking the [table#view](#tableview) method.
+by invoking the [table#view][20] method.
 
 **Examples**
 
@@ -39,19 +42,19 @@ table.view({row_pivots: ["name"]});
 
 ### delete
 
-Delete this [view](#view) and clean up all resources associated with it.
+Delete this [view][1] and clean up all resources associated with it.
 View objects do not stop consuming resources or processing updates when
 they are garbage collected - you must call this method to reclaim these.
 
 ### schema
 
-The schema of this [view](#view).  A schema is an Object, the keys of which
-are the columns of this [view](#view), and the values are their string type names.
-If this [view](#view) is aggregated, theses will be the aggregated types;
-otherwise these types will be the same as the columns in the underlying 
-[table](#table)
+The schema of this [view][1].  A schema is an Object, the keys of which
+are the columns of this [view][1], and the values are their string type names.
+If this [view][1] is aggregated, theses will be the aggregated types;
+otherwise these types will be the same as the columns in the underlying
+[table][9]
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)>** A Promise of this [view](#view)'s schema.
+Returns **[Promise][21]&lt;[Object][22]>** A Promise of this [view][1]'s schema.
 
 ### to_json
 
@@ -59,103 +62,125 @@ Serializes this view to JSON data in a standard format.
 
 **Parameters**
 
--   `options` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)?** An optional configuration object.
-    -   `options.start_row` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The starting row index from which
+-   `options` **[Object][22]?** An optional configuration object.
+    -   `options.start_row` **[number][23]** The starting row index from which
         to serialize.
-    -   `options.end_row` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The ending row index from which
+    -   `options.end_row` **[number][23]** The ending row index from which
         to serialize.
-    -   `options.start_col` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The starting column index from which
+    -   `options.start_col` **[number][23]** The starting column index from which
         to serialize.
-    -   `options.end_col` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The ending column index from which
+    -   `options.end_col` **[number][23]** The ending column index from which
         to serialize.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)>** A Promise resolving to An array of Objects 
-representing the rows of this [view](#view).  If this [view](#view) had a
+Returns **[Promise][21]&lt;[Array][24]>** A Promise resolving to An array of Objects
+representing the rows of this [view][1].  If this [view][1] had a
 "row_pivots" config parameter supplied when constructed, each row Object
-will have a "**ROW_PATH**" key, whose value specifies this row's 
-aggregated path.  If this [view](#view) had a "column_pivots" config
+will have a "**ROW_PATH**" key, whose value specifies this row's
+aggregated path.  If this [view][1] had a "column_pivots" config
 parameter supplied, the keys of this object will be comma-prepended with
 their comma-separated column paths.
 
 ### num_rows
 
-The number of aggregated rows in this [view](#view).  This is affected by
-the "row_pivots" configuration parameter supplied to this [view](#view)'s
+The number of aggregated rows in this [view][1].  This is affected by
+the "row_pivots" configuration parameter supplied to this [view][1]'s
 contructor.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The number of aggregated rows.
+Returns **[Promise][21]&lt;[number][23]>** The number of aggregated rows.
 
 ### num_columns
 
-The number of aggregated columns in this [view](#view).  This is affected by
-the "column_pivots" configuration parameter supplied to this [view](#view)'s
+The number of aggregated columns in this [view][1].  This is affected by
+the "column_pivots" configuration parameter supplied to this [view][1]'s
 contructor.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The number of aggregated columns.
+Returns **[Promise][21]&lt;[number][23]>** The number of aggregated columns.
 
 ### on_update
 
-Register a callback with this [view](#view).  Whenever the [view](#view)'s
+Register a callback with this [view][1].  Whenever the [view][1]'s
 underlying table emits an update, this callback will be invoked with the
 aggregated row deltas.
 
 **Parameters**
 
--   `callback` **[function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** A callback function invoked on update.  The 
-    parameter to this callback shares a structure with the return type of 
-    [view#to_json](#viewto_json).
+-   `callback` **[function][25]** A callback function invoked on update.  The
+    parameter to this callback shares a structure with the return type of
+    [view#to_json][26].
+
+### on_delete
+
+Register a callback with this [view][1].  Whenever the [view][1]
+is deleted, this callback will be invoked.
+
+**Parameters**
+
+-   `callback` **[function][25]** A callback function invoked on update.  The 
+        parameter to this callback shares a structure with the return type of 
+        [view#to_json][26].
 
 ## table
 
 A Table object is the basic data container in Perspective.  Tables are
 typed - they have an immutable set of column names, and a known type for
-each. 
+each.
 
 <strong>Note</strong> This constructor is not public - Tables are created
-by invoking the [table](#table) factory method, either on the perspective 
-module object, or an a [worker](https://developer.mozilla.org/docs/Web/JavaScript) instance.
+by invoking the [table][9] factory method, either on the perspective
+module object, or an a [worker][27] instance.
 
 ### delete
 
-Delete this [table](#table) and clean up all resources associated with it.
+Delete this [table][9] and clean up all resources associated with it.
 Table objects do not stop consuming resources or processing updates when
 they are garbage collected - you must call this method to reclaim these.
 
+### on_delete
+
+Register a callback with this [table][9].  Whenever the [view][1]
+is deleted, this callback will be invoked.
+
+**Parameters**
+
+-   `callback` **[function][25]** A callback function invoked on update.  The 
+        parameter to this callback shares a structure with the return type of 
+        [table#to_json][28].
+
 ### size
 
-The number of accumulated rows in this [table](#table).  This is affected by
-the "index" configuration parameter supplied to this [view](#view)'s
+The number of accumulated rows in this [table][9].  This is affected by
+the "index" configuration parameter supplied to this [view][1]'s
 contructor - as rows will be overwritten when they share an idnex column.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** The number of accumulated rows.
+Returns **[Promise][21]&lt;[number][23]>** The number of accumulated rows.
 
 ### schema
 
-The schema of this [table](#table).  A schema is an Object, the keys of which
-are the columns of this [table](#table), and the values are their string type names.
+The schema of this [table][9].  A schema is an Object, the keys of which
+are the columns of this [table][9], and the values are their string type names.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)>** A Promise of this [table](#table)'s schema.
+Returns **[Promise][21]&lt;[Object][22]>** A Promise of this [table][9]'s schema.
 
 ### view
 
-Create a new [view](#view) from this table with a specified
+Create a new [view][1] from this table with a specified
 configuration.
 
 **Parameters**
 
--   `config` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)?** The configuration object for this [view](#view).
-    -   `config.row_pivot` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>?** An array of column names 
-        to use as [Row Pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
-    -   `config.column_pivot` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>?** An array of column names 
-        to use as [Column Pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
-    -   `config.aggregate` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)>?** An Array of Aggregate configuration objects,
-        each of which should provide an "name" and "op" property, repsresnting the string 
+-   `config` **[Object][22]?** The configuration object for this [view][1].
+    -   `config.row_pivot` **[Array][24]&lt;[string][29]>?** An array of column names
+        to use as [Row Pivots][30].
+    -   `config.column_pivot` **[Array][24]&lt;[string][29]>?** An array of column names
+        to use as [Column Pivots][31].
+    -   `config.aggregate` **[Array][24]&lt;[Object][22]>?** An Array of Aggregate configuration objects,
+        each of which should provide an "name" and "op" property, repsresnting the string
         aggregation type and associated column name, respectively.  Aggregates not provided
         will use their type defaults
-    -   `config.filter` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>?** An Array of Filter configurations to
-        apply.  A filter configuration is an array of 3 elements:  A column name, 
+    -   `config.filter` **[Array][24]&lt;[Array][24]&lt;[string][29]>>?** An Array of Filter configurations to
+        apply.  A filter configuration is an array of 3 elements:  A column name,
         a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-    -   `config.sort` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>?** An Array of column names by which to sort.
+    -   `config.sort` **[Array][24]&lt;[string][29]>?** An Array of column names by which to sort.
 
 **Examples**
 
@@ -168,44 +193,52 @@ var view = table.view({
 });
 ```
 
-Returns **[view](#view)** A new [view](#view) object for the supplied configuration,
+Returns **[view][32]** A new [view][1] object for the supplied configuration,
 bound to this table
 
 ### update
 
--   **See: [table](#table)**
+-   **See: [table][9]**
 
-Updates the rows of a [table](#table).  Updated rows are pushed down to any
-derived [view](#view) objects.
+Updates the rows of a [table][9].  Updated rows are pushed down to any
+derived [view][1] objects.
 
 **Parameters**
 
--   `data` **([Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)> | [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)> | [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String))** The input data 
+-   `data` **([Object][22]&lt;[string][29], [Array][24]> | [Array][24]&lt;[Object][22]> | [string][29])** The input data
     for this table.  The supported input types mirror the constructor options, minus
-    the ability to pass a schema (Object&lt;string, string>) as this table has. 
+    the ability to pass a schema (Object&lt;string, string>) as this table has.
     already been constructed, thus its types are set in stone.
+
+### add_computed
+
+Create a new table with the addition of new computed columns (defined as javascript functions)
+
+**Parameters**
+
+-   `computed`  
 
 ### columns
 
 The column names of this table.
 
-Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** An array of column names for this table.
+Returns **[Array][24]&lt;[string][29]>** An array of column names for this table.
 
 ## table
 
-A factory method for constructing [table](#table)s.
+A factory method for constructing [table][9]s.
 
 **Parameters**
 
--   `data` **([Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)> | [Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)> | [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)> | [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String))** The input data 
-        for this table.  When supplied an Object with string values, an empty 
-        table is returned using this Object as a schema.  When an Object with 
-        Array values is supplied, a table is returned using this object's 
+-   `data` **([Object][22]&lt;[string][29], [Array][24]> | [Object][22]&lt;[string][29], [string][29]> | [Array][24]&lt;[Object][22]> | [string][29])** The input data
+        for this table.  When supplied an Object with string values, an empty
+        table is returned using this Object as a schema.  When an Object with
+        Array values is supplied, a table is returned using this object's
         key/value pairs as name/columns respectively.  When an Array is supplied,
-        a table is constructed using this Array's objects as rows.  When 
+        a table is constructed using this Array's objects as rows.  When
         a string is supplied, the parameter as parsed as a CSV.
--   `options` **[Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)?** An optional options dictionary.
-    -   `options.index` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** The name of the column in the resulting
+-   `options` **[Object][22]?** An optional options dictionary.
+    -   `options.index` **[string][29]** The name of the column in the resulting
             table to treat as an index.  When updating this table, rows sharing anb
             index of a new row will be overwritten.
 
@@ -221,4 +254,70 @@ var table = perspective.table([{x: 1}, {x: 2}]);
 var table = worker.table([{x: 1}, {x: 2}]);
 ```
 
-Returns **[table](#table)** A new [table](#table) object.
+Returns **[table][33]** A new [table][9] object.
+
+[1]: #view
+
+[2]: #delete
+
+[3]: #schema
+
+[4]: #to_json
+
+[5]: #num_rows
+
+[6]: #num_columns
+
+[7]: #on_update
+
+[8]: #on_delete
+
+[9]: #table
+
+[10]: #delete-1
+
+[11]: #on_delete-1
+
+[12]: #size
+
+[13]: #schema-1
+
+[14]: #view-1
+
+[15]: #update
+
+[16]: #add_computed
+
+[17]: #columns
+
+[18]: #table-1
+
+[19]: #viewdelete
+
+[20]: #tableview
+
+[21]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+
+[22]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+
+[23]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+
+[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+
+[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+
+[26]: #viewto_json
+
+[27]: https://developer.mozilla.org/docs/Web/JavaScript
+
+[28]: table#to_json
+
+[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[30]: https://en.wikipedia.org/wiki/Pivot_table#Row_labels
+
+[31]: https://en.wikipedia.org/wiki/Pivot_table#Column_labels
+
+[32]: #view
+
+[33]: #table

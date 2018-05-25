@@ -27,6 +27,10 @@ using namespace perspective;
 using namespace emscripten;
 
 
+typedef std::codecvt_utf8<wchar_t> utf8convert_type;
+typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
+
+
 /******************************************************************************
  *
  * Data Loading
@@ -74,33 +78,48 @@ _get_fterms(t_schema schema, val j_filters)
     {
         std::vector<val> filter = vecFromJSArray<val>(filters[fidx]);
         std::string coln = filter[0].as<std::string>();
+        t_filter_op comp = filter[1].as<t_filter_op>();
 
-        t_tscalar term;
-        switch (schema.get_dtype(coln))
+        switch(comp)
         {
-            case DTYPE_INT32:
-                term = mktscalar(filter[2].as<t_int32>());
-                break;
-            case DTYPE_FLOAT64:
-                term = mktscalar(filter[2].as<t_float64>());
-                break;
-            case DTYPE_BOOL:
-                term = mktscalar(filter[2].as<bool>());
-                break;
-			case DTYPE_TIME:
-			{
-				std::cout << "Date filters not handled yet" << std::endl;
-			}
-			break;
+            case FILTER_OP_IN:
+            {
+                t_tscalvec terms{};
+                std::vector<std::string> j_terms = vecFromJSArray<std::string>(filter[2]);
+                for (auto jidx = 0; jidx < j_terms.size(); ++jidx)
+                {
+                    terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
+                }
+                fvec.push_back(t_fterm(coln, comp, mktscalar(0), terms));
+            }
+            break;
             default:
             {
-                //std::cout << filter[2].as<std::string>().c_str() << std::endl;
-                term = mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str()));
+                t_tscalar term;
+                switch (schema.get_dtype(coln))
+                {
+                    case DTYPE_INT32:
+                        term = mktscalar(filter[2].as<t_int32>());
+                        break;
+                    case DTYPE_INT64:
+                    case DTYPE_FLOAT64:
+                        term = mktscalar(filter[2].as<t_float64>());
+                        break;
+                    case DTYPE_BOOL:
+                        term = mktscalar(filter[2].as<bool>());
+                        break;
+                    case DTYPE_TIME:
+                        term = mktscalar(t_time(static_cast<t_int64>(filter[2].as<t_float64>())));
+                        break;
+                    default:
+                    {
+                        term = mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str()));
+                    }
+                }
+
+                fvec.push_back(t_fterm(coln, comp, term, t_tscalvec()));
             }
         }
-
-        t_filter_op comp = filter[1].as<t_filter_op>();
-        fvec.push_back(t_fterm(coln, comp, term, t_tscalvec()));
     }
     return fvec;
 }
@@ -121,12 +140,22 @@ _get_aggspecs(val j_aggs)
 {
     std::vector<val> aggs = vecFromJSArray<val>(j_aggs);
     t_aggspecvec aggspecs;
-    for (auto cidx = 0; cidx < aggs.size(); ++cidx)
+    for (auto idx = 0; idx < aggs.size(); ++idx)
     {
-        std::vector<val> agg_row = vecFromJSArray<val>(aggs[cidx]);
+        std::vector<val> agg_row = vecFromJSArray<val>(aggs[idx]);
         std::string name = agg_row[0].as<std::string>();
         t_aggtype aggtype = agg_row[1].as<t_aggtype>();
-        aggspecs.push_back(t_aggspec(name, aggtype, name));
+
+        t_depvec dependencies;
+        std::vector<val> deps = vecFromJSArray<val>(agg_row[2]);
+        for (auto didx = 0; didx < deps.size(); ++didx) {
+            if (deps[didx].isUndefined()) {
+                continue;
+            }
+            std::string dep = deps[didx].as<std::string>();
+            dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
+        }
+        aggspecs.push_back(t_aggspec(name, aggtype, dependencies));
     }
     return aggspecs;
 }
@@ -173,24 +202,26 @@ namespace arrow {
         }
     }
 
-    template<typename T>
     void
-    fill_col_dict(t_uint32 nrows, t_uint32 dsize, val dcol, val vkeys, t_col_sptr col, const char* destType)
+    fill_col_dict(val dictvec, t_col_sptr col)
     {
         // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it support other Vector types?
-        val vdata = dcol["values"];
+        val vdata = dictvec["values"];
         t_int32 vsize = vdata["length"].as<t_int32>();
         std::vector<t_uchar> data;
         data.reserve(vsize);
         data.resize(vsize);
         vecFromTypedArray(vdata, data.data(), vsize);
 
-        val voffsets = dcol["valueOffsets"];
+        val voffsets = dictvec["valueOffsets"];
         t_int32 osize = voffsets["length"].as<t_int32>();
         std::vector<t_int32> offsets;
         offsets.reserve(osize);
         offsets.resize(osize);
         vecFromTypedArray(voffsets, offsets.data(), osize);
+
+        // Get number of dictionary entries
+        t_uint32 dsize = dictvec["length"].as<t_uint32>();
 
         t_vocab* vocab = col->_get_vocab();
         t_str elem;
@@ -198,14 +229,11 @@ namespace arrow {
         for (t_uint32 i = 0; i < dsize; ++i) {
             t_int32 bidx = offsets[i];
             std::size_t es = offsets[i+1] - bidx;
-            assert(es > 0);
             elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
             t_uindex idx = vocab->get_interned(elem);
+            // Make sure there are no duplicates in the arrow dictionary
             assert(idx == i);
         }
-
-        // Now process index keys into dictionary
-        arrow::vecFromTypedArray(vkeys, col->get_nth<T>(0), nrows, destType);
     }
 }
 
@@ -312,29 +340,15 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
         if (dcol["constructor"]["name"].as<t_str>() == "DictionaryVector") {
 
             val dictvec = dcol["dictionary"];
+            arrow::fill_col_dict(dictvec, col);
 
-            // Get number of dictionary entries
-            t_uint32 dsize = dictvec["length"].as<t_uint32>();
-            
-            val vkeys = dcol["indices"]["values"];
+            // Now process index into dictionary
 
             // Perspective stores string indices in a 32bit unsigned array
             // Javascript's typed arrays handle copying from various bitwidth arrays properly
-            auto width = vkeys["constructor"]["BYTES_PER_ELEMENT"].as<t_int32>();
+            val vkeys = dcol["indices"]["values"];
+            arrow::vecFromTypedArray(vkeys, col->get_nth<t_uindex>(0), nrows, "Uint32Array");
 
-            switch (width) {
-                case 1:
-                    arrow::fill_col_dict<t_int8>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                case 2:
-                    arrow::fill_col_dict<t_int16>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                case 4:
-                    arrow::fill_col_dict<t_int32>(nrows, dsize, dictvec, vkeys, col, "Uint32Array");
-                    break;
-                default:
-                    break;
-            }
         } else if (dcol["constructor"]["name"].as<t_str>() == "Utf8Vector" || 
                    dcol["constructor"]["name"].as<t_str>() == "BinaryVector") {
 
@@ -357,19 +371,14 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
             for (t_int32 i = 0; i < nrows; ++i) {
                 t_int32 bidx = offsets[i];
                 std::size_t es = offsets[i+1] - bidx;
-                if (es > 0) {
-                    elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
-                    col->set_nth(i, elem);
-                } else {
-                    col->clear(i);
-                }
+                elem.assign(reinterpret_cast<char*>(data.data())+bidx, es);
+                col->set_nth(i, elem);
             }
         }
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
             std::wstring welem = dcol[i].as<std::wstring>();
-            typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);
@@ -494,7 +503,8 @@ make_table(
     val j_data,
     t_uint32 offset,
     t_str index,
-    t_bool is_arrow
+    t_bool is_arrow,
+    t_bool is_delete
 ) {
     // Create the input and port schemas
     t_svec colnames = vecFromJSArray<std::string>(j_colnames);
@@ -509,8 +519,13 @@ make_table(
     _fill_data(tbl, colnames, j_data, dtypes, offset, is_arrow);
 
     // Set up pkey and op columns
-    auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
-    op_col->raw_fill<t_uint8>(OP_INSERT);
+    if (is_delete) {
+        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_DELETE);
+    } else {
+        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_INSERT);
+    }
 
     if (index == "")
     {
@@ -589,6 +604,24 @@ make_gnode(t_table_sptr table)
     gnode->init();
 
     return gnode;
+}
+
+
+/**
+ * Copies the internal table from a gnode
+ *
+ * Params
+ * ------
+ *
+ * Returns
+ * -------
+ * A table.
+ */
+t_table_sptr
+clone_gnode_table(t_gnode_sptr gnode)
+{
+    // This creates a copy of the table
+    return t_table_sptr(gnode->_get_pkeyed_table());
 }
 
 /**
@@ -713,9 +746,8 @@ sort(t_ctx2_sptr ctx2, val j_sortby)
  *
  */
 val
-scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
+scalar_to_val(const t_tscalar scalar)
 {
-    auto scalar = scalars[idx];
     switch (scalar.get_dtype())
     {
         case DTYPE_BOOL:
@@ -760,11 +792,176 @@ scalar_to_val(const t_tscalvec& scalars, t_uint32 idx)
         case DTYPE_STR:
         default:
         {
-            typedef std::codecvt_utf8<wchar_t> utf8convert_type;
             std::wstring_convert<utf8convert_type, wchar_t> converter;
             return val(converter.from_bytes(scalar.to_string()));
         }
     }
+}
+
+val
+scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx)
+{
+    return scalar_to_val(scalars[idx]);
+}
+
+val
+get_column_data(t_table_sptr table,
+                t_str colname)
+{
+    val arr = val::array();
+    auto col = table->get_column(colname);
+    for (auto idx = 0; idx < col->size(); ++idx)
+    {
+        arr.set(idx, scalar_to_val(col->get_scalar(idx)));
+    }
+    return arr;
+}
+
+void set_column_nth(t_column* col, t_uindex idx, val value) {
+
+    // Check if the value is a javascript null
+    if (value.isNull()) {
+        col->set_valid(idx, false);
+        return;
+    }
+
+    switch (col->get_dtype())
+    {
+        case DTYPE_BOOL:
+        {
+            col->set_nth<t_bool>(idx, value.as<t_bool>(), true);
+            break;
+        }
+        case DTYPE_FLOAT64:
+        {
+            col->set_nth<t_float64>(idx, value.as<t_float64>(), true);
+            break;
+        }
+        case DTYPE_FLOAT32:
+        {
+            col->set_nth<t_float32>(idx, value.as<t_float32>(), true);
+            break;
+        }
+        case DTYPE_UINT32:
+        {
+            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), true);
+            break;
+        }
+        case DTYPE_UINT64:
+        {
+            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), true);
+            break;
+        }
+        case DTYPE_INT32:
+        {
+            col->set_nth<t_int32>(idx, value.as<t_int32>(), true);
+            break;
+        }
+        case DTYPE_INT64:
+        {
+            col->set_nth<t_int64>(idx, value.as<t_int64>(), true);
+            break;
+        }
+        case DTYPE_STR:
+        {
+            std::wstring welem = value.as<std::wstring>();
+
+            std::wstring_convert<utf16convert_type, wchar_t> converter;
+            std::string elem = converter.to_bytes(welem);
+            col->set_nth(idx, elem, true);
+            break;
+        }
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_TIME:
+        default:
+        {
+            // Other types not implemented
+        }
+    }
+}
+
+/**
+ * Helper function for computed columns
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
+
+void
+table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype,
+    val func, val inputs) {
+
+    // Get list of input column names
+    auto icol_names = vecFromJSArray<std::string>(inputs);
+
+    // Get t_column* for all input columns
+    t_colcptrvec icols;
+    for (const auto& cc : icol_names) {
+        icols.push_back(table->_get_column(cc));
+    }
+
+    int arity = icols.size();
+
+    // Add new column
+    t_column* out = table->add_column(name, dtype, true);
+
+    val i1 = val::undefined(),
+        i2 = val::undefined(),
+        i3 = val::undefined(),
+        i4 = val::undefined();
+
+    t_uindex size = table->size();
+    for (t_uindex ridx = 0; ridx < size; ++ridx) {
+        val value = val::null();
+
+        switch (arity) {
+            case 0: {
+                value = func();
+                break;
+            }
+            case 1: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                value = func(i1);
+                break;
+            }
+            case 2: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                value = func(i1, i2);
+                break;
+            }
+            case 3: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                value = func(i1, i2, i3);
+                break;
+            }
+            case 4: {
+                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                i4 = scalar_to_val(icols[3]->get_scalar(ridx));
+                value = func(i1, i2, i3, i4);
+                break;
+            }
+            default: {
+                // Don't handle other arity values
+                break;
+            }
+        }
+
+        set_column_nth(out, ridx, value);
+    }
+
 }
 
 /**
@@ -786,7 +983,7 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
     val arr = val::array();
     for (auto idx = 0; idx < slice.size(); ++idx)
     {
-        arr.set(idx, scalar_to_val(slice, idx));
+        arr.set(idx, scalar_to_val(slice[idx]));
     }
     return arr;
 }
@@ -819,10 +1016,14 @@ main(int argc, char** argv)
 
 EMSCRIPTEN_BINDINGS(perspective)
 {
+    class_<t_column>("t_column")
+        .smart_ptr<std::shared_ptr<t_column>>("shared_ptr<t_column>")
+        .function<void>("set_scalar", &t_column::set_scalar);
 
     class_<t_table>("t_table")
         .constructor<t_schema, t_uindex>()
         .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
+        .function<t_column*>("add_column", &t_table::add_column, allow_raw_pointers())
         .function<void>("pprint", &t_table::pprint)
         .function<unsigned long>(
             "size",
@@ -1059,11 +1260,15 @@ EMSCRIPTEN_BINDINGS(perspective)
     function("sort", &sort);
     function("make_table", &make_table);
     function("make_gnode", &make_gnode);
+    function("clone_gnode_table", &clone_gnode_table);
     function("fill", &fill, allow_raw_pointers());
     function("make_context_zero", &make_context_zero);
     function("make_context_one", &make_context_one);
     function("make_context_two", &make_context_two);
     function("scalar_to_val", &scalar_to_val);
+    function("scalar_vec_to_val", &scalar_vec_to_val);
+    function("table_add_computed_column", &table_add_computed_column);
+    function("set_column_nth", &set_column_nth, allow_raw_pointers());
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);

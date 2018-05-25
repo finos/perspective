@@ -28,7 +28,7 @@ set(EXTENDED_FLAGS " \
 
 if(DEFINED ENV{PSP_DEBUG})
 	set(OPT_FLAGS " \
-		-Os \
+		-O1 \
 		-g4 \
 	    -s SAFE_HEAP=1 \
 		-s DISABLE_EXCEPTION_CATCHING=0 \

@@ -1,8 +1,8 @@
 {
   "name": "@jpmorganchase/perspective",
-  "version": "0.1.4",
+  "version": "0.1.11",
   "description": "Perspective.js",
-  "main": "build/perspective.js",
+  "main": "build/perspective.umd.js",
   "publishConfig": {
     "access": "public"
   },
@@ -34,7 +34,6 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective-common": "^0.1.2",
     "@apache-arrow/es5-esm": "^0.3.1",
     "d3-array": "^1.2.1",
     "moment": "^2.19.1",
@@ -42,11 +41,12 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "@apache-arrow/es5-esm": "^0.2.0",
-    "@jpmorganchase/perspective-common": "^0.1.2",
     "arraybuffer-loader": "^1.0.2",
     "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.3",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
@@ -56,6 +56,7 @@
     "codemirror-javascript": "^0.2.0",
     "css-loader": "^0.28.7",
     "documentation": "^5.3.3",
+    "eslint": "^4.19.1",
     "jasmine": "^2.8.0",
     "jasmine-core": "^2.8.0",
     "jest": "^22.0.4",

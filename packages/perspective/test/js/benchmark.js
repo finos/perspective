@@ -255,6 +255,47 @@ window.addEventListener("perspective-ready", function() {
             });
         });
 
+        test(500, function(resolve) {
+            var table2 = table.add_computed([
+                {column: "Constant",
+                 type: "number",
+                 f: () => 0,
+                 inputs: [],
+                }
+            ]);
+            table2.delete();
+            resolve();
+        });
+
+        // Arithmetic
+        test(500, function(resolve) {
+            var table2 = table.add_computed([
+                {column: "Speed",
+                 type: "number",
+                 f: (airtime, distance) => airtime/distance,
+                 inputs: ["AirTime", "Distance"],
+                }
+            ]);
+            table2.delete();
+            resolve();
+        });
+
+        // Generate string
+        test(500, function(resolve) {
+            var table2 = table.add_computed([
+                {column: "Day",
+                 type: "string",
+                 f: (x) => {
+                    let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
+                    return days[x-1];
+                 },
+                 inputs: ["DayOfWeek"],
+                }
+            ]);
+            table2.delete();
+            resolve();
+        });
+
         run_tests();
     });
 

@@ -451,7 +451,7 @@ function decorateBackgroundWithBottomBorder(gc, config) {
         thickness = 1 || config.thickness ||
             this.groupCount - this.groupIndex; // when `thickness` undefined, higher-order groups get progressively thicker borders
 
-    gc.cache.fillStyle = "#fff"; // config.color;
+    gc.cache.fillStyle = config.columnHeaderSeparatorColor || "#fff"; // config.color;
     gc.fillRect(bounds.x + 3, bounds.y + bounds.height - thickness, bounds.width - 6, thickness);
 }
 

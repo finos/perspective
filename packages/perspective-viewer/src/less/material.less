@@ -1,0 +1,319 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+input {
+    padding: 6px 10px 6px 0px;
+}
+
+button {
+    text-transform: uppercase;
+}
+
+select, ul {
+    padding: 0px 10px 0px 0px;
+}
+
+perspective-viewer:not([settings]) {
+    z-index: 3;
+}
+
+perspective-viewer #side_panel perspective-row .row_draggable {
+    height: 26px;
+    cursor: move;
+}
+
+perspective-viewer:not([row-pivots='[]']) #side_panel {
+
+    #active_columns perspective-row .row_draggable {
+        height: 52px;
+    }
+
+    #inactive_columns perspective-row .row_draggable {
+        height: 26px;
+    }
+}
+
+perspective-viewer.dragging #app {
+
+    #side_panel {
+         
+        #inactive_columns {
+
+            perspective-row:hover .is_visible {
+                opacity: 0;
+            }
+        }
+        #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
+            margin-top: 0px;
+        }
+    }
+    
+    #top_panel .rrow > * {
+        border-top: 0px !important;
+        border-left: 0px !important;
+        border-right: 0px !important;
+        margin-top: 0px;
+        margin-left: 0px;
+    }
+}
+
+perspective-row:before {
+    font-size: 10px;
+    font-family: "Open Sans";
+}
+
+perspective-viewer {
+
+    #config_button {
+        margin-top: 14px;
+        margin-left: 7px;
+        &:before {
+            font-family: "Material Icons";
+            content: "more_vert";
+        }
+    }
+
+    #app {
+
+        #side_panel {
+
+            #active_columns {
+
+                perspective-row:before {
+                    margin-left: 48px;
+                    left: 48px;
+                }
+
+                perspective-row {
+                    .is_visible:before {
+                        font-family: "material icons";
+                        margin-top: 1px;
+                        margin-left: -8px;
+                        font-size: 16px;
+                        content: "\E834";
+                    }
+                }
+            }
+        }
+    }
+}
+
+perspective-viewer #app {
+
+    input, select, ul, #filters {
+        border-right: 0px;
+        background: none;
+        color: #666;
+    }
+
+    #filters {
+        padding-left: 0px;
+    }
+
+    perspective-row .string::before,
+    perspective-row .float::before,
+    perspective-row .integer::before,
+    perspective-row .date::before {
+        font-family: "Roboto Mono", monospace;
+        padding-left: 0px;
+    }
+
+    perspective-row {
+
+        li#psp_row {
+            margin-bottom: 0px;
+            color: #666;
+            margin-right: 0px;
+        }
+    }
+
+    #side_panel {
+        padding: 24px 0px 0px 0px;
+        max-width: 250px;
+
+        .is_visible {
+            transition: opacity 0.4s;
+        }
+
+        #divider {
+            height: 24px;
+            min-height: 24px;
+            max-height: 24px;
+            border-left-width: 12px;
+            border-right-width: 0px;
+            z-index: 1;
+            margin: 0;
+        }
+
+        #active_columns, #inactive_columns {
+            will-change: opacity, height, margin, transform;
+            margin-top: 0px;
+            margin-bottom:0px;
+            padding: 24px 24px 24px 0px;
+
+            perspective-row {
+                position: relative;
+
+                span.is_visible:before {
+                    position: absolute;
+                    margin-top: 1px;
+                    margin-left: -8px;
+                }
+
+                span.is_visible {
+                    height: 26px;
+                    margin: 0;
+                    position: absolute;
+                    top: 0px;
+                    left: 0px;
+                    width: 48px;
+                    text-align: center;
+                }
+
+                .row_draggable {                            
+                    background: none;
+                    border-right: 0px;
+                    color: #666;
+                    margin-left: 48px;
+                    padding: 4px 3px 4px 0px;
+
+                    select {
+                        margin: 6px 0px 0px 20px;
+                    }
+                }
+            }
+        }
+
+        #vis_selector_container {
+            min-height: 36px;
+            z-index: 1;
+            margin-right: 12px;
+            margin-left: 46px;
+
+            select#vis_selector {
+                margin: 0px 12px 24px 0px;
+            }
+        }
+
+        #active_columns {
+
+            // perspective-row:hover {
+            //     .is_visible:before {
+            //         content: "\E15D";
+            //     }
+            // }
+
+            perspective-row {
+                .is_visible:before {
+                    color: #1A7dA1;
+                }
+            }
+
+            perspective-row:last-child .row_draggable {
+                border-bottom: 0px solid #ccc;
+            }
+        }
+
+        #inactive_columns {
+            padding-top: 24px;
+
+            perspective-row {
+                margin-top: 0px;
+            }
+
+            perspective-row:hover {
+                .is_visible:before {
+                    color: #1A7dA1;
+                }
+            }
+
+            perspective-row.active {
+                display: block;
+                height: 0px;
+                max-height: 0px;
+                overflow: hidden;
+            }
+
+            perspective-row {
+             
+                .is_visible {
+                    opacity: 0.5;
+                }
+
+                .is_visible:before {
+                    font-family: "Material Icons";
+                    content: "\E835";
+                    font-size: 16px;
+                }
+
+                #name {
+                    color: #AAA;
+                }
+
+                #name:before {
+                    opacity: 0.5;
+                    background: none !important;
+                }
+            }
+
+            perspective-row:hover {
+
+                &.active {
+                    #name {
+                        color: #eee;
+                    }
+                }
+
+                .is_visible {
+                    opacity: 1;
+                }
+
+                #name {
+                    color: #666;
+                }
+
+                #name:before {
+                    opacity: 1 !important;
+                }
+            }
+        }
+    }
+
+    #divider {
+        height: 1px;
+        min-height: 1px;
+        max-height: 1px;
+    }
+
+    #top_panel {
+        padding: 24px 0px 12px 0px;
+        .rrow ul {
+            padding: 3px 0px 0px 0px;
+        }
+    }
+
+    .rrow {
+        margin: 0px 24px 12px 0px;
+    }
+
+
+    #pivot_chart {
+        padding: 24px 24px 24px 24px;
+        .chart {
+            height: calc(~"100% - 34px");
+            width: calc(~"100% - 48px");
+            padding: 0px;
+        }
+    }
+}
+

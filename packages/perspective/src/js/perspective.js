@@ -8,10 +8,12 @@
  */
 
 import papaparse from "papaparse";
-import moment from "moment";
-import * as Arrow from "@apache-arrow/es5-esm";
+import {Table} from "@apache-arrow/es5-esm/table";
+import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Precision} from "@apache-arrow/es5-esm/type";
+import {is_valid_date, DateParser} from "./date_parser.js";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -50,7 +52,7 @@ function infer_type(x) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (!isNaN(Number(x)) && x !== '') {
         t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-    } else if (typeof x === "string" && moment(x, DATE_PARSE_CANDIDATES, true).isValid()) {
+    } else if (typeof x === "string" && is_valid_date(x)) {
         t = __MODULE__.t_dtype.DTYPE_TIME;
     } else if (typeof x === "string") {
         let lower = x.toLowerCase();
@@ -62,18 +64,6 @@ function infer_type(x) {
     }
     return t;
 }
-
-const DATE_PARSE_CANDIDATES = [
-    moment.ISO_8601, 
-    moment.RFC_2822, 
-    'YYYY-MM-DD\\DHH:mm:ss.SSSS', 
-    'MM-DD-YYYY', 
-    'MM/DD/YYYY', 
-    'M/D/YYYY', 
-    'M/D/YY', 
-    'DD MMM YYYY',
-    'HH:mm:ss.SSS',
-];
 
 /**
  * Do any necessary data transforms on columns. Currently it does the following
@@ -169,13 +159,17 @@ function parse_data(data, names, types) {
                 inferredType = __MODULE__.t_dtype.DTYPE_STR;
             }
             col = [];
-            const date_types = [];
-            const date_candidates = DATE_PARSE_CANDIDATES.slice();
-            const date_exclusions = [];
+            const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
                 if (!(name in data[x]) || data[x][name] === undefined) continue;
-                if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value || inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
+                if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
                     col.push(Number(data[x][name]));
+                } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
+                    const val = Number(data[x][name]);
+                        col.push(val);
+                    if (val > 2147483647 || val < -2147483648) {
+                        types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
+                    }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_BOOL.value) {
                     let cell = data[x][name];
                     if ((typeof cell) === "string") {
@@ -188,32 +182,8 @@ function parse_data(data, names, types) {
                         col.push(cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
-                    if (date_exclusions.indexOf(data[x][name]) > -1) {
-                        col.push(-1);
-                    } else {
-                        let val = data[x][name];
-                        if (typeof val === "string") {
-                            val = moment(data[x][name], date_types, true);
-                            if (!val.isValid() || date_types.length === 0) {
-                                let found = false;
-                                for (let candidate of date_candidates) {
-                                    val = moment(data[x][name], candidate, true);
-                                    if (val.isValid()) {
-                                        date_types.push(candidate);
-                                        date_candidates.splice(date_candidates.indexOf(candidate), 1);
-                                        found = true;
-                                        break;
-                                    }
-                                }
-                                if (!found) {
-                                    date_exclusions.push(data[x][name]);
-                                    col.push(-1);
-                                    continue;
-                                }
-                            }
-                        }
-                        col.push(+val);
-                    }
+                    let val = data[x][name];
+                    col.push(parser.parse(val));
                 } else {
                     col.push(data[x][name] === null ? (types[types.length - 1].value === 19 ? "" : 0) : "" + data[x][name]); // TODO this is not right - might not be a string.  Need a data cleaner
                 }
@@ -281,7 +251,7 @@ function parse_data(data, names, types) {
  */
 function load_arrow_buffer(data, names, types) {
     // TODO Need to validate that the names/types passed in match those in the buffer
-    let arrow = Arrow.Table.from([new Uint8Array(data)]);
+    let arrow = Table.from([new Uint8Array(data)]);
     let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
         return loader.loadColumn(field, arrow.getColumnAt(colIdx));
     }, new ArrowColumnLoader());
@@ -298,7 +268,7 @@ function load_arrow_buffer(data, names, types) {
  *
  * @private
  */
-class ArrowColumnLoader extends Arrow.visitor.TypeVisitor {
+class ArrowColumnLoader extends TypeVisitor {
     constructor(cdata, names, types) {
         super();
         this.cdata = cdata || [];
@@ -335,10 +305,10 @@ class ArrowColumnLoader extends Arrow.visitor.TypeVisitor {
     }
     visitFloat(type/*: Arrow.type.Float*/) {
         const precision = type.precision;
-        if (precision === Arrow.enum_.Precision.DOUBLE) {
+        if (precision === Precision.DOUBLE) {
             this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
         }
-        else if (precision === Arrow.enum_.Precision.SINGLE) {
+        else if (precision === Precision.SINGLE) {
             this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
         }
         // todo?
@@ -460,7 +430,7 @@ view.prototype._column_names = function() {
             let col_path = this.ctx.unity_get_column_path(key + 1);
             col_name = [];
             for (let cnix = 0; cnix < col_path.size(); cnix++) {
-                col_name.push(__MODULE__.scalar_to_val(col_path, cnix));
+                col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
             }
             col_name = col_name.reverse();
             col_name.push(name);
@@ -512,7 +482,7 @@ view.prototype.schema = async function() {
         if (this.sides() > 0) {
             for (let agg in this.config.aggregate) {
                 agg = this.config.aggregate[agg];
-                if (agg.column === col_name) {
+                if (agg.column.join(',') === col_name) {
                     if (["distinct count", "distinctcount", "distinct", "count"].indexOf(agg.op) > -1) {
                         new_schema[col_name] = "integer";
                     }
@@ -595,7 +565,7 @@ view.prototype.to_json = async function(options) {
                     let row_path = this.ctx.unity_get_row_path(start_row + ridx);
                     row[col_name] = [];
                     for (let i = 0; i < row_path.size(); i++) {
-                        row[col_name].unshift(__MODULE__.scalar_to_val(row_path, i));
+                        row[col_name].unshift(__MODULE__.scalar_vec_to_val(row_path, i));
                     }
                     row_path.delete();
                 }
@@ -706,13 +676,14 @@ view.prototype.on_delete = function (callback) {
  * @class
  * @hideconstructor
  */
-function table(gnode, pool, index) {
+function table(gnode, pool, index, computed) {
     this.gnode = gnode;
     this.pool = pool;
     this.name = Math.random() + "";
     this.initialized = false;
     this.index = index;
     this.pool.set_update_delegate(this);
+    this.computed = computed || [];
     this.callbacks = [];
     this.views = [];
 }
@@ -722,6 +693,38 @@ table.prototype._update_callback = function () {
         this.callbacks[e].callback();
     }
  }
+
+
+table.prototype._calculate_computed = function(tbl, computed_defs) {
+    // tbl is the pointer to the C++ t_table
+
+    for (let i = 0; i < computed_defs.length; ++i) {
+        let coldef = computed_defs[i];
+        let name = coldef['column'];
+        let func = coldef['func'];
+        let inputs = coldef['inputs'];
+        let type = coldef['type'] || 'string';
+
+        let dtype;
+        switch (type) {
+            case 'integer':
+                dtype = __MODULE__.t_dtype.DTYPE_INT32;
+                break;
+            case 'float':
+                dtype = __MODULE__.t_dtype.DTYPE_FLOAT64;
+                break;
+            case 'boolean':
+                dtype = __MODULE__.t_dtype.DTYPE_BOOL;
+                break;
+            case 'string':
+            default:
+                dtype = __MODULE__.t_dtype.DTYPE_STR;
+                break;
+        }
+
+        __MODULE__.table_add_computed_column(tbl, name, dtype, func, inputs);
+    }
+}
 
 /**
  * Delete this {@link table} and clean up all resources associated with it.
@@ -765,15 +768,7 @@ table.prototype.size = async function() {
     return this.gnode.get_table().size();
 }
 
-/**
- * The schema of this {@link table}.  A schema is an Object, the keys of which
- * are the columns of this {@link table}, and the values are their string type names.
- *
- * @async
- *
- * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
- */
-table.prototype.schema = async function() {
+table.prototype._schema = function () {
     let schema = this.gnode.get_tblschema();
     let columns = schema.columns();
     let types = schema.types();
@@ -794,7 +789,22 @@ table.prototype.schema = async function() {
             new_schema[columns.get(key)] = "date";
         }
     }
+    schema.delete();
+    columns.delete();
+    types.delete();
     return new_schema;
+}
+
+/**
+ * The schema of this {@link table}.  A schema is an Object, the keys of which
+ * are the columns of this {@link table}, and the values are their string type names.
+ *
+ * @async
+ *
+ * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
+ */
+table.prototype.schema = async function() {
+    return this._schema();
 }
 
 /**
@@ -827,7 +837,7 @@ table.prototype.schema = async function() {
  * bound to this table
  */
 table.prototype.view = function(config) {
-    config = config || {};
+    config = {...config};
 
     const _string_to_filter_op = {
         "&": __MODULE__.t_filter_op.FILTER_OP_AND,
@@ -897,8 +907,13 @@ table.prototype.view = function(config) {
     let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
 
     if (config.filter) {
+        let schema = this._schema();
         filters = config.filter.map(function(filter) {
-            return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            if (schema[filter[0]] === "date") {
+                return [filter[0], _string_to_filter_op[filter[1]], +new DateParser().parse(filter[2])];
+            } else {
+                return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+            }
         });
         if (config.filter_op) {
             filter_op = _string_to_filter_op[config.filter_op];
@@ -908,37 +923,38 @@ table.prototype.view = function(config) {
     // Sort
     let sort = [];
     if (config.sort) {
+        sort = config.sort.map(x => {
+            if (!Array.isArray(x)) {
+                return [config.aggregate.map(agg => agg.column).indexOf(x), 1];
+            } else {
+                return [config.aggregate.map(agg => agg.column).indexOf(x[0]), SORT_ORDERS.indexOf(x[1])];
+            }
+        });
         if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
-            config.sort = config.sort.filter(x => config.row_pivot.indexOf(x) === -1);
+            config.sort = config.sort.filter(x => config.row_pivot.indexOf(x[0]) === -1);
         }
-        sort = config.sort.map(x => [config.aggregate.map(agg => agg.column).indexOf(x), 1]);
     }
 
     // Row Pivots
     let aggregates = [];
-    if (typeof config.aggregate === "string") {
-        let agg_op = _string_to_aggtype[config.aggregate];
-        if (config.column_only) {
-            agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
-        }
-        let schema = this.gnode.get_tblschema();
-        let t_aggs = schema.columns();
-        for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-            let name = t_aggs.get(aidx);
-            if (name !== "psp_okey") {
-                aggregates.push([name, agg_op, name]);
-            }
-        }
-        schema.delete();
-        t_aggs.delete();
-    } else if (typeof config.aggregate === 'object') {
+    if (typeof config.aggregate === 'object') {
         for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
             let agg = config.aggregate[aidx];
             let agg_op = _string_to_aggtype[agg.op];
             if (config.column_only) {
                 agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                config.aggregate[aidx].op= "any";
             }
-            aggregates.push([agg.column, agg_op]);
+            if (typeof agg.column === 'string') {
+                agg.column = [agg.column];
+            } else {
+                let dep_length = agg.column.length;
+                if ((agg.op === "weighted mean" && dep_length != 2) ||
+                    (agg.op !== "weighted mean" && dep_length != 1)) {
+                    throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
+                }
+            }
+            aggregates.push([agg.name || agg.column.join(","), agg_op, agg.column]);
         }
     } else {
         let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
@@ -948,9 +964,9 @@ table.prototype.view = function(config) {
         let schema = this.gnode.get_tblschema()
         let t_aggs = schema.columns();
         for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-            let name = t_aggs.get(aidx);
-            if (name !== "psp_okey") {
-                aggregates.push([name, agg_op, name]);
+            let column = t_aggs.get(aidx);
+            if (column !== "psp_okey") {
+                aggregates.push([column, agg_op, [column]]);
             }
         }
         schema.delete();
@@ -1055,7 +1071,11 @@ table.prototype.update = function (data) {
     try {
         tbl = __MODULE__.make_table(pdata.row_count || 0, 
             pdata.names, pdata.types, pdata.cdata,
-            this.gnode.get_table().size(), this.index || "", pdata.is_arrow);
+            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, false);
+
+        // Add any computed columns
+        this._calculate_computed(tbl, this.computed);
+
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
     } catch (e) {
@@ -1066,6 +1086,89 @@ table.prototype.update = function (data) {
         }
         schema.delete();
         types.delete();
+    }
+}
+
+/**
+ * Removes the rows of a {@link table}.  Removed rows are pushed down to any
+ * derived {@link view} objects.
+ *
+ * @param {Array<Object>} data An array of primary keys to remove.
+ *
+ * @see {@link table}
+ */
+table.prototype.remove = function (data) {
+    let pdata;
+    let cols = this._columns();
+    let schema = this.gnode.get_tblschema();
+    let types = schema.types();
+
+    data = data.map(idx => ({[this.index]: idx}));
+
+    if (data instanceof ArrayBuffer) {
+        pdata = load_arrow_buffer(data, [this.index], types);
+    }
+    else {
+        pdata = parse_data(data, [this.index], types);
+    }
+
+    let tbl;
+    try {
+        tbl = __MODULE__.make_table(pdata.row_count || 0, 
+            pdata.names, pdata.types, pdata.cdata,
+            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, true);
+
+        __MODULE__.fill(this.pool, this.gnode, tbl);
+        this.initialized = true;
+    } catch (e) {
+        console.error(e);
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
+        schema.delete();
+        types.delete();
+    }
+}
+
+/**
+ * Create a new table with the addition of new computed columns (defined as javascript functions)
+ */
+table.prototype.add_computed = function(computed) {
+    let pool, gnode, tbl;
+
+    try {
+        // Create perspective pool
+        pool = new __MODULE__.t_pool({_update_callback: function() {} } );
+
+        // Pull out the t_table from the current gnode
+        tbl = __MODULE__.clone_gnode_table(this.gnode);
+
+        // Add new computed columns in place to tbl
+        this._calculate_computed(tbl, computed);
+
+        gnode = __MODULE__.make_gnode(tbl);
+        pool.register_gnode(gnode);
+        __MODULE__.fill(pool, gnode, tbl);
+
+        // Merge in definition of previous computed columns
+        if (this.computed.length > 0) {
+            computed = this.computed.concat(computed);
+        }
+
+        return new table(gnode, pool, this.index, computed);
+    } catch (e) {
+        if (pool) {
+            pool.delete();
+        }
+        if (gnode) {
+            gnode.delete();
+        }
+        throw e;
+    } finally {
+        if (tbl) {
+            tbl.delete();
+        }
     }
 }
 
@@ -1146,6 +1249,16 @@ if (typeof self !== "undefined" && self.addEventListener) {
             case 'table':
                 _tables[msg.name] = perspective.table(msg.data, msg.options);
                 break;
+            case 'add_computed':
+                let table = _tables[msg.original];
+                let computed = msg.computed;
+                // rehydrate computed column functions
+                for (let i = 0; i < computed.length; ++i) {
+                    let column = computed[i];
+                    eval("column.func = " + column.func);
+                }
+                _tables[msg.name] = table.add_computed(computed);
+                break;
             case 'table_generate':
                 let g;
                 eval("g = " + msg.args)
@@ -1214,13 +1327,27 @@ if (typeof self !== "undefined" && self.addEventListener) {
             }
             case 'view_method': {
                 let obj = _views[msg.name];
+                if (!obj) {
+                    self.postMessage({
+                        id: msg.id,
+                        error: "View is not initialized"
+                    });
+                    return;
+                }
                 if (msg.subscribe) {
-                    obj[msg.method](e => {
+                    try {
+                        obj[msg.method](e => {
+                            self.postMessage({
+                                id: msg.id,
+                                data: e
+                            });
+                        });
+                    } catch (error) {
                         self.postMessage({
                             id: msg.id,
-                            data: e
+                            error: error + ""
                         });
-                    });
+                    }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
                         self.postMessage({
@@ -1252,7 +1379,13 @@ const perspective = {
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
+    TYPE_FILTERS: TYPE_FILTERS,
+
     AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
+
+    FILTER_DEFAULTS: FILTER_DEFAULTS,
+
+    SORT_ORDERS: SORT_ORDERS,
 
     worker: function () {},
 
@@ -1312,10 +1445,10 @@ const perspective = {
             // Fill t_table with data
             tbl = __MODULE__.make_table(pdata.row_count || 0,
                 pdata.names, pdata.types, pdata.cdata,
-                0, options.index, pdata.is_arrow);
+                0, options.index, pdata.is_arrow, false);
 
             gnode = __MODULE__.make_gnode(tbl);
-            gnode._id = pool.register_gnode(gnode);
+            pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
 
             return new table(gnode, pool, options.index);

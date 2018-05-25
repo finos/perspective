@@ -1,8 +1,8 @@
 {
   "name": "@jpmorganchase/perspective-viewer-hypergrid",
-  "version": "0.1.4",
+  "version": "0.1.13",
   "description": "Perspective.js",
-  "main": "build/hypergrid.plugin.js",
+  "main": "build/hypergrid.plugin.umd.js",
   "directories": {
     "test": "test"
   },
@@ -13,7 +13,7 @@
   "scripts": {
     "hypergrid": "webpack --config src/config/hypergrid.plugin.config.js",
     "start": "npm run hypergrid",
-    "compile_test": "cp test/html/* build",
+    "compile_test": "cp test/html/* build && webpack --config test/config/hypergrid.config.js",
     "test": "jest --silent --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete"
   },
@@ -33,19 +33,18 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective-common": "^0.1.2",
+    "@jpmorganchase/perspective": "^0.1.11",
+    "@jpmorganchase/perspective-viewer": "^0.1.13",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
     "fin-hypergrid": "2.0.2",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
-    "@jpmorganchase/perspective": "^0.1.4",
-    "@jpmorganchase/perspective-common": "^0.1.2",
-    "@jpmorganchase/perspective-viewer": "^0.1.4",
     "babel-core": "^6.26.0",
     "babel-jest": "^22.0.4",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",

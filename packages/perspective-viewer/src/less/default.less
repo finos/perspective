@@ -1,0 +1,294 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@border-color: #ccc;
+
+.selected_indicator() {
+    font-family: Arial;
+    font-weight: 500;
+}
+
+.bordered() {
+    border: 1px solid @border-color;
+    border-top-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
+
+perspective-viewer.dragging #top_panel .rrow > * {
+    border: 1px solid #1078d1 !important;
+}
+
+perspective-viewer.dragging #top_panel .rrow > .dropping {
+    background-color: rgb(240, 240, 255) !important;
+}
+
+.dropping perspective-row.inserting {
+    border-top: 25px solid rgba(0,0,0,0);
+}
+
+.dropping perspective-row.postserting {
+    border-bottom: 25px solid rgba(0,0,0,0);
+}
+
+perspective-viewer {
+
+    .awesomplete > ul {
+        border-radius: 0px;
+        margin: 0px;
+        border: none;
+        transform-origin: none;
+        transition: 0;
+    }
+
+    .awesomplete > ul:before {
+        content: none;
+    }
+
+    perspective-row #psp_row {
+        color: rgb(51, 51, 51);
+    }
+
+    #side_panel perspective-row .row_draggable {
+        padding-right: 10px;
+        color: rgb(51, 51, 51);
+        transition: height 0.2s;
+    }
+
+    #side_panel #active_columns perspective-row .row_draggable {
+        .bordered();
+        background-color: white;
+    }
+
+    #side_panel perspective-row .is_visible {
+        color: #999;
+    }
+
+    #side_panel #inactive_columns perspective-row .is_visible::before {
+        content: "\25CB";
+    }
+
+    #side_panel perspective-row 
+
+    [settings=true] #app {
+        border-top: 1px solid #ccc;
+    }
+
+    ul {
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    #side_panel #active_columns perspective-row[drop-target] {
+        .row_draggable {
+            background-color: rgb(240, 240, 255) !important;
+            border: 1px solid #1078d1 !important;
+        }
+    }
+
+    #filters {
+        border-bottom: 1px solid #ccc;
+        color: #ccc;
+    }
+
+    #filters perspective-row {
+
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    }
+
+    #sort perspective-row #sort_order {
+        display: inline-block;
+    }
+
+    .column_row() {
+        font-family: monospace;
+    }
+
+
+    perspective-row {
+        border: 0px solid rgba(0,0,0,0);
+
+        #row_close {
+            color:#999;
+            font-family:Arial;
+            font-size:10px;
+        }
+        #column_aggregate {
+            font-family: Arial;
+        }
+
+        .row_draggable select {
+            border: none;
+        }
+
+        .row_draggable select:focus {
+            outline: none;
+        }
+    }
+
+    #side_panel perspective-row {
+
+        .is_visible::before {
+            content: "\25CF";
+        }
+
+        .integer::before, .float::before {
+            .column_row();
+            content: "123";
+            color: #016bc6;
+        }
+
+        .string::before {
+            .column_row();
+            content: "abc";
+            color: #fe9292;
+        }
+
+        .boolean::before {
+            .column_row();
+            content: "t/f";
+            color: #999999;
+        }
+
+        .date::before {
+            .column_row();
+            content: "mdy";
+            color: #999999;
+        }
+    }
+
+
+    font-family: Arial;
+
+    .noselect {
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+        user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
+    }
+    svg text {
+        font-family: Arial !important;
+    }
+
+    svg text { 
+        font-family: Arial !important;
+
+    }
+    svg .highcharts-axis-title, svg .highcharts-axis-title {
+        font-family: Arial !important;
+    }
+    svg .highcharts-legend-box {
+        fill: none;
+    }
+
+    #pivot_chart {
+        background-color: white;
+    }
+
+    #active_columns, #inactive_columns {
+        border: none !important;
+    }
+
+    #divider {
+        min-height: 2px;
+        height: 2px;
+        margin: 15px 13px 15px 13px;
+        margin-bottom: 5px;
+    }
+
+    #drop_target {
+        background: white;
+    }
+    #drop_target_inner h3 {
+        color: #aaa;
+        font-weight: 300;
+    }
+    #config_button {
+        font-weight: normal;
+        font-family: Arial;
+        font-size: 16px;
+        color: #999;
+        transition: opacity 0.3s;
+    }
+
+    #config_button:before {
+        content: '\1f527';
+    }
+
+    #filters {
+        background-color: white;
+    }
+
+    ul label, #filters label {
+        color: #ccc;
+        font-weight: normal;
+    }
+    
+    ul, #filters {
+        .bordered();
+        font-size: 12px;
+        padding: 0px 10px 0px 10px;
+    }
+    select {
+        border-radius: 0;
+        background-color: white;
+        .bordered();
+    }
+    select:focus {
+        outline: none;
+    }
+    input {
+        .bordered();
+    }
+    input::placeholder {
+        color: #ccc;
+    }
+    rect, svg image {
+        opacity: 0.5;
+    }
+    path, circle {
+        opacity: 0.8;
+    }
+
+    option[value=""] {
+        color: white !important;
+    }
+    select:focus {
+        color: #000 !important;
+    }
+
+    #app {
+        background-color: #eee;
+    }
+    
+    #top_panel ul {
+        background-color: white;
+    }
+
+    perspective-hypergrid {
+        color: #666;
+    }
+
+    ::-webkit-scrollbar, ::shadow ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb, ::shadow ::-webkit-scrollbar-thumb {
+        background: #ccc;
+    }
+
+    ::-webkit-scrollbar-track, ::shadow ::-webkit-scrollbar-track {
+        background: none;
+    }
+}
