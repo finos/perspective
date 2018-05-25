@@ -11,11 +11,10 @@ import {Widget} from '@phosphor/widgets';
 import {Message} from '@phosphor/messaging';
 import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
-import {Clipboard} from '@jupyterlab/apputils';
 import '../src/css/index.css';
 import '../src/css/material.dark.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, convertToCSV} from './utils.js';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, createCopyDl} from './utils.js';
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
@@ -38,90 +37,6 @@ interface PerspectiveSpec {
     schema: string,
     layout: string,
     config: string;
-}
-
-
-function createCopy(psp: any) : HTMLElement {
-    let button = document.createElement('button');
-    button.textContent = 'copy/dl';
-
-    let viewtype: string;
-    let data: any;
-    let height: number;
-    let width: number;
-
-    button.onmousedown = () => {
-        viewtype = psp.getAttribute('view');
-        if (viewtype === 'hypergrid') {
-            psp._view.to_json().then((dat: Array<Object>) => {
-                data = dat;
-            });
-        } else if (viewtype === 'vertical' || 
-                   viewtype === 'horizontal' || 
-                   viewtype === 'heatmap' || 
-                   viewtype === 'line' || 
-                   viewtype === 'scatter'
-            ) {
-            let svg = psp.querySelector('svg') as SVGSVGElement;
-            height = svg.height.baseVal.value;
-            width = svg.width.baseVal.value;
-
-            data = new XMLSerializer().serializeToString(svg);
-        }
-    }
-
-    button.onclick = () => {
-        let copied = false;
-        let timeout = 100;
-        while (timeout<=16000){
-            setTimeout(() => {
-                if(copied){
-                    return;
-                }
-                if (data) {
-                    if(viewtype === 'hypergrid'){
-                        Clipboard.copyToSystem(convertToCSV(data));
-                    } else if (viewtype === 'vertical' || 
-                       viewtype === 'horizontal' || 
-                       viewtype === 'heatmap' || 
-                       viewtype === 'line' || 
-                       viewtype === 'scatter') {
-
-                        let canvas = document.createElement('canvas') as HTMLCanvasElement;
-                        canvas.height = height;
-                        canvas.width = width;
-
-                        let ctx = canvas.getContext("2d");
-                        let DOMURL = window.URL || (window as any).webkitURL || window;
-                        let img = new Image();
-                        let svg = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
-
-                        let url = DOMURL.createObjectURL(svg);
-                        img.onload = function() {
-                            ctx.drawImage(img, 0, 0, width, height);
-                            let png = canvas.toDataURL("image/png");
-                            var a = document.createElement('a');
-                            a.download = 'psp.png';
-                            a.target = "_blank";
-                            a.href = png;
-                            document.body.appendChild(a);
-                            a.click();
-                            a.remove();
-                            DOMURL.revokeObjectURL(png);
-                        };
-                        img.src = url;
-                        Clipboard.copyToSystem(data);
-                    }
-                    copied = true;
-                } else if (timeout == 16000){
-                    console.error('Timeout waiting for perspective!');
-                }
-            }, timeout);
-            timeout *= 2;
-        }
-    };
-
-    return button;
 }
 
 
@@ -315,10 +230,16 @@ namespace Private {
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
 
-        let btn = createCopy(psp);
+        let btns = createCopyDl(psp);
 
         node.appendChild(psp);
-        node.appendChild(btn);
+
+        let div = document.createElement('div');
+        div.style.setProperty('display', 'flex');
+        div.style.setProperty('flex-direction', 'row');
+        div.appendChild(btns['copy']);
+        div.appendChild(btns['dl']);
+        node.appendChild(div);
         return node;
     }
 }
