@@ -13,6 +13,7 @@ import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
 
 import '../src/css/index.css';
+import '../src/css/material.dark.css';
 
 import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.js';
 
@@ -28,6 +29,9 @@ const PSP_CLASS = 'jp-PSPViewer';
 
 export
 const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
+
+export
+const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
 
 interface PerspectiveSpec {
     data: string,
@@ -47,13 +51,29 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
         let psp = (<any>(this.node.querySelector('perspective-viewer')));
         
         let layout = JSON.parse(this._lyt);
-
         for(let key in layout){
             if(layout[key]){
-                if(key !== 'view'){
-                    psp.setAttribute(key, JSON.stringify(layout[key]));
-                } else {
+                if(key === 'view'){
                     psp.setAttribute(key, layout[key]);
+                } else if (key === 'colorscheme'){
+                    if(layout[key]==='dark'){
+                        this.node.classList.add(PSP_CONTAINER_CLASS_DARK)
+                        psp.addEventListener('loaded', ()=>{
+                            // Call once rendered
+                            let grid = this.node.querySelector('perspective-hypergrid');
+                            if (grid){
+                                (<any>grid).grid.addProperties({
+                                    columnHeaderBackgroundColor:'#2a2c2f',
+                                    columnHeaderColor:'#eee',
+                                    rowProperties: [
+                                        { color: '#eee', backgroundColor: '#2a2c2f' },
+                                    ],
+                                });
+                            }
+                        });
+                    }
+                } else {
+                    psp.setAttribute(key, JSON.stringify(layout[key]));
                 }
             }
         }
