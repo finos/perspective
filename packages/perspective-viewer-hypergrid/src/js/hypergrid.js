@@ -318,7 +318,7 @@ async function grid(div, view, task) {
         let new_range = Range.estimate(this.hypergrid);
         if (new_range.within(range)) {
             let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), range.start_row, Math.min(range.end_row, nrows), nrows).rows;
-            rows[0] = this.hypergrid.behavior.dataModel.viewData[0];
+            rows[0] = this.hypergrid.behavior.dataModel.data[0];
             this.hypergrid.setData({data: rows});
             return true;
         } else {
@@ -343,10 +343,7 @@ global.registerPlugin('hypergrid', {
     },
     delete: function() {
         if (this.hypergrid) {
-           // this.hypergrid.clearState();
-            this.hypergrid.behavior.reset();
-            this.hypergrid.renderer.reset();
-            this.hypergrid.canvas.resize();
+            this.hypergrid.terminate();
         }
     }
 });
