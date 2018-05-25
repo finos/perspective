@@ -29,32 +29,64 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return row ? row[x] : null;
     },
 
-    cellStyle: function(gridCellConfig, rendererName) {
-        if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
-            gridCellConfig.value = '-';
-        } else {
-            var type = this.schema[gridCellConfig.dataCell.x].type;
-            if (['number', 'float', 'integer'].indexOf(type) > -1) {
-                if (gridCellConfig.value === 0) {
-                    gridCellConfig.value = type === 'float' ? '0.00' : '0';
-                } else if (isNaN(gridCellConfig.value)) {
-                    gridCellConfig.value = '-';
-                } else {
-                    gridCellConfig.color = gridCellConfig.value >= 0
-                        ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)')
-                        : (gridCellConfig.columnHeaderBackgroundNumberNegative || 'rgb(255,136,136)');
-                }
-            } else if (type === 'boolean') {
-                gridCellConfig.value = String(gridCellConfig.value);
-            }
+    fetchData: function(rectangles, callback) {
+        if (this.clearCache) {
+            this.data = [];
+            this.lastSuccessfullyFetchedRects = false;
         }
+
+        fetchData.call(this, rectangles, callback);
+    },
+
+    // return true for all data fetched, false if any data missing
+    gotData: function(rects) {
+        if (
+            this.lastSuccessfullyFetchedRects &&
+            this.lastSuccessfullyFetchedRects.length === rects.length &&
+            this.lastSuccessfullyFetchedRects.every(function(oldRect, i) {
+                return (
+                    oldRect.origin.equals(rects[i].origin) &&
+                    oldRect.corner.equals(rects[i].corner)
+                );
+            })
+        ) {
+            return true; // shortcut when requested rects same as last successfully fetched rects
+        }
+
+        var data = this.data,
+            schema = this.schema;
+
+        // for better performance, we first
+        // (1) check all rects for any missing rows before
+        // (2) checking rows for any missing cells
+        return !(
+            rects.find(function(rect) { // (1)
+                for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
+                    var dataRow = data[y];
+                    if (!dataRow) {
+                        return true;
+                    }
+                }
+            })
+            ||
+            rects.find(function(rect) { // (2)
+                for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
+                    var dataRow = data[y];
+                    for (var x = rect.origin.x, X = rect.corner.x; x < X; ++x) {
+                        if (!(schema[x].name in dataRow)) {
+                            return true;
+                        }
+                    }
+                }
+            })
+        );
     },
 
     // Return the cell renderer
     getCell: function(config, rendererName) {
         var nextRow, depthDelta;
         if (config.isUserDataArea) {
-            this.cellStyle(config, rendererName);
+            cellStyle.call(this, config, rendererName);
         } else if (config.dataCell.x === TREE_COLUMN_INDEX) {
             nextRow = this.getRow(config.dataCell.y + 1);
             depthDelta = nextRow ? config.value.rowPath.length - nextRow[TREE_COLUMN_INDEX].rowPath.length : -1;
@@ -76,3 +108,25 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return declaredEditorName;
     }
 });
+
+
+function cellStyle(gridCellConfig, rendererName) {
+    if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
+        gridCellConfig.value = '-';
+    } else {
+        var type = this.schema[gridCellConfig.dataCell.x].type;
+        if (['number', 'float', 'integer'].indexOf(type) > -1) {
+            if (gridCellConfig.value === 0) {
+                gridCellConfig.value = type === 'float' ? '0.00' : '0';
+            } else if (isNaN(gridCellConfig.value)) {
+                gridCellConfig.value = '-';
+            } else {
+                gridCellConfig.color = gridCellConfig.value >= 0
+                    ? (gridCellConfig.columnHeaderBackgroundNumberPositive || 'rgb(160,207,255)')
+                    : (gridCellConfig.columnHeaderBackgroundNumberNegative || 'rgb(255,136,136)');
+            }
+        } else if (type === 'boolean') {
+            gridCellConfig.value = String(gridCellConfig.value);
+        }
+    }
+}
