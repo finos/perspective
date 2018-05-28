@@ -583,8 +583,8 @@ function update() {
         this._render_count--;
     });
 
-    this._plugin.create.call(this, this._datavis, this._view, hidden, task).catch(() => {
-        console.debug("View cancelled");
+    this._plugin.create.call(this, this._datavis, this._view, hidden, task).catch(err => {
+        console.warn(err);
     }).finally(() => {
         if (!this.hasAttribute('render_time')) {
             this.dispatchEvent(new Event('loaded', {bubbles: true}));
