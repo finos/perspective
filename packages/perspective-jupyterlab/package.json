@@ -28,6 +28,7 @@
     "@jpmorganchase/perspective-viewer-highcharts": "^0.1.13",
     "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.13",
     "@jupyterlab/application": "^0.16.0",
+    "@jupyterlab/apputils": "^0.16.0",
     "@jupyterlab/rendermime-interfaces": "^1.0.0",
     "@jupyterlab/services": "^2.0.0",
     "@phosphor/messaging": "^1.2.2",
