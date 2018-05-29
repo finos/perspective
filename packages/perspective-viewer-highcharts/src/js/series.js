@@ -12,6 +12,8 @@
  * Y
  */
 
+import {COLORS_10, COLORS_20} from "./externals.js";
+
 function row_to_series(series, sname, gname) {
     let s;
     for (var sidx = 0; sidx < series.length; sidx++) {
@@ -25,7 +27,7 @@ function row_to_series(series, sname, gname) {
         s = {
             name: sname,
             connectNulls: true,
-            data: [],
+            data: []
         };
         if (gname) {
             s.stack = gname;
