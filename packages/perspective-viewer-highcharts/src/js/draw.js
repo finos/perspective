@@ -17,10 +17,11 @@ import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
 import {set_boost, set_axis, set_category_axis, default_config} from "./config.js";
 
-export const draw = (mode) => async function(el, view, hidden, task) {
+export const draw = (mode) => async function(el, view, task) {
     const row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
     const col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
     const aggregates = this._get_view_aggregates();
+    const hidden = this._get_view_hidden(aggregates);
 
     const [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
 
@@ -42,7 +43,11 @@ export const draw = (mode) => async function(el, view, hidden, task) {
         xaxis_name = aggregates.length > 0 ? aggregates[0].column : undefined,
         xaxis_type = schema[xaxis_name],
         yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
-        yaxis_type = schema[yaxis_name];
+        yaxis_type = schema[yaxis_name],
+        xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
+        xtree_type = tschema[xaxis_name],
+        ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
+        ytree_type = tschema[yaxis_name];
 
     if (mode === 'scatter') {
         let [series, top, colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
@@ -73,13 +78,8 @@ export const draw = (mode) => async function(el, view, hidden, task) {
         color_axis.call(this, config, colorRange)
         set_boost(config);
 
-        xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
-        xaxis_type = tschema[xaxis_name];
-        yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
-        yaxis_type = tschema[yaxis_name];
-
-        set_category_axis(config, 'xAxis', xaxis_type, top);
-        set_category_axis(config, 'yAxis', yaxis_type, ytop);
+        set_category_axis(config, 'xAxis', xtree_type, top);
+        set_category_axis(config, 'yAxis', ytree_type, ytop);
 
         Object.assign(config, {
             series: [{
@@ -115,17 +115,11 @@ export const draw = (mode) => async function(el, view, hidden, task) {
     } else {
         let [series, top, colorRange] = make_y_data(js, row_pivots, hidden);
         config.series = series;
-        const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
-
-        xaxis_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined;
-        xaxis_type = tschema[xaxis_name];
-        yaxis_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined;
-        yaxis_type = tschema[yaxis_name];
-        set_category_axis(config, 'xAxis', xaxis_type, top);
+        config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        
+        set_category_axis(config, 'xAxis', xtree_type, top);
         config.legend.enabled = col_pivots.length > 0 || series.length > 1;
         config.legend.floating = series.length <= 20;
         Object.assign(config, {
-            colors: colors,
             yAxis: {
                 startOnTick: false,
                 endOnTick: false,

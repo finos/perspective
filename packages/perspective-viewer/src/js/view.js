@@ -531,14 +531,11 @@ function update() {
     let filters = this._get_view_filters();
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
-    let hidden = [];
     let sort = this._get_view_sorts("#sort perspective-row");
-    for (let s of sort) {
-        if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
-            let all = this._get_view_aggregates('#inactive_columns perspective-row');
-            aggregates.push(all.reduce((obj, y) => y.column === s[0] ? y : obj));
-            hidden.push(s[0]);
-        }
+    let hidden = this._get_view_hidden(aggregates, sort);
+    for (let s of hidden) {
+        let all = this._get_view_aggregates('#inactive_columns perspective-row');
+        aggregates.push(all.reduce((obj, y) => y.column === s ? y : obj));
     }
 
     if (this._view) {
@@ -564,7 +561,7 @@ function update() {
                     this._task.cancel();
                 }
                 const task = this._task = new CancelTask();
-                this._plugin.create.call(this, this._datavis, this._view, hidden, task).then(() => {
+                this._plugin.create.call(this, this._datavis, this._view, task).then(() => {
                     timer();
                     task.cancel();
                 }).catch(err => {
@@ -583,7 +580,7 @@ function update() {
         this._render_count--;
     });
 
-    this._plugin.create.call(this, this._datavis, this._view, hidden, task).catch(err => {
+    this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
         console.warn(err);
     }).finally(() => {
         if (!this.hasAttribute('render_time')) {
@@ -671,6 +668,18 @@ function update() {
 
     _get_view_sorts() {
         return this._view_columns('#sort perspective-row', false, false, true);
+    }
+
+    _get_view_hidden(aggregates, sort) {
+        aggregates = aggregates || this._get_view_aggregates();
+        let hidden = [];
+        sort = sort || this._get_view_sorts("#sort perspective-row");
+        for (let s of sort) {
+            if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
+                hidden.push(s[0]);
+            }
+        }
+        return hidden;
     }
 
     _view_columns(selector, types, filters, sort) {
