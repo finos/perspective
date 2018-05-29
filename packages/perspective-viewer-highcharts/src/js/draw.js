@@ -7,15 +7,14 @@
  *
  */
 
-import highcharts from 'highcharts';
-const Highcharts = highcharts;
+import Highcharts from 'highcharts';
 
 import "../less/highcharts.less";
 
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
-import {set_boost, set_axis, set_category_axis, default_config} from "./config.js";
+import {set_boost, set_axis, set_category_axis, default_config, set_tick_size} from "./config.js";
 
 export const draw = (mode) => async function(el, view, task) {
     const row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
@@ -47,15 +46,15 @@ export const draw = (mode) => async function(el, view, task) {
         xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
         xtree_type = tschema[xaxis_name],
         ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
-        ytree_type = tschema[yaxis_name];
+        ytree_type = tschema[yaxis_name],
+        num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length - hidden.length;
 
     if (mode === 'scatter') {
         let [series, top, colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
-        const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         config.legend.floating = series.length <= 20;
-        let num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length - hidden.length;
         config.legend.enabled = num_cols > 3 || col_pivots.length > 0;
         config.series = series;
+        config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         if (colorRange[0] !== Infinity) {
             if (aggregates.length <= 3) {
                 config.chart.type = 'coloredScatter';
@@ -64,19 +63,19 @@ export const draw = (mode) => async function(el, view, task) {
             }
             color_axis.bind(this)(config, colorRange);
         }
-        if (aggregates.length < 3) {
-            set_boost(config);
+        if (num_cols < 3) {
+            set_boost(config, xaxis_type, yaxis_type);
         }
-        config.colors = [colors[0]];
         set_axis(config, 'xAxis', xaxis_name, xaxis_type);
         set_axis(config, 'yAxis', yaxis_name, yaxis_type);
+        set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
         let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden);
         config.series = series;
         config.legend.enabled = true;
 
         color_axis.call(this, config, colorRange)
-        set_boost(config);
+        set_boost(config, xaxis_type, yaxis_type);
 
         set_category_axis(config, 'xAxis', xtree_type, top);
         set_category_axis(config, 'yAxis', ytree_type, ytop);
@@ -86,10 +85,7 @@ export const draw = (mode) => async function(el, view, task) {
                 name: null,
                 data: series,
                 nullColor: 'none'
-            }],
-            boost: {
-                useGPUTranslations: true
-            }
+            }]
         });
 
         config.legend.floating = false;
@@ -110,6 +106,9 @@ export const draw = (mode) => async function(el, view, task) {
         config.series = series;
         config.plotOptions.scatter.marker = {enabled: false, radius: 0};
         config.colors = colors;
+        if (set_boost(config, xaxis_type, yaxis_type)) {
+            delete config.chart['type'];
+        }
         set_axis(config, 'xAxis', xaxis_name, xaxis_type);
         set_axis(config, 'yAxis', yaxis_name, yaxis_type);
     } else {
@@ -138,14 +137,12 @@ export const draw = (mode) => async function(el, view, task) {
 
     if (this._chart) {
         if (mode === 'scatter') {
-            let new_radius = Math.min(6, Math.max(2, Math.floor((this._chart.chartWidth + this._chart.chartHeight) / Math.max(300, config.series[0].data.length / 3))));
-            this._chart.update({
+            let conf = {
                 series: config.series,
-                plotOptions: {
-                    coloredScatter: {marker: {radius: new_radius}},
-                    scatter: {marker: {radius: new_radius}}
-                }
-            });
+                plotOptions: {}
+            };
+            set_tick_size.call(this, conf);
+            this._chart.update(conf);
         } else if (mode.indexOf('line') > -1) {
             this._chart.update({
                 series: config.series
