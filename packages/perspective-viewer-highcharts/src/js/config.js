@@ -12,7 +12,6 @@ export function set_boost(config, series, ...types) {
     if (count > 5000) {
         Object.assign(config, {
             boost: {
-                enabeld: true,
                 useGPUTranslations: types.indexOf('date') === -1,
                 usePreAllocated: types.indexOf('date') === -1
             }
@@ -35,7 +34,7 @@ export function set_axis(config, axis, name, type) {
         startOnTick: false,
         endOnTick: false,
         title: {
-            style: {'color': '#666666', 'fontSize': "14px"},
+            style: {color: '#666666', fontSize: "14px"},
             text: name
         },
     };

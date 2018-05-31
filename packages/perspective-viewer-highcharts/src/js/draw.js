@@ -47,12 +47,13 @@ export const draw = (mode) => async function(el, view, task) {
         xtree_type = tschema[xaxis_name],
         ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
         ytree_type = tschema[yaxis_name],
-        num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length - hidden.length;
+        num_aggregates = aggregates.length - hidden.length,
+        num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length;
 
     if (mode === 'scatter') {
-        let [series, top, colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
+        let [series, , colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
         config.legend.floating = series.length <= 20;
-        config.legend.enabled = num_cols > 3 || col_pivots.length > 0;
+        config.legend.enabled = col_pivots.length > 0;
         config.series = series;
         config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         if (colorRange[0] !== Infinity) {
@@ -61,9 +62,9 @@ export const draw = (mode) => async function(el, view, task) {
             } else {
                 config.chart.type = 'coloredBubble';
             }
-            color_axis.bind(this)(config, colorRange);
+            color_axis.call(this, config, colorRange);
         }
-        if (num_cols < 3) {
+        if (num_aggregates < 3) {
             set_boost(config, xaxis_type, yaxis_type);
         }
         set_axis(config, 'xAxis', xaxis_name, xaxis_type);
@@ -71,38 +72,32 @@ export const draw = (mode) => async function(el, view, task) {
         set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
         let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden);
-        config.series = series;
+        config.series = [{
+            name: null,
+            data: series,
+            nullColor: 'none'
+        }];
         config.legend.enabled = true;
+        config.legend.floating = false;
 
         color_axis.call(this, config, colorRange)
         set_boost(config, xaxis_type, yaxis_type);
-
         set_category_axis(config, 'xAxis', xtree_type, top);
         set_category_axis(config, 'yAxis', ytree_type, ytop);
 
-        Object.assign(config, {
-            series: [{
-                name: null,
-                data: series,
-                nullColor: 'none'
-            }]
-        });
-
-        config.legend.floating = false;
     } else if (mode === "treemap" || mode === "sunburst") {
         let [series, top, colorRange] = make_tree_data(js, row_pivots, hidden, aggregates);
         config.series = series;
+        config.plotOptions.series.borderWidth = 1;
+        config.legend.floating = false;
         if (colorRange) {
             color_axis.call(this, config, colorRange);
         }
-        config.plotOptions.series.borderWidth = 1;
-        config.legend.floating = false;
     } else if (mode === 'line') {
         let [series, top, colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
         const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         config.legend.floating = series.length <= 20;
-        let num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length - hidden.length;
-        config.legend.enabled = num_cols > 2 || col_pivots.length > 0;
+        config.legend.enabled = col_pivots.length > 0;
         config.series = series;
         config.plotOptions.scatter.marker = {enabled: false, radius: 0};
         config.colors = colors;
@@ -115,9 +110,13 @@ export const draw = (mode) => async function(el, view, task) {
         let [series, top, colorRange] = make_y_data(js, row_pivots, hidden);
         config.series = series;
         config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        
-        set_category_axis(config, 'xAxis', xtree_type, top);
         config.legend.enabled = col_pivots.length > 0 || series.length > 1;
         config.legend.floating = series.length <= 20;
+        config.plotOptions.series.dataLabels = {
+            allowOverlap: false,
+            padding: 10
+        }
+        set_category_axis(config, 'xAxis', xtree_type, top);
         Object.assign(config, {
             yAxis: {
                 startOnTick: false,
@@ -129,10 +128,6 @@ export const draw = (mode) => async function(el, view, task) {
                 labels: {overflow: 'justify'}
             }
         });
-        config.plotOptions.series.dataLabels = {
-            allowOverlap: false,
-            padding: 10
-        }
     }
 
     if (this._chart) {
