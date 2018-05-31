@@ -169,7 +169,7 @@ function make_tick(row, columns, is_string, colorRange) {
         tick.z = isNaN(row[columns[3]]) ? 1 : row[columns[3]];
     }
     if ('__ROW_PATH__' in row) {
-    tick.name = row['__ROW_PATH__'].join(", ");
+        tick.name = row['__ROW_PATH__'].join(", ");
     }
     return tick;
 }
@@ -178,7 +178,6 @@ export function make_xy_data(js, pivots, col_pivots, hidden) {
     let rows = new TreeAxisIterator(pivots.length, js);
     let rows2 = new ColumnsIterator(rows, hidden);
     let series = [];
-    let columns;
     let colorRange = [Infinity, -Infinity];
     let is_string = {};
 

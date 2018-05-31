@@ -7,15 +7,25 @@
  *
  */
 
-export function set_boost(config) {
-    Object.assign(config, {
-        boost: {
-            useGPUTranslations: true,
-            usePreAllocated: true
-        }
-    });
-    config.plotOptions.series.boostThreshold = 5000;
-    config.plotOptions.series.turboThreshold = Infinity;
+export function set_boost(config, series, ...types) {
+    const count = config.series[0].data ? config.series[0].data.length * config.series.length : config.series.length;
+    if (count > 5000) {
+        Object.assign(config, {
+            boost: {
+                useGPUTranslations: types.indexOf('date') === -1,
+                usePreAllocated: types.indexOf('date') === -1
+            }
+        });
+        config.plotOptions.series.boostThreshold = 1;
+        config.plotOptions.series.turboThreshold = 0;
+        return true;
+    }
+}
+
+export function set_tick_size(config) {
+    let new_radius = Math.min(6, Math.max(3, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, config.series[0].data.length / 3))));
+    config.plotOptions.coloredScatter = {marker: {radius: new_radius}};
+    config.plotOptions.scatter = {marker: {radius: new_radius}};
 }
 
 export function set_axis(config, axis, name, type) {
@@ -24,7 +34,7 @@ export function set_axis(config, axis, name, type) {
         startOnTick: false,
         endOnTick: false,
         title: {
-            style: {'color': '#666666', 'fontSize': "14px"},
+            style: {color: '#666666', fontSize: "14px"},
             text: name
         },
     };
@@ -153,7 +163,7 @@ export function default_config(aggregates, mode, js, col_pivots) {
             series: {
                 animation: false,
                 nullColor: "rgba(0,0,0,0)",
-                boostThreshold: Infinity,
+                boostThreshold: 0,
                 turboThreshold: 60000,
                 borderWidth: 0,
                 connectNulls: true,
