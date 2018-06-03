@@ -13,7 +13,7 @@ list(APPEND CMAKE_PREFIX_PATH /usr/local)
 
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 include_directories("/usr/local/include")
-include_directories("/src/boost_includes")
+include_directories("/boost_includes")
 
 
 set(EXTENDED_FLAGS " \
@@ -21,8 +21,8 @@ set(EXTENDED_FLAGS " \
 	--memory-init-file 1 \
 	-s NO_EXIT_RUNTIME=1 \
 	-s NO_FILESYSTEM=1 \
-    -s NO_DYNAMIC_EXECUTION=1 \
 	-s ALLOW_MEMORY_GROWTH=1 \
+	-s NO_DYNAMIC_EXECUTION=2 \
 	-s EXPORTED_FUNCTIONS=\"['_main']\" \
 ")
 

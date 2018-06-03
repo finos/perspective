@@ -13,8 +13,8 @@
   "scripts": {
     "compile": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs && (cd obj/ && emcmake cmake ../ && emmake make -j8)",
     "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
-    "start": "npm run compile && (npm run perspective & npm run compile_node & wait)",
-    "compile_test": "cp test/html/* build && cp test/csv/* build && webpack --config test/config/test_browser.config.js & webpack --config test/config/test_node.config.js & webpack --config test/config/benchmark.config.js & wait",
+    "build": "npm run compile && (npm run perspective & npm run compile_node & wait)",
+    "build_test": "cp test/html/* build && cp test/csv/* build && webpack --config test/config/test_browser.config.js & webpack --config test/config/test_node.config.js & webpack --config test/config/benchmark.config.js & wait",
     "compile_node": "webpack --config src/config/perspective.node.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
     "test": "jest --runInBand 2>&1",

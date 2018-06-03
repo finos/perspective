@@ -1220,12 +1220,13 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     console.log("Loading asm.js");
                     __MODULE__ = __MODULE__({
                         wasmJSMethod: "asmjs",
-                        memoryInitializerPrefixURL: msg.path + 'asmjs/',
+                        locateFile: path => `asmjs/${path}`,
+                        filePackagePrefixURL: msg.path + 'asmjs/',
                         printErr: (x) => console.warn(x),
                         print: (x) => console.log(x)
                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
                     });
-               } else {
+                 } else {
                     console.log('Loading wasm');
                     if (msg.data) {
                         module = {};
