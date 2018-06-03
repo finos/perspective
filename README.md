@@ -2,8 +2,8 @@
 
 [![Build Status](https://travis-ci.org/jpmorganchase/perspective.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
 
-A streaming data visualization engine for Javascript, Perspective makes it simple to build real-time 
-& user configurable analytics entirely in the browser.
+A streaming data visualization engine for Javascript, Perspective makes it 
+simple to build real-time & user configurable analytics entirely in the browser.
 
 <img src="https://jpmorganchase.github.io/perspective/examples/demo.gif">
 
@@ -14,8 +14,8 @@ A streaming data visualization engine for Javascript, Perspective makes it simpl
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
 - An embeddable, framework-agnostic configuration UI, based
-  on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for
-  responsiveness at high frequency.
+  on [Web Components](https://www.webcomponents.org/), and a WebWorker engine 
+  host for responsiveness at high frequency.
 
 - A suite of simple visualization plugins for some common Javascript libraries such as
   [HighCharts](https://github.com/highcharts/highcharts) and 
@@ -70,29 +70,37 @@ The main modules available via NPM:
 ### From source
 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 
-and uses [lerna](https://lernajs.io/) to manage dependencies.  `@jpmorganchase/perspective` depends on an additional enviornment dependency, [emscripten](https://github.com/kripken/emscripten), to compile the core C++ engine.  You'll need to install the emscripten SDK, then activate and export the latest `emsdk` environment via [`emsdk_env.sh`](https://github.com/juj/emsdk):
+and uses [lerna](https://lernajs.io/) to manage dependencies.
 
-```bash
-source emsdk/emsdk_env.sh
-```
-
-Once installed, you can build perspective via:
+`@jpmorganchase/perspective` has an additional dependency, 
+[emscripten](https://github.com/kripken/emscripten), to compile the core C++ 
+engine.  For convenience, Perspective provides a Docker container for this.
+To use it, you only need to install [Docker](https://docs.docker.com/install/) 
+itself, then build perspective via:
 
 ```bash
 npm install
-./node_modules/.bin/lerna run start --stream
+./node_modules/.bin/lerna run build --stream
 ```
 
 If everything is successful, you should find a few built example assets in the 
-`packages/perspective-examples/build` directory:
-
-You can run a simple test server on port 8080 by running:
+`packages/perspective-examples/build` directory.  You can run a simple test 
+server on port 8080 to host these by running:
 
 ```bash
 ./node_modules/.bin/lerna run host --stream
 ```
 
-#### OSX specific instructions
+#### EMSDK
+
+If you don't want to use Docker for the build, you'll need to install the 
+emscripten SDK, then activate and export the latest `emsdk` environment via 
+[`emsdk_env.sh`](https://github.com/juj/emsdk):
+  
+```bash
+source emsdk/emsdk_env.sh
+```
+##### OSX specific instructions
 
 Installing and activating the latest [emscriptn SDK]((https://github.com/kripken/emscripten)): 
 
@@ -108,24 +116,30 @@ brew install cmake
 brew install boost
 ```
 
-#### Windows 10 specific instructions
+##### Windows 10 specific instructions
 
-You need to use bash in order to build Perspective packages. To successfully build on Windows 10, enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) (WSL) and install the linux distribution
-of your choice. 
+You need to use bash in order to build Perspective packages. To successfully 
+build on Windows 10, enable [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) 
+(WSL) and install the linux distribution of your choice. 
 
-Create symbolic link to easily access Windows directories and projects modified via Windows. This way you can modify any of the Perspective files using your favorite editors on Windows 
-and build via Linux.
+Create symbolic link to easily access Windows directories and projects modified 
+via Windows. This way you can modify any of the Perspective files using your 
+favorite editors on Windows and build via Linux.
 
-Follow the Linux specific instructions to install Emscripten and all prerequisite tools.
+Follow the Linux specific instructions to install Emscripten and all
+prerequisite tools.
 
-#### Linux specific instructions
+##### Ubuntu/Debian
 
 When installing Emscripten, make sure to follow [Linux specific instructions](http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux).  
 
-Linking to boost libraries with CMake:
-- You might need to apply a workaround to correctly link boost libraries as described [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html).
+On Ubuntu, cmake will mistakenly resolve the system headers in `/usr/include` 
+rather than the emscripten supplied versions.  You can resolve this by moving
+boost to somewhere other than `/use/include` - into perspective's own `src` dir,
+for example (as per [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
 
 ```bash
+apt-get install libboost-all-dev
 cp -r /usr/include/boost ./packages/perspective/src/include/
 ```
 
@@ -331,7 +345,9 @@ document.addEventListener("WebComponentsReady", function () {
 ```
 
 Views can share a table by instancing it separately and passing it to the
-`load()` method.
+`load()` method.  Both Views will update when the underlying `table`'
+s `update()` method is invoked, but `table.delete()` will fail
+until all Views which use it are also deleted.
 
 ```javascript
 var view1 = document.getElementById('view1');
