@@ -21,8 +21,8 @@ set(EXTENDED_FLAGS " \
 	--memory-init-file 1 \
 	-s NO_EXIT_RUNTIME=1 \
 	-s NO_FILESYSTEM=1 \
-    -s NO_DYNAMIC_EXECUTION=1 \
 	-s ALLOW_MEMORY_GROWTH=1 \
+	-s NO_DYNAMIC_EXECUTION=2 \
 	-s EXPORTED_FUNCTIONS=\"['_main']\" \
 ")
 
