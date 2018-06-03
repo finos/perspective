@@ -18,8 +18,8 @@
     "access": "public"
   },
   "scripts": {
-    "start": "tsc",
-    "prepublish": "npm run start",
+    "build": "tsc",
+    "prepublish": "npm run build",
     "clean": "rimraf build",
     "watch": "tsc -w"
   },

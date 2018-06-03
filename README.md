@@ -80,7 +80,7 @@ itself, then build perspective via:
 
 ```bash
 npm install
-./node_modules/.bin/lerna run docker_build --stream
+PSP_DOCKER=1 npm run build
 ```
 
 If everything is successful, you should find a few built example assets in the 
@@ -100,6 +100,7 @@ emscripten SDK, then activate and export the latest `emsdk` environment via
 ```bash
 source emsdk/emsdk_env.sh
 ```
+
 ##### OSX specific instructions
 
 Installing and activating the latest [emscriptn SDK]((https://github.com/kripken/emscripten)): 
@@ -147,6 +148,7 @@ cp -r /usr/include/boost ./packages/perspective/src/include/
 
 The build script respects a few environment flags:
 
+* `PSP_DOCKER` will compile C++ source via an Emscripten Docker container.
 * `PSP_DEBUG` will run a debug build of the C++ source.
 * `PSP_NO_MINIFY` will skip Javascript minification.
 
