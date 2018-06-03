@@ -52,6 +52,16 @@ RUN echo "\n## Start building" \
     \
 &&	emcc --clear-cache --clear-ports \
     \
+&&	echo "\n## Compile sample code" \
+&&	mkdir -p /tmp/emscripten_test && cd /tmp/emscripten_test \
+&&	printf '#include <iostream>\nint main(){std::cout<<"HELLO FROM DOCKER C++"<<std::endl;return 0;}' > test.cpp \
+&&	em++ -O2 test.cpp -o test.js && nodejs test.js \
+&&	em++ test.cpp -o test.js && nodejs test.js \
+&&	em++ test.cpp -o test.js --closure 1 && nodejs test.js \
+    \
+&&	cd / \
+&&	rm -fr /tmp/emscripten_test \
+    \
 &&  echo "\n## Moving Boost locally" \
     \
 &&  mkdir /boost_includes \
