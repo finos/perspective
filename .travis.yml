@@ -10,24 +10,15 @@ env:
   global:
     - EM_USE_GLOBAL_CACHE=1
 
-addons:
-  apt:
-    packages: &trusty_pocl_packages
-      - libboost-all-dev
-
 sudo: required
 
 services:
   - docker
 
-before_install:
-  - mkdir boost_includes
-  - cp -r /usr/include/boost boost_includes/
-  - docker run -dit --name emscripten -v $(pwd):/src trzeci/emscripten:sdk-tag-1.37.33-64bit bash
-
 install:
   - npm install
 
 script:
-  - docker exec -it emscripten npm run docker_start
-  - npm run travis_test
+  - npm run docker_start
+  - npm run compile_test
+  - npm run docker_test
