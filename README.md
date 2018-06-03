@@ -80,7 +80,7 @@ itself, then build perspective via:
 
 ```bash
 npm install
-./node_modules/.bin/lerna run build --stream
+./node_modules/.bin/lerna run docker_build --stream
 ```
 
 If everything is successful, you should find a few built example assets in the 

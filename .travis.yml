@@ -19,6 +19,6 @@ install:
   - npm install
 
 script:
-  - npm run docker_start
+  - npm run docker_build
   - npm run compile_test
   - npm run docker_test
