@@ -606,7 +606,7 @@ function update() {
         const t = performance.now();
         return () => this.setAttribute('render_time', performance.now() - t);
     }
-     
+
     get _plugin() {
         let view = this.getAttribute('view');
         if (!view) {
@@ -1117,6 +1117,16 @@ class View extends ViewPrivate {
             return this._table.worker;
         }
         return get_worker();
+    }
+
+    /**
+     * This element's `perpsective.table.view` instance.  The instance itself
+     * will change after every `View#perspective-config-update` event. 
+     *
+     * @readonly
+     */
+    get view() {
+        return this._view;
     }
     
     /**
