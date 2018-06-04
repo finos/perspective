@@ -566,7 +566,7 @@ function update() {
                     task.cancel();
                 }).catch(err => {
                     console.error("Error rendering plugin.", err);
-                });
+                }).finally(() => this.dispatchEvent(new Event('perspective-view-update')));
             }, timeout || 0);
         }
     });
@@ -584,7 +584,7 @@ function update() {
         console.warn(err);
     }).finally(() => {
         if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('loaded', {bubbles: true}));
+            this.dispatchEvent(new Event('perspective-view-update'));
         }
         timer();
         task.cancel();
@@ -606,7 +606,7 @@ function update() {
         const t = performance.now();
         return () => this.setAttribute('render_time', performance.now() - t);
     }
-     
+
     get _plugin() {
         let view = this.getAttribute('view');
         if (!view) {
@@ -871,6 +871,7 @@ class View extends ViewPrivate {
      * @name sort
      * @memberof View.prototype
      * @type {array<string>} Array of column names
+     * @fires View#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('sort', JSON.stringify(["x"]));
@@ -895,7 +896,7 @@ class View extends ViewPrivate {
                 this._sort.appendChild(row);
             }.bind(this));
         }
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
     
@@ -905,6 +906,7 @@ class View extends ViewPrivate {
      * @name columns
      * @memberof View.prototype
      * @param {array} columns An array of strings, the names of visible columns.
+     * @fires View#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
@@ -914,7 +916,7 @@ class View extends ViewPrivate {
     @array_attribute
     set columns(show) {
         this._update_column_view(show, true);
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
 
@@ -928,6 +930,7 @@ class View extends ViewPrivate {
      * override;  in lieu of a key for a column supplied by the developers, a
      * default will be selected and reflected to the attribute based on the
      * column's type.  See {@link perspective/src/js/defaults.js}
+     * @fires View#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
@@ -943,7 +946,7 @@ class View extends ViewPrivate {
                 x.setAttribute('aggregate', agg);
             }
         });
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
 
@@ -959,6 +962,7 @@ class View extends ViewPrivate {
      *       {@link perspective/src/js/defaults.js}
      *     * The filter argument, as a string, float or Array<string> as the 
      *       filter operation demands.
+     * @fires View#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let filters = [
      *     ["x", "<", 3], 
@@ -994,7 +998,7 @@ class View extends ViewPrivate {
                 });
             }
         }
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
 
@@ -1002,11 +1006,12 @@ class View extends ViewPrivate {
      * Sets the currently selected plugin, via its `name` field.
      * 
      * @type {string}
+     * @fires View#perspective-config-update
      */
     set view(v) {
         this._vis_selector.value = this.getAttribute('view');
         this._set_column_defaults();
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
     }
 
     /**
@@ -1015,6 +1020,7 @@ class View extends ViewPrivate {
      * @name column-pivots
      * @memberof View.prototype
      * @type {array<string>} Array of column names
+     * @fires View#perspective-config-update
      */
     @array_attribute
     set 'column-pivots'(pivots) {
@@ -1029,7 +1035,7 @@ class View extends ViewPrivate {
                 this._column_pivots.appendChild(row);
             }.bind(this));
         }
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
 
@@ -1052,6 +1058,7 @@ class View extends ViewPrivate {
      * @name row-pivots
      * @memberof View.prototype
      * @type {array<string>} Array of column names
+     * @fires View#perspective-config-update
      */
     @array_attribute
     set 'row-pivots'(pivots) {
@@ -1066,7 +1073,7 @@ class View extends ViewPrivate {
                 this._row_pivots.appendChild(row);
             }.bind(this));
         }
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
     }
 
@@ -1111,6 +1118,16 @@ class View extends ViewPrivate {
         }
         return get_worker();
     }
+
+    /**
+     * This element's `perpsective.table.view` instance.  The instance itself
+     * will change after every `View#perspective-config-update` event. 
+     *
+     * @readonly
+     */
+    get view() {
+        return this._view;
+    }
     
     /**
      * Load data.  If `load` or `update` have already been called on this
@@ -1118,6 +1135,7 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
+     * @fires View#perspective-view-update
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.load([
@@ -1158,6 +1176,7 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table.update`.
+     * @fires View#perspective-view-update
      * @example
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.update([
@@ -1267,6 +1286,22 @@ class View extends ViewPrivate {
             this.removeAttribute('columns');
         }
         this.setAttribute('view', Object.keys(RENDERERS)[0]);
-        this.dispatchEvent(new Event('config-update'));
+        this.dispatchEvent(new Event('perspective-config-update'));
     }
 }
+
+/**
+ * `perspective-config-update` is fired whenever an configuration attribute has
+ * been modified, by the user or otherwise.
+ *
+ * @event View#perspective-config-update
+ * @type {string}
+ */
+
+ /**
+ * `perspective-view-update` is fired whenever underlying `view`'s data has
+ * updated, including every invocation of `load` and `update`.
+ *
+ * @event View#perspective-view-update
+ * @type {string}
+ */
