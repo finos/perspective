@@ -1,0 +1,196 @@
+digraph G {
+    graph [rankdir="LR" fontname="helvetica" labeljust="l"]
+    node [shape="box" fontname="monospace" fontsize=8 color=gray70 style=filled fillcolor=white];
+    edge [color="#EDEBDF" arrowsize=0.8]
+    subgraph cluster_11 {
+        label="\lPython Server";
+        fontcolor=gray30
+        margin=10
+        color=none
+        subgraph cluster_thread_2 {
+            graph [
+                label="\lPerspectiveManager - Thread 2";
+                style=filled
+                fillcolor="#91A4A8"
+                color=none
+                fontcolor="#EDEBDF"
+                fontsize=10
+                margin=10
+            ]
+            table_thread_2 [
+                label="table(df)"
+                width=1
+                color=none
+                fillcolor="#E6E2DA"
+            ]
+            view_thread_2 [
+                label="view({\l    row_pivot: [\"State\"]]\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            view_thread_2_2 [
+                label="view({\l    row_pivot: [\"City\"]]\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            table_thread_2 -> view_thread_2_2;
+            table_thread_2 -> view_thread_2;
+        }
+        subgraph cluster_thread_1 {
+            graph [
+                label="\lPerspectiveManager - Thread 1";
+                style=filled
+                fillcolor="#91A4A8"
+                color=none
+                fontcolor="#EDEBDF"
+                fontsize=10
+                margin=10
+            ]
+            table_thread_1 [
+                label="table(arrow)"
+                width=1
+                color=none
+                fillcolor="#E6E2DA"
+            ]
+            view_thread_1 [
+                label="view({\l    row_pivots:'[\"State\"]\l    column_pivots:'[\"Segment\"]'\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            table_thread_1 -> view_thread_1;
+        }
+    }
+    subgraph cluster_browser {
+        graph [
+            label="\lBrowser";
+            color="#CADEE1";
+            margin=10
+            style=filled;
+            fontcolor=gray30
+        ]
+        subgraph cluster_2 {
+            graph [
+                label="\lWebWorker 1";
+                style=filled
+                margin=10
+                fillcolor="#2D4C68"
+                color=none
+                fontcolor="#EDEBDF"
+                fontsize=10
+            ]
+            table1 [
+                label="table(csv)"
+                width=1
+                color=none
+                fillcolor="#E6E2DA"
+            ]
+            table_remote_view [
+                label="table(json)"
+                width=1
+                color=none
+                fillcolor="#E6E2DA"
+            ]
+            view1 [
+                label="view({\l    row_pivot: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            view2 [
+                label="view({\l    row_pivot: [\"Sub-Category\"]\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            view3 [
+                label="view()\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+            table1 -> {view1 view2};
+            table_remote_view -> view3;
+        }
+        
+        subgraph cluster_webworker2 {
+            graph [
+                label="\lWebWorker 2";
+                style=filled
+                margin=10
+                fillcolor="#2D4C68"
+                color=none
+                fontcolor="#EDEBDF"
+                fontsize=10
+            ]
+            table12 [
+                label="table(...)"
+                width=1
+                color=none
+                fillcolor="#E6E2DA"
+            ]
+
+            view12 [
+                label="view({\l    row_pivot: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
+                width=2.5
+                color=none
+                fillcolor="#EDEBDF"
+            ]
+
+            table12 -> {view12}  [color="#E6E2DA"];
+        }
+
+        view_thread_2  -> table12 [penwidth=2 style=dashed arrowhead=none color="#D1A043"];
+
+        view1 -> viewer1 [penwidth=2 style=dashed arrowhead=none color="#666"];
+        view2 -> viewer2 [penwidth=2 style=dashed arrowhead=none color="#666"];
+        view3 -> viewer3 [penwidth=2 style=dashed arrowhead=none color="#666"];
+
+        subgraph cluster_41 {
+           graph [
+                label="\l<html>";
+                color=none
+                fillcolor=white
+                fontcolor=gray30
+                fontsize=10
+                fontname="monospace" fontsize=8 color=none 
+
+            ]
+            viewer1 [
+                label = "<perspective-viewer\l    view=\"Y Bar\"\l    row-pivots='[\"Category\"]'\l    filters='[[\"State\",\"==\",\"Texas\"]]'>\l"
+                width=2.8
+            ];
+            viewer2 [
+                label = "<perspective-viewer\l    view=\"xy_scatter\"\l    row-pivots='[\"Sub-Category\"]'>\l"
+                width=2.8
+                color=lightgrey
+            ];
+            viewer3 [
+                label = "<perspective-viewer\l    view=\"grid\">\l"
+                width=2.8
+            ];
+            viewerN [
+                style=invis
+            ]
+            
+            viewer5 [
+                label = "<perspective-viewer\l    view=\"heatmap\"\l    row-pivots='[\"State\"]\l    column-pivots='[\"Segment\"]'>\l"
+                width=2.8
+            ];
+            viewerZ [
+                style=invis
+                height=0.3
+            ]
+            viewer4 [
+                label = "<perspective-viewer\l    view=\"heatmap\"\l    row-pivots='[\"State\"]\l    column-pivots='[\"Segment\"]'>\l"
+                width=2.8
+            ];
+            view_thread_1 -> viewer4 [penwidth=2 style=dashed arrowhead=none color="#D1A043" constraint=false];
+            view12 -> viewer5 [penwidth=2 style=dashed arrowhead=none color="#666"];
+        }
+      
+        
+    }	
+}

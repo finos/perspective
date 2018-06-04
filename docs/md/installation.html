@@ -1,0 +1,127 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Installation · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Javascript"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Installation · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="## Javascript"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Public+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="js/index.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/logo.png" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/md/js.html" target="_self">Docs</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Installation</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="javascript"></a><a href="#javascript" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Javascript</h2>
+<p>Because Perspective uses both WebAssembly and Web Workers, each of which place
+constraints on how assets and scripts must be loaded, the installation process
+for Perspective in a Javascript environment is more complex than most &quot;pure&quot;
+Javascript libraries.</p>
+<h3><a class="anchor" aria-hidden="true" id="from-npm"></a><a href="#from-npm" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From NPM</h3>
+<p>For using Perspective from Node.js, or as a dependency in a <code>package.json</code> based
+<code>webpack</code> or other browser application build toolchain, Perspective is available
+via NPM:</p>
+<pre><code class="hljs css language-bash">$ yarn add @finos/perspective-viewer @finos/perspective-viewer-d3fc @finos/perspective-viewer-datagrid
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="an-important-note-about-hosting"></a><a href="#an-important-note-about-hosting" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>An important note about Hosting</h4>
+<p>All uses of Perspective from NPM require the browser to have access to
+Perspective's <code>.worker.*.js</code> and <code>.wasm</code> assets <em>in addition</em> to the bundled
+<code>.js</code> scripts. By default, Perspective <a href="https://github.com/finos/perspective/pull/870">inlines</a>
+these assets into the <code>.js</code> scripts, and delivers them in one file. This has no
+performance impact, but does increase asset load time. Any non-trivial application
+should make use of <code>@finos/perspective-webpack-plugin</code>, which automatically
+splits the assets into separate files and downloads them when the bundling
+step runs.</p>
+<h3><a class="anchor" aria-hidden="true" id="webpack-plugin"></a><a href="#webpack-plugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Webpack Plugin</h3>
+<p>When importing <code>perspective</code> from NPM modules for a browser application, you
+should use <code>@finos/perspective-webpack-plugin</code> to manage the <code>.worker.*.js</code> and
+<code>.wasm</code> assets for you. The plugin handles downloading and packaging
+Perspective's additional assets, and is easy to set up in your <code>webpack.config</code>:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> PerspectivePlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@finos/perspective-webpack-plugin"</span>);
+
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./in.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">"out.js"</span>,
+        <span class="hljs-attr">path</span>: <span class="hljs-string">"build"</span>
+    },
+    <span class="hljs-attr">plugins</span>: [<span class="hljs-keyword">new</span> PerspectivePlugin()]
+};
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="from-cdn"></a><a href="#from-cdn" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From CDN</h3>
+<p>Perspective can be loaded directly from
+<a href="https://unpkg.com/@finos/perspective-viewer">unpkg.com</a>, which is the easiest
+way to get started with Perspective in the browser, and absolutely perfect
+for spinning up quick instances of <code>perspective-viewer</code>. An example is
+demonstrated in <a href="https://github.com/finos/perspective/blob/master/examples/simple/superstore-arrow.html"><code>superstore-arrow.html</code></a>,
+which loads a dataset stored in the Apache Arrow format using the <code>Fetch</code> API.</p>
+<p>Add these scripts to your <code>.html</code>'s <code>&lt;head&gt;</code> section:</p>
+<pre><code class="hljs css language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@finos/perspective/dist/umd/perspective.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@finos/perspective-viewer/dist/umd/perspective-viewer.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@finos/perspective-viewer-datagrid/dist/umd/perspective-viewer-datagrid.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"https://unpkg.com/@finos/perspective-viewer-d3fc/dist/umd/perspective-viewer-d3fc.js"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
+<p>Once added to your page, you can access the Javascript API through the
+<code>perspective</code> symbol:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> worker = perspective.worker();
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">await</span> worker.table({<span class="hljs-attr">A</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>]});
+<span class="hljs-keyword">const</span> view = <span class="hljs-keyword">await</span> table.view({<span class="hljs-attr">sort</span>: [[<span class="hljs-string">"A"</span>, <span class="hljs-string">"desc"</span>]]});
+</code></pre>
+<p>Or create a <code>&lt;perspective-viewer&gt;</code> in HTML:</p>
+<pre><code class="hljs css language-html"><span class="hljs-tag">&lt;<span class="hljs-name">perspective-viewer</span> <span class="hljs-attr">columns</span>=<span class="hljs-string">"['Sales', 'Profit']"</span>&gt;</span>`
+  <span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    <span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"DOMContentLoaded"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+      <span class="hljs-keyword">const</span> data = {
+        <span class="hljs-attr">Sales</span>: [<span class="hljs-number">500</span>, <span class="hljs-number">1000</span>, <span class="hljs-number">1500</span>],
+        <span class="hljs-attr">Profit</span>: [<span class="hljs-number">100.25</span>, <span class="hljs-number">200.5</span>, <span class="hljs-number">300.75</span>]
+      };
+      <span class="hljs-comment">// The `&lt;perspective-viewer&gt;` HTML element exposes the viewer API</span>
+      <span class="hljs-keyword">const</span> el = <span class="hljs-built_in">document</span>.getElementsByTagName(<span class="hljs-string">"perspective-viewer"</span>)[<span class="hljs-number">0</span>];
+      el.load(data);
+    });
+  </span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
+</code></pre>
+<p>You may choose to wait for the document's <code>DOMContentLoaded</code> event to fire,
+which indicates that all page DOM content is available.</p>
+<p>This makes it extremely easy to spin up Perspective locally without depending
+on a build chain or other tooling. For production usage, you should incorporate
+Perspective into your application's bundled scripts using <code>NPM</code> and <code>Webpack</code>.</p>
+<h2><a class="anchor" aria-hidden="true" id="python"></a><a href="#python" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Python</h2>
+<p><code>perspective-python</code> contains full bindings to the Perspective API, a JupyterLab
+widget, and a <a href="http://www.tornadoweb.org/en/stable/">Tornado</a> WebSocket handler
+that allows you to host Perspective using server-side Python.</p>
+<p>In addition to supporting row/columnar formats of data using <code>dict</code> and <code>list</code>,
+<code>pandas.DataFrame</code>, dictionaries of NumPy arrays, NumPy structured arrays, and
+NumPy record arrays are all supported in <code>perspective-python</code>.</p>
+<p><code>perspective-python</code> can be installed from <code>pip</code>:</p>
+<pre><code class="hljs css language-bash">pip install perspective-python
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="troubleshooting-installation-from-source"></a><a href="#troubleshooting-installation-from-source" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Troubleshooting installation from source</h3>
+<p>If you are installing from a source distribution (sdist), make sure you have
+CMake and Boost headers present on your machine:</p>
+<ul>
+<li>CMake (version 3.15.4 or higher)</li>
+<li>Boost Headers (version 1.67)</li>
+</ul>
+<p>Try installing in verbose mode:</p>
+<pre><code class="hljs css language-bash">pip install -vv perspective-python
+</code></pre>
+<p>The most common culprits are:</p>
+<ul>
+<li>CMake version too old</li>
+<li>Boost headers are missing or too old</li>
+<li>PyArrow not installed prior to installing perspective</li>
+</ul>
+<p>Additionally, due to PEP-518 and build isolation, its possible that the version of PyArrow that pip uses to build perspective-python is different from the one you have installed. To disable this, pass the <code>--no-build-isolation</code> flag to pip.</p>
+<h4><a class="anchor" aria-hidden="true" id="wheels-pyarrow-linkage"></a><a href="#wheels-pyarrow-linkage" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Wheels PyArrow linkage</h4>
+<p>Because we compile Apache Arrow from source to webassembly via Emscripten, we have a tight coupling on the specific version of Apache Arrow that must be used. As such, we link against a specific Apache Arrow version which must be present. Currently, our wheels build against PyArrow==0.17.1 for Python 3.* and PyArrow==0.16.0 for Python 2.7.</p>
+<p>To ignore compiled wheels and install from source with pip, install via</p>
+<pre><code class="hljs css language-bash">pip install --no-binary perspective-python
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="jupyterlab"></a><a href="#jupyterlab" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Jupyterlab</h3>
+<p><code>PerspectiveWidget</code> is a JupyterLab widget that implements the same API as
+<code>&lt;perspective-viewer&gt;</code>, allowing for fast, intuitive
+transformations/visualizations of various data formats within JupyterLab.</p>
+<p><img src="https://perspective.finos.org/img/jupyterlab.png"></img></p>
+<p>To use the JupyterLab plugin, make sure you have installed <code>perspective-python</code>
+and then install the extension from the Jupyter lab extension directory:</p>
+<pre><code class="hljs css language-bash">jupyter labextension install @finos/perspective-jupyterlab
+</code></pre>
+<p>If the widget does not display, you might be missing the <a href="https://ipywidgets.readthedocs.io/en/latest/user_install.html#installing-the-jupyterlab-extension">ipywidgets extension</a>. Install it from the extension directory:</p>
+<pre><code class="hljs css language-bash">jupyter labextension install @jupyter-widgets/jupyterlab-manager
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="from-source"></a><a href="#from-source" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From source</h2>
+<p>For hackers, contributors, and masochists, Perspective can be installed directly
+from source available on <a href="https://github.com/finos/perspective">Github</a>. Doing
+so is quite a bit more complex than a standard pure Javascript NPM package, so
+if you're not looking to hack on Perspective itself, you are likely better off
+choosing the CDN or NPM methods above. See the
+<a href="development.html">developer docs</a> for details.</p>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#javascript">Javascript</a><ul class="toc-headings"><li><a href="#from-npm">From NPM</a></li><li><a href="#webpack-plugin">Webpack Plugin</a></li><li><a href="#from-cdn">From CDN</a></li></ul></li><li><a href="#python">Python</a><ul class="toc-headings"><li><a href="#troubleshooting-installation-from-source">Troubleshooting installation from source</a></li><li><a href="#jupyterlab">Jupyterlab</a></li></ul></li><li><a href="#from-source">From source</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/md/js.html">Javascript User Guide</a><a href="/docs/md/python.html">Python User Guide</a><a href="/docs/obj/perspective.html">Perspective API</a><a href="/docs/obj/perspective-viewer.html">Perspective Viewer API</a><a href="/docs/obj/perspective-python-table.html">Perspective Python API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Perspective Authors</section></footer></div></body></html>

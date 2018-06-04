@@ -1,0 +1,207 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Table · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;script src=&quot;../../../../js/index.js&quot;&gt;&lt;/script&gt;"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Table · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="&lt;script src=&quot;../../../../js/index.js&quot;&gt;&lt;/script&gt;"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/atom-one-light.min.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Public+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="js/index.js"></script><script src="/js/scrollSpy.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/logo.png" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/md/js.html" target="_self">Docs</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Guides</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Guides</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/md/js.html">JavaScript User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/python.html">Python User Guide</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/md/table.html">Table</a></li><li class="navListItem"><a class="navItem" href="/docs/md/view.html">View</a></li><li class="navListItem"><a class="navItem" href="/docs/md/server.html">Data Binding</a></li><li class="navListItem"><a class="navItem" href="/docs/md/development.html">Developer Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/obj/perspective.html">perspective API</a></li><li class="navListItem"><a class="navItem" href="/docs/obj/perspective-viewer.html">perspective-viewer API</a></li><li class="navListItem"><a class="navItem" href="/docs/obj/perspective-python.html">perspective-python API</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer docsContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 id="__docusaurus" class="postHeaderTitle">Table</h1></header><article><div><span><script src="../../../../js/index.js"></script>
+<link rel="stylesheet" href="../../../../css/concepts/index.css">
+<p>The <code>Table</code> is Perspective's columnar data frame, analogous to a
+Pandas <code>DataFrame</code> or Apache Arrow. <code>Table</code> supports appending data, in-place
+updates, removal by index, and notifications on update.</p>
+<p>A <code>Table</code> contains columns, each of which have a unique name, are strongly and
+consistently typed, and contains rows of data conforming to the column's type.
+Each column in a <code>Table</code> must have the same number of rows, though not every
+row must contain data; null-values are used to indicate missing values in the
+dataset.</p>
+<p>The columns of a <code>Table</code> are <em>immutable after creation</em>, which means their names
+and data types cannot be changed after the <code>Table</code> has been created. Columns
+cannot be added or deleted after creation, but a <code>View</code> can be used to select
+an arbitrary set of columns from the <code>Table</code>.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">var</span> data = [
+    {<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"a"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span>},
+    {<span class="hljs-attr">x</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"b"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span>},
+    {<span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"c"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span>},
+    {<span class="hljs-attr">x</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"d"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span>}
+];
+
+<span class="hljs-keyword">const</span> table1 = <span class="hljs-keyword">await</span> worker.table(data);
+</code></pre>
+<pre><code class="hljs css language-python">data = [
+    {<span class="hljs-string">"x"</span>: <span class="hljs-number">1</span>, <span class="hljs-string">"y"</span>: <span class="hljs-string">"a"</span>, <span class="hljs-string">"z"</span>: <span class="hljs-literal">True</span>},
+    {<span class="hljs-string">"x"</span>: <span class="hljs-number">2</span>, <span class="hljs-string">"y"</span>: <span class="hljs-string">"b"</span>, <span class="hljs-string">"z"</span>: <span class="hljs-literal">False</span>},
+    {<span class="hljs-string">"x"</span>: <span class="hljs-number">3</span>, <span class="hljs-string">"y"</span>: <span class="hljs-string">"c"</span>, <span class="hljs-string">"z"</span>: <span class="hljs-literal">True</span>},
+    {<span class="hljs-string">"x"</span>: <span class="hljs-number">4</span>, <span class="hljs-string">"y"</span>: <span class="hljs-string">"d"</span>, <span class="hljs-string">"z"</span>: <span class="hljs-literal">False</span>}
+];
+
+table1 = perspective.Table(data)
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="schema-and-types"></a><a href="#schema-and-types" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Schema and Types</h2>
+<p>The mapping of a <code>Table</code>'s column names to data types is referred to as a
+<code>schema</code>. Each column has a unique name and a single data type, and
+data types are expressed with a common vocabulary of across all supported host
+languages.  In Python, you may alternatively use native types over their String
+counterparts:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">var</span> schema = {
+    <span class="hljs-attr">x</span>: <span class="hljs-string">"integer"</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-string">"string"</span>,
+    <span class="hljs-attr">z</span>: <span class="hljs-string">"boolean"</span>
+};
+
+<span class="hljs-keyword">const</span> table2 = <span class="hljs-keyword">await</span> worker.table(schema);
+</code></pre>
+<pre><code class="hljs css language-python"><span class="hljs-keyword">from</span> datetime <span class="hljs-keyword">import</span> date, datetime
+
+schema = {
+    <span class="hljs-string">"a"</span>: int,
+    <span class="hljs-string">"b"</span>: float,
+    <span class="hljs-string">"c"</span>: date,
+    <span class="hljs-string">"d"</span>: datetime,
+    <span class="hljs-string">"e"</span>: bool,
+    <span class="hljs-string">"f"</span>: str
+}
+
+table2 = perspective.Table(schema)
+</code></pre>
+<p>When passing data directly to the <code>table()</code> constructor, the type of each
+column is inferred automatically.  In some cases, the inference algorithm may
+not return exactly what you'd like.  For example, a column may be interpreted
+as a <code>datetime</code> when you intended it to be a <code>string</code>, or a column may have no
+values at all (yet), as it will be updated with values from a real-time data
+source later on.  In these cases, create a <code>table()</code> with a <em>schema</em>.</p>
+<p>Once the <code>Table</code> has been created with a schema, further <code>update()</code> calls will
+conver data types to conform with the schema;  a column that is typed as a
+<code>datetime</code>, for example, can be updated
+with <code>date</code> objects, <code>datetime</code> objects, <code>pandas.Timestamp</code>, <code>numpy.datetime64</code>,
+and even valid millisecond/seconds from epoch timestamps. Similarly, updating
+string columns with integer data will cause a cast to string, updating floats
+with ints will cast to float, and etc.  Type conversion can also leverage Python
+converters, such as <code>__int__</code>, <code>__float__</code>, etc.</p>
+<h2><a class="anchor" aria-hidden="true" id="index-and-limit"></a><a href="#index-and-limit" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Index and Limit</h2>
+<p>Initializing a <code>Table</code> with an <code>index</code> tells Perspective to treat a column as
+the primary key, allowing in-place updates of rows.  Only a single column
+(of any type) can be used as an <code>index</code>.  Indexed <code>Table</code> instances allow:</p>
+<ul>
+<li>In-place <em>updates</em> whenever a new row shares an <code>index</code> values with an existing row</li>
+<li><em>Partial updates</em> when such a row leaves some column values <code>undefined</code></li>
+<li><em>Removes</em> to delete a row by <code>index</code>.</li>
+</ul>
+<p>To create an indexed <code>Table</code>, provide the <code>index</code> property with a string column
+name to be used as an index:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> indexed_table = <span class="hljs-keyword">await</span> perspective.table(data, {<span class="hljs-attr">index</span>: <span class="hljs-string">"a"</span>});
+</code></pre>
+<pre><code class="hljs css language-python">indexed_table = perspective.Table(data, index=<span class="hljs-string">"a"</span>);
+</code></pre>
+<p>Initializing a <code>Table</code> with a <code>limit</code> sets the total number of rows the <code>Table</code>
+is allowed to have. When the <code>Table</code> is updated, and the resulting size of
+the <code>Table</code> would exceed its <code>limit</code>, rows that exceed <code>limit</code> overwrite the
+oldest rows in the <code>Table</code>.  To create a <code>Table</code> with a <code>limit</code>, provide the
+<code>limit</code> property with an integer indicating the maximum rows:</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> limit_table = <span class="hljs-keyword">await</span> perspective.table(data, {<span class="hljs-attr">limit</span>: <span class="hljs-number">1000</span>});
+</code></pre>
+<pre><code class="hljs css language-python">limit_table = perspective.Table(data, limit=<span class="hljs-number">1000</span>);
+</code></pre>
+<blockquote>
+<p><code>limit</code> cannot be used in conjunction with <code>index</code>.</p>
+</blockquote>
+<h2><a class="anchor" aria-hidden="true" id="update-and-remove"></a><a href="#update-and-remove" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Update and Remove</h2>
+<p>Once a <code>Table</code> has been created, it can be updated with new data conforming to
+the <code>Table</code>'s <code>schema</code>.  The dataset used for <code>update()</code> must conform with the
+formats supported by Perspective.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> schema = {
+    <span class="hljs-attr">a</span>: <span class="hljs-string">"integer"</span>,
+    <span class="hljs-attr">b</span>: <span class="hljs-string">"float"</span>
+};
+
+<span class="hljs-keyword">const</span> table = <span class="hljs-keyword">await</span> perspective.table(schema);
+table.update(new_data);
+</code></pre>
+<pre><code class="hljs css language-python">schema = {<span class="hljs-string">"a"</span>: int, <span class="hljs-string">"b"</span>: float}
+
+table = perspective.Table(schema)
+table.update(new_data)
+</code></pre>
+<p>Without an <code>index</code> set, calls to <code>update()</code> <em>append</em> new data to the end of the
+<code>Table</code>.  Otherwise, Perspective allows <a href="#index-and-limit"><em>partial updates</em> (in-place)</a>
+using the <code>index</code> to determine which rows to update:</p>
+<pre><code class="hljs css language-javascript">indexed_table.update({<span class="hljs-attr">id</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>], <span class="hljs-attr">name</span>: [<span class="hljs-string">"x"</span>, <span class="hljs-string">"y"</span>]});
+</code></pre>
+<pre><code class="hljs css language-python">indexed_table.update({<span class="hljs-string">"id"</span>: [<span class="hljs-number">1</span>, <span class="hljs-number">4</span>], <span class="hljs-string">"name"</span>: [<span class="hljs-string">"x"</span>, <span class="hljs-string">"y"</span>]})
+</code></pre>
+<p>Any value on a <code>table()</code> can be unset using the value <code>null</code> (Javascript) or
+<code>None</code> (Python).  Values may be unset on construction, as any <code>null</code> in the
+dataset will be treated as an unset value, and can be explicitly unset
+via <code>update()</code> on a <code>table()</code> with <code>index</code> applied.  <code>update()</code> calls do not
+need values for <em>all columns</em> in the <code>table()</code> schema;
+Missing keys (or keys with values set to <code>undefined</code>  in Javascript), will be
+omitted from <code>table()</code>s with <code>index</code> set, and become <code>null</code>:</p>
+<pre><code class="hljs css language-javascript">table.update([{<span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-literal">null</span>}]); <span class="hljs-comment">// `z` missing</span>
+</code></pre>
+<pre><code class="hljs css language-python">table.update([{<span class="hljs-string">"x"</span>: <span class="hljs-number">3</span>, <span class="hljs-string">"y"</span>: <span class="hljs-literal">None</span>}]) // `z` missing
+</code></pre>
+<p>Rows can also be removed from an indexed <code>Table</code>, with an array of primary keys:</p>
+<pre><code class="hljs css language-javascript">indexed_table.remove([<span class="hljs-number">1</span>, <span class="hljs-number">4</span>]);
+</code></pre>
+<pre><code class="hljs css language-python">indexed_table.remove([<span class="hljs-number">1</span>, <span class="hljs-number">4</span>])
+</code></pre>
+<p>Calling <code>clear()</code> will remove all data from the underlying
+<code>Table</code>. Calling <code>replace(data)</code> with new data will clear the <code>Table</code>, and
+update it with a new dataset that conforms to Perspective's data types and the
+existing schema on the <code>Table</code>.</p>
+<pre><code class="hljs css language-javascript">table.clear();
+table.replace(json);
+</code></pre>
+<pre><code class="hljs css language-python">table.clear()
+table.replace(df2)
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/md/python.html"><span class="arrow-prev">← </span><span>Python User Guide</span></a><a class="docs-next button" href="/docs/md/view.html"><span>View</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#schema-and-types">Schema and Types</a></li><li><a href="#index-and-limit">Index and Limit</a></li><li><a href="#update-and-remove">Update and Remove</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/md/js.html">Javascript User Guide</a><a href="/docs/md/python.html">Python User Guide</a><a href="/docs/obj/perspective.html">Perspective API</a><a href="/docs/obj/perspective-viewer.html">Perspective Viewer API</a><a href="/docs/obj/perspective-python-table.html">Perspective Python API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2021 Perspective Authors</section></footer></div></body></html>

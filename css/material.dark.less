@@ -1,0 +1,44 @@
+
+@import "../../../packages/perspective-viewer/src/themes/material-dense.less";
+@import "../../../packages/perspective-viewer/src/less/variables.less";
+
+perspective-column-style, perspective-expression-editor {
+  background-color: @grey700;
+  color: #FFFFFF;
+  border: 1px solid @grey500;
+  --input--border-color: @grey500;
+  --active-color: #2770a9;
+  --inactive-color: @grey500;
+}
+
+.homeContainer, #get_started, .dark {
+    @import "../../../packages/perspective-viewer/src/themes/material-dense.dark.less";
+   
+}
+
+.docsContainer {
+    @import "../../../packages/perspective-viewer/src/themes/material-dense.less";
+}
+
+td, th, table, tbody, thead {
+  border: 0;
+  font-size: 12px;
+  font-family: "Open Sans";
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
+}
+
+table tr {
+  border-top: none;
+}
+
+table tr:nth-child(2n) {
+  background-color: transparent;
+}
+
+table th,
+table td {
+  border: none;
+  padding: 0px 5px;
+}
