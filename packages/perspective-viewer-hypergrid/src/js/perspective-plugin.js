@@ -44,11 +44,11 @@ function setPSP(payload) {
         new_schema.push({
             name: columnIndex.toString(),
             header: col_header,
-            type: type === 'str' ? 'string' : type
+            type: type
         });
     });
 
-    const old_schema = grid.behavior.dataModel.schema;
+    const old_schema = grid.behavior.dataModel.schema.map((({name, header, type}) => ({name, header, type})));
     this.schema_loaded = this.schema_loaded && _.isEqual(new_schema, old_schema);
 
     this.grid.properties.showTreeColumn = payload.isTree;

@@ -5,7 +5,7 @@ const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').protot
 var conv = {
     integer: 'integer',
     float: 'float',
-    string: 'str',
+    string: 'string',
     boolean: 'boolean',
     date: 'date'
 };
