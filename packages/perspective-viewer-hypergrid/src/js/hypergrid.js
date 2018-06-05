@@ -7,10 +7,9 @@
  *
  */
 
-import {GridUIFixPlugin} from "./fixes.js";
-
 const Hypergrid = require("fin-hypergrid");
-const Behaviors = require("fin-hypergrid/src/behaviors");
+const images = require('fin-hypergrid/images');
+const JSONBehavior = require("fin-hypergrid/src/behaviors/JSON.js");
 const Base = require("fin-hypergrid/src/Base.js");
 
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer.js").treeLineRendererPaint;
@@ -44,6 +43,8 @@ var base_grid_properties = {
     enableContinuousRepaint: false,
     fixedColumnCount: 0,
     fixedRowCount: 0,
+    fixedLinesHWidth: 1,
+    fixedLinesVWidth: 1,
     font: '12px "Arial", Helvetica, sans-serif',
     foregroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     gridLinesH: false,
@@ -59,14 +60,14 @@ var base_grid_properties = {
     rowHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     rowResize: true,
     scrollbarHoverOff: 'visible',
-    showCheckboxes: false,
+    rowHeaderCheckboxes: false,
+    rowHeaderNumbers: false,
     showFilterRow: true,
     showHeaderRow: true,
-    showRowNumbers: false,
     showTreeColumn: false,
     singleRowSelectionMode: false,
     sortColumns: [],
-    treeColumn: '',
+    treeRenderer: 'TreeCell',
     treeHeaderFont: '12px Arial, Helvetica, sans-serif',
     treeHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     useBitBlit: false,
@@ -94,9 +95,10 @@ var light_theme_overrides = {
     columnHeaderBackgroundNumberPositive: '#1078d1',
     columnHeaderBackgroundNumberNegative: "#de3838",
     rowHeaderForegroundSelectionFont: '12px Arial, Helvetica, sans-serif',
-    //rowProperties: [
-    //    { color: '#666', backgroundColor: '#fff' },
-    //],
+    treeHeaderColor: '#666',
+    treeHeaderBackgroundColor: '#fff',
+    treeHeaderForegroundSelectionColor: '#333',
+    treeHeaderBackgroundSelectionColor: '#40536d',
     hoverCellHighlight: {
         enabled: true,
         backgroundColor: '#eeeeee'
@@ -119,26 +121,17 @@ function generateGridProperties(overrides) {
 }
 
 function setPSP(payload) {
-    if (payload.isTree) {
-        this.grid.renderer.properties.fixedColumnCount = 1;
-    } else {
-        this.grid.renderer.properties.fixedColumnCount = 0;
-    }
     var processed_schema = [];
-    var treecolumnIndex = 0;
     var col_name, col_header, col_settings;
 
     if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === "") {
         payload.columnPaths[0] = [' '];
     }
 
-    for (var i = 0; i < payload.columnPaths.length; i++) {
+    for (var i = (payload.isTree?1:0); i < payload.columnPaths.length; i++) {
         col_name = payload.columnPaths[i].join('|');
         var aliases = payload.configuration.columnAliases;
         col_header = aliases ? (aliases[col_name] || col_name) : col_name;
-        if (this.grid.properties.treeColumn === col_name) {
-            treecolumnIndex = i;
-        }
 
         col_settings = { name: i.toString(), header: col_header };
         if (payload.columnTypes[i] === 'str') {
@@ -179,16 +172,11 @@ function setPSP(payload) {
         });
         this.schema_loaded = true;
 
-        this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: this.grid } }));
-
-        this.grid.properties.treeColumnIndex = 0;
-        this.grid.installPlugins([GroupedHeader]);
-        this.grid.behavior.setHeaders();
-
-        let old = this.grid.renderer.computeCellsBounds;
-        this.grid.renderer.computeCellsBounds = function() {
-            old.call(this);
+        if (payload.isTree) {
+            this.grid.properties.showTreeColumn = true;
         }
+
+        this.grid.behavior.setHeaders();
 
         for (i = 0; i < this.schema.length; i++) {
             let props = this.grid.getColumnProperties(i);
@@ -228,66 +216,24 @@ function setPSP(payload) {
             props.columnAutosizing = true;
             this.grid.behavior.setColumnProperties(i, props);
         }
+
+        this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-schema-loaded', { detail: { grid: this.grid } }));
+
     }
     this.grid.canvas.dispatchEvent(new CustomEvent('fin-hypergrid-data-loaded', { detail: { grid: this.grid } }));
 
 }
 
 
-function CheckboxTrackingPlugin(grid) {
-
-    grid.selectionModel.checkedRows = {};
-
-    grid._clearSelections = grid._clearSelections;
-    grid._clearSelections = function () {
-        grid.clearCheckedRows();
-        grid._clearSelections();
-    };
-
-    grid.clearCheckedRows = function () {
-        grid.selectionModel.checkedRows = {};
-    };
-
-
-    grid.isRowChecked = function (rowIdx) {
-        var row = grid.getRow(rowIdx);
-        if (row) {
-            return (grid.selectionModel.checkedRows && (JSON.stringify(row.rowPath) in grid.selectionModel.checkedRows));
-        }
-    };
-
-    grid.getCheckedRows = function () {
-        return grid.selectionModel.checkedRows;
-    };
-
-    grid.getRowIdx = function (rowPath) {
-        var path = Array.isArray(rowPath) ? JSON.stringify(rowPath) : rowPath;
-        for (let i = 0; i < grid.getRowCount(); i ++) {
-            if (JSON.stringify(grid.getRow(i).rowPath) === path) {
-                return i;
-            }
-        }
-    };
-
-}
-
 function PerspectiveDataModel(grid) {
-    Behaviors.JSON.prototype.setPSP = setPSP;
-
-    var treeLineRenderer = Base.extend({ paint: treeLineRendererPaint });
-    grid.cellRenderers.add('TreeLines', treeLineRenderer);
-    grid.behavior.dataModel.configuration = {};
-    grid.behavior.dataModel.configuration['expandedRows'] = [];
-
-    this.grid = grid;
-    this.viewData = [];
+    grid.behavior.__proto__.setPSP = setPSP;
 
     grid.mixIn.call(grid.behavior.dataModel, {
 
         // Override setData
         setData: function (dataPayload, schema) {
             this.viewData = dataPayload;
-            this.source.setData(dataPayload, schema);     
+            this.source.setData(dataPayload, schema);
         },
 
         // Is the grid view a tree
@@ -304,28 +250,10 @@ function PerspectiveDataModel(grid) {
             return x === this.grid.properties.treeColumnIndex && this.isTree();
         },
 
-        isLeafNode: function (y) {
-            return this.viewData[y].isLeaf;
-        },
-
-        // Custom API to check if a given row path and any children are expanded
-        matchedRowExpansions: function( rowPath ) {
-            var currentExpandedRows = this.configuration['expandedRows'];
-            var matchedRowPathIndices = [];
-            for (var i = 0; i < currentExpandedRows.length; i++) {
-                if (_.isEqual(currentExpandedRows[i], rowPath)) {
-                    matchedRowPathIndices.push(i);
-                }
-                if (rowPath.length < currentExpandedRows[i].length && _.isEqual(rowPath, currentExpandedRows[i].slice(0, rowPath.length))) {
-                    matchedRowPathIndices.push(i);
-                }
-            }
-            return matchedRowPathIndices;
-        },
-
         // Return the value for a given cell based on (x,y) coordinates
         getValue: function(x, y) {
-            return this.dataSource.data[y].rowData[x];
+            var offset = this.grid.behavior.hasTreeColumn() ? 1 : 0;
+            return this.dataSource.data[y].rowData[x+offset];
         },
 
         // Process a value entered in a cell within the grid
@@ -336,28 +264,6 @@ function PerspectiveDataModel(grid) {
         // Returns the number of rows for this dataset
         getRowCount: function () {
             return this.dataSource.data.length;
-        },
-
-        // Return the number of columns, allowing for the tree column
-        getColumnCount: function() {
-            var offset = this.grid.behavior.hasTreeColumn() ? -1 : 0;
-            return this.dataSource.getColumnCount() + offset;
-        },
-
-        // Called when clickong on a row group expand
-        toggleRow: function (y, expand, event) {
-            if (this.isTreeCol(event.dataCell.x)) {
-                var adjusted_path = this.dataSource.data[y].rowPath.slice();
-                var existingRowExpansionIndices = this.matchedRowExpansions(adjusted_path);
-                if (existingRowExpansionIndices.length > 0) {
-                    existingRowExpansionIndices.sort();
-                    for (var i = 0; i < existingRowExpansionIndices.length; i++) {
-                        this.configuration['expandedRows'].splice(existingRowExpansionIndices[i]-i, 1);
-                    }
-                } else {
-                    this.configuration['expandedRows'].push(adjusted_path);
-                }
-            }
         },
 
         cellStyle: function (gridCellConfig, rendererName) {
@@ -378,24 +284,19 @@ function PerspectiveDataModel(grid) {
 
         // Return the cell renderer
         getCell: function (config, rendererName) {
-            // if in single row selection mode, hide the header row checkbox
-            if (this.grid.properties.singleRowSelectionMode && config.isHandleColumn && config.isHeaderRow) {
-                config.value = [];
-            }
-            else if (this.grid.properties.showCheckboxes && config.isHandleColumn && config.isDataRow) {
-                var icon = Hypergrid.images[ this.grid.isRowChecked( config.dataCell.y) ? 'checked' : 'unchecked'];
-                config.value = [icon];
-            } else if (config.isUserDataArea) {
+            if (config.isUserDataArea) {
                 this.cellStyle(config, rendererName);
-                if (this.isTreeCol(config.dataCell.x)) {
-                    config.depth = config.dataRow.rowPath.length-1;
-                    config.leaf = config.dataRow.isLeaf;
-                    var lastChild = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
+            } else {
+                if (config.dataCell.x == -1) {
+                    if (!config.isHeaderRow) {
+                    config.last = (config.dataCell.y + 1) === this.getRowCount() || this.getRow(config.dataCell.y + 1).rowPath.length != config.dataRow.rowPath.length;
+
                     var next_row = this.dataSource.data[config.dataCell.y + 1];
                     config.expanded = next_row ? config.dataRow.rowPath.length < next_row.rowPath.length : false;
-                    config.last = lastChild;
-                    config._type = this.schema[0].type[config.depth - 1];
-                    return grid.cellRenderers.get('TreeLines');
+                    } else {
+                        rendererName = 'SimpleCell';
+                        config.value = '';
+                    }
                 }
             }
             return grid.cellRenderers.get(rendererName);
@@ -509,7 +410,7 @@ function null_formatter(formatter, null_value = '') {
     }
     return formatter
 }
-  
+
 function is_subrange(sub, sup) {
     if (!sup) {
         return false;
@@ -524,9 +425,9 @@ const OFFSET_SETTINGS = 5;
 
 /**
  * Estimate the visible range of a Hypergrid.
- * 
- * @param {any} grid 
- * @returns 
+ *
+ * @param {any} grid
+ * @returns
  */
 function estimate_range(grid) {
     let range = Object.keys(grid.renderer.visibleRowsByDataRowIndex);
@@ -549,11 +450,11 @@ function CachedRendererPlugin(grid) {
                 let updated = await grid._updating_cache;
                 if (updated) {
                     grid._updating_cache = undefined;
-                    grid._cached_range = range;  
+                    grid._cached_range = range;
                 }
                 return updated;
             } else if (!is_subrange(range, grid._cached_range)) {
-                return false; 
+                return false;
             }
         }
         return true;
@@ -638,25 +539,20 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             var host = this.querySelector('#mainGrid');
 
             host.setAttribute('hidden', true);
-            this.grid = new Hypergrid(host, { Behavior: Behaviors.JSON });
+            this.grid = new Hypergrid(host, { Behavior: JSONBehavior });
             host.removeAttribute('hidden');
 
             this.grid.installPlugins([
-                GridUIFixPlugin,
                 PerspectiveDataModel,
-                CheckboxTrackingPlugin,
-                CachedRendererPlugin
+                CachedRendererPlugin,
+                [GroupedHeader, {CellRenderer: 'SimpleCell'}]
             ]);
 
-            var grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
-            const style = window.getComputedStyle(this, null);
-            const header = window.getComputedStyle(this.querySelector('th'), null);
-            grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
-            grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
-            grid_properties['color'] = style.getPropertyValue('color');
-            grid_properties['columnHeaderBackgroundColor'] = header.getPropertyValue('background-color');
-            grid_properties['columnHeaderColor'] = header.getPropertyValue('color');
+            let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             this.grid.addProperties(grid_properties);
+
+            // Add tree cell renderer
+            this.grid.cellRenderers.add('TreeCell', Base.extend({ paint: treeLineRendererPaint }));
 
             const float_formatter = null_formatter(new this.grid.localization.NumberFormatter('en-US', {
                 minimumFractionDigits: 2,
@@ -745,8 +641,8 @@ async function grid(div, view, task) {
     this[PRIVATE] = this[PRIVATE] || {};
 
     let [nrows, json, schema, tschema] = await Promise.all([
-        view.num_rows(), 
-        view.to_json({end_row: 1}), 
+        view.num_rows(),
+        view.to_json({end_row: 1}),
         view.schema(),
         this._table.schema()
     ]);
@@ -790,7 +686,7 @@ async function grid(div, view, task) {
     this.hypergrid._lazy_load = lazy_load;
 
     this.hypergrid._cache_update = async (s, e) => {
-        json = await fill_page(view, json, hidden, s, e); 
+        json = await fill_page(view, json, hidden, s, e);
         let new_range = estimate_range(this.hypergrid);
         if (is_subrange(new_range, [s, e])) {
             let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), s, Math.min(e, nrows), nrows).rows;
@@ -801,14 +697,14 @@ async function grid(div, view, task) {
             return false;
         }
     }
-   
+
     this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
 
 global.registerPlugin("hypergrid", {
-    name: "Grid", 
+    name: "Grid",
     create: grid,
     selectMode: "toggle",
     deselectMode: "pivots",
