@@ -14,10 +14,10 @@ function treeArrowRendererPaint(gc, config) {
     var height = config.bounds.height;
 
     var value = config.value;
-    var depth = config.depth;
+    var leaf = config.dataRow.isLeaf;
+    var depth = config.dataRow.rowPath.length-1;
     var parent = config.expanded;
     var lastChild = config.last;
-    var leaf = config.leaf;
 
     var backgroundColor = config.backgroundColor;
     if (config.isSelected) {
@@ -85,10 +85,10 @@ export function treeLineRendererPaint(gc, config) {
     var height = config.bounds.height;
 
     var value = config.value;
-    var depth = config.depth;
+    var leaf = config.dataRow.isLeaf;
+    var depth = config.dataRow.rowPath.length-1;
     var parent = config.expanded;
     var lastChild = config.last;
-    var leaf = config.leaf;
 
     var backgroundColor = config.backgroundColor;
     if (config.isSelected) {
