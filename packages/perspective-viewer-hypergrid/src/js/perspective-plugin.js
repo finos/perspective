@@ -44,38 +44,28 @@ function setPSP(payload) {
         new_schema.push({
             name: columnIndex.toString(),
             header: col_header,
-            type: type === 'str' ? 'string' : type
+            type: type
         });
     });
 
-    const old_schema = grid.behavior.dataModel.schema;
-    this.schema_loaded = this.schema_loaded && _.isEqual(new_schema, old_schema);
-
     this.grid.properties.showTreeColumn = payload.isTree;
 
-    if (this.schema_loaded) {
+  
 
-        grid.setData({
-            data: payload.rows,
-        });
+    console.log('Setting up initial schema and data load into HyperGrid');
 
-    } else {
+    this.stashedWidths = stashColumnWidths.call(this);
 
-        console.log('Setting up initial schema and data load into HyperGrid');
+    // Following call to setData signals the grid to call createColumns and dispatch the
+    // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
+    // into `this` (behavior instance) to complete the setup before the event is dispatched.
+    this.createColumns = createColumns;
 
-        this.stashedWidths = stashColumnWidths.call(this);
+    grid.setData({
+        data: payload.rows,
+        schema: new_schema
+    });
 
-        // Following call to setData signals the grid to call createColumns and dispatch the
-        // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
-        // into `this` (behavior instance) to complete the setup before the event is dispatched.
-        this.createColumns = createColumns;
-
-        grid.setData({
-            data: payload.rows,
-            schema: new_schema
-        });
-
-    }
 }
 
 /**

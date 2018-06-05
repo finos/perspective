@@ -7,7 +7,7 @@
  *
  */
 
-'use strict';
+const Range = require('./Range');
 
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
@@ -29,13 +29,18 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return row ? row[x] : null;
     },
 
-    fetchData: function(rectangles, callback) {
+    getRowCount: function () {
+        return this.data.length;
+    },
+
+    fetchData: async function (rectangles, callback) {
         if (this.clearCache) {
             this.data = [];
             this.lastSuccessfullyFetchedRects = false;
         }
-
-        fetchData.call(this, rectangles, callback);
+        for (let rect of rectangles) {
+            this._cache_update(Range.create(rect.origin.y, rect.corner.y + 20), callback);
+        }
     },
 
     // return true for all data fetched, false if any data missing
@@ -59,11 +64,12 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         // for better performance, we first
         // (1) check all rects for any missing rows before
         // (2) checking rows for any missing cells
-        return !(
+        const z = !(
             rects.find(function(rect) { // (1)
                 for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
                     var dataRow = data[y];
-                    if (!dataRow) {
+                    if (!dataRow && y < data.length - 1) {
+                        console.log([y, data]);
                         return true;
                     }
                 }
@@ -72,14 +78,18 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             rects.find(function(rect) { // (2)
                 for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
                     var dataRow = data[y];
-                    for (var x = rect.origin.x, X = rect.corner.x; x < X; ++x) {
-                        if (!(schema[x].name in dataRow)) {
-                            return true;
+                    if (dataRow) {
+                        for (var x = rect.origin.x, X = rect.corner.x; x < X; ++x) {
+                            if (!(schema[x].index in dataRow)) {
+                                return true;
+                            }
                         }
                     }
                 }
             })
         );
+
+        return z;
     },
 
     // Return the cell renderer

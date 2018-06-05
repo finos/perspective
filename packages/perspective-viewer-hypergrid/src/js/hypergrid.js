@@ -139,11 +139,11 @@ function null_formatter(formatter, null_value = '') {
 
 bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
-    set_data(data, schema, tschema, row_pivots) {
+    set_data(data, schema, tschema, row_pivots, s, e, l) {
         if (this._detached) {
             this._detached = false;
         }
-        var hg_data = psp2hypergrid(data, schema, tschema, row_pivots);
+        var hg_data = psp2hypergrid(data, schema, tschema, row_pivots, s, e, l);
         if (this.grid) {
             this.grid.behavior.setPSP(hg_data);
         } else {
@@ -167,7 +167,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             this.grid.installPlugins([
                 perspectivePlugin,
-                CachedRendererPlugin,
+              //  CachedRendererPlugin,
                 [groupedHeaderPlugin, {
                     paintBackground: null, // no group header label decoration
                     columnHeaderLines: false, // only draw vertical rule lines between group labels
@@ -295,48 +295,44 @@ async function grid(div, view, task) {
 
     json.length = nrows;
 
-    let lazy_load = nrows > LAZY_THRESHOLD;
-
     if (!(document.contains ? document.contains(this[PRIVATE].grid) : false)) {
         div.innerHTML = '';
         div.appendChild(this[PRIVATE].grid);
         await new Promise(resolve => setTimeout(resolve));
     }
 
-    if (!lazy_load) {
-        json = view.to_json().then(json => filter_hidden(hidden, json));
-    } else {
-        let range = Range.estimate(this.hypergrid);
-        if (range.isInvalid()) {
-            range.reset(0, 100);
-        }
-        json = fill_page(view, json, hidden, range);
-        this.hypergrid._cached_range = range;
-    }
+    this.hypergrid._lazy_load = false;
 
-    json = await json;
-    if (task.cancelled) {
-        return;
-    }
-
-    this.hypergrid._lazy_load = lazy_load;
-
-    this.hypergrid._cache_update = async (range) => {
-        json = await fill_page(view, json, hidden, range);
+    this.hypergrid._cache_update = this.hypergrid.behavior.dataModel._cache_update = async (range, cb) => {
+        let next_page = await view.to_json(range);
+        next_page = filter_hidden(hidden, next_page);
         let new_range = Range.estimate(this.hypergrid);
+        let val = false;
         if (new_range.within(range)) {
-            let rows = psp2hypergrid(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), range.start_row, Math.min(range.end_row, nrows), nrows).rows;
-            rows[0] = this.hypergrid.behavior.dataModel.data[0];
-            this.hypergrid.setData({data: rows});
-            return true;
-        } else {
-            return false;
+            let rows = psp2hypergrid(
+                next_page, 
+                schema,
+                tschema,
+                JSON.parse(this.getAttribute('row-pivots')), 
+                0, 
+                next_page.length, 
+                next_page.length
+            ).rows;
+            for (let x = range.start_row; x < range.end_row + 1; x++) {
+                let cell = x - range.start_row;
+                if (cell < rows.length) {
+                    this.hypergrid.behavior.dataModel.data[x] = rows[cell];
+                }
+            }
+            val = true;
+        } else if (new_range.start_row + next_page.length < this.hypergrid.behavior.dataModel.data.length + 1) {
+            val = true;
         }
+        if (cb) cb();
+        return val;
     };
 
     this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
-    await this.hypergrid.canvas.resize();
-    await this.hypergrid.canvas.resize();
 }
 
 global.registerPlugin('hypergrid', {
