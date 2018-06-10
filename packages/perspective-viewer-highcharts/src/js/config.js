@@ -28,6 +28,14 @@ export function set_tick_size(config) {
     config.plotOptions.scatter = {marker: {radius: new_radius}};
 }
 
+export function set_both_axis(config, axis, name, type, tree_type, top) {
+    if (type === "string") {
+        set_category_axis(config, axis, tree_type, top);
+    } else {
+        set_axis(config, axis, name, type);
+    }
+}
+
 export function set_axis(config, axis, name, type) {
     let opts = {
         type: type === "date" ? "datetime" : undefined,

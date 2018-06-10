@@ -14,7 +14,7 @@ import "../less/highcharts.less";
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
-import {set_boost, set_axis, set_category_axis, default_config, set_tick_size} from "./config.js";
+import {set_boost, set_axis, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 
 export const draw = (mode) => async function(el, view, task) {
     const row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
@@ -43,15 +43,14 @@ export const draw = (mode) => async function(el, view, task) {
         xaxis_type = schema[xaxis_name],
         yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
         yaxis_type = schema[yaxis_name],
-        xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
+        // xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
         xtree_type = tschema[xaxis_name],
-        ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
+        //ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
         ytree_type = tschema[yaxis_name],
-        num_aggregates = aggregates.length - hidden.length,
-        num_cols = Object.keys(js[0]).filter(x => x !== '__ROW_PATH__').length;
+        num_aggregates = aggregates.length - hidden.length;
 
     if (mode === 'scatter') {
-        let [series, , colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
+        let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
         config.legend.floating = series.length <= 20;
         config.legend.enabled = col_pivots.length > 0;
         config.series = series;
@@ -67,8 +66,8 @@ export const draw = (mode) => async function(el, view, task) {
         if (num_aggregates < 3) {
             set_boost(config, xaxis_type, yaxis_type);
         }
-        set_axis(config, 'xAxis', xaxis_name, xaxis_type);
-        set_axis(config, 'yAxis', yaxis_name, yaxis_type);
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xtree_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
         set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
         let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden);
@@ -86,7 +85,7 @@ export const draw = (mode) => async function(el, view, task) {
         set_category_axis(config, 'yAxis', ytree_type, ytop);
 
     } else if (mode === "treemap" || mode === "sunburst") {
-        let [series, top, colorRange] = make_tree_data(js, row_pivots, hidden, aggregates);
+        let [series, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates);
         config.series = series;
         config.plotOptions.series.borderWidth = 1;
         config.legend.floating = false;
@@ -94,7 +93,7 @@ export const draw = (mode) => async function(el, view, task) {
             color_axis.call(this, config, colorRange);
         }
     } else if (mode === 'line') {
-        let [series, top, colorRange] = make_xy_data(js, row_pivots, col_pivots, hidden);
+        let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
         const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         config.legend.floating = series.length <= 20;
         config.legend.enabled = col_pivots.length > 0;
@@ -104,10 +103,10 @@ export const draw = (mode) => async function(el, view, task) {
         if (set_boost(config, xaxis_type, yaxis_type)) {
             delete config.chart['type'];
         }
-        set_axis(config, 'xAxis', xaxis_name, xaxis_type);
-        set_axis(config, 'yAxis', yaxis_name, yaxis_type);
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xtree_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
     } else {
-        let [series, top, colorRange] = make_y_data(js, row_pivots, hidden);
+        let [series, top, ] = make_y_data(js, row_pivots, hidden);
         config.series = series;
         config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        
         config.legend.enabled = col_pivots.length > 0 || series.length > 1;
