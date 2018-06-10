@@ -46,17 +46,23 @@ perspective-viewer {
     }
 
     .chart {
-        flex-grow: 1;
-        height: 100%;
-        width: 100%;
-        position: absolute;
         padding: 15px;    
     }
-    #pivot_chart {
-        position: relative;
-        display: flex;
+
+    #pivot_chart_container {
         flex-grow: 1;
+        position: relative;
+    }
+
+    #pivot_chart {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: grid;
         margin: 0px;
+        justify-content: stretch;
+        grid-template-rows: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     }
 
     .config {

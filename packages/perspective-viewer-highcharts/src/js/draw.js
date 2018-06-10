@@ -92,17 +92,15 @@ export const draw = (mode) => async function(el, view, task) {
         set_category_axis(config, 'yAxis', ytree_type, ytop);
 
     } else if (mode === "treemap" || mode === "sunburst") {
-        for (let xxx of [0, 1]) {
-            let config = default_config(aggregates, mode, js, col_pivots);
-            let [series, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates);
-            config.series = series;
-            config.plotOptions.series.borderWidth = 1;
-            config.legend.floating = false;
-            if (colorRange) {
-                color_axis.call(this, config, colorRange);
-            }
-            configs.push(config);
+        let config = default_config(aggregates, mode, js, col_pivots);
+        let [series, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates);
+        config.series = series;
+        config.plotOptions.series.borderWidth = 1;
+        config.legend.floating = false;
+        if (colorRange) {
+            color_axis.call(this, config, colorRange);
         }
+        configs.push(config);
     } else if (mode === 'line') {
         let config = configs[0] = default_config(aggregates, mode, js, col_pivots);
         let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
