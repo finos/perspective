@@ -141,6 +141,10 @@ export function default_config(aggregates, mode, js, col_pivots) {
             enabled: false
         },
         plotOptions: {
+            area: {
+                stacking: 'normal',
+                marker: {enabled: false, radius: 0}
+            },
             line: {
                 marker: {enabled: false, radius: 0}
             },
