@@ -48,10 +48,10 @@ export const draw = (mode) => async function(el, view, task) {
         xaxis_type = schema[xaxis_name],
         yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
         yaxis_type = schema[yaxis_name],
-        // xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
-        xtree_type = tschema[xaxis_name],
-        //ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
-        ytree_type = tschema[yaxis_name],
+        xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
+        xtree_type = tschema[xtree_name],
+        ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
+        ytree_type = tschema[ytree_name],
         num_aggregates = aggregates.length - hidden.length;
 
     if (mode === 'scatter') {
