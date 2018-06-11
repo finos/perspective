@@ -46,5 +46,15 @@
     "heatmap.html/sorts by a numeric column.": "7e9496591d144d8c9dcefc383ade7067",
     "heatmap.html/filters by a numeric column.": "f5ae636e34bdd781ae4c6e004bf8b108",
     "heatmap.html/sorts by an alpha column.": "5f9ca7ad1c277d1ab897632e98714735",
-    "heatmap.html/displays visible columns.": "f2e5d2b34dd1585e48d9b9f552361ba0"
+    "heatmap.html/displays visible columns.": "f2e5d2b34dd1585e48d9b9f552361ba0",
+    "treemap.html/shows a grid without any settings applied.": "642f65f20d8e41142941a26b15e01c17",
+    "treemap.html/pivots by a row.": "b61ce1d49a4de91a97638d99cb80bc42",
+    "treemap.html/pivots by two rows.": "f06a60cadd750561d58e6c468f8bc884",
+    "treemap.html/pivots by a row and a column.": "9bef0c41f2d8787b3f05b919ba0fc976",
+    "treemap.html/pivots by two rows and two columns.": "53956497b98b508020babc7ac2a560a2",
+    "treemap.html/sorts by a hidden column.": "93f7bd6312470093e6d90468053fcc2b",
+    "treemap.html/sorts by a numeric column.": "c0d3133e42b220ae0b51a03a727a7220",
+    "treemap.html/filters by a numeric column.": "0d641b25f1251e98bb51fae105b64cec",
+    "treemap.html/sorts by an alpha column.": "01ef0c304078e6547e56484a89da5589",
+    "treemap.html/displays visible columns.": "aa3cbce618a10759be1377a85b0de74e"
 }
