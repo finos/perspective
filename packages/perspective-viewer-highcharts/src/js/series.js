@@ -319,7 +319,7 @@ export function make_xyz_data(js, pivots, hidden) {
  * Tree
  */
 
-function recolor(aggregates, all, leaf_only) {
+function make_color(aggregates, all, leaf_only) {
     let colorRange;
     if (aggregates.length >= 2) {
         colorRange = [Infinity, -Infinity];
@@ -340,34 +340,7 @@ function recolor(aggregates, all, leaf_only) {
     return colorRange;
 }
 
-class TreeIterator {
-
-    constructor(depth, json) {
-        this.depth = depth;
-        this.json = json;
-        this.top = {name: "", depth: 0, categories: []};
-    }
-
-    add_label(path) {
-        let label = {
-            name: path[path.length - 1],
-            depth: path.length,
-            categories: []
-        }
-
-        // Find the correct parent
-        var parent = this.top;
-        for (var lidx = 0; lidx < path.length - 1; lidx++) {
-            for (var cidx = 0; cidx < parent.categories.length; cidx++) {
-                if (parent.categories[cidx].name === path[lidx]) {
-                    parent = parent.categories[cidx];
-                    break;
-                }
-            }
-        }
-        parent.categories.push(label);
-        return label;
-    }
+class TreeIterator extends TreeAxisIterator {
 
     *[Symbol.iterator]() {
         let label = this.top;
@@ -383,11 +356,46 @@ class TreeIterator {
     }
 }
 
+function make_levels(row_pivots) {
+    let levels = [];
+    for (let i = 0; i < row_pivots.length; i++) {
+        levels.push({
+            level: i + 1,
+            borderWidth: (row_pivots.length - i) * 2,
+            dataLabels: {
+                enabled: true,
+                allowOverlap: true,
+                style: {
+                    opacity: [1, 0.3][i] || 0,
+                    fontSize: `${[14, 10][i] || 0}px`,
+                    textOutline: null
+                }
+            },
+        });
+    }
+    return levels;
+}
+
+function make_configs(series, levels) {
+    let configs = [];
+    for (let data of series) {
+        let title = data.name.split(',');
+        configs.push({
+            layoutAlgorithm: 'squarified',
+            allowDrillToNode: true,
+            alternateStartingDirection: true,
+            data: data.data.slice(1),
+            levels: levels,
+            title: title
+        });  
+    }
+    return configs;
+}
+
 export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let rows = new TreeIterator(row_pivots.length, js);
     let rows2 = new ColumnsIterator(rows, hidden);
     var series = [];
-    let configs = [];
 
     for (let row of rows2) {
         let rp = row['__ROW_PATH__'];
@@ -414,36 +422,9 @@ export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
         }
     }
 
-    let levels = [];
-    for (let i = 0; i < row_pivots.length; i++) {
-        levels.push({
-            level: i + 1,
-            borderWidth: (row_pivots.length - i) * 2,
-            dataLabels: {
-                enabled: true,
-                allowOverlap: true,
-                style: {
-                    opacity: [1, 0.3][i] || 0,
-                    fontSize: `${[14, 10][i] || 0}px`,
-                    textOutline: null
-                }
-            },
-        });
-    }
-
-    for (let data of series) {
-        let title = data.name.split(',');
-        configs.push({
-            layoutAlgorithm: 'squarified',
-            allowDrillToNode: true,
-            alternateStartingDirection: true,
-            data: data.data.slice(1),
-            levels: levels,
-            title: title
-        });  
-    }
-    
-    let colorRange = recolor(aggregates, series, leaf_only, row_pivots);
+    let levels = make_levels(row_pivots);
+    let configs = make_configs(series, levels);
+    let colorRange = make_color(aggregates, series, leaf_only, row_pivots);
     return [configs, rows.top, colorRange];
 }
 
