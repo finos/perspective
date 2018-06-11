@@ -182,5 +182,10 @@ export const draw = (mode) => async function(el, view, task) {
         for (let e of Array.prototype.slice.call(el.children)) { el.removeChild(e); }
         this._charts.map(x => el.appendChild(x.renderTo));
     }
+
+    // TODO resize bug in Highcharts?
+    if (configs.length > 1) {
+       this._charts.map(x => x.reflow());
+    }
 }
 
