@@ -4,10 +4,7 @@ const webpack = require('webpack');
 
 const plugins = [
     new webpack.IgnorePlugin(/vertx/),
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/),
-    new webpack.ProvidePlugin({
-        TextDecoder: ['text-encoding', 'TextDecoder']
-    })
+    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)
 ];
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
