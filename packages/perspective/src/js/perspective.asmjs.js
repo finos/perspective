@@ -14,7 +14,7 @@ if (global.document !== undefined) {
 	const Module = load_perspective({
 		wasmJSMethod: "asmjs",
 		locateFile: path => `asmjs/${path}`,
-        filePackagePrefixURL: "asmjs/",
+        filePackagePrefixURL: "",
 	    printErr: (x) => console.warn(x),
 	    print: (x) => console.warn(x)
 	});

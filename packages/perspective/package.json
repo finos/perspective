@@ -63,6 +63,7 @@
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
+    "text-encoding": "^0.6.4",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.6",
     "wrap-loader": "^0.2.0"
