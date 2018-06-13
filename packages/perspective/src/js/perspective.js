@@ -222,6 +222,8 @@ function parse_data(data, names, types) {
                 types.push(__MODULE__.t_dtype.DTYPE_BOOL);
             } else if (data[name] === "date") {
                 types.push(__MODULE__.t_dtype.DTYPE_TIME);
+            } else {
+                throw `Unknown type ${data[name]}`;
             }
             cdata.push([]);
         }
