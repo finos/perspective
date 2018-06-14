@@ -85,7 +85,7 @@ function undrag(event) {
     }
     let parent = div.parentElement;
     let idx = Array.prototype.slice.call(parent.children).indexOf(div);
-    let attr_name = parent.getAttribute('id').replace('_', '-');
+    let attr_name = parent.getAttribute('for');
     let pivots = JSON.parse(this.getAttribute(attr_name));
     pivots.splice(idx, 1);
     this.setAttribute(attr_name, JSON.stringify(pivots));
@@ -179,7 +179,7 @@ function drop(ev) {
     data = JSON.parse(data);
 
     // Update the columns attribute
-    let name = ev.currentTarget.getAttribute('id').replace('_', '-');
+    let name = ev.currentTarget.querySelector('ul').getAttribute('for') || ev.currentTarget.getAttribute('id').replace('_', '-');
     let columns = JSON.parse(this.getAttribute(name) || "[]");
     let data_index = columns.indexOf(data[0]);
     if (data_index !== -1) {
@@ -880,12 +880,9 @@ class View extends ViewPrivate {
      */
     @array_attribute
     set sort(sort) {
-        this._sort.innerHTML = "";
-        if (sort.length === 0) {
-            let label = document.createElement('label');
-            label.innerHTML = this._sort.getAttribute('name');
-            this._sort.appendChild(label);
-        } else {
+        var inner = this._sort.querySelector( 'ul');
+        inner.innerHTML = "";
+        if (sort.length > 0) {
             sort.map(function(s) {
                 let dir = "asc";
                 if (Array.isArray(s)) {
@@ -893,7 +890,7 @@ class View extends ViewPrivate {
                     s = s[0];
                 }
                 let row = new_row.call(this, s, false, false, false, dir);
-                this._sort.appendChild(row);
+                inner.appendChild(row);
             }.bind(this));
         }
         this.dispatchEvent(new Event('perspective-config-update'));
@@ -976,12 +973,9 @@ class View extends ViewPrivate {
     @array_attribute
     set filters(filters) {
         if (!this._updating_filter) {
-            this._filters.innerHTML = "";
-            if (filters.length === 0) {
-                let label = document.createElement('label');
-                label.innerHTML = this._filters.getAttribute('name');
-                this._filters.appendChild(label);
-            } else {
+            var inner = this._filters.querySelector('ul'); 
+            inner.innerHTML = "";
+            if (filters.length > 0) {
                 filters.map(pivot => {
                     const fterms = JSON.stringify({
                         operator: pivot[1], 
@@ -994,7 +988,7 @@ class View extends ViewPrivate {
                         undefined, 
                         fterms
                     );
-                    this._filters.appendChild(row);
+                    inner.appendChild(row);
                 });
             }
         }
@@ -1024,15 +1018,12 @@ class View extends ViewPrivate {
      */
     @array_attribute
     set 'column-pivots'(pivots) {
-        this._column_pivots.innerHTML = "";
-        if (pivots.length === 0) {
-            let label = document.createElement('label');
-            label.innerHTML = this._column_pivots.getAttribute('name');
-            this._column_pivots.appendChild(label);
-        } else {
+        var inner = this._column_pivots.querySelector('ul'); 
+        inner.innerHTML = "";
+        if (pivots.length > 0) {
             pivots.map(function(pivot) {
                 let row = new_row.call(this, pivot);
-                this._column_pivots.appendChild(row);
+                inner.appendChild(row);
             }.bind(this));
         }
         this.dispatchEvent(new Event('perspective-config-update'));
@@ -1062,15 +1053,12 @@ class View extends ViewPrivate {
      */
     @array_attribute
     set 'row-pivots'(pivots) {
-        this._row_pivots.innerHTML = "";
-        if (pivots.length === 0) {
-            let label = document.createElement('label');
-            label.innerHTML = this._row_pivots.getAttribute('name');
-            this._row_pivots.appendChild(label);
-        } else {
+        var inner = this._row_pivots.querySelector('ul'); 
+        inner.innerHTML = "";
+        if (pivots.length > 0) {
             pivots.map(function(pivot) {
                 let row = new_row.call(this, pivot);
-                this._row_pivots.appendChild(row);
+                inner.appendChild(row);
             }.bind(this));
         }
         this.dispatchEvent(new Event('perspective-config-update'));
