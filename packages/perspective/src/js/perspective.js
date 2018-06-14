@@ -222,6 +222,8 @@ function parse_data(data, names, types) {
                 types.push(__MODULE__.t_dtype.DTYPE_BOOL);
             } else if (data[name] === "date") {
                 types.push(__MODULE__.t_dtype.DTYPE_TIME);
+            } else {
+                throw `Unknown type ${data[name]}`;
             }
             cdata.push([]);
         }
@@ -1220,8 +1222,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     console.log("Loading asm.js");
                     __MODULE__ = __MODULE__({
                         wasmJSMethod: "asmjs",
-                        locateFile: path => `asmjs/${path}`,
-                        filePackagePrefixURL: msg.path + 'asmjs/',
+                        locateFile: path => `${path}`,
+                        filePackagePrefixURL: msg.path,
                         printErr: (x) => console.warn(x),
                         print: (x) => console.log(x)
                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
