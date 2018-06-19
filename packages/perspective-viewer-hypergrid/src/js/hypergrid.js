@@ -30,7 +30,7 @@ const TREE = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColum
 const COLUMN_HEADER_FONT = '12px amplitude-regular, Helvetica, sans-serif';
 const GROUP_LABEL_FONT = '12px open sans, sans-serif'; // overrides COLUMN_HEADER_FONT for group labels
 
-var base_grid_properties = {
+const base_grid_properties = {
     autoSelectRows: false,
     cellPadding: 5,
     cellSelection: false,
@@ -82,7 +82,7 @@ var base_grid_properties = {
     voffset: 0
 };
 
-var light_theme_overrides = {
+const light_theme_overrides = {
     backgroundColor: '#ffffff',
     color: '#666',
     lineColor: '#AAA',
@@ -139,11 +139,11 @@ function null_formatter(formatter, null_value = '') {
 
 bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
-    set_data(data, schema, tschema, row_pivots, s, e, l) {
+    set_data(data, schema, tschema, row_pivots) {
         if (this._detached) {
             this._detached = false;
         }
-        var hg_data = psp2hypergrid(data, schema, tschema, row_pivots, s, e, l);
+        const hg_data = psp2hypergrid(data, schema, tschema, row_pivots);
         if (this.grid) {
             this.grid.behavior.setPSP(hg_data);
         } else {
@@ -157,7 +157,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
     connectedCallback() {
         if (!this.grid) {
-            var host = this.querySelector('#mainGrid');
+            const host = this.querySelector('#mainGrid');
 
             host.setAttribute('hidden', true);
             this.grid = new Hypergrid(host, { DataModel: PerspectiveDataModel });
@@ -179,7 +179,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             ]);
 
 
-            let grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
+            const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             const style = window.getComputedStyle(this, null);
             const header = window.getComputedStyle(this.querySelector('th'), null);
             grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
@@ -215,7 +215,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             this.grid.localization.add('FinanceTree', {
                 format: function(val, type) {
-                    let f = {
+                    const f = {
                         date: date_formatter,
                         integer: integer_formatter,
                         float: float_formatter,
@@ -240,14 +240,12 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
 });
 
-const PAGE_SIZE = 1000;
-
 function filter_hidden(hidden, json) {
     if (hidden.length > 0) {
-        let first = json[0];
-        let to_delete = [];
+        const first = json[0];
+        const to_delete = [];
         for (let key in first) {
-            let split_key = key.split(',');
+            const split_key = key.split(',');
             if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
                 to_delete.push(key);
             }
@@ -261,78 +259,61 @@ function filter_hidden(hidden, json) {
     return json;
 }
 
-async function fill_page(view, json, hidden, range) {
-    let next_page = await view.to_json(range);
-    next_page = filter_hidden(hidden, next_page);
-    for (let idx = 0; idx < next_page.length; idx++) {
-        json[range.start_row + idx] = next_page[idx];
-    }
-    return json;
-}
-
-const LAZY_THRESHOLD = 10000;
-
 const PRIVATE = Symbol('Hypergrid private');
 
 async function grid(div, view, task) {
-    let hidden = this._get_view_hidden();
+    const hidden = this._get_view_hidden();
 
     this[PRIVATE] = this[PRIVATE] || {};
 
-    let [nrows, json, schema, tschema] = await Promise.all([
+    const [nrows, json, schema, tschema] = await Promise.all([
         view.num_rows(),
-        view.to_json({end_row: 1}),
+        view.to_json(Range.create(0, 100)),
         view.schema(),
         this._table.schema()
     ]);
 
+    const rowPivots = JSON.parse(this.getAttribute('row-pivots')), isTree = !!rowPivots.length;
+
+    let perspectiveHypergridElement;
+
     if (!this.hypergrid) {
-        this[PRIVATE].grid = document.createElement('perspective-hypergrid');
+        perspectiveHypergridElement = this[PRIVATE].grid = document.createElement('perspective-hypergrid');
         Object.defineProperty(this, 'hypergrid', {
-            get: () => this[PRIVATE].grid.grid
+            configurable: true,
+            get: () => perspectiveHypergridElement.grid
         });
+    } else {
+        perspectiveHypergridElement = this[PRIVATE].grid;
     }
 
-    json.length = nrows;
-
-    if (!(document.contains ? document.contains(this[PRIVATE].grid) : false)) {
+    if (!document.body.contains(perspectiveHypergridElement)) {
         div.innerHTML = '';
-        div.appendChild(this[PRIVATE].grid);
+        div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
     }
 
+    const dataModel = this.hypergrid.behavior.dataModel;
+
     this.hypergrid._lazy_load = false;
 
-    this.hypergrid._cache_update = this.hypergrid.behavior.dataModel._cache_update = async (range, cb) => {
-        let next_page = await view.to_json(range);
-        next_page = filter_hidden(hidden, next_page);
-        let new_range = Range.estimate(this.hypergrid);
-        let val = false;
-        if (new_range.within(range)) {
-            let rows = psp2hypergrid(
-                next_page, 
-                schema,
-                tschema,
-                JSON.parse(this.getAttribute('row-pivots')), 
-                0, 
-                next_page.length, 
-                next_page.length
-            ).rows;
-            for (let x = range.start_row; x < range.end_row + 1; x++) {
-                let cell = x - range.start_row;
-                if (cell < rows.length) {
-                    this.hypergrid.behavior.dataModel.data[x] = rows[cell];
-                }
-            }
-            val = true;
-        } else if (new_range.start_row + next_page.length < this.hypergrid.behavior.dataModel.data.length + 1) {
-            val = true;
-        }
-        if (cb) cb();
-        return val;
+    dataModel.isTree = function() {
+        return isTree;
     };
 
-    this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
+    dataModel.getRowCount = function() {
+        return nrows;
+    };
+
+    dataModel.pspFetch = async function(range) {
+        let next_page = await view.to_json(range);
+        next_page = filter_hidden(hidden, next_page);
+        const rows = psp2hypergrid(next_page, schema, tschema, rowPivots).rows;
+        const data = this.data, base = range.start_row;
+        rows.forEach((row, offset) => data[base + offset] = row);
+    };
+
+    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots);
 }
 
 global.registerPlugin('hypergrid', {
