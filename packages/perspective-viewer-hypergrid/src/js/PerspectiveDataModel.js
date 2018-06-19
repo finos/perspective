@@ -56,9 +56,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return config.grid.cellRenderers.get(rendererName);
     },
 
-    _cache_update: function() {
-        return Promise.resolve();
-    }
+    pspFetch: async function() {}
 });
 
 function fetchRows(rectangles, callback, ordinal, reason) {
@@ -68,7 +66,7 @@ function fetchRows(rectangles, callback, ordinal, reason) {
     }
 
     const promises = rectangles.map(
-        rect => this._cache_update(Range.create(rect.origin.y, rect.corner.y + 20))
+        rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2))
     );
 
     Promise.all(promises)

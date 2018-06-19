@@ -50,8 +50,6 @@ function setPSP(payload) {
 
     this.grid.properties.showTreeColumn = payload.isTree;
 
-
-
     console.log('Setting up initial schema and data load into HyperGrid');
 
     this.stashedWidths = stashColumnWidths.call(this);
@@ -61,10 +59,7 @@ function setPSP(payload) {
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    grid.behavior.setData({
-        data: payload.rows,
-        schema: new_schema
-    });
+    grid.behavior.schema = new_schema;
 
 }
 

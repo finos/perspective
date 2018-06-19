@@ -287,7 +287,7 @@ async function grid(div, view, task) {
 
     json.length = nrows;
 
-    if (!(document.contains ? document.contains(this[PRIVATE].grid) : false)) {
+    if (!document.body.contains(this[PRIVATE].grid)) {
         div.innerHTML = '';
         div.appendChild(this[PRIVATE].grid);
         await new Promise(resolve => setTimeout(resolve));
@@ -295,33 +295,17 @@ async function grid(div, view, task) {
 
     this.hypergrid._lazy_load = false;
 
-    this.hypergrid._cache_update = this.hypergrid.behavior.dataModel._cache_update = async (range, cb) => {
+    this.hypergrid.behavior.dataModel.getRowCount = function() {
+        return nrows;
+    };
+
+    this.hypergrid.behavior.dataModel.pspFetch = async (range) => {
         let next_page = await view.to_json(range);
         next_page = filter_hidden(hidden, next_page);
-        let new_range = Range.estimate(this.hypergrid);
-        let val = false;
-        if (new_range.within(range)) {
-            let rows = psp2hypergrid(
-                next_page, 
-                schema,
-                tschema,
-                JSON.parse(this.getAttribute('row-pivots')), 
-                0, 
-                next_page.length, 
-                next_page.length
-            ).rows;
-            for (let x = range.start_row; x < range.end_row + 1; x++) {
-                let cell = x - range.start_row;
-                if (cell < rows.length) {
-                    this.hypergrid.behavior.dataModel.data[x] = rows[cell];
-                }
-            }
-            val = true;
-        } else if (new_range.start_row + next_page.length < this.hypergrid.behavior.dataModel.data.length + 1) {
-            val = true;
-        }
-        if (cb) cb();
-        return val;
+        let rows = psp2hypergrid(next_page, schema, tschema, JSON.parse(this.getAttribute('row-pivots'))).rows;
+        let data = this.hypergrid.behavior.dataModel.data;
+        let base = range.start_row;
+        rows.forEach((row, offset) => data[base + offset] = row);
     };
 
     this[PRIVATE].grid.set_data(json, schema, tschema, JSON.parse(this.getAttribute('row-pivots')), 0, 30, nrows);
