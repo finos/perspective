@@ -11,10 +11,12 @@
 
 .psp-text-field{
     position: relative;
-    border-bottom: 1px solid #969696;
+    background-color: white;
+    border-bottom: 1px solid @border-color;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    height: 24px;
 }
 
 .dragging .psp-text-field.dropping{
@@ -36,15 +38,17 @@
 .psp-text-field__input + label{
     line-height:17px;
     box-sizing:border-box;
-    color: #737373;
+    color: rgb(204, 204, 204);
     font-weight: 400;
     white-space: nowrap;
-    padding: 3px 0px 2px 0px;
+    padding: 0px 0px 2px 10px;
+    font-size: 12px;
+    display: inline-block;
 }
 
 .dropping .psp-text-field__input, .psp-text-field__input:not(:empty){
-    margin-top:18px;
-    display:initial;
+    display: initial;
+    padding-top: 1px;
 }
 
 .dropping .psp-text-field__input::after{
@@ -59,7 +63,8 @@
     position: absolute;
     top: 0px;
     line-height: 10px;
-    font-size: 13px;
+    font-size: 10px;
+    display: none;
 }
 
 .selected_indicator() {

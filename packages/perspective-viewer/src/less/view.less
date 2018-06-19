@@ -70,7 +70,7 @@ perspective-viewer {
         display: flex;
     }
 
-    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row {
+    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row, #filters #psp_row {
         display: inline;
     }
 
@@ -108,9 +108,11 @@ perspective-viewer {
         flex-direction: column;
         flex: 1;
     }
+
     .rrow {
         display: flex;
         flex-grow: 1;
+        height: 24px;
         align-items: center;
         max-width: 400px;
         list-style: none;
@@ -203,7 +205,7 @@ perspective-viewer {
 
     .centered {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: center;
     }
     #top_panel {
