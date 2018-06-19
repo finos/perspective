@@ -12,6 +12,10 @@ const Range = require('./Range');
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
+    initialize: function() {
+        this.fetchOrdinal = 0;
+    },
+
     // Is the grid view a tree
     isTree: function() {
         return this.data[0] && this.data[0][TREE_COLUMN_INDEX] && this.data[0][TREE_COLUMN_INDEX].rowPath.length;
@@ -30,66 +34,12 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
     },
 
     getRowCount: function () {
-        return this.data.length;
+        return 9994;//this.data.length;
     },
 
-    fetchData: async function (rectangles, callback) {
-        if (this.clearCache) {
-            this.data = [];
-            this.lastSuccessfullyFetchedRects = false;
-        }
-        for (let rect of rectangles) {
-            this._cache_update(Range.create(rect.origin.y, rect.corner.y + 20), callback);
-        }
-    },
-
-    // return true for all data fetched, false if any data missing
-    gotData: function(rects) {
-        if (
-            this.lastSuccessfullyFetchedRects &&
-            this.lastSuccessfullyFetchedRects.length === rects.length &&
-            this.lastSuccessfullyFetchedRects.every(function(oldRect, i) {
-                return (
-                    oldRect.origin.equals(rects[i].origin) &&
-                    oldRect.corner.equals(rects[i].corner)
-                );
-            })
-        ) {
-            return true; // shortcut when requested rects same as last successfully fetched rects
-        }
-
-        var data = this.data,
-            schema = this.schema;
-
-        // for better performance, we first
-        // (1) check all rects for any missing rows before
-        // (2) checking rows for any missing cells
-        const z = !(
-            rects.find(function(rect) { // (1)
-                for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
-                    var dataRow = data[y];
-                    if (!dataRow && y < data.length - 1) {
-                        console.log([y, data]);
-                        return true;
-                    }
-                }
-            })
-            ||
-            rects.find(function(rect) { // (2)
-                for (var y = rect.origin.y, Y = rect.corner.y; y < Y; ++y) {
-                    var dataRow = data[y];
-                    if (dataRow) {
-                        for (var x = rect.origin.x, X = rect.corner.x; x < X; ++x) {
-                            if (!(schema[x].index in dataRow)) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            })
-        );
-
-        return z;
+    fetchData: function (rectangles, callback) {
+        this.data = []; // don't cache rows
+        fetchRows.call(this, rectangles, callback);
     },
 
     // Return the cell renderer
@@ -106,25 +56,35 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return config.grid.cellRenderers.get(rendererName);
     },
 
-    // Return the cell editor for a given (x,y) cell coordinate
-    getCellEditorAt: function(x, y, declaredEditorName, cellEvent) {
-        if (declaredEditorName) {
-            var cellEditor = cellEvent.grid.cellEditors.create(declaredEditorName, cellEvent);
-            if (declaredEditorName === 'combobox') {
-                // cellEditor.modes[0].appendOptions = testingDropdownItems;
-            }
-            return cellEditor;
-        }
-        return declaredEditorName;
+    _cache_update: function() {
+        return Promise.resolve();
     }
 });
 
+function fetchRows(rectangles, callback, ordinal, reason) {
+    if (!ordinal) {
+        // this is a new fetch request (as opposed to a retry)
+        ordinal = ++this.fetchOrdinal;
+    }
+
+    const promises = rectangles.map(
+        rect => this._cache_update(Range.create(rect.origin.y, rect.corner.y + 20))
+    );
+
+    Promise.all(promises)
+        .then(value => {
+            if (ordinal === this.fetchOrdinal) { // still current?
+                callback(false); // falsy means success (always, because we are currently retrying indefinitely)
+            }
+        })
+        .catch(fetchRows.bind(this, rectangles, callback, ordinal)); // retry (with same ordinal)
+}
 
 function cellStyle(gridCellConfig, rendererName) {
     if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
         gridCellConfig.value = '-';
     } else {
-        var type = this.schema[gridCellConfig.dataCell.x].type;
+        const type = this.schema[gridCellConfig.dataCell.x].type;
         if (['number', 'float', 'integer'].indexOf(type) > -1) {
             if (gridCellConfig.value === 0) {
                 gridCellConfig.value = type === 'float' ? '0.00' : '0';
