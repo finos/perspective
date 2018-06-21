@@ -48,9 +48,10 @@ function setPSP(payload) {
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    this.dataModel.reset();
-
-    this.schema = new_schema;
+    this.grid.setData({
+        data: payload.rows,
+        schema: new_schema
+    });
 }
 
 /**
