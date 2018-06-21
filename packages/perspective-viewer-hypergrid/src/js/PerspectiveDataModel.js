@@ -43,6 +43,12 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
     // Note that `reason` comes from catch() albeit not used herein.
     fetchData: function(rectangles, callback, ordinal, reason) {
         if (!ordinal) {
+            if (!rectangles.find(uncachedRow, this)) {
+                // no uncached rows so all rows available so do nothing
+                callback(false); // falsy means success
+                return;
+            }
+
             // this is a new fetch request (as opposed to a retry)
             ordinal = ++this.fetchOrdinal;
         }
@@ -78,6 +84,14 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
 
     pspFetch: async function() {}
 });
+
+function uncachedRow(rect) {
+    for (var r = rect.origin.y, R = Math.min(rect.corner.y + 2, this.getRowCount()); r < R; ++r) {
+        if (!this.data[r]) {
+            return true;
+        }
+    }
+}
 
 function cellStyle(gridCellConfig, rendererName) {
     if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
