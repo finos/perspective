@@ -22,13 +22,10 @@ module.exports = function psp2hypergrid(data, schema, tschema, row_pivots) {
         };
     }
 
-    var is_tree = data[0].hasOwnProperty('__ROW_PATH__');
+    var is_tree = !!row_pivots.length;
 
-    var columnPaths = Object.keys(data[0])
-        .filter(row => row !== '__ROW_PATH__')
-        .map(row => row.split(','));
-
-    let flat_columns = columnPaths.map(col => col.join(','));
+    var flat_columns = Object.keys(data[0]).filter(row => row !== '__ROW_PATH__');
+    var columnPaths = flat_columns.map(row => row.split(','));
 
     let rows = data.map(function(row, idx) {
         // `dataRow` (element of `dataModel.data`) keys will be `index` here rather than

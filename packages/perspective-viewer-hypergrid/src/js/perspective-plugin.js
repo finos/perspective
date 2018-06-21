@@ -9,24 +9,16 @@
 
 'use strict';
 
-const _ = require('underscore');
-
-
 /**
  * @this {Behavior}
  * @param payload
  */
 function setPSP(payload) {
-    const grid = this.grid;
     const new_schema = [];
-
-    if (payload.columnPaths[0].length === 0 || payload.columnPaths[0][0] === '') {
-        payload.columnPaths[0] = [' '];
-    }
 
     if (payload.isTree) {
         new_schema[this.treeColumnIndex] = {
-            name: this.treeColumnIndex,
+            name: this.treeColumnIndex.toString(),
             header: ' ' // space char because empty string defaults to `name`
         };
     }
@@ -38,14 +30,11 @@ function setPSP(payload) {
 
         const col_name = columnPath.join('|'),
             aliases = payload.configuration.columnAliases,
-            col_header = aliases ? (aliases[col_name] || col_name) : col_name,
+            header = aliases && aliases[col_name] || col_name,
+            name = columnIndex.toString(),
             type = payload.columnTypes[columnIndex];
 
-        new_schema.push({
-            name: columnIndex.toString(),
-            header: col_header,
-            type: type
-        });
+        new_schema.push({ name, header, type });
     });
 
     this.grid.properties.showTreeColumn = payload.isTree;
@@ -59,7 +48,7 @@ function setPSP(payload) {
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    grid.behavior.schema = new_schema;
+    this.schema = new_schema;
 
 }
 

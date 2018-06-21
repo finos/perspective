@@ -7,6 +7,16 @@
  *
  */
 
+'use strict';
+
+/*
+ * NOTE
+ * This data model depends on Perspective injecting the following methods upon view change (dataset redefinition):
+ * * `isTree` — Is the grid view a tree?
+ * * `getRowCount` — Total height of dataset
+ * * `pspFetch` - Lazy loader called internally
+ */
+
 const Range = require('./Range');
 
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
@@ -14,11 +24,6 @@ const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').protot
 module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
     initialize: function() {
         this.fetchOrdinal = 0;
-    },
-
-    // Is the grid view a tree
-    isTree: function() {
-        return this.data[0] && this.data[0][TREE_COLUMN_INDEX] && this.data[0][TREE_COLUMN_INDEX].rowPath.length;
     },
 
     // Is this column the 'tree' column
@@ -33,13 +38,28 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         return row ? row[x] : null;
     },
 
-    getRowCount: function () {
-        return 9994;//this.data.length;
-    },
+    // Called by Hypergrid with first two params only, creating a new ordinal;
+    // called by self with all four params on error for retry.
+    // Note that `reason` comes from catch() albeit not used herein.
+    fetchData: function(rectangles, callback, ordinal, reason) {
+        if (!ordinal) {
+            // this is a new fetch request (as opposed to a retry)
+            ordinal = ++this.fetchOrdinal;
+        }
 
-    fetchData: function (rectangles, callback) {
-        this.data = []; // don't cache rows
-        fetchRows.call(this, rectangles, callback);
+        this.data.length = 0; // discard previously fetched rows (i.e., don't cache rows)
+
+        const promises = rectangles.map(
+            rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2))
+        );
+
+        Promise.all(promises)
+            .then(value => {
+                if (ordinal === this.fetchOrdinal) { // still current?
+                    callback(false); // falsy means success (always, because we are currently retrying indefinitely)
+                }
+            })
+            .catch(this.fetchData.bind(this, rectangles, callback, ordinal)); // retry (with same ordinal)
     },
 
     // Return the cell renderer
@@ -58,25 +78,6 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
 
     pspFetch: async function() {}
 });
-
-function fetchRows(rectangles, callback, ordinal, reason) {
-    if (!ordinal) {
-        // this is a new fetch request (as opposed to a retry)
-        ordinal = ++this.fetchOrdinal;
-    }
-
-    const promises = rectangles.map(
-        rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2))
-    );
-
-    Promise.all(promises)
-        .then(value => {
-            if (ordinal === this.fetchOrdinal) { // still current?
-                callback(false); // falsy means success (always, because we are currently retrying indefinitely)
-            }
-        })
-        .catch(fetchRows.bind(this, rectangles, callback, ordinal)); // retry (with same ordinal)
-}
 
 function cellStyle(gridCellConfig, rendererName) {
     if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
