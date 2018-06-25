@@ -70,7 +70,7 @@ perspective-viewer {
         display: flex;
     }
 
-    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row {
+    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row, #filters #psp_row {
         display: inline;
     }
 
@@ -108,12 +108,13 @@ perspective-viewer {
         flex-direction: column;
         flex: 1;
     }
+
     .rrow {
         display: flex;
         flex-grow: 1;
+        height: 24px;
         align-items: center;
         max-width: 400px;
-        height: 24px;
         list-style: none;
         min-width: 140px;
         margin: 5px 10px 0px 0px;
@@ -121,6 +122,12 @@ perspective-viewer {
 
     .rrow > * {
         height: 100%;
+    }
+
+    .rrow > div {
+        display:flex;
+        flex-direction: column;
+        justify-content: flex-end;
     }
 
     #top_panel > .rrow > * {
@@ -181,20 +188,8 @@ perspective-viewer {
     #config_button:before {
         content: '\1f527';
     }
-
-    #filters {
-        label {
-            padding-top: 3px;
-            margin-top: -2px;
-        }
-    }
-
-    ul label, #filters label {
-        font-weight: normal;
-        margin-left: 0px;
-    }
     
-    ul, #filters {
+    ul {
         padding: 0px;
         margin: 0;
         font-size: 12px;
@@ -220,9 +215,6 @@ perspective-viewer {
         padding-bottom: 10px;
         padding-top: 5px;
         max-width: 1000px;
-    }
-    #top_panel ul {
-        padding-top: 3px;
     }
 
     #side_panel > div {

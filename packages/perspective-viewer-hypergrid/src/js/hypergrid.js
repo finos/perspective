@@ -655,6 +655,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
             grid_properties['color'] = style.getPropertyValue('color');
             grid_properties['columnHeaderBackgroundColor'] = header.getPropertyValue('background-color');
+            grid_properties['columnHeaderSeparatorColor'] = header.getPropertyValue('border-color');
             grid_properties['columnHeaderColor'] = header.getPropertyValue('color');
             this.grid.addProperties(grid_properties);
 

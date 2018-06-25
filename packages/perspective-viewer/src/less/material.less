@@ -306,14 +306,21 @@ perspective-viewer #app {
     }
 
     #top_panel {
-        padding: 24px 0px 12px 0px;
+        padding: 24px 0px 0px 0px;
         .rrow ul {
             padding: 3px 0px 0px 0px;
+        }
+
+        .psp-text-field {
+            background: none;
+        }
+        .rrow {
+            margin: 0px 24px 24px 0px;
         }
     }
 
     .rrow {
-        margin: 0px 24px 12px 0px;
+        margin: 0px 24px 24px 0px;
     }
 
 
@@ -325,3 +332,26 @@ perspective-viewer #app {
     }
 }
 
+perspective-viewer .psp-text-field__input + label {
+    padding-left: 0px;
+}
+
+.dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {
+    padding-left: 0px;
+    display: inline-block;
+    top: -8px
+}
+
+perspective-viewer {
+
+    #app #top_panel {
+
+        #row_pivots label:before {
+            content: "Group By";
+        }
+
+        #column_pivots label:before {
+            content: "Split By";
+        }
+    }
+}

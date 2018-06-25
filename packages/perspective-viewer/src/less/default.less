@@ -9,6 +9,64 @@
 
 @border-color: #ccc;
 
+.psp-text-field{
+    position: relative;
+    background-color: white;
+    border-bottom: 1px solid @border-color;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 24px;
+}
+
+.dragging .psp-text-field.dropping{
+    border-bottom: 2px solid #22A0CE;
+}
+
+.dragging  .psp-text-field{
+    border-bottom: 1px solid #22A0CE;
+}
+
+.psp-text-field > .psp-text-field__input{
+    border: 0px;
+    line-height: 20px;
+    vertical-align: bottom;
+    padding-bottom: 0px;
+    display:none;
+}
+
+.psp-text-field__input + label{
+    line-height:17px;
+    box-sizing:border-box;
+    color: rgb(204, 204, 204);
+    font-weight: 400;
+    white-space: nowrap;
+    padding: 0px 0px 2px 10px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.dropping .psp-text-field__input, .psp-text-field__input:not(:empty){
+    display: initial;
+    padding-top: 1px;
+}
+
+.dropping .psp-text-field__input::after{
+    content:'|';
+}
+
+.dropping * {
+    pointer-events: none;
+}
+
+.dropping  .psp-text-field label, .psp-text-field__input:not(:empty) + label{
+    position: absolute;
+    top: 0px;
+    line-height: 10px;
+    font-size: 10px;
+    display: none;
+}
+
 .selected_indicator() {
     font-family: Arial;
     font-weight: 500;
@@ -19,14 +77,6 @@
     border-top-width: 0px;
     border-left-width: 0px;
     border-right-width: 0px;
-}
-
-perspective-viewer.dragging #top_panel .rrow > * {
-    border: 1px solid #1078d1 !important;
-}
-
-perspective-viewer.dragging #top_panel .rrow > .dropping {
-    background-color: rgb(240, 240, 255) !important;
 }
 
 .dropping perspective-row.inserting {
@@ -49,6 +99,10 @@ perspective-viewer {
 
     .awesomplete > ul:before {
         content: none;
+    }
+
+    .awesomplete > input{
+        background-color: transparent;
     }
 
     perspective-row #psp_row {
@@ -91,17 +145,13 @@ perspective-viewer {
         }
     }
 
-    #filters {
-        border-bottom: 1px solid #ccc;
-        color: #ccc;
-    }
-
     #filters perspective-row {
 
         select {
             -webkit-appearance: none;
             -moz-appearance: none;
             appearance: none;
+            background-color: transparent;
         }
     }
 
@@ -226,16 +276,7 @@ perspective-viewer {
         content: '\1f527';
     }
 
-    #filters {
-        background-color: white;
-    }
-
-    ul label, #filters label {
-        color: #ccc;
-        font-weight: normal;
-    }
-    
-    ul, #filters {
+    ul {
         .bordered();
         font-size: 12px;
         padding: 0px 10px 0px 10px;
@@ -260,7 +301,7 @@ perspective-viewer {
     path, circle {
         opacity: 0.8;
     }
-
+    
     option[value=""] {
         color: white !important;
     }
@@ -272,9 +313,7 @@ perspective-viewer {
         background-color: #eee;
     }
     
-    #top_panel ul {
-        background-color: white;
-    }
+   
 
     perspective-hypergrid {
         color: #666;

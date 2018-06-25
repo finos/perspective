@@ -22,24 +22,36 @@
         <div class="column noselect">
             <div id='top_panel'>
                 <div class="rrow">
-                    <ul id="row_pivots" name="Row Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="row_pivots">Group by</label>
-                    </ul>
+                    <div id="row_pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <div class="psp-text-field">
+                            <ul class="psp-text-field__input" for="row-pivots"></ul>
+                            <label for="row_pivots"></label>
+                        </div>
+                    </div>
                 </div>
                 <span class="rrow centered" style="min-width:5px;max-width:5px;flex-grow:0;color:#999;font-family:Arial;font-size:12px">&#x2715;</span>
                 <div class="rrow">
-                    <ul id="column_pivots" name="Column Pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="column_pivots">Split by</label>
-                    </ul>
+                    <div id="column_pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <div class="psp-text-field">
+                            <ul class="psp-text-field__input" for="column-pivots"></ul>
+                            <label for="column_pivots"></label>
+                        </div>
+                    </div>
                 </div>
                 <div class="rrow">
-                    <ul id="sort" name="Sort" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="sort">Sort</label>
-                    </ul>
+                    <div id="sort" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <div class="psp-text-field">
+                            <ul class="psp-text-field__input" for="sort"></ul>
+                            <label for="sort"></label>
+                        </div>
+                    </div>
                 </div>
                 <div class="rrow" style='flex-grow:3;height:auto;flex:1 1 400px;max-width:none'>
-                    <div id="filters" name="Filter" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
-                        <label for="sort">Filter</label>
+                    <div id="filters"  ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                        <div class="psp-text-field">
+                            <ul class="psp-text-field__input" for='filters'></ul>
+                            <label for="filters"></label>
+                        </div>
                     </div>
                 </div>
             </div>
