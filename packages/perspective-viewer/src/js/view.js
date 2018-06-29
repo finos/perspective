@@ -549,6 +549,11 @@ function update() {
         aggregate: aggregates,
         sort: sort
     });
+    
+    let updater = this._plugin.update;
+    if (!updater) {
+        updater = this._plugin.create;
+    }
     this._view.on_update(() => {
         if (!this._debounced) {
             let view_count = document.getElementsByTagName('perspective-viewer').length;
@@ -557,11 +562,12 @@ function update() {
             this._debounced = setTimeout(() => {
                 this._debounced = undefined;
                 const timer = this._render_time();
-                if (this._task) {
+                if (this._task && (!this._plugin.update || this._render_count === 0)) {
                     this._task.cancel();
                 }
                 const task = this._task = new CancelTask();
-                this._plugin.create.call(this, this._datavis, this._view, task).then(() => {
+
+                updater.call(this, this._datavis, this._view, task).then(() => {
                     timer();
                     task.cancel();
                 }).catch(err => {

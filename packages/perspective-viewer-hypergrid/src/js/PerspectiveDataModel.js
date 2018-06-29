@@ -7,69 +7,58 @@
  *
  */
 
-'use strict';
-
-/*
- * NOTE
- * This data model depends on Perspective injecting the following methods upon view change (dataset redefinition):
- * * `isTree` — Is the grid view a tree?
- * * `getRowCount` — Total height of dataset
- * * `pspFetch` - Lazy loader called internally
- */
-
 const Range = require('./Range');
 
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
-    initialize: function() {
-        this.fetchOrdinal = 0;
-    },
 
-    // Is this column the 'tree' column
-    isTreeCol: function(x) {
+    isTreeCol: function (x) {
         return x === TREE_COLUMN_INDEX && this.isTree();
     },
 
-    // Return the value for a given cell based on (x,y) coordinates
-    // All our column names are column indexes (including tree column's), so no need to indirect through schema.
-    getValue: function(x, y) {
+    getValue: function (x, y) {
         var row = this.data[y];
         return row ? row[x] : null;
     },
 
-    // Called by Hypergrid with first two params only, creating a new ordinal;
-    // called by self with all four params on error for retry.
-    // Note that `reason` comes from catch() albeit not used herein.
-    fetchData: function(rectangles, callback, ordinal, reason) {
-        if (!ordinal) {
-            if (!rectangles.find(uncachedRow, this)) {
-                // no uncached rows so all rows available so do nothing
-                callback(false); // falsy means success
-                return;
-            }
+    getRowCount: function () {
+        return this._nrows || 0;
+    },
 
-            // this is a new fetch request (as opposed to a retry)
-            ordinal = ++this.fetchOrdinal;
+    setRowCount: function (count) {
+        this._nrows = count || 0;
+    },
+    
+    isTree: function () {
+        return this._isTree;
+    },
+
+    setIsTree: function (isTree) {
+        this._isTree = isTree;
+    },
+
+
+    fetchData: function (rectangles, resolve) {
+        if (!rectangles.find(uncachedRow, this)) {
+            resolve(false);
+            return;
         }
 
-        this.data.length = 0; // discard previously fetched rows (i.e., don't cache rows)
+        this.data.length = 0;
 
         const promises = rectangles.map(
             rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2))
         );
 
-        Promise.all(promises)
-            .then(value => {
-                if (ordinal === this.fetchOrdinal) { // still current?
-                    callback(false); // falsy means success (always, because we are currently retrying indefinitely)
-                }
-            })
-            .catch(this.fetchData.bind(this, rectangles, callback, ordinal)); // retry (with same ordinal)
+        Promise.all(promises).then(() => {
+            resolve(false);
+        }).catch(() => {
+            resolve(true);
+        }); 
     },
 
-    // Return the cell renderer
-    getCell: function(config, rendererName) {
+    getCell: function (config, rendererName) {
         var nextRow, depthDelta;
         if (config.isUserDataArea) {
             cellStyle.call(this, config, rendererName);
@@ -78,6 +67,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             depthDelta = nextRow ? config.value.rowPath.length - nextRow[TREE_COLUMN_INDEX].rowPath.length : -1;
             config.last = depthDelta !== 0;
             config.expanded = depthDelta < 0;
+            config._type = this.schema[-1].type[config.value.rowPath.length - 2];
         }
         return config.grid.cellRenderers.get(rendererName);
     },
@@ -93,7 +83,7 @@ function uncachedRow(rect) {
     }
 }
 
-function cellStyle(gridCellConfig, rendererName) {
+function cellStyle(gridCellConfig) {
     if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
         gridCellConfig.value = '-';
     } else {

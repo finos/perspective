@@ -7,8 +7,6 @@
  *
  */
 
-'use strict';
-
 /**
  * @this {Behavior}
  * @param payload
@@ -24,17 +22,18 @@ function setPSP(payload) {
     }
 
     payload.columnPaths.forEach(function(columnPath, columnIndex) {
-        if (payload.isTree && columnIndex === 0) {
-            return;
-        }
-
+      
         const col_name = columnPath.join('|'),
             aliases = payload.configuration.columnAliases,
             header = aliases && aliases[col_name] || col_name,
             name = columnIndex.toString(),
             type = payload.columnTypes[columnIndex];
 
-        new_schema.push({ name, header, type });
+        if (payload.isTree && columnIndex === 0) {
+            new_schema[-1] = { name, header, type };
+        } else {
+            new_schema.push({ name, header, type });
+        }
     });
 
     this.grid.properties.showTreeColumn = payload.isTree;
@@ -64,6 +63,12 @@ function createColumns() {
         setColumnPropsByType.call(this, column);
         restoreColumnWidth(this.stashedWidths, column.properties);
     }, this);
+
+    let treeColumn = this.getTreeColumn();
+    if (treeColumn) {
+        setColumnPropsByType.call(this, treeColumn);
+    }
+
     this.stashedWidths = undefined;
 
     this.setHeaders(); // grouped-header override that sets all header cell renderers and header row height

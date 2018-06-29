@@ -7,8 +7,6 @@
  *
  */
 
-'use strict';
-
 /**
  * @constructor
  * @returns

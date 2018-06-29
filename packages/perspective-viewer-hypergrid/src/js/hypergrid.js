@@ -18,14 +18,11 @@ const PerspectiveDataModel = require('./PerspectiveDataModel');
 const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
 const psp2hypergrid = require('./psp-to-hypergrid');
 
-// import {detectChrome} from "@jpmorganchase/perspective/src/js/utils.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
 const TEMPLATE = require('../html/hypergrid.html');
 
 import "../less/hypergrid.less";
-
-const TREE = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 const COLUMN_HEADER_FONT = '12px amplitude-regular, Helvetica, sans-serif';
 const GROUP_LABEL_FONT = '12px open sans, sans-serif'; // overrides COLUMN_HEADER_FONT for group labels
@@ -139,20 +136,13 @@ function null_formatter(formatter, null_value = '') {
 
 bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
-    set_data(data, schema, tschema, row_pivots) {
-        if (this._detached) {
-            this._detached = false;
-        }
-        const hg_data = psp2hypergrid(data, schema, tschema, row_pivots);
+    set_data(data, hidden, schema, tschema, row_pivots) {
+        const hg_data = psp2hypergrid(data, hidden, schema, tschema, row_pivots);
         if (this.grid) {
             this.grid.behavior.setPSP(hg_data);
         } else {
             this._hg_data = hg_data;
         }
-    }
-
-    detachedCallback() {
-        this._detached = true;
     }
 
     connectedCallback() {
@@ -167,7 +157,7 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             this.grid.installPlugins([
                 perspectivePlugin,
-              //  CachedRendererPlugin,
+                CachedRendererPlugin,
                 [groupedHeaderPlugin, {
                     paintBackground: null, // no group header label decoration
                     columnHeaderLines: false, // only draw vertical rule lines between group labels
@@ -182,12 +172,14 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             const style = window.getComputedStyle(this, null);
             const header = window.getComputedStyle(this.querySelector('th'), null);
+
             grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
-            grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
-            grid_properties['color'] = style.getPropertyValue('color');
+            grid_properties['treeHeaderBackgroundColor'] = grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
+            grid_properties['treeHeaderColor'] = grid_properties['color'] = style.getPropertyValue('color');
             grid_properties['columnHeaderBackgroundColor'] = header.getPropertyValue('background-color');
             grid_properties['columnHeaderSeparatorColor'] = header.getPropertyValue('border-color');
             grid_properties['columnHeaderColor'] = header.getPropertyValue('color');
+            
             this.grid.addProperties(grid_properties);
 
             // Add tree cell renderer
@@ -233,50 +225,56 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
                 delete this._hgdata;
             }
 
-        } else {
-            this._detached = false;
         }
     }
 
 });
 
-function filter_hidden(hidden, json) {
-    if (hidden.length > 0) {
-        const first = json[0];
-        const to_delete = [];
-        for (let key in first) {
-            const split_key = key.split(',');
-            if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
-                to_delete.push(key);
-            }
-        }
-        for (let row of json) {
-            for (let h of to_delete) {
-                delete row[h];
+const PRIVATE = Symbol('Hypergrid private');
+
+/**
+ * Compare two schemas for equality.
+ * 
+ * @param {Object} schema1 
+ * @param {Object} schema2 
+ */
+function comp_schema(schema1, schema2) {
+    if (schema1.length != schema2.length) {
+        return false;
+    }
+    for (let key of ["name", "header", "type"]) {
+        for (let idx = 0; idx < schema1.length; idx ++) {
+            if (schema1[idx][key] !== schema2[idx][key]) {
+                return false;
             }
         }
     }
-    return json;
+    return true;
 }
 
-const PRIVATE = Symbol('Hypergrid private');
+async function grid_update(div, view, task) {
+    const nrows = await view.num_rows();
 
-async function grid(div, view, task) {
-    const hidden = this._get_view_hidden();
+    if (task.cancelled) {
+        return;
+    }
 
-    this[PRIVATE] = this[PRIVATE] || {};
+    this.hypergrid.renderer.needsComputeCellsBounds = true;
+    this.hypergrid.canvas.dirty = true;
+    this.hypergrid.behavior.dataModel.data = [];
+    this.hypergrid.behavior.dataModel._nrows = nrows;
+    this.hypergrid.behavior.dataModel.fetchOrdinal = -1;
+    this.hypergrid._cached_range = undefined;
+    await this.hypergrid.canvas.paintNow();
+}
 
-    const [nrows, json, schema, tschema] = await Promise.all([
-        view.num_rows(),
-        view.to_json(Range.create(0, 100)),
-        view.schema(),
-        this._table.schema()
-    ]);
-
-    const rowPivots = JSON.parse(this.getAttribute('row-pivots')), isTree = !!rowPivots.length;
-
+/**
+ * Create a new <perspective-hypergrid> web component, and attach it to the DOM.
+ * 
+ * @param {HTMLElement} div Attachment point.
+ */
+async function getOrCreateHypergrid(div) {
     let perspectiveHypergridElement;
-
     if (!this.hypergrid) {
         perspectiveHypergridElement = this[PRIVATE].grid = document.createElement('perspective-hypergrid');
         Object.defineProperty(this, 'hypergrid', {
@@ -292,34 +290,53 @@ async function grid(div, view, task) {
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
     }
+    return perspectiveHypergridElement;
+}
+
+async function grid_create(div, view, task) {
+    this[PRIVATE] = this[PRIVATE] || {};
+
+    const hidden = this._get_view_hidden();
+    const colPivots = JSON.parse(this.getAttribute('column-pivots'));
+    const [nrows, json, schema, tschema] = await Promise.all([
+        view.num_rows(),
+        view.to_json(Range.create(0, colPivots.length + 1)),
+        view.schema(),
+        this._table.schema()
+    ]);
+
+    if (task.cancelled) {
+        return;
+    }
+
+    let perspectiveHypergridElement = await getOrCreateHypergrid.call(this, div);
+
+    if (task.cancelled) {
+        return;
+    }
 
     const dataModel = this.hypergrid.behavior.dataModel;
+    const rowPivots = JSON.parse(this.getAttribute('row-pivots'));
 
-    this.hypergrid._lazy_load = false;
-
-    dataModel.isTree = function() {
-        return isTree;
-    };
-
-    dataModel.getRowCount = function() {
-        return nrows;
-    };
-
-    dataModel.pspFetch = async function(range) {
+    dataModel.setRowCount(nrows);
+    dataModel.setIsTree(!!rowPivots.length);
+   
+    dataModel.pspFetch = async function (range) {
         let next_page = await view.to_json(range);
-        next_page = filter_hidden(hidden, next_page);
-        const rows = psp2hypergrid(next_page, schema, tschema, rowPivots).rows;
+        const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
         const data = this.data, base = range.start_row;
         rows.forEach((row, offset) => data[base + offset] = row);
     };
 
-    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots);
+    perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
+    await this.hypergrid.canvas.resize();
 }
 
 global.registerPlugin('hypergrid', {
     name: 'Grid',
-    create: grid,
+    create: grid_create,
     selectMode: 'toggle',
+    update: grid_update,
     deselectMode: 'pivots',
     resize: function() {
         if (this.hypergrid) {
