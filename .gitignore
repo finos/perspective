@@ -8,6 +8,15 @@ auto-save-list
 tramp
 .\#*
 
+# npm lock file
+package-lock.json
+
+# Intellij/WebStorm IDE
+/.idea
+
+# Visual Studio Code configuration
+/jsconfig.json
+
 # Org-mode
 .org-id-locations
 *_archive
@@ -91,16 +100,16 @@ ftpsync.settings
 Gemfile
 Gemfile.lock
 Vagrantfile
-packages/sigma
-packages/perspective/obj
-package-lock.json
-jsconfig.json
+/packages/sigma
+/packages/perspective/obj
+/packages/perspective/src/include/boost
+/packages/fin-hypergrid
 
-\.DS_Store
+.DS_Store
 
-website/translated_docs 
-website/build/ 
-website/yarn.lock 
-website/node_modules 
-website/i18n/* 
-!website/i18n/en.json 
+website/translated_docs
+website/build/
+website/yarn.lock
+website/node_modules
+website/i18n/*
+!website/i18n/en.json

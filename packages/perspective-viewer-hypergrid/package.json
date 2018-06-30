@@ -15,7 +15,8 @@
     "build": "npm run hypergrid",
     "build_test": "cp test/html/* build && webpack --config test/config/hypergrid.config.js",
     "test": "jest --silent --runInBand 2>&1",
-    "clean": "find build -mindepth 1 -delete"
+    "clean": "find build -mindepth 1 -delete",
+    "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"
   },
   "jest": {
     "roots": [
@@ -37,7 +38,10 @@
     "@jpmorganchase/perspective-viewer": "^0.1.15",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "fin-hypergrid": "2.0.2",
+    "datasaur-local": "github:fin-hypergrid/datasaur-local#3.0.0",
+    "fin-hypergrid": "github:fin-hypergrid/core#alpha",
+    "fin-hypergrid-grouped-header-plugin": "^1.1.2",
+    "rectangular": "1.0.1",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
