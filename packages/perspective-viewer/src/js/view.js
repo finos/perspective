@@ -550,10 +550,6 @@ function update() {
         sort: sort
     });
     
-    let updater = this._plugin.update;
-    if (!updater) {
-        updater = this._plugin.create;
-    }
     this._view.on_update(() => {
         if (!this._debounced) {
             let view_count = document.getElementsByTagName('perspective-viewer').length;
@@ -562,11 +558,14 @@ function update() {
             this._debounced = setTimeout(() => {
                 this._debounced = undefined;
                 const timer = this._render_time();
-                if (this._task && (!this._plugin.update || this._render_count === 0)) {
+                if (this._task && !this._task.initial) {
                     this._task.cancel();
-                }
+                } 
                 const task = this._task = new CancelTask();
-
+                let updater = this._plugin.update;
+                if (!updater) {
+                    updater = this._plugin.create;
+                }
                 updater.call(this, this._datavis, this._view, task).then(() => {
                     timer();
                     task.cancel();
@@ -585,6 +584,7 @@ function update() {
     const task = this._task = new CancelTask(() => {
         this._render_count--;
     });
+    task.initial = true;
 
     this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
         console.warn(err);
