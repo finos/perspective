@@ -606,7 +606,16 @@ function update() {
  *
  */
 
- class ViewPrivate extends HTMLElement {
+function _fill_numeric(cols, pref, bypass = false) {
+    for (let col of cols) {
+        let type = col.getAttribute('type');
+        if (bypass || ['float', 'integer'].indexOf(type) > -1) {
+            pref.push(col.getAttribute('name'));
+        }
+    }      
+}
+
+class ViewPrivate extends HTMLElement {
 
     _render_time() {
         const t = performance.now();
@@ -624,23 +633,28 @@ function update() {
 
     _set_column_defaults() {
         let cols = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
+        let current_cols = Array.prototype.slice.call(this.querySelectorAll("#active_columns perspective-row"));
         if (cols.length > 0) {
             if (this._plugin.initial) {
                 let pref = [];
                 let count = this._plugin.initial.count || 2;
-                if (this._plugin.initial.type === 'number') {
-                    for (let col of cols) {
-                        let type = col.getAttribute('type');
-                        if (['float', 'integer'].indexOf(type) > -1) {
-                            pref.push(col.getAttribute('name'));
-                        }
-                    }
+                if (current_cols.length === count) {
+                    pref = current_cols.map(x => x.getAttribute('name'));
+                } else if (current_cols.length < count) {
+                    pref = current_cols.map(x => x.getAttribute('name'));
+                    _fill_numeric(cols, pref);                          
                     if (pref.length < count) {
-                        for (let col of cols) {
-                            if (pref.indexOf(col.getAttribute('name')) === -1) {
-                                pref.push(col.getAttribute('name'));
-                            }
-                        }                            
+                        _fill_numeric(cols, pref, true);                            
+                    }
+                } else {
+                    if (this._plugin.initial.type === 'number') {
+                        _fill_numeric(current_cols, pref);
+                        if (pref.length < count) {
+                            _fill_numeric(cols, pref);                          
+                        }
+                        if (pref.length < count) {
+                            _fill_numeric(cols, pref, true);                            
+                        }
                     }
                 }
                 this.setAttribute('columns', JSON.stringify(pref.slice(0, count)));
