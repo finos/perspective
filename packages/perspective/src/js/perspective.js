@@ -528,6 +528,9 @@ view.prototype.to_json = async function(options) {
     let start_col = options.start_col || (viewport.left ? viewport.left : 0);
     let end_col = options.end_col || (viewport.width ? start_row + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
     let slice;
+    if (this.config.row_pivot[0] === 'psp_okey') {
+        end_row += this.config.column_pivot.length;
+    }
     if (this.sides() === 0) {
         slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
     } else if (this.sides() === 1) {

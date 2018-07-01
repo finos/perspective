@@ -7,29 +7,13 @@
  *
  */
 
-'use strict';
-
 const rectangular = require('rectangular');
-
-const Range = require('./Range');
-
-function getSubrects() {
-    let range = Range.estimate(this.grid);
-    range.end_row = Math.min(range.end_row, this.grid.behavior.dataModel.getRowCount());
-    if (!this.dataWindow) {
-        return []
-    }
-    var dw = this.dataWindow;
-    var rect = this.grid.newRectangle(dw.left, Math.min(dw.top, range.start_row), dw.width, Math.max(dw.height, range.end_row)); // convert from InclusiveRect
-    return [rect];
-}
 
 function CachedRendererPlugin(grid) {
 
     async function update_cache() {
         return await new Promise(resolve => {
-            const rects = getSubrects.call(grid.renderer)
-            grid.behavior.dataModel.fetchData(rects, val => resolve(!val));
+            grid.behavior.dataModel.fetchData(undefined, val => resolve(!val));
         });
     }
 

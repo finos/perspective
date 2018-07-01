@@ -117,6 +117,11 @@ export function default_config(aggregates, mode, js, col_pivots) {
             inverted: mode.indexOf('horizontal') > -1,
             animation: false,
             zoomType: mode === 'scatter' ? 'xy' : 'x',
+            resetZoomButton: {
+                position: {
+                    align: 'left',
+                }
+            }
         },
         navigation: {
             buttonOptions: {
