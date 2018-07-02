@@ -40,7 +40,7 @@
     "babel-runtime": "^6.26.0",
     "datasaur-local": "github:fin-hypergrid/datasaur-local#3.0.0",
     "fin-hypergrid": "github:fin-hypergrid/core#alpha",
-    "fin-hypergrid-grouped-header-plugin": "^1.1.2",
+    "fin-hypergrid-grouped-header-plugin": "github:fin-hypergrid/grouped-header-plugin#1.1.2",
     "rectangular": "1.0.1",
     "underscore": "^1.8.3"
   },

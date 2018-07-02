@@ -274,7 +274,7 @@ async function getOrCreateHypergrid(div) {
         perspectiveHypergridElement = this[PRIVATE].grid = document.createElement('perspective-hypergrid');
         Object.defineProperty(this, 'hypergrid', {
             configurable: true,
-            get: () => perspectiveHypergridElement.grid
+            get: () => (this[PRIVATE].grid ? this[PRIVATE].grid.grid : undefined)
         });
     } else {
         perspectiveHypergridElement = this[PRIVATE].grid;
@@ -344,6 +344,7 @@ global.registerPlugin('hypergrid', {
     delete: function() {
         if (this.hypergrid) {
             this.hypergrid.terminate();
+            delete this[PRIVATE]['grid'];
         }
     }
 });
