@@ -259,12 +259,7 @@ async function grid_update(div, view, task) {
         return;
     }
 
-    this.hypergrid.renderer.needsComputeCellsBounds = true;
-    this.hypergrid.canvas.dirty = true;
-    this.hypergrid.behavior.dataModel.data = [];
-    this.hypergrid.behavior.dataModel._nrows = nrows;
-    this.hypergrid.behavior.dataModel.fetchOrdinal = -1;
-    this.hypergrid._cached_range = undefined;
+    this.hypergrid.behavior.dataModel.setDirty(nrows);
     await this.hypergrid.canvas.paintNow();
 }
 
@@ -323,12 +318,15 @@ async function grid_create(div, view, task) {
    
     dataModel.pspFetch = async function (range) {
         let next_page = await view.to_json(range);
+        this.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
         const data = this.data, base = range.start_row;
         rows.forEach((row, offset) => data[base + offset] = row);
     };
 
+    this.hypergrid.setVScrollValue(0);
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
+    await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
 }
 

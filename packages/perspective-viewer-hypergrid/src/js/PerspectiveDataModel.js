@@ -11,6 +11,15 @@ const Range = require('./Range');
 
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
+function getSubrects() {
+    if (!this.dataWindow) {
+        return []
+    }
+    var dw = this.dataWindow;
+    var rect = this.grid.newRectangle(dw.left, dw.top, dw.width, dw.height); // convert from InclusiveRect
+    return [rect];
+}
+
 module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
 
     isTreeCol: function (x) {
@@ -38,22 +47,37 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         this._isTree = isTree;
     },
 
+    isCached: function (rects) {
+        return !rects || !rects.find(uncachedRow, this);
+    },
+
+    setDirty: function (nrows) {
+        this._dirty = true;
+        this.grid.renderer.needsComputeCellsBounds = true;
+        this.grid.canvas.dirty = true;
+        this._nrows = nrows;
+    },
 
     fetchData: function (rectangles, resolve) {
-        if (!rectangles.find(uncachedRow, this)) {
+        if (!rectangles) {
+            rectangles = getSubrects.call(this.grid.renderer);
+        }
+
+        if (!this._dirty && !rectangles.find(uncachedRow, this)) {
             resolve(false);
             return;
         }
 
-        this.data.length = 0;
+        this._dirty = false;
 
         const promises = rectangles.map(
             rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2))
         );
 
         Promise.all(promises).then(() => {
-            resolve(false);
-        }).catch(() => {
+            let rects = getSubrects.call(this.grid.renderer);
+            resolve(!!rects.find(uncachedRow, this));
+        }).catch(e => {
             resolve(true);
         }); 
     },
@@ -76,11 +100,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
 });
 
 function uncachedRow(rect) {
-    for (var r = rect.origin.y, R = Math.min(rect.corner.y + 2, this.getRowCount()); r < R; ++r) {
-        if (!this.data[r]) {
-            return true;
-        }
-    }
+    return !(this.data[rect.origin.y] && this.data[Math.min(rect.corner.y, this.getRowCount() - 1)]);
 }
 
 function cellStyle(gridCellConfig) {
