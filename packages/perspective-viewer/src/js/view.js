@@ -609,8 +609,9 @@ function update() {
 function _fill_numeric(cols, pref, bypass = false) {
     for (let col of cols) {
         let type = col.getAttribute('type');
-        if (bypass || ['float', 'integer'].indexOf(type) > -1) {
-            pref.push(col.getAttribute('name'));
+        let name = col.getAttribute('name');
+        if (bypass || ['float', 'integer'].indexOf(type) > -1 && pref.indexOf(name) === -1) {
+            pref.push(name);
         }
     }      
 }

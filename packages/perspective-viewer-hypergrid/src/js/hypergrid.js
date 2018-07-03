@@ -168,6 +168,12 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
                 }]
             ]);
 
+            // Broken in fin-hypergrid-grouped-header 0.1.2
+            let _old_paint = this.grid.cellRenderers.items.GroupedHeader.paint;
+            this.grid.cellRenderers.items.GroupedHeader.paint = function (gc, config) {
+                this.visibleColumns = config.grid.renderer.visibleColumns;
+                return _old_paint.call(this, gc, config);
+            }
 
             const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
             const style = window.getComputedStyle(this, null);
@@ -285,6 +291,8 @@ async function getOrCreateHypergrid(div) {
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
     }
+    perspectiveHypergridElement.grid.setVScrollValue(0);
+    await perspectiveHypergridElement.grid.canvas.paintNow();
     return perspectiveHypergridElement;
 }
 
@@ -315,7 +323,8 @@ async function grid_create(div, view, task) {
 
     dataModel.setRowCount(nrows);
     dataModel.setIsTree(!!rowPivots.length);
-   
+    dataModel.setDirty(nrows);
+
     dataModel.pspFetch = async function (range) {
         let next_page = await view.to_json(range);
         this.data = [];
@@ -324,7 +333,6 @@ async function grid_create(div, view, task) {
         rows.forEach((row, offset) => data[base + offset] = row);
     };
 
-    this.hypergrid.setVScrollValue(0);
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
     await this.hypergrid.canvas.resize();
     await this.hypergrid.canvas.resize();
