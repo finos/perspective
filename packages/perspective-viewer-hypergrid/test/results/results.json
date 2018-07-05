@@ -1,14 +1,14 @@
 {
     "superstore.html/shows a grid without any settings applied.": "5cd4ec1fe4cf92399a419c9921ed6dd7",
-    "superstore.html/pivots by a row.": "b32eda311b22ade1df2fe5b0cb84ebaf",
-    "superstore.html/pivots by two rows.": "37b0bbeebff6584cfcd27daf3e1b3aa6",
-    "superstore.html/pivots by a row and a column.": "dd176caef5d3550f7cc2534717b832f1",
-    "superstore.html/pivots by two rows and two columns.": "5fc25c97600617880b389aa60d73042c",
-    "superstore.html/sorts by a numeric column.": "b3f2eefdcc1bcdc46c623009cfb7395f",
-    "superstore.html/sorts by an alpha column.": "4a5f60fdb7167b95eaccc4742cb6c0a2",
-    "superstore.html/displays visible columns.": "e1c955dc01d20313ac1985332e8162ee",
-    "superstore.html/resets viewable area when the logical size expands.": "3c9ca89a9441f20a9312484542ea1efd",
+    "superstore.html/pivots by a row.": "c759e8870df38fc8a924e078f3bbc607",
+    "superstore.html/pivots by two rows.": "4f5b4db8715d72208cac5798c76b2b4d",
+    "superstore.html/pivots by a row and a column.": "50b33ef86fceebe0177e7728c945ccd4",
+    "superstore.html/pivots by two rows and two columns.": "e892120e7c5f329df98262773b681d62",
+    "superstore.html/sorts by a numeric column.": "c95630fc1ecccffa24dc3974453e340d",
+    "superstore.html/sorts by an alpha column.": "d07f2fd8f0ab79435f7f983fe0e96c25",
+    "superstore.html/displays visible columns.": "9875d344019f5ca9560c8fe7ce5214ed",
+    "superstore.html/resets viewable area when the logical size expands.": "9d97bf273130eaec12dc17da0c95f7ef",
     "superstore.html/resets viewable area when the physical size expands.": "5cd4ec1fe4cf92399a419c9921ed6dd7",
-    "superstore.html/sorts by a hidden column.": "865d39bcdc95086c0ee82aa16d8f187d",
-    "superstore.html/filters by a numeric column.": "292921eeb3253f3e4ace1a35b33bea8c"
+    "superstore.html/sorts by a hidden column.": "ea00be250ccb802714cbbf272b9cbea9",
+    "superstore.html/filters by a numeric column.": "ecea2da59789a7ff76873dd219d78e1c"
 }
