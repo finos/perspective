@@ -71,7 +71,7 @@ module.exports = function psp2hypergrid(data, hidden, schema, tschema, row_pivot
             dataRow[TREE_COLUMN_INDEX] = {
                 rollup: name,
                 rowPath: ['ROOT'].concat(row.__ROW_PATH__),
-                isLeaf: row.__ROW_PATH__.length >= (data[idx + 1] ? data[idx + 1].__ROW_PATH__.length : 0)
+                isLeaf: row.__ROW_PATH__.length >= row_pivots.length
             };
         }
 

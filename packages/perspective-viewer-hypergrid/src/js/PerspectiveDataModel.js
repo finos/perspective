@@ -58,6 +58,41 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         this._nrows = nrows;
     },
 
+    // Called when clickong on a row group expand
+    toggleRow: async function (row, col) {
+
+        if (this.isTreeCol(col)) {
+            let isShift = false;
+            if (window.event) {
+                isShift = !!window.event.detail.primitiveEvent.shiftKey; // typecast to boolean
+            }
+            let is_expanded = await this._view.get_row_expanded(row);
+            if (isShift) {
+                if (is_expanded) {
+                    this._view.collapse_to_depth(this.data[row][col].rowPath.length - 2);
+                } else {
+                    this._view.expand_to_depth(this.data[row][col].rowPath.length - 1);
+                }
+            } else {
+                if (is_expanded) {
+                    this._view.close(row);
+                } else {
+                    this._view.open(row);
+                }
+            }
+            let nrows = await this._view.num_rows();
+            this._nrows = nrows;
+            if (nrows < this.grid.getVScrollValue()) {
+                let start_row = Math.max(0, nrows - 10);
+                let height = this.grid.renderer.dataWindow.height;
+                this.grid.setVScrollValue(start_row);
+                this.grid.renderer.dataWindow = this.grid.newRectangle(this.grid.renderer.dataWindow.left, start_row, this.grid.renderer.dataWindow.width, Math.min(height, nrows - start_row))
+            } 
+            this.setDirty(nrows);
+            await this.grid.canvas.resize();
+        }
+    },
+
     fetchData: function (rectangles, resolve) {
         if (!rectangles) {
             rectangles = getSubrects.call(this.grid.renderer);
@@ -88,7 +123,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             cellStyle.call(this, config, rendererName);
         } else if (config.dataCell.x === TREE_COLUMN_INDEX) {
             nextRow = this.getRow(config.dataCell.y + 1);
-            depthDelta = nextRow ? config.value.rowPath.length - nextRow[TREE_COLUMN_INDEX].rowPath.length : -1;
+            depthDelta = nextRow ? config.value.rowPath.length - nextRow[TREE_COLUMN_INDEX].rowPath.length : 1;
             config.last = depthDelta !== 0;
             config.expanded = depthDelta < 0;
             config._type = this.schema[-1].type[config.value.rowPath.length - 2];

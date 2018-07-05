@@ -324,6 +324,7 @@ async function grid_create(div, view, task) {
     dataModel.setRowCount(nrows);
     dataModel.setIsTree(!!rowPivots.length);
     dataModel.setDirty(nrows);
+    dataModel._view = view;
 
     dataModel.pspFetch = async function (range) {
         let next_page = await view.to_json(range);
