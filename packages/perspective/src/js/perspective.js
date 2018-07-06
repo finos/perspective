@@ -634,9 +634,9 @@ view.prototype.get_row_expanded = async function (idx) {
  * @returns {Promise<void>} 
  */
 view.prototype.open = async function (idx) {
-    if (this.nsides === 2) {
+    if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
         return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
-    } else {
+    } else if (this.nsides < 2) {
         return this.ctx.open(idx);
     }
 }

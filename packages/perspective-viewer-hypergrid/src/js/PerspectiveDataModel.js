@@ -58,7 +58,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
         this._nrows = nrows;
     },
 
-    // Called when clickong on a row group expand
+    // Called when clicking on a row group expand
     toggleRow: async function (row, col) {
 
         if (this.isTreeCol(col)) {
@@ -69,7 +69,11 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             let is_expanded = await this._view.get_row_expanded(row);
             if (isShift) {
                 if (is_expanded) {
-                    this._view.collapse_to_depth(this.data[row][col].rowPath.length - 2);
+                    if (this.data[row][col].rowPath.length === 1) {
+                        this._view.close(row);
+                    } else {
+                        this._view.collapse_to_depth(this.data[row][col].rowPath.length - 2);
+                    }
                 } else {
                     this._view.expand_to_depth(this.data[row][col].rowPath.length - 1);
                 }
