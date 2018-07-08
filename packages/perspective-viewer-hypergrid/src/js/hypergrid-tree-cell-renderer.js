@@ -81,6 +81,10 @@ export function treeLineRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
+    if (config.value === null) {
+        return;
+    }
+
     var value = config.value.rollup;
     var leaf = config.value.isLeaf;
     var depth = config.value.rowPath.length-1;
