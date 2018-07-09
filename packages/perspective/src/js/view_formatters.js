@@ -1,30 +1,27 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+import papaparse from "papaparse";
+
 const jsonFormatter = {
     initDataValue: () => [],
     initRowValue: () => ({}),
-    initColumnValue: (row, colName) => row[colName] = {},
-    setColumnValue: (row, colName, value) => row[colName] = [value],
-    addColumnValue: (row, colName, value) => row[colName].unshift(value),
-    addRow: (data, row) => data.push(row)
-    formatData: (data) => data
+    initColumnValue: (row, colName) => row[colName] = [],
+    setColumnValue: (data, row, colName, value) => row[colName] = value,
+    addColumnValue: (data, row, colName, value) => row[colName].unshift(value),
+    addRow: (data, row) => data.push(row),
+    formatData: data => data
 };
 
-const csvFormatter = {
-    initDataValue: () => [''],
-    initRowValue: () => ({}),
-    initColumnValue: (row, colName) => void,
-    setColumnValue: (data, row, colName, value) => {
-        row.push(value);
-        //append header
-        data[0] = data[0] + "," + value;
-    },
-    addColumnValue: (data, row, colName, value) => {
-        row.unshift(value);
-        //prepend header
-        data[0] = value + "," + data[0];
-    },
-    addRow: (data, row) => data.push(row.toString()),
-    formatData: (data) => data.join('\r\n')
-};
+const csvFormatter = Object.assign({}, jsonFormatter, {
+    formatData: (data, config) => papaparse.unparse(data, config)
+});
 
 export default {
     jsonFormatter,

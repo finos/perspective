@@ -12,7 +12,7 @@ import {Table} from "@apache-arrow/es5-esm/table";
 import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
 import {Precision} from "@apache-arrow/es5-esm/type";
 import {is_valid_date, DateParser} from "./date_parser.js";
-import {formatters} from "./view_formatters";
+import formatters from "./view_formatters";
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
 
@@ -497,7 +497,7 @@ view.prototype.schema = async function() {
     return new_schema;
 }
 
-to_format = async function(options, formatter) {
+const to_format = async function (options, formatter) {
     options = options || {};
     let viewport = this.config.viewport ? this.config.viewport : {};
     let start_row = options.start_row || (viewport.top ? viewport.top : 0);
@@ -516,7 +516,7 @@ to_format = async function(options, formatter) {
         slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
     }
 
-    let data = formatter.initDataValue;
+    let data = formatter.initDataValue();
 
     let col_names = [[]].concat(this._column_names());
     let row, prev_row;
@@ -560,7 +560,7 @@ to_format = async function(options, formatter) {
         data = data.slice(this.config.column_pivot.length);
     }
     
-    return formatter.formatData(data)
+    return formatter.formatData(data, options.config)
 }
 /**
  * Serializes this view to JSON data in a standard format.
@@ -586,7 +586,7 @@ to_format = async function(options, formatter) {
  * their comma-separated column paths.
  */
 view.prototype.to_json = async function(options) {
-    return to_format(options, formatters.jsonFormatter);
+    return to_format.call(this, options, formatters.jsonFormatter);
 }
 
 /**
@@ -603,6 +603,8 @@ view.prototype.to_json = async function(options) {
  * to serialize.
  * @param {number} options.end_col The ending column index from which
  * to serialize.
+ * @param {Object} options.config A config object for the Papaparse {@link https://www.papaparse.com/docs#json-to-csv}
+ * config object.
  *
  * @returns {Promise<string>} A Promise resolving to a string in CSV format
  * representing the rows of this {@link view}.  If this {@link view} had a
@@ -612,8 +614,8 @@ view.prototype.to_json = async function(options) {
  * parameter supplied, the keys of this object will be comma-prepended with
  * their comma-separated column paths.
  */
-view.prototype.to_csv = async function(options) {
-    return to_format(options, formatters.csvFormatter);
+view.prototype.to_csv = async function (options) {
+    return to_format.call(this, options, formatters.csvFormatter);
 }
 
 /**
@@ -625,7 +627,7 @@ view.prototype.to_csv = async function(options) {
  *
  * @returns {Promise<number>} The number of aggregated rows.
  */
-view.prototype.num_rows = async function() {
+view.prototype.num_rows = async function () {
     return this.ctx.get_row_count();
 }
 
