@@ -40,8 +40,6 @@ function setPSP(payload) {
 
     console.log('Setting up initial schema and data load into HyperGrid');
 
-    this.stashedWidths = stashColumnWidths.call(this);
-
     // Following call to setData signals the grid to call createColumns and dispatch the
     // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
@@ -61,7 +59,6 @@ function createColumns() {
 
     this.getActiveColumns().forEach(function(column) {
         setColumnPropsByType.call(this, column);
-        restoreColumnWidth(this.stashedWidths, column.properties);
     }, this);
 
     let treeColumn = this.getTreeColumn();
@@ -102,29 +99,6 @@ function setColumnPropsByType(column) {
             }
     }
 }
-
-/**
- * @this {Behavior}
- */
-function stashColumnWidths() {
-    const widths = {};
-    this.getActiveColumns().forEach(function(column) {
-        let header = column.properties.header;
-        let name = header.split('|');
-        name = name[name.length - 1];
-        widths[name in widths ? header : name] = column.getWidth();;
-    });
-    return widths;
-}
-
-function restoreColumnWidth(widths, props) {
-    let header = props.header;
-    let name = header.split('|');
-    name = name[name.length - 1];
-    props.width = widths[header in widths ? header : name] || 50;
-    props.columnAutosizing = true;
-}
-
 
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {

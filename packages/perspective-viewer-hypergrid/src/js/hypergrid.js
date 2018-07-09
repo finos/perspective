@@ -12,7 +12,6 @@ const Base = require('fin-hypergrid/src/Base');
 const groupedHeaderPlugin = require('fin-hypergrid-grouped-header-plugin');
 
 const Range = require('./Range');
-const CachedRendererPlugin = require('./CachedRendererPlugin');
 const perspectivePlugin = require('./perspective-plugin');
 const PerspectiveDataModel = require('./PerspectiveDataModel');
 const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
@@ -157,7 +156,6 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
             this.grid.installPlugins([
                 perspectivePlugin,
-                CachedRendererPlugin,
                 [groupedHeaderPlugin, {
                     paintBackground: null, // no group header label decoration
                     columnHeaderLines: false, // only draw vertical rule lines between group labels
@@ -266,7 +264,7 @@ async function grid_update(div, view, task) {
     }
 
     this.hypergrid.behavior.dataModel.setDirty(nrows);
-    await this.hypergrid.canvas.paintNow();
+    this.hypergrid.canvas.paintNow();
 }
 
 /**
@@ -291,8 +289,6 @@ async function getOrCreateHypergrid(div) {
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
     }
-    perspectiveHypergridElement.grid.setVScrollValue(0);
-    await perspectiveHypergridElement.grid.canvas.paintNow();
     return perspectiveHypergridElement;
 }
 
@@ -324,18 +320,27 @@ async function grid_create(div, view, task) {
     dataModel.setRowCount(nrows);
     dataModel.setIsTree(!!rowPivots.length);
     dataModel.setDirty(nrows);
+    dataModel._view = view;
 
     dataModel.pspFetch = async function (range) {
         let next_page = await view.to_json(range);
         this.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
-        const data = this.data, base = range.start_row;
+        const data = this.data
+        const base = range.start_row;
         rows.forEach((row, offset) => data[base + offset] = row);
     };
 
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
-    await this.hypergrid.canvas.resize();
-    await this.hypergrid.canvas.resize();
+    this.hypergrid.canvas.paintNow();
+    let running = true;
+    while (running) {
+        running = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
+        if (running) {
+            await new Promise(resolve => setTimeout(resolve, 10));
+        }
+    }
+    this.hypergrid.canvas.resize();
 }
 
 global.registerPlugin('hypergrid', {
@@ -344,12 +349,12 @@ global.registerPlugin('hypergrid', {
     selectMode: 'toggle',
     update: grid_update,
     deselectMode: 'pivots',
-    resize: function() {
+    resize: function () {
         if (this.hypergrid) {
             this.hypergrid.canvas.resize();
         }
     },
-    delete: function() {
+    delete: function () {
         if (this.hypergrid) {
             this.hypergrid.terminate();
             delete this[PRIVATE]['grid'];

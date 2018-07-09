@@ -616,6 +616,79 @@ view.prototype.num_columns = async function() {
 }
 
 /**
+ * Whether this row at index `idx` is in an expanded or collapsed state.
+ * 
+ * @async
+ *
+ * @returns {Promise<bool>} Whether this row is expanded.
+ */
+view.prototype.get_row_expanded = async function (idx) {
+    return this.ctx.unity_get_row_expanded(idx);
+}
+
+/**
+ * Opens the row at index `idx`.
+ * 
+ * @async
+ *
+ * @returns {Promise<void>} 
+ */
+view.prototype.open = async function (idx) {
+    if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
+        return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
+    } else if (this.nsides < 2) {
+        return this.ctx.open(idx);
+    }
+}
+
+/**
+ * Closes the row at index `idx`.
+ * 
+ * @async
+ *
+ * @returns {Promise<void>} 
+ */
+view.prototype.close = async function (idx) {
+    if (this.nsides === 2) {
+        return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
+    } else {
+        return this.ctx.close(idx);
+    }
+}
+
+/**
+ * Expand the tree down to `depth`.
+ *
+ */
+view.prototype.expand_to_depth = async function (depth) {
+    if (this.config.row_pivot.length >= depth) {
+        if (this.nsides === 2) {
+            return this.ctx.expand_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
+        } else {
+            return this.ctx.expand_to_depth(depth);
+        }
+    } else {
+        console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
+    }
+}
+
+/**
+ * Collapse the tree down to `depth`.
+ *
+ */
+view.prototype.collapse_to_depth = async function(depth) {
+    if (this.config.row_pivot.length >= depth) {
+        if (this.nsides === 2) {
+            return this.ctx.collapse_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
+        } else {
+            return this.ctx.collapse_to_depth(depth);
+        }
+    } else {
+        console.warn(`Cannot collapse past ${this.config.row_pivot.length}`);
+    }
+}
+
+/**
  * Register a callback with this {@link view}.  Whenever the {@link view}'s
  * underlying table emits an update, this callback will be invoked with the
  * aggregated row deltas.
