@@ -516,7 +516,7 @@ to_format = async function(options, formatter) {
         slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
     }
 
-    let data;
+    let data = formatter.initDataValue;
 
     let col_names = [[]].concat(this._column_names());
     let row, prev_row;
@@ -533,7 +533,7 @@ to_format = async function(options, formatter) {
         }
         if (this.sides() === 0) {
             let col_name = col_names[start_col + cidx + 1];
-            formatter.setColumnValue(row, col_name, slice[idx])
+            formatter.setColumnValue(data, row, col_name, slice[idx])
         } else {
             if (cidx === 0) {
                 if (this.config.row_pivot[0] !== 'psp_okey') {
@@ -542,13 +542,13 @@ to_format = async function(options, formatter) {
                     formatter.initColumnValue(row, col_name)
                     for (let i = 0; i < row_path.size(); i++) {
                         const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                        formatter.addColumnValue(row, col_name, value);
+                        formatter.addColumnValue(data, row, col_name, value);
                     }
                     row_path.delete();
                 }
             } else {
                 let col_name = col_names[start_col + cidx];
-                formatter.setColumnValue(row, col_name, slice[idx])
+                formatter.setColumnValue(data, row, col_name, slice[idx])
             }
         }
     }
