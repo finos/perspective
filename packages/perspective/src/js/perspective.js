@@ -542,7 +542,7 @@ to_format = async function(options, formatter) {
                     formatter.initColumnValue(row, col_name)
                     for (let i = 0; i < row_path.size(); i++) {
                         const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                        formatter.addColumnValue(row, value, col_name);
+                        formatter.addColumnValue(row, col_name, value);
                     }
                     row_path.delete();
                 }
