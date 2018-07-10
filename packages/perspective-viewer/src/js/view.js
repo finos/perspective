@@ -13,7 +13,7 @@ import "awesomplete";
 import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
-import {bindTemplate, json_attribute, array_attribute} from "./utils.js";
+import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
 
 import template from "../html/view.html";
 
@@ -1297,6 +1297,37 @@ class View extends ViewPrivate {
         this.setAttribute('view', Object.keys(RENDERERS)[0]);
         this.dispatchEvent(new Event('perspective-config-update'));
     }
+
+    /**
+     * Copies this element's view data (as a CSV) to the clipboard.  This method
+     * must be called from an event handler, subject to the browser's 
+     * restrictions on clipboard access.  See 
+     * {@link https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard}.
+     * 
+     */
+    handleClipboardCopy(options) {
+        let data
+        if (!this._view) {
+            console.warn("No view to copy - skipping");
+            return;
+        }
+        this._view.to_csv(options).then(csv => {
+            data = csv;
+        }).catch(err => {
+            console.error(err);
+            data = "";
+        });
+        let count = 0, f = () => {
+            if (typeof data !== "undefined") {
+                copy_to_clipboard(data);
+            } else if (count < 50) {
+                count++;
+                setTimeout(f, 50);
+            }
+        }
+        f();
+    }
+    
 }
 
 /**
