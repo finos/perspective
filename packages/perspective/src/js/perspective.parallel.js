@@ -99,6 +99,8 @@ function view(table_name, worker, config) {
 
 view.prototype.to_json = async_queue('to_json');
 
+view.prototype.to_csv = async_queue('to_csv');
+
 view.prototype.schema = async_queue('schema');
 
 view.prototype.num_columns = async_queue('num_columns');
