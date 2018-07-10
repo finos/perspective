@@ -71,7 +71,7 @@
             <form class="my-form">
               <p>Upload a CSV file by dragging from your desktop and dropping onto the dashed region.</p>
               <p>(Data is processed in browser, and never sent to any server).</p>
-              <input type="file" id="fileElem" multiple accept="text/csv" onchange="handleFiles(this.files)">
+              <input type="file" id="fileElem" multiple accept="text/csv" >
               <label class="button" for="fileElem">Select a file</label>
             </form>
         </div>
@@ -80,6 +80,7 @@
 
             window.addEventListener('WebComponentsReady', function () {
                 var dropArea = document.getElementById('drop-area')
+                var input = document.getElementById('fileElem');
 
                 dropArea.addEventListener('dragenter', () => {}, false);
                 dropArea.addEventListener('dragleave', () => {}, false);
@@ -97,12 +98,12 @@
                     e.stopPropagation();
                 }
 
-                ;['dragenter', 'dragover'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, highlight, false)
+                ;['dragenter', 'dragover'].forEach(function (eventName) {
+                    dropArea.addEventListener(eventName, highlight, false);
                 })
 
-                ;['dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, unhighlight, false)
+                ;['dragleave', 'drop'].forEach(function (eventName) {
+                    dropArea.addEventListener(eventName, unhighlight, false);
                 })
 
                 function highlight(e) {
@@ -114,6 +115,10 @@
                 }
 
                 dropArea.addEventListener('drop', handleDrop, false)
+
+                input.addEventListener('change', function () {
+                    handleFiles(this.files);
+                });
 
                 function handleDrop(e) {
                     let dt = e.dataTransfer
