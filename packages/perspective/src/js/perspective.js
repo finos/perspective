@@ -12,8 +12,9 @@ import {Table} from "@apache-arrow/es5-esm/table";
 import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
 import {Precision} from "@apache-arrow/es5-esm/type";
 import {is_valid_date, DateParser} from "./date_parser.js";
-
+import formatters from "./view_formatters";
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
+
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -222,6 +223,8 @@ function parse_data(data, names, types) {
                 types.push(__MODULE__.t_dtype.DTYPE_BOOL);
             } else if (data[name] === "date") {
                 types.push(__MODULE__.t_dtype.DTYPE_TIME);
+            } else {
+                throw `Unknown type ${data[name]}`;
             }
             cdata.push([]);
         }
@@ -494,6 +497,71 @@ view.prototype.schema = async function() {
     return new_schema;
 }
 
+const to_format = async function (options, formatter) {
+    options = options || {};
+    let viewport = this.config.viewport ? this.config.viewport : {};
+    let start_row = options.start_row || (viewport.top ? viewport.top : 0);
+    let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
+    let start_col = options.start_col || (viewport.left ? viewport.left : 0);
+    let end_col = options.end_col || (viewport.width ? start_row + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
+    let slice;
+    if (this.config.row_pivot[0] === 'psp_okey') {
+        end_row += this.config.column_pivot.length;
+    }
+    if (this.sides() === 0) {
+        slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
+    } else if (this.sides() === 1) {
+        slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
+    } else {
+        slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
+    }
+
+    let data = formatter.initDataValue();
+
+    let col_names = [[]].concat(this._column_names());
+    let row, prev_row;
+    let depth = [];
+    let ridx = -1;
+    for (let idx = 0; idx < slice.length; idx++) {
+        let cidx = idx % (end_col - start_col);
+        if (cidx === 0) {
+            if (row) {
+                formatter.addRow(data, row);
+            }
+            row = formatter.initRowValue();
+            ridx ++;
+        }
+        if (this.sides() === 0) {
+            let col_name = col_names[start_col + cidx + 1];
+            formatter.setColumnValue(data, row, col_name, slice[idx])
+        } else {
+            if (cidx === 0) {
+                if (this.config.row_pivot[0] !== 'psp_okey') {
+                    let col_name = "__ROW_PATH__";
+                    let row_path = this.ctx.unity_get_row_path(start_row + ridx);
+                    formatter.initColumnValue(row, col_name)
+                    for (let i = 0; i < row_path.size(); i++) {
+                        const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                        formatter.addColumnValue(data, row, col_name, value);
+                    }
+                    row_path.delete();
+                }
+            } else {
+                let col_name = col_names[start_col + cidx];
+                formatter.setColumnValue(data, row, col_name, slice[idx])
+            }
+        }
+    }
+
+    if (row) {
+        formatter.addRow(data, row);
+    }
+    if (this.config.row_pivot[0] === 'psp_okey') {
+        data = data.slice(this.config.column_pivot.length);
+    }
+    
+    return formatter.formatData(data, options.config)
+}
 /**
  * Serializes this view to JSON data in a standard format.
  *
@@ -518,70 +586,36 @@ view.prototype.schema = async function() {
  * their comma-separated column paths.
  */
 view.prototype.to_json = async function(options) {
+    return to_format.call(this, options, formatters.jsonFormatter);
+}
 
-    options = options || {};
-    let viewport = this.config.viewport ? this.config.viewport : {};
-    let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-    let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
-    let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-    let end_col = options.end_col || (viewport.width ? start_row + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
-    let slice;
-    if (this.sides() === 0) {
-        slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
-    } else if (this.sides() === 1) {
-        slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
-    } else {
-        slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
-    }
-
-    let data;
-
-    if (options.format && options.format === "table") {
-        data = {};
-    } else {
-        data = [];
-    }
-
-    let col_names = [[]].concat(this._column_names());
-    let row, prev_row;
-    let depth = [];
-    let ridx = -1;
-    for (let idx = 0; idx < slice.length; idx++) {
-        let cidx = idx % (end_col - start_col);
-        if (cidx === 0) {
-            if (row) {
-                data.push(row);
-            }
-            row = {};
-            ridx ++;
-        }
-        if (this.sides() === 0) {
-            let col_name = col_names[start_col + cidx + 1];
-            row[col_name] = slice[idx];
-        } else {
-            if (cidx === 0) {
-                if (this.config.row_pivot[0] !== 'psp_okey') {
-                    let col_name = "__ROW_PATH__";
-                    let row_path = this.ctx.unity_get_row_path(start_row + ridx);
-                    row[col_name] = [];
-                    for (let i = 0; i < row_path.size(); i++) {
-                        row[col_name].unshift(__MODULE__.scalar_vec_to_val(row_path, i));
-                    }
-                    row_path.delete();
-                }
-            } else {
-                let col_name = col_names[start_col + cidx];
-                row[col_name] = slice[idx];
-            }
-        }
-    }
-
-    if (row) data.push(row);
-    if (this.config.row_pivot[0] === 'psp_okey') {
-        return data.slice(this.config.column_pivot.length);
-    } else {
-        return data;
-    }
+/**
+ * Serializes this view to CSV data in a standard format.
+ *
+ * @async
+ *
+ * @param {Object} [options] An optional configuration object.
+ * @param {number} options.start_row The starting row index from which
+ * to serialize.
+ * @param {number} options.end_row The ending row index from which
+ * to serialize.
+ * @param {number} options.start_col The starting column index from which
+ * to serialize.
+ * @param {number} options.end_col The ending column index from which
+ * to serialize.
+ * @param {Object} options.config A config object for the Papaparse {@link https://www.papaparse.com/docs#json-to-csv}
+ * config object.
+ *
+ * @returns {Promise<string>} A Promise resolving to a string in CSV format
+ * representing the rows of this {@link view}.  If this {@link view} had a
+ * "row_pivots" config parameter supplied when constructed, each row 
+ * will have prepended those values specified by this row's
+ * aggregated path.  If this {@link view} had a "column_pivots" config
+ * parameter supplied, the keys of this object will be comma-prepended with
+ * their comma-separated column paths.
+ */
+view.prototype.to_csv = async function (options) {
+    return to_format.call(this, options, formatters.csvFormatter);
 }
 
 /**
@@ -593,7 +627,7 @@ view.prototype.to_json = async function(options) {
  *
  * @returns {Promise<number>} The number of aggregated rows.
  */
-view.prototype.num_rows = async function() {
+view.prototype.num_rows = async function () {
     return this.ctx.get_row_count();
 }
 
@@ -608,6 +642,79 @@ view.prototype.num_rows = async function() {
  */
 view.prototype.num_columns = async function() {
     return this.ctx.unity_get_column_count();
+}
+
+/**
+ * Whether this row at index `idx` is in an expanded or collapsed state.
+ * 
+ * @async
+ *
+ * @returns {Promise<bool>} Whether this row is expanded.
+ */
+view.prototype.get_row_expanded = async function (idx) {
+    return this.ctx.unity_get_row_expanded(idx);
+}
+
+/**
+ * Opens the row at index `idx`.
+ * 
+ * @async
+ *
+ * @returns {Promise<void>} 
+ */
+view.prototype.open = async function (idx) {
+    if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
+        return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
+    } else if (this.nsides < 2) {
+        return this.ctx.open(idx);
+    }
+}
+
+/**
+ * Closes the row at index `idx`.
+ * 
+ * @async
+ *
+ * @returns {Promise<void>} 
+ */
+view.prototype.close = async function (idx) {
+    if (this.nsides === 2) {
+        return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
+    } else {
+        return this.ctx.close(idx);
+    }
+}
+
+/**
+ * Expand the tree down to `depth`.
+ *
+ */
+view.prototype.expand_to_depth = async function (depth) {
+    if (this.config.row_pivot.length >= depth) {
+        if (this.nsides === 2) {
+            return this.ctx.expand_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
+        } else {
+            return this.ctx.expand_to_depth(depth);
+        }
+    } else {
+        console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
+    }
+}
+
+/**
+ * Collapse the tree down to `depth`.
+ *
+ */
+view.prototype.collapse_to_depth = async function(depth) {
+    if (this.config.row_pivot.length >= depth) {
+        if (this.nsides === 2) {
+            return this.ctx.collapse_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
+        } else {
+            return this.ctx.collapse_to_depth(depth);
+        }
+    } else {
+        console.warn(`Cannot collapse past ${this.config.row_pivot.length}`);
+    }
 }
 
 /**
@@ -1220,8 +1327,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     console.log("Loading asm.js");
                     __MODULE__ = __MODULE__({
                         wasmJSMethod: "asmjs",
-                        locateFile: path => `asmjs/${path}`,
-                        filePackagePrefixURL: msg.path + 'asmjs/',
+                        locateFile: path => `${path}`,
+                        filePackagePrefixURL: msg.path,
                         printErr: (x) => console.warn(x),
                         print: (x) => console.log(x)
                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'

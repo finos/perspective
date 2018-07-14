@@ -30,11 +30,11 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [streaming.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/streaming.html) A streaming random data demo.
 * [coincap.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/coincap.html) Streaming crypto currency prices via [Coincap.io](http://coincap.io/).
 * [theme-material.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/theme-material.html) Material theme example.
+* [csv.html](https://unpkg.com/@jpmorganchase/perspective-examples/build/csv.html) Upload a CSV of your own.
 
 ## Documentation
 
 * [Project Site](https://jpmorganchase.github.io/perspective/)
-
 * [Installation](https://jpmorganchase.github.io/perspective/docs/installation.html)
 * [User's Guide](https://jpmorganchase.github.io/perspective/docs/usage.html)
 * [Perspective API](https://jpmorganchase.github.io/perspective/docs/perspective_api.html)

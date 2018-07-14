@@ -170,8 +170,8 @@ test.capture = function capture(name, body, timeout = 60000) {
                 cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
             }
         }
-        expect(hash).toBe(results[_url + '/' + name]);
         expect(errors).toEqual([]);
+        expect(hash).toBe(results[_url + '/' + name]);
     }, timeout);
 }
 

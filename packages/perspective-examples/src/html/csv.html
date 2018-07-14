@@ -1,0 +1,151 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+
+        <script src="mobile_fix.js"></script>
+        <script src="perspective.view.js"></script>
+        <script src="hypergrid.plugin.js"></script>
+        <script src="highcharts.plugin.js"></script>
+
+        <link rel='stylesheet' href="demo.css">
+        <link rel='stylesheet' href="material.css">
+
+        <style>
+
+            #drop-area {
+                border: 1px solid #ccc;
+                width: 480px;
+                font-family: sans-serif;
+                margin: 100px auto;
+                padding: 48px;
+            }
+            #drop-area.highlight {
+                border-color: purple;
+            }
+            p {
+                margin-top: 0;
+            }
+            .my-form {
+                margin-bottom: 10px;
+            }
+            #gallery {
+                margin-top: 10px;
+            }
+            #gallery img {
+                width: 150px;
+                margin-bottom: 10px;
+                margin-right: 10px;
+                vertical-align: middle;
+            }
+            .button {
+                display: inline-block;
+                padding: 10px;
+                background: #ccc;
+                cursor: pointer;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            }
+            .button:hover {
+                background: #ddd;
+            }
+            #fileElem {
+                display: none;
+            }
+        </style>
+
+    </head>
+    <body>
+
+        <div id="drop-area">
+            <form class="my-form">
+              <p>Upload a CSV file by dragging from your desktop and dropping onto the dashed region.</p>
+              <p>(Data is processed in browser, and never sent to any server).</p>
+              <input type="file" id="fileElem" multiple accept="text/csv" >
+              <label class="button" for="fileElem">Select a file</label>
+            </form>
+        </div>
+
+        <script>
+
+            window.addEventListener('WebComponentsReady', function () {
+                var dropArea = document.getElementById('drop-area')
+                var input = document.getElementById('fileElem');
+
+                dropArea.addEventListener('dragenter', () => {}, false);
+                dropArea.addEventListener('dragleave', () => {}, false);
+                dropArea.addEventListener('dragover', () => {}, false);
+                dropArea.addEventListener('drop', x => {
+                    console.log(x);
+                }, false);
+                
+                ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    dropArea.addEventListener(eventName, preventDefaults, false)
+                })
+
+                function preventDefaults (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+
+                ;['dragenter', 'dragover'].forEach(function (eventName) {
+                    dropArea.addEventListener(eventName, highlight, false);
+                })
+
+                ;['dragleave', 'drop'].forEach(function (eventName) {
+                    dropArea.addEventListener(eventName, unhighlight, false);
+                })
+
+                function highlight(e) {
+                    dropArea.classList.add('highlight')
+                }
+
+                function unhighlight(e) {
+                    dropArea.classList.remove('highlight')
+                }
+
+                dropArea.addEventListener('drop', handleDrop, false)
+
+                input.addEventListener('change', function () {
+                    handleFiles(this.files);
+                });
+
+                function handleDrop(e) {
+                    let dt = e.dataTransfer
+                    let files = dt.files
+
+                    handleFiles(files)
+                }
+
+                function handleFiles(files) {
+                    ([...files]).forEach(uploadFile)
+                }
+
+                function uploadFile(file) {
+                    let reader = new FileReader();
+                    reader.onload = function (fileLoadedEvent) {
+                        let txt = fileLoadedEvent.target.result;
+                        const parent = dropArea.parentElement;
+                        parent.removeChild(dropArea);
+                        let psp = document.createElement('perspective-viewer');
+                        parent.appendChild(psp);
+                        psp.load(txt);
+                    }
+                    reader.readAsText(file);
+                }
+            });
+
+        </script>
+
+    </body>
+</html>

@@ -10,16 +10,16 @@
 import {draw} from "./draw.js";
 
 function resize(immediate) {
-    if (this._chart && !this._resize_timer) {
-        this._chart.reflow();
+    if (this._charts && this._charts.length > 0 && !this._resize_timer) {
+        this._charts.map(x => x.reflow());
     } 
     if (this._resize_timer) {
         clearTimeout(this._resize_timer);
         this._debounce_resize = true;
     }
     this._resize_timer = setTimeout(() => {
-        if (this._chart && !document.hidden && this.offsetParent && document.contains(this) && this._debounce_resize) {
-            this._chart.reflow();
+        if (this._charts && this._charts.length > 0 && !document.hidden && this.offsetParent && document.contains(this) && this._debounce_resize) {
+            this._charts.map(x => x.reflow());
         }
         this._resize_timer = undefined;
         this._debounce_resize = false;
@@ -28,9 +28,9 @@ function resize(immediate) {
 }
 
 function delete_chart() {
-    if (this._chart) {
-        this._chart.destroy();
-        this._chart = undefined;
+    if (this._charts && this._charts.length > 0) {
+        this._charts.map(x => x.destroy());
+        this._charts = [];
     }
 }
 

@@ -28,6 +28,14 @@ export function set_tick_size(config) {
     config.plotOptions.scatter = {marker: {radius: new_radius}};
 }
 
+export function set_both_axis(config, axis, name, type, tree_type, top) {
+    if (type === "string") {
+        set_category_axis(config, axis, tree_type, top);
+    } else {
+        set_axis(config, axis, name, type);
+    }
+}
+
 export function set_axis(config, axis, name, type) {
     let opts = {
         type: type === "date" ? "datetime" : undefined,
@@ -109,6 +117,11 @@ export function default_config(aggregates, mode, js, col_pivots) {
             inverted: mode.indexOf('horizontal') > -1,
             animation: false,
             zoomType: mode === 'scatter' ? 'xy' : 'x',
+            resetZoomButton: {
+                position: {
+                    align: 'left',
+                }
+            }
         },
         navigation: {
             buttonOptions: {
@@ -133,6 +146,10 @@ export function default_config(aggregates, mode, js, col_pivots) {
             enabled: false
         },
         plotOptions: {
+            area: {
+                stacking: 'normal',
+                marker: {enabled: false, radius: 0}
+            },
             line: {
                 marker: {enabled: false, radius: 0}
             },

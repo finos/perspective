@@ -46,24 +46,31 @@ perspective-viewer {
     }
 
     .chart {
-        flex-grow: 1;
-        height: 100%;
-        width: 100%;
-        position: absolute;
-        padding: 15px;    
+        padding: 15px;
     }
-    #pivot_chart {
-        position: relative;
-        display: flex;
+
+    #pivot_chart_container {
         flex-grow: 1;
+        position: relative;
+    }
+
+    #pivot_chart {
+        position: absolute;
+        overflow-y: auto;
+        width: 100%;
+        height: 100%;
+        display: grid;
         margin: 0px;
+        justify-content: stretch;
+        grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     }
 
     .config {
         display: flex;
     }
 
-    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row {
+    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row, #filters #psp_row {
         display: inline;
     }
 
@@ -101,12 +108,13 @@ perspective-viewer {
         flex-direction: column;
         flex: 1;
     }
+
     .rrow {
         display: flex;
         flex-grow: 1;
+        height: 24px;
         align-items: center;
         max-width: 400px;
-        height: 24px;
         list-style: none;
         min-width: 140px;
         margin: 5px 10px 0px 0px;
@@ -114,6 +122,12 @@ perspective-viewer {
 
     .rrow > * {
         height: 100%;
+    }
+
+    .rrow > div {
+        display:flex;
+        flex-direction: column;
+        justify-content: flex-end;
     }
 
     #top_panel > .rrow > * {
@@ -174,25 +188,19 @@ perspective-viewer {
     #config_button:before {
         content: '\1f527';
     }
-
-    #filters {
-        label {
-            padding-top: 3px;
-            margin-top: -2px;
-        }
-    }
-
-    ul label, #filters label {
-        font-weight: normal;
-        margin-left: 0px;
-    }
     
-    ul, #filters {
+    ul {
         padding: 0px;
         margin: 0;
         font-size: 12px;
     }
     select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==) no-repeat 95% 50%;
+        background-color: #fff;
+        border-radius: 5px;
         height: 24px;
         padding: 0px 0px 0px 6px;
         font-size: 12px;
@@ -214,9 +222,6 @@ perspective-viewer {
         padding-top: 5px;
         max-width: 1000px;
     }
-    #top_panel ul {
-        padding-top: 3px;
-    }
 
     #side_panel > div {
         display: flex;
@@ -237,4 +242,11 @@ perspective-viewer {
         margin-right: 10px;
     }
 
+}
+
+perspective-viewer[view=treemap]:not([column-pivots="[]"]), perspective-viewer[view=sunburst]:not([column-pivots="[]"]) {
+
+    .chart {
+        position: relative !important;
+    }
 }

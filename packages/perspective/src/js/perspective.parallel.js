@@ -99,11 +99,23 @@ function view(table_name, worker, config) {
 
 view.prototype.to_json = async_queue('to_json');
 
+view.prototype.to_csv = async_queue('to_csv');
+
 view.prototype.schema = async_queue('schema');
 
 view.prototype.num_columns = async_queue('num_columns');
 
 view.prototype.num_rows = async_queue('num_rows');
+
+view.prototype.expand_to_depth = async_queue('expand_to_depth');
+
+view.prototype.collapse_to_depth = async_queue('collapse_to_depth');
+
+view.prototype.get_row_expanded = async_queue('get_row_expanded');
+
+view.prototype.open = async_queue('open');
+
+view.prototype.close = async_queue('close');
 
 view.prototype.delete = async_queue('delete');
 

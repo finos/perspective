@@ -13,11 +13,10 @@ function treeArrowRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
-    var value = config.value;
-    var depth = config.depth;
+    var value = config.value.rollup;
+    var leaf = config.value.isLeaf;
+    var depth = config.value.rowPath.length-1;
     var parent = config.expanded;
-    var lastChild = config.last;
-    var leaf = config.leaf;
 
     var backgroundColor = config.backgroundColor;
     if (config.isSelected) {
@@ -36,7 +35,6 @@ function treeArrowRendererPaint(gc, config) {
     gc.cache.strokeStyle = fgColor;
     gc.cache.fillStyle = fgColor;
 
-    var xOffset = x;
     var lineNodeSpace = 12;
     var nodeRadius = 4;
 
@@ -71,7 +69,6 @@ function treeArrowRendererPaint(gc, config) {
     gc.textBaseline = 'middle';
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
     var metrics = gc.getTextWidthTruncated(value, width - cellTextOffset + (x - 3), true);
-    var yOffset = y + height / 2;
     config.minWidth = cellTextOffset + gc.getTextWidth(value);
     gc.fillText(metrics.string ? metrics.string : value, cellTextOffset, y + height / 2 + 0.5);
     gc.restore();
@@ -84,11 +81,15 @@ export function treeLineRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
-    var value = config.value;
-    var depth = config.depth;
+    if (config.value === null) {
+        return;
+    }
+
+    var value = config.value.rollup;
+    var leaf = config.value.isLeaf;
+    var depth = config.value.rowPath.length-1;
     var parent = config.expanded;
     var lastChild = config.last;
-    var leaf = config.leaf;
 
     var backgroundColor = config.backgroundColor;
     if (config.isSelected) {
@@ -104,8 +105,6 @@ export function treeLineRendererPaint(gc, config) {
     gc.cache.fillStyle = backgroundColor;
     gc.rect(x, y, width, height);
     gc.fillRect(x, y, width, height);
-    //gc.strokeRect(x, y, width, height);
-   // gc.clip();
 
     var fgColor = config.isSelected ? config.foregroundSelectionColor : config.color;
     gc.cache.strokeStyle = fgColor;
@@ -166,7 +165,7 @@ export function treeLineRendererPaint(gc, config) {
     gc.textBaseline = 'middle';
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
     var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
-    let formatted_value = config.formatValue(config.value, config._type);
+    let formatted_value = config.formatValue(value, config._type);
     config.minWidth = cellTextOffset + gc.getTextWidth(formatted_value) + 15;
     var metrics = gc.getTextWidthTruncated(formatted_value, width - cellTextOffset + (x - 3), true);
     var yOffset = y + height / 2;

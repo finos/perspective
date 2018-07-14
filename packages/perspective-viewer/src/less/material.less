@@ -112,6 +112,14 @@ perspective-viewer {
 
 perspective-viewer #app {
 
+    perspective-hypergrid {
+        position: absolute;
+        top: 24px;
+        bottom: 24px;
+        left: 24px;
+        right: 24px;     
+    }
+
     input, select, ul, #filters {
         border-right: 0px;
         background: none;
@@ -132,7 +140,7 @@ perspective-viewer #app {
 
     perspective-row {
 
-        li#psp_row {
+        #psp_row {
             margin-bottom: 0px;
             color: #666;
             margin-right: 0px;
@@ -298,24 +306,52 @@ perspective-viewer #app {
     }
 
     #top_panel {
-        padding: 24px 0px 12px 0px;
+        padding: 24px 0px 0px 0px;
         .rrow ul {
             padding: 3px 0px 0px 0px;
+        }
+
+        .psp-text-field {
+            background: none;
+        }
+        .rrow {
+            margin: 0px 24px 24px 0px;
         }
     }
 
     .rrow {
-        margin: 0px 24px 12px 0px;
+        margin: 0px 24px 24px 0px;
     }
 
 
     #pivot_chart {
         padding: 24px 24px 24px 24px;
         .chart {
-            height: calc(~"100% - 34px");
-            width: calc(~"100% - 48px");
             padding: 0px;
         }
     }
 }
 
+perspective-viewer .psp-text-field__input + label {
+    padding-left: 0px;
+}
+
+.dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {
+    padding-left: 0px;
+    display: inline-block;
+    top: -8px
+}
+
+perspective-viewer {
+
+    #app #top_panel {
+
+        #row_pivots label:before {
+            content: "Group By";
+        }
+
+        #column_pivots label:before {
+            content: "Split By";
+        }
+    }
+}

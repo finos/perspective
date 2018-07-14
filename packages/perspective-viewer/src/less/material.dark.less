@@ -156,7 +156,6 @@ perspective-viewer #app {
     }
 
     #filters {
-        border-bottom: 1px solid #666;
         color: #666
     }                
 
@@ -251,20 +250,13 @@ perspective-viewer #app {
         max-height: 1px;
     }
 
-    #top_panel {
-        padding: 24px 0px 12px 0px;
-        .rrow ul {
-            padding: 3px 0px 0px 0px;
-        }
-    }
-
     perspective-hypergrid {
         color: #eee;
         background-color: @coolgrey700;
+        th {
+            border-color: @coolgrey700;
+            background-color: @coolgrey700;
+        }
     }
 
-
-    .rrow {
-        margin: 0px 24px 12px 0px;
-    }
 }

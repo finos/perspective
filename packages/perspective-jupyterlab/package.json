@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-jupyterlab",
-  "version": "0.1.14",
+  "version": "0.1.17",
   "description": "Perspective.js",
   "files": [
     "build/*.d.ts",
@@ -24,9 +24,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jpmorganchase/perspective-viewer": "^0.1.14",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.14",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.14",
+    "@jpmorganchase/perspective-viewer": "^0.1.17",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.17",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.17",
     "@jupyterlab/application": "^0.16.0",
     "@jupyterlab/rendermime-interfaces": "^1.0.0",
     "@jupyterlab/services": "^2.0.0",

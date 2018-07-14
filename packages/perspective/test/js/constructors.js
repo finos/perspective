@@ -137,6 +137,41 @@ module.exports = (perspective) => {
 
     });  
 
+    describe("Formatters", function () {
+
+        it("Serializes a simple view to CSV", async function () {
+            var table = perspective.table(data);
+            var view = table.view({});
+            var answer = `x,y,z\r\n1,a,true\r\n2,b,false\r\n3,c,true\r\n4,d,false`;
+            let result2 = await view.to_csv();
+            expect(answer).toEqual(result2);
+        });
+
+        it("Serializes 1 sided view to CSV", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'sum', column:'x'}],
+            });
+            var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
+            let result2 = await view.to_csv();
+            expect(answer).toEqual(result2);
+        });
+
+        it("Serializes a 2 sided view to CSV", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                column_pivot: ['y'],
+                aggregate: [{op: 'sum', column:'x'}],
+            });
+            var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
+            let result2 = await view.to_csv();
+            expect(answer).toEqual(result2);
+        });
+
+    });
+
     describe("Constructors", function() {
 
         it("JSON constructor", async function () {

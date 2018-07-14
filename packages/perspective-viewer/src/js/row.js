@@ -23,18 +23,25 @@ import "../less/row.less";
  */
 
 global.dragEnter = function dragEnter(ev) {
+    ev.stopPropagation();
     ev.preventDefault();
     ev.currentTarget.classList.add('dropping');
 }
 
 global.allowDrop = function allowDrop(ev) {
+    ev.stopPropagation();
     ev.preventDefault();
-    ev.currentTarget.classList.add('dropping');
+    ev.currentTarget.classList.add('dropping'); 
     ev.dataTransfer.dropEffect = 'move';
+    
 }
 
 global.disallowDrop = function disallowDrop(ev) {
-    ev.currentTarget.classList.remove('dropping');
+    if (ev.currentTarget == ev.target ){
+        ev.stopPropagation();
+        ev.preventDefault();
+        ev.currentTarget.classList.remove('dropping');
+    }
 }
 
 function get_text_width(text, max = 0) {

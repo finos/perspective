@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective",
-  "version": "0.1.14",
+  "version": "0.1.17",
   "description": "Perspective.js",
   "main": "build/perspective.umd.js",
   "publishConfig": {
