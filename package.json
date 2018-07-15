@@ -1,8 +1,10 @@
 {
 	"devDependencies": {
-		"lerna": "^2.5.1"
+		"lerna": "^2.5.1",
+		"rimraf": "^2.6.2"
 	},
 	"scripts": {
+		"prebuild": "lerna exec -- rimraf build",
 		"build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build || npm run _emsdk -- npm run _build",
 		"build_test": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build_test || npm run _emsdk -- npm run _build_test",
 		"test": "npm run _test_perspective && npm run _test_viewer && npm run _test_hypergrid && npm run _test_highcharts",

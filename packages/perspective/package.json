@@ -11,11 +11,21 @@
     "build/*"
   ],
   "scripts": {
-    "compile": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs && (cd obj/ && emcmake cmake ../ && emmake make -j8)",
-    "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
-    "build": "npm run compile && (npm run perspective & npm run compile_node & wait)",
-    "build_test": "cp test/html/* build && cp test/csv/* build && webpack --config test/config/test_browser.config.js & webpack --config test/config/test_node.config.js & webpack --config test/config/benchmark.config.js & wait",
-    "compile_node": "webpack --config src/config/perspective.node.config.js",
+    "build": "npm-run-all -l build:compile:* build:webpack:* ",
+    "build:compile:copy": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs",
+    "build:compile:emmake": "cd obj/ && emcmake cmake ../ && emmake make -j8",
+    "build:webpack:asmj": "webpack --config src/config/perspective.asmjs.config.js",
+    "build:webpack:wasm": "webpack --config src/config/perspective.wasm.config.js",
+    "build:webpack:parallel": "webpack --config src/config/perspective.parallel.config.js",
+    "build:webpack:node": "webpack --config src/config/perspective.node.config.js",
+    "build_test": "npm-run-all -l build_test:copy build_test:webpack",
+    "build_test:copy": "npm-run-all -l -p build_test:copy:*",
+    "build_test:copy:html": "cp test/html/* build",
+    "build_test:copy:test": "cp test/csv/* build",
+    "build_test:webpack": "npm-run-all -l build_test:webpack:*",
+    "build_test:webpack:browser": "webpack --config test/config/test_browser.config.js",
+    "build_test:webpack:node": "webpack --config test/config/test_node.config.js",
+    "build_test:webpack:benchmark": "webpack --config test/config/benchmark.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
     "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
@@ -32,7 +42,7 @@
     "url": "https://github.com/jpmorganchase/perspective"
   },
   "author": "",
-  "license": "Apache",
+  "license": "Apache-2.0",
   "dependencies": {
     "@apache-arrow/es5-esm": "^0.3.1",
     "d3-array": "^1.2.1",
@@ -62,6 +72,7 @@
     "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
+    "npm-run-all": "^4.1.3",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.6",

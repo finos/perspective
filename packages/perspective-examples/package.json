@@ -19,7 +19,14 @@
     "build:hypergrid": "webpack --config ../perspective-viewer-hypergrid/test/config/hypergrid.config.js --context ../perspective-viewer-hypergrid/ --output-path ../perspective-examples/build",
     "build:highcharts": "webpack --config ../perspective-viewer-highcharts/test/config/highcharts.config.js --context ../perspective-viewer-highcharts/ --output-path ../perspective-examples/build",
     "build_test": "npm run copy",
-    "copy": "mkdir -p build && cp -r node_modules/@jpmorganchase/perspective/build/* build && cp -r node_modules/@jpmorganchase/perspective-viewer/build/*.css build && cp src/html/* build && cp src/json/* build && cp src/csv/* build && cp src/css/* build && cp src/js/* build",
+    "copy": "mkdir -p build && npm-run-all -l -p copy:*",
+    "copy:build": "cp -r node_modules/@jpmorganchase/perspective/build/* build",
+    "copy:css": "cp -r node_modules/@jpmorganchase/perspective-viewer/build/*.css build",
+    "copy:src-html": "cp src/html/* build",
+    "copy:src-json": "cp src/json/* build",
+    "copy:src-csv": "cp src/csv/* build",
+    "copy:src-css": "cp src/css/* build",
+    "copy:src-js": "cp src/js/* build",
     "host": "http-server build/",
     "clean": "find build -mindepth 1 -delete"
   },
@@ -28,7 +35,7 @@
     "url": "https://github.com/jpmorganchase/perspective"
   },
   "author": "",
-  "license": "Apache",
+  "license": "Apache-2.0",
   "dependencies": {
     "@jpmorganchase/perspective": "^0.1.17",
     "@jpmorganchase/perspective-viewer": "^0.1.17",
@@ -41,6 +48,6 @@
   },
   "devDependencies": {
     "http-server": "^0.10.0",
-    "npm-run-all": "^4.1.2"
+    "npm-run-all": "^4.1.3"
   }
 }
