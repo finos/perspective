@@ -386,7 +386,8 @@ function make_configs(series, levels) {
             alternateStartingDirection: true,
             data: data.data.slice(1),
             levels: levels,
-            title: title
+            title: title,
+            stack: data.stack,
         });  
     }
     return configs;
@@ -395,13 +396,13 @@ function make_configs(series, levels) {
 export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let rows = new TreeIterator(row_pivots.length, js);
     let rows2 = new ColumnsIterator(rows, hidden);
-    var series = [];
+    let series = [];
 
     for (let row of rows2) {
         let rp = row['__ROW_PATH__'];
-        let id = rp.join("_");
+        let id = rp.join(", ");
         let name = rp.slice(-1)[0];
-        let parent = rp.slice(0, -1).join("_");
+        let parent = rp.slice(0, -1).join(", ");
         
         for (let idx = 0; idx < rows2.columns.length; idx++) {
             let prop = rows2.columns[idx];

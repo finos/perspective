@@ -7,6 +7,8 @@
  *
  */
 
+import * as tooltip from './tooltip';
+
 export function set_boost(config, series, ...types) {
     const count = config.series[0].data ? config.series[0].data.length * config.series.length : config.series.length;
     if (count > 5000) {
@@ -83,7 +85,7 @@ export function set_category_axis(config, axis, type, top) {
     }
 };
 
-export function default_config(aggregates, mode, js, col_pivots) {
+export function default_config(aggregates, mode) {
 
     let type = 'scatter';
     if (mode === 'y_line') {
@@ -110,7 +112,15 @@ export function default_config(aggregates, mode, js, col_pivots) {
     // if (mode === 'scatter') {
     //     new_radius = Math.min(8, Math.max(4, Math.floor((this.clientWidth + this.clientHeight) / Math.max(300, series[0].data.length / 3))));
     // }
-        
+    //
+
+    // read this + define chart schema using _view()
+    const that = this,
+        config = that._view._config;
+
+    const axis_titles = get_axis_titles(config.aggregate);
+    const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
+
     return {
         chart: {
             type: type,
@@ -145,37 +155,33 @@ export function default_config(aggregates, mode, js, col_pivots) {
         boost: {
             enabled: false
         },
+
         plotOptions: {
             area: {
                 stacking: 'normal',
                 marker: {enabled: false, radius: 0}
             },
             line: {
-                marker: {enabled: false, radius: 0}
+                marker: {enabled: false, radius: 0},
             },
             coloredScatter: {
                 // marker: {radius: new_radius},
-                tooltip: {
-                    headerFormat: '<span>{point.key}</span><br/><span>{series.name}</span><br/>'
-                }
             },
             scatter: {
                 // marker: {radius: new_radius},
-                tooltip: {
-                    headerFormat: '<span>{point.key}</span><br/><span>{series.name}</span><br/>'
-                }
             },
             column: {
                 stacking: 'normal',
                 states: {
                     hover: {
+                        // add ajax
                         brightness: -0.1,
                         borderColor: '#000000'
                     }
-                }
+                },
             },
             heatmap: {
-                nullColor: "rgba(0,0,0,0)"
+                nullColor: "rgba(0,0,0,0)",
             },
             series: {
                 animation: false,
@@ -206,9 +212,20 @@ export function default_config(aggregates, mode, js, col_pivots) {
             backgroundColor: '#FFFFFF',
             borderColor: '#777777',
             followPointer: false,
+            valueDecimals: 2,
+            formatter: function(highcharts_tooltip) {
+                that._view.schema().then(schema => {
+                    let tooltip_text = tooltip.format_tooltip(this, type, schema, axis_titles, pivot_titles);
+                    highcharts_tooltip.label.attr({
+                        text: tooltip_text
+                    });
+                }).catch(err => console.error(err));
+
+                return "Loading...";
+            },
             positioner: function (labelWidth, labelHeight, point) {
-                var chart = this.chart;
-                var tooltipX, tooltipY;
+                let chart = this.chart;
+                let tooltipX, tooltipY;
                 if (point.plotX + labelWidth > chart.plotWidth) {
                     tooltipX = point.plotX + chart.plotLeft - labelWidth;
                 } else {
@@ -221,5 +238,20 @@ export function default_config(aggregates, mode, js, col_pivots) {
                 };
             }
         },
+    }
+}
+
+function get_axis_titles(aggs) {
+    let titles = [];
+    for (let i = 0; i < aggs.length; i++) {
+        titles.push(aggs[i].column);
+    }
+    return titles;
+}
+
+function get_pivot_titles(row_pivots, column_pivots) {
+    return {
+        row: row_pivots,
+        column: column_pivots
     }
 }

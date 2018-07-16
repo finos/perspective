@@ -18,6 +18,11 @@ utils.with_server({}, () => {
 
         simple_tests.default();
 
+        describe('tooltip tests', () => {
+
+        });
+
+
     });
 
 });

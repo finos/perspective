@@ -19,6 +19,8 @@
     "build:hypergrid": "webpack --config ../perspective-viewer-hypergrid/test/config/hypergrid.config.js --context ../perspective-viewer-hypergrid/ --output-path ../perspective-examples/build",
     "build:highcharts": "webpack --config ../perspective-viewer-highcharts/test/config/highcharts.config.js --context ../perspective-viewer-highcharts/ --output-path ../perspective-examples/build",
     "build_test": "npm run copy",
+    "watch:view": "webpack --watch --config ../perspective-viewer/test/config/view.config.js --context ../perspective-viewer/ --output-path ../perspective-examples/build",
+    "watch:highcharts": "webpack --watch --config ../perspective-viewer-highcharts/test/config/highcharts.config.js --context ../perspective-viewer-highcharts/ --output-path ../perspective-examples/build",
     "copy": "mkdir -p build && npm-run-all -l -p copy:*",
     "copy:build": "cp -r node_modules/@jpmorganchase/perspective/build/* build",
     "copy:css": "cp -r node_modules/@jpmorganchase/perspective-viewer/build/*.css build",
@@ -48,6 +50,31 @@
   },
   "devDependencies": {
     "http-server": "^0.10.0",
+<<<<<<< Updated upstream
     "npm-run-all": "^4.1.3"
+=======
+    "npm-run-all": "^4.1.2",
+    "arraybuffer-loader": "^1.0.2",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.3",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-plugin-transform-es2015-for-of": "^6.23.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "chart.js": "^2.7.1",
+    "css-loader": "^0.28.7",
+    "documentation": "^5.3.3",
+    "eslint": "^4.19.1",
+    "jest": "^22.0.4",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.5",
+    "style-loader": "^0.18.2",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "webpack": "^3.5.6",
+    "wrap-loader": "^0.2.0"
+>>>>>>> Stashed changes
   }
 }
