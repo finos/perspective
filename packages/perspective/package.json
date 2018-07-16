@@ -8,8 +8,10 @@
   },
   "files": [
     "src/*",
-    "build/*"
+    "build/*",
+    "index.d.ts"
   ],
+  "typings": "index.d.ts",  
   "scripts": {
     "compile": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs && (cd obj/ && emcmake cmake ../ && emmake make -j8)",
     "perspective": "webpack --config src/config/perspective.asmjs.config.js & webpack --config src/config/perspective.wasm.config.js & webpack --config src/config/perspective.parallel.config.js & wait",
