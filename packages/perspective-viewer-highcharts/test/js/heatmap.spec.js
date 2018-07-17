@@ -19,7 +19,15 @@ utils.with_server({}, () => {
         simple_tests.default();
 
         describe('tooltip tests', () => {
+            test("tooltip shows a value.", async page => {
+                await page.hover("rect.highcharts-point.highcharts-color-0:first-of-type");
+                const text = await page.$(".highcharts-label.highcharts-tooltip > text");
+                const has_value = await page.evaluate(
+                    element => element.textContent !== undefined,
+                    text);
 
+                expect(has_value === true);
+            });
         });
 
     });
