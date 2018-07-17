@@ -226,12 +226,19 @@ export function default_config(aggregates, mode) {
             positioner: function (labelWidth, labelHeight, point) {
                 let chart = this.chart;
                 let tooltipX, tooltipY;
+
                 if (point.plotX + labelWidth > chart.plotWidth) {
-                    tooltipX = point.plotX + chart.plotLeft - labelWidth;
+                    tooltipX = point.plotX + chart.plotLeft - labelWidth - 5;
                 } else {
                     tooltipX = point.plotX + chart.plotLeft;
                 }
-                tooltipY = point.plotY + chart.plotTop;
+
+                if (point.plotY + labelHeight > chart.plotHeight) {
+                    tooltipY = point.plotY + chart.plotTop - labelHeight;
+                } else {
+                    tooltipY = point.plotY + chart.plotTop;
+                }
+
                 return {
                     x: tooltipX,
                     y: tooltipY
