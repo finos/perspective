@@ -1320,9 +1320,11 @@ class View extends ViewPrivate {
         let count = 0, f = () => {
             if (typeof data !== "undefined") {
                 copy_to_clipboard(data);
-            } else if (count < 50) {
+            } else if (count < 200) {
                 count++;
                 setTimeout(f, 50);
+            } else {
+                console.warn("Timeout expired - copy to clipboard cancelled.");
             }
         }
         f();
