@@ -16,30 +16,30 @@ utils.with_server({}, () => {
 
     describe.page("scatter.html", () => {
 
-        simple_tests.default();
+        //simple_tests.default();
 
         describe('tooltip tests', () => {
-            const point_selector = "path.highcharts-point.highcharts-color-0:first-of-type";
-            test.capture("tooltip shows on hover.", async page => {
-                await page.hover(point_selector);
-                await page.waitForSelector('.highcharts-label.highcharts-tooltip');
+            const tooltip_selector = 'g.highcharts-label.highcharts-tooltip';
+            const text = tooltip_selector + ' > text';
+
+            test.run("tooltip shows on hover.", async page => {
+                page.mouse.move(109, 158);
+                await page.waitForSelector(tooltip_selector);
+                return await page.$eval(tooltip_selector,
+                        element => element.getAttribute('opacity') === '1');
             });
 
 
-            test("tooltip shows proper column labels.", async page => {
-                await page.hover(point_selector);
-                const tooltip = await page.$(".highcharts-label.highcharts-tooltip > text");
-                const has_column_labels = await page.evaluate(
-                    element => {
-                        const text = element.textContent;
-                        return text.includes("Sales") && text.includes("Profits");
-                    },
-                    tooltip);
-
-                expect(has_column_labels === true);
+            test.run("tooltip shows proper column labels.", async page => {
+                page.mouse.move(109, 158);
+                return await page.$eval(
+                    text, element => {
+                        return element.textContent.includes("Sales") &&
+                            element.textContent.includes("Profits");
+                    });
             });
 
-            test("tooltip shows pivot labels.", async page => {
+            test.run("tooltip shows pivot labels.", async page => {
                 await page.click('#config_button');
                 const viewer = await page.$("perspective-viewer");
 
@@ -49,15 +49,12 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                // hover and validate tooltip text
-                await page.hover(point_selector);
-                const text = await page.$(".highcharts-label.highcharts-tooltip > text");
-                const has_pivot_labels = await page.evaluate(element => {
+                page.mouse.move(277, 173);
+                return await page.$eval(
+                    text, element => {
                     return element.textContent.includes("State") &&
                         element.textContent.includes("Category");
-                }, text);
-
-                expect(has_pivot_labels === true);
+                    });
             });
         });
 

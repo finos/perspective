@@ -96,7 +96,7 @@ if (!fs.existsSync('screenshots')) {
 let browser, page, url, errors = [], __name = "";
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
+    browser = await puppeteer.launch({devtools: true, headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
     page = await browser.newPage();
 
     // CSS Animations break our screenshot tests, so set the
@@ -138,7 +138,18 @@ describe.page = (_url, body) => {
         url = old;
         return result;
     });
-}
+};
+
+test.run = function run(name, body) {
+    let _url = url;
+    test(name, async () => {
+        await new Promise(setTimeout);
+        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+        await page.waitForSelector('perspective-viewer:not([updating])');
+        const body_results = await body(page);
+        expect(body_results).toBe(true);
+    }, 300000);
+};
 
 test.capture = function capture(name, body, timeout = 60000) {
     let _url = url;
@@ -173,7 +184,7 @@ test.capture = function capture(name, body, timeout = 60000) {
         expect(errors).toEqual([]);
         expect(hash).toBe(results[_url + '/' + name]);
     }, timeout);
-}
+};
 
 async function dragDrop(page, origin, target) {
     const element = await page.$(origin);
@@ -185,4 +196,11 @@ async function dragDrop(page, origin, target) {
     await page.waitFor(1000)
     await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2);
     await page.mouse.up();
+}
+
+
+exports.get_svg_coordinates = async function get_svg_coordinates(svg_selector) {
+    return await page.$eval(svg_selector, element => {
+        return element.getBoundingClientRect();
+    });
 }

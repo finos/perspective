@@ -14,6 +14,7 @@
     "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
     "build": "npm run highcharts",
     "build_test": "cp test/html/* build && webpack --config test/config/highcharts.config.js",
+    "watch_test": "cp test/html* build && webpack --config --watch test/config/highcharts.config.js",
     "test": "jest --silent --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete",
     "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"
@@ -41,7 +42,8 @@
     "gradient-parser": "0.1.5",
     "highcharts": "6.1.0",
     "highcharts-grouped-categories": "1.1.2",
-    "highcharts-more": "^0.1.2"
+    "highcharts-more": "^0.1.2",
+    "puppeteer": "^1.6.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

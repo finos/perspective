@@ -16,17 +16,15 @@ utils.with_server({}, () => {
 
     describe.page("heatmap.html", () => {
 
-        simple_tests.default();
+        //simple_tests.default();
 
         describe('tooltip tests', () => {
-            test("tooltip shows a value.", async page => {
-                await page.hover("rect.highcharts-point.highcharts-color-0:first-of-type");
-                const text = await page.$(".highcharts-label.highcharts-tooltip > text");
-                const has_value = await page.evaluate(
-                    element => element.textContent !== undefined,
-                    text);
-
-                expect(has_value === true);
+            //const point_selector = "rect.highcharts-point";
+            const text = '.highcharts-label.highcharts-tooltip > text';
+            test.run("tooltip shows a value.", async page => {
+                await page.mouse.move(241, 177);
+                return await page.$eval(
+                    text, element => element.textContent !== "");
             });
         });
 

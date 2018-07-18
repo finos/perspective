@@ -12,6 +12,7 @@
 		"postinstall": "lerna bootstrap --hoist",
 		"_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_build_test": "lerna run build_test ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
+		"_watch_tests": "lerna run watch_test ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_emsdk": "docker run --rm -it -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",
 		"_puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/packages/${PACKAGE} perspective/puppeteer",
 		"_test": "./node_modules/.bin/jest --runInBand",

@@ -16,12 +16,12 @@ utils.with_server({}, () => {
 
     describe.page("treemap.html", () => {
 
-        simple_tests.default();
+        //simple_tests.default();
 
         describe('tooltip tests', () => {
-            const point_selector = "rect.highcharts-point:first-of-type";
-
-            beforeAll(async page => {
+            //const point_selector = "rect.highcharts-point";
+            const tooltip_selector = '.highcharts-label.highcharts-tooltip';
+            test.run("tooltip shows on hover.", async page => {
                 await page.click('#config_button');
                 const viewer = await page.$("perspective-viewer");
 
@@ -30,11 +30,11 @@ utils.with_server({}, () => {
                 await page.waitForSelector('perspective-viewer:not([updating])');
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
-            });
 
-            test.capture("tooltip shows on hover.", async page => {
-                await page.hover(point_selector);
-                await page.waitForSelector('.highcharts-label.highcharts-tooltip');
+                await page.mouse.move(333, 245);
+                await page.waitForSelector(tooltip_selector);
+                return await page.$eval(tooltip_selector,
+                    element => element.getAttribute('opacity') === '1');
             });
         });
 
