@@ -112,7 +112,7 @@ perspective-viewer {
     .rrow {
         display: flex;
         flex-grow: 1;
-        height: 24px;
+        min-height: 24px;
         align-items: center;
         max-width: 400px;
         list-style: none;
@@ -120,12 +120,9 @@ perspective-viewer {
         margin: 5px 10px 0px 0px;
     }
 
-    .rrow > * {
-        height: 100%;
-    }
-
     .rrow > div {
         display:flex;
+        min-height: 24px;
         flex-direction: column;
         justify-content: flex-end;
     }

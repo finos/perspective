@@ -12,7 +12,12 @@
 }
 
 #top_panel perspective-row {
+    margin-bottom: -1px;
     display: inline-block;
+}
+
+#top_panel #filters perspective-row {
+    margin-bottom: 0px;
 }
 
 #side_panel #active_columns perspective-row[drop-target] {
@@ -28,11 +33,6 @@
         display: none;
         cursor: pointer;
     }
-}
-
-perspective-viewer.dragging #top_panel .rrow > * {
-   // margin-top: -2px;
-    margin-left: -1px;
 }
 
 perspective-row {
