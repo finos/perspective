@@ -9,14 +9,14 @@
 
 @border-color: #ccc;
 
-.psp-text-field{
+.psp-text-field {
     position: relative;
     background-color: white;
     border-bottom: 1px solid @border-color;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    height: 24px;
+    min-height: 24px;
 }
 
 .dragging .psp-text-field.dropping{
@@ -48,12 +48,15 @@
 
 .dropping .psp-text-field__input, .psp-text-field__input:not(:empty){
     display: initial;
-    padding-top: 1px;
 }
 
 .dropping .psp-text-field__input::after{
     content:'|';
+    width: 0px;
+    overflow:visible;
+    margin-top: -2px;
 }
+
 
 .dropping * {
     pointer-events: none;
