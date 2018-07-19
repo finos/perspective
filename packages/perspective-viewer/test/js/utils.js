@@ -193,14 +193,15 @@ async function dragDrop(page, origin, target) {
     const box2 = await element2.boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await page.waitFor(1000)
+    await page.waitFor(1000);
     await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2);
     await page.mouse.up();
 }
 
-
-exports.get_svg_coordinates = async function get_svg_coordinates(svg_selector) {
-    return await page.$eval(svg_selector, element => {
-        return element.getBoundingClientRect();
-    });
+exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
+    const element = await page.$(svg_selector);
+    const box = await element.boundingBox();
+    await page.mouse.move(box.x + (box.width / 2), box.y + (box.height / 2));
+    await element.hover();
+    await page.waitForSelector('.highcharts-label.highcharts-tooltip');
 }

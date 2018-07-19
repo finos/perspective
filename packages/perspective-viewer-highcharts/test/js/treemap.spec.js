@@ -16,11 +16,10 @@ utils.with_server({}, () => {
 
     describe.page("treemap.html", () => {
 
-        //simple_tests.default();
+        simple_tests.default();
 
         describe('tooltip tests', () => {
-            //const point_selector = "rect.highcharts-point";
-            const tooltip_selector = '.highcharts-label.highcharts-tooltip';
+
             test.run("tooltip shows on hover.", async page => {
                 await page.click('#config_button');
                 const viewer = await page.$("perspective-viewer");
@@ -31,9 +30,8 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                await page.mouse.move(333, 245);
-                await page.waitForSelector(tooltip_selector);
-                return await page.$eval(tooltip_selector,
+                await utils.invoke_tooltip('.highcharts-point', page);
+                return await page.$eval('.highcharts-tooltip',
                     element => element.getAttribute('opacity') === '1');
             });
         });

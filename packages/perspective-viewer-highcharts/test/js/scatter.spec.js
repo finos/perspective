@@ -16,26 +16,31 @@ utils.with_server({}, () => {
 
     describe.page("scatter.html", () => {
 
-        //simple_tests.default();
+        simple_tests.default();
 
         describe('tooltip tests', () => {
-            const tooltip_selector = 'g.highcharts-label.highcharts-tooltip';
+            const point = 'path.highcharts-point';
+            const tooltip_selector = '.highcharts-label.highcharts-tooltip';
             const text = tooltip_selector + ' > text';
 
             test.run("tooltip shows on hover.", async page => {
-                page.mouse.move(109, 158);
-                await page.waitForSelector(tooltip_selector);
+                await page.click('#config_button');
+                await page.$("perspective-viewer");
+
+                await utils.invoke_tooltip(point, page);
                 return await page.$eval(tooltip_selector,
                         element => element.getAttribute('opacity') === '1');
             });
 
 
             test.run("tooltip shows proper column labels.", async page => {
-                page.mouse.move(109, 158);
+                await page.click('#config_button');
+                await page.$("perspective-viewer");
+                await utils.invoke_tooltip(point, page);
                 return await page.$eval(
                     text, element => {
                         return element.textContent.includes("Sales") &&
-                            element.textContent.includes("Profits");
+                            element.textContent.includes("Profit");
                     });
             });
 
@@ -49,7 +54,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                page.mouse.move(277, 173);
+                await utils.invoke_tooltip(point, page);
                 return await page.$eval(
                     text, element => {
                     return element.textContent.includes("State") &&

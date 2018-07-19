@@ -16,13 +16,12 @@ utils.with_server({}, () => {
 
     describe.page("heatmap.html", () => {
 
-        //simple_tests.default();
+        simple_tests.default();
 
         describe('tooltip tests', () => {
-            //const point_selector = "rect.highcharts-point";
             const text = '.highcharts-label.highcharts-tooltip > text';
             test.run("tooltip shows a value.", async page => {
-                await page.mouse.move(241, 177);
+                await utils.invoke_tooltip('.highcharts-point', page);
                 return await page.$eval(
                     text, element => element.textContent !== "");
             });

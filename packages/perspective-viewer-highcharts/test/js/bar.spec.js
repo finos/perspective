@@ -16,27 +16,23 @@ utils.with_server({}, () => {
 
     describe.page('bar.html', () => {
 
-        //simple_tests.default();
+        simple_tests.default();
 
         describe('tooltip tests', () => {
+            const bar = 'rect.highcharts-point';
             const tooltip_selector = '.highcharts-label.highcharts-tooltip';
             const text = tooltip_selector + ' > text';
 
-            // fixme hashes have changed
             test.run('tooltip shows on hover.', async page => {
-                // puppeteer bug: does not click/hover over svg elements
-                await page.mouse.move(280, 140);
-                await page.waitForSelector(tooltip_selector);
+                await utils.invoke_tooltip(bar, page);
                 return await page.$eval(
                     tooltip_selector, element => element.getAttribute('opacity') === '1');
             });
 
             test.run('tooltip shows column label.', async page => {
-                await page.mouse.move(280, 140);
-                await page.waitForSelector(tooltip_selector);
+                await utils.invoke_tooltip(bar, page);
                 return await page.$eval(
-                    tooltip_selector + ' > text',
-                    element => element.textContent.includes('Sales'));
+                    text, element => element.textContent.includes('Sales'));
             });
 
             test.run('tooltip shows proper column labels based on hover target.', async page => {
@@ -47,11 +43,11 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('columns', '["Sales", "Profit"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                await page.mouse.move(387, 251);
+                await utils.invoke_tooltip(bar, page);
                 const has_sales_label = await page.$eval(
                     text, element => element.textContent.includes('Sales'));
 
-                await page.mouse.move(389, 433);
+                await utils.invoke_tooltip('rect.highcharts-color-1', page);
                 const has_profit_label = await page.$eval(
                     text, element => element.textContent.includes('Profit'));
 
@@ -68,8 +64,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                // hover and validate tooltip text
-                await page.mouse.move(306, 245);
+                await utils.invoke_tooltip(bar, page);
                 return await page.$eval(
                     text, element => {
                         return element.textContent.includes('State') &&

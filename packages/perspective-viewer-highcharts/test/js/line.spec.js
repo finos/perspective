@@ -16,17 +16,17 @@ utils.with_server({}, () => {
 
     describe.page("line.html", () => {
 
-        //simple_tests.default();
+        simple_tests.default();
 
         describe('tooltip tests', () => {
+            const series = 'path.highcharts-graph';
             const tooltip_selector = '.highcharts-label.highcharts-tooltip';
             const text = tooltip_selector + ' > text';
 
-            // todo convert to screenshot type
             test.run('tooltip shows on hover.', async page => {
-                await page.mouse.move(490, 112);
-                await page.waitForSelector(tooltip_selector);
-
+                await page.click('#config_button');
+                await page.$('perspective-viewer');
+                await utils.invoke_tooltip(series, page);
                 return await page.$eval(
                     tooltip_selector,
                         element => element.getAttribute('opacity') === '1');
@@ -34,13 +34,12 @@ utils.with_server({}, () => {
 
 
             test.run('tooltip shows proper column labels.', async page => {
-                await page.mouse.move(490, 112);
-
-                return await page.$eval(
-                    text, element => {
-                        const text = element.textContent;
-                        return text.includes('Order Date') && text.includes('Profits');
-                    });
+                await page.click('#config_button');
+                await page.$('perspective-viewer');
+                await utils.invoke_tooltip(series, page);
+                return await page.$eval(text,
+                    element => element.textContent.includes('Order Date') &&
+                        element.textContent.includes('Profit'));
             });
 
             test.run('tooltip shows pivot labels.', async page => {
@@ -53,8 +52,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
-                await page.mouse.move(306, 169);
-
+                await utils.invoke_tooltip(series, page);
                 return await page.$eval(
                     text, element => {
                     return element.textContent.includes('State') &&
