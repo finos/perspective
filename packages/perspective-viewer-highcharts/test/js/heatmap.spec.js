@@ -18,6 +18,15 @@ utils.with_server({}, () => {
 
         simple_tests.default();
 
+        describe('tooltip tests', () => {
+            const text = '.highcharts-label.highcharts-tooltip > text';
+            test.run("tooltip shows a value.", async page => {
+                await utils.invoke_tooltip('.highcharts-point', page);
+                return await page.$eval(
+                    text, element => element.textContent !== "");
+            });
+        });
+
     });
 
 });

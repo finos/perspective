@@ -1315,6 +1315,14 @@ table.prototype.execute = function (f) {
  *
  */
 
+function error_to_json(error) {
+    const obj = {};
+    Object.getOwnPropertyNames(error).forEach(key => {
+        obj[key] = error[key];
+    }, error);
+    return obj;
+}
+
 if (typeof self !== "undefined" && self.addEventListener) {
     let _tables = {};
     let _views = {};
@@ -1394,10 +1402,10 @@ if (typeof self !== "undefined" && self.addEventListener) {
 
                     if (msg.subscribe) {
                         obj[msg.method](e => {
-                    self.postMessage({
-                        id: msg.id,
+                            self.postMessage({
+                                id: msg.id,
                                 data: e
-                    });
+                            });
                         });
                     } else {
                         result = obj[msg.method].apply(obj, msg.args);   
@@ -1412,7 +1420,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                         }).catch(error => {
                             self.postMessage({
                                 id: msg.id,
-                                error: error
+                                error: error_to_json(error)
                             });
                         });
                     } else {
@@ -1426,7 +1434,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 } catch (e) {
                     self.postMessage({
                         id: msg.id,
-                        error: e
+                        error: error_to_json(e)
                     });
                     return;
                 }
@@ -1438,7 +1446,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 if (!obj) {
                     self.postMessage({
                         id: msg.id,
-                        error: "View is not initialized"
+                        error: {message: "View is not initialized"}
                     });
                     return;
                 }
@@ -1453,7 +1461,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     } catch (error) {
                         self.postMessage({
                             id: msg.id,
-                            error: error + ""
+                            error: error_to_json(error)
                         });
                     }
                 } else {
@@ -1465,7 +1473,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                     }).catch(error => {
                         self.postMessage({
                             id: msg.id,
-                            error: error
+                            error: error_to_json(error)
                         });
                     });
                 }

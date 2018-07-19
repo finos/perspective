@@ -16,7 +16,7 @@ import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
 import {set_boost, set_axis, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 
-export const draw = (mode) => async function(el, view, task) {
+export const draw = (mode) => async function (el, view, task) {
     const row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');
     const col_pivots = this._view_columns('#column_pivots perspective-row:not(.off)');
     const aggregates = this._get_view_aggregates();
@@ -55,7 +55,7 @@ export const draw = (mode) => async function(el, view, task) {
         num_aggregates = aggregates.length - hidden.length;
 
     if (mode === 'scatter') {
-        let config = configs[0] = default_config(aggregates, mode, js, col_pivots);
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
         config.legend.floating = series.length <= 20;
         config.legend.enabled = col_pivots.length > 0;
@@ -76,7 +76,7 @@ export const draw = (mode) => async function(el, view, task) {
         set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
         set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
-        let config = configs[0] = default_config(aggregates, mode, js, col_pivots);
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden);
         config.series = [{
             name: null,
@@ -86,7 +86,7 @@ export const draw = (mode) => async function(el, view, task) {
         config.legend.enabled = true;
         config.legend.floating = false;
 
-        color_axis.call(this, config, colorRange)
+        color_axis.call(this, config, colorRange);
         set_boost(config, xaxis_type, yaxis_type);
         set_category_axis(config, 'xAxis', xtree_type, top);
         set_category_axis(config, 'yAxis', ytree_type, ytop);
@@ -94,7 +94,7 @@ export const draw = (mode) => async function(el, view, task) {
     } else if (mode === "treemap" || mode === "sunburst") {
         let [charts, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates, mode === "treemap");
         for (let series of charts) {
-            let config = default_config(aggregates, mode, js, col_pivots);
+            let config = default_config.call(this, aggregates, mode, js, col_pivots);
             config.series = [series];
             if (charts.length > 1) {
                 config.title.text = series.title;
@@ -107,7 +107,7 @@ export const draw = (mode) => async function(el, view, task) {
             configs.push(config);
         }
     } else if (mode === 'line') {
-        let config = configs[0] = default_config(aggregates, mode, js, col_pivots);
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
         const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         config.legend.floating = series.length <= 20;
@@ -121,7 +121,7 @@ export const draw = (mode) => async function(el, view, task) {
         set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xtree_type, xtop);
         set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
     } else {
-        let config = configs[0] = default_config(aggregates, mode, js, col_pivots);
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, top, ] = make_y_data(js, row_pivots, hidden);
         config.series = series;
         config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        
