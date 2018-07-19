@@ -42,8 +42,7 @@
     "gradient-parser": "0.1.5",
     "highcharts": "6.1.0",
     "highcharts-grouped-categories": "1.1.2",
-    "highcharts-more": "^0.1.2",
-    "puppeteer": "^1.6.0"
+    "highcharts-more": "^0.1.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

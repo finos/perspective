@@ -96,7 +96,7 @@ if (!fs.existsSync('screenshots')) {
 let browser, page, url, errors = [], __name = "";
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({devtools: true, headless: false, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
+    browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']});
     page = await browser.newPage();
 
     // CSS Animations break our screenshot tests, so set the
@@ -148,7 +148,7 @@ test.run = function run(name, body) {
         await page.waitForSelector('perspective-viewer:not([updating])');
         const body_results = await body(page);
         expect(body_results).toBe(true);
-    }, 300000);
+    });
 };
 
 test.capture = function capture(name, body, timeout = 60000) {
@@ -199,6 +199,7 @@ async function dragDrop(page, origin, target) {
 }
 
 exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
+    await page.waitForSelector(svg_selector, { visible: true });
     const element = await page.$(svg_selector);
     const box = await element.boundingBox();
     await page.mouse.move(box.x + (box.width / 2), box.y + (box.height / 2));
