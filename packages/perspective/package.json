@@ -8,8 +8,10 @@
   },
   "files": [
     "src/*",
-    "build/*"
+    "build/*",
+    "index.d.ts"
   ],
+  "typings": "index.d.ts",  
   "scripts": {
     "build": "npm-run-all -l build:compile:* build:webpack:* ",
     "build:compile:copy": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs",
