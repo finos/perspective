@@ -13,6 +13,9 @@
 @import url('https://fonts.googleapis.com/css?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
+@sans-serif-fonts: "Open Sans", Arial, sans-serif;
+@monospace-fonts: "Roboto Mono", monospace;
+
 input {
     padding: 6px 10px 6px 0;
 }
@@ -71,10 +74,12 @@ perspective-viewer.dragging #app {
 
 perspective-row:before {
     font-size: 10px;
-    font-family: "Open Sans";
+    font-family: @sans-serif-fonts;
 }
 
 perspective-viewer {
+
+    font-family: @sans-serif-fonts;
 
     #config_button {
         margin-top: 14px;

@@ -15,8 +15,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
         has_column_pivot = column_pivot_titles.length > 0;
 
     if(type === 'area' || type === 'line' || type === 'column') {
-        // pivots do not have a type mapping
-        // check for pivot
+        // pivots cannot be type-mapped
         let row_pivot_text = '',
             column_pivot_text = '';
 
@@ -90,7 +89,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
     } else if (type === 'heatmap') {
         return `<span>${format_value(context.point.value)}</span>`
     } else if (type === 'treemap' || type === 'sunburst') {
-        return `<b>${ context.point.id }: </b><span>${format_value(context.x)}</span>`
+        return `<span>${ context.point.id }: </span><b>${format_value(context.x)}</b>`
     }
 
     let default_value;
