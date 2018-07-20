@@ -15,7 +15,7 @@ import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
 import '../src/css/index.css';
 import '../src/css/material.dark.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.js';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils';
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
@@ -37,7 +37,7 @@ interface PerspectiveSpec {
     data: string,
     schema: string,
     layout: string,
-    config: string;
+    config: string
 }
 
 export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
