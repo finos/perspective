@@ -58,7 +58,7 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
                 } else if (key === 'colorscheme'){
                     if(layout[key]==='dark'){
                         this.node.classList.add(PSP_CONTAINER_CLASS_DARK)
-                        psp.addEventListener('loaded', ()=>{
+                        psp.addEventListener('perspective-view-update', ()=>{
                             // Call once rendered
                             let grid = this.node.querySelector('perspective-hypergrid');
                             if (grid){
@@ -68,6 +68,14 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
                                     rowProperties: [
                                         { color: '#eee', backgroundColor: '#2a2c2f' },
                                     ],
+                                    hoverRowHighlight: {
+                                        enabled: true,
+                                        backgroundColor: '#555'
+                                    },
+                                    hoverCellHighlight: {
+                                        enabled: true,
+                                        backgroundColor: '#444'
+                                    },
                                 });
                             }
                         });
