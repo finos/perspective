@@ -118,7 +118,7 @@ export function default_config(aggregates, mode) {
     const that = this,
         config = that._view._config;
 
-    const axis_titles = get_axis_titles(config.aggregate);
+    const axis_titles = get_axis_titles(config.aggregate, config.sort);
     const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
 
     return {
@@ -248,10 +248,14 @@ export function default_config(aggregates, mode) {
     }
 }
 
-function get_axis_titles(aggs) {
+function get_axis_titles(aggs, sort) {
+    const sort_titles = sort.map(row => row[0]);
     let titles = [];
+
     for (let i = 0; i < aggs.length; i++) {
-        titles.push(aggs[i].column);
+        let axis_title = aggs[i].column;
+        if(!sort_titles.includes(axis_title))
+            titles.push(aggs[i].column);
     }
     return titles;
 }

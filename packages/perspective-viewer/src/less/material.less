@@ -13,8 +13,11 @@
 @import url('https://fonts.googleapis.com/css?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
+@sans-serif-fonts: "Open Sans", Arial, sans-serif;
+@monospace-fonts: "Roboto Mono", monospace;
+
 input {
-    padding: 6px 10px 6px 0px;
+    padding: 6px 10px 6px 0;
 }
 
 button {
@@ -22,7 +25,7 @@ button {
 }
 
 select, ul {
-    padding: 0px 10px 0px 0px;
+    padding: 0 10px 0 0;
 }
 
 perspective-viewer:not([settings]) {
@@ -56,25 +59,27 @@ perspective-viewer.dragging #app {
             }
         }
         #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
-            margin-top: 0px;
+            margin-top: 0;
         }
     }
     
     #top_panel .rrow > * {
-        border-top: 0px !important;
-        border-left: 0px !important;
-        border-right: 0px !important;
-        margin-top: 0px;
-        margin-left: 0px;
+        border-top: 0 !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
+        margin-top: 0;
+        margin-left: 0;
     }
 }
 
 perspective-row:before {
     font-size: 10px;
-    font-family: "Open Sans";
+    font-family: @sans-serif-fonts;
 }
 
 perspective-viewer {
+
+    font-family: @sans-serif-fonts;
 
     #config_button {
         margin-top: 14px;
@@ -108,9 +113,26 @@ perspective-viewer {
             }
         }
     }
+
+    #app #top_panel {
+
+        #row_pivots label:before {
+            content: "Group By";
+        }
+
+        #column_pivots label:before {
+            content: "Split By";
+        }
+    }
 }
 
 perspective-viewer #app {
+
+    input, select, ul, #filters {
+        border-right: 0;
+        background-color: #eee;
+        color: #666;
+    }
 
     perspective-hypergrid {
         position: absolute;
@@ -120,35 +142,29 @@ perspective-viewer #app {
         right: 24px;     
     }
 
-    input, select, ul, #filters {
-        border-right: 0px;
-        background-color: #eee;
-        color: #666;
-    }
-
     #filters {
-        padding-left: 0px;
+        padding-left: 0;
     }
 
     perspective-row .string::before,
     perspective-row .float::before,
     perspective-row .integer::before,
     perspective-row .date::before {
-        font-family: "Roboto Mono", monospace;
-        padding-left: 0px;
+        font-family: @monospace-fonts;
+        padding-left: 0;
     }
 
     perspective-row {
 
         #psp_row {
-            margin-bottom: 0px;
+            margin-bottom: 0;
             color: #666;
-            margin-right: 0px;
+            margin-right: 0;
         }
     }
 
     #side_panel {
-        padding: 24px 0px 0px 0px;
+        padding: 24px 0 0 0;
         max-width: 250px;
 
         .is_visible {
@@ -160,16 +176,16 @@ perspective-viewer #app {
             min-height: 24px;
             max-height: 24px;
             border-left-width: 12px;
-            border-right-width: 0px;
+            border-right-width: 0;
             z-index: 1;
             margin: 0;
         }
 
         #active_columns, #inactive_columns {
             will-change: opacity, height, margin, transform;
-            margin-top: 0px;
-            margin-bottom:0px;
-            padding: 24px 24px 24px 0px;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 24px 24px 24px 0;
 
             perspective-row {
                 position: relative;
@@ -184,21 +200,21 @@ perspective-viewer #app {
                     height: 26px;
                     margin: 0;
                     position: absolute;
-                    top: 0px;
-                    left: 0px;
+                    top: 0;
+                    left: 0;
                     width: 48px;
                     text-align: center;
                 }
 
                 .row_draggable {                            
                     background: none;
-                    border-right: 0px;
+                    border-right: 0;
                     color: #666;
                     margin-left: 48px;
-                    padding: 4px 3px 4px 0px;
+                    padding: 4px 3px 4px 0;
 
                     select {
-                        margin: 6px 0px 0px 20px;
+                        margin: 6px 0 0 20px;
                     }
                 }
             }
@@ -211,7 +227,7 @@ perspective-viewer #app {
             margin-left: 46px;
 
             select#vis_selector {
-                margin: 0px 12px 24px 0px;
+                margin: 0 12px 24px 0;
             }
         }
 
@@ -230,7 +246,7 @@ perspective-viewer #app {
             }
 
             perspective-row:last-child .row_draggable {
-                border-bottom: 0px solid #ccc;
+                border-bottom: 0 solid #ccc;
             }
         }
 
@@ -238,7 +254,7 @@ perspective-viewer #app {
             padding-top: 24px;
 
             perspective-row {
-                margin-top: 0px;
+                margin-top: 0;
             }
 
             perspective-row:hover {
@@ -249,8 +265,8 @@ perspective-viewer #app {
 
             perspective-row.active {
                 display: block;
-                height: 0px;
-                max-height: 0px;
+                height: 0;
+                max-height: 0;
                 overflow: hidden;
             }
 
@@ -306,52 +322,38 @@ perspective-viewer #app {
     }
 
     #top_panel {
-        padding: 24px 0px 0px 0px;
+        padding: 24px 0 0 0;
         .rrow ul {
-            padding: 3px 0px 0px 0px;
+            padding: 3px 0 0 0;
         }
 
         .psp-text-field {
             background: none;
         }
         .rrow {
-            margin: 0px 24px 24px 0px;
+            margin: 0 24px 24px 0;
         }
     }
 
     .rrow {
-        margin: 0px 24px 24px 0px;
+        margin: 0 24px 24px 0;
     }
 
 
     #pivot_chart {
         padding: 24px 24px 24px 24px;
         .chart {
-            padding: 0px;
+            padding: 0;
         }
     }
 }
 
 perspective-viewer .psp-text-field__input + label {
-    padding-left: 0px;
+    padding-left: 0;
 }
 
 .dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {
-    padding-left: 0px;
+    padding-left: 0;
     display: inline-block;
     top: -8px
-}
-
-perspective-viewer {
-
-    #app #top_panel {
-
-        #row_pivots label:before {
-            content: "Group By";
-        }
-
-        #column_pivots label:before {
-            content: "Split By";
-        }
-    }
 }

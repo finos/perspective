@@ -11,6 +11,8 @@
 
 @border-color: #3B3F46;
 
+@coolgrey100: #ECEFF1;
+@coolgrey200: #CFD8DC;
 @coolgrey800: #2A2C2F;
 @coolgrey900: #242526;
 @coolgrey700: #2F3136;
@@ -81,7 +83,7 @@ perspective-viewer #app {
     border-top-color: @coolgrey900 !important;
 
     select:focus {
-        color: #FFF !important;
+        color: @coolgrey200 !important;
     }
 
     .highcharts-heatmap-gradient-full {
@@ -106,7 +108,7 @@ perspective-viewer #app {
     }
 
     svg g.highcharts-axis-labels text {
-        fill: #FFF !important;
+        fill: @coolgrey200 !important;
     }
 
     rect.highcharts-background {
@@ -128,7 +130,7 @@ perspective-viewer #app {
         background-color: @coolgrey700;
 
         tspan, text {
-            fill: #FFF !important;
+            fill: @coolgrey200 !important;
         }
 
         rect, image {
@@ -143,7 +145,7 @@ perspective-viewer #app {
     input, select, ul, #filters {
         border-right: 0px;
         background-color: @coolgrey800;
-        color: #fff;
+        color: @coolgrey200;
         border-color: #666;
     }
 
@@ -166,7 +168,7 @@ perspective-viewer #app {
     perspective-row {
 
         #psp_row {
-            color: #fff;
+            color: @coolgrey200;
         }
     }
 
@@ -180,7 +182,7 @@ perspective-viewer #app {
 
                 .row_draggable {                            
                     border-color: #666;
-                    color: #fff;
+                    color: @coolgrey200;
                 }
             }
         }
@@ -238,7 +240,7 @@ perspective-viewer #app {
                 }
 
                 #name {
-                    color: #fff;
+                    color: @coolgrey200;
                 }
 
                 #name:before {

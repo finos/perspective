@@ -7,7 +7,9 @@
  *
  */
 
+
 @border-color: #ccc;
+@sans-serif-fonts: Arial, sans-serif;
 
 .psp-text-field {
     position: relative;
@@ -92,6 +94,8 @@
 
 perspective-viewer {
 
+    font-family: @sans-serif-fonts;
+
     .awesomplete > ul {
         border-radius: 0px;
         margin: 0px;
@@ -166,7 +170,6 @@ perspective-viewer {
         font-family: monospace;
     }
 
-
     perspective-row {
         border: 0px solid rgba(0,0,0,0);
 
@@ -219,9 +222,6 @@ perspective-viewer {
         }
     }
 
-
-    font-family: Arial;
-
     .noselect {
         -webkit-touch-callout: none; /* iOS Safari */
         -webkit-user-select: none; /* Safari */
@@ -230,16 +230,13 @@ perspective-viewer {
         -ms-user-select: none; /* Internet Explorer/Edge */
         user-select: none; /* Non-prefixed version, currently supported by Chrome and Opera */
     }
+
     svg text {
-        font-family: Arial !important;
+        font-family: @sans-serif-fonts !important;
     }
 
-    svg text { 
-        font-family: Arial !important;
-
-    }
     svg .highcharts-axis-title, svg .highcharts-axis-title {
-        font-family: Arial !important;
+        font-family: @sans-serif-fonts !important;
     }
     svg .highcharts-legend-box {
         fill: none;
