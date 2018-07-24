@@ -788,6 +788,8 @@ class ViewPrivate extends HTMLElement {
         this._row_pivots = this.querySelector('#row_pivots');
         this._column_pivots = this.querySelector('#column_pivots');
         this._datavis = this.querySelector('#pivot_chart');
+        this._columns_container = this.querySelector('#columns_container');
+        this._side_panel_divider = this.querySelector('#columns_container > #divider');
         this._active_columns = this.querySelector('#active_columns');
         this._inactive_columns = this.querySelector('#inactive_columns');
         this._inner_drop_target = this.querySelector('#drop_target_inner');
@@ -863,6 +865,9 @@ class View extends ViewPrivate {
         this._register_debounce_instance();
         this._slaves = [];
         this._show_config = true;
+        const resize_handler = _.debounce(this.notifyResize, 250).bind(this);
+        window.addEventListener('load', resize_handler);
+        window.addEventListener('resize', resize_handler);
     }
 
     connectedCallback() {
@@ -1206,6 +1211,21 @@ class View extends ViewPrivate {
      * 
      */
     notifyResize() {
+        if (this.clientHeight < 500) {
+            this._side_panel.classList.add('columns_horizontal');
+            this._side_panel_divider.classList.add('columns_horizontal');
+            this._columns_container.classList.add('columns_horizontal');
+            this._active_columns.classList.add('columns_horizontal');
+            this._inactive_columns.classList.add('columns_horizontal');
+        } else {
+            this._side_panel.classList.remove('columns_horizontal');
+            this._side_panel_divider.classList.remove('columns_horizontal');
+            this._columns_container.classList.remove('columns_horizontal');
+            this._active_columns.classList.remove('columns_horizontal');
+            this._inactive_columns.classList.remove('columns_horizontal');
+        }
+
+
         if (!document.hidden && this.offsetParent && document.contains(this)) {
             this._plugin.resize.call(this);
         }
@@ -1246,6 +1266,9 @@ class View extends ViewPrivate {
         if (this._plugin.delete) {
             this._plugin.delete.call(this);
         }
+        const resize_handler = _.debounce(this.notifyResize, 250).bind(this);
+        window.removeEventListener('load', resize_handler);
+        window.removeEventListener('resize', resize_handler);
         return x;
     }
     

@@ -122,17 +122,44 @@ perspective-viewer {
         transition: height 0.2s;
     }
 
-    #side_panel #active_columns perspective-row .row_draggable {
-        .bordered();
-        background-color: white;
+    #columns_container {
+        flex-direction: column;
+
+        &.columns_horizontal {
+            flex-direction: row-reverse;
+        }
+
+        #active_columns, #inactive_columns {
+            border: none !important;
+
+            &.columns_horizontal {
+                flex: 1 !important;
+            }
+        }
+
+        #active_columns.columns_horizontal {
+            padding-right: 8px;
+        }
+
+        #active_columns perspective-row .row_draggable {
+            .bordered();
+            background-color: white;
+        }
+
+        #active_columns perspective-row[drop-target] {
+            .row_draggable {
+                background-color: rgb(240, 240, 255) !important;
+                border: 1px solid #1078d1 !important;
+            }
+        }
+
+        #inactive_columns perspective-row .is_visible::before {
+            content: "\25CB";
+        }
     }
 
     #side_panel perspective-row .is_visible {
         color: #999;
-    }
-
-    #side_panel #inactive_columns perspective-row .is_visible::before {
-        content: "\25CB";
     }
 
     #side_panel perspective-row 
@@ -145,12 +172,7 @@ perspective-viewer {
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    #side_panel #active_columns perspective-row[drop-target] {
-        .row_draggable {
-            background-color: rgb(240, 240, 255) !important;
-            border: 1px solid #1078d1 !important;
-        }
-    }
+    #side_panel
 
     #filters perspective-row {
 
@@ -246,15 +268,15 @@ perspective-viewer {
         background-color: white;
     }
 
-    #active_columns, #inactive_columns {
-        border: none !important;
-    }
-
     #divider {
         min-height: 2px;
         height: 2px;
         margin: 15px 13px 15px 13px;
         margin-bottom: 5px;
+
+        &.columns_horizontal {
+            display: none;
+        }
     }
 
     #drop_target {
