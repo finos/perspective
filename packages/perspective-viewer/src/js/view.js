@@ -397,7 +397,7 @@ async function loadTable(table) {
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
         }
-        this._set_column_defaults()
+        this._set_column_defaults();
         shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
         for (let x in cols) {
             if (shown.indexOf(x) !== -1) {
@@ -1112,7 +1112,7 @@ class View extends ViewPrivate {
     /**
      * This element's `perspective` worker instance.  This property is not 
      * reflected as an HTML attribute, and is readonly;  it can be effectively 
-     * set however by calliong the `load() method with a `perspective.table` 
+     * set however by calling the `load() method with a `perspective.table`
      * instance from the preferred worker.
      * 
      * @readonly
