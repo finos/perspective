@@ -7,14 +7,8 @@
  *
  */
 
-perspective-viewer.jp-PSPViewer {
-    display: block;
-    height: 100%;
-}
+import worker from "worker-loader?inline=true&fallback=false!@jpmorganchase/perspective/build/wasm_async/perspective.js";
+import buffer from "arraybuffer-loader!@jpmorganchase/perspective/build/wasm_async/psp.wasm" 
 
-div.jp-PSPContainer {
-    overflow: auto;
-    resize: both;
-    padding-right: 20px;
-    height: 400px;
-}
+window.__PSP_WORKER__ = worker;
+window.__PSP_WASM__ = buffer;

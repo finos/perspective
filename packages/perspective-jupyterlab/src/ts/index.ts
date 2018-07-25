@@ -12,14 +12,18 @@ import {Message} from '@phosphor/messaging';
 import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
 
-import '../src/css/index.css';
-import '../src/css/material.dark.css';
+import '../css/index.css';
+import '../css/material.dark.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.ts';
+
+import "../js/embed.js";
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
+
+import "@jpmorganchase/perspective-viewer/build/material.css";
 
 export
 const MIME_TYPE = 'application/psp+json';
@@ -49,6 +53,8 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
     onAfterAttach(msg: Message) : void {
         if (this._loaded) return;
         let psp = (<any>(this.node.querySelector('perspective-viewer')));
+        let observer = new MutationObserver(psp.notifyResize.bind(psp));
+        observer.observe(this.node, {attributes: true});
         
         let layout = JSON.parse(this._lyt);
         for(let key in layout){
