@@ -12,10 +12,12 @@ import {Message} from '@phosphor/messaging';
 import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
 
-import '../src/css/index.css';
-import '../src/css/material.dark.css';
+import '../css/index.css';
+import '../css/material.dark.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.ts';
+
+import "../js/embed.js";
 
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";

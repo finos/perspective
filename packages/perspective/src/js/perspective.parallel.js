@@ -235,23 +235,39 @@ function worker() {
         handlers: {},
         messages: []
     };
-    if (window.location.href.indexOf(__SCRIPT_PATH__.host()) > -1) {
+    if (window.__PSP_WORKER__) {
+        this._start_embedded();
+    } else if (window.location.href.indexOf(__SCRIPT_PATH__.host()) > -1) {
         this._start_same_origin();
     } else {
         this._start_cross_origin();
     }
 }
 
-worker.prototype._detect_transferable = function() {
+worker.prototype._detect_transferable = function () {
     var ab = new ArrayBuffer(1);
     this._worker.postMessage(ab, [ab]);
     this._worker.transferable = (ab.byteLength === 0);
     if (!this._worker.transferable) {
-        console.warn('Transferables are not supported in your browser!');
+        console.warn('Transferable support not detected');
+    } else {
+        console.log('Transferable support detected');
     }
 }
 
-worker.prototype._start_cross_origin = function() {
+worker.prototype._start_embedded = function () {
+    console.log("Running PSP in embedded mode");
+    var w = new window.__PSP_WORKER__();
+    for (var key in this._worker) {
+        w[key] = this._worker[key];
+    }
+    this._worker = w;
+    this._worker.addEventListener('message', this._handle.bind(this));
+    this._worker.postMessage({cmd: 'init', data: window.__PSP_WASM__, path: __SCRIPT_PATH__.path()});
+    this._detect_transferable();
+};
+
+worker.prototype._start_cross_origin = function () {
     var dir = (typeof WebAssembly === "undefined" ? 'asmjs' : 'wasm_async');
     XHRWorker(__SCRIPT_PATH__.path() + dir + '/perspective.js', function(worker) {
         for (var key in this._worker) {
@@ -270,14 +286,14 @@ worker.prototype._start_cross_origin = function() {
     }, this);
 };
 
-worker.prototype._start_cross_origin_asmjs = function() {
+worker.prototype._start_cross_origin_asmjs = function () {
     this._worker.postMessage({
         cmd: 'init',
         path: __SCRIPT_PATH__.path()
     });
 }
 
-worker.prototype._start_cross_origin_wasm = function() {
+worker.prototype._start_cross_origin_wasm = function () {
     var wasmXHR = new XMLHttpRequest();
     wasmXHR.open('GET', __SCRIPT_PATH__.path() + 'wasm_async/psp.wasm', true);
     wasmXHR.responseType = 'arraybuffer';
