@@ -1207,7 +1207,7 @@ class View extends ViewPrivate {
     }
       
     /**
-     * Invalidate this element's dimensions and redraw.
+     * Determine whether to reflow the viewer and redraw.
      * 
      */
     notifyResize() {

@@ -7,6 +7,10 @@
  *
  */
 
+body {
+    overflow: hidden;
+}
+
 perspective-viewer {
     position: absolute;
     top: 0;

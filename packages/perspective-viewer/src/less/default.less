@@ -123,6 +123,7 @@ perspective-viewer {
     }
 
     #columns_container {
+        height: 100%;
         flex-direction: column;
 
         &.columns_horizontal {
@@ -133,17 +134,27 @@ perspective-viewer {
             border: none !important;
 
             &.columns_horizontal {
+                display: flex;
+                flex-direction: column;
                 flex: 1 !important;
             }
         }
 
         #active_columns.columns_horizontal {
             padding-right: 8px;
+
+            perspective-row {
+
+                div#psp_row {
+                    margin-right: 2px;
+                }
+            }
         }
 
         #active_columns perspective-row .row_draggable {
             .bordered();
             background-color: white;
+            overflow: hidden;
         }
 
         #active_columns perspective-row[drop-target] {

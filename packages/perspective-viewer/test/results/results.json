@@ -9,5 +9,6 @@
     "superstore.html/displays visible columns.": "cea5bcfa6b40ff1307db1ecae75e1848",
     "superstore.html/sorts by a hidden column.": "ea40ec5853b636e0d218815b7ffd5ba8",
     "superstore.html/filters by a numeric column.": "d8d1fecdb6ae6cf8b07f5d38b03944c0",
+    "superstore.html/shows horizontal columns on small viewports.": "64f400a8d9ec3c345bb61d097c3c1c55",
     "blank.html/Handles reloading with a schema.": "12aece0a0c593b9fe8fd7966abd75b32"
 }
