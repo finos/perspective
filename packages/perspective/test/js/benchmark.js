@@ -17,7 +17,15 @@ import 'codemirror/mode/javascript/javascript.js';
 
 import Chart from "chart.js";
 
-
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
 
 import {histogram} from "d3-array";
 
@@ -132,10 +140,23 @@ function run_tests() {
     setTimeout(_run_tests);
 }
 
+const RESULTS = [];
+
+window.save = function () {
+    for (let result of RESULTS) {
+        window.localStorage[result[0]] = result[1];
+    }
+}
+
 function _run_tests() {
 
     if (__tests__.length === 0) {
         print("Performance suite complete.");
+        if (!getParameterByName('save')) {
+            const div = document.createElement('div');
+            div.innerHTML = '<button onclick="save()">SAVE</button>';
+            document.body.appendChild(div);
+        }
         return;
     }
 
@@ -169,7 +190,13 @@ function _run_tests() {
                 div.className = "histogram";
                 document.body.appendChild(div);
                 let old = JSON.parse(window.localStorage[f.toString().hashCode()] || "[]");
-                window.localStorage[f.toString().hashCode()] = JSON.stringify(results);
+                if (getParameterByName('save')) {
+                    console.log('Saving');
+                    window.localStorage[f.toString().hashCode()] = JSON.stringify(results);
+                } else {
+                    console.log("Not Saving");
+                    RESULTS.push([f.toString().hashCode(), JSON.stringify(results)]);
+                }
 
                 var bins = histogram().thresholds(iterations / 5)(results);
                 var bins2 = histogram().thresholds(iterations / 5)(old);
@@ -255,46 +282,46 @@ window.addEventListener("perspective-ready", function() {
             });
         });
 
-        test(500, function(resolve) {
-            var table2 = table.add_computed([
-                {column: "Constant",
-                 type: "number",
-                 f: () => 0,
-                 inputs: [],
-                }
-            ]);
-            table2.delete();
-            resolve();
-        });
+        // test(500, function(resolve) {
+        //     var table2 = table.add_computed([
+        //         {column: "Constant",
+        //          type: "number",
+        //          f: () => 0,
+        //          inputs: [],
+        //         }
+        //     ]);
+        //     table2.delete();
+        //     resolve();
+        // });
 
         // Arithmetic
-        test(500, function(resolve) {
-            var table2 = table.add_computed([
-                {column: "Speed",
-                 type: "number",
-                 f: (airtime, distance) => airtime/distance,
-                 inputs: ["AirTime", "Distance"],
-                }
-            ]);
-            table2.delete();
-            resolve();
-        });
+        // test(500, function(resolve) {
+        //     var table2 = table.add_computed([
+        //         {column: "Speed",
+        //          type: "number",
+        //          f: (airtime, distance) => airtime/distance,
+        //          inputs: ["AirTime", "Distance"],
+        //         }
+        //     ]);
+        //     table2.delete();
+        //     resolve();
+        // });
 
-        // Generate string
-        test(500, function(resolve) {
-            var table2 = table.add_computed([
-                {column: "Day",
-                 type: "string",
-                 f: (x) => {
-                    let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
-                    return days[x-1];
-                 },
-                 inputs: ["DayOfWeek"],
-                }
-            ]);
-            table2.delete();
-            resolve();
-        });
+        // // Generate string
+        // test(500, function(resolve) {
+        //     var table2 = table.add_computed([
+        //         {column: "Day",
+        //          type: "string",
+        //          f: (x) => {
+        //             let days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'];
+        //             return days[x-1];
+        //          },
+        //          inputs: ["DayOfWeek"],
+        //         }
+        //     ]);
+        //     table2.delete();
+        //     resolve();
+        // });
 
         run_tests();
     });
