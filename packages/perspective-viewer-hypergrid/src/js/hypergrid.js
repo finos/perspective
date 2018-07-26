@@ -185,7 +185,8 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             const style = window.getComputedStyle(this, null);
 
             const header = window.getComputedStyle(this.querySelector('th'), null);
-            const style_hover = window.getComputedStyle(this.querySelector('td'), null);
+            const row_hover = window.getComputedStyle(this.querySelector('tr.hover'), null);
+            const cell_hover = window.getComputedStyle(this.querySelector('td.hover'), null);
 
             grid_properties['showRowNumbers'] = grid_properties['showCheckboxes'] || grid_properties['showRowNumbers'];
             grid_properties['treeHeaderBackgroundColor'] = grid_properties['backgroundColor'] = style.getPropertyValue('background-color');
@@ -194,8 +195,10 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
             grid_properties['columnHeaderSeparatorColor'] = header.getPropertyValue('border-color');
             grid_properties['columnHeaderColor'] = header.getPropertyValue('color');
 
-            grid_properties['hoverRowHighlight']['backgroundColor'] = style_hover.getPropertyValue('background-color');
-            grid_properties['hoverCellHighlight']['backgroundColor'] = style_hover.getPropertyValue('color');
+            grid_properties['hoverRowHighlight']['backgroundColor'] = row_hover.getPropertyValue('background-color');
+            grid_properties['hoverRowHighlight']['color'] = row_hover.getPropertyValue('color');
+            grid_properties['hoverCellHighlight']['backgroundColor'] = cell_hover.getPropertyValue('background-color');
+            grid_properties['hoverCellHighlight']['color'] = cell_hover.getPropertyValue('color');
 
             this.grid.addProperties(grid_properties);
 
