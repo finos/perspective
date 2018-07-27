@@ -1,0 +1,205 @@
+/******************************************************************************
+*
+* Copyright (c) 2017, the Perspective Authors.
+*
+* This file is part of the Perspective library, distributed under the terms of
+* the Apache License 2.0.  The full license can be found in the LICENSE file.
+*
+*/
+
+@import "variables";
+
+@darkgray: #666;
+
+.hidden {
+  display: none;
+}
+
+perspective-computed-column {
+  background: #E5E5E5;
+  display: none;
+  font-family: @sans-serif-fonts !important;
+  flex-direction: column;
+  flex-shrink: 1;
+  min-height: 25%;
+  max-height: 35%;
+  padding: 5px;
+
+  &.edit {
+    #psp-cc-button-delete {
+      display: block !important;
+    }
+  }
+
+  .psp-cc__label {
+    color: @darkgray;
+    font-size: 10px;
+    margin-left: 4px;
+
+    &.psp-cc__error {
+      color: #cb4549 !important;
+      width: 120px;
+    }
+  }
+
+ #psp-cc__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-right: 5px;
+  }
+
+  #psp-cc__body, .psp-cc__container {
+    display: flex;
+    flex-direction: column;
+
+    &.row {
+      align-items: center;
+      flex-direction: row;
+    }
+  }
+
+  .psp-cc__container {
+    margin: 0 5px 10px 26px;
+
+    &:first-of-type {
+      margin-bottom: 0;
+    }
+
+    span#psp-cc__mode {
+      color: #000;
+      font-size: 12px;
+
+    }
+
+    span#psp-cc__close {
+      color: @darkgray;
+      margin-left: auto;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    input {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+      font-size: 12px;
+      margin-top: 5px;
+      padding: 3px 4px;
+    }
+  }
+
+  #psp-cc-computation__input-column {
+    background: none;
+    border-bottom: 1px solid #ccc;
+    margin-top: 5px;
+    height: 21px;
+    width: 100%;
+
+    &.dropping {
+      background-color: rgb(240, 240, 255) !important;
+      border: 1px solid #1078d1 !important;
+
+      perspective-row {
+        display: none !important;
+      }
+    }
+
+    &.dropped {
+      border: 0;
+      background: none;
+    }
+
+    perspective-row .row_draggable {
+      border: 1px solid @border-color;
+      border-top-width: 0px;
+      border-left-width: 0px;
+      border-right-width: 0px;
+      background-color: white;
+      margin-right: 0;
+    }
+  }
+
+  #psp-cc-computation {
+    align-items: center;
+    display: flex;
+    margin-top: 5px;
+  }
+
+  #psp-cc-computation__type {
+    display: flex;
+    font-family: @monospace-fonts;
+    flex-direction: column;
+    font-size: 12px;
+    padding-right: 5px;
+    text-align: center;
+
+    .date, .boolean {
+      color: #999;
+    }
+
+    .float, .integer {
+      color: #016bc6;
+    }
+
+    .string {
+      color: #fe9292;
+    }
+  }
+
+  #psp-cc-computation__select {
+    margin-left: auto;
+    width: 100%;
+  }
+
+  #psp-cc-computation__drop-target-hover {
+    display: none;
+  }
+
+  .psp-cc__button {
+    border-radius: 0;
+    border-bottom: 1px solid #ccc;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    font-size: 12px;
+    margin-left: 5px;
+    padding: 2px 5px;
+    width: 55px;
+
+    &:hover {
+      cursor: pointer;
+    }
+
+    &[disabled] {
+      background: @darkgray;
+      color: #fff;
+    }
+
+    &#psp-cc-button-delete {
+      background: #e76056;
+      border-bottom-color: #bf4d45;
+      color: #fff;
+      display: none;
+
+      &:active {
+        background: #bf4d45;
+        border-bottom-color: #9d3f39;
+      }
+    }
+
+    &#psp-cc-button-save {
+      background: #0171d2;
+      border-bottom-color: #0160b1;
+      color: #fff;
+
+      &:active {
+        background: #0160b1;
+        border-bottom-color: #014986;
+      }
+    }
+  }
+}

@@ -25,7 +25,7 @@ div.jp-PSPContainer-dark ul {
 
 div.jp-PSPContainer-dark perspective-hypergrid {
   color: #eee;
-  background-color: @coolgrey700;
+  background-color: #2F3136;
 }
 
 div.jp-PSPContainer-dark perspective-viewer:not([settings]) {

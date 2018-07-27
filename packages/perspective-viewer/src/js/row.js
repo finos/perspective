@@ -37,7 +37,7 @@ global.allowDrop = function allowDrop(ev) {
 }
 
 global.disallowDrop = function disallowDrop(ev) {
-    if (ev.currentTarget == ev.target ){
+    if (ev.currentTarget == ev.target){
         ev.stopPropagation();
         ev.preventDefault();
         ev.currentTarget.classList.remove('dropping');
@@ -210,9 +210,11 @@ class Row extends HTMLElement {
         li.addEventListener('dragstart', ev => {
             if (this.hasAttribute('filter')) {
                 let {operator, operand} = JSON.parse(this.getAttribute('filter'));
-                ev.dataTransfer.setData("text", JSON.stringify([this.getAttribute('name'), operator, operand]));
+                ev.dataTransfer.setData("text",
+                    JSON.stringify([this.getAttribute('name'), operator, operand, this.getAttribute('type'), this.getAttribute('aggregate')]));
             } else {
-                ev.dataTransfer.setData("text", JSON.stringify([this.getAttribute('name'), perspective.FILTER_DEFAULTS[this.getAttribute('type')], undefined]));
+                ev.dataTransfer.setData("text",
+                    JSON.stringify([this.getAttribute('name'), perspective.FILTER_DEFAULTS[this.getAttribute('type')], undefined, this.getAttribute('type'), this.getAttribute('aggregate')]));
             }
             this.dispatchEvent(new CustomEvent('row-drag'));
         });
