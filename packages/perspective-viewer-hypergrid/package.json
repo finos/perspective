@@ -22,7 +22,8 @@
     "roots": [
       "test/js"
     ],
-    "verbose": true
+    "verbose": true,
+    "testURL": "http://localhost/"
   },
   "publishConfig": {
     "access": "public"

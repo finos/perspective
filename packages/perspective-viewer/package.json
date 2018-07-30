@@ -24,7 +24,8 @@
     "roots": [
       "test/js"
     ],
-    "verbose": true
+    "verbose": true,
+    "testURL": "http://localhost/"
   },
   "repository": {
     "type": "git",
