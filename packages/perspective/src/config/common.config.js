@@ -59,7 +59,7 @@ module.exports = function () {
                 }
             }, {
                 test: /\.js$/,
-                exclude: /node_modules|psp\.js/,
+                exclude: /node_modules\/(?!\@apache-arrow)|psp\.js/,
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],
