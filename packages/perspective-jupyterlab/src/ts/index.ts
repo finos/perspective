@@ -132,19 +132,16 @@ export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
             Session.listRunning().then(sessionModels => {
                 for (let i=0; i<sessionModels.length; i++) {
                     if (sessionModels[i].kernel.id === kernelId) {
-                        Session.connectTo(sessionModels[i]).then(session => {
-
-                            session.kernel.connectToComm(name + '/' + channel).then(comm => {
-                                comm.open('ack');
-                                comm.onMsg = (msg: any) => {
-                                    let dat = msg['content']['data'];
-                                    let tmp = JSON.parse(dat);
-                                    psp.update(tmp);
-                                };
-                                comm.onClose = (msg: any) => {};
-                            });
-
-                        });
+                        const session = Session.connectTo(sessionModels[i]);
+                        const comm = session.kernel.connectToComm(name + '/' + channel);
+                    
+                        comm.open('ack');
+                        comm.onMsg = (msg: any) => {
+                            let dat = msg['content']['data'];
+                            let tmp = JSON.parse(dat);
+                            psp.update(tmp);
+                        };
+                        comm.onClose = (msg: any) => {};
                     }
                 }
             });
