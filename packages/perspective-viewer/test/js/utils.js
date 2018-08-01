@@ -140,9 +140,15 @@ describe.page = (_url, body) => {
     });
 };
 
-test.run = function run(name, body) {
+test.run = function run(name, body, viewport = null) {
     let _url = url;
     test(name, async () => {
+        if (viewport !== null)
+            await page.setViewport({
+                width: viewport.width,
+                height: viewport.height
+            });
+
         await new Promise(setTimeout);
         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
         await page.waitForSelector('perspective-viewer:not([updating])');
@@ -151,11 +157,18 @@ test.run = function run(name, body) {
     });
 };
 
-test.capture = function capture(name, body, timeout = 60000) {
+test.capture = function capture(name, body, timeout = 60000, viewport = null) {
     let _url = url;
     test(name, async () => {
         errors = [];
         __name = name;
+        
+        if (viewport !== null)
+            await page.setViewport({
+                width: viewport.width,
+                height: viewport.height
+            });
+
         await new Promise(setTimeout);
         await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
         await page.waitForSelector('perspective-viewer:not([updating])');

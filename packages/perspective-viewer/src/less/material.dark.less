@@ -45,7 +45,7 @@ perspective-viewer.dragging {
         color: white !important;
     }
 
-    #side_panel #active_columns perspective-row[drop-target] .row_draggable {
+    #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable {
         background-color: @blue900 !important;
         color: white !important;
     }
@@ -173,77 +173,81 @@ perspective-viewer #app {
     }
 
     #side_panel {
-      
-        #active_columns, #inactive_columns {
-            perspective-row {
-                .float:before, .integer:before {
-                    color: #22A0CE;
-                }
 
-                .row_draggable {                            
-                    border-color: #666;
-                    color: @coolgrey200;
-                }
-            }
-        }
+        #columns_container {
 
-        #active_columns {
+            #active_columns, #inactive_columns {
 
-            perspective-row {
-                .is_visible:before {
-                    color: #22A0CE;
+                perspective-row {
+                    .float:before, .integer:before {
+                        color: #22A0CE;
+                    }
+
+                    .row_draggable {
+                        border-color: #666;
+                        color: @coolgrey200;
+                    }
                 }
             }
 
-            perspective-row:last-child .row_draggable {
-                border-bottom: 0px solid @coolgrey800;
-            }
-        }
+            #active_columns {
 
-        #inactive_columns {
-            padding-top: 24px;
-
-            perspective-row {
-                margin-top: 0px;
-            }
-
-            perspective-row:hover {
-                .is_visible:before {
-                    color: #22A0CE;
-                }
-            }
-
-            perspective-row.active {
-                display: block;
-                height: 0px;
-                max-height: 0px;
-                overflow: hidden;
-            }
-
-            perspective-row {
-                #name {
-                    color: #666;
-                }
-            }
-
-            perspective-row:hover {
-
-                &.active {
-                    #name {
-                        color: #eee;
+                perspective-row {
+                    .is_visible:before {
+                        color: #22A0CE;
                     }
                 }
 
-                .is_visible {
-                    opacity: 1;
+                perspective-row:last-child .row_draggable {
+                    border-bottom: 0px solid @coolgrey800;
+                }
+            }
+
+            #inactive_columns {
+                padding-top: 24px;
+
+                perspective-row {
+                    margin-top: 0px;
                 }
 
-                #name {
-                    color: @coolgrey200;
+                perspective-row:hover {
+                    .is_visible:before {
+                        color: #22A0CE;
+                    }
                 }
 
-                #name:before {
-                    opacity: 1 !important;
+                perspective-row.active {
+                    display: block;
+                    height: 0px;
+                    max-height: 0px;
+                    overflow: hidden;
+                }
+
+                perspective-row {
+                    #name {
+                        color: #666;
+                    }
+                }
+
+                perspective-row:hover {
+
+                    &.active {
+                        #name {
+                            color: #eee;
+                        }
+                    }
+
+                    .is_visible {
+                        opacity: 1;
+                    }
+
+                    #name {
+                        color: @coolgrey200;
+                    }
+
+                    #name:before {
+                        opacity: 1 !important;
+                    }
                 }
             }
         }

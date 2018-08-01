@@ -39,11 +39,11 @@ perspective-viewer #side_panel perspective-row .row_draggable {
 
 perspective-viewer:not([row-pivots='[]']) #side_panel {
 
-    #active_columns perspective-row .row_draggable {
+    #columns_container #active_columns perspective-row .row_draggable {
         height: 52px;
     }
 
-    #inactive_columns perspective-row .row_draggable {
+    #columns_container #inactive_columns perspective-row .row_draggable {
         height: 26px;
     }
 }
@@ -51,15 +51,18 @@ perspective-viewer:not([row-pivots='[]']) #side_panel {
 perspective-viewer.dragging #app {
 
     #side_panel {
-         
-        #inactive_columns {
 
-            perspective-row:hover .is_visible {
-                opacity: 0;
+        #columns_container {
+
+            #inactive_columns {
+                perspective-row:hover .is_visible {
+                    opacity: 0;
+                }
             }
-        }
-        #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
-            margin-top: 0;
+
+            #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
+                margin-top: 0;
+            }
         }
     }
     
@@ -94,23 +97,27 @@ perspective-viewer {
 
         #side_panel {
 
-            #active_columns {
+            #columns_container {
 
-                perspective-row:before {
-                    margin-left: 48px;
-                    left: 48px;
-                }
+                #active_columns {
 
-                perspective-row {
-                    .is_visible:before {
-                        font-family: "material icons";
-                        margin-top: 1px;
-                        margin-left: -8px;
-                        font-size: 16px;
-                        content: "\E834";
+                    perspective-row:before {
+                        margin-left: 48px;
+                        left: 48px;
+                    }
+
+                    perspective-row {
+                        .is_visible:before {
+                            font-family: "material icons";
+                            margin-top: 1px;
+                            margin-left: -8px;
+                            font-size: 16px;
+                            content: "\E834";
+                        }
                     }
                 }
             }
+
         }
     }
 
@@ -122,6 +129,18 @@ perspective-viewer {
 
         #column_pivots label:before {
             content: "Split By";
+        }
+    }
+}
+
+perspective-viewer #app.columns_horizontal {
+
+    #side_panel {
+        max-width: 500px !important;
+        padding: 24px 5px 0 0;
+
+        #divider {
+            display: none;
         }
     }
 }
@@ -167,8 +186,20 @@ perspective-viewer #app {
         padding: 24px 0 0 0;
         max-width: 250px;
 
+
         .is_visible {
             transition: opacity 0.4s;
+        }
+
+        #vis_selector_container {
+            min-height: 36px;
+            z-index: 1;
+            margin-right: 12px;
+            margin-left: 46px;
+
+            select#vis_selector {
+                margin: 0 12px 24px 0;
+            }
         }
 
         #divider {
@@ -217,17 +248,6 @@ perspective-viewer #app {
                         margin: 6px 0 0 20px;
                     }
                 }
-            }
-        }
-
-        #vis_selector_container {
-            min-height: 36px;
-            z-index: 1;
-            margin-right: 12px;
-            margin-left: 46px;
-
-            select#vis_selector {
-                margin: 0 12px 24px 0;
             }
         }
 

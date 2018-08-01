@@ -122,17 +122,57 @@ perspective-viewer {
         transition: height 0.2s;
     }
 
-    #side_panel #active_columns perspective-row .row_draggable {
-        .bordered();
-        background-color: white;
+    #app.columns_horizontal {
+        #columns_container {
+            flex-direction: row-reverse;
+        }
+        #active_columns, #inactive_columns {
+            display: flex;
+            flex-direction: column;
+            flex: 1 !important;
+        }
+        #active_columns {
+            padding-right: 8px;
+            perspective-row {
+                div#psp_row {
+                    margin-right: 2px;
+                }
+            }
+        }
+
+        #side_panel #divider {
+            display: none;
+        }
+    }
+
+    #columns_container {
+        height: 100%;
+        flex-direction: column;
+
+        #active_columns, #inactive_columns {
+            border: none !important;
+        }
+
+        #active_columns perspective-row .row_draggable {
+            .bordered();
+            background-color: white;
+            overflow: hidden;
+        }
+
+        #active_columns perspective-row[drop-target] {
+            .row_draggable {
+                background-color: rgb(240, 240, 255) !important;
+                border: 1px solid #1078d1 !important;
+            }
+        }
+
+        #inactive_columns perspective-row .is_visible::before {
+            content: "\25CB";
+        }
     }
 
     #side_panel perspective-row .is_visible {
         color: #999;
-    }
-
-    #side_panel #inactive_columns perspective-row .is_visible::before {
-        content: "\25CB";
     }
 
     #side_panel perspective-row 
@@ -145,12 +185,7 @@ perspective-viewer {
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    #side_panel #active_columns perspective-row[drop-target] {
-        .row_draggable {
-            background-color: rgb(240, 240, 255) !important;
-            border: 1px solid #1078d1 !important;
-        }
-    }
+    #side_panel
 
     #filters perspective-row {
 
@@ -244,10 +279,6 @@ perspective-viewer {
 
     #pivot_chart {
         background-color: white;
-    }
-
-    #active_columns, #inactive_columns {
-        border: none !important;
     }
 
     #divider {
