@@ -98,7 +98,7 @@ function calc_index(event) {
         for (let cidx in this._active_columns.children) {
             let child = this._active_columns.children[cidx];
             if (child.offsetTop + child.offsetHeight > event.offsetY + this._active_columns.scrollTop) {
-                return cidx;
+                return parseInt(cidx);
             }
         }
         return this._active_columns.children.length;
