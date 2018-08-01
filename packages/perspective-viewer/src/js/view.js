@@ -1212,19 +1212,10 @@ class View extends ViewPrivate {
      */
     notifyResize() {
         if (this.clientHeight < 500) {
-            this._side_panel.classList.add('columns_horizontal');
-            this._side_panel_divider.classList.add('columns_horizontal');
-            this._columns_container.classList.add('columns_horizontal');
-            this._active_columns.classList.add('columns_horizontal');
-            this._inactive_columns.classList.add('columns_horizontal');
+            this.querySelector('#app').classList.add('columns_horizontal');
         } else {
-            this._side_panel.classList.remove('columns_horizontal');
-            this._side_panel_divider.classList.remove('columns_horizontal');
-            this._columns_container.classList.remove('columns_horizontal');
-            this._active_columns.classList.remove('columns_horizontal');
-            this._inactive_columns.classList.remove('columns_horizontal');
+            this.querySelector('#app').classList.remove('columns_horizontal');
         }
-
 
         if (!document.hidden && this.offsetParent && document.contains(this)) {
             this._plugin.resize.call(this);

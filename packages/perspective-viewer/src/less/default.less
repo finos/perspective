@@ -122,33 +122,35 @@ perspective-viewer {
         transition: height 0.2s;
     }
 
-    #columns_container {
-        height: 100%;
-        flex-direction: column;
-
-        &.columns_horizontal {
+    #app.columns_horizontal {
+        #columns_container {
             flex-direction: row-reverse;
         }
-
         #active_columns, #inactive_columns {
-            border: none !important;
-
-            &.columns_horizontal {
-                display: flex;
-                flex-direction: column;
-                flex: 1 !important;
-            }
+            display: flex;
+            flex-direction: column;
+            flex: 1 !important;
         }
-
-        #active_columns.columns_horizontal {
+        #active_columns {
             padding-right: 8px;
-
             perspective-row {
-
                 div#psp_row {
                     margin-right: 2px;
                 }
             }
+        }
+
+        #side_panel #divider {
+            display: none;
+        }
+    }
+
+    #columns_container {
+        height: 100%;
+        flex-direction: column;
+
+        #active_columns, #inactive_columns {
+            border: none !important;
         }
 
         #active_columns perspective-row .row_draggable {
@@ -284,10 +286,6 @@ perspective-viewer {
         height: 2px;
         margin: 15px 13px 15px 13px;
         margin-bottom: 5px;
-
-        &.columns_horizontal {
-            display: none;
-        }
     }
 
     #drop_target {

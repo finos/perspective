@@ -133,6 +133,18 @@ perspective-viewer {
     }
 }
 
+perspective-viewer #app.columns_horizontal {
+
+    #side_panel {
+        max-width: 500px !important;
+        padding: 24px 5px 0 0;
+
+        #divider {
+            display: none;
+        }
+    }
+}
+
 perspective-viewer #app {
 
     input, select, ul, #filters {
@@ -174,10 +186,6 @@ perspective-viewer #app {
         padding: 24px 0 0 0;
         max-width: 250px;
 
-        &.columns_horizontal {
-          max-width: 500px !important;
-          padding: 24px 5px 0 0;
-        }
 
         .is_visible {
             transition: opacity 0.4s;
@@ -202,10 +210,6 @@ perspective-viewer #app {
             border-right-width: 0;
             z-index: 1;
             margin: 0;
-
-            &.columns_horizontal {
-                display: none;
-            }
         }
 
         #active_columns, #inactive_columns {
