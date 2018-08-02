@@ -13,6 +13,11 @@
   ],
   "typings": "index.d.ts",
   "scripts": {
+    "build_bench": "npm-run-all -l build_bench:*",
+    "build_bench:benchmark": "webpack --config bench/config/benchmark.config.js",
+    "build_bench:report": "webpack --config bench/config/report.config.js",
+    "build_bench:copy": "cp bench/csv/* build",    
+    "bench": "node build/benchmark.js",
     "build": "npm-run-all -l build:compile:* build:webpack:* ",
     "build:compile:copy": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs",
     "build:compile:emmake": "cd obj/ && emcmake cmake ../ && emmake make -j8",
@@ -27,7 +32,6 @@
     "build_test:webpack": "npm-run-all -l build_test:webpack:*",
     "build_test:webpack:browser": "webpack --config test/config/test_browser.config.js",
     "build_test:webpack:node": "webpack --config test/config/test_node.config.js",
-    "build_test:webpack:benchmark": "webpack --config test/config/benchmark.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
     "test": "jest --runInBand 2>&1",
     "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
@@ -64,6 +68,7 @@
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
+    "benchmark": "^2.1.4",
     "chart.js": "^2.7.1",
     "codemirror": "^5.30.0",
     "codemirror-javascript": "^0.2.0",
