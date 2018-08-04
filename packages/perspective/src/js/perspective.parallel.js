@@ -41,7 +41,7 @@ function subscribe(method, cmd) {
     return function() {
         var resolve = arguments[arguments.length - 1];
         var args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
-        this._worker.handlers[++this._worker.msg_id] = {resolve, reject: () => {}, keep_alive: true};
+        this._worker.handlers[++this._worker.msg_id] = {resolve: resolve, reject: () => {}, keep_alive: true};
         var msg = {
             id: this._worker.msg_id,
             cmd: cmd || 'view_method',
