@@ -7,14 +7,12 @@
  *
  */
 
- @import "./default.less";
+@import "variables";
+@import "default";
 
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
 @import url('https://fonts.googleapis.com/css?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
-
-@sans-serif-fonts: "Open Sans", Arial, sans-serif;
-@monospace-fonts: "Roboto Mono", monospace;
 
 input {
     padding: 6px 10px 6px 0;
@@ -28,61 +26,56 @@ select, ul {
     padding: 0 10px 0 0;
 }
 
-perspective-viewer:not([settings]) {
-    z-index: 3;
-}
-
-perspective-viewer #side_panel perspective-row .row_draggable {
-    height: 26px;
-    cursor: move;
-}
-
-perspective-viewer:not([row-pivots='[]']) #side_panel {
-
-    #columns_container #active_columns perspective-row .row_draggable {
-        height: 52px;
-    }
-
-    #columns_container #inactive_columns perspective-row .row_draggable {
-        height: 26px;
-    }
-}
-
-perspective-viewer.dragging #app {
-
-    #side_panel {
-
-        #columns_container {
-
-            #inactive_columns {
-                perspective-row:hover .is_visible {
-                    opacity: 0;
-                }
-            }
-
-            #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
-                margin-top: 0;
-            }
-        }
-    }
-    
-    #top_panel .rrow > * {
-        border-top: 0 !important;
-        border-left: 0 !important;
-        border-right: 0 !important;
-        margin-top: 0;
-        margin-left: 0;
-    }
-}
-
-perspective-row:before {
-    font-size: 10px;
-    font-family: @sans-serif-fonts;
-}
-
 perspective-viewer {
 
-    font-family: @sans-serif-fonts;
+    font-family: @material-sans-serif-fonts;
+
+    &:not([settings]) {
+        z-index: 3;
+    }
+
+    #side_panel perspective-row .row_draggable {
+        height: 26px;
+        cursor: move;
+    }
+
+    &:not([row-pivots='[]']) #side_panel {
+
+        #columns_container #active_columns perspective-row .row_draggable {
+            height: 52px;
+        }
+
+        #columns_container #inactive_columns perspective-row .row_draggable {
+            height: 26px;
+        }
+    }
+
+    &.dragging #app {
+
+        #side_panel {
+
+            #columns_container {
+
+                #inactive_columns {
+                    perspective-row:hover .is_visible {
+                        opacity: 0;
+                    }
+                }
+
+                #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
+                    margin-top: 0;
+                }
+            }
+        }
+
+        #top_panel .rrow > * {
+            border-top: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            margin-top: 0;
+            margin-left: 0;
+        }
+    }
 
     #config_button {
         margin-top: 14px;
@@ -93,59 +86,24 @@ perspective-viewer {
         }
     }
 
-    #app {
-
-        #side_panel {
-
-            #columns_container {
-
-                #active_columns {
-
-                    perspective-row:before {
-                        margin-left: 48px;
-                        left: 48px;
-                    }
-
-                    perspective-row {
-                        .is_visible:before {
-                            font-family: "material icons";
-                            margin-top: 1px;
-                            margin-left: -8px;
-                            font-size: 16px;
-                            content: "\E834";
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    #app #top_panel {
-
-        #row_pivots label:before {
-            content: "Group By";
-        }
-
-        #column_pivots label:before {
-            content: "Split By";
-        }
-    }
-}
-
-perspective-viewer #app.columns_horizontal {
-
-    #side_panel {
-        max-width: 500px !important;
-        padding: 24px 5px 0 0;
-
-        #divider {
-            display: none;
-        }
+    .psp-text-field__input + label {
+        padding-left: 0;
     }
 }
 
 perspective-viewer #app {
+
+    &.columns_horizontal {
+
+        #side_panel {
+            max-width: 500px !important;
+            padding: 24px 5px 0 0;
+
+            #divider {
+                display: none;
+            }
+        }
+    }
 
     input, select, ul, #filters {
         border-right: 0;
@@ -165,15 +123,20 @@ perspective-viewer #app {
         padding-left: 0;
     }
 
-    perspective-row .string::before,
-    perspective-row .float::before,
-    perspective-row .integer::before,
-    perspective-row .date::before {
-        font-family: @monospace-fonts;
-        padding-left: 0;
-    }
-
     perspective-row {
+
+        &:before {
+            font-size: 10px;
+            font-family: @material-sans-serif-fonts;
+        }
+
+        &.string:before,
+        &.float:before,
+        &.integer:before,
+        &.date:before {
+            font-family: @material-monospace-fonts;
+            padding-left: 0;
+        }
 
         #psp_row {
             margin-bottom: 0;
@@ -260,13 +223,24 @@ perspective-viewer #app {
             // }
 
             perspective-row {
+
+                &:before {
+                    margin-left: 48px;
+                    left: 48px;
+                }
+
+                &:last-child .row_draggable {
+                    border-bottom: 0 solid #ccc;
+                }
+
                 .is_visible:before {
                     color: #1A7dA1;
+                    font-family: "material icons";
+                    margin-top: 1px;
+                    margin-left: -8px;
+                    font-size: 16px;
+                    content: "\E834";
                 }
-            }
-
-            perspective-row:last-child .row_draggable {
-                border-bottom: 0 solid #ccc;
             }
         }
 
@@ -275,23 +249,38 @@ perspective-viewer #app {
 
             perspective-row {
                 margin-top: 0;
-            }
 
-            perspective-row:hover {
-                .is_visible:before {
-                    color: #1A7dA1;
+                &:hover {
+                    .is_visible:before {
+                        color: #1A7dA1;
+                    }
+
+                    &.active {
+                        #name {
+                            color: #eee;
+                        }
+                    }
+
+                    .is_visible {
+                        opacity: 1;
+                    }
+
+                    #name {
+                        color: #666;
+                    }
+
+                    #name:before {
+                        opacity: 1 !important;
+                    }
                 }
-            }
 
-            perspective-row.active {
-                display: block;
-                height: 0;
-                max-height: 0;
-                overflow: hidden;
-            }
+                &.active {
+                    display: block;
+                    height: 0;
+                    max-height: 0;
+                    overflow: hidden;
+                }
 
-            perspective-row {
-             
                 .is_visible {
                     opacity: 0.5;
                 }
@@ -311,27 +300,6 @@ perspective-viewer #app {
                     background: none !important;
                 }
             }
-
-            perspective-row:hover {
-
-                &.active {
-                    #name {
-                        color: #eee;
-                    }
-                }
-
-                .is_visible {
-                    opacity: 1;
-                }
-
-                #name {
-                    color: #666;
-                }
-
-                #name:before {
-                    opacity: 1 !important;
-                }
-            }
         }
     }
 
@@ -343,6 +311,7 @@ perspective-viewer #app {
 
     #top_panel {
         padding: 24px 0 0 0;
+
         .rrow ul {
             padding: 3px 0 0 0;
         }
@@ -353,23 +322,30 @@ perspective-viewer #app {
         .rrow {
             margin: 0 24px 24px 0;
         }
+
+        #row_pivots label:before {
+            content: "Group By";
+        }
+
+        #column_pivots label:before {
+            content: "Split By";
+        }
     }
 
     .rrow {
         margin: 0 24px 24px 0;
     }
 
-
     #pivot_chart {
         padding: 24px 24px 24px 24px;
         .chart {
             padding: 0;
+
+            .tooltip {
+                font-family: @material-sans-serif-fonts !important;
+            }
         }
     }
-}
-
-perspective-viewer .psp-text-field__input + label {
-    padding-left: 0;
 }
 
 .dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {

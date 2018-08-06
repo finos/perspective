@@ -7,20 +7,8 @@
  *
  */
 
-@import "./material.less";
-
-@border-color: #3B3F46;
-
-@coolgrey100: #ECEFF1;
-@coolgrey200: #CFD8DC;
-@coolgrey800: #2A2C2F;
-@coolgrey900: #242526;
-@coolgrey700: #2F3136;
-@coolgrey600: #3B3F46;
-
-@blue800: #1A7DA1;
-@blue900: #135D78;
-
+@import "variables";
+@import "material";
 
 perspective-viewer {
     
@@ -37,240 +25,242 @@ perspective-viewer {
         background-color: #666;
     }
 
-}
-
-perspective-viewer.dragging {
-    #top_panel .dropping {
-        background-color: @blue900 !important;
-        color: white !important;
-    }
-
-    #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable {
-        background-color: @blue900 !important;
-        color: white !important;
-    }
-}
-
-perspective-viewer[view=heatmap] image.highcharts-boost-canvas {
-    opacity: 0.8 !important;
-}
-
-perspective-viewer[view=treemap] {
-    rect {
-        stroke: @coolgrey700 !important;
-    }
-}
-
-
-perspective-viewer[view=sunburst] {
-    path {
-        stroke: @coolgrey700 !important;
-    }
-}
-
-perspective-viewer[view=treemap], perspective-viewer[view=heatmap] {
-    rect {
-        stroke: @coolgrey700 !important;
-    }
-}
-
-perspective-viewer image.highcharts-boost-canvas {
-    opacity: 1 !important;
-}
-
-perspective-viewer #app {
-    background-color: @coolgrey800;
-    border-top-color: @coolgrey900 !important;
-
-    select:focus {
-        color: @coolgrey200 !important;
-    }
-
-    .highcharts-heatmap-gradient-full {
-        background: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4D342F 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
-    }
-
-    .highcharts-heatmap-gradient-positive {
-        background: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
-    }
-
-    .highcharts-heatmap-gradient-negative {
-        background: linear-gradient(#feeb65 0%, #e4521b 35%, #4D342F 70%, #222222 100%);
-    }
-
-
-    svg .highcharts-axis tspan {
-        fill: #AAA !important;
-    }
-
-    svg .highcharts-button-box {
-        fill: @coolgrey900;
-    }
-
-    svg g.highcharts-axis-labels text {
-        fill: @coolgrey200 !important;
-    }
-
-    rect.highcharts-background {
-        fill: none;
-    }
-
-    svg .highcharts-tooltip-box {
-        fill: @coolgrey900;
-    }
-
-    svg .highcharts-legend-box {
-        fill: none !important;
-    }
-    .highcharts-yaxis-grid path.highcharts-grid-line {
-        stroke: @coolgrey600;
-    }
-
-    #pivot_chart {
-        background-color: @coolgrey700;
-
-        tspan, text {
-            fill: @coolgrey200 !important;
+    &.dragging {
+        #top_panel .dropping {
+            background-color: @blue900 !important;
+            color: white !important;
         }
 
-        rect, image {
-            opacity: 0.85;
+        #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable {
+            background-color: @blue900 !important;
+            color: white !important;
         }
     }
 
-    #drop_target {
-        background-color: @coolgrey700;
+    &[view=treemap], &[view=heatmap] {
+        rect {
+            stroke: @coolgrey700 !important;
+        }
     }
 
-    input, select, ul, #filters {
-        border-right: 0px;
+    &[view=heatmap] image.highcharts-boost-canvas {
+        opacity: 0.8 !important;
+    }
+
+    &[view=treemap] {
+        rect {
+            stroke: @coolgrey700 !important;
+        }
+    }
+
+    &[view=sunburst] {
+        path {
+            stroke: @coolgrey700 !important;
+        }
+    }
+
+    image.highcharts-boost-canvas {
+        opacity: 1 !important;
+    }
+
+    #app {
         background-color: @coolgrey800;
-        color: @coolgrey200;
-        border-color: #666;
-    }
+        border-top-color: @coolgrey900 !important;
 
-    select {
-        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9Ii0xNzcgMTc2IDQuOSAxMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAtMTc3IDE3NiA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjx0aXRsZT5hcnJvd3M8L3RpdGxlPg0KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSItMTc1LjYsMTgwLjcgLTE3NC41LDE3OS4yIC0xNzMuNSwxODAuNyAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iLTE3My41LDE4MS4zIC0xNzQuNSwxODIuOCAtMTc1LjYsMTgxLjMgIi8+DQo8L3N2Zz4=) no-repeat 95% 50% !important;
-    }
-
-    input::placeholder {
-        color: #666;
-    }
-
-    label {
-        color: #666;
-    }
-
-    #filters {
-        color: #666
-    }                
-
-    perspective-row {
-
-        #psp_row {
+        input, select, ul, #filters {
+            border-right: 0px;
+            background-color: @coolgrey800;
             color: @coolgrey200;
+            border-color: @coolgrey600;
         }
-    }
 
-    #side_panel {
+        select {
+            background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9Ii0xNzcgMTc2IDQuOSAxMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAtMTc3IDE3NiA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjx0aXRsZT5hcnJvd3M8L3RpdGxlPg0KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSItMTc1LjYsMTgwLjcgLTE3NC41LDE3OS4yIC0xNzMuNSwxODAuNyAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iLTE3My41LDE4MS4zIC0xNzQuNSwxODIuOCAtMTc1LjYsMTgxLjMgIi8+DQo8L3N2Zz4=) no-repeat 95% 50% !important;
 
-        #columns_container {
-
-            #active_columns, #inactive_columns {
-
-                perspective-row {
-                    .float:before, .integer:before {
-                        color: #22A0CE;
-                    }
-
-                    .row_draggable {
-                        border-color: #666;
-                        color: @coolgrey200;
-                    }
-                }
-            }
-
-            #active_columns {
-
-                perspective-row {
-                    .is_visible:before {
-                        color: #22A0CE;
-                    }
-                }
-
-                perspective-row:last-child .row_draggable {
-                    border-bottom: 0px solid @coolgrey800;
-                }
-            }
-
-            #inactive_columns {
-                padding-top: 24px;
-
-                perspective-row {
-                    margin-top: 0px;
-                }
-
-                perspective-row:hover {
-                    .is_visible:before {
-                        color: #22A0CE;
-                    }
-                }
-
-                perspective-row.active {
-                    display: block;
-                    height: 0px;
-                    max-height: 0px;
-                    overflow: hidden;
-                }
-
-                perspective-row {
-                    #name {
-                        color: #666;
-                    }
-                }
-
-                perspective-row:hover {
-
-                    &.active {
-                        #name {
-                            color: #eee;
-                        }
-                    }
-
-                    .is_visible {
-                        opacity: 1;
-                    }
-
-                    #name {
-                        color: @coolgrey200;
-                    }
-
-                    #name:before {
-                        opacity: 1 !important;
-                    }
-                }
+            &:focus {
+                color: @coolgrey200 !important;
             }
         }
-    }
 
-    #divider {
-        height: 1px;
-        min-height: 1px;
-        max-height: 1px;
-    }
+        input::placeholder {
+            color: #666;
+        }
 
-    perspective-hypergrid {
-        color: #eee;
-        background-color: @coolgrey700;
-        th {
-            border-color: @coolgrey700;
+        label {
+            color: #666;
+        }
+
+        svg {
+            .highcharts-axis tspan {
+                fill: #AAA !important;
+            }
+
+            .highcharts-button-box {
+                fill: @coolgrey900;
+            }
+
+            g.highcharts-axis-labels text {
+                fill: @coolgrey200 !important;
+            }
+
+            .highcharts-tooltip-box {
+                fill: @coolgrey900;
+            }
+
+            .highcharts-legend-box {
+                fill: none !important;
+            }
+        }
+
+        rect.highcharts-background {
+            fill: none;
+        }
+
+        .highcharts-heatmap-gradient-full {
+            background: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4D342F 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
+        }
+
+        .highcharts-heatmap-gradient-positive {
+            background: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+        }
+
+        .highcharts-heatmap-gradient-negative {
+            background: linear-gradient(#feeb65 0%, #e4521b 35%, #4D342F 70%, #222222 100%);
+        }
+
+
+        .highcharts-yaxis-grid path.highcharts-grid-line {
+            stroke: @coolgrey600;
+        }
+
+        .psp-text-field {
+            border-bottom-color: @coolgrey600;
+        }
+
+        #pivot_chart {
+            background-color: @coolgrey700;
+
+            tspan, text {
+                fill: @coolgrey200 !important;
+            }
+
+            rect, image {
+                opacity: 0.85;
+            }
+        }
+
+        #drop_target {
             background-color: @coolgrey700;
         }
-        td.hover {
-            background-color: #444;
+
+        #filters {
+            color: #666
         }
-        tr.hover {
-            background-color: #555;
+
+        perspective-row {
+            #psp_row {
+                color: @coolgrey200;
+            }
+        }
+
+        #side_panel {
+
+            #columns_container {
+
+                #active_columns, #inactive_columns {
+
+                    perspective-row {
+                        .float:before, .integer:before {
+                            color: #22A0CE;
+                        }
+
+                        .row_draggable {
+                            border-color: #666;
+                            color: @coolgrey200;
+                        }
+                    }
+                }
+
+                #active_columns {
+
+                    perspective-row {
+                        .is_visible:before {
+                            color: #22A0CE;
+                        }
+
+                        &:last-child .row_draggable {
+                            border-bottom: 0px solid @coolgrey800;
+                        }
+                    }
+                }
+
+                #inactive_columns {
+                    padding-top: 24px;
+
+                    perspective-row {
+                        margin-top: 0px;
+
+                        &:hover {
+                            .is_visible:before {
+                                color: #22A0CE;
+                            }
+
+                            &.active {
+                                #name {
+                                    color: #eee;
+                                }
+                            }
+
+                            .is_visible {
+                                opacity: 1;
+                            }
+
+                            #name {
+                                color: @coolgrey200;
+                            }
+
+                            #name:before {
+                                opacity: 1 !important;
+                            }
+                        }
+
+                        &.active {
+                            display: block;
+                            height: 0px;
+                            max-height: 0px;
+                            overflow: hidden;
+                        }
+
+                        #name {
+                            color: #666;
+                        }
+                    }
+                }
+            }
+        }
+
+        #divider {
+            height: 1px;
+            min-height: 1px;
+            max-height: 1px;
+        }
+
+        perspective-hypergrid {
+            color: #eee;
+            background-color: @coolgrey700;
+
+            th {
+                border-color: @coolgrey700;
+                background-color: @coolgrey700;
+            }
+
+            td.hover {
+                background-color: #444;
+            }
+
+            tr.hover {
+                background-color: #555;
+            }
         }
     }
 }
