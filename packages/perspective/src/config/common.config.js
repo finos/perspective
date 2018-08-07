@@ -3,7 +3,6 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const webpack = require('webpack');
 
 const plugins = [
-    new webpack.IgnorePlugin(/vertx/),
     new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)
 ];
 
