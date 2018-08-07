@@ -35,7 +35,7 @@
   "license": "Apache",
   "dependencies": {
     "@jpmorganchase/perspective": "^0.1.18",
-    "@webcomponents/webcomponentsjs": "~1.2.0",
+    "@webcomponents/webcomponentsjs": "~2.0.4",
     "awesomplete": "^1.1.2",
     "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
