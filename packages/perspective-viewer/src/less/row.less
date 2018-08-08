@@ -7,6 +7,8 @@
  *
  */
 
+@import "variables";
+
 .selected_indicator() {
     font-size: 12px;
 }
@@ -28,24 +30,67 @@
     }
 }
 
+perspective-row {
+    display: block;
+
+    #row_close {
+        min-width: 5px;
+        max-width: 5px;
+        margin-right: 3px;
+        flex-grow: 0;
+        font-size: 10px;
+        cursor: pointer;
+        margin-left: 3px;
+    }
+
+    .row_computed {
+        display: none;
+        flex-direction: row;
+    }
+}
+
 #side_panel perspective-row {
+
     #row_close {
         display: none;
         cursor: pointer;
     }
-}
 
-perspective-row {
-    #row_close {
-        min-width:5px;
-        max-width:5px;
-        margin-right:3px;
-        flex-grow:0;
-        font-size:10px;
-        cursor: pointer;
-        margin-left: 3px;
+    .row_computed {
+        display: none;
+
+        span {
+            color: @darkgray;
+            font-size: 10px;
+        }
+
+        #computation_name {
+            margin-left: 5px;
+        }
+
+        #row_edit {
+            color: @darkgray;
+            cursor: pointer;
+            font-size: 9px;
+            margin-left: 5px;
+
+            &:before {
+                content: "\01F527"
+            }
+        }
+
     }
-    display: block;
+
+    &.computed {
+
+        #psp_row .row_draggable {
+            height: 35px !important;
+        }
+
+        .row_computed {
+            display: flex !important;
+        }
+    }
 }
 
 .dropping * {
@@ -184,7 +229,7 @@ perspective-row {
 perspective-row #column_aggregate {
     display: none;
     font-size: 10px;
-    font-family: Arial;
+    font-family: @sans-serif-fonts;
     width: 90px;
     height: 20px;
 }

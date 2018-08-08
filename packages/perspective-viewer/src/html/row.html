@@ -16,7 +16,14 @@
             <select id="column_aggregate" class="string"></select>
             <select id="filter_operator"></select>
             <input id="filter_operand" placeholder="Value"/>
-            <span id='row_close'>&#x2715;</span>                
+            <div class="row_computed">
+                <span id="computation_name"></span>
+                <span>(</span>
+                <span id="computed_input_column"></span>
+                <span>)</span>
+                <span id="row_edit"></span>
+            </div>
+            <span id='row_close'>&#x2715;</span>
         </div>
     </div>
 </template>

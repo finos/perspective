@@ -180,6 +180,14 @@ class Row extends HTMLElement {
         this.querySelector('#sort_order').innerHTML = icon;
     }
 
+    set 'computed_column' (c) {
+        const data = this._get_computed_data();
+        const computed_input_column = this.querySelector('#computed_input_column');
+        const computation_name = this.querySelector('#computation_name');
+        computation_name.textContent = data.computation.name;
+        computed_input_column.textContent = data.input_column; //.getAttribute('computed_input_column');
+    }
+
     _update_filter(event) {
         let filter_operand = this.querySelector('#filter_operand');
         let filter_operator = this.querySelector('#filter_operator');
@@ -205,7 +213,18 @@ class Row extends HTMLElement {
         this.dispatchEvent(new CustomEvent('filter-selected', {detail: event}));   
     }
 
+    _get_computed_data() {
+        const data = JSON.parse(this.getAttribute('computed_column'));
+        return {
+            column_name: data.column_name,
+            input_column: data.input_column,
+            computation: data.computation,
+            type: data.type,
+        };
+    }
+
     connectedCallback() {
+        // todo add edit button callback here
         let li = this.querySelector('.row_draggable');
         li.addEventListener('dragstart', ev => {
             if (this.hasAttribute('filter')) {
@@ -248,6 +267,14 @@ class Row extends HTMLElement {
             filter_input.style.width = get_text_width("" + filter_operand.value, 30);    
             debounced_filter();
         });
+
+        const edit_computed_column_button = this.querySelector('#row_edit');
+        edit_computed_column_button.addEventListener('click', () => {
+            this.dispatchEvent(new CustomEvent('perspective-computed-column-edit', {
+                bubbles: true,
+                detail: this._get_computed_data()
+            }));
+        })
     }
 };
 

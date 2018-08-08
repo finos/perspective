@@ -199,7 +199,7 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null) {
     }, timeout);
 };
 
-async function dragDrop(page, origin, target) {
+exports.drag_drop = async function drag_drop(page, origin, target) {
     const element = await page.$(origin);
     const box = await element.boundingBox();
     const element2 = await page.$(target);

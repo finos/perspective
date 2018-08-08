@@ -171,7 +171,7 @@ perspective-viewer {
 
                     perspective-row {
                         .float:before, .integer:before {
-                            color: #22A0CE;
+                            color: @lightblue600;
                         }
 
                         .row_draggable {
@@ -185,7 +185,7 @@ perspective-viewer {
 
                     perspective-row {
                         .is_visible:before {
-                            color: #22A0CE;
+                            color: @lightblue600;
                         }
 
                         &:last-child .row_draggable {
@@ -202,7 +202,7 @@ perspective-viewer {
 
                         &:hover {
                             .is_visible:before {
-                                color: #22A0CE;
+                                color: @lightblue600;
                             }
 
                             &.active {
@@ -234,6 +234,67 @@ perspective-viewer {
                         #name {
                             color: #666;
                         }
+                    }
+                }
+
+                perspective-computed-column {
+                    background: @coolgrey800;
+
+                    .psp-cc__container {
+                        span#psp-cc__close {
+                            color: @coolgrey200;
+                        }
+                    }
+
+                    #psp-cc-computation__type {
+                        span.integer, span.float {
+                            color: @lightblue600;
+                        }
+
+                        span.string {
+                            color: #fe9292;
+                        }
+                    }
+                }
+            }
+        }
+
+                    #psp-cc-computation__input-column {
+                        border-bottom-color: @coolgrey600;
+
+                        &.dropping {
+                            background-color: @blue900 !important;
+                            color: white !important;
+                        }
+                    }
+
+                    perspective-row {
+                        .is_visible:before {
+                            color: @lightblue600;
+                        }
+
+                        div.row_draggable {
+                            color: @coolgrey200;
+                        }
+                    }
+
+                    #psp-cc-button-save {
+                        background: @lightblue600;
+                        color: @coolgrey200;
+
+                        &:hover {
+                            background: @lightblue700;
+                        }
+                    }
+                }
+            }
+            
+            #side_panel__actions {
+                button {
+                    color: @coolgrey200;
+
+                    &:hover {
+                        color: @coolgrey100;
                     }
                 }
             }
