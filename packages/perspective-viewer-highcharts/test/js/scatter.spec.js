@@ -23,15 +23,11 @@ utils.with_server({}, () => {
             const tooltip_selector = '.highcharts-label.highcharts-tooltip';
             const text = tooltip_selector + ' > text';
 
-            test.run("tooltip shows on hover.", async page => {
+            test.capture('tooltip shows on hover.', async page => {
                 await page.click('#config_button');
                 await page.$("perspective-viewer");
-
                 await utils.invoke_tooltip(point, page);
-                return await page.$eval(tooltip_selector,
-                        element => element.getAttribute('opacity') === '1');
             });
-
 
             test.run("tooltip shows proper column labels.", async page => {
                 await page.click('#config_button');
