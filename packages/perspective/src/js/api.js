@@ -60,6 +60,8 @@ view.prototype.to_csv = async_queue('to_csv');
 
 view.prototype.schema = async_queue('schema');
 
+view.prototype.computed_schema = async_queue('computed_schema');
+
 view.prototype.num_columns = async_queue('num_columns');
 
 view.prototype.num_rows = async_queue('num_rows');
@@ -132,6 +134,8 @@ table.prototype.view = function (config) {
 }
 
 table.prototype.schema = async_queue('schema', 'table_method');
+
+table.prototype.computed_schema = async_queue('computed_schema', 'table_method');
 
 table.prototype.size = async_queue('size', 'table_method');
 

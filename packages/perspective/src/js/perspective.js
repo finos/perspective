@@ -853,7 +853,6 @@ table.prototype._update_callback = function () {
     }
  }
 
-
 table.prototype._calculate_computed = function(tbl, computed_defs) {
     // tbl is the pointer to the C++ t_table
 
@@ -955,8 +954,8 @@ table.prototype._schema = function () {
 }
 
 /**
- * The schema of this {@link table}.  A schema is an Object, the keys of which
- * are the columns of this {@link table}, and the values are their string type names.
+ * The schema of this {@link table}.  A schema is an Object whose keys are the
+ * columns of this {@link table}, and whose values are their string type names.
  *
  * @async
  *
@@ -964,6 +963,67 @@ table.prototype._schema = function () {
  */
 table.prototype.schema = async function() {
     return this._schema();
+}
+
+table.prototype._computed_schema =  function() {
+    let computed = this.computed;
+
+    if(computed.length < 0) return {};
+
+    let schema = this.gnode.get_tblschema();
+    let columns = schema.columns();
+    let types = schema.types();
+
+    let computed_schema = {};
+
+    for (let i = 0; i < computed.length; i++) {
+        const column_name = computed[i].column;
+        const column_type = computed[i].type;
+
+        const column = {
+            type: undefined,
+            input_column: undefined,
+            input_type: undefined,
+            computation: undefined
+        };
+
+        column.type = "integer";
+        if (column_type === 1 || column_type === 2) {
+            column.type = "integer";
+        } else if (column_type === 19) {
+            column.type = "string";
+        } else if (column_type === 10 || column_type === 9) {
+            column.type = "float";
+        } else if (column_type === 11) {
+            column.type = "boolean";
+        } else if (column_type === 12) {
+            column.type = "date";
+        }
+
+        // edit this when we need to support multiple input columns
+        column.input_column = computed[i].inputs[0];
+        column.input_type = computed[i].input_type;
+        column.computation = computed[i].computation;
+        computed_schema[column_name] = column;
+    }
+
+    schema.delete();
+    columns.delete();
+    types.delete();
+    return computed_schema;
+}
+
+/**
+ * The computed schema of this {@link table}. Returns a schema of only computed
+ * columns added by the user, the keys of which are computed columns and the values an
+ * Object containing the associated column_name, column_type, and computation.
+ *
+ * @async
+ *
+ * @returns {Promise<Object>} A Promise of this {@link table}'s computed schema.
+ */
+table.prototype.computed_schema = async function() {
+    return this._computed_schema();
 }
 
 /**
