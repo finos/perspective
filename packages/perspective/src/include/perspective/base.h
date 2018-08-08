@@ -50,7 +50,6 @@ const t_float64 PSP_TABLE_GROW_RATIO = 1.3;
 
 const t_index INVALID_INDEX = -1;
 
-//#define PSP_PARALLEL_FOR
 #ifdef PSP_PARALLEL_FOR
 #define PSP_PSORT tbb::parallel_sort
 #else

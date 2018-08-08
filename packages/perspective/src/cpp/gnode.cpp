@@ -495,7 +495,7 @@ t_gnode::_process()
 
     t_colcptrvec fcolumns(flattened->num_columns());
     t_uindex ncols = sschema.get_num_columns();
-	
+
     t_colcptrvec scolumns(ncols);
     t_colptrvec dcolumns(ncols);
     t_colptrvec pcolumns(ncols);
@@ -1261,7 +1261,7 @@ t_gnode::notify_contexts(const t_table& flattened)
     t_sctxhvec ctxhvec(num_ctx);
 
     t_index ctxh_count = 0;
-    for (t_sctxhmap::iterator iter = m_contexts.begin();
+    for (t_sctxhmap::const_iterator iter = m_contexts.begin();
          iter != m_contexts.end();
          ++iter)
     {
@@ -1272,7 +1272,7 @@ t_gnode::notify_contexts(const t_table& flattened)
     auto notify_context_helper = [this, &ctxhvec, &flattened](
         t_index ctxidx) {
         const t_ctx_handle& ctxh = ctxhvec[ctxidx];
-        switch (ctxh.m_ctx_type)
+        switch (ctxh.get_type())
         {
             case TWO_SIDED_CONTEXT:
             {

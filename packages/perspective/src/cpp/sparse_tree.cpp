@@ -1011,18 +1011,26 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
     cols_topo_sorted.clear();
     cols_topo_sorted.reserve(col_cnt);
 
+    static bool const enable_aggregate_reordering = true; 
+    static bool const enable_fix_double_calculation = true; 
+
     std::unordered_set< t_column* > dst_visited;
-    auto push_column = [&](size_t idx)
+    auto push_column = [&]( size_t idx )
     {
-        t_column* dst = agg_update_info.m_dst[idx];
-        if (dst_visited.find(dst) != dst_visited.end())
+        if ( enable_fix_double_calculation )
         {
-            return;
+            t_column* dst = agg_update_info.m_dst[ idx ];
+            if ( dst_visited.find( dst ) != dst_visited.end() )
+            {
+                return;
+            }
+            dst_visited.insert( dst );
         }
-        dst_visited.insert(dst);
-        cols_topo_sorted.push_back(idx);
+        cols_topo_sorted.push_back( idx );
     };
 
+    if ( enable_aggregate_reordering )
+    { 
     // Move scaled agg columns to the end
     // This does not handle case where scaled aggregate depends on other scaled aggregate
     // ( not sure if that is possible )
@@ -1038,6 +1046,15 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
         if (is_col_scaled_aggregate(i))
         {
             push_column(i);
+        }
+    }
+    }
+    else
+    {
+        // If backed out, use same column order as before ( not topo sorted )
+        for ( size_t i = 0; i < col_cnt; ++i )
+        {
+            push_column( i );
         }
     }
 
@@ -1213,6 +1230,7 @@ t_stree::update_agg_table(t_uindex nidx,
                           t_index nstrands,
                           const t_gstate& gstate)
 {
+    static bool const enable_sticky_nan_fix = true;
     for (t_uindex idx : info.m_dst_topo_sorted)
     {
         const t_column* src = info.m_src[idx];
@@ -1231,8 +1249,7 @@ t_stree::update_agg_table(t_uindex nidx,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 new_value.set(dst_scalar.add(src_scalar));
-
-                if(old_value.is_nan())
+                if( enable_sticky_nan_fix && old_value.is_nan() ) // is_nan returns false for non-float types
                 {
                     // if we previously had a NaN, add can't make it finite again; recalculate entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
@@ -1240,7 +1257,6 @@ t_stree::update_agg_table(t_uindex nidx,
                     gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
                     new_value.set(std::accumulate(values.begin(), values.end(), t_float64(0)));
                 }
-
                 dst->set_scalar(dst_ridx, new_value);
             }
             break;
@@ -2337,7 +2353,7 @@ t_stree::get_aggcols(const t_idxvec& agg_indices) const
 // aggregates should be presized to be same size
 // as agg_indices
 void
-t_stree::get_aggregates(t_uindex nidx,
+t_stree::get_aggregates_for_sorting(t_uindex nidx,
                         const t_idxvec& agg_indices,
                         t_tscalvec& aggregates,
                         t_ctx2 * ctx2) const
@@ -2350,7 +2366,7 @@ t_stree::get_aggregates(t_uindex nidx,
         auto which_agg = agg_indices[idx];
        if(which_agg < 0)
         {
-            aggregates[idx] = get_value(nidx);
+            aggregates[idx] = get_sortby_value(nidx);
         }
         else if( ctx2 || ( size_t(which_agg) >= m_aggcols.size() ) )
         {

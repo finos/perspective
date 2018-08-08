@@ -344,7 +344,7 @@ class PERSPECTIVE_EXPORT t_stree
 
     // aggregates should be presized to be same size
     // as agg_indices
-    void get_aggregates(t_uindex nidx,
+    void get_aggregates_for_sorting(t_uindex nidx,
                         const t_idxvec& agg_indices,
                         t_tscalvec& aggregates,
                         t_ctx2 *) const;

@@ -947,15 +947,11 @@ t_ctx_grouped_pkey::notify(const t_table& flattened)
 // aggregates should be presized to be same size
 // as agg_indices
 void
-t_ctx_grouped_pkey::get_aggregates(t_uindex nidx,
+t_ctx_grouped_pkey::get_aggregates_for_sorting(t_uindex nidx,
                                    const t_idxvec& agg_indices,
                                    t_tscalvec& aggregates,
                                    t_ctx2 * ) const
 {
-
-    const t_str& grouping_label_col =
-        m_config.get_grouping_label_column();
-
     for (t_uindex idx = 0, loop_end = agg_indices.size();
          idx < loop_end;
          ++idx)
@@ -964,16 +960,7 @@ t_ctx_grouped_pkey::get_aggregates(t_uindex nidx,
 
         if (which_agg < 0)
         {
-            if (m_has_label)
-            {
-                t_tscalvec pkeys;
-                auto iters = m_tree->get_pkeys_for_leaf(nidx);
-                aggregates[idx].set(m_state->get_value(
-                    iters.first->m_pkey, grouping_label_col));
-            } else
-            {
-                aggregates[idx].set(m_tree->get_value(nidx));
-            }
+            aggregates[idx].set(m_tree->get_sortby_value(nidx));
         }
         else
         {

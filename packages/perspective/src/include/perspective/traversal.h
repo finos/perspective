@@ -190,7 +190,7 @@ t_traversal::sort_by(const t_config& config,
             {
                 children_ptidx[i] = h_children[i].second;
 
-                src.get_aggregates(children_ptidx[i],
+                src.get_aggregates_for_sorting(children_ptidx[i],
                                    sortby_agg_indices,
                                    aggregates,
                                    ctx2);

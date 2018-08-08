@@ -17,14 +17,21 @@
 #include <perspective/mask.h>
 #include <perspective/filter.h>
 #include <perspective/compat.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <polaris/jitcompiler_psp.h>
-#endif
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
 #endif
 #include <tuple>
+
+#ifdef PSP_ENABLE_PYTHON
+
+namespace JITCompiler {
+
+class PspCompiledComputedColumn;
+
+} // namespace JITCompiler
+
+#endif
 
 namespace perspective
 {
