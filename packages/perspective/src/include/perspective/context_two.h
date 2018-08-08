@@ -97,6 +97,11 @@ class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
                                      t_tvidx idx) const;
     using t_ctxbase<t_ctx2>::get_data;
 
+    t_tscalvec get_data_old_path(t_tvidx start_row,
+                 t_tvidx end_row,
+                 t_tvidx start_col,
+                 t_tvidx end_col) const;
+
   protected:
     t_cinfovec resolve_cells(const t_uidxpvec& cells) const;
 

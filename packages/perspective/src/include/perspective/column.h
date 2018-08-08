@@ -218,7 +218,7 @@ class PERSPECTIVE_EXPORT t_column
     // indices should be > 0
     // scalars will be implicitly understood to be of dtype str
     template <typename VOCAB_T>
-    void set_vocabulary(const VOCAB_T& vocab);
+    void set_vocabulary(const VOCAB_T& vocab, size_t total_size = 0);
 
     void copy_vocabulary(const t_column* other);
 
@@ -493,6 +493,8 @@ template <typename DATA_T>
 t_histogram
 t_column::build_histogram(t_uindex nbuckets, t_mask* mask) const
 {
+    static bool const enable_gethistogram_fix = true;
+
     DATA_T histmin = std::numeric_limits<DATA_T>::max();
     DATA_T histmax = std::numeric_limits<DATA_T>::min();
 
@@ -515,16 +517,24 @@ t_column::build_histogram(t_uindex nbuckets, t_mask* mask) const
         }
     }
 
+    t_histogram rval(nbuckets);
+
     t_float64 range = histmax - histmin;
     t_float64 bucket_size = range / nbuckets;
 
-    t_histogram rval(nbuckets);
-
     for (t_uindex idx = 0; idx < nbuckets; ++idx)
     {
-        rval.m_buckets[idx].m_begin.set(histmin + idx * bucket_size);
-        rval.m_buckets[idx].m_end.set(histmin +
+        if( enable_gethistogram_fix )
+        {
+            rval.m_buckets[idx].m_begin.set(std::numeric_limits<DATA_T>::max());
+            rval.m_buckets[idx].m_end.set(std::numeric_limits<DATA_T>::min());
+        }
+        else
+        {
+            rval.m_buckets[idx].m_begin.set(histmin + idx * bucket_size);
+            rval.m_buckets[idx].m_end.set(histmin +
                                       (idx + 1) * bucket_size);
+        }
     }
 
     for (t_uindex idx = 0; idx < nrows; ++idx)
@@ -542,10 +552,26 @@ t_column::build_histogram(t_uindex nbuckets, t_mask* mask) const
             continue;
         }
 
-        t_uindex buck_num = v == histmax
-                                ? nbuckets - 1
-                                : static_cast<t_uindex>(std::floor(
-                                      (v - histmin) / bucket_size));
+        t_uindex buck_num;
+        if( enable_gethistogram_fix )
+        {
+
+            buck_num = v >= histmax
+                                    ? nbuckets - 1
+                                    : static_cast<t_uindex>(std::max( 0.0, std::floor(
+                                          (v - histmin) / bucket_size)));
+
+
+            rval.m_buckets[idx].m_begin.set( std::min(rval.m_buckets[buck_num].m_begin.get<DATA_T>(), v ) );
+            rval.m_buckets[idx].m_end.set( std::max(rval.m_buckets[buck_num].m_end.get<DATA_T>(), v ) );
+        }
+        else
+        {
+            buck_num = v == histmax
+                                    ? nbuckets - 1
+                                    : static_cast<t_uindex>(std::floor(
+                                          (v - histmin) / bucket_size));
+        }
 
         rval.m_buckets[buck_num].m_count += 1;
     }
@@ -561,12 +587,13 @@ t_column::raw_fill(DATA_T v)
 
 template <typename VOCAB_T>
 void
-t_column::set_vocabulary(const VOCAB_T& vocab)
+t_column::set_vocabulary(const VOCAB_T& vocab, size_t total_size)
 {
+    if( total_size )
+        m_vocab->reserve( total_size, vocab.size() + 1 );
+
     for (const auto& kv : vocab)
-    {
         m_vocab->get_interned(kv.first.get_char_ptr());
-    }
 }
 
 template <>

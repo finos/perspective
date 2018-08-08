@@ -7,54 +7,45 @@
  *
  */
 
-/******************************************************************************
- *
- * Copyright (c) 2017, the Perspective Authors.
- *
- * This file is part of the Perspective library, distributed under the terms of
- * the Apache License 2.0.  The full license can be found in the LICENSE file.
- *
- */
-
 #pragma once
+#include <perspective/first.h>
+ 
+#ifdef PSP_ENABLE_PYTHON
 
-#ifdef __unix
-#define OPEN_MODE_BINARY 0
-#define OPEN_PMODE 0644
+#include <ASGUtils/portable.h>
+
 #else
-#define OPEN_MODE_BINARY O_BINARY
-#define OPEN_PMODE ( FILE_SHARE_READ | FILE_SHARE_WRITE )
-#define strcasecmp stricmp
-#endif
 
-#define CXX_FINAL    final
-#define CXX_OVERRIDE override
-
-#ifdef __GNUC__
-#define CXX_NOEXCEPT noexcept(true)
-#else
-#define CXX_NOEXCEPT
-#endif
-
+// standalone build, no ASGUtils
 #if defined( __GNUC__ )
-
 #define __ALWAYS_INLINE__ __attribute__(( always_inline ))
+#ifndef NOINLINE
 #define NOINLINE __attribute__(( noinline ))
+#endif
+
+#ifndef NORETURN
 #define NORETURN __attribute__((__noreturn__)) void
+#endif
+
 #define UNUSED __attribute__(( unused ))
 #define PRAGMA_GCC( X_ ) _Pragma( #X_ )
 #define PRAGMA_VC( X_ )
-#define ASG_BREAK() __asm__( "int3" )
-
 #else
 
 #define __ALWAYS_INLINE__ __forceinline
+
+// TODO: Resolve collision on NOINLINE and NORETURN with fxalib
+#ifndef NOINLINE
 #define NOINLINE __declspec( noinline )
+#endif
+
+#ifndef NORETURN
 #define NORETURN __declspec( noreturn ) void
+#endif
+
 #define UNUSED
 #define PRAGMA_GCC( X_ )
 #define PRAGMA_VC( X_ ) __pragma( X_ )
-#define ASG_BREAK() DebugBreak()
 
 #endif
 
@@ -63,3 +54,5 @@
 
 #define SUPPRESS_WARNINGS_VC( X_ ) PRAGMA_VC( warning( push ) ) PRAGMA_VC( warning( disable: X_ ) )
 #define RESTORE_WARNINGS_VC() PRAGMA_VC( warning( pop ) )
+
+#endif

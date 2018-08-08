@@ -137,7 +137,10 @@ notify_sparse_tree_common(t_table_sptr strands,
 
     if (!leaf_paths.empty() && traversal.get() && traversal->size() == 1)
     {
-       traversal->populate_root_children(tree);   
+        if ( traversal->get_node( 0 ).m_expanded )
+        {
+            traversal->populate_root_children( tree );
+        }
     }
     else
     {
