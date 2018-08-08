@@ -185,7 +185,7 @@ class Row extends HTMLElement {
         const computed_input_column = this.querySelector('#computed_input_column');
         const computation_name = this.querySelector('#computation_name');
         computation_name.textContent = data.computation.name;
-        computed_input_column.textContent = data.input_column; //.getAttribute('computed_input_column');
+        computed_input_column.textContent = data.input_column;
     }
 
     _update_filter(event) {
@@ -218,13 +218,13 @@ class Row extends HTMLElement {
         return {
             column_name: data.column_name,
             input_column: data.input_column,
+            input_type: data.input_type,
             computation: data.computation,
             type: data.type,
         };
     }
 
     connectedCallback() {
-        // todo add edit button callback here
         let li = this.querySelector('.row_draggable');
         li.addEventListener('dragstart', ev => {
             if (this.hasAttribute('filter')) {

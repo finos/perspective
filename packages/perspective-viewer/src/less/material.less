@@ -234,7 +234,7 @@ perspective-viewer #app {
                     text-align: center;
                 }
 
-                .row_draggable {                            
+                .row_draggable {
                     background: none;
                     border-right: 0;
                     color: #666;
@@ -325,6 +325,14 @@ perspective-viewer #app {
                     overflow: hidden;
                 }
 
+                &.computed {
+                    #psp_row {
+                        .row_draggable {
+                            height: 40px !important;
+                        }
+                    }
+                }
+
                 .is_visible {
                     opacity: 0.5;
                 }
@@ -357,7 +365,7 @@ perspective-viewer #app {
                         &:before {
                             font-family: "Material Icons";
                             content: "more_vert" !important;
-                            font-size: 10px;
+                            font-size: 12px;
                         }
                     }
                 }
@@ -421,7 +429,7 @@ perspective-viewer #app {
                 color: #666;
                 font-family: @material-sans-serif-fonts !important;
                 text-transform: none;
-                
+
                 &:hover {
                     color: #000;
                 }

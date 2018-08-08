@@ -222,6 +222,12 @@ perspective-viewer {
                             #name:before {
                                 opacity: 1 !important;
                             }
+
+                            .row_computed {
+                                span {
+                                    color: @coolgrey200 !important;
+                                }
+                            }
                         }
 
                         &.active {
@@ -232,7 +238,13 @@ perspective-viewer {
                         }
 
                         #name {
-                            color: #666;
+                            color: @darkgray;
+                        }
+
+                        .row_computed {
+                            span {
+                                color: @darkgray !important;
+                            }
                         }
                     }
                 }
@@ -255,9 +267,6 @@ perspective-viewer {
                             color: #fe9292;
                         }
                     }
-                }
-            }
-        }
 
                     #psp-cc-computation__input-column {
                         border-bottom-color: @coolgrey600;
@@ -288,13 +297,13 @@ perspective-viewer {
                     }
                 }
             }
-            
+
             #side_panel__actions {
                 button {
-                    color: @coolgrey200;
+                    color: @coolgrey200 !important;
 
                     &:hover {
-                        color: @coolgrey100;
+                        color: @coolgrey100 !important;
                     }
                 }
             }

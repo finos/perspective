@@ -202,12 +202,14 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null) {
 exports.drag_drop = async function drag_drop(page, origin, target) {
     const element = await page.$(origin);
     const box = await element.boundingBox();
+    process.stdout.write(element, box);
     const element2 = await page.$(target);
     const box2 = await element2.boundingBox();
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    process.stdout.write(element2, box2);
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, {steps: 100});
     await page.mouse.down();
     await page.waitFor(1000);
-    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2);
+    await page.mouse.move(box2.x + box2.width / 2, box2.y + box2.height / 2, {steps: 100});
     await page.mouse.up();
 }
 

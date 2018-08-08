@@ -233,9 +233,7 @@ function column_visibility_clicked(ev) {
     } else {
         // check if we're manipulating computed column input
         if(ev.path[1].id === 'psp-cc-computation__input-column') {
-            this._computed_column_input_column.innerHTML = '';
-            this._computed_column_input_column.classList.remove('dropped');
-            this._computed_column.setAttribute('input_column', '');
+            this._computed_column._clear_input_column();
             this._update_column_view();
             return;
         }
@@ -317,6 +315,16 @@ function set_aggregate_attribute(aggs) {
     }, {})));
 }
 
+function _format_computed_data(cc) {
+    return {
+        column_name: cc[0],
+        input_column: cc[1].input_column,
+        input_type: cc[1].input_type,
+        computation: cc[1].computation,
+        type: cc[1].type
+    };
+}
+
 async function loadTable(table) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
@@ -330,8 +338,6 @@ async function loadTable(table) {
         table.schema(),
         table.computed_schema()
     ]);
-
-    console.log(computed_schema);
 
     // todo: computed columns do NOT persist across refreshes
     // fixme: find better implementation than strip computed columns
@@ -422,17 +428,11 @@ async function loadTable(table) {
 
         // fixme better approach please
         for (let cc of computed_cols) {
-            // todo: spin off into side function?
-            let cc_meta = {
-                column_name: cc[0],
-                input_column: cc[1].input_column,
-                computation: cc[1].computation,
-                type: cc[1].type
-            };
+            let cc_data = _format_computed_data(cc);
             let aggregate = aggregates
                 .filter(a => a.column === cc[0])
                 .map(a => a.op)[0];
-            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_meta);
+            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
             this._inactive_columns.appendChild(row);
         }
 
@@ -457,17 +457,11 @@ async function loadTable(table) {
 
         // fixme better approach please
         for (let cc of computed_cols) {
-            // fixme reduce redundancy and pull from one spot, consistent naming
-            let cc_meta = {
-                column_name: cc[0],
-                input_column: cc[1].input_column,
-                computation: cc[1].computation,
-                type: cc[1].type
-            };
+            let cc_data = _format_computed_data(cc);
             let aggregate = aggregates
                 .filter(a => a.column === cc[0])
                 .map(a => a.op)[0];
-            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_meta);
+            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
             this._inactive_columns.appendChild(row);
         }
 
@@ -864,27 +858,19 @@ class ViewPrivate extends HTMLElement {
         const data = event.detail;
         let computed_column_name = data.column_name;
 
-        // fixme: new table wipes old attribute data
         this._table.columns().then((cols) => {
             // edit overwrites last column, otherwise avoid name collision
             if(cols.includes(computed_column_name) && !data.edit) {
                 computed_column_name += (Math.round(Math.random() * 100));
             }
 
-            /**
-             * TODO: computation data flow
-             * make sure that the computation is saved as part of the table on a separate accessible object
-             * we need the computation to set its type
-             * ideal solution: store the computation as part of the computed schema, or at least its component types
-             *
-             */
-
             const params = [{
                 computation: data.computation,
                 column: computed_column_name,
                 func: data.computation.func,
-                inputs: [data.input_column],
-                type: data.computation.return_type
+                inputs: [data.input_column.name],
+                input_type: data.input_column.type,
+                type: data.computation.return_type,
             }];
 
             const table = this._table.add_computed(params);
@@ -1445,7 +1431,7 @@ class View extends ViewPrivate {
      * 
      */
     handleClipboardCopy(options) {
-        let data
+        let data;
         if (!this._view) {
             console.warn("No view to copy - skipping");
             return;
@@ -1465,7 +1451,7 @@ class View extends ViewPrivate {
             } else {
                 console.warn("Timeout expired - copy to clipboard cancelled.");
             }
-        }
+        };
         f();
     }
 }
