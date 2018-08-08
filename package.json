@@ -5,6 +5,8 @@
 	},
 	"scripts": {
 		"build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build || npm run _emsdk -- npm run _build",
+		"build_bench": "lerna run build_bench --stream",
+		"bench": "lerna run bench --stream",
 		"build_test": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build_test || npm run _emsdk -- npm run _build_test",
 		"test": "npm run _test_perspective && npm run _test_viewer && npm run _test_hypergrid && npm run _test_highcharts",
 		"quiet_test": "npm run _puppeteer -- npm run _quiet_test",

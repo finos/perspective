@@ -2,10 +2,10 @@ const path = require('path');
 const common = require('../../src/config/common.config.js');
 
 module.exports = Object.assign({}, common(), {
-	plugins: [],
-    entry: './test/js/benchmark.js',
+    entry: './bench/js/report.js',
+    target: "node",
     output: {
-        filename: 'benchmark.js',
+        filename: 'report.js',
         path: path.resolve(__dirname, '../../build')
     }
 });
