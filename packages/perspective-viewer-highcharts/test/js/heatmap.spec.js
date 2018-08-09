@@ -20,8 +20,14 @@ utils.with_server({}, () => {
 
         describe('tooltip tests', () => {
             const text = '.highcharts-label.highcharts-tooltip > text';
+            const point = '.highcharts-point';
+
+            test.capture('tooltip shows on hover.', async page => {
+                await utils.invoke_tooltip(point, page);
+            });
+
             test.run("tooltip shows a value.", async page => {
-                await utils.invoke_tooltip('.highcharts-point', page);
+                await utils.invoke_tooltip(point, page);
                 return await page.$eval(
                     text, element => element.textContent !== "");
             });

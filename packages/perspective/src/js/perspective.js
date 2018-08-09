@@ -482,19 +482,28 @@ view.prototype.schema = async function() {
         } else if (types[col_name] === 12) {
             new_schema[col_name] = "date";
         }
-        if (this.sides() > 0) {
-            for (let agg in this.config.aggregate) {
-                agg = this.config.aggregate[agg];
-                if (agg.column.join(',') === col_name) {
-                    if (["distinct count", "distinctcount", "distinct", "count"].indexOf(agg.op) > -1) {
-                        new_schema[col_name] = "integer";
-                    }
-
-                }
-            }
+        if (this.sides() > 0 && this.config.row_pivot.length > 0) {
+            new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }
     return new_schema;
+}
+
+const map_aggregate_types = function(col_name, orig_type, aggregate) {
+    const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
+    const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
+
+    for (let agg in aggregate) {
+        let found_agg = aggregate[agg];
+        if (found_agg.column.join(',') === col_name) {
+            if (INTEGER_AGGS.includes(found_agg.op)) {
+                return "integer";
+            } else if (FLOAT_AGGS.includes(found_agg.op)) {
+                return "float";
+            }
+        }
+    }
+    return orig_type;
 }
 
 const to_format = async function (options, formatter) {
