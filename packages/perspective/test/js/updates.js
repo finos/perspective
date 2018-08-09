@@ -19,6 +19,12 @@ var data = [
     {'x': 4, 'y':'d', 'z': false}
 ];
 
+var col_data = {
+    'x': [1, 2, 3, 4],
+    'y': ['a', 'b', 'c', 'd'],
+    'z': [true, false, true, false]
+};
+
 var meta = {
     'x': "integer",
     'y': "string",
@@ -82,6 +88,36 @@ module.exports = (perspective) => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+        });
+
+        it("Meta constructor then column oriented `update()`", async function () {
+            var table = perspective.table(meta);
+            table.update(col_data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(data);
+        });
+
+        it("Column data constructor then column oriented `update()`", async function () {
+            var colUpdate = {
+                'x': [3, 4, 5],
+                'y': ['h', 'i', 'j'],
+                'z': [false, true, false],
+            };
+
+            var expected = [
+                {'x': 1, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': false},
+                {'x': 3, 'y':'h', 'z': false},
+                {'x': 4, 'y':'i', 'z': true},
+                {'x': 5, 'y':'j', 'z': false}
+            ];
+
+            var table = perspective.table(col_data, {index: "x"});
+            table.update(colUpdate);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(expected);
         });
 
         it("Multiple `update()`s", async function () {
