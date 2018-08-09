@@ -195,6 +195,10 @@ function parse_data(data, names, types) {
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
 
+        // Names and types will be added (all columns must be given set)
+        names = [];
+        types = [];
+
         // Column oriented
         for (let name in data) {
             names.push(name);
