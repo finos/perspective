@@ -68,6 +68,25 @@ function infer_type(x) {
 }
 
 /**
+ * Gets the type of a column.
+ * @private
+ * @returns {string}
+ */
+function get_column_type(val) {
+    if (val === 1 || val === 2) {
+        return "integer";
+    } else if (val === 19) {
+        return "string";
+    } else if (val === 10 || val === 9) {
+        return "float";
+    } else if (val === 11) {
+        return "boolean";
+    } else if (val === 12) {
+        return "date";
+    }
+}
+
+/**
  * Do any necessary data transforms on columns. Currently it does the following
  * transforms
  * 1. Date objects are converted into float millis since epoch
@@ -935,7 +954,8 @@ table.prototype._schema = function () {
         if (columns.get(key) === "psp_okey") {
             continue;
         }
-        if (types.get(key).value === 1 || types.get(key).value === 2) {
+        new_schema[columns.get(key)] = get_column_type(types.get(key).value);
+        /*if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
             new_schema[columns.get(key)] = "string";
@@ -945,7 +965,7 @@ table.prototype._schema = function () {
             new_schema[columns.get(key)] = "boolean";
         } else if (types.get(key).value === 12) {
             new_schema[columns.get(key)] = "date";
-        }
+        }*/
     }
     schema.delete();
     columns.delete();
@@ -980,30 +1000,13 @@ table.prototype._computed_schema =  function() {
         const column_name = computed[i].column;
         const column_type = computed[i].type;
 
-        const column = {
-            type: undefined,
-            input_column: undefined,
-            input_type: undefined,
-            computation: undefined
-        };
+        const column = {};
 
-        column.type = "integer";
-        if (column_type === 1 || column_type === 2) {
-            column.type = "integer";
-        } else if (column_type === 19) {
-            column.type = "string";
-        } else if (column_type === 10 || column_type === 9) {
-            column.type = "float";
-        } else if (column_type === 11) {
-            column.type = "boolean";
-        } else if (column_type === 12) {
-            column.type = "date";
-        }
-
-        // edit this when we need to support multiple input columns
-        column.input_column = computed[i].inputs[0];
+        column.type = get_column_type(column_type);
+        column.input_column = computed[i].inputs[0]; // edit to support multiple input columns
         column.input_type = computed[i].input_type;
         column.computation = computed[i].computation;
+
         computed_schema[column_name] = column;
     }
 
@@ -1414,6 +1417,55 @@ table.prototype._columns = function () {
  */
 table.prototype.columns = async function () {
     return this._columns();
+}
+
+table.prototype._column_metadata = function () {
+    let schema = this.gnode.get_tblschema();
+    let computed_schema = this._computed_schema();
+    let cols = schema.columns();
+    let types = schema.types();
+
+    let metadata = [];
+    for (let cidx = 0; cidx < cols.size(); cidx++) {
+        let name = cols.get(cidx);
+        let meta = {};
+
+        if (name === "psp_okey") {
+            continue;
+        }
+
+        meta.name = name;
+        meta.type = get_column_type(types.get(cidx).value);
+
+        let computed_col = computed_schema[name];
+
+        if (computed_col !== undefined) {
+            meta.computed = {
+                input_column: computed_col.input_column,
+                input_type: computed_col.input_type,
+                computation: computed_col.computation
+            }
+        } else {
+            meta.computed = undefined;
+        }
+
+        metadata.push(meta);
+    }
+
+    return metadata;
+}
+
+/**
+ * Column metadata for this table. If the column is computed, the `computed` property
+ * is an Object containing `input_column`, `input_type`, and `computation`. Otherwise,
+ * `computed` is `undefined`.
+ *
+ * @async
+ *
+ * @returns {Array<object>} An array of Objects containing metadata for each column.
+ */
+table.prototype.column_metadata = function() {
+    return this._column_metadata();
 }
 
 table.prototype.execute = function (f) {
