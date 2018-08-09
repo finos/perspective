@@ -18,6 +18,12 @@ var data = [
     {'x': 4, 'y':'d', 'z': false}
 ];
 
+var col_data = {
+    'x': [1, 2, 3, 4],
+    'y': ['a', 'b', 'c', 'd'],
+    'z': [true, false, true, false]
+};
+
 var meta = {
     'x': "integer",
     'y': "string",
@@ -176,6 +182,13 @@ module.exports = (perspective) => {
 
         it("JSON constructor", async function () {
             var table = perspective.table(data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(data).toEqual(result);
+        });
+
+        it("JSON column oriented constructor", async function () {
+            var table = perspective.table(col_data);
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
