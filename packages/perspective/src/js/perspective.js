@@ -103,7 +103,9 @@ function infer_type(x) {
 function parse_data(data, names, types) {
     let preloaded = types ? true : false;
     names = names || [];
-    if (types === undefined) {
+
+    const isColumnOriented = Array.isArray(data[Object.keys(data)[0]]);
+    if (types === undefined || isColumnOriented) {
         types = []
     } else {
         let _types = [];
@@ -193,7 +195,7 @@ function parse_data(data, names, types) {
             row_count = col.length;
         }
 
-    } else if (Array.isArray(data[Object.keys(data)[0]])) {
+    } else if (isColumnOriented) {
 
         // Names and types will be added (all columns must be given set)
         names = [];
