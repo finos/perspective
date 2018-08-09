@@ -482,7 +482,7 @@ view.prototype.schema = async function() {
         } else if (types[col_name] === 12) {
             new_schema[col_name] = "date";
         }
-        if (this.sides() > 0) {
+        if (this.sides() > 0 && this.config.row_pivot.length > 0) {
             new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }

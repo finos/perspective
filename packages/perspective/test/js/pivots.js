@@ -124,6 +124,36 @@ module.exports = (perspective) => {
             expect(result2).toEqual(meta);
         });
 
+        it("['x'] translates type `string` to `integer` when pivoted by row", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['x'],
+                aggregate: [{column: 'y', op: 'distinct count'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({y: 'integer'});
+        });
+
+        it("['x'] translates type `integer` to `float` when pivoted by row", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['y'],
+                aggregate: [{column: 'x', op: 'avg'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({x: 'float'});
+        });
+
+        it("['x'] does not translate type when only pivoted by column", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                col_pivot: ['y'],
+                aggregate: [{column: 'x', op: 'avg'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({x: 'integer'});
+        });
+
         it("['x'] has the correct # of rows", async function () {
             var table = perspective.table(data);
             var view = table.view({
