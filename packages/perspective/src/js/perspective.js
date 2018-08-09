@@ -203,8 +203,8 @@ function parse_data(data, names, types) {
             // Infer column type if necessary
             if (!preloaded) {
                 let i = 0;
-                let inferredType = undefined;
-                while(!inferredType && i < 100 && i < data[name].length) {
+                let inferredType = null;
+                while(inferredType === null && i < 100 && i < data[name].length) {
                     inferredType = infer_type(data[name][i]);
                     i++;
                 }
