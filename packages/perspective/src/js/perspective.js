@@ -194,12 +194,26 @@ function parse_data(data, names, types) {
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
-
         // Column oriented
+
+        names = Object.keys(data);
+
+        let colNum = 0;
         for (let name in data) {
-            names.push(name);
-            types.push(infer_type(data[name][0]));
-            let transformed = transform_data(types[types.length - 1], data[name]);
+            // Infer column type if necessary
+            if (!preloaded) {
+                let i = 0;
+                let inferredType = null;
+                while(inferredType === null && i < 100 && i < data[name].length) {
+                    inferredType = infer_type(data[name][i]);
+                    i++;
+                }
+                inferredType = inferredType || __MODULE__.t_dtype.DTYPE_STR;
+                types.push(inferredType);
+            }
+
+            let transformed = transform_data(types[colNum], data[name]);
+            colNum++;
             cdata.push(transformed);
             row_count = transformed.length
         }
