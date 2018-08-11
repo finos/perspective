@@ -1363,11 +1363,8 @@ class Host {
 
     process(msg) {
         switch (msg.cmd) {
-            case 'init':
-                this.init(msg);
-                break;
             case 'table':
-                this._tables[msg.name] = perspective.table(msg.data, msg.options);
+                this._tables[msg.name] = perspective.table(msg.args[0], msg.options);
                 break;
             case 'add_computed':
                 let table = this._tables[msg.original];
@@ -1483,6 +1480,12 @@ class Host {
                 }
                 break;
             }
+            default:
+                if (this.custom) {
+                    this.custom(msg);
+                    break;
+                }
+                console.error(`Invalid message`, msg);
         }
     }
 }
@@ -1498,37 +1501,41 @@ class WorkerHost extends Host {
         self.postMessage(msg);
     }
 
-    init(msg) {
-        if (typeof WebAssembly === 'undefined') {
-            console.log("Loading asm.js");
-            __MODULE__ = __MODULE__({
-                wasmJSMethod: "asmjs",
-                locateFile: path => `${path}`,
-                filePackagePrefixURL: msg.path,
-                printErr: (x) => console.warn(x),
-                print: (x) => console.log(x)
-            //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
-            });
-        } else {
-            console.log('Loading wasm');
-            if (msg.data) {
-                module = {};
-                module.wasmBinary = msg.data;
-                module.wasmJSMethod = 'native-wasm';
-                __MODULE__ = __MODULE__(module);
-            } else {
-                let wasmXHR = new XMLHttpRequest();
-                wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
-                wasmXHR.responseType = 'arraybuffer';
-                wasmXHR.onload = function() {
-                    module = {};
-                    module.wasmBinary = wasmXHR.response;
-                    module.wasmJSMethod = 'native-wasm';
-                    __MODULE__ = __MODULE__(module);
+    custom(msg) {
+        switch(msg.cmd) {
+            case 'init':
+                if (typeof WebAssembly === 'undefined') {
+                    console.log("Loading asm.js");
+                    __MODULE__ = __MODULE__({
+                        wasmJSMethod: "asmjs",
+                        locateFile: path => `${path}`,
+                        filePackagePrefixURL: msg.path,
+                        printErr: (x) => console.warn(x),
+                        print: (x) => console.log(x)
+                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
+                    });
+                } else {
+                    console.log('Loading wasm');
+                    if (msg.data) {
+                        module = {};
+                        module.wasmBinary = msg.data;
+                        module.wasmJSMethod = 'native-wasm';
+                        __MODULE__ = __MODULE__(module);
+                    } else {
+                        let wasmXHR = new XMLHttpRequest();
+                        wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
+                        wasmXHR.responseType = 'arraybuffer';
+                        wasmXHR.onload = function() {
+                            module = {};
+                            module.wasmBinary = wasmXHR.response;
+                            module.wasmJSMethod = 'native-wasm';
+                            __MODULE__ = __MODULE__(module);
+                        };
+                        wasmXHR.send(null);
+                    }
                 };
-                wasmXHR.send(null);
-            }
-        };
+                break;
+        }
     }
 
 }
