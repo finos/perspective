@@ -1486,6 +1486,7 @@ class Host {
                     break;
                 }
                 console.error(`Invalid message`, msg);
+                this.post(msg);
         }
     }
 }

@@ -81,7 +81,7 @@ view.prototype.on_delete = subscribe('on_delete', 'view_method', true);
 function table(worker, data, options) {
     this._worker = worker;
     // Set up msg
-    name = Math.random() + "";
+    name = options.name || Math.random() + "";
     var msg = {
         cmd: 'table',
         name: name,
@@ -113,7 +113,13 @@ function computed_table(worker, computed, name) {
     this._worker.post(msg);
 }
 
+function proxy_table(worker, name) {
+    this._worker = worker;
+    this._name = name;
+}
+
 computed_table.prototype = table.prototype;
+proxy_table.prototype = table.prototype;
 
 table.prototype.add_computed = function (computed) {
     return new computed_table(this._worker, computed, this._name);
@@ -181,6 +187,10 @@ worker.prototype.post = function (msg, resolve, reject, keep_alive = false) {
 
 worker.prototype.send = function (msg) {
     throw new Error("post() not implemented");
+}
+
+worker.prototype.open = function (name) {
+    return new proxy_table(this, name);
 }
 
 let _initialized = false;

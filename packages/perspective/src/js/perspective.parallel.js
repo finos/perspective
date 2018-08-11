@@ -70,7 +70,7 @@ WebWorker.prototype.send = function (msg) {
     }
 }
 
-worker.prototype._detect_transferable = function () {
+WebWorker.prototype._detect_transferable = function () {
     var ab = new ArrayBuffer(1);
     this._worker.postMessage(ab, [ab]);
     this._worker.transferable = (ab.byteLength === 0);
@@ -81,7 +81,7 @@ worker.prototype._detect_transferable = function () {
     }
 }
 
-worker.prototype._start_embedded = function () {
+WebWorker.prototype._start_embedded = function () {
     console.log("Running PSP in embedded mode");
     var w = new window.__PSP_WORKER__();
     for (var key in this._worker) {
@@ -93,7 +93,7 @@ worker.prototype._start_embedded = function () {
     this._detect_transferable();
 };
 
-worker.prototype._start_cross_origin = function () {
+WebWorker.prototype._start_cross_origin = function () {
     var dir = (typeof WebAssembly === "undefined" ? 'asmjs' : 'wasm_async');
     XHRWorker(__SCRIPT_PATH__.path() + dir + '/perspective.js', function(worker) {
         for (var key in this._worker) {
@@ -112,14 +112,14 @@ worker.prototype._start_cross_origin = function () {
     }, this);
 };
 
-worker.prototype._start_cross_origin_asmjs = function () {
+WebWorker.prototype._start_cross_origin_asmjs = function () {
     this._worker.postMessage({
         cmd: 'init',
         path: __SCRIPT_PATH__.path()
     });
 }
 
-worker.prototype._start_cross_origin_wasm = function () {
+WebWorker.prototype._start_cross_origin_wasm = function () {
     var wasmXHR = new XMLHttpRequest();
     wasmXHR.open('GET', __SCRIPT_PATH__.path() + 'wasm_async/psp.wasm', true);
     wasmXHR.responseType = 'arraybuffer';
@@ -143,7 +143,7 @@ function detect_iphone () {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
-worker.prototype._start_same_origin = function () {
+WebWorker.prototype._start_same_origin = function () {
     var dir = (typeof WebAssembly === "undefined" || detect_iphone() ? 'asmjs' : 'wasm_async');
     var w =  new Worker(__SCRIPT_PATH__.path() + dir + '/perspective.js');
     for (var key in this._worker) {
@@ -155,16 +155,16 @@ worker.prototype._start_same_origin = function () {
     this._detect_transferable();
 };
 
-worker.prototype.terminate = function () {
+WebWorker.prototype.terminate = function () {
     this._worker.terminate();
     this._worker = undefined;
 };
 
 export default {
     worker: function () {
-        // if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
-        //     return perspective;
-        // }
+        if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
+            return perspective;
+        }
         return new WebWorker();
     },
 

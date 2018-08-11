@@ -44,8 +44,9 @@ class WebSocketHost extends module.exports.Host {
         super();
         this.REQS = {};        
         this._wss = new WebSocket.Server({port: port});
-        this._wss.on('connection', function connection(ws) {
+        this._wss.on('connection', ws => {
             ws.on('message', msg => {
+                msg = JSON.parse(msg);
                 this.REQS[msg.id] = ws;
                 this.process(msg);
             });
@@ -55,12 +56,16 @@ class WebSocketHost extends module.exports.Host {
     }
 
     post(msg) {
-        this.REQS[msg.id].send(msg);
+        this.REQS[msg.id].send(JSON.stringify(msg));
         delete this.REQS[msg.id];
     }
 
     init() {
        
+    }
+
+    open(name, data, options) {
+        this._tables[name] = module.exports.table(data, options);
     }
 }
 
