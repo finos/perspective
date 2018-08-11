@@ -1346,64 +1346,45 @@ function error_to_json(error) {
     return obj;
 }
 
-if (typeof self !== "undefined" && self.addEventListener) {
-    let _tables = {};
-    let _views = {};
+class Host {
 
-    self.addEventListener('message', function(e) {
-        let msg = e.data;
+    constructor() {
+        this._tables = {};
+        this._views = {};
+    }
+
+    init(msg) {
+        throw new Error("init() not implemented!");
+    }
+
+    post(msg) {
+        throw new Error("post() not implemented!");
+    }
+
+    process(msg) {
         switch (msg.cmd) {
             case 'init':
-                if (typeof WebAssembly === 'undefined') {
-                    console.log("Loading asm.js");
-                    __MODULE__ = __MODULE__({
-                        wasmJSMethod: "asmjs",
-                        locateFile: path => `${path}`,
-                        filePackagePrefixURL: msg.path,
-                        printErr: (x) => console.warn(x),
-                        print: (x) => console.log(x)
-                   //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
-                    });
-                 } else {
-                    console.log('Loading wasm');
-                    if (msg.data) {
-                        module = {};
-                        module.wasmBinary = msg.data;
-                        module.wasmJSMethod = 'native-wasm';
-                        __MODULE__ = __MODULE__(module);
-                    } else {
-                        let wasmXHR = new XMLHttpRequest();
-                        wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
-                        wasmXHR.responseType = 'arraybuffer';
-                        wasmXHR.onload = function() {
-                            module = {};
-                            module.wasmBinary = wasmXHR.response;
-                            module.wasmJSMethod = 'native-wasm';
-                            __MODULE__ = __MODULE__(module);
-                        };
-                        wasmXHR.send(null);
-                    }
-                };
+                this.init(msg);
                 break;
             case 'table':
-                _tables[msg.name] = perspective.table(msg.data, msg.options);
+                this._tables[msg.name] = perspective.table(msg.data, msg.options);
                 break;
             case 'add_computed':
-                let table = _tables[msg.original];
+                let table = this._tables[msg.original];
                 let computed = msg.computed;
                 // rehydrate computed column functions
                 for (let i = 0; i < computed.length; ++i) {
                     let column = computed[i];
                     eval("column.func = " + column.func);
                 }
-                _tables[msg.name] = table.add_computed(computed);
+                this._tables[msg.name] = table.add_computed(computed);
                 break;
             case 'table_generate':
                 let g;
                 eval("g = " + msg.args)
                 g(function (tbl) {
-                    _tables[msg.name] = tbl;
-                    self.postMessage({
+                    this._tables[msg.name] = tbl;
+                    this.post({
                         id: msg.id,
                         data: 'created!'
                     });
@@ -1412,20 +1393,20 @@ if (typeof self !== "undefined" && self.addEventListener) {
             case 'table_execute':
                 let f;
                 eval("f = " + msg.f);
-                f(_tables[msg.name]);
+                f(this._tables[msg.name]);
                 break;
             case 'view':
-                _views[msg.view_name] = _tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
                 break;
             case 'table_method': {
-                let obj = _tables[msg.name];
+                let obj = this._tables[msg.name];
                 let result;
 
                 try {
 
                     if (msg.subscribe) {
                         obj[msg.method](e => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 data: e
                             });
@@ -1435,19 +1416,19 @@ if (typeof self !== "undefined" && self.addEventListener) {
                         if (result && result.then) {
                         result.then(data => {
                             if (data) {
-                                self.postMessage({
+                                this.post({
                                     id: msg.id,
                                     data: data
                                 });
                             }
                         }).catch(error => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 error: error_to_json(error)
                             });
                         });
                     } else {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             data: result
                         });
@@ -1455,7 +1436,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 }
 
                 } catch (e) {
-                    self.postMessage({
+                    this.post({
                         id: msg.id,
                         error: error_to_json(e)
                     });
@@ -1465,9 +1446,9 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             }
             case 'view_method': {
-                let obj = _views[msg.name];
+                let obj = this._views[msg.name];
                 if (!obj) {
-                    self.postMessage({
+                    this.post({
                         id: msg.id,
                         error: {message: "View is not initialized"}
                     });
@@ -1476,25 +1457,25 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 if (msg.subscribe) {
                     try {
                         obj[msg.method](e => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 data: e
                             });
                         });
                     } catch (error) {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             error: error_to_json(error)
                         });
                     }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             data: result
                         });
                     }).catch(error => {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             error: error_to_json(error)
                         });
@@ -1503,8 +1484,57 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             }
         }
-    }, false);
+    }
+}
 
+class WorkerHost extends Host {
+
+    constructor() {
+        super();
+        self.addEventListener('message', e => this.process(e.data), false);
+    }
+
+    post(msg) {
+        self.postMessage(msg);
+    }
+
+    init(msg) {
+        if (typeof WebAssembly === 'undefined') {
+            console.log("Loading asm.js");
+            __MODULE__ = __MODULE__({
+                wasmJSMethod: "asmjs",
+                locateFile: path => `${path}`,
+                filePackagePrefixURL: msg.path,
+                printErr: (x) => console.warn(x),
+                print: (x) => console.log(x)
+            //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
+            });
+        } else {
+            console.log('Loading wasm');
+            if (msg.data) {
+                module = {};
+                module.wasmBinary = msg.data;
+                module.wasmJSMethod = 'native-wasm';
+                __MODULE__ = __MODULE__(module);
+            } else {
+                let wasmXHR = new XMLHttpRequest();
+                wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
+                wasmXHR.responseType = 'arraybuffer';
+                wasmXHR.onload = function() {
+                    module = {};
+                    module.wasmBinary = wasmXHR.response;
+                    module.wasmJSMethod = 'native-wasm';
+                    __MODULE__ = __MODULE__(module);
+                };
+                wasmXHR.send(null);
+            }
+        };
+    }
+
+}
+
+if (typeof self !== "undefined" && self.addEventListener) {
+    new WorkerHost();   
 };
 
 
@@ -1515,6 +1545,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
  */
 
 const perspective = {
+
+    Host: Host,
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
@@ -1607,7 +1639,7 @@ const perspective = {
     }
 }
 
-module.exports = function(Module) {
+module.exports = function (Module) {
     __MODULE__ = Module;
     return perspective;
 };
