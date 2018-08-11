@@ -23,21 +23,21 @@ class WebSocketWorker extends api.worker {
         super();
         this._ws = new WebSocket(url);
         this._ws.onopen = () => {
-            this.send({id: -1});
+            this.send({id: -1, cmd: 'init'});
         };
         this._ws.onmessage = (msg) => {
             this._handle({data: JSON.parse(msg.data)});
         }
     }
-}
 
-WebSocketWorker.prototype.send = function (msg) {
-    this._ws.send(JSON.stringify(msg));
-}
+    send(msg) {
+        this._ws.send(JSON.stringify(msg));
+    }
 
-WebSocketWorker.prototype.terminate = function () {
-    this._ws.close();  
-};
+    terminate() {
+        this._ws.close();  
+    }
+}
 
 export default {
     worker: function (url) {

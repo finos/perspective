@@ -18,7 +18,7 @@ import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
-    global.performance || {now: Date.now};
+    global.performance = {now: Date.now};
 }
 
 if (typeof self !== "undefined" && self.performance === undefined) {
@@ -1354,7 +1354,7 @@ class Host {
     }
 
     init(msg) {
-        throw new Error("init() not implemented!");
+        this.post(msg);
     }
 
     post(msg) {
@@ -1363,6 +1363,9 @@ class Host {
 
     process(msg) {
         switch (msg.cmd) {
+            case 'init':
+                this.init(msg);
+                break;
             case 'table':
                 this._tables[msg.name] = perspective.table(msg.args[0], msg.options);
                 break;
@@ -1480,13 +1483,6 @@ class Host {
                 }
                 break;
             }
-            default:
-                if (this.custom) {
-                    this.custom(msg);
-                    break;
-                }
-                console.error(`Invalid message`, msg);
-                this.post(msg);
         }
     }
 }
@@ -1502,41 +1498,37 @@ class WorkerHost extends Host {
         self.postMessage(msg);
     }
 
-    custom(msg) {
-        switch(msg.cmd) {
-            case 'init':
-                if (typeof WebAssembly === 'undefined') {
-                    console.log("Loading asm.js");
-                    __MODULE__ = __MODULE__({
-                        wasmJSMethod: "asmjs",
-                        locateFile: path => `${path}`,
-                        filePackagePrefixURL: msg.path,
-                        printErr: (x) => console.warn(x),
-                        print: (x) => console.log(x)
-                    //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
-                    });
-                } else {
-                    console.log('Loading wasm');
-                    if (msg.data) {
-                        module = {};
-                        module.wasmBinary = msg.data;
-                        module.wasmJSMethod = 'native-wasm';
-                        __MODULE__ = __MODULE__(module);
-                    } else {
-                        let wasmXHR = new XMLHttpRequest();
-                        wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
-                        wasmXHR.responseType = 'arraybuffer';
-                        wasmXHR.onload = function() {
-                            module = {};
-                            module.wasmBinary = wasmXHR.response;
-                            module.wasmJSMethod = 'native-wasm';
-                            __MODULE__ = __MODULE__(module);
-                        };
-                        wasmXHR.send(null);
-                    }
+    init(msg) {
+        if (typeof WebAssembly === 'undefined') {
+            console.log("Loading asm.js");
+            __MODULE__ = __MODULE__({
+                wasmJSMethod: "asmjs",
+                locateFile: path => `${path}`,
+                filePackagePrefixURL: msg.path,
+                printErr: (x) => console.warn(x),
+                print: (x) => console.log(x)
+            //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
+            });
+        } else {
+            console.log('Loading wasm');
+            if (msg.data) {
+                module = {};
+                module.wasmBinary = msg.data;
+                module.wasmJSMethod = 'native-wasm';
+                __MODULE__ = __MODULE__(module);
+            } else {
+                let wasmXHR = new XMLHttpRequest();
+                wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
+                wasmXHR.responseType = 'arraybuffer';
+                wasmXHR.onload = function() {
+                    module = {};
+                    module.wasmBinary = wasmXHR.response;
+                    module.wasmJSMethod = 'native-wasm';
+                    __MODULE__ = __MODULE__(module);
                 };
-                break;
-        }
+                wasmXHR.send(null);
+            }
+        };
     }
 
 }
