@@ -11,11 +11,15 @@
     "build/*"
   ],
   "scripts": {
-    "highcharts": "webpack --config src/config/highcharts.plugin.config.js",
+    "bench": "npm-run-all bench:build bench:run",
+    "bench:build": "echo \"No Benchmarks\"",
+    "bench:run": "echo \"No Benchmarks\"",
+    "highcharts": "webpack --color --config src/config/highcharts.plugin.config.js",
     "build": "npm run highcharts",
-    "build_test": "cp test/html/* build && webpack --config test/config/highcharts.config.js",
-    "watch_test": "cp test/html* build && webpack --config --watch test/config/highcharts.config.js",
-    "test": "jest --silent 2>&1",
+    "test:build": "cp test/html/* build && webpack --color --config test/config/highcharts.config.js",
+    "watch_test": "cp test/html* build && webpack --color --config --watch test/config/highcharts.config.js",
+    "test:run": "jest --silent 2>&1",
+    "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete",
     "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"
   },

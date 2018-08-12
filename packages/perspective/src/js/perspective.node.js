@@ -11,6 +11,8 @@ const perspective = require('./perspective.js');
 
 const fs = require('fs');
 
+const WebSocket = require('ws');
+
 let Module;
 
 if (typeof WebAssembly === "undefined") {
@@ -32,3 +34,39 @@ if (typeof WebAssembly === "undefined") {
 }
 
 module.exports = perspective(Module);
+
+/**
+ * A Server instance for a remote perspective.
+ */
+class WebSocketHost extends module.exports.Host {
+
+    constructor(port = 8080) {
+        super();
+        this.REQS = {};        
+        this._wss = new WebSocket.Server({port: port});
+        this._wss.on('connection', ws => {
+            ws.on('message', msg => {
+                msg = JSON.parse(msg);
+                this.REQS[msg.id] = ws;
+                try {
+                    this.process(msg);
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+            ws.on('error', console.error);
+        });
+        console.log(`Listening on port ${port}`);
+    }
+
+    post(msg) {
+        this.REQS[msg.id].send(JSON.stringify(msg));
+        delete this.REQS[msg.id];
+    }
+
+    open(name, data, options) {
+        this._tables[name] = module.exports.table(data, options);
+    }
+}
+
+module.exports.WebSocketHost = WebSocketHost;

@@ -1,0 +1,40 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+        <script src="mobile_fix.js"></script>
+        <script src="perspective.view.js"></script>
+        <script src="hypergrid.plugin.js"></script>
+        <script src="highcharts.plugin.js"></script>
+        <script src="perspective.remote.js"></script>
+
+        <link rel='stylesheet' href="demo.css">
+
+    </head>
+    <body>
+
+        <perspective-viewer id="view1"></perspective-viewer>
+
+        <script>
+
+            window.addEventListener('WebComponentsReady', function () {
+                var elem = document.getElementById('view1');
+                var worker = perspective_remote.default.worker('ws://localhost:3000');
+                elem.load(worker.open('superstore.csv'));
+            });
+
+        </script>
+
+    </body>
+</html>
