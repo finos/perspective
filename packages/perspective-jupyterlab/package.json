@@ -18,7 +18,13 @@
     "access": "public"
   },
   "scripts": {
-    "build": "webpack --config src/config/plugin.config.js",
+    "bench": "npm-run-all bench:build bench:run",
+    "bench:build": "echo \"No Benchmarks\"",
+    "bench:run": "echo \"No Benchmarks\"",
+    "test": "npm-run-all test:build test:run",
+    "test:build": "echo \"No Tests\"",
+    "test:run": "echo \"No Tests\"",
+    "build": "webpack --color --config src/config/plugin.config.js",
     "clean": "rimraf build"
   },
   "dependencies": {

@@ -48,7 +48,11 @@ class WebSocketHost extends module.exports.Host {
             ws.on('message', msg => {
                 msg = JSON.parse(msg);
                 this.REQS[msg.id] = ws;
-                this.process(msg);
+                try {
+                    this.process(msg);
+                } catch (e) {
+                    console.error(e);
+                }
             });
             ws.on('error', console.error);
         });
