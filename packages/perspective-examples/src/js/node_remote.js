@@ -10,7 +10,7 @@
 const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
 const fs = require("fs");
 
-let host = new WebSocketHost(3000);
-let csv = fs.readFileSync('packages/perspective-examples/build/superstore.csv') + "";
+const host = new WebSocketHost(3000);
+const arr = fs.readFileSync(__dirname +'/../../build/superstore.arrow');
 
-host.open("superstore.csv", csv);
+host.open("superstore.arrow", arr);

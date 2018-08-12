@@ -11,6 +11,7 @@
 		"test:build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build_test || npm run _emsdk -- npm run _build_test",
 		"test:run": "npm run _test_perspective && npm run _test_viewer && npm run _test_hypergrid && npm run _test_highcharts",
 		"test": "npm-run-all test:build test:run",
+		"clean": "lerna run clean --stream",
 		"quiet_test": "npm run _puppeteer -- npm run _quiet_test",
 		"write_tests": "WRITE_TESTS=1 npm run test:run",
 		"postinstall": "lerna bootstrap --hoist",

@@ -1361,7 +1361,21 @@ class Host {
         throw new Error("post() not implemented!");
     }
 
-    process(msg) {
+    clear_views(client_id) {
+        for (let key of Object.keys(this._views)) {
+            if (this._views[key].client_id === client_id) {
+                try {
+                    this._views[key].delete();
+                } catch (e) {
+                    console.error(e);
+                }
+                delete this._views[key];
+            }
+        }
+        console.debug(`GC ${Object.keys(this._views).length} views in memory`);
+    }
+
+    process(msg, client_id) {
         switch (msg.cmd) {
             case 'init':
                 this.init(msg);
@@ -1397,6 +1411,7 @@ class Host {
                 break;
             case 'view':
                 this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name].client_id = client_id;
                 break;
             case 'table_method': {
                 let obj = this._tables[msg.name];
@@ -1470,6 +1485,9 @@ class Host {
                     }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
+                        if (msg.method === "delete") {
+                            delete this._views[msg.name];
+                        }
                         this.post({
                             id: msg.id,
                             data: result
@@ -1590,7 +1608,7 @@ const perspective = {
         options.index = options.index || "";
         let pdata;
 
-        if (data instanceof ArrayBuffer) {
+        if (data instanceof ArrayBuffer  || (Buffer && data instanceof Buffer)) {
             // Arrow data
             pdata = load_arrow_buffer(data);
         } else {
