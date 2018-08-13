@@ -27,6 +27,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 
 let __MODULE__;
 
+const CHUNKED_THRESHOLD = 100000
 
 /******************************************************************************
  *
@@ -1606,7 +1607,7 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        let pdata;
+        let pdata, chunked = false;
 
         if (data instanceof ArrayBuffer  || (Buffer && data instanceof Buffer)) {
             // Arrow data
@@ -1616,29 +1617,49 @@ const perspective = {
                 if (data[0] === ",") {
                     data = "_" + data;
                 }
-                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
+                data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
             }
             pdata = parse_data(data);
+            chunked = pdata.row_count > CHUNKED_THRESHOLD;
         }
 
         if (options.index && pdata.names.indexOf(options.index) === -1) {
             throw `Specified index '${options.index}' does not exist in data.`;
         }
 
-        let tbl, gnode, pool;
+        let tbl, gnode, pool, pages;
 
         try {
             // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
 
+            if (chunked) {
+                pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+            } else {
+                pages = pdata.cdata;
+            }
+
             // Fill t_table with data
-            tbl = __MODULE__.make_table(pdata.row_count || 0,
-                pdata.names, pdata.types, pdata.cdata,
+            tbl = __MODULE__.make_table(pages[0].length || 0,
+                pdata.names, pdata.types, pages,
                 0, options.index, pdata.is_arrow, false);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
+
+            if (chunked) {
+                while (pdata.cdata[0].length > 0) {
+                    tbl.delete();
+                    pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+                
+                    tbl = __MODULE__.make_table(pages[0].length || 0,
+                        pdata.names, pdata.types, pages,
+                        gnode.get_table().size(), options.index, pdata.is_arrow, false);
+    
+                    __MODULE__.fill(pool, gnode, tbl);    
+                }
+            }
 
             return new table(gnode, pool, options.index);
         } catch (e) {
