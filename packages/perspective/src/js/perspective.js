@@ -27,6 +27,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 
 let __MODULE__;
 
+const CHUNKED_THRESHOLD = 100000
 
 /******************************************************************************
  *
@@ -1361,7 +1362,21 @@ class Host {
         throw new Error("post() not implemented!");
     }
 
-    process(msg) {
+    clear_views(client_id) {
+        for (let key of Object.keys(this._views)) {
+            if (this._views[key].client_id === client_id) {
+                try {
+                    this._views[key].delete();
+                } catch (e) {
+                    console.error(e);
+                }
+                delete this._views[key];
+            }
+        }
+        console.debug(`GC ${Object.keys(this._views).length} views in memory`);
+    }
+
+    process(msg, client_id) {
         switch (msg.cmd) {
             case 'init':
                 this.init(msg);
@@ -1397,6 +1412,7 @@ class Host {
                 break;
             case 'view':
                 this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name].client_id = client_id;
                 break;
             case 'table_method': {
                 let obj = this._tables[msg.name];
@@ -1470,6 +1486,9 @@ class Host {
                     }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
+                        if (msg.method === "delete") {
+                            delete this._views[msg.name];
+                        }
                         this.post({
                             id: msg.id,
                             data: result
@@ -1588,9 +1607,9 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        let pdata;
+        let pdata, chunked = false;
 
-        if (data instanceof ArrayBuffer) {
+        if (data instanceof ArrayBuffer  || (Buffer && data instanceof Buffer)) {
             // Arrow data
             pdata = load_arrow_buffer(data);
         } else {
@@ -1598,29 +1617,49 @@ const perspective = {
                 if (data[0] === ",") {
                     data = "_" + data;
                 }
-                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
+                data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
             }
             pdata = parse_data(data);
+            chunked = pdata.row_count > CHUNKED_THRESHOLD;
         }
 
         if (options.index && pdata.names.indexOf(options.index) === -1) {
             throw `Specified index '${options.index}' does not exist in data.`;
         }
 
-        let tbl, gnode, pool;
+        let tbl, gnode, pool, pages;
 
         try {
             // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
 
+            if (chunked) {
+                pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+            } else {
+                pages = pdata.cdata;
+            }
+
             // Fill t_table with data
-            tbl = __MODULE__.make_table(pdata.row_count || 0,
-                pdata.names, pdata.types, pdata.cdata,
+            tbl = __MODULE__.make_table(pages[0].length || 0,
+                pdata.names, pdata.types, pages,
                 0, options.index, pdata.is_arrow, false);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
+
+            if (chunked) {
+                while (pdata.cdata[0].length > 0) {
+                    tbl.delete();
+                    pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+                
+                    tbl = __MODULE__.make_table(pages[0].length || 0,
+                        pdata.names, pdata.types, pages,
+                        gnode.get_table().size(), options.index, pdata.is_arrow, false);
+    
+                    __MODULE__.fill(pool, gnode, tbl);    
+                }
+            }
 
             return new table(gnode, pool, options.index);
         } catch (e) {

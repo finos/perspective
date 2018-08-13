@@ -15,25 +15,17 @@ const WebSocket = require('ws');
 
 let Module;
 
-if (typeof WebAssembly === "undefined") {
-    const load_perspective = require("../../build/asmjs/psp.js").load_perspective;
-    Module = load_perspective({
-        wasmJSMethod: "asmjs",
-        memoryInitializerPrefixURL: 'build/asmjs/',
-        asmjsCodeFile: "asmjs/psp.js",
-        ENVIRONMENT: "NODE"
-    });
-} else {
-    const load_perspective = require("../../build/wasm_sync/psp.js").load_perspective;
-    const wasm = fs.readFileSync('./build/wasm_sync/psp.wasm');
-    Module = load_perspective({
-        wasmBinary: wasm,
-        wasmJSMethod: 'native-wasm',
-        ENVIRONMENT: "NODE"
-    });    
-}
+const load_perspective = require("../../build/wasm_sync/psp.js").load_perspective;
+const wasm = fs.readFileSync('./build/wasm_sync/psp.wasm');
+Module = load_perspective({
+    wasmBinary: wasm,
+    wasmJSMethod: 'native-wasm',
+    ENVIRONMENT: "NODE"
+});    
 
 module.exports = perspective(Module);
+
+let CLIENT_ID_GEN = 0;
 
 /**
  * A Server instance for a remote perspective.
@@ -43,16 +35,20 @@ class WebSocketHost extends module.exports.Host {
     constructor(port = 8080) {
         super();
         this.REQS = {};        
-        this._wss = new WebSocket.Server({port: port});
+        this._wss = new WebSocket.Server({port: port, perMessageDeflate: true});
         this._wss.on('connection', ws => {
+            ws.id = CLIENT_ID_GEN++;
             ws.on('message', msg => {
                 msg = JSON.parse(msg);
                 this.REQS[msg.id] = ws;
                 try {
-                    this.process(msg);
+                    this.process(msg, ws.id);
                 } catch (e) {
                     console.error(e);
                 }
+            });
+            ws.on('close', () => {
+                this.clear_views(ws.id);
             });
             ws.on('error', console.error);
         });
