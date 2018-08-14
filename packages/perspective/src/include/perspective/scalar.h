@@ -64,11 +64,6 @@ union t_scalar_u {
 };
 
 // t_scalar should remain a POD type.
-#ifdef PSP_ENABLE_PYTHON
-#pragma pack(push)
-#pragma pack(1)
-#endif
-
 struct PERSPECTIVE_EXPORT t_tscalar
 {
 
@@ -152,10 +147,6 @@ struct PERSPECTIVE_EXPORT t_tscalar
     t_bool m_inplace;
 };
 
-#ifdef PSP_ENABLE_PYTHON
-#pragma pack(pop)
-#endif
-
 typedef std::vector<t_tscalar> t_tscalvec;
 typedef boost::unordered_set<t_tscalar> t_tscalset;
 typedef boost::unordered_map<t_tscalar, t_tvidx> t_tscaltvimap;
@@ -175,40 +166,6 @@ t_tscalar::coerce_numeric() const
 
 template <>
 t_tscalar t_tscalar::coerce_numeric<t_bool>() const;
-
-#ifdef PSP_ENABLE_PYTHON
-t_int64 py_to_int(PyObject* pyo, t_bool& valid);
-t_float64 py_to_float(PyObject* pyo, t_bool& valid);
-
-template <typename DATA_T>
-void
-python_to_tscalar_helper_int(PyObject* pyo, t_tscalar& s)
-{
-    t_bool valid;
-    t_int64 v = py_to_int(pyo, valid);
-    s.set(DATA_T(v));
-    s.m_valid = (valid &&
-                 (v == t_int64(s.get<DATA_T>()))); // truncation check
-}
-
-template <typename DATA_T>
-void
-python_to_tscalar_helper_float(PyObject* pyo, t_tscalar& s)
-{
-    t_bool valid;
-    DATA_T v = py_to_float(pyo, valid);
-    s.set(v);
-    s.m_valid = valid;
-}
-
-PERSPECTIVE_EXPORT PyObject* tscalar_to_python(const t_tscalar& s);
-
-PERSPECTIVE_EXPORT t_tscalar python_to_tscalar(PyObject* pyo);
-
-PERSPECTIVE_EXPORT t_tscalar python_to_tscalar(t_dtype dtype,
-                                               PyObject* pyo);
-
-#endif
 
 template <>
 t_int64 t_tscalar::get() const;

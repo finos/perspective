@@ -7,11 +7,8 @@
  *
  */
 
-#ifndef PSP_ENABLE_PYTHON
 #ifndef PSP_ENABLE_WASM
-#define PSP_ENABLE_PYTHON
 #define PSP_PARALLEL_FOR
-#endif
 #endif
 
 #pragma once
@@ -20,9 +17,6 @@
 #define NOMINMAX
 #endif // ifndex nominmax
 #endif // win32
-#ifdef PSP_ENABLE_PYTHON
-#include <Python.h>
-#endif
 
 #ifdef PSP_VERIFY
 #define PSP_STORAGE_VERIFY

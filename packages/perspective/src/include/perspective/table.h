@@ -23,16 +23,6 @@
 #endif
 #include <tuple>
 
-#ifdef PSP_ENABLE_PYTHON
-
-namespace JITCompiler {
-
-class PspCompiledComputedColumn;
-
-} // namespace JITCompiler
-
-#endif
-
 namespace perspective
 {
 
@@ -81,21 +71,6 @@ struct PERSPECTIVE_EXPORT t_table_recipe
     // in same order as m_schema.m_columns
     t_column_recipe_vec m_columns;
 };
-
-#ifdef PSP_ENABLE_PYTHON
-typedef JITCompiler::PspCompiledComputedColumn t_jit;
-typedef std::shared_ptr< t_jit > t_jitsptr;
-
-struct PERSPECTIVE_EXPORT t_expr_info
-{
-    t_expr_info(t_jitsptr jit, const t_str& ocol);
-
-    t_jitsptr m_jit;
-    t_str m_ocol;
-};
-
-typedef std::vector<t_expr_info> t_expr_infovec;
-#endif
 
 class PERSPECTIVE_EXPORT t_table
 {
@@ -167,28 +142,6 @@ class PERSPECTIVE_EXPORT t_table
 
     t_column* clone_column(const t_str& existing_col,
                            const t_str& new_colname);
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* filter(t_filter_op combiner,
-                     const t_ftermvec& fops) const;
-    void fill_expr_helper(const t_svec& icol_names,
-                          const t_str& expr,
-                          const t_str& output_column,
-                          const t_svec& where_keys,
-                          const t_svec& where_values,
-                          const t_str& base_case);
-    void fill_expr(const t_str& expr, const t_str& output_column);
-    void fill_expr(const t_svec& icol_names,
-                   const t_str& expr,
-                   const t_str& output_column,
-                   const t_svec& where_keys,
-                   const t_svec& where_values,
-                   const t_str& base_case);
-    void fill_expr_jit(PyObject* fn, const t_str& output_column);
-    void fill_expr_jit(t_uindex expidx);
-    t_uindex register_jit_expr(PyObject* fn,
-                               const t_str& output_column);
-    t_mask where(const t_str& expr) const;
-#endif
 
     t_table_recipe get_recipe() const;
 
@@ -286,9 +239,6 @@ class PERSPECTIVE_EXPORT t_table
     t_colsptrvec m_columns;
     t_table_recipe m_recipe;
     t_bool m_from_recipe;
-#ifdef PSP_ENABLE_PYTHON
-    t_expr_infovec m_einfovec;
-#endif
 };
 
 template <typename FLATTENED_T>

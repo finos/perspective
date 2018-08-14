@@ -8,11 +8,6 @@
  */
 
 #include <perspective/first.h>
-#ifdef PSP_ENABLE_PYTHON
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
-#endif
 #include <perspective/sort_specification.h>
 #include <perspective/context_iterators.h>
 #include <perspective/context_zero.h>

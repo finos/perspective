@@ -186,13 +186,6 @@ class PERSPECTIVE_MPROTECT_EXPORT t_lstore : public t_debug_helper
     template <typename T>
     T* extend(t_uindex idx);
 
-#ifdef PSP_ENABLE_PYTHON
-    /* Python bits */
-    PyObject* _as_numpy(t_dtype dtype);
-
-    // export as uchar np array
-    PyObject* _as_numpy();
-#endif
     t_str get_fname() const;
 
     void* get_ptr(t_uindex offset);

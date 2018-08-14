@@ -8,9 +8,6 @@
  */
 
 #include <perspective/first.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <datetime.h>
-#endif
 #include <perspective/date.h>
 
 namespace perspective
@@ -19,40 +16,6 @@ namespace perspective
 t_date::t_date() : m_storage(0)
 {
 }
-
-#ifdef PSP_ENABLE_PYTHON
-void
-t_date::set_py_date(PyObject* pyo)
-
-{
-    m_storage = 0;
-    // Caller is assumed to own the GIL
-    if (!PyDateTimeAPI)
-        PyDateTime_IMPORT;
-
-    PSP_VERBOSE_ASSERT(PyDate_CheckExact(pyo),
-                       "Date object expected");
-    set_year(PyDateTime_GET_YEAR(pyo));
-    set_month(PyDateTime_GET_MONTH(pyo));
-    set_day(PyDateTime_GET_DAY(pyo));
-}
-
-PyObject*
-t_date::get_py_date() const
-{
-    // Caller is assumed to hold the GIL
-    if (!PyDateTimeAPI)
-        PyDateTime_IMPORT;
-    PyObject* rval = PyDate_FromDate(year(), month(), day());
-    if (rval)
-    {
-        return rval;
-    }
-    return PyDate_FromDate(1970, 1, 1);
-}
-
-#endif
-
 
 void
 t_date::set_psp_date(t_uindex dt)

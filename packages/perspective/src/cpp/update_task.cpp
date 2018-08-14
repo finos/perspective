@@ -10,10 +10,6 @@
 #include <perspective/first.h>
 #include <perspective/pool.h>
 #include <perspective/update_task.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/pythonhelpers.h>
-#include <thread>
-#endif
 
 namespace perspective
 {
