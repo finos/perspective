@@ -15,18 +15,6 @@
 namespace perspective
 {
 
-#ifdef PSP_ENABLE_PYTHON
-struct t_py_handle
-{
-    PyObject* m_pyo;
-
-    PyObject* get();
-    t_py_handle(PyObject* pyo);
-    ~t_py_handle();
-    void release();
-};
-#endif
-
 class t_file_handle
 {
     t_handle m_value;

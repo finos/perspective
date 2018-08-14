@@ -151,40 +151,4 @@ t_leaf_data_iter<CONTEXT_T>& t_leaf_data_iter<CONTEXT_T>::operator++()
     return *this;
 }
 
-#ifdef PSP_ENABLE_PYTHON
-template <typename ITER_T>
-PyObject* iter_into_numpy_arrays(PyObject* py_iterable,
-                                 ITER_T& iter,
-                                 t_float64 xlimit,
-                                 const t_idxvec& idxs,
-                                 const t_idxvec& types);
-
-PERSPECTIVE_EXPORT PyObject* context_minmax_idx_0s(
-    t_ctx0* ctx, t_index column_idx, t_uindex column_type);
-
-PERSPECTIVE_EXPORT PyObject*
-context_into_numpy_arrays_0s(PyObject* py_iterable,
-                             t_ctx0* ctx,
-                             t_float64 xlimit,
-                             const t_idxvec& idxs,
-                             const t_idxvec& types,
-                             t_float64 xlo,
-                             t_float64 xhi);
-
-PERSPECTIVE_EXPORT PyObject*
-context_into_numpy_arrays_1s(PyObject* py_iterable,
-                             t_ctx1* ctx,
-                             t_uindex rlevel,
-                             const t_idxvec& idxs,
-                             const t_idxvec& types);
-
-PERSPECTIVE_EXPORT PyObject*
-context_into_numpy_arrays_2s(PyObject* py_iterable,
-                             t_ctx2* ctx,
-                             t_uindex rlevel,
-                             t_uindex clevel,
-                             const t_idxvec& idxs,
-                             const t_idxvec& types);
-#endif
-
 } // end namespace perspective

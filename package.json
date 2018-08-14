@@ -1,6 +1,6 @@
 {
 	"devDependencies": {
-		"lerna": "^2.5.1",
+		"lerna": "^2.11.0",
 		"rimraf": "^2.6.2"
 	},
 	"scripts": {
@@ -24,5 +24,8 @@
 		"_test_viewer": "PACKAGE=perspective-viewer npm run _puppeteer -- npm run test:run",
 		"_test_hypergrid": "PACKAGE=perspective-viewer-hypergrid npm run _puppeteer -- npm run test:run",
 		"_test_highcharts": "PACKAGE=perspective-viewer-highcharts npm run _puppeteer -- npm run test:run"
+	},
+	"dependencies": {
+		"npm-run-all": "^4.1.3"
 	}
 }

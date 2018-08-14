@@ -9,11 +9,6 @@
 
 #include <perspective/first.h>
 #include <perspective/mask.h>
-#ifdef PSP_ENABLE_PYTHON
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
-#endif
 #include <perspective/raii.h>
 
 namespace perspective
@@ -28,29 +23,6 @@ t_mask::t_mask(t_uindex size) : m_bitmap(t_msize(size))
 {
     LOG_CONSTRUCTOR("t_mask");
 }
-
-#ifdef PSP_ENABLE_PYTHON
-t_mask::t_mask(PyObject* mask)
-{
-    LOG_CONSTRUCTOR("t_mask");
-    PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(mask);
-
-    PSP_VERBOSE_ASSERT(PyArray_IS_C_CONTIGUOUS(arr),
-                       "Only contiguous arrays supported currently");
-
-    PSP_VERBOSE_ASSERT(PyArray_DESCR(arr)->type_num == NPY_BOOL,
-                       "Expecting bool array");
-
-    t_bool* carr = static_cast<t_bool*>(PyArray_DATA(arr));
-    t_uindex len = PyArray_SIZE(arr);
-    m_bitmap = boost::dynamic_bitset<>(t_msize(len));
-
-    for (t_uindex idx = 0; idx < len; ++idx)
-    {
-        set(idx, *(carr + idx));
-    }
-}
-#endif
 
 t_mask::t_mask(const t_simple_bitmask& m)
 {
@@ -142,33 +114,6 @@ t_mask::find_next(t_uindex pos) const
 {
     return m_bitmap.find_next(t_msize(pos));
 }
-
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_mask::as_numpy() const
-{
-    PyArray_Descr* descr = PyArray_DescrFromType(NPY_BOOL);
-
-    PSP_VERBOSE_ASSERT(descr != 0, "Error building array descr");
-
-    npy_intp dims[1];
-    dims[0] = npy_int(size());
-
-    PyObject* arr = PyArray_NewFromDescr(
-        &PyArray_Type, descr, 1, dims, 0, 0, NPY_ARRAY_DEFAULT, 0);
-
-    PyArrayObject* arr_ = reinterpret_cast<PyArrayObject*>(arr);
-    t_bool* carr = static_cast<t_bool*>(PyArray_DATA(arr_));
-    t_uindex len = size();
-
-    for (t_uindex idx = 0; idx < len; ++idx)
-    {
-        carr[idx] = get(idx);
-    }
-
-    return arr;
-}
-#endif
 
 void
 t_mask::pprint() const

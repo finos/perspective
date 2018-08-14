@@ -10,11 +10,6 @@
 #include <perspective/first.h>
 #include <perspective/portable.h>
 SUPPRESS_WARNINGS_VC(4505)
-#ifdef PSP_ENABLE_PYTHON
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
-#endif
 #include <perspective/column.h>
 #include <perspective/defaults.h>
 #include <perspective/base.h>
@@ -189,47 +184,6 @@ t_column::~t_column()
 {
     LOG_DESTRUCTOR("t_column");
 }
-
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_column::_as_numpy()
-{
-    if (is_vlen_dtype(m_dtype))
-        return m_data->_as_numpy(DTYPE_UINT64);
-    return m_data->_as_numpy(m_dtype);
-}
-
-PyObject*
-t_column::_as_numpy_newref()
-{
-    if (!is_vlen_dtype(m_dtype))
-    {
-        auto rv = m_data->_as_numpy(m_dtype);
-        Py_XINCREF(rv);
-        return rv;
-    }
-
-    auto max_len = m_vocab->get_max_slen() + 1;
-
-    auto descr = PyArray_DescrNewFromType(NPY_STRING);
-    descr->elsize = static_cast<int>(max_len);
-
-    npy_intp dims[1];
-    dims[0] = npy_int(size());
-
-    PyObject* arr = PyArray_NewFromDescr(
-        &PyArray_Type, descr, 1, dims, 0, 0, NPY_ARRAY_DEFAULT, 0);
-
-    PyArrayObject* arr_ = reinterpret_cast<PyArrayObject*>(arr);
-    const t_column* ccol = static_cast<const t_column*>(this);
-    for(t_uindex i=0, loop_end=size(); i < loop_end; i++)
-    {
-        strncpy((char*)PyArray_GETPTR1(arr_, i), ccol->get_nth<const char>(i) , max_len);
-    }
-
-    return arr;
-}
-#endif
 
 t_dtype
 t_column::get_dtype() const

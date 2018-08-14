@@ -27,10 +27,6 @@ class PERSPECTIVE_EXPORT t_mask
   public:
     t_mask();
     t_mask(t_uindex size);
-#ifdef PSP_ENABLE_PYTHON
-    t_mask(PyObject* arr);
-    PyObject* as_numpy() const;
-#endif
 
     t_mask(const t_simple_bitmask& m);
 
