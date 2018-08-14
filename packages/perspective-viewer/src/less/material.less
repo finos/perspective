@@ -1,0 +1,355 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+@import "variables";
+@import "default";
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+
+input {
+    padding: 6px 10px 6px 0;
+}
+
+button {
+    text-transform: uppercase;
+}
+
+select, ul {
+    padding: 0 10px 0 0;
+}
+
+perspective-viewer {
+
+    font-family: @material-sans-serif-fonts;
+
+    &:not([settings]) {
+        z-index: 3;
+    }
+
+    #side_panel perspective-row .row_draggable {
+        height: 26px;
+        cursor: move;
+    }
+
+    &:not([row-pivots='[]']) #side_panel {
+
+        #columns_container #active_columns perspective-row .row_draggable {
+            height: 52px;
+        }
+
+        #columns_container #inactive_columns perspective-row .row_draggable {
+            height: 26px;
+        }
+    }
+
+    &.dragging #app {
+
+        #side_panel {
+
+            #columns_container {
+
+                #inactive_columns {
+                    perspective-row:hover .is_visible {
+                        opacity: 0;
+                    }
+                }
+
+                #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
+                    margin-top: 0;
+                }
+            }
+        }
+
+        #top_panel .rrow > * {
+            border-top: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            margin-top: 0;
+            margin-left: 0;
+        }
+    }
+
+    #config_button {
+        margin-top: 14px;
+        margin-left: 7px;
+        &:before {
+            font-family: "Material Icons";
+            content: "more_vert" !important;
+        }
+    }
+
+    .psp-text-field__input + label {
+        padding-left: 0;
+    }
+}
+
+perspective-viewer #app {
+
+    &.columns_horizontal {
+
+        #side_panel {
+            max-width: 500px !important;
+            padding: 24px 5px 0 0;
+
+            #divider {
+                display: none;
+            }
+        }
+    }
+
+    input, select, ul, #filters {
+        border-right: 0;
+        background-color: #eee;
+        color: #666;
+    }
+
+    perspective-hypergrid {
+        position: absolute;
+        top: 24px;
+        bottom: 24px;
+        left: 24px;
+        right: 24px;     
+    }
+
+    #filters {
+        padding-left: 0;
+    }
+
+    perspective-row {
+
+        &:before {
+            font-size: 10px;
+            font-family: @material-sans-serif-fonts;
+        }
+
+        &.string:before,
+        &.float:before,
+        &.integer:before,
+        &.date:before {
+            font-family: @material-monospace-fonts;
+            padding-left: 0;
+        }
+
+        #psp_row {
+            margin-bottom: 0;
+            color: #666;
+            margin-right: 0;
+        }
+    }
+
+    #side_panel {
+        padding: 24px 0 0 0;
+        max-width: 250px;
+
+
+        .is_visible {
+            transition: opacity 0.4s;
+        }
+
+        #vis_selector_container {
+            min-height: 36px;
+            z-index: 1;
+            margin-right: 12px;
+            margin-left: 46px;
+
+            select#vis_selector {
+                margin: 0 12px 24px 0;
+            }
+        }
+
+        #divider {
+            height: 24px;
+            min-height: 24px;
+            max-height: 24px;
+            border-left-width: 12px;
+            border-right-width: 0;
+            z-index: 1;
+            margin: 0;
+        }
+
+        #active_columns, #inactive_columns {
+            will-change: opacity, height, margin, transform;
+            margin-top: 0;
+            margin-bottom: 0;
+            padding: 24px 24px 24px 0;
+
+            perspective-row {
+                position: relative;
+
+                span.is_visible:before {
+                    position: absolute;
+                    margin-top: 1px;
+                    margin-left: -8px;
+                }
+
+                span.is_visible {
+                    height: 26px;
+                    margin: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 48px;
+                    text-align: center;
+                }
+
+                .row_draggable {                            
+                    background: none;
+                    border-right: 0;
+                    color: #666;
+                    margin-left: 48px;
+                    padding: 4px 3px 4px 0;
+
+                    select {
+                        margin: 6px 0 0 20px;
+                    }
+                }
+            }
+        }
+
+        #active_columns {
+
+            // perspective-row:hover {
+            //     .is_visible:before {
+            //         content: "\E15D";
+            //     }
+            // }
+
+            perspective-row {
+
+                &:before {
+                    margin-left: 48px;
+                    left: 48px;
+                }
+
+                &:last-child .row_draggable {
+                    border-bottom: 0 solid #ccc;
+                }
+
+                .is_visible:before {
+                    color: #1A7dA1;
+                    font-family: "material icons";
+                    margin-top: 1px;
+                    margin-left: -8px;
+                    font-size: 16px;
+                    content: "\E834";
+                }
+            }
+        }
+
+        #inactive_columns {
+            padding-top: 24px;
+
+            perspective-row {
+                margin-top: 0;
+
+                &:hover {
+                    .is_visible:before {
+                        color: #1A7dA1;
+                    }
+
+                    &.active {
+                        #name {
+                            color: #eee;
+                        }
+                    }
+
+                    .is_visible {
+                        opacity: 1;
+                    }
+
+                    #name {
+                        color: #666;
+                    }
+
+                    #name:before {
+                        opacity: 1 !important;
+                    }
+                }
+
+                &.active {
+                    display: block;
+                    height: 0;
+                    max-height: 0;
+                    overflow: hidden;
+                }
+
+                .is_visible {
+                    opacity: 0.5;
+                }
+
+                .is_visible:before {
+                    font-family: "Material Icons";
+                    content: "\E835";
+                    font-size: 16px;
+                }
+
+                #name {
+                    color: #AAA;
+                }
+
+                #name:before {
+                    opacity: 0.5;
+                    background: none !important;
+                }
+            }
+        }
+    }
+
+    #divider {
+        height: 1px;
+        min-height: 1px;
+        max-height: 1px;
+    }
+
+    #top_panel {
+        padding: 24px 0 0 0;
+
+        .rrow ul {
+            padding: 3px 0 0 0;
+        }
+
+        .psp-text-field {
+            background: none;
+        }
+        .rrow {
+            margin: 0 24px 24px 0;
+        }
+
+        #row_pivots label:before {
+            content: "Group By";
+        }
+
+        #column_pivots label:before {
+            content: "Split By";
+        }
+    }
+
+    .rrow {
+        margin: 0 24px 24px 0;
+    }
+
+    #pivot_chart {
+        padding: 24px 24px 24px 24px;
+        .chart {
+            padding: 0;
+
+            .tooltip {
+                font-family: @material-sans-serif-fonts !important;
+            }
+        }
+    }
+}
+
+.dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {
+    padding-left: 0;
+    display: inline-block;
+    top: -8px
+}

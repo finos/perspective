@@ -8,13 +8,15 @@
 -->
 
 <template id="perspective-row">
-    <li id="psp_row">
+    <div id="psp_row">
         <span class='is_visible'></span>
         <div draggable='true' class="row_draggable">
-            <span id='name'></span>
+            <span id='name' class="column_name"></span>
             <span id="sort_order"></span>
-            <select id="column_aggregate" class="string">
-            </select>
+            <select id="column_aggregate" class="string"></select>
+            <select id="filter_operator"></select>
+            <input id="filter_operand" placeholder="Value"/>
+            <span id='row_close'>&#x2715;</span>                
         </div>
-    </li>
+    </div>
 </template>

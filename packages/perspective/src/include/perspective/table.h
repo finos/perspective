@@ -17,14 +17,21 @@
 #include <perspective/mask.h>
 #include <perspective/filter.h>
 #include <perspective/compat.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <polaris/jitcompiler_psp.h>
-#endif
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
 #endif
 #include <tuple>
+
+#ifdef PSP_ENABLE_PYTHON
+
+namespace JITCompiler {
+
+class PspCompiledComputedColumn;
+
+} // namespace JITCompiler
+
+#endif
 
 namespace perspective
 {
@@ -289,7 +296,7 @@ void
 t_table::flatten_body(FLATTENED_T flattened) const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
     switch (get_const_column("psp_pkey")->get_dtype())

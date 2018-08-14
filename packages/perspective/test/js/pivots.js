@@ -20,6 +20,15 @@ var meta = {
     'z': "boolean"
 };
 
+
+var data2 = [
+    {'x': 1, 'y':1, 'z': true},
+    {'x': 2, 'y':1, 'z': false},
+    {'x': 3, 'y':2, 'z': true},
+    {'x': 4, 'y':2, 'z': false}
+];
+
+
 module.exports = (perspective) => {
 
     describe("Aggregate", function() {
@@ -38,6 +47,39 @@ module.exports = (perspective) => {
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);
         });
+
+        it("['z'], sum with new column syntax", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'sum', column:['x']}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 10},
+                {__ROW_PATH__: [ false ], x: 6},
+                {__ROW_PATH__: [ true ], x: 4},
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
+        it("['z'], weighted_mean", async function () {
+            var table = perspective.table(data2);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'mean', column:['x']},
+                            {op: 'weighted mean', column:['x', 'y']}
+                            ],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 2.5, "x,y": 2.8333333333333335},
+                {__ROW_PATH__: [ false ], x: 3, "x,y": 3.3333333333333335},
+                {__ROW_PATH__: [ true ], x: 2, "x,y": 2.3333333333333335},
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
 
         it("['z'], mean", async function () {
             var table = perspective.table(data);
@@ -80,6 +122,36 @@ module.exports = (perspective) => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual(meta);
+        });
+
+        it("['x'] translates type `string` to `integer` when pivoted by row", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['x'],
+                aggregate: [{column: 'y', op: 'distinct count'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({y: 'integer'});
+        });
+
+        it("['x'] translates type `integer` to `float` when pivoted by row", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['y'],
+                aggregate: [{column: 'x', op: 'avg'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({x: 'float'});
+        });
+
+        it("['x'] does not translate type when only pivoted by column", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                col_pivot: ['y'],
+                aggregate: [{column: 'x', op: 'avg'}]
+            });
+            let result2 = await view.schema();
+            expect(result2).toEqual({x: 'integer'});
         });
 
         it("['x'] has the correct # of rows", async function () {
@@ -136,6 +208,27 @@ module.exports = (perspective) => {
             expect(answer).toEqual(result2);
         });
 
+
+        it("['x', 'z'] windowed", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['x', 'z']
+            });
+
+            var answer = [
+                { __ROW_PATH__: [ 1, true ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 2 ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 2, false ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 3 ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 3, true ], x: 1, y: 1, z: 1},
+                { __ROW_PATH__: [ 4 ], x: 1, y: 1, z: 1 },
+                { __ROW_PATH__: [ 4, false ], x: 1, y: 1, z: 1}
+            ];
+
+            let result2 = await view.to_json({start_row: 2});
+            expect(answer).toEqual(result2);
+        });
+
         it("['x', 'z'], pivot_depth = 1", async function () {
             var table = perspective.table(data);
             var view = table.view({
@@ -159,6 +252,30 @@ module.exports = (perspective) => {
 
     describe("Column pivot", function() {
 
+        it("['x'] only, schema", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ['y']
+            });
+            let result2 = await view.schema();
+            expect(meta).toEqual(result2);
+        });
+
+        it("['x'] only", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ['y']
+            });
+            var answer =  [
+                {"a,x":1,"a,y":"a","a,z":true,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":2,"b,y":"b","b,z":false,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":3,"c,y":"c","c,z":true,"d,x":null,"d,y":null,"d,z":null},
+                {"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":4,"d,y":"d","d,z":false}
+            ];
+            let result2 = await view.to_json();
+            expect(answer).toEqual(result2);
+        });
+
         it("['x']", async function () {
             var table = perspective.table(data);
             var view = table.view({
@@ -167,10 +284,10 @@ module.exports = (perspective) => {
             });
             var answer =  [
                 {"__ROW_PATH__":[],"a,x":1,"a,y":1,"a,z":1,"b,x":1,"b,y":1,"b,z":1,"c,x":1,"c,y":1,"c,z":1,"d,x":1,"d,y":1,"d,z":1},
-                {"__ROW_PATH__":[1],"a,x":1,"a,y":1,"a,z":1,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[2],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":1,"b,y":1,"b,z":1,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[3],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":1,"c,y":1,"c,z":1,"d,x":undefined,"d,y":undefined,"d,z":undefined},
-                {"__ROW_PATH__":[4],"a,x":undefined,"a,y":undefined,"a,z":undefined,"b,x":undefined,"b,y":undefined,"b,z":undefined,"c,x":undefined,"c,y":undefined,"c,z":undefined,"d,x":1,"d,y":1,"d,z":1}
+                {"__ROW_PATH__":[1],"a,x":1,"a,y":1,"a,z":1,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[2],"a,x":null,"a,y":null,"a,z":null,"b,x":1,"b,y":1,"b,z":1,"c,x":null,"c,y":null,"c,z":null,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[3],"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":1,"c,y":1,"c,z":1,"d,x":null,"d,y":null,"d,z":null},
+                {"__ROW_PATH__":[4],"a,x":null,"a,y":null,"a,z":null,"b,x":null,"b,y":null,"b,z":null,"c,x":null,"c,y":null,"c,z":null,"d,x":1,"d,y":1,"d,z":1}
             ];
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);

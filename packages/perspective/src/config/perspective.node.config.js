@@ -1,14 +1,20 @@
 const path = require('path');
-const common = require('perspective-common/common.config.js');
+const common = require('./common.config.js');
 
 module.exports = Object.assign({}, common(), {
     entry: './src/js/perspective.node.js',
-    plugins: [],
     target: "node",
+    externals: [/^([a-z0-9]|\@(?!apache\-arrow)).*$/],
+    plugins: [],
     node: {},
     output: {
         filename: 'perspective.node.js',
         path: path.resolve(__dirname, '../../build'),
-        libraryTarget: "commonjs-module"
+        libraryTarget: "umd"
     }
+});
+
+module.exports.module.rules.push({
+    test: /\.wasm$/,
+    loader: "arraybuffer-loader"
 });

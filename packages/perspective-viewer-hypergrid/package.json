@@ -1,18 +1,36 @@
 {
-  "name": "perspective-viewer-hypergrid",
-  "version": "0.0.0",
+  "name": "@jpmorganchase/perspective-viewer-hypergrid",
+  "version": "0.1.18",
   "description": "Perspective.js",
-  "main": "src/js/hypergrid.js",
+  "main": "build/hypergrid.plugin.umd.js",
   "directories": {
     "test": "test"
   },
   "files": [
-    "src/*"
+    "src/*",
+    "build/*"
   ],
   "scripts": {
-    "hypergrid": "webpack --config src/config/hypergrid.plugin.config.js",
-    "start": "npm run hypergrid",
-    "clean": "find build -mindepth 1 -delete"    
+    "bench": "npm-run-all bench:build bench:run",
+    "bench:build": "echo \"No Benchmarks\"",
+    "bench:run": "echo \"No Benchmarks\"",
+    "hypergrid": "webpack --color --config src/config/hypergrid.plugin.config.js",
+    "build": "npm run hypergrid",
+    "test:build": "cp test/html/* build && webpack --color --config test/config/hypergrid.config.js",
+    "test:run": "jest --silent 2>&1",
+    "test": "npm-run-all test:build test:run",
+    "clean": "find build -mindepth 1 -delete",
+    "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"
+  },
+  "jest": {
+    "roots": [
+      "test/js"
+    ],
+    "verbose": true,
+    "testURL": "http://localhost/"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -21,26 +39,32 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
+    "@jpmorganchase/perspective": "^0.1.18",
+    "@jpmorganchase/perspective-viewer": "^0.1.18",
+    "babel-polyfill": "^6.26.0",
     "babel-runtime": "^6.26.0",
-    "fin-hypergrid": "2.0.2",
-    "underscore": "^1.8.3",
-    "perspective-common": "^0.0.0"
+    "datasaur-local": "3.0.0",
+    "fin-hypergrid": "^3.0.0",
+    "fin-hypergrid-grouped-header-plugin": "^1.2.4",
+    "rectangular": "1.0.1",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
+    "babel-jest": "^22.0.4",
     "babel-loader": "^7.1.2",
-    "babel-polyfill": "^6.26.0",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
     "babel-plugin-transform-es2015-for-of": "^6.23.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
-    "chart.js": "^2.7.1",
     "css-loader": "^0.28.7",
     "html-loader": "^0.5.1",
+    "http-server": "^0.10.0",
+    "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6",
-    "perspective-common": "^0.0.0"
+    "webpack": "^3.5.6"
   }
 }

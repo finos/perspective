@@ -1,0 +1,24 @@
+
+dist: trusty
+
+language: node_js
+
+node_js:
+  - "8"
+
+env:
+  global:
+    - EM_USE_GLOBAL_CACHE=1
+
+sudo: required
+
+services:
+  - docker
+
+install:
+  - npm install
+
+script:
+  - PSP_DOCKER=1 npm run build
+  - PSP_DOCKER=1 npm run test:build
+  - npm run quiet_test

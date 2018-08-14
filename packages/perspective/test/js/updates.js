@@ -10,12 +10,20 @@
 import _  from "underscore";
 import papaparse from "papaparse";
 
+import arrow from "../arrow/test.arrow";
+
 var data = [
     {'x': 1, 'y':'a', 'z': true},
     {'x': 2, 'y':'b', 'z': false},
     {'x': 3, 'y':'c', 'z': true},
     {'x': 4, 'y':'d', 'z': false}
 ];
+
+var col_data = {
+    'x': [1, 2, 3, 4],
+    'y': ['a', 'b', 'c', 'd'],
+    'z': [true, false, true, false]
+};
 
 var meta = {
     'x': "integer",
@@ -30,7 +38,47 @@ var data_2 = [
     {'x': 6, 'y':'h', 'z': true},
 ];
 
+var arrow_result = [
+    {"f32": 1.5, "f64": 1.5, "i64": 1, "i32": 1, "i16": 1, "i8": 1, "bool": true,  "char": "a", "dict": "a", "datetime": +(new Date("2018-01-25"))},
+    {"f32": 2.5, "f64": 2.5, "i64": 2, "i32": 2, "i16": 2, "i8": 2, "bool": false, "char": "b", "dict": "b", "datetime": +(new Date("2018-01-26"))},
+    {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c", "datetime": +(new Date("2018-01-27"))},
+    {"f32": 4.5, "f64": 4.5, "i64": 4, "i32": 4, "i16": 4, "i8": 4, "bool": false, "char": "d", "dict": "d", "datetime": +(new Date("2018-01-28"))},
+    {"f32": 5.5, "f64": 5.5, "i64": 5, "i32": 5, "i16": 5, "i8": 5, "bool": true,  "char": "d", "dict": "d", "datetime": +(new Date("2018-01-29"))}
+];
+
+var arrow_indexed_result = [
+    {"f32": 1.5, "f64": 1.5, "i64": 1, "i32": 1, "i16": 1, "i8": 1, "bool": true,  "char": "a", "dict": "a", "datetime": +(new Date("2018-01-25"))},
+    {"f32": 2.5, "f64": 2.5, "i64": 2, "i32": 2, "i16": 2, "i8": 2, "bool": false, "char": "b", "dict": "b", "datetime": +(new Date("2018-01-26"))},
+    {"f32": 3.5, "f64": 3.5, "i64": 3, "i32": 3, "i16": 3, "i8": 3, "bool": true,  "char": "c", "dict": "c", "datetime": +(new Date("2018-01-27"))},
+    {"f32": 5.5, "f64": 5.5, "i64": 5, "i32": 5, "i16": 5, "i8": 5, "bool": true,  "char": "d", "dict": "d", "datetime": +(new Date("2018-01-29"))}
+];
+
+
 module.exports = (perspective) => {
+
+
+    describe("Removes", function() {
+
+        it("after an `update()`", async function () {
+            var table = perspective.table(meta, {index: "x"});
+            table.update(data);
+            var view = table.view();
+            table.remove([1, 2]);
+            let result = await view.to_json();
+            expect(result.length).toEqual(2);
+            expect(data.slice(2, 4)).toEqual(result);
+        });
+
+        it("after an regular data load`", async function () {
+            var table = perspective.table(data, {index: "x"});
+            var view = table.view();
+            table.remove([1, 2]);
+            let result = await view.to_json();
+            expect(result.length).toEqual(2);
+            expect(data.slice(2, 4)).toEqual(result);
+        });
+
+    });
 
     describe("Updates", function() {
 
@@ -40,6 +88,36 @@ module.exports = (perspective) => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+        });
+
+        it("Meta constructor then column oriented `update()`", async function () {
+            var table = perspective.table(meta);
+            table.update(col_data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(data);
+        });
+
+        it("Column data constructor then column oriented `update()`", async function () {
+            var colUpdate = {
+                'x': [3, 4, 5],
+                'y': ['h', 'i', 'j'],
+                'z': [false, true, false],
+            };
+
+            var expected = [
+                {'x': 1, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': false},
+                {'x': 3, 'y':'h', 'z': false},
+                {'x': 4, 'y':'i', 'z': true},
+                {'x': 5, 'y':'j', 'z': false}
+            ];
+
+            var table = perspective.table(col_data, {index: "x"});
+            table.update(colUpdate);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(expected);
         });
 
         it("Multiple `update()`s", async function () {
@@ -57,6 +135,14 @@ module.exports = (perspective) => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+        });
+
+        it("Arrow `update()`s", async function () {
+            var table = perspective.table(arrow.slice());
+            table.update(arrow.slice());
+            var view = table.view();
+            let result = await view.to_json();
+            expect(arrow_result.concat(arrow_result)).toEqual(result);
         });
 
     });
@@ -137,6 +223,27 @@ module.exports = (perspective) => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+        });
+
+        it("Arrow with {index: 'i64'} (int)", async function () {
+            var table = perspective.table(arrow.slice(), {index: 'i64'});
+            var view = table.view();
+            let result = await view.to_json();
+            expect(arrow_result).toEqual(result);
+        });
+
+        it("Arrow with {index: 'char'} (char)", async function () {
+            var table = perspective.table(arrow.slice(), {index: 'char'});
+            var view = table.view();
+            let result = await view.to_json();
+            expect(arrow_indexed_result).toEqual(result);
+        });
+
+        it("Arrow with {index: 'dict'} (dict)", async function () {
+            var table = perspective.table(arrow.slice(), {index: 'dict'});
+            var view = table.view();
+            let result = await view.to_json();
+            expect(arrow_indexed_result).toEqual(result);
         });
 
         it("multiple updates on {index: 'x'}", async function () {

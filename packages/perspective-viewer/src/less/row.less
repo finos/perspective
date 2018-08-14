@@ -7,96 +7,88 @@
  *
  */
 
-@border-color: #ccc;
-
 .selected_indicator() {
-    font-family: Arial;
-    font-weight: 600;
     font-size: 12px;
-}
-
-.bordered() {
-    border: 1px solid @border-color;
-    border-top-width: 0px;
-    border-left-width: 0px;
 }
 
 #top_panel perspective-row {
+    margin-bottom: -1px;
     display: inline-block;
 }
 
-perspective-viewer.dragging #top_panel ul {
-    border: 1px solid #1078d1 !important;
-    margin-top: -2px;
-    margin-left: -1px;
+#top_panel #filters perspective-row {
+    margin-bottom: 0px;
 }
 
-perspective-viewer.dragging #top_panel ul.dropping {
-    background-color: rgb(240, 240, 255) !important;
+#side_panel #active_columns perspective-row[drop-target] {
+    .row_draggable {
+        * {
+            display: none !important;
+        }
+    }
+}
+
+#side_panel perspective-row {
+    #row_close {
+        display: none;
+        cursor: pointer;
+    }
 }
 
 perspective-row {
+    #row_close {
+        min-width:5px;
+        max-width:5px;
+        margin-right:3px;
+        flex-grow:0;
+        font-size:10px;
+        cursor: pointer;
+        margin-left: 3px;
+    }
     display: block;
 }
 
-perspective-viewer ul {
-    transition: background-color 0.2s, border-color 0.2s;
+.dropping * {
+    pointer-events: none;
 }
 
-perspective-row li {
-    color: rgb(51, 51, 51);
+#side_panel #active_columns perspective-row #psp_row {
     margin-bottom: 2px;
-    margin-right: 5px;
+}
+
+perspective-row #psp_row {
     display: flex;
-    overflow: hidden;
+    overflow: visible;
     align-items: center;
-    transition: margin-right 0.2s;
+    width: auto !important;
+    height: auto !important;
+    float: none !important;
 }
 
-
-perspective-row li:hover{
-    margin-right: 2px;
+#side_panel perspective-row #psp_row {
+    margin-right: 5px;
 }
 
-#column_names perspective-row div {
-    color: rgb(51, 51, 51);
+#side_panel perspective-row .row_draggable {
     padding: 2px;
     font-size: 12px;
     flex-grow: 1;
-    border-bottom: 1px solid rgb(238, 238, 238);
-    border-right: 1px solid rgb(238, 238, 238);
-    transition: margin 0.2s, padding 0.2s;
 }
 
-#column_names perspective-row div:hover {
-    margin-left: -3px;
-    padding-left: 5px;
-}
-
-#column_names perspective-row:hover div {
-    margin-left: -3px;
-    padding-left: 5px;
-}
-
-#column_names perspective-row:not(.off) div {
-    .bordered();
-    background-color: white;
-}
-
-#column_names perspective-row .is_visible {
+#side_panel perspective-row .is_visible {
     width: 20px;
     min-width: 20px;
-    margin-left: 5px;
+    margin-left: 6px;
     cursor: pointer;
-    color: #999;
     font-size: 14px;
+    margin-top: -2px;
 }
 
-#column_names perspective-row.off .is_visible::before {
+#side_panel #inactive_columns perspective-row .is_visible::before {
     content: "\25CB";
 }
 
-#column_names perspective-row .is_visible::before {
+#side_panel perspective-row .is_visible::before {
     content: "\25CF";
 }
 
@@ -104,8 +96,49 @@ perspective-row #sort_order {
     display: none;
 }
 
+perspective-row {
+    #filter_operand, #filter_operator {
+        display: none;
+        margin: 0;
+    }
+
+    #filter_operand {
+        padding: 0px;
+        height: 19px;
+    }
+
+    #sort_order {
+        cursor: pointer;
+        width: 20px;
+    }
+}
+
+
+
+#filters perspective-row {
+    margin-right: 24px;
+
+    &:before {
+        content: none !important;
+    }
+
+    select {
+        margin-left: 15px;
+        padding-right: 15px;
+        cursor: pointer;
+    }
+    #filter_operator {
+        display: inline-block;
+        height: 17px;
+    }
+    #filter_operand {
+        display: inline-block;
+    }
+}
+
 #sort perspective-row #sort_order {
     display: inline-block;
+    padding-left: 10px;
 }
 
 .column_row() {
@@ -114,35 +147,38 @@ perspective-row #sort_order {
     padding-left: 5px;
     padding-right: 5px;
     min-width: 18px;
-    font-family: monospace;
 }
 
 #side_panel {
     padding-top: 5px;
+    flex: 0 1 auto;
+}
+
+#side_panel perspective-row .column_name {
+    overflow: hidden;
+    max-width: 180px;
+    white-space: nowrap;
+    text-overflow: ellipsis; 
 }
 
 #side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
     .column_row();
     content: "123";
-    color: #016bc6;
 }
 
 #side_panel perspective-row .string::before {
     .column_row();
     content: "abc";
-    color: #fe9292;
 }
 
 #side_panel perspective-row .boolean::before {
     .column_row();
     content: "t/f";
-    color: #999999;
 }
 
 #side_panel perspective-row .date::before {
     .column_row();
     content: "mdy";
-    color: #999999;
 }
 
 perspective-row #column_aggregate {
@@ -153,7 +189,7 @@ perspective-row #column_aggregate {
     height: 20px;
 }
 
-#column_names perspective-row span#name {
+#active_columns perspective-row span#name {
     width: 100%;
     white-space: nowrap;
 }
@@ -169,49 +205,18 @@ perspective-row .row_draggable {
 }
 
 perspective-row .row_draggable select {
-    margin-left: 22px;
-    border: none;
+    margin: 0px 0px 0px 22px;
 }
 
-perspective-row .row_draggable select:focus {
-    outline: none;
-}
-
-perspective-viewer[view=scatter], perspective-viewer[view=line], perspective-viewer[view=line] {
-    #column_names {
-        .off .is_visible::before {
-            content: "\25CB";
-        }
-        .visible_1 .is_visible::before {
-            .selected_indicator();
-            content: "X";
-        }
-        .visible_2 .is_visible::before {
-            .selected_indicator();
-            content: "Y";
-        }
-        .visible_3 .is_visible::before {
-            .selected_indicator();
-            content: "C";
-        }
-        .visible_4 .is_visible::before {
-            .selected_indicator();
-            content: "S";
-        }
-    }
-}
-
-perspective-viewer:not([row-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate,
-perspective-viewer:not([column-pivots='[]']) #column_names perspective-row:not(.off) #column_aggregate {
+perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
     display: inline-block;
 }
 
-perspective-viewer:not([row-pivots='[]']) #column_names,
-perspective-viewer:not([column-pivots='[]']) #column_names {
-    perspective-row .row_draggable {
+perspective-viewer:not([row-pivots='[]']) #side_panel {
+    #active_columns perspective-row .row_draggable {
         height: 41px;
     }
-    perspective-row.off .row_draggable {
+    #inactive_columns perspective-row .row_draggable {
         height: 21px;
     }
 }

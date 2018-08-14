@@ -65,6 +65,8 @@ class PERSPECTIVE_EXPORT t_vocab
     t_bool string_exists(const char* c, t_stridx& interned) const;
     t_uindex get_max_slen() const;
 
+    void reserve(size_t total_string_size, size_t string_count);
+
   protected:
     // vlen interface
     t_uindex genidx();

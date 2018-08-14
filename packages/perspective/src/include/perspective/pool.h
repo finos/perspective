@@ -119,8 +119,6 @@ class PERSPECTIVE_EXPORT t_pool
     std::vector<t_gnode*> m_gnodes;
 #ifdef PSP_ENABLE_PYTHON
     std::vector<PyObject*> m_pynodes;
-    PyObject* m_update_delegate;
-    t_ctx_refmap m_ctx_refmap;
 #endif
 
 #ifdef PSP_ENABLE_WASM
@@ -129,6 +127,10 @@ class PERSPECTIVE_EXPORT t_pool
     std::atomic_flag m_run;
     std::atomic<t_bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;
+#ifdef PSP_ENABLE_PYTHON
+    PyObject* m_update_delegate;
+    t_ctx_refmap m_ctx_refmap;
+#endif
     std::atomic<t_uindex> m_epoch;
     t_bool m_has_python_dep;
 };

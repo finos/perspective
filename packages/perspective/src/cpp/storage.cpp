@@ -356,7 +356,7 @@ void
 t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if ((capacity < m_capacity) && !allow_shrink)
         return;
 
@@ -456,7 +456,7 @@ void
 t_lstore::load(const t_str& fname)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     t_rfmapping imap;
     map_file_read(fname, imap);
@@ -470,7 +470,7 @@ void
 t_lstore::save(const t_str& fname)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_init, "Store not inited.");
 
     t_rfmapping omap;
@@ -482,7 +482,7 @@ void
 t_lstore::copy(t_lstore& out)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_COMPLAIN_AND_ABORT("copy is unimplemented!");
 }
 
@@ -490,7 +490,7 @@ void
 t_lstore::warmup()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 }
 
 #ifdef PSP_ENABLE_PYTHON
@@ -498,7 +498,7 @@ PyObject*
 t_lstore::_as_numpy(t_dtype dtype)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
         dtype != DTYPE_STR,
         "as_numpy not implemented for string columns yet");
@@ -516,7 +516,7 @@ PyObject*
 t_lstore::_as_numpy()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return _as_numpy(DTYPE_UINT8);
 }
 #endif
@@ -547,7 +547,7 @@ t_str
 t_lstore::get_fname() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_fname;
 }
 
@@ -588,7 +588,7 @@ t_str
 t_lstore::get_desc_fname() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return unique_path(m_fname);
 }
 
@@ -596,7 +596,7 @@ t_uindex
 t_lstore::get_version() const
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_version;
 }
 
@@ -604,7 +604,7 @@ void
 t_lstore::append(const t_lstore& other)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     push_back(other.m_base, other.size());
 }
 
@@ -612,7 +612,7 @@ void
 t_lstore::clear()
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     memset(m_base, 0, size_t(capacity()));
     {
         t_unlock_store tmp(this);
@@ -643,7 +643,7 @@ void
 t_lstore::fill(const t_lstore& other)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     reserve(other.size());
     memcpy(m_base,
            const_cast<void*>(other.m_base),
@@ -657,7 +657,7 @@ t_lstore::fill(const t_lstore& other,
                t_uindex elem_size)
 {
     PSP_TRACE_SENTINEL();
-    check_init(m_init, __FILE__, __LINE__);
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     reserve(mask.size() * elem_size);
 
     PSP_VERBOSE_ASSERT(mask.size() * elem_size <= m_size,

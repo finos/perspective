@@ -177,6 +177,8 @@ struct PERSPECTIVE_EXPORT t_agg_update_info
     t_colcptrvec m_src;
     t_colptrvec m_dst;
     t_aggspecvec m_aggspecs;
+
+    std::vector< t_uindex > m_dst_topo_sorted;
 };
 
 struct t_tree_unify_rec
@@ -342,7 +344,7 @@ class PERSPECTIVE_EXPORT t_stree
 
     // aggregates should be presized to be same size
     // as agg_indices
-    void get_aggregates(t_uindex nidx,
+    void get_aggregates_for_sorting(t_uindex nidx,
                         const t_idxvec& agg_indices,
                         t_tscalvec& aggregates,
                         t_ctx2 *) const;

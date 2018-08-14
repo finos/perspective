@@ -164,7 +164,7 @@ t_traversal::expand_node(const t_sortsvec& sortby, t_tvidx exp_idx, t_ctx2 * ctx
              iter != tchildren.end();
              ++iter)
         {
-            m_tree->get_aggregates(
+            m_tree->get_aggregates_for_sorting(
                 iter->m_idx, sortby_agg_indices, aggregates, ctx2);
             (*sortelems)[count] = t_mselem(aggregates, child_idx);
             ++count;

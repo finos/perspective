@@ -12,11 +12,14 @@ const perspective = require('./perspective.js');
 
 if (global.document !== undefined) {
 	const Module = load_perspective({
-	    wasmJSMethod: "asmjs",
-	    memoryInitializerPrefixURL: 'asmjs/',
-	    asmjsCodeFile: "asmjs/psp.js"
+		wasmJSMethod: "asmjs",
+		locateFile: path => `asmjs/${path}`,
+        filePackagePrefixURL: "",
+	    printErr: (x) => console.warn(x),
+	    print: (x) => console.warn(x)
 	});
 	module.exports = perspective(Module);
 } else {
 	module.exports = perspective(load_perspective);
 }
+
