@@ -563,7 +563,7 @@ const to_format = async function (options, formatter) {
                 if (this.config.row_pivot[0] !== 'psp_okey') {
                     let col_name = "__ROW_PATH__";
                     let row_path = this.ctx.unity_get_row_path(start_row + ridx);
-                    formatter.initColumnValue(row, col_name)
+                    formatter.initColumnValue(data, row, col_name)
                     for (let i = 0; i < row_path.size(); i++) {
                         const value = __MODULE__.scalar_vec_to_val(row_path, i);
                         formatter.addColumnValue(data, row, col_name, value);
@@ -586,8 +586,9 @@ const to_format = async function (options, formatter) {
     
     return formatter.formatData(data, options.config)
 }
+
 /**
- * Serializes this view to JSON data in a standard format.
+ * Serializes this view to JSON data in a column-oriented format.
  *
  * @async
  *
@@ -609,7 +610,34 @@ const to_format = async function (options, formatter) {
  * parameter supplied, the keys of this object will be comma-prepended with
  * their comma-separated column paths.
  */
-view.prototype.to_json = async function(options) {
+view.prototype.to_columns = async function (options) {
+    return to_format.call(this, options, formatters.jsonTableFormatter);
+}
+
+/**
+ * Serializes this view to JSON data in a row-oriented format.
+ *
+ * @async
+ *
+ * @param {Object} [options] An optional configuration object.
+ * @param {number} options.start_row The starting row index from which
+ * to serialize.
+ * @param {number} options.end_row The ending row index from which
+ * to serialize.
+ * @param {number} options.start_col The starting column index from which
+ * to serialize.
+ * @param {number} options.end_col The ending column index from which
+ * to serialize.
+ *
+ * @returns {Promise<Array>} A Promise resolving to An array of Objects
+ * representing the rows of this {@link view}.  If this {@link view} had a
+ * "row_pivots" config parameter supplied when constructed, each row Object
+ * will have a "__ROW_PATH__" key, whose value specifies this row's
+ * aggregated path.  If this {@link view} had a "column_pivots" config
+ * parameter supplied, the keys of this object will be comma-prepended with
+ * their comma-separated column paths.
+ */
+view.prototype.to_json = async function (options) {
     return to_format.call(this, options, formatters.jsonFormatter);
 }
 

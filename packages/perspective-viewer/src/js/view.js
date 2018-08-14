@@ -194,7 +194,7 @@ function drop(ev) {
     }
 
     // Deselect the dropped column
-    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort") {
+    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort" && name !== "filter") {
         for (let x of this.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute('name') === data[0]) {
                  this._active_columns.removeChild(x);
