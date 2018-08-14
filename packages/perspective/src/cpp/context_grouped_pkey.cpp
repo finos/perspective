@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_grouped_pkey.h>
 #include <perspective/extract_aggregate.h>
@@ -640,16 +639,6 @@ t_ctx_grouped_pkey::get_leaf_data(t_uindex depth,
 
     PSP_COMPLAIN_AND_ABORT("Not supported yet");
     return t_tscalvec();
-}
-
-t_leaf_data_iter<t_ctx_grouped_pkey>
-t_ctx_grouped_pkey::iter_leaf_data(const t_idxvec& idxs,
-                                   t_uindex row_depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return t_leaf_data_iter<t_ctx_grouped_pkey>(
-        m_tree, idxs, row_depth);
 }
 
 t_bool

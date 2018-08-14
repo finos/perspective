@@ -20,9 +20,6 @@
 namespace perspective
 {
 
-template <typename CONTEXT_T>
-class t_leaf_data_iter;
-
 class PERSPECTIVE_EXPORT t_ctx_grouped_pkey
     : public t_ctxbase<t_ctx_grouped_pkey>
 {
@@ -73,8 +70,6 @@ class PERSPECTIVE_EXPORT t_ctx_grouped_pkey
                              t_uindex start_col,
                              t_uindex end_col) const;
 
-    t_leaf_data_iter<t_ctx_grouped_pkey>
-    iter_leaf_data(const t_idxvec& idxs, t_uindex row_depth) const;
     t_float64 get_min(t_uindex aggidx) const;
     t_float64 get_max(t_uindex aggidx) const;
 

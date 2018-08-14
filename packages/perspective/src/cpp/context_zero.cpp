@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_base.h>
 #include <perspective/context_common.h>
 #include <perspective/context_zero.h>
@@ -681,21 +680,6 @@ t_ctx0::lower_bound(t_tscalvec& partial) const
     partial.resize(m_config.get_num_columns());
     return m_traversal->lower_bound_row_idx(
         m_state, m_config, partial);
-}
-
-t_leaf_data_iter<t_ctx0>
-t_ctx0::iter_data(const t_idxvec& idxs, t_index start_row_idx) const
-{
-    t_idxvec idx_map(idxs.size());
-    auto schema = m_state->get_schema();
-
-    for (size_t ii = 0; ii < idxs.size(); ii++)
-    {
-        idx_map[ii] = schema.get_colidx(m_config.col_at(idxs[ii]));
-    }
-
-    return t_leaf_data_iter<t_ctx0>(
-        m_traversal, m_state, idx_map, start_row_idx);
 }
 
 t_bool
