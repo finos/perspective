@@ -116,7 +116,13 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             return this._view.num_rows();
         }).then(nrows => {
             let rects = getSubrects.call(this.grid.renderer, nrows);
-            resolve(!!rects.find(uncachedRow, this));
+            if (!!rects.find(uncachedRow, this)) {
+                this.grid.renderer.dataWindow.left = rects[0].left;
+                this.grid.renderer.dataWindow.top = rects[0].top;
+                this.grid.renderer.dataWindow.width = rects[0].width;
+                this.grid.renderer.dataWindow.height = rects[0].height;
+            }
+            resolve(false);
         }).catch(() => {
             resolve(true);
         }).finally(() => {
