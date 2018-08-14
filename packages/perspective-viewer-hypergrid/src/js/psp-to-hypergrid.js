@@ -10,27 +10,19 @@
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 function filter_hidden(hidden, json) {
-    if (hidden.length > 0) {
-        const first = json[0];
-        const to_delete = [];
-        for (let key in first) {
-            const split_key = key.split(',');
-            if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
-                to_delete.push(key);
-            }
-        }
-        for (let row of json) {
-            for (let h of to_delete) {
-                delete row[h];
-            }
+    for (let key of Object.keys(json)) {
+        const split_key = key.split(',');
+        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
+            delete json[key];
         }
     }
     return json;
 }
 
-module.exports = function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
+function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
     data = filter_hidden(hidden, data);
-    if (data.length === 0) {
+    const firstcol = Object.keys(data)[0];
+    if (data[firstcol].length === 0) {
         let columns = Object.keys(schema);
         return {
             rows: [],
@@ -43,40 +35,35 @@ module.exports = function psp2hypergrid(data, hidden, schema, tschema, row_pivot
 
     var is_tree = !!row_pivots.length;
 
-    var flat_columns = Object.keys(data[0]).filter(row => row !== '__ROW_PATH__');
+    var flat_columns = Object.keys(data).filter(row => row !== '__ROW_PATH__');
     var columnPaths = flat_columns.map(row => row.split(','));
 
-    let rows = data.map(function (row, idx) {
-        // `dataRow` (element of `dataModel.data`) keys will be `index` here rather than
-        // `columnName` because pivoted data have obscure column names of little use to developer.
-        // This also allows us to override `dataModel.getValue` with a slightly more efficient version
-        // that doesn't require mapping the name through `dataModel.dataSource.schema` to get the index.
+    let rows = [];
+
+    for (let idx = 0; idx < data[firstcol].length; idx++) {
+        
         let dataRow = flat_columns.reduce(function (dataRow, columnName, index) {
-            dataRow[index] = row[columnName];
+            dataRow[index] = data[columnName][idx];
             return dataRow;
         }, {});
+        rows.push(dataRow);
 
         if (is_tree) {
-            if (row.__ROW_PATH__ === undefined) {
-                row.__ROW_PATH__ = [];
+            if (data['__ROW_PATH__'][idx] === undefined) {
+                data['__ROW_PATH__'][idx] = [];
             }
 
-            let name = row.__ROW_PATH__[row.__ROW_PATH__.length - 1];
+            let name = data['__ROW_PATH__'][idx][data['__ROW_PATH__'][idx].length - 1];
             if (name === undefined && idx === 0) {
                 name = 'TOTAL';
             }
-
-            // Following stores the tree column under [-1] rather than ['Tree'] so our `getValue`
-            // override can access it using the tree column index rather than the tree column name.
             dataRow[TREE_COLUMN_INDEX] = {
                 rollup: name,
-                rowPath: ['ROOT'].concat(row.__ROW_PATH__),
-                isLeaf: row.__ROW_PATH__.length >= row_pivots.length
+                rowPath: ['ROOT'].concat(data['__ROW_PATH__'][idx]),
+                isLeaf: data['__ROW_PATH__'][idx].length >= row_pivots.length
             };
         }
-
-        return dataRow;
-    });
+    }
 
     return {
         rows: rows,
@@ -87,3 +74,5 @@ module.exports = function psp2hypergrid(data, hidden, schema, tschema, row_pivot
             .concat(columnPaths.map(col => schema[col[col.length - 1]]))
     };
 };
+
+module.exports = {psp2hypergrid}
