@@ -7,18 +7,18 @@
  *
  */
 
+import buffer from "../../build/wasm_async/psp.wasm";
+
 const perspective = require('./perspective.js');
 
 const fs = require('fs');
 
 const WebSocket = require('ws');
 
-let Module;
-
 const load_perspective = require("../../build/wasm_sync/psp.js").load_perspective;
-const wasm = fs.readFileSync('./build/wasm_sync/psp.wasm');
-Module = load_perspective({
-    wasmBinary: wasm,
+
+let Module = load_perspective({
+    wasmBinary: buffer,
     wasmJSMethod: 'native-wasm',
     ENVIRONMENT: "NODE"
 });    
