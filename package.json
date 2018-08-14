@@ -4,11 +4,11 @@
 		"rimraf": "^2.6.2"
 	},
 	"scripts": {
-		"build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build || npm run _emsdk -- npm run _build",
+		"build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build",
 		"bench:build": "lerna run bench:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"bench:run": "lerna exec ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run bench:run",
 		"bench": "npm-run-all bench:build bench:run",
-		"test:build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run _build_test || npm run _emsdk -- npm run _build_test",
+		"test:build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build_test || npm run --silent _emsdk -- npm run --silent _build_test",
 		"test:run": "npm run --silent _test_perspective && npm run --silent _test_viewer && npm run --silent _test_hypergrid && npm run --silent _test_highcharts",
 		"test": "npm-run-all test:build test:run",
 		"clean": "lerna run clean --stream",
