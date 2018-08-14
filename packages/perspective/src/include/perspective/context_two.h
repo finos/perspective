@@ -20,9 +20,6 @@
 namespace perspective
 {
 
-template <typename CONTEXT_T>
-class t_leaf_data_iter;
-
 class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
 {
   public:
@@ -86,10 +83,6 @@ class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
                              t_uindex end_row,
                              t_uindex start_col,
                              t_uindex end_col) const;
-
-    t_leaf_data_iter<t_ctx2> iter_leaf_data(const t_idxvec& idxs,
-                                            t_uindex row_depth,
-                                            t_uindex col_depth) const;
 
     t_index get_row_idx(const t_tscalvec& path) const;
     t_tvnode get_trav_node(t_header header, t_tvidx idx) const;

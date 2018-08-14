@@ -9,7 +9,6 @@
 
 #include <perspective/first.h>
 #include <perspective/sort_specification.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_one.h>
 #include <perspective/extract_aggregate.h>
@@ -640,14 +639,6 @@ t_ctx1::get_leaf_data(t_uindex depth,
         last_depth = node.m_depth;
     }
     return values;
-}
-
-t_leaf_data_iter<t_ctx1>
-t_ctx1::iter_leaf_data(const t_idxvec& idxs, t_uindex row_depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return t_leaf_data_iter<t_ctx1>(m_tree, idxs, row_depth);
 }
 
 t_bool

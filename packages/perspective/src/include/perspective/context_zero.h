@@ -21,9 +21,6 @@ namespace perspective
 
 class t_table;
 
-template <typename CONTEXT_T>
-class t_leaf_data_iter;
-
 class PERSPECTIVE_EXPORT t_ctx0 : public t_ctxbase<t_ctx0>
 {
   public:
@@ -50,9 +47,6 @@ class PERSPECTIVE_EXPORT t_ctx0 : public t_ctxbase<t_ctx0>
     t_histogram get_histogram(const t_str& cname,
                               t_uindex nbuckets,
                               t_bool show_filtered) const;
-
-    t_leaf_data_iter<t_ctx0>
-    iter_data(const t_idxvec& idxs, t_index start_row_idx = 0) const;
 
     t_uindex lower_bound(t_tscalvec& partial) const;
 

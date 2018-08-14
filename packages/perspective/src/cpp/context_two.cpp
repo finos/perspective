@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_two.h>
 #include <perspective/extract_aggregate.h>
@@ -1433,23 +1432,6 @@ t_ctx2::get_leaf_data(t_uindex row_depth,
         last_depth = node.m_depth;
     }
     return retval;
-}
-
-t_leaf_data_iter<t_ctx2>
-t_ctx2::iter_leaf_data(const t_idxvec& idxs,
-                       t_uindex row_depth,
-                       t_uindex col_depth) const
-{
-
-    t_stree_csptr_vec trees(m_trees.size());
-    for (t_uindex idx = 0, loop_end = trees.size(); idx < loop_end;
-         ++idx)
-    {
-        trees[idx] = m_trees[idx];
-    }
-
-    return t_leaf_data_iter<t_ctx2>(
-        m_config, trees, idxs, row_depth, col_depth);
 }
 
 t_bool
