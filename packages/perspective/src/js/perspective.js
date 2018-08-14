@@ -581,7 +581,7 @@ const to_format = async function (options, formatter) {
         formatter.addRow(data, row);
     }
     if (this.config.row_pivot[0] === 'psp_okey') {
-        data = data.slice(this.config.column_pivot.length);
+        data = formatter.slice(data, this.config.column_pivot.length);
     }
     
     return formatter.formatData(data, options.config)

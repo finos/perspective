@@ -15,7 +15,7 @@
     "view": "webpack --color --config src/config/view.config.js",
     "build": "npm run view && npm run themes",
     "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build && webpack --color --config test/config/view.config.js",
-    "test:run": "jest --silent 2>&1",
+    "test:run": "jest --silent --color 2>&1",
     "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete",
     "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete",
