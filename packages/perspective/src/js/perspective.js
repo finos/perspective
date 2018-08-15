@@ -1258,9 +1258,9 @@ table.prototype.update = function (data) {
  */
 table.prototype.remove = function (data) {
     let pdata;
-    let cols = this._columns();
     let schema = this.gnode.get_tblschema();
     let types = schema.types();
+    schema.delete();
 
     data = data.map(idx => ({[this.index]: idx}));
 
@@ -1285,7 +1285,6 @@ table.prototype.remove = function (data) {
         if (tbl) {
             tbl.delete();
         }
-        schema.delete();
         types.delete();
     }
 }
@@ -1341,8 +1340,8 @@ table.prototype._columns = function () {
             names.push(name);
         }
     }
-  //  schema.delete();
-  //  cols.delete();
+    schema.delete();
+    cols.delete();
     return names;
 }
 
