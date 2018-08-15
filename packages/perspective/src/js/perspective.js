@@ -103,7 +103,6 @@ function infer_type(x) {
  */
 function parse_data(data, names, types) {
     let preloaded = types ? true : false;
-    names = names || [];
     if (types === undefined) {
         types = []
     } else {
@@ -123,22 +122,19 @@ function parse_data(data, names, types) {
         if (data.length === 0) {
             throw "Not yet implemented: instantiate empty grid without column type";
         }
-        let inferredType, i;
-        let col;
-        let MAX_CHECK = 50;
-        for (let ix = 0; ix < MAX_CHECK && ix < data.length; ix ++) {
-            if (names.length > 0) {
+        let max_check = 50;
+        if (names === undefined) {
+            names = Object.keys(data[0]);
+            for (let ix = 0; ix < Math.min(max_check, data.length); ix ++) {
                 let next = Object.keys(data[ix]);
                 if (names.length !== next.length) {
-                    if (MAX_CHECK === 50) console.warn("Array data has inconsistent rows");
                     if (next.length > names.length) {
+                        if (max_check === 50) console.warn("Array data has inconsistent rows");
                         console.warn("Extending from " + names.length + " to " + next.length);
                         names = next;
-                        MAX_CHECK *= 2;
+                        max_check *= 2;
                     }
                 }
-            } else {
-                names = Object.keys(data[ix]);
             }
         }
         for (let n in names) {
@@ -160,10 +156,13 @@ function parse_data(data, names, types) {
                 console.warn(`Could not infer type for column ${name}`)
                 inferredType = __MODULE__.t_dtype.DTYPE_STR;
             }
-            col = [];
+            let col = [];
             const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
-                if (!(name in data[x]) || data[x][name] === undefined) continue;
+                if (!(name in data[x]) || data[x][name] === undefined) {
+                    col.push(undefined);
+                    continue;
+                };
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
                     col.push(Number(data[x][name]));
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
@@ -181,7 +180,7 @@ function parse_data(data, names, types) {
                             col.push(false);
                         }
                     } else {
-                        col.push(cell);
+                        col.push(!!cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
                     let val = data[x][name];
@@ -224,6 +223,7 @@ function parse_data(data, names, types) {
         //if (this.initialized) {
           //  throw "Cannot update already initialized table with schema.";
        // }
+        names = [];
 
         // Empty type dict
         for (let name in data) {
