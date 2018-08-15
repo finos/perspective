@@ -8,7 +8,6 @@
  */
 
 import _  from "underscore";
-import papaparse from "papaparse";
 
 import arrow from "../arrow/test.arrow";
 
@@ -290,6 +289,30 @@ module.exports = (perspective) => {
             });
             table.update(data_2);
         });
+
+        it("partial update", function (done) {
+            var partial = [
+                {'x': 5, 'y':'a'},
+                {'y':'b', 'z': true},
+            ];
+            var expected = [
+                {'x': 5, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': true},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(data);
+            view.on_update(async function (new_data) {
+                expect(new_data).toEqual(expected.slice(0, 2));
+                let json = await view.to_json();
+                expect(json).toEqual(expected);
+                done();
+            });
+            table.update(partial);
+        });
+
 
     });
 

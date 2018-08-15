@@ -15,7 +15,7 @@ const Range = require('./Range');
 const perspectivePlugin = require('./perspective-plugin');
 const PerspectiveDataModel = require('./PerspectiveDataModel');
 const treeLineRendererPaint = require('./hypergrid-tree-cell-renderer').treeLineRendererPaint;
-const psp2hypergrid = require('./psp-to-hypergrid');
+const {psp2hypergrid} = require('./psp-to-hypergrid');
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
@@ -315,7 +315,7 @@ async function grid_create(div, view, task) {
     const colPivots = JSON.parse(this.getAttribute('column-pivots'));
     const [nrows, json, schema, tschema] = await Promise.all([
         view.num_rows(),
-        view.to_json(Range.create(0, colPivots.length + 1)),
+        view.to_columns(Range.create(0, colPivots.length + 1)),
         view.schema(),
         this._table.schema()
     ]);
@@ -339,7 +339,7 @@ async function grid_create(div, view, task) {
     dataModel._view = view;
 
     dataModel.pspFetch = async function (range) {
-        let next_page = await view.to_json(range);
+        let next_page = await view.to_columns(range);
         this.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
         const data = this.data

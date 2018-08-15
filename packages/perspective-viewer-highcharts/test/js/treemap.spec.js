@@ -20,7 +20,7 @@ utils.with_server({}, () => {
 
         describe('tooltip tests', () => {
 
-            test.run("tooltip shows on hover.", async page => {
+            test.capture('tooltip shows on hover.', async page => {
                 await page.click('#config_button');
                 const viewer = await page.$("perspective-viewer");
 
@@ -31,8 +31,6 @@ utils.with_server({}, () => {
                 await page.waitForSelector('perspective-viewer:not([updating])');
 
                 await utils.invoke_tooltip('.highcharts-point', page);
-                return await page.$eval('.highcharts-tooltip',
-                    element => element.getAttribute('opacity') === '1');
             });
         });
 

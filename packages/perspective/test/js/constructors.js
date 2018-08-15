@@ -44,6 +44,13 @@ var data_3 = [
     {'w': 4.5, 'x': 4, 'y':'d', 'z': false}
 ];
 
+var data_7 = {
+    'w': [1.5, 2.5, 3.5, 4.5],
+    'x': [1, 2, 3, 4],
+    'y': ['a', 'b', 'c', 'd'],
+    'z': [true, false, true, false]
+};
+
 var meta_3 = {
     'w': 'float',
     'x': "integer",
@@ -174,6 +181,13 @@ module.exports = (perspective) => {
             var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
             let result2 = await view.to_csv();
             expect(answer).toEqual(result2);
+        });
+
+        it("Serializes a simple view to column-oriented JSON", async function () {
+            var table = perspective.table(data_3);
+            var view = table.view({});
+            let result2 = await view.to_columns();
+            expect(data_7).toEqual(result2);
         });
 
     });

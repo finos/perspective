@@ -194,9 +194,9 @@ function drop(ev) {
     }
 
     // Deselect the dropped column
-    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort") {
+    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort" && name !== "filter") {
         for (let x of this.querySelectorAll("#active_columns perspective-row")) {
-            if (x.getAttribute('name') === data) {
+            if (x.getAttribute('name') === data[0]) {
                  this._active_columns.removeChild(x);
                  break;
             }
@@ -258,17 +258,9 @@ function column_aggregate_clicked() {
 
 
 function column_filter_clicked() {
-    let filters = JSON.parse(this.getAttribute('filters'));
     let new_filters = this._get_view_filters();
-    for (let filter of filters) {
-        let updated_filter = new_filters.find(x => x[0] === filter[0]);
-        if (updated_filter) {
-            filter[1] = updated_filter[1];
-            filter[2] = updated_filter[2];
-        }
-    }
     this._updating_filter = true;
-    this.setAttribute('filters', JSON.stringify(filters));
+    this.setAttribute('filters', JSON.stringify(new_filters));
     this._updating_filter = false;
     this._debounce_update();
 }

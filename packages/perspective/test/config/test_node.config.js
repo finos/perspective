@@ -13,3 +13,8 @@ module.exports = Object.assign({}, common(), {
         libraryTarget: 'umd'
     }
 });
+
+module.exports.module.rules.push({
+    test: /\.wasm$/,
+    loader: "arraybuffer-loader"
+});

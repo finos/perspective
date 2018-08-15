@@ -18,7 +18,7 @@ import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
-    global.performance || {now: Date.now};
+    global.performance = {now: Date.now};
 }
 
 if (typeof self !== "undefined" && self.performance === undefined) {
@@ -27,6 +27,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 
 let __MODULE__;
 
+const CHUNKED_THRESHOLD = 100000
 
 /******************************************************************************
  *
@@ -102,7 +103,6 @@ function infer_type(x) {
  */
 function parse_data(data, names, types) {
     let preloaded = types ? true : false;
-    names = names || [];
     if (types === undefined) {
         types = []
     } else {
@@ -122,22 +122,19 @@ function parse_data(data, names, types) {
         if (data.length === 0) {
             throw "Not yet implemented: instantiate empty grid without column type";
         }
-        let inferredType, i;
-        let col;
-        let MAX_CHECK = 50;
-        for (let ix = 0; ix < MAX_CHECK && ix < data.length; ix ++) {
-            if (names.length > 0) {
+        let max_check = 50;
+        if (names === undefined) {
+            names = Object.keys(data[0]);
+            for (let ix = 0; ix < Math.min(max_check, data.length); ix ++) {
                 let next = Object.keys(data[ix]);
                 if (names.length !== next.length) {
-                    if (MAX_CHECK === 50) console.warn("Array data has inconsistent rows");
                     if (next.length > names.length) {
+                        if (max_check === 50) console.warn("Array data has inconsistent rows");
                         console.warn("Extending from " + names.length + " to " + next.length);
                         names = next;
-                        MAX_CHECK *= 2;
+                        max_check *= 2;
                     }
                 }
-            } else {
-                names = Object.keys(data[ix]);
             }
         }
         for (let n in names) {
@@ -159,10 +156,13 @@ function parse_data(data, names, types) {
                 console.warn(`Could not infer type for column ${name}`)
                 inferredType = __MODULE__.t_dtype.DTYPE_STR;
             }
-            col = [];
+            let col = [];
             const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
-                if (!(name in data[x]) || data[x][name] === undefined) continue;
+                if (!(name in data[x]) || data[x][name] === undefined) {
+                    col.push(undefined);
+                    continue;
+                };
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
                     col.push(Number(data[x][name]));
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
@@ -180,7 +180,7 @@ function parse_data(data, names, types) {
                             col.push(false);
                         }
                     } else {
-                        col.push(cell);
+                        col.push(!!cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
                     let val = data[x][name];
@@ -223,6 +223,7 @@ function parse_data(data, names, types) {
         //if (this.initialized) {
           //  throw "Cannot update already initialized table with schema.";
        // }
+        names = [];
 
         // Empty type dict
         for (let name in data) {
@@ -496,19 +497,28 @@ view.prototype.schema = async function() {
         } else if (types[col_name] === 12) {
             new_schema[col_name] = "date";
         }
-        if (this.sides() > 0) {
-            for (let agg in this.config.aggregate) {
-                agg = this.config.aggregate[agg];
-                if (agg.column.join(',') === col_name) {
-                    if (["distinct count", "distinctcount", "distinct", "count"].indexOf(agg.op) > -1) {
-                        new_schema[col_name] = "integer";
-                    }
-
-                }
-            }
+        if (this.sides() > 0 && this.config.row_pivot.length > 0) {
+            new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }
     return new_schema;
+}
+
+const map_aggregate_types = function(col_name, orig_type, aggregate) {
+    const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
+    const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
+
+    for (let agg in aggregate) {
+        let found_agg = aggregate[agg];
+        if (found_agg.column.join(',') === col_name) {
+            if (INTEGER_AGGS.includes(found_agg.op)) {
+                return "integer";
+            } else if (FLOAT_AGGS.includes(found_agg.op)) {
+                return "float";
+            }
+        }
+    }
+    return orig_type;
 }
 
 const to_format = async function (options, formatter) {
@@ -553,7 +563,7 @@ const to_format = async function (options, formatter) {
                 if (this.config.row_pivot[0] !== 'psp_okey') {
                     let col_name = "__ROW_PATH__";
                     let row_path = this.ctx.unity_get_row_path(start_row + ridx);
-                    formatter.initColumnValue(row, col_name)
+                    formatter.initColumnValue(data, row, col_name)
                     for (let i = 0; i < row_path.size(); i++) {
                         const value = __MODULE__.scalar_vec_to_val(row_path, i);
                         formatter.addColumnValue(data, row, col_name, value);
@@ -571,13 +581,14 @@ const to_format = async function (options, formatter) {
         formatter.addRow(data, row);
     }
     if (this.config.row_pivot[0] === 'psp_okey') {
-        data = data.slice(this.config.column_pivot.length);
+        data = formatter.slice(data, this.config.column_pivot.length);
     }
     
     return formatter.formatData(data, options.config)
 }
+
 /**
- * Serializes this view to JSON data in a standard format.
+ * Serializes this view to JSON data in a column-oriented format.
  *
  * @async
  *
@@ -599,7 +610,34 @@ const to_format = async function (options, formatter) {
  * parameter supplied, the keys of this object will be comma-prepended with
  * their comma-separated column paths.
  */
-view.prototype.to_json = async function(options) {
+view.prototype.to_columns = async function (options) {
+    return to_format.call(this, options, formatters.jsonTableFormatter);
+}
+
+/**
+ * Serializes this view to JSON data in a row-oriented format.
+ *
+ * @async
+ *
+ * @param {Object} [options] An optional configuration object.
+ * @param {number} options.start_row The starting row index from which
+ * to serialize.
+ * @param {number} options.end_row The ending row index from which
+ * to serialize.
+ * @param {number} options.start_col The starting column index from which
+ * to serialize.
+ * @param {number} options.end_col The ending column index from which
+ * to serialize.
+ *
+ * @returns {Promise<Array>} A Promise resolving to An array of Objects
+ * representing the rows of this {@link view}.  If this {@link view} had a
+ * "row_pivots" config parameter supplied when constructed, each row Object
+ * will have a "__ROW_PATH__" key, whose value specifies this row's
+ * aggregated path.  If this {@link view} had a "column_pivots" config
+ * parameter supplied, the keys of this object will be comma-prepended with
+ * their comma-separated column paths.
+ */
+view.prototype.to_json = async function (options) {
     return to_format.call(this, options, formatters.jsonFormatter);
 }
 
@@ -1337,64 +1375,59 @@ function error_to_json(error) {
     return obj;
 }
 
-if (typeof self !== "undefined" && self.addEventListener) {
-    let _tables = {};
-    let _views = {};
+class Host {
 
-    self.addEventListener('message', function(e) {
-        let msg = e.data;
+    constructor() {
+        this._tables = {};
+        this._views = {};
+    }
+
+    init(msg) {
+        this.post(msg);
+    }
+
+    post(msg) {
+        throw new Error("post() not implemented!");
+    }
+
+    clear_views(client_id) {
+        for (let key of Object.keys(this._views)) {
+            if (this._views[key].client_id === client_id) {
+                try {
+                    this._views[key].delete();
+                } catch (e) {
+                    console.error(e);
+                }
+                delete this._views[key];
+            }
+        }
+        console.debug(`GC ${Object.keys(this._views).length} views in memory`);
+    }
+
+    process(msg, client_id) {
         switch (msg.cmd) {
             case 'init':
-                if (typeof WebAssembly === 'undefined') {
-                    console.log("Loading asm.js");
-                    __MODULE__ = __MODULE__({
-                        wasmJSMethod: "asmjs",
-                        locateFile: path => `${path}`,
-                        filePackagePrefixURL: msg.path,
-                        printErr: (x) => console.warn(x),
-                        print: (x) => console.log(x)
-                   //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
-                    });
-                 } else {
-                    console.log('Loading wasm');
-                    if (msg.data) {
-                        module = {};
-                        module.wasmBinary = msg.data;
-                        module.wasmJSMethod = 'native-wasm';
-                        __MODULE__ = __MODULE__(module);
-                    } else {
-                        let wasmXHR = new XMLHttpRequest();
-                        wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
-                        wasmXHR.responseType = 'arraybuffer';
-                        wasmXHR.onload = function() {
-                            module = {};
-                            module.wasmBinary = wasmXHR.response;
-                            module.wasmJSMethod = 'native-wasm';
-                            __MODULE__ = __MODULE__(module);
-                        };
-                        wasmXHR.send(null);
-                    }
-                };
+                this.init(msg);
                 break;
             case 'table':
-                _tables[msg.name] = perspective.table(msg.data, msg.options);
+                this._tables[msg.name] = perspective.table(msg.args[0], msg.options);
                 break;
             case 'add_computed':
-                let table = _tables[msg.original];
+                let table = this._tables[msg.original];
                 let computed = msg.computed;
                 // rehydrate computed column functions
                 for (let i = 0; i < computed.length; ++i) {
                     let column = computed[i];
                     eval("column.func = " + column.func);
                 }
-                _tables[msg.name] = table.add_computed(computed);
+                this._tables[msg.name] = table.add_computed(computed);
                 break;
             case 'table_generate':
                 let g;
                 eval("g = " + msg.args)
                 g(function (tbl) {
-                    _tables[msg.name] = tbl;
-                    self.postMessage({
+                    this._tables[msg.name] = tbl;
+                    this.post({
                         id: msg.id,
                         data: 'created!'
                     });
@@ -1403,20 +1436,21 @@ if (typeof self !== "undefined" && self.addEventListener) {
             case 'table_execute':
                 let f;
                 eval("f = " + msg.f);
-                f(_tables[msg.name]);
+                f(this._tables[msg.name]);
                 break;
             case 'view':
-                _views[msg.view_name] = _tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
+                this._views[msg.view_name].client_id = client_id;
                 break;
             case 'table_method': {
-                let obj = _tables[msg.name];
+                let obj = this._tables[msg.name];
                 let result;
 
                 try {
 
                     if (msg.subscribe) {
                         obj[msg.method](e => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 data: e
                             });
@@ -1426,19 +1460,19 @@ if (typeof self !== "undefined" && self.addEventListener) {
                         if (result && result.then) {
                         result.then(data => {
                             if (data) {
-                                self.postMessage({
+                                this.post({
                                     id: msg.id,
                                     data: data
                                 });
                             }
                         }).catch(error => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 error: error_to_json(error)
                             });
                         });
                     } else {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             data: result
                         });
@@ -1446,7 +1480,7 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 }
 
                 } catch (e) {
-                    self.postMessage({
+                    this.post({
                         id: msg.id,
                         error: error_to_json(e)
                     });
@@ -1456,9 +1490,9 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             }
             case 'view_method': {
-                let obj = _views[msg.name];
+                let obj = this._views[msg.name];
                 if (!obj) {
-                    self.postMessage({
+                    this.post({
                         id: msg.id,
                         error: {message: "View is not initialized"}
                     });
@@ -1467,25 +1501,28 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 if (msg.subscribe) {
                     try {
                         obj[msg.method](e => {
-                            self.postMessage({
+                            this.post({
                                 id: msg.id,
                                 data: e
                             });
                         });
                     } catch (error) {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             error: error_to_json(error)
                         });
                     }
                 } else {
                     obj[msg.method].apply(obj, msg.args).then(result => {
-                        self.postMessage({
+                        if (msg.method === "delete") {
+                            delete this._views[msg.name];
+                        }
+                        this.post({
                             id: msg.id,
                             data: result
                         });
                     }).catch(error => {
-                        self.postMessage({
+                        this.post({
                             id: msg.id,
                             error: error_to_json(error)
                         });
@@ -1494,8 +1531,57 @@ if (typeof self !== "undefined" && self.addEventListener) {
                 break;
             }
         }
-    }, false);
+    }
+}
 
+class WorkerHost extends Host {
+
+    constructor() {
+        super();
+        self.addEventListener('message', e => this.process(e.data), false);
+    }
+
+    post(msg) {
+        self.postMessage(msg);
+    }
+
+    init(msg) {
+        if (typeof WebAssembly === 'undefined') {
+            console.log("Loading asm.js");
+            __MODULE__ = __MODULE__({
+                wasmJSMethod: "asmjs",
+                locateFile: path => `${path}`,
+                filePackagePrefixURL: msg.path,
+                printErr: (x) => console.warn(x),
+                print: (x) => console.log(x)
+            //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
+            });
+        } else {
+            console.log('Loading wasm');
+            if (msg.data) {
+                module = {};
+                module.wasmBinary = msg.data;
+                module.wasmJSMethod = 'native-wasm';
+                __MODULE__ = __MODULE__(module);
+            } else {
+                let wasmXHR = new XMLHttpRequest();
+                wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
+                wasmXHR.responseType = 'arraybuffer';
+                wasmXHR.onload = function() {
+                    module = {};
+                    module.wasmBinary = wasmXHR.response;
+                    module.wasmJSMethod = 'native-wasm';
+                    __MODULE__ = __MODULE__(module);
+                };
+                wasmXHR.send(null);
+            }
+        };
+    }
+
+}
+
+if (typeof self !== "undefined" && self.addEventListener) {
+    new WorkerHost();   
 };
 
 
@@ -1506,6 +1592,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
  */
 
 const perspective = {
+
+    Host: Host,
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
 
@@ -1547,9 +1635,9 @@ const perspective = {
     table: function(data, options) {
         options = options || {};
         options.index = options.index || "";
-        let pdata;
+        let pdata, chunked = false;
 
-        if (data instanceof ArrayBuffer) {
+        if (data instanceof ArrayBuffer  || (Buffer && data instanceof Buffer)) {
             // Arrow data
             pdata = load_arrow_buffer(data);
         } else {
@@ -1557,29 +1645,49 @@ const perspective = {
                 if (data[0] === ",") {
                     data = "_" + data;
                 }
-                data = papaparse.parse(data, {dynamicTyping: true, header: true}).data;
+                data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
             }
             pdata = parse_data(data);
+            chunked = pdata.row_count > CHUNKED_THRESHOLD;
         }
 
         if (options.index && pdata.names.indexOf(options.index) === -1) {
             throw `Specified index '${options.index}' does not exist in data.`;
         }
 
-        let tbl, gnode, pool;
+        let tbl, gnode, pool, pages;
 
         try {
             // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {} } );
 
+            if (chunked) {
+                pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+            } else {
+                pages = pdata.cdata;
+            }
+
             // Fill t_table with data
-            tbl = __MODULE__.make_table(pdata.row_count || 0,
-                pdata.names, pdata.types, pdata.cdata,
+            tbl = __MODULE__.make_table(pages[0].length || 0,
+                pdata.names, pdata.types, pages,
                 0, options.index, pdata.is_arrow, false);
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
             __MODULE__.fill(pool, gnode, tbl);
+
+            if (chunked) {
+                while (pdata.cdata[0].length > 0) {
+                    tbl.delete();
+                    pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+                
+                    tbl = __MODULE__.make_table(pages[0].length || 0,
+                        pdata.names, pdata.types, pages,
+                        gnode.get_table().size(), options.index, pdata.is_arrow, false);
+    
+                    __MODULE__.fill(pool, gnode, tbl);    
+                }
+            }
 
             return new table(gnode, pool, options.index);
         } catch (e) {
@@ -1598,7 +1706,7 @@ const perspective = {
     }
 }
 
-module.exports = function(Module) {
+module.exports = function (Module) {
     __MODULE__ = Module;
     return perspective;
 };
