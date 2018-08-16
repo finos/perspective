@@ -138,19 +138,11 @@ class PERSPECTIVE_EXPORT t_config
 
     t_bool handle_nan_sort() const;
 
-    t_boolvec calc_has_sortby(const t_pivotvec& p) const;
-
-    t_svec get_detail_columns() const;
-
     t_str get_parent_pkey_column() const;
 
     t_str get_child_pkey_column() const;
 
     const t_str& get_grouping_label_column() const;
-
-    t_uindex get_row_expand_depth() const;
-
-    t_uindex get_col_expand_depth() const;
 
     t_config_recipe get_recipe() const;
 

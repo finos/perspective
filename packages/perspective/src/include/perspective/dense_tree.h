@@ -32,9 +32,6 @@ class t_filter;
 class t_dtree
 {
   public:
-    typedef const t_dtree* t_cptr;
-    typedef std::shared_ptr<t_dtree> t_sptr;
-    typedef std::shared_ptr<const t_dtree> t_csptr;
     typedef t_dense_tnode t_tnode;
     typedef std::vector<t_tnode> t_tnodevec;
     typedef t_table_csptr t_dssptr;
@@ -55,12 +52,6 @@ class t_dtree
     t_str values_colname(const t_str& tbl_colname) const;
     void check_pivot(const t_filter& f, t_uindex level);
     void pivot(const t_filter& f, t_uindex level);
-    void print_nodes() const;
-    void print_leaves() const;
-    void print_child_indices(t_ptidx idx) const;
-    void print_leaves(t_ptidx idx) const;
-    void print_levels() const;
-    void print_values() const;
 
     t_uindex size() const;
 
@@ -73,19 +64,10 @@ class t_dtree
 
     t_uindex get_depth(t_ptidx idx) const;
     t_ptipair get_level_markers(t_uindex idx) const;
-    t_tnode* get_node_ptr(t_ptidx idx);
     const t_tnode* get_node_ptr(t_ptidx idx) const;
-    t_uindex level_len(t_uindex depth) const;
     t_uindex last_level() const;
     t_uidxpair get_span_index(t_ptidx idx) const;
     void pprint(const t_filter& filter) const;
-    void pprint_pivots(t_uindex end_level, t_uindex width = 18) const;
-
-    const t_column* _get_leaves() const;
-    t_column* _get_leaves();
-    t_column* _get_nodes();
-    t_column* _get_values(t_uindex lvl);
-    t_uidxpvec _get_levels() const;
 
     const t_column* get_leaf_cptr() const;
 
@@ -93,9 +75,6 @@ class t_dtree
     t_dfs_iter<t_dtree> dfs() const;
     t_ptidx get_parent(t_ptidx idx) const;
     const t_pivotvec& get_pivots() const;
-
-    void pprint_values() const;
-
   private:
     t_str m_dirname;
     t_uindex m_levels_pivoted;

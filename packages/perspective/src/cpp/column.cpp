@@ -382,12 +382,6 @@ t_column::size() const
     return m_size;
 }
 
-t_uindex
-t_column::get_version() const
-{
-    return m_data->get_version();
-}
-
 void
 t_column::set_size(t_uindex size)
 {
@@ -417,75 +411,16 @@ t_column::_get_data_lstore()
     return m_data.get();
 }
 
-t_lstore*
-t_column::_get_vlendata_lstore()
-{
-    return m_vocab->get_vlendata().get();
-}
-
-t_lstore*
-t_column::_get_extents_lstore()
-{
-    return m_vocab->get_extents().get();
-}
-
-t_lstore*
-t_column::_get_valid_lstore()
-{
-    return m_valid.get();
-}
-
 t_vocab*
 t_column::_get_vocab()
 {
     return m_vocab.get();
 }
 
-const t_lstore*
-t_column::_get_data_lstore() const
-{
-    return m_data.get();
-}
-
-const t_lstore*
-t_column::_get_vlendata_lstore() const
-{
-    return m_vocab->get_vlendata().get();
-}
-
-const t_lstore*
-t_column::_get_extents_lstore() const
-{
-    return m_vocab->get_extents().get();
-}
-
-const t_lstore*
-t_column::_get_valid_lstore() const
-{
-    return m_valid.get();
-}
-
 t_uindex
 t_column::get_vlenidx() const
 {
     return m_vocab->get_vlenidx();
-}
-
-t_uindex
-t_column::nbytes() const
-{
-    t_uindex rv = 0;
-    rv += m_data->capacity();
-    if (is_vlen_dtype(m_dtype))
-    {
-        rv += m_vocab->nbytes();
-    }
-
-    if (is_valid_enabled())
-    {
-        rv += m_valid->capacity();
-    }
-    return rv;
 }
 
 t_tscalar
@@ -975,192 +910,6 @@ t_column::copy_vocabulary(const t_column* other)
     COLUMN_CHECK_VALUES();
 }
 
-t_histogram
-t_column::get_histogram(t_uindex nbuckets)
-{
-    return get_histogram(nbuckets, 0);
-}
-
-t_histogram
-t_column::get_histogram(t_uindex nbuckets, t_mask* mask) const
-{
-    switch (m_dtype)
-    {
-        case DTYPE_NONE:
-        {
-            return t_histogram(0);
-        }
-        break;
-        case DTYPE_INT64:
-        {
-            return build_histogram<t_int64>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_INT32:
-        {
-            return build_histogram<t_int32>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_INT16:
-        {
-            return build_histogram<t_int16>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_INT8:
-        {
-            return build_histogram<t_int8>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_UINT64:
-        {
-            return build_histogram<t_uint64>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_UINT32:
-        {
-            return build_histogram<t_uint32>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_UINT16:
-        {
-            return build_histogram<t_uint16>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_UINT8:
-        {
-            return build_histogram<t_uint8>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_FLOAT64:
-        {
-            return build_histogram<t_float64>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_FLOAT32:
-        {
-            return build_histogram<t_float32>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_BOOL:
-        {
-            return build_histogram<t_bool>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_TIME:
-        {
-            return build_histogram<t_int64>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_DATE:
-        {
-            return build_histogram<t_uint32>(nbuckets, mask);
-        }
-        break;
-        case DTYPE_STR:
-        {
-            return build_histogram<t_str>(nbuckets, mask);
-        }
-        break;
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Unexpected type");
-            return t_histogram(0);
-        }
-    }
-}
-
-template <>
-t_histogram
-t_column::build_histogram<t_str>(t_uindex buckets, t_mask* mask) const
-{
-    typedef std::unordered_map<t_uindex, t_uindex> t_map;
-    t_map count_map;
-    t_uindex nrows = size();
-    t_bool valid_enabled = is_valid_enabled();
-
-    for (t_uindex idx = 0; idx < nrows; ++idx)
-    {
-        t_uindex v = *(get_nth<t_uindex>(idx));
-        t_bool valid = mask ? mask->get(idx) : true;
-
-        if (valid_enabled)
-        {
-            valid = valid && *(get_nth_valid(idx));
-        }
-
-        if (valid)
-        {
-            auto iter = count_map.find(v);
-
-            if (iter == count_map.end())
-            {
-                count_map[v] = 1;
-            }
-            else
-            {
-                t_uindex ocount = iter->second;
-                count_map[v] = ocount + 1;
-            }
-        }
-    }
-
-    t_histogram rval(count_map.size());
-
-    t_uindex bcount = 0;
-    for (const auto& kv : count_map)
-    {
-        auto sc = get_interned_tscalar(unintern_c(kv.first));
-        rval.m_buckets[bcount].m_begin.set(sc);
-        rval.m_buckets[bcount].m_end.set(sc);
-        rval.m_buckets[bcount].m_count = kv.second;
-        ++bcount;
-    }
-
-    return rval;
-}
-
-template <>
-t_histogram
-t_column::build_histogram<t_bool>(t_uindex buckets,
-                                  t_mask* mask) const
-{
-
-    t_histogram rval(2);
-
-    t_tscalar fval;
-    fval.set(false);
-
-    t_tscalar tval;
-    tval.set(true);
-
-    rval.m_buckets[0].m_begin = fval;
-    rval.m_buckets[0].m_end = fval;
-
-    rval.m_buckets[1].m_begin = tval;
-    rval.m_buckets[1].m_end = tval;
-
-    t_uindex nrows = size();
-    t_bool valid_enabled = is_valid_enabled();
-
-    for (t_uindex idx = 0; idx < nrows; ++idx)
-    {
-        t_uint8 v = *(get_nth<t_uint8>(idx));
-        t_bool valid = mask ? mask->get(idx) : true;
-        if (valid_enabled)
-        {
-            valid = valid && *(get_nth_valid(idx));
-        }
-
-        if (valid)
-        {
-            t_uint8 bucket_num(v);
-            rval.m_buckets[bucket_num].m_count += 1;
-        }
-    }
-
-    return rval;
-}
-
 void
 t_column::pprint_vocabulary() const
 {
@@ -1336,29 +1085,6 @@ t_column::copy_helper<const char>(const t_column* other,
     COLUMN_CHECK_VALUES();
 }
 
-void
-t_column::set_vlenidx(t_uindex idx)
-{
-    m_vocab->set_vlenidx(idx);
-}
-
-t_bool
-t_column::has_invalid_entry() const
-{
-    if (!is_valid_enabled())
-        return false;
-
-    for (t_uindex idx = 0, loop_end = size(); idx < loop_end; ++idx)
-    {
-        if (!is_valid(idx))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 template <>
 void
 t_column::fill(std::vector<const char*>& vec,
@@ -1375,20 +1101,6 @@ t_column::fill(std::vector<const char*>& vec,
         vec[idx] = get_nth<const char>(*(bidx + idx));
     }
     COLUMN_CHECK_VALUES();
-}
-
-t_column_dynamic_ctx
-t_column::get_dynamic_context() const
-{
-    t_column_dynamic_ctx rv;
-    rv.m_base = static_cast<void*>(m_data->get<t_uint8>(0));
-    t_bool ve = is_valid_enabled();
-    rv.m_valid = ve ? m_valid->get<t_uint8>(0) : 0;
-    t_bool vlen = is_vlen_dtype(m_dtype);
-    rv.m_extents_base = vlen ? m_vocab->get_extents_base() : 0;
-    rv.m_vlendata_base = vlen ? m_vocab->get_vlen_base() : 0;
-    rv.m_opaque = 0;
-    return rv;
 }
 
 void
@@ -1439,13 +1151,6 @@ const char*
 t_column::unintern_c(t_uindex idx) const
 {
     return m_vocab->unintern_c(idx);
-}
-
-t_bool
-t_column::string_exists(const char* c, t_stridx& interned) const
-{
-    COLUMN_CHECK_STRCOL();
-    return m_vocab->string_exists(c, interned);
 }
 
 void
