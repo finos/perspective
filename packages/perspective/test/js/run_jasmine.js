@@ -7,16 +7,11 @@
  *
  */
 
-#pragma once
+var Jasmine = require('jasmine');
+var jasmine = new Jasmine();
 
-namespace perspective
-{
-const int META_NBYTES = 1;
+jasmine.configureDefaultReporter({
+    showColors: true
+});
 
-enum t_meta_mode
-{
-    META_MODE_MISSING,
-    META_MODE_STR_IMM,
-    META_MODE_STR_ENUM
-};
-}
+jasmine.execute(['./build/test_node.js']);

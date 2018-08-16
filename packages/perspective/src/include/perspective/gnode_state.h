@@ -43,9 +43,6 @@ class PERSPECTIVE_EXPORT t_gstate
     void erase(const t_tscalar& pkey);
 
     void update_history(const t_table* tbl);
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* get_mask() const;
-#endif
     t_mask get_cpp_mask() const;
 
     t_tscalar get_value(const t_tscalar& pkey,

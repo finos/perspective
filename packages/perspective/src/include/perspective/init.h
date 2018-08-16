@@ -9,11 +9,9 @@
 
 #pragma once
 #include <perspective/first.h>
-#include <Python.h>
 
 namespace perspective
 {
 void perspective_init();
-PyObject* perspective_jit_global_dict();
 void perspective_finalize();
 }

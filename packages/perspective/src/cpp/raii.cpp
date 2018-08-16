@@ -19,31 +19,6 @@
 namespace perspective
 {
 
-#ifdef PSP_ENABLE_PYTHON
-t_py_handle::t_py_handle(PyObject* pyo) : m_pyo(pyo)
-{
-}
-
-t_py_handle::~t_py_handle()
-{
-    if (m_pyo)
-        Py_XDECREF(m_pyo);
-}
-
-void
-t_py_handle::release()
-{
-    m_pyo = 0;
-}
-
-PyObject*
-t_py_handle::get()
-{
-    return m_pyo;
-}
-
-#endif
-
 t_file_handle::t_file_handle(t_handle value) : m_value(value)
 {
 }
