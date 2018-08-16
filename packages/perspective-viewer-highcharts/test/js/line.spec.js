@@ -11,6 +11,7 @@ const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
 
 const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
 
+const axis_tests = require('./axis_tests.js');
 
 utils.with_server({}, () => {
 
@@ -18,6 +19,8 @@ utils.with_server({}, () => {
 
         simple_tests.default();
 
+        axis_tests.default();
+       
         describe('tooltip tests', () => {
             const series = 'path.highcharts-graph';
             const tooltip_selector = '.highcharts-label.highcharts-tooltip';
