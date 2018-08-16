@@ -229,7 +229,7 @@ worker.prototype._handle = function (e) {
 };
 
 worker.prototype.table = function (data, options) {
-    return new table(this, data, options);
+    return new table(this, data, options || {});
 };
 
 worker.prototype.terminate = function () {

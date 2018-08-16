@@ -8,7 +8,6 @@
  */
 
 import _  from "underscore";
-import papaparse from "papaparse";
 
 import arrow from "../arrow/test.arrow";
 
@@ -76,6 +75,20 @@ module.exports = (perspective) => {
             let result = await view.to_json();
             expect(result.length).toEqual(2);
             expect(data.slice(2, 4)).toEqual(result);
+        });
+
+        it("multiple single element removes", async function () {
+            let table = perspective.table(meta, {index: "x"});
+            for (let i = 0; i < 100; i++) {
+                table.update([{x: i, y: "test", z: false}]);
+            }
+            for (let i = 1; i < 100; i++) {
+                table.remove([i]);
+            }
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{x: 0, y: "test", z: false}]);
+            expect(result.length).toEqual(1);
         });
 
     });
@@ -290,6 +303,30 @@ module.exports = (perspective) => {
             });
             table.update(data_2);
         });
+
+        it("partial update", function (done) {
+            var partial = [
+                {'x': 5, 'y':'a'},
+                {'y':'b', 'z': true},
+            ];
+            var expected = [
+                {'x': 5, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': true},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(data);
+            view.on_update(async function (new_data) {
+                expect(new_data).toEqual(expected.slice(0, 2));
+                let json = await view.to_json();
+                expect(json).toEqual(expected);
+                done();
+            });
+            table.update(partial);
+        });
+
 
     });
 

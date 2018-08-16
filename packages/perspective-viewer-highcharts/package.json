@@ -18,7 +18,7 @@
     "build": "npm run highcharts",
     "test:build": "cp test/html/* build && webpack --color --config test/config/highcharts.config.js",
     "watch_test": "cp test/html* build && webpack --color --config --watch test/config/highcharts.config.js",
-    "test:run": "jest --silent 2>&1",
+    "test:run": "jest --silent --color 2>&1",
     "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete",
     "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"

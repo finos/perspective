@@ -24,6 +24,12 @@ exports.default = function() {
         await page.evaluate(element => element.setAttribute('row-pivots', '["Category","Sub-Category"]'), viewer);
     });
 
+    test.capture("pivots by a column.", async page => {        
+        await page.click('#config_button');
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
+    });
+
     test.capture("pivots by a row and a column.", async page => {        
         await page.click('#config_button');
         const viewer = await page.$('perspective-viewer');
