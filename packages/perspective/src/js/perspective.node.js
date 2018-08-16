@@ -7,7 +7,7 @@
  *
  */
 
-import buffer from "../../build/wasm_async/psp.wasm";
+import buffer from "../../build/wasm_sync/psp.wasm";
 
 const perspective = require('./perspective.js');
 

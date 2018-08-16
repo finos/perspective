@@ -72,8 +72,8 @@ export const draw = (mode) => async function (el, view, task) {
         if (num_aggregates < 3) {
             set_boost(config, xaxis_type, yaxis_type);
         }
-        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xtree_type, xtop);
-        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xaxis_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, yaxis_type, ytop);
         set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
         let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
@@ -118,8 +118,8 @@ export const draw = (mode) => async function (el, view, task) {
         if (set_boost(config, xaxis_type, yaxis_type)) {
             delete config.chart['type'];
         }
-        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xtree_type, xtop);
-        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, ytree_type, ytop);
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xaxis_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, yaxis_type, ytop);
     } else {
         let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, top, ] = make_y_data(js, row_pivots, hidden);

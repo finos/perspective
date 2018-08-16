@@ -4,25 +4,23 @@
 		"rimraf": "^2.6.2"
 	},
 	"scripts": {
-		"build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build",
+		"build,test": "npm run --silent build && npm run --silent test",
+		"build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
+		"build,bench": "npm run --silent build && npm run --silent bench",
+		"build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build'",
 		"bench:build": "lerna run bench:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"bench:run": "lerna exec ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run bench:run",
-		"bench": "npm-run-all bench:build bench:run",
-		"test:build": "[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build_test || npm run --silent _emsdk -- npm run --silent _build_test",
-		"test:run": "npm run --silent _test_perspective && npm run --silent _test_viewer && npm run --silent _test_hypergrid && npm run --silent _test_highcharts",
-		"test": "npm-run-all test:build test:run",
+		"bench": "npm-run-all --silent bench:build bench:run",
+		"test:build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build_test || npm run --silent _emsdk -- npm run --silent _build_test'",
+		"test:run": "npm run --silent _puppeteer -- node_modules/.bin/lerna exec --concurrency 1  ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run --silent test:run",
+		"test:run_quiet": "npm run --silent _puppeteer -- node_modules/.bin/lerna run test:run",
+		"test": "npm-run-all --silent test:build test:run",
 		"clean": "lerna run clean --stream",
-		"quiet_test": "npm run --silent _puppeteer -- npm run --silent _quiet_test",
 		"write_tests": "WRITE_TESTS=1 npm run test:run",
 		"postinstall": "lerna bootstrap --hoist",
 		"_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_emsdk": "docker run --rm -it -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",
-		"_puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -v $(pwd):/src -w /src/packages/${PACKAGE} perspective/puppeteer",
-		"_quiet_test": "lerna run test:run ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
-		"_test_perspective": "PACKAGE=perspective npm run --silent _puppeteer -- npm run --silent test:run",
-		"_test_viewer": "PACKAGE=perspective-viewer npm run --silent _puppeteer -- npm run --silent test:run",
-		"_test_hypergrid": "PACKAGE=perspective-viewer-hypergrid npm run --silent _puppeteer -- npm --silent run test:run",
-		"_test_highcharts": "PACKAGE=perspective-viewer-highcharts npm run --silent _puppeteer -- npm --silent run test:run"
+		"_puppeteer": "docker run -it --rm --shm-size=2g -u root -e WRITE_TESTS=${WRITE_TESTS} -e PACKAGE=${PACKAGE} -v $(pwd):/src -w /src perspective/puppeteer"
 	}
 }
