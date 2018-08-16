@@ -4,6 +4,9 @@
 		"rimraf": "^2.6.2"
 	},
 	"scripts": {
+		"build,test": "npm run --silent build && npm run --silent test",
+		"build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
+		"build,bench": "npm run --silent build && npm run --silent bench",
 		"build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build'",
 		"bench:build": "lerna run bench:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"bench:run": "lerna exec ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run bench:run",
