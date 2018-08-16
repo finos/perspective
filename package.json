@@ -7,7 +7,7 @@
 		"build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build'",
 		"bench:build": "lerna run bench:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"bench:run": "lerna exec ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run bench:run",
-		"bench": "npm-run-all bench:build bench:run",
+		"bench": "npm-run-all --silent bench:build bench:run",
 		"test:build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build_test || npm run --silent _emsdk -- npm run --silent _build_test'",
 		"test:run": "npm run --silent _puppeteer -- node_modules/.bin/lerna exec --concurrency 1  ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run --silent test:run",
 		"test:run_quiet": "npm run --silent _puppeteer -- node_modules/.bin/lerna run test:run",
