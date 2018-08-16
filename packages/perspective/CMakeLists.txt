@@ -60,7 +60,7 @@ src/cpp/base.cpp
 src/cpp/base_impl_linux.cpp
 src/cpp/base_impl_win.cpp
 src/cpp/build_filter.cpp
-src/cpp/calc_agg_dtype.cpp
+#src/cpp/calc_agg_dtype.cpp
 src/cpp/column.cpp
 src/cpp/comparators.cpp
 src/cpp/compat.cpp
@@ -94,7 +94,6 @@ src/cpp/path.cpp
 src/cpp/pivot.cpp
 src/cpp/pool.cpp
 src/cpp/port.cpp
-src/cpp/query.cpp
 src/cpp/raii.cpp
 src/cpp/raii_impl_linux.cpp
 src/cpp/raii_impl_win.cpp
@@ -146,4 +145,3 @@ set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLA
 set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "../build/asmjs/")
 set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp")
 add_dependencies(perspective.asm perspective.sync)
-

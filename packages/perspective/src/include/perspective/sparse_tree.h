@@ -49,14 +49,6 @@ using namespace boost::multi_index;
 typedef std::pair<t_depth, t_ptidx> t_dptipair;
 typedef std::vector<t_dptipair> t_dptipairvec;
 
-struct t_sortby_updated
-{
-    bool updated() const;
-    void push_back(const t_dptipair& data);
-    t_index first_update_depth() const;
-
-    t_dptipairvec m_update_indices;
-};
 
 struct by_idx
 {
@@ -71,10 +63,6 @@ struct by_pidx
 };
 
 struct by_pidx_hash
-{
-};
-
-struct by_pkey
 {
 };
 
@@ -274,7 +262,6 @@ class PERSPECTIVE_EXPORT t_stree
                                  const t_gstate& gstate);
 
     t_uindex size() const;
-    void pprint(t_bool show_pkeys = false) const;
 
     t_uindex get_num_children(t_uindex idx) const;
     void get_child_nodes(t_uindex idx, t_tnodevec& nodes) const;
@@ -289,7 +276,6 @@ class PERSPECTIVE_EXPORT t_stree
 
     t_uindex get_parent_idx(t_uindex idx) const;
     t_uidxvec get_ancestry(t_uindex idx) const;
-    t_uindex get_num_levels() const;
 
     t_index get_sibling_idx(t_tvidx p_ptidx,
                             t_index p_nchild,
@@ -308,8 +294,6 @@ class PERSPECTIVE_EXPORT t_stree
     t_uindex resolve_child(t_uindex root,
                            const t_tscalar& datum) const;
 
-    t_tscalar get_interned(t_tscalar v);
-
     void drop_zero_strands();
 
     void add_pkey(t_uindex idx, t_tscalar pkey);
@@ -323,7 +307,6 @@ class PERSPECTIVE_EXPORT t_stree
                          t_depth rel_depth,
                          t_uidxvec& leaves) const;
     t_uidxvec get_leaves(t_uindex idx) const;
-    t_mask get_leaves_mask(t_uindex idx) const;
     t_tscalvec get_pkeys(t_uindex idx) const;
     t_uidxvec get_child_idx(t_uindex idx) const;
     t_ptipairvec get_child_idx_depth(t_uindex idx) const;
@@ -332,15 +315,8 @@ class PERSPECTIVE_EXPORT t_stree
 
     t_uindex last_level() const;
 
-    t_uidxvec get_node_indices() const;
-
-    void pprint_idxpkey() const;
-    void pprint_idxleaf() const;
-
     const t_pivotvec& get_pivots() const;
     t_ptidx resolve_path(t_uindex root, const t_tscalvec& path) const;
-
-    t_colcptrvec get_aggcols(const t_idxvec& agg_indices) const;
 
     // aggregates should be presized to be same size
     // as agg_indices
@@ -351,12 +327,6 @@ class PERSPECTIVE_EXPORT t_stree
 
     t_tscalar get_aggregate(t_ptidx idx, t_index aggnum) const;
 
-    t_str dot_emit_node(t_ptidx idx) const;
-    t_str dot_emit_nodes() const;
-    t_str dot_emit_edges() const;
-    t_str dot() const;
-    void dot_autoinc(const t_str& fname_prefix);
-    void dot(const t_str& fname_prefix) const;
     void get_child_indices(t_ptidx idx, t_ptivec& out_data) const;
 
     void set_alerts_enabled(bool enabled_state);
@@ -386,26 +356,9 @@ class PERSPECTIVE_EXPORT t_stree
 
     t_bool node_exists(t_uindex nidx);
 
-    const t_tree_unify_rec_vec& updated_node_info() const;
-
-    void set_aggregate(const t_str& agg_name,
-                       const t_tree_unify_rec_vec& update_info,
-                       const t_tscalvec& values);
-
     t_table* get_aggtable();
-    t_mask get_updated_aggmask() const;
-
-    t_svec get_combiner_input_columns() const;
-    t_aggspecvec get_reducer_aggspecs() const;
-    t_aggspecvec get_combiner_aggspecs() const;
-
-    t_uindex get_num_leaves(t_uindex depth) const;
-
-    t_idxvec get_indices_for_depth(t_uindex depth) const;
 
     void clear_aggregates(const t_uidxvec& indices);
-
-    t_by_pidx_ipair get_parent_children(t_uindex pidx);
 
     std::pair<iter_by_idx, bool> insert_node(const t_tnode& node);
     t_bool has_deltas() const;

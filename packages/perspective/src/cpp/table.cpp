@@ -170,15 +170,6 @@ t_table::size() const
     return num_rows();
 }
 
-t_uindex
-t_table::num_rows(const t_mask& q) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(q.size() == size(), "Mismatch in mask size.")
-    return q.count();
-}
-
 t_dtype
 t_table::get_dtype(const t_str& colname) const
 {
@@ -202,14 +193,6 @@ t_table::get_const_column(const t_str& colname) const
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
-    return m_columns[idx];
-}
-
-t_col_sptr
-t_table::get_column(t_uindex idx)
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
 }
 
@@ -304,25 +287,6 @@ t_table::get_schema() const
     return m_schema;
 }
 
-t_table*
-t_table::_flatten() const
-{
-
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
-
-    auto flattened = new t_table("",
-                                 "",
-                                 m_schema,
-                                 DEFAULT_EMPTY_CAPACITY,
-                                 BACKING_STORE_MEMORY);
-
-    flattened->init();
-    flatten_body<t_table*>(flattened);
-    return flattened;
-}
-
 t_table_sptr
 t_table::flatten() const
 {
@@ -341,21 +305,6 @@ t_table::flatten() const
     return flattened;
 }
 
-void
-t_table::flatten_common(const t_tscalvec& row,
-                        t_uindex ncols,
-                        t_table_sptr tbl,
-                        std::vector<t_column*>& columns) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    for (t_uindex colidx = 0; colidx < ncols; ++colidx)
-    {
-        columns[colidx]->push_back(row[colidx]);
-    }
-    tbl->set_size(tbl->num_rows() + 1);
-}
-
 t_bool
 t_table::is_pkey_table() const
 {
@@ -370,16 +319,6 @@ t_table::is_same_shape(t_table& tbl) const
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema == tbl.m_schema;
-}
-
-t_table_sptr
-t_table::empty_like() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_schema schema = m_schema;
-    return std::make_shared<t_table>(
-        "", "", schema, num_rows(), BACKING_STORE_MEMORY);
 }
 
 void
@@ -553,8 +492,6 @@ t_mask
 t_table::filter_cpp(t_filter_op combiner,
                     const t_ftermvec& fterms_) const
 {
-    static bool const enable_interned_filtering = true;
-
     auto self = const_cast<t_table*>(this);
     auto fterms = fterms_;
 
@@ -568,7 +505,7 @@ t_table::filter_cpp(t_filter_op combiner,
         indices[idx] = m_schema.get_colidx(fterms[idx].m_colname);
         columns[idx] = get_const_column(fterms[idx].m_colname).get();
         fterms[idx].coerce_numeric(columns[idx]->get_dtype());
-        if (fterms[idx].m_use_interned && enable_interned_filtering)
+        if (fterms[idx].m_use_interned)
         {
             t_tscalar& thr = fterms[idx].m_threshold;
             auto col = self->get_column(fterms[idx].m_colname);
@@ -597,7 +534,7 @@ t_table::filter_cpp(t_filter_op combiner,
                     const auto& ft = fterms[cidx];
                     t_bool tval;
 
-                    if (ft.m_use_interned && enable_interned_filtering)
+                    if (ft.m_use_interned)
                     {
                         cell_val.set(
                             *(columns[cidx]->get_nth<t_stridx>(ridx)));
@@ -724,63 +661,6 @@ t_table::set_column(const t_str& name, t_col_sptr col)
     set_column(idx, col);
 }
 
-void
-t_table::join_inplace(const t_svec& on,
-                      const t_svec& update_cols,
-                      const t_table& other)
-{
-    // s_ = self, o_ = other
-    t_tscalvec s_term(on.size());
-    t_tscalvec o_term(on.size());
-
-    t_colcptrvec s_jcols(on.size());
-    t_colcptrvec o_jcols(on.size());
-
-    t_uindex idx = 0;
-    for (const auto& cname : on)
-    {
-        s_jcols[idx] = get_const_column(cname).get();
-        o_jcols[idx] = other.get_const_column(cname).get();
-        ++idx;
-    }
-
-    t_colptrvec s_ucols(update_cols.size());
-    t_colcptrvec o_ucols(update_cols.size());
-    idx = 0;
-    for (const auto& cname : update_cols)
-    {
-        s_ucols[idx] = get_column(cname).get();
-        o_ucols[idx] = other.get_const_column(cname).get();
-        ++idx;
-    }
-
-    t_uindex n_on = on.size();
-    t_uindex n_upd = update_cols.size();
-
-    for (t_uindex ridx = 0, loop_end = other.size(); ridx < loop_end;
-         ++ridx)
-    {
-        for (t_uindex onidx = 0; onidx < n_on; ++onidx)
-        {
-            s_term[onidx].set(s_jcols[onidx]->get_scalar(ridx));
-            o_term[onidx].set(o_jcols[onidx]->get_scalar(ridx));
-        }
-
-        if (!(s_term == o_term))
-            continue;
-
-        for (t_uindex updidx = 0; updidx < n_upd; ++updidx)
-        {
-            t_tscalar updval = o_ucols[updidx]->get_scalar(ridx);
-
-            if (!updval.is_valid())
-                continue;
-
-            s_ucols[updidx]->set_scalar(ridx, updval);
-        }
-    }
-}
-
 t_column*
 t_table::clone_column(const t_str& existing_col,
                       const t_str& new_colname)
@@ -816,44 +696,6 @@ t_table::repr() const
     return ss.str();
 }
 
-t_table*
-t_table::project(const t_svec& columns) const
-{
-    t_schema sch;
-    for (const auto& cname : columns)
-    {
-        sch.add_column(cname, get_const_column(cname)->get_dtype());
-    }
-
-    t_table* rval = new t_table(sch, size());
-    rval->init();
-
-    for (const auto& cname : columns)
-    {
-        rval->set_column(cname, get_const_column(cname)->clone());
-    }
-    rval->set_size(size());
-    return rval;
-}
-
-t_table*
-t_table::select(const t_mask& mask) const
-{
-    return clone_(mask);
-}
-
-t_column_dynamic_ctxvec
-t_table::get_dynamic_context() const
-{
-    t_column_dynamic_ctxvec rv;
-
-    for (auto& c : m_columns)
-    {
-        rv.push_back(c->get_dynamic_context());
-    }
-    return rv;
-}
-
 void
 t_table::verify() const
 {
@@ -870,22 +712,6 @@ t_table::verify() const
         PSP_VERBOSE_ASSERT(sz == c->size(),
                            "Ragged table encountered");
     }
-}
-
-t_tscalvec
-t_table::_as_list() const
-{
-    t_tscalvec rval;
-    auto columns = get_const_columns();
-
-    for (t_uindex idx = 0, loop_end = size(); idx < loop_end; ++idx)
-    {
-        for (auto c : columns)
-        {
-            rval.push_back(c->get_scalar(idx));
-        }
-    }
-    return rval;
 }
 
 void

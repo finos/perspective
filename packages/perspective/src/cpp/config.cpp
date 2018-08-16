@@ -473,29 +473,6 @@ t_config::handle_nan_sort() const
     return m_handle_nan_sort;
 }
 
-t_boolvec
-t_config::calc_has_sortby(const t_pivotvec& p) const
-{
-    t_boolvec rval(p.size() + 1);
-    rval[0] = false;
-    t_uindex idx = 1;
-
-    for (const auto& p_ : p)
-    {
-        auto colname = p_.colname();
-        auto iter = m_sortby.find(colname);
-        rval[idx] = iter != m_sortby.end() && iter->second != colname;
-        ++idx;
-    }
-    return rval;
-}
-
-t_svec
-t_config::get_detail_columns() const
-{
-    return m_detail_columns;
-}
-
 t_str
 t_config::get_parent_pkey_column() const
 {
@@ -512,18 +489,6 @@ const t_str&
 t_config::get_grouping_label_column() const
 {
     return m_grouping_label_column;
-}
-
-t_uindex
-t_config::get_row_expand_depth() const
-{
-    return m_row_expand_depth;
-}
-
-t_uindex
-t_config::get_col_expand_depth() const
-{
-    return m_col_expand_depth;
 }
 
 t_config_recipe

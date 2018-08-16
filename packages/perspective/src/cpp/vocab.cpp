@@ -129,17 +129,6 @@ t_vocab::genidx()
     return m_vlenidx++;
 }
 
-t_str
-t_vocab::unintern(t_uindex idx) const
-{
-    const t_uidxpair* p = m_extents->get_nth<t_uidxpair>(idx);
-
-    const char* c =
-        static_cast<const char*>(m_vlendata->get_ptr(p->first));
-
-    return t_str(c);
-}
-
 void
 t_vocab::init(t_bool from_recipe)
 {
@@ -299,34 +288,11 @@ t_vocab::get_extents()
     return m_extents;
 }
 
-t_lstore_csptr
-t_vocab::get_vlendata() const
-{
-    return m_vlendata;
-}
-
-t_lstore_csptr
-t_vocab::get_extents() const
-{
-    return m_extents;
-}
-
 t_uindex
 t_vocab::get_vlenidx() const
 {
     return m_vlenidx;
 }
 
-
-t_uindex t_vocab::get_max_slen() const
-{
-    t_uindex rv = 0;
-
-    for (const auto kv: m_map)
-    {
-        rv = std::max(static_cast<t_uindex>(strlen(kv.first)), rv);
-    }
-    return rv;
-}
 
 } // end namespace perspective

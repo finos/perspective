@@ -14,7 +14,6 @@
 #include <perspective/comparators.h>
 #include <perspective/mask.h>
 #include <perspective/scalar.h>
-#include <perspective/kernel.h>
 #include <perspective/exports.h>
 #include <boost/scoped_ptr.hpp>
 #include <functional>
@@ -236,7 +235,6 @@ class PERSPECTIVE_EXPORT t_filter
     t_select_mode m_mode;
     t_uindex m_bidx;
     t_uindex m_eidx;
-    t_kernel m_kernel;
     t_svec m_columns;
     t_masksptr m_mask;
 };

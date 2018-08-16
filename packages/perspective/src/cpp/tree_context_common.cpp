@@ -63,18 +63,6 @@ notify_sparse_tree_common(t_table_sptr strands,
 
     dctx.init();
 
-    if (t_env::log_data_nsparse_dctx())
-    {
-        std::cout << "nsparse_dctx => " << std::endl;
-        dctx.pprint_strands_tree();
-    }
-
-    if (t_env::log_data_nsparse_stree_prev())
-    {
-        std::cout << "nsparse_stree_prev" << std::endl;
-        tree->pprint();
-    }
-
     tree->update_shape_from_static(dctx);
 
     auto zero_strands = tree->zero_strands();
@@ -94,19 +82,6 @@ notify_sparse_tree_common(t_table_sptr strands,
     tree->populate_leaf_index(non_zero_leaves);
 
     tree->update_aggs_from_static(dctx, gstate);
-
-    if (t_env::log_data_nsparse_stree_after())
-    {
-        std::cout << "nsparse_stree_after" << std::endl;
-        auto pivots = tree->get_pivots();
-        std::cout << "pivots => ";
-        for (const auto& p : pivots)
-        {
-            std::cout << p.colname() << ", ";
-        }
-        std::cout << std::endl;
-        tree->pprint();
-    }
 
     t_uidxset visited;
 

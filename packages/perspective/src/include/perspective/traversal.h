@@ -54,8 +54,6 @@ class t_traversal
 
     t_ptidx get_tree_index(t_tvidx idx) const;
 
-    void get_tree_indices(t_tvidx bidx, t_tvidx eidx, t_ptivec& out);
-
     t_uindex size() const;
 
     t_depth get_depth(t_tvidx idx) const;
@@ -70,9 +68,6 @@ class t_traversal
                            t_index insert_level_idx);
 
     bool validate_cells(const t_uidxpvec& cells) const;
-
-    void get_pkeys(const t_tvipairvec& cells,
-                   t_tscalvec& pkeys) const;
 
     t_index remove_subtree(t_tvidx idx);
 
@@ -146,7 +141,7 @@ t_traversal::sort_by(const t_config& config,
 
     // Add root to queue
     new_nodes[0] = (*m_nodes)[0];
-    queue.push_back(std::pair<t_tvidx, t_tvidx>(0, 0));
+    queue.emplace_back(std::pair<t_tvidx, t_tvidx>(0, 0));
 
     t_idxvec sortby_agg_indices(sortby.size());
 
@@ -158,7 +153,7 @@ t_traversal::sort_by(const t_config& config,
     }
 
     // while queue is not empty
-    while (queue.size() > 0)
+    while (!queue.empty())
     {
         // get head
         const std::pair<t_tvidx, t_tvidx> head_info = queue.back();
@@ -175,18 +170,18 @@ t_traversal::sort_by(const t_config& config,
         std::vector<std::pair<t_tvidx, t_ptidx>> h_children;
         get_child_indices(h_ctvidx, h_children);
 
-        if (h_children.size() > 0)
+        if (!h_children.empty())
         {
             // Get sorted indices
-            t_index n_changed = h_children.size();
+            auto n_changed = h_children.size();
             t_idxvec sorted_idx(n_changed);
             t_ptivec children_ptidx(n_changed);
             auto sortelems =
                 std::make_shared<t_mselemvec>(size_t(n_changed));
-            t_index num_aggs = sortby.size();
+            auto num_aggs = sortby.size();
             t_tscalvec aggregates(num_aggs);
 
-            for (int i = 0, loop_end = n_changed; i < loop_end; i++)
+            for (t_uindex i = 0, loop_end = n_changed; i < loop_end; i++)
             {
                 children_ptidx[i] = h_children[i].second;
 
@@ -204,7 +199,7 @@ t_traversal::sort_by(const t_config& config,
                 sortelems, sort_orders, m_handle_nan_sort);
             argsort(sorted_idx, sorter);
 
-            t_index nchild = n_changed;
+            auto nchild = n_changed;
             t_index ndesc = head.m_ndesc;
 
             // Fast path - if none of heads children are
@@ -213,8 +208,8 @@ t_traversal::sort_by(const t_config& config,
             {
                 // Set contiguous block in traversal for
                 // children
-                t_tvidx bidx = h_ntvidx + 1;
-                t_tvidx eidx = bidx + nchild;
+                auto bidx = h_ntvidx + 1;
+                auto eidx = bidx + nchild;
 
                 for (t_index idx = bidx; idx < eidx; idx++)
                 {
@@ -228,7 +223,7 @@ t_traversal::sort_by(const t_config& config,
             {
                 t_tvidx c_ntvidx = h_ntvidx + 1;
 
-                for (t_index idx = 0, loop_end = h_children.size();
+                for (t_uindex idx = 0, loop_end = h_children.size();
                      idx < loop_end;
                      idx++)
                 {
@@ -241,7 +236,7 @@ t_traversal::sort_by(const t_config& config,
                     // Enqueue child if it is expanded
                     if (child.m_expanded)
                     {
-                        queue.push_back(std::pair<t_tvidx, t_tvidx>(
+                        queue.emplace_back(std::pair<t_tvidx, t_tvidx>(
                             c_otvidx, c_ntvidx));
                     }
 
