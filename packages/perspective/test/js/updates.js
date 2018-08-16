@@ -77,6 +77,20 @@ module.exports = (perspective) => {
             expect(data.slice(2, 4)).toEqual(result);
         });
 
+        it("multiple single element removes", async function () {
+            let table = perspective.table(meta, {index: "x"});
+            for (let i = 0; i < 100; i++) {
+                table.update([{x: i, y: "test", z: false}]);
+            }
+            for (let i = 1; i < 100; i++) {
+                table.remove([i]);
+            }
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{x: 0, y: "test", z: false}]);
+            expect(result.length).toEqual(1);
+        });
+
     });
 
     describe("Updates", function() {
