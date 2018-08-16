@@ -17,7 +17,7 @@
     "hypergrid": "webpack --color --config src/config/hypergrid.plugin.config.js",
     "build": "npm run hypergrid",
     "test:build": "cp test/html/* build && webpack --color --config test/config/hypergrid.config.js",
-    "test:run": "jest --silent 2>&1",
+    "test:run": "jest --silent --color 2>&1",
     "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete",
     "clean:screenshots": "find screenshots/ -name *.diff.png -o -name *.failed.png -mindepth 1 -delete"

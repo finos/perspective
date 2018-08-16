@@ -34,7 +34,7 @@
     "test:build:webpack:browser": "webpack --color --config test/config/test_browser.config.js",
     "test:build:webpack:node": "webpack --color --config test/config/test_node.config.js",
     "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
-    "test:run": "jest --runInBand 2>&1",
+    "test:run": "jest --runInBand --color 2>&1",
     "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
   },
