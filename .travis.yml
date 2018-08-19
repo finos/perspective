@@ -21,4 +21,4 @@ install:
 script:
   - PSP_DOCKER=1 npm run build
   - PSP_DOCKER=1 npm run test:build
-  - npm run quiet_test
+  - npm run test:run_quiet

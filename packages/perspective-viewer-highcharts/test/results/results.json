@@ -66,5 +66,9 @@
     "heatmap.html/pivots by a column.": "a30c031a166ce10b925fade0fa727568",
     "line.html/pivots by a column.": "a9cdbcf9dc241c5a11077c325765eac4",
     "bar.html/pivots by a column.": "e38874f04098eabf0feb0dad278d7a05",
-    "treemap.html/pivots by a column.": "716d4b3985568360c5f61f9c8f20ac69"
+    "treemap.html/pivots by a column.": "716d4b3985568360c5f61f9c8f20ac69",
+    "line.html/sets a category X axis when pivoted by a datetime.": "8009cad9214cc528204f33cbd99d8566",
+    "line.html/sets a category axis when the axis type is a string.": "fe4a026828733fef085702789e71c1b2",
+    "scatter.html/sets a category X axis when pivoted by a datetime.": "ea32a14be1b802bec8962c6950ab5120",
+    "scatter.html/sets a category axis when the axis type is a string.": "583fbe15fd8380e238e0f2cd6b6ab184"
 }

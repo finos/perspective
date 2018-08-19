@@ -116,7 +116,13 @@ perspective-viewer #app {
         top: 24px;
         bottom: 24px;
         left: 24px;
-        right: 24px;     
+        right: 24px;   
+        div.finbar-horizontal div.thumb {
+            height: 7px;
+        }
+        div.finbar-vertical div.thumb {
+            width: 7px;
+        }
     }
 
     #filters {
@@ -143,6 +149,34 @@ perspective-viewer #app {
             color: #666;
             margin-right: 0;
         }
+    }
+
+    .column_row() {
+        position: relative;
+        display: inline-block;
+        padding-left: 0px;
+        padding-right: 5px;
+        min-width: 18px;
+    }
+    
+    #side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
+        .column_row();
+        content: "123";
+    }
+    
+    #side_panel perspective-row .string::before {
+        .column_row();
+        content: "abc";
+    }
+    
+    #side_panel perspective-row .boolean::before {
+        .column_row();
+        content: "t/f";
+    }
+    
+    #side_panel perspective-row .date::before {
+        .column_row();
+        content: "mdy";
     }
 
     #side_panel {
