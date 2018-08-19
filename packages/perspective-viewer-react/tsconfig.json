@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "es2015",
+      "es2016",
+      "es2017"
+    ],
+    "jsx": "react",
+    "sourceMap": true,
+    "removeComments": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "moduleResolution": "node",
+    "preserveSymlinks": true
+  },
+  "include": [
+    "./src/*"
+  ],
+  "exclude": [
+    "**/__tests__/**"
+  ]
+}

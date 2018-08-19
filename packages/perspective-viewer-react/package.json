@@ -1,0 +1,45 @@
+{
+  "name": "@jpmorganchase/perspective-viewer-react",
+  "version": "0.1.0",
+  "description": "React bindings to the perspective viewer",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "npm-run-all -l -p build:*",
+    "build:es": "tsc --module es2015 --outDir lib --declaration true",
+    "build:lib": "tsc --module commonjs --outDir lib --declaration false",
+    "test": "karma start"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpmorganchase/perspective"
+  },
+  "author": "",
+  "license": "Apache",
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "@types/jasmine": "^2.8.8",
+    "@types/react": "^16.4.11",
+    "@types/react-dom": "^16.0.7",
+    "@types/react-test-renderer": "^16.0.2",
+    "debug": "^3.1.0",
+    "jasmine-core": "^3.2.1",
+    "karma": "^2.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-jasmine": "^1.1.2",
+    "karma-typescript": "3.0.13",
+    "karma-typescript-es6-transform": "^1.0.4",
+    "npm-run-all": "^4.1.3",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "react-test-renderer": "^16.4.2",
+    "ts-loader": "^4.5.0",
+    "ts-node": "^7.0.1",
+    "typescript": "^3.0.1"
+  },
+  "dependencies": {
+    "@jpmorganchase/perspective-viewer": "^0.1.18"
+  }
+}
