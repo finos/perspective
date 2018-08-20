@@ -17,8 +17,15 @@ utils.with_server({}, () => {
 
     describe.page("superstore.html", () => {
         simple_tests.default();
-        computed_column_tests.default();
-        responsive_tests.default();
+
+        describe("Computed Columns", () => {
+            computed_column_tests.default();
+        });
+
+        describe("Responsive Layout", () => {
+            responsive_tests.default();
+        });
+
     });
 
 });

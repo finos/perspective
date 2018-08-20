@@ -28,6 +28,7 @@
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'superstore.csv', true);
             xhr.onload = function () { 
+                window.__CSV__ = xhr.response;
                 document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
             }
             xhr.send(null);

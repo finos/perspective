@@ -220,6 +220,15 @@ perspective-viewer #app {
             margin: 0;
         }
 
+        .psp-title__columnName {
+            margin-left: 44px;
+        }
+
+        .psp-icon__add {
+            margin-left: 14px;
+            color: #999;
+        }
+
         #active_columns, #inactive_columns {
             will-change: opacity, height, margin, transform;
             margin-top: 0;
@@ -337,10 +346,9 @@ perspective-viewer #app {
                 }
 
                 &.computed {
-                    #psp_row {
-                        .row_draggable {
-                            height: 40px !important;
-                        }
+                    
+                    .row_computed {
+                        margin-right: -12px;
                     }
                 }
 
@@ -386,12 +394,31 @@ perspective-viewer #app {
         perspective-computed-column {
             font-family: @material-sans-serif-fonts !important;
 
-            .psp-cc-container {
-                margin-bottom: 15px;
+            #psp-cc-computation__input-column {
+                background: none;
+                perspective-row {
+                    margin-left: -24px;
+                }
+            }
+
+            .psp-icon__add {
+                margin-left: 14px !important;
+            }
+
+            .psp-cc__container {
+                margin-left: 38px
             }
 
             #psp-cc-computation__type {
-                padding-right: 10px;
+                padding-right: 5px;
+            }
+
+            span#psp-cc__close {
+                margin-left: 14px;
+            }
+
+            #psp-cc__actions {
+                margin-left: 36px;
             }
 
             perspective-row {
@@ -413,6 +440,7 @@ perspective-viewer #app {
                     border: none !important;
                     background: none !important;
                     margin-right: 0;
+                    margin-left: 1px;
                 }
             }
 

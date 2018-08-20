@@ -293,8 +293,11 @@ function make_tree_axis(series) {
     return ytop;
 }
 
-export function make_xyz_data(js, pivots, hidden) {
+export function make_xyz_data(js, pivots, hidden, ytree_type) {
     let [series, top] = make_y_data(js, pivots, hidden);
+    if (ytree_type !== 'string' && ytree_type !== undefined) {
+        series = series.reverse();
+    }
     let colorRange = [Infinity, -Infinity];
     let ytop = make_tree_axis(series);
     let data = [];

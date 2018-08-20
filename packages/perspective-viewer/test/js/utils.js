@@ -89,6 +89,8 @@ const results = (() => {
     }
 })();
 
+const new_results = {};
+
 if (!fs.existsSync('screenshots')) {
     fs.mkdirSync('screenshots');
 }
@@ -123,7 +125,17 @@ beforeAll(async () => {
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
-        fs.writeFileSync('test/results/results.json', JSON.stringify(results, null, 4));
+        const results2 = (() => {
+            if (fs.existsSync('test/results/results.json')) {
+                return JSON.parse(fs.readFileSync('test/results/results.json'));
+            } else {
+                return {};
+            }
+        })();
+        for (let key of Object.keys(new_results)) {
+            results2[key] = new_results[key];
+        }
+        fs.writeFileSync('test/results/results.json', JSON.stringify(results2, null, 4));
     }
 });
 
@@ -181,10 +193,7 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null) {
         const screenshot = await page.screenshot();
        // await page.close();
         const hash = crypto.createHash('md5').update(screenshot).digest("hex");
-        if (process.env.WRITE_TESTS) {
-            results[_url + '/' + name] = hash;
-        }
-        const filename = `screenshots/${_url.replace('.html', '')}/${name.replace(/ /g, '_').replace(/\./g, '')}`;
+        const filename = `screenshots/${_url.replace('.html', '')}/${name.replace(/ /g, '_').replace(/[\.']/g, '')}`;
         if (hash === results[_url + '/' + name]) {
             fs.writeFileSync(filename + ".png", screenshot);
         } else {
@@ -193,6 +202,12 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null) {
                 cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
                 cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
             }
+        }
+        if (process.env.WRITE_TESTS) {
+            setTimeout(() => {
+                results[_url + '/' + name] = hash;
+                new_results[_url + '/' + name] = hash;
+            });
         }
         expect(errors).toEqual([]);
         expect(hash).toBe(results[_url + '/' + name]);

@@ -11,6 +11,6 @@ const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.no
 const fs = require("fs");
 
 const host = new WebSocketHost(3000);
-const arr = fs.readFileSync(__dirname +'/../../build/superstore.arrow');
+const arr = fs.readFileSync(__dirname +'/superstore.arrow');
 
 host.open("superstore.arrow", arr);
