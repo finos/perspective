@@ -17,7 +17,7 @@
     "test": "npm-run-all --silent test:build test:run",
     "clean": "lerna run clean --stream",
     "write_tests": "WRITE_TESTS=1 npm run test:run",
-    "postinstall": "lerna bootstrap",
+    "postinstall": "lerna bootstrap --hoist",
     "_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
     "_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
     "_emsdk": "docker run --rm -it -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",
