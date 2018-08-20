@@ -28,13 +28,7 @@ services:
 install:
   - npm install
 
-jobs:
-  include:
-    - stage: Build
-      script: PSP_DOCKER=1 npm run build
-    - stage: Test
-      script: PSP_DOCKER=1 npm run test:build
-    - stage: Test
-      script: PSP_DOCKER=1 npm run test:run
-    - stage: Test
-      script: npm run test:run_quiet
+script:
+  - PSP_DOCKER=1 npm run build
+  - PSP_DOCKER=1 npm run test:build
+  - npm run test:run_quiet
