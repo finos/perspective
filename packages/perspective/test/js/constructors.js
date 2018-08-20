@@ -58,6 +58,12 @@ var meta_3 = {
     'z': "boolean"
 };
 
+let column_meta = [
+    {name: "x", type: "integer", computed: undefined},
+    {name: "y", type: "string", computed: undefined},
+    {name: "z", type: "boolean", computed: undefined}
+];
+
 import arrow from "../arrow/test-null.arrow";
 
 var arrow_result = [
@@ -334,6 +340,46 @@ module.exports = (perspective) => {
             let result = await table2.view({aggregate: [{op: 'count', column: 'yes/no'}]}).to_json();
             let expected = [{"yes/no": "yes"},{"yes/no": "no"},{"yes/no": "yes"},{"yes/no": "no"}];
             expect(expected).toEqual(result);
+        });
+
+        it("Computed schema returns names and metadata", async function () {
+            const func = (i) => i + 2;
+
+            const computation = {
+                name: "+2",
+                input_type: "integer",
+                return_type: "integer",
+                func: func.toString()
+            };
+
+            const table = perspective.table(data);
+
+            const table2 = table.add_computed([{
+                computation: computation,
+                column: "plus2",
+                type: "integer",
+                inputs: ["x"],
+                input_type: "integer",
+                func: func,
+            }]);
+
+            const result = await table2.computed_schema();
+            const expected = {
+                "plus2": {
+                    input_column: "x",
+                    input_type: "integer",
+                    computation: computation,
+                    type: "integer"
+                }
+            };
+
+            expect(expected).toEqual(result);
+        });
+
+        it("Column metadata returns names and type", async function () {
+           let table = perspective.table(data);
+           let result = await table.column_metadata();
+           expect(result).toEqual(column_meta);
         });
     });
 

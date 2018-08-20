@@ -20,6 +20,7 @@ import template from "../html/view.html";
 import "../less/view.less";
 
 import "./row.js";
+import "./computed_column.js";
 
 polyfill({});
 
@@ -230,6 +231,12 @@ function column_visibility_clicked(ev) {
             this._active_columns.removeChild(parent);
         }
     } else {
+        // check if we're manipulating computed column input
+        if(ev.path[1].id === 'psp-cc-computation__input-column') {
+            this._computed_column._clear_input_column();
+            this._update_column_view();
+            return;
+        }
         if (ev.detail.shiftKey && this._plugin.selectMode === 'toggle' || !ev.detail.shiftKey && this._plugin.selectMode === 'select') {
             for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                 this._active_columns.removeChild(child);
@@ -308,6 +315,16 @@ function set_aggregate_attribute(aggs) {
     }, {})));
 }
 
+function _format_computed_data(cc) {
+    return {
+        column_name: cc[0],
+        input_column: cc[1].input_column,
+        input_type: cc[1].input_type,
+        computation: cc[1].computation,
+        type: cc[1].type
+    };
+}
+
 async function loadTable(table) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
@@ -316,10 +333,26 @@ async function loadTable(table) {
 
     this._table = table;
 
-    let [cols, schema] = await Promise.all([
+    let [cols, schema, computed_schema] = await Promise.all([
         table.columns(),
-        table.schema()
+        table.schema(),
+        table.computed_schema()
     ]);
+
+    // todo: computed columns do NOT persist across refreshes
+    // fixme: find better implementation than strip computed columns
+    if(!_.isEmpty(computed_schema)) {
+        const computed_columns = _.keys(computed_schema);
+        for (let i = 0; i < computed_columns.length; i++) {
+            const cc = computed_columns[i];
+            if (cols.includes(cc)) {
+                cols.splice(cols.indexOf(cc), 1);
+            }
+            if (_.has(schema, cc)) {
+                delete schema[cc];
+            }
+        }
+    }
 
     this._inactive_columns.innerHTML = "";
     this._active_columns.innerHTML = "";
@@ -343,6 +376,9 @@ async function loadTable(table) {
         }
         return r;
     });
+
+    // fixme: better approach please
+    const computed_cols = _.pairs(computed_schema);
 
     // Update Aggregates.
     let aggregates = [];
@@ -389,6 +425,17 @@ async function loadTable(table) {
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
         }
+
+        // fixme better approach please
+        for (let cc of computed_cols) {
+            let cc_data = _format_computed_data(cc);
+            let aggregate = aggregates
+                .filter(a => a.column === cc[0])
+                .map(a => a.op)[0];
+            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
+            this._inactive_columns.appendChild(row);
+        }
+
         this._set_column_defaults();
         shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
         for (let x in cols) {
@@ -408,6 +455,16 @@ async function loadTable(table) {
             }
         }
 
+        // fixme better approach please
+        for (let cc of computed_cols) {
+            let cc_data = _format_computed_data(cc);
+            let aggregate = aggregates
+                .filter(a => a.column === cc[0])
+                .map(a => a.op)[0];
+            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
+            this._inactive_columns.appendChild(row);
+        }
+
         for (let x of shown) {
             let active_row = new_row.call(this, x, schema[x]);
             this._active_columns.appendChild(active_row);
@@ -420,18 +477,21 @@ async function loadTable(table) {
         this._inactive_columns.style.display = 'block';
     }
 
+    this.querySelector('#columns_container').style.visibility = "visible";
+    this.querySelector('#side_panel__actions').style.visibility = "visible";
+
     this.filters = this.getAttribute('filters');
 
     this._debounce_update();
 }
 
-function new_row(name, type, aggregate, filter, sort) {
+function new_row(name, type, aggregate, filter, sort, computed) {
     let row = document.createElement('perspective-row');
 
     if (!type) {
         let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
         if (all.length > 0) {
-            type = all.find(x => x.getAttribute('name') === name)
+            type = all.find(x => x.getAttribute('name') === name);
             if (type) {
                 type = type.getAttribute('type');
             } else {
@@ -493,6 +553,12 @@ function new_row(name, type, aggregate, filter, sort) {
     });
     row.addEventListener('sort-order', sort_order_clicked.bind(this));
     row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+
+    if(computed) {
+        row.setAttribute('computed_column', JSON.stringify(computed));
+        row.classList.add('computed');
+    }
+
     return row;
 }
 
@@ -773,6 +839,59 @@ class ViewPrivate extends HTMLElement {
         }
     }
 
+    _open_computed_column(event) {
+        const data = event.detail;
+        event.stopImmediatePropagation();
+        if (event.type === 'perspective-computed-column-edit') {
+            this._computed_column._edit_computed_column(data);
+        }
+        this._computed_column.style.display = 'flex';
+        this._side_panel_actions.style.display = 'none';
+    }
+
+    _set_computed_column_input(event) {
+        this._computed_column_input_column.appendChild(
+            new_row.call(this, event.detail.name, event.detail.type));
+        this._update_column_view();
+    }
+
+    _create_computed_column(event) {
+        const data = event.detail;
+        let computed_column_name = data.column_name;
+
+        this._table.columns().then((cols) => {
+            // edit overwrites last column, otherwise avoid name collision
+            if(cols.includes(computed_column_name) && !data.edit) {
+                computed_column_name += (Math.round(Math.random() * 100));
+            }
+
+            const params = [{
+                computation: data.computation,
+                column: computed_column_name,
+                func: data.computation.func,
+                inputs: [data.input_column.name],
+                input_type: data.input_column.type,
+                type: data.computation.return_type,
+            }];
+
+            const table = this._table.add_computed(params);
+            loadTable.call(this, table).then(() => {
+                this._update_column_view();
+                //this.dispatchEvent(new Event('perspective-view-update'));
+
+                this._computed_column.style.display = 'none';
+                this._side_panel_actions.style.display = 'flex';
+                this._computed_column._clear_state();
+            });
+        });
+    }
+
+    _transpose() {
+        let row_pivots = this.getAttribute('row-pivots');
+        this.setAttribute('row-pivots', this.getAttribute('column-pivots'));
+        this.setAttribute('column-pivots', row_pivots);
+    }
+
     _register_ids() {
         this._aggregate_selector = this.querySelector('#aggregate_selector');
         this._vis_selector = this.querySelector('#vis_selector');
@@ -784,12 +903,17 @@ class ViewPrivate extends HTMLElement {
         this._side_panel_divider = this.querySelector('#columns_container > #divider');
         this._active_columns = this.querySelector('#active_columns');
         this._inactive_columns = this.querySelector('#inactive_columns');
+        this._side_panel_actions = this.querySelector('#side_panel__actions');
+        this._add_computed_column = this.querySelector('#add-computed-column');
+        this._computed_column = this.querySelector('perspective-computed-column');
+        this._computed_column_input_column = this._computed_column.querySelector('#psp-cc-computation__input-column');
         this._inner_drop_target = this.querySelector('#drop_target_inner');
         this._drop_target = this.querySelector('#drop_target');
         this._config_button = this.querySelector('#config_button');
         this._side_panel = this.querySelector('#side_panel');
         this._top_panel = this.querySelector('#top_panel');
         this._sort = this.querySelector('#sort');
+        this._transpose_button = this.querySelector('#transpose_button');
     }
 
     _register_callbacks() {
@@ -805,7 +929,12 @@ class ViewPrivate extends HTMLElement {
         this._active_columns.addEventListener('dragend', column_undrag.bind(this));
         this._active_columns.addEventListener('dragover', column_dragover.bind(this));
         this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
+        this._add_computed_column.addEventListener('mousedown', this._open_computed_column.bind(this));
+        this._computed_column.addEventListener('perspective-computed-column-save', this._create_computed_column.bind(this));
+        this._computed_column.addEventListener('perspective-computed-column-update', this._set_computed_column_input.bind(this));
+        //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
+        this._transpose_button.addEventListener('click', this._transpose.bind(this));
         
         this._vis_selector.addEventListener('change', () => {
             this.setAttribute('view', this._vis_selector.value);
@@ -1126,7 +1255,7 @@ class View extends ViewPrivate {
     }
 
     /**
-     * This element's `perpsective.table.view` instance.  The instance itself
+     * This element's `perspective.table.view` instance.  The instance itself
      * will change after every `View#perspective-config-update` event. 
      *
      * @readonly
@@ -1312,7 +1441,7 @@ class View extends ViewPrivate {
      * 
      */
     handleClipboardCopy(options) {
-        let data
+        let data;
         if (!this._view) {
             console.warn("No view to copy - skipping");
             return;
@@ -1332,10 +1461,9 @@ class View extends ViewPrivate {
             } else {
                 console.warn("Timeout expired - copy to clipboard cancelled.");
             }
-        }
+        };
         f();
     }
-    
 }
 
 /**
