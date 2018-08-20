@@ -14,6 +14,17 @@
 @import url('https://fonts.googleapis.com/css?family=Material+Icons');
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
+
+perspective-viewer[view=treemap], perspective-viewer[view=sunburst], perspective-viewer[view=xy_line], perspective-viewer[view=xy_scatter] {
+
+    #app.columns_horizontal #side_panel {
+
+        #inactive_columns {
+            padding-top: 46px;
+        }
+    }
+}
+
 input {
     padding: 6px 10px 6px 0;
 }
@@ -96,7 +107,7 @@ perspective-viewer #app {
     &.columns_horizontal {
 
         #side_panel {
-            max-width: 500px !important;
+            max-width: 750px !important;
             padding: 24px 5px 0 0;
 
             #divider {
@@ -209,6 +220,15 @@ perspective-viewer #app {
             margin: 0;
         }
 
+        .psp-title__columnName {
+            margin-left: 44px;
+        }
+
+        .psp-icon__add {
+            margin-left: 14px;
+            color: #999;
+        }
+
         #active_columns, #inactive_columns {
             will-change: opacity, height, margin, transform;
             margin-top: 0;
@@ -234,7 +254,7 @@ perspective-viewer #app {
                     text-align: center;
                 }
 
-                .row_draggable {                            
+                .row_draggable {
                     background: none;
                     border-right: 0;
                     color: #666;
@@ -268,7 +288,7 @@ perspective-viewer #app {
                 }
 
                 .is_visible:before {
-                    color: #1A7dA1;
+                    color: @blue800;
                     font-family: "material icons";
                     margin-top: 1px;
                     margin-left: -8px;
@@ -286,7 +306,7 @@ perspective-viewer #app {
 
                 &:hover {
                     .is_visible:before {
-                        color: #1A7dA1;
+                        color: @blue800;
                     }
 
                     &.active {
@@ -306,6 +326,16 @@ perspective-viewer #app {
                     #name:before {
                         opacity: 1 !important;
                     }
+
+                    .row_computed {
+                        span {
+                            color: #666;
+                        }
+
+                        span:before {
+                            opacity: 1 !important;
+                        }
+                    }
                 }
 
                 &.active {
@@ -313,6 +343,13 @@ perspective-viewer #app {
                     height: 0;
                     max-height: 0;
                     overflow: hidden;
+                }
+
+                &.computed {
+                    
+                    .row_computed {
+                        margin-right: -12px;
+                    }
                 }
 
                 .is_visible {
@@ -332,6 +369,108 @@ perspective-viewer #app {
                 #name:before {
                     opacity: 0.5;
                     background: none !important;
+                }
+
+                .row_computed {
+                    span {
+                        color: #AAA;
+                    }
+
+                    span:before {
+                        opacity: 0.5;
+                    }
+
+                    #row_edit {
+                        &:before {
+                            font-family: "Material Icons";
+                            content: "more_vert" !important;
+                            font-size: 12px;
+                        }
+                    }
+                }
+            }
+        }
+
+        perspective-computed-column {
+            font-family: @material-sans-serif-fonts !important;
+
+            #psp-cc-computation__input-column {
+                background: none;
+                perspective-row {
+                    margin-left: -24px;
+                }
+            }
+
+            .psp-icon__add {
+                margin-left: 14px !important;
+            }
+
+            .psp-cc__container {
+                margin-left: 38px
+            }
+
+            #psp-cc-computation__type {
+                padding-right: 5px;
+            }
+
+            span#psp-cc__close {
+                margin-left: 14px;
+            }
+
+            #psp-cc__actions {
+                margin-left: 36px;
+            }
+
+            perspective-row {
+                &:before {
+                    margin-left: 48px;
+                    left: 48px;
+                }
+
+                .is_visible:before {
+                    color: @blue800;
+                    font-family: "material icons";
+                    margin-top: 1px;
+                    margin-left: -8px;
+                    font-size: 16px;
+                    content: "\E834";
+                }
+
+                .row_draggable {
+                    border: none !important;
+                    background: none !important;
+                    margin-right: 0;
+                    margin-left: 1px;
+                }
+            }
+
+            .psp-cc__button {
+                text-transform: none;
+
+                &#psp-cc-button-save {
+                    background: @blue800;
+                    &:hover {
+                        background: @blue900;
+                    }
+                }
+
+                &#psp-cc-button-delete {
+                    background: @red800;
+                    &:hover {
+                        background: @red900;
+                    }
+                }
+            }
+        }
+
+        #side_panel__actions {
+            button.side_panel-action {
+                color: #666;
+                font-family: @material-sans-serif-fonts !important;
+                text-transform: none;
+
+                &:hover {
+                    color: #000;
                 }
             }
         }

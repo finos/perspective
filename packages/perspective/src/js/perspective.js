@@ -68,6 +68,25 @@ function infer_type(x) {
 }
 
 /**
+ * Gets the type of a column.
+ * @private
+ * @returns {string}
+ */
+function get_column_type(val) {
+    if (val === 1 || val === 2) {
+        return "integer";
+    } else if (val === 19) {
+        return "string";
+    } else if (val === 10 || val === 9) {
+        return "float";
+    } else if (val === 11) {
+        return "boolean";
+    } else if (val === 12) {
+        return "date";
+    }
+}
+
+/**
  * Do any necessary data transforms on columns. Currently it does the following
  * transforms
  * 1. Date objects are converted into float millis since epoch
@@ -853,7 +872,6 @@ table.prototype._update_callback = function () {
     }
  }
 
-
 table.prototype._calculate_computed = function(tbl, computed_defs) {
     // tbl is the pointer to the C++ t_table
 
@@ -874,6 +892,9 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
                 break;
             case 'boolean':
                 dtype = __MODULE__.t_dtype.DTYPE_BOOL;
+                break;
+            case 'date':
+                dtype = __MODULE__.t_dtype.DTYPE_TIME;
                 break;
             case 'string':
             default:
@@ -936,7 +957,8 @@ table.prototype._schema = function () {
         if (columns.get(key) === "psp_okey") {
             continue;
         }
-        if (types.get(key).value === 1 || types.get(key).value === 2) {
+        new_schema[columns.get(key)] = get_column_type(types.get(key).value);
+        /*if (types.get(key).value === 1 || types.get(key).value === 2) {
             new_schema[columns.get(key)] = "integer";
         } else if (types.get(key).value === 19) {
             new_schema[columns.get(key)] = "string";
@@ -946,7 +968,7 @@ table.prototype._schema = function () {
             new_schema[columns.get(key)] = "boolean";
         } else if (types.get(key).value === 12) {
             new_schema[columns.get(key)] = "date";
-        }
+        }*/
     }
     schema.delete();
     columns.delete();
@@ -955,8 +977,8 @@ table.prototype._schema = function () {
 }
 
 /**
- * The schema of this {@link table}.  A schema is an Object, the keys of which
- * are the columns of this {@link table}, and the values are their string type names.
+ * The schema of this {@link table}.  A schema is an Object whose keys are the
+ * columns of this {@link table}, and whose values are their string type names.
  *
  * @async
  *
@@ -964,6 +986,50 @@ table.prototype._schema = function () {
  */
 table.prototype.schema = async function() {
     return this._schema();
+}
+
+table.prototype._computed_schema =  function() {
+    let computed = this.computed;
+
+    if(computed.length < 0) return {};
+
+    let schema = this.gnode.get_tblschema();
+    let columns = schema.columns();
+    let types = schema.types();
+
+    let computed_schema = {};
+
+    for (let i = 0; i < computed.length; i++) {
+        const column_name = computed[i].column;
+        const column_type = computed[i].type;
+
+        const column = {};
+
+        column.type = column_type;
+        column.input_column = computed[i].inputs[0]; // edit to support multiple input columns
+        column.input_type = computed[i].input_type;
+        column.computation = computed[i].computation;
+
+        computed_schema[column_name] = column;
+    }
+
+    schema.delete();
+    columns.delete();
+    types.delete();
+    return computed_schema;
+}
+
+/**
+ * The computed schema of this {@link table}. Returns a schema of only computed
+ * columns added by the user, the keys of which are computed columns and the values an
+ * Object containing the associated column_name, column_type, and computation.
+ *
+ * @async
+ *
+ * @returns {Promise<Object>} A Promise of this {@link table}'s computed schema.
+ */
+table.prototype.computed_schema = async function() {
+    return this._computed_schema();
 }
 
 /**
@@ -1354,6 +1420,55 @@ table.prototype._columns = function () {
  */
 table.prototype.columns = async function () {
     return this._columns();
+}
+
+table.prototype._column_metadata = function () {
+    let schema = this.gnode.get_tblschema();
+    let computed_schema = this._computed_schema();
+    let cols = schema.columns();
+    let types = schema.types();
+
+    let metadata = [];
+    for (let cidx = 0; cidx < cols.size(); cidx++) {
+        let name = cols.get(cidx);
+        let meta = {};
+
+        if (name === "psp_okey") {
+            continue;
+        }
+
+        meta.name = name;
+        meta.type = get_column_type(types.get(cidx).value);
+
+        let computed_col = computed_schema[name];
+
+        if (computed_col !== undefined) {
+            meta.computed = {
+                input_column: computed_col.input_column,
+                input_type: computed_col.input_type,
+                computation: computed_col.computation
+            }
+        } else {
+            meta.computed = undefined;
+        }
+
+        metadata.push(meta);
+    }
+
+    return metadata;
+}
+
+/**
+ * Column metadata for this table. If the column is computed, the `computed` property
+ * is an Object containing `input_column`, `input_type`, and `computation`. Otherwise,
+ * `computed` is `undefined`.
+ *
+ * @async
+ *
+ * @returns {Array<object>} An array of Objects containing metadata for each column.
+ */
+table.prototype.column_metadata = function() {
+    return this._column_metadata();
 }
 
 table.prototype.execute = function (f) {

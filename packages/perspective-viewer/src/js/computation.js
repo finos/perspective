@@ -7,10 +7,11 @@
  *
  */
 
-const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
-const fs = require("fs");
-
-const host = new WebSocketHost(3000);
-const arr = fs.readFileSync(__dirname +'/superstore.arrow');
-
-host.open("superstore.arrow", arr);
+export default class Computation {
+    constructor(name, input_type, return_type, func) {
+        this.name = name;
+        this.input_type = input_type;
+        this.return_type = return_type;
+        this.func = func.toString();
+    }
+}

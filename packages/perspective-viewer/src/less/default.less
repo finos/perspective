@@ -141,10 +141,14 @@ perspective-viewer {
         #side_panel #divider {
             display: none;
         }
+
+        perspective-computed-column {
+            max-height: none;
+
+        }
     }
 
     #columns_container {
-        height: 100%;
         flex-direction: column;
 
         #active_columns, #inactive_columns {
@@ -180,8 +184,6 @@ perspective-viewer {
     ul {
         transition: background-color 0.2s, border-color 0.2s;
     }
-
-    #side_panel
 
     #filters perspective-row {
 
@@ -250,6 +252,43 @@ perspective-viewer {
             .column_row();
             content: "mdy";
             color: #999999;
+        }
+    }
+
+    #side_panel #side_panel__actions {
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 1000;
+        justify-content: flex-start;
+        padding: 5px;
+        position: relative;
+        overflow-y: auto;
+        width: 100%;
+        margin-top:36px;
+        min-height: 36px;
+
+        button.side_panel-action {
+            align-items: center;
+            align-content: center;
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: row;
+            font-family: @sans-serif-fonts !important;
+            font-size: 12px;
+            padding-right: 10px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+
+            span {
+                margin-left: 5px;
+                font-size: 15px;
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
         }
     }
 
@@ -355,4 +394,5 @@ perspective-viewer {
     ::-webkit-scrollbar-track, ::shadow ::-webkit-scrollbar-track {
         background: none;
     }
+
 }
