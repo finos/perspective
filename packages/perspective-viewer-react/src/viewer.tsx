@@ -1,7 +1,7 @@
 import * as debug from "debug";
 import * as React from "react";
 import * as ReactDOMServer from "react-dom/server";
-import { HTMLPerspectiveElement } from "@jpmorganchase/perspective-viewer";
+import { HTMLPerspectiveViewerElement } from "@jpmorganchase/perspective-viewer";
 
 interface PerspectiveViewerAPI {
   load(...args: any[]): void;
@@ -29,12 +29,15 @@ export interface PerspectiveViewerState {
 
 const logger = debug("perspective:viewer:react");
 
-export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, PerspectiveViewerState> {
-  private ref: HTMLPerspectiveElement;
+export class PerspectiveViewer extends React.Component<
+  PerspectiveViewerProps,
+  PerspectiveViewerState
+> {
+  private ref: HTMLPerspectiveViewerElement;
 
   constructor(props: PerspectiveViewerProps) {
     super(props);
-    
+
     // Bind all viewer functions to ensure we don't re-render the viewer
     this.save = this.save.bind(this);
     this.load = this.load.bind(this);
@@ -45,10 +48,18 @@ export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, P
   }
 
   public render() {
-    const { columns, filters, sort, view, columnPivots, index, rowPivots } = this.props;
+    const {
+      columns,
+      filters,
+      sort,
+      view,
+      columnPivots,
+      index,
+      rowPivots
+    } = this.props;
     return (
       <perspective-viewer
-        ref={this.bindRef} 
+        ref={this.bindRef}
         columns={JSON.stringify(columns)}
         filters={JSON.stringify(filters)}
         sort={JSON.stringify(sort)}
@@ -65,14 +76,14 @@ export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, P
     if (!this.props.message) {
       return void 0;
     }
-    
+
     return ReactDOMServer.renderToStaticMarkup(this.props.message);
   }
 
-  private bindRef(ref: HTMLPerspectiveElement) {
+  private bindRef(ref: HTMLPerspectiveViewerElement) {
     this.ref = ref;
   }
-  
+
   public componentWillMount() {
     if (this.props.onViewerReady) {
       this.props.onViewerReady({
@@ -81,7 +92,7 @@ export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, P
         save: this.save,
         restore: this.restore,
         doLayout: this.doLayout
-      })
+      });
     }
   }
 
@@ -119,7 +130,9 @@ export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, P
     this.checkRef();
 
     if (this.state.loaded) {
-      logger("Calling load multiple times is not advised for performance reasons");
+      logger(
+        "Calling load multiple times is not advised for performance reasons"
+      );
     }
 
     this.ref.load(...args);
@@ -129,7 +142,7 @@ export class PerspectiveViewer extends React.Component<PerspectiveViewerProps, P
     this.checkRef();
 
     if (this.state.loaded) {
-      // We've loaded data before, so we can load 
+      // We've loaded data before, so we can load
       this.ref.update(...args);
     } else {
       this.ref.load(...args);
