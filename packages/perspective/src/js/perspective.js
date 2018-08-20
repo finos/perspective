@@ -893,6 +893,9 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
             case 'boolean':
                 dtype = __MODULE__.t_dtype.DTYPE_BOOL;
                 break;
+            case 'date':
+                dtype = __MODULE__.t_dtype.DTYPE_TIME;
+                break;
             case 'string':
             default:
                 dtype = __MODULE__.t_dtype.DTYPE_STR;
@@ -1002,7 +1005,7 @@ table.prototype._computed_schema =  function() {
 
         const column = {};
 
-        column.type = get_column_type(column_type);
+        column.type = column_type;
         column.input_column = computed[i].inputs[0]; // edit to support multiple input columns
         column.input_type = computed[i].input_type;
         column.computation = computed[i].computation;

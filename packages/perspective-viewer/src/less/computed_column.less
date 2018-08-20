@@ -13,8 +13,39 @@
   display: none;
 }
 
+.psp-icon {
+  color: #999;
+
+  &:hover {
+      cursor: pointer;
+  }
+}
+
+.psp-icon__add {
+  display: flex;
+  width: 20px;
+  margin-left: 6px;
+  min-width: 20px;
+  margin-top: -2px;
+  height: 0px;
+  &:before {        
+      content: "+";
+  }
+}
+
+.psp-title__columnName {
+  display: flex;
+  margin-left: 34px;
+  margin-top: 3px;
+  font-size: 12px;
+  color: #666;
+}
+
+.side_panel-action:hover {
+  cursor: pointer;
+}
+
 perspective-computed-column {
-  background: #E5E5E5;
   display: none;
   font-family: @sans-serif-fonts !important;
   flex-direction: column;
@@ -22,6 +53,9 @@ perspective-computed-column {
   min-height: 25%;
   max-height: 35%;
   padding: 5px;
+  margin-top: 34px;
+  margin-bottom: 24px;
+  flex: 1 !important;
 
   &.edit {
     #psp-cc-button-delete {
@@ -32,18 +66,20 @@ perspective-computed-column {
   .psp-cc__label {
     color: @darkgray;
     font-size: 10px;
-    margin-left: 4px;
+    margin-left: 8px;
 
     &.psp-cc__error {
       color: #cb4549 !important;
-      width: 120px;
+      width: 110px;
     }
   }
 
  #psp-cc__actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     margin-right: 5px;
+    margin-left: 20px;
+    margin-top: 12px;
   }
 
   #psp-cc__body, .psp-cc__container {
@@ -56,8 +92,18 @@ perspective-computed-column {
     }
   }
 
+  span#psp-cc__close {
+    color: @darkgray;
+    margin-left: 6px;
+    position: absolute;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
   .psp-cc__container {
-    margin: 0 5px 10px 26px;
+    margin: 2px 5px 10px 26px;
 
     &:first-of-type {
       margin-bottom: 0;
@@ -69,14 +115,6 @@ perspective-computed-column {
 
     }
 
-    span#psp-cc__close {
-      color: @darkgray;
-      margin-left: auto;
-
-      &:hover {
-        cursor: pointer;
-      }
-    }
 
     input {
       -webkit-appearance: none;
@@ -85,17 +123,67 @@ perspective-computed-column {
       background: #fff;
       border-bottom: 1px solid #ccc;
       font-size: 12px;
-      margin-top: 5px;
       padding: 3px 4px;
+      flex-basis: 500px;
+    }
+  }
+
+  .column_row() {
+    font-family: monospace;
+    display: flex;    
+  }
+
+  .psp-label__placeholder {
+    color: #ccc;
+    display: inline-block;
+    font-size: 12px;
+    margin-left: 4px;
+  }
+
+  .psp-label__requiredType {
+    margin-left: 5px;
+    margin-top: -1px;
+    display: inline-block;
+
+    &.integer::before, &.float::before {
+        .column_row();
+        content: "123";
+        color: #016bc6;
+    }
+
+    &.string::before {
+        .column_row();
+        content: "abc";
+        color: #fe9292;
+    }
+
+    &.boolean::before {
+        .column_row();
+        content: "t/f";
+        color: #999999;
+    }
+
+    &.date::before {
+        .column_row();
+        content: "mdy";
+        color: #999999;
     }
   }
 
   #psp-cc-computation__input-column {
-    background: none;
+    display: flex;
+    align-items: center;
+    background-color: rgba(255,255,255,0.3);
     border-bottom: 1px solid #ccc;
     margin-top: 5px;
-    height: 21px;
+    height: 23px;
     width: 100%;
+    
+    perspective-row {
+      margin-left: -26px;
+      margin-right: -5px;
+      width: calc(~"100% + 26px");
+    }
 
     &.dropping {
       background-color: rgb(240, 240, 255) !important;
@@ -132,8 +220,12 @@ perspective-computed-column {
     font-family: @monospace-fonts;
     flex-direction: column;
     font-size: 12px;
-    padding-right: 5px;
+    padding-right: 3px;
+    padding-left: 6px;
+    background: eee;
+    height: 24px;
     text-align: center;
+    padding-top: 4px;
 
     .date, .boolean {
       color: #999;
@@ -151,6 +243,31 @@ perspective-computed-column {
   #psp-cc-computation__select {
     margin-left: auto;
     width: 100%;
+    background-color: #eee;
+    font-size: 10px;
+    border-bottom: none;
+    color: #666;
+  }
+
+  #psp-cc-name {
+    background-color: #eee;
+    border-bottom: none;
+    font-size: 12px;
+    color: #333;
+    padding-left: 2px;
+
+    * {
+        display: inline;
+    }
+  
+    br {
+        display: none;
+    }
+  }
+
+  #psp-cc-name:empty:before{
+    content: "New Column";
+    color: #ccc;
   }
 
   #psp-cc-computation__drop-target-hover {
@@ -164,9 +281,9 @@ perspective-computed-column {
     border-right: 0;
     border-top: 0;
     font-size: 12px;
-    margin-left: 5px;
+    margin-left: 6px;
     padding: 2px 5px;
-    width: 55px;
+    width: 45px;
 
     &:hover {
       cursor: pointer;

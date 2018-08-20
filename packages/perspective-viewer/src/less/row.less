@@ -70,7 +70,7 @@ perspective-row {
 
         #row_edit {
             color: @darkgray;
-            cursor: pointer;
+           
             font-size: 9px;
             margin-left: 5px;
 
@@ -83,11 +83,19 @@ perspective-row {
 
     &.computed {
 
-        #psp_row .row_draggable {
-            height: 35px !important;
+        // #psp_row .row_draggable {
+        //     height: 35px !important;
+        // }
+
+        #name {
+            margin-right: 16px;
         }
 
         .row_computed {
+            position: absolute;
+            right: 0px;
+            margin-right: 12px;
+            margin-top: 2px;
             display: flex !important;
         }
     }
@@ -230,7 +238,7 @@ perspective-row #column_aggregate {
     display: none;
     font-size: 10px;
     font-family: @sans-serif-fonts;
-    width: 90px;
+    width: calc(100% - 12px);
     height: 20px;
 }
 
@@ -250,7 +258,7 @@ perspective-row .row_draggable {
 }
 
 perspective-row .row_draggable select {
-    margin: 0px 0px 0px 22px;
+    margin: 0px 0px 0px 26px;
 }
 
 perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {

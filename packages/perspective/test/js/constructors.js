@@ -368,7 +368,8 @@ module.exports = (perspective) => {
                 "plus2": {
                     input_column: "x",
                     input_type: "integer",
-                    computation: computation
+                    computation: computation,
+                    type: "integer"
                 }
             };
 

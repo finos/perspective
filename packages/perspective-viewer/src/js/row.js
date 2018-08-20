@@ -181,11 +181,11 @@ class Row extends HTMLElement {
     }
 
     set 'computed_column' (c) {
-        const data = this._get_computed_data();
-        const computed_input_column = this.querySelector('#computed_input_column');
-        const computation_name = this.querySelector('#computation_name');
-        computation_name.textContent = data.computation.name;
-        computed_input_column.textContent = data.input_column;
+        // const data = this._get_computed_data();
+        // const computed_input_column = this.querySelector('#computed_input_column');
+        // const computation_name = this.querySelector('#computation_name');
+        // computation_name.textContent = data.computation.name;
+        // computed_input_column.textContent = data.input_column;
     }
 
     _update_filter(event) {

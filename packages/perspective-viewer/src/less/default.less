@@ -145,15 +145,10 @@ perspective-viewer {
         perspective-computed-column {
             max-height: none;
 
-            .psp-cc__container {
-                margin: 0 8px 10px;
-            }
-
         }
     }
 
     #columns_container {
-        height: 100%;
         flex-direction: column;
 
         #active_columns, #inactive_columns {
@@ -264,13 +259,13 @@ perspective-viewer {
         display: flex;
         flex-direction: column;
         flex-shrink: 1000;
-        justify-content: flex-end;
-        min-height: 10%;
-        margin-top: auto;
+        justify-content: flex-start;
         padding: 5px;
         position: relative;
         overflow-y: auto;
         width: 100%;
+        margin-top:36px;
+        min-height: 36px;
 
         button.side_panel-action {
             align-items: center;
@@ -399,4 +394,5 @@ perspective-viewer {
     ::-webkit-scrollbar-track, ::shadow ::-webkit-scrollbar-track {
         background: none;
     }
+
 }

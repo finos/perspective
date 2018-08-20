@@ -477,6 +477,9 @@ async function loadTable(table) {
         this._inactive_columns.style.display = 'block';
     }
 
+    this.querySelector('#columns_container').style.visibility = "visible";
+    this.querySelector('#side_panel__actions').style.visibility = "visible";
+
     this.filters = this.getAttribute('filters');
 
     this._debounce_update();
@@ -840,9 +843,7 @@ class ViewPrivate extends HTMLElement {
         const data = event.detail;
         event.stopImmediatePropagation();
         if (event.type === 'perspective-computed-column-edit') {
-            this._computed_column.dispatchEvent(
-                new CustomEvent('perspective-computed-column-edit', {detail: data})
-            );
+            this._computed_column._edit_computed_column(data);
         }
         this._computed_column.style.display = 'flex';
         this._side_panel_actions.style.display = 'none';
@@ -876,12 +877,19 @@ class ViewPrivate extends HTMLElement {
             const table = this._table.add_computed(params);
             loadTable.call(this, table).then(() => {
                 this._update_column_view();
-                this.dispatchEvent(new Event('perspective-view-update'));
+                //this.dispatchEvent(new Event('perspective-view-update'));
 
                 this._computed_column.style.display = 'none';
                 this._side_panel_actions.style.display = 'flex';
+                this._computed_column._clear_state();
             });
         });
+    }
+
+    _transpose() {
+        let row_pivots = this.getAttribute('row-pivots');
+        this.setAttribute('row-pivots', this.getAttribute('column-pivots'));
+        this.setAttribute('column-pivots', row_pivots);
     }
 
     _register_ids() {
@@ -905,6 +913,7 @@ class ViewPrivate extends HTMLElement {
         this._side_panel = this.querySelector('#side_panel');
         this._top_panel = this.querySelector('#top_panel');
         this._sort = this.querySelector('#sort');
+        this._transpose_button = this.querySelector('#transpose_button');
     }
 
     _register_callbacks() {
@@ -923,8 +932,9 @@ class ViewPrivate extends HTMLElement {
         this._add_computed_column.addEventListener('mousedown', this._open_computed_column.bind(this));
         this._computed_column.addEventListener('perspective-computed-column-save', this._create_computed_column.bind(this));
         this._computed_column.addEventListener('perspective-computed-column-update', this._set_computed_column_input.bind(this));
-        this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
+        //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
+        this._transpose_button.addEventListener('click', this._transpose.bind(this));
         
         this._vis_selector.addEventListener('change', () => {
             this.setAttribute('view', this._vis_selector.value);
