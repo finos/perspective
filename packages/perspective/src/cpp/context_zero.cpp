@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_base.h>
 #include <perspective/context_common.h>
 #include <perspective/context_zero.h>
@@ -102,14 +101,6 @@ t_ctx0::step_end()
     m_minmax = rval;
 }
 
-void
-t_ctx0::delete_delta(const t_tscalar& pkey)
-{
-    iterpair_by_zc_pkey_colidx iterators =
-        m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
-    m_deltas->erase(iterators.first, iterators.second);
-}
-
 // ASGGrid data interface
 t_index
 t_ctx0::get_row_count() const
@@ -121,20 +112,6 @@ t_index
 t_ctx0::get_column_count() const
 {
     return m_config.get_num_columns();
-}
-
-t_tvipair
-t_ctx0::sanitize_index(t_tvidx bidx,
-                       t_tvidx eidx,
-                       t_tvidx lower_bound,
-                       t_tvidx upper_bound) const
-{
-    bidx = std::min(bidx, upper_bound);
-    eidx = std::min(eidx, upper_bound);
-    bidx = std::max(lower_bound, bidx);
-    eidx = std::max(lower_bound, eidx);
-    eidx = std::max(bidx, eidx);
-    return std::pair<t_tvidx, t_tvidx>(bidx, eidx);
 }
 
 t_tscalvec
@@ -582,69 +559,6 @@ t_ctx0::calc_step_delta(const t_table& flattened,
     }
 }
 
-t_histogram
-t_ctx0::get_histogram(const t_str& cname, t_uindex nbuckets) const
-{
-    return get_histogram(cname, nbuckets, true);
-}
-
-t_histogram
-t_ctx0::get_histogram(const t_str& cname,
-                      t_uindex nbuckets,
-                      t_bool show_filtered) const
-{
-    t_mask mask(m_state->get_table()->size());
-
-    if (show_filtered)
-    {
-        t_tscalvec pkeys = m_traversal->get_pkeys(0, m_traversal->size());
-        for (const auto& pkey : pkeys)
-        {
-            t_rlookup l = m_state->lookup(pkey);
-            if (l.m_exists)
-            {
-                mask.set(l.m_idx, true);
-            }
-            else
-            {
-                PSP_COMPLAIN_AND_ABORT("pkey not found");
-            }
-        }
-    }
-    else
-    {
-        mask = m_state->get_cpp_mask();
-    }
-
-    return m_state->get_table()
-        ->get_const_column(cname)
-        ->get_histogram(nbuckets, &mask);
-}
-
-void
-t_ctx0::set_feature_state(t_ctx_feature feature, t_bool state)
-{
-    m_features[feature] = state;
-}
-
-void
-t_ctx0::set_alerts_enabled(bool enabled_state)
-{
-    m_features[CTX_FEAT_ALERT] = enabled_state;
-}
-
-void
-t_ctx0::set_deltas_enabled(bool enabled_state)
-{
-    m_features[CTX_FEAT_DELTA] = enabled_state;
-}
-
-void
-t_ctx0::set_minmax_enabled(bool enabled_state)
-{
-    m_features[CTX_FEAT_MINMAX] = enabled_state;
-}
-
 t_minmaxvec
 t_ctx0::get_min_max() const
 {
@@ -673,29 +587,6 @@ t_streeptr_vec
 t_ctx0::get_trees()
 {
     return t_streeptr_vec();
-}
-
-t_uindex
-t_ctx0::lower_bound(t_tscalvec& partial) const
-{
-    partial.resize(m_config.get_num_columns());
-    return m_traversal->lower_bound_row_idx(
-        m_state, m_config, partial);
-}
-
-t_leaf_data_iter<t_ctx0>
-t_ctx0::iter_data(const t_idxvec& idxs, t_index start_row_idx) const
-{
-    t_idxvec idx_map(idxs.size());
-    auto schema = m_state->get_schema();
-
-    for (size_t ii = 0; ii < idxs.size(); ii++)
-    {
-        idx_map[ii] = schema.get_colidx(m_config.col_at(idxs[ii]));
-    }
-
-    return t_leaf_data_iter<t_ctx0>(
-        m_traversal, m_state, idx_map, start_row_idx);
 }
 
 t_bool
@@ -771,19 +662,6 @@ t_ctx0::notify(const t_table& flattened)
 void
 t_ctx0::pprint() const
 {
-}
-
-t_index
-t_ctx0::get_row_idx(t_tscalar pkey) const
-{
-    return m_traversal->get_row_idx(pkey);
-}
-
-t_table*
-t_ctx0::get_pkeyed_table() const
-{
-    auto pkeys = m_traversal->get_pkeys();
-    return m_state->_get_pkeyed_table(pkeys);
 }
 
 t_dtype

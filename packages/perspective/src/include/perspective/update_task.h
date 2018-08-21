@@ -11,9 +11,7 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/exports.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <ASGWidget/ASGWidget.h>
-#endif
+
 namespace perspective
 {
 class t_pool;
