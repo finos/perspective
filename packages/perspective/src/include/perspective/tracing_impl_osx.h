@@ -7,19 +7,12 @@
  *
  */
 
-#ifdef __linux__
+#pragma once
 #include <perspective/first.h>
-#include <perspective/base.h>
 
-namespace perspective
-{
-
-t_str
-get_error_str()
-{
-    // handled by perror
-    return t_str();
+#ifndef _WIN32
+extern "C" {
+__attribute__((__constructor__)) void th_trace_init();
+__attribute__((__destructor__)) void th_trace_fini();
 }
-
-} // end namespace perspective
 #endif

@@ -7,7 +7,7 @@
  *
  */
 
-#ifdef __linux__
+#ifdef __APPLE__
 #include <perspective/first.h>
 #include <perspective/tracing.h>
 #include <perspective/tracing_impl_linux.h>
