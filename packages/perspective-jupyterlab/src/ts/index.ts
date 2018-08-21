@@ -11,11 +11,10 @@ import {Widget} from '@phosphor/widgets';
 import {Message} from '@phosphor/messaging';
 import {Session} from '@jupyterlab/services';
 import {IRenderMime} from '@jupyterlab/rendermime-interfaces';
-
 import '../css/index.css';
 import '../css/material.dark.css';
 
-import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper} from './utils.ts';
+import {PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, createCopyDl} from './utils.ts';
 
 import "../js/embed.js";
 
@@ -43,6 +42,7 @@ interface PerspectiveSpec {
     layout: string,
     config: string
 }
+
 
 export class RenderedPSP extends Widget implements IRenderMime.IRenderer {
 
@@ -240,7 +240,17 @@ namespace Private {
         let psp = document.createElement('perspective-viewer');
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
+
+        let btns = createCopyDl(psp);
+
         node.appendChild(psp);
+
+        let div = document.createElement('div');
+        div.style.setProperty('display', 'flex');
+        div.style.setProperty('flex-direction', 'row');
+        div.appendChild(btns['copy']);
+        div.appendChild(btns['dl']);
+        node.appendChild(div);
         return node;
     }
 }
