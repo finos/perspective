@@ -11,7 +11,7 @@
 #define PSP_PARALLEL_FOR
 #endif
 
-#if !defined(__linux__) && !defined(__APPLE__) && !defined(_WIN32)
+#if !defined(__linux__) && !defined(__APPLE__) && !defined(WIN32)
 //default to linux
 #define __linux__
 #endif
