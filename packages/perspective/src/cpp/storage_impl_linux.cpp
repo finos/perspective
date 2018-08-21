@@ -7,9 +7,10 @@
  *
  */
 
-#ifdef __linux__
-
 #include <perspective/first.h>
+
+
+#ifdef __linux__
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
 #include <perspective/storage.h>

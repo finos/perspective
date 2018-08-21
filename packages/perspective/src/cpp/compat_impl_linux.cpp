@@ -7,9 +7,9 @@
  *
  */
 
-#ifdef __linux__
-
 #include <perspective/first.h>
+
+#ifdef __linux__
 #include <perspective/compat.h>
 #include <perspective/raii.h>
 #include <perspective/raw_types.h>
