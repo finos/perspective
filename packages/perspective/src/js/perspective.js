@@ -901,6 +901,8 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
         let inputs = coldef['inputs'];
         let type = coldef['type'] || 'string';
 
+        console.log(coldef, name, func, inputs, type);
+
         let dtype;
         switch (type) {
             case 'integer':
@@ -1014,7 +1016,7 @@ table.prototype._computed_schema =  function() {
         const column = {};
 
         column.type = column_type;
-        column.input_column = computed[i].inputs[0]; // edit to support multiple input columns
+        column.input_column = computed[i].inputs; // edit to support multiple input columns
         column.input_type = computed[i].input_type;
         column.computation = computed[i].computation;
 

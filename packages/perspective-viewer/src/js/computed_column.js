@@ -25,60 +25,6 @@ polyfill({});
  *
  */
 
-// Called on end of drag operation by releasing the mouse
-function column_undrag() {
-    this._input_column.classList.remove('dropping');
-}
-
-// Called when the column leaves the target
-function column_dragleave(event) {
-    let src = event.relatedTarget;
-    while (src && src !== this._input_column) {
-        src = src.parentElement;
-    }
-    if (src === null) {
-        this._input_column.classList.remove('dropping');
-        this._drop_target_hover.removeAttribute('drop-target');
-    }
-}
-
-// Called when column is held over the target
-function column_dragover(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-
-    this._clear_error_messages();
-
-    if (event.currentTarget.className !== 'dropping') {
-        //event.currentTarget.classList.remove('dropped');
-        event.currentTarget.classList.add('dropping');
-    }
-    if (!this._drop_target_hover.hasAttribute('drop-target')) {
-        this._drop_target_hover.setAttribute('drop-target', true);
-    }
-
-    const input_column = this._input_column;
-
-    if(input_column.children.length === 0) {
-        // drop_target_hover is the blue box
-        input_column.parentNode.insertBefore(this._drop_target_hover, input_column.nextSibling);
-    }
-}
-
-// Called when the column is dropped on the target
-function column_drop(event) {
-    event.preventDefault();
-    event.currentTarget.classList.remove('dropping');
-
-    // column must match return type of computation
-    const data = JSON.parse(event.dataTransfer.getData('text'));
-    if (!data) return;
-
-    const column_name = data[0];
-    const column_type = data[3];
-
-    this._set_input_column(event, column_name, column_type);
-}
 
 // Computations
 const hour_of_day = function (val) {
@@ -117,7 +63,7 @@ class ComputedColumn extends HTMLElement {
             edit: false,
             column_name: undefined,
             computation: undefined,
-            input_column: undefined,
+            input_column: [],
         };
 
         this.computations = {
@@ -128,7 +74,9 @@ class ComputedColumn extends HTMLElement {
             'day_bucket': new Computation('day_bucket', 'date', 'date', day_bucket),
             'uppercase': new Computation('uppercase', 'string', 'string', x => x.toUpperCase()),
             'lowercase': new Computation('lowercase', 'string', 'string', x => x.toLowerCase()),
-            'length': new Computation('length', 'string', 'integer', x => x.length)
+            'length': new Computation('length', 'string', 'integer', x => x.length),
+            'add': new Computation('add', 'integer', 'integer', (a, b) => a + b, 2),
+            'multiply': new Computation('multiply', 'integer', 'integer', (a, b) => a * b, 2),
         };
 
         this.type_markers = {
@@ -145,6 +93,7 @@ class ComputedColumn extends HTMLElement {
         this._register_computations();
         this._register_callbacks();
         this._update_computation(null);
+        this._register_inputs();
     }
 
     _register_computations() {
@@ -155,7 +104,99 @@ class ComputedColumn extends HTMLElement {
             iterate = false;
         }
     }
+
+    _register_inputs() {
+        this._input_columns.innerHTML = '';
+        const state = this._get_state();
+        const computation = state.computation;
+        const input_type = computation.input_type;
+
+        this._set_state('input_column', []);
+
+        for (let i = 0; i < computation.num_params; i++) {
+            this._input_columns.innerHTML +=
+                `<div class="psp-cc-computation__input-column" 
+                      data-index="${i}" 
+                      drop-target 
+                      ondragenter="dragEnter(event)">
+                      <span class="psp-label__requiredType ${input_type}"></span>
+                      <span class="psp-label__placeholder">Param ${i+1}</span>
+                      <div class="psp-cc-computation__drop-target-hover"></div>
+                </div>`;
+        }
+
+        for (let column of this._input_columns.children) {
+            column.addEventListener('drop', this.column_drop.bind(this));
+            column.addEventListener('dragend', this.column_undrag.bind(this));
+            column.addEventListener('dragover', this.column_dragover.bind(this));
+            column.addEventListener('dragleave', this.column_dragleave.bind(this));
+        }
+
+        this._clear_column_name();
+    }
+
     // utils
+
+    // Called on end of drag operation by releasing the mouse
+    column_undrag(event) {
+        event.currentTarget.remove('dropping');
+        const state = this._get_state();
+        const refresh = this._input_columns.children.length < state.computation.num_params;
+        if (refresh)
+            this._register_inputs();
+    }
+
+    // Called when the column leaves the target
+    column_dragleave(event) {
+        const src = event.currentTarget;
+        if (src !== null && src.nodeName !== 'SPAN') {
+            const drop_target_hover = src.querySelector('.psp-cc-computation__drop-target-hover');
+            src.classList.remove('dropping');
+            if(drop_target_hover)
+                drop_target_hover.removeAttribute('drop-target');
+        }
+    }
+
+    // Called when column is held over the target
+    column_dragover(event) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'move';
+
+        const input_column = event.currentTarget;
+        const drop_target_hover = input_column.querySelector('.psp-cc-computation__drop-target-hover');
+
+        this._clear_error_messages();
+
+        if (input_column.className !== 'dropping') {
+            //event.currentTarget.classList.remove('dropped');
+            input_column.classList.add('dropping');
+        }
+        if (drop_target_hover && !drop_target_hover.hasAttribute('drop-target')) {
+            drop_target_hover.setAttribute('drop-target', true);
+        }
+
+        if(input_column.children.length === 2) {
+            // drop_target_hover is the blue box
+            input_column.parentNode.insertBefore(drop_target_hover, input_column.nextSibling);
+        }
+    }
+
+    // Called when the column is dropped on the target
+     column_drop(event) {
+        event.preventDefault();
+        event.currentTarget.classList.remove('dropping');
+
+        // column must match return type of computation
+        const data = JSON.parse(event.dataTransfer.getData('text'));
+        if (!data) return;
+
+        const column_name = data[0];
+        const column_type = data[3];
+
+        this._set_input_column(event, column_name, column_type);
+    }
+
+    // state
     _get_state() {
         return this.state;
     }
@@ -179,25 +220,21 @@ class ComputedColumn extends HTMLElement {
     _clear_state() {
         this.classList.remove('edit');
         this._column_name_input.innerText = '';
-        this._input_column.innerHTML = '';
-        this._input_column.classList.remove('dropped');
+        this._input_columns.innerHTML = '';
+
+        for (let child of this._input_columns.children)
+            child.classList.remove('dropped');
+
         this.state = {
             edit: false,
             column_name: undefined,
             computation: undefined,
-            input_column: undefined,
+            input_column: [],
             name_edited: false
         };
-        this._update_computation(null);
-        this._clear_error_messages();
-    }
 
-    _clear_input_column() {
-        this._input_column.classList.remove('dropped');
-        var input_type = this._get_state().computation.input_type;
-        this._input_column.innerHTML = `<span class="psp-label__requiredType ${input_type}"></span><span class="psp-label__placeholder">Param 1</span>`;
-        this._set_state('input_column', undefined);
-        this._auto_name();
+        this._update_computation();
+        this._clear_error_messages();
     }
 
     _close_computed_column() {
@@ -228,56 +265,81 @@ class ComputedColumn extends HTMLElement {
         if (state.name_edited) {
             return;
         }
-        if (state.input_column) {
-            this._column_name_input.innerText = `${state.computation.name}(${state.input_column.name})`;
+        if (state.input_column.length > 0) {
+            let names = [];
+            for (let column of state.input_column)
+                names.push(column.name);
+            this._column_name_input.innerText = `${state.computation.name}(${names.join(', ')})`;
         } else {
             this._column_name_input.innerText = '';
         }
         this._set_column_name();
     }
 
+    _clear_column_name() {
+        const input = this._column_name_input;
+        input.innerText = '';
+        this._set_state('name_edited', false);
+        this._set_column_name();
+    }
+
     _set_input_column(event, name, type) {
-        const computation = this._get_state().computation;
+        const state = this._get_state();
+        const computation = state.computation;
         const computation_type = computation.input_type;
+        const inputs = state.input_column;
 
-        this._input_column.innerHTML = '';
-        this._set_state('input_column', '');
+        const target = event.currentTarget;
+        const index = Number.parseInt(target.getAttribute('data-index'));
 
-        if(type !== computation_type) {
-            this._clear_input_column();
+        if (type !== computation_type) {
+            this._register_inputs();
             this._set_error_message(
                 `Input column type (${type}) must match computation input type (${computation_type}).`,
                 this._input_column_error_message);
-            this._input_column.classList.remove('dropped');
+            target.classList.remove('dropped');
             return;
         }
 
-        this._input_column.classList.add('dropped');
+        target.classList.add('dropped');
 
-        this._drop_target_hover.removeAttribute('drop-target');
+        const drop_target_hover = target.querySelector('.psp-cc-computation__drop-target-hover');
+        if (drop_target_hover)
+            drop_target_hover.removeAttribute('drop-target');
+
+        target.innerHTML = '';
 
         const input_column = {
             name: name,
             type: type,
         };
 
-        this._set_state('input_column', input_column);
+        if (inputs[index]) {
+            inputs[index] = input_column;
+        } else {
+            inputs.push(input_column);
+        }
+
+        this._set_state('input_column', inputs);
         this._auto_name();
 
         this.dispatchEvent(new CustomEvent('perspective-computed-column-update', {
-            detail: input_column
+            detail: {
+                target,
+                input_column
+            }
         }));
     }
 
     // computation
     _update_computation(event, computation_name) {
         const state = this._get_state();
-        const has_input_column = state.input_column !== undefined;
+        //const has_input_column = state.input_column.length > 0;
         const select = this._computation_selector;
 
         if (!computation_name) {
             computation_name = select[select.selectedIndex].value;
-        } else if (event === null) {
+        } else if (event === null || event === undefined) {
             select.value = computation_name;
         }
 
@@ -293,11 +355,13 @@ class ComputedColumn extends HTMLElement {
         this._computation_type.innerHTML = `<span class="${return_type}">${this.type_markers[return_type]}</span>`;
 
         this._set_state('computation', computation);
-        this._auto_name();
+        this._clear_column_name();
 
-        if((!has_input_column) || (event !== null && state.input_column.type !== input_type)) {
-            this._clear_input_column();
-        }
+        this._register_inputs();
+/*
+        if((has_input_column) || (event !== null && state.input_column.type !== input_type)) {
+
+        }*/
 
         this._clear_error_messages();
     }
@@ -353,8 +417,7 @@ class ComputedColumn extends HTMLElement {
         this._column_name_input = this.querySelector('#psp-cc-name');
         this._computation_selector = this.querySelector('#psp-cc-computation__select');
         this._computation_type = this.querySelector('#psp-cc-computation__type');
-        this._input_column = this.querySelector('#psp-cc-computation__input-column');
-        this._drop_target_hover = this.querySelector('#psp-cc-computation__drop-target-hover');
+        this._input_columns = this.querySelector('#psp-cc-computation-inputs');
         //this._delete_button = this.querySelector('#psp-cc-button-delete');
         this._save_button = this.querySelector('#psp-cc-button-save');
         this._input_column_error_message = this.querySelector('#psp-cc__error--input');
@@ -363,10 +426,6 @@ class ComputedColumn extends HTMLElement {
 
     _register_callbacks() {
         this._close_button.addEventListener('click', this._close_computed_column.bind(this));
-        this._input_column.addEventListener('drop', column_drop.bind(this));
-        this._input_column.addEventListener('dragend', column_undrag.bind(this));
-        this._input_column.addEventListener('dragover', column_dragover.bind(this));
-        this._input_column.addEventListener('dragleave', column_dragleave.bind(this));
         this._computation_selector.addEventListener('change', this._update_computation.bind(this));
         this._column_name_input.addEventListener('keyup', event => {
             this._set_state('name_edited', this._column_name_input.innerText && this._column_name_input.innerText.length > 0);

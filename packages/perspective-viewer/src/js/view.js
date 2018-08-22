@@ -232,8 +232,8 @@ function column_visibility_clicked(ev) {
         }
     } else {
         // check if we're manipulating computed column input
-        if(ev.path[1].id === 'psp-cc-computation__input-column') {
-            this._computed_column._clear_input_column();
+        if(ev.path[1].classList.contains('psp-cc-computation__input-column')) {
+            this._computed_column._register_inputs();
             this._update_column_view();
             return;
         }
@@ -854,8 +854,8 @@ class ViewPrivate extends HTMLElement {
     }
 
     _set_computed_column_input(event) {
-        this._computed_column_input_column.appendChild(
-            new_row.call(this, event.detail.name, event.detail.type));
+        event.detail.target.appendChild(
+            new_row.call(this, event.detail.input_column.name, event.detail.input_column.type));
         this._update_column_view();
     }
 
@@ -868,13 +868,13 @@ class ViewPrivate extends HTMLElement {
             if(cols.includes(computed_column_name) && !data.edit) {
                 computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
             }
-
+            
             const params = [{
                 computation: data.computation,
                 column: computed_column_name,
                 func: data.computation.func,
-                inputs: [data.input_column.name],
-                input_type: data.input_column.type,
+                inputs: data.input_column.map(col => col.name),
+                input_type: data.computation.input_type,
                 type: data.computation.return_type,
             }];
 
@@ -910,7 +910,7 @@ class ViewPrivate extends HTMLElement {
         this._side_panel_actions = this.querySelector('#side_panel__actions');
         this._add_computed_column = this.querySelector('#add-computed-column');
         this._computed_column = this.querySelector('perspective-computed-column');
-        this._computed_column_input_column = this._computed_column.querySelector('#psp-cc-computation__input-column');
+        this._computed_column_inputs = this._computed_column.querySelector('#psp-cc-computation-inputs');
         this._inner_drop_target = this.querySelector('#drop_target_inner');
         this._drop_target = this.querySelector('#drop_target');
         this._config_button = this.querySelector('#config_button');
