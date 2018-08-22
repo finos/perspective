@@ -843,19 +843,22 @@ class ViewPrivate extends HTMLElement {
         }
     }
 
+    // Computed columns
     _open_computed_column(event) {
-        const data = event.detail;
+        //const data = event.detail;
         event.stopImmediatePropagation();
-        if (event.type === 'perspective-computed-column-edit') {
+        /*if (event.type === 'perspective-computed-column-edit') {
             this._computed_column._edit_computed_column(data);
-        }
+        }*/
         this._computed_column.style.display = 'flex';
         this._side_panel_actions.style.display = 'none';
     }
 
     _set_computed_column_input(event) {
         event.detail.target.appendChild(
-            new_row.call(this, event.detail.input_column.name, event.detail.input_column.type));
+            new_row.call(this,
+                event.detail.input_column.name,
+                event.detail.input_column.type));
         this._update_column_view();
     }
 
@@ -868,7 +871,7 @@ class ViewPrivate extends HTMLElement {
             if(cols.includes(computed_column_name) && !data.edit) {
                 computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
             }
-            
+
             const params = [{
                 computation: data.computation,
                 column: computed_column_name,
@@ -882,10 +885,7 @@ class ViewPrivate extends HTMLElement {
             loadTable.call(this, table).then(() => {
                 this._update_column_view();
                 //this.dispatchEvent(new Event('perspective-view-update'));
-
-                this._computed_column.style.display = 'none';
-                this._side_panel_actions.style.display = 'flex';
-                this._computed_column._clear_state();
+                this._computed_column._close_computed_column();
             });
         });
     }
