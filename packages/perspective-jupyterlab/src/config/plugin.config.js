@@ -36,4 +36,4 @@ module.exports = Object.assign({}, common(), {
     }
 });
 
-module.exports.module.rules.push({test: /\.ts?$|@jupyterlab/, loader: "ts-loader"})
+module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"})
