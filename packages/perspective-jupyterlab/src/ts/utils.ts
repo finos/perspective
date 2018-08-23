@@ -139,12 +139,12 @@ export function convertToCSV(objArray: Array<Object>): string {
         for (var index in array[i]) {
             if (i === 0){
                 if (header != ''){
-                    header += ',';
+                    header += ', ';
                 }
                 header += index;
             }
             if (line != ''){
-                line += ',';
+                line += ', ';
             }
             line += array[i][index];
         }
