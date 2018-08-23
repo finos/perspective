@@ -79,7 +79,7 @@ exports.default = function() {
 
     test.skip("pivots by row when drag-and-dropped.", async page => {        
         await page.click('#config_button');
-        await dragDrop(page, 'perspective-row[name=Category]', '#row_pivots');
+        await drag_drop(page, 'perspective-row[name=Category]', '#row_pivots');
     });
 
 };

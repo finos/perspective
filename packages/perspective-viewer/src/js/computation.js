@@ -7,16 +7,11 @@
  *
  */
 
-#pragma once
-
-namespace perspective
-{
-const int META_NBYTES = 1;
-
-enum t_meta_mode
-{
-    META_MODE_MISSING,
-    META_MODE_STR_IMM,
-    META_MODE_STR_ENUM
-};
+export default class Computation {
+    constructor(name, input_type, return_type, func) {
+        this.name = name;
+        this.input_type = input_type;
+        this.return_type = return_type;
+        this.func = func.toString();
+    }
 }

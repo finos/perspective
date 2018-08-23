@@ -875,11 +875,15 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
             col->set_nth(idx, elem, true);
             break;
         }
+        case DTYPE_TIME:
+        {
+            col->set_nth<t_int64>(idx, static_cast<t_int64>(value.as<t_float64>()), true);
+            break;
+        }
         case DTYPE_UINT8:
         case DTYPE_UINT16:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_TIME:
         default:
         {
             // Other types not implemented

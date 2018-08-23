@@ -10,9 +10,6 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/filter.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/table_iterator.h>
-#endif
 #include <perspective/table.h>
 #include <perspective/mask.h>
 #include <perspective/comparators.h>
