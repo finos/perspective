@@ -366,7 +366,7 @@ module.exports = (perspective) => {
             const result = await table2.computed_schema();
             const expected = {
                 "plus2": {
-                    input_column: "x",
+                    input_columns: ["x"],
                     input_type: "integer",
                     computation: computation,
                     type: "integer"

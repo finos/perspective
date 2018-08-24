@@ -901,8 +901,6 @@ table.prototype._calculate_computed = function(tbl, computed_defs) {
         let inputs = coldef['inputs'];
         let type = coldef['type'] || 'string';
 
-        console.log(coldef, name, func, inputs, type);
-
         let dtype;
         switch (type) {
             case 'integer':
@@ -1016,7 +1014,7 @@ table.prototype._computed_schema =  function() {
         const column = {};
 
         column.type = column_type;
-        column.input_column = computed[i].inputs; // edit to support multiple input columns
+        column.input_columns = computed[i].inputs;
         column.input_type = computed[i].input_type;
         column.computation = computed[i].computation;
 
@@ -1454,7 +1452,7 @@ table.prototype._column_metadata = function () {
 
         if (computed_col !== undefined) {
             meta.computed = {
-                input_column: computed_col.input_column,
+                input_columns: computed_col.input_columns,
                 input_type: computed_col.input_type,
                 computation: computed_col.computation
             }
@@ -1473,9 +1471,14 @@ table.prototype._column_metadata = function () {
 }
 
 /**
- * Column metadata for this table. If the column is computed, the `computed` property
- * is an Object containing `input_column`, `input_type`, and `computation`. Otherwise,
- * `computed` is `undefined`.
+ * Column metadata for this table.
+ *
+ * If the column is computed, the `computed` property is an Object containing:
+ *  - Array `input_columns`
+ *  - String `input_type`
+ *  - Object `computation`.
+ *
+ *  Otherwise, `computed` is `undefined`.
  *
  * @async
  *

@@ -217,7 +217,7 @@ class Row extends HTMLElement {
         const data = JSON.parse(this.getAttribute('computed_column'));
         return {
             column_name: data.column_name,
-            input_column: data.input_column,
+            input_columns: data.input_columns,
             input_type: data.input_type,
             computation: data.computation,
             type: data.type,

@@ -319,7 +319,7 @@ function set_aggregate_attribute(aggs) {
 function _format_computed_data(cc) {
     return {
         column_name: cc[0],
-        input_column: cc[1].input_column,
+        input_columns: cc[1].input_columns,
         input_type: cc[1].input_type,
         computation: cc[1].computation,
         type: cc[1].type
@@ -857,8 +857,8 @@ class ViewPrivate extends HTMLElement {
     _set_computed_column_input(event) {
         event.detail.target.appendChild(
             new_row.call(this,
-                event.detail.input_column.name,
-                event.detail.input_column.type));
+                event.detail.column.name,
+                event.detail.column.type));
         this._update_column_view();
     }
 
@@ -876,7 +876,7 @@ class ViewPrivate extends HTMLElement {
                 computation: data.computation,
                 column: computed_column_name,
                 func: data.computation.func,
-                inputs: data.input_column.map(col => col.name),
+                inputs: data.input_columns.map(col => col.name),
                 input_type: data.computation.input_type,
                 type: data.computation.return_type,
             }];
