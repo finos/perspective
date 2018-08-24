@@ -7,14 +7,15 @@
  *
  */
 
+#ifdef __APPLE__
+
 #include <perspective/first.h>
 
-
-#ifdef __linux__
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
 #include <perspective/storage.h>
 #include <perspective/raii.h>
+
 #include <perspective/defaults.h>
 #include <perspective/compat.h>
 #include <perspective/utils.h>
@@ -89,7 +90,12 @@ t_lstore::resize_mapping(t_uindex cap_new)
 {
     t_index rcode = ftruncate(m_fd, cap_new);
     PSP_VERBOSE_ASSERT(rcode == 0, "ftruncate failed");
-    void* base = mremap(m_base, capacity(), cap_new, MREMAP_MAYMOVE);
+
+    if (munmap(m_base, capacity()) == -1){
+        throw;
+    }
+
+    void* base = mmap(0, cap_new, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, 0);
 
     if (base == MAP_FAILED)
     {

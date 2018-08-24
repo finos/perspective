@@ -16,7 +16,6 @@
 #include <perspective/sym_table.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/tbb.h>
-#include <perspective/config_proc.h>
 #endif
 
 namespace perspective

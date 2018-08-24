@@ -133,13 +133,8 @@ t_pool::_process_helper()
     auto work_to_do = m_data_remaining.load();
     if (work_to_do)
     {
-#ifdef PSP_ENABLE_WASM
         t_update_task task(*this);
         task.run();
-#else
-        auto task = new t_update_task(*this);
-        ASGWidget::c_task_queue_post(task);
-#endif
     }
 }
 
