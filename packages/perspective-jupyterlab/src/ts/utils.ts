@@ -15,6 +15,24 @@ export interface PSPHelper {
     getUrl(): string;
 }
 
+export function datasource_to_source(source: string){
+    if(source.indexOf('sio://') !== -1){
+        return 'sio';
+    } else if(source.indexOf('ws://') !== -1){
+        return 'ws';
+    } else if(source.indexOf('wss://') !== -1){
+        return 'wss';
+    } else if(source.indexOf('http://') !== -1){
+        return 'http';
+    } else if(source.indexOf('https://') !== -1){
+        return 'http';
+    } else if(source.indexOf('comm://') !== -1){
+        return 'comm';
+    } else{
+        throw new Error('Unrecognized source');
+    }
+}
+
 export class PSPWebsocketHelper implements PSPHelper {
     constructor(url: string, send: string, records: boolean) {
         this.url = url;
