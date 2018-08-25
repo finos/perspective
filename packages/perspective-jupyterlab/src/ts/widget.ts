@@ -13,7 +13,7 @@ import {Session} from '@jupyterlab/services';
 
 /* Helper methods */
 import {
-  PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, datasource_to_source
+  PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, datasourceToSource, createCopyDl
 } from './utils.ts';
 
 /* perspective components */
@@ -112,7 +112,7 @@ class PerspectiveView extends DOMWidgetView {
   }
 
   datasrc_changed(){
-    let type = datasource_to_source(this.model.get('datasrc'));
+    let type = datasourceToSource(this.model.get('datasrc'));
     if (type === 'static') {
       this.data_changed();
     } else if (type === 'ws' || type === 'wss') {
@@ -217,7 +217,17 @@ namespace Private {
         let psp = document.createElement('perspective-viewer');
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
+
+        let btns = createCopyDl(psp);
+
         node.appendChild(psp);
+
+        let div = document.createElement('div');
+        div.style.setProperty('display', 'flex');
+        div.style.setProperty('flex-direction', 'row');
+        div.appendChild(btns['copy']);
+        div.appendChild(btns['dl']);
+        node.appendChild(div);
         return psp;
     }
 }

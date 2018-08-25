@@ -17,7 +17,7 @@ export interface PSPHelper {
     getUrl(): string;
 }
 
-export function datasource_to_source(source: string){
+export function datasourceToSource(source: string){
     if(source.indexOf('sio://') !== -1){
         return 'sio';
     } else if(source.indexOf('ws://') !== -1){
