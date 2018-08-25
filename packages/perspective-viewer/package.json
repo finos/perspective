@@ -3,6 +3,7 @@
   "version": "0.1.18",
   "description": "Perspective.js",
   "main": "build/perspective.view.umd.js",
+  "typings": "./typings/index.d.ts",
   "files": [
     "src/*",
     "build/*"

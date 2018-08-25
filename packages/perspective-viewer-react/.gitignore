@@ -1,0 +1,6 @@
+coverage
+es
+lib
+
+# Logs
+*.logs
