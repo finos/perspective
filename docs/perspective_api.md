@@ -164,7 +164,7 @@ configuration.
     -   `config.filter` **[Array][24]&lt;[Array][24]&lt;[string][29]>>?** An Array of Filter configurations to
         apply.  A filter configuration is an array of 3 elements:  A column name,
         a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-    -   `config.sort` **[Array][24]&lt;[string][29]>?** An Array of column names by which to sort.
+    -   `config.sort` **[Array][24]&lt;[Array][24]&lt;[string][29]>?** An Array of sort configurations consisting of a column name & its corresponding sort order by which to sort.
 
 **Examples**
 
@@ -173,7 +173,7 @@ var view = table.view({
      row_pivot: ['region'],
      aggregate: [{op: 'dominant', column:'region'}],
      filter: [['client', 'contains', 'fred']],
-     sort: ['value']
+     sort: [['value', 'asc']]
 });
 ```
 

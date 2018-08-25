@@ -49,8 +49,7 @@ HTMLElement class for `<perspective-viewer` custom element.
 
 ### sort
 
-Sets this `perspective.table.view`'s `sort` property, an array of column
-names.
+Sets this `perspective.table.view`'s `sort` property, an array of sort configurations consisting of a column name and its sort order.
 
 **Examples**
 
@@ -58,13 +57,13 @@ _via Javascript DOM_
 
 ```javascript
 let elem = document.getElementById('my_viewer');
-elem.setAttribute('sort', JSON.stringify(["x"]));
+elem.setAttribute('sort', JSON.stringify(["x", "desc"]));
 ```
 
 _via HTML_
 
 ```javascript
-<perspective-viewer sort='["x"]'></perspective-viewer>
+<perspective-viewer sort='["x", "desc"]'></perspective-viewer>
 ```
 
 ### columns
