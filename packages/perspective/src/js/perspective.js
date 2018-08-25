@@ -217,7 +217,6 @@ function parse_data(data, names, types) {
 
         const names_in_update = Object.keys(data);
         row_count = data[names_in_update[0]].length;
-        let col_of_undefined;
         names = names || names_in_update;
 
         for (let col_num = 0; col_num < names.length; col_num++) {
@@ -240,9 +239,7 @@ function parse_data(data, names, types) {
             if (data.hasOwnProperty(name)) {
                 transformed = transform_data(types[col_num], data[name]);
             } else {
-                // Lazily create one array of undefined of correct length (can use multiple times)
-                col_of_undefined = col_of_undefined || new Array(row_count).fill(undefined);
-                transformed = col_of_undefined;
+                transformed = new Array(row_count);
             }
             cdata.push(transformed);
         }
@@ -506,6 +503,8 @@ view.prototype.schema = async function() {
     let schema = this.gnode.get_tblschema();
     let _types = schema.types();
     let names = schema.columns();
+    schema.delete();
+
     let types = {};
     for (let i = 0; i < names.size(); i ++) {
         types[names.get(i)] = _types.get(i).value
@@ -530,6 +529,10 @@ view.prototype.schema = async function() {
             new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }
+
+    _types.delete();
+    names.delete();
+
     return new_schema;
 }
 
@@ -968,17 +971,6 @@ table.prototype._schema = function () {
             continue;
         }
         new_schema[columns.get(key)] = get_column_type(types.get(key).value);
-        /*if (types.get(key).value === 1 || types.get(key).value === 2) {
-            new_schema[columns.get(key)] = "integer";
-        } else if (types.get(key).value === 19) {
-            new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
-            new_schema[columns.get(key)] = "float";
-        } else if (types.get(key).value === 11) {
-            new_schema[columns.get(key)] = "boolean";
-        } else if (types.get(key).value === 12) {
-            new_schema[columns.get(key)] = "date";
-        }*/
     }
     schema.delete();
     columns.delete();
@@ -1464,6 +1456,10 @@ table.prototype._column_metadata = function () {
 
         metadata.push(meta);
     }
+
+    types.delete()
+    cols.delete();
+    schema.delete();
 
     return metadata;
 }
