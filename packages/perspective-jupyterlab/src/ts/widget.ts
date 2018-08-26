@@ -5,11 +5,11 @@ import {
   DOMWidgetModel, DOMWidgetView, ISerializers
 } from '@jupyter-widgets/base';
 
-import {
-  PERSPECTIVE_VERSION
-} from './version.ts';
-
 import {Session} from '@jupyterlab/services';
+
+/* defines */
+import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from './utils.ts';
+import {PERSPECTIVE_VERSION} from './version.ts';
 
 /* Helper methods */
 import {
@@ -27,21 +27,6 @@ import "../js/embed.js";
 /* css */
 import "@jpmorganchase/perspective-viewer/build/material.css";
 import '../css/index.css';
-import '../css/material.dark.css';
-
-/* defines */
-export
-const MIME_TYPE = 'application/psp+json';
-
-export
-const PSP_CLASS = 'jp-PSPViewer';
-
-export
-const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
-
-export
-const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
-
 
 
 export
@@ -105,6 +90,10 @@ class PerspectiveView extends DOMWidgetView {
     this.model.on('change:sort', this.sort_changed, this);
     this.model.on('change:settings', this.settings_changed, this);
     this.model.on('change:dark', this.dark_changed, this);
+
+    this.displayed.then(()=> {
+      this.data_changed();
+    });
   }
 
   data_changed(){
@@ -176,6 +165,7 @@ class PerspectiveView extends DOMWidgetView {
     if (schema){
       this.psp.load(schema);
     }
+    this.psp.update(this.model.get('_data'));
   }
 
   view_changed(){
@@ -213,6 +203,9 @@ class PerspectiveView extends DOMWidgetView {
     } else {
       this.el.classList.remove(PSP_CONTAINER_CLASS_DARK);
     }
+
+    //FIXME dont do this
+    this.data_changed();
   }
 }
 

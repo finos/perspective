@@ -10,6 +10,19 @@
 import * as io from 'socket.io-client';
 import {Clipboard} from '@jupyterlab/apputils';
 
+/* defines */
+export
+const MIME_TYPE = 'application/psp+json';
+
+export
+const PSP_CLASS = 'jp-PSPViewer';
+
+export
+const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
+
+export
+const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
+
 
 export interface PSPHelper {
     //FIXME should enforce perspective viewer type
