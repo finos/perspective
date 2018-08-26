@@ -7,14 +7,14 @@
  *
  */
 
-import papaparse from "papaparse";
+import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS} from "./defaults.js";
+import {DateParser, is_valid_date} from "./date_parser.js";
+
+import {Precision} from "@apache-arrow/es5-esm/type";
 import {Table} from "@apache-arrow/es5-esm/table";
 import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
-import {Precision} from "@apache-arrow/es5-esm/type";
-import {is_valid_date, DateParser} from "./date_parser.js";
 import formatters from "./view_formatters";
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
-
+import papaparse from "papaparse";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -1102,8 +1102,8 @@ table.prototype.view = function(config) {
         "div": __MODULE__.t_aggtype.AGGTYPE_SCALED_DIV,
         "add": __MODULE__.t_aggtype.AGGTYPE_SCALED_ADD,
         "dominant": __MODULE__.t_aggtype.AGGTYPE_DOMINANT,
-        "first": __MODULE__.t_aggtype.AGGTYPE_FIRST,
-        "last": __MODULE__.t_aggtype.AGGTYPE_LAST,
+        "first by index": __MODULE__.t_aggtype.AGGTYPE_FIRST,
+        "last by index": __MODULE__.t_aggtype.AGGTYPE_LAST,
         "and": __MODULE__.t_aggtype.AGGTYPE_AND,
         "or": __MODULE__.t_aggtype.AGGTYPE_OR,
         "last": __MODULE__.t_aggtype.AGGTYPE_LAST_VALUE,
