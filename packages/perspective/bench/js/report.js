@@ -75,7 +75,7 @@ function draw(canvas, bins, bins2) {
              //   fill: 'origin'
             },{
                 label: "Previous",
-                data: bins2.map(function(x) { return {x: x[0], y: x[1]} }),
+                data: (bins2 || []).map(function(x) { return {x: x[0], y: x[1]} }),
                 backgroundColor: 'rgba(99, 255, 132, 0.2)',
                 borderColor: 'rgba(99,255,132,1)',
                 borderWidth: 2,
@@ -112,6 +112,8 @@ window.addEventListener('load', function () {
     for (let r in window.__RESULTS__.data) {
         let result = window.__RESULTS__.data[r];
         let old = window.__OLD__.data[r] || {bins: []};
+        old.avg = old.avg || Infinity;
+        old.std = old.std || Infinity;
         print(`Scenario ${parseInt(r) + 1}`);
         code(result.code);
         print(`  avg: ${result.avg.toFixed(2)} (${old.avg.toFixed(2)}) ${result.avg_diff}`);
