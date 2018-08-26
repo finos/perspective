@@ -19,7 +19,7 @@ matrix:
       cache: pip
 
 install:
-  - if [ "$TEST" = "WASM" ]; then $npm install; fi
+  - if [ "$TEST" = "WASM" ]; then npm install; fi
 
 script:
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 npm run build; fi
