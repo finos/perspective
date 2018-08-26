@@ -1206,9 +1206,20 @@ t_stree::update_agg_table(t_uindex nidx,
                 gstate.read_column(
                     spec.get_dependencies()[0].name(), pkeys, values);
 
-                auto nr = std::accumulate(
-                    values.begin(), values.end(), t_float64(0));
-                t_float64 dr = values.size();
+                t_float64 nr = 0;
+                t_float64 dr = 0;
+                auto bit = values.begin();
+                auto eit = values.end();
+
+                for(; bit != eit; ++bit)
+                {
+                    auto val = *bit;
+                    if (val != NULL) 
+                    {
+                        nr += val;
+                        dr += 1;
+                    }
+                }
 
                 t_f64pair* dst_pair =
                     dst->get_nth<t_f64pair>(dst_ridx);

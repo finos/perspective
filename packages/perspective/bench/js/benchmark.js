@@ -85,6 +85,7 @@ function average(data) {
 function stats(results) {
     const r_avg = average(results);
     const r_std = stddev(results);
+    OLD.data[RESULTS.length] = OLD.data[RESULTS.length] || {avg: Infinity, std: Infinity};    
     const old_avg =  OLD.data[RESULTS.length].avg;
     const old_std =  OLD.data[RESULTS.length].std;
     let r_avg_diff = ((r_avg - old_avg) / r_avg) * 100;
@@ -149,7 +150,7 @@ function _run_tests() {
             } catch (e) {
 
             }
-            if (x === iterations) {
+            if (x >= iterations) {
                 print("");
                 print("");
                 print("Completed in " + numberWithCommas((performance.now() - start_all).toFixed(3)) + "ms", false);
@@ -164,7 +165,7 @@ function _run_tests() {
                 x++;
                 setTimeout(testcase, 10);
             }
-        });
+        }).catch(console.error);
     }
     setTimeout(testcase);
 
@@ -240,6 +241,19 @@ get_csv('build/flight_small.csv', function(csv) {
         var view = table.view({
             row_pivot: ['Dest'],
             aggregate: "count",
+            row_pivot_depth: 1,
+        })
+        view.to_json().then(function() {
+            view.delete();
+            resolve();
+        });
+    });
+
+    
+    test(150 * FACTOR, function(resolve) {
+        var view = table.view({
+            row_pivot: ['Dest'],
+            aggregate: "mean",
             row_pivot_depth: 1,
         })
         view.to_json().then(function() {

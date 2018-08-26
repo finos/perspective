@@ -7,14 +7,14 @@
  *
  */
 
-import papaparse from "papaparse";
+import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS} from "./defaults.js";
+import {DateParser, is_valid_date} from "./date_parser.js";
+
+import {Precision} from "@apache-arrow/es5-esm/type";
 import {Table} from "@apache-arrow/es5-esm/table";
 import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
-import {Precision} from "@apache-arrow/es5-esm/type";
-import {is_valid_date, DateParser} from "./date_parser.js";
 import formatters from "./view_formatters";
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
-
+import papaparse from "papaparse";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -213,12 +213,15 @@ function parse_data(data, names, types) {
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
-        // Column oriented
+        // Column oriented update. Extending schema not supported here.
 
-        names = Object.keys(data);
+        const names_in_update = Object.keys(data);
+        row_count = data[names_in_update[0]].length;
+        names = names || names_in_update;
 
-        let colNum = 0;
-        for (let name in data) {
+        for (let col_num = 0; col_num < names.length; col_num++) {
+            const name = names[col_num];
+
             // Infer column type if necessary
             if (!preloaded) {
                 let i = 0;
@@ -231,10 +234,14 @@ function parse_data(data, names, types) {
                 types.push(inferredType);
             }
 
-            let transformed = transform_data(types[colNum], data[name]);
-            colNum++;
+            // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
+            let transformed;
+            if (data.hasOwnProperty(name)) {
+                transformed = transform_data(types[col_num], data[name]);
+            } else {
+                transformed = new Array(row_count);
+            }
             cdata.push(transformed);
-            row_count = transformed.length
         }
 
     } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
@@ -496,6 +503,8 @@ view.prototype.schema = async function() {
     let schema = this.gnode.get_tblschema();
     let _types = schema.types();
     let names = schema.columns();
+    schema.delete();
+
     let types = {};
     for (let i = 0; i < names.size(); i ++) {
         types[names.get(i)] = _types.get(i).value
@@ -520,6 +529,10 @@ view.prototype.schema = async function() {
             new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }
+
+    _types.delete();
+    names.delete();
+
     return new_schema;
 }
 
@@ -958,17 +971,6 @@ table.prototype._schema = function () {
             continue;
         }
         new_schema[columns.get(key)] = get_column_type(types.get(key).value);
-        /*if (types.get(key).value === 1 || types.get(key).value === 2) {
-            new_schema[columns.get(key)] = "integer";
-        } else if (types.get(key).value === 19) {
-            new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
-            new_schema[columns.get(key)] = "float";
-        } else if (types.get(key).value === 11) {
-            new_schema[columns.get(key)] = "boolean";
-        } else if (types.get(key).value === 12) {
-            new_schema[columns.get(key)] = "date";
-        }*/
     }
     schema.delete();
     columns.delete();
@@ -1100,8 +1102,8 @@ table.prototype.view = function(config) {
         "div": __MODULE__.t_aggtype.AGGTYPE_SCALED_DIV,
         "add": __MODULE__.t_aggtype.AGGTYPE_SCALED_ADD,
         "dominant": __MODULE__.t_aggtype.AGGTYPE_DOMINANT,
-        "first": __MODULE__.t_aggtype.AGGTYPE_FIRST,
-        "last": __MODULE__.t_aggtype.AGGTYPE_LAST,
+        "first by index": __MODULE__.t_aggtype.AGGTYPE_FIRST,
+        "last by index": __MODULE__.t_aggtype.AGGTYPE_LAST,
         "and": __MODULE__.t_aggtype.AGGTYPE_AND,
         "or": __MODULE__.t_aggtype.AGGTYPE_OR,
         "last": __MODULE__.t_aggtype.AGGTYPE_LAST_VALUE,
@@ -1454,6 +1456,10 @@ table.prototype._column_metadata = function () {
 
         metadata.push(meta);
     }
+
+    types.delete()
+    cols.delete();
+    schema.delete();
 
     return metadata;
 }
