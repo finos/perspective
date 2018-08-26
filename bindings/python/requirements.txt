@@ -1,5 +1,6 @@
 Cython
 IPython
+ipywidgets
 mock
 nose
 numpy
