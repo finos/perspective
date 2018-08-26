@@ -22,6 +22,11 @@
 #include <cmath>
 #include <unordered_map>
 
+#ifdef PSP_ENABLE_PYTHON
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#endif
+
 /*
 TODO -
 1. Implement implicit typepunning based on cardinality.
@@ -103,6 +108,10 @@ class PERSPECTIVE_EXPORT t_column
 
     template <typename DATA_T>
     void push_back(DATA_T elem, t_bool valid);
+
+#ifdef PSP_ENABLE_PYTHON
+    np::ndarray _as_numpy();
+#endif
 
     t_dtype get_dtype() const;
 

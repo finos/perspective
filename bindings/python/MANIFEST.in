@@ -1,0 +1,2 @@
+recursive-include perspective *
+prune examples/

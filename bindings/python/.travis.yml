@@ -1,0 +1,21 @@
+language: python
+cache: pip
+
+services:
+  - docker
+
+os:
+  - linux
+  # - osx
+
+python:
+  - "3.6"
+
+script: docker build .
+
+branches:
+  only:
+  - master
+
+notifications:
+  email: false

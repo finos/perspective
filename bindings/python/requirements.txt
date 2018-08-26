@@ -1,0 +1,10 @@
+Cython
+IPython
+mock
+nose
+numpy
+pandas
+scipy
+six
+ujson
+sphinx

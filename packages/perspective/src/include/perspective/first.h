@@ -23,6 +23,16 @@
 #endif // ifndex nominmax
 #endif // win32
 
+#ifdef PSP_ENABLE_PYTHON
+#include <boost/python.hpp>
+#include <boost/python/def.hpp>
+#include <boost/python/numpy.hpp>
+#include <numpy/arrayobject.h>
+
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#endif
+
 #ifdef PSP_VERIFY
 #define PSP_STORAGE_VERIFY
 #define PSP_COLUMN_VERIFY
