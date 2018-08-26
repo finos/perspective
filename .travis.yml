@@ -15,6 +15,7 @@ matrix:
       language: node_js
       env: TEST=WASM
     - python: "3.6"
+      language: python
       env: TEST=PYTHON
       cache: pip
 
