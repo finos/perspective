@@ -20,7 +20,7 @@ RUN ln -s /usr/local/lib/libboost_python37.so /usr/local/lib/libboost_python.so
 RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
 
 RUN python3 -m pip install codecov nose mock
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install -r bindings/python/requirements.txt
 
-RUN DOCKER=true make test
-RUN codecov --token d33ecf96-a51f-43b6-8429-c11f83b961ad
+RUN DOCKER=true cd bindings/python && make test
+RUN cd bindings/python && codecov --token d33ecf96-a51f-43b6-8429-c11f83b961ad
