@@ -21,28 +21,23 @@ import {
   PERSPECTIVE_VERSION
 } from './version.ts';
 
-const EXTENSION_ID = 'perspective';
 
-const pspWidget: IPlugin<Application<Widget>, void> = {
-  id: EXTENSION_ID,
+const pspPlugin: IPlugin<Application<Widget>, void> = {
+  id: '@jpmorganchase/perspective-jupyterlab',
   requires: [IJupyterWidgetRegistry],
-  activate: activateWidgetExtension,
+  activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
+    console.log(app);
+    console.log(registry);
+    registry.registerWidget({
+      name: '@jpmorganchase/perspective-jupyterlab',
+      version: PERSPECTIVE_VERSION,
+      exports: {
+        PerspectiveModel: PerspectiveModel,
+        PerspectiveView: PerspectiveView
+      }
+    });
+  },
   autoStart: true
 };
 
-export default pspWidget;
-
-
-/**
- * Activate the widget extension.
- */
-function activateWidgetExtension(app: Application<Widget>, registry: IJupyterWidgetRegistry): void {
-  registry.registerWidget({
-    name: 'perspective',
-    version: PERSPECTIVE_VERSION,
-    exports: {
-      PerspectiveModel: PerspectiveModel,
-      PerspectiveView: PerspectiveView
-    }
-  });
-}
+export default pspPlugin;

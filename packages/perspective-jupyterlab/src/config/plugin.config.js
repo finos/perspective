@@ -29,6 +29,7 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
 module.exports = Object.assign({}, common(), {
     entry: './src/ts/index.ts',
     plugins: plugins,
+    externals: ['@jupyter-widgets/base'],
     output: {
         filename: 'index.js',
         libraryTarget: "umd",
