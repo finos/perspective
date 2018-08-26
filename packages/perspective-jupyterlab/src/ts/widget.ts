@@ -55,7 +55,7 @@ class PerspectiveModel extends DOMWidgetModel {
       _view_module: PerspectiveModel.view_module,
       _view_module_version: PerspectiveModel.view_module_version,
       
-      data: null,
+      _data: null,
       datasrc: 'static',
       schema: {},
       view: 'hypergrid',
@@ -94,7 +94,7 @@ class PerspectiveView extends DOMWidgetView {
     let observer = new MutationObserver(this.psp.notifyResize.bind(this.psp));
     observer.observe(this.el, {attributes: true});
 
-    this.model.on('change:data', this.data_changed, this);
+    this.model.on('change:_data', this.data_changed, this);
     this.model.on('change:datasrc', this.datasrc_changed, this);
     this.model.on('change:schema', this.schema_changed, this);
     this.model.on('change:view', this.view_changed, this);
@@ -108,7 +108,13 @@ class PerspectiveView extends DOMWidgetView {
   }
 
   data_changed(){
-    this.psp.update(this.model.get('data'));
+    this.psp.delete();
+    let schema = this.model.get('schema');
+
+    if (schema){
+      this.psp.load(schema);
+    }
+    this.psp.update(this.model.get('_data'));
   }
 
   datasrc_changed(){
@@ -165,8 +171,11 @@ class PerspectiveView extends DOMWidgetView {
 
   schema_changed(){
     this.psp.delete();
-    this.psp.load(this.model.get('schema'));
-    this.data_changed();
+    let schema = this.model.get('schema');
+
+    if (schema){
+      this.psp.load(schema);
+    }
   }
 
   view_changed(){
