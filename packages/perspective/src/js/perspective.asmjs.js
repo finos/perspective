@@ -15,7 +15,7 @@ if (global.document !== undefined) {
 		wasmJSMethod: "asmjs",
 		locateFile: path => `asmjs/${path}`,
         filePackagePrefixURL: "",
-	    printErr: (x) => console.warn(x),
+	    printErr: (x) => console.error(x),
 	    print: (x) => console.warn(x)
 	});
 	module.exports = perspective(Module);

@@ -381,8 +381,27 @@ module.exports = (perspective) => {
            let result = await table.column_metadata();
            expect(result).toEqual(column_meta);
         });
-    });
 
+        it("allocates a large tables", async function () {
+
+            function makeid() {
+                var text = "";
+                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";              
+                for (var i = 0; i < 15; i++)
+                    text += possible.charAt(Math.floor(Math.random() * possible.length));              
+                return text;
+            }
+            let data = [];
+            for (let i = 0; i < 20000; i++) {
+                data.push([{a: makeid(), b: makeid(), c: makeid(), d: makeid(), w: i + 0.5, x: i, y: makeid()}]);
+            }
+            let table = perspective.table(data);
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result.length).toEqual(20000);
+        });
+
+    });
 
 };
 

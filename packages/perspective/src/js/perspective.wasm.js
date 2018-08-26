@@ -11,18 +11,13 @@ const load_perspective = require("../../build/wasm_async/psp.js").load_perspecti
 const perspective = require('./perspective.js');
 
 if (global.document !== undefined && typeof WebAssembly !== 'undefined') {
-	var wasmXHR = new XMLHttpRequest();
-	wasmXHR.open('GET', 'wasm_async/psp.wasm', true);
-	wasmXHR.responseType = 'arraybuffer';
-	wasmXHR.onload = function() {
-	    let Module = {};
-	    Module.wasmBinary = wasmXHR.response;
-	    Module.wasmJSMethod = 'native-wasm';
-	    Module = load_perspective(Module);
-	    perspective(Module);
-	};
-	wasmXHR.send(null);
-	module.exports = perspective({});
+	module.exports = perspective(load_perspective({
+		wasmJSMethod: "native-wasm",
+		locateFile: path => `wasm_async/${path}`,
+		filePackagePrefixURL: "",
+		printErr: (x) => console.error(x),
+		print: (x) => console.warn(x)
+	}));
 } else {
 	module.exports = perspective(load_perspective);
 }
