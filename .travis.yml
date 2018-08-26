@@ -26,4 +26,4 @@ script:
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 npm run build; fi
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 npm run test:build; fi
   - if [ "$TEST" = "WASM" ]; then npm run test:run_quiet; fi
-  - if [ "$TEST" = "PYTHON" ]; then cd bindings/python && docker build .; fi
+  - if [ "$TEST" = "PYTHON" ]; then docker build -f bindings/python/Dockerfile .; fi
