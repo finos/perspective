@@ -249,6 +249,7 @@ function column_visibility_clicked(ev) {
     this._update_column_view(cols);
 }
 
+// todo: apply to computed columns, separate branch
 function column_aggregate_clicked() {
     let aggregates = get_aggregate_attribute.call(this);
     let new_aggregates = this._get_view_aggregates();
@@ -339,21 +340,6 @@ async function loadTable(table) {
         table.computed_schema()
     ]);
 
-    // todo: computed columns do NOT persist across refreshes
-    // fixme: find better implementation than strip computed columns
-    if(!_.isEmpty(computed_schema)) {
-        const computed_columns = _.keys(computed_schema);
-        for (let i = 0; i < computed_columns.length; i++) {
-            const cc = computed_columns[i];
-            if (cols.includes(cc)) {
-                cols.splice(cols.indexOf(cc), 1);
-            }
-            if (_.has(schema, cc)) {
-                delete schema[cc];
-            }
-        }
-    }
-
     this._inactive_columns.innerHTML = "";
     this._active_columns.innerHTML = "";
 
@@ -376,9 +362,6 @@ async function loadTable(table) {
         }
         return r;
     });
-
-    // fixme: better approach please
-    const computed_cols = _.pairs(computed_schema);
 
     // Update Aggregates.
     let aggregates = [];
@@ -417,6 +400,22 @@ async function loadTable(table) {
     // Update column rows.
     let shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
 
+    // strip computed columns from sorted columns & schema - place at end
+    if(!_.isEmpty(computed_schema)) {
+        const computed_columns = _.keys(computed_schema);
+        for (let i = 0; i < computed_columns.length; i++) {
+            const cc = computed_columns[i];
+            if (cols.includes(cc)) {
+                cols.splice(cols.indexOf(cc), 1);
+            }
+            if (_.has(schema, cc)) {
+                delete schema[cc];
+            }
+        }
+    }
+
+    const computed_cols = _.pairs(computed_schema);
+
     if (!this.hasAttribute('columns') || shown.length === 0) {
         for (let x of cols) {
             let aggregate = aggregates
@@ -430,9 +429,10 @@ async function loadTable(table) {
         for (let cc of computed_cols) {
             let cc_data = _format_computed_data(cc);
             let aggregate = aggregates
-                .filter(a => a.column === cc[0])
+                .filter(a => a.column === cc_data.column_name)
                 .map(a => a.op)[0];
-            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
+            console.log(aggregate, cc_data);
+            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
             this._inactive_columns.appendChild(row);
         }
 
@@ -450,7 +450,7 @@ async function loadTable(table) {
                 .map(a => a.op)[0];
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
-            if (shown.indexOf(x) !== -1) {
+            if (shown.includes(x)) {
                 row.classList.add('active');
             }
         }
@@ -458,11 +458,15 @@ async function loadTable(table) {
         // fixme better approach please
         for (let cc of computed_cols) {
             let cc_data = _format_computed_data(cc);
+            console.log(aggregates);
             let aggregate = aggregates
-                .filter(a => a.column === cc[0])
+                .filter(a => a.column === cc_data.column_name)
                 .map(a => a.op)[0];
-            let row = new_row.call(this, cc[0], cc[1].type, aggregate, null, null, cc_data);
+            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
             this._inactive_columns.appendChild(row);
+            if (shown.includes(cc)) {
+                row.classList.add('active');
+            }
         }
 
         for (let x of shown) {
@@ -862,7 +866,7 @@ class ViewPrivate extends HTMLElement {
         this._table.columns().then((cols) => {
             // edit overwrites last column, otherwise avoid name collision
             if(cols.includes(computed_column_name) && !data.edit) {
-                computed_column_name += (Math.round(Math.random() * 100));
+                computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
             }
 
             const params = [{

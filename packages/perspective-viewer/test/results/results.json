@@ -17,6 +17,7 @@
     "superstore.html/pivots by computed column.": "d4467ad3612e90136fa391196e61189b",
     "superstore.html/sorts by computed column.": "7a4c989e68159de9f2ed70a1e6380ef9",
     "superstore.html/filters by computed column.": "12d31929677602612fdb26ee04958eef",
+    "superstore.html/computed column aggregates should persist.": "0dbc9d15dc1a9d62d62e94b534447787",
     "blank.html/Handles reloading with a schema.": "9cda0b27c92efb59599e11dffbad169e",
     "superstore.html/pivots by a column.": "71c2f17f6ade6513574aa0143a84c634",
     "superstore.html/click on add computed column button opens the UI.": "4dd9778ed1f321d928570d7b3e60a473",
