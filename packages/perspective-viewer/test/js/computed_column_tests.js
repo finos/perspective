@@ -132,4 +132,14 @@ exports.default = function() {
         const viewer = await page.$('perspective-viewer');
         await page.evaluate(element => element.setAttribute('filters', '[["new_cc", "==", "2 Monday"]]'), viewer);
     });
+
+    test.capture("computed column aggregates should persist.", async page => {
+        await add_computed_column(page);
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('row-pivots', '["Quantity"]'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity", "new_cc"]'), viewer);
+        await page.evaluate(element => element.setAttribute('aggregates', '{"new_cc":"any"}'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity"]'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity", "new_cc"]'), viewer);
+    });
 };
