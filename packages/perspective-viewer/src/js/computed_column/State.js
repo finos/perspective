@@ -7,17 +7,23 @@
  *
  */
 
+import { values } from 'underscore';
+
 export default class State {
     constructor() {
-        return {
-            errors: {
-                input_column: undefined,
-                save: undefined,
-            },
-            column_name: undefined,
-            computation: undefined,
-            input_columns: [],
-            name_edited: false,
-        }
+        this.errors = {
+            input_column: undefined,
+            save: undefined,
+        };
+        this.edit = false;
+        this.column_name = undefined;
+        this.computation = undefined;
+        this.input_columns = [];
+        this.name_edited = false;
+    }
+
+    is_valid() {
+        const vals = values(this);
+        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes('');
     }
 }

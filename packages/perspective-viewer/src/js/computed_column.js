@@ -7,7 +7,6 @@
  *
  */
 
-import { values } from 'underscore';
 import {polyfill} from "mobile-drag-drop";
 
 import {bindTemplate} from './utils.js';
@@ -115,6 +114,8 @@ class ComputedColumn extends HTMLElement {
 
         this.state.input_columns = [];
 
+        // todo: replace html-loader with handlebars-loader
+
         for (let i = 0; i < computation.num_params; i++) {
             this._input_columns.innerHTML +=
                 `<div class="psp-cc-computation__input-column" 
@@ -210,12 +211,6 @@ class ComputedColumn extends HTMLElement {
         this._column_name_input.innerText = name;
         this._set_column_name();
         this.state['name_edited'] = true;
-    }
-
-    // State validation
-    _is_valid_state() {
-        const vals = values(this.state);
-        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes('');
     }
 
     // error handling
@@ -334,35 +329,9 @@ class ComputedColumn extends HTMLElement {
         this._clear_error_messages();
     }
 
-    /* edit
-    _edit_computed_column(data) {
-        this.state['computation'] = data.computation.name)
-        this.state('column_name', data.column_name);
-        this.state['input_columns'] = data.input_columns,
-        this.state['edit'] = true;
-        //this.state['name_edited'] = data.column_name !== `${data.computation.name}(${data.input_column})`;
-        this._apply_state();
-        //this.classList.add('edit');
-    }
-
-     delete - cannot be used without corresponding engine API
-    _delete_computed_column() {
-        const state = this._get_state();
-        if (!state.edit) return;
-
-        const computed_column = this._get_state();
-
-        const event = new CustomEvent('perspective-computed-column-delete', {
-            detail: computed_column
-        });
-
-        this.dispatchEvent(event);
-        this._clear_state();
-    } */
-
     // save
     _save_computed_column() {
-        if(!this._is_valid_state()) {
+        if(!this.state.is_valid()) {
             this.state.errors.save = 'Missing parameters for computed column.';
             this._set_error_message('save', this._save_error_message);
             return;
@@ -390,9 +359,7 @@ class ComputedColumn extends HTMLElement {
             child.classList.remove('dropped');
 
         this.state = new State();
-
         this._update_computation();
-        this._clear_error_messages();
     }
 
     _register_ids() {
