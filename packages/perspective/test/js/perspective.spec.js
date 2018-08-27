@@ -42,7 +42,7 @@ describe("perspective.js", function() {
             pivot_tests(RUNTIMES[mode]);
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
-            internal_tests(RUNTIMES[mode]);
+            internal_tests(RUNTIMES[mode], mode);
 
         });
 

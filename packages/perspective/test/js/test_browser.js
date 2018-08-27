@@ -25,9 +25,9 @@ const RUNTIMES = {
     'Parallel': psp_parallel.worker()
 }
 
-describe("perspective.js", function() {
+describe("perspective.js", function () {
 
-    Object.keys(RUNTIMES).forEach(function(mode) {
+    Object.keys(RUNTIMES).forEach(function (mode) {
 
         (typeof WebAssembly === 'undefined' && mode === "WASM" ? xdescribe : describe)(mode, function() {
 
@@ -37,7 +37,7 @@ describe("perspective.js", function() {
             filter_tests(RUNTIMES[mode]);
 
             if (mode !== 'Parallel') {
-                internal_tests(RUNTIMES[mode]);
+                internal_tests(RUNTIMES[mode], mode);
             }
         });
 

@@ -25,10 +25,11 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
-let __MODULE__;
-
 const CHUNKED_THRESHOLD = 100000
 
+module.exports = function (Module) {
+    let __MODULE__ = Module;
+ 
 /******************************************************************************
  *
  * Private
@@ -1713,6 +1714,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
 
 const perspective = {
 
+    __module__: __MODULE__,
+
     Host: Host,
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
@@ -1824,10 +1827,7 @@ const perspective = {
             }
         }
     }
-}
-
-module.exports = function (Module) {
-    __MODULE__ = Module;
+};
     return perspective;
 };
 
