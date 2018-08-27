@@ -383,23 +383,21 @@ module.exports = (perspective) => {
         });
 
         it("allocates a large tables", async function () {
-
             function makeid() {
                 var text = "";
-                var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";              
-                for (var i = 0; i < 15; i++)
-                    text += possible.charAt(Math.floor(Math.random() * possible.length));              
+                var possible = Array.from(Array(26).keys()).map(x => String.fromCharCode(x + 65));             
+                for (var i = 0; i < 15; i++) text += possible[Math.floor(Math.random() * possible.length)];
                 return text;
             }
             let data = [];
-            for (let i = 0; i < 20000; i++) {
+            for (let i = 0; i < 35000; i++) {
                 data.push([{a: makeid(), b: makeid(), c: makeid(), d: makeid(), w: i + 0.5, x: i, y: makeid()}]);
             }
             let table = perspective.table(data);
             let view = table.view();
             let result = await view.to_json();
-            expect(result.length).toEqual(20000);
-        });
+            expect(result.length).toEqual(35000);
+        }, 3000);
 
     });
 
