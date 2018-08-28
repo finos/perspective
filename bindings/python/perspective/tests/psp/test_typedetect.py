@@ -48,7 +48,9 @@ class TestTypedetect:
         t, _, x = type_detect(df, True)
 
         expected = json.dumps([{"index": 0, "0": 1}, {"index": 1, "0": 2}])
-        assert x == expected
+        print(x)
+        print(expected)
+        assert json.loads(x) == json.loads(expected)
         assert t == 'pandas'
 
         df = pd.DataFrame([[1, 2]], columns=['1', '2'], index=[datetime.today(), datetime.today()])
@@ -91,7 +93,7 @@ class TestTypedetect:
 
         t, _, y = type_detect(x, True)
         print(y)
-        assert y == '["a","simple","test"]'
+        assert y == '["a", "simple", "test"]'
         assert t == 'list'
 
     def test_dict(self):
@@ -100,7 +102,7 @@ class TestTypedetect:
 
         t, _, y = type_detect(x, True)
         print(y)
-        assert y == '[{"a":"simple test"}]'
+        assert y == '[{"a": "simple test"}]'
         assert t == 'dict'
 
     def test_webroutes(self):

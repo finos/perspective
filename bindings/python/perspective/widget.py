@@ -1,3 +1,4 @@
+from enum import Enum
 from ipywidgets import Widget
 from traitlets import Unicode, List, Bool, Dict, Any, validate
 
@@ -116,13 +117,13 @@ class PerspectiveWidget(Widget):
 
     def __init__(self, data, view='hypergrid', schema=None, columns=None, rowpivots=None, columnpivots=None, aggregates=None, sort=None, settings=True, dark=False, helper_config=None, **kwargs):
         super(PerspectiveWidget, self).__init__(**kwargs)
-        self.view = view
+        self.view = validate_view(view)
         self.schema = schema or {}
-        self.columns = columns or []
-        self.rowpivots = rowpivots or []
-        self.columnpivots = columnpivots or []
-        self.aggregates = aggregates or {}
-        self.sort = sort or []
+        self.columns = validate_columns(columns) or []
+        self.rowpivots = validate_rowpivots(rowpivots) or []
+        self.columnpivots = validate_columnpivots(columnpivots) or []
+        self.aggregates = validate_aggregates(aggregates) or {}
+        self.sort = validate_sort(sort) or []
         self.settings = settings
         self.dark = dark
         self.helper_config = helper_config or {}

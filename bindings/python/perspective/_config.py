@@ -3,6 +3,8 @@ import json
 
 def config(config, data, as_string=True):
     if not isinstance(data, str):
+        if as_string:
+            return '{}'
         return {}
 
     config = {} if config is None else config

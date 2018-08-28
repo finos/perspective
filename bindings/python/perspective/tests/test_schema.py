@@ -13,13 +13,14 @@ class TestLayout:
         assert schema(None, 'lantern') == '{}'
 
         x = schema({'test': 3}, 'dict')
-        assert x == '{"test":"integer"}'
+        assert x == '{"test": "integer"}'
         x = schema([{'test': 3}], 'list')
-        assert x == '{"test":"integer"}'
+        assert x == '{"test": "integer"}'
 
         x = pd.DataFrame([{'test': 3}])
         x = schema(x, 'pandas')
-        assert x == '{"test":"integer"}'
+        print(x)
+        assert x == '{"test": "integer"}'
 
     def test_convert_to_psp_schema(self):
         from perspective._schema import convert_to_psp_schema

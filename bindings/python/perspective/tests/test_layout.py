@@ -40,32 +40,22 @@ class TestLayout:
 
     def test_layout3(self):
         import pandas as pd
-        from perspective import psp, View, PSPException
+        from perspective import psp, View
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, View.YBAR, None, '1')
             psp(df, View.YBAR, None, ['1'])
             psp(df, View.YBAR, None, ['1'], '1')
             psp(df, View.YBAR, None, ['1'], ['1'])
-            try:
-                psp(df, View.YBAR, ['1'], 5)
-                assert False
-            except PSPException:
-                pass
 
     def test_layout4(self):
         import pandas as pd
-        from perspective import psp, View, PSPException
+        from perspective import psp, View
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, View.YBAR, None, ['1'])
             psp(df, View.YBAR, None, ['1'], None, ['1'])
             psp(df, View.YBAR, None, ['1'], None, '1')
-            try:
-                psp(df, View.YBAR, ['1'], None, 5)
-                assert False
-            except PSPException:
-                pass
 
     def test_layout5(self):
         import pandas as pd
@@ -73,7 +63,6 @@ class TestLayout:
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, View.YBAR, None, ['1'])
-            psp(df, View.YBAR, None, ['1'], None, None, None, 'test')
             psp(df, View.YBAR, None, ['1'], None, None, None, [['test', 'asc']])
             try:
                 psp(df, View.YBAR, None, ['1'], None, None, None, 5)
