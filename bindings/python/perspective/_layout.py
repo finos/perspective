@@ -1,4 +1,4 @@
-import ujson
+import json
 from six import iteritems
 from .exception import PSPException
 from .view import View
@@ -96,4 +96,4 @@ def layout(view='hypergrid', columns=None, rowpivots=None, columnpivots=None, ag
     ret['sort'] = validate_sort(sort)
     ret['settings'] = settings
     ret['colorscheme'] = dark
-    return ujson.dumps(ret)
+    return json.dumps(ret)

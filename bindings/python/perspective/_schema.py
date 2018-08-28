@@ -1,5 +1,5 @@
 from six import iteritems
-import ujson
+import json
 
 
 def convert_to_psp_schema(schema):
@@ -41,4 +41,4 @@ def validate_schema(data, typ):
 
 def schema(data, typ):
     schema = validate_schema(data, typ)
-    return ujson.dumps(schema)
+    return json.dumps(schema)

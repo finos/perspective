@@ -1,5 +1,5 @@
 import sys
-import ujson
+import json
 
 
 def _is_pandas(data, as_string=False):
@@ -51,7 +51,7 @@ def _is_remote(data, as_string=False):
 def _is_dict(data, as_string=False):
     if isinstance(data, dict):
         if as_string:
-            return 'dict', data, ujson.dumps([data])
+            return 'dict', data, json.dumps([data])
         else:
             return 'dict', data, [data]
     return '', '', ''
@@ -60,7 +60,7 @@ def _is_dict(data, as_string=False):
 def _is_list(data, as_string=False):
     if isinstance(data, list):
         if as_string:
-            return 'list', data, ujson.dumps(data)
+            return 'list', data, json.dumps(data)
         else:
             return 'list', data, data
     return '', '', ''

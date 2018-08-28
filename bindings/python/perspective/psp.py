@@ -1,11 +1,11 @@
-import ujson
-from ._type import type_detect
-from ._layout import layout
-from ._schema import schema as _schema
-from ._config import config
+from .widget import PerspectiveWidget
 
 
-def psp(data, view='hypergrid', schema=None, columns=None, rowpivots=None, columnpivots=None, aggregates=None, sort=None, settings=False, dark=False, helper_config=None):
+def _or_default(name, _def):
+    return name if name else _def
+
+
+def psp(data, view='hypergrid', schema=None, columns=None, rowpivots=None, columnpivots=None, aggregates=None, sort=None, settings=True, dark=False, helper_config=None):
     '''Render a perspective javascript widget in jupyter
 
     Arguments:
@@ -19,18 +19,5 @@ def psp(data, view='hypergrid', schema=None, columns=None, rowpivots=None, colum
         aggregates {dict(str, str/Aggregate)} -- dictionary of name to aggregate type (either string or enum Aggregate)
         settings {bool} -- display settings
     '''
-    from IPython.display import display
-
-    typ, dat_orig, dat = type_detect(data, True)
-    if schema and not isinstance(schema, str):
-        schema = ujson.dumps(schema)
-
-    bundle = {}
-    bundle['application/psp+json'] = {
-        'data': dat,
-        'schema': schema or _schema(dat_orig, typ),
-        'layout': layout(view, columns, rowpivots, columnpivots, aggregates, sort, settings, dark),
-        'config': config(helper_config, dat_orig)
-    }
-    print(bundle)
-    return display(bundle, raw=True)
+    p = PerspectiveWidget(data, view, schema, columns, rowpivots, columnpivots, aggregates, sort, settings, dark, helper_config)
+    return p

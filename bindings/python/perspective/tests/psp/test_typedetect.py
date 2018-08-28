@@ -41,13 +41,13 @@ class TestTypedetect:
 
     def test_pandas(self):
         import pandas as pd
-        import ujson
+        import json
         from perspective._type import type_detect
 
         df = pd.DataFrame([1, 2])
         t, _, x = type_detect(df, True)
 
-        expected = ujson.dumps([{"index": 0, "0": 1}, {"index": 1, "0": 2}])
+        expected = json.dumps([{"index": 0, "0": 1}, {"index": 1, "0": 2}])
         assert x == expected
         assert t == 'pandas'
 
