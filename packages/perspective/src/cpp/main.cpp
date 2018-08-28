@@ -256,7 +256,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
-            if (dcol[i].isUndefined()) continue;
+            if (dcol[i].isUndefined() || dcol[i].isNull()) continue;
             auto elem = dcol[i].as<T>();
             col->set_nth(i, elem);
         }

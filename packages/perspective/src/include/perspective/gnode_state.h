@@ -56,6 +56,11 @@ class PERSPECTIVE_EXPORT t_gstate
                      const t_tscalvec& pkeys,
                      t_f64vec& out_data) const;
 
+    void read_column(const t_str& colname,
+                     const t_tscalvec& pkeys,
+                     t_f64vec& out_data,
+                     bool include_nones) const;
+
     t_table_sptr get_table();
     t_table_csptr get_table() const;
 

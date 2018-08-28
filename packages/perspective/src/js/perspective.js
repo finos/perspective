@@ -186,8 +186,9 @@ function parse_data(data, names, types) {
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
                     col.push(Number(data[x][name]));
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
-                    const val = Number(data[x][name]);
-                        col.push(val);
+                    let val = data[x][name];
+                    if (val !== null) val = Number(val);
+                    col.push(val);
                     if (val > 2147483647 || val < -2147483648) {
                         types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
                     }
