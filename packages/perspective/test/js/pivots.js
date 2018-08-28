@@ -94,6 +94,64 @@ module.exports = (perspective) => {
             expect(answer).toEqual(result);
         });
 
+        it("['z'], first by index", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'first by index', column:'x'}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 1},
+                {__ROW_PATH__: [ false ], x: 2},
+                {__ROW_PATH__: [ true ], x: 1},
+            ];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+          });
+  
+          it("['z'], last by index", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'last by index', column:'x'}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 4},
+                {__ROW_PATH__: [ false ], x: 4},
+                {__ROW_PATH__: [ true ], x: 3},
+            ];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+          });
+  
+          it("['z'], last", async function () {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ['z'],
+                aggregate: [{op: 'last', column:'x'}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 3},
+                {__ROW_PATH__: [ false ], x: 4},
+                {__ROW_PATH__: [ true ], x: 3},
+            ];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+  
+            table.update([
+              {'x': 1, 'y':'c', 'z': true},
+              {'x': 2, 'y':'d', 'z': false}
+            ]);
+            var answerAfterUpdate =  [
+              {__ROW_PATH__: [], x: 1},
+              {__ROW_PATH__: [ false ], x: 2},
+              {__ROW_PATH__: [ true ], x: 1},
+            ];
+            let result2 = await view.to_json();
+            expect(answerAfterUpdate).toEqual(result2);
+          });
+  
+
     });
 
     describe("Aggregates with nulls", function () {
@@ -201,63 +259,6 @@ module.exports = (perspective) => {
             ];
             let result = await view.to_json();
             expect(answer).toEqual(result);
-        });
-
-        it("['z'], first by index", async function () {
-          var table = perspective.table(data);
-          var view = table.view({
-              row_pivot: ['z'],
-              aggregate: [{op: 'first by index', column:'x'}],
-          });
-          var answer =  [
-              {__ROW_PATH__: [], x: 1},
-              {__ROW_PATH__: [ false ], x: 2},
-              {__ROW_PATH__: [ true ], x: 1},
-          ];
-          let result = await view.to_json();
-          expect(answer).toEqual(result);
-        });
-
-        it("['z'], last by index", async function () {
-          var table = perspective.table(data);
-          var view = table.view({
-              row_pivot: ['z'],
-              aggregate: [{op: 'last by index', column:'x'}],
-          });
-          var answer =  [
-              {__ROW_PATH__: [], x: 4},
-              {__ROW_PATH__: [ false ], x: 4},
-              {__ROW_PATH__: [ true ], x: 3},
-          ];
-          let result = await view.to_json();
-          expect(answer).toEqual(result);
-        });
-
-        it("['z'], last", async function () {
-          var table = perspective.table(data);
-          var view = table.view({
-              row_pivot: ['z'],
-              aggregate: [{op: 'last', column:'x'}],
-          });
-          var answer =  [
-              {__ROW_PATH__: [], x: 3},
-              {__ROW_PATH__: [ false ], x: 4},
-              {__ROW_PATH__: [ true ], x: 3},
-          ];
-          let result = await view.to_json();
-          expect(answer).toEqual(result);
-
-          table.update([
-            {'x': 1, 'y':'c', 'z': true},
-            {'x': 2, 'y':'d', 'z': false}
-          ]);
-          var answerAfterUpdate =  [
-            {__ROW_PATH__: [], x: 1},
-            {__ROW_PATH__: [ false ], x: 2},
-            {__ROW_PATH__: [ true ], x: 1},
-          ];
-          let result2 = await view.to_json();
-          expect(answerAfterUpdate).toEqual(result2);
         });
 
     });
