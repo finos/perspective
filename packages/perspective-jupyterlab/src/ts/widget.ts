@@ -98,6 +98,14 @@ class PerspectiveView extends DOMWidgetView {
       } else {
         this.datasrc_changed();
       }
+      this.view_changed();
+      this.columns_changed();
+      this.rowpivots_changed();
+      this.columnpivots_changed();
+      this.aggregates_changed();
+      this.sort_changed();
+      this.settings_changed();
+      this.dark_changed();
     });
   }
 
