@@ -213,8 +213,79 @@ module.exports = (perspective) => {
 
         });
 
-    });
+        describe("nulls", function () {
 
+            it("x > 2", async function () {
+                var table = perspective.table([
+                    {'x': 3, 'y':1},
+                    {'x': 2, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': 4, 'y':2},
+                    {'x': null, 'y':2}
+                ]);
+                var view = table.view({
+                    filter: [
+                        ['x', '>', 2]
+                    ]
+                });
+                var answer = [
+                    {'x': 3, 'y':1},
+                    {'x': 4, 'y':2},
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+            });
+
+
+            it("x < 3", async function () {
+                var table = perspective.table([
+                    {'x': 3, 'y':1},
+                    {'x': 2, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': 4, 'y':2},
+                    {'x': null, 'y':2}
+                ]);
+                var view = table.view({
+                    filter: [
+                        ['x', '<', 3]
+                    ]
+                });
+                var answer = [
+                    {'x': 2, 'y':1},
+                ];
+                let result = await view.to_json();
+                expect(result).toEqual(answer);
+            });
+
+
+            it("x > 2", async function () {
+                var table = perspective.table({x: 'float', y: 'integer'});
+                table.update([
+                    {'x': 3.5, 'y':1},
+                    {'x': 2.5, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': null, 'y':1},
+                    {'x': 4.5, 'y':2},
+                    {'x': null, 'y':2}
+                ]);
+                var view = table.view({
+                    filter: [
+                        ['x', '>', 2.5]
+                    ]
+                });
+                var answer = [
+                    {'x': 3.5, 'y':1},
+                    {'x': 4.5, 'y':2},
+                ];
+                let result = await view.to_json();
+                expect(answer).toEqual(result);
+            });
+
+        });
+
+    });
 
 };
 
