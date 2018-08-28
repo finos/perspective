@@ -19,6 +19,7 @@ export default class State {
         this.column_name = undefined;
         this.computation = undefined;
         this.input_columns = [];
+        this.swap_target = false;
         this.name_edited = false;
     }
 

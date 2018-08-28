@@ -431,7 +431,6 @@ async function loadTable(table) {
             let aggregate = aggregates
                 .filter(a => a.column === cc_data.column_name)
                 .map(a => a.op)[0];
-            console.log(aggregate, cc_data);
             let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
             this._inactive_columns.appendChild(row);
         }
@@ -458,7 +457,6 @@ async function loadTable(table) {
         // fixme better approach please
         for (let cc of computed_cols) {
             let cc_data = _format_computed_data(cc);
-            console.log(aggregates);
             let aggregate = aggregates
                 .filter(a => a.column === cc_data.column_name)
                 .map(a => a.op)[0];

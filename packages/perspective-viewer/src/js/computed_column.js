@@ -113,6 +113,7 @@ class ComputedColumn extends HTMLElement {
         const input_type = computation.input_type;
 
         this.state.input_columns = [];
+        this.state.swap_target = false;
 
         // todo: replace html-loader with handlebars-loader
 
@@ -129,17 +130,36 @@ class ComputedColumn extends HTMLElement {
         }
 
         for (let column of this._input_columns.children) {
-            column.addEventListener('drop', this.drop_column.bind(this));
-            column.addEventListener('dragend', this.remove_column.bind(this));
-            column.addEventListener('dragover', this.hover_column.bind(this));
-            column.addEventListener('dragleave', this.pass_column.bind(this));
+            column.addEventListener('drop', this._drop_column.bind(this));
+            column.addEventListener('dragstart', this._drag_column.bind(this));
+            column.addEventListener('dragend', this._remove_column.bind(this));
+            column.addEventListener('dragover', this._hover_column.bind(this));
+            column.addEventListener('dragleave', this._pass_column.bind(this));
         }
 
         this._clear_column_name();
     }
 
     // Drag & Drop
-    hover_column(event) {
+    _parse_data_transfer(data) {
+        const column_data = JSON.parse(data);
+        if (!column_data) return;
+
+        return {
+            column_name: column_data[0],
+            column_type: column_data[3],
+        }
+    }
+
+    _drag_column(event) {
+        // called when columns are dragged from inside the UI
+        if (this.state.computation.num_params > 1) {
+            // if there is a chance of a swap happening, cache the swap target
+            this.state.swap_target = event.currentTarget;
+        }
+    }
+
+    _hover_column(event) {
         event.preventDefault();
         event.dataTransfer.dropEffect = 'move';
 
@@ -162,30 +182,43 @@ class ComputedColumn extends HTMLElement {
         }
     }
 
-    drop_column(event) {
+    _drop_column(event) {
+        const target = event.currentTarget;
         event.preventDefault();
-        event.currentTarget.classList.remove('dropping');
+
+        target.classList.remove('dropping');
+
+        const is_swap = this.state.swap_target !== undefined &&
+            target.innerHTML.indexOf('perspective-row') > -1;
 
         // column must match return type of computation
-        const data = JSON.parse(event.dataTransfer.getData('text'));
+        const data = this._parse_data_transfer(event.dataTransfer.getData('text'));
         if (!data) return;
 
-        const column_name = data[0];
-        const column_type = data[3];
+        if (is_swap) {
+            const current_column = target.children[0];
+            const current_column_name = current_column.getAttribute('name');
+            const current_column_type = current_column.getAttribute('type');
+            event.swapTarget = this.state.swap_target;
 
-        this._set_input_column(event, column_name, column_type);
+            // take the column at the drop target, and set it to the column being swapped
+            this._set_input_column(event, current_column_name, current_column_type);
+
+            // reset swap_target and currentTarget
+            this.state.swap_target = false;
+            delete event.swapTarget;
+        }
+
+        this._set_input_column(event, data.column_name, data.column_type);
     }
 
     // Called when a column is dragged out of the computed column UI
-    remove_column(event) {
-        event.currentTarget.remove('dropping');
-        const refresh = this._input_columns.children.length < this.state.computation.num_params;
-        if (refresh)
-            this._register_inputs();
+    _remove_column(event) {
+        event.currentTarget.classList.remove('dropping');
     }
 
     // Called when the column passes over and then leaves the drop target
-    pass_column(event) {
+    _pass_column(event) {
         const src = event.currentTarget;
         if (src !== null && src.nodeName !== 'SPAN') {
             const drop_target_hover = src.querySelector('.psp-cc-computation__drop-target-hover');
@@ -261,7 +294,13 @@ class ComputedColumn extends HTMLElement {
         const computation_type = computation.input_type;
         const inputs = this.state.input_columns;
 
-        const target = event.currentTarget;
+        let target;
+        if (event.swapTarget) {
+            target = event.swapTarget;
+        } else {
+            target = event.currentTarget;
+        }
+
         const index = Number.parseInt(target.getAttribute('data-index'));
 
         if (type !== computation_type) {
