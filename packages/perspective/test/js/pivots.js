@@ -201,6 +201,29 @@ module.exports = (perspective) => {
             expect(answer).toEqual(result);
         });
 
+        it("mean with 0.0 (floats)", async function () {
+            var table = perspective.table({x: 'float', y: 'integer'});
+            table.update([
+                {'x': 3, 'y':1},
+                {'x': 3, 'y':1},
+                {'x': 0, 'y':1},
+                {'x': null, 'y':1},
+                {'x': null, 'y':1},
+                {'x': 4, 'y':2},
+                {'x': null, 'y':2}
+            ]);
+            var view = table.view({
+                row_pivot: ['y'],
+                aggregate: [{op: 'mean', column:'x'}],
+            });
+            var answer =  [
+                {__ROW_PATH__: [], x: 2.5},
+                {__ROW_PATH__: [ 1 ], x: 2},
+                {__ROW_PATH__: [ 2 ], x: 4},
+            ];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+        });
 
         it("sum", async function () {
             var table = perspective.table([
