@@ -98,14 +98,18 @@ class PerspectiveView extends DOMWidgetView {
       } else {
         this.datasrc_changed();
       }
+      this.settings_changed();
+      this.dark_changed();
       this.view_changed();
-      this.columns_changed();
       this.rowpivots_changed();
       this.columnpivots_changed();
       this.aggregates_changed();
       this.sort_changed();
-      this.settings_changed();
-      this.dark_changed();
+
+      let columns = this.model.get('columns');
+      if(columns.length > 0){
+        this.columns_changed();
+      }
     });
   }
 
@@ -208,7 +212,12 @@ class PerspectiveView extends DOMWidgetView {
   }
 
   columns_changed(){
-    this.psp.setAttribute('columns', JSON.stringify(this.model.get('columns')));
+    let columns = this.model.get('columns');
+    if(columns.length > 0){
+      this.psp.setAttribute('columns', JSON.stringify(this.model.get('columns')));
+    } else {
+      this.psp.removeAttribute('columns');
+    }
   }
 
   rowpivots_changed(){
