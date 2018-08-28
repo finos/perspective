@@ -51,7 +51,7 @@ class PerspectiveModel extends DOMWidgetModel {
       sort: [],
       settings: false,
       dark: false,
-      helper_config: '{}'
+      helper_config: {}
     };
   }
 
@@ -92,32 +92,50 @@ class PerspectiveView extends DOMWidgetView {
     this.model.on('change:dark', this.dark_changed, this);
 
     this.displayed.then(()=> {
-      this.data_changed();
+    let data = this.model.get('_data');
+      if (data.length > 0){
+        this.psp.update(this.model.get('_data'));
+      } else {
+        this.datasrc_changed();
+      }
     });
   }
 
   data_changed(){
     this.psp.delete();
-    let schema = this.model.get('schema');
 
-    if (schema){
+    let schema = this.model.get('schema');
+    let data = this.model.get('_data');
+
+    console.log('data-schema');
+    console.log(schema);
+    console.log('data-data');
+    console.log(data);
+
+    if (Object.keys(schema).length > 0 ){
       this.psp.load(schema);
     }
-    this.psp.update(this.model.get('_data'));
+    if (data.length > 0){
+      this.psp.update(this.model.get('_data'));
+    }
   }
 
   datasrc_changed(){
+    this.psp.delete();
     let type = datasourceToSource(this.model.get('datasrc'));
+    console.log(this.model.get('datasrc'));
+    console.log(type);
+
     if (type === 'static') {
       this.data_changed();
     } else if (type === 'ws' || type === 'wss') {
-        let config = JSON.parse(this.model.get('helper_config'));
+        let config = this.model.get('helper_config');
         let send = config.send || '';
         let records = config.records || false;
         this.helper = new PSPWebsocketHelper(this.model.get('datasrc'), send, records);
         this.helper.start(this.psp);
     } else if (type === 'http' || type === 'https') {
-        let config = JSON.parse(this.model.get('helper_config'));
+        let config = this.model.get('helper_config');
         let field = config.field || '';
         let records = config.records || false;
         let repeat = config.repeat || 1;
@@ -125,7 +143,7 @@ class PerspectiveView extends DOMWidgetView {
         this.helper.start(this.psp);
 
     } else if (type === 'sio') {
-        let config = JSON.parse(this.model.get('helper_config'));
+        let config = this.model.get('helper_config');
         let channel = config.channel || '';
         let records = config.records || false;
         let addr = this.model.get('datasrc').replace('sio://', '');
@@ -155,17 +173,26 @@ class PerspectiveView extends DOMWidgetView {
                 }
             }
         });
+    } else {
+      console.log('here');
+      throw new Error('Source not recognized!');
     }
   }
 
   schema_changed(){
     this.psp.delete();
     let schema = this.model.get('schema');
-
-    if (schema){
+    let data = this.model.get('_data');
+    console.log('schema-schema');
+    console.log(schema);
+    console.log('schema-data');
+    console.log(data);
+    if (Object.keys(schema).length > 0 ){
       this.psp.load(schema);
     }
-    this.psp.update(this.model.get('_data'));
+    if (data.length > 0){
+      this.psp.update(this.model.get('_data'));
+    }
   }
 
   view_changed(){
@@ -204,7 +231,7 @@ class PerspectiveView extends DOMWidgetView {
       this.el.classList.remove(PSP_CONTAINER_CLASS_DARK);
     }
 
-    //FIXME dont do this
+    //FIXME dont do this, force a repaint instead
     this.data_changed();
   }
 }
@@ -221,6 +248,10 @@ namespace Private {
         psp.setAttribute('type', MIME_TYPE);
 
         let btns = createCopyDl(psp);
+
+        while(node.lastChild){
+          node.removeChild(node.lastChild);
+        }
 
         node.appendChild(psp);
 

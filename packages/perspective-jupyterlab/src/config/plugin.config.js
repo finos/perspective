@@ -19,7 +19,7 @@ const plugins = [
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     plugins.push(new UglifyJSPlugin({
-        sourceMap: false,
+        sourceMap: true,
         mangle: false,
         output: {
             ascii_only: true
