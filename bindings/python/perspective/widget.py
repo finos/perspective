@@ -124,8 +124,9 @@ class PerspectiveWidget(Widget):
         self.dark = dark
         self.helper_config = helper_config or {}
 
-        self.data = data
-        self.columns = validate_columns(columns) or []
         self.rowpivots = validate_rowpivots(rowpivots) or []
         self.columnpivots = validate_columnpivots(columnpivots) or []
         self.aggregates = validate_aggregates(aggregates) or {}
+
+        self.data = data
+        self.columns = validate_columns(columns) or []
