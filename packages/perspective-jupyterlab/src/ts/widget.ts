@@ -103,13 +103,15 @@ class PerspectiveView extends DOMWidgetView {
       this.view_changed();
       this.rowpivots_changed();
       this.columnpivots_changed();
-      this.aggregates_changed();
       this.sort_changed();
 
       let columns = this.model.get('columns');
       if(columns.length > 0){
         this.columns_changed();
       }
+
+      // do aggregates after columns
+      this.aggregates_changed();
     });
   }
 
