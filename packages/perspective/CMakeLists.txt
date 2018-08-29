@@ -18,7 +18,7 @@ include_directories("/boost_includes")
 
 set(EXTENDED_FLAGS " \
 	--bind \
-	--memory-init-file 1 \
+	--memory-init-file 0 \
 	-s NO_EXIT_RUNTIME=1 \
 	-s NO_FILESYSTEM=1 \
 	-s ALLOW_MEMORY_GROWTH=1 \
@@ -42,9 +42,9 @@ else()
 	")
 endif()
 
-set(SYNC_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
-set(ASYNC_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=1 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
-set(ASMJS_MODE_FLAGS "-s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"asmjs\"' -Wno-almost-asm -s WASM=0")
+set(SYNC_MODE_FLAGS "-s ENVIRONMENT=node -s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
+set(ASYNC_MODE_FLAGS "-s ENVIRONMENT=worker -s BINARYEN_ASYNC_COMPILATION=1 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
+set(ASMJS_MODE_FLAGS "-s ENVIRONMENT=worker -s LEGACY_VM_SUPPORT=1 -s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"asmjs\"' -Wno-almost-asm -s WASM=0")
 
 set(CMAKE_C_FLAGS " \
 	${CMAKE_C_FLAGS} \

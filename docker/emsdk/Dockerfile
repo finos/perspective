@@ -1,6 +1,6 @@
 # Liberally copied from trzeci/emscripten
 
-ARG EMSCRIPTEN_SDK=sdk-tag-1.38.4-64bit
+ARG EMSCRIPTEN_SDK=sdk-tag-1.38.11-64bit
 FROM trzeci/emscripten-slim:${EMSCRIPTEN_SDK}
 
 # ------------------------------------------------------------------------------

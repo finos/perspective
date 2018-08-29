@@ -13,7 +13,6 @@ const perspective = require('./perspective.js');
 if (global.document !== undefined) {
 	const Module = load_perspective({
 		wasmJSMethod: "asmjs",
-		locateFile: path => `asmjs/${path}`,
         filePackagePrefixURL: "",
 	    printErr: (x) => console.error(x),
 	    print: (x) => console.warn(x)
