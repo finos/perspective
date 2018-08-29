@@ -504,36 +504,20 @@ t_gstate::read_column(const t_str& colname,
     t_col_csptr col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
     
-    if (include_nones)
+    t_f64vec rval;
+    for (t_index idx = 0; idx < num; ++idx)
     {
-        t_f64vec rval(num);
-        for (t_index idx = 0; idx < num; ++idx)
-        {
-            t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
-            if (iter != m_mapping.end())
-            {
-                rval[idx] = col_->get_scalar(iter->second).to_double();
-            }
-        }
-        std::swap(rval, out_data);
+	t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
+	if (iter != m_mapping.end())
+	{
+	  auto tscalar = col_->get_scalar(iter->second);
+	  if (include_nones || tscalar.is_valid())
+	  {
+	      rval.push_back(tscalar.to_double());
+	   }
+	}
     }
-    else
-    {
-        t_f64vec rval;
-        for (t_index idx = 0; idx < num; ++idx)
-        {
-            t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
-            if (iter != m_mapping.end())
-            {
-                auto tscalar = col_->get_scalar(iter->second);
-                if (tscalar.is_valid())
-                {
-                    rval.push_back(tscalar.to_double());
-                }
-            }
-        }
-        std::swap(rval, out_data);
-    } 
+    std::swap(rval, out_data);
 }
 
 t_tscalar
