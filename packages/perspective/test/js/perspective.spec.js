@@ -8,17 +8,11 @@
  */
 
 const perspective = require('../../src/js/perspective.js');
-const load_asmjs = require("../../build/asmjs/psp.js").load_perspective;
+const asmjs_perspective = require("../../src/js/perspective.asmjs.js");
 const node_perspective = require("../../src/js/perspective.node.js");
 
 const RUNTIMES = {
-    ASMJS: perspective(load_asmjs({
-        wasmJSMethod: "asmjs",
-        locateFile: path => `build/asmjs/${path}`,
-        filePackagePrefixURL: "asmjs/",
-        asmjsCodeFile: "asmjs/psp.js",
-        ENVIRONMENT: "NODE"
-    })),
+    ASMJS: asmjs_perspective,
     NODE: node_perspective
 }
 

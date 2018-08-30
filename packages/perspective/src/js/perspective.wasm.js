@@ -13,7 +13,6 @@ const perspective = require('./perspective.js');
 if (global.document !== undefined && typeof WebAssembly !== 'undefined') {
 	module.exports = perspective(load_perspective({
 		wasmJSMethod: "native-wasm",
-		locateFile: path => `wasm_async/${path}`,
 		filePackagePrefixURL: "",
 		printErr: (x) => console.error(x),
 		print: (x) => console.warn(x)
