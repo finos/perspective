@@ -7,14 +7,5 @@
  *
  */
 
-perspective-viewer.jp-PSPViewer {
-    display: block;
-    height: 100%;
-}
-
-div.jp-PSPContainer {
-    overflow: auto;
-    resize: both;
-    padding-right: 20px;
-    height: 400px;
-}
+export 
+const PERSPECTIVE_VERSION = '0.1.18';

@@ -7,7 +7,18 @@
  *
  */
 
-export * from './plugin.ts';
-export * from './widget.ts';
-export * from './version.ts';
-export * from './utils.ts';
+perspective-viewer.jp-PSPViewer {
+    display: block;
+    height: 95%;
+}
+
+div.jp-PSPContainer {
+    overflow: auto;
+    resize: both;
+    padding-right: 20px;
+    height: 450px;
+}
+
+div.jp-PSPContainer {
+    @import "../../../perspective-viewer/src/less/material.less";
+}
