@@ -7,7 +7,5 @@
  *
  */
 
-export * from './plugin.ts';
-export * from './widget.ts';
-export * from './version.ts';
-export * from './utils.ts';
+export 
+const PERSPECTIVE_VERSION = '0.1.18';
