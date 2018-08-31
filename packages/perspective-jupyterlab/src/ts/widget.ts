@@ -7,7 +7,6 @@
  *
  */
 
-
 import {
   DOMWidgetModel, DOMWidgetView, ISerializers
 } from '@jupyter-widgets/base';
@@ -32,9 +31,7 @@ import "@jpmorganchase/perspective-viewer-highcharts";
 import "../js/embed.js";
 
 /* css */
-import "@jpmorganchase/perspective-viewer/build/material.css";
-import '../css/index.css';
-
+import '../less/material.less';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
