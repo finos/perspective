@@ -9,12 +9,964 @@
 
 perspective-viewer.jp-PSPViewer {
     display: block;
-    height: 100%;
+    height: 95%;
 }
 
 div.jp-PSPContainer {
     overflow: auto;
     resize: both;
     padding-right: 20px;
-    height: 400px;
+    height: 450px;
+}
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+@import url('https://fonts.googleapis.com/css?family=Material+Icons');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
+div.jp-PSPContainer-light .psp-text-field {
+  position: relative;
+  background-color: white;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 24px;
+}
+div.jp-PSPContainer .dragging .psp-text-field.dropping {
+  border-bottom: 2px solid #22A0CE;
+}
+div.jp-PSPContainer .dragging .psp-text-field {
+  border-bottom: 1px solid #22A0CE;
+}
+
+div.jp-PSPContainer .psp-text-field > .psp-text-field__input {
+  border: 0px;
+  line-height: 20px;
+  vertical-align: bottom;
+  padding-bottom: 0px;
+  display: none;
+}
+
+div.jp-PSPContainer .psp-text-field__input + label {
+  line-height: 17px;
+  box-sizing: border-box;
+  color: #cccccc;
+  font-weight: 400;
+  white-space: nowrap;
+  padding: 0px 0px 2px 10px;
+  font-size: 12px;
+  display: inline-block;
+}
+div.jp-PSPContainer .dropping .psp-text-field__input,
+div.jp-PSPContainer .psp-text-field__input:not(:empty) {
+  display: initial;
+}
+div.jp-PSPContainer .dropping .psp-text-field__input::after {
+  content: '|';
+  width: 0px;
+  overflow: visible;
+  margin-top: -2px;
+}
+div.jp-PSPContainer .dropping * {
+  pointer-events: none;
+}
+div.jp-PSPContainer .dropping .psp-text-field label,
+div.jp-PSPContainer .psp-text-field__input:not(:empty) + label {
+  position: absolute;
+  top: 0px;
+  line-height: 10px;
+  font-size: 10px;
+  display: none;
+}
+div.jp-PSPContainer .dropping perspective-row.inserting {
+  border-top: 25px solid rgba(0, 0, 0, 0);
+}
+div.jp-PSPContainer .dropping perspective-row.postserting {
+  border-bottom: 25px solid rgba(0, 0, 0, 0);
+}
+div.jp-PSPContainer perspective-viewer {
+  font-family: Arial, sans-serif;
+}
+div.jp-PSPContainer perspective-viewer .awesomplete > ul {
+  border-radius: 0px;
+  margin: 0px;
+  border: none;
+  transform-origin: none;
+  transition: 0;
+}
+div.jp-PSPContainer perspective-viewer .awesomplete > ul:before {
+  content: none;
+}
+div.jp-PSPContainer perspective-viewer .awesomplete > input {
+  background-color: transparent;
+}
+
+div.jp-PSPContainer perspective-viewer perspective-row #psp_row {
+  color: #333333;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .row_draggable {
+  padding-right: 10px;
+  color: #333333;
+  transition: height 0.2s;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #columns_container {
+  flex-direction: row-reverse;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #active_columns,
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #inactive_columns {
+  display: flex;
+  flex-direction: column;
+  flex: 1 !important;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #active_columns {
+  padding-right: 8px;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #active_columns perspective-row div#psp_row {
+  margin-right: 2px;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #side_panel #divider {
+  display: none;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal perspective-computed-column {
+  max-height: none;
+}
+div.jp-PSPContainer perspective-viewer #columns_container {
+  flex-direction: column;
+}
+div.jp-PSPContainer perspective-viewer #columns_container #active_columns,
+div.jp-PSPContainer perspective-viewer #columns_container #inactive_columns {
+  border: none !important;
+}
+div.jp-PSPContainer perspective-viewer #columns_container #active_columns perspective-row .row_draggable {
+  border: 1px solid #ccc;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  background-color: white;
+  overflow: hidden;
+}
+div.jp-PSPContainer perspective-viewer #columns_container #active_columns perspective-row[drop-target] .row_draggable {
+  background-color: #f0f0ff !important;
+  border: 1px solid #1078d1 !important;
+}
+div.jp-PSPContainer perspective-viewer #columns_container #inactive_columns perspective-row .is_visible::before {
+  content: "\25CB";
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .is_visible {
+  color: #999;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row [settings=true] #app {
+  border-top: 1px solid #ccc;
+}
+div.jp-PSPContainer perspective-viewer ul {
+  transition: background-color 0.2s, border-color 0.2s;
+}
+div.jp-PSPContainer perspective-viewer #filters perspective-row select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+}
+div.jp-PSPContainer perspective-viewer #sort perspective-row #sort_order {
+  display: inline-block;
+}
+div.jp-PSPContainer perspective-viewer perspective-row {
+  border: 0px solid rgba(0, 0, 0, 0);
+}
+div.jp-PSPContainer perspective-viewer perspective-row #row_close {
+  color: #999;
+  font-family: Arial;
+  font-size: 10px;
+}
+div.jp-PSPContainer perspective-viewer perspective-row #column_aggregate {
+  font-family: Arial;
+}
+div.jp-PSPContainer perspective-viewer perspective-row .row_draggable select {
+  border: none;
+}
+div.jp-PSPContainer perspective-viewer perspective-row .row_draggable select:focus {
+  outline: none;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .is_visible::before {
+  content: "\25CF";
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .integer::before,
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .float::before {
+  font-family: monospace;
+  content: "123";
+  color: #016bc6;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .string::before {
+  font-family: monospace;
+  content: "abc";
+  color: #fe9292;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .boolean::before {
+  font-family: monospace;
+  content: "t/f";
+  color: #999999;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .date::before {
+  font-family: monospace;
+  content: "mdy";
+  color: #999999;
+}
+div.jp-PSPContainer perspective-viewer #side_panel #side_panel__actions {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1000;
+  justify-content: flex-start;
+  padding: 5px;
+  position: relative;
+  overflow-y: auto;
+  width: 100%;
+  margin-top: 36px;
+  min-height: 36px;
+}
+div.jp-PSPContainer perspective-viewer #side_panel #side_panel__actions button.side_panel-action {
+  align-items: center;
+  align-content: center;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: row;
+  font-family: Arial, sans-serif !important;
+  font-size: 12px;
+  padding-right: 10px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+div.jp-PSPContainer perspective-viewer #side_panel #side_panel__actions button.side_panel-action span {
+  margin-left: 5px;
+  font-size: 15px;
+}
+div.jp-PSPContainer perspective-viewer #side_panel #side_panel__actions button.side_panel-action:hover {
+  cursor: pointer;
+}
+div.jp-PSPContainer perspective-viewer .noselect {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version, currently supported by Chrome and Opera */
+}
+div.jp-PSPContainer perspective-viewer svg text {
+  font-family: Arial, sans-serif !important;
+}
+div.jp-PSPContainer perspective-viewer svg .highcharts-axis-title,
+div.jp-PSPContainer perspective-viewer svg .highcharts-axis-title {
+  font-family: Arial, sans-serif !important;
+}
+div.jp-PSPContainer perspective-viewer svg .highcharts-legend-box {
+  fill: none;
+}
+div.jp-PSPContainer perspective-viewer #pivot_chart {
+  background-color: white;
+}
+div.jp-PSPContainer perspective-viewer #divider {
+  min-height: 2px;
+  height: 2px;
+  margin: 15px 13px 15px 13px;
+  margin-bottom: 5px;
+}
+div.jp-PSPContainer perspective-viewer #drop_target {
+  background: white;
+}
+div.jp-PSPContainer perspective-viewer #drop_target_inner h3 {
+  color: #aaa;
+  font-weight: 300;
+}
+div.jp-PSPContainer perspective-viewer #config_button {
+  font-weight: normal;
+  font-family: Arial;
+  font-size: 16px;
+  color: #999;
+  transition: opacity 0.3s;
+}
+div.jp-PSPContainer perspective-viewer #config_button:before {
+  content: '\1f527';
+}
+div.jp-PSPContainer perspective-viewer ul {
+  border: 1px solid #ccc;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+  font-size: 12px;
+  padding: 0px 10px 0px 10px;
+}
+div.jp-PSPContainer perspective-viewer select {
+  border-radius: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+}
+div.jp-PSPContainer perspective-viewer select:focus {
+  outline: none;
+}
+div.jp-PSPContainer perspective-viewer input {
+  border: 1px solid #ccc;
+  border-top-width: 0px;
+  border-left-width: 0px;
+  border-right-width: 0px;
+}
+div.jp-PSPContainer perspective-viewer input::placeholder {
+  color: #ccc;
+}
+div.jp-PSPContainer perspective-viewer rect,
+div.jp-PSPContainer perspective-viewer svg image {
+  opacity: 0.5;
+}
+div.jp-PSPContainer perspective-viewer path,
+div.jp-PSPContainer perspective-viewer circle {
+  opacity: 0.8;
+}
+div.jp-PSPContainer perspective-viewer option[value=""] {
+  color: white !important;
+}
+div.jp-PSPContainer perspective-viewer select:focus {
+  color: #000 !important;
+}
+div.jp-PSPContainer perspective-viewer #app {
+  background-color: #eee;
+}
+div.jp-PSPContainer perspective-viewer perspective-hypergrid {
+  color: #666;
+}
+div.jp-PSPContainer perspective-viewer ::-webkit-scrollbar,
+div.jp-PSPContainer perspective-viewer ::shadow ::-webkit-scrollbar {
+  width: 12px;
+}
+div.jp-PSPContainer perspective-viewer ::-webkit-scrollbar-thumb,
+div.jp-PSPContainer perspective-viewer ::shadow ::-webkit-scrollbar-thumb {
+  background: #ccc;
+}
+div.jp-PSPContainer perspective-viewer ::-webkit-scrollbar-track,
+div.jp-PSPContainer perspective-viewer ::shadow ::-webkit-scrollbar-track {
+  background: none;
+}
+div.jp-PSPContainer perspective-viewer[view=treemap] #app.columns_horizontal #side_panel #inactive_columns,
+div.jp-PSPContainer perspective-viewer[view=sunburst] #app.columns_horizontal #side_panel #inactive_columns,
+div.jp-PSPContainer perspective-viewer[view=xy_line] #app.columns_horizontal #side_panel #inactive_columns,
+div.jp-PSPContainer perspective-viewer[view=xy_scatter] #app.columns_horizontal #side_panel #inactive_columns {
+  padding-top: 46px;
+}
+div.jp-PSPContainer input {
+  padding: 6px 10px 6px 0;
+}
+div.jp-PSPContainer button {
+  text-transform: uppercase;
+}
+div.jp-PSPContainer select,
+div.jp-PSPContainer ul {
+  padding: 0 10px 0 0;
+}
+div.jp-PSPContainer perspective-viewer {
+  font-family: "Open Sans", Arial, sans-serif;
+}
+div.jp-PSPContainer perspective-viewer:not([settings]) {
+  z-index: 3;
+}
+div.jp-PSPContainer perspective-viewer #side_panel perspective-row .row_draggable {
+  height: 26px;
+  cursor: move;
+}
+div.jp-PSPContainer perspective-viewer:not([row-pivots='[]']) #side_panel #columns_container #active_columns perspective-row .row_draggable {
+  height: 52px;
+}
+div.jp-PSPContainer perspective-viewer:not([row-pivots='[]']) #side_panel #columns_container #inactive_columns perspective-row .row_draggable {
+  height: 26px;
+}
+div.jp-PSPContainer perspective-viewer.dragging #app #side_panel #columns_container #inactive_columns perspective-row:hover .is_visible {
+  opacity: 0;
+}
+div.jp-PSPContainer perspective-viewer.dragging #app #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable,
+div.jp-PSPContainer perspective-viewer.dragging #app #side_panel #columns_container .rrow ul {
+  margin-top: 0;
+}
+div.jp-PSPContainer perspective-viewer.dragging #app #top_panel .rrow > * {
+  border-top: 0 !important;
+  border-left: 0 !important;
+  border-right: 0 !important;
+  margin-top: 0;
+  margin-left: 0;
+}
+div.jp-PSPContainer perspective-viewer #config_button {
+  margin-top: 14px;
+  margin-left: 7px;
+}
+div.jp-PSPContainer perspective-viewer #config_button:before {
+  font-family: "Material Icons";
+  content: "more_vert" !important;
+}
+div.jp-PSPContainer perspective-viewer .psp-text-field__input + label {
+  padding-left: 0;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #side_panel {
+  max-width: 750px !important;
+  padding: 24px 5px 0 0;
+}
+div.jp-PSPContainer perspective-viewer #app.columns_horizontal #side_panel #divider {
+  display: none;
+}
+div.jp-PSPContainer perspective-viewer #app input,
+div.jp-PSPContainer perspective-viewer #app select,
+div.jp-PSPContainer perspective-viewer #app ul,
+div.jp-PSPContainer perspective-viewer #app #filters {
+  border-right: 0;
+  background-color: #eee;
+  color: #666;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-hypergrid {
+  position: absolute;
+  top: 24px;
+  bottom: 24px;
+  left: 24px;
+  right: 24px;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-hypergrid div.finbar-horizontal div.thumb {
+  height: 7px;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-hypergrid div.finbar-vertical div.thumb {
+  width: 7px;
+}
+div.jp-PSPContainer perspective-viewer #app #filters {
+  padding-left: 0;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-row:before {
+  font-size: 10px;
+  font-family: "Open Sans", Arial, sans-serif;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-row.string:before,
+div.jp-PSPContainer perspective-viewer #app perspective-row.float:before,
+div.jp-PSPContainer perspective-viewer #app perspective-row.integer:before,
+div.jp-PSPContainer perspective-viewer #app perspective-row.date:before {
+  font-family: "Roboto Mono", monospace;
+  padding-left: 0;
+}
+div.jp-PSPContainer perspective-viewer #app perspective-row #psp_row {
+  margin-bottom: 0;
+  color: #666;
+  margin-right: 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-row .integer::before,
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-row .float::before {
+  position: relative;
+  display: inline-block;
+  padding-left: 0px;
+  padding-right: 5px;
+  min-width: 18px;
+  content: "123";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-row .string::before {
+  position: relative;
+  display: inline-block;
+  padding-left: 0px;
+  padding-right: 5px;
+  min-width: 18px;
+  content: "abc";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-row .boolean::before {
+  position: relative;
+  display: inline-block;
+  padding-left: 0px;
+  padding-right: 5px;
+  min-width: 18px;
+  content: "t/f";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-row .date::before {
+  position: relative;
+  display: inline-block;
+  padding-left: 0px;
+  padding-right: 5px;
+  min-width: 18px;
+  content: "mdy";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel {
+  padding: 24px 0 0 0;
+  max-width: 250px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel .is_visible {
+  transition: opacity 0.4s;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #vis_selector_container {
+  min-height: 36px;
+  z-index: 1;
+  margin-right: 12px;
+  margin-left: 46px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #vis_selector_container select#vis_selector {
+  margin: 0 12px 24px 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #divider {
+  height: 24px;
+  min-height: 24px;
+  max-height: 24px;
+  border-left-width: 12px;
+  border-right-width: 0;
+  z-index: 1;
+  margin: 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel .psp-title__columnName {
+  margin-left: 44px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel .psp-icon__add {
+  margin-left: 14px;
+  color: #999;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns {
+  will-change: opacity, height, margin, transform;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 24px 24px 24px 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row {
+  position: relative;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row span.is_visible:before,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row span.is_visible:before {
+  position: absolute;
+  margin-top: 1px;
+  margin-left: -8px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row span.is_visible,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row span.is_visible {
+  height: 26px;
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  text-align: center;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row .row_draggable,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .row_draggable {
+  background: none;
+  border-right: 0;
+  color: #666;
+  margin-left: 48px;
+  padding: 4px 3px 4px 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row .row_draggable select,
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .row_draggable select {
+  margin: 6px 0 0 20px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row:before {
+  margin-left: 48px;
+  left: 48px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row:last-child .row_draggable {
+  border-bottom: 0 solid #ccc;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #active_columns perspective-row .is_visible:before {
+  color: #1A7DA1;
+  font-family: "material icons";
+  margin-top: 1px;
+  margin-left: -8px;
+  font-size: 16px;
+  content: "\E834";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns {
+  padding-top: 24px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row {
+  margin-top: 0;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover .is_visible:before {
+  color: #1A7DA1;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover.active #name {
+  color: #eee;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover .is_visible {
+  opacity: 1;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover #name {
+  color: #666;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover #name:before {
+  opacity: 1 !important;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover .row_computed span {
+  color: #666;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row:hover .row_computed span:before {
+  opacity: 1 !important;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row.active {
+  display: block;
+  height: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row.computed .row_computed {
+  margin-right: -12px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .is_visible {
+  opacity: 0.5;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .is_visible:before {
+  font-family: "Material Icons";
+  content: "\E835";
+  font-size: 16px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row #name {
+  color: #AAA;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row #name:before {
+  opacity: 0.5;
+  background: none !important;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .row_computed span {
+  color: #AAA;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .row_computed span:before {
+  opacity: 0.5;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #inactive_columns perspective-row .row_computed #row_edit:before {
+  font-family: "Material Icons";
+  content: "more_vert" !important;
+  font-size: 12px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column {
+  font-family: "Open Sans", Arial, sans-serif !important;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column #psp-cc-computation__input-column {
+  background: none;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column #psp-cc-computation__input-column perspective-row {
+  margin-left: -24px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-icon__add {
+  margin-left: 14px !important;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__container {
+  margin-left: 38px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column #psp-cc-computation__type {
+  padding-right: 5px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column span#psp-cc__close {
+  margin-left: 14px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column #psp-cc__actions {
+  margin-left: 36px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column perspective-row:before {
+  margin-left: 48px;
+  left: 48px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column perspective-row .is_visible:before {
+  color: #1A7DA1;
+  font-family: "material icons";
+  margin-top: 1px;
+  margin-left: -8px;
+  font-size: 16px;
+  content: "\E834";
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column perspective-row .row_draggable {
+  border: none !important;
+  background: none !important;
+  margin-right: 0;
+  margin-left: 1px;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__button {
+  text-transform: none;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__button#psp-cc-button-save {
+  background: #1A7DA1;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__button#psp-cc-button-save:hover {
+  background: #135D78;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__button#psp-cc-button-delete {
+  background: #c62828;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel perspective-computed-column .psp-cc__button#psp-cc-button-delete:hover {
+  background: #b71c1c;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #side_panel__actions button.side_panel-action {
+  color: #666;
+  font-family: "Open Sans", Arial, sans-serif !important;
+  text-transform: none;
+}
+div.jp-PSPContainer perspective-viewer #app #side_panel #side_panel__actions button.side_panel-action:hover {
+  color: #000;
+}
+div.jp-PSPContainer perspective-viewer #app #divider {
+  height: 1px;
+  min-height: 1px;
+  max-height: 1px;
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel {
+  padding: 24px 0 0 0;
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel .rrow ul {
+  padding: 3px 0 0 0;
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel .psp-text-field {
+  background: none;
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel .rrow {
+  margin: 0 24px 24px 0;
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel #row_pivots label:before {
+  content: "Group By";
+}
+div.jp-PSPContainer perspective-viewer #app #top_panel #column_pivots label:before {
+  content: "Split By";
+}
+div.jp-PSPContainer perspective-viewer #app .rrow {
+  margin: 0 24px 24px 0;
+}
+div.jp-PSPContainer perspective-viewer #app #pivot_chart {
+  padding: 24px 24px 24px 24px;
+}
+div.jp-PSPContainer perspective-viewer #app #pivot_chart .chart {
+  padding: 0;
+}
+div.jp-PSPContainer perspective-viewer #app #pivot_chart .chart .tooltip {
+  font-family: "Open Sans", Arial, sans-serif !important;
+}
+.dropping .psp-text-field label,
+div.jp-PSPContainer perspective-viewer .psp-text-field__input:not(:empty) + label {
+  padding-left: 0;
+  display: inline-block;
+  top: -8px;
+}
+
+
+
+div.jp-PSPContainer-dark perspective-viewer ::-webkit-scrollbar {
+  width: 6px;
+}
+div.jp-PSPContainer-dark perspective-viewer ::-webkit-scrollbar-track {
+  background: none;
+}
+div.jp-PSPContainer-dark perspective-viewer ::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: #666;
+}
+div.jp-PSPContainer-dark perspective-viewer.dragging #top_panel .dropping {
+  background-color: #135D78 !important;
+  color: white !important;
+}
+div.jp-PSPContainer-dark perspective-viewer.dragging #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable {
+  background-color: #135D78 !important;
+  color: white !important;
+}
+div.jp-PSPContainer-dark perspective-viewer[view=treemap] rect,
+div.jp-PSPContainer-dark perspective-viewer[view=heatmap] rect {
+  stroke: #2F3136 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer[view=heatmap] image.highcharts-boost-canvas {
+  opacity: 0.8 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer[view=treemap] rect {
+  stroke: #2F3136 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer[view=sunburst] path {
+  stroke: #2F3136 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer image.highcharts-boost-canvas {
+  opacity: 1 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app {
+  background-color: #2A2C2F;
+  border-top-color: #242526 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app input,
+div.jp-PSPContainer-dark perspective-viewer #app select,
+div.jp-PSPContainer-dark perspective-viewer #app ul,
+div.jp-PSPContainer-dark perspective-viewer #app #filters {
+  border-right: 0px;
+  background-color: #2A2C2F;
+  color: #CFD8DC;
+  border-color: #3B3F46;
+}
+div.jp-PSPContainer-dark perspective-viewer #app select {
+  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9Ii0xNzcgMTc2IDQuOSAxMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAtMTc3IDE3NiA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjx0aXRsZT5hcnJvd3M8L3RpdGxlPg0KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSItMTc1LjYsMTgwLjcgLTE3NC41LDE3OS4yIC0xNzMuNSwxODAuNyAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iLTE3My41LDE4MS4zIC0xNzQuNSwxODIuOCAtMTc1LjYsMTgxLjMgIi8+DQo8L3N2Zz4=) no-repeat 95% 50% !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app select:focus {
+  color: #CFD8DC !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app input::placeholder {
+  color: #666;
+}
+div.jp-PSPContainer-dark perspective-viewer #app label {
+  color: #666;
+}
+div.jp-PSPContainer-dark perspective-viewer #app svg .highcharts-axis tspan {
+  fill: #AAA !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app svg .highcharts-button-box {
+  fill: #242526;
+}
+div.jp-PSPContainer-dark perspective-viewer #app svg g.highcharts-axis-labels text {
+  fill: #CFD8DC !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app svg .highcharts-tooltip-box {
+  fill: #242526;
+}
+div.jp-PSPContainer-dark perspective-viewer #app svg .highcharts-legend-box {
+  fill: none !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app rect.highcharts-background {
+  fill: none;
+}
+div.jp-PSPContainer-dark perspective-viewer #app .highcharts-heatmap-gradient-full {
+  background: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4D342F 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
+}
+div.jp-PSPContainer-dark perspective-viewer #app .highcharts-heatmap-gradient-positive {
+  background: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+}
+div.jp-PSPContainer-dark perspective-viewer #app .highcharts-heatmap-gradient-negative {
+  background: linear-gradient(#feeb65 0%, #e4521b 35%, #4D342F 70%, #222222 100%);
+}
+div.jp-PSPContainer-dark perspective-viewer #app .highcharts-yaxis-grid path.highcharts-grid-line {
+  stroke: #3B3F46;
+}
+div.jp-PSPContainer-dark perspective-viewer #app .psp-text-field {
+  border-bottom-color: #3B3F46;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #pivot_chart {
+  background-color: #2F3136;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #pivot_chart tspan,
+div.jp-PSPContainer-dark perspective-viewer #app #pivot_chart text {
+  fill: #CFD8DC !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #pivot_chart rect,
+div.jp-PSPContainer-dark perspective-viewer #app #pivot_chart image {
+  opacity: 0.85;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #drop_target {
+  background-color: #2F3136;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #filters {
+  color: #666;
+}
+div.jp-PSPContainer-dark perspective-viewer #app perspective-row #psp_row {
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #active_columns perspective-row .float:before,
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row .float:before,
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #active_columns perspective-row .integer:before,
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row .integer:before {
+  color: #22A0CE;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #active_columns perspective-row .row_draggable,
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row .row_draggable {
+  border-color: #666;
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #active_columns perspective-row .is_visible:before {
+  color: #22A0CE;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #active_columns perspective-row:last-child .row_draggable {
+  border-bottom: 0px solid #2A2C2F;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns {
+  padding-top: 24px;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row {
+  margin-top: 0px;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover .is_visible:before {
+  color: #22A0CE;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover.active #name {
+  color: #eee;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover .is_visible {
+  opacity: 1;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover #name {
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover #name:before {
+  opacity: 1 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row:hover .row_computed span {
+  color: #CFD8DC !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row.active {
+  display: block;
+  height: 0px;
+  max-height: 0px;
+  overflow: hidden;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row #name {
+  color: #666;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container #inactive_columns perspective-row .row_computed span {
+  color: #666 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column {
+  background: #2A2C2F;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column .psp-cc__container span#psp-cc__close {
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-computation__type span.integer,
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-computation__type span.float {
+  color: #22A0CE;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-computation__type span.string {
+  color: #fe9292;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-computation__input-column {
+  border-bottom-color: #3B3F46;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-computation__input-column.dropping {
+  background-color: #135D78 !important;
+  color: white !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column perspective-row .is_visible:before {
+  color: #22A0CE;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column perspective-row div.row_draggable {
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-button-save {
+  background: #22A0CE;
+  color: #CFD8DC;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #columns_container perspective-computed-column #psp-cc-button-save:hover {
+  background: #0288D1;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #side_panel__actions button {
+  color: #CFD8DC !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #side_panel #side_panel__actions button:hover {
+  color: #ECEFF1 !important;
+}
+div.jp-PSPContainer-dark perspective-viewer #app #divider {
+  height: 1px;
+  min-height: 1px;
+  max-height: 1px;
+}
+div.jp-PSPContainer-dark perspective-viewer #app perspective-hypergrid {
+  color: #eee;
+  background-color: #2F3136;
+}
+div.jp-PSPContainer-dark perspective-viewer #app perspective-hypergrid th {
+  border-color: #2F3136;
+  background-color: #2F3136;
+}
+div.jp-PSPContainer-dark perspective-viewer #app perspective-hypergrid td.hover {
+  background-color: #444;
+}
+div.jp-PSPContainer-dark perspective-viewer #app perspective-hypergrid tr.hover {
+  background-color: #555;
 }

@@ -19,7 +19,7 @@ const plugins = [
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     plugins.push(new UglifyJSPlugin({
-        sourceMap: true,
+        sourceMap: false,
         mangle: false,
         output: {
             ascii_only: true
@@ -27,11 +27,10 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     }));
 }
 module.exports = Object.assign({}, common(), {
-    entry: './src/ts/index.ts',
+    entry: './src/ts/mimerenderer.ts',
     plugins: plugins,
-    externals: ['@jupyter-widgets/base'],
     output: {
-        filename: 'index.js',
+        filename: 'mime.js',
         libraryTarget: "umd",
         path: path.resolve(__dirname, '../../build')
     }

@@ -24,7 +24,7 @@
     "test": "npm-run-all test:build test:run",
     "test:build": "echo \"No Tests\"",
     "test:run": "echo \"No Tests\"",
-    "build": "webpack --color --config src/config/plugin.config.js",
+    "build": "webpack --color --config src/config/plugin.config.js && webpack --color --config src/config/mimerenderer.config.js",
     "clean": "rimraf build"
   },
   "dependencies": {
@@ -33,10 +33,13 @@
     "@jpmorganchase/perspective-viewer-highcharts": "^0.1.18",
     "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.18",
     "@jupyterlab/application": "^0.18.0",
+    "@jupyterlab/apputils": "^0.18.0",
     "@jupyterlab/rendermime-interfaces": "^1.1.0",
     "@jupyterlab/services": "^3.1.0",
+    "@jupyter-widgets/base": "^1.1.10",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
+    "@phosphor/application": "^1.5.0",
     "@types/socket.io-client": "^1.4.0",
     "socket.io": "2.0.3"
   },
@@ -59,12 +62,12 @@
     "rimraf": "^2.6.2",
     "style-loader": "^0.18.2",
     "ts-loader": "^3.5.0",
-    "typescript": "~2.6.2",
+    "typescript": "~2.9.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.5.6",
     "worker-loader": "~1.1.1"
   },
   "jupyterlab": {
-    "mimeExtension": true
+    "extension": "build/index.js"
   }
 }
