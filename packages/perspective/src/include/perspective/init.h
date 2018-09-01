@@ -14,4 +14,4 @@ namespace perspective
 {
 void perspective_init();
 void perspective_finalize();
-}
+} // namespace perspective

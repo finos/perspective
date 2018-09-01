@@ -14,12 +14,10 @@
 namespace perspective
 {
 
-t_mask::t_mask()
-{
-    LOG_CONSTRUCTOR("t_mask");
-}
+t_mask::t_mask() { LOG_CONSTRUCTOR("t_mask"); }
 
-t_mask::t_mask(t_uindex size) : m_bitmap(t_msize(size))
+t_mask::t_mask(t_uindex size)
+    : m_bitmap(t_msize(size))
 {
     LOG_CONSTRUCTOR("t_mask");
 }
@@ -34,10 +32,7 @@ t_mask::t_mask(const t_simple_bitmask& m)
     }
 }
 
-t_mask::~t_mask()
-{
-    LOG_DESTRUCTOR("t_mask");
-}
+t_mask::~t_mask() { LOG_DESTRUCTOR("t_mask"); }
 
 void
 t_mask::clear()
@@ -136,15 +131,13 @@ t_mask_iterator::has_next() const
 }
 
 t_mask_iterator::t_mask_iterator(t_maskcsptr m)
-    : m_mask(m), m_pos(m_mask->find_first())
+    : m_mask(m)
+    , m_pos(m_mask->find_first())
 {
     LOG_CONSTRUCTOR("t_mask_iterator");
 }
 
-t_mask_iterator::t_mask_iterator()
-{
-    LOG_CONSTRUCTOR("t_mask_iterator");
-}
+t_mask_iterator::t_mask_iterator() { LOG_CONSTRUCTOR("t_mask_iterator"); }
 
 t_uindex
 t_mask_iterator::size() const
@@ -158,10 +151,7 @@ t_mask_iterator::count() const
     return m_mask->count();
 }
 
-t_mask_iterator::~t_mask_iterator()
-{
-    LOG_DESTRUCTOR("t_mask_iterator");
-}
+t_mask_iterator::~t_mask_iterator() { LOG_DESTRUCTOR("t_mask_iterator"); }
 
 } // end namespace perspective
 
@@ -171,14 +161,11 @@ std::ostream&
 operator<<(std::ostream& os, const perspective::t_mask& mask)
 {
     std::cout << "t_mask<\n";
-    for (perspective::t_uindex idx = 0, loop_end = mask.size();
-         idx < loop_end;
-         ++idx)
+    for (perspective::t_uindex idx = 0, loop_end = mask.size(); idx < loop_end; ++idx)
     {
-        std::cout << "\t" << idx << ". " << mask.get(idx)
-                  << std::endl;
+        std::cout << "\t" << idx << ". " << mask.get(idx) << std::endl;
     }
     std::cout << ">\n";
     return os;
 }
-}
+} // namespace std

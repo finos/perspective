@@ -14,13 +14,15 @@
 namespace perspective
 {
 
-t_vocab::t_vocab() : m_vlenidx(0)
+t_vocab::t_vocab()
+    : m_vlenidx(0)
 {
     m_vlendata.reset(new t_lstore);
     m_extents.reset(new t_lstore);
 }
 
-t_vocab::t_vocab(const t_column_recipe& r) : m_vlenidx(r.m_vlenidx)
+t_vocab::t_vocab(const t_column_recipe& r)
+    : m_vlenidx(r.m_vlenidx)
 {
     if (is_vlen_dtype(r.m_dtype))
     {
@@ -34,8 +36,7 @@ t_vocab::t_vocab(const t_column_recipe& r) : m_vlenidx(r.m_vlenidx)
     }
 }
 
-t_vocab::t_vocab(const t_lstore_recipe& vlendata_recipe,
-                 const t_lstore_recipe& extents_recipe)
+t_vocab::t_vocab(const t_lstore_recipe& vlendata_recipe, const t_lstore_recipe& extents_recipe)
     : m_vlenidx(0)
 {
     m_vlendata.reset(new t_lstore(vlendata_recipe));
@@ -53,14 +54,13 @@ t_vocab::rebuild_map()
     }
 }
 
-void 
+void
 t_vocab::reserve(size_t total_string_size, size_t string_count)
 {
-    m_vlendata->reserve( total_string_size );
-    m_extents->reserve( sizeof(t_uidxpair) * string_count );
+    m_vlendata->reserve(total_string_size);
+    m_extents->reserve(sizeof(t_uidxpair) * string_count);
     rebuild_map();
 }
-
 
 t_bool
 t_vocab::string_exists(const char* c, t_stridx& interned) const
@@ -115,8 +115,7 @@ t_vocab::get_interned(const char* s)
 #ifdef PSP_COLUMN_VERIFY
     if (t_str(s) == "")
     {
-        PSP_VERBOSE_ASSERT(idx == 0,
-                           "Expected empty string to map to 0");
+        PSP_VERBOSE_ASSERT(idx == 0, "Expected empty string to map to 0");
     }
 #endif
 #endif
@@ -138,9 +137,9 @@ t_vocab::init(t_bool from_recipe)
     {
         rebuild_map();
     }
-    #ifndef PSP_ENABLE_WASM
+#ifndef PSP_ENABLE_WASM
     get_interned("");
-    #endif //PSP_ENABLE_WASM
+#endif // PSP_ENABLE_WASM
 }
 
 t_uindex
@@ -162,8 +161,7 @@ t_vocab::verify() const
 #ifndef PSP_ENABLE_WASM
     auto zero = rlookup.find(t_stridx(0));
     PSP_VERBOSE_ASSERT(zero != rlookup.end(), "0 Not found");
-    PSP_VERBOSE_ASSERT(t_str(zero->second) == "",
-                       "0 mapped to unknown");
+    PSP_VERBOSE_ASSERT(t_str(zero->second) == "", "0 mapped to unknown");
 #endif
 
     std::unordered_set<t_str> seen;
@@ -175,28 +173,23 @@ t_vocab::verify() const
     {
         std::stringstream ss;
         ss << "idx => " << idx << " not found";
-        PSP_VERBOSE_ASSERT(rlookup.find(idx) != rlookup.end(),
-                           ss.str());
+        PSP_VERBOSE_ASSERT(rlookup.find(idx) != rlookup.end(), ss.str());
 
         t_str curstr = t_str(rlookup.at(idx));
 
-        PSP_VERBOSE_ASSERT(seen.find(curstr) == seen.end(),
-                           "string encountered again");
+        PSP_VERBOSE_ASSERT(seen.find(curstr) == seen.end(), "string encountered again");
 
-        PSP_VERBOSE_ASSERT(t_str(unintern_c(idx)) == curstr,
-                           "String mismatch");
+        PSP_VERBOSE_ASSERT(t_str(unintern_c(idx)) == curstr, "String mismatch");
     }
 }
 
 void
 t_vocab::verify_size() const
 {
-    PSP_VERBOSE_ASSERT(m_vlenidx == m_map.size(),
-                       "Size and vlenidx size dont line up");
+    PSP_VERBOSE_ASSERT(m_vlenidx == m_map.size(), "Size and vlenidx size dont line up");
 
-    PSP_VERBOSE_ASSERT(m_vlenidx * sizeof(t_stridxpair) <=
-                           m_extents->capacity(),
-                       "Not enough space reserved for extents");
+    PSP_VERBOSE_ASSERT(m_vlenidx * sizeof(t_stridxpair) <= m_extents->capacity(),
+        "Not enough space reserved for extents");
 }
 
 t_uindex
@@ -209,9 +202,7 @@ t_vocab::nbytes() const
 }
 
 void
-t_vocab::fill(const t_lstore& o_vlen,
-              const t_lstore& o_extents,
-              t_uindex vlenidx)
+t_vocab::fill(const t_lstore& o_vlen, const t_lstore& o_extents, t_uindex vlenidx)
 {
     m_vlendata->fill(o_vlen);
     m_extents->fill(o_extents);
@@ -233,8 +224,7 @@ t_vocab::pprint_vocabulary() const
     std::cout << "vocabulary =========\n";
     for (t_uindex idx = 0; idx < m_vlenidx; ++idx)
     {
-        std::cout << "\t" << idx << " => " << unintern_c(idx)
-                  << std::endl;
+        std::cout << "\t" << idx << " => " << unintern_c(idx) << std::endl;
     }
 
     std::cout << "end vocabulary =========\n";
@@ -244,8 +234,7 @@ const char*
 t_vocab::unintern_c(t_uindex idx) const
 {
     const t_uidxpair* p = m_extents->get_nth<t_uidxpair>(idx);
-    const char* rv =
-        static_cast<const char*>(m_vlendata->get_ptr(p->first));
+    const char* rv = static_cast<const char*>(m_vlendata->get_ptr(p->first));
     return rv;
 }
 
@@ -293,6 +282,5 @@ t_vocab::get_vlenidx() const
 {
     return m_vlenidx;
 }
-
 
 } // end namespace perspective

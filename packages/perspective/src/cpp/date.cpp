@@ -13,7 +13,8 @@
 namespace perspective
 {
 
-t_date::t_date() : m_storage(0)
+t_date::t_date()
+    : m_storage(0)
 {
 }
 
@@ -24,10 +25,7 @@ t_date::set_psp_date(t_uindex dt)
     m_storage = t_rawtype(dt);
 }
 
-t_date::t_date(t_int16 year, t_int8 month, t_int8 day)
-{
-    set_year_month_day(year, month, day);
-}
+t_date::t_date(t_int16 year, t_int8 month, t_int8 day) { set_year_month_day(year, month, day); }
 
 void
 t_date::set_year_month_day(t_int16 year, t_int8 month, t_int8 day)
@@ -53,7 +51,8 @@ t_date::set_day(t_int8 day)
     m_storage = (m_storage & ~DAY_MASK) | (day << DAY_SHIFT);
 }
 
-t_date::t_date(t_uint32 raw_val) : m_storage(raw_val)
+t_date::t_date(t_uint32 raw_val)
+    : m_storage(raw_val)
 {
 }
 
@@ -73,10 +72,9 @@ t_date::consecutive_day_idx() const
     t_int32 m = month();
     t_int32 y = year();
     t_int32 yP = y - 1;
-    t_int32 leap_selector =
-        (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
-    return day() + 365 * y + yP / 4 - yP / 100 + yP / 400 +
-           CUMULATIVE_DAYS[leap_selector][m - 1];
+    t_int32 leap_selector = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
+    return day() + 365 * y + yP / 4 - yP / 100 + yP / 400
+        + CUMULATIVE_DAYS[leap_selector][m - 1];
 }
 
 t_date
@@ -84,25 +82,19 @@ from_consecutive_day_idx(t_int32 idx)
 {
     t_int32 y = static_cast<t_int32>(idx / 365.2425);
     t_int32 yP = y - 1;
-    t_int32 idx_year_removed =
-        idx - (y * 365 + yP / 4 - yP / 100 + yP / 400);
-    t_int32 tgt_substraction =
-        (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 366 : 365;
+    t_int32 idx_year_removed = idx - (y * 365 + yP / 4 - yP / 100 + yP / 400);
+    t_int32 tgt_substraction = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 366 : 365;
     if (idx_year_removed > tgt_substraction)
     {
         idx_year_removed -= tgt_substraction;
         y += 1;
     }
-    t_int32 yearkind =
-        (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
-    const t_int32* const pos =
-        std::lower_bound(CUMULATIVE_DAYS[yearkind],
-                         CUMULATIVE_DAYS[yearkind] + 13,
-                         idx_year_removed) -
-        1;
-    return t_date(y,
-                  std::distance(CUMULATIVE_DAYS[yearkind], pos) + 1,
-                  idx_year_removed - *pos /*+1*/);
+    t_int32 yearkind = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
+    const t_int32* const pos = std::lower_bound(CUMULATIVE_DAYS[yearkind],
+                                   CUMULATIVE_DAYS[yearkind] + 13, idx_year_removed)
+        - 1;
+    return t_date(
+        y, std::distance(CUMULATIVE_DAYS[yearkind], pos) + 1, idx_year_removed - *pos /*+1*/);
 }
 
 bool
@@ -169,4 +161,4 @@ operator<<(std::ostream& os, const perspective::t_date& t)
     os << t.str();
     return os;
 }
-}
+} // namespace std

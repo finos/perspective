@@ -7,7 +7,7 @@
  *
  */
 
-#ifdef __linux__ 
+#ifdef __linux__
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/raii.h>

@@ -28,8 +28,9 @@ namespace perspective
 template <typename CTX_T>
 class t_ctx_common
 {
-  public:
-    t_ctx_common(CTX_T* ctx) : m_ctx(ctx)
+public:
+    t_ctx_common(CTX_T* ctx)
+        : m_ctx(ctx)
     {
     }
 
@@ -39,7 +40,7 @@ class t_ctx_common
         return m_ctx->unity_get_data(rng, fvec);
     }
 
-  private:
+private:
     PSP_NON_COPYABLE(t_ctx_common);
     CTX_T* m_ctx;
 };
@@ -47,7 +48,7 @@ class t_ctx_common
 template <typename DERIVED_T>
 class t_ctxbase
 {
-  public:
+public:
     typedef DERIVED_T t_derived;
 
     t_ctxbase();
@@ -77,19 +78,14 @@ class t_ctxbase
         return t_ctx_common<t_ctxbase>(this);
     }
 
-    void unity_populate_slice_row(t_slice& s,
-                                  const t_fetchvec& fvec,
-                                  t_uindex idx) const;
-    void unity_populate_slice_column(t_slice& s,
-                                     const t_fetchvec& fvec,
-                                     t_uindex idx) const;
+    void unity_populate_slice_row(t_slice& s, const t_fetchvec& fvec, t_uindex idx) const;
+    void unity_populate_slice_column(t_slice& s, const t_fetchvec& fvec, t_uindex idx) const;
 
-    t_slice unity_get_data(const t_range& rng,
-                           const t_fetchvec& fvec) const;
+    t_slice unity_get_data(const t_range& rng, const t_fetchvec& fvec) const;
 
     t_tscalvec get_data() const;
 
-  protected:
+protected:
     t_schema m_schema;
     t_config m_config;
     t_bool m_rows_changed;
@@ -103,18 +99,22 @@ class t_ctxbase
 
 template <typename DERIVED_T>
 t_ctxbase<DERIVED_T>::t_ctxbase()
-    : m_rows_changed(true), m_columns_changed(true), m_init(false)
+    : m_rows_changed(true)
+    , m_columns_changed(true)
+    , m_init(false)
 {
     m_features = std::vector<t_bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
 }
 
 template <typename DERIVED_T>
-t_ctxbase<DERIVED_T>::t_ctxbase(const t_schema& schema,
-                                const t_config& config)
+t_ctxbase<DERIVED_T>::t_ctxbase(const t_schema& schema, const t_config& config)
 
-    : m_schema(schema), m_config(config), m_rows_changed(true),
-      m_columns_changed(true), m_init(false)
+    : m_schema(schema)
+    , m_config(config)
+    , m_rows_changed(true)
+    , m_columns_changed(true)
+    , m_init(false)
 {
     m_features = std::vector<t_bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
@@ -216,15 +216,13 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
             case FETCH_COLUMN_DEPTH:
             {
                 s.column_depth().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_depth(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_depth(idx));
             }
             break;
             case FETCH_COLUMN_PATHS:
             {
                 s.column_paths().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_path(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_path(idx));
             }
             break;
             case FETCH_COLUMN_INDICES:
@@ -235,8 +233,7 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
             case FETCH_IS_COLUMN_EXPANDED:
             {
                 s.is_column_expanded().push_back(
-                    reinterpret_cast<const DERIVED_T*>(this)
-                        ->unity_get_column_expanded(idx));
+                    reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_expanded(idx));
             }
             break;
             default:
@@ -248,9 +245,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
 
 template <typename DERIVED_T>
 void
-t_ctxbase<DERIVED_T>::unity_populate_slice_row(t_slice& s,
-                                               const t_fetchvec& fvec,
-                                               t_uindex idx) const
+t_ctxbase<DERIVED_T>::unity_populate_slice_row(
+    t_slice& s, const t_fetchvec& fvec, t_uindex idx) const
 {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     for (auto f : fvec)
@@ -259,8 +255,7 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(t_slice& s,
         {
             case FETCH_ROW_PATHS:
             {
-                s.row_paths().push_back(
-                    cptr->unity_get_row_path(idx));
+                s.row_paths().push_back(cptr->unity_get_row_path(idx));
             }
             break;
             case FETCH_ROW_INDICES:
@@ -275,14 +270,12 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(t_slice& s,
             break;
             case FETCH_IS_ROW_EXPANDED:
             {
-                s.is_row_expanded().push_back(
-                    cptr->unity_get_row_expanded(idx));
+                s.is_row_expanded().push_back(cptr->unity_get_row_expanded(idx));
             }
             break;
             case FETCH_ROW_DEPTH:
             {
-                s.row_depth().push_back(
-                    cptr->unity_get_row_depth(idx));
+                s.row_depth().push_back(cptr->unity_get_row_depth(idx));
             }
             break;
             default:
@@ -294,8 +287,7 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(t_slice& s,
 
 template <typename DERIVED_T>
 t_slice
-t_ctxbase<DERIVED_T>::unity_get_data(const t_range& rng,
-                                     const t_fetchvec& fvec) const
+t_ctxbase<DERIVED_T>::unity_get_data(const t_range& rng, const t_fetchvec& fvec) const
 {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     t_uindex row_count = cptr->get_row_count();
@@ -317,8 +309,7 @@ t_ctxbase<DERIVED_T>::unity_get_data(const t_range& rng,
         break;
         default:
         {
-            std::cout << "Unexpected mode encountered => "
-                      << rng.get_mode() << std::endl;
+            std::cout << "Unexpected mode encountered => " << rng.get_mode() << std::endl;
             return t_slice();
         }
     }
@@ -349,8 +340,7 @@ t_tscalvec
 t_ctxbase<DERIVED_T>::get_data() const
 {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
-    return cptr->get_data(
-        0, cptr->get_row_count(), 0, cptr->get_column_count());
+    return cptr->get_data(0, cptr->get_row_count(), 0, cptr->get_column_count());
 }
 
 } // end namespace perspective

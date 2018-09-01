@@ -19,38 +19,34 @@
 namespace perspective
 {
 
-t_updctx::t_updctx()
-{
-}
+t_updctx::t_updctx() {}
 
 t_updctx::t_updctx(t_uindex gnode_id, const t_str& ctx)
-    : m_gnode_id(gnode_id), m_ctx(ctx)
+    : m_gnode_id(gnode_id)
+    , m_ctx(ctx)
 {
 }
 
 #ifdef PSP_ENABLE_WASM
 t_pool::t_pool(emscripten::val update_delegate)
-    : m_sleep(0),
-      m_update_delegate(update_delegate),
-      m_has_python_dep(false)
+    : m_sleep(0)
+    , m_update_delegate(update_delegate)
+    , m_has_python_dep(false)
 {
     m_run.clear();
 }
 #else
 
 t_pool::t_pool()
-    : m_sleep(
-          100),
-      m_has_python_dep(false)
+    : m_sleep(100)
+    , m_has_python_dep(false)
 {
     m_run.clear();
 }
 
 #endif
 
-t_pool::~t_pool()
-{
-}
+t_pool::~t_pool() {}
 
 void
 t_pool::init()
@@ -78,8 +74,7 @@ t_pool::register_gnode(t_gnode* node)
 
     if (t_env::log_progress())
     {
-        std::cout << "t_pool.register_gnode node => " << node
-                  << " rv => " << id << std::endl;
+        std::cout << "t_pool.register_gnode node => " << node << " rv => " << id << std::endl;
     }
 
     return id;
@@ -92,17 +87,14 @@ t_pool::unregister_gnode(t_uindex idx)
 
     if (t_env::log_progress())
     {
-        std::cout << "t_pool.unregister_gnode idx => " << idx
-                  << std::endl;
+        std::cout << "t_pool.unregister_gnode idx => " << idx << std::endl;
     }
 
     m_gnodes[idx] = 0;
 }
 
 void
-t_pool::send(t_uindex gnode_id,
-             t_uindex port_id,
-             const t_table& table)
+t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_table& table)
 {
     {
         std::lock_guard<std::mutex> lg(m_mtx);
@@ -114,9 +106,8 @@ t_pool::send(t_uindex gnode_id,
 
         if (t_env::log_progress())
         {
-            std::cout << "t_pool.send gnode_id => " << gnode_id
-                      << " port_id => " << port_id << " tbl_size => "
-                      << table.size() << std::endl;
+            std::cout << "t_pool.send gnode_id => " << gnode_id << " port_id => " << port_id
+                      << " tbl_size => " << table.size() << std::endl;
         }
 
         if (t_env::log_data_pool_send())
@@ -141,9 +132,9 @@ t_pool::_process_helper()
 void
 t_pool::_process()
 {
-  t_uindex sleep_time = m_sleep.load();
-  _process_helper();
-  std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
+    t_uindex sleep_time = m_sleep.load();
+    _process_helper();
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time));
 }
 
 void
@@ -185,8 +176,7 @@ t_pool::get_trees()
         if (!g)
             continue;
         auto trees = g->get_trees();
-        rval.insert(
-            std::end(rval), std::begin(trees), std::end(trees));
+        rval.insert(std::end(rval), std::begin(trees), std::end(trees));
     }
 
     if (t_env::log_progress())
@@ -209,10 +199,7 @@ t_pool::set_update_delegate(emscripten::val ud)
 
 #ifdef PSP_ENABLE_WASM
 void
-t_pool::register_context(t_uindex gnode_id,
-                         const t_str& name,
-                         t_ctx_type type,
-                         t_int32 ptr)
+t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int32 ptr)
 {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
@@ -222,19 +209,15 @@ t_pool::register_context(t_uindex gnode_id,
     if (t_env::log_progress())
     {
         std::cout << repr() << " << t_pool.register_context: "
-                  << " gnode_id => " << gnode_id << " name => "
-                  << name << " type => " << type << " ptr => " << ptr
-                  << std::endl;
+                  << " gnode_id => " << gnode_id << " name => " << name << " type => " << type
+                  << " ptr => " << ptr << std::endl;
     }
 }
 
 #else
 
 void
-t_pool::register_context(t_uindex gnode_id,
-                         const t_str& name,
-                         t_ctx_type type,
-                         t_int64 ptr)
+t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int64 ptr)
 {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
@@ -244,9 +227,8 @@ t_pool::register_context(t_uindex gnode_id,
     if (t_env::log_progress())
     {
         std::cout << repr() << " << t_pool.register_context: "
-                  << " gnode_id => " << gnode_id << " name => "
-                  << name << " type => " << type << " ptr => " << ptr
-                  << std::endl;
+                  << " gnode_id => " << gnode_id << " name => " << name << " type => " << type
+                  << " ptr => " << ptr << std::endl;
     }
 }
 #endif
@@ -258,8 +240,7 @@ t_pool::unregister_context(t_uindex gnode_id, const t_str& name)
     if (t_env::log_progress())
     {
         std::cout << repr() << " << t_pool.unregister_context: "
-                  << " gnode_id => " << gnode_id << " name => "
-                  << name << std::endl;
+                  << " gnode_id => " << gnode_id << " name => " << name << std::endl;
     }
 
     if (!validate_gnode_id(gnode_id))
@@ -287,8 +268,8 @@ t_pool::get_row_data_pkeys(t_uindex gnode_id, const t_tscalvec& pkeys)
     if (t_env::log_progress())
     {
         std::cout << "t_pool.get_row_data_pkeys: "
-                  << " gnode_id => " << gnode_id << " pkeys => "
-                  << pkeys << " rv => " << rv << std::endl;
+                  << " gnode_id => " << gnode_id << " pkeys => " << pkeys << " rv => " << rv
+                  << std::endl;
     }
 
     return rv;
@@ -300,14 +281,12 @@ t_pool::get_contexts_last_updated()
     std::lock_guard<std::mutex> lg(m_mtx);
     t_updctx_vec rval;
 
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx)
     {
         if (!m_gnodes[idx])
             continue;
 
-        auto updated_contexts =
-            m_gnodes[idx]->get_contexts_last_updated();
+        auto updated_contexts = m_gnodes[idx]->get_contexts_last_updated();
         auto gnode_id = m_gnodes[idx]->get_id();
 
         for (const auto& ctx_name : updated_contexts)
@@ -315,8 +294,8 @@ t_pool::get_contexts_last_updated()
             if (t_env::log_progress())
             {
                 std::cout << "t_pool.get_contexts_last_updated: "
-                          << " gnode_id => " << gnode_id
-                          << " ctx_name => " << ctx_name << std::endl;
+                          << " gnode_id => " << gnode_id << " ctx_name => " << ctx_name
+                          << std::endl;
             }
             rval.push_back(t_updctx(gnode_id, ctx_name));
         }
@@ -343,8 +322,7 @@ t_pool::pprint_registered() const
 {
     auto self = repr();
 
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx)
     {
         if (!m_gnodes[idx])
             continue;
@@ -353,8 +331,8 @@ t_pool::pprint_registered() const
 
         for (const auto& cname : ctxnames)
         {
-            std::cout << self << " gnode_id => " << gnode_id
-                      << " ctxname => " << cname << std::endl;
+            std::cout << self << " gnode_id => " << gnode_id << " ctxname => " << cname
+                      << std::endl;
         }
     }
 }
@@ -392,8 +370,7 @@ t_pool::flush()
     if (!m_data_remaining.load())
         return;
 
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx)
     {
         if (m_gnodes[idx])
         {
@@ -421,8 +398,7 @@ t_pool::get_gnodes_last_updated()
     std::lock_guard<std::mutex> lg(m_mtx);
     t_uidxvec rv;
 
-    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx)
     {
         if (!m_gnodes[idx] || !m_gnodes[idx]->was_updated())
             continue;
@@ -437,8 +413,7 @@ t_gnode*
 t_pool::get_gnode(t_uindex idx)
 {
     std::lock_guard<std::mutex> lg(m_mtx);
-    PSP_VERBOSE_ASSERT(idx < m_gnodes.size() && m_gnodes[idx],
-                       "Bad gnode encountered");
+    PSP_VERBOSE_ASSERT(idx < m_gnodes.size() && m_gnodes[idx], "Bad gnode encountered");
     return m_gnodes[idx];
 }
 

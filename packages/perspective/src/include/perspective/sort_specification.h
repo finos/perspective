@@ -28,9 +28,7 @@ struct PERSPECTIVE_EXPORT t_sortspec
 {
     t_sortspec();
     t_sortspec(t_index agg_index, t_sorttype sort_type);
-    t_sortspec(const t_tscalvec& path,
-               t_index agg_index,
-               t_sorttype sort_type);
+    t_sortspec(const t_tscalvec& path, t_index agg_index, t_sorttype sort_type);
 
     bool operator==(const t_sortspec& s2) const;
     bool operator!=(const t_sortspec& s2) const;
@@ -50,6 +48,5 @@ PERSPECTIVE_EXPORT t_sorttvec get_sort_orders(const t_sortsvec& vec);
 
 namespace std
 {
-PERSPECTIVE_EXPORT std::ostream&
-operator<<(std::ostream& os, const perspective::t_sortspec& t);
+PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_sortspec& t);
 } // end namespace std

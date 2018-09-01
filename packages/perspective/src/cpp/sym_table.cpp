@@ -20,9 +20,7 @@ namespace perspective
 
 std::mutex sym_table_mutex;
 
-t_symtable::t_symtable()
-{
-}
+t_symtable::t_symtable() {}
 
 t_symtable::~t_symtable()
 {

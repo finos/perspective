@@ -19,7 +19,8 @@
 namespace perspective
 {
 
-t_file_handle::t_file_handle(t_handle value) : m_value(value)
+t_file_handle::t_file_handle(t_handle value)
+    : m_value(value)
 {
 }
 
@@ -30,7 +31,8 @@ t_file_handle::value()
 }
 
 t_mmap_handle::t_mmap_handle(void* value, t_uindex len)
-    : m_value(value), m_len(len)
+    : m_value(value)
+    , m_len(len)
 {
 }
 

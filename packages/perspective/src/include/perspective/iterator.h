@@ -16,26 +16,18 @@ namespace perspective
 {
 
 template <typename DATA_T>
-class t_iter : public std::iterator<std::random_access_iterator_tag,
-                                    DATA_T,
-                                    std::ptrdiff_t,
-                                    DATA_T*,
-                                    DATA_T&>
+class t_iter : public std::iterator<std::random_access_iterator_tag, DATA_T, std::ptrdiff_t,
+                   DATA_T*, DATA_T&>
 {
-  public:
-    t_iter(DATA_T* ptr = nullptr)
-    {
-        m_ptr = ptr;
-    }
+public:
+    t_iter(DATA_T* ptr = nullptr) { m_ptr = ptr; }
 
 #ifndef WIN32
     t_iter(const t_iter<DATA_T>& other) = default;
     t_iter<DATA_T>& operator=(const t_iter<DATA_T>& other) = default;
 #endif
 
-    ~t_iter()
-    {
-    }
+    ~t_iter() {}
 
     t_iter<DATA_T>&
     operator=(DATA_T* ptr)
@@ -78,26 +70,30 @@ class t_iter : public std::iterator<std::random_access_iterator_tag,
         return (*this);
     }
 
-    t_iter<DATA_T>& operator++()
+    t_iter<DATA_T>&
+    operator++()
     {
         ++m_ptr;
         return (*this);
     }
 
-    t_iter<DATA_T>& operator--()
+    t_iter<DATA_T>&
+    operator--()
     {
         --m_ptr;
         return (*this);
     }
 
-    t_iter<DATA_T> operator++(int)
+    t_iter<DATA_T>
+    operator++(int)
     {
         auto temp(*this);
         ++m_ptr;
         return temp;
     }
 
-    t_iter<DATA_T> operator--(int)
+    t_iter<DATA_T>
+    operator--(int)
     {
         auto temp(*this);
         --m_ptr;
@@ -130,20 +126,11 @@ class t_iter : public std::iterator<std::random_access_iterator_tag,
         return std::distance(other.get_ptr(), this->get_ptr());
     }
 
-    DATA_T& operator*()
-    {
-        return *m_ptr;
-    }
+    DATA_T& operator*() { return *m_ptr; }
 
-    const DATA_T& operator*() const
-    {
-        return *m_ptr;
-    }
+    const DATA_T& operator*() const { return *m_ptr; }
 
-    DATA_T* operator->()
-    {
-        return m_ptr;
-    }
+    DATA_T* operator->() { return m_ptr; }
 
     DATA_T*
     get_ptr() const
@@ -157,7 +144,7 @@ class t_iter : public std::iterator<std::random_access_iterator_tag,
         return m_ptr;
     }
 
-  protected:
+protected:
     DATA_T* m_ptr;
 };
-}
+} // namespace perspective

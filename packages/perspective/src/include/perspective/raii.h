@@ -19,7 +19,7 @@ class t_file_handle
 {
     t_handle m_value;
 
-  public:
+public:
     t_file_handle(t_handle value);
     ~t_file_handle();
     t_handle value();
@@ -32,7 +32,7 @@ class t_mmap_handle
     void* m_value;
     t_uindex m_len;
 
-  public:
+public:
     t_mmap_handle(void* value, t_uindex len);
     ~t_mmap_handle();
     void* value();

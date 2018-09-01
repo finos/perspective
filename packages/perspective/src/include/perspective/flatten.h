@@ -16,4 +16,4 @@ class t_flattener
 {
     static void op();
 };
-}
+} // namespace perspective

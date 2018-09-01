@@ -35,6 +35,5 @@
 #endif // mprotect
 #endif // perspective exports
 #else
-#define PERSPECTIVE_MPROTECT_EXPORT                                  \
-    __attribute__((visibility("default")))
+#define PERSPECTIVE_MPROTECT_EXPORT __attribute__((visibility("default")))
 #endif // win32

@@ -21,28 +21,22 @@
 namespace perspective
 {
 
-t_gstate::t_gstate(const t_schema& tblschema,
-                   const t_schema& pkeyed_schema)
+t_gstate::t_gstate(const t_schema& tblschema, const t_schema& pkeyed_schema)
 
-    : m_tblschema(tblschema), m_pkeyed_schema(pkeyed_schema),
-      m_init(false)
+    : m_tblschema(tblschema)
+    , m_pkeyed_schema(pkeyed_schema)
+    , m_init(false)
 {
     LOG_CONSTRUCTOR("t_gstate");
 }
 
-t_gstate::~t_gstate()
-{
-    LOG_DESTRUCTOR("t_gstate");
-}
+t_gstate::~t_gstate() { LOG_DESTRUCTOR("t_gstate"); }
 
 void
 t_gstate::init()
 {
-    m_table = std::make_shared<t_table>("",
-                                        "",
-                                        m_pkeyed_schema,
-                                        DEFAULT_EMPTY_CAPACITY,
-                                        BACKING_STORE_MEMORY);
+    m_table = std::make_shared<t_table>(
+        "", "", m_pkeyed_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_table->init();
     m_pkcol = m_table->get_column("psp_pkey");
     m_opcol = m_table->get_column("psp_op");
@@ -117,10 +111,8 @@ t_gstate::lookup_or_create(const t_tscalar& pkey)
     t_uindex nrows = m_table->num_rows();
     if (nrows >= m_table->get_capacity() - 1)
     {
-        m_table->reserve(
-            std::max(nrows + 1,
-                     static_cast<t_uindex>(m_table->get_capacity() *
-                                           PSP_TABLE_GROW_RATIO)));
+        m_table->reserve(std::max(
+            nrows + 1, static_cast<t_uindex>(m_table->get_capacity() * PSP_TABLE_GROW_RATIO)));
     }
 
     m_table->set_size(nrows + 1);
@@ -150,19 +142,17 @@ t_gstate::update_history(const t_table* tbl)
     t_colcptrvec fcolumns(tbl->num_columns());
 
     t_uindex count = 0;
-    for (t_uindex idx = 0, loop_end = fschema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = fschema.size(); idx < loop_end; ++idx)
     {
         const t_str& cname = fschema.m_columns[idx];
-            col_translation[count] = idx;
-            fcolumns[idx] = tbl->get_const_column(cname).get();
-            ++count;
-        }
+        col_translation[count] = idx;
+        fcolumns[idx] = tbl->get_const_column(cname).get();
+        ++count;
+    }
 
     t_colptrvec scolumns(ncols);
 
-    for (t_uindex idx = 0, loop_end = sschema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = sschema.size(); idx < loop_end; ++idx)
     {
         const t_str& cname = sschema.m_columns[idx];
         scolumns[idx] = stable->get_column(cname).get();
@@ -173,20 +163,14 @@ t_gstate::update_history(const t_table* tbl)
         m_free.clear();
         m_mapping.clear();
 #ifdef PSP_PARALLEL_FOR
-        PSP_PFOR(0,
-                 int(ncols),
-                 1,
-                 [&stable, &fcolumns, &col_translation](int idx)
+        PSP_PFOR(0, int(ncols), 1,
+            [&stable, &fcolumns, &col_translation](int idx)
 #else
         for (t_uindex idx = 0; idx < ncols; ++idx)
 #endif
-                 {
-                     stable->set_column(
-                         idx,
-                         fcolumns[col_translation[idx]]->clone());
-                 }
+            { stable->set_column(idx, fcolumns[col_translation[idx]]->clone()); }
 #ifdef PSP_PARALLEL_FOR
-                 );
+        );
 #endif
         m_pkcol = stable->get_column("psp_pkey");
         m_opcol = stable->get_column("psp_op");
@@ -194,9 +178,7 @@ t_gstate::update_history(const t_table* tbl)
         stable->set_capacity(tbl->get_capacity());
         stable->set_size(tbl->size());
 
-        for (t_uindex idx = 0, loop_end = tbl->num_rows();
-             idx < loop_end;
-             ++idx)
+        for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx)
         {
             t_tscalar pkey = pkey_col->get_scalar(idx);
             const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
@@ -206,8 +188,7 @@ t_gstate::update_history(const t_table* tbl)
             {
                 case OP_INSERT:
                 {
-                    m_mapping[m_symtable.get_interned_tscalar(pkey)] =
-                        idx;
+                    m_mapping[m_symtable.get_interned_tscalar(pkey)] = idx;
                     m_opcol->set_nth<t_uint8>(idx, OP_INSERT);
                     m_pkcol->set_scalar(idx, pkey);
                 }
@@ -235,8 +216,7 @@ t_gstate::update_history(const t_table* tbl)
     /* size is not zero */
     t_uidxvec stableidx_vec(tbl->num_rows());
 
-    for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx)
     {
         t_tscalar pkey = pkey_col->get_scalar(idx);
         const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
@@ -247,8 +227,7 @@ t_gstate::update_history(const t_table* tbl)
             case OP_INSERT:
             {
                 stableidx_vec[idx] = lookup_or_create(pkey);
-                m_opcol->set_nth<t_uint8>(stableidx_vec[idx],
-                                          OP_INSERT);
+                m_opcol->set_nth<t_uint8>(stableidx_vec[idx], OP_INSERT);
                 m_pkcol->set_scalar(stableidx_vec[idx], pkey);
             }
             break;
@@ -267,31 +246,19 @@ t_gstate::update_history(const t_table* tbl)
 
 #ifdef PSP_PARALLEL_FOR
     const t_mapping* m = &m_mapping;
-    PSP_PFOR(
-        0,
-        int(ncols),
-        1,
-        [m,
-         tbl,
-         pkey_col,
-         op_col,
-         &col_translation,
-         &fcolumns,
-         &scolumns,
-         &stableidx_vec](int colidx)
+    PSP_PFOR(0, int(ncols), 1,
+        [m, tbl, pkey_col, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](
+            int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
 
         {
-            const t_column* fcolumn =
-                fcolumns[col_translation[colidx]];
+            const t_column* fcolumn = fcolumns[col_translation[colidx]];
 
             t_column* scolumn = scolumns[colidx];
 
-            for (t_uindex idx = 0, loop_end = tbl->num_rows();
-                 idx < loop_end;
-                 ++idx)
+            for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx)
             {
 
                 t_bool is_valid = fcolumn->is_valid(idx);
@@ -315,99 +282,78 @@ t_gstate::update_history(const t_table* tbl)
                     break;
                     case DTYPE_INT64:
                     {
-                        scolumn->set_nth<t_int64>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_int64>(idx)));
+                        scolumn->set_nth<t_int64>(stableidx, *(fcolumn->get_nth<t_int64>(idx)));
                     }
                     break;
                     case DTYPE_INT32:
                     {
-                        scolumn->set_nth<t_int32>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_int32>(idx)));
+                        scolumn->set_nth<t_int32>(stableidx, *(fcolumn->get_nth<t_int32>(idx)));
                     }
                     break;
                     case DTYPE_INT16:
                     {
-                        scolumn->set_nth<t_int16>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_int16>(idx)));
+                        scolumn->set_nth<t_int16>(stableidx, *(fcolumn->get_nth<t_int16>(idx)));
                     }
                     break;
                     case DTYPE_INT8:
                     {
-                        scolumn->set_nth<t_int8>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_int8>(idx)));
+                        scolumn->set_nth<t_int8>(stableidx, *(fcolumn->get_nth<t_int8>(idx)));
                     }
                     break;
                     case DTYPE_UINT64:
                     {
                         scolumn->set_nth<t_uint64>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint64>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_uint64>(idx)));
                     }
                     break;
                     case DTYPE_UINT32:
                     {
                         scolumn->set_nth<t_uint32>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint32>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_uint32>(idx)));
                     }
                     break;
                     case DTYPE_UINT16:
                     {
                         scolumn->set_nth<t_uint16>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint16>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_uint16>(idx)));
                     }
                     break;
                     case DTYPE_UINT8:
                     {
-                        scolumn->set_nth<t_uint8>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint8>(idx)));
+                        scolumn->set_nth<t_uint8>(stableidx, *(fcolumn->get_nth<t_uint8>(idx)));
                     }
                     break;
                     case DTYPE_FLOAT64:
                     {
                         scolumn->set_nth<t_float64>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_float64>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_float64>(idx)));
                     }
                     break;
                     case DTYPE_FLOAT32:
                     {
                         scolumn->set_nth<t_float32>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_float32>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_float32>(idx)));
                     }
                     break;
                     case DTYPE_BOOL:
                     {
-                        scolumn->set_nth<t_uint8>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint8>(idx)));
+                        scolumn->set_nth<t_uint8>(stableidx, *(fcolumn->get_nth<t_uint8>(idx)));
                     }
                     break;
                     case DTYPE_TIME:
                     {
-                        scolumn->set_nth<t_int64>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_int64>(idx)));
+                        scolumn->set_nth<t_int64>(stableidx, *(fcolumn->get_nth<t_int64>(idx)));
                     }
                     break;
                     case DTYPE_DATE:
                     {
                         scolumn->set_nth<t_uint32>(
-                            stableidx,
-                            *(fcolumn->get_nth<t_uint32>(idx)));
+                            stableidx, *(fcolumn->get_nth<t_uint32>(idx)));
                     }
                     break;
                     case DTYPE_STR:
                     {
-                        const char* s =
-                            fcolumn->get_nth<const char>(idx);
+                        const char* s = fcolumn->get_nth<const char>(idx);
                         scolumn->set_nth<const char*>(stableidx, s);
                     }
                     break;
@@ -419,7 +365,7 @@ t_gstate::update_history(const t_table* tbl)
             }
         }
 #ifdef PSP_PARALLEL_FOR
-        );
+    );
 #endif
 }
 
@@ -428,9 +374,7 @@ t_gstate::pprint() const
 {
     t_uidxvec indices(m_mapping.size());
     t_uindex idx = 0;
-    for (t_mapping::const_iterator iter = m_mapping.begin();
-         iter != m_mapping.end();
-         ++iter)
+    for (t_mapping::const_iterator iter = m_mapping.begin(); iter != m_mapping.end(); ++iter)
     {
         indices[idx] = iter->second;
         ++idx;
@@ -443,9 +387,7 @@ t_gstate::get_cpp_mask() const
 {
     t_uindex sz = m_table->size();
     t_mask msk(sz);
-    for (t_mapping::const_iterator iter = m_mapping.begin();
-         iter != m_mapping.end();
-         ++iter)
+    for (t_mapping::const_iterator iter = m_mapping.begin(); iter != m_mapping.end(); ++iter)
     {
         msk.set(iter->second, true);
     }
@@ -465,9 +407,7 @@ t_gstate::get_table() const
 }
 
 void
-t_gstate::read_column(const t_str& colname,
-                      const t_tscalvec& pkeys,
-                      t_tscalvec& out_data) const
+t_gstate::read_column(const t_str& colname, const t_tscalvec& pkeys, t_tscalvec& out_data) const
 {
     t_index num = pkeys.size();
     t_col_csptr col = m_table->get_const_column(colname);
@@ -487,35 +427,31 @@ t_gstate::read_column(const t_str& colname,
 }
 
 void
-t_gstate::read_column(const t_str& colname,
-                      const t_tscalvec& pkeys,
-                      t_f64vec& out_data) const
+t_gstate::read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data) const
 {
     read_column(colname, pkeys, out_data, true);
 }
 
 void
-t_gstate::read_column(const t_str& colname,
-                      const t_tscalvec& pkeys,
-                      t_f64vec& out_data,
-                      bool include_nones) const
+t_gstate::read_column(
+    const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data, bool include_nones) const
 {
     t_index num = pkeys.size();
     t_col_csptr col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
-    
+
     t_f64vec rval;
     for (t_index idx = 0; idx < num; ++idx)
     {
-	t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
-	if (iter != m_mapping.end())
-	{
-	  auto tscalar = col_->get_scalar(iter->second);
-	  if (include_nones || tscalar.is_valid())
-	  {
-	      rval.push_back(tscalar.to_double());
-	   }
-	}
+        t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
+        if (iter != m_mapping.end())
+        {
+            auto tscalar = col_->get_scalar(iter->second);
+            if (include_nones || tscalar.is_valid())
+            {
+                rval.push_back(tscalar.to_double());
+            }
+        }
     }
     std::swap(rval, out_data);
 }
@@ -554,9 +490,7 @@ t_gstate::get_row(t_tscalar pkey) const
 }
 
 t_bool
-t_gstate::is_unique(const t_tscalvec& pkeys,
-                    const t_str& colname,
-                    t_tscalar& value) const
+t_gstate::is_unique(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value) const
 {
     t_col_csptr col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
@@ -578,10 +512,7 @@ t_gstate::is_unique(const t_tscalvec& pkeys,
 }
 
 t_bool
-t_gstate::apply(
-    const t_tscalvec& pkeys,
-    const t_str& colname,
-    t_tscalar& value,
+t_gstate::apply(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value,
     std::function<t_bool(const t_tscalar&, t_tscalar&)> fn) const
 {
     t_col_csptr col = m_table->get_const_column(colname);
@@ -649,8 +580,7 @@ t_gstate::_get_pkeyed_table(const t_tscalvec& pkeys) const
 }
 
 t_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema,
-                            const t_tscalvec& pkeys) const
+t_gstate::_get_pkeyed_table(const t_schema& schema, const t_tscalvec& pkeys) const
 {
     t_mask mask(size());
 
@@ -674,8 +604,7 @@ t_gstate::_get_pkeyed_table(const t_schema& schema) const
 }
 
 t_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema,
-                            const t_mask& mask) const
+t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const
 {
     static bool const enable_pkeyed_table_mask_fix = true;
     t_uindex o_ncols = schema.m_columns.size();
@@ -689,24 +618,21 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
     const t_table* tbl = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0,
-             int(o_ncols),
-             1,
-             [&sch_cols, rval, tbl, &mask](int colidx)
+    PSP_PFOR(0, int(o_ncols), 1,
+        [&sch_cols, rval, tbl, &mask](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < o_ncols; ++colidx)
 #endif
-             {
-                 const t_str& c = sch_cols[colidx];
-                 if (c != "psp_op" && c != "psp_pkey")
-                 {
-                     rval->set_column(
-                         c, tbl->get_const_column(c)->clone(mask));
-                 }
-             }
+        {
+            const t_str& c = sch_cols[colidx];
+            if (c != "psp_op" && c != "psp_pkey")
+            {
+                rval->set_column(c, tbl->get_const_column(c)->clone(mask));
+            }
+        }
 
 #ifdef PSP_PARALLEL_FOR
-             );
+    );
 #endif
     auto pkey_col = rval->get_column("psp_pkey").get();
     auto op_col = rval->get_column("psp_op").get();
@@ -715,17 +641,18 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
     op_col->valid_raw_fill(true);
     pkey_col->valid_raw_fill(true);
 
-    std::vector<std::pair<t_tscalar, t_uindex>> order(enable_pkeyed_table_mask_fix ? sz : m_mapping.size());
-    if( enable_pkeyed_table_mask_fix )
+    std::vector<std::pair<t_tscalar, t_uindex>> order(
+        enable_pkeyed_table_mask_fix ? sz : m_mapping.size());
+    if (enable_pkeyed_table_mask_fix)
     {
         std::vector<t_uindex> mapping;
         mapping.resize(mask.size());
         {
             t_uindex mapped = 0;
-            for( t_uindex idx = 0; idx < mask.size(); ++idx )
+            for (t_uindex idx = 0; idx < mask.size(); ++idx)
             {
                 mapping[idx] = mapped;
-                if( mask.get(idx) )
+                if (mask.get(idx))
                     ++mapped;
             }
         }
@@ -733,9 +660,9 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
         t_uindex oidx = 0;
         for (const auto& kv : m_mapping)
         {
-            if( mask.get( kv.second ) )
+            if (mask.get(kv.second))
             {
-                order[oidx] = std::make_pair( kv.first, mapping[kv.second] );
+                order[oidx] = std::make_pair(kv.first, mapping[kv.second]);
                 ++oidx;
             }
         }
@@ -750,12 +677,10 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
         }
     }
 
-    std::sort(order.begin(),
-              order.end(),
-              [](const std::pair<t_tscalar, t_uindex>& a,
-                 const std::pair<t_tscalar, t_uindex>& b) {
-                  return a.second < b.second;
-              });
+    std::sort(order.begin(), order.end(),
+        [](const std::pair<t_tscalar, t_uindex>& a, const std::pair<t_tscalar, t_uindex>& b) {
+            return a.second < b.second;
+        });
 
     if (get_pkey_dtype() == DTYPE_STR)
     {
@@ -766,12 +691,10 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
 
         size_t total_string_size = 0;
 
-        if( enable_pkeyed_table_vocab_reserve )
+        if (enable_pkeyed_table_vocab_reserve)
         {
             total_string_size += offset;
-            for (t_uindex idx = 0, loop_end = order.size();
-                 idx < loop_end;
-                 ++idx)
+            for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx)
             {
                 total_string_size += strlen(order[idx].first.get_char_ptr()) + 1;
             }
@@ -779,15 +702,13 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
 
         // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys being strings
         // don't try to reserve in this case
-        if( !order.size() )
+        if (!order.size())
             total_string_size = 0;
 
         pkey_col->set_vocabulary(order, total_string_size);
         auto base = pkey_col->get_nth<t_uindex>(0);
 
-        for (t_uindex idx = 0, loop_end = order.size();
-             idx < loop_end;
-             ++idx)
+        for (t_uindex idx = 0, loop_end = order.size(); idx < loop_end; ++idx)
         {
             base[idx] = idx + offset;
         }
@@ -819,8 +740,7 @@ t_gstate::get_row_data_pkeys(const t_tscalvec& pkeys) const
     t_tscalvec rval;
 
     t_colcptrvec columns(ncols);
-    for (t_uindex idx = 0, loop_end = schema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = schema.size(); idx < loop_end; ++idx)
     {
         const t_str& cname = schema.m_columns[idx];
         columns[idx] = m_table->get_const_column(cname).get();
@@ -964,8 +884,7 @@ t_gstate::get_pkeys_idx(const t_tscalvec& pkeys) const
     for (const auto& p : pkeys)
     {
         auto lk = lookup(p);
-        std::cout << "pkey " << p << " exists " << lk.m_exists
-                  << std::endl;
+        std::cout << "pkey " << p << " exists " << lk.m_exists << std::endl;
         if (lk.m_exists)
             rv.push_back(lk.m_idx);
     }

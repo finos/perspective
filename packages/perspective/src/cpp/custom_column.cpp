@@ -13,22 +13,24 @@ namespace perspective
 {
 
 t_custom_column::t_custom_column(const t_custom_column_recipe& ccr)
-    : m_icols(ccr.m_icols), m_ocol(ccr.m_ocol), m_expr(ccr.m_expr),
-      m_where_keys(ccr.m_where_keys),
-      m_where_values(ccr.m_where_values), m_base_case(ccr.m_base_case)
+    : m_icols(ccr.m_icols)
+    , m_ocol(ccr.m_ocol)
+    , m_expr(ccr.m_expr)
+    , m_where_keys(ccr.m_where_keys)
+    , m_where_values(ccr.m_where_values)
+    , m_base_case(ccr.m_base_case)
 
 {
 }
 
-t_custom_column::t_custom_column(const t_svec& icols,
-                                 const t_str& ocol,
-                                 const t_str& expr,
-                                 const t_svec& where_keys,
-                                 const t_svec& where_values,
-                                 const t_str& base_case)
-    : m_icols(icols), m_ocol(ocol), m_expr(expr),
-      m_where_keys(where_keys), m_where_values(where_values),
-      m_base_case(base_case)
+t_custom_column::t_custom_column(const t_svec& icols, const t_str& ocol, const t_str& expr,
+    const t_svec& where_keys, const t_svec& where_values, const t_str& base_case)
+    : m_icols(icols)
+    , m_ocol(ocol)
+    , m_expr(expr)
+    , m_where_keys(where_keys)
+    , m_where_values(where_values)
+    , m_base_case(base_case)
 {
 }
 
@@ -81,4 +83,4 @@ t_custom_column::get_base_case() const
     return m_base_case;
 }
 
-} // end namsepace perspective
+} // namespace perspective

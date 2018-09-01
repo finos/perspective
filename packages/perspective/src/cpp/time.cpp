@@ -14,11 +14,13 @@
 namespace perspective
 {
 
-t_tdelta::t_tdelta() : v(0)
+t_tdelta::t_tdelta()
+    : v(0)
 {
 }
 
-t_tdelta::t_tdelta(t_int64 v) : v(v)
+t_tdelta::t_tdelta(t_int64 v)
+    : v(v)
 {
 }
 
@@ -29,18 +31,18 @@ t_tdelta::operator*=(t_int64 multiplier)
     return *this;
 }
 
-t_time::t_time() : m_storage(0)
+t_time::t_time()
+    : m_storage(0)
 {
 }
 
-t_time::t_time(t_int64 raw_val) : m_storage(raw_val)
+t_time::t_time(t_int64 raw_val)
+    : m_storage(raw_val)
 {
 }
 
-t_time::t_time(
-    int year, int month, int day, int hour, int min, int sec)
-    : m_storage(to_gmtime(year, month, day, hour, min, sec) *
-                1000000LL)
+t_time::t_time(int year, int month, int day, int hour, int min, int sec)
+    : m_storage(to_gmtime(year, month, day, hour, min, sec) * 1000000LL)
 {
 }
 
@@ -95,9 +97,7 @@ t_time::as_tm(struct tm& out) const
 t_int32
 isleap(long int year)
 {
-    return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0))
-               ? 1
-               : 0;
+    return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) ? 1 : 0;
 }
 
 t_int32
@@ -140,8 +140,7 @@ t_time::gmtime(struct tm& out, t_int64 secs, t_int32 offset) const
 
         /* Adjust DAYS and Y to match the guessed year.
          */
-        days -= ((yg - y) * 365 + LEAPS_THRU_END_OF(yg - 1) -
-                 LEAPS_THRU_END_OF(y - 1));
+        days -= ((yg - y) * 365 + LEAPS_THRU_END_OF(yg - 1) - LEAPS_THRU_END_OF(y - 1));
         y = yg;
     }
     out.tm_year = y - 1900;
@@ -212,9 +211,8 @@ t_time::str(const struct tm& t) const
 
     t_float64 s = seconds(t) + microseconds() / 1000000.0;
 
-    ss << year(t) << "-" << str_(month(t)) << "-" << str_(day(t))
-       << " " << str_(hours(t)) << ":" << str_(minutes(t)) << ":"
-       << std::setfill('0') << std::setw(6) << std::fixed
+    ss << year(t) << "-" << str_(month(t)) << "-" << str_(day(t)) << " " << str_(hours(t))
+       << ":" << str_(minutes(t)) << ":" << std::setfill('0') << std::setw(6) << std::fixed
        << std::setprecision(3) << s;
 
     return ss.str();
@@ -243,17 +241,11 @@ days_before_month(t_int32 year, t_int32 month)
 t_int32
 ymd_to_ord(t_int32 year, t_int32 month, t_int32 day)
 {
-    return days_before_year(year) + days_before_month(year, month) +
-           day;
+    return days_before_year(year) + days_before_month(year, month) + day;
 }
 
 t_int64
-to_gmtime(t_int32 year,
-          t_int32 month,
-          t_int32 day,
-          t_int32 hour,
-          t_int32 min,
-          t_int32 sec)
+to_gmtime(t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec)
 {
     static t_int32 EPOCH_ORD = ymd_to_ord(1970, 1, 1);
     t_int64 days = ymd_to_ord(year, month, day) - EPOCH_ORD;
@@ -308,4 +300,4 @@ operator<<(std::ostream& os, const perspective::t_time& t)
 
     return os;
 }
-}
+} // namespace std

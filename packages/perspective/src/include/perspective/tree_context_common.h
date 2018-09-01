@@ -18,51 +18,26 @@
 namespace perspective
 {
 
-PERSPECTIVE_EXPORT void
-notify_sparse_tree_common(t_table_sptr strands,
-                          t_table_sptr strand_deltas,
-                          t_stree_sptr tree,
-                          t_trav_sptr traversal,
-                          t_bool process_traversal,
-                          const t_aggspecvec& aggregates,
-                          const t_sspvec& tree_sortby,
-                          const t_sortsvec& ctx_sortby,
-                          const t_gstate& gstate);
+PERSPECTIVE_EXPORT void notify_sparse_tree_common(t_table_sptr strands,
+    t_table_sptr strand_deltas, t_stree_sptr tree, t_trav_sptr traversal,
+    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
+    const t_sortsvec& ctx_sortby, const t_gstate& gstate);
 
-PERSPECTIVE_EXPORT void
-notify_sparse_tree(t_stree_sptr tree,
-                   t_trav_sptr traversal,
-                   t_bool process_traversal,
-                   const t_aggspecvec& aggregates,
-                   const t_sspvec& tree_sortby,
-                   const t_sortsvec& ctx_sortby,
-                   const t_table& flattened,
-                   const t_table& delta,
-                   const t_table& prev,
-                   const t_table& current,
-                   const t_table& transitions,
-                   const t_table& existed,
-                   const t_config& config,
-                   const t_gstate& gstate);
+PERSPECTIVE_EXPORT void notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal,
+    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
+    const t_sortsvec& ctx_sortby, const t_table& flattened, const t_table& delta,
+    const t_table& prev, const t_table& current, const t_table& transitions,
+    const t_table& existed, const t_config& config, const t_gstate& gstate);
 
-PERSPECTIVE_EXPORT void
-notify_sparse_tree(t_stree_sptr tree,
-                   t_trav_sptr traversal,
-                   t_bool process_traversal,
-                   const t_aggspecvec& aggregates,
-                   const t_sspvec& tree_sortby,
-                   const t_sortsvec& ctx_sortby,
-                   const t_table& flattened,
-                   const t_config& config,
-                   const t_gstate& gstate);
+PERSPECTIVE_EXPORT void notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal,
+    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
+    const t_sortsvec& ctx_sortby, const t_table& flattened, const t_config& config,
+    const t_gstate& gstate);
 
 template <typename CONTEXT_T>
 void
-ctx_expand_path(CONTEXT_T& ctx,
-                t_header header,
-                t_stree_sptr tree,
-                t_trav_sptr traversal,
-                const t_tscalvec& path)
+ctx_expand_path(CONTEXT_T& ctx, t_header header, t_stree_sptr tree, t_trav_sptr traversal,
+    const t_tscalvec& path)
 {
     t_index root = 0;
     t_tvidx bidx = 0;
@@ -86,11 +61,8 @@ ctx_expand_path(CONTEXT_T& ctx,
 
 template <typename CONTEXT_T>
 void
-ctx_set_expansion_state(CONTEXT_T& ctx,
-                        t_header header,
-                        t_stree_sptr tree,
-                        t_trav_sptr traversal,
-                        const t_pathvec& paths)
+ctx_set_expansion_state(CONTEXT_T& ctx, t_header header, t_stree_sptr tree,
+    t_trav_sptr traversal, const t_pathvec& paths)
 {
     for (int i = 0, loop_end = paths.size(); i < loop_end; i++)
     {
@@ -99,18 +71,13 @@ ctx_set_expansion_state(CONTEXT_T& ctx,
     }
 }
 
-PERSPECTIVE_EXPORT t_pathvec
-ctx_get_expansion_state(t_stree_csptr tree, t_trav_csptr traversal);
+PERSPECTIVE_EXPORT t_pathvec ctx_get_expansion_state(
+    t_stree_csptr tree, t_trav_csptr traversal);
 
-PERSPECTIVE_EXPORT t_tscalvec ctx_get_path(t_stree_csptr tree,
-                                           t_trav_csptr traversal,
-                                           t_tvidx idx);
+PERSPECTIVE_EXPORT t_tscalvec ctx_get_path(
+    t_stree_csptr tree, t_trav_csptr traversal, t_tvidx idx);
 
-PERSPECTIVE_EXPORT t_ftnvec
-ctx_get_flattened_tree(t_tvidx idx,
-                       t_depth stop_depth,
-                       t_traversal& trav,
-                       const t_config& config,
-                       const t_sortsvec& sortby);
+PERSPECTIVE_EXPORT t_ftnvec ctx_get_flattened_tree(t_tvidx idx, t_depth stop_depth,
+    t_traversal& trav, const t_config& config, const t_sortsvec& sortby);
 
 } // end namespace perspective

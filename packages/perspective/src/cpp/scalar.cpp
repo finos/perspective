@@ -300,8 +300,7 @@ t_tscalar::set(const char* v)
     m_type = DTYPE_STR;
     if (can_store_inplace(v))
     {
-        strncpy(
-            reinterpret_cast<char*>(&m_data), v, SCALAR_INPLACE_LEN);
+        strncpy(reinterpret_cast<char*>(&m_data), v, SCALAR_INPLACE_LEN);
         m_inplace = true;
     }
     else
@@ -688,9 +687,8 @@ t_str
 t_tscalar::repr() const
 {
     std::stringstream ss;
-    ss << "t_tscalar< "
-       << get_dtype_descr(static_cast<t_dtype>(m_type)) << ", "
-       << to_string() << " valid: " << m_valid << " >";
+    ss << "t_tscalar< " << get_dtype_descr(static_cast<t_dtype>(m_type)) << ", " << to_string()
+       << " valid: " << m_valid << " >";
     return ss.str();
 }
 
@@ -709,8 +707,8 @@ t_tscalar::is_floating_point() const
 bool
 t_tscalar::is_signed() const
 {
-    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32 ||
-            m_type == DTYPE_INT16 || m_type == DTYPE_INT8);
+    return (m_type == DTYPE_INT64 || m_type == DTYPE_INT32 || m_type == DTYPE_INT16
+        || m_type == DTYPE_INT8);
 }
 
 t_tscalar::operator bool() const
@@ -798,8 +796,7 @@ t_tscalar::operator bool() const
         default:
         {
 #ifdef PSP_DEBUG
-            std::cout << __FILE__ << ":" << __LINE__
-                      << " Reached unknown type " << m_type
+            std::cout << __FILE__ << ":" << __LINE__ << " Reached unknown type " << m_type
                       << std::endl;
 #endif
         }
@@ -874,8 +871,7 @@ t_tscalar::to_string(t_bool for_expr) const
             if (for_expr)
             {
                 auto d = get<t_date>();
-                ss << "date(" << d.year() << ", " << d.month() << ", "
-                   << d.day() << ")";
+                ss << "date(" << d.year() << ", " << d.month() << ", " << d.day() << ")";
             }
             else
             {
@@ -1283,8 +1279,7 @@ t_tscalar::ends_with(const t_tscalar& other) const
     boost::to_lower(sstr);
     boost::to_lower(ostr);
     size_t idx = sstr.rfind(ostr);
-    return (idx != std::string::npos) &&
-           (idx + ostr.size() == sstr.size());
+    return (idx != std::string::npos) && (idx + ostr.size() == sstr.size());
 }
 
 bool
@@ -1313,8 +1308,7 @@ hash_value(const t_tscalar& s)
     if (s.m_type == DTYPE_STR)
     {
         const char* c = s.get_char_ptr();
-		boost::hash_combine(seed, boost::hash_range(c, c + std::strlen(c)));
-
+        boost::hash_combine(seed, boost::hash_range(c, c + std::strlen(c)));
     }
     else
     {
@@ -1578,8 +1572,8 @@ t_tscalar::coerce_numeric<t_bool>() const
         t_str s2("true");
         t_str s3("TRUE");
 
-        if (strcmp(v, s1.c_str()) == 0 ||
-            strcmp(v, s2.c_str()) == 0 || strcmp(v, s3.c_str()) == 0)
+        if (strcmp(v, s1.c_str()) == 0 || strcmp(v, s2.c_str()) == 0
+            || strcmp(v, s3.c_str()) == 0)
         {
             rv.set(true);
             return rv;

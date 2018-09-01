@@ -27,19 +27,16 @@ t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
 {
 }
 
-t_ctx1::~t_ctx1()
-{
-}
+t_ctx1::~t_ctx1() {}
 
 void
 t_ctx1::init()
 {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(
-        pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
-    m_traversal = std::shared_ptr<t_traversal>(
-        new t_traversal(m_tree, m_config.handle_nan_sort()));
+    m_traversal
+        = std::shared_ptr<t_traversal>(new t_traversal(m_tree, m_config.handle_nan_sort()));
     m_minmax = t_minmaxvec(m_config.get_num_aggregates());
     m_init = true;
 }
@@ -101,15 +98,11 @@ t_ctx1::close(t_tvidx idx)
 }
 
 t_tscalvec
-t_ctx1::get_data(t_tvidx start_row,
-                 t_tvidx end_row,
-                 t_tvidx start_col,
-                 t_tvidx end_col) const
+t_ctx1::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx end_col) const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    auto ext = sanitize_get_data_extents(
-        *this, start_row, end_row, start_col, end_col);
+    auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
@@ -124,9 +117,7 @@ t_ctx1::get_data(t_tvidx start_row,
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size();
-         aggidx < loop_end;
-         ++aggidx)
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx)
     {
         const t_str& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
@@ -140,25 +131,18 @@ t_ctx1::get_data(t_tvidx start_row,
         t_ptidx pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX
-                                ? INVALID_INDEX
-                                : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
 
         t_tscalar tree_value = m_tree->get_value(nidx);
         tmpvalues[(ridx - ext.m_srow) * ncols] = tree_value;
 
-        for (t_index aggidx = 0, loop_end = aggcols.size();
-             aggidx < loop_end;
-             ++aggidx)
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx)
         {
-            t_tscalar value = extract_aggregate(aggspecs[aggidx],
-                                                aggcols[aggidx],
-                                                agg_ridx,
-                                                agg_pridx);
+            t_tscalar value
+                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
             if (!value.is_valid())
                 value.set(none);
-            tmpvalues[(ridx - ext.m_srow) * ncols + 1 + aggidx].set(
-                value);
+            tmpvalues[(ridx - ext.m_srow) * ncols + 1 + aggidx].set(value);
         }
     }
 
@@ -166,8 +150,7 @@ t_ctx1::get_data(t_tvidx start_row,
     {
         for (auto cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx)
         {
-            auto insert_idx =
-                (ridx - ext.m_srow) * stride + cidx - ext.m_scol;
+            auto insert_idx = (ridx - ext.m_srow) * stride + cidx - ext.m_scol;
             auto src_idx = (ridx - ext.m_srow) * ncols + cidx;
             values[insert_idx].set(tmpvalues[src_idx]);
         }
@@ -177,30 +160,15 @@ t_ctx1::get_data(t_tvidx start_row,
 }
 
 void
-t_ctx1::notify(const t_table& flattened,
-               const t_table& delta,
-               const t_table& prev,
-               const t_table& current,
-               const t_table& transitions,
-               const t_table& existed)
+t_ctx1::notify(const t_table& flattened, const t_table& delta, const t_table& prev,
+    const t_table& current, const t_table& transitions, const t_table& existed)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + " notify.enter");
-    notify_sparse_tree(m_tree,
-                       m_traversal,
-                       true,
-                       m_config.get_aggregates(),
-                       m_config.get_sortby_pairs(),
-                       m_sortby,
-                       flattened,
-                       delta,
-                       prev,
-                       current,
-                       transitions,
-                       existed,
-                       m_config,
-                       *m_state);
+    notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
+        m_config.get_sortby_pairs(), m_sortby, flattened, delta, prev, current, transitions,
+        existed, m_config, *m_state);
     psp_log_time(repr() + " notify.exit");
 }
 
@@ -277,8 +245,7 @@ t_ctx1::expand_to_depth(t_depth depth)
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (m_config.get_num_rpivots() == 0)
         return;
-    t_depth expand_depth =
-        std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
+    t_depth expand_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
     m_traversal->expand_to_depth(m_sortby, expand_depth);
 }
 
@@ -309,8 +276,7 @@ t_ctx1::get_pkeys(const t_uidxpvec& cells) const
         auto ptidx = m_traversal->get_tree_index(c.first);
         auto pkeys = m_tree->get_pkeys(ptidx);
 
-        rval.insert(
-            std::end(rval), std::begin(pkeys), std::end(pkeys));
+        rval.insert(std::end(rval), std::begin(pkeys), std::end(pkeys));
     }
     return rval;
 }
@@ -333,8 +299,7 @@ t_ctx1::get_cell_data(const t_uidxpvec& cells) const
     auto aggcols = aggtable->get_const_columns();
     const t_aggspecvec& aggspecs = m_config.get_aggregates();
 
-    for (t_index idx = 0, loop_end = cells.size(); idx < loop_end;
-         ++idx)
+    for (t_index idx = 0, loop_end = cells.size(); idx < loop_end; ++idx)
     {
         const auto& cell = cells[idx];
         if (cell.second == 0)
@@ -348,12 +313,10 @@ t_ctx1::get_cell_data(const t_uidxpvec& cells) const
 
         t_ptidx p_rptidx = m_tree->get_parent_idx(rptidx);
         t_uindex agg_ridx = m_tree->get_aggidx(rptidx);
-        t_index agg_pridx = p_rptidx == INVALID_INDEX
-                                ? INVALID_INDEX
-                                : m_tree->get_aggidx(p_rptidx);
+        t_index agg_pridx
+            = p_rptidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(p_rptidx);
 
-        rval[idx] = extract_aggregate(
-            aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+        rval[idx] = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
     }
 
     return rval;
@@ -402,9 +365,7 @@ t_ctx1::get_step_delta(t_tvidx bidx, t_tvidx eidx)
     bidx = std::min(bidx, t_tvidx(m_traversal->size()));
     eidx = std::min(eidx, t_tvidx(m_traversal->size()));
 
-    t_stepdelta rval(m_rows_changed,
-                     m_columns_changed,
-                     get_cell_delta(bidx, eidx));
+    t_stepdelta rval(m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_tree->clear_deltas();
     return rval;
 }
@@ -420,15 +381,11 @@ t_ctx1::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const
     for (t_tvidx idx = bidx; idx < eidx; ++idx)
     {
         t_ptidx ptidx = m_traversal->get_tree_index(idx);
-        auto iterators =
-            deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
-        for (auto iter = iterators.first; iter != iterators.second;
-             ++iter)
+        auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
+        for (auto iter = iterators.first; iter != iterators.second; ++iter)
         {
-            rval.push_back(t_cellupd(idx,
-                                     iter->m_aggidx + 1,
-                                     iter->m_old_value,
-                                     iter->m_new_value));
+            rval.push_back(
+                t_cellupd(idx, iter->m_aggidx + 1, iter->m_old_value, iter->m_new_value));
         }
     }
     return rval;
@@ -438,12 +395,11 @@ void
 t_ctx1::reset()
 {
     auto pivots = m_config.get_row_pivots();
-    m_tree = std::make_shared<t_stree>(
-        pivots, m_config.get_aggregates(), m_schema, m_config);
+    m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_tree->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
-    m_traversal = std::shared_ptr<t_traversal>(
-        new t_traversal(m_tree, m_config.handle_nan_sort()));
+    m_traversal
+        = std::shared_ptr<t_traversal>(new t_traversal(m_tree, m_config.handle_nan_sort()));
 }
 
 void
@@ -451,8 +407,7 @@ t_ctx1::reset_step_state()
 {
     if (t_env::log_progress())
     {
-        std::cout << "t_ctx1.reset_step_state " << repr()
-                  << std::endl;
+        std::cout << "t_ctx1.reset_step_state " << repr() << std::endl;
     }
 }
 
@@ -487,15 +442,8 @@ t_ctx1::notify(const t_table& flattened)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    notify_sparse_tree(m_tree,
-                       m_traversal,
-                       true,
-                       m_config.get_aggregates(),
-                       m_config.get_sortby_pairs(),
-                       m_sortby,
-                       flattened,
-                       m_config,
-                       *m_state);
+    notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
+        m_config.get_sortby_pairs(), m_sortby, flattened, m_config, *m_state);
 }
 
 void
@@ -504,8 +452,7 @@ t_ctx1::pprint() const
     std::cout << "\t" << std::endl;
     for (auto idx = 1; idx < get_column_count(); ++idx)
     {
-        std::cout << get_aggregate(idx - 1).agg_str() << ", "
-                  << std::endl;
+        std::cout << get_aggregate(idx - 1).agg_str() << ", " << std::endl;
     }
 
     t_colcptrvec aggcols(m_config.get_num_aggregates());
@@ -513,9 +460,7 @@ t_ctx1::pprint() const
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
-    for (t_uindex aggidx = 0, loop_end = aggcols.size();
-         aggidx < loop_end;
-         ++aggidx)
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx)
     {
         const t_str& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
@@ -529,19 +474,13 @@ t_ctx1::pprint() const
         t_ptidx pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
-        t_index agg_pridx = pnidx == INVALID_INDEX
-                                ? INVALID_INDEX
-                                : m_tree->get_aggidx(pnidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
 
         std::cout << get_row_path(ridx) << " => ";
-        for (t_index aggidx = 0, loop_end = aggcols.size();
-             aggidx < loop_end;
-             ++aggidx)
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx)
         {
-            t_tscalar value = extract_aggregate(aggspecs[aggidx],
-                                                aggcols[aggidx],
-                                                agg_ridx,
-                                                agg_pridx);
+            t_tscalar value
+                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
             if (!value.is_valid())
                 value.set(none);
 
@@ -571,9 +510,7 @@ t_ctx1::get_column_dtype(t_uindex idx) const
 {
     if (idx == 0 || idx >= static_cast<t_uindex>(get_column_count()))
         return DTYPE_NONE;
-    return m_tree->get_aggtable()
-        ->get_const_column(idx - 1)
-        ->get_dtype();
+    return m_tree->get_aggtable()->get_const_column(idx - 1)->get_dtype();
 }
 
 t_depth
@@ -640,9 +577,7 @@ t_ctx1::unity_get_column_names() const
 {
     t_svec rv;
 
-    for (t_uindex idx = 0, loop_end = unity_get_column_count();
-         idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx)
     {
         rv.push_back(unity_get_column_name(idx));
     }
@@ -654,9 +589,7 @@ t_ctx1::unity_get_column_display_names() const
 {
     t_svec rv;
 
-    for (t_uindex idx = 0, loop_end = unity_get_column_count();
-         idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx)
     {
         rv.push_back(unity_get_column_display_name(idx));
     }

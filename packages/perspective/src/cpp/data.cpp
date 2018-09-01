@@ -12,11 +12,10 @@
 
 namespace perspective
 {
-t_data::t_data()
-{
-}
+t_data::t_data() {}
 
-t_data::t_data(const t_tscalvec& data) : m_data(data)
+t_data::t_data(const t_tscalvec& data)
+    : m_data(data)
 {
 }
 
@@ -31,4 +30,4 @@ t_data::data()
 {
     return m_data;
 }
-}
+} // namespace perspective

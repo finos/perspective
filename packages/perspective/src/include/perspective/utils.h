@@ -74,20 +74,14 @@ inline void
 ltrim_inplace(t_str& s)
 {
     s.erase(s.begin(),
-            std::find_if(
-                s.begin(),
-                s.end(),
-                std::not1(std::ptr_fun<int, int>(std::isspace))));
+        std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
 
 inline void
 rtrim_inplace(t_str& s)
 {
-    s.erase(
-        std::find_if(s.rbegin(),
-                     s.rend(),
-                     std::not1(std::ptr_fun<int, int>(std::isspace)))
-            .base(),
+    s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace)))
+                .base(),
         s.end());
 }
 
@@ -150,8 +144,9 @@ class t_cmod
 {
     t_color_code m_code;
 
-  public:
-    t_cmod(t_color_code code) : m_code(code)
+public:
+    t_cmod(t_color_code code)
+        : m_code(code)
     {
     }
 
@@ -172,16 +167,15 @@ struct t_ns_timer
     std::function<void(int)> m_cb;
 
     t_ns_timer(std::function<void(int)> callback)
-        : m_t0(std::chrono::high_resolution_clock::now()),
-          m_cb(callback)
+        : m_t0(std::chrono::high_resolution_clock::now())
+        , m_cb(callback)
     {
     }
     ~t_ns_timer(void)
     {
-        auto nanos =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(
-                std::chrono::high_resolution_clock::now() - m_t0)
-                .count();
+        auto nanos = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            std::chrono::high_resolution_clock::now() - m_t0)
+                         .count();
 
         m_cb(static_cast<int>(nanos));
     }
@@ -198,8 +192,7 @@ join_str(const t_svec& terms, const t_str& sep)
 
     t_str rv;
 
-    for (size_t idx = 0, loop_end = terms.size() - 1; idx < loop_end;
-         ++idx)
+    for (size_t idx = 0, loop_end = terms.size() - 1; idx < loop_end; ++idx)
     {
         rv = rv + terms[idx] + sep;
     }
@@ -207,4 +200,4 @@ join_str(const t_svec& terms, const t_str& sep)
     rv = rv + terms.back();
     return rv;
 }
-}
+} // namespace perspective

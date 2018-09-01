@@ -28,9 +28,10 @@ const int SECS_PER_HOUR = 60 * 60;
 const int SECS_PER_DAY = SECS_PER_HOUR * 24;
 static unsigned short const int __mon_yday[2][13] = {
     /* Normal years.  */
-    {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365},
+    { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
     /* Leap years.  */
-    {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366}};
+    { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
+};
 class t_time;
 
 // A simple difference in ms between two t_times can be
@@ -45,8 +46,7 @@ struct t_tdelta
     // Gets, say, a time difference twice as long as the
     // current value.
     t_tdelta& operator*=(t_int64 multiplier);
-    friend std::ostream& operator<<(std::ostream& s,
-                                    const t_tdelta& td);
+    friend std::ostream& operator<<(std::ostream& s, const t_tdelta& td);
     friend class t_time;
 };
 
@@ -54,12 +54,8 @@ t_int32 isleap(long int year);
 t_int32 days_before_year(t_int32 year);
 t_int32 days_before_month(t_int32 year, t_int32 month);
 t_int32 ymd_to_ord(t_int32 year, t_int32 month, t_int32 day);
-t_int64 to_gmtime(t_int32 year,
-                  t_int32 month,
-                  t_int32 day,
-                  t_int32 hour,
-                  t_int32 min,
-                  t_int32 sec);
+t_int64 to_gmtime(
+    t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec);
 
 // Interal details: m_storage stores "microseconds since the
 // epoch-defined-in-the-class".
@@ -75,17 +71,12 @@ t_int64 to_gmtime(t_int32 year,
 // A microseconds() in the range [0..999].
 class PERSPECTIVE_EXPORT t_time
 {
-  public:
+public:
     typedef t_int64 t_rawtype;
 
     t_time();
     explicit t_time(t_int64 raw_val);
-    t_time(t_int32 year,
-           t_int32 month,
-           t_int32 day,
-           t_int32 hour,
-           t_int32 min,
-           t_int32 sec);
+    t_time(t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec);
 
     t_int64 raw_value() const;
 
@@ -95,13 +86,11 @@ class PERSPECTIVE_EXPORT t_time
     friend bool operator>=(const t_time& a, const t_time& b);
     friend bool operator==(const t_time& a, const t_time& b);
     friend bool operator!=(const t_time& a, const t_time& b);
-    friend std::ostream& operator<<(std::ostream& os,
-                                    const t_time& t);
+    friend std::ostream& operator<<(std::ostream& os, const t_time& t);
 
     bool as_tm(struct tm& out) const;
 
-    t_int32
-    gmtime(struct tm& out, t_int64 secs, t_int32 offset) const;
+    t_int32 gmtime(struct tm& out, t_int64 secs, t_int32 offset) const;
 
     t_int32 year(const struct tm& t) const;
     t_int32 month(const struct tm& t) const;
@@ -122,7 +111,7 @@ class PERSPECTIVE_EXPORT t_time
 
     friend t_tdelta operator-(const t_time& a, const t_time& b);
 
-  private:
+private:
     t_rawtype m_storage;
 };
 
@@ -139,9 +128,7 @@ hash_value(const t_time& t)
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& s,
-                         const perspective::t_tdelta& td);
+std::ostream& operator<<(std::ostream& s, const perspective::t_tdelta& td);
 
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_time& t);
-}
+std::ostream& operator<<(std::ostream& os, const perspective::t_time& t);
+} // namespace std

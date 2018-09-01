@@ -14,19 +14,18 @@
 namespace perspective
 {
 t_rlookup::t_rlookup(t_uindex idx, t_bool exists)
-    : m_idx(idx), m_exists(exists)
+    : m_idx(idx)
+    , m_exists(exists)
 {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_rlookup");
 }
 
-t_rlookup::t_rlookup()
-{
-}
+t_rlookup::t_rlookup() {}
 
 t_rlookup::~t_rlookup()
 {
     PSP_TRACE_SENTINEL();
     LOG_DESTRUCTOR("t_rlookup");
 }
-}
+} // namespace perspective

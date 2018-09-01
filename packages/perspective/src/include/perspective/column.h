@@ -63,11 +63,9 @@ class t_column;
 typedef std::shared_ptr<t_column> t_col_sptr;
 
 #ifdef PSP_COLUMN_VERIFY
-#define COLUMN_CHECK_ACCESS(idx)                                     \
-    PSP_VERBOSE_ASSERT((idx) <= m_size, "Invalid column access")
+#define COLUMN_CHECK_ACCESS(idx) PSP_VERBOSE_ASSERT((idx) <= m_size, "Invalid column access")
 #define COLUMN_CHECK_VALUES() verify()
-#define COLUMN_CHECK_STRCOL()                                        \
-    PSP_VERBOSE_ASSERT(m_isvlen, "Expected to use string column")
+#define COLUMN_CHECK_STRCOL() PSP_VERBOSE_ASSERT(m_isvlen, "Expected to use string column")
 #else
 #define COLUMN_CHECK_ACCESS(idx)
 #define COLUMN_CHECK_VALUES()
@@ -76,19 +74,15 @@ typedef std::shared_ptr<t_column> t_col_sptr;
 
 class PERSPECTIVE_EXPORT t_column
 {
-  public:
+public:
 #ifdef PSP_DBG_MALLOC
     PSP_NEW_DELETE(t_column)
 #endif
     t_column();
     t_column(const t_column_recipe& recipe);
-    t_column(t_dtype dtype,
-             t_bool missing_enabled,
-             const t_lstore_recipe& a);
-    t_column(t_dtype dtype,
-             t_bool missing_enabled,
-             const t_lstore_recipe& a,
-             t_uindex row_capacity);
+    t_column(t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a);
+    t_column(
+        t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity);
     ~t_column();
 
     void column_copy_helper(const t_column& other);
@@ -179,9 +173,7 @@ class PERSPECTIVE_EXPORT t_column
     void clear();
 
     template <typename VEC_T>
-    void fill(VEC_T& vec,
-              const t_uindex* bidx,
-              const t_uindex* eidx) const;
+    void fill(VEC_T& vec, const t_uindex* bidx, const t_uindex* eidx) const;
 
     void pprint() const;
 
@@ -210,13 +202,9 @@ class PERSPECTIVE_EXPORT t_column
     void valid_raw_fill(t_bool value);
 
     template <typename DATA_T>
-    void copy_helper(const t_column* other,
-                     const t_uidxvec& indices,
-                     t_uindex offset);
+    void copy_helper(const t_column* other, const t_uidxvec& indices, t_uindex offset);
 
-    void copy(const t_column* other,
-              const t_uidxvec& indices,
-              t_uindex offset);
+    void copy(const t_column* other, const t_uidxvec& indices, t_uindex offset);
 
     void clear(t_uindex idx);
 
@@ -230,7 +218,7 @@ class PERSPECTIVE_EXPORT t_column
 
     void borrow_vocabulary(const t_column& o);
 
-  private:
+private:
     t_dtype m_dtype;
     t_bool m_init;
     t_bool m_isvlen;
@@ -253,7 +241,6 @@ class PERSPECTIVE_EXPORT t_column
     t_uint32 m_elemsize;
 };
 
-
 typedef std::shared_ptr<t_column> t_col_sptr;
 typedef std::shared_ptr<const t_column> t_col_csptr;
 typedef std::vector<t_col_sptr> t_colsptrvec;
@@ -262,39 +249,32 @@ typedef std::vector<t_col_sptr> t_colsptrvec;
 typedef std::vector<t_col_csptr> t_colcsptrvec;
 
 template <>
-PERSPECTIVE_EXPORT void
-t_column::push_back<const char*>(const char* elem);
+PERSPECTIVE_EXPORT void t_column::push_back<const char*>(const char* elem);
 
 template <>
 PERSPECTIVE_EXPORT void t_column::push_back<char*>(char* elem);
 
 template <>
-PERSPECTIVE_EXPORT void
-t_column::push_back<std::string>(std::string elem);
+PERSPECTIVE_EXPORT void t_column::push_back<std::string>(std::string elem);
 
 template <>
-PERSPECTIVE_EXPORT void
-t_column::push_back<t_tscalar>(t_tscalar elem);
+PERSPECTIVE_EXPORT void t_column::push_back<t_tscalar>(t_tscalar elem);
 
 template <>
-PERSPECTIVE_EXPORT void
-t_column::set_nth<const char*>(t_uindex idx, const char* elem);
+PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(t_uindex idx, const char* elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx,
-                                                 t_str elem);
+PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx, t_str elem);
 
 template <>
 PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
     t_uindex idx, const char* elem, t_bool valid);
 
 template <>
-PERSPECTIVE_EXPORT void
-t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_bool valid);
+PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_bool valid);
 
 template <>
-PERSPECTIVE_EXPORT const char*
-t_column::get_nth<const char>(t_uindex idx) const;
+PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(t_uindex idx) const;
 
 template <typename T>
 T*
@@ -354,8 +334,7 @@ template <typename DATA_T>
 void
 t_column::push_back(DATA_T elem, t_bool valid)
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not enabled for column");
+    PSP_VERBOSE_ASSERT(is_valid_enabled(), "Validity not enabled for column");
     m_data->push_back(elem);
     m_valid->push_back(valid);
     ++m_size;
@@ -391,25 +370,19 @@ t_column::set_nth(t_uindex idx, T v, t_bool valid)
 
 template <>
 void t_column::fill<std::vector<const char*>>(
-    std::vector<const char*>& vec,
-    const t_uindex* bidx,
-    const t_uindex* eidx) const;
+    std::vector<const char*>& vec, const t_uindex* bidx, const t_uindex* eidx) const;
 
 template <typename VEC_T>
 void
-t_column::fill(VEC_T& vec,
-               const t_uindex* bidx,
-               const t_uindex* eidx) const
+t_column::fill(VEC_T& vec, const t_uindex* bidx, const t_uindex* eidx) const
 {
 
     PSP_VERBOSE_ASSERT(eidx - bidx > 0, "Invalid pointers passed in");
 
-    for (t_uindex idx = 0, loop_end = eidx - bidx; idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = eidx - bidx; idx < loop_end; ++idx)
 
     {
-        vec[idx] =
-            *(get_nth<typename VEC_T::value_type>(*(bidx + idx)));
+        vec[idx] = *(get_nth<typename VEC_T::value_type>(*(bidx + idx)));
     }
 }
 
@@ -418,8 +391,7 @@ void
 t_column::set_nth_body(t_uindex idx, DATA_T elem, bool valid)
 {
     COLUMN_CHECK_ACCESS(idx);
-    PSP_VERBOSE_ASSERT(m_dtype == DTYPE_STR,
-                       "Setting non string column");
+    PSP_VERBOSE_ASSERT(m_dtype == DTYPE_STR, "Setting non string column");
     t_uindex interned = m_vocab->get_interned(elem);
     m_data->set_nth<t_uindex>(idx, interned);
 
@@ -440,26 +412,22 @@ template <typename VOCAB_T>
 void
 t_column::set_vocabulary(const VOCAB_T& vocab, size_t total_size)
 {
-    if( total_size )
-        m_vocab->reserve( total_size, vocab.size() + 1 );
+    if (total_size)
+        m_vocab->reserve(total_size, vocab.size() + 1);
 
     for (const auto& kv : vocab)
         m_vocab->get_interned(kv.first.get_char_ptr());
 }
 
 template <>
-void t_column::copy_helper<const char>(const t_column* other,
-                                       const t_uidxvec& indices,
-                                       t_uindex offset);
+void t_column::copy_helper<const char>(
+    const t_column* other, const t_uidxvec& indices, t_uindex offset);
 
 template <typename DATA_T>
 void
-t_column::copy_helper(const t_column* other,
-                      const t_uidxvec& indices,
-                      t_uindex offset)
+t_column::copy_helper(const t_column* other, const t_uidxvec& indices, t_uindex offset)
 {
-    t_uindex eidx = std::min(other->size(),
-                             static_cast<t_uindex>(indices.size()));
+    t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
     const DATA_T* o_base = other->get_nth<DATA_T>(0);

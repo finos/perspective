@@ -138,14 +138,11 @@ struct t_hdf5_tag
 {
 };
 
-
-
 struct t_extent_pair
 {
     t_uindex m_begin;
     t_uindex m_end;
 };
-
 
 struct t_column_static_ctx
 {

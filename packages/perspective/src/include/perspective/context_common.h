@@ -12,7 +12,6 @@
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
 
-
 namespace perspective
 {
 
@@ -26,11 +25,8 @@ struct t_get_data_extents
 
 template <typename CONTEXT_T>
 t_get_data_extents
-sanitize_get_data_extents(const CONTEXT_T& ctx,
-                          t_tvidx start_row,
-                          t_tvidx end_row,
-                          t_tvidx start_col,
-                          t_tvidx end_col)
+sanitize_get_data_extents(const CONTEXT_T& ctx, t_tvidx start_row, t_tvidx end_row,
+    t_tvidx start_col, t_tvidx end_col)
 {
     t_index ncols = ctx.get_column_count();
 
@@ -56,4 +52,4 @@ sanitize_get_data_extents(const CONTEXT_T& ctx,
 
     return rval;
 }
-}
+} // namespace perspective

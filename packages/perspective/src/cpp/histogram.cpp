@@ -12,20 +12,19 @@
 
 namespace perspective
 {
-t_hist_bucket::t_hist_bucket(t_tscalar begin,
-                             t_tscalar end,
-                             t_uindex count)
-    : m_begin(begin), m_end(end), m_count(count)
+t_hist_bucket::t_hist_bucket(t_tscalar begin, t_tscalar end, t_uindex count)
+    : m_begin(begin)
+    , m_end(end)
+    , m_count(count)
 {
 }
 
-t_hist_bucket::t_hist_bucket() : m_count(0)
+t_hist_bucket::t_hist_bucket()
+    : m_count(0)
 {
 }
 
-t_histogram::t_histogram()
-{
-}
+t_histogram::t_histogram() {}
 
 t_histogram::t_histogram(t_uindex nbuckets)
     : m_buckets(t_hist_bucket_vec(nbuckets))

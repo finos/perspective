@@ -81,6 +81,5 @@ size_t hash_value(const t_none& none);
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_none& dt);
+std::ostream& operator<<(std::ostream& os, const perspective::t_none& dt);
 }

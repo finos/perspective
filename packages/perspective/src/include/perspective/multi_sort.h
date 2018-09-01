@@ -44,9 +44,8 @@ namespace std
 inline std::ostream&
 operator<<(std::ostream& os, const perspective::t_mselem& t)
 {
-    os << "mse<pkey => " << t.m_pkey << " row => " << t.m_row
-       << " deleted => " << t.m_deleted << " order => " << t.m_order
-       << ">";
+    os << "mse<pkey => " << t.m_pkey << " row => " << t.m_row << " deleted => " << t.m_deleted
+       << " order => " << t.m_order << ">";
     return os;
 }
 
@@ -73,8 +72,7 @@ struct PERSPECTIVE_EXPORT t_minmax_idx
 
 // Given a vector return the indices of the
 // minimum and maximum elements in it.
-PERSPECTIVE_EXPORT t_minmax_idx get_minmax_idx(const t_tscalvec& vec,
-                                               t_sorttype stype);
+PERSPECTIVE_EXPORT t_minmax_idx get_minmax_idx(const t_tscalvec& vec, t_sorttype stype);
 
 typedef std::vector<t_mselem> t_mselemvec;
 typedef std::shared_ptr<t_mselemvec> t_mselemvec_sptr;
@@ -90,20 +88,16 @@ struct PERSPECTIVE_EXPORT t_nancmp
     t_cmp_op m_cmpval;
 };
 
-PERSPECTIVE_EXPORT t_nancmp nan_compare(t_sorttype order,
-                                        const t_tscalar& a,
-                                        const t_tscalar& b);
+PERSPECTIVE_EXPORT t_nancmp nan_compare(
+    t_sorttype order, const t_tscalar& a, const t_tscalar& b);
 
 inline PERSPECTIVE_EXPORT t_bool
-cmp_mselem(const t_mselem& a,
-           const t_mselem& b,
-           const t_sorttvec& sort_order,
-           t_bool handle_nans)
+cmp_mselem(
+    const t_mselem& a, const t_mselem& b, const t_sorttvec& sort_order, t_bool handle_nans)
 {
     typedef std::pair<t_float64, t_tscalar> dpair;
 
-    if (a.m_row.size() != b.m_row.size() ||
-        a.m_row.size() != sort_order.size())
+    if (a.m_row.size() != b.m_row.size() || a.m_row.size() != sort_order.size())
     {
         std::cout << "ERROR detected in MultiSort." << std::endl;
         return false;
@@ -112,8 +106,7 @@ cmp_mselem(const t_mselem& a,
     t_tscalar first_pkey = a.m_pkey;
     t_tscalar second_pkey = b.m_pkey;
 
-    for (int idx = 0, loop_end = sort_order.size(); idx < loop_end;
-         ++idx)
+    for (int idx = 0, loop_end = sort_order.size(); idx < loop_end; ++idx)
     {
         const t_tscalar& first = a.m_row[idx];
         const t_tscalar& second = b.m_row[idx];
@@ -121,8 +114,7 @@ cmp_mselem(const t_mselem& a,
         t_sorttype order = sort_order[idx];
         t_nancmp nancmp = nan_compare(order, first, second);
 
-        if (handle_nans && first.is_floating_point() &&
-            nancmp.m_active)
+        if (handle_nans && first.is_floating_point() && nancmp.m_active)
         {
             switch (nancmp.m_cmpval)
             {
@@ -164,16 +156,14 @@ cmp_mselem(const t_mselem& a,
             {
                 t_float64 val_a = first.to_double();
                 t_float64 val_b = second.to_double();
-                return dpair(std::abs(val_a), first_pkey) <
-                       dpair(std::abs(val_b), second_pkey);
+                return dpair(std::abs(val_a), first_pkey) < dpair(std::abs(val_b), second_pkey);
             }
             break;
             case SORTTYPE_DESCENDING_ABS:
             {
                 t_float64 val_a = first.to_double();
                 t_float64 val_b = second.to_double();
-                return dpair(std::abs(val_a), first_pkey) >
-                       dpair(std::abs(val_b), second_pkey);
+                return dpair(std::abs(val_a), first_pkey) > dpair(std::abs(val_b), second_pkey);
             }
             break;
             case SORTTYPE_NONE:
@@ -192,10 +182,8 @@ cmp_mselem(const t_mselem& a,
 }
 
 inline PERSPECTIVE_EXPORT t_bool
-cmp_mselem(const t_mselem* a,
-           const t_mselem* b,
-           const t_sorttvec& sort_order,
-           t_bool handle_nans)
+cmp_mselem(
+    const t_mselem* a, const t_mselem* b, const t_sorttvec& sort_order, t_bool handle_nans)
 {
     return cmp_mselem(*a, *b, sort_order, handle_nans);
 }
@@ -206,9 +194,7 @@ struct PERSPECTIVE_EXPORT t_multisorter
 {
     t_multisorter(const t_sorttvec& order, t_bool handle_nans);
 
-    t_multisorter(t_mselemvec_csptr elems,
-                  const t_sorttvec& order,
-                  t_bool handle_nans);
+    t_multisorter(t_mselemvec_csptr elems, const t_sorttvec& order, t_bool handle_nans);
 
     bool operator()(const t_mselem& a, const t_mselem& b) const;
 

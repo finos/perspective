@@ -26,89 +26,68 @@ namespace perspective
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
 class PERSPECTIVE_EXPORT t_aggimpl
 {
-  public:
+public:
     typedef RAW_DATA_T t_raw_data;
     typedef ROLLING_T t_rolling;
     typedef RESULT_T t_result;
 
     RESULT_T value(ROLLING_T rs);
-    ROLLING_T reduce(const RAW_DATA_T* biter,
-                     const RAW_DATA_T* eiter);
+    ROLLING_T reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter);
     ROLLING_T roll_up(const ROLLING_T* biter, const ROLLING_T* eiter);
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_sum
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_sum : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
     {
-        ROLLING_T value =
-            std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
+        ROLLING_T value = std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
         return value;
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter)
     {
-        ROLLING_T value =
-            std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
+        ROLLING_T value = std::accumulate(biter, eiter, static_cast<ROLLING_T>(0));
         return value;
     }
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_mul
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_mul : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
     {
-        ROLLING_T value =
-            std::accumulate(biter,
-                            eiter,
-                            static_cast<ROLLING_T>(1),
-                            std::multiplies<ROLLING_T>());
+        ROLLING_T value = std::accumulate(
+            biter, eiter, static_cast<ROLLING_T>(1), std::multiplies<ROLLING_T>());
         return value;
     }
 
     ROLLING_T
     roll_up(const ROLLING_T* biter, const ROLLING_T* eiter)
     {
-        ROLLING_T value =
-            std::accumulate(biter,
-                            eiter,
-                            static_cast<ROLLING_T>(1),
-                            std::multiplies<ROLLING_T>());
+        ROLLING_T value = std::accumulate(
+            biter, eiter, static_cast<ROLLING_T>(1), std::multiplies<ROLLING_T>());
         return value;
     }
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_count
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_count : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
@@ -127,22 +106,17 @@ class PERSPECTIVE_EXPORT t_aggimpl_count
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_mean
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_mean : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return rs.first / rs.second;
-    }
+    value(ROLLING_T rs) { return rs.first / rs.second; }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
     {
 
-        t_float64 sum =
-            std::accumulate(biter, eiter, static_cast<t_float64>(0));
+        t_float64 sum = std::accumulate(biter, eiter, static_cast<t_float64>(0));
 
         t_float64 count = eiter - biter;
 
@@ -171,12 +145,9 @@ template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
 class PERSPECTIVE_EXPORT t_aggimpl_last_value
     : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
@@ -197,15 +168,11 @@ class PERSPECTIVE_EXPORT t_aggimpl_last_value
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_hwm
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_hwm : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
@@ -225,15 +192,11 @@ class PERSPECTIVE_EXPORT t_aggimpl_hwm
 };
 
 template <typename RAW_DATA_T, typename ROLLING_T, typename RESULT_T>
-class PERSPECTIVE_EXPORT t_aggimpl_lwm
-    : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
+class PERSPECTIVE_EXPORT t_aggimpl_lwm : public t_aggimpl<RAW_DATA_T, ROLLING_T, RESULT_T>
 {
-  public:
+public:
     RESULT_T
-    value(ROLLING_T rs)
-    {
-        return RESULT_T(rs);
-    }
+    value(ROLLING_T rs) { return RESULT_T(rs); }
 
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter)
@@ -254,17 +217,15 @@ class PERSPECTIVE_EXPORT t_aggimpl_lwm
 
 class PERSPECTIVE_EXPORT t_aggregate
 {
-  public:
-    t_aggregate(const t_dtree& tree,
-                t_aggtype aggtype,
-                t_colcsptrvec icolumns,
-                t_col_sptr column);
+public:
+    t_aggregate(
+        const t_dtree& tree, t_aggtype aggtype, t_colcsptrvec icolumns, t_col_sptr column);
     void init();
 
     template <typename AGGIMPL_T>
     void build_aggregate();
 
-  private:
+private:
     const t_dtree& m_tree;
     t_aggtype m_aggtype;
     t_colcsptrvec m_icolumns;
@@ -272,16 +233,12 @@ class PERSPECTIVE_EXPORT t_aggregate
 };
 
 template <typename AGGIMPL_T,
-          typename std::enable_if<
-              !std::is_same<const char*,
-                            typename AGGIMPL_T::t_rolling>::value,
-              int>::type = 0>
+    typename std::enable_if<!std::is_same<const char*, typename AGGIMPL_T::t_rolling>::value,
+        int>::type
+    = 0>
 void
-build_aggregate_helper(AGGIMPL_T& aggimpl,
-                       t_ptidx bcidx,
-                       t_ptidx ecidx,
-                       t_column* ocolumn,
-                       t_ptidx nidx)
+build_aggregate_helper(
+    AGGIMPL_T& aggimpl, t_ptidx bcidx, t_ptidx ecidx, t_column* ocolumn, t_ptidx nidx)
 {
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     const t_rolling* biter = ocolumn->get_nth<t_rolling>(bcidx);
@@ -291,16 +248,12 @@ build_aggregate_helper(AGGIMPL_T& aggimpl,
 }
 
 template <typename AGGIMPL_T,
-          typename std::enable_if<
-              std::is_same<const char*,
-                           typename AGGIMPL_T::t_rolling>::value,
-              int>::type = 0>
+    typename std::enable_if<std::is_same<const char*, typename AGGIMPL_T::t_rolling>::value,
+        int>::type
+    = 0>
 void
-build_aggregate_helper(AGGIMPL_T& aggimpl,
-                       t_ptidx bcidx,
-                       t_ptidx ecidx,
-                       t_column* ocolumn,
-                       t_ptidx nidx)
+build_aggregate_helper(
+    AGGIMPL_T& aggimpl, t_ptidx bcidx, t_ptidx ecidx, t_column* ocolumn, t_ptidx nidx)
 {
     const t_column* c_ocolumn = ocolumn;
     typedef typename AGGIMPL_T::t_rolling t_rolling;
@@ -308,16 +261,14 @@ build_aggregate_helper(AGGIMPL_T& aggimpl,
     for (t_ptidx sidx = bcidx; sidx < ecidx; ++sidx)
     {
 
-        auto tmpv = c_ocolumn->get_nth<const char>(
-            static_cast<t_uindex>(sidx));
+        auto tmpv = c_ocolumn->get_nth<const char>(static_cast<t_uindex>(sidx));
         sbuf[sidx - bcidx] = tmpv;
     }
 
     if (!sbuf.empty())
     {
 
-        t_rolling rolling =
-            aggimpl.roll_up(sbuf.data(), sbuf.data() + sbuf.size());
+        t_rolling rolling = aggimpl.roll_up(sbuf.data(), sbuf.data() + sbuf.size());
         ocolumn->set_nth<t_rolling>(nidx, rolling);
     }
 }
@@ -338,9 +289,7 @@ t_aggregate::build_aggregate()
     typedef typename t_dtree::t_tnode t_tnode;
     t_column* ocolumn = m_ocolumn.get();
 
-    PSP_VERBOSE_ASSERT(
-        m_icolumns.size() == 1,
-        "Multiple input dependencies not supported yet");
+    PSP_VERBOSE_ASSERT(m_icolumns.size() == 1, "Multiple input dependencies not supported yet");
 
     const t_column* icptr = m_icolumns[0].get();
     t_uindex icptr_size = icptr->size();
@@ -370,8 +319,7 @@ t_aggregate::build_aggregate()
                 const t_uindex* blptr = base_lcptr + n.m_flidx;
                 const t_uindex* elptr = blptr + n.m_nleaves;
 
-                PSP_VERBOSE_ASSERT(elptr > blptr,
-                                   "Unexpected pointers");
+                PSP_VERBOSE_ASSERT(elptr > blptr, "Unexpected pointers");
 
                 icptr->fill(buffer, blptr, elptr);
 
@@ -392,8 +340,7 @@ t_aggregate::build_aggregate()
                 t_ptidx bcidx = n.m_fcidx;
                 t_ptidx ecidx = bcidx + n.m_nchild;
 
-                build_aggregate_helper(
-                    aggimpl, bcidx, ecidx, ocolumn, nidx);
+                build_aggregate_helper(aggimpl, bcidx, ecidx, ocolumn, nidx);
             }
         }
     }

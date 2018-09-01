@@ -34,6 +34,5 @@ typedef std::vector<t_minmax> t_minmaxvec;
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_minmax& mm);
+std::ostream& operator<<(std::ostream& os, const perspective::t_minmax& mm);
 } // end namespace std
