@@ -1057,6 +1057,7 @@ int
 main(int argc, char** argv)
 {
     std::cout << "Perspective initialized successfully." << std::endl;
+    // clang-format off
     EM_ASM({
         if (global.dispatchEvent && !global._perspective_initialized && global.document)
         {
@@ -1065,11 +1066,12 @@ main(int argc, char** argv)
             event.initEvent("perspective-ready", false, true);
             global.dispatchEvent(event);
         }
-        else if (!global.document&& typeof self != = "undefined")
+        else if (!global.document&& typeof self !== "undefined")
         {
             self.postMessage({});
         }
     });
+    // clang-format on
 }
 
 /******************************************************************************
