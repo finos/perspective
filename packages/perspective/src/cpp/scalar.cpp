@@ -1499,12 +1499,12 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const
         break;
         case FILTER_OP_IS_NAN:
         {
-            return isnan(to_double());
+            return std::isnan(to_double());
         }
         break;
         case FILTER_OP_IS_NOT_NAN:
         {
-            return !isnan(to_double());
+            return !std::isnan(to_double());
         }
         break;
         case FILTER_OP_IS_VALID:
