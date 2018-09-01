@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.11)
 project (psp)
 
 if (NOT PSP_WASM_BUILD)
-	set(PSP_WASM_BUILD OFF)
+	set(PSP_WASM_BUILD ON)
 endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
