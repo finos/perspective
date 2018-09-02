@@ -248,6 +248,7 @@ template<typename T>
 void
 _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
 {
+    // iterates through dcol, sets them on the c++ column
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -256,7 +257,13 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
-            if (dcol[i].isUndefined() || dcol[i].isNull()) continue;
+            if (dcol[i].isUndefined()) continue;
+
+            if (dcol[i].isNull()) {
+                col->clear(i);
+                continue;
+            }
+
             auto elem = dcol[i].as<T>();
             col->set_nth(i, elem);
         }
@@ -307,6 +314,12 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
         for (auto i = 0; i < nrows; ++i)
         {
             if (dcol[i].isUndefined()) continue;
+            
+            if (dcol[i].isNull()) {
+                col->clear(i);
+                continue;
+            }
+
             auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
             col->set_nth(i, elem);
         }
@@ -332,6 +345,12 @@ _fill_col<t_bool>(val dcol, t_col_sptr col, t_bool is_arrow)
         for (auto i = 0; i < nrows; ++i)
         {
             if (dcol[i].isUndefined()) continue;
+
+            if (dcol[i].isNull()) {
+                col->clear(i);
+                continue;
+            }
+
             auto elem = dcol[i].as<t_bool>();
             col->set_nth(i, elem);
         }
@@ -389,6 +408,12 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
         for (auto i = 0; i < nrows; ++i)
         {
             if (dcol[i].isUndefined()) continue;
+            
+            if (dcol[i].isNull()) {
+                col->clear(i);
+                continue;
+            }
+            
             std::wstring welem = dcol[i].as<std::wstring>();
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
