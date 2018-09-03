@@ -7,11 +7,13 @@
  *
  */
 
+import {COLUMN_SEPARATOR_STRING} from "@jpmorganchase/perspective/src/js/defaults.js";
+
 const TREE_COLUMN_INDEX = require('fin-hypergrid/src/behaviors/Behavior').prototype.treeColumnIndex;
 
 function filter_hidden(hidden, json) {
     for (let key of Object.keys(json)) {
-        const split_key = key.split(',');
+        const split_key = key.split(COLUMN_SEPARATOR_STRING);
         if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
             delete json[key];
         }
@@ -36,7 +38,7 @@ function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
     var is_tree = !!row_pivots.length;
 
     var flat_columns = Object.keys(data).filter(row => row !== '__ROW_PATH__');
-    var columnPaths = flat_columns.map(row => row.split(','));
+    var columnPaths = flat_columns.map(row => row.split(COLUMN_SEPARATOR_STRING));
 
     let rows = [];
 

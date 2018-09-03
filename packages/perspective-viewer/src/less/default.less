@@ -121,14 +121,20 @@ perspective-viewer {
     }
 
     #app.columns_horizontal {
+        #side_panel {
+            max-width: none;
+        }
+
         #columns_container {
             flex-direction: row-reverse;
         }
+
         #active_columns, #inactive_columns {
             display: flex;
             flex-direction: column;
             flex: 1 !important;
         }
+
         #active_columns {
             padding-right: 8px;
             perspective-row {

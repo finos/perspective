@@ -7,10 +7,7 @@
  *
  */
 
-/******************************************************************************
- *
- * Y
- */
+import {COLUMN_SEPARATOR_STRING} from "@jpmorganchase/perspective/src/js/defaults.js";
 
 function row_to_series(series, sname, gname) {
     let s;
@@ -89,12 +86,12 @@ class ColumnsIterator {
         for (let row of this.rows) {
             if (this.columns === undefined) {
                 this.columns = Object.keys(row).filter(prop => {
-                    let cname = prop.split(',');
+                    let cname = prop.split(COLUMN_SEPARATOR_STRING);
                     cname = cname[cname.length - 1];
                     return prop !== "__ROW_PATH__" && this.hidden.indexOf(cname) === -1;
                 });
                 this.is_stacked = this.columns.map(value =>
-                    value.substr(value.lastIndexOf(',') + 1, value.length)
+                    value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)
                 ).filter((value, index, self) =>
                     self.indexOf(value) === index
                 ).length > 1;
@@ -111,7 +108,7 @@ export function make_y_data(js, pivots, hidden) {
 
     for (let row of rows2) {
         for (let prop of rows2.columns) {
-            let sname = prop.split(',');
+            let sname = prop.split(COLUMN_SEPARATOR_STRING);
             let gname = sname[sname.length - 1];
             if (rows2.is_stacked) {
                 sname = sname.join(", ") || gname;
@@ -226,12 +223,12 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
     } else {
         let prev, group = [], s;
         let cols = Object.keys(js[0]).filter(prop => {
-            let cname = prop.split(',');
+            let cname = prop.split(COLUMN_SEPARATOR_STRING);
             cname = cname[cname.length - 1];
             return prop !== "__ROW_PATH__" && hidden.indexOf(cname) === -1;
         });
         for (let prop of cols) {
-            let column_levels = prop.split(',');
+            let column_levels = prop.split(COLUMN_SEPARATOR_STRING);
             let group_name = column_levels.slice(0, column_levels.length - 1).join(",") || " ";
             if (prev === undefined) {
                 prev = group_name;
@@ -382,7 +379,7 @@ function make_levels(row_pivots) {
 function make_configs(series, levels) {
     let configs = [];
     for (let data of series) {
-        let title = data.name.split(',');
+        let title = data.name.split(COLUMN_SEPARATOR_STRING);
         configs.push({
             layoutAlgorithm: 'squarified',
             allowDrillToNode: true,
@@ -409,7 +406,7 @@ export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
         
         for (let idx = 0; idx < rows2.columns.length; idx++) {
             let prop = rows2.columns[idx];
-            let sname = prop.split(',');
+            let sname = prop.split(COLUMN_SEPARATOR_STRING);
             let gname = sname[sname.length - 1];
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
             if (idx % aggregates.length === 0) {
