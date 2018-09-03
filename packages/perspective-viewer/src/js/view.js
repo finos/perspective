@@ -51,16 +51,8 @@ function _register_debug_plugin() {
     global.registerPlugin('debug', {
         name: "Debug", 
         create: async function(div) { 
-            const json = await this._view.to_json();
+            const csv = await this._view.to_csv({config: {delimiter: "|"}});
             const timer = this._render_time();
-            let csv = "";
-            if (json.length > 0) {
-                let columns = Object.keys(json[0]);
-                csv += columns.join('|') + '\n';
-                for (let row of json) {
-                    csv += Object.values(row).join('|') + "\n";                                    
-                }
-            }
             div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`;
             timer();
         },

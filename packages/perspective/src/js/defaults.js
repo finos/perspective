@@ -119,6 +119,8 @@ const DATE_FILTERS = [
   "!="
 ];
 
+export const COLUMN_SEPARATOR_STRING = "|";
+
 export const TYPE_FILTERS = {
   'string': STRING_FILTERS,
   'float': NUMBER_FILTERS,

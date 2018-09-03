@@ -7,7 +7,7 @@
  *
  */
 
-import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS} from "./defaults.js";
+import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "./defaults.js";
 import {DateParser, is_valid_date} from "./date_parser.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
@@ -25,7 +25,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
-const CHUNKED_THRESHOLD = 100000
+const CHUNKED_THRESHOLD = 100000;
 
 module.exports = function (Module) {
     let __MODULE__ = Module;
@@ -484,7 +484,7 @@ view.prototype._column_names = function() {
             }
             col_name = col_name.reverse();
             col_name.push(name);
-            col_name = col_name.join(",");
+            col_name = col_name.join(COLUMN_SEPARATOR_STRING);
             col_path.delete();
         }
         col_names.push(col_name);
@@ -518,7 +518,7 @@ view.prototype.schema = async function() {
     let new_schema = {};
     let col_names = this._column_names();
     for (let col_name of col_names) {
-        col_name = col_name.split(',');
+        col_name = col_name.split(COLUMN_SEPARATOR_STRING);
         col_name = col_name[col_name.length - 1];
         if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
@@ -548,7 +548,7 @@ const map_aggregate_types = function(col_name, orig_type, aggregate) {
 
     for (let agg in aggregate) {
         let found_agg = aggregate[agg];
-        if (found_agg.column.join(',') === col_name) {
+        if (found_agg.column.join(COLUMN_SEPARATOR_STRING) === col_name) {
             if (INTEGER_AGGS.includes(found_agg.op)) {
                 return "integer";
             } else if (FLOAT_AGGS.includes(found_agg.op)) {
@@ -1187,7 +1187,7 @@ table.prototype.view = function(config) {
                     throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
                 }
             }
-            aggregates.push([agg.name || agg.column.join(","), agg_op, agg.column]);
+            aggregates.push([agg.name || agg.column.join(COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
         }
     } else {
         let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;

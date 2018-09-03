@@ -117,3 +117,4 @@ website/i18n/*
 
 .idea
 cmake-build-debug
+.ipynb_checkpoints
