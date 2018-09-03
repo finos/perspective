@@ -70,11 +70,11 @@ class ComputedColumn extends HTMLElement {
             'uppercase': new Computation('uppercase', 'string', 'string', x => x.toUpperCase()),
             'lowercase': new Computation('lowercase', 'string', 'string', x => x.toLowerCase()),
             'length': new Computation('length', 'string', 'integer', x => x.length),
-            'add': new Computation('add', 'integer', 'integer', (a, b) => a + b, 2),
-            'subtract': new Computation('subtract', 'integer', 'integer', (a, b) => a - b, 2),
-            'multiply': new Computation('multiply', 'integer', 'integer', (a, b) => a * b, 2),
-            'divide': new Computation('divide', 'integer', 'integer', (a, b) => a / b, 2),
-            'percent_a_of_b': new Computation('percent_a_of_b', 'integer', 'integer', (a, b) => ((a / b) * 100), 2),
+            'add': new Computation('add', 'float', 'float', (a, b) => a + b, 2),
+            'subtract': new Computation('subtract', 'float', 'float', (a, b) => a - b, 2),
+            'multiply': new Computation('multiply', 'float', 'float', (a, b) => a * b, 2),
+            'divide': new Computation('divide', 'float', 'float', (a, b) => a / b, 2),
+            'percent_a_of_b': new Computation('percent_a_of_b', 'float', 'float', (a, b) => ((a / b) * 100), 2),
             'concat_space': new Computation('concat_space', 'string', 'string', (a, b) => a + ' ' + b, 2),
             'concat_comma': new Computation('concat_comma', 'string', 'string', (a, b) => a + ', ' + b, 2),
         };
@@ -303,7 +303,7 @@ class ComputedColumn extends HTMLElement {
 
         const index = Number.parseInt(target.getAttribute('data-index'));
 
-        if (type !== computation_type) {
+        if ((computation_type !== "float" && type !== computation_type) || (computation_type === "float" && type !== "float" && type !== "integer")) {
             this._register_inputs();
             this.state.errors.input_column = `Input column type (${type}) must match computation input type (${computation_type}).`;
             this._set_error_message('input_column', this._input_column_error_message);
