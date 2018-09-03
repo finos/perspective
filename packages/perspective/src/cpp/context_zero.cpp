@@ -140,6 +140,7 @@ t_ctx0::get_data(t_tvidx start_row,
         {
             auto v = out_data[ridx - ext.m_srow];
 
+            // todo: fix null handling
             if (!v.is_valid())
                 v.set(none);
 

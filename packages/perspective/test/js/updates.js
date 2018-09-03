@@ -391,12 +391,18 @@ module.exports = (perspective) => {
             table.update(partial);
         });
 
-        /*it("partial update with null unsets value", function (done) {
+    });
+
+    describe("null handling", function() {
+        it("partial update with null unsets value", function (done) {
             var partial = [
-                {'x': null, y: undefined, z: undefined},
+                {'x': null, 'y': 'a', 'z': false},
             ];
+
+            // make err on call partial update w/o index
+
             var expected = [
-                {'x': null, 'y': 'a', 'z': null},
+                {'x': null, 'y': 'a', 'z': false},
                 {'x': 2, 'y':'b', 'z': false},
                 {'x': 3, 'y':'c', 'z': true},
                 {'x': 4, 'y':'d', 'z': false}
@@ -404,16 +410,35 @@ module.exports = (perspective) => {
             var table = perspective.table(meta, {index: 'y'});
             var view = table.view();
             table.update(data);
-            view.on_update(async function (new_data) {
-                console.log(new_data)
-                expect(new_data).toEqual(expected.slice(0, 2));
-                let json = await view.to_json();
+            table.update(partial);
+            view.to_json().then(json => {
                 expect(json).toEqual(expected);
                 done();
             });
-            table.update(partial);
-        });*/
+        });
 
+
+        it("partial column oriented update with null unsets value", function (done) {
+            var partial = {
+                x: [null],
+                y: ['a'],
+            };
+
+            var expected = [
+                {'x': null, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': false},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(col_data);
+            table.update(partial);
+            view.to_json().then(json => {
+                expect(json).toEqual(expected);
+                done();
+            });
+        });
     });
 
     describe("Viewport", function() {

@@ -260,6 +260,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
             if (dcol[i].isUndefined()) continue;
 
             if (dcol[i].isNull()) {
+                // fixme: updates using null are not working
                 col->clear(i);
                 continue;
             }
