@@ -212,6 +212,11 @@ class ComputedColumn extends HTMLElement {
         this._set_input_column(event, data.column_name, data.column_type);
     }
 
+    deselect_column(name) {
+        this.state.input_columns = this.state.input_columns.map(x => x && x.name === name ? undefined : x);
+        this._apply_state(this.state.input_columns, this.state.computation);
+    }
+
     // Called when a column is dragged out of the computed column UI
     _remove_column(event) {
         event.currentTarget.classList.remove('dropping');
@@ -235,15 +240,18 @@ class ComputedColumn extends HTMLElement {
         const inputs = this._input_columns.children;
 
         for (let i = 0; i < this.state['input_columns'].length; i++) {
-            this._set_input_column(
-                { currentTarget: inputs[i] },
-                this.state['input_columns'][i].name,
-                this.state['input_columns'][i].type);
+            if (this.state['input_columns'][i] !== undefined) {
+                this._set_input_column(
+                    {currentTarget: inputs[i]},
+                    this.state['input_columns'][i].name,
+                    this.state['input_columns'][i].type
+                );
+            }
         }
 
-        this._column_name_input.innerText = name;
+        this._column_name_input.innerText = name || "";
         this._set_column_name();
-        this.state['name_edited'] = true;
+        this.state['name_edited'] = name !== undefined;
     }
 
     // error handling
@@ -324,14 +332,10 @@ class ComputedColumn extends HTMLElement {
             type: type,
         };
 
-        if (inputs[index]) {
-            inputs[index] = column;
-        } else {
-            inputs.push(column);
-        }
+        inputs[index] = column;
 
         this.state['input_columns'] = inputs;
-        if (inputs.length === computation.num_params) {
+        if (inputs.filter(x => x).length === computation.num_params) {
             this._auto_column_name();
         }
 

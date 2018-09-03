@@ -225,7 +225,8 @@ function column_visibility_clicked(ev) {
     } else {
         // check if we're manipulating computed column input
         if(ev.path[1].classList.contains('psp-cc-computation__input-column')) {
-            this._computed_column._register_inputs();
+          //  this._computed_column._register_inputs();
+            this._computed_column.deselect_column(ev.currentTarget.getAttribute('name'));
             this._update_column_view();
             return;
         }
@@ -318,7 +319,7 @@ function _format_computed_data(cc) {
     };
 }
 
-async function loadTable(table) {
+async function loadTable(table, redraw = true) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
     
@@ -475,8 +476,7 @@ async function loadTable(table) {
     this.querySelector('#side_panel__actions').style.visibility = "visible";
 
     this.filters = this.getAttribute('filters');
-
-    this._debounce_update();
+    this._debounce_update(redraw);
 }
 
 function new_row(name, type, aggregate, filter, sort, computed) {
@@ -576,7 +576,7 @@ class CancelTask {
 
 }
 
-function update() {
+function update(redraw = true) {
     if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row');
     let column_pivots = this._view_columns('#column_pivots perspective-row');
@@ -629,27 +629,34 @@ function update() {
     });
 
     const timer = this._render_time();
-    this._render_count = (this._render_count || 0) + 1;
-    if (this._task) {
-        this._task.cancel();
-    }
-    const task = this._task = new CancelTask(() => {
-        this._render_count--;
-    });
-    task.initial = true;
-
-    this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
-        console.warn(err);
-    }).finally(() => {
-        if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('perspective-view-update'));
+    if (redraw) {
+            this._render_count = (this._render_count || 0) + 1;
+        if (this._task) {
+            this._task.cancel();
         }
+        const task = this._task = new CancelTask(() => {
+            this._render_count--;
+        });
+        task.initial = true;
+
+        this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
+            console.warn(err);
+        }).finally(() => {
+            if (!this.hasAttribute('render_time')) {
+                this.dispatchEvent(new Event('perspective-view-update'));
+            }
+            timer();
+            task.cancel();
+            if (this._render_count === 0) {
+                this.removeAttribute('updating');
+            }
+        });
+    } else {
         timer();
-        task.cancel();
         if (this._render_count === 0) {
             this.removeAttribute('updating');
         }
-    });
+    }
 }
 
 /******************************************************************************
@@ -872,7 +879,7 @@ class ViewPrivate extends HTMLElement {
             }];
 
             const table = this._table.add_computed(params);
-            loadTable.call(this, table).then(() => {
+            loadTable.call(this, table, false).then(() => {
                 this._update_column_view();
                 //this.dispatchEvent(new Event('perspective-view-update'));
                 this._computed_column._close_computed_column();
@@ -959,9 +966,9 @@ class ViewPrivate extends HTMLElement {
 
     _register_debounce_instance() {
         const _update = _.debounce(update.bind(this), 10);
-        this._debounce_update = () => {
+        this._debounce_update = (redraw) => {
             this.setAttribute('updating', true);
-            _update();
+            _update(redraw);
         }
     }
  }
