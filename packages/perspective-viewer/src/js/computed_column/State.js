@@ -25,6 +25,6 @@ export default class State {
 
     is_valid() {
         const vals = values(this);
-        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes('');
+        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes('') && this.input_columns.length === this.computation.num_params;
     }
 }

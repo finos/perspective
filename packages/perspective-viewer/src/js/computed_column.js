@@ -331,7 +331,9 @@ class ComputedColumn extends HTMLElement {
         }
 
         this.state['input_columns'] = inputs;
-        this._auto_column_name();
+        if (inputs.length === computation.num_params) {
+            this._auto_column_name();
+        }
 
         this.dispatchEvent(new CustomEvent('perspective-computed-column-update', {
             detail: {
