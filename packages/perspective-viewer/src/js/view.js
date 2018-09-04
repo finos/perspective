@@ -476,7 +476,7 @@ async function loadTable(table, redraw = true) {
     this.querySelector('#side_panel__actions').style.visibility = "visible";
 
     this.filters = this.getAttribute('filters');
-    this._debounce_update(redraw);
+    await this._debounce_update(redraw);
 }
 
 function new_row(name, type, aggregate, filter, sort, computed) {
@@ -576,7 +576,7 @@ class CancelTask {
 
 }
 
-function update(redraw = true) {
+async function update(redraw = true) {
     if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row');
     let column_pivots = this._view_columns('#column_pivots perspective-row');
@@ -630,7 +630,7 @@ function update(redraw = true) {
 
     const timer = this._render_time();
     if (redraw) {
-            this._render_count = (this._render_count || 0) + 1;
+        this._render_count = (this._render_count || 0) + 1;
         if (this._task) {
             this._task.cancel();
         }
@@ -639,7 +639,7 @@ function update(redraw = true) {
         });
         task.initial = true;
 
-        this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
+        await this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
             console.warn(err);
         }).finally(() => {
             if (!this.hasAttribute('render_time')) {
@@ -965,10 +965,12 @@ class ViewPrivate extends HTMLElement {
     }
 
     _register_debounce_instance() {
-        const _update = _.debounce(update.bind(this), 10);
-        this._debounce_update = (redraw) => {
+        const _update = _.debounce((redraw, resolve) => {
+            update.bind(this)(redraw).then(resolve);
+        }, 10);
+        this._debounce_update = async (redraw) => {
             this.setAttribute('updating', true);
-            _update(redraw);
+            await new Promise(resolve => _update(redraw, resolve));
         }
     }
  }
@@ -1271,6 +1273,8 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
+     * @returns {Promise<void>} A promise which resolves once the data is
+     * loaded and a `perspective.view` has been created.
      * @fires View#perspective-view-update
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
@@ -1300,11 +1304,12 @@ class View extends ViewPrivate {
         } else {
             table = get_worker().table(data, options);
         }
-        loadTable.call(this, table);
+        let _promises = [loadTable.call(this, table)];
         for (let slave of this._slaves) {
-            loadTable.call(slave, table);
+            _promises.push(loadTable.call(slave, table));
         }
         this._slaves = [];
+        return Promise.all(_promises);
     }
 
     /**

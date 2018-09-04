@@ -746,13 +746,13 @@ view.prototype.get_row_expanded = async function (idx) {
 }
 
 /**
- * Opens the row at index `idx`.
+ * Expands the row at index `idx`.
  * 
  * @async
  *
  * @returns {Promise<void>} 
  */
-view.prototype.open = async function (idx) {
+view.prototype.expand = async function (idx) {
     if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
         return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
     } else if (this.nsides < 2) {
@@ -761,13 +761,13 @@ view.prototype.open = async function (idx) {
 }
 
 /**
- * Closes the row at index `idx`.
+ * Collapses the row at index `idx`.
  * 
  * @async
  *
  * @returns {Promise<void>} 
  */
-view.prototype.close = async function (idx) {
+view.prototype.collapse = async function (idx) {
     if (this.nsides === 2) {
         return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
     } else {
