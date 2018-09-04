@@ -53,6 +53,16 @@ class TestTypedetect:
         assert json.loads(x) == json.loads(expected)
         assert t == 'pandas'
 
+        # series check
+        df = pd.DataFrame([1, 2])
+        t, _, x = type_detect(df[0], True)
+
+        expected = json.dumps([{"index": 0, "0": 1}, {"index": 1, "0": 2}])
+        print(x)
+        print(expected)
+        assert json.loads(x) == json.loads(expected)
+        assert t == 'pandas'
+
         df = pd.DataFrame([[1, 2]], columns=['1', '2'], index=[datetime.today(), datetime.today()])
         t, _, x = type_detect(df, True)
         assert t == 'pandas'

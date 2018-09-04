@@ -21,6 +21,17 @@ def _is_pandas(data, as_string=False):
                 else:
                     ret_dat = df.to_dict(orient='records')
                 return 'pandas', ret_df, ret_dat
+            elif isinstance(data, pd.Series):
+                ret_df = data.reset_index()
+                df = data.reset_index()
+                for x in df.dtypes.iteritems():
+                    if 'date' in str(x[1]):
+                        df[x[0]] = df[x[0]].astype(str)
+                if as_string:
+                    ret_dat = df.to_json(orient='records')
+                else:
+                    ret_dat = df.to_dict(orient='records')
+                return 'pandas', ret_df, ret_dat
     except ImportError:
         return '', '', ''
     return '', '', ''
