@@ -70,9 +70,9 @@ view.prototype.collapse_to_depth = async_queue('collapse_to_depth');
 
 view.prototype.get_row_expanded = async_queue('get_row_expanded');
 
-view.prototype.open = async_queue('open');
+view.prototype.expand = async_queue('expand');
 
-view.prototype.close = async_queue('close');
+view.prototype.collapse = async_queue('collapse');
 
 view.prototype.delete = async_queue('delete');
 
