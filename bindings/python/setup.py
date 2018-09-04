@@ -1,7 +1,7 @@
 import os
 import os.path
 import pathlib
-import pprint;
+import pprint
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 from codecs import open
@@ -58,12 +58,11 @@ class build_ext(build_ext_orig):
 
 
 setup(
-    name='perspective-python',
-    version='0.0.12',
+    name='perspective-python-table',
+    version='0.0.1',
     description='Analytics library',
     long_description=long_description,
-    url='https://github.com/timkpaine/perspective-python',
-    download_url='https://github.com/timkpaine/perspective-python/archive/v0.0.12.tar.gz',
+    url='https://github.com/jpmorganchase/perspective',
     author='Tim Paine',
     author_email='timothy.k.paine@gmail.com',
     license='Apache 2.0',
