@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_grouped_pkey.h>
 #include <perspective/extract_aggregate.h>
@@ -25,17 +24,6 @@
 
 namespace perspective
 {
-
-t_ctx_grouped_pkey::t_ctx_grouped_pkey(const t_schema& schema,
-                                       const t_config& pivot_config)
-    : t_ctxbase<t_ctx_grouped_pkey>(schema, pivot_config)
-{
-    const t_str& grouping_label_col =
-        m_config.get_grouping_label_column();
-
-    m_has_label = schema.has_column(grouping_label_col) &&
-                  grouping_label_col.size() > 0;
-}
 
 t_ctx_grouped_pkey::~t_ctx_grouped_pkey()
 {
@@ -68,15 +56,6 @@ t_ctx_grouped_pkey::get_column_count() const
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_num_columns() + 1;
-}
-
-t_vdnvec
-t_ctx_grouped_pkey::get_view_nodes(t_tvidx start_row,
-                                   t_tvidx end_row) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_traversal->get_view_nodes(start_row, end_row);
 }
 
 t_index
@@ -235,46 +214,12 @@ t_ctx_grouped_pkey::step_end()
     m_minmax = m_tree->get_min_max();
 }
 
-t_depth
-t_ctx_grouped_pkey::get_num_levels() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_num_rpivots() + 1;
-}
-
-t_aggspec
-t_ctx_grouped_pkey::get_aggregate(t_uindex idx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    if (idx >= m_config.get_num_aggregates())
-        return t_aggspec();
-    return m_config.get_aggregates()[idx];
-}
-
 t_aggspecvec
 t_ctx_grouped_pkey::get_aggregates() const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_aggregates();
-}
-
-t_pivotvec
-t_ctx_grouped_pkey::get_row_pivots() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_row_pivots();
-}
-
-t_pivotvec
-t_ctx_grouped_pkey::get_column_pivots() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_column_pivots();
 }
 
 t_tscalvec
@@ -437,43 +382,6 @@ t_ctx_grouped_pkey::get_pkeys(const t_uidxpvec& cells) const
 }
 
 t_tscalvec
-t_ctx_grouped_pkey::get_pkeys_without_descendents(
-    const t_uidxpvec& cells) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
-    if (!m_traversal->validate_cells(cells))
-    {
-        t_tscalvec rval;
-        return rval;
-    }
-
-    t_tscalvec rval;
-
-    std::unordered_set<t_uindex> seen;
-
-    for (const auto& c : cells)
-    {
-        auto ptidx = m_traversal->get_tree_index(c.first);
-
-        if (static_cast<t_uindex>(ptidx) == static_cast<t_uindex>(-1))
-            continue;
-
-        if (seen.find(ptidx) == seen.end())
-        {
-            auto iters = m_tree->get_pkeys_for_leaf(ptidx);
-            for (auto iter = iters.first; iter != iters.second; ++iter)
-            {
-                rval.push_back(iter->m_pkey);
-            }
-            seen.insert(ptidx);
-        }
-    }
-    return rval;
-}
-
-t_tscalvec
 t_ctx_grouped_pkey::get_cell_data(const t_uidxpvec& cells) const
 {
     PSP_TRACE_SENTINEL();
@@ -620,60 +528,12 @@ t_ctx_grouped_pkey::get_trees()
     return rval;
 }
 
-t_uindex
-t_ctx_grouped_pkey::get_leaf_count(const t_depth depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_num_leaves(depth);
-}
-
-t_tscalvec
-t_ctx_grouped_pkey::get_leaf_data(t_uindex depth,
-                                  t_uindex start_row,
-                                  t_uindex end_row,
-                                  t_uindex start_col,
-                                  t_uindex end_col) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
-    PSP_COMPLAIN_AND_ABORT("Not supported yet");
-    return t_tscalvec();
-}
-
-t_leaf_data_iter<t_ctx_grouped_pkey>
-t_ctx_grouped_pkey::iter_leaf_data(const t_idxvec& idxs,
-                                   t_uindex row_depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return t_leaf_data_iter<t_ctx_grouped_pkey>(
-        m_tree, idxs, row_depth);
-}
-
 t_bool
 t_ctx_grouped_pkey::has_deltas() const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return true;
-}
-
-t_float64
-t_ctx_grouped_pkey::get_min(t_uindex aggidx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_min_max().at(aggidx).m_min.to_double();
-}
-
-t_float64
-t_ctx_grouped_pkey::get_max(t_uindex aggidx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_min_max().at(aggidx).m_max.to_double();
 }
 
 t_minmax
@@ -1077,33 +937,6 @@ t_ctx_grouped_pkey::clear_deltas()
 void
 t_ctx_grouped_pkey::unity_init_load_step_end()
 {
-}
-
-t_histogram
-t_ctx_grouped_pkey::get_histogram(const t_str& cname,
-                                  t_uindex nbuckets) const
-{
-    return get_histogram(cname, nbuckets, true);
-}
-
-t_histogram
-t_ctx_grouped_pkey::get_histogram(const t_str& cname,
-                                  t_uindex nbuckets,
-                                  t_bool show_filtered) const
-{
-    if (show_filtered && m_config.has_filters())
-    {
-        auto tbl = m_state->get_pkeyed_table();
-        auto mask = filter_table_for_config(*tbl, m_config);
-        return tbl->get_const_column(cname)->get_histogram(nbuckets,
-                                                           &mask);
-    }
-
-    auto mask = m_state->get_cpp_mask();
-
-    return m_state->get_table()
-        ->get_const_column(cname)
-        ->get_histogram(nbuckets, &mask);
 }
 
 } // end namespace perspective

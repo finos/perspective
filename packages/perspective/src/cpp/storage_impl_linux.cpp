@@ -7,21 +7,14 @@
  *
  */
 
-#ifndef WIN32
-
 #include <perspective/first.h>
-#ifdef PSP_ENABLE_PYTHON
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
-#endif
+
+
+#ifdef __linux__
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
 #include <perspective/storage.h>
 #include <perspective/raii.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/numpy.h>
-#endif
 #include <perspective/defaults.h>
 #include <perspective/compat.h>
 #include <perspective/utils.h>

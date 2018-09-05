@@ -16,7 +16,6 @@
 #include <perspective/sym_table.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/tbb.h>
-#include <perspective/config_proc.h>
 #endif
 
 namespace perspective
@@ -439,15 +438,6 @@ t_gstate::pprint() const
     m_table->pprint(indices);
 }
 
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_gstate::get_mask() const
-{
-    auto msk = get_cpp_mask();
-    return msk.as_numpy();
-}
-#endif
-
 t_mask
 t_gstate::get_cpp_mask() const
 {
@@ -501,20 +491,32 @@ t_gstate::read_column(const t_str& colname,
                       const t_tscalvec& pkeys,
                       t_f64vec& out_data) const
 {
+    read_column(colname, pkeys, out_data, true);
+}
+
+void
+t_gstate::read_column(const t_str& colname,
+                      const t_tscalvec& pkeys,
+                      t_f64vec& out_data,
+                      bool include_nones) const
+{
     t_index num = pkeys.size();
     t_col_csptr col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
-    t_f64vec rval(num);
-
+    
+    t_f64vec rval;
     for (t_index idx = 0; idx < num; ++idx)
     {
-        t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
-        if (iter != m_mapping.end())
-        {
-            rval[idx] = col_->get_scalar(iter->second).to_double();
-        }
+	t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
+	if (iter != m_mapping.end())
+	{
+	  auto tscalar = col_->get_scalar(iter->second);
+	  if (include_nones || tscalar.is_valid())
+	  {
+	      rval.push_back(tscalar.to_double());
+	   }
+	}
     }
-
     std::swap(rval, out_data);
 }
 
@@ -675,11 +677,7 @@ t_table*
 t_gstate::_get_pkeyed_table(const t_schema& schema,
                             const t_mask& mask) const
 {
-#ifdef PSP_ENABLE_PYTHON
-    static bool const enable_pkeyed_table_mask_fix = athena::Conf_proc::isFeatureEnabled("PSP_GNODE_PKEYED_TABLE_MASK_FIX");
-#else
     static bool const enable_pkeyed_table_mask_fix = true;
-#endif
     t_uindex o_ncols = schema.m_columns.size();
     auto sz = enable_pkeyed_table_mask_fix ? mask.count() : mask.size();
     auto rval = new t_table(schema, sz);

@@ -7,7 +7,7 @@
  *
  */
 
-#ifndef _WIN32
+#ifdef __linux__
 #include <perspective/first.h>
 #include <perspective/tracing.h>
 #include <perspective/tracing_impl_linux.h>

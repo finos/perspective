@@ -8,7 +8,6 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_two.h>
 #include <perspective/extract_aggregate.h>
@@ -102,32 +101,9 @@ t_ctx2::get_row_count() const
 }
 
 t_index
-t_ctx2::get_row_count(t_header header) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_rtraversal->size();
-        case HEADER_COLUMN:
-            return m_ctraversal->size();
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-    }
-    return 0;
-}
-
-t_index
 t_ctx2::get_column_count() const
 {
     return get_num_view_columns();
-}
-
-t_vdnvec
-t_ctx2::get_view_nodes(t_tvidx start_row, t_tvidx end_row) const
-{
-    return m_rtraversal->get_view_nodes(start_row, end_row);
 }
 
 t_index
@@ -243,117 +219,11 @@ t_ctx2::get_ctraversal_indices() const
 }
 
 t_tscalvec
-t_ctx2::get_data_old_path(t_tvidx start_row,
-                 t_tvidx end_row,
-                 t_tvidx start_col,
-                 t_tvidx end_col) const
-{
-    auto ext = sanitize_get_data_extents(
-        *this, start_row, end_row, start_col, end_col);
-
-    t_uidxpvec cells;
-
-    for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx)
-    {
-        for (t_index cidx = 1; cidx < end_col; ++cidx)
-        {
-            cells.push_back(t_idxpair(ridx, cidx));
-        }
-    }
-
-    auto cells_info = resolve_cells(cells);
-
-    t_index nrows = ext.m_erow - ext.m_srow;
-    t_index stride = ext.m_ecol - ext.m_scol;
-    t_tscalvec retval(nrows * stride);
-    t_uindex cinfoidx = 0;
-
-    t_tscalar empty = mknone();
-
-    typedef std::pair<t_uindex, t_uindex> t_aggpair;
-    std::map<t_aggpair, const t_column*> aggmap;
-
-    for (t_uindex treeidx = 0, tree_loop_end = m_trees.size();
-         treeidx < tree_loop_end;
-         ++treeidx)
-    {
-        auto aggtable = m_trees[treeidx]->get_aggtable();
-        t_schema aggschema = aggtable->get_schema();
-
-        for (t_uindex aggidx = 0,
-                      agg_loop_end = m_config.get_num_aggregates();
-             aggidx < agg_loop_end;
-             ++aggidx)
-        {
-            const t_str& aggname = aggschema.m_columns[aggidx];
-
-            aggmap[t_aggpair(treeidx, aggidx)] =
-                aggtable->get_const_column(aggname).get();
-        }
-    }
-
-    const t_aggspecvec& aggspecs = m_config.get_aggregates();
-
-    for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx)
-    {
-        retval[(ridx - ext.m_srow) * stride].set(
-            rtree()->get_value(m_rtraversal->get_tree_index(ridx)));
-
-        for (t_index cidx = 1; cidx < end_col; ++cidx)
-        {
-            t_index insert_idx = (ridx - ext.m_srow) * stride + cidx;
-            const t_cellinfo& cinfo = cells_info[cinfoidx];
-
-            if (cinfo.m_idx < 0)
-            {
-                retval[insert_idx].set(empty);
-            }
-            else
-            {
-                auto aggcol = aggmap[t_aggpair(cinfo.m_treenum,
-                                               cinfo.m_agg_index)];
-
-                t_ptidx p_idx =
-                    m_trees[cinfo.m_treenum]->get_parent_idx(
-                        cinfo.m_idx);
-
-                t_uindex agg_ridx =
-                    m_trees[cinfo.m_treenum]->get_aggidx(cinfo.m_idx);
-
-                t_uindex agg_pridx =
-                    p_idx == INVALID_INDEX
-                        ? INVALID_INDEX
-                        : m_trees[cinfo.m_treenum]->get_aggidx(p_idx);
-
-                auto value =
-                    extract_aggregate(aggspecs[cinfo.m_agg_index],
-                                      aggcol,
-                                      agg_ridx,
-                                      agg_pridx);
-
-                if (!value.is_valid())
-                    value.set(empty);
-
-                retval[insert_idx].set(value);
-            }
-            ++cinfoidx;
-        }
-    }
-
-    return retval;
-}
-
-t_tscalvec
 t_ctx2::get_data(t_tvidx start_row,
                  t_tvidx end_row,
                  t_tvidx start_col,
                  t_tvidx end_col) const
 {
-    static bool const enable_getdata_fix = true;
-
-    if( !enable_getdata_fix )
-        return get_data_old_path( start_row, end_row, start_col, end_col );
-
     auto ext = sanitize_get_data_extents(
         *this, start_row, end_row, start_col, end_col);
 
@@ -694,27 +564,6 @@ t_ctx2::is_ctree_idx(t_uindex idx) const
     return idx == 0;
 }
 
-t_uindex
-t_ctx2::get_max_levels(t_header header) const
-{
-    return get_num_levels(header);
-}
-
-t_uindex
-t_ctx2::get_num_levels(t_header header) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_config.get_num_rpivots() + 1;
-        case HEADER_COLUMN:
-            return m_config.get_num_cpivots() + 1;
-        default:
-            PSP_COMPLAIN_AND_ABORT("Unknown header type");
-            return INVALID_INDEX;
-    }
-}
-
 t_stree_sptr
 t_ctx2::rtree()
 {
@@ -737,18 +586,6 @@ t_stree_csptr
 t_ctx2::ctree() const
 {
     return m_trees.front();
-}
-
-t_stree*
-t_ctx2::_get_ctree()
-{
-    return ctree().get();
-}
-
-t_stree*
-t_ctx2::_get_rtree()
-{
-    return rtree().get();
 }
 
 t_uindex
@@ -861,114 +698,10 @@ t_ctx2::translate_column_index(t_tvidx idx) const
     return rval;
 }
 
-t_trav_csptr
-t_ctx2::get_traversal(t_header header) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_rtraversal;
-        case HEADER_COLUMN:
-            return m_ctraversal;
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-    }
-    return t_trav_csptr();
-}
-
-t_tscalar
-t_ctx2::get_tree_value(t_header header, t_ptidx nidx) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return rtree()->get_value(nidx);
-        case HEADER_COLUMN:
-            return ctree()->get_value(nidx);
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-    }
-    return t_tscalar();
-}
-
-t_aggspec
-t_ctx2::get_aggregate(t_uindex idx) const
-{
-    if (idx >= m_config.get_num_aggregates())
-        return t_aggspec();
-    return m_config.get_aggregates()[idx];
-}
-
 t_aggspecvec
 t_ctx2::get_aggregates() const
 {
     return m_config.get_aggregates();
-}
-
-t_pivotvec
-t_ctx2::get_row_pivots() const
-{
-    return m_config.get_row_pivots();
-}
-
-t_pivotvec
-t_ctx2::get_column_pivots() const
-{
-    return m_config.get_column_pivots();
-}
-
-t_pathvec
-t_ctx2::get_expansion_state(t_header header) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-        {
-            return ctx_get_expansion_state(rtree(), m_rtraversal);
-        }
-        break;
-        case HEADER_COLUMN:
-        {
-            return ctx_get_expansion_state(ctree(), m_ctraversal);
-        }
-        break;
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-        break;
-    }
-
-    return t_pathvec();
-}
-
-void
-t_ctx2::set_expansion_state(t_header header, const t_pathvec& paths)
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-        {
-            ctx_set_expansion_state(
-                *this, HEADER_ROW, rtree(), m_rtraversal, paths);
-        }
-        break;
-        case HEADER_COLUMN:
-        {
-            ctx_set_expansion_state(
-                *this, HEADER_COLUMN, ctree(), m_ctraversal, paths);
-        }
-        break;
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-        break;
-    }
 }
 
 void
@@ -1018,31 +751,6 @@ t_ctx2::collapse_to_depth(t_header header, t_depth depth)
         case HEADER_COLUMN:
         {
             m_ctraversal->collapse_to_depth(depth);
-        }
-        break;
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-        break;
-    }
-}
-
-void
-t_ctx2::expand_path(t_header header, const t_tscalvec& path)
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-        {
-            ctx_expand_path(
-                *this, HEADER_ROW, rtree(), m_rtraversal, path);
-        }
-        break;
-        case HEADER_COLUMN:
-        {
-            ctx_expand_path(
-                *this, HEADER_COLUMN, ctree(), m_ctraversal, path);
         }
         break;
         default:
@@ -1259,199 +967,6 @@ t_ctx2::get_trees()
     return rval;
 }
 
-t_uindex
-t_ctx2::get_leaf_count(t_header header, t_uindex depth) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_trees.back()->get_num_leaves(depth);
-        case HEADER_COLUMN:
-            return m_trees.front()->get_num_leaves(depth);
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Bad header passed in");
-            return 0;
-        }
-    }
-}
-
-t_tscalvec
-t_ctx2::get_leaf_data(t_uindex row_depth,
-                      t_uindex col_depth,
-                      t_uindex start_row,
-                      t_uindex end_row,
-                      t_uindex start_col,
-                      t_uindex end_col) const
-{
-    t_index nrows = end_row - start_row;
-    t_index stride = end_col - start_col;
-
-    t_tscalvec retval((nrows + 1) * stride);
-
-    t_index n_aggs = m_config.get_num_aggregates();
-
-    t_tscalvec r_path;
-    r_path.reserve(m_config.get_num_rpivots() +
-                   m_config.get_num_cpivots() + 1);
-
-    t_tscalar empty;
-    empty.set("");
-
-    t_index ridx = 0;
-    t_depth minus_one = -1;
-    t_depth last_depth = -1;
-
-    auto tree = m_trees[row_depth];
-
-    std::vector<t_tscalvec> col_paths(end_col);
-
-    t_idxvec cidxvec = m_trees[0]->get_indices_for_depth(col_depth);
-
-    for (t_uindex cidx = 1; cidx < end_col; ++cidx)
-    {
-        t_index translated_idx = (cidx - 1) / n_aggs;
-        t_ptidx c_ptidx = cidxvec[translated_idx];
-        col_paths[cidx - 1].reserve(m_config.get_num_cpivots());
-        m_trees[0]->get_path(c_ptidx, col_paths[cidx - 1]);
-
-        std::stringstream label;
-        t_tscalvec& plabels = col_paths[cidx - 1];
-        if (!plabels.empty())
-        {
-            auto last = plabels.rend() - 1;
-            for (auto lit = plabels.rbegin(); lit != last; ++lit)
-            {
-                label << lit->to_string() << "/";
-            }
-            label << last->to_string();
-        }
-        retval[cidx].set(get_interned_tscalar(label.str().c_str()));
-    }
-
-    // Iterate by depth
-    std::deque<t_stnode> dft;
-    dft.push_front(tree->get_node(0));
-
-    std::vector<t_str> plabels;
-    while (!dft.empty())
-    {
-        t_stnode node = dft.front();
-        dft.pop_front();
-
-        t_str value = node.m_value.to_string();
-
-        if (node.m_depth < row_depth)
-        {
-            if (node.m_depth < last_depth && last_depth != minus_one)
-            {
-                for (t_uindex i = 0; i < last_depth - node.m_depth;
-                     ++i)
-                {
-                    plabels.pop_back();
-                }
-            }
-
-            if (node.m_depth != 0)
-                plabels.push_back(value);
-
-            t_stnode_vec nodes;
-            tree->get_child_nodes(node.m_idx, nodes);
-            std::copy(nodes.rbegin(),
-                      nodes.rend(),
-                      std::front_inserter(dft));
-        }
-        else if (node.m_depth == row_depth)
-        {
-            ridx++;
-            std::stringstream label;
-            for (auto lit = plabels.begin(); lit != plabels.end();
-                 ++lit)
-            {
-                label << *lit << "/";
-            }
-            label << value;
-
-            t_ptidx r_ptidx = node.m_idx;
-            tree->get_path(r_ptidx, r_path);
-            t_depth r_depth = node.m_depth;
-
-            retval[(ridx - start_row) * stride].set(
-                get_interned_tscalar(label.str().c_str()));
-
-            for (t_uindex cidx = 1; cidx < end_col; ++cidx)
-            {
-                t_index translated_cidx = cidx - 1;
-                t_index insert_idx =
-                    (ridx - start_row) * stride + cidx;
-                const t_tscalvec& c_path = col_paths[translated_cidx];
-
-                t_index agg_idx = translated_cidx % n_aggs;
-                t_ptidx query_ptidx = INVALID_INDEX;
-
-                if (c_path.size() == 0)
-                {
-                    query_ptidx = r_ptidx;
-                }
-                else
-                {
-                    if (r_depth + 1 ==
-                        static_cast<t_depth>(m_trees.size()))
-                    {
-                        query_ptidx =
-                            tree->resolve_path(r_ptidx, c_path);
-                    }
-                    else
-                    {
-                        t_ptidx path_ptidx =
-                            tree->resolve_path(0, r_path);
-                        if (path_ptidx < 0)
-                        {
-                            query_ptidx = INVALID_INDEX;
-                        }
-                        else
-                        {
-                            query_ptidx = tree->resolve_path(
-                                path_ptidx, c_path);
-                        }
-                    }
-                }
-
-                if (query_ptidx < 0)
-                {
-                    retval[insert_idx].set(empty);
-                }
-                else
-                {
-                    retval[insert_idx].set(
-                        tree->get_aggregate(query_ptidx, agg_idx));
-                }
-            }
-
-            r_path.clear();
-        }
-        last_depth = node.m_depth;
-    }
-    return retval;
-}
-
-t_leaf_data_iter<t_ctx2>
-t_ctx2::iter_leaf_data(const t_idxvec& idxs,
-                       t_uindex row_depth,
-                       t_uindex col_depth) const
-{
-
-    t_stree_csptr_vec trees(m_trees.size());
-    for (t_uindex idx = 0, loop_end = trees.size(); idx < loop_end;
-         ++idx)
-    {
-        trees[idx] = m_trees[idx];
-    }
-
-    return t_leaf_data_iter<t_ctx2>(
-        m_config, trees, idxs, row_depth, col_depth);
-}
-
 t_bool
 t_ctx2::has_deltas() const
 {
@@ -1515,18 +1030,6 @@ t_ctx2::pprint() const
 {
 }
 
-t_index
-t_ctx2::get_row_idx(const t_tscalvec& path) const
-{
-    auto nidx = rtree()->resolve_path(0, path);
-    if (nidx == INVALID_INDEX)
-    {
-        return nidx;
-    }
-
-    return m_rtraversal->get_traversal_index(nidx);
-}
-
 t_dtype
 t_ctx2::get_column_dtype(t_uindex idx) const
 {
@@ -1539,41 +1042,6 @@ t_ctx2::get_column_dtype(t_uindex idx) const
         ->get_aggtable()
         ->get_const_column((idx - 1) % naggs)
         ->get_dtype();
-}
-
-t_tvnode
-t_ctx2::get_trav_node(t_header header, t_tvidx idx) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_rtraversal->get_node(idx);
-        case HEADER_COLUMN:
-            return m_ctraversal->get_node(idx);
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-    }
-
-    return t_tvnode();
-}
-
-t_index
-t_ctx2::get_trav_num_tree_leaves(t_header header, t_tvidx idx) const
-{
-    switch (header)
-    {
-        case HEADER_ROW:
-            return m_rtraversal->get_num_tree_leaves(idx);
-        case HEADER_COLUMN:
-            return m_ctraversal->get_num_tree_leaves(idx);
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid header");
-        }
-    }
-    return 0;
 }
 
 t_tscalvec

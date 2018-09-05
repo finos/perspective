@@ -104,31 +104,8 @@ t_aggspec::t_aggspec(const t_str& aggname,
 {
 }
 
-#ifdef PSP_ENABLE_PYTHON
-t_aggspec::t_aggspec(const t_str& aggname,
-                     const t_str& disp_aggname,
-                     t_aggtype agg,
-                     const t_depvec& idependencies,
-                     const t_depvec& odependencies,
-                     PyObject* kernel)
-    : m_name(aggname), m_disp_name(disp_aggname), m_agg(agg),
-      m_dependencies(idependencies), m_odependencies(odependencies),
-      m_kernel(kernel)
-{
-    PSP_VERBOSE_ASSERT(odependencies.size() == 1,
-                       "Only 1 output per spec supported for now.");
-    Py_XINCREF(m_kernel);
-}
-#endif
-
 t_aggspec::~t_aggspec()
 {
-#ifdef PSP_ENABLE_PYTHON
-    if (m_kernel)
-    {
-        Py_XDECREF(m_kernel);
-    }
-#endif
 }
 
 t_str
@@ -519,14 +496,6 @@ t_aggspec::is_reducer_agg() const
 {
     return m_agg == AGGTYPE_UDF_REDUCER;
 }
-
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_aggspec::get_py_kernel()
-{
-    return m_kernel;
-}
-#endif
 
 t_bool
 t_aggspec::is_non_delta() const

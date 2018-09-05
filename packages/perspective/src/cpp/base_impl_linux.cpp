@@ -7,7 +7,7 @@
  *
  */
 
-#ifndef WIN32
+#ifdef __linux__
 #include <perspective/first.h>
 #include <perspective/base.h>
 

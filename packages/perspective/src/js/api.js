@@ -70,9 +70,9 @@ view.prototype.collapse_to_depth = async_queue('collapse_to_depth');
 
 view.prototype.get_row_expanded = async_queue('get_row_expanded');
 
-view.prototype.open = async_queue('open');
+view.prototype.expand = async_queue('expand');
 
-view.prototype.close = async_queue('close');
+view.prototype.collapse = async_queue('collapse');
 
 view.prototype.delete = async_queue('delete');
 
@@ -132,6 +132,8 @@ table.prototype.view = function (config) {
 }
 
 table.prototype.schema = async_queue('schema', 'table_method');
+
+table.prototype.column_metadata = async_queue('column_metadata', 'table_method');
 
 table.prototype.computed_schema = async_queue('computed_schema', 'table_method');
 

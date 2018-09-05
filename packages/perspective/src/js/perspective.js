@@ -7,14 +7,14 @@
  *
  */
 
-import papaparse from "papaparse";
+import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "./defaults.js";
+import {DateParser, is_valid_date} from "./date_parser.js";
+
+import {Precision} from "@apache-arrow/es5-esm/type";
 import {Table} from "@apache-arrow/es5-esm/table";
 import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
-import {Precision} from "@apache-arrow/es5-esm/type";
-import {is_valid_date, DateParser} from "./date_parser.js";
 import formatters from "./view_formatters";
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
-
+import papaparse from "papaparse";
 
 // IE fix - chrono::steady_clock depends on performance.now() which does not exist in IE workers
 if (global.performance === undefined) {
@@ -25,10 +25,11 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
-let __MODULE__;
+const CHUNKED_THRESHOLD = 100000;
 
-const CHUNKED_THRESHOLD = 100000
-
+module.exports = function (Module) {
+    let __MODULE__ = Module;
+ 
 /******************************************************************************
  *
  * Private
@@ -183,10 +184,15 @@ function parse_data(data, names, types) {
                     continue;
                 };
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
-                    col.push(Number(data[x][name]));
+                    let val = data[x][name];
+                    if (val !== null) {
+                        val = Number(val);
+                    }
+                    col.push(val);
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
-                    const val = Number(data[x][name]);
-                        col.push(val);
+                    let val = data[x][name];
+                    if (val !== null) val = Number(val);
+                    col.push(val);
                     if (val > 2147483647 || val < -2147483648) {
                         types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
                     }
@@ -213,12 +219,15 @@ function parse_data(data, names, types) {
         }
 
     } else if (Array.isArray(data[Object.keys(data)[0]])) {
-        // Column oriented
+        // Column oriented update. Extending schema not supported here.
 
-        names = Object.keys(data);
+        const names_in_update = Object.keys(data);
+        row_count = data[names_in_update[0]].length;
+        names = names || names_in_update;
 
-        let colNum = 0;
-        for (let name in data) {
+        for (let col_num = 0; col_num < names.length; col_num++) {
+            const name = names[col_num];
+
             // Infer column type if necessary
             if (!preloaded) {
                 let i = 0;
@@ -231,10 +240,14 @@ function parse_data(data, names, types) {
                 types.push(inferredType);
             }
 
-            let transformed = transform_data(types[colNum], data[name]);
-            colNum++;
+            // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
+            let transformed;
+            if (data.hasOwnProperty(name)) {
+                transformed = transform_data(types[col_num], data[name]);
+            } else {
+                transformed = new Array(row_count);
+            }
             cdata.push(transformed);
-            row_count = transformed.length
         }
 
     } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
@@ -471,7 +484,7 @@ view.prototype._column_names = function() {
             }
             col_name = col_name.reverse();
             col_name.push(name);
-            col_name = col_name.join(",");
+            col_name = col_name.join(COLUMN_SEPARATOR_STRING);
             col_path.delete();
         }
         col_names.push(col_name);
@@ -496,6 +509,8 @@ view.prototype.schema = async function() {
     let schema = this.gnode.get_tblschema();
     let _types = schema.types();
     let names = schema.columns();
+    schema.delete();
+
     let types = {};
     for (let i = 0; i < names.size(); i ++) {
         types[names.get(i)] = _types.get(i).value
@@ -503,7 +518,7 @@ view.prototype.schema = async function() {
     let new_schema = {};
     let col_names = this._column_names();
     for (let col_name of col_names) {
-        col_name = col_name.split(',');
+        col_name = col_name.split(COLUMN_SEPARATOR_STRING);
         col_name = col_name[col_name.length - 1];
         if (types[col_name] === 1 || types[col_name] === 2) {
             new_schema[col_name] = "integer";
@@ -520,6 +535,10 @@ view.prototype.schema = async function() {
             new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
         }
     }
+
+    _types.delete();
+    names.delete();
+
     return new_schema;
 }
 
@@ -529,7 +548,7 @@ const map_aggregate_types = function(col_name, orig_type, aggregate) {
 
     for (let agg in aggregate) {
         let found_agg = aggregate[agg];
-        if (found_agg.column.join(',') === col_name) {
+        if (found_agg.column.join(COLUMN_SEPARATOR_STRING) === col_name) {
             if (INTEGER_AGGS.includes(found_agg.op)) {
                 return "integer";
             } else if (FLOAT_AGGS.includes(found_agg.op)) {
@@ -727,13 +746,13 @@ view.prototype.get_row_expanded = async function (idx) {
 }
 
 /**
- * Opens the row at index `idx`.
+ * Expands the row at index `idx`.
  * 
  * @async
  *
  * @returns {Promise<void>} 
  */
-view.prototype.open = async function (idx) {
+view.prototype.expand = async function (idx) {
     if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
         return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
     } else if (this.nsides < 2) {
@@ -742,13 +761,13 @@ view.prototype.open = async function (idx) {
 }
 
 /**
- * Closes the row at index `idx`.
+ * Collapses the row at index `idx`.
  * 
  * @async
  *
  * @returns {Promise<void>} 
  */
-view.prototype.close = async function (idx) {
+view.prototype.collapse = async function (idx) {
     if (this.nsides === 2) {
         return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
     } else {
@@ -958,17 +977,6 @@ table.prototype._schema = function () {
             continue;
         }
         new_schema[columns.get(key)] = get_column_type(types.get(key).value);
-        /*if (types.get(key).value === 1 || types.get(key).value === 2) {
-            new_schema[columns.get(key)] = "integer";
-        } else if (types.get(key).value === 19) {
-            new_schema[columns.get(key)] = "string";
-        } else if (types.get(key).value === 10 || types.get(key).value === 9) {
-            new_schema[columns.get(key)] = "float";
-        } else if (types.get(key).value === 11) {
-            new_schema[columns.get(key)] = "boolean";
-        } else if (types.get(key).value === 12) {
-            new_schema[columns.get(key)] = "date";
-        }*/
     }
     schema.delete();
     columns.delete();
@@ -1006,7 +1014,7 @@ table.prototype._computed_schema =  function() {
         const column = {};
 
         column.type = column_type;
-        column.input_column = computed[i].inputs[0]; // edit to support multiple input columns
+        column.input_columns = computed[i].inputs;
         column.input_type = computed[i].input_type;
         column.computation = computed[i].computation;
 
@@ -1100,8 +1108,8 @@ table.prototype.view = function(config) {
         "div": __MODULE__.t_aggtype.AGGTYPE_SCALED_DIV,
         "add": __MODULE__.t_aggtype.AGGTYPE_SCALED_ADD,
         "dominant": __MODULE__.t_aggtype.AGGTYPE_DOMINANT,
-        "first": __MODULE__.t_aggtype.AGGTYPE_FIRST,
-        "last": __MODULE__.t_aggtype.AGGTYPE_LAST,
+        "first by index": __MODULE__.t_aggtype.AGGTYPE_FIRST,
+        "last by index": __MODULE__.t_aggtype.AGGTYPE_LAST,
         "and": __MODULE__.t_aggtype.AGGTYPE_AND,
         "or": __MODULE__.t_aggtype.AGGTYPE_OR,
         "last": __MODULE__.t_aggtype.AGGTYPE_LAST_VALUE,
@@ -1179,7 +1187,7 @@ table.prototype.view = function(config) {
                     throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
                 }
             }
-            aggregates.push([agg.name || agg.column.join(","), agg_op, agg.column]);
+            aggregates.push([agg.name || agg.column.join(COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
         }
     } else {
         let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
@@ -1444,7 +1452,7 @@ table.prototype._column_metadata = function () {
 
         if (computed_col !== undefined) {
             meta.computed = {
-                input_column: computed_col.input_column,
+                input_columns: computed_col.input_columns,
                 input_type: computed_col.input_type,
                 computation: computed_col.computation
             }
@@ -1455,13 +1463,22 @@ table.prototype._column_metadata = function () {
         metadata.push(meta);
     }
 
+    types.delete()
+    cols.delete();
+    schema.delete();
+
     return metadata;
 }
 
 /**
- * Column metadata for this table. If the column is computed, the `computed` property
- * is an Object containing `input_column`, `input_type`, and `computation`. Otherwise,
- * `computed` is `undefined`.
+ * Column metadata for this table.
+ *
+ * If the column is computed, the `computed` property is an Object containing:
+ *  - Array `input_columns`
+ *  - String `input_type`
+ *  - Object `computation`.
+ *
+ *  Otherwise, `computed` is `undefined`.
  *
  * @async
  *
@@ -1707,6 +1724,8 @@ if (typeof self !== "undefined" && self.addEventListener) {
 
 const perspective = {
 
+    __module__: __MODULE__,
+
     Host: Host,
 
     TYPE_AGGREGATES: TYPE_AGGREGATES,
@@ -1818,10 +1837,7 @@ const perspective = {
             }
         }
     }
-}
-
-module.exports = function (Module) {
-    __MODULE__ = Module;
+};
     return perspective;
 };
 

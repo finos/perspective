@@ -13,15 +13,9 @@ const add_computed_column = async (page) => {
     await page.evaluate(element => element.setAttribute('columns', '["Row ID","Quantity"]'), viewer);
     await page.click('#add-computed-column');
     await page.$eval('perspective-computed-column', element => {
-        element._set_state('input_column', {
-            name: 'Order Date',
-            type: 'date'
-        });
-        element._set_state('column_name', 'new_cc');
-        element._set_state('name_edited', true);
-        element._apply_state();
+        const columns = [{name: 'Order Date', type: 'date'}];
+        element._apply_state(columns, element.computations['day_of_week'], 'new_cc');
     });
-    await page.select('#psp-cc-computation__select', 'day_of_week');
     await page.click('#psp-cc-button-save');
     await page.waitForSelector('perspective-viewer:not([updating])');
     await page.evaluate(element => element.setAttribute('aggregates', '{"new_cc":"dominant"}'), viewer);
@@ -58,33 +52,38 @@ exports.default = function() {
         await page.click('#add-computed-column');
         await page.$eval('perspective-computed-column', element => {
             // call internal APIs to bypass drag/drop action
-            element._set_state('input_column', {
-                name: 'Order Date',
-                type: 'date',
-            });
-            element._set_state('column_name', 'new_cc');
-            element._set_state('name_edited', true);
-            element._apply_state();
+            const columns = [{name: 'State', type: 'string'}];
+            element._apply_state(columns, element.computations['lowercase'], 'new_cc');
         });
     });
 
-    // computation
-    test.capture("computations of the same type should not clear input column.", async page => {
+    test.capture("setting multiple column parameters should set input.", async page => {
         await page.click('#config_button');
         const viewer = await page.$('perspective-viewer');
         await page.evaluate(element => element.setAttribute('columns', '["Row ID","Quantity"]'), viewer);
         await page.$('perspective-viewer');
         await page.click('#add-computed-column');
         await page.$eval('perspective-computed-column', element => {
-            element._set_state('input_column', {
-                name: 'Order Date',
-                type: 'date',
-            });
-            element._set_state('column_name', 'new_cc');
-            element._set_state('name_edited', true);
-            element._apply_state();
+            const columns = [
+                {name: 'Quantity', type: 'integer'},
+                {name: 'Row ID', type: 'integer'}
+            ];
+            element._apply_state(columns, element.computations['add'], 'new_cc');
         });
-        await page.select('#psp-cc-computation__select', 'day_of_week');
+    });
+
+    // computation
+    test.capture("computations should clear input column.", async page => {
+        await page.click('#config_button');
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID","Quantity"]'), viewer);
+        await page.$('perspective-viewer');
+        await page.click('#add-computed-column');
+        await page.$eval('perspective-computed-column', element => {
+            const columns = [{name: 'State', type: 'string'}];
+            element._apply_state(columns, element.computations['lowercase'], 'new_cc');
+        });
+        await page.select('#psp-cc-computation__select', 'subtract');
     });
 
     // save
@@ -131,5 +130,15 @@ exports.default = function() {
         await add_computed_column(page);
         const viewer = await page.$('perspective-viewer');
         await page.evaluate(element => element.setAttribute('filters', '[["new_cc", "==", "2 Monday"]]'), viewer);
+    });
+
+    test.capture("computed column aggregates should persist.", async page => {
+        await add_computed_column(page);
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('row-pivots', '["Quantity"]'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity", "new_cc"]'), viewer);
+        await page.evaluate(element => element.setAttribute('aggregates', '{"new_cc":"any"}'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity"]'), viewer);
+        await page.evaluate(element => element.setAttribute('columns', '["Row ID", "Quantity", "new_cc"]'), viewer);
     });
 };

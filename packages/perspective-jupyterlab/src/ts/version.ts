@@ -7,15 +7,5 @@
  *
  */
 
-#pragma once
-
-namespace perspective
-{
-
-struct simple
-{
-    simple()
-    {
-    }
-};
-}
+export 
+const PERSPECTIVE_VERSION = '0.1.18';

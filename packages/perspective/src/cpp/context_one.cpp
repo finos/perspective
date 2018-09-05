@@ -9,7 +9,6 @@
 
 #include <perspective/first.h>
 #include <perspective/sort_specification.h>
-#include <perspective/chart_interfaces.h>
 #include <perspective/context_common.h>
 #include <perspective/context_one.h>
 #include <perspective/extract_aggregate.h>
@@ -59,14 +58,6 @@ t_ctx1::get_column_count() const
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_num_aggregates() + 1;
-}
-
-t_vdnvec
-t_ctx1::get_view_nodes(t_tvidx start_row, t_tvidx end_row) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_traversal->get_view_nodes(start_row, end_row);
 }
 
 t_index
@@ -230,14 +221,6 @@ t_ctx1::step_end()
     sort_by(m_sortby);
 }
 
-t_depth
-t_ctx1::get_num_levels() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_num_rpivots() + 1;
-}
-
 t_aggspec
 t_ctx1::get_aggregate(t_uindex idx) const
 {
@@ -256,22 +239,6 @@ t_ctx1::get_aggregates() const
     return m_config.get_aggregates();
 }
 
-t_pivotvec
-t_ctx1::get_row_pivots() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_row_pivots();
-}
-
-t_pivotvec
-t_ctx1::get_column_pivots() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_config.get_column_pivots();
-}
-
 t_tscalvec
 t_ctx1::get_row_path(t_tvidx idx) const
 {
@@ -288,64 +255,6 @@ t_ctx1::reset_sortby()
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = t_sortsvec();
-}
-
-t_pathvec
-t_ctx1::get_expansion_state() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return ctx_get_expansion_state(m_tree, m_traversal);
-}
-
-void
-t_ctx1::set_expansion_state(const t_pathvec& paths)
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    ctx_set_expansion_state(
-        *this, HEADER_ROW, m_tree, m_traversal, paths);
-}
-
-void
-t_ctx1::expand_path(const t_tscalvec& path)
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    ctx_expand_path(*this, HEADER_ROW, m_tree, m_traversal, path);
-}
-
-t_stree*
-t_ctx1::_get_tree()
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree.get();
-}
-
-t_tscalar
-t_ctx1::get_tree_value(t_ptidx nidx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_value(nidx);
-}
-
-t_ftnvec
-t_ctx1::get_flattened_tree(t_tvidx idx, t_depth stop_depth)
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return ctx_get_flattened_tree(
-        idx, stop_depth, *(m_traversal.get()), m_config, m_sortby);
-}
-
-t_trav_csptr
-t_ctx1::get_traversal() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_traversal;
 }
 
 void
@@ -557,121 +466,12 @@ t_ctx1::get_trees()
     return rval;
 }
 
-t_uindex
-t_ctx1::get_leaf_count(const t_depth depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_num_leaves(depth);
-}
-
-t_tscalvec
-t_ctx1::get_leaf_data(t_uindex depth,
-                      t_uindex start_row,
-                      t_uindex end_row,
-                      t_uindex start_col,
-                      t_uindex end_col) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_uindex nrows = end_row - start_row;
-    t_uindex stride = end_col - start_col;
-
-    t_tscalvec values((nrows + 1) * stride);
-    t_uindex ridx = 1;
-
-    t_depth last_depth = -1;
-
-    // Iterate by depth
-    std::deque<t_stnode> dft;
-    dft.push_front(m_tree->get_node(0));
-
-    t_uindex naggs = m_config.get_num_aggregates();
-
-    std::vector<t_str> plabels;
-    while (!dft.empty())
-    {
-        t_stnode node = dft.front();
-        dft.pop_front();
-
-        t_str value = node.m_value.to_string();
-
-        if (node.m_depth < depth)
-        {
-            if (node.m_depth < last_depth &&
-                last_depth != t_depth(-1))
-            {
-                for (t_uindex i = 0; i < last_depth - node.m_depth;
-                     ++i)
-                {
-                    plabels.pop_back();
-                }
-            }
-
-            if (node.m_depth != 0)
-                plabels.push_back(value);
-
-            t_stnode_vec nodes;
-            m_tree->get_child_nodes(node.m_idx, nodes);
-            std::copy(nodes.rbegin(),
-                      nodes.rend(),
-                      std::front_inserter(dft));
-        }
-        else if (node.m_depth == depth)
-        {
-            std::stringstream label;
-            for (auto lit = plabels.begin(); lit != plabels.end();
-                 ++lit)
-            {
-                label << *lit << "/";
-            }
-            label << value;
-
-            values[(ridx - start_row) * stride].set(
-                get_interned_tscalar(label.str().c_str()));
-
-            for (t_uindex aggidx = 0; aggidx < naggs; ++aggidx)
-            {
-                values[(ridx - start_row) * stride + 1 + aggidx].set(
-                    m_tree->get_aggregate(node.m_idx, aggidx));
-            }
-            ridx++;
-        }
-        last_depth = node.m_depth;
-    }
-    return values;
-}
-
-t_leaf_data_iter<t_ctx1>
-t_ctx1::iter_leaf_data(const t_idxvec& idxs, t_uindex row_depth) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return t_leaf_data_iter<t_ctx1>(m_tree, idxs, row_depth);
-}
-
 t_bool
 t_ctx1::has_deltas() const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_tree->has_deltas();
-}
-
-t_float64
-t_ctx1::get_min(t_uindex aggidx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_min_max().at(aggidx).m_min.to_double();
-}
-
-t_float64
-t_ctx1::get_max(t_uindex aggidx) const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_tree->get_min_max().at(aggidx).m_max.to_double();
 }
 
 t_minmax
@@ -752,7 +552,6 @@ t_ctx1::pprint() const
     }
 
     std::cout << "=================" << std::endl;
-    m_tree->pprint();
 }
 
 t_index

@@ -127,9 +127,7 @@ typedef std::vector<t_f64pair> t_f64pvec;
 typedef std::vector<t_float64> t_f64vec;
 typedef std::set<std::string> t_sset;
 typedef std::map<t_str, t_str> t_ssmap;
-#ifdef PSP_ENABLE_PYTHON
-typedef std::vector<PyObject*> t_pyvec;
-#endif
+
 typedef std::set<t_ptidx> t_ptiset;
 
 typedef std::map<t_index, t_index> t_iimap;

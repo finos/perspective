@@ -40,21 +40,8 @@ class PERSPECTIVE_EXPORT t_pool
 {
     friend class t_update_task;
     typedef std::pair<t_uindex, t_str> t_ctx_id;
-#ifdef PSP_ENABLE_PYTHON
-    typedef std::map<t_ctx_id, PyObject*> t_ctx_refmap;
-#endif
   public:
-#ifdef PSP_ENABLE_PYTHON
-    t_pool(PyObject* pyo = Py_None);
-    t_uindex register_gnode(t_gnode* node, PyObject* pynode = 0);
-    void register_context(t_uindex gnode_id,
-                          const t_str& name,
-                          t_ctx_type type,
-                          t_int64 ptr,
-                          PyObject* py_ctx = 0);
-    void set_update_delegate(PyObject* ud);
-    void py_notify_userspace();
-#elif PSP_ENABLE_WASM
+#ifdef PSP_ENABLE_WASM
     t_pool(emscripten::val update_delegate);
     void set_update_delegate(emscripten::val ud);
     t_uindex register_gnode(t_gnode* node);
@@ -117,9 +104,6 @@ class PERSPECTIVE_EXPORT t_pool
   private:
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
-#ifdef PSP_ENABLE_PYTHON
-    std::vector<PyObject*> m_pynodes;
-#endif
 
 #ifdef PSP_ENABLE_WASM
     emscripten::val m_update_delegate;
@@ -127,10 +111,6 @@ class PERSPECTIVE_EXPORT t_pool
     std::atomic_flag m_run;
     std::atomic<t_bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* m_update_delegate;
-    t_ctx_refmap m_ctx_refmap;
-#endif
     std::atomic<t_uindex> m_epoch;
     t_bool m_has_python_dep;
 };

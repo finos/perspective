@@ -14,7 +14,6 @@
 #include <perspective/comparators.h>
 #include <perspective/mask.h>
 #include <perspective/scalar.h>
-#include <perspective/kernel.h>
 #include <perspective/exports.h>
 #include <boost/scoped_ptr.hpp>
 #include <functional>
@@ -220,9 +219,6 @@ class PERSPECTIVE_EXPORT t_filter
     t_filter(const t_svec& columns, t_uindex bidx, t_uindex eidx);
 
     t_filter(const t_svec& columns, t_uindex mask_size);
-#ifdef PSP_ENABLE_PYTHON
-    t_filter(const t_svec& columns, PyObject* mask);
-#endif
     t_filter(const t_mask& mask);
 
     t_uindex num_cols() const;
@@ -239,7 +235,6 @@ class PERSPECTIVE_EXPORT t_filter
     t_select_mode m_mode;
     t_uindex m_bidx;
     t_uindex m_eidx;
-    t_kernel m_kernel;
     t_svec m_columns;
     t_masksptr m_mask;
 };

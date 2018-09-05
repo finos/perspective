@@ -101,10 +101,19 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 function collate_single_value(title, raw_value, schema) {
     const type = get_axis_type(title, schema);
     const formatted_value = format_value(raw_value, type);
+
+    /* columns in aggregate AND in sort need to show up, but
+     * columns not in aggregate but NOT in sort need to hide */
+    if (formatted_value === 'NaN' || formatted_value === null || formatted_value === undefined)
+        return '';
+
     return `<span>${ title }: <b>${ formatted_value }</b></span><br/>`;
 }
 
 function collate_multiple_values(titles, values) {
+    if (values.length <= 0)
+        return '';
+
     let output = [];
     for (let i = 0; i < titles.length; i++) {
         output.push(`<span>${ titles[i] }: <b>${ values[i] }</b></span><br/>`)

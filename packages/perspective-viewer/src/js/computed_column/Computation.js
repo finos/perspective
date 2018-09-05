@@ -7,13 +7,12 @@
  *
  */
 
-#pragma once
-
-
-namespace perspective
-{
-	class t_bitmap
-	{
-	};
-
-} // end namespace perspective
+export default class Computation {
+    constructor(name, input_type, return_type, func, num_params = 1) {
+        this.name = name;
+        this.input_type = input_type;
+        this.return_type = return_type;
+        this.func = func.toString();
+        this.num_params = num_params;
+    }
+}

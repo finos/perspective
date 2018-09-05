@@ -21,7 +21,7 @@
     "bench": "npm-run-all bench:build bench:run",
     "build": "npm-run-all build:compile:* build:webpack",
     "build:compile:copy": "mkdir -p obj build build/wasm_async build/wasm_sync build/asmjs",
-    "build:compile:emmake": "cd obj/ && emcmake cmake ../ && emmake make -j8",
+    "build:compile:emmake": "cd obj/ && emcmake cmake ../ && emmake make -j${PSP_CPU_COUNT-8}",
     "build:webpack": "npm-run-all -p build:webpack:*",
     "build:webpack:asmjs": "webpack --color --config src/config/perspective.asmjs.config.js",
     "build:webpack:wasm": "webpack --color --config src/config/perspective.wasm.config.js",

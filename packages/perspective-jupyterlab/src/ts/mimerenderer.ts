@@ -6,15 +6,3 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
-#pragma once
-
-#include <perspective/column.h>
-
-namespace perspective
-{
-
-T find(const t_column& c, H a);
-t_column select(const t_column& c, );
-
-} // end namespace perspective

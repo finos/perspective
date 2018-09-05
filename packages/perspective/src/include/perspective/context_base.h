@@ -97,10 +97,8 @@ class t_ctxbase
     t_str m_name;
     t_gstate_sptr m_state;
     t_bool m_init;
-    t_bool m_enabled_prior_step;
     std::vector<t_bool> m_features;
     t_minmaxvec m_minmax;
-    t_ctx_type m_ctxtype;
 };
 
 template <typename DERIVED_T>

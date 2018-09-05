@@ -11,18 +11,12 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/exports.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <ASGWidget/ASGWidget.h>
-#endif
+
 namespace perspective
 {
 class t_pool;
 
-#ifdef PSP_ENABLE_WASM
 class PERSPECTIVE_EXPORT t_update_task
-#else
-class PERSPECTIVE_EXPORT t_update_task : public ASGWidget::WidgetTask
-#endif
 {
   public:
     t_update_task(t_pool& pool);
