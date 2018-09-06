@@ -23,7 +23,7 @@ export const draw = mode =>
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 
-        const [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
+    const [js, cols, schema, tschema] = await Promise.all([view.to_json(), view.to_columns(), view.schema(), this._table.schema()]);
 
         if (task.cancelled) {
             return;
@@ -172,11 +172,43 @@ export const draw = mode =>
             for (let e of Array.prototype.slice.call(el.children)) {
                 el.removeChild(e);
             }
-            for (let config of configs) {
-                let chart = document.createElement("div");
-                chart.className = "chart";
-                el.appendChild(chart);
-                this._charts.push(() => Highcharts.chart(chart, config));
+            configs.push(config);
+        }
+    } else if (mode === 'line') {
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
+        let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
+        config.legend.floating = series.length <= 20;
+        config.legend.enabled = col_pivots.length > 0;
+        config.series = series;
+        config.plotOptions.scatter.marker = {enabled: false, radius: 0};
+        config.colors = colors;
+        if (set_boost(config, xaxis_type, yaxis_type)) {
+            delete config.chart['type'];
+        }
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xaxis_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, yaxis_type, ytop);
+    } else {
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
+        let [series, top, ] = make_y_data(cols, row_pivots, hidden);
+        config.series = series;
+        config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        
+        config.legend.enabled = col_pivots.length > 0 || series.length > 1;
+        config.legend.floating = series.length <= 20;
+        config.plotOptions.series.dataLabels = {
+            allowOverlap: false,
+            padding: 10
+        }
+        set_category_axis(config, 'xAxis', xtree_type, top);
+        Object.assign(config, {
+            yAxis: {
+                startOnTick: false,
+                endOnTick: false,
+                title: {
+                    text: aggregates.map(x => x.column).join(",  "),
+                    style: {'color': '#666666', 'fontSize': "14px"}
+                },
+                labels: {overflow: 'justify'}
             }
 
             this._charts = this._charts.map(x => x());
