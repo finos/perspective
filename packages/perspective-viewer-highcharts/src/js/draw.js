@@ -23,11 +23,13 @@ export const draw = mode =>
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 
-    const [js, cols, schema, tschema] = await Promise.all([view.to_json(), view.to_columns(), view.schema(), this._table.schema()]);
+    const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
 
-        if (task.cancelled) {
-            return;
-        }
+    let js;
+
+    if (task.cancelled) {
+        return;
+    }
 
         if (!this._charts) {
             this._charts = [];
@@ -55,20 +57,19 @@ export const draw = mode =>
             ytree_type = tschema[ytree_name],
             num_aggregates = aggregates.length - hidden.length;
 
-        if (mode === "scatter") {
-            let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
-            let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
-            config.legend.floating = series.length <= 20;
-            config.legend.enabled = col_pivots.length > 0;
-            config.series = series;
-            config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
-            if (colorRange[0] !== Infinity) {
-                if (aggregates.length <= 3) {
-                    config.chart.type = "coloredScatter";
-                } else {
-                    config.chart.type = "coloredBubble";
-                }
-                color_axis.call(this, config, colorRange);
+    if (mode === 'scatter') {
+        js = await view.to_json();
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
+        let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        config.legend.floating = series.length <= 20;
+        config.legend.enabled = col_pivots.length > 0;
+        config.series = series;
+        config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
+        if (colorRange[0] !== Infinity) {
+            if (aggregates.length <= 3) {
+                config.chart.type = 'coloredScatter';
+            } else {
+                config.chart.type = 'coloredBubble';
             }
             if (num_aggregates < 3) {
                 set_boost(config, xaxis_type, yaxis_type);
@@ -146,26 +147,34 @@ export const draw = mode =>
                 }
             });
         }
+        set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xaxis_type, xtop);
+        set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, yaxis_type, ytop);
+        set_tick_size.call(this, config);
+    } else if (mode === 'heatmap') {
+        js = await view.to_json();
+        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
+        let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden, ytree_type);
+        config.series = [{
+            name: null,
+            data: series,
+            nullColor: 'none'
+        }];
+        config.legend.enabled = true;
+        config.legend.floating = false;
 
-        if (this._charts.length > 0) {
-            let idx = 0;
-            for (let chart of this._charts) {
-                let config = configs[idx++];
-                if (mode === "scatter") {
-                    let conf = {
-                        series: config.series,
-                        plotOptions: {}
-                    };
-                    set_tick_size.call(this, conf);
-                    chart.update(conf);
-                } else if (mode.indexOf("line") > -1) {
-                    chart.update({
-                        series: config.series
-                    });
-                } else {
-                    let opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
-                    chart.update(opts);
-                }
+        color_axis.call(this, config, colorRange);
+        set_boost(config, xaxis_type, yaxis_type);
+        set_category_axis(config, 'xAxis', xtree_type, top);
+        set_category_axis(config, 'yAxis', ytree_type, ytop);
+
+    } else if (mode === "treemap" || mode === "sunburst") {
+        js = await view.to_json();
+        let [charts, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates, mode === "treemap");
+        for (let series of charts) {
+            let config = default_config.call(this, aggregates, mode, js, col_pivots);
+            config.series = [series];
+            if (charts.length > 1) {
+                config.title.text = series.title;
             }
         } else {
             this._charts = [];
@@ -175,6 +184,7 @@ export const draw = mode =>
             configs.push(config);
         }
     } else if (mode === 'line') {
+        js = await view.to_json();
         let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
         let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
         const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
@@ -189,7 +199,8 @@ export const draw = mode =>
         set_both_axis(config, 'xAxis', xaxis_name, xaxis_type, xaxis_type, xtop);
         set_both_axis(config, 'yAxis', yaxis_name, yaxis_type, yaxis_type, ytop);
     } else {
-        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
+        let config = configs[0] = default_config.call(this, aggregates, mode);
+        let cols = await view.to_columns();
         let [series, top, ] = make_y_data(cols, row_pivots, hidden);
         config.series = series;
         config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;        

@@ -241,7 +241,6 @@ class Row extends HTMLElement {
 
         let sort_order = this.querySelector('#sort_order');
         sort_order.addEventListener('click', event => {
-            // TODO: event loop optimizations to prevent hang on large graph redraws?
             const current = this.getAttribute('sort-order');
             const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % 5;
             this.setAttribute("sort-order", perspective.SORT_ORDERS[order]);
