@@ -734,6 +734,7 @@ class ViewPrivate extends HTMLElement {
         }
         this._show_config = !this._show_config;
         this._plugin.resize.call(this, true);
+        this.dispatchEvent(new CustomEvent('perspective-toggle-settings', {detail: this._show_config}));
     }
 
     _get_view_filters() {

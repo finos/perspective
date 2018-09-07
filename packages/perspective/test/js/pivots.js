@@ -27,6 +27,12 @@ var data2 = [
     {'x': 4, 'y':2, 'z': false}
 ];
 
+var data_7 = {
+    'w': [1.5, 2.5, 3.5, 4.5],
+    'x': [1, 2, 3, 4],
+    'y': ['a', 'b', 'c', 'd'],
+    'z': [true, false, true, false]
+};
 
 module.exports = (perspective) => {
 
@@ -109,7 +115,7 @@ module.exports = (perspective) => {
             expect(answer).toEqual(result);
           });
   
-          it("['z'], last by index", async function () {
+        it("['z'], last by index", async function () {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivot: ['z'],
@@ -122,9 +128,9 @@ module.exports = (perspective) => {
             ];
             let result = await view.to_json();
             expect(answer).toEqual(result);
-          });
+        });
   
-          it("['z'], last", async function () {
+        it("['z'], last", async function () {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivot: ['z'],
@@ -149,9 +155,8 @@ module.exports = (perspective) => {
             ];
             let result2 = await view.to_json();
             expect(answerAfterUpdate).toEqual(result2);
-          });
+        });
   
-
     });
 
     describe("Aggregates with nulls", function () {
@@ -472,6 +477,38 @@ module.exports = (perspective) => {
             });
             let result2 = await view.schema();
             expect(meta).toEqual(result2);
+        });
+
+        it("['x'] only, column-oriented input", async function () {
+            var table = perspective.table(data_7);
+            var view = table.view({
+                column_pivot: ['z']
+            });
+            let result2 = await view.to_json();
+            expect(result2).toEqual([
+                {'true|w': 1.5, 'true|x': 1, 'true|y': 'a', 'true|z': true, 'false|w': null, 'false|x': null, 'false|y': null, 'false|z': null},
+                {'true|w': null, 'true|x': null, 'true|y': null, 'true|z': null, 'false|w': 2.5, 'false|x': 2, 'false|y': 'b', 'false|z': false},
+                {'true|w': 3.5, 'true|x': 3, 'true|y':'c', 'true|z': true, 'false|w': null, 'false|x': null, 'false|y': null, 'false|z': null},
+                {'true|w': null, 'true|x': null, 'true|y': null, 'true|z': null, 'false|w': 4.5, 'false|x': 4, 'false|y': 'd', 'false|z': false}
+            ]);
+        });
+
+        it("['x'] only, column-oriented output", async function () {
+            var table = perspective.table(data_7);
+            var view = table.view({
+                column_pivot: ['z']
+            });
+            let result2 = await view.to_columns();
+            expect(result2).toEqual({
+                'true|w': [1.5, null, 3.5, null], 
+                'true|x': [1, null, 3, null], 
+                'true|y': ['a', null, 'c', null],
+                'true|z': [true, null, true, null],
+                'false|w': [null, 2.5, null, 4.5], 
+                'false|x': [null, 2, null, 4],
+                'false|y': [null, 'b', null, 'd'],
+                'false|z': [null, false, null, false]
+            });
         });
 
         it("['x'] only", async function () {
