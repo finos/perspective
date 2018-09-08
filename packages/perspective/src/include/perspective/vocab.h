@@ -39,8 +39,6 @@ class PERSPECTIVE_EXPORT t_vocab
     void init(t_bool from_recipe);
     t_lstore_sptr get_vlendata();
     t_lstore_sptr get_extents();
-    t_lstore_csptr get_vlendata() const;
-    t_lstore_csptr get_extents() const;
     t_uindex get_vlenidx() const;
     t_uindex nbytes() const;
     void verify() const;
@@ -57,13 +55,10 @@ class PERSPECTIVE_EXPORT t_vocab
     t_uindex get_interned(const t_str& s);
     t_uindex get_interned(const char* s);
     void copy_vocabulary(const t_vocab& other);
-
-    t_str unintern(t_uindex idx) const;
     const char*
     unintern_c(t_uindex idx) const;
 
     t_bool string_exists(const char* c, t_stridx& interned) const;
-    t_uindex get_max_slen() const;
 
     void reserve(size_t total_string_size, size_t string_count);
 

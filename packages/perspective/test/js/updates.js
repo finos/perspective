@@ -111,6 +111,21 @@ module.exports = (perspective) => {
             expect(result).toEqual(data);
         });
 
+        it("Column oriented `update()` with columns in different order to schema", async function () {
+            var table = perspective.table(meta);
+
+            var reordered_col_data = {
+                'y': ['a', 'b', 'c', 'd'],
+                'z': [true, false, true, false],
+                'x': [1, 2, 3, 4]
+            };
+
+            table.update(reordered_col_data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(data);
+        });
+
         it("Column data constructor then column oriented `update()`", async function () {
             var colUpdate = {
                 'x': [3, 4, 5],
@@ -327,6 +342,54 @@ module.exports = (perspective) => {
             table.update(partial);
         });
 
+        it("partial column oriented update", function (done) {
+            var partial = {
+                x: [5, undefined],
+                y: ['a', 'b'],
+                z: [undefined, true]
+            };
+
+            var expected = [
+                {'x': 5, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': true},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(col_data);
+            view.on_update(async function (new_data) {
+                expect(new_data).toEqual(expected.slice(0, 2));
+                let json = await view.to_json();
+                expect(json).toEqual(expected);
+                done();
+            });
+            table.update(partial);
+        });
+
+        it("partial column oriented update with entire columns missing", function (done) {
+            var partial = {
+                y: ['a', 'b'],
+                z: [false, true]
+            };
+
+            var expected = [
+                {'x': 1, 'y':'a', 'z': false},
+                {'x': 2, 'y':'b', 'z': true},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(col_data);
+            view.on_update(async function (new_data) {
+                expect(new_data).toEqual(expected.slice(0, 2));
+                let json = await view.to_json();
+                expect(json).toEqual(expected);
+                done();
+            });
+            table.update(partial);
+        });
 
     });
 

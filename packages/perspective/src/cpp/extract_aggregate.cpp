@@ -91,10 +91,15 @@ extract_aggregate(const t_aggspec& aggspec,
         case AGGTYPE_MEAN:
         {
             const t_f64pair* pair = aggcol->get_nth<t_f64pair>(ridx);
-            t_float64 mean = pair->first / pair->second;
             t_tscalar rval;
-            rval.set(mean);
-            return rval;
+            t_float64 second = pair->second;
+            if (second > 0) {
+                t_float64 mean = pair->first / second;
+                rval.set(mean);
+            } else {
+                rval.set(t_none());
+            }
+            return rval;            
         }
         break;
         default:

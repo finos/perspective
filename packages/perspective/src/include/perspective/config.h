@@ -16,9 +16,6 @@
 #include <perspective/config.h>
 #include <perspective/pivot.h>
 #include <perspective/filter.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/jit_context.h>
-#endif
 
 namespace perspective
 {
@@ -141,40 +138,17 @@ class PERSPECTIVE_EXPORT t_config
 
     t_bool handle_nan_sort() const;
 
-    t_boolvec calc_has_sortby(const t_pivotvec& p) const;
-
-    t_svec get_detail_columns() const;
-
     t_str get_parent_pkey_column() const;
 
     t_str get_child_pkey_column() const;
 
     const t_str& get_grouping_label_column() const;
 
-    t_uindex get_row_expand_depth() const;
-
-    t_uindex get_col_expand_depth() const;
-
     t_config_recipe get_recipe() const;
 
     t_str unity_get_column_name(t_uindex idx) const;
     t_str unity_get_column_display_name(t_uindex idx) const;
-    void build_expressions(const t_table_static_ctx& pkeyed_ctx,
-                           const t_table_static_ctx& non_pkeyed_ctx);
     t_fmode get_fmode() const;
-#ifdef PSP_ENABLE_PYTHON
-    t_jit_ctxcsptr
-    get_pkeyed_jit() const
-    {
-        return m_pkeyed_jit;
-    }
-
-    t_jit_ctxcsptr
-    get_non_pkeyed_jit() const
-    {
-        return m_non_pkeyed_jit;
-    }
-#endif
 
     inline const t_str& get_grand_agg_str() const
     {
@@ -204,10 +178,6 @@ class PERSPECTIVE_EXPORT t_config
     t_fmode m_fmode;
     t_svec m_filter_exprs;
     t_str m_grand_agg_str;
-#ifdef PSP_ENABLE_PYTHON
-    t_jit_ctxsptr m_pkeyed_jit;
-    t_jit_ctxsptr m_non_pkeyed_jit;
-#endif
 };
 
 } // end namespace perspective

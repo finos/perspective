@@ -7,16 +7,19 @@
  *
  */
 
-#pragma once
+#ifdef __APPLE__
+#include <perspective/first.h>
+#include <perspective/base.h>
 
 namespace perspective
 {
-const int META_NBYTES = 1;
 
-enum t_meta_mode
+t_str
+get_error_str()
 {
-    META_MODE_MISSING,
-    META_MODE_STR_IMM,
-    META_MODE_STR_ENUM
-};
+    // handled by perror
+    return t_str();
 }
+
+} // end namespace perspective
+#endif

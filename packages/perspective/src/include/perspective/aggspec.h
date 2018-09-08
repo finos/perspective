@@ -82,14 +82,6 @@ class PERSPECTIVE_EXPORT t_aggspec
               t_uindex agg_two_idx,
               t_float64 agg_one_weight,
               t_float64 agg_two_weight);
-#ifdef PSP_ENABLE_PYTHON
-    t_aggspec(const t_str& aggname,
-              const t_str& disp_aggname,
-              t_aggtype agg,
-              const t_depvec& idependencies,
-              const t_depvec& odependencies,
-              PyObject* kernel);
-#endif
     t_str name() const;
     t_str disp_name() const;
     t_aggtype agg() const;
@@ -116,9 +108,7 @@ class PERSPECTIVE_EXPORT t_aggspec
     t_bool is_reducer_agg() const;
 
     t_bool is_non_delta() const;
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* get_py_kernel();
-#endif
+    
     t_str get_first_depname() const;
 
     t_aggspec_recipe get_recipe() const;
@@ -135,11 +125,7 @@ class PERSPECTIVE_EXPORT t_aggspec
     t_float64 m_agg_one_weight;
     t_float64 m_agg_two_weight;
     t_invmode m_invmode;
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* m_kernel;
-#else
     t_uindex m_kernel;
-#endif
 };
 
 typedef std::vector<t_aggspec> t_aggspecvec;

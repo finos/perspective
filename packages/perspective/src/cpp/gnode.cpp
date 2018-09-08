@@ -17,9 +17,6 @@
 #include <perspective/mask.h>
 #include <perspective/tracing.h>
 #include <perspective/env_vars.h>
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/pythonhelpers.h>
-#endif
 #include <perspective/logtime.h>
 #include <perspective/utils.h>
 
@@ -189,17 +186,6 @@ t_gnode::init()
 
     t_port_sptr& iport = m_iports[0];
     t_table_sptr flattened = iport->get_table()->flatten();
-#ifdef PSP_ENABLE_PYTHON
-    for (const auto& ccol : m_custom_columns)
-    {
-        flattened->fill_expr(ccol.get_icols(),
-                             ccol.get_expr(),
-                             ccol.get_ocol(),
-                             ccol.get_where_keys(),
-                             ccol.get_where_values(),
-                             ccol.get_base_case());
-    }
-#endif
     m_init = true;
 }
 
@@ -415,17 +401,6 @@ t_gnode::_process()
 
     if (m_state->mapping_size() == 0)
     {
-        for (const auto& ccol : m_custom_columns)
-        {
-#ifdef PSP_ENABLE_PYTHON
-            flattened->fill_expr(ccol.get_icols(),
-                                 ccol.get_expr(),
-                                 ccol.get_ocol(),
-                                 ccol.get_where_keys(),
-                                 ccol.get_where_values(),
-                                 ccol.get_base_case());
-#endif
-        }
         psp_log_time(repr() + " _process.init_path.post_fill_expr");
 
         m_state->update_history(flattened.get());
@@ -610,17 +585,6 @@ t_gnode::_process()
     if (!m_expr_icols.empty())
     {
         populate_icols_in_flattened(lkup, flattened);
-        for (const auto& ccol : m_custom_columns)
-        {
-#ifdef PSP_ENABLE_PYTHON
-            flattened->fill_expr(ccol.get_icols(),
-                                 ccol.get_expr(),
-                                 ccol.get_ocol(),
-                                 ccol.get_where_keys(),
-                                 ccol.get_where_values(),
-                                 ccol.get_base_case());
-#endif
-        }
     }
 
 #ifdef PSP_PARALLEL_FOR
@@ -991,16 +955,6 @@ t_gnode::pprint() const
     m_state->pprint();
 }
 
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_gnode::get_mask() const
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return m_state->get_mask();
-}
-#endif
-
 template <typename CTX_T>
 void
 t_gnode::set_ctx_state(void* ptr)
@@ -1162,8 +1116,6 @@ t_gnode::_register_context(const t_str& name,
             }
 
             ctx->reset();
-            ctx->get_config().build_expressions(
-                pkeyed_tblcontext, non_pkeyed_tblcontext);
 
             if (should_update)
                 update_context_from_state<t_ctx2>(ctx, *flattened);
@@ -1182,8 +1134,6 @@ t_gnode::_register_context(const t_str& name,
             }
 
             ctx->reset();
-            ctx->get_config().build_expressions(
-                pkeyed_tblcontext, non_pkeyed_tblcontext);
 
             if (should_update)
                 update_context_from_state<t_ctx1>(ctx, *flattened);
@@ -1202,8 +1152,6 @@ t_gnode::_register_context(const t_str& name,
             }
 
             ctx->reset();
-            ctx->get_config().build_expressions(
-                pkeyed_tblcontext, non_pkeyed_tblcontext);
 
             if (should_update)
                 update_context_from_state<t_ctx0>(ctx, *flattened);
@@ -1222,8 +1170,6 @@ t_gnode::_register_context(const t_str& name,
             }
 
             ctx->reset();
-            ctx->get_config().build_expressions(
-                pkeyed_tblcontext, non_pkeyed_tblcontext);
 
             if (should_update)
                 update_context_from_state<t_ctx_grouped_pkey>(

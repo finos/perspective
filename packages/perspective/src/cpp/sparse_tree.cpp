@@ -416,7 +416,6 @@ t_stree::build_strand_table(const t_table& flattened,
     aggs->init();
 
     t_col_csptr pkey_col = flattened.get_const_column("psp_pkey");
-
     t_col_csptr op_col = flattened.get_const_column("psp_op");
 
     t_uindex npivotlike = rv.m_npivotlike;
@@ -1109,81 +1108,6 @@ t_stree::size() const
 }
 
 void
-t_stree::pprint(t_bool show_pkeys) const
-{
-    std::vector<t_uindex> q{0};
-    t_str indent("  ");
-
-    std::cout << "Tree node, ";
-
-    t_colcptrvec aggcols;
-    t_uindex naggcols = 0;
-
-    for (const t_str& aggcol : m_aggregates->get_schema().m_columns)
-    {
-        std::cout << aggcol << ", ";
-        aggcols.push_back(
-            m_aggregates->get_const_column(aggcol).get());
-        ++naggcols;
-    }
-    std::cout << "\n========================\n";
-
-    while (!q.empty())
-    {
-        t_uindex nidx = q.back();
-        q.pop_back();
-
-        auto iter = m_nodes->get<by_idx>().find(nidx);
-        PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                           "Node unexpectedly not found");
-
-        for (t_uindex idx = 0; idx < iter->m_depth; ++idx)
-        {
-            std::cout << indent;
-        }
-
-        std::cout << "v: " << iter->m_value
-                  << " sv: " << iter->m_sort_value
-                  << " ns:" << iter->m_nstrands
-                  << " nidx:" << iter->m_idx
-                  << " pidx:" << iter->m_pidx
-                  << " aggidx:" << iter->m_aggidx
-                  << " depth: " << t_index(iter->m_depth)
-                  << " aggs => ";
-
-        for (t_uindex aggidx = 0; aggidx < naggcols; ++aggidx)
-        {
-            std::cout << aggcols[aggidx]->get_scalar(iter->m_aggidx)
-                      << ", ";
-        }
-        std::cout << "\n";
-
-        if (show_pkeys)
-        {
-            t_tscalvec pkeys = get_pkeys(nidx);
-
-            t_uindex pkey_count = 0;
-
-            for (auto pkey : pkeys)
-            {
-                for (auto idx = 0; idx < iter->m_depth + 1; ++idx)
-                {
-                    std::cout << indent;
-                }
-
-                std::cout << "pkey #" << pkey_count << ": " << pkey
-                          << std::endl;
-
-                ++pkey_count;
-            }
-        }
-        auto children = get_children(nidx);
-
-        q.insert(q.end(), children.rbegin(), children.rend());
-    }
-}
-
-void
 t_stree::get_child_nodes(t_uindex idx, t_tnodevec& nodes) const
 {
     t_index num_children = get_num_children(idx);
@@ -1280,11 +1204,11 @@ t_stree::update_agg_table(t_uindex nidx,
                 t_f64vec values;
 
                 gstate.read_column(
-                    spec.get_dependencies()[0].name(), pkeys, values);
+                    spec.get_dependencies()[0].name(), pkeys, values, false);
 
-                auto nr = std::accumulate(
-                    values.begin(), values.end(), t_float64(0));
+                auto nr = std::accumulate(values.begin(), values.end(), t_float64(0));
                 t_float64 dr = values.size();
+
 
                 t_f64pair* dst_pair =
                     dst->get_nth<t_f64pair>(dst_ridx);
@@ -1851,12 +1775,6 @@ t_stree::get_parent_idx(t_uindex ptidx) const
     return iter->m_pidx;
 }
 
-t_uindex
-t_stree::get_num_levels() const
-{
-    return m_pivots.size() + 1;
-}
-
 t_uidxvec
 t_stree::get_ancestry(t_uindex idx) const
 {
@@ -1871,12 +1789,6 @@ t_stree::get_ancestry(t_uindex idx) const
 
     std::reverse(rval.begin(), rval.end());
     return rval;
-}
-
-t_by_pidx_ipair
-t_stree::get_parent_children(t_uindex pidx)
-{
-    return m_nodes->get<by_pidx>().equal_range(pidx);
 }
 
 t_index
@@ -2092,20 +2004,6 @@ t_stree::get_leaves(t_uindex idx) const
     return rval;
 }
 
-t_mask
-t_stree::get_leaves_mask(t_uindex idx) const
-{
-    auto leaves = get_leaves(idx);
-
-    t_mask rval(m_aggregates->size());
-
-    for (auto lf : leaves)
-    {
-        rval.set(lf);
-    }
-    return rval;
-}
-
 t_depth
 t_stree::get_depth(t_uindex ptidx) const
 {
@@ -2209,68 +2107,6 @@ t_stree::last_level() const
     return m_pivots.size();
 }
 
-t_uidxvec
-t_stree::get_node_indices() const
-{
-    t_uidxvec rval(m_nodes->size());
-    auto biter = m_nodes->get<by_idx>().begin();
-    auto eiter = m_nodes->get<by_idx>().end();
-
-    t_uindex count = 0;
-
-    for (auto iter = biter; iter != eiter; ++iter)
-    {
-        rval[count] = iter->m_idx;
-        ++count;
-    }
-    return rval;
-}
-
-void
-t_stree::pprint_idxpkey() const
-{
-    auto biter = m_idxpkey->get<by_idx_pkey>().begin();
-    auto eiter = m_idxpkey->get<by_idx_pkey>().end();
-
-    t_uindex count = 0;
-
-    std::cout << "========= " << this
-              << " idxpkey ===========" << std::endl;
-
-    for (auto iter = biter; iter != eiter; ++iter)
-    {
-        std::cout << count << ". idx =>" << iter->m_idx << " pkey => "
-                  << iter->m_pkey << std::endl;
-        ++count;
-    }
-
-    std::cout << "========= end " << this
-              << " idxpkey ===========" << std::endl;
-}
-
-void
-t_stree::pprint_idxleaf() const
-{
-
-    auto biter = m_idxleaf->get<by_idx_lfidx>().begin();
-    auto eiter = m_idxleaf->get<by_idx_lfidx>().end();
-
-    t_uindex count = 0;
-
-    std::cout << "========= " << this
-              << " idxleaf ===========" << std::endl;
-
-    for (auto iter = biter; iter != eiter; ++iter)
-    {
-        std::cout << count << ". idx =>" << iter->m_idx
-                  << " lfidx => " << iter->m_lfidx << std::endl;
-        ++count;
-    }
-
-    std::cout << "========= end " << this
-              << " idxleaf ===========" << std::endl;
-}
-
 t_bool
 t_stree::is_leaf(t_uindex nidx) const
 {
@@ -2329,25 +2165,6 @@ t_stree::resolve_path(t_uindex root, const t_tscalvec& path) const
     }
 
     return curidx;
-}
-
-t_colcptrvec
-t_stree::get_aggcols(const t_idxvec& agg_indices) const
-{
-    t_colcptrvec aggcols(agg_indices.size());
-
-    auto aggtable = get_aggtable();
-    t_schema aggschema = aggtable->get_schema();
-
-    for (t_uindex aggidx = 0, loop_end = aggcols.size();
-         aggidx < loop_end;
-         ++aggidx)
-    {
-        const t_str& aggname = aggschema.m_columns[aggidx];
-        aggcols[aggidx] = aggtable->get_const_column(aggname).get();
-    }
-
-    return aggcols;
 }
 
 // aggregates should be presized to be same size
@@ -2434,133 +2251,6 @@ t_stree::get_aggregate(t_ptidx idx, t_index aggnum) const
 
     return extract_aggregate(
         m_aggspecs[aggnum], c, agg_ridx, agg_pridx);
-}
-
-t_str
-t_stree::dot_emit_node(t_ptidx idx) const
-{
-    std::stringstream s;
-
-    auto node = get_node(idx);
-    s << "\tnode_" << idx << " [shape=\"record\", label=\""
-      << "<f0> idx: " << node.m_idx << " | <f1> pidx: " << node.m_pidx
-      << " | <f2> value: " << node.m_value
-      << " | <f3> sort_value: " << node.m_sort_value
-      << " | <f4> depth: " << t_index(node.m_depth)
-      << " | <f5> aggidx: " << node.m_aggidx
-      << " | <f6> nstrands: " << node.m_nstrands << " \"];";
-    return s.str();
-}
-
-t_str
-t_stree::dot_emit_nodes() const
-{
-    std::stringstream s;
-    std::queue<t_ptidx> q;
-    q.push(0);
-
-    while (!q.empty())
-    {
-        t_ptidx hidx = q.front();
-        q.pop();
-        s << dot_emit_node(hidx) << std::endl;
-        t_ptivec children;
-        get_child_indices(hidx, children);
-        for (t_index idx = 0, loop_end = children.size();
-             idx < loop_end;
-             ++idx)
-        {
-            q.push(children[idx]);
-        }
-    }
-
-    return s.str();
-}
-
-t_str
-t_stree::dot_emit_edges() const
-{
-    std::stringstream s;
-    std::queue<t_ptidx> q;
-    q.push(0);
-
-    while (!q.empty())
-    {
-        t_ptidx hidx = q.front();
-        q.pop();
-        t_ptivec children;
-        get_child_indices(hidx, children);
-        for (t_index idx = 0, loop_end = children.size();
-             idx < loop_end;
-             ++idx)
-        {
-            s << "\tnode_" << hidx << " -> "
-              << "node_" << children[idx] << ";" << std::endl;
-            q.push(children[idx]);
-        }
-    }
-    return s.str();
-}
-
-t_str
-t_stree::dot() const
-{
-    std::stringstream s;
-    s << "digraph tree \n{\n\trankdir=LR;\n";
-    s << dot_emit_nodes() << std::endl;
-    s << dot_emit_edges() << std::endl;
-    s << "}\n";
-
-    return s.str();
-}
-
-void
-t_stree::dot(const t_str& fname_prefix) const
-{
-    std::stringstream fname;
-    fname << fname_prefix << "_" << this << ".dot";
-    std::ofstream f;
-    f.open(fname.str());
-    f << dot() << std::endl;
-    f.close();
-}
-
-void
-t_stree::dot_autoinc(const t_str& fname_prefix)
-{
-    std::stringstream prefix;
-    prefix << fname_prefix << "_" << this << "_" << m_dotcount;
-
-    std::stringstream fname;
-    fname << prefix.str() << ".dot";
-
-    std::ofstream f;
-    f.open(fname.str());
-    f << dot() << std::endl;
-    f.close();
-
-    std::stringstream svg;
-    svg << prefix.str() << ".svg";
-
-    std::stringstream svgcmd;
-    svgcmd << "dot -Tsvg -o " << svg.str() << " " << fname.str();
-
-    launch_proc(svgcmd.str());
-
-    if (t_env::show_svg_browser())
-    {
-        std::string iestr("C:/Program Files (x86)/Internet "
-                          "Explorer/iexplore.exe -framemerging "
-                          "-sessionmerging");
-        std::stringstream browsecmd;
-
-        browsecmd << iestr << " file:///" << cwd() << "\\"
-                  << svg.str() << std::endl;
-        std::cout << browsecmd.str() << std::endl;
-        launch_proc(browsecmd.str());
-    }
-
-    ++m_dotcount;
 }
 
 void
@@ -2724,123 +2414,10 @@ t_stree::node_exists(t_uindex idx)
     return iter != m_nodes->get<by_idx>().end();
 }
 
-const t_tree_unify_rec_vec&
-t_stree::updated_node_info() const
-{
-    return m_tree_unification_records;
-}
-
-void
-t_stree::set_aggregate(const t_str& agg_name,
-                       const t_tree_unify_rec_vec& update_info,
-                       const t_tscalvec& values)
-
-{
-    auto col = m_aggregates->get_column(agg_name).get();
-    t_uindex idx = 0;
-    for (const auto& rec : update_info)
-    {
-        col->set_scalar(rec.m_saggidx, values[idx]);
-        ++idx;
-    }
-}
-
 t_table*
 t_stree::get_aggtable()
 {
     return m_aggregates.get();
-}
-
-t_mask
-t_stree::get_updated_aggmask() const
-{
-    t_mask rval(m_aggregates->size());
-    for (const auto& rec : m_tree_unification_records)
-    {
-        rval.set(rec.m_saggidx);
-    }
-    return rval;
-}
-
-t_svec
-t_stree::get_combiner_input_columns() const
-{
-    t_svec rval;
-    for (const auto& spec : m_aggspecs)
-    {
-        if (spec.is_combiner_agg())
-        {
-            auto depnames = spec.get_input_depnames();
-            rval.insert(
-                rval.end(), std::begin(depnames), std::end(depnames));
-        }
-    }
-    return rval;
-}
-
-t_aggspecvec
-t_stree::get_reducer_aggspecs() const
-{
-    t_aggspecvec rval;
-    for (const auto& spec : m_aggspecs)
-    {
-        if (spec.is_reducer_agg())
-        {
-            rval.push_back(spec);
-        }
-    }
-    return rval;
-}
-
-t_aggspecvec
-t_stree::get_combiner_aggspecs() const
-{
-    t_aggspecvec rval;
-    for (const auto& spec : m_aggspecs)
-    {
-        if (spec.is_combiner_agg())
-        {
-            rval.push_back(spec);
-        }
-    }
-    return rval;
-}
-
-t_uindex
-t_stree::get_num_leaves(t_uindex depth) const
-{
-    t_uint8 d8(depth);
-    auto iterators = m_nodes->get<by_depth>().equal_range(d8);
-    return std::distance(iterators.first, iterators.second);
-}
-
-t_idxvec
-t_stree::get_indices_for_depth(t_uindex depth) const
-
-{
-    t_idxvec indices;
-    std::deque<t_tnode> dft;
-    dft.push_front(get_node(0));
-
-    while (!dft.empty())
-    {
-        t_tnode node = dft.front();
-        dft.pop_front();
-
-        if (node.m_depth < depth)
-        {
-            t_stnode_vec nodes;
-            get_child_nodes(node.m_idx, nodes);
-            std::copy(nodes.rbegin(),
-                      nodes.rend(),
-                      std::front_inserter(dft));
-        }
-        else if (node.m_depth == depth)
-        {
-            indices.push_back(node.m_idx);
-        }
-    }
-    return indices;
 }
 
 std::pair<iter_by_idx, t_bool>

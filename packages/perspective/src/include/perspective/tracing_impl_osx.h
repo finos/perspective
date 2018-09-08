@@ -9,14 +9,10 @@
 
 #pragma once
 #include <perspective/first.h>
-#include <perspective/schema.h>
-#include <perspective/aggspec.h>
-#include <perspective/exports.h>
 
-namespace perspective
-{
-
-PERSPECTIVE_EXPORT t_dtype calc_agg_dtype(const t_schema& schema,
-                                          const t_aggspec& spec);
-
-} // end namespace perspective
+#ifdef __APPLE__
+extern "C" {
+__attribute__((__constructor__)) void th_trace_init();
+__attribute__((__destructor__)) void th_trace_fini();
+}
+#endif

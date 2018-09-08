@@ -15,10 +15,14 @@
                 <select id="vis_selector">
                 </select>
             </div>
-            <div id="columns_container">
+            <div id="columns_container" style="visibility: hidden">
                 <ul id='active_columns' ondragenter="dragEnter(event)"></ul>
                 <div id='divider'></div>
                 <ul id='inactive_columns'></ul>
+                <perspective-computed-column></perspective-computed-column>
+            </div>
+            <div id="side_panel__actions" style="visibility: hidden">
+                <div id="add-computed-column" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
             </div>
         </div>
         <div class="column noselect">
@@ -31,7 +35,7 @@
                         </div>
                     </div>
                 </div>
-                <span class="rrow centered" style="min-width:5px;max-width:5px;flex-grow:0;color:#999;font-family:Arial;font-size:12px">&#x2715;</span>
+                <span id="transpose_button" class="rrow centered">&#x2715;</span>
                 <div class="rrow">
                     <div id="column_pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
                         <div class="psp-text-field">

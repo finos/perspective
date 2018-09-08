@@ -358,21 +358,6 @@ t_dtree::pivot(const t_filter& filter, t_uindex level)
     m_nidx = neidx;
 }
 
-void
-t_dtree::print_nodes() const
-{
-    std::cout << "nodes for table " << repr() << std::endl;
-    if (m_levels.empty())
-        return;
-
-    for (t_uindex idx = 0; idx < m_nidx; ++idx)
-    {
-        std::cout << *(m_nodes.get_nth<t_tnode>(idx)) << std::endl;
-    }
-
-    std::cout << "================== " << repr() << std::endl;
-}
-
 t_uindex
 t_dtree::get_depth(t_ptidx idx) const
 {
@@ -404,24 +389,9 @@ t_dtree::pprint(const t_filter& filter) const
 }
 
 t_uindex
-t_dtree::level_len(t_uindex depth) const
-{
-    PSP_VERBOSE_ASSERT(depth <= last_level(), "Invalid access");
-
-    const t_uidxpair& lvlp = m_levels[depth];
-    return lvlp.second - lvlp.first;
-}
-
-t_uindex
 t_dtree::last_level() const
 {
     return m_pivots.size();
-}
-
-t_dtree::t_tnode*
-t_dtree::get_node_ptr(t_ptidx nidx)
-{
-    return m_nodes.get_nth<t_tnode>(nidx);
 }
 
 const t_dtree::t_tnode*
@@ -487,115 +457,10 @@ t_dtree::get_span_index(t_ptidx idx) const
     return t_uidxpair(0, 0);
 }
 
-t_column*
-t_dtree::_get_leaves()
-{
-    return &m_leaves;
-}
-
-const t_column*
-t_dtree::_get_leaves() const
-{
-    return &m_leaves;
-}
-
-t_column*
-t_dtree::_get_nodes()
-{
-    return &m_nodes;
-}
-
-t_column*
-t_dtree::_get_values(t_uindex lvl)
-{
-    return &m_values[lvl];
-}
-
-t_uidxpvec
-t_dtree::_get_levels() const
-{
-    return m_levels;
-}
-
 const t_column*
 t_dtree::get_leaf_cptr() const
 {
     return &m_leaves;
-}
-
-void
-t_dtree::print_leaves() const
-{
-    for (t_uindex idx = 0; idx < m_leaves.size(); ++idx)
-    {
-        std::cout << idx << ". " << *(m_leaves.get_nth<t_uindex>(idx))
-                  << std::endl;
-    }
-}
-
-void
-t_dtree::print_child_indices(t_ptidx idx) const
-{
-
-    const t_tnode& pnode = *(m_nodes.get_nth<const t_tnode>(idx));
-
-    t_ptidx fcidx = pnode.m_fcidx;
-    t_ptidx nchild = pnode.m_nchild;
-
-    for (t_index idx = 0; idx < nchild; ++idx)
-    {
-        std::cout << idx << ". " << fcidx + idx << std::endl;
-    }
-}
-
-void
-t_dtree::print_leaves(t_ptidx idx) const
-{
-
-    const t_tnode& pnode = *(m_nodes.get_nth<const t_tnode>(idx));
-
-    t_ptidx flidx = pnode.m_flidx;
-    t_ptidx nleaves = pnode.m_nleaves;
-
-    for (t_index idx = 0; idx < nleaves; ++idx)
-    {
-        std::cout << idx << ". "
-                  << *(m_leaves.get_nth<t_uindex>(flidx + idx))
-                  << std::endl;
-    }
-}
-
-void
-t_dtree::print_levels() const
-{
-    std::cout << "tree levels" << std::endl;
-    for (t_uindex idx = 0, loop_end = m_levels.size(); idx < loop_end;
-         ++idx)
-    {
-        std::cout << idx << ". <" << m_levels[idx].first << ", "
-                  << m_levels[idx].second << ">" << std::endl;
-    }
-    std::cout << "end levels ------------------------------"
-              << std::endl;
-}
-
-void
-t_dtree::print_values() const
-{
-
-    for (t_uindex idx = 0, loop_end = m_values.size(); idx < loop_end;
-         ++idx)
-    {
-
-        std::cout << "values " << idx
-                  << "\n***********************************\n"
-                  << std::endl;
-
-        m_values[idx].pprint();
-    }
-
-    std::cout << "end values ------------------------------"
-              << std::endl;
 }
 
 t_bfs_iter<t_dtree>
@@ -615,55 +480,6 @@ t_dtree::get_parent(t_ptidx idx) const
 {
     const t_tnode* n = get_node_ptr(idx);
     return n->m_pidx;
-}
-
-void
-t_dtree::pprint_pivots(t_uindex end_level, t_uindex width) const
-{
-    std::cout << "pivots ..........." << std::endl;
-
-    t_colcptrvec tmpcols;
-
-    for (t_uindex inneridx = 1; inneridx < end_level; ++inneridx)
-    {
-        t_str colname = m_pivots[inneridx - 1].colname();
-        std::cout << std::setw(width) << colname;
-        tmpcols.push_back(m_ds->get_const_column(colname).get());
-    }
-
-    std::cout << "\n=====================================\n";
-
-    for (t_uindex idx = 0; idx < m_leaves.size(); ++idx)
-    {
-        t_uindex lfidx = *(m_leaves.get_nth<t_uindex>(idx));
-        std::cout << "leaf #" << lfidx << ".";
-        for (t_uindex inneridx = 0; inneridx < tmpcols.size();
-             ++inneridx)
-        {
-            std::cout << std::setw(width)
-                      << tmpcols[inneridx]->get_scalar(lfidx);
-        }
-        std::cout << std::endl;
-    }
-}
-
-void
-t_dtree::pprint_values() const
-{
-    for (t_uindex idx = 0; idx < get_pivots().size(); ++idx)
-    {
-        std::cout << "pivot => " << m_pivots[idx].colname();
-        std::cout << "values => \n";
-        m_values[idx].pprint();
-    }
-
-    t_filter fltr;
-    for (t_uindex idx = 0; idx < size(); ++idx)
-    {
-        std::cout << "nidx => " << idx << ", get_value => "
-                  << get_value(fltr, idx) << " svalue => "
-                  << get_sortby_value(fltr, idx) << std::endl;
-    }
 }
 
 const t_pivotvec&

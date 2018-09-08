@@ -1,15 +1,15 @@
 {
     "superstore.html/shows a grid without any settings applied.": "5c9f7fcce4e9bb1f144409afbc43b0fa",
-    "superstore.html/pivots by a row.": "9d52596594e9e9b8fe835970a089ee51",
-    "superstore.html/pivots by two rows.": "0f79c1f0772dba50561e91b065b1fca2",
-    "superstore.html/pivots by a row and a column.": "3e7d0105da311980935d6448748797d9",
-    "superstore.html/pivots by two rows and two columns.": "62f299b21e94c437c0546d3442e1005f",
-    "superstore.html/sorts by a numeric column.": "be8c749a8093333ffa46e1a7a14d3ff9",
-    "superstore.html/sorts by an alpha column.": "85337a8e43678e9105bf7be68ec84575",
-    "superstore.html/displays visible columns.": "ea730944a673e51e70c707bbb49f084e",
-    "superstore.html/resets viewable area when the logical size expands.": "b7bf4b0d438ccd2141f56d5582d7d1af",
+    "superstore.html/pivots by a row.": "a4a3502c749d8a5f08c3b02e28096bc5",
+    "superstore.html/pivots by two rows.": "c562f3ff391ca00b012b3ae234e54403",
+    "superstore.html/pivots by a row and a column.": "5ee2065c4fff44b221cb0dbe2a387049",
+    "superstore.html/pivots by two rows and two columns.": "f57c6449438b5948879b62a6f8873f9a",
+    "superstore.html/sorts by a numeric column.": "ca81b8bf29d2d9732e2d40a98f794913",
+    "superstore.html/sorts by an alpha column.": "1824dbeec52b10c3a17419874eca8606",
+    "superstore.html/displays visible columns.": "345212af70cae1d7ebf5b915970e433f",
+    "superstore.html/resets viewable area when the logical size expands.": "80b8c89e5d461e5aa4037fdafd432945",
     "superstore.html/resets viewable area when the physical size expands.": "5c9f7fcce4e9bb1f144409afbc43b0fa",
-    "superstore.html/sorts by a hidden column.": "9b7f9c4f32d5c55d30294391cba272a6",
-    "superstore.html/filters by a numeric column.": "52f89aceca9f801cbcb7932535a14370",
-    "superstore.html/pivots by a column.": "3179b8b88a1915425ec41406cd7516cd"
+    "superstore.html/sorts by a hidden column.": "93293864b4d0670ba1e46ec5ff397d02",
+    "superstore.html/filters by a numeric column.": "f3b7ca04028702596acabfbe46ca074c",
+    "superstore.html/pivots by a column.": "8370b9f653271729a384765e9a609584"
 }

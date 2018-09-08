@@ -20,6 +20,7 @@ import template from "../html/view.html";
 import "../less/view.less";
 
 import "./row.js";
+import "./computed_column.js";
 
 polyfill({});
 
@@ -50,16 +51,8 @@ function _register_debug_plugin() {
     global.registerPlugin('debug', {
         name: "Debug", 
         create: async function(div) { 
-            const json = await this._view.to_json();
+            const csv = await this._view.to_csv({config: {delimiter: "|"}});
             const timer = this._render_time();
-            let csv = "";
-            if (json.length > 0) {
-                let columns = Object.keys(json[0]);
-                csv += columns.join('|') + '\n';
-                for (let row of json) {
-                    csv += Object.values(row).join('|') + "\n";                                    
-                }
-            }
             div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`;
             timer();
         },
@@ -230,6 +223,13 @@ function column_visibility_clicked(ev) {
             this._active_columns.removeChild(parent);
         }
     } else {
+        // check if we're manipulating computed column input
+        if(ev.path[1].classList.contains('psp-cc-computation__input-column')) {
+          //  this._computed_column._register_inputs();
+            this._computed_column.deselect_column(ev.currentTarget.getAttribute('name'));
+            this._update_column_view();
+            return;
+        }
         if (ev.detail.shiftKey && this._plugin.selectMode === 'toggle' || !ev.detail.shiftKey && this._plugin.selectMode === 'select') {
             for (let child of Array.prototype.slice.call(this._active_columns.children)) {
                 this._active_columns.removeChild(child);
@@ -242,6 +242,7 @@ function column_visibility_clicked(ev) {
     this._update_column_view(cols);
 }
 
+// todo: apply to computed columns, separate branch
 function column_aggregate_clicked() {
     let aggregates = get_aggregate_attribute.call(this);
     let new_aggregates = this._get_view_aggregates();
@@ -308,7 +309,17 @@ function set_aggregate_attribute(aggs) {
     }, {})));
 }
 
-async function loadTable(table) {
+function _format_computed_data(cc) {
+    return {
+        column_name: cc[0],
+        input_columns: cc[1].input_columns,
+        input_type: cc[1].input_type,
+        computation: cc[1].computation,
+        type: cc[1].type
+    };
+}
+
+async function loadTable(table, redraw = true) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
     
@@ -316,9 +327,10 @@ async function loadTable(table) {
 
     this._table = table;
 
-    let [cols, schema] = await Promise.all([
+    let [cols, schema, computed_schema] = await Promise.all([
         table.columns(),
-        table.schema()
+        table.schema(),
+        table.computed_schema()
     ]);
 
     this._inactive_columns.innerHTML = "";
@@ -381,6 +393,22 @@ async function loadTable(table) {
     // Update column rows.
     let shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
 
+    // strip computed columns from sorted columns & schema - place at end
+    if(!_.isEmpty(computed_schema)) {
+        const computed_columns = _.keys(computed_schema);
+        for (let i = 0; i < computed_columns.length; i++) {
+            const cc = computed_columns[i];
+            if (cols.includes(cc)) {
+                cols.splice(cols.indexOf(cc), 1);
+            }
+            if (_.has(schema, cc)) {
+                delete schema[cc];
+            }
+        }
+    }
+
+    const computed_cols = _.pairs(computed_schema);
+
     if (!this.hasAttribute('columns') || shown.length === 0) {
         for (let x of cols) {
             let aggregate = aggregates
@@ -389,6 +417,17 @@ async function loadTable(table) {
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
         }
+
+        // fixme better approach please
+        for (let cc of computed_cols) {
+            let cc_data = _format_computed_data(cc);
+            let aggregate = aggregates
+                .filter(a => a.column === cc_data.column_name)
+                .map(a => a.op)[0];
+            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+            this._inactive_columns.appendChild(row);
+        }
+
         this._set_column_defaults();
         shown = JSON.parse(this.getAttribute('columns') || "[]").filter(x => cols.indexOf(x) > -1);
         for (let x in cols) {
@@ -403,7 +442,20 @@ async function loadTable(table) {
                 .map(a => a.op)[0];
             let row = new_row.call(this, x, schema[x], aggregate);
             this._inactive_columns.appendChild(row);
-            if (shown.indexOf(x) !== -1) {
+            if (shown.includes(x)) {
+                row.classList.add('active');
+            }
+        }
+
+        // fixme better approach please
+        for (let cc of computed_cols) {
+            let cc_data = _format_computed_data(cc);
+            let aggregate = aggregates
+                .filter(a => a.column === cc_data.column_name)
+                .map(a => a.op)[0];
+            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+            this._inactive_columns.appendChild(row);
+            if (shown.includes(cc)) {
                 row.classList.add('active');
             }
         }
@@ -420,18 +472,20 @@ async function loadTable(table) {
         this._inactive_columns.style.display = 'block';
     }
 
-    this.filters = this.getAttribute('filters');
+    this.querySelector('#columns_container').style.visibility = "visible";
+    this.querySelector('#side_panel__actions').style.visibility = "visible";
 
-    this._debounce_update();
+    this.filters = this.getAttribute('filters');
+    await this._debounce_update(redraw);
 }
 
-function new_row(name, type, aggregate, filter, sort) {
+function new_row(name, type, aggregate, filter, sort, computed) {
     let row = document.createElement('perspective-row');
 
     if (!type) {
         let all = Array.prototype.slice.call(this.querySelectorAll('#inactive_columns perspective-row'));
         if (all.length > 0) {
-            type = all.find(x => x.getAttribute('name') === name)
+            type = all.find(x => x.getAttribute('name') === name);
             if (type) {
                 type = type.getAttribute('type');
             } else {
@@ -493,6 +547,12 @@ function new_row(name, type, aggregate, filter, sort) {
     });
     row.addEventListener('sort-order', sort_order_clicked.bind(this));
     row.addEventListener('row-dragend', () => this.classList.remove('dragging'));
+
+    if(computed) {
+        row.setAttribute('computed_column', JSON.stringify(computed));
+        row.classList.add('computed');
+    }
+
     return row;
 }
 
@@ -516,7 +576,7 @@ class CancelTask {
 
 }
 
-function update() {
+async function update(redraw = true) {
     if (!this._table) return;
     let row_pivots = this._view_columns('#row_pivots perspective-row');
     let column_pivots = this._view_columns('#column_pivots perspective-row');
@@ -569,27 +629,34 @@ function update() {
     });
 
     const timer = this._render_time();
-    this._render_count = (this._render_count || 0) + 1;
-    if (this._task) {
-        this._task.cancel();
-    }
-    const task = this._task = new CancelTask(() => {
-        this._render_count--;
-    });
-    task.initial = true;
-
-    this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
-        console.warn(err);
-    }).finally(() => {
-        if (!this.hasAttribute('render_time')) {
-            this.dispatchEvent(new Event('perspective-view-update'));
+    if (redraw) {
+        this._render_count = (this._render_count || 0) + 1;
+        if (this._task) {
+            this._task.cancel();
         }
+        const task = this._task = new CancelTask(() => {
+            this._render_count--;
+        });
+        task.initial = true;
+
+        await this._plugin.create.call(this, this._datavis, this._view, task).catch(err => {
+            console.warn(err);
+        }).finally(() => {
+            if (!this.hasAttribute('render_time')) {
+                this.dispatchEvent(new Event('perspective-view-update'));
+            }
+            timer();
+            task.cancel();
+            if (this._render_count === 0) {
+                this.removeAttribute('updating');
+            }
+        });
+    } else {
         timer();
-        task.cancel();
         if (this._render_count === 0) {
             this.removeAttribute('updating');
         }
-    });
+    }
 }
 
 /******************************************************************************
@@ -773,6 +840,59 @@ class ViewPrivate extends HTMLElement {
         }
     }
 
+    // Computed columns
+    _open_computed_column(event) {
+        //const data = event.detail;
+        event.stopImmediatePropagation();
+        /*if (event.type === 'perspective-computed-column-edit') {
+            this._computed_column._edit_computed_column(data);
+        }*/
+        this._computed_column.style.display = 'flex';
+        this._side_panel_actions.style.display = 'none';
+    }
+
+    _set_computed_column_input(event) {
+        event.detail.target.appendChild(
+            new_row.call(this,
+                event.detail.column.name,
+                event.detail.column.type));
+        this._update_column_view();
+    }
+
+    _create_computed_column(event) {
+        const data = event.detail;
+        let computed_column_name = data.column_name;
+
+        this._table.columns().then((cols) => {
+            // edit overwrites last column, otherwise avoid name collision
+            if(cols.includes(computed_column_name) && !data.edit) {
+                computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
+            }
+
+            const params = [{
+                computation: data.computation,
+                column: computed_column_name,
+                func: data.computation.func,
+                inputs: data.input_columns.map(col => col.name),
+                input_type: data.computation.input_type,
+                type: data.computation.return_type,
+            }];
+
+            const table = this._table.add_computed(params);
+            loadTable.call(this, table, false).then(() => {
+                this._update_column_view();
+                //this.dispatchEvent(new Event('perspective-view-update'));
+                this._computed_column._close_computed_column();
+            });
+        });
+    }
+
+    _transpose() {
+        let row_pivots = this.getAttribute('row-pivots');
+        this.setAttribute('row-pivots', this.getAttribute('column-pivots'));
+        this.setAttribute('column-pivots', row_pivots);
+    }
+
     _register_ids() {
         this._aggregate_selector = this.querySelector('#aggregate_selector');
         this._vis_selector = this.querySelector('#vis_selector');
@@ -784,12 +904,17 @@ class ViewPrivate extends HTMLElement {
         this._side_panel_divider = this.querySelector('#columns_container > #divider');
         this._active_columns = this.querySelector('#active_columns');
         this._inactive_columns = this.querySelector('#inactive_columns');
+        this._side_panel_actions = this.querySelector('#side_panel__actions');
+        this._add_computed_column = this.querySelector('#add-computed-column');
+        this._computed_column = this.querySelector('perspective-computed-column');
+        this._computed_column_inputs = this._computed_column.querySelector('#psp-cc-computation-inputs');
         this._inner_drop_target = this.querySelector('#drop_target_inner');
         this._drop_target = this.querySelector('#drop_target');
         this._config_button = this.querySelector('#config_button');
         this._side_panel = this.querySelector('#side_panel');
         this._top_panel = this.querySelector('#top_panel');
         this._sort = this.querySelector('#sort');
+        this._transpose_button = this.querySelector('#transpose_button');
     }
 
     _register_callbacks() {
@@ -805,7 +930,12 @@ class ViewPrivate extends HTMLElement {
         this._active_columns.addEventListener('dragend', column_undrag.bind(this));
         this._active_columns.addEventListener('dragover', column_dragover.bind(this));
         this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
+        this._add_computed_column.addEventListener('mousedown', this._open_computed_column.bind(this));
+        this._computed_column.addEventListener('perspective-computed-column-save', this._create_computed_column.bind(this));
+        this._computed_column.addEventListener('perspective-computed-column-update', this._set_computed_column_input.bind(this));
+        //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
+        this._transpose_button.addEventListener('click', this._transpose.bind(this));
         
         this._vis_selector.addEventListener('change', () => {
             this.setAttribute('view', this._vis_selector.value);
@@ -835,10 +965,12 @@ class ViewPrivate extends HTMLElement {
     }
 
     _register_debounce_instance() {
-        const _update = _.debounce(update.bind(this), 10);
-        this._debounce_update = () => {
+        const _update = _.debounce((redraw, resolve) => {
+            update.bind(this)(redraw).then(resolve);
+        }, 10);
+        this._debounce_update = async (redraw) => {
             this.setAttribute('updating', true);
-            _update();
+            await new Promise(resolve => _update(redraw, resolve));
         }
     }
  }
@@ -1126,7 +1258,7 @@ class View extends ViewPrivate {
     }
 
     /**
-     * This element's `perpsective.table.view` instance.  The instance itself
+     * This element's `perspective.table.view` instance.  The instance itself
      * will change after every `View#perspective-config-update` event. 
      *
      * @readonly
@@ -1141,6 +1273,8 @@ class View extends ViewPrivate {
      * 
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table`.
+     * @returns {Promise<void>} A promise which resolves once the data is
+     * loaded and a `perspective.view` has been created.
      * @fires View#perspective-view-update
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
@@ -1170,11 +1304,12 @@ class View extends ViewPrivate {
         } else {
             table = get_worker().table(data, options);
         }
-        loadTable.call(this, table);
+        let _promises = [loadTable.call(this, table)];
         for (let slave of this._slaves) {
-            loadTable.call(slave, table);
+            _promises.push(loadTable.call(slave, table));
         }
         this._slaves = [];
+        return Promise.all(_promises);
     }
 
     /**
@@ -1312,7 +1447,7 @@ class View extends ViewPrivate {
      * 
      */
     handleClipboardCopy(options) {
-        let data
+        let data;
         if (!this._view) {
             console.warn("No view to copy - skipping");
             return;
@@ -1332,10 +1467,9 @@ class View extends ViewPrivate {
             } else {
                 console.warn("Timeout expired - copy to clipboard cancelled.");
             }
-        }
+        };
         f();
     }
-    
 }
 
 /**

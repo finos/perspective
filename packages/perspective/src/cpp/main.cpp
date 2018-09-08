@@ -144,7 +144,7 @@ _get_aggspecs(val j_aggs)
     {
         std::vector<val> agg_row = vecFromJSArray<val>(aggs[idx]);
         std::string name = agg_row[0].as<std::string>();
-        t_aggtype aggtype = agg_row[1].as<t_aggtype>();
+        t_aggtype aggtype = agg_row[1].as<t_aggtype>(); 
 
         t_depvec dependencies;
         std::vector<val> deps = vecFromJSArray<val>(agg_row[2]);
@@ -155,7 +155,14 @@ _get_aggspecs(val j_aggs)
             std::string dep = deps[didx].as<std::string>();
             dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
         }
-        aggspecs.push_back(t_aggspec(name, aggtype, dependencies));
+        if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
+            if (dependencies.size() == 1) {
+                dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
+            }
+            aggspecs.push_back(t_aggspec(name, name, aggtype, dependencies, SORTTYPE_ASCENDING)); 
+        } else {
+            aggspecs.push_back(t_aggspec(name, aggtype, dependencies));
+        }
     }
     return aggspecs;
 }
@@ -249,7 +256,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
     } else {
         for (auto i = 0; i < nrows; ++i)
         {
-            if (dcol[i].isUndefined()) continue;
+            if (dcol[i].isUndefined() || dcol[i].isNull()) continue;
             auto elem = dcol[i].as<T>();
             col->set_nth(i, elem);
         }
@@ -875,11 +882,15 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
             col->set_nth(idx, elem, true);
             break;
         }
+        case DTYPE_TIME:
+        {
+            col->set_nth<t_int64>(idx, static_cast<t_int64>(value.as<t_float64>()), true);
+            break;
+        }
         case DTYPE_UINT8:
         case DTYPE_UINT16:
         case DTYPE_INT8:
         case DTYPE_INT16:
-        case DTYPE_TIME:
         default:
         {
             // Other types not implemented

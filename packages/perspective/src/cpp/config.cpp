@@ -430,14 +430,6 @@ t_config::has_filters() const
             return !m_fterms.empty();
         }
         break;
-#ifdef PSP_ENABLE_PYTHON
-        case FMODE_JIT_EXPR:
-        {
-            return m_pkeyed_jit->has_fn() &&
-                   m_non_pkeyed_jit->has_fn();
-        }
-        break;
-#endif
         default:
         {
             return false;
@@ -481,29 +473,6 @@ t_config::handle_nan_sort() const
     return m_handle_nan_sort;
 }
 
-t_boolvec
-t_config::calc_has_sortby(const t_pivotvec& p) const
-{
-    t_boolvec rval(p.size() + 1);
-    rval[0] = false;
-    t_uindex idx = 1;
-
-    for (const auto& p_ : p)
-    {
-        auto colname = p_.colname();
-        auto iter = m_sortby.find(colname);
-        rval[idx] = iter != m_sortby.end() && iter->second != colname;
-        ++idx;
-    }
-    return rval;
-}
-
-t_svec
-t_config::get_detail_columns() const
-{
-    return m_detail_columns;
-}
-
 t_str
 t_config::get_parent_pkey_column() const
 {
@@ -520,18 +489,6 @@ const t_str&
 t_config::get_grouping_label_column() const
 {
     return m_grouping_label_column;
-}
-
-t_uindex
-t_config::get_row_expand_depth() const
-{
-    return m_row_expand_depth;
-}
-
-t_uindex
-t_config::get_col_expand_depth() const
-{
-    return m_col_expand_depth;
 }
 
 t_config_recipe
@@ -595,21 +552,6 @@ t_config::unity_get_column_display_name(t_uindex idx) const
     }
 
     return m_aggregates[idx % m_aggregates.size()].disp_name();
-}
-
-void
-t_config::build_expressions(const t_table_static_ctx& pkeyed_ctx,
-                            const t_table_static_ctx& non_pkeyed_ctx)
-{
-#ifdef PSP_ENABLE_PYTHON
-    if (m_fmode != FMODE_JIT_EXPR)
-        return;
-    m_pkeyed_jit.reset(new t_jit_ctx(m_filter_exprs, m_combiner));
-    m_pkeyed_jit->bind_table(pkeyed_ctx, m_fterms);
-
-    m_non_pkeyed_jit.reset(new t_jit_ctx(m_filter_exprs, m_combiner));
-    m_non_pkeyed_jit->bind_table(non_pkeyed_ctx, m_fterms);
-#endif
 }
 
 t_fmode

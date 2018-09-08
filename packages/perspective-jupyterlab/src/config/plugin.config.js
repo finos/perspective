@@ -19,7 +19,7 @@ const plugins = [
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     plugins.push(new UglifyJSPlugin({
-        sourceMap: false,
+        sourceMap: true,
         mangle: false,
         output: {
             ascii_only: true
@@ -29,6 +29,7 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
 module.exports = Object.assign({}, common(), {
     entry: './src/ts/index.ts',
     plugins: plugins,
+    externals: ['@jupyter-widgets/base'],
     output: {
         filename: 'index.js',
         libraryTarget: "umd",
@@ -36,4 +37,4 @@ module.exports = Object.assign({}, common(), {
     }
 });
 
-module.exports.module.rules.push({test: /\.ts?$|@jupyterlab/, loader: "ts-loader"})
+module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"})

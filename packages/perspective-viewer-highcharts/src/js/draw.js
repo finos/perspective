@@ -50,7 +50,7 @@ export const draw = (mode) => async function (el, view, task) {
         yaxis_type = schema[yaxis_name],
         xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
         xtree_type = tschema[xtree_name],
-        ytree_name = col_pivots.length > 1 ? col_pivots[col_pivots.length - 1] : undefined,
+        ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
         ytree_type = tschema[ytree_name],
         num_aggregates = aggregates.length - hidden.length;
 
@@ -77,7 +77,7 @@ export const draw = (mode) => async function (el, view, task) {
         set_tick_size.call(this, config);
     } else if (mode === 'heatmap') {
         let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
-        let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden);
+        let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden, ytree_type);
         config.series = [{
             name: null,
             data: series,

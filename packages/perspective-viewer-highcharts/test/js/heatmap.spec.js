@@ -11,7 +11,6 @@ const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
 
 const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
 
-
 utils.with_server({}, () => {
 
     describe.page("heatmap.html", () => {

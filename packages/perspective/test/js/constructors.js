@@ -58,6 +58,12 @@ var meta_3 = {
     'z': "boolean"
 };
 
+let column_meta = [
+    {name: "x", type: "integer", computed: undefined},
+    {name: "y", type: "string", computed: undefined},
+    {name: "z", type: "boolean", computed: undefined}
+];
+
 import arrow from "../arrow/test-null.arrow";
 
 var arrow_result = [
@@ -335,8 +341,65 @@ module.exports = (perspective) => {
             let expected = [{"yes/no": "yes"},{"yes/no": "no"},{"yes/no": "yes"},{"yes/no": "no"}];
             expect(expected).toEqual(result);
         });
-    });
 
+        it("Computed schema returns names and metadata", async function () {
+            const func = (i) => i + 2;
+
+            const computation = {
+                name: "+2",
+                input_type: "integer",
+                return_type: "integer",
+                func: func.toString()
+            };
+
+            const table = perspective.table(data);
+
+            const table2 = table.add_computed([{
+                computation: computation,
+                column: "plus2",
+                type: "integer",
+                inputs: ["x"],
+                input_type: "integer",
+                func: func,
+            }]);
+
+            const result = await table2.computed_schema();
+            const expected = {
+                "plus2": {
+                    input_columns: ["x"],
+                    input_type: "integer",
+                    computation: computation,
+                    type: "integer"
+                }
+            };
+
+            expect(expected).toEqual(result);
+        });
+
+        it("Column metadata returns names and type", async function () {
+           let table = perspective.table(data);
+           let result = await table.column_metadata();
+           expect(result).toEqual(column_meta);
+        });
+
+        it("allocates a large tables", async function () {
+            function makeid() {
+                var text = "";
+                var possible = Array.from(Array(26).keys()).map(x => String.fromCharCode(x + 65));             
+                for (var i = 0; i < 15; i++) text += possible[Math.floor(Math.random() * possible.length)];
+                return text;
+            }
+            let data = [];
+            for (let i = 0; i < 35000; i++) {
+                data.push([{a: makeid(), b: makeid(), c: makeid(), d: makeid(), w: i + 0.5, x: i, y: makeid()}]);
+            }
+            let table = perspective.table(data);
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result.length).toEqual(35000);
+        }, 3000);
+
+    });
 
 };
 

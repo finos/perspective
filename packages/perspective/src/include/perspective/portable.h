@@ -9,28 +9,22 @@
 
 #pragma once
 #include <perspective/first.h>
- 
-#ifdef PSP_ENABLE_PYTHON
-
-#include <ASGUtils/portable.h>
-
-#else
 
 // standalone build, no ASGUtils
 #if defined( __GNUC__ )
 #define __ALWAYS_INLINE__ __attribute__(( always_inline ))
 #ifndef NOINLINE
 #define NOINLINE __attribute__(( noinline ))
-#endif
+#endif // NOINLINE
 
 #ifndef NORETURN
 #define NORETURN __attribute__((__noreturn__)) void
-#endif
+#endif // NORETURN
 
 #define UNUSED __attribute__(( unused ))
 #define PRAGMA_GCC( X_ ) _Pragma( #X_ )
 #define PRAGMA_VC( X_ )
-#else
+#else // __GNUC__
 
 #define __ALWAYS_INLINE__ __forceinline
 
@@ -47,7 +41,7 @@
 #define PRAGMA_GCC( X_ )
 #define PRAGMA_VC( X_ ) __pragma( X_ )
 
-#endif
+#endif // else
 
 #define SUPPRESS_WARNINGS_GCC( X_ ) PRAGMA_GCC( GCC diagnostic push ) PRAGMA_GCC( GCC diagnostic ignored #X_ )
 #define RESTORE_WARNINGS_GCC() PRAGMA_GCC( GCC diagnostic pop )
@@ -55,4 +49,3 @@
 #define SUPPRESS_WARNINGS_VC( X_ ) PRAGMA_VC( warning( push ) ) PRAGMA_VC( warning( disable: X_ ) )
 #define RESTORE_WARNINGS_VC() PRAGMA_VC( warning( pop ) )
 
-#endif

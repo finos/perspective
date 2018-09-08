@@ -22,22 +22,6 @@ filter_table_for_config(const t_table& tbl, const t_config& config)
 
     switch (config.get_fmode())
     {
-#ifdef PSP_ENABLE_PYTHON
-        case FMODE_JIT_EXPR:
-        {
-            t_mask msk(tbl.size());
-            if (tbl.is_pkey_table())
-            {
-                config.get_pkeyed_jit()->invoke_filter(tbl, msk);
-            }
-            else
-            {
-                config.get_non_pkeyed_jit()->invoke_filter(tbl, msk);
-            }
-            return msk;
-        }
-        break;
-#endif
         case FMODE_SIMPLE_CLAUSES:
         {
             return tbl.filter_cpp(config.get_combiner(),

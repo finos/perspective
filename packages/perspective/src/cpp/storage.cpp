@@ -10,12 +10,6 @@
 #include <perspective/first.h>
 #include <perspective/portable.h>
 SUPPRESS_WARNINGS_VC(4505)
-#ifdef PSP_ENABLE_PYTHON
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
-#include <perspective/numpy.h>
-#endif
 #include <stdlib.h>
 #include <assert.h>
 #include <csignal>
@@ -492,34 +486,6 @@ t_lstore::warmup()
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 }
-
-#ifdef PSP_ENABLE_PYTHON
-PyObject*
-t_lstore::_as_numpy(t_dtype dtype)
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(
-        dtype != DTYPE_STR,
-        "as_numpy not implemented for string columns yet");
-
-    npy_intp dims[1];
-    dims[0] = npy_int(m_size / get_dtype_size(dtype));
-    PyObject* rval = PyArray_SimpleNewFromData(
-        1, dims, get_numpy_typenum_from_dtype(dtype), m_base);
-
-    PSP_VERBOSE_ASSERT(rval, "Null array found!");
-    return rval;
-}
-
-PyObject*
-t_lstore::_as_numpy()
-{
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    return _as_numpy(DTYPE_UINT8);
-}
-#endif
 
 t_uindex
 t_lstore::size() const

@@ -14,9 +14,13 @@ import arrow from "../arrow/test-null.arrow";
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
 
-module.exports = (perspective) => {
+module.exports = (perspective, mode) => {
 
     describe("Internal API", function () {
+
+        it("is actually using the correct runtime", async function () {
+            expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : 'native-wasm');
+        });
 
         it("['z'], sum with new column syntax with wrong column arity errors", async function () {
             var table = perspective.table(arrow.slice());

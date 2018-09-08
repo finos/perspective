@@ -23,16 +23,6 @@
 #endif
 #include <tuple>
 
-#ifdef PSP_ENABLE_PYTHON
-
-namespace JITCompiler {
-
-class PspCompiledComputedColumn;
-
-} // namespace JITCompiler
-
-#endif
-
 namespace perspective
 {
 
@@ -52,25 +42,12 @@ struct t_flatten_record
 };
 
 class t_table;
-typedef std::vector<t_table> t_tblvec;
 typedef std::shared_ptr<t_table> t_table_sptr;
 typedef std::shared_ptr<const t_table> t_table_csptr;
-
-enum t_table_mode
-{
-    TABLE_MODE_FREE_STANDING_DENSE,
-    TABLE_MODE_FREE_STANDING_SPARSE,
-    TABLE_MODE_SUBSET_RANGE,
-    TABLE_MODE_SUBSET_MASKED,
-    TABLE_MODE_SUBSET_KEYED
-};
 
 struct PERSPECTIVE_EXPORT t_table_recipe
 {
     t_table_recipe();
-
-    // TODO
-    void release_storage();
 
     t_str m_name;
     t_str m_dirname;
@@ -82,25 +59,12 @@ struct PERSPECTIVE_EXPORT t_table_recipe
     t_column_recipe_vec m_columns;
 };
 
-#ifdef PSP_ENABLE_PYTHON
-typedef JITCompiler::PspCompiledComputedColumn t_jit;
-typedef std::shared_ptr< t_jit > t_jitsptr;
+class PERSPECTIVE_EXPORT t_tabular {
 
-struct PERSPECTIVE_EXPORT t_expr_info
-{
-    t_expr_info(t_jitsptr jit, const t_str& ocol);
-
-    t_jitsptr m_jit;
-    t_str m_ocol;
 };
-
-typedef std::vector<t_expr_info> t_expr_infovec;
-#endif
 
 class PERSPECTIVE_EXPORT t_table
 {
-    friend class t_jit_ctx;
-
   public:
 #ifdef PSP_DBG_MALLOC
     PSP_NEW_DELETE(t_table)
@@ -120,7 +84,6 @@ class PERSPECTIVE_EXPORT t_table
     void init();
     t_uindex num_columns() const;
     t_uindex num_rows() const;
-    t_uindex num_rows(const t_mask& q) const;
     const t_schema& get_schema() const;
     t_uindex size() const;
     t_uindex get_capacity() const;
@@ -129,7 +92,6 @@ class PERSPECTIVE_EXPORT t_table
     t_col_sptr get_column(const t_str& colname);
     t_col_csptr get_const_column(const t_str& colname) const;
 
-    t_col_sptr get_column(t_uindex idx);
     t_col_csptr get_const_column(t_uindex idx) const;
 
     // Only increment capacity
@@ -147,13 +109,10 @@ class PERSPECTIVE_EXPORT t_table
     t_bool is_pkey_table() const;
     t_bool is_same_shape(t_table& tbl) const;
 
-    t_table_sptr empty_like() const;
-
     void pprint() const;
     void pprint(t_uindex nrows, std::ostream* os = 0) const;
     void pprint(const t_str& fname) const;
     void pprint(const t_uidxvec& vec) const;
-    void pprint_vocabulary() const;
 
     void append(const t_table& other);
 
@@ -167,28 +126,6 @@ class PERSPECTIVE_EXPORT t_table
 
     t_column* clone_column(const t_str& existing_col,
                            const t_str& new_colname);
-#ifdef PSP_ENABLE_PYTHON
-    PyObject* filter(t_filter_op combiner,
-                     const t_ftermvec& fops) const;
-    void fill_expr_helper(const t_svec& icol_names,
-                          const t_str& expr,
-                          const t_str& output_column,
-                          const t_svec& where_keys,
-                          const t_svec& where_values,
-                          const t_str& base_case);
-    void fill_expr(const t_str& expr, const t_str& output_column);
-    void fill_expr(const t_svec& icol_names,
-                   const t_str& expr,
-                   const t_str& output_column,
-                   const t_svec& where_keys,
-                   const t_svec& where_values,
-                   const t_str& base_case);
-    void fill_expr_jit(PyObject* fn, const t_str& output_column);
-    void fill_expr_jit(t_uindex expidx);
-    t_uindex register_jit_expr(PyObject* fn,
-                               const t_str& output_column);
-    t_mask where(const t_str& expr) const;
-#endif
 
     t_table_recipe get_recipe() const;
 
@@ -198,15 +135,6 @@ class PERSPECTIVE_EXPORT t_table
     void set_column(t_uindex idx, t_col_sptr col);
     void set_column(const t_str& name, t_col_sptr col);
 
-    void join_inplace(const t_svec& on,
-                      const t_svec& update_cols,
-                      const t_table& other);
-
-    // return the ops required to make
-    t_table diff(const t_table& tbl) const;
-
-    t_table* _flatten() const;
-
     t_column* add_column(const t_str& cname,
                          t_dtype dtype,
                          t_bool valid_enabled);
@@ -214,45 +142,8 @@ class PERSPECTIVE_EXPORT t_table
     t_col_sptr make_column(const t_str& colname,
                            t_dtype dtype,
                            t_bool valid_enabled);
-
-    t_table* project(const t_svec& columns) const;
-    t_table* select(const t_mask& mask) const;
     void verify() const;
-    t_tscalvec _as_list() const;
     void set_capacity(t_uindex idx);
-
-    template <typename TPL_T, std::size_t remaining>
-    struct set_row_helper
-    {
-        static void
-        fn(t_table* tbl, t_uindex ridx, const TPL_T& t)
-        {
-            const int cidx =
-                std::tuple_size<TPL_T>::value - remaining;
-            typedef
-                typename std::tuple_element<cidx, TPL_T>::type elem_t;
-            tbl->m_columns[cidx]->set_nth<elem_t>(ridx,
-                                                  std::get<cidx>(t));
-            set_row_helper<TPL_T, remaining - 1>::fn(tbl, ridx, t);
-        }
-    };
-
-    template <typename TPL_T>
-    struct set_row_helper<TPL_T, 0>
-    {
-        static void
-        fn(t_table* tbl, int ridx, const TPL_T& t)
-        {
-        }
-    };
-
-    template <typename TPL_T>
-    void
-    set_row(t_uindex ridx, const TPL_T& t)
-    {
-        set_row_helper<TPL_T, std::tuple_size<TPL_T>::value>::fn(
-            this, ridx, t);
-    }
 
   protected:
     template <typename FLATTENED_T>
@@ -266,14 +157,8 @@ class PERSPECTIVE_EXPORT t_table
                           std::vector<t_flatten_record>& fltrecs,
                           const t_column* scol,
                           t_column* dcol) const;
-
-    void flatten_common(const t_tscalvec& row,
-                        t_uindex ncols,
-                        t_table_sptr tbl,
-                        std::vector<t_column*>& columns) const;
     t_str repr() const;
 
-    t_column_dynamic_ctxvec get_dynamic_context() const;
 
   private:
     t_str m_name;
@@ -286,9 +171,6 @@ class PERSPECTIVE_EXPORT t_table
     t_colsptrvec m_columns;
     t_table_recipe m_recipe;
     t_bool m_from_recipe;
-#ifdef PSP_ENABLE_PYTHON
-    t_expr_infovec m_einfovec;
-#endif
 };
 
 template <typename FLATTENED_T>
@@ -511,8 +393,7 @@ t_table::flatten_helper_1(FLATTENED_T flattened) const
             ++store_idx;
         }
 
-        if (!delete_encountered ||
-            (delete_encountered && bidx + 1 != eidx))
+        if (!delete_encountered || (bidx + 1 != eidx))
         {
             t_flatten_record rec;
             rec.m_store_idx = store_idx;
