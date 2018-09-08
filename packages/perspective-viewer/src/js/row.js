@@ -9,6 +9,9 @@
 
 import _ from "underscore";
 
+import Awesomplete from "awesomplete";
+import "awesomplete/awesomplete.css";
+
 import {bindTemplate} from "./utils.js";
 
 import perspective from "@jpmorganchase/perspective";
@@ -65,7 +68,9 @@ const ICONS = {
     "desc abs": "&#x2B07;"
 };
 
-@bindTemplate(template)
+// Eslint complains here because we don't do anything, but actually we globally
+// register this class as a CustomElement
+@bindTemplate(template) // eslint-disable-next-line no-unused-vars
 class Row extends HTMLElement {
 
     set name(n) {
@@ -171,6 +176,8 @@ class Row extends HTMLElement {
         let agg_dropdown = this.querySelector('#column_aggregate');
         let aggregate = this.getAttribute('aggregate');
         if (agg_dropdown.value !== aggregate) {
+            // TODO: Should type be removed here? What is it doing
+            // eslint-disable-next-line no-undef
             agg_dropdown.value = aggregate || perspective.AGGREGATE_DEFAULTS[type];
         }
     }
@@ -237,7 +244,7 @@ class Row extends HTMLElement {
             }
             this.dispatchEvent(new CustomEvent('row-drag'));
         });
-        li.addEventListener('dragend', ev => {
+        li.addEventListener('dragend', () => {
             this.dispatchEvent(new CustomEvent('row-dragend'));
         });
         let visible = this.querySelector('.is_visible');
@@ -261,7 +268,7 @@ class Row extends HTMLElement {
         let filter_operand = this.querySelector('#filter_operand');
         let filter_operator = this.querySelector('#filter_operator');
         let debounced_filter = _.debounce(event => this._update_filter(event), 50);
-        filter_operator.addEventListener('change', event => {
+        filter_operator.addEventListener('change', () => {
             filter_operator.style.width = get_text_width(filter_operator.value);
             const filter_input = this.querySelector('#filter_operand');
             filter_input.style.width = get_text_width("" + filter_operand.value, 30);    

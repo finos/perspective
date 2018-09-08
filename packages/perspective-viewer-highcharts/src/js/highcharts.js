@@ -9,7 +9,7 @@
 
 import {draw} from "./draw.js";
 
-function resize(immediate) {
+function resize() {
     if (this._charts && this._charts.length > 0 && !this._resize_timer) {
         this._charts.map(x => x.reflow());
     } 

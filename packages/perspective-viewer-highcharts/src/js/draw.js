@@ -14,7 +14,7 @@ import "../less/highcharts.less";
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
-import {set_boost, set_axis, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
+import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 
 export const draw = (mode) => async function (el, view, task) {
     const row_pivots = this._view_columns('#row_pivots perspective-row:not(.off)');

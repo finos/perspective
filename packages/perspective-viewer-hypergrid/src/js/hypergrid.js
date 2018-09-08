@@ -252,26 +252,6 @@ bindTemplate(TEMPLATE)(class HypergridElement extends HTMLElement {
 
 const PRIVATE = Symbol('Hypergrid private');
 
-/**
- * Compare two schemas for equality.
- * 
- * @param {Object} schema1 
- * @param {Object} schema2 
- */
-function comp_schema(schema1, schema2) {
-    if (schema1.length != schema2.length) {
-        return false;
-    }
-    for (let key of ["name", "header", "type"]) {
-        for (let idx = 0; idx < schema1.length; idx ++) {
-            if (schema1[idx][key] !== schema2[idx][key]) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 async function grid_update(div, view, task) {
     const nrows = await view.num_rows();
 

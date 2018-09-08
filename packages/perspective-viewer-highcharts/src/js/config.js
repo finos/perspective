@@ -197,11 +197,10 @@ export function default_config(aggregates, mode) {
                     },
                 },
                 events: {
-                    legendItemClick: function(event) {
-                        //console.log(this);
-                        //return false;
+                    legendItemClick: function() {
+                        console.log(this);
                     },
-                    click: function(event) {
+                    click: function() {
                         console.log(this);
                     }
                 }
