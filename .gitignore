@@ -118,3 +118,5 @@ website/i18n/*
 .idea
 cmake-build-debug
 .ipynb_checkpoints
+
+package.json.lerna_backup
