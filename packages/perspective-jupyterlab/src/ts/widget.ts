@@ -19,7 +19,7 @@ import {PERSPECTIVE_VERSION} from './version.ts';
 
 /* Helper methods */
 import {
-    PSPHelper, PSPWebsocketHelper, PSPSocketIOHelper, PSPHttpHelper, datasourceToSource, createCopyDl
+    datasourceToSource, createCopyDl
 } from './utils.ts';
 
 /* perspective components */
@@ -46,7 +46,6 @@ class PerspectiveModel extends DOMWidgetModel {
             _view_module_version: PerspectiveModel.view_module_version,
             _data: null,
 
-            datasrc: 'static',
             schema: {},
             view: 'hypergrid',
             columns: [],
@@ -55,8 +54,7 @@ class PerspectiveModel extends DOMWidgetModel {
             aggregates: [],
             sort: [],
             settings: false,
-            dark: false,
-            helper_config: {}
+            dark: false
         };
     }
 
@@ -77,7 +75,6 @@ class PerspectiveModel extends DOMWidgetModel {
 export
 class PerspectiveView extends DOMWidgetView {
     private psp: any;
-    private helper: PSPHelper;
 
     render() {
         this.psp = Private.createNode(this.el);
@@ -85,7 +82,6 @@ class PerspectiveView extends DOMWidgetView {
         observer.observe(this.el, {attributes: true});
 
         this.model.on('change:_data', this.data_changed, this);
-        this.model.on('change:datasrc', this.datasrc_changed, this);
         this.model.on('change:schema', this.schema_changed, this);
         this.model.on('change:view', this.view_changed, this);
         this.model.on('change:columns', this.columns_changed, this);
@@ -153,28 +149,6 @@ class PerspectiveView extends DOMWidgetView {
 
         if (type === 'static') {
             this.data_changed();
-        } else if (type === 'ws' || type === 'wss') {
-            let config = this.model.get('helper_config');
-            let send = config.send || '';
-            let records = config.records || false;
-            this.helper = new PSPWebsocketHelper(this.model.get('datasrc'), send, records);
-            this.helper.start(this.psp);
-        } else if (type === 'http' || type === 'https') {
-            let config = this.model.get('helper_config');
-            let field = config.field || '';
-            let records = config.records || false;
-            let repeat = config.repeat || 1;
-            this.helper = new PSPHttpHelper(this.model.get('datasrc'), field, records, repeat);
-            this.helper.start(this.psp);
-
-        } else if (type === 'sio') {
-            let config = this.model.get('helper_config');
-            let channel = config.channel || '';
-            let records = config.records || false;
-            let addr = this.model.get('datasrc').replace('sio://', '');
-            this.helper = new PSPSocketIOHelper(addr, channel, records);
-            this.helper.start(this.psp);
-
         } else if (type === 'comm') {
             //grab session id 
             let els = this.model.get('datasrc').replace('comm://', '').split('/');
