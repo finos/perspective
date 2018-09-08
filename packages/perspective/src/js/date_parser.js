@@ -48,7 +48,7 @@ export class DateParser {
 
     parse(input) {
         if (this.date_exclusions.indexOf(input) > -1) {
-            return -1;;
+            return -1;
         } else {
             let val = input;
             if (typeof val === "string") {
