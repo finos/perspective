@@ -28,7 +28,7 @@ t_schema::t_schema(const t_schema_recipe& recipe)
 
 t_schema::t_schema(const t_svec& columns, const t_dtypevec& types)
     : m_columns(columns), m_types(types),
-      m_valid_enabled(columns.size()), m_pkeyidx(0), m_opidx(0)
+      m_status_enabled(columns.size()), m_pkeyidx(0), m_opidx(0)
 {
     PSP_VERBOSE_ASSERT(columns.size() == types.size(),
                        "Size mismatch");
@@ -44,7 +44,7 @@ t_schema::t_schema(const t_svec& columns, const t_dtypevec& types)
     {
         m_colidx_map[columns[idx]] = idx;
         m_coldt_map[columns[idx]] = types[idx];
-        m_valid_enabled[idx] = true;
+        m_status_enabled[idx] = true;
         if (columns[idx] == pkey_str)
         {
             pkey_found = true;
@@ -109,7 +109,7 @@ t_bool
 t_schema::operator==(const t_schema& rhs) const
 {
     return m_columns == rhs.m_columns && m_types == rhs.m_types &&
-           m_valid_enabled == rhs.m_valid_enabled;
+           m_status_enabled == rhs.m_status_enabled;
 }
 
 void
@@ -117,7 +117,7 @@ t_schema::add_column(const t_str& colname, t_dtype dtype)
 {
     t_uindex idx = m_columns.size();
     m_columns.push_back(colname);
-    m_valid_enabled.push_back(true);
+    m_status_enabled.push_back(true);
     m_types.push_back(dtype);
     m_colidx_map[colname] = idx;
     m_coldt_map[colname] = dtype;

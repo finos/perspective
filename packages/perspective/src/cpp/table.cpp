@@ -123,7 +123,7 @@ t_table::init()
                  const t_str& colname = m_schema.m_columns[idx];
                  t_dtype dtype = m_schema.m_types[idx];
                  m_columns[idx] = make_column(
-                     colname, dtype, m_schema.m_valid_enabled[idx]);
+                     colname, dtype, m_schema.m_status_enabled[idx]);
                  m_columns[idx]->init();
              }
 #ifdef PSP_PARALLEL_FOR
@@ -136,14 +136,14 @@ t_table::init()
 t_col_sptr
 t_table::make_column(const t_str& colname,
                      t_dtype dtype,
-                     t_bool valid_enabled)
+                     t_bool status_enabled)
 {
     t_lstore_recipe a(m_dirname,
                       m_name + t_str("_") + colname,
                       m_capacity * get_dtype_size(dtype),
                       m_backing_store);
     return std::make_shared<t_column>(
-        dtype, valid_enabled, a, m_capacity);
+        dtype, status_enabled, a, m_capacity);
 }
 
 t_uindex
@@ -626,7 +626,7 @@ t_table::clone(const t_mask& mask) const
 t_column*
 t_table::add_column(const t_str& name,
                     t_dtype dtype,
-                    t_bool valid_enabled)
+                    t_bool status_enabled)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -639,7 +639,7 @@ t_table::add_column(const t_str& name,
         return m_columns.at(m_schema.get_colidx(name)).get();
     }
     m_schema.add_column(name, dtype);
-    m_columns.push_back(make_column(name, dtype, valid_enabled));
+    m_columns.push_back(make_column(name, dtype, status_enabled));
     m_columns.back()->init();
     m_columns.back()->reserve(std::max(
         size(), std::max(static_cast<t_uindex>(8), m_capacity)));

@@ -260,8 +260,7 @@ _fill_col(val dcol, t_col_sptr col, t_bool is_arrow)
             if (dcol[i].isUndefined()) continue;
 
             if (dcol[i].isNull()) {
-                // fixme: updates using null are not working
-                col->clear(i);
+                col->unset(i);
                 continue;
             }
 
@@ -317,7 +316,7 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow)
             if (dcol[i].isUndefined()) continue;
             
             if (dcol[i].isNull()) {
-                col->clear(i);
+                col->unset(i);
                 continue;
             }
 
@@ -348,7 +347,7 @@ _fill_col<t_bool>(val dcol, t_col_sptr col, t_bool is_arrow)
             if (dcol[i].isUndefined()) continue;
 
             if (dcol[i].isNull()) {
-                col->clear(i);
+                col->unset(i);
                 continue;
             }
 
@@ -411,7 +410,7 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow)
             if (dcol[i].isUndefined()) continue;
             
             if (dcol[i].isNull()) {
-                col->clear(i);
+                col->unset(i);
                 continue;
             }
             
@@ -487,11 +486,11 @@ _fill_data(t_table_sptr tbl,
                 _fill_col<t_float64>(dcol, col, is_arrow);
             }
             break;
-			case DTYPE_TIME:
-			{
-                _fill_col<t_time>(dcol, col, is_arrow);
-			}
-			break;
+            case DTYPE_TIME:
+            {
+                      _fill_col<t_time>(dcol, col, is_arrow);
+            }
+            break;
             case DTYPE_STR:
             {
                 _fill_col<std::string>(dcol, col, is_arrow);
@@ -505,7 +504,7 @@ _fill_data(t_table_sptr tbl,
             t_uint32 null_count = dcol["nullCount"].as<t_uint32>();
 
             if (null_count == 0) {
-                col->valid_raw_fill(true);
+                col->valid_raw_fill();
             } else {
                 val validity = dcol["nullBitmap"];
                 arrow::fill_col_valid(validity, col);
@@ -858,7 +857,7 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
 
     // Check if the value is a javascript null
     if (value.isNull()) {
-        col->set_valid(idx, false);
+        col->unset(idx);
         return;
     }
 
@@ -866,37 +865,37 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
     {
         case DTYPE_BOOL:
         {
-            col->set_nth<t_bool>(idx, value.as<t_bool>(), true);
+            col->set_nth<t_bool>(idx, value.as<t_bool>(), STATUS_VALID);
             break;
         }
         case DTYPE_FLOAT64:
         {
-            col->set_nth<t_float64>(idx, value.as<t_float64>(), true);
+            col->set_nth<t_float64>(idx, value.as<t_float64>(), STATUS_VALID);
             break;
         }
         case DTYPE_FLOAT32:
         {
-            col->set_nth<t_float32>(idx, value.as<t_float32>(), true);
+            col->set_nth<t_float32>(idx, value.as<t_float32>(), STATUS_VALID);
             break;
         }
         case DTYPE_UINT32:
         {
-            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), true);
+            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), STATUS_VALID);
             break;
         }
         case DTYPE_UINT64:
         {
-            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), true);
+            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), STATUS_VALID);
             break;
         }
         case DTYPE_INT32:
         {
-            col->set_nth<t_int32>(idx, value.as<t_int32>(), true);
+            col->set_nth<t_int32>(idx, value.as<t_int32>(), STATUS_VALID);
             break;
         }
         case DTYPE_INT64:
         {
-            col->set_nth<t_int64>(idx, value.as<t_int64>(), true);
+            col->set_nth<t_int64>(idx, value.as<t_int64>(), STATUS_VALID);
             break;
         }
         case DTYPE_STR:
@@ -905,12 +904,12 @@ void set_column_nth(t_column* col, t_uindex idx, val value) {
 
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
-            col->set_nth(idx, elem, true);
+            col->set_nth(idx, elem, STATUS_VALID);
             break;
         }
         case DTYPE_TIME:
         {
-            col->set_nth<t_int64>(idx, static_cast<t_int64>(value.as<t_float64>()), true);
+            col->set_nth<t_int64>(idx, static_cast<t_int64>(value.as<t_float64>()), STATUS_VALID);
             break;
         }
         case DTYPE_UINT8:

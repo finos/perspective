@@ -26,8 +26,8 @@ t_column_recipe::t_column_recipe() : m_vlenidx(0), m_size(0)
 
 t_column::t_column()
     : m_dtype(DTYPE_NONE), m_init(false), m_isvlen(false),
-      m_data(nullptr), m_vocab(nullptr), m_valid(nullptr), m_size(0),
-      m_valid_enabled(false), m_from_recipe(false)
+      m_data(nullptr), m_vocab(nullptr), m_status(nullptr), m_size(0),
+      m_status_enabled(false), m_from_recipe(false)
 
 {
     LOG_CONSTRUCTOR("t_column");
@@ -35,7 +35,7 @@ t_column::t_column()
 
 t_column::t_column(const t_column_recipe& recipe)
     : m_dtype(recipe.m_dtype), m_init(false), m_size(recipe.m_size),
-      m_valid_enabled(recipe.m_valid_enabled), m_from_recipe(true)
+      m_status_enabled(recipe.m_status_enabled), m_from_recipe(true)
 
 {
     LOG_CONSTRUCTOR("t_column");
@@ -51,13 +51,13 @@ t_column::t_column(const t_column_recipe& recipe)
         m_vocab.reset(new t_vocab);
     }
 
-    if (m_valid_enabled)
+    if (m_status_enabled)
     {
-        m_valid.reset(new t_lstore(recipe.m_valid));
+        m_status.reset(new t_lstore(recipe.m_status));
     }
     else
     {
-        m_valid.reset(new t_lstore);
+        m_status.reset(new t_lstore);
     }
 }
 
@@ -71,10 +71,10 @@ t_column::column_copy_helper(const t_column& other)
     m_vocab.reset(
         new t_vocab(other.m_vocab->get_vlendata()->get_recipe(),
                     other.m_vocab->get_extents()->get_recipe()));
-    m_valid.reset(new t_lstore(other.m_valid->get_recipe()));
+    m_status.reset(new t_lstore(other.m_status->get_recipe()));
 
     m_size = other.m_size;
-    m_valid_enabled = other.m_valid_enabled;
+    m_status_enabled = other.m_status_enabled;
     m_from_recipe = false;
 }
 
@@ -109,7 +109,7 @@ t_column::t_column(t_dtype dtype,
                    const t_lstore_recipe& a,
                    t_uindex row_capacity)
     : m_dtype(dtype), m_init(false), m_size(0),
-      m_valid_enabled(missing_enabled), m_from_recipe(false)
+      m_status_enabled(missing_enabled), m_from_recipe(false)
 {
 
     m_data.reset(new t_lstore(a));
@@ -137,24 +137,24 @@ t_column::t_column(t_dtype dtype,
         m_vocab.reset(new t_vocab);
     }
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
         t_lstore_recipe missing_args(a);
         missing_args.m_capacity = row_capacity;
 
         missing_args.m_colname = a.m_colname + t_str("_missing");
-        m_valid.reset(new t_lstore(missing_args));
+        m_status.reset(new t_lstore(missing_args));
     }
     else
     {
-        m_valid.reset(new t_lstore);
+        m_status.reset(new t_lstore);
     }
 }
 
 bool
-t_column::is_valid_enabled() const
+t_column::is_status_enabled() const
 {
-    return m_valid_enabled;
+    return m_status_enabled;
 }
 
 void
@@ -169,9 +169,9 @@ t_column::init()
         m_vocab->init(m_from_recipe);
     }
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        m_valid->init();
+        m_status->init();
     }
 
     if (is_deterministic_sized(m_dtype))
@@ -200,11 +200,11 @@ t_column::extend_dtype(t_uindex idx)
     m_data->set_size(new_extents);
     m_size = m_data->size() / get_dtype_size(m_dtype);
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        t_uindex sz = idx * get_dtype_size(DTYPE_BOOL);
-        m_valid->reserve(sz);
-        m_valid->set_size(sz);
+        t_uindex sz = idx * get_dtype_size(DTYPE_UINT8);
+        m_status->reserve(sz);
+        m_status->set_size(sz);
     }
 }
 
@@ -255,29 +255,29 @@ t_column::push_back<std::string>(std::string elem)
 
 template <>
 void
-t_column::push_back<const char*>(const char* elem, t_bool valid)
+t_column::push_back<const char*>(const char* elem, t_status status)
 {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
-    m_valid->push_back(valid);
+    m_status->push_back(status);
 }
 
 template <>
 void
-t_column::push_back<char*>(char* elem, t_bool valid)
+t_column::push_back<char*>(char* elem, t_status status)
 {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
-    m_valid->push_back(valid);
+    m_status->push_back(status);
 }
 
 template <>
 void
-t_column::push_back<std::string>(std::string elem, t_bool valid)
+t_column::push_back<std::string>(std::string elem, t_status status)
 {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
-    m_valid->push_back(valid);
+    m_status->push_back(status);
 }
 
 template <>
@@ -295,72 +295,72 @@ t_column::push_back<t_tscalar>(t_tscalar elem)
         break;
         case DTYPE_INT64:
         {
-            push_back(elem.get<t_int64>(), elem.is_valid());
+            push_back(elem.get<t_int64>(), elem.m_status);
         }
         break;
         case DTYPE_INT32:
         {
-            push_back(elem.get<t_int32>(), elem.is_valid());
+            push_back(elem.get<t_int32>(), elem.m_status);
         }
         break;
         case DTYPE_INT16:
         {
-            push_back(elem.get<t_int16>(), elem.is_valid());
+            push_back(elem.get<t_int16>(), elem.m_status);
         }
         break;
         case DTYPE_INT8:
         {
-            push_back(elem.get<t_int8>(), elem.is_valid());
+            push_back(elem.get<t_int8>(), elem.m_status);
         }
         break;
         case DTYPE_UINT64:
         {
-            push_back(elem.get<t_uint64>(), elem.is_valid());
+            push_back(elem.get<t_uint64>(), elem.m_status);
         }
         break;
         case DTYPE_UINT32:
         {
-            push_back(elem.get<t_uint32>(), elem.is_valid());
+            push_back(elem.get<t_uint32>(), elem.m_status);
         }
         break;
         case DTYPE_UINT16:
         {
-            push_back(elem.get<t_uint16>(), elem.is_valid());
+            push_back(elem.get<t_uint16>(), elem.m_status);
         }
         break;
         case DTYPE_UINT8:
         {
-            push_back(elem.get<t_uint8>(), elem.is_valid());
+            push_back(elem.get<t_uint8>(), elem.m_status);
         }
         break;
         case DTYPE_FLOAT64:
         {
-            push_back(elem.get<t_float64>(), elem.is_valid());
+            push_back(elem.get<t_float64>(), elem.m_status);
         }
         break;
         case DTYPE_FLOAT32:
         {
-            push_back(elem.get<t_float32>(), elem.is_valid());
+            push_back(elem.get<t_float32>(), elem.m_status);
         }
         break;
         case DTYPE_BOOL:
         {
-            push_back(elem.get<t_bool>(), elem.is_valid());
+            push_back(elem.get<t_bool>(), elem.m_status);
         }
         break;
         case DTYPE_TIME:
         {
-            push_back(elem.get<t_int64>(), elem.is_valid());
+            push_back(elem.get<t_int64>(), elem.m_status);
         }
         break;
         case DTYPE_DATE:
         {
-            push_back(elem.get<t_uint32>(), elem.is_valid());
+            push_back(elem.get<t_uint32>(), elem.m_status);
         }
         break;
         case DTYPE_STR:
         {
-            push_back(elem.get<const char*>(), elem.is_valid());
+            push_back(elem.get<const char*>(), elem.m_status);
         }
         break;
         default:
@@ -393,16 +393,16 @@ t_column::set_size(t_uindex size)
     m_size = size;
     m_data->set_size(m_elemsize * size);
 
-    if (is_valid_enabled())
-        m_valid->set_size(get_dtype_size(DTYPE_BOOL) * size);
+    if (is_status_enabled())
+        m_status->set_size(get_dtype_size(DTYPE_UINT8) * size);
 }
 
 void
 t_column::reserve(t_uindex size)
 {
     m_data->reserve(get_dtype_size(m_dtype) * size);
-    if (is_valid_enabled())
-        m_valid->reserve(get_dtype_size(DTYPE_BOOL) * size);
+    if (is_status_enabled())
+        m_status->reserve(get_dtype_size(DTYPE_UINT8) * size);
 }
 
 t_lstore*
@@ -526,20 +526,31 @@ t_column::get_scalar(t_uindex idx) const
         }
     }
 
-    if (is_valid_enabled())
-        rv.m_valid = is_valid(idx);
+    if (is_status_enabled())
+        rv.m_status = *get_nth_status(idx);
     return rv;
 }
 
 void
+t_column::unset(t_uindex idx) {
+  clear(idx, STATUS_CLEAR);
+}
+
+void
 t_column::clear(t_uindex idx)
+{
+  clear(idx, STATUS_INVALID);
+}
+
+void
+t_column::clear(t_uindex idx, t_status status)
 {
     switch (m_dtype)
     {
 		case DTYPE_STR:
 		{
 			t_stridx v = 0;
-            set_nth<t_stridx>(idx, v, false);
+            set_nth<t_stridx>(idx, v, status);
 		}
 		break;
         case DTYPE_TIME:
@@ -548,7 +559,7 @@ t_column::clear(t_uindex idx)
         case DTYPE_INT64:
         {
             t_uint64 v = 0;
-            set_nth<t_uint64>(idx, v, false);
+            set_nth<t_uint64>(idx, v, status);
         }
         break;
         case DTYPE_DATE:
@@ -557,14 +568,14 @@ t_column::clear(t_uindex idx)
         case DTYPE_INT32:
         {
             t_uint32 v = 0;
-            set_nth<t_uint32>(idx, v, false);
+            set_nth<t_uint32>(idx, v, status);
         }
         break;
         case DTYPE_UINT16:
         case DTYPE_INT16:
         {
             t_uint16 v = 0;
-            set_nth<t_uint16>(idx, v, false);
+            set_nth<t_uint16>(idx, v, status);
         }
         break;
         case DTYPE_BOOL:
@@ -572,7 +583,7 @@ t_column::clear(t_uindex idx)
         case DTYPE_INT8:
         {
             t_uint8 v = 0;
-            set_nth<t_uint8>(idx, v, false);
+            set_nth<t_uint8>(idx, v, status);
         }
         break;
         case DTYPE_F64PAIR:
@@ -580,7 +591,7 @@ t_column::clear(t_uindex idx)
             std::pair<t_uint64, t_uint64> v;
             v.first = 0;
             v.second = 0;
-            set_nth<std::pair<t_uint64, t_uint64>>(idx, v, false);
+            set_nth<std::pair<t_uint64, t_uint64>>(idx, v, status);
         }
         break;
         default:
@@ -610,31 +621,34 @@ t_column::get_nth<const char>(t_uindex idx) const
 }
 
 // idx is in items
-const t_bool*
-t_column::get_nth_valid(t_uindex idx) const
+const t_status*
+t_column::get_nth_status(t_uindex idx) const
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
+    PSP_VERBOSE_ASSERT(is_status_enabled(),
+                       "Status not available for column");
     COLUMN_CHECK_ACCESS(idx);
-    return m_valid->get_nth<t_bool>(idx);
-}
-
-t_bool*
-t_column::get_nth_valid(t_uindex idx)
-{
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
-    COLUMN_CHECK_ACCESS(idx);
-    return m_valid->get_nth<t_bool>(idx);
+    t_status* status = m_status->get_nth<t_status>(idx);
+    return status;
 }
 
 t_bool
 t_column::is_valid(t_uindex idx) const
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
+    PSP_VERBOSE_ASSERT(is_status_enabled(),
+                       "Status not available for column");
     COLUMN_CHECK_ACCESS(idx);
-    return *m_valid->get_nth<t_bool>(idx);
+    t_status status = *m_status->get_nth<t_status>(idx);
+    return status == STATUS_VALID;
+}
+
+t_bool
+t_column::is_cleared(t_uindex idx) const
+{
+    PSP_VERBOSE_ASSERT(is_status_enabled(),
+                       "Status not available for column");
+    COLUMN_CHECK_ACCESS(idx);
+    t_status status = *m_status->get_nth<t_status>(idx);
+    return status == STATUS_CLEAR;
 }
 
 template <>
@@ -642,7 +656,7 @@ void
 t_column::set_nth<const char*>(t_uindex idx, const char* elem)
 {
     COLUMN_CHECK_STRCOL();
-    set_nth_body(idx, elem, true);
+    set_nth_body(idx, elem, STATUS_VALID);
 }
 
 template <>
@@ -650,32 +664,39 @@ void
 t_column::set_nth<t_str>(t_uindex idx, t_str elem)
 {
     COLUMN_CHECK_STRCOL();
-    set_nth(idx, elem.c_str(), true);
+    set_nth(idx, elem.c_str(), STATUS_VALID);
 }
 
 template <>
 void
 t_column::set_nth<const char*>(t_uindex idx,
                                const char* elem,
-                               t_bool valid)
+                               t_status status)
 {
     COLUMN_CHECK_STRCOL();
-    set_nth_body(idx, elem, valid);
+    set_nth_body(idx, elem, status);
 }
 
 template <>
 void
-t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_bool valid)
+t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_status status)
 {
     COLUMN_CHECK_STRCOL();
-    set_nth(idx, elem.c_str(), valid);
+    set_nth(idx, elem.c_str(), status);
 }
 
 void
 t_column::set_valid(t_uindex idx, t_bool valid)
 {
-    m_valid->set_nth<t_bool>(idx, valid);
+    set_status(idx, valid ? STATUS_VALID : STATUS_INVALID);
 }
+
+void
+t_column::set_status(t_uindex idx, t_status status)
+{
+    m_status->set_nth<t_status>(idx, status);
+}
+
 void
 t_column::set_scalar(t_uindex idx, t_tscalar value)
 {
@@ -691,79 +712,79 @@ t_column::set_scalar(t_uindex idx, t_tscalar value)
         case DTYPE_INT64:
         {
             t_int64 tgt = value.get<t_int64>();
-            set_nth<t_int64>(idx, tgt, value.is_valid());
+            set_nth<t_int64>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_INT32:
         {
             t_int32 tgt = value.get<t_int32>();
-            set_nth<t_int32>(idx, tgt, value.is_valid());
+            set_nth<t_int32>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_INT16:
         {
             t_int16 tgt = value.get<t_int16>();
-            set_nth<t_int16>(idx, tgt, value.is_valid());
+            set_nth<t_int16>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_INT8:
         {
             t_int8 tgt = value.get<t_int8>();
-            set_nth<t_int8>(idx, tgt, value.is_valid());
+            set_nth<t_int8>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_UINT64:
         {
             t_uint64 tgt = value.get<t_uint64>();
-            set_nth<t_uint64>(idx, tgt, value.is_valid());
+            set_nth<t_uint64>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_UINT32:
         {
             t_uint32 tgt = value.get<t_uint32>();
-            set_nth<t_uint32>(idx, tgt, value.is_valid());
+            set_nth<t_uint32>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_UINT16:
         {
             t_uint16 tgt = value.get<t_uint16>();
-            set_nth<t_uint16>(idx, tgt, value.is_valid());
+            set_nth<t_uint16>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_UINT8:
         {
             t_uint8 tgt = value.get<t_uint8>();
-            set_nth<t_uint8>(idx, tgt, value.is_valid());
+            set_nth<t_uint8>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_FLOAT64:
         {
             t_float64 tgt = value.get<t_float64>();
-            set_nth<t_float64>(idx, tgt, value.is_valid());
+            set_nth<t_float64>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_FLOAT32:
         {
             t_float32 tgt = value.get<t_float32>();
-            set_nth<t_float32>(idx, tgt, value.is_valid());
+            set_nth<t_float32>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_BOOL:
         {
             t_bool tgt = value.get<t_bool>();
-            set_nth<t_bool>(idx, tgt, value.is_valid());
+            set_nth<t_bool>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_TIME:
         {
             t_time tgt = value.get<t_time>();
-            set_nth<t_time>(idx, tgt, value.is_valid());
+            set_nth<t_time>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_DATE:
         {
             t_date tgt = value.get<t_date>();
-            set_nth<t_date>(idx, tgt, value.is_valid());
+            set_nth<t_date>(idx, tgt, value.m_status);
         }
         break;
         case DTYPE_STR:
@@ -777,12 +798,12 @@ t_column::set_scalar(t_uindex idx, t_tscalar value)
                 PSP_VERBOSE_ASSERT(
                     value.m_type == DTYPE_STR,
                     "Setting non string scalar on string column");
-                set_nth<const char*>(idx, tgt, value.is_valid());
+                set_nth<const char*>(idx, tgt, value.m_status);
             }
             else
             {
                 set_nth<const char*>(
-                    idx, empty.c_str(), value.is_valid());
+                    idx, empty.c_str(), value.m_status);
             }
         }
         break;
@@ -811,9 +832,9 @@ t_column::append(const t_column& other)
 
             m_data->fill(*other.m_data);
 
-            if (other.is_valid_enabled())
+            if (other.is_status_enabled())
             {
-                m_valid->fill(*other.m_valid);
+                m_status->fill(*other.m_status);
             }
 
             m_vocab->fill(*(other.m_vocab->get_vlendata()),
@@ -833,9 +854,9 @@ t_column::append(const t_column& other)
                 push_back(s);
             }
 
-            if (is_valid_enabled())
+            if (is_status_enabled())
             {
-                m_valid->append(*other.m_valid);
+                m_status->append(*other.m_status);
             }
         }
     }
@@ -843,9 +864,9 @@ t_column::append(const t_column& other)
     {
         m_data->append(*other.m_data);
 
-		if (is_valid_enabled())
+		if (is_status_enabled())
 		{
-			m_valid->append(*other.m_valid);
+			m_status->append(*other.m_status);
 		}
     }
 
@@ -858,9 +879,9 @@ t_column::clear()
     m_data->set_size(0);
     if (m_dtype == DTYPE_STR)
         m_data->clear();
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        m_valid->clear();
+        m_status->clear();
     }
     m_size = 0;
 }
@@ -888,10 +909,10 @@ t_column::get_recipe() const
         rval.m_extents = m_vocab->get_extents()->get_recipe();
     }
 
-    rval.m_valid_enabled = m_valid_enabled;
-    if (m_valid_enabled)
+    rval.m_status_enabled = m_status_enabled;
+    if (m_status_enabled)
     {
-        rval.m_valid = m_valid->get_recipe();
+        rval.m_status = m_status->get_recipe();
     }
 
     rval.m_vlenidx = get_vlenidx();
@@ -926,9 +947,9 @@ t_column::clone() const
     rval->set_size(size());
     rval->m_data->fill(*m_data);
 
-    if (rval->is_valid_enabled())
+    if (rval->is_status_enabled())
     {
-        rval->m_valid->fill(*m_valid);
+        rval->m_status->fill(*m_status);
     }
 
     if (is_vlen_dtype(get_dtype()))
@@ -956,9 +977,9 @@ t_column::clone(const t_mask& mask) const
 
     rval->m_data->fill(*m_data, mask, get_dtype_size(get_dtype()));
 
-    if (rval->is_valid_enabled())
+    if (rval->is_status_enabled())
     {
-        rval->m_valid->fill(*m_valid, mask, sizeof(t_bool));
+        rval->m_status->fill(*m_status, mask, sizeof(t_status));
     }
 
     if (is_vlen_dtype(get_dtype()))
@@ -972,9 +993,9 @@ t_column::clone(const t_mask& mask) const
 }
 
 void
-t_column::valid_raw_fill(t_bool value)
+t_column::valid_raw_fill()
 {
-    m_valid->raw_fill(value);
+    m_status->raw_fill(STATUS_VALID);
 }
 
 void
@@ -1128,10 +1149,10 @@ t_column::verify_size(t_uindex idx) const
                            m_data->capacity(),
                        "Not enough space reserved for column");
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
         PSP_VERBOSE_ASSERT(idx * get_dtype_size(DTYPE_UINT8) <=
-                               m_valid->capacity(),
+                               m_status->capacity(),
                            "Not enough space reserved for column");
     }
 

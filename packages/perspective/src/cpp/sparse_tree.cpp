@@ -635,7 +635,7 @@ t_stree::build_strand_table(const t_table& flattened,
     strands->set_size(insert_count);
     aggs->reserve(insert_count);
     aggs->set_size(insert_count);
-    agg_scount->valid_raw_fill(true);
+    agg_scount->valid_raw_fill();
     return std::pair<t_table_sptr, t_table_sptr>(strands, aggs);
 }
 
@@ -755,7 +755,7 @@ t_stree::build_strand_table(const t_table& flattened,
     strands->set_size(insert_count);
     aggs->reserve(insert_count);
     aggs->set_size(insert_count);
-    agg_scount->valid_raw_fill(true);
+    agg_scount->valid_raw_fill();
     return std::pair<t_table_sptr, t_table_sptr>(strands, aggs);
 }
 

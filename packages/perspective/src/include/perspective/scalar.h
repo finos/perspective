@@ -143,7 +143,7 @@ struct PERSPECTIVE_EXPORT t_tscalar
 
     t_scalar_u m_data;
     t_uchar m_type;
-    t_bool m_valid;
+    t_status m_status;
     t_bool m_inplace;
 };
 
@@ -222,10 +222,10 @@ t_tscalar::compare_common(const t_tscalar& rhs) const
         return cmp(m_type, rhs.m_type);
     }
 
-    if (rhs.m_valid != rhs.m_valid)
+    if (rhs.m_status != rhs.m_status)
     {
         COMPARER_T<t_uchar> cmp;
-        return cmp(m_valid, rhs.m_valid);
+        return cmp(m_status, rhs.m_status);
     }
 
     switch (m_type)

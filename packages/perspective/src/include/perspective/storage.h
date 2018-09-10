@@ -391,10 +391,10 @@ struct PERSPECTIVE_EXPORT t_column_recipe
     t_lstore_recipe m_data;
     t_lstore_recipe m_vlendata;
     t_lstore_recipe m_extents;
-    t_lstore_recipe m_valid;
+    t_lstore_recipe m_status;
     t_uindex m_vlenidx;
     t_uindex m_size;
-    t_bool m_valid_enabled;
+    t_bool m_status_enabled;
 };
 
 } // end namespace perspective
