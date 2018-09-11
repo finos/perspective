@@ -130,7 +130,7 @@ class WebWorker extends worker {
 
     _start_cross_origin_wasm() {
         var wasmXHR = new XMLHttpRequest();
-        wasmXHR.open('GET', __SCRIPT_PATH__.path() + '/_psp.async.wasm', true);
+        wasmXHR.open('GET', __SCRIPT_PATH__.path() + '/psp.async.wasm', true);
         wasmXHR.responseType = 'arraybuffer';
         wasmXHR.onload = () => {
             let msg = {

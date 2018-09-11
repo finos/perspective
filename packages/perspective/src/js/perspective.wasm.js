@@ -7,7 +7,7 @@
  *
  */
 
-const load_perspective = require("../../build/_psp.async.js").load_perspective;
+const load_perspective = require("../../obj/psp.async.js").load_perspective;
 const perspective = require('./perspective.js');
 
 if (global.document !== undefined && typeof WebAssembly !== 'undefined') {
