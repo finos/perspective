@@ -8,7 +8,6 @@
  */
 
 import _  from "underscore";
-
 import arrow from "../arrow/test.arrow";
 
 var data = [
@@ -398,9 +397,6 @@ module.exports = (perspective) => {
             var partial = [
                 {'x': null, 'y': 'a', 'z': false},
             ];
-
-            // make err on call partial update w/o index
-
             var expected = [
                 {'x': null, 'y': 'a', 'z': false},
                 {'x': 2, 'y':'b', 'z': false},
@@ -416,6 +412,27 @@ module.exports = (perspective) => {
                 done();
             });
         });
+
+        it("update by adding rows (new pkeys) with partials/nulls", function (done) {
+          var update = [
+            {'x': null, 'y':'e', 'z': null}
+          ];
+          var expected = [
+            {'x': 1, 'y':'a', 'z': true},
+            {'x': 2, 'y':'b', 'z': false},
+            {'x': 3, 'y':'c', 'z': true},
+            {'x': 4, 'y':'d', 'z': false},
+            {'x': null, 'y':'e', 'z': null}
+          ];
+          var table = perspective.table(meta, {index: 'y'});
+          var view = table.view();
+          table.update(data);
+          table.update(update);
+          view.to_json().then(json => {
+              expect(json).toEqual(expected);
+              done();
+          });
+      });
 
 
         it("partial column oriented update with null unsets value", function (done) {

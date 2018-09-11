@@ -294,11 +294,12 @@ t_gstate::update_history(const t_table* tbl)
                  ++idx)
             {
                 t_bool is_valid = fcolumn->is_valid(idx);
+                t_uindex stableidx = stableidx_vec[idx];
 
                 if (!is_valid) {
                   t_bool is_cleared = fcolumn->is_cleared(idx);
                   if (is_cleared) {
-                    scolumn->clear(idx);
+                    scolumn->clear(stableidx);
                   }
                   continue;
                 }
@@ -308,8 +309,6 @@ t_gstate::update_history(const t_table* tbl)
 
                 if (op == OP_DELETE)
                     continue;
-
-                t_uindex stableidx = stableidx_vec[idx];
 
                 switch (fcolumn->get_dtype())
                 {
