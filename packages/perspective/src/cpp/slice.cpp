@@ -149,4 +149,4 @@ t_slice::is_column_expanded()
     return m_is_column_expanded;
 }
 
-} // end namespace std
+} // namespace perspective

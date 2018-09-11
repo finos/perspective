@@ -23,15 +23,9 @@ namespace perspective
 {
 
 void
-notify_sparse_tree_common(t_table_sptr strands,
-                          t_table_sptr strand_deltas,
-                          t_stree_sptr tree,
-                          t_trav_sptr traversal,
-                          t_bool process_traversal,
-                          const t_aggspecvec& aggregates,
-                          const t_sspvec& tree_sortby,
-                          const t_sortsvec& ctx_sortby,
-                          const t_gstate& gstate)
+notify_sparse_tree_common(t_table_sptr strands, t_table_sptr strand_deltas, t_stree_sptr tree,
+    t_trav_sptr traversal, t_bool process_traversal, const t_aggspecvec& aggregates,
+    const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby, const t_gstate& gstate)
 {
     t_filter fltr;
     if (t_env::log_data_nsparse_strands())
@@ -99,124 +93,83 @@ notify_sparse_tree_common(t_table_sptr strands,
     {
         leaf_paths[count].m_lfidx = lfidx;
         tree->get_sortby_path(lfidx, leaf_paths[count].m_path);
-        std::reverse(leaf_paths[count].m_path.begin(),
-                     leaf_paths[count].m_path.end());
+        std::reverse(leaf_paths[count].m_path.begin(), leaf_paths[count].m_path.end());
         ++count;
     }
 
-    std::sort(leaf_paths.begin(),
-              leaf_paths.end(),
-              [](const t_leaf_path& a, const t_leaf_path& b) {
-                  return a.m_path < b.m_path;
-              });
+    std::sort(leaf_paths.begin(), leaf_paths.end(),
+        [](const t_leaf_path& a, const t_leaf_path& b) { return a.m_path < b.m_path; });
 
     if (!leaf_paths.empty() && traversal.get() && traversal->size() == 1)
     {
-        if ( traversal->get_node( 0 ).m_expanded )
+        if (traversal->get_node(0).m_expanded)
         {
-            traversal->populate_root_children( tree );
+            traversal->populate_root_children(tree);
         }
     }
     else
     {
-      for (const auto& lpath : leaf_paths)
-    {
-        t_uindex lfidx = lpath.m_lfidx;
-        auto ancestry = tree->get_ancestry(lfidx);
-
-        t_uindex num_tnodes_existed = 0;
-
-        for (auto nidx : ancestry)
+        for (const auto& lpath : leaf_paths)
         {
-            if (non_zero_ids.find(nidx) == non_zero_ids.end() ||
-                visited.find(nidx) != visited.end())
+            t_uindex lfidx = lpath.m_lfidx;
+            auto ancestry = tree->get_ancestry(lfidx);
+
+            t_uindex num_tnodes_existed = 0;
+
+            for (auto nidx : ancestry)
             {
-                ++num_tnodes_existed;
+                if (non_zero_ids.find(nidx) == non_zero_ids.end()
+                    || visited.find(nidx) != visited.end())
+                {
+                    ++num_tnodes_existed;
+                }
+                else
+                {
+                    break;
+                }
             }
-            else
+
+            if (process_traversal)
             {
-                break;
+                traversal->add_node(ctx_sortby, ancestry, num_tnodes_existed);
             }
-        }
 
-        if (process_traversal)
-        {
-            traversal->add_node(
-                 ctx_sortby, ancestry, num_tnodes_existed);
-        }
-
-        for (auto nidx : ancestry)
-        {
-            visited.insert(nidx);
+            for (auto nidx : ancestry)
+            {
+                visited.insert(nidx);
+            }
         }
     }
-    }
-    
 }
 
 void
-notify_sparse_tree(t_stree_sptr tree,
-                   t_trav_sptr traversal,
-                   t_bool process_traversal,
-                   const t_aggspecvec& aggregates,
-                   const t_sspvec& tree_sortby,
-                   const t_sortsvec& ctx_sortby,
-                   const t_table& flattened,
-                   const t_table& delta,
-                   const t_table& prev,
-                   const t_table& current,
-                   const t_table& transitions,
-                   const t_table& existed,
-                   const t_config& config,
-                   const t_gstate& gstate)
+notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_traversal,
+    const t_aggspecvec& aggregates, const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby,
+    const t_table& flattened, const t_table& delta, const t_table& prev, const t_table& current,
+    const t_table& transitions, const t_table& existed, const t_config& config,
+    const t_gstate& gstate)
 {
 
-    auto strand_values = tree->build_strand_table(flattened,
-                                                  delta,
-                                                  prev,
-                                                  current,
-                                                  transitions,
-                                                  aggregates,
-                                                  config);
+    auto strand_values = tree->build_strand_table(
+        flattened, delta, prev, current, transitions, aggregates, config);
 
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;
-    notify_sparse_tree_common(strands,
-                              strand_deltas,
-                              tree,
-                              traversal,
-                              process_traversal,
-                              aggregates,
-                              tree_sortby,
-                              ctx_sortby,
-                              gstate);
+    notify_sparse_tree_common(strands, strand_deltas, tree, traversal, process_traversal,
+        aggregates, tree_sortby, ctx_sortby, gstate);
 }
 
 void
-notify_sparse_tree(t_stree_sptr tree,
-                   t_trav_sptr traversal,
-                   t_bool process_traversal,
-                   const t_aggspecvec& aggregates,
-                   const t_sspvec& tree_sortby,
-                   const t_sortsvec& ctx_sortby,
-                   const t_table& flattened,
-                   const t_config& config,
-                   const t_gstate& gstate)
+notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_traversal,
+    const t_aggspecvec& aggregates, const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby,
+    const t_table& flattened, const t_config& config, const t_gstate& gstate)
 {
-    auto strand_values =
-        tree->build_strand_table(flattened, aggregates, config);
+    auto strand_values = tree->build_strand_table(flattened, aggregates, config);
 
     auto strands = strand_values.first;
     auto strand_deltas = strand_values.second;
-    notify_sparse_tree_common(strands,
-                              strand_deltas,
-                              tree,
-                              traversal,
-                              process_traversal,
-                              aggregates,
-                              tree_sortby,
-                              ctx_sortby,
-                              gstate);
+    notify_sparse_tree_common(strands, strand_deltas, tree, traversal, process_traversal,
+        aggregates, tree_sortby, ctx_sortby, gstate);
 }
 
 t_pathvec
@@ -251,11 +204,8 @@ ctx_get_path(t_stree_csptr tree, t_trav_csptr traversal, t_tvidx idx)
 }
 
 t_ftnvec
-ctx_get_flattened_tree(t_tvidx idx,
-                       t_depth stop_depth,
-                       t_traversal& trav,
-                       const t_config& config,
-                       const t_sortsvec& sortby)
+ctx_get_flattened_tree(t_tvidx idx, t_depth stop_depth, t_traversal& trav,
+    const t_config& config, const t_sortsvec& sortby)
 {
     t_ptidx ptidx = trav.get_tree_index(idx);
     trav.expand_to_depth(sortby, stop_depth);

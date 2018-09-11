@@ -20,7 +20,7 @@ namespace perspective
 
 class PERSPECTIVE_EXPORT t_ctx1 : public t_ctxbase<t_ctx1>
 {
-  public:
+public:
     t_ctx1();
 
     t_ctx1(const t_schema& schema, const t_config& config);
@@ -49,7 +49,7 @@ class PERSPECTIVE_EXPORT t_ctx1 : public t_ctxbase<t_ctx1>
 
     using t_ctxbase<t_ctx1>::get_data;
 
-  private:
+private:
     t_trav_sptr m_traversal;
     t_stree_sptr m_tree;
     t_sortsvec m_sortby;

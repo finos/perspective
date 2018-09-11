@@ -40,4 +40,4 @@ typedef std::shared_ptr<const t_table> t_table_csptr;
 class t_column;
 typedef std::vector<t_column*> t_colptrvec;
 typedef std::vector<const t_column*> t_colcptrvec;
-}
+} // namespace perspective

@@ -13,9 +13,7 @@
 namespace perspective
 {
 
-t_fterm::t_fterm()
-{
-}
+t_fterm::t_fterm() {}
 
 t_fterm::t_fterm(const t_fterm_recipe& v)
 {
@@ -23,32 +21,34 @@ t_fterm::t_fterm(const t_fterm_recipe& v)
     m_op = v.m_op;
     m_threshold = v.m_threshold;
     m_bag = v.m_bag;
-    m_use_interned = (m_op == FILTER_OP_EQ || m_op == FILTER_OP_NE) &&
-                     m_threshold.m_type == DTYPE_STR;
+    m_use_interned
+        = (m_op == FILTER_OP_EQ || m_op == FILTER_OP_NE) && m_threshold.m_type == DTYPE_STR;
 }
 
-t_fterm::t_fterm(const t_str& colname,
-                 t_filter_op op,
-                 t_tscalar threshold,
-                 const t_tscalvec& bag,
-                 t_bool negated,
-                 t_bool is_primary)
-    : m_colname(colname), m_op(op), m_threshold(threshold),
-      m_bag(bag), m_negated(negated), m_is_primary(is_primary)
+t_fterm::t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold,
+    const t_tscalvec& bag, t_bool negated, t_bool is_primary)
+    : m_colname(colname)
+    , m_op(op)
+    , m_threshold(threshold)
+    , m_bag(bag)
+    , m_negated(negated)
+    , m_is_primary(is_primary)
 {
-    m_use_interned = (op == FILTER_OP_EQ || op == FILTER_OP_NE) &&
-                     threshold.m_type == DTYPE_STR;
+    m_use_interned
+        = (op == FILTER_OP_EQ || op == FILTER_OP_NE) && threshold.m_type == DTYPE_STR;
 }
 
-t_fterm::t_fterm(const t_str& colname,
-                 t_filter_op op,
-                 t_tscalar threshold,
-                 const t_tscalvec& bag)
-    : m_colname(colname), m_op(op), m_threshold(threshold),
-      m_bag(bag), m_negated(false), m_is_primary(false)
+t_fterm::t_fterm(
+    const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag)
+    : m_colname(colname)
+    , m_op(op)
+    , m_threshold(threshold)
+    , m_bag(bag)
+    , m_negated(false)
+    , m_is_primary(false)
 {
-    m_use_interned = (op == FILTER_OP_EQ || op == FILTER_OP_NE) &&
-                     threshold.m_type == DTYPE_STR;
+    m_use_interned
+        = (op == FILTER_OP_EQ || op == FILTER_OP_NE) && threshold.m_type == DTYPE_STR;
 }
 
 void
@@ -106,8 +106,7 @@ t_fterm::get_expr() const
         case FILTER_OP_BEGINS_WITH:
         case FILTER_OP_ENDS_WITH:
         {
-            ss << "." << filter_op_to_str(m_op) << "( "
-               << m_threshold.to_string(true) << " )";
+            ss << "." << filter_op_to_str(m_op) << "( " << m_threshold.to_string(true) << " )";
         }
         break;
         default:
@@ -119,26 +118,29 @@ t_fterm::get_expr() const
     return ss.str();
 }
 
-t_filter::t_filter() : m_mode(SELECT_MODE_ALL)
+t_filter::t_filter()
+    : m_mode(SELECT_MODE_ALL)
 {
 }
 
 t_filter::t_filter(const t_svec& columns)
-    : m_mode(SELECT_MODE_ALL), m_columns(columns)
+    : m_mode(SELECT_MODE_ALL)
+    , m_columns(columns)
 {
 }
 
-t_filter::t_filter(const t_svec& columns,
-                   t_uindex bidx,
-                   t_uindex eidx)
-    : m_mode(SELECT_MODE_RANGE), m_bidx(bidx), m_eidx(eidx),
-      m_columns(columns)
+t_filter::t_filter(const t_svec& columns, t_uindex bidx, t_uindex eidx)
+    : m_mode(SELECT_MODE_RANGE)
+    , m_bidx(bidx)
+    , m_eidx(eidx)
+    , m_columns(columns)
 {
 }
 
 t_filter::t_filter(const t_svec& columns, t_uindex mask_size)
-    : m_mode(SELECT_MODE_MASK), m_columns(columns),
-      m_mask(std::make_shared<t_mask>(mask_size))
+    : m_mode(SELECT_MODE_MASK)
+    , m_columns(columns)
+    , m_mask(std::make_shared<t_mask>(mask_size))
 {
 }
 

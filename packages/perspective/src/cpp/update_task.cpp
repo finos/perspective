@@ -13,7 +13,8 @@
 
 namespace perspective
 {
-t_update_task::t_update_task(t_pool& pool) : m_pool(pool)
+t_update_task::t_update_task(t_pool& pool)
+    : m_pool(pool)
 {
 }
 

@@ -14,10 +14,8 @@ namespace perspective
 {
 
 t_tscalar
-extract_aggregate(const t_aggspec& aggspec,
-                  const t_column* aggcol,
-                  t_uindex ridx,
-                  t_index pridx)
+extract_aggregate(
+    const t_aggspec& aggspec, const t_column* aggcol, t_uindex ridx, t_index pridx)
 {
     static t_str non_unique("-");
 
@@ -33,16 +31,14 @@ extract_aggregate(const t_aggspec& aggspec,
             }
 
             t_tscalar pv = aggcol->get_scalar(pridx);
-            return mktscalar<t_float64>(
-                100.0 * (cv.to_double() / pv.to_double()));
+            return mktscalar<t_float64>(100.0 * (cv.to_double() / pv.to_double()));
         }
         break;
         case AGGTYPE_PCT_SUM_GRAND_TOTAL:
         {
             t_tscalar cv = aggcol->get_scalar(ridx);
             t_tscalar pv = aggcol->get_scalar(ROOT_AGGIDX);
-            return mktscalar<t_float64>(
-                100.0 * (cv.to_double() / pv.to_double()));
+            return mktscalar<t_float64>(100.0 * (cv.to_double() / pv.to_double()));
         }
         break;
         case AGGTYPE_SUM:
@@ -93,13 +89,16 @@ extract_aggregate(const t_aggspec& aggspec,
             const t_f64pair* pair = aggcol->get_nth<t_f64pair>(ridx);
             t_tscalar rval;
             t_float64 second = pair->second;
-            if (second > 0) {
+            if (second > 0)
+            {
                 t_float64 mean = pair->first / second;
                 rval.set(mean);
-            } else {
+            }
+            else
+            {
                 rval.set(t_none());
             }
-            return rval;            
+            return rval;
         }
         break;
         default:

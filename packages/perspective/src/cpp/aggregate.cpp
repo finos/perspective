@@ -13,12 +13,12 @@
 namespace perspective
 {
 
-t_aggregate::t_aggregate(const t_dtree& tree,
-                         t_aggtype aggtype,
-                         t_colcsptrvec icolumns,
-                         t_col_sptr ocolumn)
-    : m_tree(tree), m_aggtype(aggtype), m_icolumns(icolumns),
-      m_ocolumn(ocolumn)
+t_aggregate::t_aggregate(
+    const t_dtree& tree, t_aggtype aggtype, t_colcsptrvec icolumns, t_col_sptr ocolumn)
+    : m_tree(tree)
+    , m_aggtype(aggtype)
+    , m_icolumns(icolumns)
+    , m_ocolumn(ocolumn)
 {
 }
 
@@ -35,73 +35,57 @@ t_aggregate::init()
             {
                 case DTYPE_INT64:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_int64, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_sum<t_int64, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_int32, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_sum<t_int32, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_int16, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_sum<t_int16, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_int8, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_sum<t_int8, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_sum<t_uint64,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_sum<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_sum<t_uint32,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_sum<t_uint32, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_sum<t_uint16,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_sum<t_uint16, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_uint8, t_uint64, t_uint64>>();
+                    build_aggregate<t_aggimpl_sum<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_sum<t_float64,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_sum<t_float64, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_sum<t_float32,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_sum<t_float32, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<
-                        t_aggimpl_sum<t_uint8, t_uint64, t_uint64>>();
+                    build_aggregate<t_aggimpl_sum<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 default:
@@ -117,73 +101,57 @@ t_aggregate::init()
             {
                 case DTYPE_INT64:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_int64, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_mul<t_int64, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_int32, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_mul<t_int32, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_int16, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_mul<t_int16, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_int8, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_mul<t_int8, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_mul<t_uint64,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_mul<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_mul<t_uint32,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_mul<t_uint32, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_mul<t_uint16,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_mul<t_uint16, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_uint8, t_uint64, t_uint64>>();
+                    build_aggregate<t_aggimpl_mul<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_mul<t_float64,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_mul<t_float64, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_mul<t_float32,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_mul<t_float32, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<
-                        t_aggimpl_mul<t_uint8, t_uint64, t_uint64>>();
+                    build_aggregate<t_aggimpl_mul<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 default:
@@ -199,88 +167,64 @@ t_aggregate::init()
             {
                 case DTYPE_STR:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint64,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_TIME:
                 case DTYPE_INT64:
                 {
-                    build_aggregate<t_aggimpl_count<t_int64,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_int64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<t_aggimpl_count<t_int32,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_int32, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<t_aggimpl_count<t_int16,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_int16, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<t_aggimpl_count<t_int8,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_int8, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint64,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_DATE:
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint32,
-                                                    t_uint32,
-                                                    t_uint32>>();
+                    build_aggregate<t_aggimpl_count<t_uint32, t_uint32, t_uint32>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint16,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_uint16, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint8,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_count<t_float64,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_float64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_count<t_float32,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_float32, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<t_aggimpl_count<t_uint8,
-                                                    t_uint64,
-                                                    t_uint64>>();
+                    build_aggregate<t_aggimpl_count<t_uint8, t_uint64, t_uint64>>();
                 }
                 break;
                 default:
@@ -296,79 +240,57 @@ t_aggregate::init()
             {
                 case DTYPE_INT64:
                 {
-                    build_aggregate<t_aggimpl_mean<t_int64,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_int64, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<t_aggimpl_mean<t_int32,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_int32, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<t_aggimpl_mean<t_int16,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_int16, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<t_aggimpl_mean<t_int8,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_int8, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_mean<t_uint64,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_uint64, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_mean<t_uint32,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_uint32, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_mean<t_uint16,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_uint16, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<t_aggimpl_mean<t_uint8,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_uint8, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_mean<t_float64,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_float64, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_mean<t_float32,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_float32, t_f64pair, t_float64>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<t_aggimpl_mean<t_uint8,
-                                                   t_f64pair,
-                                                   t_float64>>();
+                    build_aggregate<t_aggimpl_mean<t_uint8, t_f64pair, t_float64>>();
                 }
                 break;
                 default:
@@ -385,90 +307,64 @@ t_aggregate::init()
                 case DTYPE_TIME:
                 case DTYPE_INT64:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_int64,
-                                                         t_int64,
-                                                         t_int64>>();
+                    build_aggregate<t_aggimpl_last_value<t_int64, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_int32,
-                                                         t_int32,
-                                                         t_int32>>();
+                    build_aggregate<t_aggimpl_last_value<t_int32, t_int32, t_int32>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_int16,
-                                                         t_int16,
-                                                         t_int16>>();
+                    build_aggregate<t_aggimpl_last_value<t_int16, t_int16, t_int16>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_int8,
-                                                         t_int8,
-                                                         t_int8>>();
+                    build_aggregate<t_aggimpl_last_value<t_int8, t_int8, t_int8>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_uint64,
-                                                         t_uint64,
-                                                         t_uint64>>();
+                    build_aggregate<t_aggimpl_last_value<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_DATE:
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_uint32,
-                                                         t_uint32,
-                                                         t_uint32>>();
+                    build_aggregate<t_aggimpl_last_value<t_uint32, t_uint32, t_uint32>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_uint16,
-                                                         t_uint16,
-                                                         t_uint16>>();
+                    build_aggregate<t_aggimpl_last_value<t_uint16, t_uint16, t_uint16>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_uint8,
-                                                         t_uint8,
-                                                         t_uint8>>();
+                    build_aggregate<t_aggimpl_last_value<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<
-                        t_aggimpl_last_value<t_float64,
-                                             t_float64,
-                                             t_float64>>();
+                    build_aggregate<t_aggimpl_last_value<t_float64, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<
-                        t_aggimpl_last_value<t_float32,
-                                             t_float32,
-                                             t_float32>>();
+                    build_aggregate<t_aggimpl_last_value<t_float32, t_float32, t_float32>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<t_aggimpl_last_value<t_uint8,
-                                                         t_uint8,
-                                                         t_uint8>>();
+                    build_aggregate<t_aggimpl_last_value<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_STR:
                 {
                     build_aggregate<
-                        t_aggimpl_last_value<const char*,
-                                             const char*,
-                                             const char*>>();
+                        t_aggimpl_last_value<const char*, const char*, const char*>>();
                 }
                 break;
                 default:
@@ -485,81 +381,63 @@ t_aggregate::init()
                 case DTYPE_TIME:
                 case DTYPE_INT64:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_int64, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_hwm<t_int64, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_int32, t_int32, t_int32>>();
+                    build_aggregate<t_aggimpl_hwm<t_int32, t_int32, t_int32>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_int16, t_int16, t_int16>>();
+                    build_aggregate<t_aggimpl_hwm<t_int16, t_int16, t_int16>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_int8, t_int8, t_int8>>();
+                    build_aggregate<t_aggimpl_hwm<t_int8, t_int8, t_int8>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_hwm<t_uint64,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_hwm<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_DATE:
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_hwm<t_uint32,
-                                                  t_uint32,
-                                                  t_uint32>>();
+                    build_aggregate<t_aggimpl_hwm<t_uint32, t_uint32, t_uint32>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_hwm<t_uint16,
-                                                  t_uint16,
-                                                  t_uint16>>();
+                    build_aggregate<t_aggimpl_hwm<t_uint16, t_uint16, t_uint16>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_uint8, t_uint8, t_uint8>>();
+                    build_aggregate<t_aggimpl_hwm<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_hwm<t_float64,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_hwm<t_float64, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_hwm<t_float32,
-                                                  t_float32,
-                                                  t_float32>>();
+                    build_aggregate<t_aggimpl_hwm<t_float32, t_float32, t_float32>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<
-                        t_aggimpl_hwm<t_uint8, t_uint8, t_uint8>>();
+                    build_aggregate<t_aggimpl_hwm<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_STR:
                 {
-                    build_aggregate<t_aggimpl_hwm<const char*,
-                                                  const char*,
-                                                  const char*>>();
+                    build_aggregate<t_aggimpl_hwm<const char*, const char*, const char*>>();
                 }
                 break;
                 default:
@@ -576,81 +454,63 @@ t_aggregate::init()
                 case DTYPE_TIME:
                 case DTYPE_INT64:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_int64, t_int64, t_int64>>();
+                    build_aggregate<t_aggimpl_lwm<t_int64, t_int64, t_int64>>();
                 }
                 break;
                 case DTYPE_INT32:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_int32, t_int32, t_int32>>();
+                    build_aggregate<t_aggimpl_lwm<t_int32, t_int32, t_int32>>();
                 }
                 break;
                 case DTYPE_INT16:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_int16, t_int16, t_int16>>();
+                    build_aggregate<t_aggimpl_lwm<t_int16, t_int16, t_int16>>();
                 }
                 break;
                 case DTYPE_INT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_int8, t_int8, t_int8>>();
+                    build_aggregate<t_aggimpl_lwm<t_int8, t_int8, t_int8>>();
                 }
                 break;
                 case DTYPE_UINT64:
                 {
-                    build_aggregate<t_aggimpl_lwm<t_uint64,
-                                                  t_uint64,
-                                                  t_uint64>>();
+                    build_aggregate<t_aggimpl_lwm<t_uint64, t_uint64, t_uint64>>();
                 }
                 break;
                 case DTYPE_DATE:
                 case DTYPE_UINT32:
                 {
-                    build_aggregate<t_aggimpl_lwm<t_uint32,
-                                                  t_uint32,
-                                                  t_uint32>>();
+                    build_aggregate<t_aggimpl_lwm<t_uint32, t_uint32, t_uint32>>();
                 }
                 break;
                 case DTYPE_UINT16:
                 {
-                    build_aggregate<t_aggimpl_lwm<t_uint16,
-                                                  t_uint16,
-                                                  t_uint16>>();
+                    build_aggregate<t_aggimpl_lwm<t_uint16, t_uint16, t_uint16>>();
                 }
                 break;
                 case DTYPE_UINT8:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_uint8, t_uint8, t_uint8>>();
+                    build_aggregate<t_aggimpl_lwm<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_FLOAT64:
                 {
-                    build_aggregate<t_aggimpl_lwm<t_float64,
-                                                  t_float64,
-                                                  t_float64>>();
+                    build_aggregate<t_aggimpl_lwm<t_float64, t_float64, t_float64>>();
                 }
                 break;
                 case DTYPE_FLOAT32:
                 {
-                    build_aggregate<t_aggimpl_lwm<t_float32,
-                                                  t_float32,
-                                                  t_float32>>();
+                    build_aggregate<t_aggimpl_lwm<t_float32, t_float32, t_float32>>();
                 }
                 break;
                 case DTYPE_BOOL:
                 {
-                    build_aggregate<
-                        t_aggimpl_lwm<t_uint8, t_uint8, t_uint8>>();
+                    build_aggregate<t_aggimpl_lwm<t_uint8, t_uint8, t_uint8>>();
                 }
                 break;
                 case DTYPE_STR:
                 {
-                    build_aggregate<t_aggimpl_lwm<const char*,
-                                                  const char*,
-                                                  const char*>>();
+                    build_aggregate<t_aggimpl_lwm<const char*, const char*, const char*>>();
                 }
                 break;
                 default:

@@ -28,8 +28,7 @@ struct PERSPECTIVE_EXPORT t_comparator
 };
 
 template <typename DATA_T, int DTYPE_T>
-inline t_comparator<DATA_T, DTYPE_T>::t_comparator(
-    const t_column* col)
+inline t_comparator<DATA_T, DTYPE_T>::t_comparator(const t_column* col)
     : m_col(col)
 {
 }
@@ -44,8 +43,7 @@ t_comparator<DATA_T, DTYPE_T>::operator()(DATA_T a, DATA_T b) const
 
 template <>
 inline bool
-t_comparator<t_uindex, DTYPE_STR>::operator()(t_uindex a,
-                                              t_uindex b) const
+t_comparator<t_uindex, DTYPE_STR>::operator()(t_uindex a, t_uindex b) const
 {
     std::less<const char*> cmp;
     return cmp(m_col->unintern_c(a), m_col->unintern_c(b));

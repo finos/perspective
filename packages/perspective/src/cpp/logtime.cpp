@@ -46,11 +46,10 @@ psp_log_time(const t_str& s)
     th_curmem = curmem;
     th_curtime = ns_curtime;
     std::stringstream ss;
-    ss << std::fixed << std::setprecision(3) << "stat tid "
-       << std::this_thread::get_id() << " gt" << std::setw(10)
-       << curtime << " dt " << std::setw(10) << curtime - prev_time
-       << " gm " << std::setw(6) << curmem << " dm " << std::setw(6)
-       << curmem - prev_curmem << " msg: " << s;
+    ss << std::fixed << std::setprecision(3) << "stat tid " << std::this_thread::get_id()
+       << " gt" << std::setw(10) << curtime << " dt " << std::setw(10) << curtime - prev_time
+       << " gm " << std::setw(6) << curmem << " dm " << std::setw(6) << curmem - prev_curmem
+       << " msg: " << s;
     std::cout << ss.str() << std::endl;
 }
 

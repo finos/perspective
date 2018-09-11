@@ -23,7 +23,7 @@ class t_table;
 
 class PERSPECTIVE_EXPORT t_ctx0 : public t_ctxbase<t_ctx0>
 {
-  public:
+public:
     t_ctx0();
 
     t_ctx0(const t_schema& schema, const t_config& config);
@@ -35,21 +35,18 @@ class PERSPECTIVE_EXPORT t_ctx0 : public t_ctxbase<t_ctx0>
 
     t_svec get_column_names() const;
 
-	void sort_by();
+    void sort_by();
     t_sortsvec get_sort_by() const;
 
     using t_ctxbase<t_ctx0>::get_data;
 
-  protected:
-
+protected:
     t_tscalvec get_all_pkeys(const t_uidxpvec& cells) const;
 
-    void calc_step_delta(const t_table& flattened,
-                         const t_table& prev,
-                         const t_table& curr,
-                         const t_table& transitions);
+    void calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
+        const t_table& transitions);
 
-  private:
+private:
     t_ftrav_sptr m_traversal;
     t_sptr_zcdeltas m_deltas;
     t_minmaxvec m_minmax;

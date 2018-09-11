@@ -63,8 +63,7 @@ template <typename DATA_T, int DTYPE_T>
 struct t_operator_in
 {
     inline bool
-    operator()(const DATA_T& value,
-               const std::set<DATA_T>& threshold_values)
+    operator()(const DATA_T& value, const std::set<DATA_T>& threshold_values)
     {
         return threshold_values.find(value) != threshold_values.end();
     }
@@ -108,9 +107,7 @@ struct t_operator_begins_with<const t_char*, DTYPE_STR>
     {
         t_uindex t_vlen = strlen(value);
         t_uindex t_tlen = strlen(threshold_value);
-        return t_vlen < t_tlen
-                   ? false
-                   : strncmp(value, threshold_value, t_tlen) == 0;
+        return t_vlen < t_tlen ? false : strncmp(value, threshold_value, t_tlen) == 0;
     }
 };
 
@@ -124,9 +121,7 @@ struct t_operator_ends_with<t_uindex, DTYPE_STR>
         t_uindex t_tlen = strlen(threshold_value);
 
         return t_vlen < t_tlen ? false
-                               : strncmp(value + t_vlen - t_tlen,
-                                         threshold_value,
-                                         t_tlen) == 0;
+                               : strncmp(value + t_vlen - t_tlen, threshold_value, t_tlen) == 0;
     }
 };
 
@@ -142,9 +137,7 @@ struct t_operator_contains<t_uindex, DTYPE_STR>
 
 struct PERSPECTIVE_EXPORT t_fterm_recipe
 {
-    t_fterm_recipe()
-    {
-    }
+    t_fterm_recipe() {}
 
     t_str m_colname;
     t_filter_op m_op;
@@ -160,17 +153,10 @@ struct PERSPECTIVE_EXPORT t_fterm
 
     t_fterm(const t_fterm_recipe& v);
 
-    t_fterm(const t_str& colname,
-            t_filter_op op,
-            t_tscalar threshold,
-            const t_tscalvec& bag);
+    t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag);
 
-    t_fterm(const t_str& colname,
-            t_filter_op op,
-            t_tscalar threshold,
-            const t_tscalvec& bag,
-            t_bool negated,
-            t_bool is_primary);
+    t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag,
+        t_bool negated, t_bool is_primary);
 
     inline bool
     operator()(t_tscalar s) const
@@ -180,8 +166,7 @@ struct PERSPECTIVE_EXPORT t_fterm
         {
             case FILTER_OP_IN:
             {
-                rv = std::find(m_bag.begin(), m_bag.end(), s) !=
-                     m_bag.end();
+                rv = std::find(m_bag.begin(), m_bag.end(), s) != m_bag.end();
             }
             break;
             default:
@@ -212,7 +197,7 @@ typedef std::vector<t_fterm> t_ftermvec;
 
 class PERSPECTIVE_EXPORT t_filter
 {
-  public:
+public:
     t_filter();
     t_filter(const t_svec& columns);
 
@@ -231,7 +216,7 @@ class PERSPECTIVE_EXPORT t_filter
     t_masksptr mask() const;
     t_uindex count() const;
 
-  private:
+private:
     t_select_mode m_mode;
     t_uindex m_bidx;
     t_uindex m_eidx;

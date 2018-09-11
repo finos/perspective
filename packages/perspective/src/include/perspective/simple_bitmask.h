@@ -18,9 +18,10 @@ namespace perspective
 
 class t_simple_bitmask
 {
-  public:
+public:
     t_simple_bitmask(t_uindex nentries)
-        : m_nentries(nentries), m_ptr(0)
+        : m_nentries(nentries)
+        , m_ptr(0)
     {
         if (!nentries)
             return;
@@ -28,10 +29,7 @@ class t_simple_bitmask
         m_ptr = calloc(1, static_cast<size_t>(calc_capacity(nentries)));
     }
 
-    ~t_simple_bitmask()
-    {
-        free(m_ptr);
-    }
+    ~t_simple_bitmask() { free(m_ptr); }
 
     inline t_bool
     is_set(t_uindex idx) const
@@ -62,7 +60,7 @@ class t_simple_bitmask
             return;
         t_uindex byte_idx = get_byte_idx(idx);
         t_uint8& bv = get_block(byte_idx);
-        bv &= ~t_uint8( 1 << get_bit_idx(idx) );
+        bv &= ~t_uint8(1 << get_bit_idx(idx));
     }
 
     void*
@@ -77,7 +75,7 @@ class t_simple_bitmask
         return m_nentries;
     }
 
-  private:
+private:
     static t_uindex
     calc_capacity(t_uindex nentries)
     {

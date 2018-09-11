@@ -19,30 +19,21 @@ namespace perspective
 
 template <typename DATA_T, int DTYPE_T, typename OPERATOR_T>
 void
-fop_apply(const t_table& tbl,
-          const t_str& colname,
-          t_mask& mask,
-          DATA_T reference_value)
+fop_apply(const t_table& tbl, const t_str& colname, t_mask& mask, DATA_T reference_value)
 {
 }
 
 template <typename DATA_T, int DTYPE_T, typename OPERATOR_T>
 void
-fop_apply(const t_table& tbl,
-          const t_str& colname,
-          t_mask& mask,
-          const std::set<DATA_T, t_filter_comparator<DATA_T>>&
-              reference_values)
+fop_apply(const t_table& tbl, const t_str& colname, t_mask& mask,
+    const std::set<DATA_T, t_filter_comparator<DATA_T>>& reference_values)
 {
 }
 
 template <typename CTYPE_T, int DTYPE_T>
 void
-apply_filters_helper(const t_table& tbl,
-                     const t_str& column,
-                     t_mask& mask,
-                     t_tscalar threshold,
-                     const t_fterm& filter)
+apply_filters_helper(const t_table& tbl, const t_str& column, t_mask& mask, t_tscalar threshold,
+    const t_fterm& filter)
 {
     CTYPE_T thr = threshold.get<CTYPE_T>();
 
@@ -99,17 +90,14 @@ apply_filters_helper(const t_table& tbl,
             std::set<CTYPE_T, t_filter_comparator<CTYPE_T>> values;
             for (t_uindex fidx = 0, loop_end = filter.m_bag.size();
 
-                 fidx < loop_end;
-                 ++fidx)
+                 fidx < loop_end; ++fidx)
             {
                 values.insert(filter
                                   .m_bag[fidx]
 
                                   .get<CTYPE_T>());
             }
-            fop_apply<CTYPE_T,
-                      DTYPE_T,
-                      t_operator_in<CTYPE_T, DTYPE_T>>(
+            fop_apply<CTYPE_T, DTYPE_T, t_operator_in<CTYPE_T, DTYPE_T>>(
 
                 tbl, column, mask, values);
         }

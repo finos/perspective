@@ -25,12 +25,8 @@ struct PERSPECTIVE_EXPORT t_tvnode
     t_uindex m_nchild;
 };
 
-PERSPECTIVE_EXPORT void fill_travnode(t_tvnode* node,
-                                      bool expanded,
-                                      t_uindex depth,
-                                      t_uindex rel_pidx,
-                                      t_uindex ndesc,
-                                      t_uindex tnid);
+PERSPECTIVE_EXPORT void fill_travnode(t_tvnode* node, bool expanded, t_uindex depth,
+    t_uindex rel_pidx, t_uindex ndesc, t_uindex tnid);
 
 typedef std::vector<t_tvnode> t_tvnvec;
 typedef std::shared_ptr<t_tvnvec> t_sptr_tvnodes;

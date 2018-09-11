@@ -12,9 +12,7 @@
 namespace perspective
 {
 
-t_none::t_none()
-{
-}
+t_none::t_none() {}
 
 bool
 t_none::operator==(const t_none&) const
@@ -52,7 +50,7 @@ hash_value(const t_none& none)
     boost::hash<long> hasher;
     return hasher(static_cast<long>(-1));
 }
-}
+} // namespace perspective
 
 namespace std
 {
@@ -62,4 +60,4 @@ operator<<(std::ostream& os, const perspective::t_none& dt)
     os << "<t_none>";
     return os;
 }
-}
+} // namespace std

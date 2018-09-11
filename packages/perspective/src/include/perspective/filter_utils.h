@@ -24,8 +24,7 @@ filter_table_for_config(const t_table& tbl, const t_config& config)
     {
         case FMODE_SIMPLE_CLAUSES:
         {
-            return tbl.filter_cpp(config.get_combiner(),
-                                  config.get_fterms());
+            return tbl.filter_cpp(config.get_combiner(), config.get_fterms());
         }
         break;
         default:

@@ -10,9 +10,10 @@
 #pragma once
 #include <perspective/first.h>
 
-#ifdef __linux__ 
-extern "C" {
-__attribute__((__constructor__)) void th_trace_init();
-__attribute__((__destructor__)) void th_trace_fini();
+#ifdef __linux__
+extern "C"
+{
+    __attribute__((__constructor__)) void th_trace_init();
+    __attribute__((__destructor__)) void th_trace_fini();
 }
 #endif

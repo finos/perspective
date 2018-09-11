@@ -22,12 +22,16 @@ t_pivot::t_pivot(const t_pivot_recipe& r)
 }
 
 t_pivot::t_pivot(const t_str& colname)
-    : m_colname(colname), m_name(colname), m_mode(PIVOT_MODE_NORMAL)
+    : m_colname(colname)
+    , m_name(colname)
+    , m_mode(PIVOT_MODE_NORMAL)
 {
 }
 
 t_pivot::t_pivot(const t_str& colname, t_pivot_mode mode)
-    : m_colname(colname), m_name(colname), m_mode(mode)
+    : m_colname(colname)
+    , m_name(colname)
+    , m_mode(mode)
 {
 }
 

@@ -20,22 +20,33 @@ namespace perspective
 {
 // TODO : move to delegated constructors in C++11
 
-t_column_recipe::t_column_recipe() : m_vlenidx(0), m_size(0)
+t_column_recipe::t_column_recipe()
+    : m_vlenidx(0)
+    , m_size(0)
 {
 }
 
 t_column::t_column()
-    : m_dtype(DTYPE_NONE), m_init(false), m_isvlen(false),
-      m_data(nullptr), m_vocab(nullptr), m_valid(nullptr), m_size(0),
-      m_valid_enabled(false), m_from_recipe(false)
+    : m_dtype(DTYPE_NONE)
+    , m_init(false)
+    , m_isvlen(false)
+    , m_data(nullptr)
+    , m_vocab(nullptr)
+    , m_valid(nullptr)
+    , m_size(0)
+    , m_valid_enabled(false)
+    , m_from_recipe(false)
 
 {
     LOG_CONSTRUCTOR("t_column");
 }
 
 t_column::t_column(const t_column_recipe& recipe)
-    : m_dtype(recipe.m_dtype), m_init(false), m_size(recipe.m_size),
-      m_valid_enabled(recipe.m_valid_enabled), m_from_recipe(true)
+    : m_dtype(recipe.m_dtype)
+    , m_init(false)
+    , m_size(recipe.m_size)
+    , m_valid_enabled(recipe.m_valid_enabled)
+    , m_from_recipe(true)
 
 {
     LOG_CONSTRUCTOR("t_column");
@@ -68,9 +79,8 @@ t_column::column_copy_helper(const t_column& other)
     m_init = false;
     m_isvlen = other.m_isvlen;
     m_data.reset(new t_lstore(other.m_data->get_recipe()));
-    m_vocab.reset(
-        new t_vocab(other.m_vocab->get_vlendata()->get_recipe(),
-                    other.m_vocab->get_extents()->get_recipe()));
+    m_vocab.reset(new t_vocab(other.m_vocab->get_vlendata()->get_recipe(),
+        other.m_vocab->get_extents()->get_recipe()));
     m_valid.reset(new t_lstore(other.m_valid->get_recipe()));
 
     m_size = other.m_size;
@@ -94,22 +104,18 @@ t_column::operator=(const t_column& c)
     return *this;
 }
 
-t_column::t_column(t_dtype dtype,
-                   t_bool missing_enabled,
-                   const t_lstore_recipe& a)
-    : t_column(dtype,
-               missing_enabled,
-               a,
-               a.m_capacity / get_dtype_size(dtype))
+t_column::t_column(t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a)
+    : t_column(dtype, missing_enabled, a, a.m_capacity / get_dtype_size(dtype))
 {
 }
 
-t_column::t_column(t_dtype dtype,
-                   t_bool missing_enabled,
-                   const t_lstore_recipe& a,
-                   t_uindex row_capacity)
-    : m_dtype(dtype), m_init(false), m_size(0),
-      m_valid_enabled(missing_enabled), m_from_recipe(false)
+t_column::t_column(
+    t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity)
+    : m_dtype(dtype)
+    , m_init(false)
+    , m_size(0)
+    , m_valid_enabled(missing_enabled)
+    , m_from_recipe(false)
 {
 
     m_data.reset(new t_lstore(a));
@@ -180,10 +186,7 @@ t_column::init()
     COLUMN_CHECK_VALUES();
 }
 
-t_column::~t_column()
-{
-    LOG_DESTRUCTOR("t_column");
-}
+t_column::~t_column() { LOG_DESTRUCTOR("t_column"); }
 
 t_dtype
 t_column::get_dtype() const
@@ -386,9 +389,8 @@ void
 t_column::set_size(t_uindex size)
 {
 #ifdef PSP_COLUMN_VERIFY
-    PSP_VERBOSE_ASSERT(size * get_dtype_size(m_dtype) <=
-                           m_data->capacity(),
-                       "Not enough space reserved for column");
+    PSP_VERBOSE_ASSERT(size * get_dtype_size(m_dtype) <= m_data->capacity(),
+        "Not enough space reserved for column");
 #endif
     m_size = size;
     m_data->set_size(m_elemsize * size);
@@ -495,15 +497,13 @@ t_column::get_scalar(t_uindex idx) const
         break;
         case DTYPE_TIME:
         {
-            const t_time::t_rawtype* v =
-                m_data->get_nth<t_time::t_rawtype>(idx);
+            const t_time::t_rawtype* v = m_data->get_nth<t_time::t_rawtype>(idx);
             rv.set(t_time(*v));
         }
         break;
         case DTYPE_DATE:
         {
-            const t_date::t_rawtype* v =
-                m_data->get_nth<t_date::t_rawtype>(idx);
+            const t_date::t_rawtype* v = m_data->get_nth<t_date::t_rawtype>(idx);
             rv.set(t_date(*v));
         }
         break;
@@ -536,12 +536,12 @@ t_column::clear(t_uindex idx)
 {
     switch (m_dtype)
     {
-		case DTYPE_STR:
-		{
-			t_stridx v = 0;
+        case DTYPE_STR:
+        {
+            t_stridx v = 0;
             set_nth<t_stridx>(idx, v, false);
-		}
-		break;
+        }
+        break;
         case DTYPE_TIME:
         case DTYPE_FLOAT64:
         case DTYPE_UINT64:
@@ -613,8 +613,7 @@ t_column::get_nth<const char>(t_uindex idx) const
 const t_bool*
 t_column::get_nth_valid(t_uindex idx) const
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
+    PSP_VERBOSE_ASSERT(is_valid_enabled(), "Validity not available for column");
     COLUMN_CHECK_ACCESS(idx);
     return m_valid->get_nth<t_bool>(idx);
 }
@@ -622,8 +621,7 @@ t_column::get_nth_valid(t_uindex idx) const
 t_bool*
 t_column::get_nth_valid(t_uindex idx)
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
+    PSP_VERBOSE_ASSERT(is_valid_enabled(), "Validity not available for column");
     COLUMN_CHECK_ACCESS(idx);
     return m_valid->get_nth<t_bool>(idx);
 }
@@ -631,8 +629,7 @@ t_column::get_nth_valid(t_uindex idx)
 t_bool
 t_column::is_valid(t_uindex idx) const
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
-                       "Validity not available for column");
+    PSP_VERBOSE_ASSERT(is_valid_enabled(), "Validity not available for column");
     COLUMN_CHECK_ACCESS(idx);
     return *m_valid->get_nth<t_bool>(idx);
 }
@@ -655,9 +652,7 @@ t_column::set_nth<t_str>(t_uindex idx, t_str elem)
 
 template <>
 void
-t_column::set_nth<const char*>(t_uindex idx,
-                               const char* elem,
-                               t_bool valid)
+t_column::set_nth<const char*>(t_uindex idx, const char* elem, t_bool valid)
 {
     COLUMN_CHECK_STRCOL();
     set_nth_body(idx, elem, valid);
@@ -775,14 +770,12 @@ t_column::set_scalar(t_uindex idx, t_tscalar value)
             if (tgt)
             {
                 PSP_VERBOSE_ASSERT(
-                    value.m_type == DTYPE_STR,
-                    "Setting non string scalar on string column");
+                    value.m_type == DTYPE_STR, "Setting non string scalar on string column");
                 set_nth<const char*>(idx, tgt, value.is_valid());
             }
             else
             {
-                set_nth<const char*>(
-                    idx, empty.c_str(), value.is_valid());
+                set_nth<const char*>(idx, empty.c_str(), value.is_valid());
             }
         }
         break;
@@ -802,8 +795,7 @@ t_column::is_vlen() const
 void
 t_column::append(const t_column& other)
 {
-    PSP_VERBOSE_ASSERT(m_dtype == other.m_dtype,
-                       "Mismatched dtypes detected");
+    PSP_VERBOSE_ASSERT(m_dtype == other.m_dtype, "Mismatched dtypes detected");
     if (is_vlen())
     {
         if (size() == 0)
@@ -816,18 +808,15 @@ t_column::append(const t_column& other)
                 m_valid->fill(*other.m_valid);
             }
 
-            m_vocab->fill(*(other.m_vocab->get_vlendata()),
-                          *(other.m_vocab->get_extents()),
-                          other.m_vocab->get_vlenidx());
+            m_vocab->fill(*(other.m_vocab->get_vlendata()), *(other.m_vocab->get_extents()),
+                other.m_vocab->get_vlenidx());
 
             set_size(other.size());
             m_vocab->rebuild_map();
         }
         else
         {
-            for (t_uindex idx = 0, loop_end = other.size();
-                 idx < loop_end;
-                 ++idx)
+            for (t_uindex idx = 0, loop_end = other.size(); idx < loop_end; ++idx)
             {
                 const char* s = other.get_nth<const char>(idx);
                 push_back(s);
@@ -843,10 +832,10 @@ t_column::append(const t_column& other)
     {
         m_data->append(*other.m_data);
 
-		if (is_valid_enabled())
-		{
-			m_valid->append(*other.m_valid);
-		}
+        if (is_valid_enabled())
+        {
+            m_valid->append(*other.m_valid);
+        }
     }
 
     COLUMN_CHECK_VALUES();
@@ -978,12 +967,9 @@ t_column::valid_raw_fill(t_bool value)
 }
 
 void
-t_column::copy(const t_column* other,
-               const t_uidxvec& indices,
-               t_uindex offset)
+t_column::copy(const t_column* other, const t_uidxvec& indices, t_uindex offset)
 {
-    PSP_VERBOSE_ASSERT(m_dtype == other->get_dtype(),
-                       "Cannot copy from diff dtype");
+    PSP_VERBOSE_ASSERT(m_dtype == other->get_dtype(), "Cannot copy from diff dtype");
 
     switch (m_dtype)
     {
@@ -1070,12 +1056,10 @@ t_column::copy(const t_column* other,
 
 template <>
 void
-t_column::copy_helper<const char>(const t_column* other,
-                                  const t_uidxvec& indices,
-                                  t_uindex offset)
+t_column::copy_helper<const char>(
+    const t_column* other, const t_uidxvec& indices, t_uindex offset)
 {
-    t_uindex eidx = std::min(other->size(),
-                             static_cast<t_uindex>(indices.size()));
+    t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
     for (t_uindex idx = 0; idx < eidx; ++idx)
@@ -1087,15 +1071,12 @@ t_column::copy_helper<const char>(const t_column* other,
 
 template <>
 void
-t_column::fill(std::vector<const char*>& vec,
-               const t_uindex* bidx,
-               const t_uindex* eidx) const
+t_column::fill(std::vector<const char*>& vec, const t_uindex* bidx, const t_uindex* eidx) const
 {
 
     PSP_VERBOSE_ASSERT(eidx - bidx > 0, "Invalid pointers passed in");
 
-    for (t_uindex idx = 0, loop_end = eidx - bidx; idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = eidx - bidx; idx < loop_end; ++idx)
 
     {
         vec[idx] = get_nth<const char>(*(bidx + idx));
@@ -1120,19 +1101,16 @@ t_column::verify_size(t_uindex idx) const
     if (m_dtype == DTYPE_USER_FIXED)
         return;
 
-    PSP_VERBOSE_ASSERT(idx * get_dtype_size(m_dtype) <=
-                           m_data->capacity(),
-                       "Not enough space reserved for column");
+    PSP_VERBOSE_ASSERT(idx * get_dtype_size(m_dtype) <= m_data->capacity(),
+        "Not enough space reserved for column");
 
-    PSP_VERBOSE_ASSERT(idx * get_dtype_size(m_dtype) <=
-                           m_data->capacity(),
-                       "Not enough space reserved for column");
+    PSP_VERBOSE_ASSERT(idx * get_dtype_size(m_dtype) <= m_data->capacity(),
+        "Not enough space reserved for column");
 
     if (is_valid_enabled())
     {
-        PSP_VERBOSE_ASSERT(idx * get_dtype_size(DTYPE_UINT8) <=
-                               m_valid->capacity(),
-                           "Not enough space reserved for column");
+        PSP_VERBOSE_ASSERT(idx * get_dtype_size(DTYPE_UINT8) <= m_valid->capacity(),
+            "Not enough space reserved for column");
     }
 
     if (is_vlen_dtype(m_dtype))

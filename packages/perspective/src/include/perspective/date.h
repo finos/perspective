@@ -21,34 +21,10 @@
 namespace perspective
 {
 static const t_int32 CUMULATIVE_DAYS[2][13] = {
-    {0,
-     31,
-     59,
-     90,
-     120,
-     151,
-     181,
-     212,
-     243,
-     273,
-     304,
-     334,
-     365} /* Normal years.  */,
-    {0,
-     31,
-     60,
-     91,
-     121,
-     152,
-     182,
-     213,
-     244,
-     274,
-     305,
-     335,
-     366} /* Leap
-             years.
-             */
+    { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 } /* Normal years.  */,
+    { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 } /* Leap
+                                                                      years.
+                                                                      */
 };
 
 // In terms of (non-tm based) inputs/outputs, t_time
@@ -58,7 +34,7 @@ static const t_int32 CUMULATIVE_DAYS[2][13] = {
 // A day() of the month in the range [1..31].
 class PERSPECTIVE_EXPORT t_date
 {
-  public:
+public:
     static const t_int32 YEAR_MASK = 0xFFFF0000;
     static const t_int32 MONTH_MASK = 0x0000FF00;
     static const t_int32 DAY_MASK = 0x000000FF;
@@ -67,7 +43,7 @@ class PERSPECTIVE_EXPORT t_date
     static const t_int32 MONTH_SHIFT = 8;
     static const t_int32 DAY_SHIFT = 0;
 
-  public:
+public:
     typedef t_uint32 t_rawtype;
 
     t_date();
@@ -106,7 +82,7 @@ class PERSPECTIVE_EXPORT t_date
 
     void set_psp_date(t_uindex dt);
 
-  private:
+private:
     t_rawtype m_storage;
 };
 
@@ -122,6 +98,5 @@ hash_value(const t_date& d)
 
 namespace std
 {
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_date& t);
+std::ostream& operator<<(std::ostream& os, const perspective::t_date& t);
 }

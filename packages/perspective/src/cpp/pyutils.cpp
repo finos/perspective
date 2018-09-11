@@ -36,8 +36,7 @@ print_python_stack()
             auto line = PyCode_Addr2Line(f->f_code, f->f_lasti);
             auto filename = PyString_AsString(f->f_code->co_filename);
             auto funcname = PyString_AsString(f->f_code->co_name);
-            std::cout << "\t" << filename << ":" << line << " : "
-                      << funcname << std::endl;
+            std::cout << "\t" << filename << ":" << line << " : " << funcname << std::endl;
             f = f->f_back;
         }
     }

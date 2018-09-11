@@ -29,7 +29,6 @@
 #include <boost/unordered_map.hpp>
 #include <perspective/portable.h>
 
-
 namespace perspective
 {
 
@@ -65,27 +64,27 @@ const t_index INVALID_INDEX = -1;
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
 #ifdef PSP_DEBUG
-#define PSP_VERBOSE_ASSERT(COND, MSG)                                \
-    {                                                                \
-        if (!(COND))                                                 \
-        {                                                            \
-            std::stringstream ss;                                    \
-            ss << __FILE__ << ":" << __LINE__ << ": " << MSG         \
-               << " : " << perspective::get_error_str();             \
-            perror(ss.str().c_str());                                \
-            PSP_ABORT();                                             \
-        }                                                            \
+#define PSP_VERBOSE_ASSERT(COND, MSG)                                                          \
+    {                                                                                          \
+        if (!(COND))                                                                           \
+        {                                                                                      \
+            std::stringstream ss;                                                              \
+            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
+               << perspective::get_error_str();                                                \
+            perror(ss.str().c_str());                                                          \
+            PSP_ABORT();                                                                       \
+        }                                                                                      \
     }
 
-#define PSP_COMPLAIN_AND_ABORT(X)                                    \
-    {                                                                \
-        std::stringstream ss;                                        \
-        ss << __FILE__ << ":" << __LINE__ << ": " << X;              \
-        perror(ss.str().c_str());                                    \
-        PSP_ABORT();                                                 \
+#define PSP_COMPLAIN_AND_ABORT(X)                                                              \
+    {                                                                                          \
+        std::stringstream ss;                                                                  \
+        ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
+        perror(ss.str().c_str());                                                              \
+        PSP_ABORT();                                                                           \
     }
 
-#define PSP_ASSERT_SIMPLE_TYPE(X)                                    \
+#define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
 static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 " Unsuitable type found. "
@@ -93,26 +92,24 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 //#define LOG_LIFETIMES 1
 
 #ifdef LOG_LIFETIMES
-#define LOG_CONSTRUCTOR(X)                                           \
-    std::cout << "constructing L: " << __LINE__ << " " << (X)        \
-              << " <" << this << ">" << std::endl;
+#define LOG_CONSTRUCTOR(X)                                                                     \
+    std::cout << "constructing L: " << __LINE__ << " " << (X) << " <" << this << ">"           \
+              << std::endl;
 
-#define LOG_DESTRUCTOR(X)                                            \
-    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <"  \
-              << this << ">" << std::endl;
+#define LOG_DESTRUCTOR(X)                                                                      \
+    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
 
-#define LOG_INIT(X)                                                  \
-    std::cout << "initing L: " << __LINE__ << " " << (X) << " <"     \
-              << this << ">" << std::endl;
+#define LOG_INIT(X)                                                                            \
+    std::cout << "initing L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
 #else
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT(COND, MSG)   
-#define PSP_COMPLAIN_AND_ABORT(X) 
-#define PSP_ASSERT_SIMPLE_TYPE(X) 
+#define PSP_VERBOSE_ASSERT(COND, MSG)
+#define PSP_COMPLAIN_AND_ABORT(X)
+#define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
@@ -409,8 +406,8 @@ typedef std::vector<t_sorttype> t_sorttvec;
 #ifdef WIN32
 #define PSP_NON_COPYABLE(X)
 #else
-#define PSP_NON_COPYABLE(X)                                          \
-    X(const X&) = delete;                                            \
+#define PSP_NON_COPYABLE(X)                                                                    \
+    X(const X&) = delete;                                                                      \
     X& operator=(const X&) = delete
 #endif
 
@@ -455,8 +452,7 @@ struct PERSPECTIVE_EXPORT t_cmp_charptr
     }
 };
 
-struct t_cchar_umap_cmp
-    : public std::binary_function<const char*, const char*, bool>
+struct t_cchar_umap_cmp : public std::binary_function<const char*, const char*, bool>
 {
     inline bool
     operator()(const char* x, const char* y) const
@@ -500,10 +496,8 @@ struct hash<perspective::t_uidxpair>
     result_type
     operator()(argument_type const& s) const
     {
-        result_type const h1(
-            std::hash<perspective::t_uindex>()(s.first));
-        result_type const h2(
-            std::hash<perspective::t_uindex>()(s.second));
+        result_type const h1(std::hash<perspective::t_uindex>()(s.first));
+        result_type const h2(std::hash<perspective::t_uindex>()(s.second));
         return h1 ^ (h2 << 1);
     }
 };

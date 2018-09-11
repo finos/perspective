@@ -17,22 +17,34 @@
 namespace perspective
 {
 
-t_mselem::t_mselem() : m_pkey(mknone()), m_order(0), m_deleted(false)
+t_mselem::t_mselem()
+    : m_pkey(mknone())
+    , m_order(0)
+    , m_deleted(false)
 {
 }
 
 t_mselem::t_mselem(const t_tscalvec& row)
-    : m_row(row), m_pkey(mknone()), m_order(0), m_deleted(false)
+    : m_row(row)
+    , m_pkey(mknone())
+    , m_order(0)
+    , m_deleted(false)
 {
 }
 
 t_mselem::t_mselem(const t_tscalvec& row, t_uindex order)
-    : m_row(row), m_pkey(mknone()), m_order(order), m_deleted(false)
+    : m_row(row)
+    , m_pkey(mknone())
+    , m_order(order)
+    , m_deleted(false)
 {
 }
 
 t_mselem::t_mselem(const t_tscalar& pkey, const t_tscalvec& row)
-    : m_row(row), m_pkey(pkey), m_order(0), m_deleted(false)
+    : m_row(row)
+    , m_pkey(pkey)
+    , m_order(0)
+    , m_deleted(false)
 {
 }
 
@@ -73,7 +85,8 @@ t_mselem::operator=(t_mselem&& other)
 }
 
 t_minmax_idx::t_minmax_idx(t_index mn, t_index mx)
-    : m_min(mn), m_max(mx)
+    : m_min(mn)
+    , m_max(mx)
 {
 }
 
@@ -97,9 +110,7 @@ get_minmax_idx(const t_tscalvec& vec, t_sorttype stype)
         case SORTTYPE_DESCENDING:
         case SORTTYPE_ASCENDING:
         {
-            for (t_index idx = 0, loop_end = vec.size();
-                 idx < loop_end;
-                 ++idx)
+            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end; ++idx)
             {
                 const t_tscalar& val = vec[idx];
                 if (val <= min_max.first)
@@ -120,14 +131,11 @@ get_minmax_idx(const t_tscalvec& vec, t_sorttype stype)
         case SORTTYPE_ASCENDING_ABS:
         case SORTTYPE_DESCENDING_ABS:
         {
-            for (t_index idx = 0, loop_end = vec.size();
-                 idx < loop_end;
-                 ++idx)
+            for (t_index idx = 0, loop_end = vec.size(); idx < loop_end; ++idx)
             {
                 t_float64 val = std::abs(vec[idx].to_double());
                 t_float64 mindbl = std::abs(t_float64(min_max.first));
-                t_float64 maxdbl =
-                    std::abs(t_float64(min_max.second));
+                t_float64 maxdbl = std::abs(t_float64(min_max.second));
 
                 if (val <= mindbl)
                 {
@@ -166,7 +174,9 @@ to_double(const t_tscalar& c)
     return c.to_double();
 }
 
-t_nancmp::t_nancmp() : m_active(false), m_cmpval(CMP_OP_EQ)
+t_nancmp::t_nancmp()
+    : m_active(false)
+    , m_cmpval(CMP_OP_EQ)
 {
 }
 
@@ -238,16 +248,17 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b)
     return rval;
 }
 
-t_multisorter::t_multisorter(const t_sorttvec& order,
-                             t_bool handle_nans)
-    : m_sort_order(order), m_handle_nans(handle_nans)
+t_multisorter::t_multisorter(const t_sorttvec& order, t_bool handle_nans)
+    : m_sort_order(order)
+    , m_handle_nans(handle_nans)
 {
 }
 
-t_multisorter::t_multisorter(t_mselemvec_csptr elems,
-                             const t_sorttvec& order,
-                             t_bool handle_nans)
-    : m_sort_order(order), m_elems(elems), m_handle_nans(handle_nans)
+t_multisorter::t_multisorter(
+    t_mselemvec_csptr elems, const t_sorttvec& order, t_bool handle_nans)
+    : m_sort_order(order)
+    , m_elems(elems)
+    , m_handle_nans(handle_nans)
 {
 }
 

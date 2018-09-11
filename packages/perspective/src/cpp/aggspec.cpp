@@ -15,20 +15,24 @@
 namespace perspective
 {
 
-t_col_name_type::t_col_name_type() : m_type(DTYPE_NONE)
+t_col_name_type::t_col_name_type()
+    : m_type(DTYPE_NONE)
 {
 }
 
 t_col_name_type::t_col_name_type(const t_str& name, t_dtype type)
-    : m_name(name), m_type(type)
+    : m_name(name)
+    , m_type(type)
 {
 }
 
-t_aggspec::t_aggspec() : m_kernel(0)
+t_aggspec::t_aggspec()
+    : m_kernel(0)
 {
 }
 
-t_aggspec::t_aggspec(const t_aggspec_recipe& v) : m_kernel(0)
+t_aggspec::t_aggspec(const t_aggspec_recipe& v)
+    : m_kernel(0)
 {
     m_name = v.m_name;
     m_disp_name = v.m_name;
@@ -52,61 +56,61 @@ t_aggspec::t_aggspec(const t_aggspec_recipe& v) : m_kernel(0)
     m_invmode = v.m_invmode;
 }
 
-t_aggspec::t_aggspec(const t_str& name,
-                     t_aggtype agg,
-                     const t_depvec& dependencies)
-    : m_name(name), m_disp_name(name), m_agg(agg),
-      m_dependencies(dependencies), m_kernel(0)
+t_aggspec::t_aggspec(const t_str& name, t_aggtype agg, const t_depvec& dependencies)
+    : m_name(name)
+    , m_disp_name(name)
+    , m_agg(agg)
+    , m_dependencies(dependencies)
+    , m_kernel(0)
 {
 }
 
-t_aggspec::t_aggspec(const t_str& aggname,
-                     t_aggtype agg,
-                     const t_str& dep)
-    : m_name(aggname), m_disp_name(aggname), m_agg(agg),
-      m_dependencies(t_depvec{t_dep(dep, DEPTYPE_COLUMN)}),
-      m_kernel(0)
+t_aggspec::t_aggspec(const t_str& aggname, t_aggtype agg, const t_str& dep)
+    : m_name(aggname)
+    , m_disp_name(aggname)
+    , m_agg(agg)
+    , m_dependencies(t_depvec{ t_dep(dep, DEPTYPE_COLUMN) })
+    , m_kernel(0)
 {
 }
 
-t_aggspec::t_aggspec(const t_str& name,
-                     const t_str& disp_name,
-                     t_aggtype agg,
-                     const t_depvec& dependencies)
-    : m_name(name), m_disp_name(disp_name), m_agg(agg),
-      m_dependencies(dependencies), m_kernel(0)
+t_aggspec::t_aggspec(
+    const t_str& name, const t_str& disp_name, t_aggtype agg, const t_depvec& dependencies)
+    : m_name(name)
+    , m_disp_name(disp_name)
+    , m_agg(agg)
+    , m_dependencies(dependencies)
+    , m_kernel(0)
 {
 }
 
-t_aggspec::t_aggspec(const t_str& name,
-                     const t_str& disp_name,
-                     t_aggtype agg,
-                     const t_depvec& dependencies,
-                     t_sorttype sort_type)
-    : m_name(name), m_disp_name(disp_name), m_agg(agg),
-      m_dependencies(dependencies), m_sort_type(sort_type),
-      m_kernel(0)
+t_aggspec::t_aggspec(const t_str& name, const t_str& disp_name, t_aggtype agg,
+    const t_depvec& dependencies, t_sorttype sort_type)
+    : m_name(name)
+    , m_disp_name(disp_name)
+    , m_agg(agg)
+    , m_dependencies(dependencies)
+    , m_sort_type(sort_type)
+    , m_kernel(0)
 {
 }
 
-t_aggspec::t_aggspec(const t_str& aggname,
-                     const t_str& disp_aggname,
-                     t_aggtype agg,
-                     t_uindex agg_one_idx,
-                     t_uindex agg_two_idx,
-                     t_float64 agg_one_weight,
-                     t_float64 agg_two_weight)
-    : m_name(aggname), m_disp_name(disp_aggname), m_agg(agg),
-      m_agg_one_idx(agg_one_idx), m_agg_two_idx(agg_two_idx),
-      m_agg_one_weight(agg_one_weight),
-      m_agg_two_weight(agg_two_weight), m_kernel(0)
+t_aggspec::t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype agg,
+    t_uindex agg_one_idx, t_uindex agg_two_idx, t_float64 agg_one_weight,
+    t_float64 agg_two_weight)
+    : m_name(aggname)
+    , m_disp_name(disp_aggname)
+    , m_agg(agg)
+    , m_agg_one_idx(agg_one_idx)
+    , m_agg_two_idx(agg_two_idx)
+    , m_agg_one_weight(agg_one_weight)
+    , m_agg_two_weight(agg_two_weight)
+    , m_kernel(0)
 
 {
 }
 
-t_aggspec::~t_aggspec()
-{
-}
+t_aggspec::~t_aggspec() {}
 
 t_str
 t_aggspec::name() const
@@ -398,10 +402,8 @@ t_aggspec::get_output_specs(const t_schema& schema) const
         case AGGTYPE_MUL:
         case AGGTYPE_SUM_NOT_NULL:
         {
-            t_dtype coltype =
-                schema.get_dtype(m_dependencies[0].name());
-            return mk_col_name_type_vec(
-                name(), get_simple_accumulator_type(coltype));
+            t_dtype coltype = schema.get_dtype(m_dependencies[0].name());
+            return mk_col_name_type_vec(name(), get_simple_accumulator_type(coltype));
         }
         case AGGTYPE_ANY:
         case AGGTYPE_UNIQUE:
@@ -416,8 +418,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const
         case AGGTYPE_IDENTITY:
         case AGGTYPE_DISTINCT_LEAF:
         {
-            t_dtype coltype =
-                schema.get_dtype(m_dependencies[0].name());
+            t_dtype coltype = schema.get_dtype(m_dependencies[0].name());
             t_col_name_type_vec rval(1);
             rval[0].m_name = name();
             rval[0].m_type = coltype;
@@ -476,8 +477,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const
 }
 
 t_col_name_type_vec
-t_aggspec::mk_col_name_type_vec(const t_str& name,
-                                t_dtype dtype) const
+t_aggspec::mk_col_name_type_vec(const t_str& name, t_dtype dtype) const
 {
     t_col_name_type_vec rval(1);
     rval[0].m_name = name;

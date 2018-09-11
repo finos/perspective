@@ -36,14 +36,23 @@ namespace perspective
 {
 
 t_lstore::t_lstore(const t_lstore_recipe& a)
-    : m_base(0), m_dirname(a.m_dirname), m_colname(a.m_colname),
-      m_fd(-1), m_capacity(a.m_capacity), m_size(0), m_alignment(a.m_alignment),
-      m_fflags(a.m_fflags), m_fmode(a.m_fmode),
-      m_creation_disposition(a.m_creation_disposition),
-      m_mprot(a.m_mprot), m_mflags(a.m_mflags),
-      m_backing_store(a.m_backing_store), m_init(false),
-      m_resize_factor(1.3), m_version(0),
-      m_from_recipe(a.m_from_recipe)
+    : m_base(0)
+    , m_dirname(a.m_dirname)
+    , m_colname(a.m_colname)
+    , m_fd(-1)
+    , m_capacity(a.m_capacity)
+    , m_size(0)
+    , m_alignment(a.m_alignment)
+    , m_fflags(a.m_fflags)
+    , m_fmode(a.m_fmode)
+    , m_creation_disposition(a.m_creation_disposition)
+    , m_mprot(a.m_mprot)
+    , m_mflags(a.m_mflags)
+    , m_backing_store(a.m_backing_store)
+    , m_init(false)
+    , m_resize_factor(1.3)
+    , m_version(0)
+    , m_from_recipe(a.m_from_recipe)
 {
     if (m_from_recipe)
     {
@@ -91,7 +100,8 @@ t_lstore::resize_mapping(t_uindex cap_new)
     t_index rcode = ftruncate(m_fd, cap_new);
     PSP_VERBOSE_ASSERT(rcode == 0, "ftruncate failed");
 
-    if (munmap(m_base, capacity()) == -1){
+    if (munmap(m_base, capacity()) == -1)
+    {
         throw;
     }
 

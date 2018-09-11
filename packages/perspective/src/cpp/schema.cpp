@@ -13,13 +13,9 @@
 namespace perspective
 {
 
-t_schema_recipe::t_schema_recipe()
-{
-}
+t_schema_recipe::t_schema_recipe() {}
 
-t_schema::t_schema()
-{
-}
+t_schema::t_schema() {}
 
 t_schema::t_schema(const t_schema_recipe& recipe)
     : t_schema(recipe.m_columns, recipe.m_types)
@@ -27,20 +23,20 @@ t_schema::t_schema(const t_schema_recipe& recipe)
 }
 
 t_schema::t_schema(const t_svec& columns, const t_dtypevec& types)
-    : m_columns(columns), m_types(types),
-      m_valid_enabled(columns.size()), m_pkeyidx(0), m_opidx(0)
+    : m_columns(columns)
+    , m_types(types)
+    , m_valid_enabled(columns.size())
+    , m_pkeyidx(0)
+    , m_opidx(0)
 {
-    PSP_VERBOSE_ASSERT(columns.size() == types.size(),
-                       "Size mismatch");
+    PSP_VERBOSE_ASSERT(columns.size() == types.size(), "Size mismatch");
 
     t_bool pkey_found = false;
     t_bool op_found = false;
 
     t_str pkey_str("psp_pkey");
     t_str op_str("psp_op");
-    for (t_svec::size_type idx = 0, loop_end = types.size();
-         idx < loop_end;
-         ++idx)
+    for (t_svec::size_type idx = 0, loop_end = types.size(); idx < loop_end; ++idx)
     {
         m_colidx_map[columns[idx]] = idx;
         m_coldt_map[columns[idx]] = types[idx];
@@ -79,8 +75,7 @@ t_schema::get_colidx(const t_str& colname) const
     auto iter = m_colidx_map.find(colname);
     if (iter == m_colidx_map.end())
     {
-        std::cout << "Column " << colname
-                  << " does not exist in schema." << std::endl;
+        std::cout << "Column " << colname << " does not exist in schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT("");
     }
     return iter->second;
@@ -92,8 +87,7 @@ t_schema::get_dtype(const t_str& colname) const
     auto iter = m_coldt_map.find(colname);
     if (iter == m_coldt_map.end())
     {
-        std::cout << "Column " << colname
-                  << " does not exist in schema." << std::endl;
+        std::cout << "Column " << colname << " does not exist in schema." << std::endl;
         PSP_COMPLAIN_AND_ABORT("");
     }
     return iter->second;
@@ -108,8 +102,8 @@ t_schema::is_pkey() const
 t_bool
 t_schema::operator==(const t_schema& rhs) const
 {
-    return m_columns == rhs.m_columns && m_types == rhs.m_types &&
-           m_valid_enabled == rhs.m_valid_enabled;
+    return m_columns == rhs.m_columns && m_types == rhs.m_types
+        && m_valid_enabled == rhs.m_valid_enabled;
 }
 
 void
@@ -167,8 +161,7 @@ t_table_static_ctx
 t_schema::get_table_context() const
 {
     t_table_static_ctx rv;
-    for (size_t idx = 0, loop_end = m_columns.size(); idx < loop_end;
-         ++idx)
+    for (size_t idx = 0, loop_end = m_columns.size(); idx < loop_end; ++idx)
     {
         t_column_static_ctx v;
         v.m_colname = m_columns[idx];
@@ -199,13 +192,12 @@ operator<<(std::ostream& os, const perspective::t_schema& s)
     const t_dtypevec& types = s.types();
 
     os << "t_schema<\n";
-    for (size_t idx = 0, loop_end = cols.size(); idx < loop_end;
-         ++idx)
+    for (size_t idx = 0, loop_end = cols.size(); idx < loop_end; ++idx)
     {
-        os << "\t" << idx << ". " << cols[idx] << ", "
-           << get_dtype_descr(types[idx]) << std::endl;
+        os << "\t" << idx << ". " << cols[idx] << ", " << get_dtype_descr(types[idx])
+           << std::endl;
     }
     os << ">\n";
     return os;
 }
-}
+} // namespace std

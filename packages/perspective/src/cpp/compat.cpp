@@ -27,12 +27,12 @@ file_size_pair(t_handle h)
     return t_szpair(upper32(sz), lower32(sz));
 }
 
-t_rfmapping::t_rfmapping()
-{
-}
+t_rfmapping::t_rfmapping() {}
 
 t_rfmapping::t_rfmapping(t_handle fd, void* base, t_uindex size)
-    : m_fd(fd), m_base(base), m_size(size)
+    : m_fd(fd)
+    , m_base(base)
+    , m_size(size)
 {
 }
 

@@ -44,8 +44,7 @@ get_dominant(t_tscalvec& values)
     t_index dcount = 1;
     t_index count = 1;
 
-    for (t_index idx = 1, loop_end = values.size(); idx < loop_end;
-         ++idx)
+    for (t_index idx = 1, loop_end = values.size(); idx < loop_end; ++idx)
     {
         const t_tscalar& prev = values[idx - 1];
         const t_tscalar& curr = values[idx];
@@ -55,8 +54,7 @@ get_dominant(t_tscalvec& values)
             ++count;
         }
 
-        if ((idx + 1) == static_cast<t_index>(values.size()) ||
-            curr != prev)
+        if ((idx + 1) == static_cast<t_index>(values.size()) || curr != prev)
         {
             if (count > dcount)
             {
@@ -71,33 +69,34 @@ get_dominant(t_tscalvec& values)
     return delem;
 }
 
-t_tree_unify_rec::t_tree_unify_rec(t_uindex sptidx,
-                                   t_uindex daggidx,
-                                   t_uindex saggidx,
-                                   t_uindex nstrands)
-    : m_sptidx(sptidx), m_daggidx(daggidx), m_saggidx(saggidx),
-      m_nstrands(nstrands)
+t_tree_unify_rec::t_tree_unify_rec(
+    t_uindex sptidx, t_uindex daggidx, t_uindex saggidx, t_uindex nstrands)
+    : m_sptidx(sptidx)
+    , m_daggidx(daggidx)
+    , m_saggidx(saggidx)
+    , m_nstrands(nstrands)
 {
 }
 
-t_stree::t_stree(const t_pivotvec& pivots,
-                 const t_aggspecvec& aggspecs,
-                 const t_schema& schema,
-                 const t_config& cfg)
-    : m_pivots(pivots), m_init(false), m_curidx(1),
-      m_aggspecs(aggspecs), m_schema(schema), m_cur_aggidx(1),
-      m_dotcount(0), m_minmax(aggspecs.size()), m_has_delta(false)
+t_stree::t_stree(const t_pivotvec& pivots, const t_aggspecvec& aggspecs, const t_schema& schema,
+    const t_config& cfg)
+    : m_pivots(pivots)
+    , m_init(false)
+    , m_curidx(1)
+    , m_aggspecs(aggspecs)
+    , m_schema(schema)
+    , m_cur_aggidx(1)
+    , m_dotcount(0)
+    , m_minmax(aggspecs.size())
+    , m_has_delta(false)
 {
     auto g_agg_str = cfg.get_grand_agg_str();
-    m_grand_agg_str =
-        g_agg_str.empty() ? "Grand Aggregate" : g_agg_str;
+    m_grand_agg_str = g_agg_str.empty() ? "Grand Aggregate" : g_agg_str;
 }
 
 t_stree::~t_stree()
 {
-    for (t_sidxmap::iterator iter = m_smap.begin();
-         iter != m_smap.end();
-         ++iter)
+    for (t_sidxmap::iterator iter = m_smap.begin(); iter != m_smap.end(); ++iter)
     {
         free(const_cast<char*>(iter->first));
     }
@@ -124,8 +123,7 @@ t_stree::init()
     m_idxpkey = std::make_shared<t_idxpkey>();
     m_idxleaf = std::make_shared<t_idxleaf>();
 
-    t_tscalar value =
-        m_symtable.get_interned_tscalar(m_grand_agg_str.c_str());
+    t_tscalar value = m_symtable.get_interned_tscalar(m_grand_agg_str.c_str());
     t_tnode node(0, root_pidx(), value, 0, value, 1, 0);
     m_nodes->insert(node);
 
@@ -152,11 +150,9 @@ t_stree::init()
 
     m_aggcols = t_colcptrvec(columns.size());
 
-    for (t_uindex idx = 0, loop_end = columns.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = columns.size(); idx < loop_end; ++idx)
     {
-        m_aggcols[idx] =
-            m_aggregates->get_const_column(columns[idx]).get();
+        m_aggcols[idx] = m_aggregates->get_const_column(columns[idx]).get();
     }
 
     m_deltas = std::make_shared<t_tcdeltas>();
@@ -168,8 +164,7 @@ t_tscalar
 t_stree::get_value(t_tvidx idx) const
 {
     iter_by_idx iter = m_nodes->get<by_idx>().find(idx);
-    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                       "Reached end iterator");
+    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(), "Reached end iterator");
     return iter->m_value;
 }
 
@@ -177,38 +172,23 @@ t_tscalar
 t_stree::get_sortby_value(t_tvidx idx) const
 {
     iter_by_idx iter = m_nodes->get<by_idx>().find(idx);
-    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                       "Reached end iterator");
+    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(), "Reached end iterator");
     return iter->m_sort_value;
 }
 
 void
-t_stree::build_strand_table_phase_1(t_tscalar pkey,
-                                    t_op op,
-                                    t_uindex idx,
-                                    t_uindex npivots,
-                                    t_uindex strand_count_idx,
-                                    t_uindex aggcolsize,
-                                    t_bool force_current_row,
-                                    const t_colcptrvec& piv_ccols,
-                                    const t_colcptrvec& piv_tcols,
-                                    const t_colcptrvec& agg_ccols,
-                                    const t_colcptrvec& agg_dcols,
-                                    t_colptrvec& piv_scols,
-                                    t_colptrvec& agg_acols,
-                                    t_column* agg_scount,
-                                    t_column* spkey,
-                                    t_uindex& insert_count,
-                                    t_bool& pivots_neq,
-                                    const t_svec& pivot_like) const
+t_stree::build_strand_table_phase_1(t_tscalar pkey, t_op op, t_uindex idx, t_uindex npivots,
+    t_uindex strand_count_idx, t_uindex aggcolsize, t_bool force_current_row,
+    const t_colcptrvec& piv_ccols, const t_colcptrvec& piv_tcols, const t_colcptrvec& agg_ccols,
+    const t_colcptrvec& agg_dcols, t_colptrvec& piv_scols, t_colptrvec& agg_acols,
+    t_column* agg_scount, t_column* spkey, t_uindex& insert_count, t_bool& pivots_neq,
+    const t_svec& pivot_like) const
 {
     pivots_neq = false;
     t_sset pivmap;
     t_bool all_eq_tt = true;
 
-    for (t_uindex pidx = 0, ploop_end = pivot_like.size();
-         pidx < ploop_end;
-         ++pidx)
+    for (t_uindex pidx = 0, ploop_end = pivot_like.size(); pidx < ploop_end; ++pidx)
     {
         const t_str& colname = pivot_like.at(pidx);
         if (pivmap.find(colname) != pivmap.end())
@@ -217,10 +197,8 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey,
         }
         pivmap.insert(colname);
         piv_scols[pidx]->push_back(piv_ccols[pidx]->get_scalar(idx));
-        const t_uint8* trans_ =
-            piv_tcols[pidx]->get_nth<t_uint8>(idx);
-        t_value_transition trans =
-            static_cast<t_value_transition>(*trans_);
+        const t_uint8* trans_ = piv_tcols[pidx]->get_nth<t_uint8>(idx);
+        t_value_transition trans = static_cast<t_value_transition>(*trans_);
         if (trans != VALUE_TRANSITION_EQ_TT)
             all_eq_tt = false;
 
@@ -236,13 +214,11 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey,
         {
             if (pivots_neq || force_current_row)
             {
-                agg_acols[aggidx]->push_back(
-                    agg_ccols[aggidx]->get_scalar(idx));
+                agg_acols[aggidx]->push_back(agg_ccols[aggidx]->get_scalar(idx));
             }
             else
             {
-                agg_acols[aggidx]->push_back(
-                    agg_dcols[aggidx]->get_scalar(idx));
+                agg_acols[aggidx]->push_back(agg_dcols[aggidx]->get_scalar(idx));
             }
         }
     }
@@ -262,10 +238,7 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey,
         else
         {
 
-            cval = npivots == 0 || !all_eq_tt || pivots_neq ||
-                           force_current_row
-                       ? 1
-                       : 0;
+            cval = npivots == 0 || !all_eq_tt || pivots_neq || force_current_row ? 1 : 0;
         }
     }
     agg_scount->push_back<t_int8>(cval);
@@ -275,24 +248,14 @@ t_stree::build_strand_table_phase_1(t_tscalar pkey,
 }
 
 void
-t_stree::build_strand_table_phase_2(t_tscalar pkey,
-                                    t_uindex idx,
-                                    t_uindex npivots,
-                                    t_uindex strand_count_idx,
-                                    t_uindex aggcolsize,
-                                    const t_colcptrvec& piv_pcols,
-                                    const t_colcptrvec& agg_pcols,
-                                    t_colptrvec& piv_scols,
-                                    t_colptrvec& agg_acols,
-                                    t_column* agg_scount,
-                                    t_column* spkey,
-                                    t_uindex& insert_count,
-                                    const t_svec& pivot_like) const
+t_stree::build_strand_table_phase_2(t_tscalar pkey, t_uindex idx, t_uindex npivots,
+    t_uindex strand_count_idx, t_uindex aggcolsize, const t_colcptrvec& piv_pcols,
+    const t_colcptrvec& agg_pcols, t_colptrvec& piv_scols, t_colptrvec& agg_acols,
+    t_column* agg_scount, t_column* spkey, t_uindex& insert_count,
+    const t_svec& pivot_like) const
 {
     t_sset pivmap;
-    for (t_uindex pidx = 0, ploop_end = pivot_like.size();
-         pidx < ploop_end;
-         ++pidx)
+    for (t_uindex pidx = 0, ploop_end = pivot_like.size(); pidx < ploop_end; ++pidx)
     {
         const t_str& colname = pivot_like.at(pidx);
         if (pivmap.find(colname) != pivmap.end())
@@ -307,8 +270,7 @@ t_stree::build_strand_table_phase_2(t_tscalar pkey,
     {
         if (aggidx != strand_count_idx)
         {
-            agg_acols[aggidx]->push_back(
-                agg_pcols[aggidx]->get_scalar(idx).negate());
+            agg_acols[aggidx]->push_back(agg_pcols[aggidx]->get_scalar(idx).negate());
         }
     }
 
@@ -318,9 +280,8 @@ t_stree::build_strand_table_phase_2(t_tscalar pkey,
 }
 
 t_build_strand_table_common_rval
-t_stree::build_strand_table_common(const t_table& flattened,
-                                   const t_aggspecvec& aggspecs,
-                                   const t_config& config) const
+t_stree::build_strand_table_common(
+    const t_table& flattened, const t_aggspecvec& aggspecs, const t_config& config) const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -338,8 +299,7 @@ t_stree::build_strand_table_common(const t_table& flattened,
             if (sschema_colset.find(cname) == sschema_colset.end())
             {
                 rv.m_pivot_like_columns.push_back(cname);
-                rv.m_strand_schema.add_column(
-                    cname, rv.m_flattened_schema.get_dtype(cname));
+                rv.m_strand_schema.add_column(cname, rv.m_flattened_schema.get_dtype(cname));
                 sschema_colset.insert(cname);
             }
         };
@@ -360,14 +320,12 @@ t_stree::build_strand_table_common(const t_table& flattened,
                 const t_str& depname = dep.name();
                 aggcolset.insert(depname);
 
-                if (aggspec.is_non_delta() &&
-                    sschema_colset.find(depname) ==
-                        sschema_colset.end())
+                if (aggspec.is_non_delta()
+                    && sschema_colset.find(depname) == sschema_colset.end())
                 {
                     rv.m_pivot_like_columns.push_back(depname);
                     rv.m_strand_schema.add_column(
-                        depname,
-                        rv.m_flattened_schema.get_dtype(depname));
+                        depname, rv.m_flattened_schema.get_dtype(depname));
                     sschema_colset.insert(depname);
                 }
             }
@@ -376,13 +334,11 @@ t_stree::build_strand_table_common(const t_table& flattened,
 
     rv.m_npivotlike = sschema_colset.size();
     rv.m_strand_schema.add_column(
-        "psp_pkey",
-        flattened.get_const_column("psp_pkey")->get_dtype());
+        "psp_pkey", flattened.get_const_column("psp_pkey")->get_dtype());
 
     for (const auto& aggcol : aggcolset)
     {
-        rv.m_aggschema.add_column(
-            aggcol, rv.m_flattened_schema.get_dtype(aggcol));
+        rv.m_aggschema.add_column(aggcol, rv.m_flattened_schema.get_dtype(aggcol));
     }
 
     rv.m_aggschema.add_column("psp_strand_count", DTYPE_INT8);
@@ -392,13 +348,9 @@ t_stree::build_strand_table_common(const t_table& flattened,
 // can contain additional rows
 // notably pivot changed rows will be added
 std::pair<t_table_sptr, t_table_sptr>
-t_stree::build_strand_table(const t_table& flattened,
-                            const t_table& delta,
-                            const t_table& prev,
-                            const t_table& current,
-                            const t_table& transitions,
-                            const t_aggspecvec& aggspecs,
-                            const t_config& config) const
+t_stree::build_strand_table(const t_table& flattened, const t_table& delta, const t_table& prev,
+    const t_table& current, const t_table& transitions, const t_aggspecvec& aggspecs,
+    const t_config& config) const
 {
 
     PSP_TRACE_SENTINEL();
@@ -407,8 +359,7 @@ t_stree::build_strand_table(const t_table& flattened,
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 
     // strand table
-    t_table_sptr strands =
-        std::make_shared<t_table>(rv.m_strand_schema);
+    t_table_sptr strands = std::make_shared<t_table>(rv.m_strand_schema);
     strands->init();
 
     // strand table
@@ -456,8 +407,7 @@ t_stree::build_strand_table(const t_table& flattened,
         else
         {
             agg_dcols[aggidx] = delta.get_const_column(aggcol).get();
-            agg_ccols[aggidx] =
-                current.get_const_column(aggcol).get();
+            agg_ccols[aggidx] = current.get_const_column(aggcol).get();
             agg_pcols[aggidx] = prev.get_const_column(aggcol).get();
         }
 
@@ -480,9 +430,7 @@ t_stree::build_strand_table(const t_table& flattened,
 
     if (has_filters)
     {
-        for (t_uindex idx = 0, loop_end = flattened.size();
-             idx < loop_end;
-             ++idx)
+        for (t_uindex idx = 0, loop_end = flattened.size(); idx < loop_end; ++idx)
         {
             t_bool filter_prev = msk_prev.get(idx);
             t_bool filter_curr = msk_curr.get(idx);
@@ -500,90 +448,40 @@ t_stree::build_strand_table(const t_table& flattened,
             else if (!filter_prev && filter_curr)
             {
                 // apply current row
-                build_strand_table_phase_1(pkey,
-                                           op,
-                                           idx,
-                                           rv.m_pivsize,
-                                           strand_count_idx,
-                                           aggcolsize,
-                                           true,
-                                           piv_ccols,
-                                           piv_tcols,
-                                           agg_ccols,
-                                           agg_dcols,
-                                           piv_scols,
-                                           agg_acols,
-                                           agg_scount,
-                                           spkey,
-                                           insert_count,
-                                           pivots_neq,
-                                           rv.m_pivot_like_columns);
+                build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+                    aggcolsize, true, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
+                    agg_acols, agg_scount, spkey, insert_count, pivots_neq,
+                    rv.m_pivot_like_columns);
             }
             else if (filter_prev && !filter_curr)
             {
                 // reverse prev row
-                build_strand_table_phase_2(pkey,
-                                           idx,
-                                           rv.m_pivsize,
-                                           strand_count_idx,
-                                           aggcolsize,
-                                           piv_pcols,
-                                           agg_pcols,
-                                           piv_scols,
-                                           agg_acols,
-                                           agg_scount,
-                                           spkey,
-                                           insert_count,
-                                           rv.m_pivot_like_columns);
+                build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx,
+                    aggcolsize, piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey,
+                    insert_count, rv.m_pivot_like_columns);
             }
             else if (filter_prev && filter_curr)
             {
                 // should be handled as normal
-                build_strand_table_phase_1(pkey,
-                                           op,
-                                           idx,
-                                           rv.m_pivsize,
-                                           strand_count_idx,
-                                           aggcolsize,
-                                           false,
-                                           piv_ccols,
-                                           piv_tcols,
-                                           agg_ccols,
-                                           agg_dcols,
-                                           piv_scols,
-                                           agg_acols,
-                                           agg_scount,
-                                           spkey,
-                                           insert_count,
-                                           pivots_neq,
-                                           rv.m_pivot_like_columns);
+                build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+                    aggcolsize, false, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
+                    agg_acols, agg_scount, spkey, insert_count, pivots_neq,
+                    rv.m_pivot_like_columns);
 
                 if (op == OP_DELETE || !pivots_neq)
                 {
                     continue;
                 }
 
-                build_strand_table_phase_2(pkey,
-                                           idx,
-                                           rv.m_pivsize,
-                                           strand_count_idx,
-                                           aggcolsize,
-                                           piv_pcols,
-                                           agg_pcols,
-                                           piv_scols,
-                                           agg_acols,
-                                           agg_scount,
-                                           spkey,
-                                           insert_count,
-                                           rv.m_pivot_like_columns);
+                build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx,
+                    aggcolsize, piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey,
+                    insert_count, rv.m_pivot_like_columns);
             }
         }
     }
     else
     {
-        for (t_uindex idx = 0, loop_end = flattened.size();
-             idx < loop_end;
-             ++idx)
+        for (t_uindex idx = 0, loop_end = flattened.size(); idx < loop_end; ++idx)
         {
 
             t_tscalar pkey = pkey_col->get_scalar(idx);
@@ -591,43 +489,19 @@ t_stree::build_strand_table(const t_table& flattened,
             t_op op = static_cast<t_op>(op_);
             t_bool pivots_neq;
 
-            build_strand_table_phase_1(pkey,
-                                       op,
-                                       idx,
-                                       rv.m_pivsize,
-                                       strand_count_idx,
-                                       aggcolsize,
-                                       false,
-                                       piv_ccols,
-                                       piv_tcols,
-                                       agg_ccols,
-                                       agg_dcols,
-                                       piv_scols,
-                                       agg_acols,
-                                       agg_scount,
-                                       spkey,
-                                       insert_count,
-                                       pivots_neq,
-                                       rv.m_pivot_like_columns);
+            build_strand_table_phase_1(pkey, op, idx, rv.m_pivsize, strand_count_idx,
+                aggcolsize, false, piv_ccols, piv_tcols, agg_ccols, agg_dcols, piv_scols,
+                agg_acols, agg_scount, spkey, insert_count, pivots_neq,
+                rv.m_pivot_like_columns);
 
             if (op == OP_DELETE || !pivots_neq)
             {
                 continue;
             }
 
-            build_strand_table_phase_2(pkey,
-                                       idx,
-                                       rv.m_pivsize,
-                                       strand_count_idx,
-                                       aggcolsize,
-                                       piv_pcols,
-                                       agg_pcols,
-                                       piv_scols,
-                                       agg_acols,
-                                       agg_scount,
-                                       spkey,
-                                       insert_count,
-                                       rv.m_pivot_like_columns);
+            build_strand_table_phase_2(pkey, idx, rv.m_pivsize, strand_count_idx, aggcolsize,
+                piv_pcols, agg_pcols, piv_scols, agg_acols, agg_scount, spkey, insert_count,
+                rv.m_pivot_like_columns);
         }
     }
 
@@ -642,9 +516,8 @@ t_stree::build_strand_table(const t_table& flattened,
 // can contain additional rows
 // notably pivot changed rows will be added
 std::pair<t_table_sptr, t_table_sptr>
-t_stree::build_strand_table(const t_table& flattened,
-                            const t_aggspecvec& aggspecs,
-                            const t_config& config) const
+t_stree::build_strand_table(
+    const t_table& flattened, const t_aggspecvec& aggspecs, const t_config& config) const
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -652,8 +525,7 @@ t_stree::build_strand_table(const t_table& flattened,
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 
     // strand table
-    t_table_sptr strands =
-        std::make_shared<t_table>(rv.m_strand_schema);
+    t_table_sptr strands = std::make_shared<t_table>(rv.m_strand_schema);
     strands->init();
 
     // strand table
@@ -693,8 +565,7 @@ t_stree::build_strand_table(const t_table& flattened,
         }
         else
         {
-            agg_fcols[aggidx] =
-                flattened.get_const_column(aggcol).get();
+            agg_fcols[aggidx] = flattened.get_const_column(aggcol).get();
         }
 
         agg_acols[aggidx] = aggs->get_column(aggcol).get();
@@ -713,9 +584,7 @@ t_stree::build_strand_table(const t_table& flattened,
 
     t_bool has_filters = config.has_filters();
 
-    for (t_uindex idx = 0, loop_end = flattened.size();
-         idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = flattened.size(); idx < loop_end; ++idx)
     {
         t_bool filter = !has_filters || msk.get(idx);
         t_tscalar pkey = pkey_col->get_scalar(idx);
@@ -728,21 +597,17 @@ t_stree::build_strand_table(const t_table& flattened,
             continue;
         }
 
-        for (t_uindex pidx = 0,
-                      ploop_end = rv.m_pivot_like_columns.size();
-             pidx < ploop_end;
+        for (t_uindex pidx = 0, ploop_end = rv.m_pivot_like_columns.size(); pidx < ploop_end;
              ++pidx)
         {
-            piv_scols[pidx]->push_back(
-                piv_fcols[pidx]->get_scalar(idx));
+            piv_scols[pidx]->push_back(piv_fcols[pidx]->get_scalar(idx));
         }
 
         for (t_uindex aggidx = 0; aggidx < aggcolsize; ++aggidx)
         {
             if (aggidx != strand_count_idx)
             {
-                agg_acols[aggidx]->push_back(
-                    agg_fcols[aggidx]->get_scalar(idx));
+                agg_acols[aggidx]->push_back(agg_fcols[aggidx]->get_scalar(idx));
             }
         }
 
@@ -763,18 +628,13 @@ t_bool
 t_stree::pivots_changed(t_value_transition t) const
 {
 
-    return t == VALUE_TRANSITION_NEQ_TF ||
-           t == VALUE_TRANSITION_NVEQ_FT ||
-           t == VALUE_TRANSITION_NEQ_TT;
+    return t == VALUE_TRANSITION_NEQ_TF || t == VALUE_TRANSITION_NVEQ_FT
+        || t == VALUE_TRANSITION_NEQ_TT;
 }
 
 void
-t_stree::populate_pkey_idx(const t_dtree_ctx& ctx,
-                           const t_dtree& dtree,
-                           t_uindex dptidx,
-                           t_uindex sptidx,
-                           t_uindex ndepth,
-                           t_idxpkey& new_idx_pkey)
+t_stree::populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uindex dptidx,
+    t_uindex sptidx, t_uindex ndepth, t_idxpkey& new_idx_pkey)
 {
     if (ndepth == dtree.last_level())
     {
@@ -782,15 +642,12 @@ t_stree::populate_pkey_idx(const t_dtree_ctx& ctx,
         auto strand_count_col = ctx.get_strand_count_col();
         auto liters = ctx.get_leaf_iterators(dptidx);
 
-        for (auto lfiter = liters.first; lfiter != liters.second;
-             ++lfiter)
+        for (auto lfiter = liters.first; lfiter != liters.second; ++lfiter)
         {
 
             auto lfidx = *lfiter;
-            auto pkey = m_symtable.get_interned_tscalar(
-                pkey_col->get_scalar(lfidx));
-            auto strand_count =
-                *(strand_count_col->get_nth<t_int8>(lfidx));
+            auto pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(lfidx));
+            auto strand_count = *(strand_count_col->get_nth<t_int8>(lfidx));
 
             if (strand_count > 0)
             {
@@ -814,8 +671,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
     m_newleaves.clear();
     m_tree_unification_records.clear();
 
-    const t_col_csptr scount =
-        ctx.get_aggtable().get_const_column("psp_strand_count_sum");
+    const t_col_csptr scount = ctx.get_aggtable().get_const_column("psp_strand_count_sum");
 
     const t_dtree& dtree = ctx.get_tree();
 
@@ -828,8 +684,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
     // update root
     auto root_iter = m_nodes->get<by_idx>().find(0);
     auto root_node = *root_iter;
-    t_index root_nstrands =
-        *(scount->get_nth<t_index>(0)) + root_node.m_nstrands;
+    t_index root_nstrands = *(scount->get_nth<t_index>(0)) + root_node.m_nstrands;
     root_node.set_nstrands(root_nstrands);
     m_nodes->get<by_idx>().replace(root_iter, root_node);
 
@@ -845,29 +700,25 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
 
         if (dptidx == 0)
         {
-            populate_pkey_idx(
-                ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
+            populate_pkey_idx(ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
             continue;
         }
 
         t_uindex p_dptidx = dtree.get_parent(dptidx);
         t_uindex p_sptidx = nmap[p_dptidx];
 
-        t_tscalar value = m_symtable.get_interned_tscalar(
-            dtree.get_value(filter, dptidx));
+        t_tscalar value = m_symtable.get_interned_tscalar(dtree.get_value(filter, dptidx));
 
-        t_tscalar sortby_value = m_symtable.get_interned_tscalar(
-            dtree.get_sortby_value(filter, dptidx));
-		
+        t_tscalar sortby_value
+            = m_symtable.get_interned_tscalar(dtree.get_sortby_value(filter, dptidx));
+
         t_uindex src_ridx = dptidx;
 
-        auto iter = m_nodes->get<by_pidx_hash>().find(
-            boost::make_tuple(p_sptidx, value));
+        auto iter = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(p_sptidx, value));
 
         auto nstrands = *(scount->get_nth<t_int64>(dptidx));
 
-        if (iter == m_nodes->get<by_pidx_hash>().end() &&
-            nstrands < 0)
+        if (iter == m_nodes->get<by_pidx_hash>().end() && nstrands < 0)
         {
             continue;
         }
@@ -886,13 +737,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
 
             t_uindex dst_ridx = gen_aggidx();
 
-            t_tnode node(sptidx,
-                         p_sptidx,
-                         value,
-                         ndepth,
-                         sortby_value,
-                         nstrands,
-                         dst_ridx);
+            t_tnode node(sptidx, p_sptidx, value, ndepth, sortby_value, nstrands, dst_ridx);
 
             m_newids.insert(sptidx);
 
@@ -905,13 +750,10 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
             if (!insert_pair.second)
             {
                 auto failed_because = *(insert_pair.first);
-                std::cout << "failed because of " << failed_because
-                          << std::endl;
+                std::cout << "failed because of " << failed_because << std::endl;
             }
-            PSP_VERBOSE_ASSERT(insert_pair.second,
-                               "Failed to insert node");
-            t_tree_unify_rec unif_rec(
-                sptidx, src_ridx, dst_ridx, nstrands);
+            PSP_VERBOSE_ASSERT(insert_pair.second, "Failed to insert node");
+            t_tree_unify_rec unif_rec(sptidx, src_ridx, dst_ridx, nstrands);
             m_tree_unification_records.push_back(unif_rec);
         }
         else
@@ -926,20 +768,17 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx)
 
             nstrands = node.m_nstrands + nstrands;
 
-            t_tree_unify_rec unif_rec(
-                sptidx, src_ridx, dst_ridx, nstrands);
+            t_tree_unify_rec unif_rec(sptidx, src_ridx, dst_ridx, nstrands);
             m_tree_unification_records.push_back(unif_rec);
 
             sptidx = iter->m_idx;
             node.set_nstrands(nstrands);
 
-            t_bool replaced =
-                m_nodes->get<by_pidx_hash>().replace(iter, node);
+            t_bool replaced = m_nodes->get<by_pidx_hash>().replace(iter, node);
             PSP_VERBOSE_ASSERT(replaced, "Failed to replace");
         }
 
-        populate_pkey_idx(
-            ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
+        populate_pkey_idx(ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
         nmap[dptidx] = sptidx;
     }
 
@@ -964,8 +803,7 @@ t_stree::mark_zero_desc()
     for (auto z : zeros)
     {
         auto d = get_descendents(z);
-        std::copy(
-            d.begin(), d.end(), std::inserter(z_desc, z_desc.end()));
+        std::copy(d.begin(), d.end(), std::inserter(z_desc, z_desc.end()));
     }
 
     for (auto n : z_desc)
@@ -978,8 +816,7 @@ t_stree::mark_zero_desc()
 }
 
 void
-t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
-                                 const t_gstate& gstate)
+t_stree::update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate)
 {
     const t_table& src_aggtable = ctx.get_aggtable();
 
@@ -988,72 +825,66 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
 
     for (auto colname : aggschema.m_columns)
     {
-        agg_update_info.m_src.push_back(
-            src_aggtable.get_const_column(colname).get());
-        agg_update_info.m_dst.push_back(
-            m_aggregates->get_column(colname).get());
-        agg_update_info.m_aggspecs.push_back(
-            ctx.get_aggspec(colname));
+        agg_update_info.m_src.push_back(src_aggtable.get_const_column(colname).get());
+        agg_update_info.m_dst.push_back(m_aggregates->get_column(colname).get());
+        agg_update_info.m_aggspecs.push_back(ctx.get_aggspec(colname));
     }
 
-    auto is_col_scaled_aggregate = [&]( int col_idx ) -> bool
-    {
-        int agg_type = agg_update_info.m_aggspecs[ col_idx ].agg();
+    auto is_col_scaled_aggregate = [&](int col_idx) -> bool {
+        int agg_type = agg_update_info.m_aggspecs[col_idx].agg();
 
-        return agg_type == AGGTYPE_SCALED_DIV
-            || agg_type == AGGTYPE_SCALED_ADD
+        return agg_type == AGGTYPE_SCALED_DIV || agg_type == AGGTYPE_SCALED_ADD
             || agg_type == AGGTYPE_SCALED_MUL;
     };
 
     size_t col_cnt = aggschema.m_columns.size();
-    auto &cols_topo_sorted = agg_update_info.m_dst_topo_sorted;
+    auto& cols_topo_sorted = agg_update_info.m_dst_topo_sorted;
     cols_topo_sorted.clear();
     cols_topo_sorted.reserve(col_cnt);
 
-    static bool const enable_aggregate_reordering = true; 
-    static bool const enable_fix_double_calculation = true; 
+    static bool const enable_aggregate_reordering = true;
+    static bool const enable_fix_double_calculation = true;
 
-    std::unordered_set< t_column* > dst_visited;
-    auto push_column = [&]( size_t idx )
-    {
-        if ( enable_fix_double_calculation )
+    std::unordered_set<t_column*> dst_visited;
+    auto push_column = [&](size_t idx) {
+        if (enable_fix_double_calculation)
         {
-            t_column* dst = agg_update_info.m_dst[ idx ];
-            if ( dst_visited.find( dst ) != dst_visited.end() )
+            t_column* dst = agg_update_info.m_dst[idx];
+            if (dst_visited.find(dst) != dst_visited.end())
             {
                 return;
             }
-            dst_visited.insert( dst );
+            dst_visited.insert(dst);
         }
-        cols_topo_sorted.push_back( idx );
+        cols_topo_sorted.push_back(idx);
     };
 
-    if ( enable_aggregate_reordering )
-    { 
-    // Move scaled agg columns to the end
-    // This does not handle case where scaled aggregate depends on other scaled aggregate
-    // ( not sure if that is possible )
-    for (size_t i = 0; i < col_cnt; ++i)
+    if (enable_aggregate_reordering)
     {
-        if (!is_col_scaled_aggregate(i))
+        // Move scaled agg columns to the end
+        // This does not handle case where scaled aggregate depends on other scaled aggregate
+        // ( not sure if that is possible )
+        for (size_t i = 0; i < col_cnt; ++i)
         {
-            push_column(i);
+            if (!is_col_scaled_aggregate(i))
+            {
+                push_column(i);
+            }
         }
-    }
-    for (size_t i = 0; i < col_cnt; ++i)
-    {
-        if (is_col_scaled_aggregate(i))
+        for (size_t i = 0; i < col_cnt; ++i)
         {
-            push_column(i);
+            if (is_col_scaled_aggregate(i))
+            {
+                push_column(i);
+            }
         }
-    }
     }
     else
     {
         // If backed out, use same column order as before ( not topo sorted )
-        for ( size_t i = 0; i < col_cnt; ++i )
+        for (size_t i = 0; i < col_cnt; ++i)
         {
-            push_column( i );
+            push_column(i);
         }
     }
 
@@ -1064,12 +895,8 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
             continue;
         }
 
-        update_agg_table(r.m_sptidx,
-                         agg_update_info,
-                         r.m_daggidx,
-                         r.m_saggidx,
-                         r.m_nstrands,
-                         gstate);
+        update_agg_table(
+            r.m_sptidx, agg_update_info, r.m_daggidx, r.m_saggidx, r.m_nstrands, gstate);
     }
 }
 
@@ -1082,18 +909,14 @@ t_stree::genidx()
 t_uidxvec
 t_stree::get_children(t_uindex idx) const
 {
-    t_by_pidx_ipair iterators =
-        m_nodes->get<by_pidx>().equal_range(idx);
+    t_by_pidx_ipair iterators = m_nodes->get<by_pidx>().equal_range(idx);
 
-    t_uindex nchild =
-        std::distance(iterators.first, iterators.second);
+    t_uindex nchild = std::distance(iterators.first, iterators.second);
 
     t_uidxvec temp(nchild);
 
     t_index count = 0;
-    for (iter_by_pidx iter = iterators.first;
-         iter != iterators.second;
-         ++iter)
+    for (iter_by_pidx iter = iterators.first; iter != iterators.second; ++iter)
     {
         temp[count] = iter->m_idx;
         ++count;
@@ -1147,12 +970,8 @@ t_stree::gen_aggidx()
 }
 
 void
-t_stree::update_agg_table(t_uindex nidx,
-                          t_agg_update_info& info,
-                          t_uindex src_ridx,
-                          t_uindex dst_ridx,
-                          t_index nstrands,
-                          const t_gstate& gstate)
+t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_ridx,
+    t_uindex dst_ridx, t_index nstrands, const t_gstate& gstate)
 {
     static bool const enable_sticky_nan_fix = true;
     for (t_uindex idx : info.m_dst_topo_sorted)
@@ -1173,9 +992,11 @@ t_stree::update_agg_table(t_uindex nidx,
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 new_value.set(dst_scalar.add(src_scalar));
-                if( enable_sticky_nan_fix && old_value.is_nan() ) // is_nan returns false for non-float types
+                if (enable_sticky_nan_fix
+                    && old_value.is_nan()) // is_nan returns false for non-float types
                 {
-                    // if we previously had a NaN, add can't make it finite again; recalculate entire sum in case it is now finite
+                    // if we previously had a NaN, add can't make it finite again; recalculate
+                    // entire sum in case it is now finite
                     auto pkeys = get_pkeys(nidx);
                     t_f64vec values;
                     gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
@@ -1203,15 +1024,12 @@ t_stree::update_agg_table(t_uindex nidx,
                 auto pkeys = get_pkeys(nidx);
                 t_f64vec values;
 
-                gstate.read_column(
-                    spec.get_dependencies()[0].name(), pkeys, values, false);
+                gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values, false);
 
                 auto nr = std::accumulate(values.begin(), values.end(), t_float64(0));
                 t_float64 dr = values.size();
 
-
-                t_f64pair* dst_pair =
-                    dst->get_nth<t_f64pair>(dst_ridx);
+                t_f64pair* dst_pair = dst->get_nth<t_f64pair>(dst_ridx);
 
                 old_value.set(dst_pair->first / dst_pair->second);
 
@@ -1230,25 +1048,18 @@ t_stree::update_agg_table(t_uindex nidx,
                 t_f64vec values;
                 t_f64vec weights;
 
-                gstate.read_column(
-                    spec.get_dependencies()[0].name(), pkeys, values);
+                gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
 
-                gstate.read_column(spec.get_dependencies()[1].name(),
-                                   pkeys,
-                                   weights);
+                gstate.read_column(spec.get_dependencies()[1].name(), pkeys, weights);
 
                 t_float64 init_value = 0.0;
 
-                auto nr = std::inner_product(weights.begin(),
-                                             weights.end(),
-                                             values.begin(),
-                                             init_value);
+                auto nr = std::inner_product(
+                    weights.begin(), weights.end(), values.begin(), init_value);
 
-                auto dr = std::accumulate(
-                    weights.begin(), weights.end(), t_float64(0));
+                auto dr = std::accumulate(weights.begin(), weights.end(), t_float64(0));
 
-                t_f64pair* dst_pair =
-                    dst->get_nth<t_f64pair>(dst_ridx);
+                t_f64pair* dst_pair = dst->get_nth<t_f64pair>(dst_ridx);
 
                 old_value.set(dst_pair->first / dst_pair->second);
 
@@ -1265,22 +1076,18 @@ t_stree::update_agg_table(t_uindex nidx,
                 auto pkeys = get_pkeys(nidx);
                 old_value.set(dst->get_scalar(dst_ridx));
 
-                t_bool is_unique = gstate.is_unique(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    new_value);
+                t_bool is_unique
+                    = gstate.is_unique(pkeys, spec.get_dependencies()[0].name(), new_value);
 
                 if (new_value.m_type == DTYPE_STR)
                 {
                     if (is_unique)
                     {
-                        new_value = m_symtable.get_interned_tscalar(
-                            new_value);
+                        new_value = m_symtable.get_interned_tscalar(new_value);
                     }
                     else
                     {
-                        new_value =
-                            m_symtable.get_interned_tscalar("-");
+                        new_value = m_symtable.get_interned_tscalar("-");
                     }
                     dst->set_scalar(dst_ridx, new_value);
                 }
@@ -1303,18 +1110,15 @@ t_stree::update_agg_table(t_uindex nidx,
             {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
-                gstate.apply(pkeys,
-                             spec.get_dependencies()[0].name(),
-                             new_value,
-                             [](const t_tscalar& row_value,
-                                t_tscalar& output) {
-                                 if (row_value)
-                                 {
-                                     output.set(row_value);
-                                     return true;
-                                 }
-                                 return false;
-                             });
+                gstate.apply(pkeys, spec.get_dependencies()[0].name(), new_value,
+                    [](const t_tscalar& row_value, t_tscalar& output) {
+                        if (row_value)
+                        {
+                            output.set(row_value);
+                            return true;
+                        }
+                        return false;
+                    });
 
                 dst->set_scalar(dst_ridx, new_value);
             }
@@ -1324,11 +1128,8 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [](t_tscalvec& values) {
                         if (values.size() == 0)
                         {
                             return t_tscalar();
@@ -1339,11 +1140,9 @@ t_stree::update_agg_table(t_uindex nidx,
                         }
                         else
                         {
-                            t_tscalvec::iterator middle =
-                                values.begin() + (values.size() / 2);
+                            t_tscalvec::iterator middle = values.begin() + (values.size() / 2);
 
-                            std::nth_element(
-                                values.begin(), middle, values.end());
+                            std::nth_element(values.begin(), middle, values.end());
 
                             return *middle;
                         }
@@ -1357,11 +1156,8 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [this](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [this](t_tscalvec& values) {
                         t_tscalset vset;
                         for (const auto& v : values)
                         {
@@ -1369,15 +1165,12 @@ t_stree::update_agg_table(t_uindex nidx,
                         }
 
                         std::stringstream ss;
-                        for (t_tscalset::const_iterator iter =
-                                 vset.begin();
-                             iter != vset.end();
+                        for (t_tscalset::const_iterator iter = vset.begin(); iter != vset.end();
                              ++iter)
                         {
                             ss << *iter << ", ";
                         }
-                        return m_symtable.get_interned_tscalar(
-                            ss.str().c_str());
+                        return m_symtable.get_interned_tscalar(ss.str().c_str());
                     }));
 
                 dst->set_scalar(dst_ridx, new_value);
@@ -1385,18 +1178,14 @@ t_stree::update_agg_table(t_uindex nidx,
             break;
             case AGGTYPE_SCALED_DIV:
             {
-                const t_column* src_1 =
-                    info.m_dst[spec.get_agg_one_idx()];
-                const t_column* src_2 =
-                    info.m_dst[spec.get_agg_two_idx()];
+                const t_column* src_1 = info.m_dst[spec.get_agg_one_idx()];
+                const t_column* src_2 = info.m_dst[spec.get_agg_two_idx()];
 
                 t_column* dst = info.m_dst[idx];
                 old_value.set(dst->get_scalar(dst_ridx));
 
-                t_float64 agg1 =
-                    src_1->get_scalar(dst_ridx).to_double();
-                t_float64 agg2 =
-                    src_2->get_scalar(dst_ridx).to_double();
+                t_float64 agg1 = src_1->get_scalar(dst_ridx).to_double();
+                t_float64 agg2 = src_2->get_scalar(dst_ridx).to_double();
 
                 t_float64 w1 = spec.get_agg_one_weight();
                 t_float64 w2 = spec.get_agg_two_weight();
@@ -1410,19 +1199,15 @@ t_stree::update_agg_table(t_uindex nidx,
             case AGGTYPE_SCALED_ADD:
             {
 
-                const t_column* src_1 =
-                    info.m_dst[spec.get_agg_one_idx()];
-                const t_column* src_2 =
-                    info.m_dst[spec.get_agg_two_idx()];
+                const t_column* src_1 = info.m_dst[spec.get_agg_one_idx()];
+                const t_column* src_2 = info.m_dst[spec.get_agg_two_idx()];
 
                 t_column* dst = info.m_dst[idx];
                 old_value.set(dst->get_scalar(dst_ridx));
 
-                t_float64 v =
-                    (src_1->get_scalar(dst_ridx).to_double() *
-                     spec.get_agg_one_weight()) +
-                    (src_2->get_scalar(dst_ridx).to_double() *
-                     spec.get_agg_two_weight());
+                t_float64 v
+                    = (src_1->get_scalar(dst_ridx).to_double() * spec.get_agg_one_weight())
+                    + (src_2->get_scalar(dst_ridx).to_double() * spec.get_agg_two_weight());
 
                 new_value.set(v);
                 dst->set_scalar(dst_ridx, new_value);
@@ -1430,19 +1215,15 @@ t_stree::update_agg_table(t_uindex nidx,
             break;
             case AGGTYPE_SCALED_MUL:
             {
-                const t_column* src_1 =
-                    info.m_dst[spec.get_agg_one_idx()];
-                const t_column* src_2 =
-                    info.m_dst[spec.get_agg_two_idx()];
+                const t_column* src_1 = info.m_dst[spec.get_agg_one_idx()];
+                const t_column* src_2 = info.m_dst[spec.get_agg_two_idx()];
 
                 t_column* dst = info.m_dst[idx];
                 old_value.set(dst->get_scalar(dst_ridx));
 
-                t_float64 v =
-                    (src_1->get_scalar(dst_ridx).to_double() *
-                     spec.get_agg_one_weight()) *
-                    (src_2->get_scalar(dst_ridx).to_double() *
-                     spec.get_agg_two_weight());
+                t_float64 v
+                    = (src_1->get_scalar(dst_ridx).to_double() * spec.get_agg_one_weight())
+                    * (src_2->get_scalar(dst_ridx).to_double() * spec.get_agg_two_weight());
 
                 new_value.set(v);
                 dst->set_scalar(dst_ridx, new_value);
@@ -1453,13 +1234,9 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(pkeys,
                     spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
-                        return get_dominant(values);
-                    }));
+                    [](t_tscalvec& values) { return get_dominant(values); }));
 
                 dst->set_scalar(dst_ridx, new_value);
             }
@@ -1477,11 +1254,8 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [](t_tscalvec& values) {
                         t_tscalar rval;
                         rval.set(true);
 
@@ -1551,11 +1325,8 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [](t_tscalvec& values) {
                         if (values.empty())
                         {
                             return mknone();
@@ -1580,11 +1351,8 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [](t_tscalvec& values) {
                         if (values.empty())
                         {
                             return mknone();
@@ -1606,11 +1374,8 @@ t_stree::update_agg_table(t_uindex nidx,
             {
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
-                new_value.set(gstate.reduce<
-                              std::function<t_tscalar(t_tscalvec&)>>(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    [](t_tscalvec& values) {
+                new_value.set(gstate.reduce<std::function<t_tscalar(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [](t_tscalvec& values) {
                         if (values.size() == 0)
                         {
                             return t_tscalar();
@@ -1622,9 +1387,7 @@ t_stree::update_agg_table(t_uindex nidx,
                         else
                         {
                             t_tscalar v = values[0];
-                            for (t_uindex vidx = 1,
-                                          vloop_end = values.size();
-                                 vidx < vloop_end;
+                            for (t_uindex vidx = 1, vloop_end = values.size(); vidx < vloop_end;
                                  ++vidx)
                             {
                                 v = v.mul(values[vidx]);
@@ -1641,20 +1404,16 @@ t_stree::update_agg_table(t_uindex nidx,
                 old_value.set(dst->get_scalar(dst_ridx));
                 auto pkeys = get_pkeys(nidx);
 
-                new_value.set(
-                    gstate
-                        .reduce<std::function<t_uint32(t_tscalvec&)>>(
-                            pkeys,
-                            spec.get_dependencies()[0].name(),
-                            [this](t_tscalvec& values) {
-                                std::unordered_set<t_tscalar> vset;
-                                for (const auto& v : values)
-                                {
-                                    vset.insert(v);
-                                }
-                                t_uint32 rv = vset.size();
-                                return rv;
-                            }));
+                new_value.set(gstate.reduce<std::function<t_uint32(t_tscalvec&)>>(
+                    pkeys, spec.get_dependencies()[0].name(), [this](t_tscalvec& values) {
+                        std::unordered_set<t_tscalar> vset;
+                        for (const auto& v : values)
+                        {
+                            vset.insert(v);
+                        }
+                        t_uint32 rv = vset.size();
+                        return rv;
+                    }));
 
                 dst->set_scalar(dst_ridx, new_value);
             }
@@ -1664,25 +1423,21 @@ t_stree::update_agg_table(t_uindex nidx,
                 auto pkeys = get_pkeys(nidx);
                 old_value.set(dst->get_scalar(dst_ridx));
                 t_bool skip = false;
-                t_bool is_unique = gstate.is_unique(
-                    pkeys,
-                    spec.get_dependencies()[0].name(),
-                    new_value);
+                t_bool is_unique
+                    = gstate.is_unique(pkeys, spec.get_dependencies()[0].name(), new_value);
 
                 if (is_leaf(nidx) && is_unique)
                 {
                     if (new_value.m_type == DTYPE_STR)
                     {
-                        new_value = m_symtable.get_interned_tscalar(
-                            new_value);
+                        new_value = m_symtable.get_interned_tscalar(new_value);
                     }
                 }
                 else
                 {
                     if (new_value.m_type == DTYPE_STR)
                     {
-                        new_value =
-                            m_symtable.get_interned_tscalar("");
+                        new_value = m_symtable.get_interned_tscalar("");
                     }
                     else
                     {
@@ -1707,8 +1462,7 @@ t_stree::update_agg_table(t_uindex nidx,
         t_bool deltas_enabled = m_features.at(CTX_FEAT_DELTA);
         if (deltas_enabled && val_neq)
         {
-            m_deltas->insert(
-                t_tcdelta(nidx, idx, old_value, new_value));
+            m_deltas->insert(t_tcdelta(nidx, idx, old_value, new_value));
         }
 
     } // end for
@@ -1720,8 +1474,7 @@ t_stree::zero_strands() const
     auto iterators = m_nodes->get<by_nstrands>().equal_range(0);
     t_uidxvec rval;
 
-    for (auto& iter = iterators.first; iter != iterators.second;
-         ++iter)
+    for (auto& iter = iterators.first; iter != iterators.second; ++iter)
     {
         rval.push_back(iter->m_idx);
     }
@@ -1741,8 +1494,7 @@ t_stree::non_zero_ids(const t_uidxvec& zero_strands) const
 }
 
 t_uidxset
-t_stree::non_zero_ids(const t_uidxset& ptiset,
-                      const t_uidxvec& zero_strands) const
+t_stree::non_zero_ids(const t_uidxset& ptiset, const t_uidxvec& zero_strands) const
 {
     t_uidxset zeroset;
     for (auto idx : zero_strands)
@@ -1792,14 +1544,10 @@ t_stree::get_ancestry(t_uindex idx) const
 }
 
 t_index
-t_stree::get_sibling_idx(t_tvidx p_ptidx,
-                         t_index p_nchild,
-                         t_uindex c_ptidx) const
+t_stree::get_sibling_idx(t_tvidx p_ptidx, t_index p_nchild, t_uindex c_ptidx) const
 {
-    t_by_pidx_ipair iterators =
-        m_nodes->get<by_pidx>().equal_range(p_ptidx);
-    iter_by_pidx c_iter = m_nodes->project<by_pidx>(
-        m_nodes->get<by_idx>().find(c_ptidx));
+    t_by_pidx_ipair iterators = m_nodes->get<by_pidx>().equal_range(p_ptidx);
+    iter_by_pidx c_iter = m_nodes->project<by_pidx>(m_nodes->get<by_idx>().find(c_ptidx));
     return std::distance(iterators.first, c_iter);
 }
 
@@ -1807,8 +1555,7 @@ t_uindex
 t_stree::get_aggidx(t_uindex idx) const
 {
     iter_by_idx iter = m_nodes->get<by_idx>().find(idx);
-    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                       "Failed in get_aggidx");
+    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(), "Failed in get_aggidx");
     return iter->m_aggidx;
 }
 
@@ -1828,8 +1575,7 @@ t_stree::t_tnode
 t_stree::get_node(t_uindex idx) const
 {
     iter_by_idx iter = m_nodes->get<by_idx>().find(idx);
-    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                       "Failed in get_node");
+    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(), "Failed in get_node");
     return *iter;
 }
 
@@ -1857,8 +1603,7 @@ t_stree::get_path(t_uindex idx, t_tscalvec& rval) const
 t_uindex
 t_stree::resolve_child(t_uindex root, const t_tscalar& datum) const
 {
-    auto iter = m_nodes->get<by_pidx_hash>().find(
-        boost::make_tuple(root, datum));
+    auto iter = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(root, datum));
 
     if (iter == m_nodes->get<by_pidx_hash>().end())
     {
@@ -1880,9 +1625,7 @@ t_stree::clear_aggregates(const t_uidxvec& indices)
         }
     }
 
-    m_agg_freelist.insert(std::end(m_agg_freelist),
-                          std::begin(indices),
-                          std::end(indices));
+    m_agg_freelist.insert(std::end(m_agg_freelist), std::begin(indices), std::end(indices));
 }
 
 void
@@ -1896,8 +1639,7 @@ t_stree::drop_zero_strands()
 
     t_uidxvec node_ids;
 
-    for (auto iter = iterators.first; iter != iterators.second;
-         ++iter)
+    for (auto iter = iterators.first; iter != iterators.second; ++iter)
     {
         if (iter->m_depth == lst)
             leaves.push_back(iter->m_idx);
@@ -1920,8 +1662,7 @@ t_stree::drop_zero_strands()
 
     auto iterators2 = m_nodes->get<by_nstrands>().equal_range(0);
 
-    m_nodes->get<by_nstrands>().erase(iterators2.first,
-                                      iterators2.second);
+    m_nodes->get<by_nstrands>().erase(iterators2.first, iterators2.second);
 }
 
 void
@@ -1934,8 +1675,7 @@ t_stree::add_pkey(t_uindex idx, t_tscalar pkey)
 void
 t_stree::remove_pkey(t_uindex idx, t_tscalar pkey)
 {
-    auto iter = m_idxpkey->get<by_idx_pkey>().find(
-        boost::make_tuple(idx, pkey));
+    auto iter = m_idxpkey->get<by_idx_pkey>().find(boost::make_tuple(idx, pkey));
 
     if (iter == m_idxpkey->get<by_idx_pkey>().end())
         return;
@@ -1953,8 +1693,7 @@ t_stree::add_leaf(t_uindex nidx, t_uindex lfidx)
 void
 t_stree::remove_leaf(t_uindex nidx, t_uindex lfidx)
 {
-    auto iter = m_idxleaf->get<by_idx_lfidx>().find(
-        boost::make_tuple(nidx, lfidx));
+    auto iter = m_idxleaf->get<by_idx_lfidx>().find(boost::make_tuple(nidx, lfidx));
 
     if (iter == m_idxleaf->get<by_idx_lfidx>().end())
         return;
@@ -2012,9 +1751,7 @@ t_stree::get_depth(t_uindex ptidx) const
 }
 
 void
-t_stree::get_drd_indices(t_uindex ridx,
-                         t_depth rel_depth,
-                         t_uidxvec& leaves) const
+t_stree::get_drd_indices(t_uindex ridx, t_depth rel_depth, t_uidxvec& leaves) const
 {
     t_ptipairvec pending;
 
@@ -2037,16 +1774,12 @@ t_stree::get_drd_indices(t_uindex ridx,
         if (head.second == edepth - 1)
         {
             auto children = get_child_idx(head.first);
-            std::copy(children.begin(),
-                      children.end(),
-                      std::back_inserter(leaves));
+            std::copy(children.begin(), children.end(), std::back_inserter(leaves));
         }
         else
         {
             auto children = get_child_idx_depth(head.first);
-            std::copy(children.begin(),
-                      children.end(),
-                      std::back_inserter(pending));
+            std::copy(children.begin(), children.end(), std::back_inserter(pending));
         }
     }
 }
@@ -2076,8 +1809,7 @@ t_stree::get_child_idx_depth(t_uindex idx) const
     t_index count = 0;
     while (iterators.first != iterators.second)
     {
-        children[count] = t_ptipair(iterators.first->m_idx,
-                                    iterators.first->m_depth);
+        children[count] = t_ptipair(iterators.first->m_idx, iterators.first->m_depth);
         ++count;
         ++iterators.first;
     }
@@ -2111,8 +1843,7 @@ t_bool
 t_stree::is_leaf(t_uindex nidx) const
 {
     auto iter = m_nodes->get<by_idx>().find(nidx);
-    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(),
-                       "Did not find node");
+    PSP_VERBOSE_ASSERT(iter != m_nodes->get<by_idx>().end(), "Did not find node");
     return iter->m_depth == last_level();
 }
 
@@ -2129,11 +1860,8 @@ t_stree::get_descendents(t_uindex nidx) const
         auto h = queue.back();
         queue.pop_back();
         auto children = get_children(h);
-        queue.insert(std::end(queue),
-                     std::begin(children),
-                     std::end(children));
-        rval.insert(
-            std::end(rval), std::begin(children), std::end(children));
+        queue.insert(std::end(queue), std::begin(children), std::end(children));
+        rval.insert(std::end(rval), std::begin(children), std::end(children));
     }
 
     return rval;
@@ -2155,8 +1883,8 @@ t_stree::resolve_path(t_uindex root, const t_tscalvec& path) const
 
     for (t_index i = path.size() - 1; i >= 0; i--)
     {
-        iter_by_pidx_hash iter = m_nodes->get<by_pidx_hash>().find(
-            boost::make_tuple(curidx, path[i]));
+        iter_by_pidx_hash iter
+            = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(curidx, path[i]));
         if (iter == m_nodes->get<by_pidx_hash>().end())
         {
             return INVALID_INDEX;
@@ -2170,43 +1898,41 @@ t_stree::resolve_path(t_uindex root, const t_tscalvec& path) const
 // aggregates should be presized to be same size
 // as agg_indices
 void
-t_stree::get_aggregates_for_sorting(t_uindex nidx,
-                        const t_idxvec& agg_indices,
-                        t_tscalvec& aggregates,
-                        t_ctx2 * ctx2) const
+t_stree::get_aggregates_for_sorting(
+    t_uindex nidx, const t_idxvec& agg_indices, t_tscalvec& aggregates, t_ctx2* ctx2) const
 {
     t_uindex aggidx = get_aggidx(nidx);
-    for (t_uindex idx = 0, loop_end = agg_indices.size();
-         idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = agg_indices.size(); idx < loop_end; ++idx)
     {
         auto which_agg = agg_indices[idx];
-       if(which_agg < 0)
+        if (which_agg < 0)
         {
             aggregates[idx] = get_sortby_value(nidx);
         }
-        else if( ctx2 || ( size_t(which_agg) >= m_aggcols.size() ) )
+        else if (ctx2 || (size_t(which_agg) >= m_aggcols.size()))
         {
-			aggregates[idx].set(t_none());
-            if(ctx2)
+            aggregates[idx].set(t_none());
+            if (ctx2)
             {
-				if( (ctx2->get_config().get_totals() == TOTALS_BEFORE) && (size_t(which_agg) < m_aggcols.size()) )
-				{
-					aggregates[idx] = m_aggcols[which_agg]->get_scalar(aggidx);
-					continue;
-				}
+                if ((ctx2->get_config().get_totals() == TOTALS_BEFORE)
+                    && (size_t(which_agg) < m_aggcols.size()))
+                {
+                    aggregates[idx] = m_aggcols[which_agg]->get_scalar(aggidx);
+                    continue;
+                }
 
                 // two sided pivoted column
                 // we don't have enough information here to work out the shape of the data
                 // so we have to use ctx2 to resolve
 
                 // fetch the row/column path from ctx2
-                t_tscalvec col_path = ctx2->get_column_path_userspace( which_agg+1 );
-                if( col_path.empty() )
+                t_tscalvec col_path = ctx2->get_column_path_userspace(which_agg + 1);
+                if (col_path.empty())
                 {
-                    if( ctx2->get_config().get_totals() == TOTALS_AFTER )
+                    if (ctx2->get_config().get_totals() == TOTALS_AFTER)
                     {
-                        aggregates[idx] = m_aggcols[which_agg % m_aggcols.size()]->get_scalar(aggidx);
+                        aggregates[idx]
+                            = m_aggcols[which_agg % m_aggcols.size()]->get_scalar(aggidx);
                     }
                     continue;
                 }
@@ -2214,20 +1940,20 @@ t_stree::get_aggregates_for_sorting(t_uindex nidx,
                 t_tscalvec row_path;
                 get_path(nidx, row_path);
 
-                auto target_tree = ctx2->get_trees()[ get_node(nidx).m_depth ];
-                t_ptidx target = target_tree->resolve_path( 0, row_path );
-                if( target != INVALID_INDEX )
-                    target = target_tree->resolve_path( target, col_path );
-                if( target != INVALID_INDEX )
+                auto target_tree = ctx2->get_trees()[get_node(nidx).m_depth];
+                t_ptidx target = target_tree->resolve_path(0, row_path);
+                if (target != INVALID_INDEX)
+                    target = target_tree->resolve_path(target, col_path);
+                if (target != INVALID_INDEX)
                 {
-                    aggregates[idx] = target_tree->get_aggregate( target, which_agg % m_aggcols.size() );
+                    aggregates[idx]
+                        = target_tree->get_aggregate(target, which_agg % m_aggcols.size());
                 }
             }
         }
         else
         {
-            aggregates[idx] =
-                m_aggcols[which_agg]->get_scalar(aggidx);
+            aggregates[idx] = m_aggcols[which_agg]->get_scalar(aggidx);
         }
     }
 }
@@ -2246,11 +1972,9 @@ t_stree::get_aggregate(t_ptidx idx, t_index aggnum) const
 
     t_ptidx pidx = get_parent_idx(idx);
 
-    t_index agg_pridx =
-        pidx == INVALID_INDEX ? INVALID_INDEX : get_aggidx(pidx);
+    t_index agg_pridx = pidx == INVALID_INDEX ? INVALID_INDEX : get_aggidx(pidx);
 
-    return extract_aggregate(
-        m_aggspecs[aggnum], c, agg_ridx, agg_pridx);
+    return extract_aggregate(m_aggspecs[aggnum], c, agg_ridx, agg_pridx);
 }
 
 void
@@ -2258,12 +1982,9 @@ t_stree::get_child_indices(t_ptidx idx, t_ptivec& out_data) const
 {
     t_index num_children = get_num_children(idx);
     t_ptivec temp(num_children);
-    t_by_pidx_ipair iterators =
-        m_nodes->get<by_pidx>().equal_range(idx);
+    t_by_pidx_ipair iterators = m_nodes->get<by_pidx>().equal_range(idx);
     t_index count = 0;
-    for (iter_by_pidx iter = iterators.first;
-         iter != iterators.second;
-         ++iter)
+    for (iter_by_pidx iter = iterators.first; iter != iterators.second; ++iter)
     {
         temp[count] = iter->m_idx;
         ++count;
@@ -2338,9 +2059,7 @@ t_stree::get_deltas() const
 }
 
 t_tscalar
-t_stree::first_last_helper(t_uindex nidx,
-                           const t_aggspec& spec,
-                           const t_gstate& gstate) const
+t_stree::first_last_helper(t_uindex nidx, const t_aggspec& spec, const t_gstate& gstate) const
 {
     auto pkeys = get_pkeys(nidx);
 
@@ -2350,13 +2069,10 @@ t_stree::first_last_helper(t_uindex nidx,
     t_tscalvec values;
     t_tscalvec sort_values;
 
-    gstate.read_column(
-        spec.get_dependencies()[0].name(), pkeys, values);
-    gstate.read_column(
-        spec.get_dependencies()[1].name(), pkeys, sort_values);
+    gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
+    gstate.read_column(spec.get_dependencies()[1].name(), pkeys, sort_values);
 
-    auto minmax_idx =
-        get_minmax_idx(sort_values, spec.get_sort_type());
+    auto minmax_idx = get_minmax_idx(sort_values, spec.get_sort_type());
 
     switch (spec.get_sort_type())
     {

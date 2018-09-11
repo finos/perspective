@@ -7,7 +7,7 @@
  *
  */
 
-#ifdef __APPLE__ 
+#ifdef __APPLE__
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/raii.h>

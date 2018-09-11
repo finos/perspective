@@ -21,9 +21,7 @@
 namespace perspective
 {
 
-t_table_recipe::t_table_recipe()
-{
-}
+t_table_recipe::t_table_recipe() {}
 
 void
 t_table::set_capacity(t_uindex idx)
@@ -43,32 +41,41 @@ t_table::set_capacity(t_uindex idx)
 }
 
 t_table::t_table(const t_table_recipe& recipe)
-    : m_name(recipe.m_name), m_dirname(recipe.m_dirname),
-      m_schema(recipe.m_schema), m_size(recipe.m_size),
-      m_backing_store(recipe.m_backing_store), m_init(false),
-      m_recipe(recipe), m_from_recipe(true)
+    : m_name(recipe.m_name)
+    , m_dirname(recipe.m_dirname)
+    , m_schema(recipe.m_schema)
+    , m_size(recipe.m_size)
+    , m_backing_store(recipe.m_backing_store)
+    , m_init(false)
+    , m_recipe(recipe)
+    , m_from_recipe(true)
 {
     set_capacity(recipe.m_capacity);
 }
 
 t_table::t_table(const t_schema& s, t_uindex init_cap)
-    : m_name(""), m_dirname(""), m_schema(s), m_size(0),
-      m_backing_store(BACKING_STORE_MEMORY), m_init(false),
-      m_from_recipe(false)
+    : m_name("")
+    , m_dirname("")
+    , m_schema(s)
+    , m_size(0)
+    , m_backing_store(BACKING_STORE_MEMORY)
+    , m_init(false)
+    , m_from_recipe(false)
 {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_table");
     set_capacity(init_cap);
 }
 
-t_table::t_table(const t_str& name,
-                 const t_str& dirname,
-                 const t_schema& s,
-                 t_uindex init_cap,
-                 t_backing_store backing_store)
-    : m_name(name), m_dirname(dirname), m_schema(s), m_size(0),
-      m_backing_store(backing_store), m_init(false),
-      m_from_recipe(false)
+t_table::t_table(const t_str& name, const t_str& dirname, const t_schema& s, t_uindex init_cap,
+    t_backing_store backing_store)
+    : m_name(name)
+    , m_dirname(dirname)
+    , m_schema(s)
+    , m_size(0)
+    , m_backing_store(backing_store)
+    , m_init(false)
+    , m_from_recipe(false)
 {
     PSP_TRACE_SENTINEL();
     LOG_CONSTRUCTOR("t_table");
@@ -111,39 +118,30 @@ t_table::init()
     }
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0,
-             int(m_schema.size()),
-             1,
-             [this](int idx)
+    PSP_PFOR(0, int(m_schema.size()), 1,
+        [this](int idx)
 #else
-    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
 #endif
-             {
-                 const t_str& colname = m_schema.m_columns[idx];
-                 t_dtype dtype = m_schema.m_types[idx];
-                 m_columns[idx] = make_column(
-                     colname, dtype, m_schema.m_valid_enabled[idx]);
-                 m_columns[idx]->init();
-             }
+        {
+            const t_str& colname = m_schema.m_columns[idx];
+            t_dtype dtype = m_schema.m_types[idx];
+            m_columns[idx] = make_column(colname, dtype, m_schema.m_valid_enabled[idx]);
+            m_columns[idx]->init();
+        }
 #ifdef PSP_PARALLEL_FOR
-             );
+    );
 #endif
 
     m_init = true;
 }
 
 t_col_sptr
-t_table::make_column(const t_str& colname,
-                     t_dtype dtype,
-                     t_bool valid_enabled)
+t_table::make_column(const t_str& colname, t_dtype dtype, t_bool valid_enabled)
 {
-    t_lstore_recipe a(m_dirname,
-                      m_name + t_str("_") + colname,
-                      m_capacity * get_dtype_size(dtype),
-                      m_backing_store);
-    return std::make_shared<t_column>(
-        dtype, valid_enabled, a, m_capacity);
+    t_lstore_recipe a(m_dirname, m_name + t_str("_") + colname,
+        m_capacity * get_dtype_size(dtype), m_backing_store);
+    return std::make_shared<t_column>(dtype, valid_enabled, a, m_capacity);
 }
 
 t_uindex
@@ -236,8 +234,7 @@ t_table::extend(t_uindex nelems)
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_init, "Table not inited");
-    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
     {
         m_columns[idx]->extend_dtype(nelems);
     }
@@ -249,8 +246,7 @@ void
 t_table::set_size(t_uindex size)
 {
     PSP_TRACE_SENTINEL();
-    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
     {
         m_columns[idx]->set_size(size);
     }
@@ -262,8 +258,7 @@ t_table::reserve(t_uindex capacity)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
     {
         m_columns[idx]->reserve(capacity);
     }
@@ -294,12 +289,8 @@ t_table::flatten() const
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
-    t_table_sptr flattened =
-        std::make_shared<t_table>("",
-                                  "",
-                                  m_schema,
-                                  DEFAULT_EMPTY_CAPACITY,
-                                  BACKING_STORE_MEMORY);
+    t_table_sptr flattened = std::make_shared<t_table>(
+        "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     flattened->init();
     flatten_body<t_table_sptr>(flattened);
     return flattened;
@@ -368,8 +359,7 @@ t_table::pprint(t_uindex nrows, std::ostream* os) const
     {
         for (t_uindex cidx = 0; cidx < ncols; ++cidx)
         {
-            (*os) << columns[cidx]->get_scalar(ridx).to_string()
-                  << ", ";
+            (*os) << columns[cidx]->get_scalar(ridx).to_string() << ", ";
         }
         (*os) << std::endl;
     }
@@ -419,8 +409,7 @@ t_table::append(const t_table& other)
     for (const auto& cname : other.m_schema.m_columns)
     {
         PSP_VERBOSE_ASSERT(
-            other.get_const_column(cname)->get_dtype() ==
-                get_column(cname)->get_dtype(),
+            other.get_const_column(cname)->get_dtype() == get_column(cname)->get_dtype(),
             "Mismatched column dtypes");
         src_cols.push_back(other.get_const_column(cname).get());
         dst_cols.push_back(get_column(cname).get());
@@ -437,18 +426,14 @@ t_table::append(const t_table& other)
     }
 
 #ifdef PSP_PARALLEL_FOR
-    PSP_PFOR(0,
-             int(src_cols.size()),
-             1,
-             [&src_cols, dst_cols](int colidx)
+    PSP_PFOR(0, int(src_cols.size()), 1,
+        [&src_cols, dst_cols](int colidx)
 #else
-    for (t_uindex colidx = 0, loop_end = src_cols.size();
-         colidx < loop_end;
-         ++colidx)
+    for (t_uindex colidx = 0, loop_end = src_cols.size(); colidx < loop_end; ++colidx)
 #endif
-             { dst_cols[colidx]->append(*(src_cols[colidx])); }
+        { dst_cols[colidx]->append(*(src_cols[colidx])); }
 #ifdef PSP_PARALLEL_FOR
-             );
+    );
 #endif
     set_capacity(std::max(m_capacity, m_size + other.num_rows()));
     set_size(m_size + other.num_rows());
@@ -459,9 +444,7 @@ t_table::clear()
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    for (t_uindex idx = 0, loop_end = m_columns.size();
-         idx < loop_end;
-         ++idx)
+    for (t_uindex idx = 0, loop_end = m_columns.size(); idx < loop_end; ++idx)
     {
         m_columns[idx]->clear();
     }
@@ -489,8 +472,7 @@ t_table::get_recipe() const
 }
 
 t_mask
-t_table::filter_cpp(t_filter_op combiner,
-                    const t_ftermvec& fterms_) const
+t_table::filter_cpp(t_filter_op combiner, const t_ftermvec& fterms_) const
 {
     auto self = const_cast<t_table*>(this);
     auto fterms = fterms_;
@@ -520,9 +502,7 @@ t_table::filter_cpp(t_filter_op combiner,
         {
             t_tscalar cell_val;
 
-            for (t_uindex ridx = 0, rloop_end = size();
-                 ridx < rloop_end;
-                 ++ridx)
+            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx)
             {
                 t_bool pass = true;
 
@@ -536,8 +516,7 @@ t_table::filter_cpp(t_filter_op combiner,
 
                     if (ft.m_use_interned)
                     {
-                        cell_val.set(
-                            *(columns[cidx]->get_nth<t_stridx>(ridx)));
+                        cell_val.set(*(columns[cidx]->get_nth<t_stridx>(ridx)));
                         tval = ft(cell_val);
                     }
                     else
@@ -559,15 +538,12 @@ t_table::filter_cpp(t_filter_op combiner,
         break;
         case FILTER_OP_OR:
         {
-            for (t_uindex ridx = 0, rloop_end = size();
-                 ridx < rloop_end;
-                 ++ridx)
+            for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx)
             {
                 t_bool pass = false;
                 for (t_uindex cidx = 0; cidx < fterm_size; ++cidx)
                 {
-                    t_tscalar cell_val =
-                        columns[cidx]->get_scalar(ridx);
+                    t_tscalar cell_val = columns[cidx]->get_scalar(ridx);
                     if (fterms[cidx](cell_val))
                     {
                         pass = true;
@@ -601,8 +577,7 @@ t_table::clone_(const t_mask& mask) const
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_schema schema = m_schema;
 
-    t_table* rval =
-        new t_table("", "", schema, 5, BACKING_STORE_MEMORY);
+    t_table* rval = new t_table("", "", schema, 5, BACKING_STORE_MEMORY);
     rval->init();
 
     for (const auto& cname : schema.m_columns)
@@ -624,15 +599,12 @@ t_table::clone(const t_mask& mask) const
 }
 
 t_column*
-t_table::add_column(const t_str& name,
-                    t_dtype dtype,
-                    t_bool valid_enabled)
+t_table::add_column(const t_str& name, t_dtype dtype, t_bool valid_enabled)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
-        !m_from_recipe,
-        "Adding columns to recipe based tables not supported yet.");
+        !m_from_recipe, "Adding columns to recipe based tables not supported yet.");
 
     if (m_schema.has_column(name))
     {
@@ -641,8 +613,7 @@ t_table::add_column(const t_str& name,
     m_schema.add_column(name, dtype);
     m_columns.push_back(make_column(name, dtype, valid_enabled));
     m_columns.back()->init();
-    m_columns.back()->reserve(std::max(
-        size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    m_columns.back()->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     m_columns.back()->set_size(size());
     return m_columns.back().get();
 }
@@ -662,15 +633,13 @@ t_table::set_column(const t_str& name, t_col_sptr col)
 }
 
 t_column*
-t_table::clone_column(const t_str& existing_col,
-                      const t_str& new_colname)
+t_table::clone_column(const t_str& existing_col, const t_str& new_colname)
 {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     PSP_VERBOSE_ASSERT(
-        !m_from_recipe,
-        "Adding columns to recipe based tables not supported yet.");
+        !m_from_recipe, "Adding columns to recipe based tables not supported yet.");
 
     if (!m_schema.has_column(existing_col))
     {
@@ -682,8 +651,7 @@ t_table::clone_column(const t_str& existing_col,
 
     m_schema.add_column(new_colname, m_columns[idx]->get_dtype());
     m_columns.push_back(m_columns[idx]->clone());
-    m_columns.back()->reserve(std::max(
-        size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    m_columns.back()->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     m_columns.back()->set_size(size());
     return m_columns.back().get();
 }
@@ -709,8 +677,7 @@ t_table::verify() const
 
     for (auto& c : m_columns)
     {
-        PSP_VERBOSE_ASSERT(sz == c->size(),
-                           "Ragged table encountered");
+        PSP_VERBOSE_ASSERT(sz == c->size(), "Ragged table encountered");
     }
 }
 

@@ -12,11 +12,10 @@
 
 namespace perspective
 {
-t_path::t_path()
-{
-}
+t_path::t_path() {}
 
-t_path::t_path(const t_tscalvec& path) : m_path(path)
+t_path::t_path(const t_tscalvec& path)
+    : m_path(path)
 {
 }
 
@@ -32,4 +31,4 @@ t_path::path()
     return m_path;
 }
 
-}
+} // namespace perspective

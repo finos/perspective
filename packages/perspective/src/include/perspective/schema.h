@@ -68,6 +68,5 @@ typedef std::vector<t_schema> t_schemavec;
 namespace std
 {
 
-PERSPECTIVE_EXPORT std::ostream&
-operator<<(std::ostream& os, const perspective::t_schema& s);
+PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_schema& s);
 }
