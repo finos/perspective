@@ -1681,11 +1681,9 @@ class WorkerHost extends Host {
             console.log("Loading asm.js");
             __MODULE__ = __MODULE__({
                 wasmJSMethod: "asmjs",
-                locateFile: path => `${path}`,
-                filePackagePrefixURL: msg.path,
+                locateFile: path => `${path}/_psp.asmjs.js`,
                 printErr: (x) => console.warn(x),
                 print: (x) => console.log(x)
-            //     asmjsCodeFile: msg.data || msg.path + 'asmjs/psp.asm.js'
             });
         } else {
             console.log('Loading wasm');
@@ -1696,7 +1694,7 @@ class WorkerHost extends Host {
                 __MODULE__ = __MODULE__(module);
             } else {
                 let wasmXHR = new XMLHttpRequest();
-                wasmXHR.open('GET', msg.path + 'wasm_async/psp.wasm', true);
+                wasmXHR.open('GET', msg.path + '/_psp.async.wasm', true);
                 wasmXHR.responseType = 'arraybuffer';
                 wasmXHR.onload = function() {
                     module = {};

@@ -1009,15 +1009,15 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
 int
 main(int argc, char** argv)
 {
-    std::cout << "Perspective initialized successfully." << std::endl;
+    std::cout << "Perspective initialized successfully" << std::endl;
     EM_ASM({
 
-        if (global.dispatchEvent && !global._perspective_initialized && global.document) {
-            global._perspective_initialized = true;
-            var event = global.document.createEvent("Event");
+        if (self.dispatchEvent && !self._perspective_initialized && self.document) {
+            self._perspective_initialized = true;
+            var event = self.document.createEvent("Event");
             event.initEvent("perspective-ready", false, true);
-            global.dispatchEvent(event);
-        } else if (!global.document && typeof self !== "undefined") {
+            self.dispatchEvent(event);
+        } else if (!self.document && typeof self !== "undefined") {
             self.postMessage({});
         }
 
