@@ -393,6 +393,45 @@ module.exports = (perspective) => {
     });
 
     describe("null handling", function() {
+
+        it('recalculates sum aggregates when a null unsets a value', async function () {
+            var table = perspective.table([
+                {'x': 1, 'y': 1},
+                {'x': 2, 'y': 1},
+            ], {index: 'x'});
+            table.update([
+                {'x': 2, 'y': null}
+            ]);
+            var view = table.view({
+                row_pivot: ['x'],
+                aggregate: [{op: 'sum', column:'y'}]
+            });
+            let json = await view.to_json();
+            expect(json).toEqual([
+                {__ROW_PATH__: [], y: 1},
+                {__ROW_PATH__: [ 1 ], y: 1},
+                {__ROW_PATH__: [ 2 ], y: 0},
+            ]);
+        });
+
+
+        it('can be removed entirely', async function () {
+            var table = perspective.table([
+                {'x': 1, 'y': 1},
+            ], {index: 'x'});
+            table.update([
+                {'x': 1, 'y': null}
+            ]);
+            table.update([
+                {'x': 1, 'y': 1}
+            ]);
+            var view = table.view();
+            let json = await view.to_json();
+            expect(json).toEqual([
+                {x: 1, y: 1}
+            ]);
+        });
+
         it("partial update with null unsets value", function (done) {
             var partial = [
                 {'x': null, 'y': 'a', 'z': false},
