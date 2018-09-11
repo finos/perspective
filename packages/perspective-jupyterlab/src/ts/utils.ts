@@ -7,7 +7,6 @@
  *
  */
 
-import * as io from 'socket.io-client';
 import {Clipboard} from '@jupyterlab/apputils';
 
 /* defines */
@@ -23,140 +22,12 @@ const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
 export
 const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
 
-
-export interface PSPHelper {
-    //FIXME should enforce perspective viewer type
-    start(psp: any): void;
-    getUrl(): string;
-}
-
 export function datasourceToSource(source: string){
-    if(source.indexOf('sio://') !== -1){
-        return 'sio';
-    } else if(source.indexOf('ws://') !== -1){
-        return 'ws';
-    } else if(source.indexOf('wss://') !== -1){
-        return 'wss';
-    } else if(source.indexOf('http://') !== -1){
-        return 'http';
-    } else if(source.indexOf('https://') !== -1){
-        return 'http';
-    } else if(source.indexOf('comm://') !== -1){
+    if(source.indexOf('comm://') !== -1){
         return 'comm';
     } else{
-        throw new Error('Unrecognized source');
+        return 'static';
     }
-}
-
-export class PSPWebsocketHelper implements PSPHelper {
-    constructor(url: string, send: string, records: boolean) {
-        this.url = url;
-        this.send = send;
-    }
-
-    start(psp: any): void {
-        let socket = new WebSocket(this.url);
-        let to_send = this.send;
-        let as_record = this.records;
-        socket.onopen = function (event: any) {
-            if (to_send) {
-                socket.send(to_send);
-            }
-        };
-
-        socket.onmessage = function (event: any) {
-            if (as_record) {
-                psp.update([event.data]);
-            } else {
-                psp.update(event.data);
-            }
-        };
-
-    }
-
-    getUrl(): string {
-        return this.url;
-    }
-
-    private url:string;
-    private send:string;
-    private records:boolean;
-}
-
-export class PSPSocketIOHelper implements PSPHelper {
-    constructor(url: string, channel: string, records: boolean) {
-        this.url = url;
-        this.channel = channel;
-        this.records = records;
-    }
-
-    start(psp: any): void {
-        let socket = io.connect(this.url);
-        let as_record = this.records;
-        socket.on(this.channel, function (msg: any) {
-            if (as_record){
-                psp.update([msg.msg]);
-            } else {
-                psp.update(msg.msg);
-            }
-        })
-    }
-
-    getUrl(): string {
-        return this.url;
-    }
-
-    private url:string;
-    private channel:string;
-    private records:boolean;
-}
-
-export class PSPHttpHelper implements PSPHelper {
-    constructor(url:string, field: string, records: boolean, repeat: number) {
-        this.url = url;
-        this.field = field;
-        this.records = records;
-        this.repeat = repeat;
-    }
-
-
-    sendAndLoad(psp: any) {
-        let xhr = new XMLHttpRequest();
-        let field = this.field;
-        let as_record = this.records;
-
-        xhr.open('GET', this.url, true);
-        xhr.onload = function () { 
-                let data = JSON.parse(xhr.response);
-                if (field !== ''){
-                    data = data[field];
-                }
-
-                if (as_record){
-                    psp.update([data]);
-                } else {
-                    psp.update(data);
-                }
-        }
-        xhr.send(null);
-    }
-
-    start(psp: any): void {
-        if (this.repeat){
-            setInterval( () => this.sendAndLoad(psp), this.repeat);
-        } else {
-            this.sendAndLoad(psp);
-        }
-    }
-
-    getUrl(): string {
-        return this.url;
-    }
-
-    private url:string;
-    private field:string;
-    private records:boolean;
-    private repeat:number;
 }
 
 export function convertToCSV(objArray: Array<Object>): string {
