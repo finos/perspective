@@ -185,6 +185,8 @@ class WebSocketWorker extends worker {
 export default {
     worker: function (url) {
         if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
+            // TODO: Should this be here? Where is it defined?
+            // eslint-disable-next-line no-undef
             return perspective;
         }
         if (url) {

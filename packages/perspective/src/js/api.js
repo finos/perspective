@@ -191,7 +191,7 @@ worker.prototype.post = function (msg, resolve, reject, keep_alive = false) {
     }
 };
 
-worker.prototype.send = function (msg) {
+worker.prototype.send = function () {
     throw new Error("post() not implemented");
 }
 

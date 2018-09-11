@@ -14,16 +14,13 @@ import boost from 'highcharts/modules/boost';
 import treemap from 'highcharts/modules/treemap';
 import sunburst from 'highcharts/modules/sunburst';
 import grouped_categories from 'highcharts-grouped-categories';
-import chroma from 'chroma-js';
 
 const Highcharts = highcharts;
 
 // cache prototypes
 let axisProto = Highcharts.Axis.prototype,
-    tickProto = Highcharts.Tick.prototype,
 
     // cache original methods
-    protoAxisInit = axisProto.init,
     protoAxisRender = axisProto.render,
     UNDEFINED = void 0;
 
@@ -112,22 +109,6 @@ Highcharts.setOptions({
     H.seriesTypes.sunburst.prototype.colorKey = 'colorValue';
 
     // Pushes part of grid to path
-    function addGridPart(path, d, width) {
-        // Based on crispLine from HC (#65)
-        if (d[0] === d[2]) {
-            d[0] = d[2] = Math.round(d[0]) - (width % 2 / 2);
-        }
-        if (d[1] === d[3]) {
-            d[1] = d[3] = Math.round(d[1]) + (width % 2 / 2);
-        }
-
-        path.push(
-            'M',
-            d[0], d[1],
-            'L',
-            d[2], d[3]
-        );
-    }
     function walk(arr, key, fn) {
         var l = arr.length,
             children;
@@ -170,23 +151,11 @@ Highcharts.setOptions({
 
         var axis = this,
             options = axis.options,
-            top = axis.top,
-            left = axis.left,
-            right = left + axis.width,
-            bottom = top + axis.height,
             visible = axis.hasVisibleSeries || axis.hasData,
-            depth = axis.labelsDepth,
             grid = axis.labelsGrid,
-            horiz = axis.horiz,
             d = axis.labelsGridPath,
-            i = options.drawHorizontalBorders === false ? (depth + 1) : 0,
-            offset = axis.opposite ? (horiz ? top : right) : (horiz ? bottom : left),
-            tickWidth = axis.tickWidth,
-            part;
+            tickWidth = axis.tickWidth;
 
-        if (axis.userTickLength) {
-            depth -= 1;
-        }
 
         // render grid path for the first time
         if (!grid) {
@@ -202,17 +171,6 @@ Highcharts.setOptions({
             if (!options.tickColor) {
                 grid.addClass('highcharts-tick');
             }
-        }
-
-        // go through every level and draw horizontal grid line
-        while (i <= depth) {
-            offset += axis.groupSize(i);
-
-            part = horiz ?
-                [left, offset, right, offset] :
-                [offset, top, offset, top];
-
-            i++;
         }
 
         // draw grid path

@@ -9,8 +9,6 @@
 import "@webcomponents/webcomponentsjs";
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
-import "awesomplete";
-import "awesomplete/awesomplete.css";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
@@ -981,7 +979,10 @@ class ViewPrivate extends HTMLElement {
  * @class View
  * @extends {ViewPrivate}
  */
-@bindTemplate(template)
+
+// Eslint complains here because we don't do anything, but actually we globally
+// register this class as a CustomElement
+@bindTemplate(template) // eslint-disable-next-line no-unused-vars
 class View extends ViewPrivate {
 
     constructor() {

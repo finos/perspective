@@ -11,8 +11,6 @@ import buffer from "../../build/wasm_sync/psp.wasm";
 
 const perspective = require('./perspective.js');
 
-const fs = require('fs');
-
 const WebSocket = require('ws');
 
 const load_perspective = require("../../build/wasm_sync/psp.js").load_perspective;

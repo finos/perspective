@@ -7,7 +7,6 @@
  *
  */
 
-const chroma = require('chroma-js');
 import * as gparser from 'gradient-parser';
 
 function _get_gradient(type) {

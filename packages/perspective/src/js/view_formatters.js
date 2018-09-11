@@ -41,7 +41,7 @@ const jsonTableFormatter = {
         data[colName] = data[colName] || [];
         data[colName].push([]);
     },
-    addRow: (data, row) => {},
+    addRow: () => {},
     formatData: data => data,
     slice: (data, start, length) => {
         for (let x in data) {

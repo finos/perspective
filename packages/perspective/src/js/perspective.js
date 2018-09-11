@@ -296,10 +296,8 @@ function parse_data(data, names, types) {
  * @private
  * @param {object} data Array buffer
  * @returns An object with 3 properties:
- *    names - the column names.
- *    types - the column t_dtypes.
  */
-function load_arrow_buffer(data, names, types) {
+function load_arrow_buffer(data) {
     // TODO Need to validate that the names/types passed in match those in the buffer
     let arrow = Table.from([new Uint8Array(data)]);
     let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
@@ -333,6 +331,8 @@ class ArrowColumnLoader extends TypeVisitor {
         return this;
     }
     // visitNull(type/*: Arrow.type.Null*/) {}
+    // TODO: Should this variable be an argument? 
+    // eslint-disable-next-line no-unused-vars
     visitBool(type/*: Arrow.type.Bool*/) {
         this.types.push(__MODULE__.t_dtype.DTYPE_BOOL);
         return true;
@@ -367,16 +367,22 @@ class ArrowColumnLoader extends TypeVisitor {
         // }
         return true;
     }
+    // TODO: Should this variable be an argument? 
+    // eslint-disable-next-line no-unused-vars
     visitUtf8(type/*: Arrow.type.Utf8 */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_STR);
         return true;
     }
+    // TODO: Should this variable be an argument? 
+    // eslint-disable-next-line no-unused-vars
     visitBinary(type/*: Arrow.type.Binary */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_STR);
         return true;
     }
     // visitFixedSizeBinary(type/*: Arrow.type.FixedSizeBinary*/) {}
     // visitDate(type/*: Arrow.type.Date_*/) {}
+    // TODO: Should this variable be an argument? 
+    // eslint-disable-next-line no-unused-vars
     visitTimestamp(type/*: Arrow.type.Timestamp*/) {
         this.types.push(__MODULE__.t_dtype.DTYPE_TIME);
         return true;
@@ -581,8 +587,7 @@ const to_format = async function (options, formatter) {
     let data = formatter.initDataValue();
 
     let col_names = [[]].concat(this._column_names());
-    let row, prev_row;
-    let depth = [];
+    let row;
     let ridx = -1;
     for (let idx = 0; idx < slice.length; idx++) {
         let cidx = idx % (end_col - start_col);
@@ -830,7 +835,6 @@ view.prototype.on_update = function (callback) {
                         rows[delta.cells.get(x).row] = true;
                     }
                     rows = Object.keys(rows);
-                    let data = [];
                     Promise.all(rows.map(row => this.to_json({
                         start_row: Number.parseInt(row),
                         end_row: Number.parseInt(row) + 1
@@ -1517,7 +1521,7 @@ class Host {
         this.post(msg);
     }
 
-    post(msg) {
+    post() {
         throw new Error("post() not implemented!");
     }
 
