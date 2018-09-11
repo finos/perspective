@@ -331,13 +331,11 @@ class ArrowColumnLoader extends TypeVisitor {
         return this;
     }
     // visitNull(type/*: Arrow.type.Null*/) {}
-    // TODO: Should this variable be an argument? 
-    // eslint-disable-next-line no-unused-vars
-    visitBool(type/*: Arrow.type.Bool*/) {
+    visitBool(/* type: Arrow.type.Bool */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_BOOL);
         return true;
     }
-    visitInt(type/*: Arrow.type.Int*/) {
+    visitInt(type /* : Arrow.type.Int */) {
         const bitWidth = type.bitWidth;
         if (bitWidth === 64) {
             this.types.push(__MODULE__.t_dtype.DTYPE_INT64);
@@ -353,7 +351,7 @@ class ArrowColumnLoader extends TypeVisitor {
         }
         return true;
     }
-    visitFloat(type/*: Arrow.type.Float*/) {
+    visitFloat(type /* : Arrow.type.Float */) {
         const precision = type.precision;
         if (precision === Precision.DOUBLE) {
             this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
@@ -367,23 +365,17 @@ class ArrowColumnLoader extends TypeVisitor {
         // }
         return true;
     }
-    // TODO: Should this variable be an argument? 
-    // eslint-disable-next-line no-unused-vars
-    visitUtf8(type/*: Arrow.type.Utf8 */) {
+    visitUtf8(/* type: Arrow.type.Utf8 */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_STR);
         return true;
     }
-    // TODO: Should this variable be an argument? 
-    // eslint-disable-next-line no-unused-vars
-    visitBinary(type/*: Arrow.type.Binary */) {
+    visitBinary(/* type: Arrow.type.Binary */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_STR);
         return true;
     }
     // visitFixedSizeBinary(type/*: Arrow.type.FixedSizeBinary*/) {}
     // visitDate(type/*: Arrow.type.Date_*/) {}
-    // TODO: Should this variable be an argument? 
-    // eslint-disable-next-line no-unused-vars
-    visitTimestamp(type/*: Arrow.type.Timestamp*/) {
+    visitTimestamp(/* type: Arrow.type.Timestamp */) {
         this.types.push(__MODULE__.t_dtype.DTYPE_TIME);
         return true;
     }
@@ -392,7 +384,7 @@ class ArrowColumnLoader extends TypeVisitor {
     // visitList(type/*: Arrow.type.List*/) {}
     // visitStruct(type/*: Arrow.type.Struct*/) {}
     // visitUnion(type/*: Arrow.type.Union<any>*/) {}
-    visitDictionary(type/*: Arrow.type.Dictionary*/) {
+    visitDictionary(type /*: Arrow.type.Dictionary */) {
         return this.visit(type.dictionary);
     }
     // visitInterval(type/*: Arrow.type.Interval*/) {}

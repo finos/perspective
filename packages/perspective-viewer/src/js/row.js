@@ -175,9 +175,8 @@ class Row extends HTMLElement {
     set aggregate(a) {
         let agg_dropdown = this.querySelector('#column_aggregate');
         let aggregate = this.getAttribute('aggregate');
-        if (agg_dropdown.value !== aggregate) {
-            // TODO: Should type be removed here? What is it doing
-            // eslint-disable-next-line no-undef
+        if (agg_dropdown.value !== aggregate && this.hasAttribute('type')) {
+            let type = this.getAttribute('type');
             agg_dropdown.value = aggregate || perspective.AGGREGATE_DEFAULTS[type];
         }
     }

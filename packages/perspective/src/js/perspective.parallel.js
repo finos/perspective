@@ -28,7 +28,7 @@ if (detectIE() && window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1) {
         script = d.createElement('script');
         script.type = 'text/javascript';
         script.async = true;
-        script.src = __SCRIPT_PATH__.path() + 'asmjs/perspective.js';
+        script.src = __SCRIPT_PATH__.path() + 'perspective.worker.asm.js';
         d.getElementsByTagName('head')[0].appendChild(script);
     }(document));
 }
