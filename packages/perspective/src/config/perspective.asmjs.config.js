@@ -5,7 +5,7 @@ module.exports = Object.assign({}, common(), {
     entry: ["babel-polyfill", './src/js/perspective.asmjs.js'],
     plugins: [],
     output: {
-        filename: 'perspective.js',
-        path: path.resolve(__dirname, '../../build/asmjs')
+        filename: 'perspective.worker.asmjs.js',
+        path: path.resolve(__dirname, '../../build')
     }
 });

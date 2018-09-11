@@ -44,7 +44,7 @@ module.exports = function () {
                     options: {}
                 }
             }, {
-                test: /psp\.js$/,
+                test: /psp\.(asmjs|async|sync).js$/,
                 loader: "wrap-loader",
                 options: {
                     before: ';var window = window || {};exports.load_perspective = function(Module) {',
@@ -58,7 +58,7 @@ module.exports = function () {
                 }
             }, {
                 test: /\.js$/,
-                exclude: /node_modules\/(?!(\@apache-arrow|\@jupyterlab))|psp\.js/,
+                exclude: /node_modules\/(?!(\@apache-arrow|\@jupyterlab))|psp\.(asmjs|async|sync).js/,
                 loader: "babel-loader",
                 options: {
                     presets: ['env'],

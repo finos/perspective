@@ -7,18 +7,14 @@
  *
  */
 
-const load_perspective = require("../../build/asmjs/psp.js").load_perspective;
+const load_perspective = require("../../obj/psp.asmjs.js").load_perspective;
 const perspective = require('./perspective.js');
 
-if (global.document !== undefined) {
-	const Module = load_perspective({
-		wasmJSMethod: "asmjs",
-        filePackagePrefixURL: "",
-	    printErr: (x) => console.error(x),
-	    print: (x) => console.warn(x)
-	});
-	module.exports = perspective(Module);
-} else {
-	module.exports = perspective(load_perspective);
-}
+const Module = load_perspective({
+	wasmJSMethod: "asmjs",
+	filePackagePrefixURL: "",
+	printErr: (x) => console.error(x),
+	print: (x) => console.log(x)
+});
+module.exports = perspective(Module);
 
