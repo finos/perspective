@@ -8,7 +8,6 @@
  */
 
 import _  from "underscore";
-
 import arrow from "../arrow/test.arrow";
 
 var data = [
@@ -391,6 +390,111 @@ module.exports = (perspective) => {
             table.update(partial);
         });
 
+    });
+
+    describe("null handling", function() {
+
+        it('recalculates sum aggregates when a null unsets a value', async function () {
+            var table = perspective.table([
+                {'x': 1, 'y': 1},
+                {'x': 2, 'y': 1},
+            ], {index: 'x'});
+            table.update([
+                {'x': 2, 'y': null}
+            ]);
+            var view = table.view({
+                row_pivot: ['x'],
+                aggregate: [{op: 'sum', column:'y'}]
+            });
+            let json = await view.to_json();
+            expect(json).toEqual([
+                {__ROW_PATH__: [], y: 1},
+                {__ROW_PATH__: [ 1 ], y: 1},
+                {__ROW_PATH__: [ 2 ], y: 0},
+            ]);
+        });
+
+
+        it('can be removed entirely', async function () {
+            var table = perspective.table([
+                {'x': 1, 'y': 1},
+            ], {index: 'x'});
+            table.update([
+                {'x': 1, 'y': null}
+            ]);
+            table.update([
+                {'x': 1, 'y': 1}
+            ]);
+            var view = table.view();
+            let json = await view.to_json();
+            expect(json).toEqual([
+                {x: 1, y: 1}
+            ]);
+        });
+
+        it("partial update with null unsets value", function (done) {
+            var partial = [
+                {'x': null, 'y': 'a', 'z': false},
+            ];
+            var expected = [
+                {'x': null, 'y': 'a', 'z': false},
+                {'x': 2, 'y':'b', 'z': false},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(data);
+            table.update(partial);
+            view.to_json().then(json => {
+                expect(json).toEqual(expected);
+                done();
+            });
+        });
+
+        it("update by adding rows (new pkeys) with partials/nulls", function (done) {
+          var update = [
+            {'x': null, 'y':'e', 'z': null}
+          ];
+          var expected = [
+            {'x': 1, 'y':'a', 'z': true},
+            {'x': 2, 'y':'b', 'z': false},
+            {'x': 3, 'y':'c', 'z': true},
+            {'x': 4, 'y':'d', 'z': false},
+            {'x': null, 'y':'e', 'z': null}
+          ];
+          var table = perspective.table(meta, {index: 'y'});
+          var view = table.view();
+          table.update(data);
+          table.update(update);
+          view.to_json().then(json => {
+              expect(json).toEqual(expected);
+              done();
+          });
+      });
+
+
+        it("partial column oriented update with null unsets value", function (done) {
+            var partial = {
+                x: [null],
+                y: ['a'],
+            };
+
+            var expected = [
+                {'x': null, 'y':'a', 'z': true},
+                {'x': 2, 'y':'b', 'z': false},
+                {'x': 3, 'y':'c', 'z': true},
+                {'x': 4, 'y':'d', 'z': false}
+            ];
+            var table = perspective.table(meta, {index: 'y'});
+            var view = table.view();
+            table.update(col_data);
+            table.update(partial);
+            view.to_json().then(json => {
+                expect(json).toEqual(expected);
+                done();
+            });
+        });
     });
 
     describe("Viewport", function() {

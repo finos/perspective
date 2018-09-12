@@ -38,6 +38,13 @@ typedef std::string t_str;
 
 typedef bool t_bool;
 
+enum t_status : t_uint8
+{
+    STATUS_INVALID,
+    STATUS_VALID,
+    STATUS_CLEAR
+};
+
 enum t_dtype
 {
     DTYPE_NONE,
@@ -156,7 +163,7 @@ struct t_column_static_ctx
 struct t_column_dynamic_ctx
 {
     void* m_base;
-    t_uint8* m_valid;
+    t_uint8* m_status;
     t_extent_pair* m_extents_base;
     t_uchar* m_vlendata_base;
     void* m_opaque;

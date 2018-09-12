@@ -69,7 +69,7 @@ function infer_type(x) {
 }
 
 /**
- * Gets the type of a column.
+ * Gets human-readable types for a column
  * @private
  * @returns {string}
  */
@@ -91,6 +91,7 @@ function get_column_type(val) {
  * Do any necessary data transforms on columns. Currently it does the following
  * transforms
  * 1. Date objects are converted into float millis since epoch
+ * 2. Null strings are converted into null values
  *
  * @private
  * @param {string} type type of column
@@ -99,15 +100,29 @@ function get_column_type(val) {
  * @returns transformed array of columnar data
  */
  function transform_data(type, data) {
-      if(type != __MODULE__.t_dtype.DTYPE_TIME) {
-         return data;
-      }
       let rv = [];
       for (let x = 0; x < data.length; x ++) {
-         let tmp = +data[x];
-         rv.push(tmp);
+        let tmp = clean_data(data[x]);
+
+        if (type == __MODULE__.t_dtype.DTYPE_TIME && tmp !== null) {
+            tmp = +data[x];
+        }
+        
+        rv.push(tmp);
       }
       return rv;
+ }
+
+/**
+ * Coerce string null into value null
+ * @param {*} value 
+ */
+ function clean_data(value) {
+     if (value === null || value === "null") {
+         return null;
+     } else {
+         return value;
+     }
  }
 
 /**
@@ -122,6 +137,7 @@ function get_column_type(val) {
  *    cdata - an array of columnar data.
  */
 function parse_data(data, names, types) {
+    // todo: refactor, treat columnar/row data as the same to marshal values + fix null handling
     let preloaded = types ? true : false;
     if (types === undefined) {
         types = []
@@ -179,27 +195,32 @@ function parse_data(data, names, types) {
             let col = [];
             const parser = new DateParser();
             for (let x = 0; x < data.length; x ++) {
-                if (!(name in data[x]) || data[x][name] === undefined) {
+                if (!(name in data[x]) || clean_data(data[x][name]) === undefined) {
                     col.push(undefined);
                     continue;
                 };
                 if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
-                    let val = data[x][name];
+                    let val = clean_data(data[x][name]);
                     if (val !== null) {
                         val = Number(val);
                     }
                     col.push(val);
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
-                    let val = data[x][name];
+                    let val = clean_data(data[x][name])
                     if (val !== null) val = Number(val);
                     col.push(val);
                     if (val > 2147483647 || val < -2147483648) {
                         types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_BOOL.value) {
-                    let cell = data[x][name];
+                    let cell = clean_data(data[x][name]);
+                    if (cell === null) {
+                        col.push(null);
+                        continue;
+                    }
+                    
                     if ((typeof cell) === "string") {
-                        if (cell.toLowerCase() === 'true') {
+                        if (cell.toLowerCase() === "true") {
                             col.push(true);
                         } else {
                             col.push(false);
@@ -208,10 +229,16 @@ function parse_data(data, names, types) {
                         col.push(!!cell);
                     }
                 } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
-                    let val = data[x][name];
-                    col.push(parser.parse(val));
+                    let val = clean_data(data[x][name]);
+                    if (val !== null) {
+                        col.push(parser.parse(val));
+                    } else {
+                        col.push(null);
+                    }
                 } else {
-                    col.push(data[x][name] === null ? (types[types.length - 1].value === 19 ? "" : 0) : "" + data[x][name]); // TODO this is not right - might not be a string.  Need a data cleaner
+                    let val = clean_data(data[x][name]);
+                    // types[types.length - 1].value === 19 ? "" : 0
+                    col.push(val === null ? null : "" + val); // TODO this is not right - might not be a string.  Need a data cleaner
                 }
             }
             cdata.push(col);

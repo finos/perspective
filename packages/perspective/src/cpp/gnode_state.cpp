@@ -293,19 +293,22 @@ t_gstate::update_history(const t_table* tbl)
                  idx < loop_end;
                  ++idx)
             {
-
                 t_bool is_valid = fcolumn->is_valid(idx);
+                t_uindex stableidx = stableidx_vec[idx];
 
-                if (!is_valid)
-                    continue;
+                if (!is_valid) {
+                  t_bool is_cleared = fcolumn->is_cleared(idx);
+                  if (is_cleared) {
+                    scolumn->clear(stableidx);
+                  }
+                  continue;
+                }
 
                 const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
                 t_op op = static_cast<t_op>(*op_ptr);
 
                 if (op == OP_DELETE)
                     continue;
-
-                t_uindex stableidx = stableidx_vec[idx];
 
                 switch (fcolumn->get_dtype())
                 {
@@ -712,8 +715,8 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
     auto op_col = rval->get_column("psp_op").get();
 
     op_col->raw_fill<t_uint8>(OP_INSERT);
-    op_col->valid_raw_fill(true);
-    pkey_col->valid_raw_fill(true);
+    op_col->valid_raw_fill();
+    pkey_col->valid_raw_fill();
 
     std::vector<std::pair<t_tscalar, t_uindex>> order(enable_pkeyed_table_mask_fix ? sz : m_mapping.size());
     if( enable_pkeyed_table_mask_fix )

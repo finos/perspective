@@ -47,7 +47,7 @@ t_tscalar::is_of_type(t_uchar t) const
 bool
 t_tscalar::operator==(const t_tscalar& rhs) const
 {
-    if (m_type != rhs.m_type || m_valid != rhs.m_valid)
+    if (m_type != rhs.m_type || m_status != rhs.m_status)
         return false;
 
     if (m_type == DTYPE_BOOL)
@@ -98,9 +98,9 @@ t_tscalar::is_numeric() const
 void
 t_tscalar::clear()
 {
-    m_type = 0;
+    m_type = DTYPE_NONE;
     m_data.m_uint64 = 0;
-    m_valid = false;
+    m_status = STATUS_INVALID;
 }
 
 t_tscalar
@@ -108,7 +108,7 @@ t_tscalar::canonical(t_dtype dtype)
 {
     t_tscalar rval;
     rval.clear();
-    rval.m_valid = true;
+    rval.m_status = STATUS_VALID;
 
     switch (dtype)
     {
@@ -203,7 +203,7 @@ t_tscalar::set(t_int64 v)
 {
     m_type = DTYPE_INT64;
     m_data.m_int64 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -212,7 +212,7 @@ t_tscalar::set(t_int32 v)
     m_type = DTYPE_INT32;
     m_data.m_uint64 = 0;
     m_data.m_int32 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -221,7 +221,7 @@ t_tscalar::set(t_int16 v)
     m_type = DTYPE_INT16;
     m_data.m_uint64 = 0;
     m_data.m_int16 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -230,7 +230,7 @@ t_tscalar::set(t_int8 v)
     m_type = DTYPE_INT8;
     m_data.m_uint64 = 0;
     m_data.m_int8 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -238,7 +238,7 @@ t_tscalar::set(t_uint64 v)
 {
     m_type = DTYPE_UINT64;
     m_data.m_uint64 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -247,7 +247,7 @@ t_tscalar::set(t_uint32 v)
     m_type = DTYPE_UINT32;
     m_data.m_uint64 = 0;
     m_data.m_uint32 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -256,7 +256,7 @@ t_tscalar::set(t_uint16 v)
     m_type = DTYPE_UINT16;
     m_data.m_uint64 = 0;
     m_data.m_uint16 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -265,7 +265,7 @@ t_tscalar::set(t_uint8 v)
     m_type = DTYPE_UINT8;
     m_data.m_uint64 = 0;
     m_data.m_uint8 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -273,7 +273,7 @@ t_tscalar::set(t_float64 v)
 {
     m_type = DTYPE_FLOAT64;
     m_data.m_float64 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -282,7 +282,7 @@ t_tscalar::set(t_float32 v)
     m_type = DTYPE_FLOAT32;
     m_data.m_uint64 = 0;
     m_data.m_float32 = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -291,7 +291,7 @@ t_tscalar::set(t_bool v)
     m_type = DTYPE_BOOL;
     m_data.m_uint64 = 0;
     m_data.m_bool = v;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -310,7 +310,7 @@ t_tscalar::set(const char* v)
         m_inplace = false;
     }
 
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -319,7 +319,7 @@ t_tscalar::set(const t_date v)
     m_type = DTYPE_DATE;
     m_data.m_uint64 = 0;
     m_data.m_uint32 = v.raw_value();
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -327,7 +327,7 @@ t_tscalar::set(const t_time v)
 {
     m_type = DTYPE_TIME;
     m_data.m_int64 = v.raw_value();
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -335,7 +335,7 @@ t_tscalar::set(const t_none v)
 {
     m_data.m_uint64 = 0;
     m_type = DTYPE_NONE;
-    m_valid = true;
+    m_status = STATUS_VALID;
 }
 
 void
@@ -343,7 +343,7 @@ t_tscalar::set(const t_tscalar v)
 {
     m_type = v.m_type;
     memcpy(&m_data, &(v.m_data), SCALAR_INPLACE_LEN);
-    m_valid = v.m_valid;
+    m_status = v.m_status;
     m_inplace = v.m_inplace;
 }
 
@@ -690,14 +690,14 @@ t_tscalar::repr() const
     std::stringstream ss;
     ss << "t_tscalar< "
        << get_dtype_descr(static_cast<t_dtype>(m_type)) << ", "
-       << to_string() << " valid: " << m_valid << " >";
+       << to_string() << " status: " << m_status << " >";
     return ss.str();
 }
 
 bool
 t_tscalar::is_valid() const
 {
-    return m_valid;
+    return m_status == STATUS_VALID;
 }
 
 bool
@@ -715,7 +715,7 @@ t_tscalar::is_signed() const
 
 t_tscalar::operator bool() const
 {
-    if (!m_valid)
+    if (m_status != STATUS_VALID)
         return false;
 
     switch (m_type)
@@ -810,7 +810,7 @@ t_tscalar::operator bool() const
 t_str
 t_tscalar::to_string(t_bool for_expr) const
 {
-    if (!m_valid)
+    if (m_status != STATUS_VALID)
         return t_str("null");
 
     std::stringstream ss;
@@ -1264,7 +1264,7 @@ t_tscalar::to_uint64() const
 bool
 t_tscalar::begins_with(const t_tscalar& other) const
 {
-    if (!m_valid || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
         return false;
     t_str sstr = to_string();
     t_str ostr = other.to_string();
@@ -1276,7 +1276,7 @@ t_tscalar::begins_with(const t_tscalar& other) const
 bool
 t_tscalar::ends_with(const t_tscalar& other) const
 {
-    if (!m_valid || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
         return false;
     t_str sstr = to_string();
     t_str ostr = other.to_string();
@@ -1290,7 +1290,7 @@ t_tscalar::ends_with(const t_tscalar& other) const
 bool
 t_tscalar::contains(const t_tscalar& other) const
 {
-    if (!m_valid || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
+    if (m_status != STATUS_VALID || m_type != DTYPE_STR || other.m_type != DTYPE_STR)
         return false;
     t_str sstr = to_string();
     t_str ostr = other.to_string();
@@ -1322,7 +1322,7 @@ hash_value(const t_tscalar& s)
     }
 
     boost::hash_combine(seed, s.m_type);
-    boost::hash_combine(seed, s.m_valid);
+    boost::hash_combine(seed, s.m_status);
     return seed;
 }
 
@@ -1509,12 +1509,12 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const
         break;
         case FILTER_OP_IS_VALID:
         {
-            return m_valid;
+            return m_status == STATUS_VALID;
         }
         break;
         case FILTER_OP_IS_NOT_VALID:
         {
-            return !m_valid;
+            return m_status != STATUS_VALID;
         }
         break;
         default:

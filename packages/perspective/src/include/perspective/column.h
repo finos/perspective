@@ -102,7 +102,7 @@ class PERSPECTIVE_EXPORT t_column
     void push_back(DATA_T elem);
 
     template <typename DATA_T>
-    void push_back(DATA_T elem, t_bool valid);
+    void push_back(DATA_T elem, t_status status);
 
     t_dtype get_dtype() const;
 
@@ -133,19 +133,18 @@ class PERSPECTIVE_EXPORT t_column
     const T* get_nth(t_uindex idx) const;
 
     // idx is in items
-    const t_bool* get_nth_valid(t_uindex idx) const;
-
-    // idx is in items
-    t_bool* get_nth_valid(t_uindex idx);
+    const t_status* get_nth_status(t_uindex idx) const;
 
     // idx is in items
     template <typename T>
     void set_nth(t_uindex idx, T v);
 
     template <typename T>
-    void set_nth(t_uindex idx, T v, t_bool valid);
+    void set_nth(t_uindex idx, T v, t_status status);
 
     void set_valid(t_uindex idx, t_bool valid);
+
+    void set_status(t_uindex idx, t_status status);
 
     void set_size(t_uindex idx);
 
@@ -168,9 +167,11 @@ class PERSPECTIVE_EXPORT t_column
     t_tscalar get_scalar(t_uindex idx) const;
     void set_scalar(t_uindex idx, t_tscalar value);
 
-    t_bool is_valid_enabled() const;
+    t_bool is_status_enabled() const;
 
     t_bool is_valid(t_uindex idx) const;
+
+    t_bool is_cleared(t_uindex idx) const;
 
     t_bool is_vlen() const;
 
@@ -186,7 +187,7 @@ class PERSPECTIVE_EXPORT t_column
     void pprint() const;
 
     template <typename DATA_T>
-    void set_nth_body(t_uindex idx, DATA_T elem, bool valid);
+    void set_nth_body(t_uindex idx, DATA_T elem, t_status status);
 
     t_column_recipe get_recipe() const;
 
@@ -207,7 +208,7 @@ class PERSPECTIVE_EXPORT t_column
 
     t_col_sptr clone(const t_mask& mask) const;
 
-    void valid_raw_fill(t_bool value);
+    void valid_raw_fill();
 
     template <typename DATA_T>
     void copy_helper(const t_column* other,
@@ -219,6 +220,9 @@ class PERSPECTIVE_EXPORT t_column
               t_uindex offset);
 
     void clear(t_uindex idx);
+    void clear(t_uindex idx, t_status status);
+
+    void unset(t_uindex idx);
 
     void verify() const;
     void verify_size() const;
@@ -242,11 +246,11 @@ class PERSPECTIVE_EXPORT t_column
     t_vocab_sptr m_vocab;
 
     // Missing value support
-    t_lstore_sptr m_valid;
+    t_lstore_sptr m_status;
 
     t_uindex m_size;
 
-    bool m_valid_enabled;
+    bool m_status_enabled;
 
     t_bool m_from_recipe;
 
@@ -286,11 +290,11 @@ PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx,
 
 template <>
 PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
-    t_uindex idx, const char* elem, t_bool valid);
+    t_uindex idx, const char* elem, t_status status);
 
 template <>
 PERSPECTIVE_EXPORT void
-t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_bool valid);
+t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_status status);
 
 template <>
 PERSPECTIVE_EXPORT const char*
@@ -352,12 +356,12 @@ t_column::push_back(DATA_T elem)
 
 template <typename DATA_T>
 void
-t_column::push_back(DATA_T elem, t_bool valid)
+t_column::push_back(DATA_T elem, t_status status)
 {
-    PSP_VERBOSE_ASSERT(is_valid_enabled(),
+    PSP_VERBOSE_ASSERT(is_status_enabled(),
                        "Validity not enabled for column");
     m_data->push_back(elem);
-    m_valid->push_back(valid);
+    m_status->push_back(status);
     ++m_size;
 }
 
@@ -370,22 +374,22 @@ t_column::set_nth(t_uindex idx, T v)
     COLUMN_CHECK_ACCESS(idx);
     m_data->set_nth<T>(idx, v);
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        m_valid->set_nth<t_bool>(idx, true);
+        m_status->set_nth<t_status>(idx, STATUS_VALID);
     }
 }
 
 template <typename T>
 void
-t_column::set_nth(t_uindex idx, T v, t_bool valid)
+t_column::set_nth(t_uindex idx, T v, t_status status)
 {
     COLUMN_CHECK_ACCESS(idx);
     m_data->set_nth<T>(idx, v);
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        m_valid->set_nth<t_bool>(idx, valid);
+        m_status->set_nth<t_status>(idx, status);
     }
 }
 
@@ -415,7 +419,7 @@ t_column::fill(VEC_T& vec,
 
 template <typename DATA_T>
 void
-t_column::set_nth_body(t_uindex idx, DATA_T elem, bool valid)
+t_column::set_nth_body(t_uindex idx, DATA_T elem, t_status status)
 {
     COLUMN_CHECK_ACCESS(idx);
     PSP_VERBOSE_ASSERT(m_dtype == DTYPE_STR,
@@ -423,9 +427,9 @@ t_column::set_nth_body(t_uindex idx, DATA_T elem, bool valid)
     t_uindex interned = m_vocab->get_interned(elem);
     m_data->set_nth<t_uindex>(idx, interned);
 
-    if (is_valid_enabled())
+    if (is_status_enabled())
     {
-        m_valid->set_nth<t_bool>(idx, valid);
+        m_status->set_nth<t_status>(idx, status);
     }
 }
 
@@ -470,11 +474,11 @@ t_column::copy_helper(const t_column* other,
         base[idx + offset] = o_base[indices[idx]];
     }
 
-    if (is_valid_enabled() && other->is_valid_enabled())
+    if (is_status_enabled() && other->is_status_enabled())
     {
         for (t_uindex idx = 0; idx < eidx; ++idx)
         {
-            set_valid(idx + offset, other->is_valid(indices[idx]));
+            set_status(idx + offset, *other->get_nth_status(indices[idx]));
         }
     }
     COLUMN_CHECK_VALUES();

@@ -137,11 +137,11 @@ class PERSPECTIVE_EXPORT t_table
 
     t_column* add_column(const t_str& cname,
                          t_dtype dtype,
-                         t_bool valid_enabled);
+                         t_bool status_enabled);
 
     t_col_sptr make_column(const t_str& colname,
                            t_dtype dtype,
-                           t_bool valid_enabled);
+                           t_bool status_enabled);
     void verify() const;
     void set_capacity(t_uindex idx);
 
@@ -268,24 +268,27 @@ t_table::flatten_helper_2(ROWPACK_VEC_T& sorted,
     {
         t_bool added = false;
         t_index fragidx = 0;
+        t_status status = STATUS_INVALID;
         for (t_index spanidx = rec.m_eidx - 1;
              spanidx >= t_index(rec.m_bidx);
              --spanidx)
         {
             const auto& sort_rec = sorted[spanidx];
             fragidx = sort_rec.m_idx;
-            if (scol->is_valid(fragidx))
+            status = *(scol->get_nth_status(fragidx));
+            if (status != STATUS_INVALID)
             {
                 added = true;
                 break;
             }
+            
         }
 
         if (added)
         {
             dcol->set_nth<DATA_T>(rec.m_store_idx,
                                   *(scol->get_nth<DATA_T>(fragidx)),
-                                  true);
+                                  status);     
         }
     }
 }
@@ -546,8 +549,8 @@ t_table::flatten_helper_1(FLATTENED_T flattened) const
         );
 #endif
 
-    d_pkey_col->valid_raw_fill(true);
-    d_op_col->valid_raw_fill(true);
+    d_pkey_col->valid_raw_fill();
+    d_op_col->valid_raw_fill();
 }
 
 typedef std::shared_ptr<t_table> t_table_sptr;

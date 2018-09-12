@@ -156,7 +156,7 @@ t_ctx1::get_data(t_tvidx start_row,
                                                 agg_ridx,
                                                 agg_pridx);
             if (!value.is_valid())
-                value.set(none);
+                value.set(none); // todo: fix null handling
             tmpvalues[(ridx - ext.m_srow) * ncols + 1 + aggidx].set(
                 value);
         }
@@ -543,7 +543,7 @@ t_ctx1::pprint() const
                                                 agg_ridx,
                                                 agg_pridx);
             if (!value.is_valid())
-                value.set(none);
+                value.set(none); // todo: fix null handling
 
             std::cout << value << ", ";
         }

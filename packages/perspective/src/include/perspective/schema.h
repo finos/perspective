@@ -55,7 +55,7 @@ struct PERSPECTIVE_EXPORT t_schema
     t_dtypevec m_types;
     t_suidxmap m_colidx_map;
     t_sdtmap m_coldt_map;
-    t_boolvec m_valid_enabled;
+    t_boolvec m_status_enabled;
     t_bool m_is_pkey;
     t_uindex m_pkeyidx;
     t_uindex m_opidx;
