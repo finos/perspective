@@ -11,7 +11,11 @@ import buffer from "../../obj/psp.sync.wasm";
 
 const perspective = require('./perspective.js');
 
+const fs = require('fs');
+const http = require("http");
 const WebSocket = require('ws');
+
+const path = require('path');
 
 const load_perspective = require("../../obj/psp.sync.js").load_perspective;
 
@@ -26,14 +30,49 @@ module.exports = perspective(Module);
 let CLIENT_ID_GEN = 0;
 
 /**
- * A Server instance for a remote perspective.
+ * A WebSocket server instance for a remote perspective, and convenience HTTP
+ * file server for easy hosting.
  */
 class WebSocketHost extends module.exports.Host {
 
-    constructor(port = 8080) {
+    constructor({port, rootDir}) {
+        port = port || 8080;
+        rootDir = rootDir || "./";
         super();
-        this.REQS = {};        
-        this._wss = new WebSocket.Server({port: port, perMessageDeflate: true});
+
+        const server = http.createServer(function (request, response) {
+            var filePath = rootDir + request.url;
+            var extname = path.extname(filePath);
+            var contentType = {
+                '.js': 'text/javascript',
+                '.css': 'text/css',
+                '.json': 'application/json',
+                '.arrow': 'arraybuffer',
+                '.wasm': 'application/wasm'
+            }[extname] || 'text/html';
+
+            fs.readFile(filePath, function(error, content) {
+                if (error) {
+                    if(error.code == 'ENOENT'){
+                        console.error(`404 ${request.url}`);
+                        response.writeHead(404);
+                        response.end(content, 'utf-8');
+                    } else {
+                        console.error(`500 ${request.url}`);
+                        response.writeHead(500);
+                        response.end(); 
+                    }
+                } else {
+                    console.log(`200 ${request.url}`);
+                    response.writeHead(200, { 'Content-Type': contentType });
+                    response.end(content, extname === '.arrow' ? 'user-defined' : 'utf-8');
+                }
+            });
+
+        });
+
+        this.REQS = {}; 
+        this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
         this._wss.on('connection', ws => {
             ws.id = CLIENT_ID_GEN++;
             ws.on('message', msg => {
@@ -50,6 +89,15 @@ class WebSocketHost extends module.exports.Host {
             });
             ws.on('error', console.error);
         });
+
+        server.on('upgrade', function upgrade(request, socket, head) {
+            console.log('200    *** websocket upgrade ***');
+            this._wss.handleUpgrade(request, socket, head, function done (sock) {
+                this._wss.emit('connection', sock, request);
+            }.bind(this));
+        }.bind(this));
+
+        server.listen(port);
         console.log(`Listening on port ${port}`);
     }
 

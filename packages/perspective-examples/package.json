@@ -35,7 +35,7 @@
     "copy:src-csv": "cp src/csv/* build",
     "copy:src-css": "cp src/css/* build",
     "copy:src-js": "cp src/js/* build",
-    "host": "http-server build/",
+    "host": "node build/node_remote.js",
     "clean": "find build -mindepth 1 -delete"
   },
   "repository": {
@@ -67,7 +67,6 @@
     "chart.js": "^2.7.1",
     "css-loader": "^0.28.7",
     "documentation": "^5.3.3",
-    "http-server": "^0.10.0",
     "jest": "^22.0.4",
     "less": "^2.7.2",
     "less-loader": "^4.0.5",
