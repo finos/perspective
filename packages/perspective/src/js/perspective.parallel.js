@@ -185,9 +185,15 @@ class WebSocketWorker extends worker {
 export default {
     worker: function (url) {
         if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
-            // TODO: Should this be here? Where is it defined?
-            // eslint-disable-next-line no-undef
-            return perspective;
+            /* This is a nasty edge case, specifically regarding when IE tries to load perspective as a WebWorker, 
+               but as a cross-origin request. This is not supported by IE AFAIK, so we instead 
+               download the inline version of the asmjs build of perspective, by inlining the script tag into <head> 
+               via Javascript. 
+               
+               This binds the perspective symbol globally, and a reference to this symbol is returned here when an 
+               attempt to instantiate a worker is made.
+            */
+            return window.perspective;
         }
         if (url) {
             return new WebSocketWorker(url);
