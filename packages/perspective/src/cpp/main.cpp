@@ -1037,13 +1037,15 @@ main(int argc, char** argv)
     std::cout << "Perspective initialized successfully" << std::endl;
     EM_ASM({
 
-        if (self.dispatchEvent && !self._perspective_initialized && self.document) {
-            self._perspective_initialized = true;
-            var event = self.document.createEvent("Event");
-            event.initEvent("perspective-ready", false, true);
-            self.dispatchEvent(event);
-        } else if (!self.document && typeof self !== "undefined") {
-            self.postMessage({});
+        if (typeof self !== "undefined") {
+            if (self.dispatchEvent && !self._perspective_initialized && self.document) {
+                self._perspective_initialized = true;
+                var event = self.document.createEvent("Event");
+                event.initEvent("perspective-ready", false, true);
+                self.dispatchEvent(event);
+            } else if (!self.document && self.postMessage) {
+                self.postMessage({});
+            }
         }
 
     });

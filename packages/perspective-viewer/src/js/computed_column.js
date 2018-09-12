@@ -54,6 +54,26 @@ const day_bucket = function (val) {
     return +date;
 }
 
+const week_bucket = function (val) {
+    let date = new Date(val);
+    let day = date.getDay();
+    let diff = date.getDate() - day + (day == 0 ? -6 : 1); 
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setDate(diff);
+    return +date;
+}
+
+const month_bucket = function (val) {
+    let date = new Date(val);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    date.setDate(1);
+    return +date;
+}
+
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
 @bindTemplate(template) // eslint-disable-next-line no-unused-vars
@@ -69,6 +89,8 @@ class ComputedColumn extends HTMLElement {
             'month_of_year': new Computation('month_of_year', 'date', 'string', month_of_year),
             'hour_bucket': new Computation('hour_bucket', 'date', 'date', hour_bucket),
             'day_bucket': new Computation('day_bucket', 'date', 'date', day_bucket),
+            'week_bucket': new Computation('week_bucket', 'date', 'date', week_bucket),
+            'month_bucket': new Computation('month_bucket', 'date', 'date', month_bucket),
             'uppercase': new Computation('uppercase', 'string', 'string', x => x.toUpperCase()),
             'lowercase': new Computation('lowercase', 'string', 'string', x => x.toLowerCase()),
             'length': new Computation('length', 'string', 'integer', x => x.length),
