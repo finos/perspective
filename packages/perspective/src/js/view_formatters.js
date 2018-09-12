@@ -17,7 +17,7 @@ const jsonFormatter = {
     addColumnValue: (data, row, colName, value) => row[colName].unshift(value),
     addRow: (data, row) => data.push(row),
     formatData: data => data,
-    slice: (data, start, length) => data.slice(start, length)
+    slice: (data, start) => data.slice(start)
 };
 
 const csvFormatter = Object.assign({}, jsonFormatter, {
@@ -43,11 +43,12 @@ const jsonTableFormatter = {
     },
     addRow: () => {},
     formatData: data => data,
-    slice: (data, start, length) => {
+    slice: (data, start) => {
+        let new_data = {}
         for (let x in data) {
-            data[x].splice(start, length);
+            new_data[x] = data[x].slice(start);
         }
-        return data;
+        return new_data;
     }
 }
 

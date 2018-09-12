@@ -78,10 +78,10 @@ module.exports = (perspective) => {
 
         it("multiple single element removes", async function () {
             let table = perspective.table(meta, {index: "x"});
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 200; i++) {
                 table.update([{x: i, y: "test", z: false}]);
             }
-            for (let i = 1; i < 100; i++) {
+            for (let i = 1; i < 200; i++) {
                 table.remove([i]);
             }
             let view = table.view();
@@ -413,7 +413,6 @@ module.exports = (perspective) => {
                 {__ROW_PATH__: [ 2 ], y: 0},
             ]);
         });
-
 
         it('can be removed entirely', async function () {
             var table = perspective.table([
