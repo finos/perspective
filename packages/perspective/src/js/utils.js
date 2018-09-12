@@ -76,7 +76,7 @@ export function detectChrome() {
  *     file : The file name itself.
  */
 export function ScriptPath() {
-    var scriptPath = '', pathParts;
+    var pathParts;
     try {
         throw new Error();
     } catch(e) {

@@ -54,7 +54,9 @@ const day_bucket = function (val) {
     return +date;
 }
 
-@bindTemplate(template)
+// Eslint complains here because we don't do anything, but actually we globally
+// register this class as a CustomElement
+@bindTemplate(template) // eslint-disable-next-line no-unused-vars
 class ComputedColumn extends HTMLElement {
     constructor() {
         super();
