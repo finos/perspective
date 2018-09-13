@@ -38,7 +38,7 @@ function column_to_series(data, sname, gname) {
     let s = {
         name: sname,
         connectNulls: true,
-        data: data.map(val => (val === undefined || val === "" ? null : val))
+        data
     };
 
     if (gname) {
@@ -185,10 +185,13 @@ class ColumnIterator {
         for (let name of this.column_names) {
             let data = this.columns[name];
             if (this.columns.__ROW_PATH__) {
-                data = data.filter(
-                    (_, idx) => {
-                        return this.columns.__ROW_PATH__[idx].length === this.pivot_length;
-                    });        
+                let filtered_data = [];
+                for (let i = 0; i < data.length; i++) {
+                    if (this.columns.__ROW_PATH__[i].length === this.pivot_length) {
+                        filtered_data.push(data[i]);
+                    }
+                }
+                data = filtered_data; 
             }
             yield {name, data};
         }
@@ -207,7 +210,10 @@ export function make_y_data(cols, pivots, hidden) {
         } else {
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
         }
-        let s = column_to_series(col.data, sname, gname);
+        let s = column_to_series(
+            col.data.map(val => val === undefined || val === "" ? null : val), 
+            sname, 
+            gname);
         series.push(s);
     }
     
@@ -243,6 +249,7 @@ export function make_y_heatmap_data(js, pivots, hidden) {
  * XY
  */
 
+// TODO: rewrite
 class TickClean {
     constructor(type) {
         this.dict = {};
@@ -271,6 +278,7 @@ class TickClean {
 class MakeTick {
     constructor(schema, columns) {
         this.schema = schema;
+        // TODO: rewrite
         this.xaxis_clean = new TickClean(schema[columns[0]]);
         this.yaxis_clean = new TickClean(schema[columns[1]]);
         this.color_clean = new TickClean(schema[columns[2]]);
@@ -315,10 +323,147 @@ class MakeTick {
         }
         return tick;
     }
+
+    make_col(cols, col_names, num_cols, pivot_length, row_path, color_range) {
+        let ticks = [];
+        let data = cols;
+
+        if (cols.length === 0) {
+            return ticks;
+        }
+
+        if (cols.length === undefined) {
+            // Dealing with a ColumnIterator object - must map data to 2D array properly
+            data = [];
+            for (let name of col_names) {
+                data.push(cols[name]);
+            }
+        }
+
+        for (let i = 0; i < data[0].length; i++) {
+            if(data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
+                data[0][i] = null;
+                continue;
+            }
+
+            let tick = {};
+ 
+            if (row_path) {
+                if (row_path[i].length !== pivot_length) {
+                    continue;
+                }
+
+                tick.name = row_path[i].join(", ");
+            }
+
+            // set x-axis
+            tick.x = data[0][i];
+            tick.x = this.xaxis_clean.clean(tick.x);
+
+            if (num_cols > 1) {
+                // set y-axis
+                tick.y = data[1][i];
+                tick.y = this.yaxis_clean.clean(tick.y);
+            }
+
+            if (num_cols > 2) {
+                // set color
+                let color = data[2][i];
+                if (this.schema[col_names[2]] === "string") {
+                    let color_index = this.color_clean.clean(color);
+                    tick.marker = {
+                        lineColor: color_index,
+                        fillColor: color_index
+                    };
+                } else {
+                    if (!isNaN(color)) {
+                        color_range[0] = Math.min(color_range[0], color);
+                        color_range[1] = Math.max(color_range[1], color);
+                    }
+                    tick.colorValue = color;
+                }
+            }
+
+            if (num_cols > 3) {
+                // set size
+                let size = data[3][i];
+                tick.z = isNaN(size) ? 1 : size;
+            }
+
+            ticks.push(tick);
+        }
+
+        return ticks;
+    }    
 }
 
-export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
-    // TODO: use column data
+export async function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
+    const columns = new ColumnIterator(cols, hidden, pivots.length);
+    let series = [];
+    let color_range = [Infinity, -Infinity];
+    let make_tick = new MakeTick(schema, columns.column_names);
+
+    let row_path = columns.columns.__ROW_PATH__;
+
+    if (col_pivots.length === 0) {
+        let ticks = make_tick.make_col(
+            columns.columns,
+            columns.column_names,
+            aggs.length,
+            columns.pivot_length,
+            row_path,
+            color_range
+        );
+            
+        let s = column_to_series(ticks, ' ');   
+        series.push(s); 
+    } else {
+        let groups = {};
+
+        if (row_path) {
+            // remove all total rows
+            let clean_row_path = [];
+
+            for (let i = 0; i < row_path.length; i++) {
+                if (row_path[i].length === columns.pivot_length) {
+                    clean_row_path.push(row_path[i]);
+                }
+            }
+            
+            row_path = clean_row_path;
+        }
+
+        for (let col of columns) {
+            let column_levels = col.name.split(COLUMN_SEPARATOR_STRING);
+            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
+
+            if (groups[group_name] === undefined) {
+                groups[group_name] = [];
+            }
+
+            groups[group_name].push(col.data);
+        }
+
+        // FIXME: this is the heaviest loop
+        for (let name in groups) {
+            let ticks = make_tick.make_col(
+                groups[name], 
+                aggs, 
+                aggs.length,
+                columns.pivot_length,
+                row_path, 
+                color_range,
+            );
+
+            let s = column_to_series(ticks, name);
+            series.push(s);
+        }
+    }
+
+    return [series, {categories: make_tick.xaxis_clean.names}, color_range, {categories: make_tick.yaxis_clean.names}];
+}
+
+export async function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
     let rows = new TreeAxisIterator(pivots.length, js);
     let rows2 = new RowIterator(rows, hidden);
     let series = [];
@@ -344,7 +489,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
         });
         for (let prop of cols) {
             let column_levels = prop.split(COLUMN_SEPARATOR_STRING);
-            let group_name = column_levels.slice(0, column_levels.length - 1).join(",") || " ";
+            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
             if (prev === undefined) {
                 prev = group_name;
             }
@@ -368,8 +513,9 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
                 s.data.push(tick);
             }
         }
-    }
-    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];
+    }   
+
+    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];   
 }
 
 /******************************************************************************

@@ -13,7 +13,7 @@ import "../less/highcharts.less";
 
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
-import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
+import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 
 export const draw = mode =>
@@ -35,32 +35,35 @@ export const draw = mode =>
             this._charts = [];
         }
 
-        if (this.hasAttribute("updating") && this._charts.length > 0) {
-            for (let chart of this._charts) {
-                try {
-                    chart.destroy();
-                } catch (e) {
-                    console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
-                }
-            }
-            this._charts = [];
-        }
-
-        let configs = [],
-            xaxis_name = aggregates.length > 0 ? aggregates[0].column : undefined,
-            xaxis_type = schema[xaxis_name],
-            yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
-            yaxis_type = schema[yaxis_name],
-            xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
-            xtree_type = tschema[xtree_name],
-            ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
-            ytree_type = tschema[ytree_name],
-            num_aggregates = aggregates.length - hidden.length;
+    let configs = [],
+        xaxis_name = aggregates.length > 0 ? aggregates[0].column : undefined,
+        xaxis_type = schema[xaxis_name],
+        yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
+        yaxis_type = schema[yaxis_name],
+        xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
+        xtree_type = tschema[xtree_name],
+        ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
+        ytree_type = tschema[ytree_name],
+        num_aggregates = aggregates.length - hidden.length;
 
     if (mode === 'scatter') {
-        js = await view.to_json();
-        let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
-        let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        let s;
+        let config = configs[0] = default_config.call(this, aggregates, mode);
+
+        // determine whether to use column/row data
+        if (col_pivots.length === 0) {
+            const cols = await view.to_columns();
+            s = await make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        } else {  
+            js = await view.to_json();
+            s = await make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        } 
+
+        const series = s[0];
+        const xtop = s[1];
+        const colorRange = s[2];
+        const ytop = s[3];
+
         config.legend.floating = series.length <= 20;
         config.legend.enabled = col_pivots.length > 0;
         config.series = series;
@@ -184,9 +187,21 @@ export const draw = mode =>
             configs.push(config);
         }
     } else if (mode === 'line') {
-        js = await view.to_json();
+        let s;
         let config = configs[0] = default_config.call(this, aggregates, mode, js, col_pivots);
-        let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+
+        if (col_pivots.length === 0) {
+            const cols = await view.to_columns();
+            s = await make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        } else {  
+            js = await view.to_json();
+            s = await make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+        } 
+        
+        const series = s[0];
+        const xtop = s[1];
+        const ytop = s[3];
+
         const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
         config.legend.floating = series.length <= 20;
         config.legend.enabled = col_pivots.length > 0;
@@ -222,12 +237,35 @@ export const draw = mode =>
                 labels: {overflow: 'justify'}
             }
 
-            this._charts = this._charts.map(x => x());
+    if (this.hasAttribute('updating') && this._charts.length > 0) {
+        for (let chart of this._charts) {
+            try {
+                chart.destroy();
+            } catch (e) {
+                console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+            }
         }
+        this._charts = [];
+    }
 
-        if (!this._charts.every(x => document.contains(x.renderTo))) {
-            for (let e of Array.prototype.slice.call(el.children)) {
-                el.removeChild(e);
+    if (this._charts.length > 0) {
+        let idx = 0;
+        for (let chart of this._charts) {
+            let config = configs[idx++];
+            if (mode === 'scatter') {
+                let conf = {
+                    series: config.series,
+                    plotOptions: {}
+                };
+                set_tick_size.call(this, conf);
+                chart.update(conf);
+            } else if (mode.indexOf('line') > -1) {
+                chart.update({
+                    series: config.series
+                });
+            } else {
+                let opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
+                chart.update(opts);
             }
             this._charts.map(x => el.appendChild(x.renderTo));
         }
@@ -237,3 +275,21 @@ export const draw = mode =>
             this._charts.map(x => x.reflow());
         }
     };
+
+        for (let i = 0; i < this._charts.length; i++) {
+            this._charts[i] = this._charts[i]();
+        }
+        //this._charts = this._charts.map(x => x());
+    }
+
+    if (!this._charts.every(x => document.contains(x.renderTo))) {
+        for (let e of Array.prototype.slice.call(el.children)) { el.removeChild(e); }
+        this._charts.map(x => el.appendChild(x.renderTo));
+    }
+
+    // TODO resize bug in Highcharts?
+    if (configs.length > 1) {
+       this._charts.map(x => x.reflow());
+    }
+}
+
