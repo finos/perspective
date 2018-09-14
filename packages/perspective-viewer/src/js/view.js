@@ -800,7 +800,9 @@ class ViewPrivate extends HTMLElement {
         if (this._table) {
             let table = this._table;
             this._table = undefined;
-            all.push(table.delete());
+            if (table._owner_viewer && table._owner_viewer === this) {
+                all.push(table.delete());
+            }
         }
         return Promise.all(all);
     }
@@ -1305,6 +1307,7 @@ class View extends ViewPrivate {
             table = data;
         } else {
             table = get_worker().table(data, options);
+            table._owner_viewer = this;
         }
         let _promises = [loadTable.call(this, table)];
         for (let slave of this._slaves) {
