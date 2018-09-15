@@ -234,6 +234,25 @@ module.exports = (perspective) => {
 
     });
 
+    describe("Limit", function () {
+
+        it("{limit: 2} with table of size 4", async function () {
+            var table = perspective.table(data, {limit: 2});
+            var view = table.view();
+            let result = await view.to_json();
+            expect(data.slice(2)).toEqual(result);
+        });
+
+        it("{limit: 5} with 2 updates of size 4", async function () {
+            var table = perspective.table(data, {limit: 5});
+            table.update(data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(data.slice(1).concat(data.slice(3, 4)).concat(data.slice(0, 1))).toEqual(result);
+        });
+
+    });
+
     describe("Indexed", function() {
 
         it("{index: 'x'} (int)", async function () {
