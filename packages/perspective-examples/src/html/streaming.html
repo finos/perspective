@@ -14,6 +14,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
         <script src="mobile_fix.js"></script>
+        <script src="perspective.js"></script>
         <script src="perspective.view.js"></script>
         <script src="hypergrid.plugin.js"></script>
         <script src="highcharts.plugin.js"></script>
@@ -23,7 +24,7 @@
     </head>
     <body>
 
-        <perspective-viewer index='id' row-pivots='["name"]' column-pivots='["client"]' columns='["chg","vol"]'></perspective-viewer>
+        <perspective-viewer row-pivots='["name"]' column-pivots='["client"]' columns='["chg","vol"]'></perspective-viewer>
 
         <script>
 
@@ -55,8 +56,6 @@
                 "Krusty",
             ]
 
-            var id = 0;
-
             function newRows() {
                 rows = [];
                 for (var x = 0; x < 5; x ++) {
@@ -68,22 +67,20 @@
                         bid: Math.random() * 10 + 90,
                         ask: Math.random() * 10 + 100,
                         vol: Math.random() * 10 + 100,                    
-                        id: id
                     });
-                    id = (id + 1) % 500;
                 }
                 return rows;
             }
 
             window.addEventListener('WebComponentsReady', function () {
                 var elem = document.getElementsByTagName('perspective-viewer')[0]; 
+                var table = perspective.worker().table(newRows(), {limit: 500});
+                elem.load(table);
 
-                function postRow() {
+                (function postRow() {
                     elem.update(newRows());
                     setTimeout(postRow, 50);
-                }
-
-                postRow();
+                })();
             });
 
         </script>

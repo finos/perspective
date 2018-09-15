@@ -538,6 +538,7 @@ make_table(
     val j_dtypes,
     val j_data,
     t_uint32 offset,
+    t_uint32 limit,
     t_str index,
     t_bool is_arrow,
     t_bool is_delete
@@ -572,8 +573,8 @@ make_table(
 
         for (auto ridx = 0; ridx < tbl->size(); ++ridx)
         {
-            key_col->set_nth<t_int32>(ridx, ridx + offset);
-            okey_col->set_nth<t_int32>(ridx, ridx + offset);
+            key_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
+            okey_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
         }
     } else {
         tbl->clone_column(index, "psp_pkey");

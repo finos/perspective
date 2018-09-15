@@ -800,7 +800,9 @@ class ViewPrivate extends HTMLElement {
         if (this._table) {
             let table = this._table;
             this._table = undefined;
-            all.push(table.delete());
+            if (table._owner_viewer && table._owner_viewer === this) {
+                all.push(table.delete());
+            }
         }
         return Promise.all(all);
     }
@@ -1183,19 +1185,6 @@ class View extends ViewPrivate {
     }
 
     /**
-     * The column name to index by.  Due to the mutable nature of 
-     * `perspective.table`, `index` cannot be modified once `load` or `update`
-     * has been called.
-     * 
-     * @type {string}
-     */
-    set index(index) {
-        if (this._table) {
-            console.error(`Setting 'index' attribute after initialization has no effect`);
-        }
-    }
-
-    /**
      * Sets this `perspective.table.view`'s `row_pivots` property.
      * 
      * @name row-pivots
@@ -1254,7 +1243,7 @@ class View extends ViewPrivate {
      */
     get worker() {
         if (this._table) {
-            return this._table.worker;
+            return this._table._worker;
         }
         return get_worker();
     }
@@ -1305,6 +1294,7 @@ class View extends ViewPrivate {
             table = data;
         } else {
             table = get_worker().table(data, options);
+            table._owner_viewer = this;
         }
         let _promises = [loadTable.call(this, table)];
         for (let slave of this._slaves) {

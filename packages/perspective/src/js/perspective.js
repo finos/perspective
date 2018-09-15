@@ -896,7 +896,7 @@ view.prototype.on_delete = function (callback) {
  * @class
  * @hideconstructor
  */
-function table(gnode, pool, index, computed) {
+function table(gnode, pool, index, computed, limit, limit_index) {
     this.gnode = gnode;
     this.pool = pool;
     this.name = Math.random() + "";
@@ -906,6 +906,8 @@ function table(gnode, pool, index, computed) {
     this.computed = computed || [];
     this.callbacks = [];
     this.views = [];
+    this.limit = limit;
+    this.limit_index = limit_index;
 }
 
 table.prototype._update_callback = function () {
@@ -1325,9 +1327,21 @@ table.prototype.update = function (data) {
 
     let tbl;
     try {
-        tbl = __MODULE__.make_table(pdata.row_count || 0, 
-            pdata.names, pdata.types, pdata.cdata,
-            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, false);
+        tbl = __MODULE__.make_table(
+            pdata.row_count || 0, 
+            pdata.names, 
+            pdata.types, 
+            pdata.cdata,
+            this.limit_index,
+            this.limit || 4294967295, 
+            this.index || "", 
+            pdata.is_arrow, false
+        );
+
+        this.limit_index += pdata.row_count;
+        if (this.limit) {
+            this.limit_index = this.limit_index % this.limit;
+        }
 
         // Add any computed columns
         this._calculate_computed(tbl, this.computed);
@@ -1370,9 +1384,22 @@ table.prototype.remove = function (data) {
 
     let tbl;
     try {
-        tbl = __MODULE__.make_table(pdata.row_count || 0, 
-            pdata.names, pdata.types, pdata.cdata,
-            this.gnode.get_table().size(), this.index || "", pdata.is_arrow, true);
+        tbl = __MODULE__.make_table(
+            pdata.row_count || 0, 
+            pdata.names, 
+            pdata.types, 
+            pdata.cdata,
+            this.limit_index,
+            this.limit || 4294967295,
+            this.index || "", 
+            pdata.is_arrow, 
+            true
+        );
+
+        this.limit_index += pdata.cdata.length;
+        if (this.limit) {
+            this.limit_index = this.limit_index % this.limit;
+        }
 
         __MODULE__.fill(this.pool, this.gnode, tbl);
         this.initialized = true;
@@ -1775,8 +1802,13 @@ const perspective = {
      *     a string is supplied, the parameter as parsed as a CSV.
      * @param {Object} [options] An optional options dictionary.
      * @param {string} options.index The name of the column in the resulting
-     *     table to treat as an index.  When updating this table, rows sharing anb
-     *     index of a new row will be overwritten.
+     *     table to treat as an index.  When updating this table, rows sharing an
+     *     index of a new row will be overwritten. `index` is mutually exclusive
+     *     to `limit`
+     * @param {integer} options.limit The maximum number of rows that can be 
+     *     added to this table.  When exceeded, old rows will be overwritten in
+     *     the order they were inserted.  `limit` is mutually exclusive to 
+     *     `index`.
      *
      * @returns {table} A new {@link table} object.
      */
@@ -1799,15 +1831,20 @@ const perspective = {
             chunked = pdata.row_count > CHUNKED_THRESHOLD;
         }
 
+
+        if (options.index && options.limit) {
+            throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
+        }
+
         if (options.index && pdata.names.indexOf(options.index) === -1) {
             throw `Specified index '${options.index}' does not exist in data.`;
         }
 
-        let tbl, gnode, pool, pages;
+        let tbl, gnode, pool, pages, limit_index = 0;
 
         try {
             // Create perspective pool
-            pool = new __MODULE__.t_pool({_update_callback: function() {} } );
+            pool = new __MODULE__.t_pool({_update_callback: function() {}} );
 
             if (chunked) {
                 pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
@@ -1816,9 +1853,21 @@ const perspective = {
             }
 
             // Fill t_table with data
-            tbl = __MODULE__.make_table(pages[0].length || 0,
-                pdata.names, pdata.types, pages,
-                0, options.index, pdata.is_arrow, false);
+            tbl = __MODULE__.make_table(
+                pages[0].length || 0,
+                pdata.names, 
+                pdata.types, 
+                pages,
+                0,
+                options.limit || 4294967295, 
+                options.index,
+                pdata.is_arrow, 
+                false
+            );
+            limit_index = tbl.size();
+            if (options.limit) {
+                limit_index = limit_index % options.limit;
+            }
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
@@ -1829,15 +1878,28 @@ const perspective = {
                     tbl.delete();
                     pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
                 
-                    tbl = __MODULE__.make_table(pages[0].length || 0,
-                        pdata.names, pdata.types, pages,
-                        gnode.get_table().size(), options.index, pdata.is_arrow, false);
+                    tbl = __MODULE__.make_table(
+                        pages[0].length || 0,
+                        pdata.names, 
+                        pdata.types, 
+                        pages,
+                        limit_index,
+                        options.limit || 4294967295, 
+                        options.index, 
+                        pdata.is_arrow, 
+                        false
+                    );
+
+                    limit_index += pages[0].length;
+                    if (options.limit) {
+                        limit_index = limit_index % options.limit;
+                    }
     
                     __MODULE__.fill(pool, gnode, tbl);    
                 }
             }
 
-            return new table(gnode, pool, options.index);
+            return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
         } catch (e) {
             if (pool) {
                 pool.delete();
