@@ -92,6 +92,8 @@ export function default_config(aggregates, mode) {
         type = 'line';
     } else if (mode === 'y_area') {
         type = 'area';
+    } else if (mode === 'y_scatter') {
+        type = 'scatter';
     } else if (mode.indexOf('bar') > -1) {
         type = 'column';
     } else if (mode == 'treemap') {

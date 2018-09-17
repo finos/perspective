@@ -34,18 +34,6 @@ function delete_chart() {
     }
 }
 
-global.registerPlugin("y_bar", {
-    name: "Y Bar Chart", 
-    create: draw("vertical_bar"), 
-    resize: resize, 
-    initial: {
-        "type": "number",    
-        "count": 1
-    },
-    selectMode: "select",
-    delete: delete_chart
-});
-
 global.registerPlugin("x_bar", {
     name: "X Bar Chart", 
     create: draw("horizontal_bar"), 
@@ -58,9 +46,33 @@ global.registerPlugin("x_bar", {
     delete: delete_chart
 });
 
+global.registerPlugin("y_bar", {
+    name: "Y Bar Chart", 
+    create: draw("vertical_bar"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
 global.registerPlugin("y_line", {
     name: "Y Line Chart", 
     create: draw("y_line"), 
+    resize: resize, 
+    initial: {
+        "type": "number",    
+        "count": 1
+    },
+    selectMode: "select",
+    delete: delete_chart
+});
+
+global.registerPlugin("y_scatter", {
+    name: "Y Scatter Chart", 
+    create: draw("y_scatter"), 
     resize: resize, 
     initial: {
         "type": "number",    
