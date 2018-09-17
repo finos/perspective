@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-viewer",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.0-beta.2",
   "description": "Perspective.js",
   "main": "build/perspective.view.umd.js",
   "files": [
@@ -38,7 +38,7 @@
   "author": "",
   "license": "Apache",
   "dependencies": {
-    "@jpmorganchase/perspective": "^0.2.0-beta.1",
+    "@jpmorganchase/perspective": "^0.2.0-beta.2",
     "@webcomponents/webcomponentsjs": "~2.0.4",
     "awesomplete": "^1.1.2",
     "babel-polyfill": "^6.26.0",
