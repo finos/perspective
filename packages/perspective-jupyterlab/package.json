@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective-jupyterlab",
-  "version": "0.1.18",
+  "version": "0.2.0-beta.1",
   "description": "Perspective.js",
   "files": [
     "build/*.d.ts",
@@ -28,18 +28,18 @@
     "clean": "rimraf build"
   },
   "dependencies": {
-    "@jpmorganchase/perspective": "^0.1.18",
-    "@jpmorganchase/perspective-viewer": "^0.1.18",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.1.18",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.1.18",
+    "@jpmorganchase/perspective": "^0.2.0-beta.1",
+    "@jpmorganchase/perspective-viewer": "^0.2.0-beta.1",
+    "@jpmorganchase/perspective-viewer-highcharts": "^0.2.0-beta.1",
+    "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.0-beta.1",
+    "@jupyter-widgets/base": "^1.1.10",
     "@jupyterlab/application": "^0.18.0",
     "@jupyterlab/apputils": "^0.18.0",
     "@jupyterlab/rendermime-interfaces": "^1.1.0",
     "@jupyterlab/services": "^3.1.0",
-    "@jupyter-widgets/base": "^1.1.10",
+    "@phosphor/application": "^1.5.0",
     "@phosphor/messaging": "^1.2.2",
     "@phosphor/widgets": "^1.5.0",
-    "@phosphor/application": "^1.5.0",
     "@types/socket.io-client": "^1.4.0",
     "socket.io": "2.0.3"
   },

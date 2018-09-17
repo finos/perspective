@@ -1,6 +1,6 @@
 {
   "name": "@jpmorganchase/perspective",
-  "version": "0.1.18",
+  "version": "0.2.0-beta.1",
   "description": "Perspective.js",
   "main": "build/perspective.umd.js",
   "publishConfig": {
@@ -16,7 +16,7 @@
     "bench:build": "npm-run-all -p bench:build:*",
     "bench:build:benchmark": "webpack --color --config bench/config/benchmark.config.js",
     "bench:build:report": "webpack --color --config bench/config/report.config.js",
-    "bench:build:copy": "cp bench/csv/* build",    
+    "bench:build:copy": "cp bench/csv/* build",
     "bench:run": "node build/benchmark.js",
     "bench": "npm-run-all bench:build bench:run",
     "build": "npm-run-all build:compile:* build:copy:* build:webpack",
