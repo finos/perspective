@@ -120,6 +120,15 @@ exports.default = function() {
         await page.evaluate(element => element.setAttribute('row-pivots', '["new_cc"]'), viewer);
     });
 
+    test.capture("adds computed column via attribute", async page => {
+        await page.click('#config_button');
+        const viewer = await page.$('perspective-viewer');
+        await page.evaluate(element => element.setAttribute('computed-columns', '[{"name":"test","func":"month_bucket","inputs":["Order Date"]}]'), viewer);
+        await page.waitForSelector('perspective-viewer:not([updating])');
+        await page.evaluate(element => element.setAttribute('columns', '["Quantity", "test"]'), viewer);
+        await page.waitForSelector('perspective-viewer:not([updating])');
+    });
+
     test.capture("sorts by computed column.", async page => {
         await add_computed_column(page);
         const viewer = await page.$('perspective-viewer');

@@ -18,7 +18,7 @@ import template from "../html/view.html";
 import "../less/view.less";
 
 import "./row.js";
-import "./computed_column.js";
+import {COMPUTATIONS} from "./computed_column.js";
 
 polyfill({});
 
@@ -320,10 +320,18 @@ function _format_computed_data(cc) {
 async function loadTable(table, redraw = true) {
     this.querySelector('#app').classList.add('hide_message');
     this.setAttribute('updating', true);
-    
-    this._clear_state();
+        
+    if (this._table && redraw) {
+        this.removeAttribute('computed-columns');
+    }
 
+    this._clear_state();
+    
     this._table = table;
+
+    if (this.hasAttribute('computed-columns') && redraw) {
+        this['computed-columns'] = this.getAttribute('computed-columns');
+    }
 
     let [cols, schema, computed_schema] = await Promise.all([
         table.columns(),
@@ -864,7 +872,7 @@ class ViewPrivate extends HTMLElement {
         const data = event.detail;
         let computed_column_name = data.column_name;
 
-        this._table.columns().then((cols) => {
+        this._table.columns().then(cols => {
             // edit overwrites last column, otherwise avoid name collision
             if(cols.includes(computed_column_name) && !data.edit) {
                 computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
@@ -932,7 +940,9 @@ class ViewPrivate extends HTMLElement {
         this._active_columns.addEventListener('dragover', column_dragover.bind(this));
         this._active_columns.addEventListener('dragleave', column_dragleave.bind(this));
         this._add_computed_column.addEventListener('mousedown', this._open_computed_column.bind(this));
-        this._computed_column.addEventListener('perspective-computed-column-save', this._create_computed_column.bind(this));
+        this._computed_column.addEventListener('perspective-computed-column-save', event => {
+            this.setAttribute('computed-columns', JSON.stringify([event.detail]));
+        });
         this._computed_column.addEventListener('perspective-computed-column-update', this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener('mousedown', this._toggle_config.bind(this));
@@ -1069,6 +1079,36 @@ class View extends ViewPrivate {
         this._update_column_view(show, true);
         this.dispatchEvent(new Event('perspective-config-update'));
         this._debounce_update();
+    }
+
+    /**
+     * The set of visible columns.
+     *
+     * @name computed-columns
+     * @memberof View.prototype
+     * @param {array} computed-columns An array of computed column objects
+     * @fires View#perspective-config-update
+     * @example <caption>via Javascript DOM</caption>
+     * let elem = document.getElementById('my_viewer');
+     * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
+     * @example <caption>via HTML</caption>
+     * <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
+     */
+    @array_attribute
+    set 'computed-columns'(computed_columns) {
+        if (this._table) {
+            for (let col of computed_columns) {
+                this._create_computed_column({
+                    detail: {
+                        column_name: col.name,
+                        input_columns: col.inputs.map(x => ({name: x})),
+                        computation: COMPUTATIONS[col.func]
+                    }
+                });
+            }
+            this._debounce_update();
+        }
+        this.dispatchEvent(new Event('perspective-config-update'));
     }
 
     /**
