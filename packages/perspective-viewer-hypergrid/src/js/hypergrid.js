@@ -347,9 +347,11 @@ global.registerPlugin('hypergrid', {
     deselectMode: 'pivots',
     resize: async function () {
         if (this.hypergrid) {
-            this.hypergrid.canvas.resize();
+            this.hypergrid.updateSize();
+            this.hypergrid.canvas.paintNow();
             let nrows = await this._view.num_rows();
             this.hypergrid.behavior.dataModel.setDirty(nrows);
+            this.hypergrid.canvas.paintNow();
         }
     },
     delete: function () {

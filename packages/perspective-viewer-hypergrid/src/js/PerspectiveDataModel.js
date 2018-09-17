@@ -70,7 +70,7 @@ module.exports = require('datasaur-local').extend('PerspectiveDataModel', {
             if (isShift) {
                 if (is_expanded) {
                     if (this.data[row][col].rowPath.length === 1) {
-                        this._view.close(row);
+                        this._view.collapse(row);
                     } else {
                         this._view.collapse_to_depth(this.data[row][col].rowPath.length - 2);
                     }

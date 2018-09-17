@@ -74,34 +74,35 @@ const month_bucket = function (val) {
     return +date;
 }
 
+export const COMPUTATIONS = {
+    'hour_of_day': new Computation('hour_of_day', 'date', 'integer', hour_of_day),
+    'day_of_week': new Computation('day_of_week', 'date', 'string', day_of_week),
+    'month_of_year': new Computation('month_of_year', 'date', 'string', month_of_year),
+    'hour_bucket': new Computation('hour_bucket', 'date', 'date', hour_bucket),
+    'day_bucket': new Computation('day_bucket', 'date', 'date', day_bucket),
+    'week_bucket': new Computation('week_bucket', 'date', 'date', week_bucket),
+    'month_bucket': new Computation('month_bucket', 'date', 'date', month_bucket),
+    'uppercase': new Computation('uppercase', 'string', 'string', x => x.toUpperCase()),
+    'lowercase': new Computation('lowercase', 'string', 'string', x => x.toLowerCase()),
+    'length': new Computation('length', 'string', 'integer', x => x.length),
+    'add': new Computation('add', 'float', 'float', (a, b) => a + b, 2),
+    'subtract': new Computation('subtract', 'float', 'float', (a, b) => a - b, 2),
+    'multiply': new Computation('multiply', 'float', 'float', (a, b) => a * b, 2),
+    'divide': new Computation('divide', 'float', 'float', (a, b) => a / b, 2),
+    'percent_a_of_b': new Computation('percent_a_of_b', 'float', 'float', (a, b) => ((a / b) * 100), 2),
+    'concat_space': new Computation('concat_space', 'string', 'string', (a, b) => a + ' ' + b, 2),
+    'concat_comma': new Computation('concat_comma', 'string', 'string', (a, b) => a + ', ' + b, 2),
+};
+
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
 @bindTemplate(template) // eslint-disable-next-line no-unused-vars
 class ComputedColumn extends HTMLElement {
+
     constructor() {
         super();
 
         this.state = new State();
-
-        this.computations = {
-            'hour_of_day': new Computation('hour_of_day', 'date', 'integer', hour_of_day),
-            'day_of_week': new Computation('day_of_week', 'date', 'string', day_of_week),
-            'month_of_year': new Computation('month_of_year', 'date', 'string', month_of_year),
-            'hour_bucket': new Computation('hour_bucket', 'date', 'date', hour_bucket),
-            'day_bucket': new Computation('day_bucket', 'date', 'date', day_bucket),
-            'week_bucket': new Computation('week_bucket', 'date', 'date', week_bucket),
-            'month_bucket': new Computation('month_bucket', 'date', 'date', month_bucket),
-            'uppercase': new Computation('uppercase', 'string', 'string', x => x.toUpperCase()),
-            'lowercase': new Computation('lowercase', 'string', 'string', x => x.toLowerCase()),
-            'length': new Computation('length', 'string', 'integer', x => x.length),
-            'add': new Computation('add', 'float', 'float', (a, b) => a + b, 2),
-            'subtract': new Computation('subtract', 'float', 'float', (a, b) => a - b, 2),
-            'multiply': new Computation('multiply', 'float', 'float', (a, b) => a * b, 2),
-            'divide': new Computation('divide', 'float', 'float', (a, b) => a / b, 2),
-            'percent_a_of_b': new Computation('percent_a_of_b', 'float', 'float', (a, b) => ((a / b) * 100), 2),
-            'concat_space': new Computation('concat_space', 'string', 'string', (a, b) => a + ' ' + b, 2),
-            'concat_comma': new Computation('concat_comma', 'string', 'string', (a, b) => a + ', ' + b, 2),
-        };
 
         this.type_markers = {
             float: '123',
@@ -110,6 +111,10 @@ class ComputedColumn extends HTMLElement {
             boolean: 't/f',
             date: 'mdy'
         };
+    }
+
+    get computations() {
+        return COMPUTATIONS;
     }
 
     connectedCallback() {
@@ -123,7 +128,7 @@ class ComputedColumn extends HTMLElement {
     _register_computations() {
         this._computation_selector.innerHTML = "";
         let iterate = true;
-        for (let comp of Object.keys(this.computations)) {
+        for (let comp of Object.keys(COMPUTATIONS)) {
             this._computation_selector.innerHTML +=
                 `<option value="${comp}"${iterate ? ' selected="selected"' : ""}>${comp.replace(/_/g, ' ')}</option>`;
             iterate = false;
@@ -381,7 +386,7 @@ class ComputedColumn extends HTMLElement {
             select.value = computation_name;
         }
 
-        const computation = Object.assign({}, this.computations[computation_name]);
+        const computation = Object.assign({}, COMPUTATIONS[computation_name]);
 
         if (computation === undefined) {
             throw 'Undefined computation could not be set.';
@@ -409,7 +414,11 @@ class ComputedColumn extends HTMLElement {
         const computed_column = this.state;
 
         const event = new CustomEvent('perspective-computed-column-save', {
-            detail: computed_column
+            detail: {
+                name: computed_column.column_name,
+                inputs: computed_column.input_columns.map(x => x.name),
+                func: computed_column.computation.name
+            }
         });
 
         this.dispatchEvent(event);

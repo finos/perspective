@@ -26,5 +26,6 @@
     "superstore.html/saving without parameters should show an error message.": "657c4319e6177c16880c38e8cccfaf30",
     "superstore.html/doesn't leak tables.": "f60686399c38b6154be75b3ebed74c83",
     "superstore.html/doesn't leak views when setting row pivots.": "9b51f44a534c4d49e4ad3876afacda0c",
-    "superstore.html/doesn't leak views when setting filters.": "e67e550265c4256b52788e2a27d572b0"
+    "superstore.html/doesn't leak views when setting filters.": "e67e550265c4256b52788e2a27d572b0",
+    "superstore.html/adds computed column via attribute": "6b5f39880548df3512a2a8d58cb31ca5"
 }

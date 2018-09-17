@@ -28,6 +28,22 @@ utils.with_server({}, () => {
 
         simple_tests.default();
 
+        describe("expand/collapse", () => {
+
+            test.capture("collapses to depth smaller than viewport", async page => {
+                const viewer = await page.$('perspective-viewer');
+                await page.evaluate(element => element.setAttribute('row-pivots', '["Category","State"]'), viewer);
+                await page.waitForSelector('perspective-viewer:not([updating])');
+
+		        await page.evaluate(element => {
+                    element.view.collapse_to_depth(0);
+                    element.notifyResize();
+                }, viewer);		        
+                await page.waitForSelector('perspective-viewer:not([updating])');
+            });
+
+        })
+
         describe("lazy render mode", () => {
 
 		    test.capture("resets viewable area when the logical size expands.", async page => {        

@@ -67,7 +67,7 @@ module.exports = (perspective) => {
             expect(data.slice(2, 4)).toEqual(result);
         });
 
-        it("after an regular data load`", async function () {
+        it("after a regular data load`", async function () {
             var table = perspective.table(data, {index: "x"});
             var view = table.view();
             table.remove([1, 2]);
@@ -91,6 +91,38 @@ module.exports = (perspective) => {
         });
 
     });
+
+
+    describe("Schema", function () {
+
+        it("updates with columns not in schema", async function () {
+            var table = perspective.table({x: 'integer', y:'string'});
+            table.update(data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual( [
+                {'x': 1, 'y':'a'},
+                {'x': 2, 'y':'b'},
+                {'x': 3, 'y':'c'},
+                {'x': 4, 'y':'d'}
+            ]);
+        });
+
+        it("coerces to string", async function () {
+            var table = perspective.table({x: 'string', y:'string', z: 'string'});
+            table.update(data);
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual( [
+                {'x': '1', 'y':'a', 'z': 'true'},
+                {'x': '2', 'y':'b', 'z': 'false'},
+                {'x': '3', 'y':'c', 'z': 'true'},
+                {'x': '4', 'y':'d', 'z': 'false'}
+            ]);
+        });
+
+    });
+
 
     describe("Updates", function() {
 
