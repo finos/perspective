@@ -104,7 +104,7 @@ class WebWorker extends worker {
     
     _start_cross_origin() {
         var dir = (typeof WebAssembly === "undefined" ? 'asmjs' : 'wasm');
-        XHRWorker(__SCRIPT_PATH__.path() + '/perspective.worker.' + dir + '.js', function(worker) {
+        XHRWorker(__SCRIPT_PATH__.path() + 'perspective.worker.' + dir + '.js', function(worker) {
             for (var key in this._worker) {
                 worker[key] = this._worker[key];
             }
@@ -130,7 +130,7 @@ class WebWorker extends worker {
 
     _start_cross_origin_wasm() {
         var wasmXHR = new XMLHttpRequest();
-        wasmXHR.open('GET', __SCRIPT_PATH__.path() + '/psp.async.wasm', true);
+        wasmXHR.open('GET', __SCRIPT_PATH__.path() + 'psp.async.wasm', true);
         wasmXHR.responseType = 'arraybuffer';
         wasmXHR.onload = () => {
             let msg = {
@@ -149,7 +149,7 @@ class WebWorker extends worker {
 
     _start_same_origin() {
         var dir = (typeof WebAssembly === "undefined" || detect_iphone() ? 'asmjs' : 'async');
-        var w =  new Worker(__SCRIPT_PATH__.path() + '/perspective.worker.' + dir + '.js');
+        var w =  new Worker(__SCRIPT_PATH__.path() + 'perspective.worker.' + dir + '.js');
         for (var key in this._worker) {
             w[key] = this._worker[key];
         }
