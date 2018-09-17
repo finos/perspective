@@ -330,7 +330,20 @@ async function loadTable(table, redraw = true) {
     this._table = table;
 
     if (this.hasAttribute('computed-columns') && redraw) {
-        this['computed-columns'] = this.getAttribute('computed-columns');
+        const computed_columns = JSON.parse(this.getAttribute('computed-columns'));
+        if (computed_columns.length > 0) {
+            for (let col of computed_columns) {
+                await this._create_computed_column({
+                    detail: {
+                        column_name: col.name,
+                        input_columns: col.inputs.map(x => ({name: x})),
+                        computation: COMPUTATIONS[col.func]
+                    }
+                });
+            }
+            this._debounce_update(true);
+            return;
+        }
     }
 
     let [cols, schema, computed_schema] = await Promise.all([
@@ -868,32 +881,29 @@ class ViewPrivate extends HTMLElement {
         this._update_column_view();
     }
 
-    _create_computed_column(event) {
+    async _create_computed_column(event) {
         const data = event.detail;
         let computed_column_name = data.column_name;
 
-        this._table.columns().then(cols => {
-            // edit overwrites last column, otherwise avoid name collision
-            if(cols.includes(computed_column_name) && !data.edit) {
-                computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
-            }
+        const cols = await this._table.columns();
+        // edit overwrites last column, otherwise avoid name collision
+        if(cols.includes(computed_column_name) && !data.edit) {
+            computed_column_name += ` ${(Math.round(Math.random() * 100))}`;
+        }
 
-            const params = [{
-                computation: data.computation,
-                column: computed_column_name,
-                func: data.computation.func,
-                inputs: data.input_columns.map(col => col.name),
-                input_type: data.computation.input_type,
-                type: data.computation.return_type,
-            }];
+        const params = [{
+            computation: data.computation,
+            column: computed_column_name,
+            func: data.computation.func,
+            inputs: data.input_columns.map(col => col.name),
+            input_type: data.computation.input_type,
+            type: data.computation.return_type,
+        }];
 
-            const table = this._table.add_computed(params);
-            loadTable.call(this, table, false).then(() => {
-                this._update_column_view();
-                //this.dispatchEvent(new Event('perspective-view-update'));
-                this._computed_column._close_computed_column();
-            });
-        });
+        const table = this._table.add_computed(params);
+        await loadTable.call(this, table, false);
+        this._update_column_view();
+        this._computed_column._close_computed_column();
     }
 
     _transpose() {
