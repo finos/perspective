@@ -1738,7 +1738,7 @@ class WorkerHost extends Host {
                 __MODULE__ = __MODULE__(module);
             } else {
                 let wasmXHR = new XMLHttpRequest();
-                wasmXHR.open('GET', msg.path + '/psp.async.wasm', true);
+                wasmXHR.open('GET', msg.path + 'psp.async.wasm', true);
                 wasmXHR.responseType = 'arraybuffer';
                 wasmXHR.onload = function() {
                     module = {};
