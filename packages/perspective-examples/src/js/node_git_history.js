@@ -7,14 +7,16 @@
  *
  */
 
-const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
-const exec = require('child_process').exec;
+const { WebSocketHost } = require("@jpmorganchase/perspective/build/perspective.node.js");
+const exec = require("child_process").exec;
 
-function execute(command, callback){
-    exec(command, function(error, stdout){ callback(stdout); });
-};
+function execute(command, callback) {
+  exec(command, function(error, stdout) {
+    callback(stdout);
+  });
+}
 
 execute(`git log --date=iso --pretty=format:'"%h","%an","%aD","%s","%ae"'`, log => {
-    const host = new WebSocketHost({rootDir: __dirname});
-    host.open("data_source_one", "Hash,Name,Date,Message,Email\n" + log);
+  const host = new WebSocketHost({ rootDir: __dirname });
+  host.open("data_source_one", "Hash,Name,Date,Message,Email\n" + log);
 });

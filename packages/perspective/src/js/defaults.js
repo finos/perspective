@@ -29,111 +29,50 @@ const NUMBER_AGGREGATES = [
   "unique"
 ];
 
-const STRING_AGGREGATES = [
-  "any",
-  "count",
-  "distinct count",
-  "distinct leaf",
-  "dominant",
-  "first by index",
-  "last by index",
-  "last",
-  "mean by count",
-  "unique"
-];
+const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique"];
 
-const BOOLEAN_AGGREGATES = [
-  "any",
-  "count",
-  "distinct count",
-  "distinct leaf",
-  "dominant",
-  "first by index",
-  "last by index",
-  "last",
-  "mean by count",
-  "unique",
-  "and",
-  "or"
-];
+const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique", "and", "or"];
 
-export const SORT_ORDERS = [
-  "asc",
-  "desc",
-  "none",
-  "asc abs",
-  "desc abs"
-]
+export const SORT_ORDERS = ["asc", "desc", "none", "asc abs", "desc abs"];
 
 export const TYPE_AGGREGATES = {
-  'string': STRING_AGGREGATES,
-  'float': NUMBER_AGGREGATES,
-  'integer': NUMBER_AGGREGATES,
-  'boolean': BOOLEAN_AGGREGATES,
-  'date': STRING_AGGREGATES
+  string: STRING_AGGREGATES,
+  float: NUMBER_AGGREGATES,
+  integer: NUMBER_AGGREGATES,
+  boolean: BOOLEAN_AGGREGATES,
+  date: STRING_AGGREGATES
 };
 
 export const AGGREGATE_DEFAULTS = {
-  'string': 'distinct count',
-  'float': 'sum',
-  'integer': 'sum',
-  'boolean': 'distinct count',
-  'date': 'distinct count'
+  string: "distinct count",
+  float: "sum",
+  integer: "sum",
+  boolean: "distinct count",
+  date: "distinct count"
 };
 
-const BOOLEAN_FILTERS = [
-  "&",
-  "|",
-  "==",
-  "!=",
-  "or",
-  "and"
-];
+const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];
 
-const NUMBER_FILTERS = [
-  "<",
-  ">",
-  "==",
-  "<=",
-  ">=",
-  "!=",
-  "is nan",
-  "is not nan"
-];
+const NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is nan", "is not nan"];
 
-const STRING_FILTERS = [
-  "==",
-  "contains",
-  "!=",
-  "in",
-  "begins with",
-  "ends with"
-];
+const STRING_FILTERS = ["==", "contains", "!=", "in", "begins with", "ends with"];
 
-const DATE_FILTERS = [
-  "<",
-  ">",
-  "==",
-  "<=",
-  ">=",
-  "!="
-];
+const DATE_FILTERS = ["<", ">", "==", "<=", ">=", "!="];
 
 export const COLUMN_SEPARATOR_STRING = "|";
 
 export const TYPE_FILTERS = {
-  'string': STRING_FILTERS,
-  'float': NUMBER_FILTERS,
-  'integer': NUMBER_FILTERS,
-  'boolean': BOOLEAN_FILTERS,
-  'date': DATE_FILTERS
+  string: STRING_FILTERS,
+  float: NUMBER_FILTERS,
+  integer: NUMBER_FILTERS,
+  boolean: BOOLEAN_FILTERS,
+  date: DATE_FILTERS
 };
 
 export const FILTER_DEFAULTS = {
-  'string': '==',
-  'float': '==',
-  'integer': '==',
-  'boolean': '==',
-  'date': '=='
+  string: "==",
+  float: "==",
+  integer: "==",
+  boolean: "==",
+  date: "=="
 };
-
