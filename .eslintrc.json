@@ -1,5 +1,8 @@
 {
     "parser": "babel-eslint",
+    "plugins": [
+        "prettier"
+    ],
     "env": {
         "browser": true,
         "commonjs": true,
@@ -13,6 +16,9 @@
         "experimentalObjectRestSpread": true
     },
     "rules": {
+        "prettier/prettier": ["error", {
+            "printWidth": 200
+        }],
         "no-const-assign": "warn",
         "no-this-before-super": "warn",
         "no-undef": "warn",
