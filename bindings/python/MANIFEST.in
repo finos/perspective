@@ -1,0 +1,3 @@
+recursive-include perspective *
+prune examples/
+include requirements.txt

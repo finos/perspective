@@ -17,6 +17,11 @@
 #include <perspective/debug_helpers.h>
 #include <cmath>
 
+#ifdef PSP_ENABLE_PYTHON
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#endif
+
 /*
 TODO.
 
@@ -183,6 +188,11 @@ class PERSPECTIVE_MPROTECT_EXPORT t_lstore : public t_debug_helper
     // assumed fixed size T
     template <typename T>
     T* extend(t_uindex idx);
+
+#ifdef PSP_ENABLE_PYTHON
+    /* Python bits */
+    np::ndarray _as_numpy(t_dtype dtype);
+#endif
 
     t_str get_fname() const;
 

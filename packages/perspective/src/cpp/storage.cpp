@@ -10,6 +10,13 @@
 #include <perspective/first.h>
 #include <perspective/portable.h>
 SUPPRESS_WARNINGS_VC(4505)
+
+#ifdef PSP_ENABLE_PYTHON
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#include <perspective/numpy.h>
+#endif
+
 #include <stdlib.h>
 #include <assert.h>
 #include <csignal>
@@ -486,6 +493,32 @@ t_lstore::warmup()
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 }
+
+#ifdef PSP_ENABLE_PYTHON
+np::ndarray
+t_lstore::_as_numpy(t_dtype dtype)
+{
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    PSP_VERBOSE_ASSERT(
+        dtype != DTYPE_STR,
+        "as_numpy not implemented for string columns yet");
+
+    np::dtype npdtype = get_numpy_typenum_from_dtype(dtype);
+    py::tuple shape = py::make_tuple(m_size/get_dtype_size(dtype));
+    py::tuple stride = py::make_tuple(get_dtype_size(dtype));
+
+    np::ndarray result = np::from_data(m_base,
+                                       npdtype,
+                                       shape,
+                                       stride,
+                                       py::object());
+
+    return result;
+    // PSP_VERBOSE_ASSERT(rval, "Null array found!");
+}   
+
+#endif
 
 t_uindex
 t_lstore::size() const
