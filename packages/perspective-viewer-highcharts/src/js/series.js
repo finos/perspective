@@ -333,7 +333,7 @@ class MakeTick {
         }
 
         if (cols.length === undefined) {
-            // Dealing with a ColumnIterator object - must map data to 2D array properly
+            // assign data to array in name order
             data = [];
             for (let name of col_names) {
                 data.push(cols[name]);
@@ -342,7 +342,6 @@ class MakeTick {
 
         for (let i = 0; i < data[0].length; i++) {
             if(data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
-                data[0][i] = null;
                 continue;
             }
 
@@ -357,13 +356,11 @@ class MakeTick {
             }
 
             // set x-axis
-            tick.x = data[0][i];
-            tick.x = this.xaxis_clean.clean(tick.x);
+            tick.x = this.xaxis_clean.clean(data[0][i]);
 
             if (num_cols > 1) {
                 // set y-axis
-                tick.y = data[1][i];
-                tick.y = this.yaxis_clean.clean(tick.y);
+                tick.y = this.yaxis_clean.clean(data[1][i]);
             }
 
             if (num_cols > 2) {
@@ -397,7 +394,7 @@ class MakeTick {
     }    
 }
 
-export async function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
+export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
     const columns = new ColumnIterator(cols, hidden, pivots.length);
     let series = [];
     let color_range = [Infinity, -Infinity];
@@ -442,28 +439,28 @@ export async function make_xy_column_data(cols, schema, aggs, pivots, col_pivots
             }
 
             groups[group_name].push(col.data);
-        }
 
-        // FIXME: this is the heaviest loop
-        for (let name in groups) {
-            let ticks = make_tick.make_col(
-                groups[name], 
-                aggs, 
-                aggs.length,
-                columns.pivot_length,
-                row_path, 
-                color_range,
-            );
+            if (groups[group_name].length === aggs.length) {
+                // generate series as soon as we have enough data
+                let ticks = make_tick.make_col(
+                    groups[group_name], 
+                    aggs, 
+                    aggs.length,
+                    columns.pivot_length,
+                    row_path, 
+                    color_range,
+                );
 
-            let s = column_to_series(ticks, name);
-            series.push(s);
+                let s = column_to_series(ticks, group_name);
+                series.push(s);
+            }
         }
     }
 
     return [series, {categories: make_tick.xaxis_clean.names}, color_range, {categories: make_tick.yaxis_clean.names}];
 }
 
-export async function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
+export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
     let rows = new TreeAxisIterator(pivots.length, js);
     let rows2 = new RowIterator(rows, hidden);
     let series = [];
@@ -514,7 +511,7 @@ export async function make_xy_data(js, schema, columns, pivots, col_pivots, hidd
             }
         }
     }   
-
+    
     return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];   
 }
 
