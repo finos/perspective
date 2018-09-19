@@ -17,7 +17,9 @@
     },
     "rules": {
         "prettier/prettier": ["error", {
-            "printWidth": 200
+            "printWidth": 200,
+            "tabWidth": 4,
+            "bracketSpacing": false
         }],
         "no-const-assign": "warn",
         "no-this-before-super": "warn",
