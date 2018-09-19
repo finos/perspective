@@ -19,7 +19,7 @@ const DATE_PARSE_CANDIDATES = [moment.ISO_8601, moment.RFC_2822, "YYYY-MM-DD\\DH
  * @returns
  */
 export function is_valid_date(x) {
-  return moment(x, DATE_PARSE_CANDIDATES, true).isValid();
+    return moment(x, DATE_PARSE_CANDIDATES, true).isValid();
 }
 
 /**
@@ -29,33 +29,33 @@ export function is_valid_date(x) {
  * @class DateParser
  */
 export class DateParser {
-  constructor() {
-    this.date_types = [];
-    this.date_candidates = DATE_PARSE_CANDIDATES.slice();
-    this.date_exclusions = [];
-  }
-
-  parse(input) {
-    if (this.date_exclusions.indexOf(input) > -1) {
-      return -1;
-    } else {
-      let val = input;
-      if (typeof val === "string") {
-        val = moment(input, this.date_types, true);
-        if (!val.isValid() || this.date_types.length === 0) {
-          for (let candidate of this.date_candidates) {
-            val = moment(input, candidate, true);
-            if (val.isValid()) {
-              this.date_types.push(candidate);
-              this.date_candidates.splice(this.date_candidates.indexOf(candidate), 1);
-              return +val;
-            }
-          }
-          this.date_exclusions.push(input);
-          return -1;
-        }
-      }
-      return +val;
+    constructor() {
+        this.date_types = [];
+        this.date_candidates = DATE_PARSE_CANDIDATES.slice();
+        this.date_exclusions = [];
     }
-  }
+
+    parse(input) {
+        if (this.date_exclusions.indexOf(input) > -1) {
+            return -1;
+        } else {
+            let val = input;
+            if (typeof val === "string") {
+                val = moment(input, this.date_types, true);
+                if (!val.isValid() || this.date_types.length === 0) {
+                    for (let candidate of this.date_candidates) {
+                        val = moment(input, candidate, true);
+                        if (val.isValid()) {
+                            this.date_types.push(candidate);
+                            this.date_candidates.splice(this.date_candidates.indexOf(candidate), 1);
+                            return +val;
+                        }
+                    }
+                    this.date_exclusions.push(input);
+                    return -1;
+                }
+            }
+            return +val;
+        }
+    }
 }

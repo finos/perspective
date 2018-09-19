@@ -19,9 +19,9 @@ function Range() {}
  * @param end_row
  */
 Range.create = function(start_row, end_row) {
-  var range = new Range();
-  range.reset(start_row, end_row);
-  return range;
+    var range = new Range();
+    range.reset(start_row, end_row);
+    return range;
 };
 
 /**
@@ -30,9 +30,9 @@ Range.create = function(start_row, end_row) {
  * @param padding
  */
 Range.estimate = function(grid) {
-  var range = new Range();
-  range.estimatedGridRange(grid);
-  return range;
+    var range = new Range();
+    range.estimatedGridRange(grid);
+    return range;
 };
 
 /**
@@ -48,8 +48,8 @@ Range.padding = 5;
  * @returns
  */
 Range.prototype.reset = function(start_row, end_row) {
-  this.start_row = start_row;
-  this.end_row = end_row;
+    this.start_row = start_row;
+    this.end_row = end_row;
 };
 
 /**
@@ -65,18 +65,18 @@ Range.prototype.reset = function(start_row, end_row) {
  * @returns
  */
 Range.prototype.estimatedGridRange = function(grid) {
-  var start_row = grid.renderer.getScrollTop(),
-    row_count = Math.ceil(grid.canvas.height / grid.properties.defaultRowHeight),
-    end_row = start_row + row_count + Range.padding;
+    var start_row = grid.renderer.getScrollTop(),
+        row_count = Math.ceil(grid.canvas.height / grid.properties.defaultRowHeight),
+        end_row = start_row + row_count + Range.padding;
 
-  this.reset(start_row, end_row);
+    this.reset(start_row, end_row);
 };
 
 /**
  * @returns {boolean} Range is invalid.
  */
 Range.prototype.isInvalid = function() {
-  return Number.isNaN(this.start_row) || Number.isNaN(this.end_row);
+    return Number.isNaN(this.start_row) || Number.isNaN(this.end_row);
 };
 
 /**
@@ -85,7 +85,7 @@ Range.prototype.isInvalid = function() {
  * @returns {boolean}
  */
 Range.prototype.within = function(range) {
-  return range instanceof Range && range.start_row <= this.start_row && this.end_row <= range.end_row;
+    return range instanceof Range && range.start_row <= this.start_row && this.end_row <= range.end_row;
 };
 
 /**
@@ -94,7 +94,7 @@ Range.prototype.within = function(range) {
  * @returns {boolean}
  */
 Range.prototype.contains = function(range) {
-  return range instanceof Range && range.within(this);
+    return range instanceof Range && range.within(this);
 };
 
 module.exports = Range;

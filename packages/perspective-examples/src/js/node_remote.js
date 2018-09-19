@@ -7,10 +7,10 @@
  *
  */
 
-const { WebSocketHost } = require("@jpmorganchase/perspective/build/perspective.node.js");
+const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
 const fs = require("fs");
 
-const host = new WebSocketHost({ rootDir: __dirname });
+const host = new WebSocketHost({rootDir: __dirname});
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
 
 host.open("data_source_one", arr);
