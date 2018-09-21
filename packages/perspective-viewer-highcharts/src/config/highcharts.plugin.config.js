@@ -1,13 +1,13 @@
-const path = require('path');
-const common = require('@jpmorganchase/perspective/src/config/common.config.js');
+const path = require("path");
+const common = require("@jpmorganchase/perspective/src/config/common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: './src/js/highcharts.js',
+    entry: "./src/js/highcharts.js",
     externals: [/^[a-z0-9\@].*$/],
     output: {
-        filename: 'highcharts.plugin.umd.js',
+        filename: "highcharts.plugin.umd.js",
         library: "perspective-view-highcharts",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, '../../build')
+        path: path.resolve(__dirname, "../../build")
     }
 });

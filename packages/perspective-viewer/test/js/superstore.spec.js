@@ -7,14 +7,13 @@
  *
  */
 
-const utils = require('./utils.js');
+const utils = require("./utils.js");
 
-const simple_tests = require('./simple_tests.js');
-const computed_column_tests = require('./computed_column_tests.js');
-const responsive_tests = require('./responsive_tests');
+const simple_tests = require("./simple_tests.js");
+const computed_column_tests = require("./computed_column_tests.js");
+const responsive_tests = require("./responsive_tests");
 
 utils.with_server({}, () => {
-
     describe.page("superstore.html", () => {
         simple_tests.default();
 
@@ -25,7 +24,5 @@ utils.with_server({}, () => {
         describe("Responsive Layout", () => {
             responsive_tests.default();
         });
-
     });
-
 });

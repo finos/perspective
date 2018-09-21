@@ -7,33 +7,27 @@
  *
  */
 
-const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
+const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 
-const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
-
+const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 utils.with_server({}, () => {
-
     describe.page("treemap.html", () => {
-
         simple_tests.default();
 
-        describe('tooltip tests', () => {
-
-            test.capture('tooltip shows on hover.', async page => {
-                await page.click('#config_button');
+        describe("tooltip tests", () => {
+            test.capture("tooltip shows on hover.", async page => {
+                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
 
                 // set a row pivot and a column pivot so the graph will render
-                await page.evaluate(element => element.setAttribute('row-pivots', '["State"]'), viewer);
-                await page.waitForSelector('perspective-viewer:not([updating])');
-                await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
-                await page.waitForSelector('perspective-viewer:not([updating])');
+                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
 
-                await utils.invoke_tooltip('.highcharts-point', page);
+                await utils.invoke_tooltip(".highcharts-point", page);
             });
         });
-
     });
-
 });

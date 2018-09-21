@@ -7,34 +7,34 @@
  *
  */
 
-const path = require('path');
-const common = require('@jpmorganchase/perspective/src/config/common.config.js');
+const path = require("path");
+const common = require("@jpmorganchase/perspective/src/config/common.config.js");
 
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-const webpack = require('webpack');
+const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
+const webpack = require("webpack");
 
-const plugins = [
-    new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)
-];
+const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
 
 if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
-    plugins.push(new UglifyJSPlugin({
-        sourceMap: true,
-        mangle: false,
-        output: {
-            ascii_only: true
-        }
-    }));
+    plugins.push(
+        new UglifyJSPlugin({
+            sourceMap: true,
+            mangle: false,
+            output: {
+                ascii_only: true
+            }
+        })
+    );
 }
 module.exports = Object.assign({}, common(), {
-    entry: './src/ts/index.ts',
+    entry: "./src/ts/index.ts",
     plugins: plugins,
-    externals: ['@jupyter-widgets/base'],
+    externals: ["@jupyter-widgets/base"],
     output: {
-        filename: 'index.js',
+        filename: "index.js",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, '../../build')
+        path: path.resolve(__dirname, "../../build")
     }
 });
 
-module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"})
+module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"});

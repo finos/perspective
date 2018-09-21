@@ -7,62 +7,53 @@
  *
  */
 
-const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
+const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 
-const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
+const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
-const axis_tests = require('./axis_tests.js');
+const axis_tests = require("./axis_tests.js");
 
 utils.with_server({}, () => {
-
     describe.page("scatter.html", () => {
-
         simple_tests.default();
 
         axis_tests.default();
 
-        describe('tooltip tests', () => {
-            const point = 'path.highcharts-point';
-            const tooltip_selector = '.highcharts-label.highcharts-tooltip';
-            const text = tooltip_selector + ' > text';
+        describe("tooltip tests", () => {
+            const point = "path.highcharts-point";
+            const tooltip_selector = ".highcharts-label.highcharts-tooltip";
+            const text = tooltip_selector + " > text";
 
-            test.capture('tooltip shows on hover.', async page => {
-                await page.click('#config_button');
+            test.capture("tooltip shows on hover.", async page => {
+                await page.click("#config_button");
                 await page.$("perspective-viewer");
                 await utils.invoke_tooltip(point, page);
             });
 
             test.run("tooltip shows proper column labels.", async page => {
-                await page.click('#config_button');
+                await page.click("#config_button");
                 await page.$("perspective-viewer");
                 await utils.invoke_tooltip(point, page);
-                return await page.$eval(
-                    text, element => {
-                        return element.textContent.includes("Sales") &&
-                            element.textContent.includes("Profit");
-                    });
+                return await page.$eval(text, element => {
+                    return element.textContent.includes("Sales") && element.textContent.includes("Profit");
+                });
             });
 
             test.run("tooltip shows pivot labels.", async page => {
-                await page.click('#config_button');
+                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
 
                 // set a row pivot and a column pivot
-                await page.evaluate(element => element.setAttribute('row-pivots', '["State"]'), viewer);
-                await page.waitForSelector('perspective-viewer:not([updating])');
-                await page.evaluate(element => element.setAttribute('column-pivots', '["Category"]'), viewer);
-                await page.waitForSelector('perspective-viewer:not([updating])');
+                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
 
                 await utils.invoke_tooltip(point, page);
-                return await page.$eval(
-                    text, element => {
-                    return element.textContent.includes("State") &&
-                        element.textContent.includes("Category");
-                    });
+                return await page.$eval(text, element => {
+                    return element.textContent.includes("State") && element.textContent.includes("Category");
+                });
             });
         });
-
-
     });
-
 });

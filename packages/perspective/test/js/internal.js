@@ -7,42 +7,37 @@
  *
  */
 
-
-
 import arrow from "../arrow/test-null.arrow";
 
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
-
 module.exports = (perspective, mode) => {
-
-    describe("Internal API", function () {
-
-        it("is actually using the correct runtime", async function () {
-            expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : 'native-wasm');
+    describe("Internal API", function() {
+        it("is actually using the correct runtime", async function() {
+            expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : "native-wasm");
         });
 
-        it("['z'], sum with new column syntax with wrong column arity errors", async function () {
+        it("['z'], sum with new column syntax with wrong column arity errors", async function() {
             var table = perspective.table(arrow.slice());
             let anon = function() {
-                let view = table.view({
-                    row_pivot: ['char'],
-                    aggregate: [{op: 'sum', column:['f16', 'f32']}],
+                table.view({
+                    row_pivot: ["char"],
+                    aggregate: [{op: "sum", column: ["f16", "f32"]}]
                 });
-            }
+            };
             expect(anon).toThrow();
         });
 
-        it("Arrow schema types are mapped correctly", async function () {
+        it("Arrow schema types are mapped correctly", async function() {
             // This only works for non parallel
             var table = perspective.table(arrow.slice());
             let schema, stypes;
             let types = [];
-            try{
+            try {
                 schema = table.gnode.get_tblschema();
                 stypes = schema.types();
 
-                for (let i = 0; i < stypes.size(); i ++) {
+                for (let i = 0; i < stypes.size(); i++) {
                     types.push(stypes.get(i).value);
                 }
                 expect(arrow_psp_internal_schema).toEqual(types);
@@ -55,6 +50,5 @@ module.exports = (perspective, mode) => {
                 }
             }
         });
-
     });
-}
+};

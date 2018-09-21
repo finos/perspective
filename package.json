@@ -29,7 +29,7 @@
 		"write_tests": "WRITE_TESTS=1 npm run test:run",
 		"postinstall": "lerna bootstrap --hoist",
 		"precommit": "npm run lint:autofix && git add . -u",
-		"lint": "eslint packages/*/src/**/*.js",
+		"lint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js",
 		"lint:autofix": "npm run lint -- --fix",
 		"_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",

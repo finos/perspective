@@ -20,9 +20,15 @@ window.onload = undefined;
 
 jasmine.pp = function(obj) {
     if (Array.isArray(obj)) {
-        return "[\n" + obj.map(function(x) {
-            return "    " + JSON.stringify(x);
-        }).join("\n") + "\n]";
+        return (
+            "[\n" +
+            obj
+                .map(function(x) {
+                    return "    " + JSON.stringify(x);
+                })
+                .join("\n") +
+            "\n]"
+        );
     } else {
         return JSON.stringify(obj, undefined, 4);
     }
@@ -37,19 +43,12 @@ var noopTimer = {
 
 function ConsoleReporter() {
     var print = console.log.bind(console),
-        showColors = false,
         onComplete = function() {},
         timer = noopTimer,
         specCount,
         failureCount,
         failedSpecs = [],
         pendingCount,
-        ansi = {
-            green: '\x1B[32m',
-            red: '\x1B[31m',
-            yellow: '\x1B[33m',
-            none: '\x1B[0m'
-        },
         failedSuites = [];
 
     let INDENT = 0;
@@ -69,20 +68,19 @@ function ConsoleReporter() {
         }
 
         if (specCount > 0) {
-            var specCounts = specCount + ' ' + plural('spec', specCount) + ', ' +
-                failureCount + ' ' + plural('failure', failureCount);
+            var specCounts = specCount + " " + plural("spec", specCount) + ", " + failureCount + " " + plural("failure", failureCount);
 
             if (pendingCount) {
-                specCounts += ', ' + pendingCount + ' pending ' + plural('spec', pendingCount);
+                specCounts += ", " + pendingCount + " pending " + plural("spec", pendingCount);
             }
 
             print(specCounts);
         } else {
-            print('No specs found');
+            print("No specs found");
         }
 
         var seconds = timer.elapsed() / 1000;
-        print('Finished in ' + seconds + ' ' + plural('second', seconds));
+        print("Finished in " + seconds + " " + plural("second", seconds));
 
         for (i = 0; i < failedSuites.length; i++) {
             suiteFailureDetails(failedSuites[i]);
@@ -94,21 +92,21 @@ function ConsoleReporter() {
     this.specDone = function(result) {
         specCount++;
 
-        if (result.status == 'pending') {
+        if (result.status == "pending") {
             pendingCount++;
             print(indent("* " + result.description, INDENT));
             return;
         }
 
-        if (result.status == 'passed') {
+        if (result.status == "passed") {
             print(indent("✓ " + result.description, INDENT));
             return;
         }
 
-        if (result.status == 'failed') {
+        if (result.status == "failed") {
             failureCount++;
             failedSpecs.push(result);
-            print(indent('✕ ' + result.description, INDENT));
+            print(indent("✕ " + result.description, INDENT));
         }
     };
 
@@ -128,11 +126,11 @@ function ConsoleReporter() {
     return this;
 
     function printNewline() {
-        print('\n');
+        print("\n");
     }
 
     function plural(str, count) {
-        return count == 1 ? str : str + 's';
+        return count == 1 ? str : str + "s";
     }
 
     function repeat(thing, times) {
@@ -144,12 +142,12 @@ function ConsoleReporter() {
     }
 
     function indent(str, spaces) {
-        var lines = (str || '').split('\n');
+        var lines = (str || "").split("\n");
         var newArr = [];
         for (var i = 0; i < lines.length; i++) {
-            newArr.push(repeat(' ', spaces).join('') + lines[i]);
+            newArr.push(repeat(" ", spaces).join("") + lines[i]);
         }
-        return newArr.join('\n');
+        return newArr.join("\n");
     }
 
     function specFailureDetails(result) {
@@ -169,20 +167,18 @@ function ConsoleReporter() {
     function suiteFailureDetails(result) {
         for (var i = 0; i < result.failedExpectations.length; i++) {
             printNewline();
-            print('An error was thrown in an afterAll');
+            print("An error was thrown in an afterAll");
             printNewline();
-            print('AfterAll ' + result.failedExpectations[i].message);
-
+            print("AfterAll " + result.failedExpectations[i].message);
         }
         printNewline();
     }
 }
 
-
 jasmine.getEnv().addReporter(new ConsoleReporter());
 
 const start = window._onload;
 
-window.addEventListener('perspective-ready', function() {
+window.addEventListener("perspective-ready", function() {
     setTimeout(start, 500);
-})
+});

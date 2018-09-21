@@ -7,31 +7,26 @@
  *
  */
 
-const utils = require('@jpmorganchase/perspective-viewer/test/js/utils.js');
+const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 
-const simple_tests = require('@jpmorganchase/perspective-viewer/test/js/simple_tests.js');
+const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 utils.with_server({}, () => {
-
     describe.page("heatmap.html", () => {
-
         simple_tests.default();
 
-        describe('tooltip tests', () => {
-            const text = '.highcharts-label.highcharts-tooltip > text';
-            const point = '.highcharts-point';
+        describe("tooltip tests", () => {
+            const text = ".highcharts-label.highcharts-tooltip > text";
+            const point = ".highcharts-point";
 
-            test.capture('tooltip shows on hover.', async page => {
+            test.capture("tooltip shows on hover.", async page => {
                 await utils.invoke_tooltip(point, page);
             });
 
             test.run("tooltip shows a value.", async page => {
                 await utils.invoke_tooltip(point, page);
-                return await page.$eval(
-                    text, element => element.textContent !== "");
+                return await page.$eval(text, element => element.textContent !== "");
             });
         });
-
     });
-
 });
