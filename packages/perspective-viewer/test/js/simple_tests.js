@@ -7,7 +7,7 @@
  *
  */
 
-const {drag_drop} = require("./utils");
+const { drag_drop} = require("./utils");
 
 exports.default = function() {
     test.capture("shows a grid without any settings applied.", async () => {});
