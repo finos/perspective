@@ -30,7 +30,7 @@
 		"postinstall": "lerna bootstrap --hoist",
 		"precommit": "npm run lint:autofix && git add . -u",
 		"lint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js",
-		"lint:autofix": "npm run lint -- --fix",
+		"lint:autofix": "npm run lint -- --fix && lerna run lint:autofix:clang",
 		"_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_emsdk": "docker run --rm -it ${PSP_CPU_COUNT:+--cpus=\"${PSP_CPU_COUNT}.0\"} -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",
