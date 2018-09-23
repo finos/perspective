@@ -17,30 +17,25 @@ const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
 const update_tests = require("./updates.js");
 const filter_tests = require("./filters.js");
-const internal_tests = require('./internal.js');
+const internal_tests = require("./internal.js");
 
 const RUNTIMES = {
-    'WASM': perspective_wasm,
-    'ASMJS': perspective_asmjs,
-    'Parallel': psp_parallel.worker()
-}
+    WASM: perspective_wasm,
+    ASMJS: perspective_asmjs,
+    Parallel: psp_parallel.worker()
+};
 
-describe("perspective.js", function () {
-
-    Object.keys(RUNTIMES).forEach(function (mode) {
-
-        (typeof WebAssembly === 'undefined' && mode === "WASM" ? xdescribe : describe)(mode, function() {
-
+describe("perspective.js", function() {
+    Object.keys(RUNTIMES).forEach(function(mode) {
+        (typeof WebAssembly === "undefined" && mode === "WASM" ? xdescribe : describe)(mode, function() {
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
 
-            if (mode !== 'Parallel') {
+            if (mode !== "Parallel") {
                 internal_tests(RUNTIMES[mode], mode);
             }
         });
-
     });
-
 });

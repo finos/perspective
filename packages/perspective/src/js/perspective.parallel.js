@@ -25,35 +25,38 @@ var __SCRIPT_PATH__ = new ScriptPath();
 if (detectIE() && window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1) {
     console.warn("Perspective does not support parallel mode in IE when loading cross-origin.  Falling back to single-process mode ...");
     (function(d, script) {
-        script = d.createElement('script');
-        script.type = 'text/javascript';
+        script = d.createElement("script");
+        script.type = "text/javascript";
         script.async = true;
-        script.src = __SCRIPT_PATH__.path() + 'perspective.worker.asm.js';
-        d.getElementsByTagName('head')[0].appendChild(script);
-    }(document));
+        script.src = __SCRIPT_PATH__.path() + "perspective.worker.asm.js";
+        d.getElementsByTagName("head")[0].appendChild(script);
+    })(document);
 }
 
 // https://github.com/kripken/emscripten/issues/6042
-function detect_iphone () {
+function detect_iphone() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
 function XHRWorker(url, ready, scope) {
     var oReq = new XMLHttpRequest();
-    oReq.addEventListener('load', function() {
-        var blob = new Blob([this.responseText]);
-        var obj = window.URL.createObjectURL(blob);
-        var worker = new Worker(obj);
-        if (ready) {
-            ready.call(scope, worker);
-        }
-    }, oReq);
+    oReq.addEventListener(
+        "load",
+        function() {
+            var blob = new Blob([this.responseText]);
+            var obj = window.URL.createObjectURL(blob);
+            var worker = new Worker(obj);
+            if (ready) {
+                ready.call(scope, worker);
+            }
+        },
+        oReq
+    );
     oReq.open("get", url, true);
     oReq.send();
 }
 
 class WebWorker extends worker {
-
     constructor() {
         super();
         if (window.__PSP_WORKER__) {
@@ -63,7 +66,6 @@ class WebWorker extends worker {
         } else {
             this._start_cross_origin();
         }
-    
     }
 
     send(msg) {
@@ -77,16 +79,16 @@ class WebWorker extends worker {
     terminate() {
         this._worker.terminate();
         this._worker = undefined;
-    };
+    }
 
     _detect_transferable() {
         var ab = new ArrayBuffer(1);
         this._worker.postMessage(ab, [ab]);
-        this._worker.transferable = (ab.byteLength === 0);
+        this._worker.transferable = ab.byteLength === 0;
         if (!this._worker.transferable) {
-            console.warn('Transferable support not detected');
+            console.warn("Transferable support not detected");
         } else {
-            console.log('Transferable support detected');
+            console.log("Transferable support detected");
         }
     }
 
@@ -97,44 +99,48 @@ class WebWorker extends worker {
             w[key] = this._worker[key];
         }
         this._worker = w;
-        this._worker.addEventListener('message', this._handle.bind(this));
-        this._worker.postMessage({cmd: 'init', data: window.__PSP_WASM__, path: __SCRIPT_PATH__.path()});
+        this._worker.addEventListener("message", this._handle.bind(this));
+        this._worker.postMessage({cmd: "init", data: window.__PSP_WASM__, path: __SCRIPT_PATH__.path()});
         this._detect_transferable();
     }
-    
+
     _start_cross_origin() {
-        var dir = (typeof WebAssembly === "undefined" ? 'asmjs' : 'wasm');
-        XHRWorker(__SCRIPT_PATH__.path() + 'perspective.worker.' + dir + '.js', function(worker) {
-            for (var key in this._worker) {
-                worker[key] = this._worker[key];
-            }
-            this._worker.postMessage = worker.postMessage.bind(worker);
-            this._worker.terminate = worker.terminate.bind(worker);
-            this._worker = worker;
-            this._detect_transferable();
-            this._worker.addEventListener('message', this._handle.bind(this));
-            if (typeof WebAssembly === 'undefined') {
-                this._start_cross_origin_asmjs();
-            } else {
-                this._start_cross_origin_wasm();
-            }
-        }, this);
+        var dir = typeof WebAssembly === "undefined" ? "asmjs" : "wasm";
+        XHRWorker(
+            __SCRIPT_PATH__.path() + "perspective.worker." + dir + ".js",
+            function(worker) {
+                for (var key in this._worker) {
+                    worker[key] = this._worker[key];
+                }
+                this._worker.postMessage = worker.postMessage.bind(worker);
+                this._worker.terminate = worker.terminate.bind(worker);
+                this._worker = worker;
+                this._detect_transferable();
+                this._worker.addEventListener("message", this._handle.bind(this));
+                if (typeof WebAssembly === "undefined") {
+                    this._start_cross_origin_asmjs();
+                } else {
+                    this._start_cross_origin_wasm();
+                }
+            },
+            this
+        );
     }
 
     _start_cross_origin_asmjs() {
         this._worker.postMessage({
-            cmd: 'init',
+            cmd: "init",
             path: __SCRIPT_PATH__.path()
         });
     }
 
     _start_cross_origin_wasm() {
         var wasmXHR = new XMLHttpRequest();
-        wasmXHR.open('GET', __SCRIPT_PATH__.path() + 'psp.async.wasm', true);
-        wasmXHR.responseType = 'arraybuffer';
+        wasmXHR.open("GET", __SCRIPT_PATH__.path() + "psp.async.wasm", true);
+        wasmXHR.responseType = "arraybuffer";
         wasmXHR.onload = () => {
             let msg = {
-                cmd: 'init',
+                cmd: "init",
                 data: wasmXHR.response,
                 path: __SCRIPT_PATH__.path()
             };
@@ -148,29 +154,28 @@ class WebWorker extends worker {
     }
 
     _start_same_origin() {
-        var dir = (typeof WebAssembly === "undefined" || detect_iphone() ? 'asmjs' : 'async');
-        var w =  new Worker(__SCRIPT_PATH__.path() + 'perspective.worker.' + dir + '.js');
+        var dir = typeof WebAssembly === "undefined" || detect_iphone() ? "asmjs" : "async";
+        var w = new Worker(__SCRIPT_PATH__.path() + "perspective.worker." + dir + ".js");
         for (var key in this._worker) {
             w[key] = this._worker[key];
         }
         this._worker = w;
-        this._worker.addEventListener('message', this._handle.bind(this));
-        this._worker.postMessage({cmd: 'init', path: __SCRIPT_PATH__.path()});
+        this._worker.addEventListener("message", this._handle.bind(this));
+        this._worker.postMessage({cmd: "init", path: __SCRIPT_PATH__.path()});
         this._detect_transferable();
     }
 }
 
 class WebSocketWorker extends worker {
-
     constructor(url) {
         super();
         this._ws = new WebSocket(url);
         this._ws.onopen = () => {
-            this.send({id: -1, cmd: 'init'});
+            this.send({id: -1, cmd: "init"});
         };
-        this._ws.onmessage = (msg) => {
+        this._ws.onmessage = msg => {
             this._handle({data: JSON.parse(msg.data)});
-        }
+        };
     }
 
     send(msg) {
@@ -178,12 +183,12 @@ class WebSocketWorker extends worker {
     }
 
     terminate() {
-        this._ws.close();  
+        this._ws.close();
     }
 }
 
 export default {
-    worker: function (url) {
+    worker: function(url) {
         if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
             /* This is a nasty edge case, specifically regarding when IE tries to load perspective as a WebWorker, 
                but as a cross-origin request. This is not supported by IE AFAIK, so we instead 

@@ -17,18 +17,18 @@
 export function detectIE() {
     if (typeof window === "undefined") return false;
     var ua = window.navigator.userAgent;
-    var msie = ua.indexOf('MSIE ');
+    var msie = ua.indexOf("MSIE ");
     if (msie > 0) {
-        return parseInt(ua.substring(msie + 5, ua.indexOf('.', msie)), 10);
+        return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)), 10);
     }
-    var trident = ua.indexOf('Trident/');
+    var trident = ua.indexOf("Trident/");
     if (trident > 0) {
-        var rv = ua.indexOf('rv:');
-        return parseInt(ua.substring(rv + 3, ua.indexOf('.', rv)), 10);
+        var rv = ua.indexOf("rv:");
+        return parseInt(ua.substring(rv + 3, ua.indexOf(".", rv)), 10);
     }
-    var edge = ua.indexOf('Edge/');
+    var edge = ua.indexOf("Edge/");
     if (edge > 0) {
-        return parseInt(ua.substring(edge + 5, ua.indexOf('.', edge)), 10);
+        return parseInt(ua.substring(edge + 5, ua.indexOf(".", edge)), 10);
     }
     return false;
 }
@@ -50,15 +50,9 @@ export function detectChrome() {
 
     if (isIOSChrome) {
         return true;
-    } else if (
-        isChromium !== null &&
-        typeof isChromium !== "undefined" &&
-        vendorName === "Google Inc." &&
-        isOpera === false &&
-        isIEedge === false
-    ) {
+    } else if (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false) {
         return true;
-    } else { 
+    } else {
         return false;
     }
 }
@@ -79,11 +73,11 @@ export function ScriptPath() {
     var pathParts;
     try {
         throw new Error();
-    } catch(e) {
-        var stackLines = e.stack.split('\n');
+    } catch (e) {
+        var stackLines = e.stack.split("\n");
         var callerIndex = 0;
-        for(var i in stackLines){
-            if(!stackLines[i].match(/http[s]?:\/\//)) continue;
+        for (var i in stackLines) {
+            if (!stackLines[i].match(/http[s]?:\/\//)) continue;
             callerIndex = Number(i);
             break;
         }
@@ -99,7 +93,7 @@ export function ScriptPath() {
     this.host = function() {
         let x = this.path().match(/.+?\/\/.+?\//);
         return x ? x[0] : window.location.hostname;
-    }
+    };
     this.file = function() {
         return pathParts ? pathParts[3] : "";
     };

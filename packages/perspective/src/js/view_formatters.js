@@ -12,8 +12,8 @@ import papaparse from "papaparse";
 const jsonFormatter = {
     initDataValue: () => [],
     initRowValue: () => ({}),
-    initColumnValue: (data, row, colName) => row[colName] = [],
-    setColumnValue: (data, row, colName, value) => row[colName] = value,
+    initColumnValue: (data, row, colName) => (row[colName] = []),
+    setColumnValue: (data, row, colName, value) => (row[colName] = value),
     addColumnValue: (data, row, colName, value) => row[colName].unshift(value),
     addRow: (data, row) => data.push(row),
     formatData: data => data,
@@ -21,8 +21,8 @@ const jsonFormatter = {
 };
 
 const csvFormatter = Object.assign({}, jsonFormatter, {
-    addColumnValue: (data, row, colName, value) => row[colName.split('|').join(',')].unshift(value),
-    setColumnValue: (data, row, colName, value) => row[colName.split('|').join(',')] = value,
+    addColumnValue: (data, row, colName, value) => row[colName.split("|").join(",")].unshift(value),
+    setColumnValue: (data, row, colName, value) => (row[colName.split("|").join(",")] = value),
     formatData: (data, config) => papaparse.unparse(data, config)
 });
 
@@ -31,7 +31,7 @@ const jsonTableFormatter = {
     initRowValue: () => {},
     setColumnValue: (data, row, colName, value) => {
         data[colName] = data[colName] || [];
-        data[colName].push(value)
+        data[colName].push(value);
     },
     addColumnValue: (data, row, colName, value) => {
         data[colName] = data[colName] || [];
@@ -44,13 +44,13 @@ const jsonTableFormatter = {
     addRow: () => {},
     formatData: data => data,
     slice: (data, start) => {
-        let new_data = {}
+        let new_data = {};
         for (let x in data) {
             new_data[x] = data[x].slice(start);
         }
         return new_data;
     }
-}
+};
 
 export default {
     jsonFormatter,

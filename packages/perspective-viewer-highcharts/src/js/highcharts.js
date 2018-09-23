@@ -12,7 +12,7 @@ import {draw} from "./draw.js";
 function resize() {
     if (this._charts && this._charts.length > 0 && !this._resize_timer) {
         this._charts.map(x => x.reflow());
-    } 
+    }
     if (this._resize_timer) {
         clearTimeout(this._resize_timer);
         this._debounce_resize = true;
@@ -24,7 +24,6 @@ function resize() {
         this._resize_timer = undefined;
         this._debounce_resize = false;
     }, 50);
-    
 }
 
 function delete_chart() {
@@ -35,111 +34,111 @@ function delete_chart() {
 }
 
 global.registerPlugin("x_bar", {
-    name: "X Bar Chart", 
-    create: draw("horizontal_bar"), 
-    resize: resize, 
+    name: "X Bar Chart",
+    create: draw("horizontal_bar"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
 global.registerPlugin("y_bar", {
-    name: "Y Bar Chart", 
-    create: draw("vertical_bar"), 
-    resize: resize, 
+    name: "Y Bar Chart",
+    create: draw("vertical_bar"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
 global.registerPlugin("y_line", {
-    name: "Y Line Chart", 
-    create: draw("y_line"), 
-    resize: resize, 
+    name: "Y Line Chart",
+    create: draw("y_line"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
 global.registerPlugin("y_scatter", {
-    name: "Y Scatter Chart", 
-    create: draw("y_scatter"), 
-    resize: resize, 
+    name: "Y Scatter Chart",
+    create: draw("y_scatter"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
 global.registerPlugin("y_area", {
-    name: "Y Area Chart", 
-    create: draw("y_area"), 
-    resize: resize, 
+    name: "Y Area Chart",
+    create: draw("y_area"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart
 });
 
 global.registerPlugin("xy_line", {
-    name: "X/Y Line Chart", 
-    create: draw("line"), 
-    resize: resize, 
+    name: "X/Y Line Chart",
+    create: draw("line"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 2
+        type: "number",
+        count: 2
     },
     selectMode: "toggle",
     delete: delete_chart
 });
 
 global.registerPlugin("xy_scatter", {
-    name: "X/Y Scatter Chart", 
-    create: draw('scatter'), 
-    resize: resize, 
+    name: "X/Y Scatter Chart",
+    create: draw("scatter"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 2
+        type: "number",
+        count: 2
     },
     selectMode: "toggle",
     delete: delete_chart
 });
 
 global.registerPlugin("treemap", {
-    name: "Treemap", 
-    create: draw('treemap'), 
-    resize: resize, 
+    name: "Treemap",
+    create: draw("treemap"),
+    resize: resize,
     initial: {
-        "type": "number",    
-        "count": 2
+        type: "number",
+        count: 2
     },
     selectMode: "toggle",
-    delete: function () {}
+    delete: function() {}
 });
 
 global.registerPlugin("sunburst", {
     name: "Sunburst",
-    create: draw('sunburst'),
+    create: draw("sunburst"),
     resize: resize,
     initial: {
-        "type": "number",
-        "count": 2
+        type: "number",
+        count: 2
     },
     selectMode: "toggle",
-    delete: function () {}
+    delete: function() {}
 });
 
 global.registerPlugin("heatmap", {
@@ -147,8 +146,8 @@ global.registerPlugin("heatmap", {
     create: draw("heatmap"),
     resize: resize,
     initial: {
-        "type": "number",
-        "count": 1
+        type: "number",
+        count: 1
     },
     selectMode: "select",
     delete: delete_chart

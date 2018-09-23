@@ -33,7 +33,6 @@ function row_to_series(series, sname, gname) {
 }
 
 class TreeAxisIterator {
-
     constructor(depth, json) {
         this.depth = depth;
         this.json = json;
@@ -45,7 +44,7 @@ class TreeAxisIterator {
             name: path[path.length - 1],
             depth: path.length,
             categories: []
-        }
+        };
 
         // Find the correct parent
         var parent = this.top;
@@ -64,11 +63,11 @@ class TreeAxisIterator {
     *[Symbol.iterator]() {
         let label = this.top;
         for (let row of this.json) {
-            let path = row.__ROW_PATH__ || [''];
+            let path = row.__ROW_PATH__ || [""];
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);     
+                label.categories.push(path[path.length - 1]);
                 yield row;
             }
         }
@@ -76,10 +75,9 @@ class TreeAxisIterator {
 }
 
 class ColumnsIterator {
-
     constructor(rows, hidden) {
-        this.rows = rows
-        this.hidden = hidden
+        this.rows = rows;
+        this.hidden = hidden;
     }
 
     *[Symbol.iterator]() {
@@ -90,11 +88,8 @@ class ColumnsIterator {
                     cname = cname[cname.length - 1];
                     return prop !== "__ROW_PATH__" && this.hidden.indexOf(cname) === -1;
                 });
-                this.is_stacked = this.columns.map(value =>
-                    value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)
-                ).filter((value, index, self) =>
-                    self.indexOf(value) === index
-                ).length > 1;
+                this.is_stacked =
+                    this.columns.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
             }
             yield row;
         }
@@ -117,7 +112,7 @@ export function make_y_data(js, pivots, hidden) {
             }
             let s = row_to_series(series, sname, gname);
             let val = row[prop];
-            val = (val === undefined || val === "" ? null : val)
+            val = val === undefined || val === "" ? null : val;
             s.data.push(val);
         }
     }
@@ -130,7 +125,6 @@ export function make_y_data(js, pivots, hidden) {
  */
 
 class TickClean {
-
     constructor(type) {
         this.dict = {};
         this.names = [];
@@ -142,7 +136,7 @@ class TickClean {
             if (!(val in this.dict)) {
                 this.dict[val] = Object.keys(this.dict).length;
                 if (val === null) {
-                    this.names.push('-');
+                    this.names.push("-");
                 } else {
                     this.names.push(val);
                 }
@@ -156,12 +150,11 @@ class TickClean {
 }
 
 class MakeTick {
-    
     constructor(schema, columns) {
         this.schema = schema;
         this.xaxis_clean = new TickClean(schema[columns[0]]);
         this.yaxis_clean = new TickClean(schema[columns[1]]);
-        this.color_clean = new TickClean(schema[columns[2]]);;
+        this.color_clean = new TickClean(schema[columns[2]]);
     }
 
     make(row, columns, colorRange) {
@@ -198,8 +191,8 @@ class MakeTick {
         if (columns.length > 3) {
             tick.z = isNaN(row[columns[3]]) ? 1 : row[columns[3]];
         }
-        if ('__ROW_PATH__' in row) {
-            tick.name = row['__ROW_PATH__'].join(", ");
+        if ("__ROW_PATH__" in row) {
+            tick.name = row["__ROW_PATH__"].join(", ");
         }
         return tick;
     }
@@ -212,8 +205,8 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
     let colorRange = [Infinity, -Infinity];
     let make_tick = new MakeTick(schema, columns);
     if (col_pivots.length === 0) {
-        let sname = ' ';
-        let s = row_to_series(series, sname);            
+        let sname = " ";
+        let s = row_to_series(series, sname);
         for (let row of rows2) {
             let tick = make_tick.make(row, columns, colorRange);
             if (tick) {
@@ -221,7 +214,9 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
             }
         }
     } else {
-        let prev, group = [], s;
+        let prev,
+            group = [],
+            s;
         let cols = Object.keys(js[0]).filter(prop => {
             let cname = prop.split(COLUMN_SEPARATOR_STRING);
             cname = cname[cname.length - 1];
@@ -242,7 +237,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
                     if (tick) {
                         s.data.push(tick);
                     }
-                        }
+                }
                 prev = group_name;
                 group = [prop];
             }
@@ -253,8 +248,8 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
                 s.data.push(tick);
             }
         }
-    }   
-    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];   
+    }
+    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];
 }
 
 /******************************************************************************
@@ -263,7 +258,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
  */
 
 function make_tree_axis(series) {
-    let ylabels = series.map(s => s.name.split(','));
+    let ylabels = series.map(s => s.name.split(","));
     let ytop = {name: null, depth: 0, categories: []};
     let maxdepth = ylabels[0].length;
 
@@ -272,7 +267,7 @@ function make_tree_axis(series) {
         let parent = ytop;
 
         for (let depth = 0; depth < ylabel.length; ++depth) {
-            let label = ylabel[depth]
+            let label = ylabel[depth];
             if (depth === maxdepth - 1) {
                 parent.categories.push(label);
             } else {
@@ -292,7 +287,7 @@ function make_tree_axis(series) {
 
 export function make_xyz_data(js, pivots, hidden, ytree_type) {
     let [series, top] = make_y_data(js, pivots, hidden);
-    if (ytree_type !== 'string' && ytree_type !== undefined) {
+    if (ytree_type !== "string" && ytree_type !== undefined) {
         series = series.reverse();
     }
     let colorRange = [Infinity, -Infinity];
@@ -324,7 +319,7 @@ function make_color(aggregates, all, leaf_only) {
     if (aggregates.length >= 2) {
         colorRange = [Infinity, -Infinity];
         for (let series of all) {
-            let colorvals = series['data'];
+            let colorvals = series["data"];
             for (let i = 1; i < colorvals.length; ++i) {
                 if ((leaf_only && colorvals[i].leaf) || !leaf_only) {
                     colorRange[0] = Math.min(colorRange[0], colorvals[i].colorValue);
@@ -341,15 +336,14 @@ function make_color(aggregates, all, leaf_only) {
 }
 
 class TreeIterator extends TreeAxisIterator {
-
     *[Symbol.iterator]() {
         let label = this.top;
         for (let row of this.json) {
-            let path = row.__ROW_PATH__ || [''];
+            let path = row.__ROW_PATH__ || [""];
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);     
+                label.categories.push(path[path.length - 1]);
             }
             yield row;
         }
@@ -370,7 +364,7 @@ function make_levels(row_pivots) {
                     fontSize: `${[14, 10][i] || 0}px`,
                     textOutline: null
                 }
-            },
+            }
         });
     }
     return levels;
@@ -381,14 +375,14 @@ function make_configs(series, levels) {
     for (let data of series) {
         let title = data.name.split(COLUMN_SEPARATOR_STRING);
         configs.push({
-            layoutAlgorithm: 'squarified',
+            layoutAlgorithm: "squarified",
             allowDrillToNode: true,
             alternateStartingDirection: true,
             data: data.data.slice(1),
             levels: levels,
             title: title,
-            stack: data.stack,
-        });  
+            stack: data.stack
+        });
     }
     return configs;
 }
@@ -399,24 +393,24 @@ export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let series = [];
 
     for (let row of rows2) {
-        let rp = row['__ROW_PATH__'];
+        let rp = row["__ROW_PATH__"];
         let id = rp.join(", ");
         let name = rp.slice(-1)[0];
         let parent = rp.slice(0, -1).join(", ");
-        
+
         for (let idx = 0; idx < rows2.columns.length; idx++) {
             let prop = rows2.columns[idx];
             let sname = prop.split(COLUMN_SEPARATOR_STRING);
             let gname = sname[sname.length - 1];
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
             if (idx % aggregates.length === 0) {
-                let s = row_to_series(series, sname, gname);    
+                let s = row_to_series(series, sname, gname);
                 s.data.push({
-                    id: id, 
-                    name: name, 
-                    value: row[prop], 
-                    colorValue: aggregates.length > 1 ? row[rows2.columns[idx + 1]] : undefined, 
-                    parent: parent, 
+                    id: id,
+                    name: name,
+                    value: row[prop],
+                    colorValue: aggregates.length > 1 ? row[rows2.columns[idx + 1]] : undefined,
+                    parent: parent,
                     leaf: row.__ROW_PATH__.length === row_pivots.length
                 });
             }
@@ -428,4 +422,3 @@ export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let colorRange = make_color(aggregates, series, leaf_only, row_pivots);
     return [configs, rows.top, colorRange];
 }
-

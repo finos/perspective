@@ -7,13 +7,13 @@
  *
  */
 
-import { values } from 'underscore';
+import {values} from "underscore";
 
 export default class State {
     constructor() {
         this.errors = {
             input_column: undefined,
-            save: undefined,
+            save: undefined
         };
         this.edit = false;
         this.column_name = undefined;
@@ -25,6 +25,6 @@ export default class State {
 
     is_valid() {
         const vals = values(this);
-        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes('') && this.input_columns.length === this.computation.num_params;
+        return !vals.includes(null) && !vals.includes(undefined) && !vals.includes("") && this.input_columns.length === this.computation.num_params;
     }
 }

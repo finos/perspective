@@ -7,10 +7,10 @@
  *
  */
 
-const perspective = require('./perspective.node.js');
-const WebSocket = require('ws');
-const http = require('http');
-const queryString = require('query-string');
+const perspective = require("./perspective.node.js");
+const WebSocket = require("ws");
+const http = require("http");
+const queryString = require("query-string");
 
 /******************************************************************************
  *
@@ -49,16 +49,16 @@ wss.broadcast = function broadcast(data) {
         if (client.readyState === WebSocket.OPEN) {
             client.send(data);
         }
-    }); 
+    });
 };
 
-wss.on('connection', function connection(ws) {
+wss.on("connection", function connection(ws) {
     view.to_json().then(data => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify(data));
         }
     });
-    ws.on('error', console.error);
+    ws.on("error", console.error);
 });
 
 let requests = 0;
@@ -92,17 +92,17 @@ const server = http.createServer((request, response) => {
     for (var key of Object.keys(tick)) {
         if (schema[key] === "float" || schema[key === "integer"]) {
             tick[key] = Number.parseFloat(tick[key]);
-        } 
+        }
     }
-    delete tick[''];
+    delete tick[""];
     table.update([tick]);
     response.end("Processed");
 });
 
-server.listen(3000, "0.0.0.0", (err) => {
+server.listen(3000, "0.0.0.0", err => {
     if (err) {
         console.error(err);
     } else {
         console.log(`Server is listening on 3000`);
     }
-})
+});

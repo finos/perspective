@@ -7,15 +7,15 @@
  *
  */
 
-import * as tooltip from './tooltip';
+import * as tooltip from "./tooltip";
 
 export function set_boost(config, series, ...types) {
     const count = config.series[0].data ? config.series[0].data.length * config.series.length : config.series.length;
     if (count > 5000) {
         Object.assign(config, {
             boost: {
-                useGPUTranslations: types.indexOf('date') === -1,
-                usePreAllocated: types.indexOf('date') === -1
+                useGPUTranslations: types.indexOf("date") === -1,
+                usePreAllocated: types.indexOf("date") === -1
             }
         });
         config.plotOptions.series.boostThreshold = 1;
@@ -44,70 +44,69 @@ export function set_axis(config, axis, name, type) {
         startOnTick: false,
         endOnTick: false,
         title: {
-            style: {color: '#666666', fontSize: "14px"},
+            style: {color: "#666666", fontSize: "14px"},
             text: name
-        },
+        }
     };
-    if (axis === 'yAxis') {
-        Object.assign(opts, {labels : {overflow: 'justify'}});
+    if (axis === "yAxis") {
+        Object.assign(opts, {labels: {overflow: "justify"}});
     }
     Object.assign(config, {[axis]: opts});
 }
 
 export function set_category_axis(config, axis, type, top) {
-    if (type === 'date') {
+    if (type === "date") {
         Object.assign(config, {
             [axis]: {
-                categories: top.categories.map(x => new Date(x).toLocaleString('en-us',  { year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' })),
+                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})),
                 labels: {
-                    enabled: (top.categories.length > 0),
+                    enabled: top.categories.length > 0,
                     autoRotation: [-5]
-                },
+                }
             }
-        });             
+        });
     } else {
         let opts = {
             categories: top.categories,
             labels: {
-                enabled: (top.categories.length > 0),
+                enabled: top.categories.length > 0,
                 padding: 0,
-                autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90],
+                autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
             }
-        }
-        if (axis === 'yAxis') {
+        };
+        if (axis === "yAxis") {
             Object.assign(opts, {
                 title: null,
                 tickWidth: 1,
-                reversed: true,
+                reversed: true
             });
-        } 
+        }
         Object.assign(config, {[axis]: opts});
     }
-};
+}
 
 export function default_config(aggregates, mode) {
-
-    let type = 'scatter';
-    if (mode === 'y_line') {
-        type = 'line';
-    } else if (mode === 'y_area') {
-        type = 'area';
-    } else if (mode === 'y_scatter') {
-        type = 'scatter';
-    } else if (mode.indexOf('bar') > -1) {
-        type = 'column';
-    } else if (mode == 'treemap') {
-        type = 'treemap';
-    } else if (mode == 'sunburst') {
-        type = 'sunburst';
-    } else if (mode === 'scatter') {
+    let type = "scatter";
+    if (mode === "y_line") {
+        type = "line";
+    } else if (mode === "y_area") {
+        type = "area";
+    } else if (mode === "y_scatter") {
+        type = "scatter";
+    } else if (mode.indexOf("bar") > -1) {
+        type = "column";
+    } else if (mode == "treemap") {
+        type = "treemap";
+    } else if (mode == "sunburst") {
+        type = "sunburst";
+    } else if (mode === "scatter") {
         if (aggregates.length <= 3) {
-            type = 'scatter';
+            type = "scatter";
         } else {
-            type = 'bubble';
+            type = "bubble";
         }
-    } else if (mode === 'heatmap') {
-        type = 'heatmap';
+    } else if (mode === "heatmap") {
+        type = "heatmap";
     }
 
     // let new_radius = 0;
@@ -126,12 +125,12 @@ export function default_config(aggregates, mode) {
     return {
         chart: {
             type: type,
-            inverted: mode.indexOf('horizontal') > -1,
+            inverted: mode.indexOf("horizontal") > -1,
             animation: false,
-            zoomType: mode === 'scatter' ? 'xy' : 'x',
+            zoomType: mode === "scatter" ? "xy" : "x",
             resetZoomButton: {
                 position: {
-                    align: 'left',
+                    align: "left"
                 }
             }
         },
@@ -142,16 +141,16 @@ export function default_config(aggregates, mode) {
         },
         credits: {enabled: false},
         title: {
-            text: null,
+            text: null
         },
         legend: {
-            align: 'right',
-            verticalAlign: 'top',
+            align: "right",
+            verticalAlign: "top",
             y: 10,
-            layout: 'vertical',
+            layout: "vertical",
             enabled: false,
             itemStyle: {
-                fontWeight: 'normal'
+                fontWeight: "normal"
             }
         },
         boost: {
@@ -160,11 +159,11 @@ export function default_config(aggregates, mode) {
 
         plotOptions: {
             area: {
-                stacking: 'normal',
+                stacking: "normal",
                 marker: {enabled: false, radius: 0}
             },
             line: {
-                marker: {enabled: false, radius: 0},
+                marker: {enabled: false, radius: 0}
             },
             coloredScatter: {
                 // marker: {radius: new_radius},
@@ -173,17 +172,17 @@ export function default_config(aggregates, mode) {
                 // marker: {radius: new_radius},
             },
             column: {
-                stacking: 'normal',
+                stacking: "normal",
                 states: {
                     hover: {
                         // add ajax
                         brightness: -0.1,
-                        borderColor: '#000000'
+                        borderColor: "#000000"
                     }
-                },
+                }
             },
             heatmap: {
-                nullColor: "rgba(0,0,0,0)",
+                nullColor: "rgba(0,0,0,0)"
             },
             series: {
                 animation: false,
@@ -192,11 +191,11 @@ export function default_config(aggregates, mode) {
                 turboThreshold: 60000,
                 borderWidth: 0,
                 connectNulls: true,
-                lineWidth: mode.indexOf('line') === -1 ? 0 : 1.5,
+                lineWidth: mode.indexOf("line") === -1 ? 0 : 1.5,
                 states: {
                     hover: {
-                        lineWidthPlus: 0,
-                    },
+                        lineWidthPlus: 0
+                    }
                 },
                 events: {
                     legendItemClick: function() {
@@ -210,21 +209,24 @@ export function default_config(aggregates, mode) {
         },
         tooltip: {
             animation: false,
-            backgroundColor: '#FFFFFF',
-            borderColor: '#777777',
+            backgroundColor: "#FFFFFF",
+            borderColor: "#777777",
             followPointer: false,
             valueDecimals: 2,
             formatter: function(highcharts_tooltip) {
-                that._view.schema().then(schema => {
-                    let tooltip_text = tooltip.format_tooltip(this, type, schema, axis_titles, pivot_titles);
-                    highcharts_tooltip.label.attr({
-                        text: tooltip_text
-                    });
-                }).catch(err => console.error(err));
+                that._view
+                    .schema()
+                    .then(schema => {
+                        let tooltip_text = tooltip.format_tooltip(this, type, schema, axis_titles, pivot_titles);
+                        highcharts_tooltip.label.attr({
+                            text: tooltip_text
+                        });
+                    })
+                    .catch(err => console.error(err));
 
                 return "Loading...";
             },
-            positioner: function (labelWidth, labelHeight, point) {
+            positioner: function(labelWidth, labelHeight, point) {
                 let chart = this.chart;
                 let tooltipX, tooltipY;
 
@@ -245,8 +247,8 @@ export function default_config(aggregates, mode) {
                     y: tooltipY
                 };
             }
-        },
-    }
+        }
+    };
 }
 
 function get_axis_titles(aggs) {
@@ -263,5 +265,5 @@ function get_pivot_titles(row_pivots, column_pivots) {
     return {
         row: row_pivots,
         column: column_pivots
-    }
+    };
 }

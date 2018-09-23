@@ -19,7 +19,7 @@ function Range() {}
  * @param end_row
  */
 Range.create = function(start_row, end_row) {
-    var range = new Range;
+    var range = new Range();
     range.reset(start_row, end_row);
     return range;
 };
@@ -30,7 +30,7 @@ Range.create = function(start_row, end_row) {
  * @param padding
  */
 Range.estimate = function(grid) {
-    var range = new Range;
+    var range = new Range();
     range.estimatedGridRange(grid);
     return range;
 };
@@ -85,9 +85,7 @@ Range.prototype.isInvalid = function() {
  * @returns {boolean}
  */
 Range.prototype.within = function(range) {
-    return range instanceof Range &&
-        range.start_row <= this.start_row &&
-        this.end_row <= range.end_row;
+    return range instanceof Range && range.start_row <= this.start_row && this.end_row <= range.end_row;
 };
 
 /**
@@ -98,6 +96,5 @@ Range.prototype.within = function(range) {
 Range.prototype.contains = function(range) {
     return range instanceof Range && range.within(this);
 };
-
 
 module.exports = Range;

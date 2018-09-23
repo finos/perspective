@@ -2,9 +2,16 @@
 	"devDependencies": {
 		"babel-eslint": "^8.2.3",
 		"eslint": "^4.19.1",
+		"eslint-config-prettier": "^3.0.1",
+		"eslint-plugin-prettier": "^2.6.2",
 		"lerna": "^2.11.0",
+		"pre-commit": "^1.2.2",
+		"prettier": "^1.14.2",
 		"rimraf": "^2.6.2"
 	},
+	"pre-commit": [
+		"precommit"
+	],
 	"scripts": {
 		"build,test": "npm run --silent build && npm run --silent test",
 		"build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
@@ -21,7 +28,9 @@
 		"clean:screenshots": "lerna run clean:screenshots ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
 		"write_tests": "WRITE_TESTS=1 npm run test:run",
 		"postinstall": "lerna bootstrap --hoist",
-		"lint": "eslint packages/*/src/js",
+		"precommit": "npm run lint:autofix && git add . -u",
+		"lint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js",
+		"lint:autofix": "npm run lint -- --fix",
 		"_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
 		"_emsdk": "docker run --rm -it ${PSP_CPU_COUNT:+--cpus=\"${PSP_CPU_COUNT}.0\"} -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",

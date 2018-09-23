@@ -19,7 +19,7 @@ export function treeLineRendererPaint(gc, config) {
 
     var value = config.value.rollup;
     var leaf = config.value.isLeaf;
-    var depth = config.value.rowPath.length-1;
+    var depth = config.value.rowPath.length - 1;
     var parent = config.expanded;
     var lastChild = config.last;
 
@@ -52,14 +52,14 @@ export function treeLineRendererPaint(gc, config) {
     gc.beginPath();
     for (var i = 1; i <= depth; i++) {
         xOffset += lineNodeSpace;
-        var lineHeight = (lastChild && !parent) ? height / 2 : height;
+        var lineHeight = lastChild && !parent ? height / 2 : height;
         gc.moveTo(xOffset, y);
         gc.lineTo(xOffset, y);
         gc.lineTo(xOffset, y + lineHeight);
         if (i === depth) {
-            gc.moveTo(xOffset, y + (height / 2));
-            gc.lineTo(xOffset, y + (height / 2));
-            gc.lineTo(xOffset + lineNodeSpace - nodeRadius, y + (height / 2));
+            gc.moveTo(xOffset, y + height / 2);
+            gc.lineTo(xOffset, y + height / 2);
+            gc.lineTo(xOffset + lineNodeSpace - nodeRadius, y + height / 2);
         } else {
             gc.lineTo(xOffset, y + height);
         }
@@ -67,21 +67,21 @@ export function treeLineRendererPaint(gc, config) {
 
     // Draw node circle
     if (!leaf) {
-        gc.moveTo(xOffset + lineNodeSpace + nodeRadius, y + (height / 2));
-        gc.arc(xOffset + lineNodeSpace, y + (height / 2), nodeRadius, 0, 2 * Math.PI);
+        gc.moveTo(xOffset + lineNodeSpace + nodeRadius, y + height / 2);
+        gc.arc(xOffset + lineNodeSpace, y + height / 2, nodeRadius, 0, 2 * Math.PI);
         if (config.isCellHovered) {
             gc.globalAlpha = 0.45;
             gc.fill();
             gc.globalAlpha = 0.3;
         }
     } else {
-        gc.lineTo(xOffset + lineNodeSpace + nodeRadius, y + (height / 2));
+        gc.lineTo(xOffset + lineNodeSpace + nodeRadius, y + height / 2);
     }
 
     if (parent && !leaf) {
         gc.globalAlpha = 0.8;
         gc.fill();
-        gc.moveTo(xOffset + lineNodeSpace, y + (height / 2) + nodeRadius);
+        gc.moveTo(xOffset + lineNodeSpace, y + height / 2 + nodeRadius);
         gc.lineTo(xOffset + lineNodeSpace, y + height);
         gc.globalAlpha = 0.3;
     }
@@ -93,10 +93,10 @@ export function treeLineRendererPaint(gc, config) {
 
     gc.globalAlpha = 1.0;
     gc.fillStyle = config.isSelected ? config.foregroundSelectionColor : config.color;
-    gc.textAlign = 'start';
-    gc.textBaseline = 'middle';
+    gc.textAlign = "start";
+    gc.textBaseline = "middle";
     gc.font = config.isSelected ? config.foregroundSelectionFont : config.treeHeaderFont;
-    var cellTextOffset = xOffset + lineNodeSpace + (2 * nodeRadius) + 3;
+    var cellTextOffset = xOffset + lineNodeSpace + 2 * nodeRadius + 3;
     let formatted_value = config.formatValue(value, config._type);
     config.minWidth = cellTextOffset + gc.getTextWidth(formatted_value) + 15;
     var metrics = gc.getTextWidthTruncated(formatted_value, width - cellTextOffset + (x - 3), true);
@@ -104,4 +104,3 @@ export function treeLineRendererPaint(gc, config) {
     gc.fillText(metrics.string ? metrics.string : formatted_value, cellTextOffset, yOffset);
     gc.restore();
 }
-

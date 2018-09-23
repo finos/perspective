@@ -1,10 +1,10 @@
 var firstMove;
 window.addEventListener("touchstart", function() {
-  firstMove = true;
+    firstMove = true;
 });
 window.addEventListener("touchmove", function(e) {
-  if (firstMove) {
-    e.preventDefault();
-    firstMove = false;
-  }
+    if (firstMove) {
+        e.preventDefault();
+        firstMove = false;
+    }
 });

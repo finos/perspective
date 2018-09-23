@@ -13,13 +13,13 @@
  * Params
  * ------
  * template : An HTML string representing a template.
- * 
+ *
  * Returns
  * -------
  * A Template DOM object.
  */
-export function importTemplate(template) {  
-    const div = document.createElement('div');
+export function importTemplate(template) {
+    const div = document.createElement("div");
     div.innerHTML = template;
     return Array.prototype.slice.call(div.children)[0];
 }
@@ -46,12 +46,10 @@ function setTemplateContent(template) {
  * proto : The new Web Component's prototype object, as per spec.
  */
 export function registerElement(templateString, proto) {
-
     const template = importTemplate(templateString);
     setTemplateContent(template);
 
     const _perspective_element = class extends proto {
-
         attributeChangedCallback(name, old, value) {
             if (name[0] !== "_" && old != value) {
                 this[name] = value;
@@ -62,14 +60,14 @@ export function registerElement(templateString, proto) {
             if (this._initialized) {
                 return;
             }
-            this._initializing= true;
+            this._initializing = true;
             this._old_children = [];
             while (this.hasChildNodes()) {
                 if (this.lastChild.nodeType === 1) {
                     this._old_children.push(this.lastChild);
                 }
                 this.removeChild(this.lastChild);
-            };
+            }
             this._old_children = this._old_children.reverse();
             var node = document.importNode(template.content, true);
             this.appendChild(node);
@@ -77,7 +75,7 @@ export function registerElement(templateString, proto) {
             if (super.connectedCallback) {
                 super.connectedCallback();
             }
-    
+
             // Call all attributes bound to setters on the proto
             for (let key of Object.getOwnPropertyNames(proto.prototype)) {
                 if (key !== "connectedCallback") {
@@ -86,19 +84,19 @@ export function registerElement(templateString, proto) {
             }
             this._initializing = false;
             this._initialized = true;
-        };
+        }
 
         static get observedAttributes() {
             return Object.getOwnPropertyNames(proto.prototype);
         }
-    }
+    };
 
     for (let key of Object.getOwnPropertyNames(proto.prototype)) {
         let descriptor = Object.getOwnPropertyDescriptor(proto.prototype, key);
         if (descriptor && descriptor.set) {
             let old = descriptor.set;
             descriptor.set = function(val) {
-                if( this.getAttribute(key) !== val) {
+                if (this.getAttribute(key) !== val) {
                     this.setAttribute(key, val);
                     return;
                 }
@@ -106,37 +104,35 @@ export function registerElement(templateString, proto) {
                     return;
                 }
                 old.call(this, val);
-            }
+            };
             Object.defineProperty(proto.prototype, key, descriptor);
         }
     }
 
-    
-    let name = template.getAttribute('id');
+    let name = template.getAttribute("id");
     console.log(`Registered ${name}`);
 
-    window.customElements.define(name, _perspective_element)
+    window.customElements.define(name, _perspective_element);
 }
 
-export function bindTemplate(template) { 
-    return function (cls) {
+export function bindTemplate(template) {
+    return function(cls) {
         return registerElement(template, cls);
-    }
+    };
 }
-
 
 /**
  * A decorator for declaring a setter property of an HTMLElement descendent
  * class as serialized JSON.  Handles converting these types before invoking
  * the underlying function/
- * 
+ *
  * @param {object} _default the default value to supply the setter when
  * undefined, removed or invalid.
  */
 function _attribute(_default) {
     return function(cls, name, desc) {
         const old_set = desc.set;
-        desc.set = function (x) {
+        desc.set = function(x) {
             let attr = this.getAttribute(name);
             try {
                 if (x === null || x === undefined) {
@@ -155,23 +151,23 @@ function _attribute(_default) {
                 console.error(`Invalid value for attribute "${name}": ${x}`);
                 attr = _default();
             }
-            old_set.call(this, attr);    
-        }
-        desc.get = function () {
+            old_set.call(this, attr);
+        };
+        desc.get = function() {
             if (this.hasAttribute(name)) {
                 return JSON.parse(this.getAttribute(name));
             }
-        }
+        };
         return desc;
-    }
+    };
 }
 
 export function copy_to_clipboard(csv) {
-    let element = document.createElement('textarea');
+    let element = document.createElement("textarea");
     document.body.appendChild(element);
     element.value = csv;
     element.select();
-    document.execCommand('copy');
+    document.execCommand("copy");
     document.body.removeChild(element);
 }
 

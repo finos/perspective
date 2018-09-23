@@ -17,28 +17,27 @@ function setPSP(payload) {
     if (payload.isTree) {
         new_schema[this.treeColumnIndex] = {
             name: this.treeColumnIndex.toString(),
-            header: ' ' // space char because empty string defaults to `name`
+            header: " " // space char because empty string defaults to `name`
         };
     }
 
     payload.columnPaths.forEach(function(columnPath, columnIndex) {
-      
-        const col_name = columnPath.join('|'),
+        const col_name = columnPath.join("|"),
             aliases = payload.configuration.columnAliases,
-            header = aliases && aliases[col_name] || col_name,
+            header = (aliases && aliases[col_name]) || col_name,
             name = columnIndex.toString(),
             type = payload.columnTypes[columnIndex];
 
         if (payload.isTree && columnIndex === 0) {
-            new_schema[-1] = { name, header, type };
+            new_schema[-1] = {name, header, type};
         } else {
-            new_schema.push({ name, header, type });
+            new_schema.push({name, header, type});
         }
     });
 
     this.grid.properties.showTreeColumn = payload.isTree;
 
-    console.log('Setting up initial schema and data load into HyperGrid');
+    console.log("Setting up initial schema and data load into HyperGrid");
 
     // Following call to setData signals the grid to call createColumns and dispatch the
     // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
@@ -79,23 +78,23 @@ function createColumns() {
 function setColumnPropsByType(column) {
     var props = column.properties;
     switch (column.type) {
-        case 'number':
-        case 'float':
-            props.halign = 'right';
-            props.columnHeaderHalign = 'right';
-            props.format = 'FinanceFloat';
+        case "number":
+        case "float":
+            props.halign = "right";
+            props.columnHeaderHalign = "right";
+            props.format = "FinanceFloat";
             break;
-        case 'integer':
-            props.halign = 'right';
-            props.columnHeaderHalign = 'right';
-            props.format = 'FinanceInteger';
+        case "integer":
+            props.halign = "right";
+            props.columnHeaderHalign = "right";
+            props.format = "FinanceInteger";
             break;
-        case 'date':
-            props.format = 'FinanceDate';
+        case "date":
+            props.format = "FinanceDate";
             break;
         default:
             if (column.index === this.treeColumnIndex) {
-                props.format = 'FinanceTree';
+                props.format = "FinanceTree";
             }
     }
 }
