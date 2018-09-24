@@ -11,6 +11,9 @@ import {detectIE, ScriptPath} from "./utils.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
+// other packages need this
+export {COLUMN_SEPARATOR_STRING} from "./defaults";
+
 import {worker} from "./api.js";
 
 /******************************************************************************

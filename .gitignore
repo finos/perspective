@@ -120,3 +120,4 @@ cmake-build-debug
 .ipynb_checkpoints
 
 package.json.lerna_backup
+packages/*/es

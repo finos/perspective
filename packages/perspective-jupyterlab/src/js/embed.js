@@ -7,7 +7,7 @@
  *
  */
 
-import worker from "worker-loader?inline=true&fallback=false!@jpmorganchase/perspective/src/js/perspective.wasm.js";
+import worker from "worker-loader?inline=true&fallback=false!@jpmorganchase/perspective";
 import buffer from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
 
 window.__PSP_WORKER__ = worker;
