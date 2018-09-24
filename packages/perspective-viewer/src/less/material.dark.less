@@ -11,7 +11,7 @@
 @import "material";
 
 perspective-viewer {
-    
+
     ::-webkit-scrollbar {
         width: 6px;
     }
@@ -27,19 +27,20 @@ perspective-viewer {
 
     &.dragging {
         #top_panel .dropping {
-            background-color: @blue900 !important;
+            background-color: @blue900  !important;
             color: white !important;
         }
 
         #side_panel #columns_container #active_columns perspective-row[drop-target] .row_draggable {
-            background-color: @blue900 !important;
+            background-color: @blue900  !important;
             color: white !important;
         }
     }
 
-    &[view=treemap], &[view=heatmap] {
+    &[view=treemap],
+    &[view=heatmap] {
         rect {
-            stroke: @coolgrey700 !important;
+            stroke: @coolgrey700  !important;
         }
     }
 
@@ -49,13 +50,13 @@ perspective-viewer {
 
     &[view=treemap] {
         rect {
-            stroke: @coolgrey700 !important;
+            stroke: @coolgrey700  !important;
         }
     }
 
     &[view=sunburst] {
         path {
-            stroke: @coolgrey700 !important;
+            stroke: @coolgrey700  !important;
         }
     }
 
@@ -65,9 +66,12 @@ perspective-viewer {
 
     #app {
         background-color: @coolgrey800;
-        border-top-color: @coolgrey900 !important;
+        border-top-color: @coolgrey900  !important;
 
-        input, select, ul, #filters {
+        input,
+        select,
+        ul,
+        #filters {
             border-right: 0px;
             background-color: @coolgrey800;
             color: @coolgrey200;
@@ -78,7 +82,7 @@ perspective-viewer {
             background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9Ii0xNzcgMTc2IDQuOSAxMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAtMTc3IDE3NiA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjx0aXRsZT5hcnJvd3M8L3RpdGxlPg0KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSItMTc1LjYsMTgwLjcgLTE3NC41LDE3OS4yIC0xNzMuNSwxODAuNyAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iLTE3My41LDE4MS4zIC0xNzQuNSwxODIuOCAtMTc1LjYsMTgxLjMgIi8+DQo8L3N2Zz4=) no-repeat 95% 50% !important;
 
             &:focus {
-                color: @coolgrey200 !important;
+                color: @coolgrey200  !important;
             }
         }
 
@@ -100,7 +104,7 @@ perspective-viewer {
             }
 
             g.highcharts-axis-labels text {
-                fill: @coolgrey200 !important;
+                fill: @coolgrey200  !important;
             }
 
             .highcharts-tooltip-box {
@@ -140,11 +144,13 @@ perspective-viewer {
         #pivot_chart {
             background-color: @coolgrey700;
 
-            tspan, text {
-                fill: @coolgrey200 !important;
+            tspan,
+            text {
+                fill: @coolgrey200  !important;
             }
 
-            rect, image {
+            rect,
+            image {
                 opacity: 0.85;
             }
         }
@@ -167,10 +173,13 @@ perspective-viewer {
 
             #columns_container {
 
-                #active_columns, #inactive_columns {
+                #active_columns,
+                #inactive_columns {
 
                     perspective-row {
-                        .float:before, .integer:before {
+
+                        .float:before,
+                        .integer:before {
                             color: @lightblue600;
                         }
 
@@ -225,7 +234,7 @@ perspective-viewer {
 
                             .row_computed {
                                 span {
-                                    color: @coolgrey200 !important;
+                                    color: @coolgrey200  !important;
                                 }
                             }
                         }
@@ -243,7 +252,7 @@ perspective-viewer {
 
                         .row_computed {
                             span {
-                                color: @darkgray !important;
+                                color: @darkgray  !important;
                             }
                         }
                     }
@@ -259,7 +268,9 @@ perspective-viewer {
                     }
 
                     #psp-cc-computation__type {
-                        span.integer, span.float {
+
+                        span.integer,
+                        span.float {
                             color: @lightblue600;
                         }
 
@@ -273,7 +284,7 @@ perspective-viewer {
                         border-bottom-color: @coolgrey600;
 
                         &.dropping {
-                            background-color: @blue900 !important;
+                            background-color: @blue900  !important;
                             color: white !important;
                         }
                     }
@@ -301,10 +312,10 @@ perspective-viewer {
 
             #side_panel__actions {
                 button {
-                    color: @coolgrey200 !important;
+                    color: @coolgrey200  !important;
 
                     &:hover {
-                        color: @coolgrey100 !important;
+                        color: @coolgrey100  !important;
                     }
                 }
             }

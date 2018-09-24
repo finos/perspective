@@ -9,33 +9,34 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<head>
 
-        <script src="mobile_fix.js"></script>
-        <script src="perspective.view.js"></script>
-        <script src="hypergrid.plugin.js"></script>
-        <script src="highcharts.plugin.js"></script>
-        
-        <script src="perspective.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <link rel='stylesheet' href="demo.css">
+    <script src="mobile_fix.js"></script>
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
 
-    </head>
-    <body>
+    <script src="perspective.js"></script>
 
-        <perspective-viewer id="view1"></perspective-viewer>
+    <link rel='stylesheet' href="demo.css">
 
-        <script>
+</head>
 
-            window.addEventListener('WebComponentsReady', function () {
-                var elem = document.getElementById('view1');
-                var worker = perspective.worker(window.location.origin.replace('http', 'ws'));
-                elem.load(worker.open('data_source_one'));
-            });
+<body>
 
-        </script>
+    <perspective-viewer id="view1"></perspective-viewer>
 
-    </body>
+    <script>
+        window.addEventListener('WebComponentsReady', function() {
+            var elem = document.getElementById('view1');
+            var worker = perspective.worker(window.location.origin.replace('http', 'ws'));
+            elem.load(worker.open('data_source_one'));
+        });
+    </script>
+
+</body>
+
 </html>

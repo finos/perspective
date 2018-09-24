@@ -9,40 +9,37 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<head>
 
-        <script src="mobile_fix.js"></script>
-        <script src="perspective.view.js"></script>
-        <script src="hypergrid.plugin.js"></script>
-        <script src="highcharts.plugin.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="mobile_fix.js"></script>
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
 
-        <link rel='stylesheet' href="demo.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
 
-    </head>
-    <body>
+    <link rel='stylesheet' href="demo.css">
 
-        <perspective-viewer 
-            index="long" 
-            sort='["mktcap"]'
-            row-pivots='["long"]'
-            columns='["mktcap","price","vwapData","supply","volume","perc","shapeshift"]'>
-                
-        </perspective-viewer>
+</head>
 
-        <script>
+<body>
 
-            window.addEventListener('WebComponentsReady', function () {
-                var socket = io.connect('https://coincap.io');
-                socket.on('trades', function (tradeMsg) {
-                    document.getElementsByTagName('perspective-viewer')[0].update([tradeMsg.msg]);
-                })
-            });
+    <perspective-viewer index="long" sort='["mktcap"]' row-pivots='["long"]' columns='["mktcap","price","vwapData","supply","volume","perc","shapeshift"]'>
 
-        </script>
+    </perspective-viewer>
 
-    </body>
+    <script>
+        window.addEventListener('WebComponentsReady', function() {
+            var socket = io.connect('https://coincap.io');
+            socket.on('trades', function(tradeMsg) {
+                document.getElementsByTagName('perspective-viewer')[0].update([tradeMsg.msg]);
+            })
+        });
+    </script>
+
+</body>
+
 </html>

@@ -7,7 +7,7 @@
  *
  */
 
- @import "./column_labels.less";
+@import "./column_labels.less";
 
 perspective-viewer:hover #config_button {
     opacity: 1;
@@ -41,7 +41,7 @@ perspective-viewer {
 
     #app.hide_message {
         #drop_target {
-            display:none;
+            display: none;
         }
     }
 
@@ -70,7 +70,10 @@ perspective-viewer {
         display: flex;
     }
 
-    #row_pivots #psp_row, #column_pivots #psp_row, #sort #psp_row, #filters #psp_row {
+    #row_pivots #psp_row,
+    #column_pivots #psp_row,
+    #sort #psp_row,
+    #filters #psp_row {
         display: inline;
     }
 
@@ -78,7 +81,8 @@ perspective-viewer {
         min-height: 20px;
     }
 
-    #active_columns, #inactive_columns {
+    #active_columns,
+    #inactive_columns {
         list-style: none;
         padding: 5px;
         width: 100%;
@@ -96,7 +100,7 @@ perspective-viewer {
     }
 
     .columns_horizontal #sub_columns.collapse #side_panel__actions {
-        margin-top: 0px;        
+        margin-top: 0px;
     }
 
     #sub_columns {
@@ -111,6 +115,7 @@ perspective-viewer {
             #inactive_columns {
                 display: none;
             }
+
             flex-shrink: 0;
             min-height: 64px;
         }
@@ -122,6 +127,7 @@ perspective-viewer {
         margin: 15px 13px 15px 13px;
         margin-bottom: 5px;
     }
+
     .column {
         display: flex;
         list-style: none;
@@ -140,14 +146,14 @@ perspective-viewer {
         margin: 5px 10px 0px 0px;
     }
 
-    .rrow > div {
-        display:flex;
+    .rrow>div {
+        display: flex;
         min-height: 24px;
         flex-direction: column;
         justify-content: flex-end;
     }
 
-    #top_panel > .rrow > * {
+    #top_panel>.rrow>* {
         width: 100%;
     }
 
@@ -155,7 +161,7 @@ perspective-viewer {
         white-space: nowrap;
     }
 
-    #top_panel perspective-row + perspective-row:before {
+    #top_panel perspective-row+perspective-row:before {
         content: ",";
         padding: 0px 10px 0px 0px;
     }
@@ -165,7 +171,7 @@ perspective-viewer {
         display: inline-block;
         vertical-align: middle;
         margin-bottom: 0px;
-        
+
     }
 
     #drop_target {
@@ -176,6 +182,7 @@ perspective-viewer {
         bottom: 0px;
         padding: 30px;
     }
+
     #drop_target_inner {
         width: 100%;
         height: 100%;
@@ -183,9 +190,11 @@ perspective-viewer {
         align-items: center;
         justify-content: center
     }
+
     #drop_target_inner h3 {
         font-weight: 300;
     }
+
     #config_button {
         position: absolute;
         top: 0;
@@ -205,12 +214,13 @@ perspective-viewer {
     #config_button:before {
         content: '\1f527';
     }
-    
+
     ul {
         padding: 0px;
         margin: 0;
         font-size: 12px;
     }
+
     select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -222,6 +232,7 @@ perspective-viewer {
         padding: 0px 0px 0px 6px;
         font-size: 12px;
     }
+
     input {
         padding: 0 10px 0 10px;
     }
@@ -241,13 +252,13 @@ perspective-viewer {
         max-width: 1000px;
     }
 
-    
+
     #side_panel {
         padding-top: 5px;
         flex: 0 0 auto;
     }
 
-    #side_panel > div {
+    #side_panel>div {
         display: flex;
     }
 
@@ -268,17 +279,18 @@ perspective-viewer {
 
     #transpose_button {
         cursor: pointer;
-        min-width:5px;
-        max-width:5px;
-        flex-grow:0;
-        color:#999;
-        font-family:Arial;
-        font-size:12px
+        min-width: 5px;
+        max-width: 5px;
+        flex-grow: 0;
+        color: #999;
+        font-family: Arial;
+        font-size: 12px
     }
 
 }
 
-perspective-viewer[view=treemap]:not([column-pivots="[]"]), perspective-viewer[view=sunburst]:not([column-pivots="[]"]) {
+perspective-viewer[view=treemap]:not([column-pivots="[]"]),
+perspective-viewer[view=sunburst]:not([column-pivots="[]"]) {
 
     .chart {
         position: relative !important;

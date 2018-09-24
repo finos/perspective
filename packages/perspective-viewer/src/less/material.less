@@ -15,7 +15,10 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto+Mono');
 
 
-perspective-viewer[view=treemap], perspective-viewer[view=sunburst], perspective-viewer[view=xy_line], perspective-viewer[view=xy_scatter] {
+perspective-viewer[view=treemap],
+perspective-viewer[view=sunburst],
+perspective-viewer[view=xy_line],
+perspective-viewer[view=xy_scatter] {
 
     #app.columns_horizontal #side_panel {
 
@@ -33,7 +36,8 @@ button {
     text-transform: uppercase;
 }
 
-select, ul {
+select,
+ul {
     padding: 0 10px 0 0;
 }
 
@@ -73,13 +77,14 @@ perspective-viewer {
                     }
                 }
 
-                #active_columns perspective-row[drop-target] .row_draggable, .rrow ul {
+                #active_columns perspective-row[drop-target] .row_draggable,
+                .rrow ul {
                     margin-top: 0;
                 }
             }
         }
 
-        #top_panel .rrow > * {
+        #top_panel .rrow>* {
             border-top: 0 !important;
             border-left: 0 !important;
             border-right: 0 !important;
@@ -91,13 +96,14 @@ perspective-viewer {
     #config_button {
         margin-top: 14px;
         margin-left: 7px;
+
         &:before {
             font-family: "Material Icons";
             content: "more_vert" !important;
         }
     }
 
-    .psp-text-field__input + label {
+    .psp-text-field__input+label {
         padding-left: 0;
     }
 }
@@ -116,7 +122,10 @@ perspective-viewer #app {
         }
     }
 
-    input, select, ul, #filters {
+    input,
+    select,
+    ul,
+    #filters {
         border-right: 0;
         background-color: #eee;
         color: #666;
@@ -127,10 +136,12 @@ perspective-viewer #app {
         top: 24px;
         bottom: 24px;
         left: 24px;
-        right: 24px;   
+        right: 24px;
+
         div.finbar-horizontal div.thumb {
             height: 7px;
         }
+
         div.finbar-vertical div.thumb {
             width: 7px;
         }
@@ -169,22 +180,23 @@ perspective-viewer #app {
         padding-right: 5px;
         min-width: 18px;
     }
-    
-    #side_panel perspective-row .integer::before, #side_panel perspective-row .float::before {
+
+    #side_panel perspective-row .integer::before,
+    #side_panel perspective-row .float::before {
         .column_row();
         content: "123";
     }
-    
+
     #side_panel perspective-row .string::before {
         .column_row();
         content: "abc";
     }
-    
+
     #side_panel perspective-row .boolean::before {
         .column_row();
         content: "t/f";
     }
-    
+
     #side_panel perspective-row .date::before {
         .column_row();
         content: "mdy";
@@ -229,7 +241,8 @@ perspective-viewer #app {
             color: #999;
         }
 
-        #active_columns, #inactive_columns {
+        #active_columns,
+        #inactive_columns {
             will-change: opacity, height, margin, transform;
             margin-top: 0;
             margin-bottom: 0;
@@ -342,7 +355,7 @@ perspective-viewer #app {
                 }
 
                 &.computed {
-                    
+
                     .row_computed {
                         margin-right: -12px;
                     }
@@ -384,11 +397,12 @@ perspective-viewer #app {
         }
 
         perspective-computed-column {
-            font-family: @material-sans-serif-fonts !important;
+            font-family: @material-sans-serif-fonts  !important;
             padding-right: 20px;
 
             .psp-cc-computation__input-column {
                 background: none;
+
                 perspective-row {
                     margin-left: -24px;
                 }
@@ -442,6 +456,7 @@ perspective-viewer #app {
 
                 &#psp-cc-button-save {
                     background: @blue800;
+
                     &:hover {
                         background: @blue900;
                     }
@@ -449,6 +464,7 @@ perspective-viewer #app {
 
                 &#psp-cc-button-delete {
                     background: @red800;
+
                     &:hover {
                         background: @red900;
                     }
@@ -459,7 +475,7 @@ perspective-viewer #app {
         #side_panel__actions {
             button.side_panel-action {
                 color: #666;
-                font-family: @material-sans-serif-fonts !important;
+                font-family: @material-sans-serif-fonts  !important;
                 text-transform: none;
 
                 &:hover {
@@ -485,6 +501,7 @@ perspective-viewer #app {
         .psp-text-field {
             background: none;
         }
+
         .rrow {
             margin: 0 24px 24px 0;
         }
@@ -504,17 +521,19 @@ perspective-viewer #app {
 
     #pivot_chart {
         padding: 24px 24px 24px 24px;
+
         .chart {
             padding: 0;
 
             .tooltip {
-                font-family: @material-sans-serif-fonts !important;
+                font-family: @material-sans-serif-fonts  !important;
             }
         }
     }
 }
 
-.dropping .psp-text-field label, perspective-viewer .psp-text-field__input:not(:empty) + label {
+.dropping .psp-text-field label,
+perspective-viewer .psp-text-field__input:not(:empty)+label {
     padding-left: 0;
     display: inline-block;
     top: -8px

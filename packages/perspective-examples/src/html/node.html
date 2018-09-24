@@ -9,50 +9,53 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<head>
 
-        <script src="mobile_fix.js"></script>
-        <script src="perspective.view.js"></script>
-        <script src="hypergrid.plugin.js"></script>
-        <script src="highcharts.plugin.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <link rel='stylesheet' href="demo.css">
+    <script src="mobile_fix.js"></script>
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
 
-    </head>
-    <body>
+    <link rel='stylesheet' href="demo.css">
 
-        <perspective-viewer id="view1" sort='["id"]'></perspective-viewer>
+</head>
 
-        <script>
+<body>
 
-            var schema = {
-                name: "string",
-                client: "string",
-                lastUpdate: "date",
-                chg: "float",
-                bid: "float",
-                ask: "float",
-                vol: "float",
-                id: "integer"
+    <perspective-viewer id="view1" sort='["id"]'></perspective-viewer>
+
+    <script>
+        var schema = {
+            name: "string",
+            client: "string",
+            lastUpdate: "date",
+            chg: "float",
+            bid: "float",
+            ask: "float",
+            vol: "float",
+            id: "integer"
+        }
+
+        window.addEventListener('WebComponentsReady', function() {
+            var elem = document.getElementById('view1');
+            elem.load(perspective.worker().table(schema, {
+                "index": "name"
+            }));
+            var socket = new WebSocket('ws://' + location.hostname + ':8080/');
+            socket.onmessage = (event) => {
+                var data = JSON.parse(event.data);
+                for (var k of data) {
+                    delete k["__ROW_PATH__"];
+                }
+                elem.update(data);
             }
 
-            window.addEventListener('WebComponentsReady', function () {
-                var elem = document.getElementById('view1');
-                elem.load(perspective.worker().table(schema, {"index": "name"}));
-                var socket = new WebSocket('ws://' + location.hostname + ':8080/');               
-                socket.onmessage = (event) => {
-                    var data = JSON.parse(event.data);
-                    for (var k of data) {
-                        delete k["__ROW_PATH__"];
-                    }
-                    elem.update(data);
-                }
+        });
+    </script>
 
-            });
+</body>
 
-        </script>
-
-    </body>
 </html>
