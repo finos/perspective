@@ -121,10 +121,7 @@ perspective-viewer {
     }
 
     #app.columns_horizontal {
-        #side_panel {
-            max-width: none;
-        }
-
+       
         #columns_container {
             flex-direction: row-reverse;
         }
@@ -132,11 +129,21 @@ perspective-viewer {
         #active_columns, #inactive_columns {
             display: flex;
             flex-direction: column;
-            flex: 1 !important;
+            flex: 0 1 auto;
+            width: 100%;
+        }
+
+        #sub_columns {
+            flex-shrink: 1;
+            perspective-row {
+                span#name {
+                    margin-right: 25px;
+                }
+            }
         }
 
         #active_columns {
-            padding-right: 8px;
+            margin-right: 8px;
             perspective-row {
                 div#psp_row {
                     margin-right: 2px;
@@ -150,12 +157,16 @@ perspective-viewer {
 
         perspective-computed-column {
             max-height: none;
-
         }
     }
 
     #columns_container {
         flex-direction: column;
+        height: 100%;
+
+        #active_columns {
+            flex: 0 1 auto;
+        }
 
         #active_columns, #inactive_columns {
             border: none !important;

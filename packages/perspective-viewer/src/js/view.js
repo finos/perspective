@@ -483,9 +483,9 @@ async function loadTable(table, redraw = true) {
     }
 
     if (cols.length === shown.length) {
-        this._inactive_columns.style.display = "none";
+        this._inactive_columns.parentElement.classList.add("collapse");
     } else {
-        this._inactive_columns.style.display = "block";
+        this._inactive_columns.parentElement.classList.remove("collapse");
     }
 
     this.querySelector("#columns_container").style.visibility = "visible";
@@ -836,9 +836,9 @@ class ViewPrivate extends HTMLElement {
         this.setAttribute("columns", JSON.stringify(columns));
         const lis = Array.prototype.slice.call(this.querySelectorAll("#inactive_columns perspective-row"));
         if (columns.length === lis.length) {
-            this._inactive_columns.style.display = "none";
+            this._inactive_columns.parentElement.classList.add("collapse");
         } else {
-            this._inactive_columns.style.display = "block";
+            this._inactive_columns.parentElement.classList.remove("collapse");
         }
         lis.forEach(x => {
             const index = columns.indexOf(x.getAttribute("name"));
@@ -915,8 +915,6 @@ class ViewPrivate extends HTMLElement {
         this._row_pivots = this.querySelector("#row_pivots");
         this._column_pivots = this.querySelector("#column_pivots");
         this._datavis = this.querySelector("#pivot_chart");
-        this._columns_container = this.querySelector("#columns_container");
-        this._side_panel_divider = this.querySelector("#columns_container > #divider");
         this._active_columns = this.querySelector("#active_columns");
         this._inactive_columns = this.querySelector("#inactive_columns");
         this._side_panel_actions = this.querySelector("#side_panel__actions");

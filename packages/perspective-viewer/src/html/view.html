@@ -18,12 +18,14 @@
             <div id="columns_container" style="visibility: hidden">
                 <ul id='active_columns' ondragenter="dragEnter(event)"></ul>
                 <div id='divider'></div>
+                <div id="sub_columns">
                 <ul id='inactive_columns'></ul>
-                <perspective-computed-column></perspective-computed-column>
+                <div id="side_panel__actions" style="visibility: hidden">
+                    <div id="add-computed-column" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
+                </div>
             </div>
-            <div id="side_panel__actions" style="visibility: hidden">
-                <div id="add-computed-column" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
-            </div>
+            <perspective-computed-column></perspective-computed-column>
+        </div>
         </div>
         <div class="column noselect">
             <div id='top_panel'>

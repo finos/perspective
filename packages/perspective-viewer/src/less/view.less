@@ -78,25 +78,41 @@ perspective-viewer {
         min-height: 20px;
     }
 
-    #side_panel {
-        max-width: 30%;
-    }
-
     #active_columns, #inactive_columns {
         list-style: none;
         padding: 5px;
         width: 100%;
         margin-top: 8px;
         overflow-y: auto;
+        overflow-x: hidden;
         position: relative;
     }
 
     #inactive_columns {
-        min-height: 33.3%;
-        flex-shrink: 1000;
 
         .active {
             display: none;
+        }
+    }
+
+    .columns_horizontal #sub_columns.collapse #side_panel__actions {
+        margin-top: 0px;        
+    }
+
+    #sub_columns {
+        min-height: 33.3%;
+        flex-shrink: 100000;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        width: 100%;
+
+        &.collapse {
+            #inactive_columns {
+                display: none;
+            }
+            flex-shrink: 0;
+            min-height: 64px;
         }
     }
 
@@ -223,6 +239,12 @@ perspective-viewer {
         padding-bottom: 10px;
         padding-top: 5px;
         max-width: 1000px;
+    }
+
+    
+    #side_panel {
+        padding-top: 5px;
+        flex: 0 0 auto;
     }
 
     #side_panel > div {
