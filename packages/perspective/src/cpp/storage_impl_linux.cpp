@@ -9,7 +9,6 @@
 
 #include <perspective/first.h>
 
-
 #ifdef __linux__
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
@@ -31,27 +30,32 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-namespace perspective
-{
+namespace perspective {
 
 t_lstore::t_lstore(const t_lstore_recipe& a)
-    : m_base(0), m_dirname(a.m_dirname), m_colname(a.m_colname),
-      m_fd(-1), m_capacity(a.m_capacity), m_size(0), m_alignment(a.m_alignment),
-      m_fflags(a.m_fflags), m_fmode(a.m_fmode),
-      m_creation_disposition(a.m_creation_disposition),
-      m_mprot(a.m_mprot), m_mflags(a.m_mflags),
-      m_backing_store(a.m_backing_store), m_init(false),
-      m_resize_factor(1.3), m_version(0),
-      m_from_recipe(a.m_from_recipe)
-{
-    if (m_from_recipe)
-    {
+    : m_base(0)
+    , m_dirname(a.m_dirname)
+    , m_colname(a.m_colname)
+    , m_fd(-1)
+    , m_capacity(a.m_capacity)
+    , m_size(0)
+    , m_alignment(a.m_alignment)
+    , m_fflags(a.m_fflags)
+    , m_fmode(a.m_fmode)
+    , m_creation_disposition(a.m_creation_disposition)
+    , m_mprot(a.m_mprot)
+    , m_mflags(a.m_mflags)
+    , m_backing_store(a.m_backing_store)
+    , m_init(false)
+    , m_resize_factor(1.3)
+    , m_version(0)
+    , m_from_recipe(a.m_from_recipe) {
+    if (m_from_recipe) {
         m_fname = a.m_fname;
         return;
     }
 
-    if (m_backing_store == BACKING_STORE_DISK)
-    {
+    if (m_backing_store == BACKING_STORE_DISK) {
         std::stringstream ss;
         ss << a.m_dirname << "/"
            << "_col_" << a.m_colname << "_" << this;
@@ -60,8 +64,7 @@ t_lstore::t_lstore(const t_lstore_recipe& a)
 }
 
 t_handle
-t_lstore::create_file()
-{
+t_lstore::create_file() {
     t_handle fd = open(m_fname.c_str(), m_fflags, m_fmode);
     PSP_VERBOSE_ASSERT(fd != -1, "Error opening file");
 
@@ -77,22 +80,19 @@ t_lstore::create_file()
 }
 
 void*
-t_lstore::create_mapping()
-{
+t_lstore::create_mapping() {
     void* rval = mmap(0, capacity(), m_mprot, m_mflags, m_fd, 0);
     PSP_VERBOSE_ASSERT(rval != MAP_FAILED, "mmap failed");
     return rval;
 }
 
 void
-t_lstore::resize_mapping(t_uindex cap_new)
-{
+t_lstore::resize_mapping(t_uindex cap_new) {
     t_index rcode = ftruncate(m_fd, cap_new);
     PSP_VERBOSE_ASSERT(rcode == 0, "ftruncate failed");
     void* base = mremap(m_base, capacity(), cap_new, MREMAP_MAYMOVE);
 
-    if (base == MAP_FAILED)
-    {
+    if (base == MAP_FAILED) {
         PSP_COMPLAIN_AND_ABORT("mremap failed!");
     }
 
@@ -101,21 +101,18 @@ t_lstore::resize_mapping(t_uindex cap_new)
 }
 
 void
-t_lstore::destroy_mapping()
-{
+t_lstore::destroy_mapping() {
     t_rcode rc = munmap(m_base, capacity());
     PSP_VERBOSE_ASSERT(!rc, "Failed to destroy mapping");
 }
 
 void
-t_lstore::freeze_impl()
-{
+t_lstore::freeze_impl() {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
 }
 
 void
-t_lstore::unfreeze_impl()
-{
+t_lstore::unfreeze_impl() {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
 }
 

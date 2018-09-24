@@ -19,8 +19,7 @@
 #include <set>
 #include <limits>
 
-namespace perspective
-{
+namespace perspective {
 typedef char t_char;
 typedef unsigned char t_uchar;
 typedef std::int8_t t_int8;
@@ -38,15 +37,9 @@ typedef std::string t_str;
 
 typedef bool t_bool;
 
-enum t_status : t_uint8
-{
-    STATUS_INVALID,
-    STATUS_VALID,
-    STATUS_CLEAR
-};
+enum t_status : t_uint8 { STATUS_INVALID, STATUS_VALID, STATUS_CLEAR };
 
-enum t_dtype
-{
+enum t_dtype {
     DTYPE_NONE,
     DTYPE_INT64,
     DTYPE_INT32,
@@ -141,27 +134,19 @@ typedef std::map<t_index, t_index> t_iimap;
 typedef t_uindex t_stridx;
 typedef std::pair<t_stridx, t_stridx> t_stridxpair;
 
-struct t_hdf5_tag
-{
-};
+struct t_hdf5_tag {};
 
-
-
-struct t_extent_pair
-{
+struct t_extent_pair {
     t_uindex m_begin;
     t_uindex m_end;
 };
 
-
-struct t_column_static_ctx
-{
+struct t_column_static_ctx {
     t_str m_colname;
     t_dtype m_dtype;
 };
 
-struct t_column_dynamic_ctx
-{
+struct t_column_dynamic_ctx {
     void* m_base;
     t_uint8* m_status;
     t_extent_pair* m_extents_base;
@@ -172,16 +157,13 @@ struct t_column_dynamic_ctx
 typedef std::vector<t_column_static_ctx> t_column_static_ctxvec;
 typedef std::vector<t_column_dynamic_ctx> t_column_dynamic_ctxvec;
 
-struct t_table_static_ctx
-{
+struct t_table_static_ctx {
     t_column_static_ctxvec m_columns;
 
     inline t_svec
-    get_colnames() const
-    {
+    get_colnames() const {
         t_svec rval;
-        for (const auto& c : m_columns)
-        {
+        for (const auto& c : m_columns) {
             rval.push_back(c.m_colname);
         }
         return rval;

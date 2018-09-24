@@ -10,24 +10,21 @@
 #include <perspective/first.h>
 #include <perspective/min_max.h>
 
-namespace perspective
-{
+namespace perspective {
 
-t_minmax::t_minmax() : m_min_count(0), m_max_count(0)
-{
+t_minmax::t_minmax()
+    : m_min_count(0)
+    , m_max_count(0) {
     m_min = mknone();
     m_max = mknone();
 }
 
 } // end namespace perspective
 
-namespace std
-{
+namespace std {
 std::ostream&
-operator<<(std::ostream& os, const perspective::t_minmax& mm)
-{
-    os << "t_minmax<min=" << mm.m_min
-       << ", mincount=" << mm.m_min_count << " max=" << mm.m_max
+operator<<(std::ostream& os, const perspective::t_minmax& mm) {
+    os << "t_minmax<min=" << mm.m_min << ", mincount=" << mm.m_min_count << " max=" << mm.m_max
        << ", maxcount=" << mm.m_max_count << ">";
     return os;
 }

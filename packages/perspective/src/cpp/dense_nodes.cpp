@@ -11,31 +11,21 @@
 #include <perspective/base.h>
 #include <perspective/dense_nodes.h>
 
-namespace std
-{
+namespace std {
 
 std::ostream&
-operator<<(std::ostream& os, const perspective::t_dense_tnode& s)
-{
-    std::cout << "t_dtnode<idx:" << s.m_idx << " pidx:" << s.m_pidx
-              << " fcidx:" << s.m_fcidx << " nchild:" << s.m_nchild
-              << " flidx:" << s.m_flidx << " nleaves:" << s.m_nleaves
-              << ">";
+operator<<(std::ostream& os, const perspective::t_dense_tnode& s) {
+    std::cout << "t_dtnode<idx:" << s.m_idx << " pidx:" << s.m_pidx << " fcidx:" << s.m_fcidx
+              << " nchild:" << s.m_nchild << " flidx:" << s.m_flidx
+              << " nleaves:" << s.m_nleaves << ">";
     return os;
 }
-}
-namespace perspective
-{
+} // namespace std
+namespace perspective {
 
 void
-fill_dense_tnode(t_dense_tnode* node,
-                 t_uindex idx,
-                 t_uindex pidx,
-                 t_uindex fcidx,
-                 t_uindex nchild,
-                 t_uindex flidx,
-                 t_uindex nleaves)
-{
+fill_dense_tnode(t_dense_tnode* node, t_uindex idx, t_uindex pidx, t_uindex fcidx,
+    t_uindex nchild, t_uindex flidx, t_uindex nleaves) {
     node->m_idx = idx;
     node->m_pidx = pidx;
     node->m_fcidx = fcidx;
@@ -43,4 +33,4 @@ fill_dense_tnode(t_dense_tnode* node,
     node->m_flidx = flidx;
     node->m_nleaves = nleaves;
 }
-}
+} // namespace perspective

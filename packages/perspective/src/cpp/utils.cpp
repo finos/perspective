@@ -14,15 +14,12 @@
 #include <string>
 #include <sstream>
 
-
-namespace perspective
-{
+namespace perspective {
 
 t_str
-unique_path(const t_str& path_prefix)
-{
-	std::stringstream ss;
-	ss << path_prefix << boost::uuids::random_generator()();
-	return ss.str();
+unique_path(const t_str& path_prefix) {
+    std::stringstream ss;
+    ss << path_prefix << boost::uuids::random_generator()();
+    return ss.str();
 }
-} // end
+} // namespace perspective

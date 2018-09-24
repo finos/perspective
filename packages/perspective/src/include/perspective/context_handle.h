@@ -13,20 +13,24 @@
 #include <map>
 #include <vector>
 
-namespace perspective
-{
+namespace perspective {
 
-struct t_ctx_handle
-{
+struct t_ctx_handle {
     t_ctx_handle();
     t_ctx_handle(void* ctx, t_ctx_type ctx_type);
 
-	t_str get_type_descr() const;
-	t_ctx_type get_type() const { return m_ctx_type; }
+    t_str get_type_descr() const;
+    t_ctx_type
+    get_type() const {
+        return m_ctx_type;
+    }
 
-	template< typename _T >
-	_T* get() const { return static_cast<_T*>( m_ctx ); }
-	
+    template <typename _T>
+    _T*
+    get() const {
+        return static_cast<_T*>(m_ctx);
+    }
+
     t_ctx_type m_ctx_type;
     void* m_ctx;
 };

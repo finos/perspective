@@ -11,26 +11,20 @@
 #include <perspective/pool.h>
 #include <perspective/update_task.h>
 
-namespace perspective
-{
-t_update_task::t_update_task(t_pool& pool) : m_pool(pool)
-{
-}
+namespace perspective {
+t_update_task::t_update_task(t_pool& pool)
+    : m_pool(pool) {}
 
 void
-t_update_task::run()
-{
+t_update_task::run() {
     auto work_to_do = m_pool.m_data_remaining.load();
-    if (work_to_do)
-    {
+    if (work_to_do) {
         m_pool.m_data_remaining.store(true);
-        for (auto g : m_pool.m_gnodes)
-        {
+        for (auto g : m_pool.m_gnodes) {
             if (g)
                 g->_process();
         }
-        for (auto g : m_pool.m_gnodes)
-        {
+        for (auto g : m_pool.m_gnodes) {
             if (g)
                 g->clear_output_ports();
         }
@@ -41,19 +35,15 @@ t_update_task::run()
 }
 
 void
-t_update_task::run(t_uindex gnode_id)
-{
+t_update_task::run(t_uindex gnode_id) {
     auto work_to_do = m_pool.m_data_remaining.load();
-    if (work_to_do)
-    {
-        for (auto g : m_pool.m_gnodes)
-        {
+    if (work_to_do) {
+        for (auto g : m_pool.m_gnodes) {
             if (g)
                 g->_process();
         }
         m_pool.m_data_remaining.store(true);
-        for (auto g : m_pool.m_gnodes)
-        {
+        for (auto g : m_pool.m_gnodes) {
             if (g)
                 g->clear_output_ports();
         }

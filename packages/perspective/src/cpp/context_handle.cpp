@@ -10,53 +10,35 @@
 #include <perspective/first.h>
 #include <perspective/context_handle.h>
 
-namespace perspective
-{
+namespace perspective {
 
 t_ctx_handle::t_ctx_handle()
-    : m_ctx_type(ZERO_SIDED_CONTEXT), m_ctx(0)
-{
-}
+    : m_ctx_type(ZERO_SIDED_CONTEXT)
+    , m_ctx(0) {}
 
 t_ctx_handle::t_ctx_handle(void* ctx, t_ctx_type ctx_type)
-    : m_ctx_type(ctx_type), m_ctx(ctx)
-{
-}
+    : m_ctx_type(ctx_type)
+    , m_ctx(ctx) {}
 
 t_str
-t_ctx_handle::get_type_descr() const
-{
-    switch (m_ctx_type)
-    {
-        case TWO_SIDED_CONTEXT:
-        {
+t_ctx_handle::get_type_descr() const {
+    switch (m_ctx_type) {
+        case TWO_SIDED_CONTEXT: {
             return "TWO_SIDED_CONTEXT";
-        }
-        break;
-        case ONE_SIDED_CONTEXT:
-        {
+        } break;
+        case ONE_SIDED_CONTEXT: {
             return "ONE_SIDED_CONTEXT";
-        }
-        break;
-        case ZERO_SIDED_CONTEXT:
-        {
+        } break;
+        case ZERO_SIDED_CONTEXT: {
             return "ZERO_SIDED_CONTEXT";
-        }
-        break;
-        case GROUPED_PKEY_CONTEXT:
-        {
+        } break;
+        case GROUPED_PKEY_CONTEXT: {
             return "GROUPED_PKEY_CONTEXT";
-        }
-        break;
-        case GROUPED_COLUMNS_CONTEXT:
-        {
+        } break;
+        case GROUPED_COLUMNS_CONTEXT: {
             return "GROUPED_COLUMNS_CONTEXT";
         }
-        default:
-        {
-            PSP_COMPLAIN_AND_ABORT("Invalid context");
-        }
-        break;
+        default: { PSP_COMPLAIN_AND_ABORT("Invalid context"); } break;
     }
     return "ZERO_SIDED_CONTEXT";
 }

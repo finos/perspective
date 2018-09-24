@@ -13,17 +13,13 @@
 #include <perspective/raw_types.h>
 #include <vector>
 
-namespace perspective
-{
+namespace perspective {
 
-class t_schema_column
-{
-    t_schema_column(const t_str& tblname,
-                    const t_str& name,
-                    const t_str& altname,
-                    t_dtype dtype);
+class t_schema_column {
+    t_schema_column(
+        const t_str& tblname, const t_str& name, const t_str& altname, t_dtype dtype);
 
-  private:
+private:
     t_str m_tblname;
     t_str m_name;
     t_str m_altname;

@@ -12,18 +12,15 @@
 #include <perspective/base.h>
 #include <perspective/table.h>
 
-namespace perspective
-{
+namespace perspective {
 
-enum t_port_mode
-{
+enum t_port_mode {
     PORT_MODE_RAW,    // no pkeys in incoming
     PORT_MODE_PKEYED, // pkeys and op present
 };
 
-class PERSPECTIVE_EXPORT t_port
-{
-  public:
+class PERSPECTIVE_EXPORT t_port {
+public:
     t_port(t_port_mode mode, const t_schema& schema);
     ~t_port();
     void init();
@@ -39,7 +36,7 @@ class PERSPECTIVE_EXPORT t_port
     void release();
     void release_or_clear();
 
-  private:
+private:
     t_port_mode m_mode;
     t_schema m_schema;
     t_bool m_init;

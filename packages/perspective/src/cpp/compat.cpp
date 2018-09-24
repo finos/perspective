@@ -17,23 +17,19 @@
 #include <fcntl.h>
 #endif
 
-namespace perspective
-{
+namespace perspective {
 
 t_szpair
-file_size_pair(t_handle h)
-{
+file_size_pair(t_handle h) {
     t_uindex sz = file_size(h);
     return t_szpair(upper32(sz), lower32(sz));
 }
 
-t_rfmapping::t_rfmapping()
-{
-}
+t_rfmapping::t_rfmapping() {}
 
 t_rfmapping::t_rfmapping(t_handle fd, void* base, t_uindex size)
-    : m_fd(fd), m_base(base), m_size(size)
-{
-}
+    : m_fd(fd)
+    , m_base(base)
+    , m_size(size) {}
 
 } // end namespace perspective

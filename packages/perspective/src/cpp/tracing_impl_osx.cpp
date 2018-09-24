@@ -15,28 +15,23 @@
 extern "C" {
 
 __attribute__((__constructor__)) void
-th_trace_init()
-{
+th_trace_init() {
     using namespace std;
     using namespace perspective;
-    if (!th_file)
-    {
+    if (!th_file) {
         pid_t pid = getpid();
         pid_t tid = syscall(__NR_gettid);
         std::stringstream ss;
         ss << "psptrace_" << pid << "_" << tid << ".trace";
         th_file = fopen(ss.str().c_str(), "wb");
         PSP_VERBOSE_ASSERT(th_file != 0, "Unable to open trace file");
-    }
-    else
-    {
+    } else {
         PSP_COMPLAIN_AND_ABORT("Thread file unexpectedly non null");
     }
 }
 
 __attribute__((__destructor__)) void
-th_trace_fini()
-{
+th_trace_fini() {
     using namespace std;
     using namespace perspective;
     flush_thbuffer(th_traceidx);
@@ -66,8 +61,7 @@ th_trace_fini()
     void* iptr = mmap(0, ifsize, PROT_READ, MAP_SHARED, ifd, 0);
 
     PSP_VERBOSE_ASSERT(iptr != MAP_FAILED, "Error in mmap");
-    PSP_VERBOSE_ASSERT(ifsize % sizeof(t_instrec) == 0,
-                       "Partial record encountered");
+    PSP_VERBOSE_ASSERT(ifsize % sizeof(t_instrec) == 0, "Partial record encountered");
 
     t_int64 ndrecs = ifsize / sizeof(t_instrec);
 
@@ -75,17 +69,13 @@ th_trace_fini()
 
     std::unordered_set<void*> fptrs;
 
-    for (t_index idx = 0; idx < ndrecs; ++idx)
-    {
+    for (t_index idx = 0; idx < ndrecs; ++idx) {
         t_instrec* irec = irecs + idx;
         fptrs.emplace(irec->t_fntrace.m_fn);
     }
 
-    for (std::unordered_set<void*>::const_iterator iter =
-             fptrs.begin();
-         iter != fptrs.end();
-         ++iter)
-    {
+    for (std::unordered_set<void*>::const_iterator iter = fptrs.begin(); iter != fptrs.end();
+         ++iter) {
 
         of << *iter << " ";
         char** mangled;
@@ -97,40 +87,29 @@ th_trace_fini()
 
         char* function = static_cast<char*>(malloc(sz));
         char *begin = 0, *end = 0;
-        for (char* j = stack_strings[0]; *j; ++j)
-        {
-            if (*j == '(')
-            {
+        for (char* j = stack_strings[0]; *j; ++j) {
+            if (*j == '(') {
                 begin = j;
-            }
-            else if (*j == '+')
-            {
+            } else if (*j == '+') {
                 end = j;
             }
         }
-        if (begin && end)
-        {
+        if (begin && end) {
 
             *begin++ = ' ';
             *end = '\0';
             int status;
-            char* ret =
-                abi::__cxa_demangle(begin, function, &sz, &status);
-            if (ret)
-            {
+            char* ret = abi::__cxa_demangle(begin, function, &sz, &status);
+            if (ret) {
                 function = ret;
-            }
-            else
-            {
+            } else {
                 std::strncpy(function, begin, sz);
                 std::strncat(function, "()", sz);
                 function[sz - 1] = ' ';
             }
 
             of << function << std::endl;
-        }
-        else
-        {
+        } else {
             of << stack_strings[0] << std::endl;
         }
         free(function);
@@ -142,8 +121,7 @@ th_trace_fini()
 }
 
 void
-flush_thbuffer(perspective::t_int32 elemidx)
-{
+flush_thbuffer(perspective::t_int32 elemidx) {
     using namespace std;
     using namespace perspective;
     t_instrec* mbuf = th_trace_buffer;

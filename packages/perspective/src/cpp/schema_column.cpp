@@ -10,15 +10,12 @@
 #include <perspective/first.h>
 #include <perspective/schema_column.h>
 
-namespace perspective
-{
+namespace perspective {
 
-t_schema_column::t_schema_column(const t_str& tblname,
-								 const t_str& name,
-								 const t_str& altname,
-								 t_dtype dtype)
-	: m_tblname(tblname), m_name(name), m_altname(altname),
-	  m_dtype(dtype)
-{
-}
-}
+t_schema_column::t_schema_column(
+    const t_str& tblname, const t_str& name, const t_str& altname, t_dtype dtype)
+    : m_tblname(tblname)
+    , m_name(name)
+    , m_altname(altname)
+    , m_dtype(dtype) {}
+} // namespace perspective

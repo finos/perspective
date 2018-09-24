@@ -13,11 +13,9 @@
 #include <perspective/exports.h>
 #include <vector>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_path
-{
+struct PERSPECTIVE_EXPORT t_path {
     t_path();
     t_path(const t_tscalvec& path);
 

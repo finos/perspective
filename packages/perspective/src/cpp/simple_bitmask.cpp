@@ -11,8 +11,7 @@
 #include <perspective/base.h>
 #include <perspective/simple_bitmask.h>
 
-namespace perspective
-{
+namespace perspective {
 
 t_simple_bitmask::t_simple_bitmask(t_uindex idx)
 }

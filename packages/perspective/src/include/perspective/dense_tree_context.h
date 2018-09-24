@@ -16,16 +16,12 @@
 #include <perspective/exports.h>
 #include <perspective/filter.h>
 
-namespace perspective
-{
+namespace perspective {
 
-class PERSPECTIVE_EXPORT t_dtree_ctx
-{
-  public:
-    t_dtree_ctx(t_table_csptr strands,
-                t_table_csptr strand_deltas,
-                const t_dtree& tree,
-                const t_aggspecvec& aggspecs);
+class PERSPECTIVE_EXPORT t_dtree_ctx {
+public:
+    t_dtree_ctx(t_table_csptr strands, t_table_csptr strand_deltas, const t_dtree& tree,
+        const t_aggspecvec& aggspecs);
     void init();
     const t_table& get_aggtable() const;
     const t_dtree& get_tree() const;
@@ -33,8 +29,7 @@ class PERSPECTIVE_EXPORT t_dtree_ctx
     const t_aggspec& get_aggspec(const t_str& aggname) const;
     void pprint(const t_filter& fltr) const;
 
-    std::pair<const t_uindex*, const t_uindex*>
-    get_leaf_iterators(t_ptidx idx) const;
+    std::pair<const t_uindex*, const t_uindex*> get_leaf_iterators(t_ptidx idx) const;
 
     t_col_csptr get_pkey_col() const;
     t_col_csptr get_strand_count_col() const;
@@ -43,11 +38,11 @@ class PERSPECTIVE_EXPORT t_dtree_ctx
     void pprint_strands() const;
     void pprint_strands_tree() const;
 
-  protected:
+protected:
     void build_aggregates();
     t_uindex get_num_aggcols() const;
 
-  private:
+private:
     t_table_csptr m_strands;
     t_table_csptr m_strand_deltas;
     const t_dtree& m_tree;

@@ -13,11 +13,9 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 #include <map>
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_schema_recipe
-{
+struct PERSPECTIVE_EXPORT t_schema_recipe {
     t_schema_recipe();
     t_svec m_columns;
     t_dtypevec m_types;
@@ -25,8 +23,7 @@ struct PERSPECTIVE_EXPORT t_schema_recipe
 
 typedef std::vector<t_schema_recipe> t_schema_recipevec;
 
-struct PERSPECTIVE_EXPORT t_schema
-{
+struct PERSPECTIVE_EXPORT t_schema {
     typedef std::map<t_str, t_dtype> t_sdtmap;
     typedef std::map<t_str, t_uindex> t_suidxmap;
 
@@ -65,9 +62,7 @@ typedef std::vector<t_schema> t_schemavec;
 
 } // end namespace perspective
 
-namespace std
-{
+namespace std {
 
-PERSPECTIVE_EXPORT std::ostream&
-operator<<(std::ostream& os, const perspective::t_schema& s);
+PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_schema& s);
 }

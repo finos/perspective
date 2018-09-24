@@ -17,13 +17,10 @@
 #include <perspective/path.h>
 #include <perspective/sym_table.h>
 
-namespace perspective
-{
+namespace perspective {
 
-class PERSPECTIVE_EXPORT t_ctx_grouped_pkey
-    : public t_ctxbase<t_ctx_grouped_pkey>
-{
-  public:
+class PERSPECTIVE_EXPORT t_ctx_grouped_pkey : public t_ctxbase<t_ctx_grouped_pkey> {
+public:
     t_ctx_grouped_pkey();
 
     ~t_ctx_grouped_pkey();
@@ -52,14 +49,12 @@ class PERSPECTIVE_EXPORT t_ctx_grouped_pkey
 
     // aggregates should be presized to be same size
     // as agg_indices
-    void get_aggregates_for_sorting(t_uindex nidx,
-                        const t_idxvec& agg_indices,
-                        t_tscalvec& aggregates,
-                        t_ctx2 *) const;
+    void get_aggregates_for_sorting(
+        t_uindex nidx, const t_idxvec& agg_indices, t_tscalvec& aggregates, t_ctx2*) const;
 
     using t_ctxbase<t_ctx_grouped_pkey>::get_data;
 
-  private:
+private:
     void rebuild();
 
     t_trav_sptr m_traversal;

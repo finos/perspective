@@ -12,13 +12,11 @@
 #include <perspective/base.h>
 #include <perspective/exports.h>
 
-namespace perspective
-{
+namespace perspective {
 class t_pool;
 
-class PERSPECTIVE_EXPORT t_update_task
-{
-  public:
+class PERSPECTIVE_EXPORT t_update_task {
+public:
     t_update_task(t_pool& pool);
     virtual void run();
 
@@ -26,7 +24,7 @@ class PERSPECTIVE_EXPORT t_update_task
     // And mutex is already held
     virtual void run(t_uindex gnode_id);
 
-  private:
+private:
     t_pool& m_pool;
 };
 

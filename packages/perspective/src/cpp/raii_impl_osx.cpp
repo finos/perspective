@@ -7,48 +7,40 @@
  *
  */
 
-#ifdef __APPLE__ 
+#ifdef __APPLE__
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/raii.h>
 #include <sys/mman.h>
 
-namespace perspective
-{
+namespace perspective {
 
-t_file_handle::~t_file_handle()
-{
-    if (valid())
-    {
+t_file_handle::~t_file_handle() {
+    if (valid()) {
         t_rcode rcode = close(m_value);
         PSP_VERBOSE_ASSERT(rcode == 0, "Error closing file.");
     }
 }
 
 bool
-t_file_handle::valid() const
-{
+t_file_handle::valid() const {
     return m_value >= 0;
 }
 
 void
-t_file_handle::release()
-{
+t_file_handle::release() {
     m_value = -1;
 }
 
-t_mmap_handle::~t_mmap_handle()
-{
-    if (valid())
-    {
+t_mmap_handle::~t_mmap_handle() {
+    if (valid()) {
         t_rcode rcode = munmap(m_value, m_len);
         PSP_VERBOSE_ASSERT(rcode == 0, "munmap failed.");
     }
 }
 
 bool
-t_mmap_handle::valid()
-{
+t_mmap_handle::valid() {
     return m_value != MAP_FAILED;
 }
 

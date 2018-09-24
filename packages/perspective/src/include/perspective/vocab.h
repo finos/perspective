@@ -19,22 +19,16 @@
 #include <cmath>
 #include <unordered_map>
 
-namespace perspective
-{
+namespace perspective {
 
-class PERSPECTIVE_EXPORT t_vocab
-{
-    typedef std::unordered_map<const char*,
-                               t_uindex,
-                               t_cchar_umap_hash,
-                               t_cchar_umap_cmp>
+class PERSPECTIVE_EXPORT t_vocab {
+    typedef std::unordered_map<const char*, t_uindex, t_cchar_umap_hash, t_cchar_umap_cmp>
         t_sidxmap;
 
-  public:
+public:
     t_vocab();
     t_vocab(const t_column_recipe& r);
-    t_vocab(const t_lstore_recipe& vlendata_recipe,
-            const t_lstore_recipe& extents_recipe);
+    t_vocab(const t_lstore_recipe& vlendata_recipe, const t_lstore_recipe& extents_recipe);
     void rebuild_map();
     void init(t_bool from_recipe);
     t_lstore_sptr get_vlendata();
@@ -43,9 +37,7 @@ class PERSPECTIVE_EXPORT t_vocab
     t_uindex nbytes() const;
     void verify() const;
     void verify_size() const;
-    void fill(const t_lstore& o_vlen,
-              const t_lstore& o_extents,
-              t_uindex vlenidx);
+    void fill(const t_lstore& o_vlen, const t_lstore& o_extents, t_uindex vlenidx);
     t_extent_pair* get_extents_base();
     t_uchar* get_vlen_base();
     void set_vlenidx(t_uindex idx);
@@ -55,18 +47,17 @@ class PERSPECTIVE_EXPORT t_vocab
     t_uindex get_interned(const t_str& s);
     t_uindex get_interned(const char* s);
     void copy_vocabulary(const t_vocab& other);
-    const char*
-    unintern_c(t_uindex idx) const;
+    const char* unintern_c(t_uindex idx) const;
 
     t_bool string_exists(const char* c, t_stridx& interned) const;
 
     void reserve(size_t total_string_size, size_t string_count);
 
-  protected:
+protected:
     // vlen interface
     t_uindex genidx();
 
-  private:
+private:
     // Max string id currently in use
     t_uindex m_vlenidx;
     // varlen

@@ -13,11 +13,9 @@
 #include <perspective/scalar.h>
 #include <perspective/exports.h>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_hist_bucket
-{
+struct PERSPECTIVE_EXPORT t_hist_bucket {
     t_hist_bucket(t_tscalar begin, t_tscalar end, t_uindex count);
     t_hist_bucket();
 
@@ -28,8 +26,7 @@ struct PERSPECTIVE_EXPORT t_hist_bucket
 
 typedef std::vector<t_hist_bucket> t_hist_bucket_vec;
 
-struct PERSPECTIVE_EXPORT t_histogram
-{
+struct PERSPECTIVE_EXPORT t_histogram {
 
     t_histogram();
     t_histogram(t_uindex nbuckets);
