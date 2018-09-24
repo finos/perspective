@@ -12,7 +12,7 @@
 #endif
 
 #if !defined(__linux__) && !defined(__APPLE__) && !defined(WIN32)
-//default to linux
+// default to linux
 #define __linux__
 #endif
 

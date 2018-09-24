@@ -12,42 +12,34 @@
 #include <perspective/base.h>
 #include <perspective/raii.h>
 
-namespace perspective
-{
+namespace perspective {
 
-t_file_handle::~t_file_handle()
-{
-    if (valid())
-    {
+t_file_handle::~t_file_handle() {
+    if (valid()) {
         auto rb = CloseHandle(m_value);
         PSP_VERBOSE_ASSERT(rb, "Error closing file");
     }
 }
 
 bool
-t_file_handle::valid() const
-{
+t_file_handle::valid() const {
     return m_value != INVALID_HANDLE_VALUE;
 }
 
 void
-t_file_handle::release()
-{
+t_file_handle::release() {
     m_value = INVALID_HANDLE_VALUE;
 }
 
-t_mmap_handle::~t_mmap_handle()
-{
-    if (valid())
-    {
+t_mmap_handle::~t_mmap_handle() {
+    if (valid()) {
         auto rc = UnmapViewOfFile(m_value);
         PSP_VERBOSE_ASSERT(rc, "Error unmapping view");
     }
 }
 
 bool
-t_mmap_handle::valid()
-{
+t_mmap_handle::valid() {
     return m_value != 0;
 }
 

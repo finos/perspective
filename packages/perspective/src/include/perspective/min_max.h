@@ -13,12 +13,10 @@
 #include <perspective/scalar.h>
 #include <perspective/exports.h>
 
-namespace perspective
-{
+namespace perspective {
 
 // Represents a min/ max value per column/aggregate
-struct PERSPECTIVE_EXPORT t_minmax
-{
+struct PERSPECTIVE_EXPORT t_minmax {
 
     t_minmax();
 
@@ -32,8 +30,6 @@ typedef std::vector<t_minmax> t_minmaxvec;
 
 } // end namespace perspective
 
-namespace std
-{
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_minmax& mm);
+namespace std {
+std::ostream& operator<<(std::ostream& os, const perspective::t_minmax& mm);
 } // end namespace std

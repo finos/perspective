@@ -16,16 +16,14 @@
 #include <sys/mman.h>
 #endif
 
-namespace perspective
-{
+namespace perspective {
 
 t_uindex file_size(t_handle h);
 void close_file(t_handle h);
 void flush_mapping(void* base, t_uindex len);
 void rmfile(const t_str& fname);
 
-struct t_rfmapping
-{
+struct t_rfmapping {
     t_rfmapping();
     t_rfmapping(t_handle fd, void* base, t_uindex size);
     ~t_rfmapping();
@@ -38,8 +36,7 @@ struct t_rfmapping
 };
 
 void map_file_read(const t_str& fname, t_rfmapping& out);
-void
-map_file_write(const t_str& fname, t_uindex size, t_rfmapping& out);
+void map_file_write(const t_str& fname, t_uindex size, t_rfmapping& out);
 
 void set_thread_name(std::thread& thr, const t_str& name);
 void set_thread_name(const t_str& name);

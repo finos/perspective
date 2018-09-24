@@ -11,12 +11,10 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 
-namespace perspective
-{
+namespace perspective {
 
 t_str
-get_error_str()
-{
+get_error_str() {
     DWORD errid = ::GetLastError();
 
     if (errid == 0)
@@ -24,15 +22,9 @@ get_error_str()
 
     LPSTR buf = 0;
 
-    size_t size = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        errid,
-        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&buf,
-        0,
-        NULL);
+    size_t size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM
+            | FORMAT_MESSAGE_IGNORE_INSERTS,
+        NULL, errid, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buf, 0, NULL);
 
     t_str message(buf, size);
     LocalFree(buf);

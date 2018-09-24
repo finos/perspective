@@ -11,12 +11,10 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 
-namespace perspective
-{
+namespace perspective {
 
 t_str
-get_error_str()
-{
+get_error_str() {
     // handled by perror
     return t_str();
 }

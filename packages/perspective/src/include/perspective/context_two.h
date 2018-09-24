@@ -17,12 +17,10 @@
 #include <perspective/sparse_tree_node.h>
 #include <perspective/traversal_nodes.h>
 
-namespace perspective
-{
+namespace perspective {
 
-class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
-{
-  public:
+class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2> {
+public:
 #include <perspective/context_common_decls.h>
     t_ctx2();
 
@@ -51,7 +49,7 @@ class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
 
     using t_ctxbase<t_ctx2>::get_data;
 
-  protected:
+protected:
     t_cinfovec resolve_cells(const t_uidxpvec& cells) const;
 
     t_stree_sptr rtree();
@@ -67,10 +65,9 @@ class PERSPECTIVE_EXPORT t_ctx2 : public t_ctxbase<t_ctx2>
 
     t_uindex get_num_trees() const;
 
-    t_uindex calc_translated_colidx(t_uindex n_aggs,
-                                    t_uindex cidx) const;
+    t_uindex calc_translated_colidx(t_uindex n_aggs, t_uindex cidx) const;
 
-  private:
+private:
     t_trav_sptr m_rtraversal;
     t_trav_sptr m_ctraversal;
     t_sortsvec m_sortby;

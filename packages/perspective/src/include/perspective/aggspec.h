@@ -16,11 +16,9 @@
 #include <perspective/schema_column.h>
 #include <vector>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_col_name_type
-{
+struct PERSPECTIVE_EXPORT t_col_name_type {
     t_col_name_type();
     t_col_name_type(const t_str& name, t_dtype type);
     t_str m_name;
@@ -29,11 +27,8 @@ struct PERSPECTIVE_EXPORT t_col_name_type
 
 typedef std::vector<t_col_name_type> t_col_name_type_vec;
 
-struct PERSPECTIVE_EXPORT t_aggspec_recipe
-{
-    t_aggspec_recipe()
-    {
-    }
+struct PERSPECTIVE_EXPORT t_aggspec_recipe {
+    t_aggspec_recipe() {}
     t_str m_name;
     t_str m_disp_name;
     t_aggtype m_agg;
@@ -49,39 +44,27 @@ struct PERSPECTIVE_EXPORT t_aggspec_recipe
 
 typedef std::vector<t_aggspec_recipe> t_aggspec_recipevec;
 
-class PERSPECTIVE_EXPORT t_aggspec
-{
-  public:
+class PERSPECTIVE_EXPORT t_aggspec {
+public:
     t_aggspec();
 
     ~t_aggspec();
 
     t_aggspec(const t_aggspec_recipe& v);
 
-    t_aggspec(const t_str& aggname,
-              t_aggtype agg,
-              const t_depvec& dependencies);
+    t_aggspec(const t_str& aggname, t_aggtype agg, const t_depvec& dependencies);
 
     t_aggspec(const t_str& aggname, t_aggtype agg, const t_str& dep);
 
-    t_aggspec(const t_str& aggname,
-              const t_str& disp_aggname,
-              t_aggtype agg,
-              const t_depvec& dependencies);
+    t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype agg,
+        const t_depvec& dependencies);
 
-    t_aggspec(const t_str& aggname,
-              const t_str& disp_aggname,
-              t_aggtype agg,
-              const t_depvec& dependencies,
-              t_sorttype sort_type);
+    t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype agg,
+        const t_depvec& dependencies, t_sorttype sort_type);
 
-    t_aggspec(const t_str& aggname,
-              const t_str& disp_aggname,
-              t_aggtype agg,
-              t_uindex agg_one_idx,
-              t_uindex agg_two_idx,
-              t_float64 agg_one_weight,
-              t_float64 agg_two_weight);
+    t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype agg,
+        t_uindex agg_one_idx, t_uindex agg_two_idx, t_float64 agg_one_weight,
+        t_float64 agg_two_weight);
     t_str name() const;
     t_str disp_name() const;
     t_aggtype agg() const;
@@ -100,20 +83,18 @@ class PERSPECTIVE_EXPORT t_aggspec
     t_svec get_input_depnames() const;
     t_svec get_output_depnames() const;
 
-    t_col_name_type_vec
-    get_output_specs(const t_schema& schema) const;
-    t_col_name_type_vec mk_col_name_type_vec(const t_str& name,
-                                             t_dtype dtype) const;
+    t_col_name_type_vec get_output_specs(const t_schema& schema) const;
+    t_col_name_type_vec mk_col_name_type_vec(const t_str& name, t_dtype dtype) const;
     t_bool is_combiner_agg() const;
     t_bool is_reducer_agg() const;
 
     t_bool is_non_delta() const;
-    
+
     t_str get_first_depname() const;
 
     t_aggspec_recipe get_recipe() const;
 
-  private:
+private:
     t_str m_name;
     t_str m_disp_name;
     t_aggtype m_agg;
@@ -130,7 +111,6 @@ class PERSPECTIVE_EXPORT t_aggspec
 
 typedef std::vector<t_aggspec> t_aggspecvec;
 
-PERSPECTIVE_EXPORT t_dtype
-get_simple_accumulator_type(t_dtype coltype);
+PERSPECTIVE_EXPORT t_dtype get_simple_accumulator_type(t_dtype coltype);
 
 } // end namespace perspective

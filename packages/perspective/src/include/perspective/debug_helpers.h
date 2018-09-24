@@ -11,34 +11,28 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 
-namespace perspective
-{
+namespace perspective {
 
-struct t_debug_helper
-{
+struct t_debug_helper {
 #ifdef PSP_DEBUG_HELPER
     void*
-    operator new(size_t size)
-    {
+    operator new(size_t size) {
         return PSP_MALLOC(size);
     }
 
     void
-    operator delete(void* mem)
-    {
+    operator delete(void* mem) {
         if (mem)
             PSP_FREE(mem);
     }
 
     void*
-    operator new[](size_t size)
-    {
+    operator new[](size_t size) {
         return PSP_MALLOC(size);
     }
 
     void
-    operator delete[](void* p)
-    {
+    operator delete[](void* p) {
         if (p)
             PSP_FREE(p);
     }

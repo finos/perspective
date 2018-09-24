@@ -13,11 +13,9 @@
 #include <perspective/exports.h>
 #include <cstdint>
 
-namespace perspective
-{
+namespace perspective {
 
-enum t_trace_type
-{
+enum t_trace_type {
     TRACE_TYPE_DURATION_ONE_SIDED_END,
     TRACE_TYPE_DURATION_ONE_SIDED_BEGIN,
     TRACE_TYPE_DURATION_TWO_SIDED,
@@ -26,20 +24,17 @@ enum t_trace_type
 
 #pragma pack(push)
 #pragma pack(1)
-struct t_instrec
-{
+struct t_instrec {
     int64_t m_time;
     uint64_t m_id : 48;
     uint8_t m_trace_type;
 
     union {
-        struct
-        {
+        struct {
             char m_payload[23];
         } t_fixed_len;
 
-        struct
-        {
+        struct {
             uint64_t m_duration;
             uint16_t m_depth;
             char m_payload[13];
@@ -49,8 +44,7 @@ struct t_instrec
 };
 #pragma pack(pop)
 
-struct t_trace
-{
+struct t_trace {
     t_trace();
     ~t_trace();
     void write_record(t_trace_type ttype) const;

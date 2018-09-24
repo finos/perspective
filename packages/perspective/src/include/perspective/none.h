@@ -13,10 +13,8 @@
 #include <iostream>
 #include <boost/functional/hash.hpp>
 
-namespace perspective
-{
-struct PERSPECTIVE_EXPORT t_none
-{
+namespace perspective {
+struct PERSPECTIVE_EXPORT t_none {
     t_none();
 
     template <class DATA_T>
@@ -42,36 +40,31 @@ struct PERSPECTIVE_EXPORT t_none
 
 template <class DATA_T>
 bool
-t_none::operator==(const DATA_T&) const
-{
+t_none::operator==(const DATA_T&) const {
     return false;
 }
 
 template <class DATA_T>
 bool
-t_none::operator<(const DATA_T&) const
-{
+t_none::operator<(const DATA_T&) const {
     return true;
 }
 
 template <class DATA_T>
 bool
-t_none::operator<=(const DATA_T&) const
-{
+t_none::operator<=(const DATA_T&) const {
     return true;
 }
 
 template <class DATA_T>
 bool
-t_none::operator>(const DATA_T&) const
-{
+t_none::operator>(const DATA_T&) const {
     return false;
 }
 
 template <class DATA_T>
 bool
-t_none::operator>=(const DATA_T&) const
-{
+t_none::operator>=(const DATA_T&) const {
     return false;
 }
 
@@ -79,8 +72,6 @@ size_t hash_value(const t_none& none);
 
 } // end namespace perspective
 
-namespace std
-{
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_none& dt);
+namespace std {
+std::ostream& operator<<(std::ostream& os, const perspective::t_none& dt);
 }

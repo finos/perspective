@@ -29,9 +29,7 @@
 #include <boost/unordered_map.hpp>
 #include <perspective/portable.h>
 
-
-namespace perspective
-{
+namespace perspective {
 
 const t_int32 PSP_VERSION = 67;
 const t_float64 PSP_TABLE_GROW_RATIO = 1.3;
@@ -65,27 +63,26 @@ const t_index INVALID_INDEX = -1;
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
 #ifdef PSP_DEBUG
-#define PSP_VERBOSE_ASSERT(COND, MSG)                                \
-    {                                                                \
-        if (!(COND))                                                 \
-        {                                                            \
-            std::stringstream ss;                                    \
-            ss << __FILE__ << ":" << __LINE__ << ": " << MSG         \
-               << " : " << perspective::get_error_str();             \
-            perror(ss.str().c_str());                                \
-            PSP_ABORT();                                             \
-        }                                                            \
+#define PSP_VERBOSE_ASSERT(COND, MSG)                                                          \
+    {                                                                                          \
+        if (!(COND)) {                                                                         \
+            std::stringstream ss;                                                              \
+            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
+               << perspective::get_error_str();                                                \
+            perror(ss.str().c_str());                                                          \
+            PSP_ABORT();                                                                       \
+        }                                                                                      \
     }
 
-#define PSP_COMPLAIN_AND_ABORT(X)                                    \
-    {                                                                \
-        std::stringstream ss;                                        \
-        ss << __FILE__ << ":" << __LINE__ << ": " << X;              \
-        perror(ss.str().c_str());                                    \
-        PSP_ABORT();                                                 \
+#define PSP_COMPLAIN_AND_ABORT(X)                                                              \
+    {                                                                                          \
+        std::stringstream ss;                                                                  \
+        ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
+        perror(ss.str().c_str());                                                              \
+        PSP_ABORT();                                                                           \
     }
 
-#define PSP_ASSERT_SIMPLE_TYPE(X)                                    \
+#define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
 static_assert(                                               \
 std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 " Unsuitable type found. "
@@ -93,40 +90,33 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 //#define LOG_LIFETIMES 1
 
 #ifdef LOG_LIFETIMES
-#define LOG_CONSTRUCTOR(X)                                           \
-    std::cout << "constructing L: " << __LINE__ << " " << (X)        \
-              << " <" << this << ">" << std::endl;
+#define LOG_CONSTRUCTOR(X)                                                                     \
+    std::cout << "constructing L: " << __LINE__ << " " << (X) << " <" << this << ">"           \
+              << std::endl;
 
-#define LOG_DESTRUCTOR(X)                                            \
-    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <"  \
-              << this << ">" << std::endl;
+#define LOG_DESTRUCTOR(X)                                                                      \
+    std::cout << "destroying L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
 
-#define LOG_INIT(X)                                                  \
-    std::cout << "initing L: " << __LINE__ << " " << (X) << " <"     \
-              << this << ">" << std::endl;
+#define LOG_INIT(X)                                                                            \
+    std::cout << "initing L: " << __LINE__ << " " << (X) << " <" << this << ">" << std::endl;
 #else
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT(COND, MSG)   
-#define PSP_COMPLAIN_AND_ABORT(X) 
-#define PSP_ASSERT_SIMPLE_TYPE(X) 
+#define PSP_VERBOSE_ASSERT(COND, MSG)
+#define PSP_COMPLAIN_AND_ABORT(X)
+#define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
 
 // Currently only supporting single ports
-enum t_gnode_processing_mode
-{
-    NODE_PROCESSING_SIMPLE_DATAFLOW,
-    NODE_PROCESSING_KERNEL
-};
+enum t_gnode_processing_mode { NODE_PROCESSING_SIMPLE_DATAFLOW, NODE_PROCESSING_KERNEL };
 
-enum t_pivot_mode
-{
+enum t_pivot_mode {
     PIVOT_MODE_NORMAL,
     PIVOT_MODE_KERNEL,
     PIVOT_MODE_CONCATENATE,
@@ -138,8 +128,7 @@ enum t_pivot_mode
     PIVOT_MODE_TIME_BUCKET_YEAR
 };
 
-enum t_select_mode
-{
+enum t_select_mode {
     SELECT_MODE_ALL,
     SELECT_MODE_RANGE,
     SELECT_MODE_MASK,
@@ -147,14 +136,9 @@ enum t_select_mode
     SELECT_MODE_KERNEL
 };
 
-enum t_backing_store
-{
-    BACKING_STORE_MEMORY,
-    BACKING_STORE_DISK
-};
+enum t_backing_store { BACKING_STORE_MEMORY, BACKING_STORE_DISK };
 
-enum t_filter_op
-{
+enum t_filter_op {
     FILTER_OP_LT,
     FILTER_OP_LTEQ,
     FILTER_OP_GT,
@@ -175,14 +159,9 @@ enum t_filter_op
 
 PERSPECTIVE_EXPORT t_str filter_op_to_str(t_filter_op op);
 
-enum t_compression_scheme
-{
-    COMPRESSION_SCHEME_NONE,
-    COMPRESSION_SCHEME_GZIP
-};
+enum t_compression_scheme { COMPRESSION_SCHEME_NONE, COMPRESSION_SCHEME_GZIP };
 
-enum t_data_format
-{
+enum t_data_format {
     DATA_FORMAT_PANDAS,
     DATA_FORMAT_CSV,
     DATA_FORMAT_LOL,
@@ -191,14 +170,9 @@ enum t_data_format
     DATA_FORMAT_PROTO
 };
 
-enum t_header
-{
-    HEADER_ROW,
-    HEADER_COLUMN
-};
+enum t_header { HEADER_ROW, HEADER_COLUMN };
 
-enum t_sorttype
-{
+enum t_sorttype {
     SORTTYPE_ASCENDING,
     SORTTYPE_DESCENDING,
     SORTTYPE_NONE,
@@ -206,8 +180,7 @@ enum t_sorttype
     SORTTYPE_DESCENDING_ABS
 };
 
-enum t_aggtype
-{
+enum t_aggtype {
     AGGTYPE_SUM,
     AGGTYPE_MUL,
     AGGTYPE_COUNT,
@@ -241,15 +214,9 @@ enum t_aggtype
     AGGTYPE_PCT_SUM_GRAND_TOTAL
 };
 
-enum t_totals
-{
-    TOTALS_BEFORE,
-    TOTALS_HIDDEN,
-    TOTALS_AFTER
-};
+enum t_totals { TOTALS_BEFORE, TOTALS_HIDDEN, TOTALS_AFTER };
 
-enum t_ctx_type
-{
+enum t_ctx_type {
     ZERO_SIDED_CONTEXT,
     ONE_SIDED_CONTEXT,
     TWO_SIDED_CONTEXT,
@@ -258,21 +225,11 @@ enum t_ctx_type
     GROUPED_COLUMNS_CONTEXT
 };
 
-enum t_strand_op
-{
-    STRAND_INSERT,
-    STRAND_DELETE
-};
+enum t_strand_op { STRAND_INSERT, STRAND_DELETE };
 
-enum t_op
-{
-    OP_INSERT,
-    OP_DELETE,
-    OP_CLEAR
-};
+enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
 
-enum t_value_transition
-{
+enum t_value_transition {
     VALUE_TRANSITION_EQ_FF,
     // VALUE_TRANSITION_EQ_FT nonsensical
     // VALUE_TRANSITION_EQ_TF nonsensical
@@ -292,8 +249,7 @@ enum t_value_transition
     VALUE_TRANSITION_NVEQ_FT
 };
 
-enum t_gnode_port
-{
+enum t_gnode_port {
     PSP_PORT_FLATTENED,   // same schema as iport (pkey,op)
     PSP_PORT_DELTA,       // same schema as state
     PSP_PORT_PREV,        // same schema as state
@@ -302,8 +258,7 @@ enum t_gnode_port
     PSP_PORT_EXISTED      // same schema as state
 };
 
-enum t_ctx_feature
-{
+enum t_ctx_feature {
     CTX_FEAT_PROCESS,
     CTX_FEAT_MINMAX,
     CTX_FEAT_DELTA,
@@ -312,15 +267,9 @@ enum t_ctx_feature
     CTX_FEAT_LAST_FEATURE
 };
 
-enum t_deptype
-{
-    DEPTYPE_COLUMN,
-    DEPTYPE_AGG,
-    DEPTYPE_SCALAR
-};
+enum t_deptype { DEPTYPE_COLUMN, DEPTYPE_AGG, DEPTYPE_SCALAR };
 
-enum t_cmp_op
-{
+enum t_cmp_op {
     CMP_OP_LT,
     CMP_OP_LTEQ,
     CMP_OP_GT,
@@ -335,16 +284,14 @@ enum t_cmp_op
     CMP_OP_AND
 };
 
-enum t_invmode
-{
+enum t_invmode {
     INV_SUBST_CANONICAL, // Substitute canonical data with canonical
                          // forms
     INV_EXCLUDE,         // Exclude invalid data from calculations
     INV_PROPAGATE        // Propagate invalid virally
 };
 
-enum t_pool_trace
-{
+enum t_pool_trace {
     PTRACE_REGISTER_GNODE,
     PTRACE_UNREGISTER_GNODE,
     PTRACE_SEND,
@@ -359,15 +306,9 @@ enum t_pool_trace
     PTRACE_LOG_DATAFRAGS
 };
 
-enum t_access_mode
-{
-    ACCESS_MODE_NONE,
-    ACCESS_MODE_READ,
-    ACCESS_MODE_READ_WRITE
-};
+enum t_access_mode { ACCESS_MODE_NONE, ACCESS_MODE_READ, ACCESS_MODE_READ_WRITE };
 
-enum t_range_mode
-{
+enum t_range_mode {
     RANGE_ROW,
     RANGE_ROW_COLUMN,
     RANGE_ROW_PATH,
@@ -376,8 +317,7 @@ enum t_range_mode
     RANGE_EXPR
 };
 
-enum t_fetch
-{
+enum t_fetch {
     FETCH_RANGE,
     FETCH_ROW_PATHS,
     FETCH_COLUMN_PATHS,
@@ -396,11 +336,7 @@ enum t_fetch
     FETCH_CONFIG
 };
 
-enum t_fmode
-{
-    FMODE_SIMPLE_CLAUSES,
-    FMODE_JIT_EXPR
-};
+enum t_fmode { FMODE_SIMPLE_CLAUSES, FMODE_JIT_EXPR };
 
 typedef std::vector<t_fetch> t_fetchvec;
 
@@ -409,8 +345,8 @@ typedef std::vector<t_sorttype> t_sorttvec;
 #ifdef WIN32
 #define PSP_NON_COPYABLE(X)
 #else
-#define PSP_NON_COPYABLE(X)                                          \
-    X(const X&) = delete;                                            \
+#define PSP_NON_COPYABLE(X)                                                                    \
+    X(const X&) = delete;                                                                      \
     X& operator=(const X&) = delete
 #endif
 
@@ -424,10 +360,8 @@ PERSPECTIVE_EXPORT t_bool is_neq_transition(t_value_transition t);
 
 template <typename T>
 inline std::ostream&
-operator<<(std::ostream& os, const std::vector<T>& row)
-{
-    for (int i = 0, loop_end = row.size(); i < loop_end; ++i)
-    {
+operator<<(std::ostream& os, const std::vector<T>& row) {
+    for (int i = 0, loop_end = row.size(); i < loop_end; ++i) {
         os << row[i] << ", ";
     }
 
@@ -436,8 +370,7 @@ operator<<(std::ostream& os, const std::vector<T>& row)
 
 template <typename FIRST_T, typename SECOND_T>
 inline std::ostream&
-operator<<(std::ostream& os, const std::pair<FIRST_T, SECOND_T>& p)
-{
+operator<<(std::ostream& os, const std::pair<FIRST_T, SECOND_T>& p) {
     os << "<" << p.first << ", " << p.second << ">";
     return os;
 }
@@ -446,30 +379,23 @@ void check_init(t_bool init, const char* file, t_int32 line);
 
 t_uindex root_pidx();
 
-struct PERSPECTIVE_EXPORT t_cmp_charptr
-{
+struct PERSPECTIVE_EXPORT t_cmp_charptr {
     bool
-    operator()(const char* a, const char* b) const
-    {
+    operator()(const char* a, const char* b) const {
         return std::strcmp(a, b) < 0;
     }
 };
 
-struct t_cchar_umap_cmp
-    : public std::binary_function<const char*, const char*, bool>
-{
+struct t_cchar_umap_cmp : public std::binary_function<const char*, const char*, bool> {
     inline bool
-    operator()(const char* x, const char* y) const
-    {
+    operator()(const char* x, const char* y) const {
         return strcmp(x, y) == 0;
     }
 };
 
-struct t_cchar_umap_hash
-{
+struct t_cchar_umap_hash {
     inline t_uindex
-    operator()(const char* s) const
-    {
+    operator()(const char* s) const {
         return boost::hash_range(s, s + std::strlen(s));
     }
 };
@@ -480,8 +406,7 @@ t_bool is_deterministic_sized(t_dtype dtype);
 
 template <typename DATA_T>
 t_str
-psp_to_str(const DATA_T& s)
-{
+psp_to_str(const DATA_T& s) {
     std::stringstream ss;
     ss << s;
     return ss.str();
@@ -489,21 +414,16 @@ psp_to_str(const DATA_T& s)
 
 } // end namespace perspective
 
-namespace std
-{
+namespace std {
 template <>
-struct hash<perspective::t_uidxpair>
-{
+struct hash<perspective::t_uidxpair> {
     typedef perspective::t_uidxpair argument_type;
     typedef std::size_t result_type;
 
     result_type
-    operator()(argument_type const& s) const
-    {
-        result_type const h1(
-            std::hash<perspective::t_uindex>()(s.first));
-        result_type const h2(
-            std::hash<perspective::t_uindex>()(s.second));
+    operator()(argument_type const& s) const {
+        result_type const h1(std::hash<perspective::t_uindex>()(s.first));
+        result_type const h2(std::hash<perspective::t_uindex>()(s.second));
         return h1 ^ (h2 << 1);
     }
 };

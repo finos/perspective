@@ -14,27 +14,20 @@
 #include <perspective/scalar.h>
 #include <perspective/exports.h>
 
-namespace perspective
-{
+namespace perspective {
 
-class PERSPECTIVE_EXPORT t_range
-{
-  public:
+class PERSPECTIVE_EXPORT t_range {
+public:
     t_range(t_uindex bridx, t_uindex eridx);
 
-    t_range(t_uindex bridx,
-            t_uindex eridx,
-            t_uindex bcidx,
-            t_uindex beidx);
+    t_range(t_uindex bridx, t_uindex eridx, t_uindex bcidx, t_uindex beidx);
 
     t_range(); // select all
 
     t_range(const t_tscalvec& brpath, const t_tscalvec& erpath);
 
-    t_range(const t_tscalvec& brpath,
-            const t_tscalvec& erpath,
-            const t_tscalvec& bcpath,
-            const t_tscalvec& ecpath);
+    t_range(const t_tscalvec& brpath, const t_tscalvec& erpath, const t_tscalvec& bcpath,
+        const t_tscalvec& ecpath);
 
     t_range(const t_str& expr_name);
 
@@ -44,7 +37,7 @@ class PERSPECTIVE_EXPORT t_range
     t_uindex ecidx() const;
     t_range_mode get_mode() const;
 
-  private:
+private:
     t_uindex m_bridx;
     t_uindex m_eridx;
     t_uindex m_bcidx;

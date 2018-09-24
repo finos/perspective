@@ -17,11 +17,9 @@
 #include <perspective/pivot.h>
 #include <perspective/filter.h>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_config_recipe
-{
+struct PERSPECTIVE_EXPORT t_config_recipe {
     t_config_recipe();
 
     t_pivot_recipevec m_row_pivots;
@@ -40,64 +38,38 @@ struct PERSPECTIVE_EXPORT t_config_recipe
     t_svec m_filter_exprs;
 };
 
-class PERSPECTIVE_EXPORT t_config
-{
-  public:
+class PERSPECTIVE_EXPORT t_config {
+public:
     t_config();
     t_config(const t_config_recipe& r);
-    t_config(const t_pivotvec& row_pivots,
-             const t_aggspecvec& aggregates);
-    t_config(const t_pivotvec& row_pivots,
-             const t_pivotvec& col_pivots,
-             const t_aggspecvec& aggregates,
-             const t_svec& detail_columns,
-             const t_totals totals,
-             const t_svec& sort_pivot,
-             const t_svec& sort_pivot_by,
-             t_filter_op combiner,
-             const t_ftermvec& fterms,
-             t_bool handle_nan_sort,
-             const t_str& parent_pkey_column,
-             const t_str& child_pkey_column,
-             const t_str& grouping_label_column,
-             t_fmode fmode,
-             const t_svec& filter_exprs,
-             const t_str& grand_agg_str);
+    t_config(const t_pivotvec& row_pivots, const t_aggspecvec& aggregates);
+    t_config(const t_pivotvec& row_pivots, const t_pivotvec& col_pivots,
+        const t_aggspecvec& aggregates, const t_svec& detail_columns, const t_totals totals,
+        const t_svec& sort_pivot, const t_svec& sort_pivot_by, t_filter_op combiner,
+        const t_ftermvec& fterms, t_bool handle_nan_sort, const t_str& parent_pkey_column,
+        const t_str& child_pkey_column, const t_str& grouping_label_column, t_fmode fmode,
+        const t_svec& filter_exprs, const t_str& grand_agg_str);
 
     // grouped_pkeys
-    t_config(const t_svec& row_pivots,
-             const t_svec& detail_columns,
-             t_filter_op combiner,
-             const t_ftermvec& fterms,
-             const t_str& parent_pkey_column,
-             const t_str& child_pkey_column,
-             const t_str& grouping_label_column);
+    t_config(const t_svec& row_pivots, const t_svec& detail_columns, t_filter_op combiner,
+        const t_ftermvec& fterms, const t_str& parent_pkey_column,
+        const t_str& child_pkey_column, const t_str& grouping_label_column);
 
     // ctx2
-    t_config(const t_svec& row_pivots,
-             const t_svec& col_pivots,
-             const t_aggspecvec& aggregates,
-             const t_totals totals,
-             t_filter_op combiner,
-             const t_ftermvec& fterms);
+    t_config(const t_svec& row_pivots, const t_svec& col_pivots, const t_aggspecvec& aggregates,
+        const t_totals totals, t_filter_op combiner, const t_ftermvec& fterms);
 
     // t_ctx1
-    t_config(const t_svec& row_pivots,
-             const t_aggspecvec& aggregates);
+    t_config(const t_svec& row_pivots, const t_aggspecvec& aggregates);
 
-    t_config(const t_svec& row_pivots,
-             const t_aggspecvec& aggregates,
-             t_filter_op combiner,
-             const t_ftermvec& fterms);
+    t_config(const t_svec& row_pivots, const t_aggspecvec& aggregates, t_filter_op combiner,
+        const t_ftermvec& fterms);
 
     // t_ctx0
-    t_config(const t_svec& detail_columns,
-             t_filter_op combiner,
-             const t_ftermvec& fterms);
+    t_config(const t_svec& detail_columns, t_filter_op combiner, const t_ftermvec& fterms);
 
-    void setup(const t_svec& detail_columns,
-               const t_svec& sort_pivot,
-               const t_svec& sort_pivot_by);
+    void setup(
+        const t_svec& detail_columns, const t_svec& sort_pivot, const t_svec& sort_pivot_by);
 
     t_index get_colidx(const t_str& colname) const;
 
@@ -150,15 +122,15 @@ class PERSPECTIVE_EXPORT t_config
     t_str unity_get_column_display_name(t_uindex idx) const;
     t_fmode get_fmode() const;
 
-    inline const t_str& get_grand_agg_str() const
-    {
+    inline const t_str&
+    get_grand_agg_str() const {
         return m_grand_agg_str;
     }
 
-  protected:
+protected:
     void populate_sortby(const t_pivotvec& pivots);
 
-  private:
+private:
     t_pivotvec m_row_pivots;
     t_pivotvec m_col_pivots;
     t_ssmap m_sortby;

@@ -11,47 +11,41 @@
 #include <perspective/pivot.h>
 #include <sstream>
 
-namespace perspective
-{
+namespace perspective {
 
-t_pivot::t_pivot(const t_pivot_recipe& r)
-{
+t_pivot::t_pivot(const t_pivot_recipe& r) {
     m_colname = r.m_colname;
     m_name = r.m_name;
     m_mode = r.m_mode;
 }
 
 t_pivot::t_pivot(const t_str& colname)
-    : m_colname(colname), m_name(colname), m_mode(PIVOT_MODE_NORMAL)
-{
-}
+    : m_colname(colname)
+    , m_name(colname)
+    , m_mode(PIVOT_MODE_NORMAL) {}
 
 t_pivot::t_pivot(const t_str& colname, t_pivot_mode mode)
-    : m_colname(colname), m_name(colname), m_mode(mode)
-{
-}
+    : m_colname(colname)
+    , m_name(colname)
+    , m_mode(mode) {}
 
 const t_str&
-t_pivot::name() const
-{
+t_pivot::name() const {
     return m_name;
 }
 
 const t_str&
-t_pivot::colname() const
-{
+t_pivot::colname() const {
     return m_colname;
 }
 
 t_pivot_mode
-t_pivot::mode() const
-{
+t_pivot::mode() const {
     return m_mode;
 }
 
 t_pivot_recipe
-t_pivot::get_recipe() const
-{
+t_pivot::get_recipe() const {
     t_pivot_recipe rv;
     rv.m_colname = m_colname;
     rv.m_name = m_name;

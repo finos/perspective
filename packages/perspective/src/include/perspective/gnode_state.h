@@ -18,21 +18,17 @@
 #include <perspective/sym_table.h>
 #include <perspective/rlookup.h>
 
-namespace perspective
-{
+namespace perspective {
 
-std::pair<t_tscalar, t_tscalar>
-get_vec_min_max(const t_tscalvec& vec);
+std::pair<t_tscalar, t_tscalar> get_vec_min_max(const t_tscalvec& vec);
 
-class PERSPECTIVE_EXPORT t_gstate
-{
+class PERSPECTIVE_EXPORT t_gstate {
     typedef boost::unordered_map<t_tscalar, t_uindex> t_mapping;
 
     typedef boost::unordered_set<t_uindex> t_free_items;
 
-  public:
-    t_gstate(const t_schema& tblschema,
-             const t_schema& pkeyed_schema);
+public:
+    t_gstate(const t_schema& tblschema, const t_schema& pkeyed_schema);
     ~t_gstate();
     void init();
 
@@ -45,62 +41,45 @@ class PERSPECTIVE_EXPORT t_gstate
     void update_history(const t_table* tbl);
     t_mask get_cpp_mask() const;
 
-    t_tscalar get_value(const t_tscalar& pkey,
-                        const t_str& colname) const;
+    t_tscalar get_value(const t_tscalar& pkey, const t_str& colname) const;
 
-    void read_column(const t_str& colname,
-                     const t_tscalvec& pkeys,
-                     t_tscalvec& out_data) const;
+    void read_column(const t_str& colname, const t_tscalvec& pkeys, t_tscalvec& out_data) const;
 
-    void read_column(const t_str& colname,
-                     const t_tscalvec& pkeys,
-                     t_f64vec& out_data) const;
+    void read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data) const;
 
-    void read_column(const t_str& colname,
-                     const t_tscalvec& pkeys,
-                     t_f64vec& out_data,
-                     bool include_nones) const;
+    void read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data,
+        bool include_nones) const;
 
     t_table_sptr get_table();
     t_table_csptr get_table() const;
 
     t_table_sptr get_pkeyed_table(const t_schema& schema) const;
     t_table* _get_pkeyed_table(const t_schema& schema) const;
-    t_table* _get_pkeyed_table(const t_schema& schema,
-                               const t_mask& mask) const;
+    t_table* _get_pkeyed_table(const t_schema& schema, const t_mask& mask) const;
 
     t_table_sptr get_pkeyed_table() const;
 
     t_table* _get_pkeyed_table() const;
     t_table* _get_pkeyed_table(const t_tscalvec& pkeys) const;
-    t_table* _get_pkeyed_table(const t_schema& schema,
-                               const t_tscalvec& pkeys) const;
+    t_table* _get_pkeyed_table(const t_schema& schema, const t_tscalvec& pkeys) const;
 
     void pprint() const;
 
     t_tscalar get(t_tscalar pkey, const t_str& colname) const;
     t_tscalvec get_row(t_tscalar pkey) const;
 
-    t_bool is_unique(const t_tscalvec& pkeys,
-                     const t_str& colname,
-                     t_tscalar& value) const;
+    t_bool is_unique(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value) const;
 
-    t_bool apply(const t_tscalvec& pkeys,
-                 const t_str& colname,
-                 t_tscalar& value) const;
+    t_bool apply(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value) const;
 
-    t_bool apply(
-        const t_tscalvec& pkeys,
-        const t_str& colname,
-        t_tscalar& value,
+    t_bool apply(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value,
         std::function<t_bool(const t_tscalar&, t_tscalar&)> fn) const;
 
     t_bool has_pkey(t_tscalar pkey) const;
 
     template <typename FN_T>
-    typename FN_T::result_type reduce(const t_tscalvec& pkeys,
-                                      const t_str& colname,
-                                      FN_T fn) const;
+    typename FN_T::result_type reduce(
+        const t_tscalvec& pkeys, const t_str& colname, FN_T fn) const;
 
     const t_schema& get_schema() const;
 
@@ -116,10 +95,10 @@ class PERSPECTIVE_EXPORT t_gstate
     const t_schema& get_port_schema() const;
     t_uidxvec get_pkeys_idx(const t_tscalvec& pkeys) const;
 
-  protected:
+protected:
     t_dtype get_pkey_dtype() const;
 
-  private:
+private:
     t_schema m_tblschema;
     t_schema m_pkeyed_schema;
     t_bool m_init;
@@ -127,16 +106,13 @@ class PERSPECTIVE_EXPORT t_gstate
     t_mapping m_mapping;
     t_free_items m_free;
     t_symtable m_symtable;
-  	t_col_sptr m_pkcol;
-  	t_col_sptr m_opcol;
+    t_col_sptr m_pkcol;
+    t_col_sptr m_opcol;
 };
 
 template <typename FN_T>
 typename FN_T::result_type
-t_gstate::reduce(const t_tscalvec& pkeys,
-                 const t_str& colname,
-                 FN_T fn) const
-{
+t_gstate::reduce(const t_tscalvec& pkeys, const t_str& colname, FN_T fn) const {
     t_tscalvec data;
     read_column(colname, pkeys, data);
     return fn(data);

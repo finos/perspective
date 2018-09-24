@@ -13,11 +13,9 @@
 #include <perspective/exports.h>
 #include <vector>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_data
-{
+struct PERSPECTIVE_EXPORT t_data {
     t_data();
     t_data(const t_tscalvec& data);
 

@@ -29,6 +29,7 @@
     "build:webpack:wasm": "webpack --color --config src/config/perspective.wasm.config.js",
     "build:webpack:parallel": "webpack --color --config src/config/perspective.parallel.config.js",
     "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
+    "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
     "test:build": "npm-run-all test:build:copy test:build:webpack",
     "test:build:copy": "npm-run-all -p test:build:copy:*",
     "test:build:copy:html": "cp test/html/* build",

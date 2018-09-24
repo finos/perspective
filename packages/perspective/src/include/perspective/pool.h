@@ -19,12 +19,9 @@
 #include <emscripten/val.h>
 #endif
 
+namespace perspective {
 
-namespace perspective
-{
-
-struct PERSPECTIVE_EXPORT t_updctx
-{
+struct PERSPECTIVE_EXPORT t_updctx {
     t_updctx();
     t_updctx(t_uindex gnode_id, const t_str& ctx);
 
@@ -36,27 +33,21 @@ typedef std::vector<t_updctx> t_updctx_vec;
 
 class t_update_task;
 
-class PERSPECTIVE_EXPORT t_pool
-{
+class PERSPECTIVE_EXPORT t_pool {
     friend class t_update_task;
     typedef std::pair<t_uindex, t_str> t_ctx_id;
-  public:
+
+public:
 #ifdef PSP_ENABLE_WASM
     t_pool(emscripten::val update_delegate);
     void set_update_delegate(emscripten::val ud);
     t_uindex register_gnode(t_gnode* node);
-    void register_context(t_uindex gnode_id,
-                          const t_str& name,
-                          t_ctx_type type,
-                          t_int32 ptr);
+    void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int32 ptr);
     void py_notify_userspace();
 #else
     t_pool();
     t_uindex register_gnode(t_gnode* node);
-    void register_context(t_uindex gnode_id,
-                          const t_str& name,
-                          t_ctx_type type,
-                          t_int64 ptr);
+    void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int64 ptr);
     void set_update_delegate();
     void py_notify_userspace();
 #endif
@@ -69,8 +60,7 @@ class PERSPECTIVE_EXPORT t_pool
 
     void unregister_context(t_uindex gnode_id, const t_str& name);
 
-    void
-    send(t_uindex gnode_id, t_uindex port_id, const t_table& table);
+    void send(t_uindex gnode_id, t_uindex port_id, const t_table& table);
 
     void _process();
     void _process_helper();
@@ -81,8 +71,7 @@ class PERSPECTIVE_EXPORT t_pool
 
     bool get_data_remaining() const;
 
-    t_tscalvec get_row_data_pkeys(t_uindex gnode_id,
-                                  const t_tscalvec& pkeys);
+    t_tscalvec get_row_data_pkeys(t_uindex gnode_id, const t_tscalvec& pkeys);
     t_updctx_vec get_contexts_last_updated();
     t_str repr() const;
 
@@ -96,12 +85,12 @@ class PERSPECTIVE_EXPORT t_pool
     t_uidxvec get_gnodes_last_updated();
     t_gnode* get_gnode(t_uindex gnode_id);
 
-  protected:
+protected:
     // Following three functions
     // use the python api
     t_bool validate_gnode_id(t_uindex gnode_id) const;
 
-  private:
+private:
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
 

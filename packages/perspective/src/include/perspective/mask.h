@@ -15,16 +15,14 @@
 #include <boost/shared_ptr.hpp>
 #include <perspective/simple_bitmask.h>
 
-namespace perspective
-{
+namespace perspective {
 
 class t_mask_iterator;
 
-class PERSPECTIVE_EXPORT t_mask
-{
+class PERSPECTIVE_EXPORT t_mask {
     typedef boost::dynamic_bitset<>::size_type t_msize;
 
-  public:
+public:
     t_mask();
     t_mask(t_uindex size);
 
@@ -50,16 +48,15 @@ class PERSPECTIVE_EXPORT t_mask
     t_uindex size() const;
     void pprint() const;
 
-  private:
+private:
     boost::dynamic_bitset<> m_bitmap;
 };
 
 typedef std::shared_ptr<t_mask> t_masksptr;
 typedef std::shared_ptr<const t_mask> t_maskcsptr;
 
-class PERSPECTIVE_EXPORT t_mask_iterator
-{
-  public:
+class PERSPECTIVE_EXPORT t_mask_iterator {
+public:
     t_mask_iterator();
     t_mask_iterator(t_maskcsptr m);
     ~t_mask_iterator();
@@ -70,15 +67,13 @@ class PERSPECTIVE_EXPORT t_mask_iterator
 
     static const t_uindex m_end = t_mask::m_npos;
 
-  private:
+private:
     t_maskcsptr m_mask;
     t_uindex m_pos;
 };
 
 } // end namespace perspective
 
-namespace std
-{
-std::ostream& operator<<(std::ostream& os,
-                         const perspective::t_mask& mask);
+namespace std {
+std::ostream& operator<<(std::ostream& os, const perspective::t_mask& mask);
 }

@@ -10,7 +10,4 @@
 #include <perspective/first.h>
 #include <perspective/comparators.h>
 
-namespace perspective
-{
-
-} // end namespace perspective
+namespace perspective {} // end namespace perspective

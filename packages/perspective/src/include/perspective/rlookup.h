@@ -11,11 +11,9 @@
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
 
-namespace perspective
-{
+namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_rlookup
-{
+struct PERSPECTIVE_EXPORT t_rlookup {
     t_rlookup();
     t_rlookup(t_uindex idx, t_bool exists);
     ~t_rlookup();

@@ -15,30 +15,23 @@
 #include <functional>
 #include <mutex>
 
-namespace perspective
-{
+namespace perspective {
 
 std::mutex sym_table_mutex;
 
-t_symtable::t_symtable()
-{
-}
+t_symtable::t_symtable() {}
 
-t_symtable::~t_symtable()
-{
-    for (auto& kv : m_mapping)
-    {
+t_symtable::~t_symtable() {
+    for (auto& kv : m_mapping) {
         free(const_cast<char*>(kv.second));
     }
 }
 
 const t_char*
-t_symtable::get_interned_cstr(const t_char* s)
-{
+t_symtable::get_interned_cstr(const t_char* s) {
     auto iter = m_mapping.find(s);
 
-    if (iter != m_mapping.end())
-    {
+    if (iter != m_mapping.end()) {
         return iter->second;
     }
 
@@ -48,10 +41,8 @@ t_symtable::get_interned_cstr(const t_char* s)
 }
 
 t_tscalar
-t_symtable::get_interned_tscalar(const t_char* s)
-{
-    if (t_tscalar::can_store_inplace(s))
-    {
+t_symtable::get_interned_tscalar(const t_char* s) {
+    if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);
         return rval;
@@ -63,8 +54,7 @@ t_symtable::get_interned_tscalar(const t_char* s)
 }
 
 t_tscalar
-t_symtable::get_interned_tscalar(const t_tscalar& s)
-{
+t_symtable::get_interned_tscalar(const t_tscalar& s) {
     if (!s.is_str() || s.is_inplace())
         return s;
 
@@ -74,36 +64,30 @@ t_symtable::get_interned_tscalar(const t_tscalar& s)
 }
 
 t_uindex
-t_symtable::size() const
-{
+t_symtable::size() const {
     return m_mapping.size();
 }
 
 static t_symtable*
-get_symtable()
-{
+get_symtable() {
     static t_symtable* sym = 0;
 
-    if (!sym)
-    {
+    if (!sym) {
         sym = new t_symtable;
     }
     return sym;
 }
 
 const t_char*
-get_interned_cstr(const t_char* s)
-{
+get_interned_cstr(const t_char* s) {
     std::lock_guard<std::mutex> guard(sym_table_mutex);
     auto sym = get_symtable();
     return sym->get_interned_cstr(s);
 }
 
 t_tscalar
-get_interned_tscalar(const t_char* s)
-{
-    if (t_tscalar::can_store_inplace(s))
-    {
+get_interned_tscalar(const t_char* s) {
+    if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);
         return rval;
@@ -114,8 +98,7 @@ get_interned_tscalar(const t_char* s)
 }
 
 t_tscalar
-get_interned_tscalar(const t_tscalar& s)
-{
+get_interned_tscalar(const t_tscalar& s) {
     if (!s.is_str() || s.is_inplace())
         return s;
 

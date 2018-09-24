@@ -10,17 +10,12 @@
 #include <perspective/first.h>
 #include <perspective/init.h>
 
-namespace perspective
-{
+namespace perspective {
 
 void
-perspective_init()
-{
-}
+perspective_init() {}
 
 void
-perspective_finalize()
-{
-}
+perspective_finalize() {}
 
 } // end namespace perspective

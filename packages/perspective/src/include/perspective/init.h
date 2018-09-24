@@ -10,8 +10,7 @@
 #pragma once
 #include <perspective/first.h>
 
-namespace perspective
-{
+namespace perspective {
 void perspective_init();
 void perspective_finalize();
-}
+} // namespace perspective

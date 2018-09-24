@@ -9,18 +9,15 @@
 
 #pragma once
 
-namespace perspective
-{
+namespace perspective {
 
-enum t_nan_handling_mode
-{
+enum t_nan_handling_mode {
     NAN_HANDLING_MODE_CANONICAL_SUBSTITUTE,
     NAN_HANDLING_MODE_PROPAGATE_NANS,
     NAN_HANDLING_MODE_IGNORE_NANS
 };
 
-enum t_nan_sorting_mode
-{
+enum t_nan_sorting_mode {
     // leave nans alone and allow
     // underlying sort to handle
     // them as they see fit
