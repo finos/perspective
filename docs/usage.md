@@ -9,11 +9,17 @@ title: Usage
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate, filter
 and sort operations for tabular data.  The engine can be instantiated in process,
-or in a Web Worker (browser only).
+or in a Web Worker (browser only), and is published in the `@jpmorganchase/perspective`
+NPM module.
 
 ### In the browser
 
-Via ES6 module and/or Babel:
+The `main` entry point for the `@jpmorganchase/perspective` runs in a Web 
+Worker, such that the CPU workload is segregated from the web application in
+which it is embedded, and so the bulk of engine code can be lazy-loaded only 
+after browser feature detection determines whether WebAssembly is supported.
+
+The library can be imported ia ES6 module and/or Babel:
 
 ```javascript
 import perspective from 'perspective';
@@ -26,7 +32,7 @@ const perspective = require('perspective');
 ```
 
 Perspective can also be referenced via the global `perspective` module name in vanilla
-Javascript.
+Javascript, when e.g. importing `@jpmorganchase/perspective` [via a CDN](https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/perspective.js).
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()` 
 method.  This will create a new WebWorker (browser) or Process (node.js), and 
@@ -37,7 +43,17 @@ and data accumulation will occur in this separate process.
 const worker = perspective.worker();
 ```
 
+The `worker` symbol will expose the full `perspective` API for one managed
+Web Worker process.  You are free to create as many as your browser supports,
+but be sure to keep track of the `worker` instances themselves, as you'll
+need them to interact with your data in each instance.
+
 ### In Node.js
+
+The `Node.js` runtime for the `@jpmorganchase/perpsective` module runs
+in-process by defualt, and does not implement a `child_process` interface.
+Hence, there is no `worker()` method, and the module object itself directly
+exports the full `perspective` API.
 
 ```javascript
 const perspective = require('@jpmorganchase/perspective/build/perspective.node.js');

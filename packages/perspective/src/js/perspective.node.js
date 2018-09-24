@@ -26,6 +26,7 @@ let Module = load_perspective({
 });
 
 module.exports = perspective(Module);
+delete module.exports["worker"];
 
 let CLIENT_ID_GEN = 0;
 
