@@ -9,7 +9,7 @@
     "superstore.html/displays visible columns.": "3b8cb1f8395dd1205539bfb1f0e01cec",
     "superstore.html/sorts by a hidden column.": "57bd2b3739ab342c71d6878722db2d95",
     "superstore.html/filters by a numeric column.": "dc1596fb2db82243f2200a0b9d8d35b8",
-    "superstore.html/shows horizontal columns on small viewports.": "a182af50a17d94732c8fa6540fc56233",
+    "superstore.html/shows horizontal columns on small viewports.": "73a42c96e41eb39c6d6e1f2f75f886e1",
     "superstore.html/setting a valid column should set it as input.": "129c59115b8b134d8075a09a802f1ec2",
     "superstore.html/setting multiple column parameters should set input.": "2e49bd48892276fbe39d27c6696639d3",
     "superstore.html/computations should clear input column.": "750e708f310ebd277f146a10e5b3a021",
