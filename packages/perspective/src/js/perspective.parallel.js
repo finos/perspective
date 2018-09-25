@@ -105,7 +105,7 @@ class WebWorker extends worker {
     }
 
     _start_cross_origin() {
-        var dir = typeof WebAssembly === "undefined" ? "asmjs" : "wasm";
+        var dir = typeof WebAssembly === "undefined" ? "asmjs" : "async";
         XHRWorker(
             __SCRIPT_PATH__.path() + "perspective.worker." + dir + ".js",
             function(worker) {
