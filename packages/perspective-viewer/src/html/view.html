@@ -18,11 +18,13 @@
             <div id="columns_container" style="visibility: hidden">
                 <ul id='active_columns' ondragenter="dragEnter(event)"></ul>
                 <div id='divider'></div>
-                <ul id='inactive_columns'></ul>
+                <div id="sub_columns">
+                    <ul id='inactive_columns'></ul>
+                    <div id="side_panel__actions" style="visibility: hidden">
+                        <div id="add-computed-column" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
+                    </div>
+                </div>
                 <perspective-computed-column></perspective-computed-column>
-            </div>
-            <div id="side_panel__actions" style="visibility: hidden">
-                <div id="add-computed-column" class="side_panel-action"><span class="psp-icon psp-icon__add"></span><span class="psp-title__columnName">New Column</span></div>
             </div>
         </div>
         <div class="column noselect">
@@ -53,7 +55,7 @@
                     </div>
                 </div>
                 <div class="rrow" style='flex-grow:3;height:auto;flex:1 1 400px;max-width:none'>
-                    <div id="filters"  ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                    <div id="filters" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
                         <div class="psp-text-field">
                             <ul class="psp-text-field__input" for='filters'></ul>
                             <label for="filters"></label>

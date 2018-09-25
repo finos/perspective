@@ -9,21 +9,22 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<head>
 
-        <script src="mobile_fix.js"></script>
-        <script src="perspective.view.js"></script>
-        <script src="hypergrid.plugin.js"></script>
-        <script src="highcharts.plugin.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <link rel='stylesheet' href="demo.css">
-        <link rel='stylesheet' href="material.css">
+    <script src="mobile_fix.js"></script>
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
 
-        <style>
+    <link rel='stylesheet' href="demo.css">
+    <link rel='stylesheet' href="material.css">
 
-            #drop-area {
+    <style>
+
+        #drop-area {
                 border: 1px solid #ccc;
                 width: 480px;
                 font-family: sans-serif;
@@ -64,88 +65,91 @@
             }
         </style>
 
-    </head>
-    <body>
+</head>
 
-        <div id="drop-area">
-            <form class="my-form">
-              <p>Upload a CSV file by dragging from your desktop and dropping onto the dashed region.</p>
-              <p>(Data is processed in browser, and never sent to any server).</p>
-              <input type="file" id="fileElem" multiple accept="text/csv" >
-              <label class="button" for="fileElem">Select a file</label>
-            </form>
-        </div>
+<body>
 
-        <script>
+    <div id="drop-area">
+        <form class="my-form">
+            <p>Upload a CSV file by dragging from your desktop and dropping onto the dashed region.</p>
+            <p>(Data is processed in browser, and never sent to any server).</p>
+            <input type="file" id="fileElem" multiple accept="text/csv">
+            <label class="button" for="fileElem">Select a file</label>
+        </form>
+    </div>
 
-            window.addEventListener('WebComponentsReady', function () {
-                var dropArea = document.getElementById('drop-area')
-                var input = document.getElementById('fileElem');
+    <script>
+        window.addEventListener('WebComponentsReady', function() {
+            var dropArea = document.getElementById('drop-area')
+            var input = document.getElementById('fileElem');
 
-                dropArea.addEventListener('dragenter', () => {}, false);
-                dropArea.addEventListener('dragleave', () => {}, false);
-                dropArea.addEventListener('dragover', () => {}, false);
-                dropArea.addEventListener('drop', x => {
-                    console.log(x);
-                }, false);
-                
-                ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                    dropArea.addEventListener(eventName, preventDefaults, false)
-                })
+            dropArea.addEventListener('dragenter', () => {}, false);
+            dropArea.addEventListener('dragleave', () => {}, false);
+            dropArea.addEventListener('dragover', () => {}, false);
+            dropArea.addEventListener('drop', x => {
+                console.log(x);
+            }, false);
 
-                function preventDefaults (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
+            ;
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false)
+            })
 
-                ;['dragenter', 'dragover'].forEach(function (eventName) {
-                    dropArea.addEventListener(eventName, highlight, false);
-                })
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
 
-                ;['dragleave', 'drop'].forEach(function (eventName) {
-                    dropArea.addEventListener(eventName, unhighlight, false);
-                })
+            ;
+            ['dragenter', 'dragover'].forEach(function(eventName) {
+                dropArea.addEventListener(eventName, highlight, false);
+            })
 
-                function highlight(e) {
-                    dropArea.classList.add('highlight')
-                }
+            ;
+            ['dragleave', 'drop'].forEach(function(eventName) {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            })
 
-                function unhighlight(e) {
-                    dropArea.classList.remove('highlight')
-                }
+            function highlight(e) {
+                dropArea.classList.add('highlight')
+            }
 
-                dropArea.addEventListener('drop', handleDrop, false)
+            function unhighlight(e) {
+                dropArea.classList.remove('highlight')
+            }
 
-                input.addEventListener('change', function () {
-                    handleFiles(this.files);
-                });
+            dropArea.addEventListener('drop', handleDrop, false)
 
-                function handleDrop(e) {
-                    let dt = e.dataTransfer
-                    let files = dt.files
-
-                    handleFiles(files)
-                }
-
-                function handleFiles(files) {
-                    ([...files]).forEach(uploadFile)
-                }
-
-                function uploadFile(file) {
-                    let reader = new FileReader();
-                    reader.onload = function (fileLoadedEvent) {
-                        let txt = fileLoadedEvent.target.result;
-                        const parent = dropArea.parentElement;
-                        parent.removeChild(dropArea);
-                        let psp = document.createElement('perspective-viewer');
-                        parent.appendChild(psp);
-                        psp.load(txt);
-                    }
-                    reader.readAsText(file);
-                }
+            input.addEventListener('change', function() {
+                handleFiles(this.files);
             });
 
-        </script>
+            function handleDrop(e) {
+                let dt = e.dataTransfer
+                let files = dt.files
 
-    </body>
+                handleFiles(files)
+            }
+
+            function handleFiles(files) {
+                ([...files]).forEach(uploadFile)
+            }
+
+            function uploadFile(file) {
+                let reader = new FileReader();
+                reader.onload = function(fileLoadedEvent) {
+                    let txt = fileLoadedEvent.target.result;
+                    const parent = dropArea.parentElement;
+                    parent.removeChild(dropArea);
+                    let psp = document.createElement('perspective-viewer');
+                    parent.appendChild(psp);
+                    psp.load(txt);
+                }
+                reader.readAsText(file);
+            }
+        });
+    </script>
+
+</body>
+
 </html>

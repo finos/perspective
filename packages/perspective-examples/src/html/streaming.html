@@ -9,81 +9,84 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+<head>
 
-        <script src="mobile_fix.js"></script>
-        <script src="perspective.js"></script>
-        <script src="perspective.view.js"></script>
-        <script src="hypergrid.plugin.js"></script>
-        <script src="highcharts.plugin.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-        <link rel='stylesheet' href="demo.css">
+    <script src="mobile_fix.js"></script>
+    <script src="perspective.js"></script>
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
 
-    </head>
-    <body>
+    <link rel='stylesheet' href="demo.css">
 
-        <perspective-viewer row-pivots='["name"]' column-pivots='["client"]' columns='["chg","vol"]'></perspective-viewer>
+</head>
 
-        <script>
+<body>
 
-            var SECURITIES = [
-                "AAPL.N",
-                "AMZN.N",
-                "QQQ.N",
-                "NVDA.N",
-                "TSLA.N",
-                "FB.N",
-                "MSFT.N",
-                "TLT.N",
-                "XIV.N",
-                "YY.N",
-                "CSCO.N",
-                "GOOGL.N",
-                "PCLN.N"
-            ];
+    <perspective-viewer row-pivots='["name"]' column-pivots='["client"]' columns='["chg","vol"]'></perspective-viewer>
 
-            var CLIENTS = [
-                "Homer",
-                "Marge",
-                "Bart",
-                "Lisa",
-                "Maggie",
-                "Moe",
-                "Lenny",
-                "Carl",
-                "Krusty",
-            ]
+    <script>
+        var SECURITIES = [
+            "AAPL.N",
+            "AMZN.N",
+            "QQQ.N",
+            "NVDA.N",
+            "TSLA.N",
+            "FB.N",
+            "MSFT.N",
+            "TLT.N",
+            "XIV.N",
+            "YY.N",
+            "CSCO.N",
+            "GOOGL.N",
+            "PCLN.N"
+        ];
 
-            function newRows() {
-                rows = [];
-                for (var x = 0; x < 5; x ++) {
-                    rows.push({
-                        name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
-                        client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)], 
-                        lastUpdate: new Date(),
-                        chg: Math.random() * 20 - 10,
-                        bid: Math.random() * 10 + 90,
-                        ask: Math.random() * 10 + 100,
-                        vol: Math.random() * 10 + 100,                    
-                    });
-                }
-                return rows;
+        var CLIENTS = [
+            "Homer",
+            "Marge",
+            "Bart",
+            "Lisa",
+            "Maggie",
+            "Moe",
+            "Lenny",
+            "Carl",
+            "Krusty",
+        ]
+
+        function newRows() {
+            rows = [];
+            for (var x = 0; x < 5; x++) {
+                rows.push({
+                    name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
+                    client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
+                    lastUpdate: new Date(),
+                    chg: Math.random() * 20 - 10,
+                    bid: Math.random() * 10 + 90,
+                    ask: Math.random() * 10 + 100,
+                    vol: Math.random() * 10 + 100,
+                });
             }
+            return rows;
+        }
 
-            window.addEventListener('WebComponentsReady', function () {
-                var elem = document.getElementsByTagName('perspective-viewer')[0]; 
-                var table = perspective.worker().table(newRows(), {limit: 500});
-                elem.load(table);
-
-                (function postRow() {
-                    elem.update(newRows());
-                    setTimeout(postRow, 50);
-                })();
+        window.addEventListener('WebComponentsReady', function() {
+            var elem = document.getElementsByTagName('perspective-viewer')[0];
+            var table = perspective.worker().table(newRows(), {
+                limit: 500
             });
+            elem.load(table);
 
-        </script>
+            (function postRow() {
+                elem.update(newRows());
+                setTimeout(postRow, 50);
+            })();
+        });
+    </script>
 
-    </body>
+</body>
+
 </html>

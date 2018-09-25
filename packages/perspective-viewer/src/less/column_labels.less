@@ -7,7 +7,7 @@
  *
  */
 
- .titled {
+.titled {
     padding-top: 5px;
 
     .is_visible:before {
@@ -37,12 +37,12 @@ perspective-viewer {
     }
 
     #app #side_panel {
-    
+
         #active_columns {
 
             perspective-row:before {
                 font-size: 10px;
-                margin-left:30px;
+                margin-left: 30px;
                 color: #666;
             }
         }
@@ -60,11 +60,12 @@ perspective-viewer[view=xy_line] {
     }
 
     #app #side_panel {
-    
+
         #active_columns {
 
             perspective-row:nth-child(1) {
                 .titled();
+
                 &:before {
                     content: "X Axis";
                 }
@@ -72,6 +73,7 @@ perspective-viewer[view=xy_line] {
 
             perspective-row:nth-child(2) {
                 .titled();
+
                 &:before {
                     content: "Y Axis";
                 }
@@ -80,7 +82,8 @@ perspective-viewer[view=xy_line] {
     }
 }
 
-perspective-viewer[view=xy_scatter], perspective-viewer[view=xy_line] {
+perspective-viewer[view=xy_scatter],
+perspective-viewer[view=xy_line] {
 
     #app.columns_horizontal #side_panel {
 
@@ -90,11 +93,12 @@ perspective-viewer[view=xy_scatter], perspective-viewer[view=xy_line] {
     }
 
     #app #side_panel {
-    
+
         #active_columns {
 
             perspective-row:nth-child(1) {
                 .titled();
+
                 &:before {
                     content: "X Axis";
                 }
@@ -102,6 +106,7 @@ perspective-viewer[view=xy_scatter], perspective-viewer[view=xy_line] {
 
             perspective-row:nth-child(2) {
                 .titled();
+
                 &:before {
                     content: "Y Axis";
                 }
@@ -120,11 +125,12 @@ perspective-viewer[view=xy_scatter] {
     }
 
     #app #side_panel {
-    
+
         #active_columns {
 
             perspective-row:nth-child(3) {
                 .titled();
+
                 &:before {
                     content: "Color";
                 }
@@ -132,6 +138,7 @@ perspective-viewer[view=xy_scatter] {
 
             perspective-row:nth-child(4) {
                 .titled();
+
                 &:before {
                     content: "Size";
                 }
@@ -140,7 +147,8 @@ perspective-viewer[view=xy_scatter] {
     }
 }
 
-perspective-viewer[view=treemap], perspective-viewer[view=sunburst] {
+perspective-viewer[view=treemap],
+perspective-viewer[view=sunburst] {
 
     #app.columns_horizontal #side_panel {
 
@@ -150,11 +158,12 @@ perspective-viewer[view=treemap], perspective-viewer[view=sunburst] {
     }
 
     #app #side_panel {
-    
+
         #active_columns {
 
             perspective-row:nth-child(1) {
                 .titled();
+
                 &:before {
                     content: "Size";
                 }
@@ -162,6 +171,7 @@ perspective-viewer[view=treemap], perspective-viewer[view=sunburst] {
 
             perspective-row:nth-child(2) {
                 .titled();
+
                 &:before {
                     content: "Color";
                 }
