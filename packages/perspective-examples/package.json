@@ -18,7 +18,6 @@
     "bench:build": "echo \"No Benchmarks\"",
     "bench:run": "echo \"No Benchmarks\"",
     "build": "npm run copy && npm-run-all -p build:*",
-    "build:perspective": "webpack --color --config ../perspective/test/config/perspective.config.js --context ../perspective/ --output-path ../perspective-examples/build",
     "build:view": "webpack --color --config ../perspective-viewer/test/config/view.config.js --context ../perspective-viewer/ --output-path ../perspective-examples/build",
     "build:hypergrid": "webpack --color --config ../perspective-viewer-hypergrid/test/config/hypergrid.config.js --context ../perspective-viewer-hypergrid/ --output-path ../perspective-examples/build",
     "build:highcharts": "webpack --color --config ../perspective-viewer-highcharts/test/config/highcharts.config.js --context ../perspective-viewer-highcharts/ --output-path ../perspective-examples/build",

@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective-viewer-hypergrid",
   "version": "0.2.0-beta.3",
   "description": "Perspective.js",
-  "main": "build/hypergrid.plugin.umd.js",
+  "main": "build/hypergrid.plugin.esm.js",
   "directories": {
     "test": "test"
   },
@@ -14,9 +14,10 @@
     "bench": "npm-run-all bench:build bench:run",
     "bench:build": "echo \"No Benchmarks\"",
     "bench:run": "echo \"No Benchmarks\"",
-    "hypergrid": "webpack --color --config src/config/hypergrid.plugin.config.js",
-    "build": "npm run hypergrid",
-    "test:build": "cp test/html/* build && webpack --color --config test/config/hypergrid.config.js",
+    "build:hypergrid": "webpack --color --config src/config/hypergrid.plugin.config.js",
+    "build:esm": "webpack --color --config src/config/hypergrid.plugin.esm.config.js",
+    "build": "npm-run-all build:*",
+    "test:build": "cp test/html/* build",
     "test:run": "jest --silent --color 2>&1",
     "test": "npm-run-all test:build test:run",
     "clean": "find build -mindepth 1 -delete",
