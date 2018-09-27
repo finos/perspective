@@ -105,7 +105,7 @@ class ChartAxis {
             name: path[path.length - 1],
             depth: path.length,
             categories: []
-        }
+        };
 
         // Find the correct parent
         var parent = this.axis;
@@ -132,7 +132,7 @@ class ChartAxis {
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);     
+                label.categories.push(path[path.length - 1]);
                 continue;
             }
         }
@@ -140,7 +140,6 @@ class ChartAxis {
 }
 
 class RowIterator {
-
     constructor(rows, hidden) {
         this.rows = rows;
         this.hidden = hidden;
@@ -163,21 +162,16 @@ class RowIterator {
 }
 
 class ColumnIterator {
-
     constructor(columns, hidden, pivot_length) {
         this.columns = columns;
         this.hidden = [...hidden, "hidden", "column_names"];
-        this.column_names = Object.keys(this.columns).filter(
-            prop => {
-                let cname = prop.split(COLUMN_SEPARATOR_STRING);
-                cname = cname[cname.length - 1];
-                return prop !== "__ROW_PATH__" && !this.hidden.includes(cname);
-            });
-        this.is_stacked = this.column_names.map(value =>
-            value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)
-        ).filter((value, index, self) =>
-            self.indexOf(value) === index
-        ).length > 1;
+        this.column_names = Object.keys(this.columns).filter(prop => {
+            let cname = prop.split(COLUMN_SEPARATOR_STRING);
+            cname = cname[cname.length - 1];
+            return prop !== "__ROW_PATH__" && !this.hidden.includes(cname);
+        });
+        this.is_stacked =
+            this.column_names.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
         this.pivot_length = pivot_length;
     }
 
@@ -191,7 +185,7 @@ class ColumnIterator {
                         filtered_data.push(data[i]);
                     }
                 }
-                data = filtered_data; 
+                data = filtered_data;
             }
             yield {name, data};
         }
@@ -210,13 +204,10 @@ export function make_y_data(cols, pivots, hidden) {
         } else {
             sname = sname.slice(0, sname.length - 1).join(", ") || " ";
         }
-        let s = column_to_series(
-            col.data.map(val => val === undefined || val === "" ? null : val), 
-            sname, 
-            gname);
+        let s = column_to_series(col.data.map(val => (val === undefined || val === "" ? null : val)), sname, gname);
         series.push(s);
     }
-    
+
     return [series, axis.axis];
 }
 
@@ -341,12 +332,12 @@ class MakeTick {
         }
 
         for (let i = 0; i < data[0].length; i++) {
-            if(data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
+            if (data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
                 continue;
             }
 
             let tick = {};
- 
+
             if (row_path) {
                 if (row_path[i].length !== pivot_length) {
                     continue;
@@ -391,7 +382,7 @@ class MakeTick {
         }
 
         return ticks;
-    }    
+    }
 }
 
 export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
@@ -403,17 +394,10 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidd
     let row_path = columns.columns.__ROW_PATH__;
 
     if (col_pivots.length === 0) {
-        let ticks = make_tick.make_col(
-            columns.columns,
-            columns.column_names,
-            aggs.length,
-            columns.pivot_length,
-            row_path,
-            color_range
-        );
-            
-        let s = column_to_series(ticks, ' ');   
-        series.push(s); 
+        let ticks = make_tick.make_col(columns.columns, columns.column_names, aggs.length, columns.pivot_length, row_path, color_range);
+
+        let s = column_to_series(ticks, " ");
+        series.push(s);
     } else {
         let groups = {};
 
@@ -426,7 +410,7 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidd
                     clean_row_path.push(row_path[i]);
                 }
             }
-            
+
             row_path = clean_row_path;
         }
 
@@ -442,14 +426,7 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidd
 
             if (groups[group_name].length === aggs.length) {
                 // generate series as soon as we have enough data
-                let ticks = make_tick.make_col(
-                    groups[group_name], 
-                    aggs, 
-                    aggs.length,
-                    columns.pivot_length,
-                    row_path, 
-                    color_range,
-                );
+                let ticks = make_tick.make_col(groups[group_name], aggs, aggs.length, columns.pivot_length, row_path, color_range);
 
                 let s = column_to_series(ticks, group_name);
                 series.push(s);
@@ -510,9 +487,9 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
                 s.data.push(tick);
             }
         }
-    }   
-    
-    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];   
+    }
+
+    return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];
 }
 
 /******************************************************************************
@@ -550,7 +527,7 @@ function make_tree_axis(series) {
 
 export function make_xyz_data(js, pivots, hidden, ytree_type) {
     let [series, top] = make_y_heatmap_data(js, pivots, hidden);
-    if (ytree_type !== 'string' && ytree_type !== undefined) {
+    if (ytree_type !== "string" && ytree_type !== undefined) {
         series = series.reverse();
     }
     let colorRange = [Infinity, -Infinity];
