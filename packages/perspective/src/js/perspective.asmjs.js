@@ -7,7 +7,7 @@
  *
  */
 
-const load_perspective = require("../../obj/psp.asmjs.js").load_perspective;
+const load_perspective = require("../../build/psp.asmjs.js").load_perspective;
 const perspective = require("./perspective.js");
 
 const Module = load_perspective({

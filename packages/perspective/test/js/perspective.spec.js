@@ -17,7 +17,7 @@ const RUNTIMES = {
 };
 
 if (typeof WebAssembly !== "undefined") {
-    RUNTIMES["WASM"] = perspective(require("../../obj/psp.sync.js"));
+    RUNTIMES["WASM"] = perspective(require("../../build/psp.sync.js"));
 }
 
 const constructor_tests = require("./constructors.js");

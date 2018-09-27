@@ -3,6 +3,7 @@
   "version": "0.2.0-beta.3",
   "description": "Perspective.js",
   "main": "build/perspective.umd.js",
+  "module": "es/js/perspective.parallel.js",
   "publishConfig": {
     "access": "public"
   },
@@ -22,9 +23,11 @@
     "build": "npm-run-all build:compile:* build:copy:* build:webpack",
     "build:compile:copy": "mkdir -p obj build",
     "build:compile:emmake": "cd obj/ && emcmake cmake ../ && emmake make -j${PSP_CPU_COUNT-8}",
-    "build:copy:async": "cp obj/psp.async.wasm build/psp.async.wasm",
-    "build:copy:sync": "cp obj/psp.sync.wasm build/psp.sync.wasm",
-    "build:webpack": "npm-run-all -p build:webpack:*",
+    "build:copy:asm": "cp obj/psp.asmjs.js build/psp.asmjs.js",
+    "build:copy:async": "cp obj/psp.async.wasm build/psp.async.wasm && cp obj/psp.async.js build/psp.async.js",
+    "build:copy:sync": "cp obj/psp.sync.wasm build/psp.sync.wasm && cp obj/psp.sync.js build/psp.sync.js",
+    "build:webpack": "npm-run-all -l -p build:webpack:*",
+    "build:webpack:babel": "babel src/js --out-dir es/js",
     "build:webpack:asmjs": "webpack --color --config src/config/perspective.asmjs.config.js",
     "build:webpack:wasm": "webpack --color --config src/config/perspective.wasm.config.js",
     "build:webpack:parallel": "webpack --color --config src/config/perspective.parallel.config.js",
@@ -65,6 +68,7 @@
   "devDependencies": {
     "@apache-arrow/es5-esm": "^0.3.1",
     "arraybuffer-loader": "^1.0.2",
+    "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-custom-element-classes": "^0.1.0",

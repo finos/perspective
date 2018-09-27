@@ -1,0 +1,25 @@
+{
+  "name": "@perspective-examples/api-usage",
+  "private": true,
+  "version": "1.0.0",
+  "description": "An example of streaming random data into perspective",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm-run-all -l -p start:*",
+    "start:server": "http-server dist",
+    "start:webpack": "webpack --watch --hot"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@jpmorganchase/perspective": "^0.2.0-beta.2"
+  },
+  "devDependencies": {
+    "http-server": "^0.11.1",
+    "webpack": "^4.19.1",
+    "webpack-cli": "^3.1.1",
+    "webpack-dev-server": "^3.1.8",
+    "copy-webpack-plugin": "^4.5.2"
+  }
+}

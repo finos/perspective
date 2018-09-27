@@ -10,7 +10,7 @@ import "@webcomponents/webcomponentsjs";
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 
-import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
+import perspective from "@jpmorganchase/perspective";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
 
 import template from "../html/view.html";
