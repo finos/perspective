@@ -13,7 +13,7 @@ import "../less/highcharts.less";
 
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
-import {make_tree_data, make_y_data, make_xy_data, make_xyz_data} from "./series.js";
+import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 
 export const draw = mode =>
@@ -23,24 +23,15 @@ export const draw = mode =>
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 
-        const [js, schema, tschema] = await Promise.all([view.to_json(), view.schema(), this._table.schema()]);
+        const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
+
+        let js;
 
         if (task.cancelled) {
             return;
         }
 
         if (!this._charts) {
-            this._charts = [];
-        }
-
-        if (this.hasAttribute("updating") && this._charts.length > 0) {
-            for (let chart of this._charts) {
-                try {
-                    chart.destroy();
-                } catch (e) {
-                    console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
-                }
-            }
             this._charts = [];
         }
 
@@ -56,8 +47,10 @@ export const draw = mode =>
             num_aggregates = aggregates.length - hidden.length;
 
         if (mode === "scatter") {
-            let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
-            let [series, xtop, colorRange, ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+            const cols = await view.to_columns();
+            const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+            const config = (configs[0] = default_config.call(this, aggregates, mode));
+
             config.legend.floating = series.length <= 20;
             config.legend.enabled = col_pivots.length > 0;
             config.series = series;
@@ -77,6 +70,7 @@ export const draw = mode =>
             set_both_axis(config, "yAxis", yaxis_name, yaxis_type, yaxis_type, ytop);
             set_tick_size.call(this, config);
         } else if (mode === "heatmap") {
+            js = await view.to_json();
             let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
             let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden, ytree_type);
             config.series = [
@@ -94,6 +88,7 @@ export const draw = mode =>
             set_category_axis(config, "xAxis", xtree_type, top);
             set_category_axis(config, "yAxis", ytree_type, ytop);
         } else if (mode === "treemap" || mode === "sunburst") {
+            js = await view.to_json();
             let [charts, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates, mode === "treemap");
             for (let series of charts) {
                 let config = default_config.call(this, aggregates, mode, js, col_pivots);
@@ -109,8 +104,21 @@ export const draw = mode =>
                 configs.push(config);
             }
         } else if (mode === "line") {
+            let s;
             let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
-            let [series, xtop, , ytop] = make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+
+            if (col_pivots.length === 0) {
+                const cols = await view.to_columns();
+                s = await make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+            } else {
+                js = await view.to_json();
+                s = await make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+            }
+
+            const series = s[0];
+            const xtop = s[1];
+            const ytop = s[3];
+
             const colors = series.length <= 10 ? COLORS_10 : COLORS_20;
             config.legend.floating = series.length <= 20;
             config.legend.enabled = col_pivots.length > 0;
@@ -123,8 +131,9 @@ export const draw = mode =>
             set_both_axis(config, "xAxis", xaxis_name, xaxis_type, xaxis_type, xtop);
             set_both_axis(config, "yAxis", yaxis_name, yaxis_type, yaxis_type, ytop);
         } else {
-            let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
-            let [series, top] = make_y_data(js, row_pivots, hidden);
+            let config = (configs[0] = default_config.call(this, aggregates, mode));
+            let cols = await view.to_columns();
+            let [series, top] = make_y_data(cols, row_pivots, hidden);
             config.series = series;
             config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
             config.legend.enabled = col_pivots.length > 0 || series.length > 1;
@@ -145,6 +154,17 @@ export const draw = mode =>
                     labels: {overflow: "justify"}
                 }
             });
+        }
+
+        if (this.hasAttribute("updating") && this._charts.length > 0) {
+            for (let chart of this._charts) {
+                try {
+                    chart.destroy();
+                } catch (e) {
+                    console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+                }
+            }
+            this._charts = [];
         }
 
         if (this._charts.length > 0) {
@@ -179,7 +199,10 @@ export const draw = mode =>
                 this._charts.push(() => Highcharts.chart(chart, config));
             }
 
-            this._charts = this._charts.map(x => x());
+            for (let i = 0; i < this._charts.length; i++) {
+                this._charts[i] = this._charts[i]();
+            }
+            //this._charts = this._charts.map(x => x());
         }
 
         if (!this._charts.every(x => document.contains(x.renderTo))) {

@@ -11,7 +11,9 @@ import {COLUMN_SEPARATOR_STRING} from "@jpmorganchase/perspective/src/js/default
 
 function row_to_series(series, sname, gname) {
     let s;
-    for (var sidx = 0; sidx < series.length; sidx++) {
+    let sidx = 0;
+    // TODO: figure out what this does
+    for (sidx; sidx < series.length; sidx++) {
         let is_group = typeof gname === "undefined" || series[sidx].stack === gname;
         if (series[sidx].name == sname && is_group) {
             s = series[sidx];
@@ -32,6 +34,21 @@ function row_to_series(series, sname, gname) {
     return s;
 }
 
+function column_to_series(data, sname, gname) {
+    let s = {
+        name: sname,
+        connectNulls: true,
+        data
+    };
+
+    if (gname) {
+        s.stack = gname;
+    }
+
+    return s;
+}
+
+// Row-based axis generator
 class TreeAxisIterator {
     constructor(depth, json) {
         this.depth = depth;
@@ -61,6 +78,7 @@ class TreeAxisIterator {
     }
 
     *[Symbol.iterator]() {
+        // Recursively map and generate axis labels
         let label = this.top;
         for (let row of this.json) {
             let path = row.__ROW_PATH__ || [""];
@@ -74,7 +92,54 @@ class TreeAxisIterator {
     }
 }
 
-class ColumnsIterator {
+class ChartAxis {
+    constructor(columns, depth) {
+        this.columns = columns;
+        this.depth = depth;
+        this.axis = {name: "", depth: 0, categories: []};
+        this.fill_axis();
+    }
+
+    add_label(path) {
+        let label = {
+            name: path[path.length - 1],
+            depth: path.length,
+            categories: []
+        };
+
+        // Find the correct parent
+        var parent = this.axis;
+        for (var lidx = 0; lidx < path.length - 1; lidx++) {
+            for (var cidx = 0; cidx < parent.categories.length; cidx++) {
+                if (parent.categories[cidx].name === path[lidx]) {
+                    parent = parent.categories[cidx];
+                    break;
+                }
+            }
+        }
+        parent.categories.push(label);
+        return label;
+    }
+
+    fill_axis() {
+        let label = this.axis;
+
+        if (this.columns.__ROW_PATH__ === undefined) {
+            return;
+        }
+
+        for (let path of this.columns.__ROW_PATH__) {
+            if (path.length > 0 && path.length < this.depth) {
+                label = this.add_label(path);
+            } else if (path.length >= this.depth) {
+                label.categories.push(path[path.length - 1]);
+                continue;
+            }
+        }
+    }
+}
+
+class RowIterator {
     constructor(rows, hidden) {
         this.rows = rows;
         this.hidden = hidden;
@@ -96,9 +161,60 @@ class ColumnsIterator {
     }
 }
 
-export function make_y_data(js, pivots, hidden) {
+class ColumnIterator {
+    constructor(columns, hidden, pivot_length) {
+        this.columns = columns;
+        this.hidden = [...hidden, "hidden", "column_names"];
+        this.column_names = Object.keys(this.columns).filter(prop => {
+            let cname = prop.split(COLUMN_SEPARATOR_STRING);
+            cname = cname[cname.length - 1];
+            return prop !== "__ROW_PATH__" && !this.hidden.includes(cname);
+        });
+        this.is_stacked =
+            this.column_names.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
+        this.pivot_length = pivot_length;
+    }
+
+    *[Symbol.iterator]() {
+        for (let name of this.column_names) {
+            let data = this.columns[name];
+            if (this.columns.__ROW_PATH__) {
+                let filtered_data = [];
+                for (let i = 0; i < data.length; i++) {
+                    if (this.columns.__ROW_PATH__[i].length === this.pivot_length) {
+                        filtered_data.push(data[i]);
+                    }
+                }
+                data = filtered_data;
+            }
+            yield {name, data};
+        }
+    }
+}
+
+export function make_y_data(cols, pivots, hidden) {
+    let series = [];
+    let axis = new ChartAxis(cols, pivots.length);
+    let columns = new ColumnIterator(cols, hidden, pivots.length);
+    for (let col of columns) {
+        let sname = col.name.split(COLUMN_SEPARATOR_STRING);
+        let gname = sname[sname.length - 1];
+        if (columns.is_stacked) {
+            sname = sname.join(", ") || gname;
+        } else {
+            sname = sname.slice(0, sname.length - 1).join(", ") || " ";
+        }
+        let s = column_to_series(col.data.map(val => (val === undefined || val === "" ? null : val)), sname, gname);
+        series.push(s);
+    }
+
+    return [series, axis.axis];
+}
+
+// Preserve old behavior for heatmaps
+export function make_y_heatmap_data(js, pivots, hidden) {
     let rows = new TreeAxisIterator(pivots.length, js);
-    let rows2 = new ColumnsIterator(rows, hidden);
+    let rows2 = new RowIterator(rows, hidden);
     var series = [];
 
     for (let row of rows2) {
@@ -124,6 +240,7 @@ export function make_y_data(js, pivots, hidden) {
  * XY
  */
 
+// TODO: rewrite
 class TickClean {
     constructor(type) {
         this.dict = {};
@@ -152,6 +269,7 @@ class TickClean {
 class MakeTick {
     constructor(schema, columns) {
         this.schema = schema;
+        // TODO: rewrite
         this.xaxis_clean = new TickClean(schema[columns[0]]);
         this.yaxis_clean = new TickClean(schema[columns[1]]);
         this.color_clean = new TickClean(schema[columns[2]]);
@@ -196,11 +314,132 @@ class MakeTick {
         }
         return tick;
     }
+
+    make_col(cols, col_names, num_cols, pivot_length, row_path, color_range) {
+        let ticks = [];
+        let data = cols;
+
+        if (cols.length === 0) {
+            return ticks;
+        }
+
+        if (cols.length === undefined) {
+            // assign data to array in name order
+            data = [];
+            for (let name of col_names) {
+                data.push(cols[name]);
+            }
+        }
+
+        for (let i = 0; i < data[0].length; i++) {
+            if (data[0][i] === null || data[0][i] === undefined || data[0][i] === "") {
+                continue;
+            }
+
+            let tick = {};
+
+            if (row_path) {
+                if (row_path[i].length !== pivot_length) {
+                    continue;
+                }
+
+                tick.name = row_path[i].join(", ");
+            }
+
+            // set x-axis
+            tick.x = this.xaxis_clean.clean(data[0][i]);
+
+            if (num_cols > 1) {
+                // set y-axis
+                tick.y = this.yaxis_clean.clean(data[1][i]);
+            }
+
+            if (num_cols > 2) {
+                // set color
+                let color = data[2][i];
+                if (this.schema[col_names[2]] === "string") {
+                    let color_index = this.color_clean.clean(color);
+                    tick.marker = {
+                        lineColor: color_index,
+                        fillColor: color_index
+                    };
+                } else {
+                    if (!isNaN(color)) {
+                        color_range[0] = Math.min(color_range[0], color);
+                        color_range[1] = Math.max(color_range[1], color);
+                    }
+                    tick.colorValue = color;
+                }
+            }
+
+            if (num_cols > 3) {
+                // set size
+                let size = data[3][i];
+                tick.z = isNaN(size) ? 1 : size;
+            }
+
+            ticks.push(tick);
+        }
+
+        return ticks;
+    }
+}
+
+export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
+    const columns = new ColumnIterator(cols, hidden, pivots.length);
+    let series = [];
+    let color_range = [Infinity, -Infinity];
+    let make_tick = new MakeTick(schema, columns.column_names);
+
+    let row_path = columns.columns.__ROW_PATH__;
+
+    if (col_pivots.length === 0) {
+        let ticks = make_tick.make_col(columns.columns, columns.column_names, aggs.length, columns.pivot_length, row_path, color_range);
+
+        let s = column_to_series(ticks, " ");
+        series.push(s);
+    } else {
+        let groups = {};
+
+        if (row_path) {
+            // remove all total rows
+            let clean_row_path = [];
+
+            for (let i = 0; i < row_path.length; i++) {
+                if (row_path[i].length === columns.pivot_length) {
+                    clean_row_path.push(row_path[i]);
+                }
+            }
+
+            row_path = clean_row_path;
+        }
+
+        for (let col of columns) {
+            let column_levels = col.name.split(COLUMN_SEPARATOR_STRING);
+            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
+
+            if (groups[group_name] === undefined) {
+                groups[group_name] = [];
+            }
+
+            groups[group_name].push(col.data);
+
+            if (groups[group_name].length === aggs.length) {
+                // generate series as soon as we have enough data
+                let ticks = make_tick.make_col(groups[group_name], aggs, aggs.length, columns.pivot_length, row_path, color_range);
+
+                let s = column_to_series(ticks, group_name);
+                series.push(s);
+            }
+        }
+    }
+
+    return [series, {categories: make_tick.xaxis_clean.names}, color_range, {categories: make_tick.yaxis_clean.names}];
 }
 
 export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
     let rows = new TreeAxisIterator(pivots.length, js);
-    let rows2 = new ColumnsIterator(rows, hidden);
+    let rows2 = new RowIterator(rows, hidden);
     let series = [];
     let colorRange = [Infinity, -Infinity];
     let make_tick = new MakeTick(schema, columns);
@@ -224,7 +463,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
         });
         for (let prop of cols) {
             let column_levels = prop.split(COLUMN_SEPARATOR_STRING);
-            let group_name = column_levels.slice(0, column_levels.length - 1).join(",") || " ";
+            let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
             if (prev === undefined) {
                 prev = group_name;
             }
@@ -249,6 +488,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
             }
         }
     }
+
     return [series, {categories: make_tick.xaxis_clean.names}, colorRange, {categories: make_tick.yaxis_clean.names}];
 }
 
@@ -286,7 +526,7 @@ function make_tree_axis(series) {
 }
 
 export function make_xyz_data(js, pivots, hidden, ytree_type) {
-    let [series, top] = make_y_data(js, pivots, hidden);
+    let [series, top] = make_y_heatmap_data(js, pivots, hidden);
     if (ytree_type !== "string" && ytree_type !== undefined) {
         series = series.reverse();
     }
@@ -389,7 +629,7 @@ function make_configs(series, levels) {
 
 export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let rows = new TreeIterator(row_pivots.length, js);
-    let rows2 = new ColumnsIterator(rows, hidden);
+    let rows2 = new RowIterator(rows, hidden);
     let series = [];
 
     for (let row of rows2) {
