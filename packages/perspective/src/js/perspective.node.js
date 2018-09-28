@@ -14,10 +14,16 @@ const perspective = require("./perspective.js");
 const fs = require("fs");
 const http = require("http");
 const WebSocket = require("ws");
+const process = require("process");
 
 const path = require("path");
 
 const load_perspective = require("../../obj/psp.sync.js").load_perspective;
+
+// eslint-disable-next-line no-undef
+const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__.resolve : module.require.resolve;
+
+const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 
 let Module = load_perspective({
     wasmBinary: buffer,
@@ -31,16 +37,24 @@ delete module.exports["worker"];
 let CLIENT_ID_GEN = 0;
 
 const DEFAULT_ASSETS = [
-    "node_modules/@jpmorganchase/perspective/build",
-    "node_modules/@jpmorganchase/perspective-viewer/build",
-    "node_modules/@jpmorganchase/perspective-viewer-highcharts/build",
-    "node_modules/@jpmorganchase/perspective-viewer-hypergrid/build"
+    "@jpmorganchase/perspective/build",
+    "@jpmorganchase/perspective-viewer/build",
+    "@jpmorganchase/perspective-viewer-highcharts/build",
+    "@jpmorganchase/perspective-viewer-hypergrid/build"
 ];
+
+const CONTENT_TYPES = {
+    ".js": "text/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".arrow": "arraybuffer",
+    ".wasm": "application/wasm"
+};
 
 function read_promise(filePath) {
     return new Promise((resolve, reject) => {
         fs.readFile(filePath, function(error, content) {
-            if (error) {
+            if (error && error.code !== "ENOENT") {
                 reject(error);
             } else {
                 resolve(content);
@@ -49,24 +63,17 @@ function read_promise(filePath) {
     });
 }
 
-function create_http_server(assets) {
+function create_http_server(assets, host_psp) {
     return async function(request, response) {
         let url = request.url;
         if (url === "/") {
             url = "/index.html";
         }
-        for (let rootDir of assets) {
-            try {
-                var extname = path.extname(url);
-                var contentType =
-                    {
-                        ".js": "text/javascript",
-                        ".css": "text/css",
-                        ".json": "application/json",
-                        ".arrow": "arraybuffer",
-                        ".wasm": "application/wasm"
-                    }[extname] || "text/html";
-                var filePath = rootDir + url;
+        let extname = path.extname(url);
+        let contentType = CONTENT_TYPES[extname] || "text/html";
+        try {
+            for (let rootDir of assets) {
+                let filePath = rootDir + url;
                 let content = await read_promise(filePath);
                 if (typeof content !== "undefined") {
                     console.log(`200 ${url}`);
@@ -74,17 +81,31 @@ function create_http_server(assets) {
                     response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
                     return;
                 }
-            } catch (error) {
-                if (error.code !== "ENOENT") {
-                    console.error(`500 ${url}`);
-                    response.writeHead(500);
-                    response.end();
+            }
+            if (host_psp || typeof host_psp === "undefined") {
+                for (let rootDir of DEFAULT_ASSETS) {
+                    try {
+                        let filePath = RESOLVER(rootDir + url, {paths: [LOCAL_PATH]});
+                        let content = await read_promise(filePath);
+                        if (typeof content !== "undefined") {
+                            console.log(`200 ${url}`);
+                            response.writeHead(200, {"Content-Type": contentType});
+                            response.end(content, extname === ".arrow" ? "user-defined" : "utf-8");
+                            return;
+                        }
+                    } catch (e) {}
                 }
             }
+            console.error(`404 ${url}`);
+            response.writeHead(404);
+            response.end("", "utf-8");
+        } catch (error) {
+            if (error.code !== "ENOENT") {
+                console.error(`500 ${url}`);
+                response.writeHead(500);
+                response.end("", "utf-8");
+            }
         }
-        console.error(`404 ${url}`);
-        response.writeHead(404);
-        response.end();
     };
 }
 
@@ -97,11 +118,8 @@ class WebSocketHost extends module.exports.Host {
         super();
         port = port || 8080;
         assets = assets || ["./"];
-        if (host_psp || typeof host_psp === "undefined") {
-            assets = [...assets, ...DEFAULT_ASSETS];
-        }
 
-        const server = http.createServer(create_http_server(assets));
+        const server = http.createServer(create_http_server(assets, host_psp));
 
         this.REQS = {};
         this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
