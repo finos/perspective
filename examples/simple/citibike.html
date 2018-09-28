@@ -13,30 +13,30 @@
 <head>
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
-
-    <script src="mobile_fix.js"></script>
+ 
     <script src="perspective.view.js"></script>
     <script src="hypergrid.plugin.js"></script>
     <script src="highcharts.plugin.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+    <script src="perspective.js"></script>
 
-    <link rel='stylesheet' href="demo.css">
+    <link rel='stylesheet' href="index.css">
+    <link rel='stylesheet' href="material.css">
 
 </head>
 
 <body>
 
-    <perspective-viewer index="long" sort='["mktcap"]' row-pivots='["long"]' columns='["mktcap","price","vwapData","supply","volume","perc","shapeshift"]'>
-
-    </perspective-viewer>
+    <perspective-viewer view='xy_scatter' columns='["longitude","latitude","availableBikes"]'></perspective-viewer>
 
     <script>
         window.addEventListener('WebComponentsReady', function() {
-            var socket = io.connect('https://coincap.io');
-            socket.on('trades', function(tradeMsg) {
-                document.getElementsByTagName('perspective-viewer')[0].update([tradeMsg.msg]);
-            })
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'citibike.json', true);
+            xhr.onload = function() {
+                document.getElementsByTagName('perspective-viewer')[0].load(JSON.parse(xhr.response).stationBeanList);
+            }
+            xhr.send(null);
         });
     </script>
 
