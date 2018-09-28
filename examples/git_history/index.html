@@ -14,20 +14,28 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <script src="mobile_fix.js"></script>
     <script src="perspective.view.js"></script>
     <script src="hypergrid.plugin.js"></script>
     <script src="highcharts.plugin.js"></script>
 
     <script src="perspective.js"></script>
 
-    <link rel='stylesheet' href="demo.css">
+    <link rel='stylesheet' href="index.css">
+    <link rel='stylesheet' href="material.css">
 
 </head>
 
 <body>
 
-    <perspective-viewer id="view1"></perspective-viewer>
+    <perspective-viewer 
+        id="view1"
+        view="y_area" 
+        row-pivots='["week_bucket(Date)"]' 
+        column-pivots='["Email"]'
+        columns='["Hash"]'
+        computed-columns='[{"name":"week_bucket(Date)","inputs":["Date"],"func":"week_bucket"}]'>
+    
+    </perspective-viewer>
 
     <script>
         window.addEventListener('WebComponentsReady', function() {

@@ -3,11 +3,11 @@ const common = require("./common.config.js");
 
 module.exports = Object.assign({}, common(), {
     entry: "./src/js/perspective.parallel.js",
-    externals: [/^[a-z0-9\@].*$/],
     output: {
-        filename: "perspective.umd.js",
+        filename: "perspective.js",
         library: "perspective",
         libraryTarget: "umd",
+        libraryExport: "default",
         path: path.resolve(__dirname, "../../build")
     }
 });

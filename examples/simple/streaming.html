@@ -1,0 +1,35 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
+
+    <script src="perspective.js"></script>
+    <script src="streaming.js"></script>
+
+    <link rel='stylesheet' href="index.css">
+    <link rel='stylesheet' href="material.css">
+    
+</head>
+
+<body>
+
+    <perspective-viewer row-pivots='["name"]' column-pivots='["client"]' columns='["chg","vol"]'></perspective-viewer>
+
+</body>
+
+</html>

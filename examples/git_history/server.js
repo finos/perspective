@@ -8,9 +8,15 @@
  */
 
 const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
-const fs = require("fs");
+const exec = require("child_process").exec;
 
-const host = new WebSocketHost({rootDir: __dirname});
-const arr = fs.readFileSync(__dirname + "/superstore.arrow");
+function execute(command, callback) {
+    exec(command, function(error, stdout) {
+        callback(stdout);
+    });
+}
 
-host.open("data_source_one", arr);
+execute(`git log --date=iso --pretty=format:'"%h","%an","%aD","%s","%ae"'`, log => {
+    const host = new WebSocketHost({assets: [__dirname]});
+    host.open("data_source_one", "Hash,Name,Date,Message,Email\n" + log);
+});
