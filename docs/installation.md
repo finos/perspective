@@ -11,9 +11,9 @@ though for production you'll ultimately want to install this via another
 option below:
 
 ```html
-<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/hypergrid.plugin.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-examples/build/highcharts.plugin.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
 ```
 
 ## From NPM
@@ -34,10 +34,6 @@ The main modules available via NPM:
 - `@jpmorganchase/perspective-viewer-highcharts`  
   A perspective-viewer plugin for [HighCharts](https://github.com/highcharts/highcharts).
 
-- `@jpmorganchase/perspective-examples`  
-  All perspective modules, bundled with their dependencies as standalone 
-  Javascript files.
-
 ## From source
 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 
@@ -54,12 +50,11 @@ npm install
 PSP_DOCKER=1 npm run build
 ```
 
-If everything is successful, you should find a few built example assets in the 
-`packages/perspective-examples/build` directory.  You can run a simple test 
-server on port 8080 to host these by running:
+If everything is successful, you should be able to run any of the `examples/`
+packages, e.g. `examples/simple` like so:
 
 ```bash
-./node_modules/.bin/lerna run host --stream
+npm start -- simple
 ```
 
 ### EMSDK
@@ -122,29 +117,21 @@ The build script respects a few environment flags:
 * `PSP_DOCKER` will compile C++ source via an Emscripten Docker container.
 * `PSP_DEBUG` will run a debug build of the C++ source.
 * `PSP_NO_MINIFY` will skip Javascript minification.
+* `PSP_CPU_COUNT` will set the concurrency limit for the build.
+* `PACKAGE` will restrict the build to only specific `@jpmorganchase/` packages.
 
 ## Hosting
 
 Whether you use just the `perspective` engine itself, or the 
 `perspective-viewer` web component, your browser will need to
-have access to the `.asm.js`, `.js.mem` and/or `.wasm` assets in addition to the 
-bundled scripts themselves.  These can be found in the `perspective/build/asmjs`
-and `perspective/build/wasm_async` directories of the package;  while the root level
-`perspective/index.js` wrapper will automatically determine which runtime to
-use based on your browser's WebAssembly support, you'll need to make sure to
-copy both directories to the same relative directory you plan to host your
-site bundle from:
+have access to the `.worker.*.js` and `.wasm` assets in addition to the 
+bundled scripts themselves.  These can be found in the `build/`
+directory of the `@jpmorganchase/perspective` and 
+`@jpmorganchase/perspective-viewer` packages. 
 
-      my_site.js (imports perspective)
-      + wasm_async/
-      |    perspective.js
-      |    perspective.wasm
-      + asmjs/
-           perspective.js
-           perspective.asm.js
-           perspective.js.mem
-
-In node, this can be achieved by hosting the contents of a packages `/build`:
+This can be achieved by hosting the contents of a packages `build/` in your 
+application's build script, or otherwising making sure these directories
+are visible to your web server:
 
 ```javascript
 cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/

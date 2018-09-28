@@ -32,7 +32,7 @@ const perspective = require('perspective');
 ```
 
 Perspective can also be referenced via the global `perspective` module name in vanilla
-Javascript, when e.g. importing `@jpmorganchase/perspective` [via a CDN](https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/perspective.js).
+Javascript, when e.g. importing `@jpmorganchase/perspective` [via a CDN](https://unpkg.com/@jpmorganchase/perspective/build/perspective.js).
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()` 
 method.  This will create a new WebWorker (browser) or Process (node.js), and 
@@ -58,9 +58,6 @@ exports the full `perspective` API.
 ```javascript
 const perspective = require('@jpmorganchase/perspective/build/perspective.node.js');
 ```
-
-See [perspective-examples/node_server.js](https://github.com/jpmorganchase/perspective/blob/master/packages/perspective-examples/src/js/node_server.js)
-for an example.
 
 ### `table()`
 
@@ -147,8 +144,7 @@ import "@jpmorganchase/perspective-viewer/build/material.css"; // or default.css
 ```
 
 Alternatively, if you're fine with a default theme and don't want to bundle yourself,
-you can just import the pre-bundled assets from the `perspective-examples` 
-module's `build/` directory:
+you can just import the pre-bundled assets from their respective modules.
 
 ```html 
 <script src="perspective.view.js"></script>
