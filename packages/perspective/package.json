@@ -2,7 +2,7 @@
   "name": "@jpmorganchase/perspective",
   "version": "0.2.0-beta.3",
   "description": "Perspective.js",
-  "main": "build/perspective.esm.js",
+  "main": "build/perspective.cjs.js",
   "publishConfig": {
     "access": "public"
   },
@@ -28,7 +28,7 @@
     "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
     "build:webpack:asmjs": "webpack --color --config src/config/perspective.asmjs.config.js",
     "build:webpack:wasm": "webpack --color --config src/config/perspective.wasm.config.js",
-    "build:webpack:parallel": "webpack --color --config src/config/perspective.esm.config.js",
+    "build:webpack:parallel": "webpack --color --config src/config/perspective.cjs.config.js",
     "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
     "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
     "test:build": "npm-run-all test:build:copy test:build:webpack",
