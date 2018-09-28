@@ -30,6 +30,7 @@
         "build:webpack:wasm": "webpack --color --config src/config/perspective.wasm.config.js",
         "build:webpack:parallel": "webpack --color --config src/config/perspective.cjs.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
+        "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
         "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
         "test:build": "npm-run-all test:build:copy test:build:webpack",
         "test:build:copy": "npm-run-all -p test:build:copy:*",
@@ -38,7 +39,6 @@
         "test:build:webpack": "npm-run-all -p test:build:webpack:*",
         "test:build:webpack:browser": "webpack --color --config test/config/test_browser.config.js",
         "test:build:webpack:node": "webpack --color --config test/config/test_node.config.js",
-        "docs": "documentation build src/js/perspective.js -f md --shallow > README.md",
         "test:run": "jest --runInBand --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"

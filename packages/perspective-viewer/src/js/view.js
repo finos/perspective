@@ -1037,13 +1037,15 @@ class View extends ViewPrivate {
      *
      * @name sort
      * @memberof View.prototype
-     * @type {array<string>} Array of column names
+     * @type {array<string>} Array of arrays tuples of column name and
+     * direction, where the possible values are "asc", "desc", "asc abs",
+     * "desc abs" and "none".
      * @fires View#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('sort', JSON.stringify(["x"]));
+     * elem.setAttribute('sort', JSON.stringify([["x","desc"]));
      * @example <caption>via HTML</caption>
-     * <perspective-viewer sort='["x"]'></perspective-viewer>
+     * <perspective-viewer sort='[["x","desc"]]'></perspective-viewer>
      */
     @array_attribute
     set sort(sort) {
