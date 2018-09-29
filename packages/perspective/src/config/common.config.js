@@ -30,7 +30,7 @@ module.exports = function() {
                 },
                 {
                     test: /\.less$/,
-                    use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
+                    use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
                 },
                 {
                     test: /\.(html)$/,

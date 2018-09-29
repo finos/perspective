@@ -8,7 +8,6 @@
  */
 
 perspective-viewer {
-
     .chart {
         position: absolute;
         top: 0;
@@ -27,7 +26,15 @@ perspective-viewer {
     }
 
     .highcharts-heatmap-gradient-full {
-        background: linear-gradient(#4D342F 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);
+        background: linear-gradient(
+            #4d342f 0%,
+            #e4521b 22.5%,
+            #feeb65 42.5%,
+            #f0f0f0 50%,
+            #dcedc8 57.5%,
+            #42b3d5 67.5%,
+            #1a237e 100%
+        );
     }
 
     .highcharts-heatmap-gradient-positive {
@@ -35,18 +42,17 @@ perspective-viewer {
     }
 
     .highcharts-heatmap-gradient-negative {
-        background: linear-gradient(#feeb65 100%, #e4521b 70%, #4D342F 0%);
+        background: linear-gradient(#feeb65 100%, #e4521b 70%, #4d342f 0%);
     }
 }
 
-
-perspective-viewer[view=sunburst] {
+perspective-viewer[view="sunburst"] {
     path {
         stroke: #fff;
     }
 }
 
-perspective-viewer[view=treemap] {
+perspective-viewer[view="treemap"] {
     rect {
         stroke: #fff;
     }

@@ -1,73 +1,73 @@
 {
-  "name": "@jpmorganchase/perspective-jupyterlab",
-  "version": "0.2.0-beta.3",
-  "description": "Perspective.js",
-  "files": [
-    "build/*.d.ts",
-    "build/*.js.map",
-    "build/*.js",
-    "build/*.wasm",
-    "src/css/*.css"
-  ],
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "directories": {
-    "build": "build/"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "scripts": {
-    "bench": "npm-run-all bench:build bench:run",
-    "bench:build": "echo \"No Benchmarks\"",
-    "bench:run": "echo \"No Benchmarks\"",
-    "test": "npm-run-all test:build test:run",
-    "test:build": "echo \"No Tests\"",
-    "test:run": "echo \"No Tests\"",
-    "build": "webpack --color --config src/config/plugin.config.js && webpack --color --config src/config/mimerenderer.config.js",
-    "clean": "rimraf build"
-  },
-  "dependencies": {
-    "@jpmorganchase/perspective": "^0.2.0-beta.3",
-    "@jpmorganchase/perspective-viewer": "^0.2.0-beta.3",
-    "@jpmorganchase/perspective-viewer-highcharts": "^0.2.0-beta.3",
-    "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.0-beta.3",
-    "@jupyter-widgets/base": "^1.1.10",
-    "@jupyterlab/application": "^0.18.0",
-    "@jupyterlab/apputils": "^0.18.0",
-    "@jupyterlab/rendermime-interfaces": "^1.1.0",
-    "@jupyterlab/services": "^3.1.0",
-    "@phosphor/application": "^1.5.0",
-    "@phosphor/messaging": "^1.2.2",
-    "@phosphor/widgets": "^1.5.0",
-    "@types/socket.io-client": "^1.4.0",
-    "socket.io": "2.0.3"
-  },
-  "devDependencies": {
-    "arraybuffer-loader": "^1.0.2",
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-transform-custom-element-classes": "^0.1.0",
-    "babel-plugin-transform-es2015-for-of": "^6.23.0",
-    "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
-    "css-loader": "^0.28.7",
-    "documentation": "^5.3.3",
-    "html-loader": "^0.5.1",
-    "jest": "^22.0.4",
-    "less": "^2.7.2",
-    "less-loader": "^4.0.5",
-    "rimraf": "^2.6.2",
-    "style-loader": "^0.18.2",
-    "ts-loader": "^3.5.0",
-    "typescript": "~2.9.2",
-    "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6",
-    "worker-loader": "~1.1.1"
-  },
-  "jupyterlab": {
-    "extension": "build/index.js"
-  }
+    "name": "@jpmorganchase/perspective-jupyterlab",
+    "version": "0.2.0-beta.3",
+    "description": "Perspective.js",
+    "files": [
+        "build/*.d.ts",
+        "build/*.js.map",
+        "build/*.js",
+        "build/*.wasm",
+        "src/css/*.css"
+    ],
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
+    "directories": {
+        "build": "build/"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "bench": "npm-run-all bench:build bench:run",
+        "bench:build": "echo \"No Benchmarks\"",
+        "bench:run": "echo \"No Benchmarks\"",
+        "test": "npm-run-all test:build test:run",
+        "test:build": "echo \"No Tests\"",
+        "test:run": "echo \"No Tests\"",
+        "build": "webpack --color --config src/config/plugin.config.js && webpack --color --config src/config/mimerenderer.config.js",
+        "clean": "rimraf build"
+    },
+    "dependencies": {
+        "@jpmorganchase/perspective": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.0-beta.3",
+        "@jupyter-widgets/base": "^1.1.10",
+        "@jupyterlab/application": "^0.18.0",
+        "@jupyterlab/apputils": "^0.18.0",
+        "@jupyterlab/rendermime-interfaces": "^1.1.0",
+        "@jupyterlab/services": "^3.1.0",
+        "@phosphor/application": "^1.5.0",
+        "@phosphor/messaging": "^1.2.2",
+        "@phosphor/widgets": "^1.5.0",
+        "@types/socket.io-client": "^1.4.0",
+        "socket.io": "2.0.3"
+    },
+    "devDependencies": {
+        "arraybuffer-loader": "^1.0.2",
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.2",
+        "babel-plugin-transform-custom-element-classes": "^0.1.0",
+        "babel-plugin-transform-es2015-for-of": "^6.23.0",
+        "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
+        "babel-plugin-transform-runtime": "^6.23.0",
+        "babel-polyfill": "^6.26.0",
+        "babel-preset-env": "^1.6.0",
+        "css-loader": "^0.28.7",
+        "documentation": "^5.3.3",
+        "html-loader": "^0.5.1",
+        "jest": "^22.0.4",
+        "less": "^2.7.2",
+        "less-loader": "^4.0.5",
+        "rimraf": "^2.6.2",
+        "style-loader": "^0.18.2",
+        "ts-loader": "^3.5.0",
+        "typescript": "~2.9.2",
+        "uglifyjs-webpack-plugin": "^0.4.6",
+        "webpack": "^3.5.6",
+        "worker-loader": "~1.1.1"
+    },
+    "jupyterlab": {
+        "extension": "build/index.js"
+    }
 }

@@ -4,15 +4,15 @@
     "version": "0.2.0-beta.3",
     "description": "A collection of simple client-side Perspective examples.",
     "scripts": {
-      "start": "node server.js"
+        "start": "node server.js"
     },
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-      "@jpmorganchase/perspective": "^0.2.0-beta.3",
-      "@jpmorganchase/perspective-viewer": "^0.2.0-beta.3",
-      "@jpmorganchase/perspective-viewer-highcharts": "^0.2.0-beta.3",
-      "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.0-beta.3"
+        "@jpmorganchase/perspective": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.0-beta.3",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.0-beta.3"
     },
     "devDependencies": {}
 }

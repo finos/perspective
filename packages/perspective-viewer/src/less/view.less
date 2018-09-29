@@ -18,13 +18,11 @@ perspective-viewer:hover #config_button {
     opacity: 1 !important;
 }
 
-[settings=true] #config_button {
+[settings="true"] #config_button {
     opacity: 1 !important;
 }
 
-
 perspective-viewer {
-
     position: relative;
     display: inline-block;
 
@@ -93,7 +91,6 @@ perspective-viewer {
     }
 
     #inactive_columns {
-
         .active {
             display: none;
         }
@@ -146,14 +143,14 @@ perspective-viewer {
         margin: 5px 10px 0px 0px;
     }
 
-    .rrow>div {
+    .rrow > div {
         display: flex;
         min-height: 24px;
         flex-direction: column;
         justify-content: flex-end;
     }
 
-    #top_panel>.rrow>* {
+    #top_panel > .rrow > * {
         width: 100%;
     }
 
@@ -161,7 +158,7 @@ perspective-viewer {
         white-space: nowrap;
     }
 
-    #top_panel perspective-row+perspective-row:before {
+    #top_panel perspective-row + perspective-row:before {
         content: ",";
         padding: 0px 10px 0px 0px;
     }
@@ -171,7 +168,6 @@ perspective-viewer {
         display: inline-block;
         vertical-align: middle;
         margin-bottom: 0px;
-
     }
 
     #drop_target {
@@ -188,7 +184,7 @@ perspective-viewer {
         height: 100%;
         display: flex;
         align-items: center;
-        justify-content: center
+        justify-content: center;
     }
 
     #drop_target_inner h3 {
@@ -212,7 +208,7 @@ perspective-viewer {
     }
 
     #config_button:before {
-        content: '\1f527';
+        content: "\1f527";
     }
 
     ul {
@@ -225,7 +221,8 @@ perspective-viewer {
         -webkit-appearance: none;
         -moz-appearance: none;
         appearance: none;
-        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==) no-repeat 95% 50%;
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==)
+            no-repeat 95% 50%;
         background-color: #fff;
         border-radius: 5px;
         height: 24px;
@@ -252,13 +249,12 @@ perspective-viewer {
         max-width: 1000px;
     }
 
-
     #side_panel {
         padding-top: 5px;
         flex: 0 0 auto;
     }
 
-    #side_panel>div {
+    #side_panel > div {
         display: flex;
     }
 
@@ -284,14 +280,12 @@ perspective-viewer {
         flex-grow: 0;
         color: #999;
         font-family: Arial;
-        font-size: 12px
+        font-size: 12px;
     }
-
 }
 
-perspective-viewer[view=treemap]:not([column-pivots="[]"]),
-perspective-viewer[view=sunburst]:not([column-pivots="[]"]) {
-
+perspective-viewer[view="treemap"]:not([column-pivots="[]"]),
+perspective-viewer[view="sunburst"]:not([column-pivots="[]"]) {
     .chart {
         position: relative !important;
     }
