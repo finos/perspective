@@ -3,6 +3,10 @@ id: usage
 title: Usage
 ---
 
+# Overview
+
+<img src="./architecture.svg">
+
 ## Perspective library
 
 [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective)
@@ -91,6 +95,8 @@ table1.update([{x: 5, y: 'e', z: true}]);
 table2.update([{x: 5, y: 'e', z: true}]);
 ```
 
+#### `index` and `limit`
+
 The `table()` method also takes an options object, with which you can provide
 the name of an `index` column in the underlying dataset, which will act as a
 primary key on the `table`, replacing `update`d rows instead of appending them.
@@ -108,6 +114,18 @@ added rows.
 // Keep only the most recent 1000 rows
 const table3 = worker.table(data, {limit: 1000});
 ```
+
+#### Partial row updates via `undefined`
+
+TODO
+
+#### Missing cells via `null`
+
+TODO
+
+#### `remove()`
+
+TODO
 
 ### `view()`
 
@@ -251,6 +269,8 @@ const host = new WebSocketHost({assets: [__dirname], port: 8080});
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
 host.open("data_source_one", arr);
 ```
+
+TODO examples
 
 In the browser:
 
