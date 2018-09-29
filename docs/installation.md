@@ -1,14 +1,42 @@
----
-id: installation
-title: Installation
-sidebar_label: Installation
----
+# Installation <!-- omit in toc -->
+
+- [(!) An important note about Hosting](#an-important-note-about-hosting)
+- [From CDN](#from-cdn)
+- [From NPM](#from-npm)
+- [From source](#from-source)
+  - [Docker](#docker)
+  - [EMSDK](#emsdk)
+    - [OSX specific instructions](#osx-specific-instructions)
+    - [Windows 10 specific instructions](#windows-10-specific-instructions)
+    - [Ubuntu/Debian](#ubuntudebian)
+  - [Build Options](#build-options)
+
+
+## (!) An important note about Hosting
+
+Whether you use just the `perspective` engine itself, or the 
+`perspective-viewer` web component, your browser will need to
+have access to the `.worker.*.js` and `.wasm` assets in addition to the 
+bundled scripts themselves.  These are downloaded asynchronously at runtime
+after detecting whether or not WebAssembly is supported by your browser.  The
+assets can be found in the `build/` directory of the 
+`@jpmorganchase/perspective` and `@jpmorganchase/perspective-viewer` packages. 
+
+This can be achieved by using the built-in `WorkerHost` Node.js server, hosting
+the contents of a packages `build/` in your application's build script, using
+`webpack` and `CopyWebpackPlugin`, or otherwise making sure these directories
+are visible to your web server, e.g.:
+
+```javascript
+cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/
+```
 
 ## From CDN
 
-Perspective can be used direct from [unpkg.com](https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js),
-though for production you'll ultimately want to install this via another 
-option below:
+By far the easiest way to get started with Perspective in the browser, the full 
+library can be used directly from 
+[unpkg.com](https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js)
+CDN by simply adding these scripts to your `.html`'s `<head>` section:
 
 ```html
 <script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
@@ -16,33 +44,41 @@ option below:
 <script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
 ```
 
+Ultimately, for production you'll want Perspective incorporated directly into your 
+application's build script for load performance, via another option below.
+
 ## From NPM
 
-The main modules available via NPM:
+For using Perspective from Node.js, or as a depedency in a `package.json` based 
+`webpack` or other browser application build toolchain, Perspective is available
+via NPM
 
-- `@jpmorganchase/perspective`   
-  The main library, as both a browser ES6 and Node.js module.  Provides an
-  asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
-  implementation.
-
-- `@jpmorganchase/perspective-viewer`  
-  A configuration and visualization (via plugins) UI, bundled as a [Web Component](https://www.webcomponents.org/introduction).
-
-- `@jpmorganchase/perspective-viewer-hypergrid`  
-  A perspective-viewer plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
-
-- `@jpmorganchase/perspective-viewer-highcharts`  
-  A perspective-viewer plugin for [HighCharts](https://github.com/highcharts/highcharts).
+```bash
+npm install --save perspective perspective-viewer perspective-viewer-highcharts perspective-viewer-hypergrid
+```
 
 ## From source
 
+For hackers, contributors, and masochists, Perspective can be installed directly
+from source available on [Github](https://github.com/jpmorganchase/perspective).
+Doing so is quite a bit more complex than a standard pure Javascript NPM
+package, so if you're not looking to hack on Perspective itself, you are likely
+better off choosing the CDN or NPM methods above.
+ 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md), 
-and uses [lerna](https://lernajs.io/) to manage dependencies.
+and uses [lerna](https://lernajs.io/) to manage dependencies.  The 
+`@jpmorganchase/perspective` modules has an additional, unmanaged dependency
+however; the [Emscripten](https://github.com/kripken/emscripten) compiler, which 
+is used to compile the core C++  engine to WebAssembly, and must be installed 
+independently.
 
-`@jpmorganchase/perspective` has an additional dependency, 
-[emscripten](https://github.com/kripken/emscripten), to compile the core C++ 
-engine.  For convenience, Perspective provides a Docker container for this.
-To use it, you only need to install [Docker](https://docs.docker.com/install/) 
+There are two main options for doing so - a provided Docker container, or
+installing the Emscripten SDK manually.
+
+### Docker
+
+For convenience, Perspective provides a Docker container for 
+this;  To use it, you only need to install [Docker](https://docs.docker.com/install/) 
 itself, then build perspective via:
 
 ```bash
@@ -69,7 +105,7 @@ source emsdk/emsdk_env.sh
 
 #### OSX specific instructions
 
-Installing and activating the latest [emscriptn SDK]((https://github.com/kripken/emscripten)): 
+Installing and activating the latest [emscripten SDK]((https://github.com/kripken/emscripten)): 
 
 ```bash
 ./emsdk install latest
@@ -110,29 +146,12 @@ apt-get install libboost-all-dev
 cp -r /usr/include/boost ./packages/perspective/src/include/
 ```
 
-### Options
+### Build Options
 
-The build script respects a few environment flags:
+Whichever method you choose, the build script respects a few environment flags:
 
 * `PSP_DOCKER` will compile C++ source via an Emscripten Docker container.
 * `PSP_DEBUG` will run a debug build of the C++ source.
 * `PSP_NO_MINIFY` will skip Javascript minification.
 * `PSP_CPU_COUNT` will set the concurrency limit for the build.
 * `PACKAGE` will restrict the build to only specific `@jpmorganchase/` packages.
-
-## Hosting
-
-Whether you use just the `perspective` engine itself, or the 
-`perspective-viewer` web component, your browser will need to
-have access to the `.worker.*.js` and `.wasm` assets in addition to the 
-bundled scripts themselves.  These can be found in the `build/`
-directory of the `@jpmorganchase/perspective` and 
-`@jpmorganchase/perspective-viewer` packages. 
-
-This can be achieved by hosting the contents of a packages `build/` in your 
-application's build script, or otherwising making sure these directories
-are visible to your web server:
-
-```javascript
-cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/
-```
