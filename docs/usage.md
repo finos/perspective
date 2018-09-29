@@ -1,66 +1,65 @@
 # Perspective User Guide <!-- omit in toc -->
 
-- [Overview](#overview)
-- [Perspective library](#perspective-library)
-    - [In the browser](#in-the-browser)
-    - [In Node.js](#in-nodejs)
-    - [Loading data with `table()`](#loading-data-with-table)
-        - [`index` and `limit`](#index-and-limit)
-        - [Partial row updates via `undefined`](#partial-row-updates-via-undefined)
-        - [Missing cells via `null`](#missing-cells-via-null)
-        - [`remove()`](#remove)
-    - [Querying data with `view()`](#querying-data-with-view)
-    - [Deleting a `table()` or `view()`](#deleting-a-table-or-view)
-- [`<perspective-viewer>` web component](#perspective-viewer-web-component)
-    - [Loading data](#loading-data)
-    - [Sharing a `table()` between multiple `<perspective-viewer>`s](#sharing-a-table-between-multiple-perspective-viewers)
-    - [Remote Perspective via `WorkerHost()`](#remote-perspective-via-workerhost)
-    - [Setting & reading viewer configuration via Attributes](#setting--reading-viewer-configuration-via-attributes)
-    - [Update events](#update-events)
+-   [Overview](#overview)
+-   [Perspective library](#perspective-library)
+    -   [In the browser](#in-the-browser)
+    -   [In Node.js](#in-nodejs)
+    -   [Loading data with `table()`](#loading-data-with-table)
+        -   [`index` and `limit`](#index-and-limit)
+        -   [Partial row updates via `undefined`](#partial-row-updates-via-undefined)
+        -   [Missing cells via `null`](#missing-cells-via-null)
+        -   [`remove()`](#remove)
+    -   [Querying data with `view()`](#querying-data-with-view)
+    -   [Deleting a `table()` or `view()`](#deleting-a-table-or-view)
+-   [`<perspective-viewer>` web component](#perspective-viewer-web-component)
+    -   [Loading data](#loading-data)
+    -   [Sharing a `table()` between multiple `<perspective-viewer>`s](#sharing-a-table-between-multiple-perspective-viewers)
+    -   [Remote Perspective via `WorkerHost()`](#remote-perspective-via-workerhost)
+    -   [Setting & reading viewer configuration via Attributes](#setting--reading-viewer-configuration-via-attributes)
+    -   [Update events](#update-events)
 
 ## Overview
 
-
 Perspective is designed for modularity, allowing developers to pick and choose
-which parts they need for their specific use case.  The main modules are:
+which parts they need for their specific use case. The main modules are:
 
-- `@jpmorganchase/perspective`   
-  The data engine library, as both a browser ES6 and Node.js module.  Provides an
-  asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
-  runtime.
+-   `@jpmorganchase/perspective`  
+    The data engine library, as both a browser ES6 and Node.js module. Provides an
+    asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
+    runtime.
 
-- `@jpmorganchase/perspective-viewer`  
-  A user-configurable visualization widget, bundled as a [Web Component](https://www.webcomponents.org/introduction).  This module includes the core data
-  engine module as a dependency.
+-   `@jpmorganchase/perspective-viewer`  
+    A user-configurable visualization widget, bundled as a [Web Component](https://www.webcomponents.org/introduction). This module includes the core data
+    engine module as a dependency.
 
 In order to allow `<perspective-viewer>` to interop with industry standard Javascript
-visualization libraries which may have mixed OSS/Commercial licenses such as 
-[HighCharts](https://github.com/highcharts/highcharts), plugin modules are 
+visualization libraries which may have mixed OSS/Commercial licenses such as
+[HighCharts](https://github.com/highcharts/highcharts), plugin modules are
 packages as separately and can be independently imported in a Perspective
 project:
 
-- `@jpmorganchase/perspective-viewer-hypergrid`  
-  A `<perspective-viewer>` plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
+-   `@jpmorganchase/perspective-viewer-hypergrid`  
+    A `<perspective-viewer>` plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
 
-- `@jpmorganchase/perspective-viewer-highcharts`  
-  A `<perspective-viewer>` plugin for [HighCharts](https://github.com/highcharts/highcharts).
+-   `@jpmorganchase/perspective-viewer-highcharts`  
+    A `<perspective-viewer>` plugin for [HighCharts](https://github.com/highcharts/highcharts).
 
-Depending on your project, you may need just one, or all Perspective modules.  Some 
+Depending on your project, you may need just one, or all Perspective modules. Some
 common use cases include:
 
-* If you are only interested in the high-performance streaming data engine
-(the WebAssembly part), or your project is purely Node.js based, you need only
-the `@jpmorganchase/perspective` module, detailed [here](#perspective-library).
+-   If you are only interested in the high-performance streaming data engine
+    (the WebAssembly part), or your project is purely Node.js based, you need only
+    the `@jpmorganchase/perspective` module, detailed [here](#perspective-library).
 
-* If you are only interested in using Perspective as a simple, browser-based 
-data visualization widget, you probably only need the
-`@jpmorganchase/perspective-viewer` module and optionally its plugins
-`@jpmorganchase/perspective-viewer-hypergrid` and 
-`@jpmorganchase/perspective-viewer-highcharts`.  The core data engine
-`@jpmorganchase/perspective` is a depedency of these packages and does not 
-need to be imported on its own for basic usage.  Details for these can be found [here](#perspective-viewer-web-component).
+-   If you are only interested in using Perspective as a simple, browser-based
+    data visualization widget, you probably only need the
+    `@jpmorganchase/perspective-viewer` module and optionally its plugins
+    `@jpmorganchase/perspective-viewer-hypergrid` and
+    `@jpmorganchase/perspective-viewer-highcharts`. The core data engine
+    `@jpmorganchase/perspective` is a depedency of these packages and does not
+    need to be imported on its own for basic usage. Details for these can be found [here](#perspective-viewer-web-component).
 
-* For more complex cases, such as [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers) and [binding a viewer to a remote view in node.js](#remote-perspective-via-workerhost), you will likely need all Perspective modules.
+-   For more complex cases, such as [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers) and [binding a viewer to a remote view in node.js](#remote-perspective-via-workerhost), you will likely need all Perspective modules.
 
 ## Perspective library
 
@@ -68,7 +67,7 @@ need to be imported on its own for basic usage.  Details for these can be found 
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate, filter
 and sort operations for tabular data. The engine can be instantiated in process,
-or in a Web Worker (browser only);  in both cases, `perspective` exports a 
+or in a Web Worker (browser only); in both cases, `perspective` exports a
 nearly identical API.
 
 ### In the browser
@@ -209,10 +208,10 @@ a `table()` to power multiple `view()`s concurrently.
 ### Deleting a `table()` or `view()`
 
 Unlike standard Javascript objects, Perspective objects such as `table()` and
-`view()` store their associated data in the WebAssembly heap.  Due of this,
+`view()` store their associated data in the WebAssembly heap. Due of this,
 and the current lack of a hook into the Javascript runtime's garbage collector
 from WebAssembly, the memory allocated to these Perspective objects does not
-automatically get cleaned up when the object falls out of scope.  In order to
+automatically get cleaned up when the object falls out of scope. In order to
 prevent memory leaks and reclaim the memory associated with a Perspective
 `table()` or `view()`, you must call the `delete()` method.
 
@@ -225,7 +224,6 @@ table.delete();
 ```
 
 ## `<perspective-viewer>` web component
-
 
 [API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer)
 
