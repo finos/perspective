@@ -245,6 +245,60 @@ fill_col_dict(val dictvec, t_col_sptr col) {
 }
 } // namespace arrow
 
+namespace arraybuffer {
+val ArrayBuffer = val::global("ArrayBuffer");
+val Int8Array = val::global("Int8Array");
+val Int16Array = val::global("Int16Array");
+val Int32Array = val::global("Int32Array");
+val Float32Array = val::global("Float32Array");
+val Float64Array = val::global("Float64Array");
+
+val
+vec_to_arraybuffer(std::vector<const char*>& vec, t_dtype dtype) {
+    int vec_size = sizeof(vec[0]) * vec.size();
+    val buffer = ArrayBuffer.new_(vec_size);
+    val typed_array = arraybuffer::Int8Array.new_(buffer);
+
+    switch (dtype) {
+        case DTYPE_INT8: {
+            typed_array = arraybuffer::Int8Array.new_(buffer);
+        } break;
+        case DTYPE_INT16: {
+            typed_array = arraybuffer::Int16Array.new_(buffer);
+        } break;
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            typed_array = arraybuffer::Int32Array.new_(buffer);
+        } break;
+        case DTYPE_FLOAT32: {
+            typed_array = arraybuffer::Float32Array.new_(buffer);
+        } break;
+        case DTYPE_FLOAT64: {
+            typed_array = arraybuffer::Float64Array.new_(buffer);
+        } break;
+        default:
+            return buffer;
+    }
+
+    return typed_array;
+}
+
+val
+col_to_arraybuffer(t_table_sptr tbl, val col_name) {
+    auto col = tbl->get_column(col_name.as<std::string>);
+    auto dtype = col->get_dtype();
+
+    std::vector<t_uchar> data;
+    data.reserve(col->size());
+    data.resize(col->size());
+
+    auto col_vect = col->fill(data, 0, col->size());
+    val buffer = arraybuffer::vec_to_arraybuffer(data, dtype);
+
+    return buffer;
+}
+} // namespace arraybuffer
+
 template <typename T>
 void
 _fill_col(val dcol, t_col_sptr col, t_bool is_arrow) {
