@@ -50,7 +50,6 @@ perspective-row {
 }
 
 #side_panel perspective-row {
-
     #row_close {
         display: none;
         cursor: pointer;
@@ -78,11 +77,9 @@ perspective-row {
                 //content: "\01F527"
             }
         }
-
     }
 
     &.computed {
-
         // #psp_row .row_draggable {
         //     height: 35px !important;
         // }
@@ -150,7 +147,6 @@ perspective-row #sort_order {
 }
 
 perspective-row {
-
     #filter_operand,
     #filter_operator {
         display: none;
@@ -167,8 +163,6 @@ perspective-row {
         width: 20px;
     }
 }
-
-
 
 #filters perspective-row {
     margin-right: 24px;
@@ -261,11 +255,15 @@ perspective-row .row_draggable select {
     margin: 0px 0px 0px 26px;
 }
 
-perspective-viewer:not([row-pivots='[]']) #side_panel #active_columns perspective-row #column_aggregate {
+perspective-viewer:not([row-pivots="[]"])
+    #side_panel
+    #active_columns
+    perspective-row
+    #column_aggregate {
     display: inline-block;
 }
 
-perspective-viewer:not([row-pivots='[]']) #side_panel {
+perspective-viewer:not([row-pivots="[]"]) #side_panel {
     #active_columns perspective-row .row_draggable {
         height: 41px;
     }

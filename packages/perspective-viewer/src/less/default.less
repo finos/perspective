@@ -20,14 +20,14 @@
 }
 
 .dragging .psp-text-field.dropping {
-    border-bottom: 2px solid #22A0CE;
+    border-bottom: 2px solid #22a0ce;
 }
 
 .dragging .psp-text-field {
-    border-bottom: 1px solid #22A0CE;
+    border-bottom: 1px solid #22a0ce;
 }
 
-.psp-text-field>.psp-text-field__input {
+.psp-text-field > .psp-text-field__input {
     border: 0px;
     line-height: 20px;
     vertical-align: bottom;
@@ -35,7 +35,7 @@
     display: none;
 }
 
-.psp-text-field__input+label {
+.psp-text-field__input + label {
     line-height: 17px;
     box-sizing: border-box;
     color: rgb(204, 204, 204);
@@ -52,19 +52,18 @@
 }
 
 .dropping .psp-text-field__input::after {
-    content: '|';
+    content: "|";
     width: 0px;
     overflow: visible;
     margin-top: -2px;
 }
-
 
 .dropping * {
     pointer-events: none;
 }
 
 .dropping .psp-text-field label,
-.psp-text-field__input:not(:empty)+label {
+.psp-text-field__input:not(:empty) + label {
     position: absolute;
     top: 0px;
     line-height: 10px;
@@ -93,10 +92,9 @@
 }
 
 perspective-viewer {
-
     font-family: @sans-serif-fonts;
 
-    .awesomplete>ul {
+    .awesomplete > ul {
         border-radius: 0px;
         margin: 0px;
         border: none;
@@ -104,11 +102,11 @@ perspective-viewer {
         transition: 0;
     }
 
-    .awesomplete>ul:before {
+    .awesomplete > ul:before {
         content: none;
     }
 
-    .awesomplete>input {
+    .awesomplete > input {
         background-color: transparent;
     }
 
@@ -123,7 +121,6 @@ perspective-viewer {
     }
 
     #app.columns_horizontal {
-
         #columns_container {
             flex-direction: row-reverse;
         }
@@ -200,7 +197,7 @@ perspective-viewer {
         color: #999;
     }
 
-    #side_panel perspective-row [settings=true] #app {
+    #side_panel perspective-row [settings="true"] #app {
         border-top: 1px solid #ccc;
     }
 
@@ -209,7 +206,6 @@ perspective-viewer {
     }
 
     #filters perspective-row {
-
         select {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -249,7 +245,6 @@ perspective-viewer {
     }
 
     #side_panel perspective-row {
-
         .is_visible::before {
             content: "\25CF";
         }
@@ -299,7 +294,7 @@ perspective-viewer {
             border: none;
             display: flex;
             flex-direction: row;
-            font-family: @sans-serif-fonts  !important;
+            font-family: @sans-serif-fonts !important;
             font-size: 12px;
             padding-right: 10px;
             -webkit-appearance: none;
@@ -333,12 +328,12 @@ perspective-viewer {
     }
 
     svg text {
-        font-family: @sans-serif-fonts  !important;
+        font-family: @sans-serif-fonts !important;
     }
 
     svg .highcharts-axis-title,
     svg .highcharts-axis-title {
-        font-family: @sans-serif-fonts  !important;
+        font-family: @sans-serif-fonts !important;
     }
 
     svg .highcharts-legend-box {
@@ -374,7 +369,7 @@ perspective-viewer {
     }
 
     #config_button:before {
-        content: '\1f527';
+        content: "\1f527";
     }
 
     ul {
@@ -441,5 +436,4 @@ perspective-viewer {
     ::shadow ::-webkit-scrollbar-track {
         background: none;
     }
-
 }

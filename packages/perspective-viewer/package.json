@@ -1,73 +1,74 @@
 {
-  "name": "@jpmorganchase/perspective-viewer",
-  "version": "0.2.0-beta.3",
-  "description": "Perspective.js",
-  "main": "build/perspective.view.cjs.js",
-  "files": [
-    "src/*",
-    "build/*"
-  ],
-  "scripts": {
-    "bench": "npm-run-all bench:build bench:run",
-    "bench:build": "echo \"No Benchmarks\"",
-    "bench:run": "echo \"No Benchmarks\"",
-    "themes": "lessc src/less/material.less build/material.css && lessc src/less/material.dark.less build/material.dark.css",
-    "build:webpack:cjs": "webpack --color --config src/config/view.cjs.config.js",
-    "build:webpack:viewer": "webpack --color --config src/config/view.config.js",
-    "build": "npm-run-all build:webpack:* themes copy:*",
-    "copy:worker": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js build",
-    "copy:sourcemaps": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js.map build",
-    "copy:wasm": "cp -r node_modules/@jpmorganchase/perspective/build/psp.async.wasm build",
-    "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
-    "test:run": "jest --silent --color 2>&1",
-    "test": "npm-run-all test:build test:run",
-    "clean": "find build -mindepth 1 -delete",
-    "clean:screenshots": "find screenshots/ \\( -name *.failed.png -o -name *.diff.png \\) -mindepth 1 -delete",
-    "docs": "documentation build src/js/view.js -f md --shallow > README.md"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "jest": {
-    "roots": [
-      "test/js"
+    "name": "@jpmorganchase/perspective-viewer",
+    "version": "0.2.0-beta.3",
+    "description": "Perspective.js",
+    "main": "build/perspective.view.cjs.js",
+    "files": [
+        "src/*",
+        "build/*"
     ],
-    "verbose": true,
-    "testURL": "http://localhost/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jpmorganchase/perspective"
-  },
-  "author": "",
-  "license": "Apache",
-  "dependencies": {
-    "@jpmorganchase/perspective": "^0.2.0-beta.3",
-    "@webcomponents/webcomponentsjs": "~2.0.4",
-    "awesomplete": "^1.1.2",
-    "babel-polyfill": "^6.26.0",
-    "babel-runtime": "^6.26.0",
-    "d3-array": "^1.2.1",
-    "mobile-drag-drop": "^2.2.0",
-    "underscore": "^1.8.3"
-  },
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-transform-custom-element-classes": "^0.1.0",
-    "babel-plugin-transform-es2015-for-of": "^6.23.0",
-    "babel-plugin-transform-promise-to-bluebird": "^1.1.1",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
-    "css-loader": "^0.28.7",
-    "documentation": "^5.3.3",
-    "html-loader": "^0.5.1",
-    "jest": "^22.0.4",
-    "less": "^2.7.2",
-    "less-loader": "^4.0.5",
-    "style-loader": "^0.18.2",
-    "uglifyjs-webpack-plugin": "^0.4.6",
-    "webpack": "^3.5.6"
-  }
+    "scripts": {
+        "bench": "npm-run-all bench:build bench:run",
+        "bench:build": "echo \"No Benchmarks\"",
+        "bench:run": "echo \"No Benchmarks\"",
+        "build:themes:material": "lessc src/less/material.less | cleancss -O2 > build/material.css 2> /dev/null",
+        "build:themes:materialdark": "lessc src/less/material.dark.less | cleancss -O2 > build/material.dark.css 2> /dev/null",
+        "build:webpack:cjs": "webpack --color --config src/config/view.cjs.config.js",
+        "build:webpack:viewer": "webpack --color --config src/config/view.config.js",
+        "build": "npm-run-all build:webpack:* build:themes:* copy:*",
+        "copy:worker": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js build",
+        "copy:sourcemaps": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js.map build",
+        "copy:wasm": "cp -r node_modules/@jpmorganchase/perspective/build/psp.async.wasm build",
+        "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
+        "test:run": "jest --silent --color 2>&1",
+        "test": "npm-run-all test:build test:run",
+        "clean": "find build -mindepth 1 -delete",
+        "clean:screenshots": "find screenshots/ \\( -name *.failed.png -o -name *.diff.png \\) -mindepth 1 -delete",
+        "docs": "documentation build src/js/view.js -f md --shallow > README.md"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "jest": {
+        "roots": [
+            "test/js"
+        ],
+        "verbose": true,
+        "testURL": "http://localhost/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jpmorganchase/perspective"
+    },
+    "author": "",
+    "license": "Apache",
+    "dependencies": {
+        "@jpmorganchase/perspective": "^0.2.0-beta.3",
+        "@webcomponents/webcomponentsjs": "~2.0.4",
+        "awesomplete": "^1.1.2",
+        "babel-polyfill": "^6.26.0",
+        "babel-runtime": "^6.26.0",
+        "d3-array": "^1.2.1",
+        "mobile-drag-drop": "^2.2.0",
+        "underscore": "^1.8.3"
+    },
+    "devDependencies": {
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.2",
+        "babel-plugin-transform-custom-element-classes": "^0.1.0",
+        "babel-plugin-transform-es2015-for-of": "^6.23.0",
+        "babel-plugin-transform-runtime": "^6.23.0",
+        "babel-polyfill": "^6.26.0",
+        "babel-preset-env": "^1.6.0",
+        "css-loader": "^0.28.7",
+        "clean-css-cli": "4.2.1",
+        "documentation": "^5.3.3",
+        "html-loader": "^0.5.1",
+        "jest": "^22.0.4",
+        "less": "^2.7.2",
+        "less-loader": "^4.0.5",
+        "style-loader": "^0.18.2",
+        "uglifyjs-webpack-plugin": "^0.4.6",
+        "webpack": "^3.5.6"
+    }
 }
