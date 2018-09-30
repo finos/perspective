@@ -1,15 +1,9 @@
-# Installation <!-- omit in toc -->
+---
+id: installation
+hide_title: true
+---
 
--   [(!) An important note about Hosting](#an-important-note-about-hosting)
--   [From CDN](#from-cdn)
--   [From NPM](#from-npm)
--   [From source](#from-source)
-    -   [Docker](#docker)
-    -   [EMSDK](#emsdk)
-        -   [OSX specific instructions](#osx-specific-instructions)
-        -   [Windows 10 specific instructions](#windows-10-specific-instructions)
-        -   [Ubuntu/Debian](#ubuntudebian)
-    -   [Build Options](#build-options)
+# Installation <!-- omit in toc -->
 
 ## (!) An important note about Hosting
 
@@ -53,7 +47,9 @@ For using Perspective from Node.js, or as a depedency in a `package.json` based
 via NPM
 
 ```bash
-npm install --save perspective perspective-viewer perspective-viewer-highcharts perspective-viewer-hypergrid
+$ npm install --save @jpmorganchase/perspective-viewer \
+@jpmorganchase/perspective-viewer-highcharts \
+@jpmorganchase/perspective-viewer-hypergrid
 ```
 
 ## From source
@@ -71,8 +67,7 @@ however; the [Emscripten](https://github.com/kripken/emscripten) compiler, which
 is used to compile the core C++ engine to WebAssembly, and must be installed
 independently.
 
-There are two main options for doing so - a provided Docker container, or
-installing the Emscripten SDK manually.
+## From source
 
 ### Docker
 
