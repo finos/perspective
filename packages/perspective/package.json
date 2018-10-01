@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective",
-    "version": "0.2.0-beta.3",
+    "version": "0.2.0",
     "description": "Perspective.js",
     "main": "build/perspective.cjs.js",
     "publishConfig": {
