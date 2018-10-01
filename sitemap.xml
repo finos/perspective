@@ -4,7 +4,7 @@
 <url> <loc>https://jpmorganchase.github.io/index.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/en/index.html" /> </url>
 <url> <loc>https://jpmorganchase.github.io/users.html</loc> <changefreq>weekly</changefreq> <priority>0.5</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/en/users.html" /> </url>
 <url> <loc>https://jpmorganchase.github.io/docs/installation.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/installation.html" /> </url>
-<url> <loc>https://jpmorganchase.github.io/docs/perspective_api.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/perspective_api.html" /> </url>
+<url> <loc>https://jpmorganchase.github.io/docs/perspective-viewer.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/perspective-viewer.html" /> </url>
+<url> <loc>https://jpmorganchase.github.io/docs/perspective.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/perspective.html" /> </url>
 <url> <loc>https://jpmorganchase.github.io/docs/usage.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/usage.html" /> </url>
-<url> <loc>https://jpmorganchase.github.io/docs/viewer_api.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://jpmorganchase.github.io/docs/viewer_api.html" /> </url>
 </urlset>

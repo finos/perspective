@@ -108,7 +108,7 @@ function rotate(next_index) {
 var tbl;
 function update() {
     tbl.update([newRow(), newRow(), newRow()]);
-    setTimeout(update, 500);
+    setTimeout(update, 100);
 }
 
 window.addEventListener('WebComponentsReady', function () {

@@ -1,84 +1,239 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Usage · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="Usage · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://jpmorganchase.github.io//perspective/index.html"/><meta property="og:description" content="## Perspective library"/><meta property="og:image" content="https://jpmorganchase.github.io//perspective/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://jpmorganchase.github.io//perspective/img/perspective.png"/><link rel="shortcut icon" href="/perspective/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css"/><link rel="alternate" type="application/atom+xml" href="https://jpmorganchase.github.io//blog/atom.xml" title="Perspective Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://jpmorganchase.github.io//blog/feed.xml" title="Perspective Blog RSS Feed"/><link rel="stylesheet" href="https://unpkg.com/@jpmorganchase/perspective-examples/build/material.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-examples/build/hypergrid.plugin.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-examples/build/highcharts.plugin.js"></script><script type="text/javascript" src="js/animation.js"></script><link rel="stylesheet" href="/perspective/css/main.css"/></head><body class="sideNavVisible doc separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/perspective/"><img class="logo" src="/perspective/img/perspective.svg" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/perspective/docs/installation.html" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/perspective/docs/viewer_api.html" target="_self">API</a></li><li class=""><a href="/perspective/blog" target="_self">Blog</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Getting Started</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/perspective/docs/installation.html">Installation</a></li><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/perspective/docs/usage.html">Usage</a></li></ul></div><div class="navGroup navGroupActive"><h3>API</h3><ul><li class="navListItem"><a class="navItem" href="/perspective/docs/perspective_api.html">perspective</a></li><li class="navListItem"><a class="navItem" href="/perspective/docs/viewer_api.html">perspective-viewer</a></li></ul></div></div></section></div><script>
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>usage · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta property="og:title" content="usage · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://jpmorganchase.github.io//perspective/index.html"/><meta property="og:description" content="# Perspective User Guide &lt;!-- omit in toc --&gt;"/><meta property="og:image" content="https://jpmorganchase.github.io//perspective/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://jpmorganchase.github.io//perspective/img/perspective.png"/><link rel="shortcut icon" href="/perspective/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai.min.css"/><link rel="alternate" type="application/atom+xml" href="https://jpmorganchase.github.io//blog/atom.xml" title="Perspective Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://jpmorganchase.github.io//blog/feed.xml" title="Perspective Blog RSS Feed"/><link rel="stylesheet" href="https://unpkg.com/@jpmorganchase/perspective-examples/build/material.dark.css"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script><script type="text/javascript" src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script><script type="text/javascript" src="js/animation.js"></script><link rel="stylesheet" href="/perspective/css/main.css"/></head><body class="sideNavVisible doc separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/perspective/"><img class="logo" src="/perspective/img/perspective.svg" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/perspective/docs/installation.html" target="_self">Docs</a></li><li class="siteNavGroupActive"><a href="/perspective/docs/perspective-viewer.html" target="_self">API</a></li><li class=""><a href="/perspective/blog" target="_self">Blog</a></li><li class=""><a href="https://github.com/jpmorganchase/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>Getting Started</span></h2></div><div class="navGroups"><div class="navGroup navGroupActive"><h3>Getting Started</h3><ul><li class="navListItem"><a class="navItem" href="/perspective/docs/installation.html">installation</a></li><li class="navListItem navListItemActive"><a class="navItem navItemActive" href="/perspective/docs/usage.html">usage</a></li></ul></div><div class="navGroup navGroupActive"><h3>API</h3><ul><li class="navListItem"><a class="navItem" href="/perspective/docs/perspective.html">perspective</a></li><li class="navListItem"><a class="navItem" href="/perspective/docs/perspective-viewer.html">perspective-viewer</a></li></ul></div></div></section></div><script>
           var toggler = document.getElementById('navToggler');
           var nav = document.getElementById('docsNav');
           toggler.onclick = function() {
             nav.classList.toggle('docsSliderActive');
           };
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1>Usage</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="perspective-library"></a><a href="#perspective-library" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Perspective library</h2>
-<p><a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective">API Docs</a></p>
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"></header><article><div><span><h1><a class="anchor" aria-hidden="true" id="perspective-user-guide-omit-in-toc"></a><a href="#perspective-user-guide-omit-in-toc" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Perspective User Guide <!-- omit in toc --></h1>
+<h2><a class="anchor" aria-hidden="true" id="overview"></a><a href="#overview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Overview</h2>
+<p>The core concepts of Perspective are the <code>table()</code>, <code>view()</code> and
+<code>&lt;perspective-viewer&gt;</code> web component, though your project need not necessarily
+use them all. A <code>table()</code> represents a single data set, and is the interface
+used to input static and streaming data into Perspective; in the Browser,
+<code>table()</code>s live in a Web Worker to isolate their runtime from the renderer.
+A <code>view()</code> represents a specific continuous query of a <code>table()</code>, and is
+used to read data or calculate analytics from a <code>table()</code>; <code>view()</code>s also
+live in a Web Worker when used in a Browser, and a single <code>table()</code> may have
+many <code>view()</code>s attached at once. <code>&lt;perspective-viewer&gt;</code> is a UI widget
+which allows the user to interact and create <code>view()</code>s on a loaded <code>table()</code>.
+Each <code>&lt;perspective-viewer&gt;</code> encapsulates and manages a single <code>view()</code> at a
+time, and optionally manages it's underlying <code>table()</code> for simple use cases,
+though you can instantiate this separately if you wish - this is helpful for
+e.g. <a href="(#sharing-a-table-between-multiple-perspective-viewers)">sharing a table</a>
+between multiple <code>&lt;perspective-viewer&gt;</code>s</p>
+<p><img src="./architecture.svg"></p>
+<p>Perspective is designed for flexibility, allowing developers to pick and choose
+which modules they need for their specific use case. The main modules are:</p>
+<ul>
+<li><p><code>@jpmorganchase/perspective</code>  <br>
+The data engine library, as both a browser ES6 and Node.js module. Provides an
+asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
+runtime.</p></li>
+<li><p><code>@jpmorganchase/perspective-viewer</code>  <br>
+A user-configurable visualization widget, bundled as a <a href="https://www.webcomponents.org/introduction">Web Component</a>.
+This module includes the core data engine module as a dependency.</p></li>
+</ul>
+<p><code>&lt;perspective-viewer&gt;</code> by itself only implements a trivial debug renderer, which
+prints the currently configured <code>view()</code> as a CSV. Plugin modules for popular
+Javascript libraries such as <a href="https://github.com/highcharts/highcharts">HighCharts</a>
+are packaged separately and must be imported individually; in this way,
+developers can choose to opt into the features, bundle size inflation and
+licensing for these dependencies as needed. When imported after
+<code>@jpmorganchase/perspective-viewer</code>, the plugin modules will register
+themselves automatically, and the renderers they export will be available in the
+<code>view</code> dropdown in the <code>&lt;perspective-viewer&gt;</code> UI.</p>
+<ul>
+<li><p><code>@jpmorganchase/perspective-viewer-hypergrid</code>  <br>
+A <code>&lt;perspective-viewer&gt;</code> plugin for <a href="https://github.com/fin-hypergrid/core">Hypergrid</a>.</p></li>
+<li><p><code>@jpmorganchase/perspective-viewer-highcharts</code>  <br>
+A <code>&lt;perspective-viewer&gt;</code> plugin for <a href="https://github.com/highcharts/highcharts">HighCharts</a>.
+This plugin has a dependency on Highcharts' <a href="https://creativecommons.org/licenses/by-nc/3.0/">mixed commercial license</a>.</p></li>
+</ul>
+<p>Depending on your requirements, you may need just one, or all Perspective modules.
+Some basic guidelines to help you decide what is most appropriate for your
+project:</p>
+<ul>
+<li><p>If you are only interested in using Perspective as a simple, browser-based
+data visualization widget, you probably only need the
+<code>@jpmorganchase/perspective-viewer</code> module and optionally its plugins
+<code>@jpmorganchase/perspective-viewer-hypergrid</code> and
+<code>@jpmorganchase/perspective-viewer-highcharts</code>. The core data engine
+<code>@jpmorganchase/perspective</code> is a depedency of these packages and does not
+need to be imported on its own for basic usage. Details for these can be found <a href="#perspective-viewer-web-component">here</a>.</p></li>
+<li><p>If you are only interested in the high-performance streaming data engine
+(the WebAssembly part), or your project is purely Node.js based, you need only
+the <code>@jpmorganchase/perspective</code> module, detailed <a href="#perspective-library">here</a>.</p></li>
+<li><p>For more complex cases, such as
+<a href="#sharing-a-table-between-multiple-perspective-viewers">sharing tables between viewers</a>
+and <a href="#remote-perspective-via-workerhost">binding a viewer to a remote view in node.js</a>,
+you will likely need all Perspective modules.</p></li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="perspective-library"></a><a href="#perspective-library" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>perspective</code> library</h2>
+<p>The main module exporting <code>table()</code> and <code>view()</code>, as well as process
+management functions such as <code>worker()</code> and <code>WorkerHost()</code>. This module is
+not needed if you only intend to use <code>&lt;perspective-viewer&gt;</code> to visualize
+simple data, and is a dependency of the <code>@jpmorganchase/perspective-viewer</code>
+module. For a complete reference on all exported methods in <code>perspective</code>, see the
+<a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective">full API Docs</a>;
+presented here is a basic overview of the module's usage.</p>
 <p>As a library, <code>perspective</code> provides a suite of streaming pivot, aggregate, filter
-and sort operations for tabular data.  The engine can be instantiated in process,
-or in a Web Worker (browser only).</p>
-<h3><a class="anchor" aria-hidden="true" id="in-the-browser"></a><a href="#in-the-browser" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>In the browser</h3>
-<p>Via ES6 module and/or Babel:</p>
-<pre><code class="hljs css javascript"><span class="hljs-keyword">import</span> perspective <span class="hljs-keyword">from</span> <span class="hljs-string">'perspective'</span>;
+and sort operations for tabular data. The engine can be instantiated in process,
+or in a Web Worker (browser only); in both cases, <code>perspective</code> exports a
+nearly identical API.</p>
+<h3><a class="anchor" aria-hidden="true" id="importing-in-the-browser"></a><a href="#importing-in-the-browser" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Importing in the browser</h3>
+<p>The <code>main</code> entry point for <code>@jpmorganchase/perspective</code> runs in a Web
+Worker, such that the CPU workload is segregated from the web application in
+which it is embedded, and so the bulk of engine code can be lazy-loaded only
+after browser feature detection determines whether WebAssembly is supported.</p>
+<p>The library can be imported ia ES6 module and/or Babel:</p>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">import</span> perspective <span class="hljs-keyword">from</span> <span class="hljs-string">"@jpmorganchase/perspective"</span>;
 </code></pre>
 <p>or</p>
-<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> perspective = <span class="hljs-built_in">require</span>(<span class="hljs-string">'perspective'</span>);
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> perspective = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@jpmorganchase/perspective"</span>);
 </code></pre>
 <p>Perspective can also be referenced via the global <code>perspective</code> module name in vanilla
-Javascript.</p>
+Javascript, when e.g. importing <code>@jpmorganchase/perspective</code>
+<a href="https://unpkg.com/@jpmorganchase/perspective/build/perspective.js">via a CDN</a>.</p>
 <p>Once imported, you'll need to instance a <code>perspective</code> engine via the <code>worker()</code>
-method.  This will create a new WebWorker (browser) or Process (node.js), and
+method. This will create a new WebWorker (browser) or Process (node.js), and
 load the appropriate supported WebAssembly or asm.js binary; all calculation
 and data accumulation will occur in this separate process.</p>
 <pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> worker = perspective.worker();
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="in-nodejs"></a><a href="#in-nodejs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>In Node.js</h3>
-<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> perspective = <span class="hljs-built_in">require</span>(<span class="hljs-string">'@jpmorganchase/perspective/build/perspective.node.js'</span>);
+<p>The <code>worker</code> symbol will expose the full <code>perspective</code> API for one managed
+Web Worker process. You are free to create as many as your browser supports,
+but be sure to keep track of the <code>worker</code> instances themselves, as you'll
+need them to interact with your data in each instance.</p>
+<h3><a class="anchor" aria-hidden="true" id="importing-in-nodejs"></a><a href="#importing-in-nodejs" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Importing in Node.js</h3>
+<p>The <code>Node.js</code> runtime for the <code>@jpmorganchase/perpsective</code> module runs
+in-process by default, and does not implement a <code>child_process</code> interface.
+Hence, there is no <code>worker()</code> method, and the module object itself directly
+exports the full <code>perspective</code> API.</p>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> perspective = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@jpmorganchase/perspective/build/perspective.node.js"</span>);
 </code></pre>
-<p>See <a href="https://github.com/jpmorganchase/perspective/blob/master/packages/perspective-examples/src/js/node_server.js">perspective-examples/node_server.js</a>
-for an example.</p>
-<h3><a class="anchor" aria-hidden="true" id="table"></a><a href="#table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>table()</code></h3>
+<h3><a class="anchor" aria-hidden="true" id="loading-data-with-table"></a><a href="#loading-data-with-table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Loading data with <code>table()</code></h3>
 <p>The basic data primitive of <code>perspective</code> is the <code>table</code>, which you can
-instantiate via the <code>table()</code> method on a <code>worker</code>.  Further data can be
+instantiate via the <code>table()</code> method on a <code>worker</code>. Further data can be
 supplied to the table via its <code>update()</code> method.</p>
 <pre><code class="hljs css javascript"><span class="hljs-comment">// With data (also works with strings in CSV format)</span>
-<span class="hljs-keyword">var</span> data = [   
-    {<span class="hljs-string">'x'</span>: <span class="hljs-number">1</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'a'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>},
-    {<span class="hljs-string">'x'</span>: <span class="hljs-number">2</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'b'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">false</span>},
-    {<span class="hljs-string">'x'</span>: <span class="hljs-number">3</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'c'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>},
-    {<span class="hljs-string">'x'</span>: <span class="hljs-number">4</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'d'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">false</span>}
+<span class="hljs-keyword">var</span> data = [
+    { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"a"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> },
+    { <span class="hljs-attr">x</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"b"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span> },
+    { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"c"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> },
+    { <span class="hljs-attr">x</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"d"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span> }
 ];
 
 <span class="hljs-keyword">const</span> table1 = worker.table(data);
-
-<span class="hljs-comment">// With a schema</span>
+</code></pre>
+<p><code>table()</code>s are columnar data structures, and each column must have a single
+type - perspective supports <code>integer</code>, <code>float</code>, <code>string</code> and <code>datetime</code> types.
+When passing simple data directly to the <code>table()</code> constructor, the type of
+each column is inferred automatically; however, in some case, the inferrence
+algorithm may not return exactly what you'd like. For example, a column may
+be interpretted as a <code>datetime</code> when you intend it to be a <code>string</code>, or a
+column may have no values at all (yet), as it will be updated with values
+from a real-time data source later on. In these cases, it may be useful to
+instead instatiate a <code>table()</code> with a <i>schema</i>:</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// With a schema</span>
 <span class="hljs-keyword">var</span> schema = {
-    <span class="hljs-attr">x</span>: <span class="hljs-string">'integer'</span>,
-    <span class="hljs-attr">y</span>: <span class="hljs-string">'string'</span>,
-    <span class="hljs-attr">z</span>: <span class="hljs-string">'boolean'</span>
+    <span class="hljs-attr">x</span>: <span class="hljs-string">"integer"</span>,
+    <span class="hljs-attr">y</span>: <span class="hljs-string">"string"</span>,
+    <span class="hljs-attr">z</span>: <span class="hljs-string">"boolean"</span>
 };
 
 <span class="hljs-keyword">const</span> table2 = worker.table(schema);
-
-<span class="hljs-comment">// Add a new row to each table</span>
-table1.update([{<span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'e'</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span>}]);
-table2.update([{<span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'e'</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span>}]);
 </code></pre>
+<p>Once instatiated, a <code>table()</code> can later be updated with new data via the
+<code>update()</code> method. New data is appended by default, for in-place updates, see
+<a href="#index-and-limit">index and limit tables</a></p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Add a new row to each table</span>
+table1.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"e"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> }]);
+table2.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"e"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> }]);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="index-and-limit"></a><a href="#index-and-limit" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>index</code> and <code>limit</code></h4>
 <p>The <code>table()</code> method also takes an options object, with which you can provide
-the name of an <code>index</code> column in the underlying dataset, which will act as a
-primary key on the <code>table</code>, replacing <code>update</code>d rows instead of appending them.</p>
+the name of an <i>index</i> column in the underlying dataset, which will act as a
+primary key on the <code>table</code>, and the <code>update()</code> method will replace or append
+rows, based on the value of the <i>index</i>. When a <code>table()</code> is indexed, the <code>update()</code> rows must contain this value, otherwise it will have a default
+<i>index</i> value of <code>null</code>.</p>
 <pre><code class="hljs css javascript"><span class="hljs-comment">// Use the 'x' column as a primary key</span>
-<span class="hljs-keyword">const</span> table3 = worker.table(data, {<span class="hljs-attr">index</span>: <span class="hljs-string">'x'</span>});
+<span class="hljs-keyword">const</span> table3 = worker.table(data, { <span class="hljs-attr">index</span>: <span class="hljs-string">"x"</span> });
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="view"></a><a href="#view" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>view()</code></h3>
+<p>Mutually exclusive to <code>index</code>, you may limit the total number of rows in a
+<code>table()</code> via the <code>limit</code> property, which preserves only the most recently
+added rows. <i>Limit</i> <code>table()</code>s otherwise share the same append-only
+<code>update()</code> behavior as default.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Keep only the most recent 1000 rows</span>
+<span class="hljs-keyword">const</span> table3 = worker.table(data, { <span class="hljs-attr">limit</span>: <span class="hljs-number">1000</span> });
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="i-unset-i-values-via-null"></a><a href="#i-unset-i-values-via-null" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><i>Unset</i> values via <code>null</code></h4>
+<p>Perspective <code>table()</code> allow any value of a <i>column</i> to be <i>unset</i>
+on construction, or later be reverted to <i>unset</i> in the case of a <code>table()</code>
+with an <i>index</i>. Perspective uses the Javascript value <code>null</code> to indicate
+values which should be explicitly <i>unset</i>, in either the constructor or in
+a subsequent call to the <code>update()</code> method.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Unsets the 'y' column for row 3</span>
+table.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-literal">null</span> }]);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="partial-i-row-i-updates-via-undefined"></a><a href="#partial-i-row-i-updates-via-undefined" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Partial <i>row</i> updates via <code>undefined</code></h4>
+<p>When calling <code>update()</code>, you need not provide values for all <i>column</i>s
+defined in the <code>table()</code>s schema. Missing keys, or keys with <code>undefined</code>
+values, will be omitted from <code>table()</code>s with an <i>index</i>, and will be
+populated with <code>null</code> for default and <i>limit</i> <code>table()</code>s.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Only updates the  'y' column for row 3, leaving the 'z' column alone</span>
+table.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"Just Y"</span> }]);
+</code></pre>
+<h4><a class="anchor" aria-hidden="true" id="deleting-i-rows-i-with-remove"></a><a href="#deleting-i-rows-i-with-remove" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deleting <i>rows</i> with <code>remove()</code></h4>
+<p>For <code>table()</code>s with an <i>index</i>, rows can be removed entirely by calling
+the <code>remove()</code> method with a list of the <i>index</i> values to be removed.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Remove rows indexed 1 and 2</span>
+table.remove([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>]);
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="querying-data-with-view"></a><a href="#querying-data-with-view" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Querying data with <code>view()</code></h3>
 <p>In order to query the table, you must then create a <code>view()</code>, an immutable set
-of transformations for an associated <code>table()</code>.  A <code>view()</code> is created from a
+of transformations for an associated <code>table()</code>. A <code>view()</code> is created from a
 <code>table()</code> via a configuration object, and a <code>view()</code> instance can return data
-from queries to its various methods (see the <a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective">API</a>).</p>
+from queries to its various methods. For a full description of the available
+configuration properties for <code>view()</code>, see the
+<a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective">full API documentation</a>.</p>
 <pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> table = worker.table(data);
 
 <span class="hljs-keyword">const</span> view = table.view({
-    <span class="hljs-attr">aggregate</span>: [{<span class="hljs-attr">column</span>: <span class="hljs-string">"Sales"</span>, <span class="hljs-attr">op</span>: <span class="hljs-string">"sum"</span>}],
+    <span class="hljs-attr">aggregate</span>: [{ <span class="hljs-attr">column</span>: <span class="hljs-string">"Sales"</span>, <span class="hljs-attr">op</span>: <span class="hljs-string">"sum"</span> }],
     <span class="hljs-attr">row_pivot</span>: [<span class="hljs-string">"Region"</span>, <span class="hljs-string">"Country"</span>],
     <span class="hljs-attr">filter</span>: [[<span class="hljs-string">"Category"</span>, <span class="hljs-string">"in"</span>, [<span class="hljs-string">"Furniture"</span>, <span class="hljs-string">"Technology"</span>]]]
 });
-
-view.to_json().then(<span class="hljs-function"><span class="hljs-params">json</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(json));
 </code></pre>
-<h2><a class="anchor" aria-hidden="true" id="perspective-viewer-web-component"></a><a href="#perspective-viewer-web-component" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>&lt;perspective-viewer&gt; web component</h2>
-<p><a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer">API Docs</a></p>
+<p>The <code>view()</code> object has several options for extracting slices of data for the
+provided configuration, the most commonly used of which are the <code>to_json()</code> and
+<code>to_columns</code> methods, which return a Javascript `promise`` for the calculated data
+in row-oriented or column-oriented JSON format, respectively.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Via standard `promise`</span>
+view.to_json().then(<span class="hljs-function"><span class="hljs-params">json</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(json));
+view.to_columns().then(<span class="hljs-function"><span class="hljs-params">json</span> =&gt;</span> <span class="hljs-built_in">console</span>.log(json));
+
+<span class="hljs-comment">// Via ES6 await/async</span>
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> view.to_json());
+<span class="hljs-built_in">console</span>.log(<span class="hljs-keyword">await</span> view.to_columns());
+</code></pre>
+<p>A <code>table()</code> can have as many <code>view()</code> associated with it as you need!
+Perspective will conserve memory and updates by relying on a single instance of
+a <code>table()</code> to power multiple <code>view()</code>s concurrently.</p>
+<h3><a class="anchor" aria-hidden="true" id="deleting-a-table-or-view"></a><a href="#deleting-a-table-or-view" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deleting a <code>table()</code> or <code>view()</code></h3>
+<p>Unlike standard Javascript objects, Perspective objects such as <code>table()</code> and
+<code>view()</code> store their associated data in the WebAssembly heap. Due of this,
+and the current lack of a hook into the Javascript runtime's garbage collector
+from WebAssembly, the memory allocated to these Perspective objects does not
+automatically get cleaned up when the object falls out of scope. In order to
+prevent memory leaks and reclaim the memory associated with a Perspective
+<code>table()</code> or <code>view()</code>, you must call the <code>delete()</code> method.</p>
+<pre><code class="hljs css javascript">view.delete();
+
+<span class="hljs-comment">// This method will throw an exception if there are still `view()`s depending</span>
+<span class="hljs-comment">// on this `table()`!</span>
+table.delete();
+</code></pre>
+<h2><a class="anchor" aria-hidden="true" id="perspective-viewer-web-component"></a><a href="#perspective-viewer-web-component" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>perspective-viewer</code> web component</h2>
 <p>As a component, <code>perspective-viewer</code> provides a complete graphical UI for
 configuring the <code>perspective</code> library and formatting its output to the
 provided visualization plugins.</p>
@@ -90,53 +245,157 @@ for use within your site's regular HTML:</p>
 <span class="hljs-keyword">import</span> <span class="hljs-string">"@jpmorganchase/perspective-viewer-hypergrid"</span>;
 <span class="hljs-keyword">import</span> <span class="hljs-string">"@jpmorganchase/perspective-viewer-highcharts"</span>;
 </code></pre>
-<p>You must also import a theme when bundling perspective-viewer.  Even though there
+<p>You must also import a theme when bundling perspective-viewer. Even though there
 are only 2 of them.</p>
-<pre><code class="hljs css javascript"><span class="hljs-keyword">import</span> <span class="hljs-string">"@jpmorganchase/perspective-viewer/build/material.css"</span>; <span class="hljs-comment">// or default.css</span>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// A theme based on Google's Material Design Language</span>
+<span class="hljs-keyword">import</span> <span class="hljs-string">"@jpmorganchase/perspective-viewer/build/material.css"</span>;
 </code></pre>
 <p>Alternatively, if you're fine with a default theme and don't want to bundle yourself,
-you can just import the pre-bundled assets from the <code>perspective-examples</code>
-module's <code>build/</code> directory:</p>
+you can just import the pre-bundled assets from their respective modules.</p>
 <pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"perspective.view.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"hypergrid.plugin.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"highcharts.plugin.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="hljs-comment">&lt;!-- Theme available separately if you are so inclined --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">'stylesheet'</span> <span class="hljs-attr">href</span>=<span class="hljs-string">'material.css'</span>&gt;</span>
 </code></pre>
 <p>Once imported, the <code>&lt;perspective-viewer&gt;</code> Web Component will be available in
-any standard HTML on your site.  A simple example:</p>
+any standard HTML on your site. A simple example:</p>
 <pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">perspective-viewer</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"view1"</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
 </code></pre>
+<h3><a class="anchor" aria-hidden="true" id="loading-data"></a><a href="#loading-data" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Loading data</h3>
 <p>To load data into a <code>&lt;perspective-viewer&gt;</code>, you can call the <code>load()</code> method
-from Javascript like so:</p>
-<pre><code class="hljs css javascript"><span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"WebComponentsReady"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) </span>{
-
-    <span class="hljs-keyword">var</span> data = [   
-        {<span class="hljs-string">'x'</span>: <span class="hljs-number">1</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'a'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>},
-        {<span class="hljs-string">'x'</span>: <span class="hljs-number">2</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'b'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">false</span>},
-        {<span class="hljs-string">'x'</span>: <span class="hljs-number">3</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'c'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>},
-        {<span class="hljs-string">'x'</span>: <span class="hljs-number">4</span>, <span class="hljs-string">'y'</span>:<span class="hljs-string">'d'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">false</span>}
+from Javascript on simple JSON or CSV data, or an <code>arraybuffer</code> of an Apache
+Arrow. If you do so via an inline <code>&lt;script&gt;</code> tag, you must wait for the
+document <code>WebComponentsReady</code> event to fire, which indicates that the provided
+<a href="https://github.com/webcomponents/webcomponentsjs">webcomponents.js polyfill</a>
+has loaded.</p>
+<pre><code class="hljs css javascript"><span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"WebComponentsReady"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> data = [
+        { <span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"a"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> },
+        { <span class="hljs-attr">x</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"b"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span> },
+        { <span class="hljs-attr">x</span>: <span class="hljs-number">3</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"c"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> },
+        { <span class="hljs-attr">x</span>: <span class="hljs-number">4</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"d"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">false</span> }
     ];
 
-    <span class="hljs-keyword">var</span> viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'view1'</span>);
+    <span class="hljs-keyword">var</span> viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"view1"</span>);
     viewer.load(data);
 
     <span class="hljs-comment">// Add new row</span>
-    viewer.update([{<span class="hljs-string">'x'</span>: <span class="hljs-number">5</span>, <span class="hljs-string">'y'</span>: <span class="hljs-string">'e'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>}]);
-
+    viewer.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"e"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> }]);
 });
 </code></pre>
+<p>In some situations, you may want finer grained control over the <code>table()</code>
+construction (see below), and <code>&lt;perspective-viewer&gt;</code>'s <code>load()</code> method
+also supports loading <code>table()</code>s directly. Remember to import the <code>perspective.js</code>
+library also, or the <code>perspective</code> symbol will not be available - though you
+can always use the <code>worker</code> property on a <code>&lt;perspective-viewer&gt;</code> to get the
+default worker singleton instantiated when another is not provided.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Create a new worker, then a new table on that worker.</span>
+<span class="hljs-keyword">var</span> table = perspective.worker().table(data);
+
+<span class="hljs-comment">// Bind a viewer element to this table.</span>
+viewer.load(table);
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="sharing-a-table-between-multiple-perspective-viewer-s"></a><a href="#sharing-a-table-between-multiple-perspective-viewer-s" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Sharing a <code>table()</code> between multiple <code>perspective-viewer</code>s</h3>
 <p>Views can share a table by instancing it separately and passing it to the
-<code>load()</code> method.  Both Views will update when the underlying <code>table</code>'
+<code>load()</code> method. Both Views will update when the underlying <code>table</code>'
 s <code>update()</code> method is invoked, but <code>table.delete()</code> will fail
 until all Views which use it are also deleted.</p>
-<pre><code class="hljs css javascript"><span class="hljs-keyword">var</span> view1 = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'view1'</span>);
-<span class="hljs-keyword">var</span> view2 = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'view2'</span>);
+<pre><code class="hljs css javascript"><span class="hljs-keyword">var</span> view1 = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"view1"</span>);
+<span class="hljs-keyword">var</span> view2 = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"view2"</span>);
 
-<span class="hljs-comment">// Use the default Web Worker instance</span>
-<span class="hljs-keyword">var</span> tbl = view1.worker.table(data);
+<span class="hljs-comment">// Create a new Web Worker</span>
+<span class="hljs-keyword">var</span> worker = perspective.worker();
 
-view1.load(tbl);
-view2.load(tbl);
+<span class="hljs-comment">// Create a table in this worker</span>
+<span class="hljs-keyword">var</span> table = worker.table(data);
 
-tbl.update([{<span class="hljs-string">'x'</span>: <span class="hljs-number">5</span>, <span class="hljs-string">'y'</span>: <span class="hljs-string">'e'</span>, <span class="hljs-string">'z'</span>: <span class="hljs-literal">true</span>}]);
+<span class="hljs-comment">// Load the same table in 2 different &lt;perspective-viewer&gt;s</span>
+view1.load(table);
+view2.load(table);
+
+<span class="hljs-comment">// Both `view1` and `view2` will reflect this update</span>
+table.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"e"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> }]);
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="installation.html">← Installation</a><a class="docs-next button" href="perspective_api.html">Perspective Library API →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#perspective-library">Perspective library</a><ul class="toc-headings"><li><a href="#in-the-browser">In the browser</a></li><li><a href="#in-nodejs">In Node.js</a></li><li><a href="#table"><code>table()</code></a></li><li><a href="#view"><code>view()</code></a></li></ul></li><li><a href="#perspective-viewer-web-component">web component</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>
+<h3><a class="anchor" aria-hidden="true" id="remote-perspective-via-workerhost"></a><a href="#remote-perspective-via-workerhost" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Remote Perspective via <code>WorkerHost()</code></h3>
+<p>For exceptionally large datasets, a <code>&lt;perspective-viewer&gt;</code> can be bound to a
+<code>perspective.table()</code> instance running in node.js remotely, rather than
+creating one in a Web Worker and downloading the entire data set. This
+trades off network bandwidth and server resource requirements, for a smaller
+browser memory and CPU footprint.</p>
+<p>In Node.js:</p>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> {
+    WebSocketHost
+} = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@jpmorganchase/perspective/build/perspective.node.js"</span>);
+<span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">"fs"</span>);
+
+<span class="hljs-comment">// Start a WS/HTTP host on port 8080.  The `assets` property allows</span>
+<span class="hljs-comment">// the `WorkerHost()` to also serves the file structure rooted in this</span>
+<span class="hljs-comment">// module's directory.</span>
+<span class="hljs-keyword">const</span> host = <span class="hljs-keyword">new</span> WebSocketHost({ <span class="hljs-attr">assets</span>: [__dirname], <span class="hljs-attr">port</span>: <span class="hljs-number">8080</span> });
+
+<span class="hljs-comment">// Read an arrow file from the file system and load it as a named data source.</span>
+<span class="hljs-keyword">const</span> arr = fs.readFileSync(__dirname + <span class="hljs-string">"/superstore.arrow"</span>);
+host.open(<span class="hljs-string">"data_source_one"</span>, arr);
+</code></pre>
+<p>In the browser:</p>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">var</span> elem = <span class="hljs-built_in">document</span>.getElementsByTagName(<span class="hljs-string">"perspective-viewer"</span>)[<span class="hljs-number">0</span>];
+
+<span class="hljs-comment">// Bind to the server's worker instead of instantiating a Web Worker.</span>
+<span class="hljs-keyword">var</span> worker = perspective.worker(<span class="hljs-built_in">window</span>.location.origin.replace(<span class="hljs-string">"http"</span>, <span class="hljs-string">"ws"</span>));
+
+<span class="hljs-comment">// Bind the viewer to the preloaded data source.</span>
+elem.load(worker.open(<span class="hljs-string">"data_source_one"</span>));
+</code></pre>
+<p><code>&lt;perspective-viewer&gt;</code> instances bound in this way are otherwise no different
+than <code>&lt;perspective-viewer&gt;</code>s which rely on a Web Worker, and can even share a
+host application with Web Worker bound <code>table()</code>s. The same <code>promise</code> based
+API is used to communicate with the server instantiated <code>view()</code>, only in this
+case it is over a Web Socket.</p>
+<h3><a class="anchor" aria-hidden="true" id="setting-reading-viewer-configuration-via-attributes"></a><a href="#setting-reading-viewer-configuration-via-attributes" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Setting &amp; reading viewer configuration via Attributes</h3>
+<p><code>&lt;perspective-view&gt;</code> uses the DOM's regular attribute API to set it's
+initial state, by reading JSON encoded properties from attributes for each
+<code>perspective</code> configuration property. For example, this HTML will apply
+<code>row_pivot</code> and <code>filter</code> confiuration to the initial <code>view()</code> created when
+data is loaded via the <code>load()</code> method, as well as set the UI controls to
+reflect this config. See the
+<a href="https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer">full Attribute API documentation</a>
+for a full description of the available Attributes.</p>
+<pre><code class="hljs css html"><span class="hljs-tag">&lt;<span class="hljs-name">perspective-viewer</span>
+    <span class="hljs-attr">row-pivots</span>=<span class="hljs-string">'["Category","Sub-Category"]'</span>
+    <span class="hljs-attr">filters</span>=<span class="hljs-string">'[["State","==","Texas"]]'</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
+</code></pre>
+<p>Attributes on a <code>&lt;perspective-viewer&gt;</code> are reactive. When the user interacts
+with the viewer, the attribtues will update to reflect the current viewer
+state, and these can be read with the standard DOM API method <code>getAttribute()</code>;
+likewise, the <code>setAttribute()</code> method will update the <code>view()</code> and UI state.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Gets  `elem`'s pivot state</span>
+<span class="hljs-keyword">var</span> pivots = elem.getAttribute(<span class="hljs-string">"row-pivots"</span>);
+
+<span class="hljs-comment">// Set `elems`'s sort state</span>
+elem.setAttribute(<span class="hljs-string">"sort"</span>, <span class="hljs-built_in">JSON</span>.stringify([[<span class="hljs-string">"Sales"</span>, <span class="hljs-string">"desc"</span>]]));
+</code></pre>
+<p>Alternatively, the <code>save()</code> and <code>restore()</code> methods allow you to read and write,
+respectively, all <code>view()</code> configuration properties at once.</p>
+<pre><code class="hljs css javascript"><span class="hljs-comment">// Get the current elem config</span>
+<span class="hljs-keyword">var</span> state = elem.save();
+
+<span class="hljs-comment">// ... later</span>
+
+<span class="hljs-comment">// Restore the previously saved state</span>
+elem.restore(state);
+</code></pre>
+<h3><a class="anchor" aria-hidden="true" id="update-events"></a><a href="#update-events" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Update events</h3>
+<p>Whenever a <code>&lt;perspective-viewer&gt;</code>s underlying <code>table()</code> is changed via the
+<code>load()</code> or <code>update()</code> methods, a <code>perspective-view-update</code> DOM event is fired.
+Similarly, <code>view()</code> updates instigated either throught he Attribute API, or
+through user interaction will fire a <code>perspective-config-update</code> event.</p>
+<pre><code class="hljs css javascript">elem.addEventListener(<span class="hljs-string">"perspective-config-update"</span>, <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{
+    <span class="hljs-keyword">var</span> config = elem.save();
+    <span class="hljs-built_in">console</span>.log(<span class="hljs-string">"The view() config has changed to "</span> + <span class="hljs-built_in">JSON</span>.stringify(config));
+});
+</code></pre>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="installation.html">← installation</a><a class="docs-next button" href="perspective.html">perspective →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#perspective-library"><code>perspective</code> library</a><ul class="toc-headings"><li><a href="#importing-in-the-browser">Importing in the browser</a></li><li><a href="#importing-in-nodejs">Importing in Node.js</a></li><li><a href="#loading-data-with-table">Loading data with <code>table()</code></a></li><li><a href="#querying-data-with-view">Querying data with <code>view()</code></a></li><li><a href="#deleting-a-table-or-view">Deleting a <code>table()</code> or <code>view()</code></a></li></ul></li><li><a href="#perspective-viewer-web-component"><code>perspective-viewer</code> web component</a><ul class="toc-headings"><li><a href="#loading-data">Loading data</a></li><li><a href="#sharing-a-table-between-multiple-perspective-viewer-s">Sharing a <code>table()</code> between multiple <code>perspective-viewer</code>s</a></li><li><a href="#remote-perspective-via-workerhost">Remote Perspective via <code>WorkerHost()</code></a></li><li><a href="#setting-reading-viewer-configuration-via-attributes">Setting &amp; reading viewer configuration via Attributes</a></li><li><a href="#update-events">Update events</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>
