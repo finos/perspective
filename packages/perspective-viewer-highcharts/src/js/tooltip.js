@@ -14,7 +14,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
     const has_row_pivot = row_pivot_titles.length > 0,
         has_column_pivot = column_pivot_titles.length > 0;
 
-    if (type === "area" || type === "line" || type === "column") {
+    if (type === "y") {
         // pivots cannot be type-mapped
         let row_pivot_text = "",
             column_pivot_text = "";
@@ -35,7 +35,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
         return `${row_pivot_text}
                 ${column_pivot_text}
                 <span>${axis_title}: </span><b>${format_value(context.y, axis_type)}</b>`;
-    } else if (type === "scatter" || type === "bubble") {
+    } else if (type === "xy") {
         const has_x_values = value_exists(axis_titles[0]),
             has_y_values = value_exists(axis_titles[1]),
             has_z_values = value_exists(axis_titles[2]),
@@ -86,9 +86,9 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
 
         const tooltip_text = [row_pivot_text, column_pivot_text, x_text, y_text, z_text, w_text];
         return tooltip_text.join("");
-    } else if (type === "heatmap") {
+    } else if (type === "xyz") {
         return `<span>${format_value(context.point.value)}</span>`;
-    } else if (type === "treemap" || type === "sunburst") {
+    } else if (type === "hierarchy") {
         return `<span>${context.point.id}: </span><b>${format_value(context.x)}</b>`;
     }
 

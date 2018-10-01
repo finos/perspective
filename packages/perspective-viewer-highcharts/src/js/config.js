@@ -87,25 +87,34 @@ export function set_category_axis(config, axis, type, top) {
 
 export function default_config(aggregates, mode) {
     let type = "scatter";
+    let hover_type = "xy";
     if (mode === "y_line") {
+        hover_type = "y";
         type = "line";
     } else if (mode === "y_area") {
+        hover_type = "y";
         type = "area";
     } else if (mode === "y_scatter") {
+        hover_type = "y";
         type = "scatter";
     } else if (mode.indexOf("bar") > -1) {
+        hover_type = "y";
         type = "column";
     } else if (mode == "treemap") {
+        hover_type = "hierarchy";
         type = "treemap";
     } else if (mode == "sunburst") {
+        hover_type = "hierarchy";
         type = "sunburst";
     } else if (mode === "scatter") {
+        hover_type = "xy";
         if (aggregates.length <= 3) {
             type = "scatter";
         } else {
             type = "bubble";
         }
     } else if (mode === "heatmap") {
+        hover_type = "xyz";
         type = "heatmap";
     }
 
@@ -217,7 +226,7 @@ export function default_config(aggregates, mode) {
                 that._view
                     .schema()
                     .then(schema => {
-                        let tooltip_text = tooltip.format_tooltip(this, type, schema, axis_titles, pivot_titles);
+                        let tooltip_text = tooltip.format_tooltip(this, hover_type, schema, axis_titles, pivot_titles);
                         highcharts_tooltip.label.attr({
                             text: tooltip_text
                         });
