@@ -1,0 +1,84 @@
+digraph G {
+    graph [rankdir="LR" fontname="helvetica" labeljust="l"]
+    subgraph cluster_1 {
+        node [shape="box" fontname="monospace" fontsize=8 color=gray70 style=filled fillcolor=white];
+        edge [arrowhead="oarrow" color=gray50 arrowsize=0.8]
+        subgraph cluster_2 {
+            graph [
+                label="\lWeb Worker #1";
+                style=filled
+                fillcolor=lightgrey
+                color=none
+                fontcolor=gray30
+                fontsize=10
+            ]
+            table1 [
+                label="table(csv)"
+                width=1
+            ]
+            table2 [
+                label="table(json)"
+                width=1
+            ]
+            view1 [
+                label="view({\l    row_pivot: [\"Category\"]\l    filter: [[\"State\",\"==\",\"Texas\"]]\l})\l"
+                width=3
+            ]
+            view2 [
+                label="view({\l    row_pivot: [\"Category\",\"Sub-Category\"]\l})\l"
+                width=3
+            ]
+            view3 [
+                label="view()\l"
+                width=3
+            ]
+            table1 -> {view1 view2};
+            table2 -> view3;
+        }
+        subgraph cluster_3 {
+            graph [
+                label="\lWeb Worker #2";
+                style=filled
+                fillcolor=lightgrey
+                color=none
+                fontcolor=gray30
+                fontsize=10
+            ]
+            table3 [
+                label="table(arrow)"
+                width=1
+            ]
+            view4 [
+                label="view({\l    row_pivot: [\"State\"]\l    column_pivot: [\"Segment\"]\l})\l"
+                width=3
+            ]
+            table3 -> view4;
+        }
+        subgraph cluster_4 {
+            label = "Main";
+        }
+        view1 -> viewer1;
+        view2 -> viewer2;
+        view3 -> viewer3;
+        view4 -> viewer4;
+
+        viewer1 [
+            label = "<perspective-viewer\l    view=\"y_bar\" row-pivots='[\"Category\"]'\l    filters='[[\"State\",\"==\",\"Texas\"]]'>\l"
+            width=3.2
+        ];
+        viewer2 [
+            label = "<perspective-viewer\l    view=\"xy_scatter\"\l    row-pivots='[\"Category\",\"Sub-Category\"]'>\l"
+            width=3.2
+        ];
+        viewer3 [
+            label = "<perspective-viewer\l    view=\"grid\">\l"
+            width=3.2
+        ];
+        viewer4 [
+            label = "<perspective-viewer\l    view=\"heatmap\"\l    row-pivots='[\"State\"]\l    column-pivots='[\"Segment\"]'>\l"
+            width=3.2
+        ];
+        label="\lBrowser";
+        color=none
+    }	
+}

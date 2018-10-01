@@ -24,7 +24,7 @@
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete",
         "clean:screenshots": "find screenshots/ \\( -name *.failed.png -o -name *.diff.png \\) -mindepth 1 -delete",
-        "docs": "documentation build src/js/view.js -f md --shallow > README.md"
+        "docs": "documentation build src/js/view.js -f md --shallow > README.md && cp README.md ../../docs/perspective-viewer.md"
     },
     "publishConfig": {
         "access": "public"

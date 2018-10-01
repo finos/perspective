@@ -28,10 +28,10 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 ## Examples
 
-* [Superstore](https://jsfiddle.net/texodus/gsoybtrp/) A static `superstore.arrow` demo.
-* [Olympics](https://jsfiddle.net/texodus/eax9tqbm/) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
-* [Streaming](https://jsfiddle.net/texodus/84u926L1/) A streaming random data demo.
-* [CSV](https://jsfiddle.net/texodus/pcrnd4jg/) Upload a CSV of your own.
+* [Superstore](https://jsfiddle.net/texodus/gsoybtrp/show/) A static `superstore.arrow` demo.
+* [Olympics](https://jsfiddle.net/texodus/eax9tqbm/show/) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
+* [Streaming](https://jsfiddle.net/texodus/84u926L1/show/) A streaming random data demo.
+* [CSV](https://jsfiddle.net/texodus/pcrnd4jg/show/) Upload a CSV of your own.
 
 ## Documentation
 

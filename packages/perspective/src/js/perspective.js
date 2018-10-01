@@ -115,6 +115,7 @@ module.exports = function(Module) {
 
     /**
      * Coerce string null into value null
+     * @private
      * @param {*} value
      */
     function clean_data(value) {
