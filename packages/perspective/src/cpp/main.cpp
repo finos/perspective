@@ -84,6 +84,7 @@ _get_fterms(t_schema schema, val j_filters) {
         t_filter_op comp = filter[1].as<t_filter_op>();
 
         switch (comp) {
+            case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
                 t_tscalvec terms{};
                 std::vector<std::string> j_terms = vecFromJSArray<std::string>(filter[2]);
@@ -1139,6 +1140,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
         .value("FILTER_OP_OR", FILTER_OP_OR)
         .value("FILTER_OP_IN", FILTER_OP_IN)
+        .value("FILTER_OP_NOT_IN", FILTER_OP_NOT_IN)
         .value("FILTER_OP_AND", FILTER_OP_AND)
         .value("FILTER_OP_IS_NAN", FILTER_OP_IS_NAN)
         .value("FILTER_OP_IS_NOT_NAN", FILTER_OP_IS_NOT_NAN)

@@ -1109,6 +1109,7 @@ module.exports = function(Module) {
             "ends with": __MODULE__.t_filter_op.FILTER_OP_ENDS_WITH,
             or: __MODULE__.t_filter_op.FILTER_OP_OR,
             in: __MODULE__.t_filter_op.FILTER_OP_IN,
+            "not in": __MODULE__.t_filter_op.FILTER_OP_NOT_IN,
             and: __MODULE__.t_filter_op.FILTER_OP_AND,
             "is nan": __MODULE__.t_filter_op.FILTER_OP_IS_NAN,
             "is not nan": __MODULE__.t_filter_op.FILTER_OP_IS_NOT_NAN

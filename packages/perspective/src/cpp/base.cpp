@@ -252,6 +252,9 @@ filter_op_to_str(t_filter_op op) {
         case FILTER_OP_IN: {
             return "in";
         } break;
+        case FILTER_OP_NOT_IN: {
+            return "not in";
+        } break;
         case FILTER_OP_AND: {
             return "and";
         } break;

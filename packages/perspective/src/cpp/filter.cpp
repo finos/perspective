@@ -82,8 +82,9 @@ t_fterm::get_expr() const {
             ss << filter_op_to_str(m_op) << " ";
             ss << m_threshold.to_string(true);
         } break;
+        case FILTER_OP_NOT_IN:
         case FILTER_OP_IN: {
-            ss << " in (";
+            ss << " " << filter_op_to_str(m_op) << " (";
             for (auto v : m_bag) {
                 ss << v.to_string(true) << ", ";
             }
