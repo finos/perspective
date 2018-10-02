@@ -223,7 +223,7 @@ function column_visibility_clicked(ev) {
         }
     } else {
         // check if we're manipulating computed column input
-        if (ev.path[1].classList.contains("psp-cc-computation__input-column")) {
+        if (ev.path && ev.path[1].classList.contains("psp-cc-computation__input-column")) {
             //  this._computed_column._register_inputs();
             this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
             this._update_column_view();
