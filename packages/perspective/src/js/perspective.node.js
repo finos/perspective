@@ -65,6 +65,10 @@ function read_promise(filePath) {
 
 function create_http_server(assets, host_psp) {
     return async function(request, response) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Request-Method", "*");
+        response.setHeader("Access-Control-Allow-Methods", "OPTIONS,GET");
+        response.setHeader("Access-Control-Allow-Headers", "*");
         let url = request.url;
         if (url === "/") {
             url = "/index.html";
