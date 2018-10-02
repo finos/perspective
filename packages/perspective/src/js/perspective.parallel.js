@@ -7,7 +7,7 @@
  *
  */
 
-import {detectIE, ScriptPath} from "./utils.js";
+import {ScriptPath} from "./utils.js";
 
 import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
 
@@ -20,18 +20,6 @@ import {worker} from "./api.js";
  */
 
 var __SCRIPT_PATH__ = new ScriptPath();
-
-// IE bug
-if (detectIE() && window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1) {
-    console.warn("Perspective does not support parallel mode in IE when loading cross-origin.  Falling back to single-process mode ...");
-    (function(d, script) {
-        script = d.createElement("script");
-        script.type = "text/javascript";
-        script.async = true;
-        script.src = __SCRIPT_PATH__.path() + "perspective.worker.asm.js";
-        d.getElementsByTagName("head")[0].appendChild(script);
-    })(document);
-}
 
 // https://github.com/kripken/emscripten/issues/6042
 function detect_iphone() {
@@ -61,7 +49,7 @@ class WebWorker extends worker {
         super();
         if (window.__PSP_WORKER__) {
             this._start_embedded();
-        } else if (window.location.href.indexOf(__SCRIPT_PATH__.host()) > -1) {
+        } else if (window.location.host === __SCRIPT_PATH__.host().trim(window.location.host.length)) {
             this._start_same_origin();
         } else {
             this._start_cross_origin();
@@ -189,17 +177,6 @@ class WebSocketWorker extends worker {
 
 export default {
     worker: function(url) {
-        if (window.location.href.indexOf(__SCRIPT_PATH__.host()) === -1 && detectIE()) {
-            /* This is a nasty edge case, specifically regarding when IE tries to load perspective as a WebWorker, 
-               but as a cross-origin request. This is not supported by IE AFAIK, so we instead 
-               download the inline version of the asmjs build of perspective, by inlining the script tag into <head> 
-               via Javascript. 
-               
-               This binds the perspective symbol globally, and a reference to this symbol is returned here when an 
-               attempt to instantiate a worker is made.
-            */
-            return window.perspective;
-        }
         if (url) {
             return new WebSocketWorker(url);
         } else {
