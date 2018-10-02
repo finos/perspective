@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+    <channel>
+        <title>Perspective Blog</title>
+        <link>https://jpmorganchase.github.io//perspective/blog</link>
+        <description>The best place to stay up-to-date with the latest Perspective news and events.</description>
+        <lastBuildDate>Mon, 01 Oct 2018 06:00:00 GMT</lastBuildDate>
+        <docs>http://blogs.law.harvard.edu/tech/rss</docs>
+        <generator>Feed for Node.js</generator>
+        <image>
+            <title>Perspective Blog</title>
+            <url>https://jpmorganchase.github.io//perspective/img/perspective.svg</url>
+            <link>https://jpmorganchase.github.io//perspective/blog</link>
+        </image>
+        <copyright>Copyright © 2018 Perspective Authors</copyright>
+        <item>
+            <title><![CDATA[0.2.0 Release]]></title>
+            <link>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</link>
+            <guid>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</guid>
+            <pubDate>Mon, 01 Oct 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>After nine months of tireless development and over 700 commits from 18
+exceptionally talented <a href="https://github.com/jpmorganchase/perspective/graphs/contributors">contributors</a>,
+we are pleased to announce the v0.2.0 release of Perspective!  With this release
+comes a cavalcade of exciting features, performance optimizations, bug fixes,
+and <strike>easter eggs</strike> usability improvements.</p>
+<p>Get started quickly with our <a href="https://jpmorganchase.github.io/perspective/docs/installation.html">new and improved documentation</a>,
+or try out some <a href="https://jsfiddle.net/user/texodus/fiddles/">live examples on JSFiddle</a>!</p>
+]]></description>
+        </item>
+    </channel>
+</rss>
