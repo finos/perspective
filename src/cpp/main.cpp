@@ -253,13 +253,21 @@ val Int32Array = val::global("Int32Array");
 val Float32Array = val::global("Float32Array");
 val Float64Array = val::global("Float64Array");
 
+// TODO: template<T>
 val
-vec_to_arraybuffer(std::vector<const char*>& vec, t_dtype dtype) {
-    int vec_size = sizeof(vec[0]) * vec.size();
-    val buffer = ArrayBuffer.new_(vec_size);
-    val typed_array = arraybuffer::Int8Array.new_(buffer);
+vec_to_typed_array(std::vector<t_float64>& data, t_dtype dtype) {
+    int data_size = sizeof(data[0]) * data.size();
 
-    switch (dtype) {
+    val buffer = ArrayBuffer.new_(data_size);
+    val typed_array = arraybuffer::Float64Array.new_(buffer);
+
+    for (int i = 0; i < data.size() + 1; i++) {
+        typed_array.call<void>("fill", val(data[i]), i, i + 1);
+    }
+
+    return typed_array;
+
+    /* switch (dtype) {
         case DTYPE_INT8: {
             typed_array = arraybuffer::Int8Array.new_(buffer);
         } break;
@@ -278,24 +286,31 @@ vec_to_arraybuffer(std::vector<const char*>& vec, t_dtype dtype) {
         } break;
         default:
             return buffer;
-    }
-
-    return typed_array;
+    } */
 }
 
 val
 col_to_arraybuffer(t_table_sptr tbl, val col_name) {
-    auto col = tbl->get_column(col_name.as<std::string>);
+    auto col = tbl->get_column(col_name.as<std::string>());
     auto dtype = col->get_dtype();
+    auto col_size = col->size();
 
-    std::vector<t_uchar> data;
-    data.reserve(col->size());
-    data.resize(col->size());
+    if (dtype == DTYPE_FLOAT64) {
+        std::vector<t_float64> data;
+        data.reserve(col_size);
+        data.resize(col_size);
 
-    auto col_vect = col->fill(data, 0, col->size());
-    val buffer = arraybuffer::vec_to_arraybuffer(data, dtype);
+        for (t_uindex idx = 0; idx < col_size; idx++)
 
-    return buffer;
+        {
+            data[idx] = *col->get_nth<t_float64>(idx);
+        }
+
+        val buffer = arraybuffer::vec_to_typed_array(data, dtype);
+        return buffer;
+    } else {
+        return val(col_size);
+    }
 }
 } // namespace arraybuffer
 
@@ -1357,4 +1372,5 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
+    function("col_to_arraybuffer", &arraybuffer::col_to_arraybuffer);
 }

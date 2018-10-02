@@ -1859,9 +1859,6 @@ module.exports = function(Module) {
                     pool.process();
                 }
 
-                // TODO: remove this part
-                // __MODULE__.col_to_arraybuffer(tbl, "")
-
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {
                 if (pool) {
