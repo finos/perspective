@@ -64,6 +64,15 @@ struct t_operator_in {
 };
 
 template <typename DATA_T, int DTYPE_T>
+struct t_operator_not_in {
+    inline bool
+    operator()(const DATA_T& value, const std::set<DATA_T>& threshold_values) {
+        return threshold_values.find(value) == threshold_values.end();
+    }
+};
+
+
+template <typename DATA_T, int DTYPE_T>
 struct t_operator_begins_with {
     inline bool
     operator()(DATA_T value, DATA_T threshold_value) {
@@ -142,6 +151,9 @@ struct PERSPECTIVE_EXPORT t_fterm {
     operator()(t_tscalar s) const {
         t_bool rv;
         switch (m_op) {
+            case FILTER_OP_NOT_IN: {
+                rv = std::find(m_bag.begin(), m_bag.end(), s) == m_bag.end();
+            } break;
             case FILTER_OP_IN: {
                 rv = std::find(m_bag.begin(), m_bag.end(), s) != m_bag.end();
             } break;

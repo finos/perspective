@@ -149,6 +149,17 @@ module.exports = perspective => {
             });
         });
 
+        describe("not in", function() {
+            it("y not in ['d']", async function() {
+                var table = perspective.table(data);
+                var view = table.view({
+                    filter: [["y", "not in", ["d"]]]
+                });
+                let json = await view.to_json();
+                expect(rdata.slice(0, 3)).toEqual(json);
+            });
+        });
+
         describe("contains", function() {
             it("y contains 'a'", async function() {
                 var table = perspective.table(data);

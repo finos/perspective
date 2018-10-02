@@ -150,6 +150,7 @@ enum t_filter_op {
     FILTER_OP_CONTAINS,
     FILTER_OP_OR,
     FILTER_OP_IN,
+    FILTER_OP_NOT_IN,
     FILTER_OP_AND,
     FILTER_OP_IS_NAN,
     FILTER_OP_IS_NOT_NAN,
