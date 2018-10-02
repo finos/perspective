@@ -162,8 +162,13 @@ function cellStyle(gridCellConfig) {
             } else if (isNaN(gridCellConfig.value)) {
                 gridCellConfig.value = "-";
             } else {
-                gridCellConfig.color =
-                    gridCellConfig.value >= 0 ? gridCellConfig.columnHeaderBackgroundNumberPositive || "rgb(160,207,255)" : gridCellConfig.columnHeaderBackgroundNumberNegative || "rgb(255,136,136)";
+                if (gridCellConfig.value > 0) {
+                    gridCellConfig.color = gridCellConfig.columnColorNumberPositive || "rgb(160,207,255)";
+                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberPositive ? gridCellConfig.columnBackgroundColorNumberPositive : gridCellConfig.backgroundColor;
+                } else {
+                    gridCellConfig.color = gridCellConfig.columnColorNumberNegative || "rgb(255,136,136)";
+                    gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberNegative ? gridCellConfig.columnBackgroundColorNumberNegative : gridCellConfig.backgroundColor;
+                }
             }
         } else if (type === "boolean") {
             gridCellConfig.value = String(gridCellConfig.value);
