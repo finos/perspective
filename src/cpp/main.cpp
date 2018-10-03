@@ -245,7 +245,7 @@ fill_col_dict(val dictvec, t_col_sptr col) {
 }
 } // namespace arrow
 
-namespace arraybuffer {
+namespace typed_array {
 val ArrayBuffer = val::global("ArrayBuffer");
 val Int8Array = val::global("Int8Array");
 val Int16Array = val::global("Int16Array");
@@ -253,66 +253,93 @@ val Int32Array = val::global("Int32Array");
 val Float32Array = val::global("Float32Array");
 val Float64Array = val::global("Float64Array");
 
-// TODO: template<T>
+template <typename T>
 val
-vec_to_typed_array(std::vector<t_float64>& data, t_dtype dtype) {
+fill(std::vector<T>& data, t_dtype dtype) {
     int data_size = sizeof(data[0]) * data.size();
-
     val buffer = ArrayBuffer.new_(data_size);
-    val typed_array = arraybuffer::Float64Array.new_(buffer);
+    val arr = val::undefined();
 
-    for (int i = 0; i < data.size() + 1; i++) {
-        typed_array.call<void>("fill", val(data[i]), i, i + 1);
-    }
-
-    return typed_array;
-
-    /* switch (dtype) {
+    switch (dtype) {
         case DTYPE_INT8: {
-            typed_array = arraybuffer::Int8Array.new_(buffer);
+            arr = typed_array::Int8Array.new_(buffer);
         } break;
         case DTYPE_INT16: {
-            typed_array = arraybuffer::Int16Array.new_(buffer);
+            arr = typed_array::Int16Array.new_(buffer);
         } break;
-        case DTYPE_INT32:
-        case DTYPE_INT64: {
-            typed_array = arraybuffer::Int32Array.new_(buffer);
+        case DTYPE_INT32: {
+            arr = typed_array::Int32Array.new_(buffer);
         } break;
         case DTYPE_FLOAT32: {
-            typed_array = arraybuffer::Float32Array.new_(buffer);
+            arr = typed_array::Float32Array.new_(buffer);
         } break;
+        case DTYPE_INT64:
         case DTYPE_FLOAT64: {
-            typed_array = arraybuffer::Float64Array.new_(buffer);
+            arr = typed_array::Float64Array.new_(buffer);
         } break;
         default:
-            return buffer;
-    } */
-}
-
-val
-col_to_arraybuffer(t_table_sptr tbl, val col_name) {
-    auto col = tbl->get_column(col_name.as<std::string>());
-    auto dtype = col->get_dtype();
-    auto col_size = col->size();
-
-    if (dtype == DTYPE_FLOAT64) {
-        std::vector<t_float64> data;
-        data.reserve(col_size);
-        data.resize(col_size);
-
-        for (t_uindex idx = 0; idx < col_size; idx++)
-
-        {
-            data[idx] = *col->get_nth<t_float64>(idx);
-        }
-
-        val buffer = arraybuffer::vec_to_typed_array(data, dtype);
-        return buffer;
-    } else {
-        return val(col_size);
+            return arr;
     }
+
+    for (int i = 0; i < data.size() + 1; i++) {
+        arr.call<void>("fill", val(data[i]), i, i + 1);
+    }
+
+    return arr;
 }
-} // namespace arraybuffer
+
+template <typename T>
+std::vector<T>
+fill_column_vec(t_tscalvec& data, int size) {
+    std::vector<T> vec;
+    vec.reserve(size);
+    vec.resize(size);
+
+    for (t_uindex idx = 0; idx < size; idx++) {
+        vec[idx] = data[idx].get<T>();
+    }
+
+    return vec;
+}
+
+template <typename T>
+val
+col_to_typed_array(T ctx, t_tvidx idx) {
+    // TODO: break early for non-numerical dtype
+    t_tscalvec data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
+    auto dtype = ctx->get_column_dtype(idx);
+    size_t size = data.size();
+
+    // TODO: cast t_int64 to t_float64
+    switch (dtype) {
+        case DTYPE_INT8: {
+            std::vector<t_int8> vec = fill_column_vec<t_int8>(data, size);
+            return typed_array::fill(vec, dtype);
+        } break;
+        case DTYPE_INT16: {
+            std::vector<t_int16> vec = fill_column_vec<t_int16>(data, size);
+            return typed_array::fill(vec, dtype);
+        } break;
+        case DTYPE_INT32: {
+            std::vector<t_int32> vec = fill_column_vec<t_int32>(data, size);
+            return typed_array::fill(vec, dtype);
+        } break;
+        case DTYPE_FLOAT32: {
+            std::vector<t_float32> vec = fill_column_vec<t_float32>(data, size);
+            return typed_array::fill(vec, dtype);
+        } break;
+        case DTYPE_INT64:
+        case DTYPE_FLOAT64: {
+            std::vector<t_float64> vec = fill_column_vec<t_float64>(data, size);
+            return typed_array::fill(vec, dtype);
+        } break;
+        default:
+            return val::undefined();
+    }
+
+    return val::undefined();
+}
+} // namespace typed_array
 
 template <typename T>
 void
@@ -1372,5 +1399,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
-    function("col_to_arraybuffer", &arraybuffer::col_to_arraybuffer);
+    function("col_to_typed_array_zero", &typed_array::col_to_typed_array<t_ctx0_sptr>);
+    function("col_to_typed_array_one", &typed_array::col_to_typed_array<t_ctx1_sptr>);
+    function("col_to_typed_array_two", &typed_array::col_to_typed_array<t_ctx2_sptr>);
 }

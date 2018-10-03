@@ -864,6 +864,51 @@ module.exports = function(Module) {
         this._delete_callback = callback;
     };
 
+    view.prototype.col_to_typed_array = async function() {
+        // TODO: implement name-to-index matching
+        /* const schema = await this.schema();
+
+        if (schema[col_name] !== "float" || schema[col_name] !== "integer") {
+            return null;
+        }
+        */
+        let arrs = [];
+
+        if (this.sides() === 0) {
+            for (let i = 0; i < 100; i++) {
+                let ta = __MODULE__.col_to_typed_array_zero(this.ctx, i);
+                if (ta !== undefined) {
+                    arrs.push({
+                        index: i,
+                        data: ta
+                    });
+                }
+            }
+        } else if (this.sides() === 1) {
+            for (let i = 0; i < 100; i++) {
+                let ta = __MODULE__.col_to_typed_array_one(this.ctx, i);
+                if (ta !== undefined) {
+                    arrs.push({
+                        index: i,
+                        data: ta
+                    });
+                }
+            }
+        } else {
+            for (let i = 0; i < 100; i++) {
+                let ta = __MODULE__.col_to_typed_array_two(this.ctx, i);
+                if (ta !== undefined) {
+                    arrs.push({
+                        index: i,
+                        data: ta
+                    });
+                }
+            }
+        }
+
+        return arrs;
+    };
+
     /******************************************************************************
      *
      * Table

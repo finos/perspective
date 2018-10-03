@@ -18,6 +18,7 @@ import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_si
 
 export const draw = mode =>
     async function(el, view, task) {
+        console.log(view.col_to_typed_array());
         const row_pivots = this._view_columns("#row_pivots perspective-row:not(.off)");
         const col_pivots = this._view_columns("#column_pivots perspective-row:not(.off)");
         const aggregates = this._get_view_aggregates();

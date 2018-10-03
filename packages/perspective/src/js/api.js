@@ -79,6 +79,8 @@ view.prototype.collapse = async_queue("collapse");
 
 view.prototype.delete = async_queue("delete");
 
+view.prototype.col_to_typed_array = async_queue("col_to_typed_array");
+
 view.prototype.on_update = subscribe("on_update", "view_method", true);
 
 view.prototype.on_delete = subscribe("on_delete", "view_method", true);
