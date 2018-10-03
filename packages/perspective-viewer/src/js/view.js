@@ -1326,14 +1326,10 @@ class View extends ViewPrivate {
      * const tbl = perspective.table("x,y\n1,a\n2,b");
      * my_viewer.load(tbl);
      */
-    load(data) {
+    load(data, options) {
         try {
             data = data.trim();
         } catch (e) {}
-        let options = {};
-        if (this.getAttribute("index")) {
-            options.index = this.getAttribute("index");
-        }
         let table;
         if (data.hasOwnProperty("_name")) {
             table = data;
