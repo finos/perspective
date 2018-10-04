@@ -9,6 +9,7 @@
 
 import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "./defaults.js";
 import {DateParser, is_valid_date} from "./date_parser.js";
+import {bindall} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -445,6 +446,7 @@ module.exports = function(Module) {
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
+        bindall(this);
     }
 
     /**
@@ -906,6 +908,7 @@ module.exports = function(Module) {
         this.views = [];
         this.limit = limit;
         this.limit_index = limit_index;
+        bindall(this);
     }
 
     table.prototype._update_callback = function() {
