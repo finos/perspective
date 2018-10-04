@@ -169,6 +169,25 @@ module.exports = perspective => {
         });
     });
 
+    describe("Computed column updates", function() {
+        it("String computed column of arity 1", async function() {
+            var table = perspective.table(data);
+
+            let table2 = table.add_computed([
+                {
+                    column: "yes/no",
+                    type: "string",
+                    func: z => (z === true ? "yes" : "no"),
+                    inputs: ["z"]
+                }
+            ]);
+            table2.update(data);
+            let result = await table2.view({aggregate: [{op: "count", column: "yes/no"}]}).to_json();
+            let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
+            expect(result).toEqual(expected);
+        });
+    });
+
     describe("Notifications", function() {
         it("`on_update()`", function(done) {
             var table = perspective.table(meta);
