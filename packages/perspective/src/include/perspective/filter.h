@@ -71,7 +71,6 @@ struct t_operator_not_in {
     }
 };
 
-
 template <typename DATA_T, int DTYPE_T>
 struct t_operator_begins_with {
     inline bool
