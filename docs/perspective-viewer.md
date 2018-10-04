@@ -235,6 +235,7 @@ element, its internal `perspective.table` will also be deleted.
 
 -   `data` **any** The data to load.  Works with the same input types
     supported by `perspective.table`.
+-   `options`  
 
 **Examples**
 

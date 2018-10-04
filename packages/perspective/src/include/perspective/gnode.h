@@ -254,7 +254,8 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                 auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
                     cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
 
-                dcolumn->set_nth<DATA_T>(added_count, cur_value - prev_value);
+                dcolumn->set_nth<DATA_T>(
+                    added_count, cur_valid ? cur_value - prev_value : DATA_T(0));
                 dcolumn->set_valid(added_count, true);
 
                 pcolumn->set_nth<DATA_T>(added_count, prev_value);
