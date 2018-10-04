@@ -38,7 +38,7 @@
         "lint:autofix:less": "prettier  --tab-width 4 --write packages/**/src/less/*.less",
         "lint:autofix:html": "html-beautify packages/**/src/html/*.html -r",
         "lint:autofix:json": "prettier --tab-width 4 --write **/package.json",
-        "lint:autofix:markdown": "prettier --tab-width 4 --write docs/*.md",
+        "lint:autofix:markdown": "prettier --tab-width 4 --write docs/usage.md docs/installation.md",
         "lint:autofix": "npm-run-all --silent lint:autofix:*",
         "_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",

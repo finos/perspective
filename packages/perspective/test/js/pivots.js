@@ -214,30 +214,15 @@ module.exports = perspective => {
                 chg: "float",
                 pos: "integer"
             };
-
-            const table = perspective.table(schema, {index: "id"});
-
             const rec1 = [{id: 1, name: "John", pos: 100, chg: 1}, {id: 2, name: "Mary", pos: 200, chg: 2}, {id: 3, name: "Tom", pos: 300, chg: 3}];
-
+            const table = perspective.table(schema, {index: "id"});
             table.update(rec1);
-
             let view = table.view({
                 row_pivot: ["id"],
                 aggregate: [{op: "sum", column: "pos"}]
             });
-
-            let result1 = await view.to_json();
-            console.log(result1);
-
-            let rec2 = [
-                {
-                    id: 1,
-                    chg: 3
-                }
-            ];
-
+            let rec2 = [{id: 1, chg: 3}];
             table.update(rec2);
-
             let result2 = await view.to_json();
             var answer = [{__ROW_PATH__: [], pos: 600}, {__ROW_PATH__: [1], pos: 100}, {__ROW_PATH__: [2], pos: 200}, {__ROW_PATH__: [3], pos: 300}];
             expect(answer).toEqual(result2);
