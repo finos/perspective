@@ -1,4 +1,5 @@
 {
+    "regressions.html/regular updates": "edcc330ff7f45b41329315853db41cdc",
     "superstore.html/shows a grid without any settings applied.": "5c9f7fcce4e9bb1f144409afbc43b0fa",
     "superstore.html/pivots by a row.": "a4a3502c749d8a5f08c3b02e28096bc5",
     "superstore.html/pivots by two rows.": "c562f3ff391ca00b012b3ae234e54403",
@@ -12,5 +13,6 @@
     "superstore.html/sorts by a hidden column.": "93293864b4d0670ba1e46ec5ff397d02",
     "superstore.html/filters by a numeric column.": "f3b7ca04028702596acabfbe46ca074c",
     "superstore.html/pivots by a column.": "d1dce7a5d99e1760954bb99751e0a761",
-    "superstore.html/collapses to depth smaller than viewport": "42f4811a16d4aaaa4a2d7ac5e632d7d9"
+    "superstore.html/collapses to depth smaller than viewport": "42f4811a16d4aaaa4a2d7ac5e632d7d9",
+    "regressions.html/saving a computed column does not interrupt update rendering": "67a91687a0ae568d86c9ddb0fa1fff63"
 }

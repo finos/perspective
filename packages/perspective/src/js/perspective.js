@@ -1306,12 +1306,19 @@ module.exports = function(Module) {
         let pdata;
         let cols = this._columns();
         let schema = this.gnode.get_tblschema();
+        let names = schema.columns();
         let types = schema.types();
 
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, cols, types);
         } else {
             pdata = parse_data(data, cols, types);
+        }
+
+        for (let i = 0; i < names.size(); i++) {
+            if (cols.indexOf(names.get(i)) === -1) {
+                pdata.types.splice(i, 1);
+            }
         }
 
         let tbl;
@@ -1335,6 +1342,7 @@ module.exports = function(Module) {
                 tbl.delete();
             }
             schema.delete();
+            names.delete();
             types.delete();
         }
     };
@@ -1407,7 +1415,7 @@ module.exports = function(Module) {
                 computed = this.computed.concat(computed);
             }
 
-            return new table(gnode, pool, this.index, computed);
+            return new table(gnode, pool, this.index, computed, this.limit, this.limit_index);
         } catch (e) {
             if (pool) {
                 pool.delete();
@@ -1425,11 +1433,12 @@ module.exports = function(Module) {
 
     table.prototype._columns = function() {
         let schema = this.gnode.get_tblschema();
+        let computed_schema = this._computed_schema();
         let cols = schema.columns();
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
             let name = cols.get(cidx);
-            if (name !== "psp_okey") {
+            if (name !== "psp_okey" && typeof computed_schema[name] === "undefined") {
                 names.push(name);
             }
         }

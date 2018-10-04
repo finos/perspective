@@ -110,9 +110,9 @@ beforeAll(async () => {
         } else {
             text = msg.text;
         }
-        if (msg.type === "error") {
+        if (msg.type() === "error") {
             errors.push(text);
-            private_console.log(`${__name}: ${text}`);
+            private_console.log(`${__name}: ${text}\n`);
         }
     });
     page.on("pageerror", msg => {
@@ -208,10 +208,7 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null) {
                 }
             }
             if (process.env.WRITE_TESTS) {
-                setTimeout(() => {
-                    results[_url + "/" + name] = hash;
-                    new_results[_url + "/" + name] = hash;
-                });
+                new_results[_url + "/" + name] = hash;
             }
             expect(errors).toEqual([]);
             expect(hash).toBe(results[_url + "/" + name]);

@@ -282,7 +282,9 @@ async function grid_update(div, view, task) {
         return;
     }
 
-    this.hypergrid.behavior.dataModel.setDirty(nrows);
+    const dataModel = this.hypergrid.behavior.dataModel;
+    dataModel.setDirty(nrows);
+    dataModel._view = view;
     this.hypergrid.canvas.paintNow();
 }
 
@@ -337,7 +339,7 @@ async function grid_create(div, view, task) {
     dataModel._view = view;
 
     dataModel.pspFetch = async function(range) {
-        let next_page = await view.to_columns(range);
+        let next_page = await dataModel._view.to_columns(range);
         this.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
         const data = this.data;
