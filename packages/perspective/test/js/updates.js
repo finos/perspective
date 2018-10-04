@@ -143,6 +143,14 @@ module.exports = perspective => {
             expect(result).toEqual(expected);
         });
 
+        it("`update()` unbound to table", async function() {
+            var table = perspective.table(meta);
+            var updater = table.update;
+            updater(data);
+            let result = await table.view().to_json();
+            expect(data).toEqual(result);
+        });
+
         it("Multiple `update()`s", async function() {
             var table = perspective.table(meta);
             table.update(data);

@@ -7,6 +7,8 @@
  *
  */
 
+import {bindall} from "./utils.js";
+
 function subscribe(method, cmd) {
     return function() {
         let resolve = arguments[arguments.length - 1];
@@ -52,6 +54,7 @@ function view(worker, table_name, config) {
         config: config
     };
     this._worker.post(msg);
+    bindall(this);
 }
 
 view.prototype.to_json = async_queue("to_json");
@@ -94,6 +97,8 @@ function table(worker, data, options) {
     };
     this._worker.post(msg);
     this._name = name;
+
+    bindall(this);
 }
 
 function computed_table(worker, computed, name) {
@@ -178,6 +183,7 @@ export function worker() {
         handlers: {},
         messages: []
     };
+    bindall(this);
 }
 
 worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {

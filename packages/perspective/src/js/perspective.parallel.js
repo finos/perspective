@@ -49,7 +49,7 @@ class WebWorker extends worker {
         super();
         if (window.__PSP_WORKER__) {
             this._start_embedded();
-        } else if (window.location.host === __SCRIPT_PATH__.host().trim(window.location.host.length)) {
+        } else if (window.location.origin === __SCRIPT_PATH__.host().slice(0, window.location.origin.length)) {
             this._start_same_origin();
         } else {
             this._start_cross_origin();
