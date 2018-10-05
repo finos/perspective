@@ -1318,7 +1318,7 @@ module.exports = function(Module) {
             pdata = parse_data(data, cols, types);
         }
 
-        for (let i = 0; i < names.size(); i++) {
+        for (let i = names.size() - 1; i >= 0; i--) {
             if (cols.indexOf(names.get(i)) === -1) {
                 pdata.types.splice(i, 1);
             }
