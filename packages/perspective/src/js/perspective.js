@@ -624,14 +624,14 @@ module.exports = function(Module) {
                         let row_path = this.ctx.unity_get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                            const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
                             formatter.addColumnValue(data, row, col_name, value);
                         }
                         row_path.delete();
                     }
                 } else {
                     let col_name = col_names[start_col + cidx];
-                    formatter.setColumnValue(data, row, col_name, slice[idx]);
+                    formatter.setColumnValue(data, row, col_name, clean_data(slice[idx]));
                 }
             }
         }

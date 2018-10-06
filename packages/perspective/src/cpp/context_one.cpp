@@ -139,7 +139,6 @@ t_ctx1::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx 
             values[insert_idx].set(tmpvalues[src_idx]);
         }
     }
-
     return values;
 }
 

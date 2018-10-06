@@ -53,8 +53,8 @@ t_dtree_ctx::build_aggregates() {
 
     for (const auto& spec : m_aggspecs) {
         auto cinfo = spec.get_output_specs(delta_schema);
-
         for (const auto& ci : cinfo) {
+            PSP_VERBOSE_ASSERT(ci.m_type != DTYPE_NONE, "NULL type encountered");
             columns.push_back(ci.m_name);
             dtypes.push_back(ci.m_type);
         }
