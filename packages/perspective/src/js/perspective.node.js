@@ -89,7 +89,9 @@ function create_http_server(assets, host_psp) {
             if (host_psp || typeof host_psp === "undefined") {
                 for (let rootDir of DEFAULT_ASSETS) {
                     try {
-                        let filePath = RESOLVER(rootDir + url, {paths: [LOCAL_PATH]});
+                        let paths = RESOLVER.paths(rootDir + url);
+                        paths = [...paths, ...assets.map(x => path.join(x, "node_modules")), LOCAL_PATH];
+                        let filePath = RESOLVER(rootDir + url, {paths});
                         let content = await read_promise(filePath);
                         if (typeof content !== "undefined") {
                             console.log(`200 ${url}`);
