@@ -328,13 +328,30 @@ module.exports = function(Module) {
         let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
             return loader.loadColumn(field, arrow.getColumnAt(colIdx));
         }, new ArrowColumnLoader());
-        return {
-            row_count: arrow.length,
-            is_arrow: true,
-            names: loader.names,
-            types: loader.types,
-            cdata: loader.cdata
-        };
+        if (typeof loader.cdata[0].values === "undefined") {
+            let nchunks = loader.cdata[0].data.chunkVectors.length;
+            let chunks = [];
+            for (let x = 0; x < nchunks; x++) {
+                chunks.push({
+                    row_count: loader.cdata[0].data.chunkVectors[x].length,
+                    is_arrow: true,
+                    names: loader.names,
+                    types: loader.types,
+                    cdata: loader.cdata.map(y => y.data.chunkVectors[x])
+                });
+            }
+            return chunks;
+        } else {
+            return [
+                {
+                    row_count: arrow.length,
+                    is_arrow: true,
+                    names: loader.names,
+                    types: loader.types,
+                    cdata: loader.cdata
+                }
+            ];
+        }
     }
 
     /**
@@ -1315,29 +1332,33 @@ module.exports = function(Module) {
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, cols, types);
         } else {
-            pdata = parse_data(data, cols, types);
+            pdata = [parse_data(data, cols, types)];
         }
 
         for (let i = names.size() - 1; i >= 0; i--) {
             if (cols.indexOf(names.get(i)) === -1) {
-                pdata.types.splice(i, 1);
+                for (let chunk of pdata) {
+                    chunk.types.splice(i, 1);
+                }
             }
         }
 
         let tbl;
         try {
-            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.limit_index, this.limit || 4294967295, this.index || "", pdata.is_arrow, false);
+            for (let chunk of pdata) {
+                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, false);
 
-            this.limit_index += pdata.row_count;
-            if (this.limit) {
-                this.limit_index = this.limit_index % this.limit;
+                this.limit_index += chunk.cdata[0].length;
+                if (this.limit) {
+                    this.limit_index = this.limit_index % this.limit;
+                }
+
+                // Add any computed columns
+                this._calculate_computed(tbl, this.computed);
+
+                __MODULE__.fill(this.pool, this.gnode, tbl);
+                this.initialized = true;
             }
-
-            // Add any computed columns
-            this._calculate_computed(tbl, this.computed);
-
-            __MODULE__.fill(this.pool, this.gnode, tbl);
-            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
@@ -1369,20 +1390,22 @@ module.exports = function(Module) {
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
         } else {
-            pdata = parse_data(data, [this.index], types);
+            pdata = [parse_data(data, [this.index], types)];
         }
 
         let tbl;
         try {
-            tbl = __MODULE__.make_table(pdata.row_count || 0, pdata.names, pdata.types, pdata.cdata, this.limit_index, this.limit || 4294967295, this.index || "", pdata.is_arrow, true);
+            for (let chunk of pdata) {
+                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, true);
 
-            this.limit_index += pdata.cdata.length;
-            if (this.limit) {
-                this.limit_index = this.limit_index % this.limit;
+                this.limit_index += chunk.cdata[0].length;
+                if (this.limit) {
+                    this.limit_index = this.limit_index % this.limit;
+                }
+
+                __MODULE__.fill(this.pool, this.gnode, tbl);
+                this.initialized = true;
             }
-
-            __MODULE__.fill(this.pool, this.gnode, tbl);
-            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
@@ -1531,9 +1554,13 @@ module.exports = function(Module) {
 
     function error_to_json(error) {
         const obj = {};
-        Object.getOwnPropertyNames(error).forEach(key => {
-            obj[key] = error[key];
-        }, error);
+        if (typeof error !== "string") {
+            Object.getOwnPropertyNames(error).forEach(key => {
+                obj[key] = error[key];
+            }, error);
+        } else {
+            obj["message"] = error;
+        }
         return obj;
     }
 
@@ -1794,11 +1821,9 @@ module.exports = function(Module) {
         table: function(data, options) {
             options = options || {};
             options.index = options.index || "";
-            let pdata,
-                chunked = false;
+            let pdata;
 
             if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
-                // Arrow data
                 pdata = load_arrow_buffer(data);
             } else {
                 if (typeof data === "string") {
@@ -1808,58 +1833,44 @@ module.exports = function(Module) {
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
                 pdata = parse_data(data);
-                chunked = pdata.row_count > CHUNKED_THRESHOLD;
+                if (pdata.row_count > CHUNKED_THRESHOLD) {
+                    let new_pdata = [];
+                    while (pdata.cdata[0].length > 0) {
+                        const chunk = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
+                        new_pdata.push(Object.assugn({}, pdata, chunk));
+                    }
+                    pdata = new_pdata;
+                } else {
+                    pdata = [pdata];
+                }
             }
 
             if (options.index && options.limit) {
                 throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
             }
 
-            if (options.index && pdata.names.indexOf(options.index) === -1) {
+            if (options.index && pdata[0].names.indexOf(options.index) === -1) {
                 throw `Specified index '${options.index}' does not exist in data.`;
             }
 
             let tbl,
                 gnode,
                 pool,
-                pages,
                 limit_index = 0;
 
             try {
-                // Create perspective pool
                 pool = new __MODULE__.t_pool({_update_callback: function() {}});
-
-                if (chunked) {
-                    pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
-                } else {
-                    pages = pdata.cdata;
-                }
-
-                // Fill t_table with data
-                tbl = __MODULE__.make_table(pages[0].length || 0, pdata.names, pdata.types, pages, 0, options.limit || 4294967295, options.index, pdata.is_arrow, false);
-                limit_index = tbl.size();
-                if (options.limit) {
-                    limit_index = limit_index % options.limit;
-                }
-
-                gnode = __MODULE__.make_gnode(tbl);
-                pool.register_gnode(gnode);
-                __MODULE__.fill(pool, gnode, tbl);
-
-                if (chunked) {
-                    while (pdata.cdata[0].length > 0) {
-                        tbl.delete();
-                        pages = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
-
-                        tbl = __MODULE__.make_table(pages[0].length || 0, pdata.names, pdata.types, pages, limit_index, options.limit || 4294967295, options.index, pdata.is_arrow, false);
-
-                        limit_index += pages[0].length;
-                        if (options.limit) {
-                            limit_index = limit_index % options.limit;
-                        }
-
-                        __MODULE__.fill(pool, gnode, tbl);
+                for (let chunk of pdata) {
+                    tbl = __MODULE__.make_table(chunk.cdata[0].length || 0, chunk.names, chunk.types, chunk.cdata, limit_index, options.limit || 4294967295, options.index, chunk.is_arrow, false);
+                    limit_index += chunk.cdata[0].length;
+                    if (options.limit) {
+                        limit_index = limit_index % options.limit;
                     }
+                    if (!gnode) {
+                        gnode = __MODULE__.make_gnode(tbl);
+                        pool.register_gnode(gnode);
+                    }
+                    __MODULE__.fill(pool, gnode, tbl);
                 }
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
