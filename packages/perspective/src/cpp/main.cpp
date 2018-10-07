@@ -750,7 +750,7 @@ scalar_to_val(const t_tscalar scalar) {
         }
         case DTYPE_STR:
         default: {
-            std::wstring_convert<utf8convert_type, wchar_t> converter;
+            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
             return val(converter.from_bytes(scalar.to_string()));
         }
     }

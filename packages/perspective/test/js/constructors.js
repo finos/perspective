@@ -43,6 +43,7 @@ var meta_3 = {
 let column_meta = [{name: "x", type: "integer", computed: undefined}, {name: "y", type: "string", computed: undefined}, {name: "z", type: "boolean", computed: undefined}];
 
 import arrow from "../arrow/test-null.arrow";
+import chunked from "../arrow/chunked.arrow";
 
 var arrow_result = [
     {
@@ -230,6 +231,13 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);
+        });
+
+        it("Arrow (chunked) constructor", async function() {
+            var table = perspective.table(chunked.slice());
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result.length).toEqual(10);
         });
 
         it("CSV constructor", async function() {
