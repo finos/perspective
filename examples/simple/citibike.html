@@ -21,17 +21,64 @@
 
     <script src="perspective.js"></script>
 
-    <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.dark.css">
-    
+    <link rel='stylesheet' href="material.css">
 
+    <style>
+
+        perspective-viewer {
+            display: block;
+            height: 50vw;
+            width: 50vw;
+            flex: 1;
+            border: 1px solid #ccc;
+            max-width: 600px;
+            max-height: 600px;
+        }
+
+        #grid {
+            display: flex;
+            flex-direction: row;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        #grid perspective-viewer {
+            margin-left: 3px;
+        }
+
+        @media (max-width: 800px) { 
+            #grid {
+                flex-direction:column;
+                width: 50%;
+            }
+
+            #grid perspective-viewer {
+                min-width: 400px;
+                min-height: 400px;
+                margin-left: 0px;
+                margin-bottom: 3px;
+            }
+        }
+
+    </style>
+    
 </head>
 
 <body>
 
-    <perspective-viewer>
-
-    </perspective-viewer>
+    <div id="grid">
+        <perspective-viewer 
+            row-pivots='["name"]' 
+            columns='["num_bikes_available"]' 
+            sort='[["num_bikes_available","desc"]]'>
+        </perspective-viewer>
+        <perspective-viewer 
+            view='xy_scatter' 
+            row-pivots='["name"]' 
+            columns='["lon","lat","num_bikes_available"]' 
+            sort='[["num_bikes_available","asc"]]'>
+        </perspective-viewer>
+    </div>
 
     <script>
 
@@ -45,17 +92,12 @@
             });
         }
 
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-
         async function get_feed(feedname, callback) {
             const url = `https://gbfs.citibikenyc.com/gbfs/en/${feedname}.json`;
             const {data: {stations}, ttl} = await get(url);
             if (typeof callback === "function") {
                 callback(stations);
-                await sleep(ttl * 1000);
-                get_feed(feedname, callback);
+                setTimeout(() => get_feed(feedname, callback), ttl * 1000);
             } else {
                 return stations;
             }
