@@ -131,6 +131,8 @@ var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
 var data_6 = [{x: "š"}];
 
+var int_float_data = [{int: 1, float: 2.25}, {int: 2, float: 3.5}, {int: 3, float: 4.75}, {int: 4, float: 5.25}];
+
 module.exports = perspective => {
     describe("Execute", function() {
         it("serialized functions in a worker", async function() {
@@ -170,6 +172,43 @@ module.exports = perspective => {
             await view2.delete();
             await table.delete();
             expect(true).toEqual(true);
+        });
+    });
+
+    describe("Typed Arrays", function() {
+        it("Ints to TypedArray in 0-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("int");
+            expect(result.byteLength).toEqual(16);
+        });
+
+        it("Floats to TypedArray in 0-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("float");
+            expect(result.byteLength).toEqual(32);
+        });
+
+        it("Ints to TypedArray in 1-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("int");
+            // should include aggregate row
+            expect(result.byteLength).toEqual(20);
+        });
+
+        it("Floats to TypedArray in 1-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("float");
+            expect(result.byteLength).toEqual(40);
         });
     });
 

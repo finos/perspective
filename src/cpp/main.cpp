@@ -179,6 +179,67 @@ _get_aggspecs(val j_aggs) {
  * -------
  *
  */
+val
+scalar_to_val(const t_tscalar scalar) {
+    if (!scalar.is_valid()) {
+        return val::null();
+    }
+    switch (scalar.get_dtype()) {
+        case DTYPE_BOOL: {
+            if (scalar) {
+                return val(true);
+            } else {
+                return val(false);
+            }
+        }
+        case DTYPE_TIME:
+        case DTYPE_FLOAT64:
+        case DTYPE_FLOAT32: {
+            return val(scalar.to_double());
+        }
+        case DTYPE_DATE: {
+            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
+        }
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_UINT32:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32: {
+            return val(static_cast<t_int32>(scalar.to_int64()));
+        }
+        case DTYPE_UINT64:
+        case DTYPE_INT64: {
+            // This could potentially lose precision
+            return val(static_cast<t_int32>(scalar.to_int64()));
+        }
+        case DTYPE_NONE: {
+            return val::null();
+        }
+        case DTYPE_STR:
+        default: {
+            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
+            return val(converter.from_bytes(scalar.to_string()));
+        }
+    }
+}
+
+val
+scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx) {
+    return scalar_to_val(scalars[idx]);
+}
+
+/**
+ *
+ *
+ * Params
+ * ------
+ *
+ *
+ * Returns
+ * -------
+ *
+ */
 
 namespace arrow {
 
@@ -245,101 +306,59 @@ fill_col_dict(val dictvec, t_col_sptr col) {
 }
 } // namespace arrow
 
-namespace typed_array {
+namespace js_typed_array {
 val ArrayBuffer = val::global("ArrayBuffer");
 val Int8Array = val::global("Int8Array");
 val Int16Array = val::global("Int16Array");
 val Int32Array = val::global("Int32Array");
 val Float32Array = val::global("Float32Array");
 val Float64Array = val::global("Float64Array");
+} // namespace js_typed_array
 
 template <typename T>
 val
-fill(std::vector<T>& data, t_dtype dtype) {
-    int data_size = sizeof(data[0]) * data.size();
-    val buffer = ArrayBuffer.new_(data_size);
-    val arr = val::undefined();
+col_to_js_typed_array(T ctx, t_tvidx idx) {
+    t_tscalvec data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
+    auto dtype = ctx->get_column_dtype(idx);
+    int data_size = data.size();
+    val constructor = val::undefined();
 
     switch (dtype) {
         case DTYPE_INT8: {
-            arr = typed_array::Int8Array.new_(buffer);
+            data_size *= sizeof(t_int8);
+            constructor = js_typed_array::Int8Array;
         } break;
         case DTYPE_INT16: {
-            arr = typed_array::Int16Array.new_(buffer);
+            data_size *= sizeof(t_int16);
+            constructor = js_typed_array::Int16Array;
         } break;
-        case DTYPE_INT32: {
-            arr = typed_array::Int32Array.new_(buffer);
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            // scalar_to_val converts int64 into int32
+            data_size *= sizeof(t_int32);
+            constructor = js_typed_array::Int32Array;
         } break;
         case DTYPE_FLOAT32: {
-            arr = typed_array::Float32Array.new_(buffer);
+            data_size *= sizeof(t_float32);
+            constructor = js_typed_array::Float32Array;
         } break;
-        case DTYPE_INT64:
         case DTYPE_FLOAT64: {
-            arr = typed_array::Float64Array.new_(buffer);
+            data_size *= sizeof(t_float64);
+            constructor = js_typed_array::Float64Array;
         } break;
         default:
-            return arr;
+            return constructor;
     }
 
-    for (int i = 0; i < data.size() + 1; i++) {
-        arr.call<void>("fill", val(data[i]), i, i + 1);
+    val buffer = js_typed_array::ArrayBuffer.new_(data_size);
+    val arr = constructor.new_(buffer);
+
+    for (int idx = 0; idx < data.size(); idx++) {
+        arr.call<void>("fill", scalar_to_val(data[idx]), idx, idx + 1);
     }
 
     return arr;
 }
-
-template <typename T>
-std::vector<T>
-fill_column_vec(t_tscalvec& data, int size) {
-    std::vector<T> vec;
-    vec.reserve(size);
-    vec.resize(size);
-
-    for (t_uindex idx = 0; idx < size; idx++) {
-        vec[idx] = data[idx].get<T>();
-    }
-
-    return vec;
-}
-
-template <typename T>
-val
-col_to_typed_array(T ctx, t_tvidx idx) {
-    // TODO: break early for non-numerical dtype
-    t_tscalvec data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
-    auto dtype = ctx->get_column_dtype(idx);
-    size_t size = data.size();
-
-    // TODO: cast t_int64 to t_float64
-    switch (dtype) {
-        case DTYPE_INT8: {
-            std::vector<t_int8> vec = fill_column_vec<t_int8>(data, size);
-            return typed_array::fill(vec, dtype);
-        } break;
-        case DTYPE_INT16: {
-            std::vector<t_int16> vec = fill_column_vec<t_int16>(data, size);
-            return typed_array::fill(vec, dtype);
-        } break;
-        case DTYPE_INT32: {
-            std::vector<t_int32> vec = fill_column_vec<t_int32>(data, size);
-            return typed_array::fill(vec, dtype);
-        } break;
-        case DTYPE_FLOAT32: {
-            std::vector<t_float32> vec = fill_column_vec<t_float32>(data, size);
-            return typed_array::fill(vec, dtype);
-        } break;
-        case DTYPE_INT64:
-        case DTYPE_FLOAT64: {
-            std::vector<t_float64> vec = fill_column_vec<t_float64>(data, size);
-            return typed_array::fill(vec, dtype);
-        } break;
-        default:
-            return val::undefined();
-    }
-
-    return val::undefined();
-}
-} // namespace typed_array
 
 template <typename T>
 void
@@ -845,67 +864,6 @@ sort(t_ctx2_sptr ctx2, val j_sortby) {
     }
 }
 
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-val
-scalar_to_val(const t_tscalar scalar) {
-    if (!scalar.is_valid()) {
-        return val::null();
-    }
-    switch (scalar.get_dtype()) {
-        case DTYPE_BOOL: {
-            if (scalar) {
-                return val(true);
-            } else {
-                return val(false);
-            }
-        }
-        case DTYPE_TIME:
-        case DTYPE_FLOAT64:
-        case DTYPE_FLOAT32: {
-            return val(scalar.to_double());
-        }
-        case DTYPE_DATE: {
-            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
-        }
-        case DTYPE_UINT8:
-        case DTYPE_UINT16:
-        case DTYPE_UINT32:
-        case DTYPE_INT8:
-        case DTYPE_INT16:
-        case DTYPE_INT32: {
-            return val(static_cast<t_int32>(scalar.to_int64()));
-        }
-        case DTYPE_UINT64:
-        case DTYPE_INT64: {
-            // This could potentially lose precision
-            return val(static_cast<t_int32>(scalar.to_int64()));
-        }
-        case DTYPE_NONE: {
-            return val::null();
-        }
-        case DTYPE_STR:
-        default: {
-            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
-            return val(converter.from_bytes(scalar.to_string()));
-        }
-    }
-}
-
-val
-scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx) {
-    return scalar_to_val(scalars[idx]);
-}
-
 val
 get_column_data(t_table_sptr table, t_str colname) {
     val arr = val::array();
@@ -1399,7 +1357,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
-    function("col_to_typed_array_zero", &typed_array::col_to_typed_array<t_ctx0_sptr>);
-    function("col_to_typed_array_one", &typed_array::col_to_typed_array<t_ctx1_sptr>);
-    function("col_to_typed_array_two", &typed_array::col_to_typed_array<t_ctx2_sptr>);
+    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0_sptr>);
+    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1_sptr>);
+    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2_sptr>);
 }

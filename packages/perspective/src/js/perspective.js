@@ -864,49 +864,23 @@ module.exports = function(Module) {
         this._delete_callback = callback;
     };
 
-    view.prototype.col_to_typed_array = async function() {
-        // TODO: implement name-to-index matching
-        /* const schema = await this.schema();
-
-        if (schema[col_name] !== "float" || schema[col_name] !== "integer") {
-            return null;
+    view.prototype.col_to_js_typed_array = async function(col_name) {
+        // TODO: does not yet work with col pivots
+        const [names, schema] = await Promise.all([this._column_names(), this.schema()]);
+        let idx = names.indexOf(col_name);
+        if (idx === -1 || (schema[col_name] !== "float" && schema[col_name] !== "integer")) {
+            return undefined;
         }
-        */
-        let arrs = [];
 
         if (this.sides() === 0) {
-            for (let i = 0; i < 100; i++) {
-                let ta = __MODULE__.col_to_typed_array_zero(this.ctx, i);
-                if (ta !== undefined) {
-                    arrs.push({
-                        index: i,
-                        data: ta
-                    });
-                }
-            }
+            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx);
         } else if (this.sides() === 1) {
-            for (let i = 0; i < 100; i++) {
-                let ta = __MODULE__.col_to_typed_array_one(this.ctx, i);
-                if (ta !== undefined) {
-                    arrs.push({
-                        index: i,
-                        data: ta
-                    });
-                }
-            }
+            // column at idx 0 is invalid, increment to avoid
+            idx += 1;
+            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx);
         } else {
-            for (let i = 0; i < 100; i++) {
-                let ta = __MODULE__.col_to_typed_array_two(this.ctx, i);
-                if (ta !== undefined) {
-                    arrs.push({
-                        index: i,
-                        data: ta
-                    });
-                }
-            }
+            return __MODULE__.col_to_js_typed_array_two(this.ctx, idx);
         }
-
-        return arrs;
     };
 
     /******************************************************************************
