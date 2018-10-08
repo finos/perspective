@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer-hypergrid",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Perspective.js",
     "main": "build/hypergrid.plugin.cjs.js",
     "directories": {
@@ -40,8 +40,8 @@
     "author": "",
     "license": "Apache",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.1",
-        "@jpmorganchase/perspective-viewer": "^0.2.1",
+        "@jpmorganchase/perspective": "^0.2.2",
+        "@jpmorganchase/perspective-viewer": "^0.2.2",
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",
         "datasaur-local": "3.0.0",

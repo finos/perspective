@@ -32,6 +32,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Olympics](https://jsfiddle.net/texodus/eax9tqbm/show/) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
 * [Streaming](https://jsfiddle.net/texodus/84u926L1/show/) A streaming random data demo.
 * [CSV](https://jsfiddle.net/texodus/pcrnd4jg/show/) Upload a CSV of your own.
+* [NYC Citibike](https://jsfiddle.net/texodus/m2rwz690/) An example of a join on two real-time datasets, from the NYC Citibike feed.
 
 ## Documentation
 

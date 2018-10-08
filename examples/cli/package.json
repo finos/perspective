@@ -1,7 +1,7 @@
 {
     "name": "cli",
     "private": true,
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "An example of Remote Perspective as a CLI tool.",
     "scripts": {
         "start": "node server.js"
@@ -12,9 +12,9 @@
         "perspective-cli": "server.js"
     },
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.1",
-        "@jpmorganchase/perspective-viewer": "^0.2.1",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.1",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.1"
+        "@jpmorganchase/perspective": "^0.2.2",
+        "@jpmorganchase/perspective-viewer": "^0.2.2",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.2",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.2"
     }
 }
