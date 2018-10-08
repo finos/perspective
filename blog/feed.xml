@@ -4,7 +4,7 @@
         <title>Perspective Blog</title>
         <link>https://jpmorganchase.github.io//perspective/blog</link>
         <description>The best place to stay up-to-date with the latest Perspective news and events.</description>
-        <lastBuildDate>Mon, 01 Oct 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 08 Oct 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,20 @@
             <link>https://jpmorganchase.github.io//perspective/blog</link>
         </image>
         <copyright>Copyright © 2018 Perspective Authors</copyright>
+        <item>
+            <title><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
+            <link>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</link>
+            <guid>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</guid>
+            <pubDate>Mon, 08 Oct 2018 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>There are many well-known perks to living in New York City - the world class
+restaurants, museums, two mediocre NFL teams (taken together, that's one pretty
+good NFL team!).  Seldom mentioned, though, is the city's world-class Open Data!</p>
+<p>In this post, we'll be taking advantage of NYC's abundance of Open Data and
+the Perspective library to build some real-time analytics visualizations that
+seek to answer one burning question: Where are all of New York's
+<a href="https://www.citibikenyc.com/">Citibikes</a>?</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[0.2.0 Release]]></title>
             <link>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</link>

@@ -2,12 +2,31 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://jpmorganchase.github.io//perspective/blog</id>
     <title>Perspective Blog</title>
-    <updated>2018-10-01T06:00:00Z</updated>
+    <updated>2018-10-08T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
     <link rel="alternate" href="https://jpmorganchase.github.io//perspective/blog"/>
     <subtitle>The best place to stay up-to-date with the latest Perspective news and events.</subtitle>
     <logo>https://jpmorganchase.github.io//perspective/img/perspective.svg</logo>
     <rights>Copyright © 2018 Perspective Authors</rights>
+    <entry>
+        <title type="html"><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
+        <id>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</id>
+        <link href="https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html">
+        </link>
+        <updated>2018-10-08T06:00:00Z</updated>
+        <summary type="html"><![CDATA[<p>There are many well-known perks to living in New York City - the world class
+restaurants, museums, two mediocre NFL teams (taken together, that's one pretty
+good NFL team!).  Seldom mentioned, though, is the city's world-class Open Data!</p>
+<p>In this post, we'll be taking advantage of NYC's abundance of Open Data and
+the Perspective library to build some real-time analytics visualizations that
+seek to answer one burning question: Where are all of New York's
+<a href="https://www.citibikenyc.com/">Citibikes</a>?</p>
+]]></summary>
+        <author>
+            <name>Andrew Stein</name>
+            <uri>http://github.com/texodus</uri>
+        </author>
+    </entry>
     <entry>
         <title type="html"><![CDATA[0.2.0 Release]]></title>
         <id>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</id>
