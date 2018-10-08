@@ -239,6 +239,7 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
     await element.hover();
     await page.waitForSelector(".highcharts-label.highcharts-tooltip");
     await page.waitFor(() => {
-        return document.querySelector(".highcharts-label.highcharts-tooltip text tspan").textContent !== "Loading ...";
+        let elem = document.querySelector(".highcharts-label.highcharts-tooltip");
+        return window.getComputedStyle(elem).opacity !== "0" && elem.querySelector("text tspan").textContent.indexOf("Loading") === -1 && elem.querySelector("text tspan").textContent.trim() !== "";
     });
 };
