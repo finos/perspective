@@ -53,7 +53,7 @@ module.exports = function(Module) {
         } else if (typeof x === "boolean") {
             t = __MODULE__.t_dtype.DTYPE_BOOL;
         } else if (x instanceof Date) {
-            t = __MODULE__.t_dtype.DTYPE_TIME;
+                t = __MODULE__.t_dtype.DTYPE_TIME;
         } else if (!isNaN(Number(x)) && x !== "") {
             t = __MODULE__.t_dtype.DTYPE_FLOAT64;
         } else if (typeof x === "string" && is_valid_date(x)) {
@@ -85,33 +85,9 @@ module.exports = function(Module) {
             return "boolean";
         } else if (val === 12) {
             return "datetime";
+        } else if (val === 13) {
+            return "date";
         }
-    }
-
-    /**
-     * Do any necessary data transforms on columns. Currently it does the following
-     * transforms
-     * 1. Date objects are converted into float millis since epoch
-     * 2. Null strings are converted into null values
-     *
-     * @private
-     * @param {string} type type of column
-     * @param {array} data array of columnar data
-     *
-     * @returns transformed array of columnar data
-     */
-    function transform_data(type, data) {
-        let rv = [];
-        for (let x = 0; x < data.length; x++) {
-            let tmp = clean_data(data[x]);
-
-            if (type == __MODULE__.t_dtype.DTYPE_TIME && tmp !== null) {
-                tmp = +data[x];
-            }
-
-            rv.push(tmp);
-        }
-        return rv;
     }
 
     /**
@@ -230,7 +206,7 @@ module.exports = function(Module) {
                         } else {
                             col.push(!!cell);
                         }
-                    } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value) {
+                    } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value || inferredType.value === __MODULE__.t_dtype.DTYPE_DATE.value) {
                         let val = clean_data(data[x][name]);
                         if (val !== null) {
                             col.push(parser.parse(val));
@@ -271,7 +247,7 @@ module.exports = function(Module) {
                 // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
                 let transformed;
                 if (data.hasOwnProperty(name)) {
-                    transformed = transform_data(types[col_num], data[name]);
+                    transformed = data[name].map(clean_data);
                 } else {
                     transformed = new Array(row_count);
                 }
@@ -296,6 +272,8 @@ module.exports = function(Module) {
                     types.push(__MODULE__.t_dtype.DTYPE_BOOL);
                 } else if (data[name] === "datetime") {
                     types.push(__MODULE__.t_dtype.DTYPE_TIME);
+                } else if (data[name] === "date") {
+                    types.push(__MODULE__.t_dtype.DTYPE_DATE);
                 } else {
                     throw `Unknown type ${data[name]}`;
                 }
@@ -568,6 +546,8 @@ module.exports = function(Module) {
                 new_schema[col_name] = "boolean";
             } else if (types[col_name] === 12) {
                 new_schema[col_name] = "datetime";
+            } else if (types[col_name] === 13) {
+                new_schema[col_name] = "date";
             }
             if (this.sides() > 0 && this.config.row_pivot.length > 0) {
                 new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
@@ -955,6 +935,9 @@ module.exports = function(Module) {
                 case "boolean":
                     dtype = __MODULE__.t_dtype.DTYPE_BOOL;
                     break;
+                case "date":
+                    dtype = __MODULE__.t_dtype.DTYPE_DATE;
+                    break;
                 case "datetime":
                     dtype = __MODULE__.t_dtype.DTYPE_TIME;
                     break;
@@ -1186,8 +1169,8 @@ module.exports = function(Module) {
         if (config.filter) {
             let schema = this._schema();
             filters = config.filter.map(function(filter) {
-                if (schema[filter[0]] === "datetime") {
-                    return [filter[0], _string_to_filter_op[filter[1]], +new DateParser().parse(filter[2])];
+                if (schema[filter[0]] === "datetime" || schema[filter[0]] === "date") {
+                    return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
                 } else {
                     return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
                 }

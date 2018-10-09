@@ -40,7 +40,8 @@ export const TYPE_AGGREGATES = {
     float: NUMBER_AGGREGATES,
     integer: NUMBER_AGGREGATES,
     boolean: BOOLEAN_AGGREGATES,
-    datetime: STRING_AGGREGATES
+    datetime: STRING_AGGREGATES,
+    date: STRING_AGGREGATES
 };
 
 export const AGGREGATE_DEFAULTS = {
@@ -48,7 +49,8 @@ export const AGGREGATE_DEFAULTS = {
     float: "sum",
     integer: "sum",
     boolean: "distinct count",
-    datetime: "distinct count"
+    datetime: "distinct count",
+    date: "distinct count"
 };
 
 const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];
@@ -66,7 +68,8 @@ export const TYPE_FILTERS = {
     float: NUMBER_FILTERS,
     integer: NUMBER_FILTERS,
     boolean: BOOLEAN_FILTERS,
-    datetime: DATETIME_FILTERS
+    datetime: DATETIME_FILTERS,
+    date: DATETIME_FILTERS
 };
 
 export const FILTER_DEFAULTS = {
@@ -74,5 +77,6 @@ export const FILTER_DEFAULTS = {
     float: "==",
     integer: "==",
     boolean: "==",
-    datetime: "=="
+    datetime: "==",
+    date: "=="
 };

@@ -37,7 +37,7 @@ export class DateParser {
 
     parse(input) {
         if (this.date_exclusions.indexOf(input) > -1) {
-            return -1;
+            return null;
         } else {
             let val = input;
             if (typeof val === "string") {
@@ -48,14 +48,15 @@ export class DateParser {
                         if (val.isValid()) {
                             this.date_types.push(candidate);
                             this.date_candidates.splice(this.date_candidates.indexOf(candidate), 1);
-                            return +val;
+                            return val.toDate();
                         }
                     }
                     this.date_exclusions.push(input);
-                    return -1;
+                    return null;
                 }
+                return val.toDate();
             }
-            return +val;
+            return val;
         }
     }
 }

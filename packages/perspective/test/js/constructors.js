@@ -310,6 +310,18 @@ module.exports = perspective => {
             expect([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]).toEqual(result2);
         });
 
+        it("Handles date values", async function() {
+            var table = perspective.table({v: "date"});
+            table.update(data_4);
+            let result2 = await table.view({}).to_json();
+            let d = new Date(data_4[0]["v"]);
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+            d.setMilliseconds(0);
+            expect([{v: d}]).toEqual(result2);
+        });
+
         it("Handles utf16", async function() {
             var table = perspective.table(data_6);
             let result = await table.view({}).to_json();
