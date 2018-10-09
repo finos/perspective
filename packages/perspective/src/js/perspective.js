@@ -84,7 +84,7 @@ module.exports = function(Module) {
         } else if (val === 11) {
             return "boolean";
         } else if (val === 12) {
-            return "date";
+            return "datetime";
         }
     }
 
@@ -294,7 +294,7 @@ module.exports = function(Module) {
                     types.push(__MODULE__.t_dtype.DTYPE_STR);
                 } else if (data[name] === "boolean") {
                     types.push(__MODULE__.t_dtype.DTYPE_BOOL);
-                } else if (data[name] === "date") {
+                } else if (data[name] === "datetime") {
                     types.push(__MODULE__.t_dtype.DTYPE_TIME);
                 } else {
                     throw `Unknown type ${data[name]}`;
@@ -567,7 +567,7 @@ module.exports = function(Module) {
             } else if (types[col_name] === 11) {
                 new_schema[col_name] = "boolean";
             } else if (types[col_name] === 12) {
-                new_schema[col_name] = "date";
+                new_schema[col_name] = "datetime";
             }
             if (this.sides() > 0 && this.config.row_pivot.length > 0) {
                 new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
@@ -955,7 +955,7 @@ module.exports = function(Module) {
                 case "boolean":
                     dtype = __MODULE__.t_dtype.DTYPE_BOOL;
                     break;
-                case "date":
+                case "datetime":
                     dtype = __MODULE__.t_dtype.DTYPE_TIME;
                     break;
                 case "string":
@@ -1186,7 +1186,7 @@ module.exports = function(Module) {
         if (config.filter) {
             let schema = this._schema();
             filters = config.filter.map(function(filter) {
-                if (schema[filter[0]] === "date") {
+                if (schema[filter[0]] === "datetime") {
                     return [filter[0], _string_to_filter_op[filter[1]], +new DateParser().parse(filter[2])];
                 } else {
                     return [filter[0], _string_to_filter_op[filter[1]], filter[2]];

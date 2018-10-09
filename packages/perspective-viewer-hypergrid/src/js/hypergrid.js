@@ -252,7 +252,7 @@ bindTemplate(TEMPLATE)(
                 this.grid.localization.add("FinanceTree", {
                     format: function(val, type) {
                         const f = {
-                            date: date_formatter,
+                            datetime: date_formatter,
                             integer: integer_formatter,
                             float: float_formatter
                         }[type];

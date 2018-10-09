@@ -123,7 +123,7 @@ var data_4 = [{v: dt}];
 
 var data_5 = [{v: "11-09-2017"}];
 
-var meta_4 = {v: "date"};
+var meta_4 = {v: "datetime"};
 
 var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
@@ -298,13 +298,13 @@ module.exports = perspective => {
             expect([{v: +data_4[0]["v"]}]).toEqual(result);
         });
 
-        it("Handles date values", async function() {
+        it("Handles datetime values", async function() {
             var table = perspective.table(data_4);
             let result2 = await table.view({}).to_json();
             expect([{v: +data_4[0]["v"]}]).toEqual(result2);
         });
 
-        it("Handles date strings", async function() {
+        it("Handles datetime strings", async function() {
             var table = perspective.table(data_5);
             let result2 = await table.view({}).to_json();
             expect([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]).toEqual(result2);

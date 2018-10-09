@@ -154,7 +154,7 @@ perspective-viewer #app {
         &.string:before,
         &.float:before,
         &.integer:before,
-        &.date:before {
+        &.datetime:before {
             font-family: @material-monospace-fonts;
             padding-left: 0;
         }
@@ -190,7 +190,7 @@ perspective-viewer #app {
         content: "t/f";
     }
 
-    #side_panel perspective-row .date::before {
+    #side_panel perspective-row .datetime::before {
         .column_row();
         content: "mdy";
     }

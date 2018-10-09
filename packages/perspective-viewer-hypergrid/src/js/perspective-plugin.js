@@ -89,7 +89,7 @@ function setColumnPropsByType(column) {
             props.columnHeaderHalign = "right";
             props.format = "FinanceInteger";
             break;
-        case "date":
+        case "datetime":
             props.format = "FinanceDate";
             break;
         default:

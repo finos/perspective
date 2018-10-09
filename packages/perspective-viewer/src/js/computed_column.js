@@ -74,13 +74,13 @@ const month_bucket = function(val) {
 };
 
 export const COMPUTATIONS = {
-    hour_of_day: new Computation("hour_of_day", "date", "integer", hour_of_day),
-    day_of_week: new Computation("day_of_week", "date", "string", day_of_week),
-    month_of_year: new Computation("month_of_year", "date", "string", month_of_year),
-    hour_bucket: new Computation("hour_bucket", "date", "date", hour_bucket),
-    day_bucket: new Computation("day_bucket", "date", "date", day_bucket),
-    week_bucket: new Computation("week_bucket", "date", "date", week_bucket),
-    month_bucket: new Computation("month_bucket", "date", "date", month_bucket),
+    hour_of_day: new Computation("hour_of_day", "datetime", "integer", hour_of_day),
+    day_of_week: new Computation("day_of_week", "datetime", "string", day_of_week),
+    month_of_year: new Computation("month_of_year", "datetime", "string", month_of_year),
+    hour_bucket: new Computation("hour_bucket", "datetime", "datetime", hour_bucket),
+    day_bucket: new Computation("day_bucket", "datetime", "datetime", day_bucket),
+    week_bucket: new Computation("week_bucket", "datetime", "datetime", week_bucket),
+    month_bucket: new Computation("month_bucket", "datetime", "datetime", month_bucket),
     uppercase: new Computation("uppercase", "string", "string", x => x.toUpperCase()),
     lowercase: new Computation("lowercase", "string", "string", x => x.toLowerCase()),
     length: new Computation("length", "string", "integer", x => x.length),
@@ -107,7 +107,7 @@ class ComputedColumn extends HTMLElement {
             integer: "123",
             string: "abc",
             boolean: "t/f",
-            date: "mdy"
+            datetime: "mdy"
         };
     }
 
