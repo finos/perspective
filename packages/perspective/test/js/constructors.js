@@ -119,6 +119,8 @@ var arrow_result = [
 ];
 
 var dt = new Date();
+dt.setHours(4);
+dt.setMinutes(12);
 var data_4 = [{v: dt}];
 
 var data_5 = [{v: "11-09-2017"}];
@@ -319,7 +321,7 @@ module.exports = perspective => {
             d.setMinutes(0);
             d.setSeconds(0);
             d.setMilliseconds(0);
-            expect([{v: d}]).toEqual(result2);
+            expect([{v: +d}]).toEqual(result2);
         });
 
         it("Handles utf16", async function() {

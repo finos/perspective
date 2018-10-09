@@ -788,13 +788,13 @@ scalar_to_val(const t_tscalar scalar) {
                 return val(false);
             }
         }
+        case DTYPE_TIME:
         case DTYPE_FLOAT64:
-        case DTYPE_FLOAT32:
-        case DTYPE_TIME: {
+        case DTYPE_FLOAT32: {
             return val(scalar.to_double());
         }
         case DTYPE_DATE: {
-            return t_date_to_jsdate(scalar.get<t_date>());
+            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
         }
         case DTYPE_UINT8:
         case DTYPE_UINT16:

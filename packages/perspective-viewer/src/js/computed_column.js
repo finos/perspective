@@ -329,7 +329,11 @@ class ComputedColumn extends HTMLElement {
 
         const index = Number.parseInt(target.getAttribute("data-index"));
 
-        if ((computation_type !== "float" && type !== computation_type) || (computation_type === "float" && type !== "float" && type !== "integer")) {
+        if (
+            (computation_type !== "float" && computation_type !== "datetime" && type !== computation_type) ||
+            (computation_type === "float" && type !== "float" && type !== "integer") ||
+            (computation_type === "datetime" && type !== "datetime" && type !== "date")
+        ) {
             this._register_inputs();
             this.state.errors.input_column = `Input column type (${type}) must match computation input type (${computation_type}).`;
             this._set_error_message("input_column", this._input_column_error_message);

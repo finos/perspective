@@ -53,7 +53,11 @@ module.exports = function(Module) {
         } else if (typeof x === "boolean") {
             t = __MODULE__.t_dtype.DTYPE_BOOL;
         } else if (x instanceof Date) {
+            if (x.getHours() === 0 && x.getMinutes() === 0 && x.getSeconds() === 0 && x.getMilliseconds() === 0) {
+                t = __MODULE__.t_dtype.DTYPE_DATE;
+            } else {
                 t = __MODULE__.t_dtype.DTYPE_TIME;
+            }
         } else if (!isNaN(Number(x)) && x !== "") {
             t = __MODULE__.t_dtype.DTYPE_FLOAT64;
         } else if (typeof x === "string" && is_valid_date(x)) {
@@ -1313,7 +1317,15 @@ module.exports = function(Module) {
         let types = schema.types();
 
         if (data instanceof ArrayBuffer) {
+            if (this.size() === 0) {
+                throw new Error("Overriding Arrow Schema is not supported.");
+            }
             pdata = load_arrow_buffer(data, cols, types);
+        } else if (typeof data === "string") {
+            if (data[0] === ",") {
+                data = "_" + data;
+            }
+            pdata = [parse_data(papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
         } else {
             pdata = [parse_data(data, cols, types)];
         }
