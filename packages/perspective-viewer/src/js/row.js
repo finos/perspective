@@ -94,8 +94,12 @@ class Row extends HTMLElement {
                 filter_dropdown.innerHTML = perspective.TYPE_FILTERS.boolean.map(agg => `<option value="${agg}">${agg}</option>`).join("");
                 break;
             case "date":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.date.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.date.map(agg => `<option value="${agg}">${agg}</option>`).join("");
+                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
+                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
+                break;
+            case "datetime":
+                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
+                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
                 break;
             case "string":
                 agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.string.map(agg => `<option value="${agg}">${agg}</option>`).join("");

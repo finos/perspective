@@ -14,8 +14,8 @@ export function set_boost(config, series, ...types) {
     if (count > 5000) {
         Object.assign(config, {
             boost: {
-                useGPUTranslations: types.indexOf("date") === -1,
-                usePreAllocated: types.indexOf("date") === -1
+                useGPUTranslations: types.indexOf("datetime") === -1 && types.indexOf("date") === -1,
+                usePreAllocated: types.indexOf("datetime") === -1 && types.indexOf("date") === -1
             }
         });
         config.plotOptions.series.boostThreshold = 1;
@@ -40,7 +40,7 @@ export function set_both_axis(config, axis, name, type, tree_type, top) {
 
 export function set_axis(config, axis, name, type) {
     let opts = {
-        type: type === "date" ? "datetime" : undefined,
+        type: ["datetime", "date"].indexOf(type) > -1 ? "datetime" : undefined,
         startOnTick: false,
         endOnTick: false,
         title: {
@@ -55,10 +55,20 @@ export function set_axis(config, axis, name, type) {
 }
 
 export function set_category_axis(config, axis, type, top) {
-    if (type === "date") {
+    if (type === "datetime") {
         Object.assign(config, {
             [axis]: {
                 categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})),
+                labels: {
+                    enabled: top.categories.length > 0,
+                    autoRotation: [-5]
+                }
+            }
+        });
+    } else if (type === "date") {
+        Object.assign(config, {
+            [axis]: {
+                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"})),
                 labels: {
                     enabled: top.categories.length > 0,
                     autoRotation: [-5]

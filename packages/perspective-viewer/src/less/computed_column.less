@@ -185,6 +185,12 @@ perspective-computed-column {
             color: #999999;
         }
 
+        &.datetime::before {
+            .column_row();
+            content: "mdy";
+            color: #999999;
+        }
+
         &.date::before {
             .column_row();
             content: "mdy";
@@ -252,7 +258,7 @@ perspective-computed-column {
         text-align: center;
         padding-top: 4px;
 
-        .date,
+        .datetime,
         .boolean {
             color: #999;
         }

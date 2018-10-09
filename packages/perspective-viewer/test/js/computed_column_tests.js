@@ -13,7 +13,7 @@ const add_computed_column = async page => {
     await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
     await page.click("#add-computed-column");
     await page.$eval("perspective-computed-column", element => {
-        const columns = [{name: "Order Date", type: "date"}];
+        const columns = [{name: "Order Date", type: "datetime"}];
         element._apply_state(columns, element.computations["day_of_week"], "new_cc");
     });
     await page.click("#psp-cc-button-save");

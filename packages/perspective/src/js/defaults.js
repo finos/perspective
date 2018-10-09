@@ -40,6 +40,7 @@ export const TYPE_AGGREGATES = {
     float: NUMBER_AGGREGATES,
     integer: NUMBER_AGGREGATES,
     boolean: BOOLEAN_AGGREGATES,
+    datetime: STRING_AGGREGATES,
     date: STRING_AGGREGATES
 };
 
@@ -48,6 +49,7 @@ export const AGGREGATE_DEFAULTS = {
     float: "sum",
     integer: "sum",
     boolean: "distinct count",
+    datetime: "distinct count",
     date: "distinct count"
 };
 
@@ -57,7 +59,7 @@ const NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is nan", "is not nan"
 
 const STRING_FILTERS = ["==", "contains", "!=", "in", "begins with", "ends with"];
 
-const DATE_FILTERS = ["<", ">", "==", "<=", ">=", "!="];
+const DATETIME_FILTERS = ["<", ">", "==", "<=", ">=", "!="];
 
 export const COLUMN_SEPARATOR_STRING = "|";
 
@@ -66,7 +68,8 @@ export const TYPE_FILTERS = {
     float: NUMBER_FILTERS,
     integer: NUMBER_FILTERS,
     boolean: BOOLEAN_FILTERS,
-    date: DATE_FILTERS
+    datetime: DATETIME_FILTERS,
+    date: DATETIME_FILTERS
 };
 
 export const FILTER_DEFAULTS = {
@@ -74,5 +77,6 @@ export const FILTER_DEFAULTS = {
     float: "==",
     integer: "==",
     boolean: "==",
+    datetime: "==",
     date: "=="
 };

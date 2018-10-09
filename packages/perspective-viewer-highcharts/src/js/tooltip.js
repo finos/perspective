@@ -144,8 +144,10 @@ function value_exists(value) {
 }
 
 function format_value(value, type) {
-    if (type === "date") {
+    if (type === "datetime") {
         return new Date(value).toLocaleString();
+    } else if (type === "date") {
+        return new Date(value).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"});
     } else if (type === "float" || type === "integer") {
         return format_number(value, type);
     } else {

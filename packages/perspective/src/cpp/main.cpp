@@ -106,9 +106,12 @@ _get_fterms(t_schema schema, val j_filters) {
                     case DTYPE_BOOL:
                         term = mktscalar(filter[2].as<bool>());
                         break;
+                    case DTYPE_DATE:
+                        term = mktscalar(t_date(filter[2].as<t_int32>()));
+                        break;
                     case DTYPE_TIME:
-                        term = mktscalar(
-                            t_time(static_cast<t_int64>(filter[2].as<t_float64>())));
+                        term = mktscalar(t_time(static_cast<t_int64>(
+                            filter[2].call<val>("getTime").as<t_float64>())));
                         break;
                     default: {
                         term
@@ -315,8 +318,65 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow) {
                 continue;
             }
 
-            auto elem = static_cast<t_int64>(dcol[i].as<t_float64>());
+            auto elem = static_cast<t_int64>(dcol[i].call<val>("getTime").as<t_float64>());
             col->set_nth(i, elem);
+        }
+    }
+}
+
+t_date
+jsdate_to_t_date(val date) {
+    return t_date(date.call<val>("getFullYear").as<t_int32>(),
+        date.call<val>("getMonth").as<t_int32>(), date.call<val>("getDate").as<t_int32>());
+}
+
+val
+t_date_to_jsdate(t_date date) {
+    val jsdate = val::global("Date").new_();
+    jsdate.call<val>("setYear", date.year());
+    jsdate.call<val>("setMonth", date.month());
+    jsdate.call<val>("setDate", date.day());
+    jsdate.call<val>("setHours", 0);
+    jsdate.call<val>("setMinutes", 0);
+    jsdate.call<val>("setSeconds", 0);
+    jsdate.call<val>("setMilliseconds", 0);
+    return jsdate;
+}
+
+template <>
+void
+_fill_col<t_date>(val dcol, t_col_sptr col, t_bool is_arrow) {
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        // val data = dcol["values"];
+        // // arrow packs 64 bit into two 32 bit ints
+        // arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
+
+        // t_int8 unit = dcol["type"]["unit"].as<t_int8>();
+        // if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
+        //     // Slow path - need to convert each value
+        //     t_int64 factor = 1;
+        //     if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
+        //         factor = 1e6;
+        //     } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
+        //         factor = 1e3;
+        //     }
+        //     for (auto i = 0; i < nrows; ++i) {
+        //         col->set_nth<t_int32>(i, *(col->get_nth<t_int32>(i)) / factor);
+        //     }
+        // }
+    } else {
+        for (auto i = 0; i < nrows; ++i) {
+            if (dcol[i].isUndefined())
+                continue;
+
+            if (dcol[i].isNull()) {
+                col->unset(i);
+                continue;
+            }
+
+            col->set_nth(i, jsdate_to_t_date(dcol[i]));
         }
     }
 }
@@ -455,6 +515,9 @@ _fill_data(t_table_sptr tbl, t_svec ocolnames, val j_data, std::vector<t_dtype> 
             } break;
             case DTYPE_FLOAT64: {
                 _fill_col<t_float64>(dcol, col, is_arrow);
+            } break;
+            case DTYPE_DATE: {
+                _fill_col<t_date>(dcol, col, is_arrow);
             } break;
             case DTYPE_TIME: {
                 _fill_col<t_time>(dcol, col, is_arrow);
@@ -725,12 +788,13 @@ scalar_to_val(const t_tscalar scalar) {
                 return val(false);
             }
         }
+        case DTYPE_TIME:
         case DTYPE_FLOAT64:
         case DTYPE_FLOAT32: {
             return val(scalar.to_double());
         }
-        case DTYPE_TIME: {
-            return val(scalar.to_double());
+        case DTYPE_DATE: {
+            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
         }
         case DTYPE_UINT8:
         case DTYPE_UINT16:
@@ -815,6 +879,10 @@ set_column_nth(t_column* col, t_uindex idx, val value) {
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(idx, elem, STATUS_VALID);
+            break;
+        }
+        case DTYPE_DATE: {
+            col->set_nth<t_date>(idx, jsdate_to_t_date(value), STATUS_VALID);
             break;
         }
         case DTYPE_TIME: {
