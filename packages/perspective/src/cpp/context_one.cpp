@@ -365,6 +365,11 @@ t_ctx1::reset_step_state() {
     }
 }
 
+t_index
+t_ctx1::sidedness() const {
+    return 2;
+}
+
 t_streeptr_vec
 t_ctx1::get_trees() {
     PSP_TRACE_SENTINEL();

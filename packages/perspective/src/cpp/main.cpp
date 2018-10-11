@@ -1058,6 +1058,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx0>("t_ctx0")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>")
+        .function<t_index>("sidedness", &t_ctx0::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_row_count))
         .function<unsigned long>("get_column_count",
@@ -1089,6 +1090,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx1>("t_ctx1")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>")
+        .function<t_index>("sidedness", &t_ctx1::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_row_count))
         .function<unsigned long>("get_column_count",
@@ -1123,6 +1125,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx2>("t_ctx2")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>")
+        .function<t_index>("sidedness", &t_ctx2::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx2::*)() const>(
                 select_overload<t_index() const>(&t_ctx2::get_row_count)))
