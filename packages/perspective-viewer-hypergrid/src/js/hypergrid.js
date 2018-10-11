@@ -24,7 +24,7 @@ const TEMPLATE = require("../html/hypergrid.html");
 import "../less/hypergrid.less";
 
 const COLUMN_HEADER_FONT = "12px amplitude-regular, Helvetica, sans-serif";
-const GROUP_LABEL_FONT = "12px open sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
+const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
 
 const base_grid_properties = {
     autoSelectRows: false,

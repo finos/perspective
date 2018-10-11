@@ -24,10 +24,6 @@ export const draw = mode =>
         const hidden = this._get_view_hidden(aggregates);
 
         const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
-        for (let key in schema) {
-            console.log(view.col_to_js_typed_array(key));
-        }
-
         let js;
 
         if (task.cancelled) {

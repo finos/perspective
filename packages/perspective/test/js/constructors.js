@@ -132,6 +132,7 @@ var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 var data_6 = [{x: "š"}];
 
 var int_float_data = [{int: 1, float: 2.25}, {int: 2, float: 3.5}, {int: 3, float: 4.75}, {int: 4, float: 5.25}];
+var int_float_string_data = [{int: 1, float: 2.25, string: "a"}, {int: 2, float: 3.5, string: "b"}, {int: 3, float: 4.75, string: "c"}, {int: 4, float: 5.25, string: "d"}];
 
 module.exports = perspective => {
     describe("Execute", function() {
@@ -176,21 +177,21 @@ module.exports = perspective => {
     });
 
     describe("Typed Arrays", function() {
-        it("Ints to TypedArray in 0-sided view", async function() {
+        it("Int, 0-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view();
             const result = await view.col_to_js_typed_array("int");
             expect(result.byteLength).toEqual(16);
         });
 
-        it("Floats to TypedArray in 0-sided view", async function() {
+        it("Float, 0-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view();
             const result = await view.col_to_js_typed_array("float");
             expect(result.byteLength).toEqual(32);
         });
 
-        it("Ints to TypedArray in 1-sided view", async function() {
+        it("Int, 1-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
                 row_pivot: ["int"],
@@ -201,7 +202,7 @@ module.exports = perspective => {
             expect(result.byteLength).toEqual(20);
         });
 
-        it("Floats to TypedArray in 1-sided view", async function() {
+        it("Float, 1-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
                 row_pivot: ["int"],
@@ -209,6 +210,28 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("float");
             expect(result.byteLength).toEqual(40);
+        });
+
+        it("Int, 2-sided view, no row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({column_pivot: ["float"]});
+            const result = await view.col_to_js_typed_array("3.5|int");
+            // bytelength should not include the aggregate row
+            expect(result.byteLength).toEqual(16);
+        });
+
+        it("Float, 2-sided view, no row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({column_pivot: ["float"]});
+            const result = await view.col_to_js_typed_array("3.5|float");
+            expect(result.byteLength).toEqual(32);
+        });
+
+        it("Undefined for non-int/float columns", async function() {
+            var table = perspective.table(int_float_string_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("string");
+            expect(result).toBeUndefined();
         });
     });
 
