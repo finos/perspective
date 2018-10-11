@@ -705,6 +705,7 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
     auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
     ctx1->init();
+    ctx1->set_deltas_enabled(true);
     ctx1->sort_by(svec);
     return ctx1;
 }
@@ -733,6 +734,7 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
     auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
     ctx2->init();
+    ctx2->set_deltas_enabled(true);
     if (svec.size() > 0) {
         ctx2->sort_by(svec);
     }

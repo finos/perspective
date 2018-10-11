@@ -860,6 +860,7 @@ module.exports = function(Module) {
                             )
                         ).then(results => callback([].concat.apply([], results)));
                     }
+                    delta.cells.delete();
                 } else {
                     callback();
                 }
