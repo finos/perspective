@@ -134,14 +134,13 @@ class ComputedColumn extends HTMLElement {
 
     // Generate input column holders, reset input column state
     _register_inputs() {
+        this._disable_save_button();
         this._input_columns.innerHTML = "";
         const computation = this.state.computation;
         const input_type = computation.input_type;
 
         this.state.input_columns = [];
         this.state.swap_target = false;
-
-        // todo: replace html-loader with handlebars-loader
 
         for (let i = 0; i < computation.num_params; i++) {
             this._input_columns.innerHTML += `<div class="psp-cc-computation__input-column" 
@@ -190,8 +189,6 @@ class ComputedColumn extends HTMLElement {
 
         const drop_target = event.currentTarget;
         const drop_target_hover = drop_target.querySelector(".psp-cc-computation__drop-target-hover");
-
-        this._clear_error_messages();
 
         if (drop_target.className !== "dropping") {
             //event.currentTarget.classList.remove('dropped');
@@ -271,27 +268,26 @@ class ComputedColumn extends HTMLElement {
         this._column_name_input.innerText = name || "";
         this._set_column_name();
         this.state["name_edited"] = name !== undefined;
-    }
 
-    // error handling
-    _set_error_message(type, target) {
-        target.innerText = this.state.errors[type];
-    }
-
-    _clear_error_messages() {
-        this.state["errors"] = {
-            input_column: undefined,
-            save: undefined
-        };
-        this._input_column_error_message.innerText = "";
-        this._save_error_message.innerText = "";
+        if (this.state.is_valid()) {
+            this._enable_save_button();
+        }
     }
 
     // column_name
     _set_column_name() {
         const input = this._column_name_input;
-        this.state["column_name"] = input.innerText;
-        this._clear_error_messages();
+        let name = input.innerText;
+        if (name.length == 0) {
+            this.state["column_name"] = undefined;
+            this._disable_save_button();
+            return;
+        }
+        this.state["column_name"] = name;
+
+        if (this.state.is_valid()) {
+            this._enable_save_button();
+        }
     }
 
     _auto_column_name() {
@@ -315,6 +311,7 @@ class ComputedColumn extends HTMLElement {
         this._set_column_name();
     }
 
+    // input column
     _set_input_column(event, name, type) {
         const computation = this.state.computation;
         const computation_type = computation.input_type;
@@ -335,8 +332,6 @@ class ComputedColumn extends HTMLElement {
             (computation_type === "datetime" && type !== "datetime" && type !== "date")
         ) {
             this._register_inputs();
-            this.state.errors.input_column = `Input column type (${type}) must match computation input type (${computation_type}).`;
-            this._set_error_message("input_column", this._input_column_error_message);
             target.classList.remove("dropped");
             return;
         }
@@ -368,6 +363,10 @@ class ComputedColumn extends HTMLElement {
                 }
             })
         );
+
+        if (this.state.is_valid()) {
+            this._enable_save_button();
+        }
     }
 
     // computation
@@ -394,28 +393,31 @@ class ComputedColumn extends HTMLElement {
 
         this._clear_column_name();
         this._register_inputs();
-        this._clear_error_messages();
+    }
+
+    // save button handlers
+    _disable_save_button() {
+        this._save_button.setAttribute("disabled", "true");
+    }
+
+    _enable_save_button() {
+        this._save_button.removeAttribute("disabled");
     }
 
     // save
     _save_computed_column() {
-        if (!this.state.is_valid()) {
-            this.state.errors.save = "Missing parameters for computed column.";
-            this._set_error_message("save", this._save_error_message);
-            return;
+        if (this.state.is_valid()) {
+            const computed_column = this.state;
+
+            const event = new CustomEvent("perspective-computed-column-save", {
+                detail: {
+                    name: computed_column.column_name,
+                    inputs: computed_column.input_columns.map(x => x.name),
+                    func: computed_column.computation.name
+                }
+            });
+            this.dispatchEvent(event);
         }
-
-        const computed_column = this.state;
-
-        const event = new CustomEvent("perspective-computed-column-save", {
-            detail: {
-                name: computed_column.column_name,
-                inputs: computed_column.input_columns.map(x => x.name),
-                func: computed_column.computation.name
-            }
-        });
-
-        this.dispatchEvent(event);
     }
 
     // close
@@ -442,8 +444,6 @@ class ComputedColumn extends HTMLElement {
         this._input_columns = this.shadowRoot.querySelector("#psp-cc-computation-inputs");
         //this._delete_button = this.shadowRoot.querySelector('#psp-cc-button-delete');
         this._save_button = this.shadowRoot.querySelector("#psp-cc-button-save");
-        this._input_column_error_message = this.shadowRoot.querySelector("#psp-cc__error--input");
-        this._save_error_message = this.shadowRoot.querySelector("#psp-cc__error--save");
     }
 
     _register_callbacks() {

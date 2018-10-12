@@ -108,7 +108,7 @@ exports.default = function() {
         await add_computed_column(page);
     });
 
-    test.capture("saving without parameters should show an error message.", async page => {
+    test.capture("saving without parameters should fail as button is disabled.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
         await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);

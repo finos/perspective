@@ -292,8 +292,11 @@
         }
 
         &[disabled] {
-            background: @darkgray;
-            color: #fff;
+            background: @darkgray !important;
+            color: @lightgray !important;
+            cursor: not-allowed;
+            border-bottom-color: #000 !important;
+            opacity: 0.5;
         }
 
         &#psp-cc-button-delete {

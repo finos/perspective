@@ -11,10 +11,6 @@ import {values} from "underscore";
 
 export default class State {
     constructor() {
-        this.errors = {
-            input_column: undefined,
-            save: undefined
-        };
         this.edit = false;
         this.column_name = undefined;
         this.computation = undefined;
