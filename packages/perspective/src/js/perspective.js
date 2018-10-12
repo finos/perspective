@@ -797,34 +797,18 @@ module.exports = function(Module) {
     };
 
     /**
-     * Expand the tree down to `depth`.
+     * Set expansion `depth` pf the pivot tree.
      *
      */
-    view.prototype.expand_to_depth = async function(depth) {
+    view.prototype.set_depth = async function(depth) {
         if (this.config.row_pivot.length >= depth) {
             if (this.nsides === 2) {
-                return this.ctx.expand_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
+                return this.ctx.set_depth(__MODULE__.t_header.HEADER_ROW, depth);
             } else {
-                return this.ctx.expand_to_depth(depth);
+                return this.ctx.set_depth(depth);
             }
         } else {
             console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
-        }
-    };
-
-    /**
-     * Collapse the tree down to `depth`.
-     *
-     */
-    view.prototype.collapse_to_depth = async function(depth) {
-        if (this.config.row_pivot.length >= depth) {
-            if (this.nsides === 2) {
-                return this.ctx.collapse_to_depth(__MODULE__.t_header.HEADER_ROW, depth);
-            } else {
-                return this.ctx.collapse_to_depth(depth);
-            }
-        } else {
-            console.warn(`Cannot collapse past ${this.config.row_pivot.length}`);
         }
     };
 
@@ -1247,15 +1231,15 @@ module.exports = function(Module) {
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
                 if (config.row_pivot_depth !== undefined) {
-                    context.expand_to_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
+                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
                 } else {
-                    context.expand_to_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot.length);
+                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot.length);
                 }
 
                 if (config.column_pivot_depth !== undefined) {
-                    context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot_depth - 1);
+                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot_depth - 1);
                 } else {
-                    context.expand_to_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
+                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
                 }
 
                 const groups = context.unity_get_column_count() / aggregates.length;
@@ -1276,9 +1260,9 @@ module.exports = function(Module) {
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
                 if (config.row_pivot_depth !== undefined) {
-                    context.expand_to_depth(config.row_pivot_depth - 1);
+                    context.set_depth(config.row_pivot_depth - 1);
                 } else {
-                    context.expand_to_depth(config.row_pivot.length);
+                    context.set_depth(config.row_pivot.length);
                 }
             }
         } else {
