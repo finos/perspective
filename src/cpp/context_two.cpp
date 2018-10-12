@@ -17,10 +17,11 @@
 #include <perspective/traversal.h>
 
 namespace perspective {
-t_ctx2::t_ctx2() {}
+t_ctx2::t_ctx2()
+    : m_row_depth_set(false), m_column_depth_set(false) {}
 
 t_ctx2::t_ctx2(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx2>(schema, pivot_config) {}
+    : t_ctxbase<t_ctx2>(schema, pivot_config), m_row_depth(-1), m_column_depth(-1) {}
 
 t_ctx2::~t_ctx2() {}
 
@@ -72,6 +73,12 @@ t_ctx2::step_begin() {
 void
 t_ctx2::step_end() {
     m_minmax = m_trees.back()->get_min_max();
+    if (m_row_depth != -1) {
+        set_depth(HEADER_ROW, m_row_depth);
+    }
+    if (m_column_depth != -1) {
+        set_depth(HEADER_COLUMN, m_column_depth);
+    }
 }
 
 t_index
@@ -91,17 +98,19 @@ t_ctx2::open(t_header header, t_tvidx idx) {
     if (header == HEADER_ROW) {
         if (!m_rtraversal->is_valid_idx(idx))
             return 0;
-        m_rows_changed = true;
+        m_row_depth = -1;
         if (m_row_sortby.empty()) {
             retval = m_rtraversal->expand_node(idx);
         } else {
             retval = m_rtraversal->expand_node(m_row_sortby, idx);
         }
+        m_rows_changed = (retval > 0);
     } else {
         if (!m_ctraversal->is_valid_idx(idx))
             return 0;
         retval = m_ctraversal->expand_node(idx);
-        m_columns_changed = true;
+        m_column_depth = -1;
+        m_columns_changed = (retval > 0);
     }
 
     return retval;
@@ -109,25 +118,29 @@ t_ctx2::open(t_header header, t_tvidx idx) {
 
 t_index
 t_ctx2::close(t_header header, t_tvidx idx) {
+    t_index retval;
+
     switch (header) {
         case HEADER_ROW: {
             if (!m_rtraversal->is_valid_idx(idx))
                 return 0;
-            m_rows_changed = true;
-            return m_rtraversal->collapse_node(idx);
+            m_row_depth = -1;
+            retval = m_rtraversal->collapse_node(idx);
+            m_rows_changed = (retval > 0);
         }
         case HEADER_COLUMN: {
-
             if (!m_ctraversal->is_valid_idx(idx))
                 return 0;
-            m_columns_changed = true;
-            return m_ctraversal->collapse_node(idx);
+            m_column_depth = -1;
+            retval = m_ctraversal->collapse_node(idx);
+            m_columns_changed = (retval > 0);
         }
         default: {
             PSP_COMPLAIN_AND_ABORT("Invalid header type detected.");
             return INVALID_INDEX;
         } break;
     }
+    return retval;
 }
 
 t_totals
@@ -505,34 +518,31 @@ t_ctx2::get_aggregates() const {
 }
 
 void
-t_ctx2::expand_to_depth(t_header header, t_depth depth) {
-    t_depth expand_depth;
+t_ctx2::set_depth(t_header header, t_depth depth) {
+    t_depth new_depth;
 
     switch (header) {
         case HEADER_ROW: {
             if (m_config.get_num_rpivots() == 0)
                 return;
-            expand_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
-            m_rtraversal->expand_to_depth(m_row_sortby, expand_depth);
+            new_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
+            if (new_depth >= m_row_depth) {
+                m_rtraversal->expand_to_depth(m_row_sortby, new_depth);
+            } else {
+                m_rtraversal->collapse_to_depth(new_depth);
+            }
+            m_row_depth = new_depth;
         } break;
         case HEADER_COLUMN: {
             if (m_config.get_num_cpivots() == 0)
                 return;
-            expand_depth = std::min<t_depth>(m_config.get_num_cpivots() - 1, depth);
-            m_ctraversal->expand_to_depth(m_column_sortby, expand_depth);
-        } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Invalid header"); } break;
-    }
-}
-
-void
-t_ctx2::collapse_to_depth(t_header header, t_depth depth) {
-    switch (header) {
-        case HEADER_ROW: {
-            m_rtraversal->collapse_to_depth(depth);
-        } break;
-        case HEADER_COLUMN: {
-            m_ctraversal->collapse_to_depth(depth);
+            new_depth = std::min<t_depth>(m_config.get_num_cpivots() - 1, depth);
+            if (new_depth >= m_column_depth) {
+                m_ctraversal->expand_to_depth(m_column_sortby, new_depth);
+            } else {
+                m_ctraversal->collapse_to_depth(new_depth);
+            }
+            m_column_depth = new_depth;
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Invalid header"); } break;
     }
@@ -649,7 +659,10 @@ t_ctx2::reset() {
 }
 
 void
-t_ctx2::reset_step_state() {}
+t_ctx2::reset_step_state() {
+    m_rows_changed = false;
+    m_columns_changed = false;
+}
 
 void
 t_ctx2::clear_deltas() {

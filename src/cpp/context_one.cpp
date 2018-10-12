@@ -22,7 +22,7 @@
 namespace perspective {
 
 t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx1>(schema, pivot_config) {}
+    : t_ctxbase<t_ctx1>(schema, pivot_config), m_depth(-1) {}
 
 t_ctx1::~t_ctx1() {}
 
@@ -69,22 +69,30 @@ t_index
 t_ctx1::open(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    // If we manually open/close a node, stop automatically expanding
+    m_depth = -1;
+    
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
-    m_rows_changed = true;
-    return m_traversal->expand_node(m_sortby, idx);
+    t_index retval = m_traversal->expand_node(m_sortby, idx);
+    m_rows_changed = (retval > 0);
+    return retval;
 }
 
 t_index
 t_ctx1::close(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    // If we manually open/close a node, stop automatically expanding
+    m_depth = -1;
+
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
-    m_rows_changed = true;
-    return m_traversal->collapse_node(idx);
+    t_index retval = m_traversal->collapse_node(idx);
+    m_rows_changed = (retval > 0);
+    return retval;
 }
 
 t_tscalvec
@@ -167,6 +175,9 @@ t_ctx1::step_end() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_minmax = m_tree->get_min_max();
     sort_by(m_sortby);
+    if (m_depth != -1) {
+        set_depth(m_depth);
+    }
 }
 
 t_aggspec
@@ -213,20 +224,20 @@ t_ctx1::sort_by(const t_sortsvec& sortby) {
 }
 
 void
-t_ctx1::expand_to_depth(t_depth depth) {
+t_ctx1::set_depth(t_depth depth) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (m_config.get_num_rpivots() == 0)
         return;
-    t_depth expand_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
-    m_traversal->expand_to_depth(m_sortby, expand_depth);
-}
-
-void
-t_ctx1::collapse_to_depth(t_depth depth) {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_traversal->collapse_to_depth(depth);
+    depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
+    t_index retval = 0;
+    if (depth >= m_depth) {
+        retval = m_traversal->expand_to_depth(m_sortby, depth);
+    } else {
+        retval = m_traversal->collapse_to_depth(depth);
+    }
+    m_rows_changed = (retval > 0);
+    m_depth = depth;
 }
 
 t_tscalvec
@@ -359,6 +370,8 @@ t_ctx1::reset() {
 
 void
 t_ctx1::reset_step_state() {
+    m_rows_changed = false;
+    m_columns_changed = false;
     if (t_env::log_progress()) {
         std::cout << "t_ctx1.reset_step_state " << repr() << std::endl;
     }
