@@ -21,7 +21,7 @@ t_ctx2::t_ctx2()
     : m_row_depth_set(false), m_column_depth_set(false) {}
 
 t_ctx2::t_ctx2(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx2>(schema, pivot_config), m_row_depth(-1), m_column_depth(-1) {}
+    : t_ctxbase<t_ctx2>(schema, pivot_config), m_row_depth_set(false), m_column_depth_set(false) {}
 
 t_ctx2::~t_ctx2() {}
 
@@ -73,10 +73,10 @@ t_ctx2::step_begin() {
 void
 t_ctx2::step_end() {
     m_minmax = m_trees.back()->get_min_max();
-    if (m_row_depth != -1) {
+    if (m_row_depth_set) {
         set_depth(HEADER_ROW, m_row_depth);
     }
-    if (m_column_depth != -1) {
+    if (m_column_depth_set) {
         set_depth(HEADER_COLUMN, m_column_depth);
     }
 }
@@ -98,7 +98,7 @@ t_ctx2::open(t_header header, t_tvidx idx) {
     if (header == HEADER_ROW) {
         if (!m_rtraversal->is_valid_idx(idx))
             return 0;
-        m_row_depth = -1;
+        m_row_depth_set = false;
         if (m_row_sortby.empty()) {
             retval = m_rtraversal->expand_node(idx);
         } else {
@@ -109,7 +109,7 @@ t_ctx2::open(t_header header, t_tvidx idx) {
         if (!m_ctraversal->is_valid_idx(idx))
             return 0;
         retval = m_ctraversal->expand_node(idx);
-        m_column_depth = -1;
+        m_column_depth_set = false;
         m_columns_changed = (retval > 0);
     }
 
@@ -124,14 +124,14 @@ t_ctx2::close(t_header header, t_tvidx idx) {
         case HEADER_ROW: {
             if (!m_rtraversal->is_valid_idx(idx))
                 return 0;
-            m_row_depth = -1;
+            m_row_depth_set = false;
             retval = m_rtraversal->collapse_node(idx);
             m_rows_changed = (retval > 0);
         }
         case HEADER_COLUMN: {
             if (!m_ctraversal->is_valid_idx(idx))
                 return 0;
-            m_column_depth = -1;
+            m_column_depth_set = false;
             retval = m_ctraversal->collapse_node(idx);
             m_columns_changed = (retval > 0);
         }
@@ -532,6 +532,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
                 m_rtraversal->collapse_to_depth(new_depth);
             }
             m_row_depth = new_depth;
+            m_row_depth_set = true;
         } break;
         case HEADER_COLUMN: {
             if (m_config.get_num_cpivots() == 0)
@@ -543,6 +544,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
                 m_ctraversal->collapse_to_depth(new_depth);
             }
             m_column_depth = new_depth;
+            m_column_depth_set = true;
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Invalid header"); } break;
     }

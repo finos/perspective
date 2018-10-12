@@ -22,7 +22,7 @@
 namespace perspective {
 
 t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx1>(schema, pivot_config), m_depth(-1) {}
+    : t_ctxbase<t_ctx1>(schema, pivot_config), m_depth_set(false) {}
 
 t_ctx1::~t_ctx1() {}
 
@@ -70,7 +70,7 @@ t_ctx1::open(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
-    m_depth = -1;
+    m_depth_set = false;
     
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
@@ -85,7 +85,7 @@ t_ctx1::close(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
-    m_depth = -1;
+    m_depth_set = false;
 
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
@@ -175,7 +175,7 @@ t_ctx1::step_end() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_minmax = m_tree->get_min_max();
     sort_by(m_sortby);
-    if (m_depth != -1) {
+    if (m_depth_set) {
         set_depth(m_depth);
     }
 }
@@ -238,6 +238,7 @@ t_ctx1::set_depth(t_depth depth) {
     }
     m_rows_changed = (retval > 0);
     m_depth = depth;
+    m_depth_set = true;
 }
 
 t_tscalvec

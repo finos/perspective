@@ -120,7 +120,7 @@ typedef std::map<t_str, t_index> t_sidxmap;
 
 typedef std::vector<t_bool> t_boolvec;
 
-typedef t_int32 t_depth;
+typedef t_uint32 t_depth;
 
 typedef std::pair<t_float64, t_float64> t_f64pair;
 typedef std::vector<t_f64pair> t_f64pvec;

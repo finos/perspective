@@ -75,7 +75,9 @@ private:
     t_sortsvec m_row_sortby;
     t_sortsvec m_column_sortby;
     t_depth m_row_depth;
+    t_bool m_row_depth_set;
     t_depth m_column_depth;
+    t_bool m_column_depth_set;
 };
 
 typedef std::shared_ptr<t_ctx2> t_ctx2_sptr;

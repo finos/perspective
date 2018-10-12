@@ -51,6 +51,7 @@ private:
     t_stree_sptr m_tree;
     t_sortsvec m_sortby;
     t_depth m_depth;
+    t_bool m_depth_set;
 };
 
 typedef std::shared_ptr<t_ctx1> t_ctx1_sptr;
