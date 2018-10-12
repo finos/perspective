@@ -80,3 +80,9 @@ export const FILTER_DEFAULTS = {
     datetime: "==",
     date: "=="
 };
+
+export const TYPED_ARRAY_SENTINEL_VALUE_INT8 = 255;
+export const TYPED_ARRAY_SENTINEL_VALUE_INT16 = 32767;
+export const TYPED_ARRAY_SENTINEL_VALUE_INT32 = 2147483647;
+export const TYPED_ARRAY_SENTINEL_VALUE_FLOAT32 = 3.40282e38;
+export const TYPED_ARRAY_SENTINEL_VALUE_FLOAT64 = Number.MAX_VALUE;

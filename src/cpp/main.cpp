@@ -335,6 +335,7 @@ val Float32Array = val::global("Float32Array");
 val Float64Array = val::global("Float64Array");
 } // namespace js_typed_array
 
+// Given a column index, serialize data to TypedArray
 template <typename T>
 val
 col_to_js_typed_array(T ctx, t_tvidx idx) {
@@ -342,27 +343,34 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
     auto dtype = ctx->get_column_dtype(idx);
     int data_size = data.size();
     val constructor = val::undefined();
+    val sentinel = val::undefined();
 
     switch (dtype) {
         case DTYPE_INT8: {
             data_size *= sizeof(t_int8);
+            sentinel = val(std::numeric_limits<t_int8>::lowest());
             constructor = js_typed_array::Int8Array;
         } break;
         case DTYPE_INT16: {
             data_size *= sizeof(t_int16);
+            sentinel = val(std::numeric_limits<t_int16>::lowest());
             constructor = js_typed_array::Int16Array;
         } break;
         case DTYPE_INT32:
         case DTYPE_INT64: {
             // scalar_to_val converts int64 into int32
             data_size *= sizeof(t_int32);
+            sentinel = val(std::numeric_limits<t_int32>::lowest());
             constructor = js_typed_array::Int32Array;
         } break;
         case DTYPE_FLOAT32: {
             data_size *= sizeof(t_float32);
+            sentinel = val(std::numeric_limits<t_float32>::lowest());
             constructor = js_typed_array::Float32Array;
         } break;
+        case DTYPE_TIME:
         case DTYPE_FLOAT64: {
+            sentinel = val(std::numeric_limits<t_float64>::lowest());
             data_size *= sizeof(t_float64);
             constructor = js_typed_array::Float64Array;
         } break;
@@ -376,8 +384,7 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
     for (int idx = 0; idx < data.size(); idx++) {
         t_tscalar scalar = data[idx];
         if (scalar.get_dtype() == DTYPE_NONE) {
-            // fill undefined in TypedArray returns NaN
-            arr.call<void>("fill", val::undefined(), idx, idx + 1);
+            arr.call<void>("fill", sentinel, idx, idx + 1);
         } else {
             arr.call<void>("fill", scalar_to_val(scalar), idx, idx + 1);
         }
