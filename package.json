@@ -1,3 +1,4 @@
+
 {
     "devDependencies": {
         "babel-eslint": "^8.2.3",
@@ -6,6 +7,8 @@
         "eslint-plugin-prettier": "^2.6.2",
         "js-beautify": "^1.8.6",
         "lerna": "^2.11.0",
+        "minimist": "^1.2.0",
+        "mkdirp": "^0.5.1",
         "pre-commit": "^1.2.2",
         "prettier": "^1.14.2",
         "rimraf": "^2.6.2"
@@ -21,12 +24,17 @@
         "bench:build": "lerna run bench:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "bench:run": "lerna exec ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run bench:run",
         "bench": "npm-run-all --silent bench:build bench:run",
+        "precompile": "mkdir -p obj",
+        "compile": "cd obj/ && emcmake cmake ../ && emmake make -j${PSP_CPU_COUNT-8}",
+        "postcompile": "node scripts/compile",
         "docs": "lerna run docs --silent --stream",
+        "pretest:build": "lerna exec -- mkdir -p build",
         "test:build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build_test || npm run --silent _emsdk -- npm run --silent _build_test'",
         "test:run": "npm run --silent clean:screenshots && npm run --silent _puppeteer -- node_modules/.bin/lerna exec --concurrency 1 --no-bail ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} -- npm run --silent test:run",
         "test:run_quiet": "npm run --silent _puppeteer -- node_modules/.bin/lerna run test:run",
         "test": "npm-run-all --silent lint test:build test:run",
-        "clean": "lerna run clean ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
+        "clean": "find obj -mindepth 1 -delete && lerna run clean ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
+        "preclean:screenshots": "lerna exec -- mkdir -p screenshots",
         "clean:screenshots": "lerna run clean:screenshots ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
         "start": "lerna run start --stream --scope",
         "write_tests": "WRITE_TESTS=1 npm run test:run",
@@ -40,6 +48,7 @@
         "lint:autofix:json": "prettier --tab-width 4 --write **/package.json",
         "lint:autofix:markdown": "prettier --tab-width 4 --write docs/usage.md docs/installation.md",
         "lint:autofix": "npm-run-all --silent lint:autofix:*",
+        "pre_build": "npm run compile",
         "_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "_emsdk": "docker run --rm -it ${PSP_CPU_COUNT:+--cpus=\"${PSP_CPU_COUNT}.0\"} -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk",
