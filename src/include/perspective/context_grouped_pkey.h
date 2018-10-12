@@ -40,8 +40,7 @@ public:
     t_ftnvec get_flattened_tree(t_tvidx idx, t_depth stop_depth);
     t_trav_csptr get_traversal() const;
 
-    void expand_to_depth(t_depth depth);
-    void collapse_to_depth(t_depth depth);
+    void set_depth(t_depth depth);
 
     void expand_path(const t_tscalvec& path);
 
@@ -62,6 +61,8 @@ private:
     t_sortsvec m_sortby;
     t_symtable m_symtable;
     t_bool m_has_label;
+    t_depth m_depth;
+    t_bool m_depth_set;
 };
 
 typedef std::shared_ptr<t_ctx_grouped_pkey> t_ctx_grouped_pkey_sptr;
