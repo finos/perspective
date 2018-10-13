@@ -120,8 +120,8 @@ declare module '@jpmorganchase/perspective' {
         on_delete(callback: Function): void;
         schema(): Promise<Schema>;
         size(): Promise<number>;
-        update(TableData): void;
-        view(ViewConfig): View;
+        update(data: TableData): void;
+        view(config: ViewConfig): View;
     }
 
     /**** perspective ****/
