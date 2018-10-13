@@ -41,7 +41,7 @@
         "precommit": "npm run lint:autofix && npm run docs && git add . -u",
         "lint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js examples/*/*.js",
         "lint:autofix:es": "npm run lint -- --fix",
-        "lint:autofix:clang": "lerna run lint:autofix:clang",
+        "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
         "lint:autofix:less": "prettier  --tab-width 4 --write packages/**/src/less/*.less",
         "lint:autofix:html": "html-beautify packages/**/src/html/*.html -r",
         "lint:autofix:json": "prettier --tab-width 4 --write **/package.json",
