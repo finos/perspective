@@ -363,19 +363,21 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view({
                 row_pivot: ["z", "y"],
-                aggregate: [],
+                aggregate: []
             });
             table.update(data);
 
             let result = await view.to_json();
 
-            let expected = [{"__ROW_PATH__":[]},
-                            {"__ROW_PATH__":[false]},
-                            {"__ROW_PATH__":[false,"b"]},
-                            {"__ROW_PATH__":[false,"d"]},
-                            {"__ROW_PATH__":[true]},
-                            {"__ROW_PATH__":[true,"a"]},
-                            {"__ROW_PATH__":[true,"c"]}];
+            let expected = [
+                {__ROW_PATH__: []},
+                {__ROW_PATH__: [false]},
+                {__ROW_PATH__: [false, "b"]},
+                {__ROW_PATH__: [false, "d"]},
+                {__ROW_PATH__: [true]},
+                {__ROW_PATH__: [true, "a"]},
+                {__ROW_PATH__: [true, "c"]}
+            ];
             expect(expected).toEqual(result);
         });
 
