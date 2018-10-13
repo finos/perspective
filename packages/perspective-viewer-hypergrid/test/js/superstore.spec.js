@@ -33,7 +33,7 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
 
                 await page.evaluate(element => {
-                    element.view.collapse_to_depth(0);
+                    element.view.set_depth(0);
                     element.notifyResize();
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
