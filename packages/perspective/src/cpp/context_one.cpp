@@ -367,7 +367,7 @@ t_ctx1::reset_step_state() {
 
 t_index
 t_ctx1::sidedness() const {
-    return 2;
+    return 1;
 }
 
 t_streeptr_vec
