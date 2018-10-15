@@ -603,23 +603,6 @@ make_table(t_uint32 size, val j_colnames, val j_dtypes, val j_data, t_uint32 off
 }
 
 /**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-void
-fill(t_pool* pool, t_gnode_sptr gnode, t_table_sptr table) {
-    pool->send(gnode->get_id(), 0, *table);
-    pool->_process();
-}
-
-/**
  * Create a default gnode.
  *
  * Params
@@ -688,8 +671,7 @@ clone_gnode_table(t_gnode_sptr gnode) {
  */
 t_ctx0_sptr
 make_context_zero(
-    t_gnode_sptr gnode, t_filter_op combiner, val j_filters, val j_columns, val j_sortby) {
-    auto schema = gnode->get_tblschema();
+    t_schema schema, t_filter_op combiner, val j_filters, val j_columns, val j_sortby) {
     auto columns = vecFromJSArray<std::string>(j_columns);
     auto fvec = _get_fterms(schema, j_filters);
     auto svec = _get_sort(j_sortby);
@@ -712,9 +694,8 @@ make_context_zero(
  *
  */
 t_ctx1_sptr
-make_context_one(t_gnode_sptr gnode, val j_pivots, t_filter_op combiner, val j_filters,
+make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters,
     val j_aggs, val j_sortby) {
-    auto schema = gnode->get_tblschema();
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto pivots = vecFromJSArray<std::string>(j_pivots);
@@ -724,6 +705,7 @@ make_context_one(t_gnode_sptr gnode, val j_pivots, t_filter_op combiner, val j_f
     auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
     ctx1->init();
+    ctx1->set_deltas_enabled(true);
     ctx1->sort_by(svec);
     return ctx1;
 }
@@ -740,9 +722,8 @@ make_context_one(t_gnode_sptr gnode, val j_pivots, t_filter_op combiner, val j_f
  *
  */
 t_ctx2_sptr
-make_context_two(t_gnode_sptr gnode, val j_rpivots, val j_cpivots, t_filter_op combiner,
+make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
     val j_filters, val j_aggs, val j_sortby) {
-    auto schema = gnode->get_tblschema();
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto rpivots = vecFromJSArray<std::string>(j_rpivots);
@@ -753,6 +734,7 @@ make_context_two(t_gnode_sptr gnode, val j_rpivots, val j_cpivots, t_filter_op c
     auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
     ctx2->init();
+    ctx2->set_deltas_enabled(true);
     if (svec.size() > 0) {
         ctx2->sort_by(svec);
     }
@@ -1071,6 +1053,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx0>("t_ctx0")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>")
+        .function<t_index>("sidedness", &t_ctx0::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_row_count))
         .function<unsigned long>("get_column_count",
@@ -1102,6 +1085,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx1>("t_ctx1")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>")
+        .function<t_index>("sidedness", &t_ctx1::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_row_count))
         .function<unsigned long>("get_column_count",
@@ -1136,6 +1120,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_ctx2>("t_ctx2")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>")
+        .function<t_index>("sidedness", &t_ctx2::sidedness)
         .function<unsigned long>("get_row_count",
             reinterpret_cast<unsigned long (t_ctx2::*)() const>(
                 select_overload<t_index() const>(&t_ctx2::get_row_count)))
@@ -1174,14 +1159,24 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .constructor<emscripten::val>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
         .function<unsigned int>("register_gnode", &t_pool::register_gnode, allow_raw_pointers())
+        .function<void>("process", &t_pool::_process)
+        .function<void>("send", &t_pool::send)
+        .function<t_uindex>("epoch", &t_pool::epoch)
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
         .function<void>("set_update_delegate", &t_pool::set_update_delegate)
         .function<void>("register_context", &t_pool::register_context)
-        .function<void>("unregister_context", &t_pool::unregister_context);
+        .function<void>("unregister_context", &t_pool::unregister_context)
+        .function<t_updctx_vec>("get_contexts_last_updated", &t_pool::get_contexts_last_updated)
+        .function<t_uidxvec>("get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
+        .function<t_gnode*>("get_gnode", &t_pool::get_gnode, allow_raw_pointers());
 
     class_<t_aggspec>("t_aggspec").function<std::string>("name", &t_aggspec::name);
 
     class_<t_tscalar>("t_tscalar");
+
+    value_object<t_updctx>("t_updctx")
+        .field("gnode_id", &t_updctx::m_gnode_id)
+        .field("ctx_name", &t_updctx::m_ctx);
 
     value_object<t_cellupd>("t_cellupd")
         .field("row", &t_cellupd::row)
@@ -1189,13 +1184,18 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .field("old_value", &t_cellupd::old_value)
         .field("new_value", &t_cellupd::new_value);
 
-    value_object<t_stepdelta>("t_stepdelta").field("cells", &t_stepdelta::cells);
+    value_object<t_stepdelta>("t_stepdelta")
+        .field("rows_changed", &t_stepdelta::rows_changed)
+        .field("columns_changed", &t_stepdelta::columns_changed)
+        .field("cells", &t_stepdelta::cells);
 
     register_vector<t_dtype>("t_dtypevec");
     register_vector<t_cellupd>("t_cellupdvec");
     register_vector<t_aggspec>("t_aggspecvec");
     register_vector<t_tscalar>("t_tscalvec");
     register_vector<std::string>("std::vector<std::string>");
+    register_vector<t_updctx>("t_updctx_vec");
+    register_vector<t_uindex>("t_uidxvec");
 
     enum_<t_header>("t_header")
         .value("HEADER_ROW", HEADER_ROW)
@@ -1295,7 +1295,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_table", &make_table);
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table);
-    function("fill", &fill, allow_raw_pointers());
     function("make_context_zero", &make_context_zero);
     function("make_context_one", &make_context_one);
     function("make_context_two", &make_context_two);

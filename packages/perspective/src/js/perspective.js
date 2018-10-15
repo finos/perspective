@@ -860,6 +860,7 @@ module.exports = function(Module) {
                             )
                         ).then(results => callback([].concat.apply([], results)));
                     }
+                    delta.cells.delete();
                 } else {
                     callback();
                 }
@@ -1199,6 +1200,8 @@ module.exports = function(Module) {
             }
         }
 
+        let schema = this.gnode.get_tblschema();
+
         // Row Pivots
         let aggregates = [];
         if (typeof config.aggregate === "object") {
@@ -1224,7 +1227,6 @@ module.exports = function(Module) {
             if (config.column_only) {
                 agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
             }
-            let schema = this.gnode.get_tblschema();
             let t_aggs = schema.columns();
             for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
                 let column = t_aggs.get(aidx);
@@ -1232,7 +1234,6 @@ module.exports = function(Module) {
                     aggregates.push([column, agg_op, [column]]);
                 }
             }
-            schema.delete();
             t_aggs.delete();
         }
 
@@ -1241,7 +1242,7 @@ module.exports = function(Module) {
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
                 config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(this.gnode, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, []);
+                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, []);
                 sides = 2;
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
@@ -1270,7 +1271,7 @@ module.exports = function(Module) {
                     __MODULE__.sort(context, new_sort);
                 }
             } else {
-                context = __MODULE__.make_context_one(this.gnode, config.row_pivot, filter_op, filters, aggregates, sort);
+                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort);
                 sides = 1;
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
@@ -1282,7 +1283,7 @@ module.exports = function(Module) {
             }
         } else {
             context = __MODULE__.make_context_zero(
-                this.gnode,
+                schema,
                 filter_op,
                 filters,
                 aggregates.map(function(x) {
@@ -1292,6 +1293,8 @@ module.exports = function(Module) {
             );
             this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
         }
+
+        schema.delete();
 
         let v = new view(this.pool, context, sides, this.gnode, config, name, this.callbacks, this);
         this.views.push(v);
@@ -1351,7 +1354,8 @@ module.exports = function(Module) {
                 // Add any computed columns
                 this._calculate_computed(tbl, this.computed);
 
-                __MODULE__.fill(this.pool, this.gnode, tbl);
+                this.pool.send(this.gnode.get_id(), 0, tbl);
+                this.pool.process();
                 this.initialized = true;
             }
         } catch (e) {
@@ -1398,7 +1402,8 @@ module.exports = function(Module) {
                     this.limit_index = this.limit_index % this.limit;
                 }
 
-                __MODULE__.fill(this.pool, this.gnode, tbl);
+                this.pool.send(this.gnode.get_id(), 0, tbl);
+                this.pool.process();
                 this.initialized = true;
             }
         } catch (e) {
@@ -1429,7 +1434,8 @@ module.exports = function(Module) {
 
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
-            __MODULE__.fill(pool, gnode, tbl);
+            pool.send(gnode.get_id(), 0, tbl);
+            pool.process();
 
             // Merge in definition of previous computed columns
             if (this.computed.length > 0) {
@@ -1865,7 +1871,8 @@ module.exports = function(Module) {
                         gnode = __MODULE__.make_gnode(tbl);
                         pool.register_gnode(gnode);
                     }
-                    __MODULE__.fill(pool, gnode, tbl);
+                    pool.send(gnode.get_id(), 0, tbl);
+                    pool.process();
                 }
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
