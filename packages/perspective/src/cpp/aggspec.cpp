@@ -224,6 +224,7 @@ t_aggspec::get_dependencies() const {
 t_dtype
 get_simple_accumulator_type(t_dtype coltype) {
     switch (coltype) {
+        case DTYPE_BOOL:
         case DTYPE_INT64:
         case DTYPE_INT32:
         case DTYPE_INT16:

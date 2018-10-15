@@ -31,7 +31,7 @@
         "build:webpack:parallel": "webpack --color --config src/config/perspective.cjs.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
-        "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
+        "lint:autofix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h && clang-format -i -style=file test/cpp/psp.cpp",
         "test:build": "npm-run-all test:build:copy test:build:webpack",
         "test:build:copy": "npm-run-all -p test:build:copy:*",
         "test:build:copy:html": "cp test/html/* build",

@@ -205,6 +205,7 @@ t_column::push_back<const char*>(const char* elem) {
 
     t_uindex idx = m_vocab->get_interned(elem);
     m_data->push_back(idx);
+    ++m_size;
 }
 
 template <>
@@ -213,6 +214,7 @@ t_column::push_back<char*>(char* elem) {
     COLUMN_CHECK_STRCOL();
     t_uindex idx = m_vocab->get_interned(elem);
     m_data->push_back(idx);
+    ++m_size;
 }
 
 template <>
@@ -220,6 +222,7 @@ void
 t_column::push_back<std::string>(std::string elem) {
     COLUMN_CHECK_STRCOL();
     push_back(elem.c_str());
+    ++m_size;
 }
 
 template <>
@@ -228,6 +231,7 @@ t_column::push_back<const char*>(const char* elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
     m_status->push_back(status);
+    ++m_size;
 }
 
 template <>
@@ -236,6 +240,7 @@ t_column::push_back<char*>(char* elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
     m_status->push_back(status);
+    ++m_size;
 }
 
 template <>
@@ -244,6 +249,7 @@ t_column::push_back<std::string>(std::string elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     push_back(elem);
     m_status->push_back(status);
+    ++m_size;
 }
 
 template <>
@@ -299,6 +305,7 @@ t_column::push_back<t_tscalar>(t_tscalar elem) {
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
     }
+    ++m_size;
 }
 
 const t_lstore&

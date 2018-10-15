@@ -20,28 +20,12 @@ namespace perspective {
 
 template <typename DATA_T, int DTYPE_T>
 struct PERSPECTIVE_EXPORT t_comparator {
-    inline t_comparator(const t_column* col);
-    inline bool operator()(DATA_T a, DATA_T b) const;
-    const t_column* m_col;
+    inline bool
+    operator()(DATA_T a, DATA_T b) const {
+        std::less<DATA_T> cmp;
+        return cmp(a, b);
+    }
 };
-
-template <typename DATA_T, int DTYPE_T>
-inline t_comparator<DATA_T, DTYPE_T>::t_comparator(const t_column* col)
-    : m_col(col) {}
-
-template <typename DATA_T, int DTYPE_T>
-inline bool
-t_comparator<DATA_T, DTYPE_T>::operator()(DATA_T a, DATA_T b) const {
-    std::less<DATA_T> cmp;
-    return cmp(a, b);
-}
-
-template <>
-inline bool
-t_comparator<t_uindex, DTYPE_STR>::operator()(t_uindex a, t_uindex b) const {
-    std::less<const char*> cmp;
-    return cmp(m_col->unintern_c(a), m_col->unintern_c(b));
-}
 
 template <typename DATA_T>
 struct PERSPECTIVE_EXPORT t_filter_comparator {
