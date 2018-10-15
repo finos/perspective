@@ -780,6 +780,9 @@ sort(t_ctx2_sptr ctx2, val j_sortby) {
  */
 val
 scalar_to_val(const t_tscalar scalar) {
+    if (!scalar.is_valid()) {
+        return val::null();
+    }
     switch (scalar.get_dtype()) {
         case DTYPE_BOOL: {
             if (scalar) {
@@ -934,7 +937,7 @@ table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype, val fun
 
     t_uindex size = table->size();
     for (t_uindex ridx = 0; ridx < size; ++ridx) {
-        val value = val::null();
+        val value = val::undefined();
 
         switch (arity) {
             case 0: {
@@ -943,20 +946,26 @@ table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype, val fun
             }
             case 1: {
                 i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                value = func(i1);
+                if (!i1.isNull()) {
+                    value = func(i1);
+                }
                 break;
             }
             case 2: {
                 i1 = scalar_to_val(icols[0]->get_scalar(ridx));
                 i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                value = func(i1, i2);
+                if (!i1.isNull() && !i2.isNull()) {
+                    value = func(i1, i2);
+                }
                 break;
             }
             case 3: {
                 i1 = scalar_to_val(icols[0]->get_scalar(ridx));
                 i2 = scalar_to_val(icols[1]->get_scalar(ridx));
                 i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-                value = func(i1, i2, i3);
+                if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
+                    value = func(i1, i2, i3);
+                }
                 break;
             }
             case 4: {
@@ -964,7 +973,9 @@ table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype, val fun
                 i2 = scalar_to_val(icols[1]->get_scalar(ridx));
                 i3 = scalar_to_val(icols[2]->get_scalar(ridx));
                 i4 = scalar_to_val(icols[3]->get_scalar(ridx));
-                value = func(i1, i2, i3, i4);
+                if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
+                    value = func(i1, i2, i3, i4);
+                }
                 break;
             }
             default: {
@@ -973,7 +984,9 @@ table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype, val fun
             }
         }
 
-        set_column_nth(out, ridx, value);
+        if (!value.isUndefined()) {
+            set_column_nth(out, ridx, value);
+        }
     }
 }
 

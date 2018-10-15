@@ -362,6 +362,33 @@ module.exports = perspective => {
             expect(expected).toEqual(result);
         });
 
+        it("Computed column of arity 2 with updates on non-dependent columns", async function() {
+            var meta = {
+                w: "float",
+                x: "float",
+                y: "string",
+                z: "boolean"
+            };
+            var table = perspective.table(meta, {index: "y"});
+            let table2 = table.add_computed([
+                {
+                    column: "ratio",
+                    type: "float",
+                    func: (w, x) => w / x,
+                    inputs: ["w", "x"]
+                }
+            ]);
+
+            table2.update(data_3);
+
+            let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
+            table2.update(delta_upd);
+
+            let result = await table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]}).to_json();
+            let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
+            expect(expected).toEqual(result);
+        });
+
         it("String computed column of arity 1", async function() {
             var table = perspective.table(data);
 
