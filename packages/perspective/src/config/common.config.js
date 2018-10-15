@@ -40,14 +40,6 @@ module.exports = function() {
                     }
                 },
                 {
-                    test: /psp\.(asmjs|async|sync).js$/,
-                    loader: "wrap-loader",
-                    options: {
-                        before: ";var window = window || {};exports.load_perspective = function(Module) {",
-                        after: ";return Module;}"
-                    }
-                },
-                {
                     test: /\.(arrow)$/,
                     use: {
                         loader: "arraybuffer-loader",

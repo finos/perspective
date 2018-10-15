@@ -8,7 +8,7 @@ node_js:
 cache:
   directories:
     - node_modules
-    - packages/perspective/obj
+    - obj
     - packages/perspective/node_modules
     - packages/perspective-examples/node_modules
     - packages/perspective-jupyterlab/node_modules

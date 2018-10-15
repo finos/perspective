@@ -86,7 +86,6 @@ flycheck_*.el
 *.out
 *.app
 
-packages/perspective/src/include/boost
 build
 CMakeCache.txt
 CMakeFiles
@@ -101,8 +100,6 @@ Gemfile
 Gemfile.lock
 Vagrantfile
 /packages/sigma
-/packages/perspective/obj
-/packages/perspective/src/include/boost
 /packages/fin-hypergrid
 
 .DS_Store
@@ -121,3 +118,7 @@ cmake-build-debug
 
 package.json.lerna_backup
 website/static/css/material.dark.css
+
+# CPP Compile
+/include/boost
+obj
