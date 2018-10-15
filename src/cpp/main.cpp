@@ -694,8 +694,8 @@ make_context_zero(
  *
  */
 t_ctx1_sptr
-make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters,
-    val j_aggs, val j_sortby) {
+make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters, val j_aggs,
+    val j_sortby) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto pivots = vecFromJSArray<std::string>(j_pivots);
