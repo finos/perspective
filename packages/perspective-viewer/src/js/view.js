@@ -885,6 +885,23 @@ class ViewPrivate extends HTMLElement {
         this._update_column_view();
     }
 
+    _validate_computed_column(event) {
+        const new_column = event.detail;
+        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+        if (computed_columns === null) {
+            computed_columns = [];
+        }
+        // names cannot be duplicates
+        for (let col of computed_columns) {
+            if (new_column.name === col.name) {
+                console.log("dupe");
+                return;
+            }
+        }
+        computed_columns.push(new_column);
+        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+    }
+
     async _create_computed_column(event) {
         const data = event.detail;
         let computed_column_name = data.column_name;
@@ -892,6 +909,7 @@ class ViewPrivate extends HTMLElement {
         const cols = await this._table.columns();
         // edit overwrites last column, otherwise avoid name collision
         if (cols.includes(computed_column_name)) {
+            console.log(computed_column_name);
             computed_column_name += ` ${Math.round(Math.random() * 100)}`;
         }
 
@@ -954,9 +972,7 @@ class ViewPrivate extends HTMLElement {
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-save", event => {
-            this.setAttribute("computed-columns", JSON.stringify([event.detail]));
-        });
+        this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener("click", this._toggle_config.bind(this));

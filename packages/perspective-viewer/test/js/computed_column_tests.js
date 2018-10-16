@@ -124,6 +124,16 @@ exports.default = function() {
         );
     });
 
+    test.capture("saving a duplicate column should fail with error message.", async page => {
+        await add_computed_column(page);
+        await page.click("#add-computed-column");
+        await page.$eval("perspective-computed-column", element => {
+            const columns = [{name: "Order Date", type: "datetime"}];
+            element._apply_state(columns, element.computations["day_of_week"], "new_cc");
+        });
+        await page.click("#psp-cc-button-save");
+    });
+
     // edit
     test.skip("clicking on the edit button should bring up the UI", async page => {
         await add_computed_column(page);
