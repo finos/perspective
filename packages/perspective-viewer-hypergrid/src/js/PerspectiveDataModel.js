@@ -70,10 +70,10 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
                     if (this.data[row][col].rowPath.length === 1) {
                         this._view.collapse(row);
                     } else {
-                        this._view.collapse_to_depth(this.data[row][col].rowPath.length - 2);
+                        this._view.set_depth(this.data[row][col].rowPath.length - 2);
                     }
                 } else {
-                    this._view.expand_to_depth(this.data[row][col].rowPath.length - 1);
+                    this._view.set_depth(this.data[row][col].rowPath.length - 1);
                 }
             } else {
                 if (is_expanded) {
