@@ -183,7 +183,7 @@ t_ftnvec
 ctx_get_flattened_tree(t_tvidx idx, t_depth stop_depth, t_traversal& trav,
     const t_config& config, const t_sortsvec& sortby) {
     t_ptidx ptidx = trav.get_tree_index(idx);
-    trav.expand_to_depth(sortby, stop_depth);
+    trav.set_depth(sortby, stop_depth);
     if (!sortby.empty()) {
         trav.sort_by(config, sortby, *(trav.get_tree()));
     }

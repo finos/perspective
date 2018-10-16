@@ -100,6 +100,7 @@ t_ctx2::open(t_header header, t_tvidx idx) {
         if (!m_rtraversal->is_valid_idx(idx))
             return 0;
         m_row_depth_set = false;
+        m_row_depth = 0;
         if (m_row_sortby.empty()) {
             retval = m_rtraversal->expand_node(idx);
         } else {
@@ -111,6 +112,7 @@ t_ctx2::open(t_header header, t_tvidx idx) {
             return 0;
         retval = m_ctraversal->expand_node(idx);
         m_column_depth_set = false;
+        m_column_depth = 0;
         m_columns_changed = (retval > 0);
     }
 
@@ -126,6 +128,7 @@ t_ctx2::close(t_header header, t_tvidx idx) {
             if (!m_rtraversal->is_valid_idx(idx))
                 return 0;
             m_row_depth_set = false;
+            m_row_depth = 0;
             retval = m_rtraversal->collapse_node(idx);
             m_rows_changed = (retval > 0);
         }
@@ -133,6 +136,7 @@ t_ctx2::close(t_header header, t_tvidx idx) {
             if (!m_ctraversal->is_valid_idx(idx))
                 return 0;
             m_column_depth_set = false;
+            m_column_depth = 0;
             retval = m_ctraversal->collapse_node(idx);
             m_columns_changed = (retval > 0);
         }
@@ -527,11 +531,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
             if (m_config.get_num_rpivots() == 0)
                 return;
             new_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
-            if (new_depth >= m_row_depth) {
-                m_rtraversal->expand_to_depth(m_row_sortby, new_depth);
-            } else {
-                m_rtraversal->collapse_to_depth(new_depth);
-            }
+            m_rtraversal->set_depth(m_row_sortby, new_depth);
             m_row_depth = new_depth;
             m_row_depth_set = true;
         } break;
@@ -539,11 +539,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
             if (m_config.get_num_cpivots() == 0)
                 return;
             new_depth = std::min<t_depth>(m_config.get_num_cpivots() - 1, depth);
-            if (new_depth >= m_column_depth) {
-                m_ctraversal->expand_to_depth(m_column_sortby, new_depth);
-            } else {
-                m_ctraversal->collapse_to_depth(new_depth);
-            }
+            m_ctraversal->set_depth(m_column_sortby, new_depth);
             m_column_depth = new_depth;
             m_column_depth_set = true;
         } break;

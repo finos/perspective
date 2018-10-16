@@ -71,6 +71,7 @@ t_ctx1::open(t_tvidx idx) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
     m_depth_set = false;
+    m_depth = 0;
     
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
@@ -86,6 +87,7 @@ t_ctx1::close(t_tvidx idx) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
     m_depth_set = false;
+    m_depth = 0;
 
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
@@ -231,11 +233,7 @@ t_ctx1::set_depth(t_depth depth) {
         return;
     depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
     t_index retval = 0;
-    if (depth >= m_depth) {
-        retval = m_traversal->expand_to_depth(m_sortby, depth);
-    } else {
-        retval = m_traversal->collapse_to_depth(depth);
-    }
+    retval = m_traversal->set_depth(m_sortby, depth);
     m_rows_changed = (retval > 0);
     m_depth = depth;
     m_depth_set = true;
