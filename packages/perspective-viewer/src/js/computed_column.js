@@ -142,8 +142,7 @@ class ComputedColumn extends HTMLElement {
         for (let i = 0; i < computation.num_params; i++) {
             this._input_columns.innerHTML += `<div class="psp-cc-computation__input-column" 
                       data-index="${i}" 
-                      drop-target 
-                      ondragenter="dragEnter(event)">
+                      drop-target>
                       <span class="psp-label__requiredType ${input_type}"></span>
                       <span class="psp-label__placeholder">Param ${i + 1}</span>
                       <div class="psp-cc-computation__drop-target-hover"></div>
@@ -181,13 +180,11 @@ class ComputedColumn extends HTMLElement {
     }
 
     _hover_column(event) {
-        console.log("hover");
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
 
         const drop_target = event.currentTarget;
         const drop_target_hover = drop_target.querySelector(".psp-cc-computation__drop-target-hover");
-
         if (drop_target.className !== "dropping") {
             //event.currentTarget.classList.remove('dropped');
             drop_target.classList.add("dropping");
@@ -238,16 +235,19 @@ class ComputedColumn extends HTMLElement {
 
     // Called when a column is dragged out of the computed column UI
     _remove_column(event) {
-        console.log("remove");
         event.currentTarget.classList.remove("dropping");
     }
 
     // Called when the column passes over and then leaves the drop target
     _pass_column(event) {
-        if (event.pageX === 0 || event.pageY === 0) {
+        const src = event.currentTarget;
+        // are we inside the column? if we are, prevent further calls which cause flickering
+        const bounds = src.getBoundingClientRect();
+        const inside_x = event.pageX >= bounds.left && event.pageX <= bounds.right - 2;
+        const inside_y = event.pageY >= bounds.top && event.pageY <= bounds.bottom - 2;
+        if (inside_x && inside_y) {
             return;
         }
-        const src = event.currentTarget;
         if (src !== null && src.nodeName !== "SPAN") {
             src.classList.remove("dropping");
             const drop_target_hover = src.querySelector(".psp-cc-computation__drop-target-hover");
