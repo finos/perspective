@@ -83,9 +83,7 @@ public:
     void post_order(t_tvidx nidx, t_tvivec& out_vec);
 
     // Traversal
-    void expand_to_depth(const t_sortsvec& sortby, t_depth depth, t_ctx2* ctx2 = nullptr);
-
-    void collapse_to_depth(t_depth depth);
+    t_index set_depth(const t_sortsvec& sortby, t_depth depth, t_ctx2* ctx2 = nullptr);
 
     t_ftnvec get_flattened_tree(t_tvidx idx, t_depth stop_depth) const;
 

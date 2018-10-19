@@ -17,12 +17,16 @@
 #include <perspective/sparse_tree_node.h>
 #include <perspective/logtime.h>
 #include <perspective/traversal.h>
+#include <perspective/env_vars.h>
 #include <perspective/filter_utils.h>
 #include <queue>
 #include <tuple>
 #include <unordered_set>
 
 namespace perspective {
+
+t_ctx_grouped_pkey::t_ctx_grouped_pkey()
+  : m_depth_set(false), m_depth(0) {}
 
 t_ctx_grouped_pkey::~t_ctx_grouped_pkey() {}
 
@@ -69,22 +73,32 @@ t_index
 t_ctx_grouped_pkey::open(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    // If we manually open/close a node, stop automatically expanding
+    m_depth_set = false;
+    m_depth = 0;
+
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
-    m_rows_changed = true;
-    return m_traversal->expand_node(m_sortby, idx);
+    t_index retval = m_traversal->expand_node(m_sortby, idx);
+    m_rows_changed = (retval > 0);
+    return retval;
 }
 
 t_index
 t_ctx_grouped_pkey::close(t_tvidx idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    // If we manually open/close a node, stop automatically expanding
+    m_depth_set = false;
+    m_depth = 0;
+
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 
-    m_rows_changed = true;
-    return m_traversal->collapse_node(idx);
+    t_index retval = m_traversal->collapse_node(idx);
+    m_rows_changed = (retval > 0);
+    return retval;
 }
 
 t_tscalvec
@@ -172,6 +186,10 @@ t_ctx_grouped_pkey::step_end() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_minmax = m_tree->get_min_max();
+    sort_by(m_sortby);
+    if (m_depth_set) {
+        set_depth(m_depth);
+    }
 }
 
 t_aggspecvec
@@ -258,18 +276,15 @@ t_ctx_grouped_pkey::sort_by(const t_sortsvec& sortby) {
 }
 
 void
-t_ctx_grouped_pkey::expand_to_depth(t_depth depth) {
+t_ctx_grouped_pkey::set_depth(t_depth depth) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_depth expand_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
-    m_traversal->expand_to_depth(m_sortby, expand_depth);
-}
-
-void
-t_ctx_grouped_pkey::collapse_to_depth(t_depth depth) {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_traversal->collapse_to_depth(depth);
+    t_depth final_depth = std::min<t_depth>(m_config.get_num_rpivots() - 1, depth);
+    t_index retval = 0;
+    retval = m_traversal->set_depth(m_sortby, final_depth);
+    m_rows_changed = (retval > 0);
+    m_depth = depth;
+    m_depth_set = true;
 }
 
 t_tscalvec
@@ -424,7 +439,13 @@ t_ctx_grouped_pkey::reset() {
 }
 
 void
-t_ctx_grouped_pkey::reset_step_state() {}
+t_ctx_grouped_pkey::reset_step_state() {
+    m_rows_changed = false;
+    m_columns_changed = false;
+    if (t_env::log_progress()) {
+        std::cout << "t_ctx_grouped_pkey.reset_step_state " << repr() << std::endl;
+    }    
+}
 
 t_streeptr_vec
 t_ctx_grouped_pkey::get_trees() {

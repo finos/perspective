@@ -505,41 +505,38 @@ t_traversal::post_order(t_tvidx nidx, t_tvivec& out_vec) {
 }
 
 // Traversal
-void
-t_traversal::expand_to_depth(const t_sortsvec& sortby, t_depth depth, t_ctx2* ctx2) {
+t_index
+t_traversal::set_depth(const t_sortsvec& sortby, t_depth depth, t_ctx2* ctx2) {
     t_ptivec pending;
     depth = depth + 1;
     pending.push_back(0);
+    t_index n_changed = 0;
     while (pending.size() > 0) {
         t_tvidx curidx = pending.back();
         pending.pop_back();
-        expand_node(sortby, curidx, ctx2);
+        n_changed += expand_node(sortby, curidx, ctx2);
         std::vector<std::pair<t_tvidx, t_ptidx>> children;
         get_child_indices(curidx, children);
+        t_ptivec collapse;
         for (t_index idx = 0, loop_end = children.size(); idx < loop_end; ++idx) {
             const std::pair<t_tvidx, t_ptidx>& child = children[idx];
-            if ((*m_nodes)[child.first].m_depth < depth) {
+            const t_tvnode& tv_node = (*m_nodes)[child.first];
+
+            if (tv_node.m_depth < depth) {
                 pending.push_back(child.first);
+            } else if (tv_node.m_depth == depth && tv_node.m_expanded) {
+                collapse.push_back(child.first);
             }
         }
-    }
-}
-
-void
-t_traversal::collapse_to_depth(t_depth depth) {
-    t_index curidx = 1;
-    bool loop = true;
-    if (static_cast<t_uindex>(curidx) >= m_nodes->size())
-        return;
-    while (loop) {
-        const t_tvnode& tv_node = (*m_nodes)[curidx];
-        if (tv_node.m_depth > depth) {
-            collapse_node(curidx);
+        // Now collapse any children
+        for (t_ptivec::reverse_iterator rit = collapse.rbegin();
+             rit!= collapse.rend(); ++rit) {
+            t_tvidx curidx = *rit;
+            n_changed += collapse_node(curidx);        
         }
-
-        curidx += 1;
-        loop = curidx < static_cast<t_index>(m_nodes->size());
     }
+
+    return n_changed;
 }
 
 t_ftnvec

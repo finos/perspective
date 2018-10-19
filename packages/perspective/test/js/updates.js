@@ -359,6 +359,28 @@ module.exports = perspective => {
             table.update(data_2);
         });
 
+        it("update with depth expansion", async function() {
+            var table = perspective.table(meta, {index: "y"});
+            var view = table.view({
+                row_pivot: ["z", "y"],
+                aggregate: []
+            });
+            table.update(data);
+
+            let result = await view.to_json();
+
+            let expected = [
+                {__ROW_PATH__: []},
+                {__ROW_PATH__: [false]},
+                {__ROW_PATH__: [false, "b"]},
+                {__ROW_PATH__: [false, "d"]},
+                {__ROW_PATH__: [true]},
+                {__ROW_PATH__: [true, "a"]},
+                {__ROW_PATH__: [true, "c"]}
+            ];
+            expect(expected).toEqual(result);
+        });
+
         it("partial update", function(done) {
             var partial = [{x: 5, y: "a"}, {y: "b", z: true}];
             var expected = [{x: 5, y: "a", z: true}, {x: 2, y: "b", z: true}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];

@@ -36,8 +36,7 @@ public:
     t_aggspec get_aggregate(t_uindex idx) const;
     t_aggspecvec get_aggregates() const;
     t_tscalvec get_row_path(t_tvidx idx) const;
-    void expand_to_depth(t_depth depth);
-    void collapse_to_depth(t_depth depth);
+    void set_depth(t_depth depth);
 
     t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
 
@@ -51,6 +50,8 @@ private:
     t_trav_sptr m_traversal;
     t_stree_sptr m_tree;
     t_sortsvec m_sortby;
+    t_depth m_depth;
+    t_bool m_depth_set;
 };
 
 typedef std::shared_ptr<t_ctx1> t_ctx1_sptr;
