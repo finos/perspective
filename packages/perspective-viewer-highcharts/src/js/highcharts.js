@@ -21,6 +21,17 @@ function delete_chart() {
     }
 }
 
+const MAXIMUM_RENDER_SIZE = {
+    line: 25000,
+    area: 25000,
+    scatter: 100000,
+    bubble: 25000,
+    column: 25000,
+    treemap: 2500,
+    sunburst: 1000,
+    heatmap: 20000
+};
+
 global.registerPlugin("x_bar", {
     name: "X Bar Chart",
     create: draw("horizontal_bar"),
@@ -30,7 +41,8 @@ global.registerPlugin("x_bar", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["column"]
 });
 
 global.registerPlugin("y_bar", {
@@ -42,7 +54,8 @@ global.registerPlugin("y_bar", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["column"]
 });
 
 global.registerPlugin("y_line", {
@@ -54,7 +67,8 @@ global.registerPlugin("y_line", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["line"]
 });
 
 global.registerPlugin("y_scatter", {
@@ -66,7 +80,8 @@ global.registerPlugin("y_scatter", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["scatter"]
 });
 
 global.registerPlugin("y_area", {
@@ -78,7 +93,8 @@ global.registerPlugin("y_area", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["area"]
 });
 
 global.registerPlugin("xy_line", {
@@ -90,7 +106,8 @@ global.registerPlugin("xy_line", {
         count: 2
     },
     selectMode: "toggle",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["scatter"]
 });
 
 global.registerPlugin("xy_scatter", {
@@ -102,7 +119,8 @@ global.registerPlugin("xy_scatter", {
         count: 2
     },
     selectMode: "toggle",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["scatter"]
 });
 
 global.registerPlugin("treemap", {
@@ -114,7 +132,8 @@ global.registerPlugin("treemap", {
         count: 2
     },
     selectMode: "toggle",
-    delete: function() {}
+    delete: function() {},
+    max_size: MAXIMUM_RENDER_SIZE["treemap"]
 });
 
 global.registerPlugin("sunburst", {
@@ -126,7 +145,8 @@ global.registerPlugin("sunburst", {
         count: 2
     },
     selectMode: "toggle",
-    delete: function() {}
+    delete: function() {},
+    max_size: MAXIMUM_RENDER_SIZE["sunburst"]
 });
 
 global.registerPlugin("heatmap", {
@@ -138,5 +158,6 @@ global.registerPlugin("heatmap", {
         count: 1
     },
     selectMode: "select",
-    delete: delete_chart
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["heatmap"]
 });

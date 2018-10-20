@@ -305,6 +305,37 @@
         --filter_operand-display: inline-block;
     }
 
+    .plugin_information {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+        padding: 0.25rem 0.5rem;
+        width: 100%;
+
+        &.hidden {
+            display: none !important;
+        }
+
+        &.plugin_information--warning {
+            background: @amber400;
+        }
+
+        .plugin_information__text {
+            font-size: 12px;
+            margin-right: 0.25rem;
+        }
+
+        .plugin_information__action {
+            font-size: 12px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .plugin_information__action--dismiss {
+            margin-left: auto;
+        }
+    }
+
     #divider {
         min-height: 2px;
         height: 2px;
