@@ -37,6 +37,8 @@ public:
     t_aggspecvec get_aggregates() const;
     t_tscalvec get_row_path(t_tvidx idx) const;
     void set_depth(t_depth depth);
+    t_depth get_depth() const;
+
 
     t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
 

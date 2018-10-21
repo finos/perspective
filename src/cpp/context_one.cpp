@@ -239,6 +239,11 @@ t_ctx1::set_depth(t_depth depth) {
     m_depth_set = true;
 }
 
+t_depth
+t_ctx1::get_depth() const {
+    return m_depth;
+}
+
 t_tscalvec
 t_ctx1::get_pkeys(const t_uidxpvec& cells) const {
     PSP_TRACE_SENTINEL();

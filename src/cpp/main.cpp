@@ -1094,6 +1094,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<t_stepdelta>("get_step_delta", &t_ctx1::get_step_delta)
         .function<t_cellupdvec>("get_cell_delta", &t_ctx1::get_cell_delta)
         .function<void>("set_depth", &t_ctx1::set_depth)
+        .function<t_depth>("get_depth",
+            reinterpret_cast<t_depth (t_ctx1::*)() const>(&t_ctx1::get_depth))
         .function("open", select_overload<t_index(t_tvidx)>(&t_ctx1::open))
         .function("close", select_overload<t_index(t_tvidx)>(&t_ctx1::close))
         .function<t_depth>("get_trav_depth", &t_ctx1::get_trav_depth)
@@ -1129,6 +1131,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<t_stepdelta>("get_step_delta", &t_ctx2::get_step_delta)
         //.function<t_cellupdvec>("get_cell_delta", &t_ctx2::get_cell_delta)
         .function<void>("set_depth", &t_ctx2::set_depth)
+        .function<t_depth>("get_depth",
+            reinterpret_cast<t_depth (t_ctx2::*)(const t_header)const>(&t_ctx2::get_depth))
         .function("open", select_overload<t_index(t_header, t_tvidx)>(&t_ctx2::open))
         .function("close", select_overload<t_index(t_header, t_tvidx)>(&t_ctx2::close))
         .function<t_aggspecvec>("get_column_names", &t_ctx2::get_aggregates)

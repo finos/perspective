@@ -547,6 +547,17 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
     }
 }
 
+t_depth
+t_ctx2::get_depth(t_header header) const {
+    switch (header) {
+        case HEADER_ROW:
+            return m_row_depth;
+        case HEADER_COLUMN:
+            return m_column_depth;
+    }
+}
+
+
 t_tscalvec
 t_ctx2::get_pkeys(const t_uidxpvec& cells) const {
     t_tscalset all_pkeys;

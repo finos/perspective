@@ -45,6 +45,7 @@ public:
     t_aggspecvec get_aggregates() const;
 
     void set_depth(t_header header, t_depth depth);
+    t_depth get_depth(t_header header) const;
 
     using t_ctxbase<t_ctx2>::get_data;
 
