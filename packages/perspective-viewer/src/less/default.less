@@ -48,14 +48,15 @@
 
 .dropping .psp-text-field__input,
 .psp-text-field__input:not(:empty) {
-    display: block;
+    display: block !important;
 }
 
 .dropping .psp-text-field__input::after {
     content: "|";
     width: 0px;
     overflow: visible;
-    margin-top: -2px;
+    margin-top: -1px;
+    position: absolute;
 }
 
 .dropping * {
@@ -91,34 +92,16 @@
     border-bottom: 25px solid rgba(0, 0, 0, 0);
 }
 
-perspective-viewer {
+:host(:not([row-pivots="[]"])) {
+    #active_columns perspective-row {
+        height: 41px;
+        --row_draggable-height: 41px;
+        --column_aggregate-display: inline-block;
+    }
+}
+
+:host {
     font-family: @sans-serif-fonts;
-
-    .awesomplete > ul {
-        border-radius: 0px;
-        margin: 0px;
-        border: none;
-        transform-origin: none;
-        transition: 0;
-    }
-
-    .awesomplete > ul:before {
-        content: none;
-    }
-
-    .awesomplete > input {
-        background-color: transparent;
-    }
-
-    perspective-row #psp_row {
-        color: rgb(51, 51, 51);
-    }
-
-    #side_panel perspective-row .row_draggable {
-        padding-right: 10px;
-        color: rgb(51, 51, 51);
-        transition: height 0.2s;
-    }
 
     #app.columns_horizontal {
         #columns_container {
@@ -136,10 +119,9 @@ perspective-viewer {
         #sub_columns {
             flex-shrink: 1;
 
+            /* TODO broken */
             perspective-row {
-                span#name {
-                    margin-right: 25px;
-                }
+                --column_name-margin: 0 25px 0 0;
             }
         }
 
@@ -147,9 +129,7 @@ perspective-viewer {
             margin-right: 8px;
 
             perspective-row {
-                div#psp_row {
-                    margin-right: 2px;
-                }
+                --psp_row-margin: 0 2px 0 0;
             }
         }
 
@@ -162,123 +142,51 @@ perspective-viewer {
         }
     }
 
+    #side_panel perspective-row {
+        --name-before-display: inline-block;
+        --is_visible-display: inline-block;
+        --row_draggable-padding: 2px 10px 2px 2px;
+        --row_close-display: none;
+        --psp_row-margin: 0 5px 0 0;
+        --column_name-max-width: 180px;
+    }
+
+    #top_panel perspective-row {
+        --row_draggable-display: inline-block;
+    }
+
     #columns_container {
         flex-direction: column;
         height: calc(~"100% - 29px");
 
         #active_columns {
             flex: 0 1 auto;
+
+            perspective-row {
+                margin-bottom: 2px;
+                --row_draggable-background-color: white;
+                --row_draggable-border-color: #ccc;
+                --row_draggable-border-width: 0 0 1px 0;
+                --row_draggable-overflow: hidden;
+            }
+
+            perspective-row[drop-target] {
+                --row_draggable_children-opacity: 0;
+            }
         }
 
         #active_columns,
         #inactive_columns {
             border: none !important;
         }
-
-        #active_columns perspective-row .row_draggable {
-            .bordered();
-            background-color: white;
-            overflow: hidden;
-        }
-
-        #active_columns perspective-row[drop-target] {
-            .row_draggable {
-                background-color: rgb(240, 240, 255) !important;
-                border: 1px solid #1078d1 !important;
-            }
-        }
-
-        #inactive_columns perspective-row .is_visible::before {
-            content: "\25CB";
-        }
-    }
-
-    #side_panel perspective-row .is_visible {
-        color: #999;
-    }
-
-    #side_panel perspective-row [settings="true"] #app {
-        border-top: 1px solid #ccc;
     }
 
     ul {
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    #filters perspective-row {
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-color: transparent;
-        }
-    }
-
-    #sort perspective-row #sort_order {
-        display: inline-block;
-    }
-
     .column_row() {
         font-family: monospace;
-    }
-
-    perspective-row {
-        border: 0px solid rgba(0, 0, 0, 0);
-
-        #row_close {
-            color: #999;
-            font-family: Arial;
-            font-size: 10px;
-        }
-
-        #column_aggregate {
-            font-family: Arial;
-        }
-
-        .row_draggable select {
-            border: none;
-        }
-
-        .row_draggable select:focus {
-            outline: none;
-        }
-    }
-
-    #side_panel perspective-row {
-        .is_visible::before {
-            content: "\25CF";
-        }
-
-        .integer::before,
-        .float::before {
-            .column_row();
-            content: "123";
-            color: #016bc6;
-        }
-
-        .string::before {
-            .column_row();
-            content: "abc";
-            color: #fe9292;
-        }
-
-        .boolean::before {
-            .column_row();
-            content: "t/f";
-            color: #999999;
-        }
-
-        .datetime::before {
-            .column_row();
-            content: "mdy";
-            color: #999999;
-        }
-
-        .date::before {
-            .column_row();
-            content: "mdy";
-            color: #999999;
-        }
     }
 
     #side_panel #side_panel__actions {
@@ -350,6 +258,13 @@ perspective-viewer {
         background-color: white;
     }
 
+    #filters perspective-row {
+        margin: 0 24px 0 0;
+        --filter_operator-display: inline-block;
+        --filter_operand-display: inline-block;
+        --select-background-color: none;
+    }
+
     #divider {
         min-height: 2px;
         height: 2px;
@@ -400,16 +315,6 @@ perspective-viewer {
 
     input::placeholder {
         color: #ccc;
-    }
-
-    rect,
-    svg image {
-        opacity: 0.5;
-    }
-
-    path,
-    circle {
-        opacity: 0.8;
     }
 
     option[value=""] {

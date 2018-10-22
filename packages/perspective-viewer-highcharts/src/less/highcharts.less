@@ -7,13 +7,22 @@
  *
  */
 
-perspective-viewer {
-    .chart {
+:host {
+    #container {
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        width: calc(~"100% - 30px");
+        height: calc(~"100% - 30px");
+        display: grid;
+        margin: 15px;
+        justify-content: stretch;
+        grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    }
+
+    .chart {
+        position: relative;
+        width: 100%;
+        height: 100%;
     }
 
     tspan,
@@ -44,16 +53,31 @@ perspective-viewer {
     .highcharts-heatmap-gradient-negative {
         background: linear-gradient(#feeb65 100%, #e4521b 70%, #4d342f 0%);
     }
-}
 
-perspective-viewer[view="sunburst"] {
-    path {
+    .highcharts-treemap-series rect,
+    .highcharts-sunburst-series path {
         stroke: #fff;
+    }
+
+    rect,
+    svg image {
+        opacity: 0.5;
+    }
+
+    path,
+    circle {
+        opacity: 0.8;
     }
 }
 
-perspective-viewer[view="treemap"] {
-    rect {
-        stroke: #fff;
-    }
-}
+// :host[view="sunburst"] {
+//     path {
+//         stroke: #fff;
+//     }
+// }
+
+// :host[view="treemap"] {
+//     rect {
+//         stroke: #fff;
+//     }
+// }

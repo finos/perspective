@@ -7,7 +7,7 @@
  *
  */
 
-perspective-hypergrid {
+:host {
     position: relative;
     color: #666;
 
@@ -31,10 +31,6 @@ perspective-hypergrid {
         color: #de3838;
     }
 
-    #app perspective-hypergrid {
-        position: absolute;
-    }
-
     #gridWrapper {
         width: 100%;
         height: 100%;
@@ -43,6 +39,11 @@ perspective-hypergrid {
     }
 
     #mainGrid {
+        & > div {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
         width: 100%;
         height: 100%;
         margin: 0px;

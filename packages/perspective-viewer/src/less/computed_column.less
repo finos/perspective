@@ -9,44 +9,7 @@
 
 @import "variables";
 
-.hidden {
-    display: none;
-}
-
-.psp-icon {
-    color: #999;
-
-    &:hover {
-        cursor: pointer;
-    }
-}
-
-.psp-icon__add {
-    display: flex;
-    width: 20px;
-    margin-left: 6px;
-    min-width: 20px;
-    margin-top: -2px;
-    height: 0px;
-
-    &:before {
-        content: "+";
-    }
-}
-
-.psp-title__columnName {
-    display: flex;
-    margin-left: 34px;
-    margin-top: 3px;
-    font-size: 12px;
-    color: #666;
-}
-
-.side_panel-action:hover {
-    cursor: pointer;
-}
-
-perspective-computed-column {
+:host {
     display: none;
     font-family: @sans-serif-fonts !important;
     flex-direction: column;
@@ -56,6 +19,23 @@ perspective-computed-column {
     margin-bottom: 24px;
 
     flex: 0 0 auto !important;
+
+    * {
+        box-sizing: border-box;
+    }
+
+    select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==)
+            no-repeat 95% 50%;
+        background-color: #fff;
+        border: none;
+        height: 24px;
+        padding: 0px 0px 0px 6px;
+        font-size: 12px;
+    }
 
     &.edit {
         #psp-cc-button-delete {
@@ -202,6 +182,7 @@ perspective-computed-column {
     }
 
     .psp-cc-computation__input-column {
+        box-sizing: border-box;
         display: flex;
         align-items: center;
         background-color: rgba(255, 255, 255, 0.3);
@@ -229,15 +210,25 @@ perspective-computed-column {
             border: 0;
             background: none;
         }
+    }
 
-        perspective-row .row_draggable {
-            border: 1px solid @border-color;
-            border-top-width: 0px;
-            border-left-width: 0px;
-            border-right-width: 0px;
-            background-color: white;
-            margin-right: 0;
-        }
+    perspective-row {
+        margin-bottom: 2px;
+        --row_draggable-background-color: white;
+        --row_draggable-border-color: #ccc;
+        --row_draggable-border-width: 0 0 1px 0;
+        --row_draggable-overflow: hidden;
+        --name-before-display: inline-block;
+        --is_visible-display: inline-block;
+        --row_draggable-padding: 2px 10px 2px 2px;
+        --row_close-display: none;
+        --psp_row-margin: 0 5px 0 0;
+        --column_name-max-width: 180px;
+        --is_visible-before: "\25CF";
+    }
+
+    perspective-row[drop-target] {
+        --row_draggable_children-opacity: 0;
     }
 
     .psp-cc__content {
@@ -247,6 +238,7 @@ perspective-computed-column {
     }
 
     #psp-cc-computation__type {
+        box-sizing: border-box;
         display: flex;
         font-family: @monospace-fonts;
         flex-direction: column;
@@ -322,6 +314,7 @@ perspective-computed-column {
             background: #0171d2;
             border-bottom-color: #0160b1;
             color: #fff;
+            height: 22px;
 
             &:active {
                 background: #0160b1;

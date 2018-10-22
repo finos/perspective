@@ -9,7 +9,7 @@
 
 @import "./column_labels.less";
 
-perspective-viewer:hover #config_button {
+:host:hover #config_button {
     opacity: 1;
 }
 
@@ -22,64 +22,107 @@ perspective-viewer:hover #config_button {
     opacity: 1 !important;
 }
 
-perspective-viewer {
+:host {
     position: relative;
     display: inline-block;
     overflow: hidden;
 
+    --highcharts-heatmap-gradient-full: linear-gradient(
+        #4d342f 0%,
+        #e4521b 22.5%,
+        #feeb65 42.5%,
+        #f0f0f0 50%,
+        #dcedc8 57.5%,
+        #42b3d5 67.5%,
+        #1a237e 100%
+    );
+
+    --highcharts-heatmap-gradient-positive: linear-gradient(
+        #dcedc8 0%,
+        #42b3d5 35%,
+        #1a237e 100%
+    );
+    --highcharts-heatmap-gradient-negative: linear-gradient(
+        #feeb65 100%,
+        #e4521b 70%,
+        #4d342f 0%
+    );
+    #pivot_chart {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: grid;
+        justify-content: stretch;
+    }
+    .hidden {
+        display: none;
+    }
+    .psp-icon {
+        color: #999;
+        &:hover {
+            cursor: pointer;
+        }
+    }
+    .psp-icon__add {
+        display: flex;
+        width: 20px;
+        margin-left: 6px;
+        min-width: 20px;
+        margin-top: -2px;
+        height: 0px;
+        &:before {
+            content: "+";
+        }
+    }
+    .psp-title__columnName {
+        display: flex;
+        margin-left: 34px;
+        margin-top: 3px;
+        font-size: 12px;
+        color: #666;
+    }
+    .side_panel-action:hover {
+        cursor: pointer;
+    }
     * {
         box-sizing: border-box;
         line-height: 1.42857143;
     }
-
     #app {
         display: flex;
         width: 100%;
         height: 100%;
     }
-
     #app.hide_message {
         #drop_target {
             display: none;
         }
     }
-
     .chart {
         padding: 15px;
     }
-
     #pivot_chart_container {
         flex-grow: 1;
         position: relative;
     }
-
-    #pivot_chart {
-        position: absolute;
-        overflow-y: auto;
-        width: 100%;
-        height: 100%;
-        display: grid;
-        margin: 0px;
-        justify-content: stretch;
-        grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    }
-
     .config {
         display: flex;
     }
-
     #row_pivots #psp_row,
     #column_pivots #psp_row,
     #sort #psp_row,
     #filters #psp_row {
         display: inline;
     }
-
     ul {
         min-height: 20px;
     }
-
+    #active_columns perspective-row {
+        --is_visible-before: "\25CF";
+    }
+    #inactive_columns perspective-row {
+        --is_visible-before: "\25CB";
+    }
     #active_columns,
     #inactive_columns {
         list-style: none;
@@ -90,17 +133,14 @@ perspective-viewer {
         overflow-x: hidden;
         position: relative;
     }
-
     #inactive_columns {
         .active {
             display: none;
         }
     }
-
     .columns_horizontal #sub_columns.collapse #side_panel__actions {
         margin-top: 0px;
     }
-
     #sub_columns {
         min-height: 33.3%;
         flex-shrink: 100000;
@@ -108,31 +148,26 @@ perspective-viewer {
         flex-direction: column;
         overflow-x: hidden;
         width: 100%;
-
         &.collapse {
             #inactive_columns {
                 display: none;
             }
-
             flex-shrink: 0;
             min-height: 64px;
         }
     }
-
     #divider {
         min-height: 2px;
         height: 2px;
         margin: 15px 13px 15px 13px;
         margin-bottom: 5px;
     }
-
     .column {
         display: flex;
         list-style: none;
         flex-direction: column;
         flex: 1;
     }
-
     .rrow {
         display: flex;
         flex-grow: 1;
@@ -143,34 +178,32 @@ perspective-viewer {
         min-width: 140px;
         margin: 5px 10px 0px 0px;
     }
-
     .rrow > div {
         display: flex;
         min-height: 24px;
         flex-direction: column;
         justify-content: flex-end;
     }
-
     #top_panel > .rrow > * {
         width: 100%;
     }
-
     .rrow #psp_row {
         white-space: nowrap;
     }
-
+    #sort perspective-row {
+        --sort_order-display: inline-block;
+        --sort_order-padding: 0 0 0 10px;
+    }
     #top_panel perspective-row + perspective-row:before {
         content: ",";
         padding: 0px 10px 0px 0px;
     }
-
     label {
         white-space: nowrap;
         display: inline-block;
         vertical-align: middle;
         margin-bottom: 0px;
     }
-
     #drop_target {
         position: absolute;
         left: 0px;
@@ -179,7 +212,6 @@ perspective-viewer {
         bottom: 0px;
         padding: 30px;
     }
-
     #drop_target_inner {
         width: 100%;
         height: 100%;
@@ -187,11 +219,9 @@ perspective-viewer {
         align-items: center;
         justify-content: center;
     }
-
     #drop_target_inner h3 {
         font-weight: 300;
     }
-
     #config_button {
         position: absolute;
         top: 0;
@@ -207,17 +237,14 @@ perspective-viewer {
         justify-content: center;
         cursor: pointer;
     }
-
     #config_button:before {
         content: "\1f527";
     }
-
     ul {
         padding: 0px;
         margin: 0;
         font-size: 12px;
     }
-
     select {
         -webkit-appearance: none;
         -moz-appearance: none;
@@ -230,17 +257,14 @@ perspective-viewer {
         padding: 0px 0px 0px 6px;
         font-size: 12px;
     }
-
     input {
         padding: 0 10px 0 10px;
     }
-
     .centered {
         display: flex;
         align-items: center;
         justify-content: center;
     }
-
     #top_panel {
         display: flex;
         flex-wrap: wrap;
@@ -248,32 +272,28 @@ perspective-viewer {
         padding-bottom: 10px;
         padding-top: 5px;
         max-width: 1000px;
+        perspective-row {
+            margin-bottom: -1px;
+            display: inline-block;
+            --psp_row-display: inline-block;
+        }
     }
-
     #side_panel {
         padding-top: 5px;
         flex: 0 0 auto;
     }
-
     #side_panel > div {
         display: flex;
     }
-
-    perspective-row .row_draggable {
-        cursor: move;
-    }
-
     #vis_selector_container {
         min-height: 29px;
         margin-left: 30px;
     }
-
     #vis_selector {
         flex-grow: 1;
         margin-top: 5px;
         margin-right: 10px;
     }
-
     #transpose_button {
         cursor: pointer;
         min-width: 5px;
@@ -282,12 +302,5 @@ perspective-viewer {
         color: #999;
         font-family: Arial;
         font-size: 12px;
-    }
-}
-
-perspective-viewer[view="treemap"]:not([column-pivots="[]"]),
-perspective-viewer[view="sunburst"]:not([column-pivots="[]"]) {
-    .chart {
-        position: relative !important;
     }
 }

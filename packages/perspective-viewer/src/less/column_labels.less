@@ -8,14 +8,10 @@
  */
 
 .titled {
-    padding-top: 5px;
-
-    .is_visible:before {
-        margin-top: 22px;
-    }
+    margin-top: 23px;
 }
 
-perspective-viewer {
+:host {
     #app #top_panel {
         #row_pivots label:before {
             content: "Row Pivots";
@@ -40,12 +36,14 @@ perspective-viewer {
                 font-size: 10px;
                 margin-left: 30px;
                 color: #666;
+                position: absolute;
+                margin-top: -15px;
             }
         }
     }
 }
 
-perspective-viewer[view="xy_line"] {
+:host([view="xy_line"]) {
     #app.columns_horizontal #side_panel {
         #inactive_columns {
             padding-top: 28px;
@@ -73,8 +71,8 @@ perspective-viewer[view="xy_line"] {
     }
 }
 
-perspective-viewer[view="xy_scatter"],
-perspective-viewer[view="xy_line"] {
+:host([view="xy_scatter"]),
+:host([view="xy_line"]) {
     #app.columns_horizontal #side_panel {
         #inactive_columns {
             padding-top: 28px;
@@ -102,7 +100,7 @@ perspective-viewer[view="xy_line"] {
     }
 }
 
-perspective-viewer[view="xy_scatter"] {
+:host([view="xy_scatter"]) {
     #app.columns_horizontal #side_panel {
         #inactive_columns {
             padding-top: 28px;
@@ -130,8 +128,8 @@ perspective-viewer[view="xy_scatter"] {
     }
 }
 
-perspective-viewer[view="treemap"],
-perspective-viewer[view="sunburst"] {
+:host([view="treemap"]),
+:host([view="sunburst"]) {
     #app.columns_horizontal #side_panel {
         #inactive_columns {
             padding-top: 28px;
