@@ -10,14 +10,22 @@
 import * as gparser from "gradient-parser";
 
 function _get_gradient(type) {
-    const thermometer = document.createElement("rect");
-    thermometer.style.display = "none";
-    thermometer.className = `highcharts-heatmap-gradient-${type}`;
-    const chart = this.querySelector("#pivot_chart");
-    chart.appendChild(thermometer);
-    const gradient = window.getComputedStyle(thermometer).getPropertyValue("background-image");
-    chart.removeChild(thermometer);
-    return gparser.parse(gradient)[0].colorStops.map(x => [Number.parseFloat(x.length.value) / 100, `rgb(${x.value.join(",")})`]);
+    let gradient;
+    if (window.ShadyCSS) {
+        gradient = window.ShadyCSS.getComputedStyleValue(this, `--highcharts-heatmap-gradient-${type}`);
+    } else {
+        gradient = getComputedStyle(this).getPropertyValue(`--highcharts-heatmap-gradient-${type}`);
+    }
+
+    return gparser.parse(gradient)[0].colorStops.map(x => {
+        let color;
+        if (x.type === "rgb") {
+            color = `rgb(${x.value.join(",")})`;
+        } else {
+            color = `#${x.value}`;
+        }
+        return [Number.parseFloat(x.length.value) / 100, color];
+    });
 }
 
 const _get_gradients = (() => {

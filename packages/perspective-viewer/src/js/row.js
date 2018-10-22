@@ -10,14 +10,14 @@
 import _ from "underscore";
 
 import Awesomplete from "awesomplete";
-import "awesomplete/awesomplete.css";
+import awesomplete_style from "awesomplete/awesomplete.css";
 
 import {bindTemplate} from "./utils.js";
 
 import perspective from "@jpmorganchase/perspective";
 import template from "../html/row.html";
 
-import "../less/row.less";
+import style from "../less/row.less";
 
 /******************************************************************************
  *
@@ -69,20 +69,20 @@ const ICONS = {
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
-@bindTemplate(template) // eslint-disable-next-line no-unused-vars
+@bindTemplate(template, {toString: () => style + "\n" + awesomplete_style}) // eslint-disable-next-line no-unused-vars
 class Row extends HTMLElement {
     set name(n) {
-        let elem = this.querySelector("#name");
+        let elem = this.shadowRoot.querySelector("#name");
         elem.innerHTML = this.getAttribute("name");
     }
 
     set type(t) {
-        let elem = this.querySelector("#name");
+        let elem = this.shadowRoot.querySelector("#name");
         let type = this.getAttribute("type");
         if (!type) return;
         elem.classList.add(type);
-        let agg_dropdown = this.querySelector("#column_aggregate");
-        let filter_dropdown = this.querySelector("#filter_operator");
+        let agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
+        let filter_dropdown = this.shadowRoot.querySelector("#filter_operator");
         switch (type) {
             case "float":
             case "integer":
@@ -109,7 +109,7 @@ class Row extends HTMLElement {
         if (!this.hasAttribute("aggregate")) {
             this.setAttribute("aggregate", perspective.AGGREGATE_DEFAULTS[type]);
         }
-        let filter_operand = this.querySelector("#filter_operand");
+        let filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._callback = event => this._update_filter(event);
         filter_operand.addEventListener("keyup", event => {
             if (filter_operand.value !== "in") {
@@ -119,8 +119,8 @@ class Row extends HTMLElement {
     }
 
     choices(choices) {
-        let filter_operand = this.querySelector("#filter_operand");
-        let filter_operator = this.querySelector("#filter_operator");
+        let filter_operand = this.shadowRoot.querySelector("#filter_operand");
+        let filter_operator = this.shadowRoot.querySelector("#filter_operator");
         new Awesomplete(filter_operand, {
             label: this.getAttribute("name"),
             list: choices,
@@ -144,13 +144,13 @@ class Row extends HTMLElement {
     }
 
     set filter(f) {
-        const filter_dropdown = this.querySelector("#filter_operator");
+        const filter_dropdown = this.shadowRoot.querySelector("#filter_operator");
         const filter = JSON.parse(this.getAttribute("filter"));
         if (filter_dropdown.value !== filter.operator) {
             filter_dropdown.value = filter.operator || perspective.FILTER_DEFAULTS[this.getAttribute("type")];
         }
         filter_dropdown.style.width = get_text_width(filter_dropdown.value);
-        const filter_input = this.querySelector("#filter_operand");
+        const filter_input = this.shadowRoot.querySelector("#filter_operand");
         const operand = filter.operand ? filter.operand.toString() : "";
         if (!this._initialized) {
             filter_input.value = operand;
@@ -159,7 +159,7 @@ class Row extends HTMLElement {
     }
 
     set aggregate(a) {
-        let agg_dropdown = this.querySelector("#column_aggregate");
+        let agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
         let aggregate = this.getAttribute("aggregate");
         if (agg_dropdown.value !== aggregate && this.hasAttribute("type")) {
             let type = this.getAttribute("type");
@@ -169,20 +169,20 @@ class Row extends HTMLElement {
 
     set "sort-order"(sort_dir) {
         const icon = ICONS[sort_dir];
-        this.querySelector("#sort_order").innerHTML = icon;
+        this.shadowRoot.querySelector("#sort_order").innerHTML = icon;
     }
 
     set computed_column(c) {
         // const data = this._get_computed_data();
-        // const computed_input_column = this.querySelector('#computed_input_column');
-        // const computation_name = this.querySelector('#computation_name');
+        // const computed_input_column = this.shadowRoot.querySelector('#computed_input_column');
+        // const computation_name = this.shadowRoot.querySelector('#computation_name');
         // computation_name.textContent = data.computation.name;
         // computed_input_column.textContent = data.input_column;
     }
 
     _update_filter(event) {
-        let filter_operand = this.querySelector("#filter_operand");
-        let filter_operator = this.querySelector("#filter_operator");
+        let filter_operand = this.shadowRoot.querySelector("#filter_operand");
+        let filter_operator = this.shadowRoot.querySelector("#filter_operator");
         let val = filter_operand.value;
         let type = this.getAttribute("type");
         switch (type) {
@@ -217,7 +217,7 @@ class Row extends HTMLElement {
     }
 
     connectedCallback() {
-        let li = this.querySelector(".row_draggable");
+        let li = this.shadowRoot.querySelector(".row_draggable");
         li.addEventListener("dragstart", ev => {
             if (this.hasAttribute("filter")) {
                 let {operator, operand} = JSON.parse(this.getAttribute("filter"));
@@ -233,17 +233,17 @@ class Row extends HTMLElement {
         li.addEventListener("dragend", () => {
             this.dispatchEvent(new CustomEvent("row-dragend"));
         });
-        let visible = this.querySelector(".is_visible");
+        let visible = this.shadowRoot.querySelector(".is_visible");
         visible.addEventListener("mousedown", event => this.dispatchEvent(new CustomEvent("visibility-clicked", {detail: event})));
-        this.querySelector("#row_close").addEventListener("mousedown", event => this.dispatchEvent(new CustomEvent("close-clicked", {detail: event})));
+        this.shadowRoot.querySelector("#row_close").addEventListener("mousedown", event => this.dispatchEvent(new CustomEvent("close-clicked", {detail: event})));
 
-        let agg_dropdown = this.querySelector("#column_aggregate");
+        let agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
         agg_dropdown.addEventListener("change", event => {
             this.setAttribute("aggregate", agg_dropdown.value);
             this.dispatchEvent(new CustomEvent("aggregate-selected", {detail: event}));
         });
 
-        let sort_order = this.querySelector("#sort_order");
+        let sort_order = this.shadowRoot.querySelector("#sort_order");
         sort_order.addEventListener("click", event => {
             const current = this.getAttribute("sort-order");
             const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % 5;
@@ -251,17 +251,17 @@ class Row extends HTMLElement {
             this.dispatchEvent(new CustomEvent("sort-order", {detail: event}));
         });
 
-        let filter_operand = this.querySelector("#filter_operand");
-        let filter_operator = this.querySelector("#filter_operator");
+        let filter_operand = this.shadowRoot.querySelector("#filter_operand");
+        let filter_operator = this.shadowRoot.querySelector("#filter_operator");
         let debounced_filter = _.debounce(event => this._update_filter(event), 50);
         filter_operator.addEventListener("change", () => {
             filter_operator.style.width = get_text_width(filter_operator.value);
-            const filter_input = this.querySelector("#filter_operand");
+            const filter_input = this.shadowRoot.querySelector("#filter_operand");
             filter_input.style.width = get_text_width("" + filter_operand.value, 30);
             debounced_filter();
         });
 
-        const edit_computed_column_button = this.querySelector("#row_edit");
+        const edit_computed_column_button = this.shadowRoot.querySelector("#row_edit");
         edit_computed_column_button.addEventListener("click", () => {
             this.dispatchEvent(
                 new CustomEvent("perspective-computed-column-edit", {

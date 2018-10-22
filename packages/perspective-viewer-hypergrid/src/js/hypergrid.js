@@ -21,7 +21,7 @@ import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
 const TEMPLATE = require("../html/hypergrid.html");
 
-import "../less/hypergrid.less";
+import style from "../less/hypergrid.less";
 
 const COLUMN_HEADER_FONT = "12px amplitude-regular, Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -139,7 +139,7 @@ function null_formatter(formatter, null_value = "") {
     return formatter;
 }
 
-bindTemplate(TEMPLATE)(
+bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
         set_data(data, hidden, schema, tschema, row_pivots) {
             const hg_data = psp2hypergrid(data, hidden, schema, tschema, row_pivots);
@@ -152,7 +152,7 @@ bindTemplate(TEMPLATE)(
 
         connectedCallback() {
             if (!this.grid) {
-                const host = this.querySelector("#mainGrid");
+                const host = this.shadowRoot.querySelector("#mainGrid");
 
                 host.setAttribute("hidden", true);
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
@@ -187,12 +187,12 @@ bindTemplate(TEMPLATE)(
                 const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
                 const style = window.getComputedStyle(this, null);
 
-                const header = window.getComputedStyle(this.querySelector("th"), null);
-                const row_hover = window.getComputedStyle(this.querySelector("tr.hover"), null);
-                const cell_hover = window.getComputedStyle(this.querySelector("td.hover"), null);
-                const cell_positive = window.getComputedStyle(this.querySelector("td.positive"), null);
-                const cell_negative = window.getComputedStyle(this.querySelector("td.negative"), null);
-                const table = window.getComputedStyle(this.querySelector("table"));
+                const header = window.getComputedStyle(this.shadowRoot.querySelector("th"), null);
+                const row_hover = window.getComputedStyle(this.shadowRoot.querySelector("tr.hover"), null);
+                const cell_hover = window.getComputedStyle(this.shadowRoot.querySelector("td.hover"), null);
+                const cell_positive = window.getComputedStyle(this.shadowRoot.querySelector("td.positive"), null);
+                const cell_negative = window.getComputedStyle(this.shadowRoot.querySelector("td.negative"), null);
+                const table = window.getComputedStyle(this.shadowRoot.querySelector("table"));
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
                 grid_properties["treeHeaderBackgroundColor"] = grid_properties["backgroundColor"] = style.getPropertyValue("background-color");

@@ -105,4 +105,7 @@ function setColumnPropsByType(column) {
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
+    Object.getPrototypeOf(grid.behavior).cellClicked = function(event) {
+        return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
+    };
 };

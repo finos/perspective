@@ -45,9 +45,13 @@ function setTemplateContent(template) {
  *     attribute which will become the new Web Component's tag name.
  * proto : The new Web Component's prototype object, as per spec.
  */
-export function registerElement(templateString, proto) {
+export function registerElement(templateString, styleString, proto) {
     const template = importTemplate(templateString);
     setTemplateContent(template);
+    if (styleString) {
+        template.innerHTML = `<style>${styleString.toString()}</style>` + template.innerHTML;
+    }
+    window.ShadyCSS && window.ShadyCSS.prepareTemplate(template, template.getAttribute("id"));
 
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {
@@ -57,6 +61,8 @@ export function registerElement(templateString, proto) {
         }
 
         connectedCallback() {
+            window.ShadyCSS && window.ShadyCSS.styleElement(this);
+
             if (this._initialized) {
                 return;
             }
@@ -70,7 +76,8 @@ export function registerElement(templateString, proto) {
             }
             this._old_children = this._old_children.reverse();
             var node = document.importNode(template.content, true);
-            this.appendChild(node);
+            this.attachShadow({mode: "open"});
+            this.shadowRoot.appendChild(node);
 
             if (super.connectedCallback) {
                 super.connectedCallback();
@@ -115,9 +122,9 @@ export function registerElement(templateString, proto) {
     window.customElements.define(name, _perspective_element);
 }
 
-export function bindTemplate(template) {
+export function bindTemplate(template, styleString) {
     return function(cls) {
-        return registerElement(template, cls);
+        return registerElement(template, styleString, cls);
     };
 }
 
