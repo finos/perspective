@@ -17,8 +17,8 @@ exports.default = function() {
     test.capture(
         "shows horizontal columns on small viewports.",
         async page => {
-            await page.click("#config_button");
             const viewer = await page.$("perspective-viewer");
+            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
             await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
         },
         60000,

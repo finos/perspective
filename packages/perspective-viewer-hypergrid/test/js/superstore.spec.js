@@ -43,8 +43,8 @@ utils.with_server({}, () => {
         describe("lazy render mode", () => {
             test.capture("resets viewable area when the logical size expands.", async page => {
                 await set_lazy(page);
-                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
                 await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["City"]'), viewer);
@@ -52,12 +52,12 @@ utils.with_server({}, () => {
 
             test.capture("resets viewable area when the physical size expands.", async page => {
                 await set_lazy(page);
-                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await page.evaluate(element => element.setAttribute("row-pivots", "[]"), viewer);
-                await page.click("#config_button");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
             });
         });
     });

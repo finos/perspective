@@ -10,8 +10,8 @@
 exports.default = function() {
     describe("axis tests", () => {
         test.capture("sets a category X axis when pivoted by a datetime.", async page => {
-            await page.click("#config_button");
             const viewer = await page.$("perspective-viewer");
+            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
             await page.evaluate(element => element.setAttribute("row-pivots", '["Order Date"]'), viewer);
             await page.waitForSelector("perspective-viewer:not([updating])");
             await page.evaluate(element => element.setAttribute("columns", '["State","Sales"]'), viewer);
@@ -21,8 +21,8 @@ exports.default = function() {
         });
 
         test.capture("sets a category axis when the axis type is a string.", async page => {
-            await page.click("#config_button");
             const viewer = await page.$("perspective-viewer");
+            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
             await page.evaluate(element => element.setAttribute("columns", '["State","Sales"]'), viewer);
             await page.waitForSelector("perspective-viewer:not([updating])");
         });

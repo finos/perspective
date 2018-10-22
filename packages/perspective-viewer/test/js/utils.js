@@ -232,14 +232,33 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
 };
 
 exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
-    await page.waitForSelector(svg_selector, {visible: true});
-    const element = await page.$(svg_selector);
-    const box = await element.boundingBox();
+    const viewer = await page.$("perspective-viewer");
+    const handle = await page.waitFor(
+        (viewer, selector) => {
+            const elem = viewer.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(selector);
+            if (elem) {
+                return elem;
+            }
+        },
+        {},
+        viewer,
+        svg_selector
+    );
+    const box = await handle.asElement().boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await element.hover();
-    await page.waitForSelector(".highcharts-label.highcharts-tooltip");
-    await page.waitFor(() => {
-        let elem = document.querySelector(".highcharts-label.highcharts-tooltip");
-        return window.getComputedStyle(elem).opacity !== "0" && elem.querySelector("text tspan").textContent.indexOf("Loading") === -1 && elem.querySelector("text tspan").textContent.trim() !== "";
-    });
+    await handle.asElement().hover();
+    await page.waitFor(
+        element => {
+            let elem = element.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(".highcharts-label.highcharts-tooltip");
+            if (elem) {
+                return (
+                    window.getComputedStyle(elem).opacity !== "0" &&
+                    elem.querySelector("text tspan").textContent.indexOf("Loading") === -1 &&
+                    elem.querySelector("text tspan").textContent.trim() !== ""
+                );
+            }
+        },
+        {},
+        viewer
+    );
 };
