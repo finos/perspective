@@ -14,6 +14,7 @@
 }
 
 #config_button {
+    padding: var(--config_button--padding, 12px 0px 0px 8px);
     background: none;
     opacity: 1 !important;
 }
@@ -66,12 +67,12 @@
     .psp-icon__add {
         display: flex;
         width: 20px;
-        margin-left: 6px;
         min-width: 20px;
         margin-top: -2px;
         height: 0px;
+        font-family: var(--column-add--font-family, inherit);
         &:before {
-            content: "+";
+            content: var(--column-add--before, "+");
         }
     }
     .psp-title__columnName {
@@ -118,17 +119,19 @@
         min-height: 20px;
     }
     #active_columns perspective-row {
-        --is_visible-before: "\25CF";
+        --column-selector--color: var(--active-column-selector--color, #999);
+        --is_visible--before: var(--active-column-selector--content, "\25CF");
     }
     #inactive_columns perspective-row {
-        --is_visible-before: "\25CB";
+        --column-selector--color: var(--inactive-column-selector--color, #999);
+        --is_visible--before: var(--inactive-column-selector--content, "\25CB");
     }
     #active_columns,
     #inactive_columns {
         list-style: none;
-        padding: 5px;
+        padding: 0px;
         width: 100%;
-        margin-top: 8px;
+        margin: var(--column-container--margin, 8px 0px 0px 0px);
         overflow-y: auto;
         overflow-x: hidden;
         position: relative;
@@ -176,7 +179,7 @@
         max-width: 400px;
         list-style: none;
         min-width: 140px;
-        margin: 5px 10px 0px 0px;
+        margin: var(--column-drop-container--margin, 5px 10px 0px 0px);
     }
     .rrow > div {
         display: flex;
@@ -226,19 +229,13 @@
         position: absolute;
         top: 0;
         left: 0;
-        width: 32px;
-        height: 44px;
         font-weight: normal;
-        font-family: Arial;
         font-size: 16px;
         opacity: 0;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-    }
-    #config_button:before {
-        content: "\1f527";
     }
     ul {
         padding: 0px;
@@ -254,7 +251,7 @@
         background-color: #fff;
         border-radius: 5px;
         height: 24px;
-        padding: 0px 0px 0px 6px;
+        padding: var(--select--padding, 0px 0px 0px 6px);
         font-size: 12px;
     }
     input {
@@ -269,8 +266,7 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: flex-start;
-        padding-bottom: 10px;
-        padding-top: 5px;
+        padding: var(--top_panel--padding, 5px 0px 10px 0px);
         max-width: 1000px;
         perspective-row {
             margin-bottom: -1px;
@@ -279,20 +275,18 @@
         }
     }
     #side_panel {
-        padding-top: 5px;
         flex: 0 0 auto;
+        padding: var(--side_panel--padding, 10px 10px 0px 11px);
     }
     #side_panel > div {
         display: flex;
     }
     #vis_selector_container {
         min-height: 29px;
-        margin-left: 30px;
+        margin-left: var(--column_selector--width, 20px);
     }
     #vis_selector {
         flex-grow: 1;
-        margin-top: 5px;
-        margin-right: 10px;
     }
     #transpose_button {
         cursor: pointer;

@@ -14,11 +14,11 @@
 :host {
     #app #top_panel {
         #row_pivots label:before {
-            content: "Row Pivots";
+            content: var(--row_pivots--before, "Row Pivots");
         }
 
         #column_pivots label:before {
-            content: "Column Pivots";
+            content: var(--column_pivots--before, "Column Pivots");
         }
 
         #sort label:before {
@@ -34,7 +34,9 @@
         #active_columns {
             perspective-row:before {
                 font-size: 10px;
-                margin-left: 30px;
+                margin-left: var(--column_selector--width, 20px);
+                left: 1px;
+                padding: var(--column_type--padding, 0px 0px 0px 5px);
                 color: #666;
                 position: absolute;
                 margin-top: -15px;
