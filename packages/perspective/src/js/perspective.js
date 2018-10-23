@@ -7,7 +7,7 @@
  *
  */
 
-import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "./defaults.js";
+import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "../../../../src/js/constants";
 import {DateParser, is_valid_date} from "./date_parser.js";
 import {bindall} from "./utils.js";
 

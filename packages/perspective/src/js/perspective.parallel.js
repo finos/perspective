@@ -9,7 +9,7 @@
 
 import {ScriptPath} from "./utils.js";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
+import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "../../../../src/js/constants";
 
 import {worker} from "./api.js";
 

@@ -8,25 +8,25 @@
  */
 
 const NUMBER_AGGREGATES = [
-    "any",
-    "avg",
-    "count",
-    "distinct count",
-    "dominant",
-    "first by index",
-    "last by index",
-    "last",
-    "high",
-    "low",
-    "mean",
-    "mean by count",
-    "median",
-    "pct sum parent",
-    "pct sum grand total",
-    "sum",
-    "sum abs",
-    "sum not null",
-    "unique"
+  "any",
+  "avg",
+  "count",
+  "distinct count",
+  "dominant",
+  "first by index",
+  "last by index",
+  "last",
+  "high",
+  "low",
+  "mean",
+  "mean by count",
+  "median",
+  "pct sum parent",
+  "pct sum grand total",
+  "sum",
+  "sum abs",
+  "sum not null",
+  "unique"
 ];
 
 const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique"];
@@ -36,21 +36,21 @@ const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "
 export const SORT_ORDERS = ["asc", "desc", "none", "asc abs", "desc abs"];
 
 export const TYPE_AGGREGATES = {
-    string: STRING_AGGREGATES,
-    float: NUMBER_AGGREGATES,
-    integer: NUMBER_AGGREGATES,
-    boolean: BOOLEAN_AGGREGATES,
-    datetime: STRING_AGGREGATES,
-    date: STRING_AGGREGATES
+  string: STRING_AGGREGATES,
+  float: NUMBER_AGGREGATES,
+  integer: NUMBER_AGGREGATES,
+  boolean: BOOLEAN_AGGREGATES,
+  datetime: STRING_AGGREGATES,
+  date: STRING_AGGREGATES
 };
 
 export const AGGREGATE_DEFAULTS = {
-    string: "distinct count",
-    float: "sum",
-    integer: "sum",
-    boolean: "distinct count",
-    datetime: "distinct count",
-    date: "distinct count"
+  string: "distinct count",
+  float: "sum",
+  integer: "sum",
+  boolean: "distinct count",
+  datetime: "distinct count",
+  date: "distinct count"
 };
 
 const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];
@@ -64,21 +64,21 @@ const DATETIME_FILTERS = ["<", ">", "==", "<=", ">=", "!="];
 export const COLUMN_SEPARATOR_STRING = "|";
 
 export const TYPE_FILTERS = {
-    string: STRING_FILTERS,
-    float: NUMBER_FILTERS,
-    integer: NUMBER_FILTERS,
-    boolean: BOOLEAN_FILTERS,
-    datetime: DATETIME_FILTERS,
-    date: DATETIME_FILTERS
+  string: STRING_FILTERS,
+  float: NUMBER_FILTERS,
+  integer: NUMBER_FILTERS,
+  boolean: BOOLEAN_FILTERS,
+  datetime: DATETIME_FILTERS,
+  date: DATETIME_FILTERS
 };
 
 export const FILTER_DEFAULTS = {
-    string: "==",
-    float: "==",
-    integer: "==",
-    boolean: "==",
-    datetime: "==",
-    date: "=="
+  string: "==",
+  float: "==",
+  integer: "==",
+  boolean: "==",
+  datetime: "==",
+  date: "=="
 };
 
 export const TYPED_ARRAY_SENTINEL_VALUE_INT8 = 255;

@@ -7,7 +7,7 @@
  *
  */
 
-import {COLUMN_SEPARATOR_STRING} from "@jpmorganchase/perspective/src/js/defaults.js";
+import {COLUMN_SEPARATOR_STRING} from "../../../../src/js/constants";
 
 function row_to_series(series, sname, gname) {
     let s;
