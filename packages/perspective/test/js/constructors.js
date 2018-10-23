@@ -131,6 +131,24 @@ var csv = "x,y,z\n1,a,true\n2,b,false\n3,c,true\n4,d,false";
 
 var data_6 = [{x: "š"}];
 
+var int_float_data = [{int: 1, float: 2.25}, {int: 2, float: 3.5}, {int: 3, float: 4.75}, {int: 4, float: 5.25}];
+var int_float_string_data = [{int: 1, float: 2.25, string: "a"}, {int: 2, float: 3.5, string: "b"}, {int: 3, float: 4.75, string: "c"}, {int: 4, float: 5.25, string: "d"}];
+var datetime_data = [{datetime: +new Date(), int: 1}, {datetime: +new Date(), int: 1}, {datetime: +new Date(), int: 2}, {datetime: +new Date(), int: 2}];
+
+// utility for checking typed arrays
+function validate_typed_array(typed_array, column_data) {
+    let is_valid = true;
+    for (let i = 0; i < typed_array.length; i++) {
+        if (column_data[i] !== null) {
+            if (typed_array[i] !== column_data[i]) {
+                is_valid = false;
+                break;
+            }
+        }
+    }
+    return is_valid;
+}
+
 module.exports = perspective => {
     describe("Execute", function() {
         it("serialized functions in a worker", async function() {
@@ -170,6 +188,137 @@ module.exports = perspective => {
             await view2.delete();
             await table.delete();
             expect(true).toEqual(true);
+        });
+    });
+
+    describe("Typed Arrays", function() {
+        it("Int, 0-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("int");
+            expect(result.byteLength).toEqual(16);
+        });
+
+        it("Float, 0-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("float");
+            expect(result.byteLength).toEqual(32);
+        });
+
+        it("Datetime, 0-sided view", async function() {
+            var table = perspective.table(datetime_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("datetime");
+            expect(result.byteLength).toEqual(32);
+        });
+
+        it("Int, 1-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("int");
+            // should include aggregate row
+            expect(result.byteLength).toEqual(20);
+        });
+
+        it("Float, 1-sided view", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("float");
+            expect(result.byteLength).toEqual(40);
+        });
+
+        it("Datetime, 1-sided view", async function() {
+            var table = perspective.table(datetime_data);
+            var view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "high", column: "datetime"}]
+            });
+            const result = await view.col_to_js_typed_array("datetime");
+            expect(result.byteLength).toEqual(24);
+        });
+
+        it("Int, 2-sided view with row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                column_pivot: ["float"],
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("3.5|int");
+            expect(result.byteLength).toEqual(20);
+        });
+
+        it("Float, 2-sided view with row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({
+                column_pivot: ["float"],
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            const result = await view.col_to_js_typed_array("3.5|float");
+            expect(result.byteLength).toEqual(40);
+        });
+
+        it("Int, 2-sided view, no row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({column_pivot: ["float"]});
+            const result = await view.col_to_js_typed_array("3.5|int");
+            // bytelength should not include the aggregate row
+            expect(result.byteLength).toEqual(16);
+        });
+
+        it("Float, 2-sided view, no row pivot", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view({column_pivot: ["float"]});
+            const result = await view.col_to_js_typed_array("3.5|float");
+            expect(result.byteLength).toEqual(32);
+        });
+
+        it("Undefined for non-int/float columns", async function() {
+            var table = perspective.table(int_float_string_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("string");
+            expect(result).toBeUndefined();
+        });
+
+        it("Symmetric output with to_columns, 0-sided", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let cols = await view.to_columns();
+
+            for (let col in cols) {
+                let ta = await view.col_to_js_typed_array(col);
+                let column = cols[col];
+                if (ta !== undefined && column !== undefined) {
+                    expect(ta.length).toEqual(cols[col].length);
+                    expect(validate_typed_array(ta, cols[col])).toEqual(true);
+                }
+            }
+        });
+
+        it("Symmetric output with to_columns, 1-sided", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivot: ["int"],
+                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+            });
+            let cols = await view.to_columns();
+
+            for (let col in cols) {
+                let ta = await view.col_to_js_typed_array(col);
+                let column = cols[col];
+                if (ta !== undefined && column !== undefined) {
+                    expect(ta.length).toEqual(cols[col].length);
+                    expect(validate_typed_array(ta, cols[col])).toEqual(true);
+                }
+            }
         });
     });
 
@@ -293,7 +442,7 @@ module.exports = perspective => {
             expect(meta_4).toEqual(result);
         });
 
-        it("Handles date udpates when constructed from a schema", async function() {
+        it("Handles date updates when constructed from a schema", async function() {
             var table = perspective.table(meta_4);
             table.update(data_4);
             let result = await table.view({}).to_json();

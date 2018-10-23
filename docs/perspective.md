@@ -8,40 +8,41 @@
     -   [to_columns][4]
     -   [to_json][5]
     -   [to_csv][6]
-    -   [num_rows][7]
-    -   [num_columns][8]
-    -   [get_row_expanded][9]
-    -   [expand][10]
-    -   [collapse][11]
-    -   [expand_to_depth][12]
-    -   [collapse_to_depth][13]
-    -   [on_update][14]
-    -   [on_delete][15]
--   [table][16]
-    -   [delete][17]
-    -   [on_delete][18]
-    -   [size][19]
-    -   [schema][20]
-    -   [computed_schema][21]
-    -   [view][22]
-    -   [update][23]
-    -   [remove][24]
-    -   [add_computed][25]
-    -   [columns][26]
-    -   [column_metadata][27]
--   [table][28]
+    -   [col_to_js_typed_array][7]
+    -   [num_rows][8]
+    -   [num_columns][9]
+    -   [get_row_expanded][10]
+    -   [expand][11]
+    -   [collapse][12]
+    -   [expand_to_depth][13]
+    -   [collapse_to_depth][14]
+    -   [on_update][15]
+    -   [on_delete][16]
+-   [table][17]
+    -   [delete][18]
+    -   [on_delete][19]
+    -   [size][20]
+    -   [schema][21]
+    -   [computed_schema][22]
+    -   [view][23]
+    -   [update][24]
+    -   [remove][25]
+    -   [add_computed][26]
+    -   [columns][27]
+    -   [column_metadata][28]
+-   [table][29]
 
 ## view
 
 A View object represents a specific transform (configuration or pivot,
-filter, sort, etc) configuration on an underlying [table][16]. A View
-receives all updates from the [table][16] from which it is derived, and
+filter, sort, etc) configuration on an underlying [table][17]. A View
+receives all updates from the [table][17] from which it is derived, and
 can be serialized to JSON or trigger a callback when it is updated.  View
 objects are immutable, and will remain in memory and actively process
-updates until its [view#delete][29] method is called.
+updates until its [view#delete][30] method is called.
 
 <strong>Note</strong> This constructor is not public - Views are created
-by invoking the [table#view][30] method.
+by invoking the [table#view][31] method.
 
 **Examples**
 
@@ -62,9 +63,9 @@ The schema of this [view][1].  A schema is an Object, the keys of which
 are the columns of this [view][1], and the values are their string type names.
 If this [view][1] is aggregated, theses will be the aggregated types;
 otherwise these types will be the same as the columns in the underlying
-[table][16]
+[table][17]
 
-Returns **[Promise][31]&lt;[Object][32]>** A Promise of this [view][1]'s schema.
+Returns **[Promise][32]&lt;[Object][33]>** A Promise of this [view][1]'s schema.
 
 ### to_columns
 
@@ -72,17 +73,17 @@ Serializes this view to JSON data in a column-oriented format.
 
 **Parameters**
 
--   `options` **[Object][32]?** An optional configuration object.
-    -   `options.start_row` **[number][33]** The starting row index from which
+-   `options` **[Object][33]?** An optional configuration object.
+    -   `options.start_row` **[number][34]** The starting row index from which
         to serialize.
-    -   `options.end_row` **[number][33]** The ending row index from which
+    -   `options.end_row` **[number][34]** The ending row index from which
         to serialize.
-    -   `options.start_col` **[number][33]** The starting column index from which
+    -   `options.start_col` **[number][34]** The starting column index from which
         to serialize.
-    -   `options.end_col` **[number][33]** The ending column index from which
+    -   `options.end_col` **[number][34]** The ending column index from which
         to serialize.
 
-Returns **[Promise][31]&lt;[Array][34]>** A Promise resolving to An array of Objects
+Returns **[Promise][32]&lt;[Array][35]>** A Promise resolving to An array of Objects
 representing the rows of this [view][1].  If this [view][1] had a
 "row_pivots" config parameter supplied when constructed, each row Object
 will have a "**ROW_PATH**" key, whose value specifies this row's
@@ -96,17 +97,17 @@ Serializes this view to JSON data in a row-oriented format.
 
 **Parameters**
 
--   `options` **[Object][32]?** An optional configuration object.
-    -   `options.start_row` **[number][33]** The starting row index from which
+-   `options` **[Object][33]?** An optional configuration object.
+    -   `options.start_row` **[number][34]** The starting row index from which
         to serialize.
-    -   `options.end_row` **[number][33]** The ending row index from which
+    -   `options.end_row` **[number][34]** The ending row index from which
         to serialize.
-    -   `options.start_col` **[number][33]** The starting column index from which
+    -   `options.start_col` **[number][34]** The starting column index from which
         to serialize.
-    -   `options.end_col` **[number][33]** The ending column index from which
+    -   `options.end_col` **[number][34]** The ending column index from which
         to serialize.
 
-Returns **[Promise][31]&lt;[Array][34]>** A Promise resolving to An array of Objects
+Returns **[Promise][32]&lt;[Array][35]>** A Promise resolving to An array of Objects
 representing the rows of this [view][1].  If this [view][1] had a
 "row_pivots" config parameter supplied when constructed, each row Object
 will have a "**ROW_PATH**" key, whose value specifies this row's
@@ -120,19 +121,19 @@ Serializes this view to CSV data in a standard format.
 
 **Parameters**
 
--   `options` **[Object][32]?** An optional configuration object.
-    -   `options.start_row` **[number][33]** The starting row index from which
+-   `options` **[Object][33]?** An optional configuration object.
+    -   `options.start_row` **[number][34]** The starting row index from which
         to serialize.
-    -   `options.end_row` **[number][33]** The ending row index from which
+    -   `options.end_row` **[number][34]** The ending row index from which
         to serialize.
-    -   `options.start_col` **[number][33]** The starting column index from which
+    -   `options.start_col` **[number][34]** The starting column index from which
         to serialize.
-    -   `options.end_col` **[number][33]** The ending column index from which
+    -   `options.end_col` **[number][34]** The ending column index from which
         to serialize.
-    -   `options.config` **[Object][32]** A config object for the Papaparse [https://www.papaparse.com/docs#json-to-csv][35]
+    -   `options.config` **[Object][33]** A config object for the Papaparse [https://www.papaparse.com/docs#json-to-csv][36]
         config object.
 
-Returns **[Promise][31]&lt;[string][36]>** A Promise resolving to a string in CSV format
+Returns **[Promise][32]&lt;[string][37]>** A Promise resolving to a string in CSV format
 representing the rows of this [view][1].  If this [view][1] had a
 "row_pivots" config parameter supplied when constructed, each row
 will have prepended those values specified by this row's
@@ -140,13 +141,30 @@ aggregated path.  If this [view][1] had a "column_pivots" config
 parameter supplied, the keys of this object will be comma-prepended with
 their comma-separated column paths.
 
+### col_to_js_typed_array
+
+Serializes a view column into a TypedArray.
+
+**Parameters**
+
+-   `col_name`  
+-   `column_name` **[string][37]** The name of the column to serialize.
+
+Returns **[Promise][32]&lt;[TypedArray][38]>** A promise resolving to a TypedArray
+representing the data of the column as retrieved from the [view][1] - all
+pivots, aggregates, sorts, and filters have been applied onto the values
+inside the TypedArray. The TypedArray will be constructed based on data type -
+integers will resolve to Int8Array, Int16Array, or Int32Array. Floats resolve to
+Float32Array or Float64Array. If the column cannot be found, or is not of an
+integer/float type, the Promise returns undefined.
+
 ### num_rows
 
 The number of aggregated rows in this [view][1].  This is affected by
 the "row_pivots" configuration parameter supplied to this [view][1]'s
 contructor.
 
-Returns **[Promise][31]&lt;[number][33]>** The number of aggregated rows.
+Returns **[Promise][32]&lt;[number][34]>** The number of aggregated rows.
 
 ### num_columns
 
@@ -154,7 +172,7 @@ The number of aggregated columns in this [view][1].  This is affected by
 the "column_pivots" configuration parameter supplied to this [view][1]'s
 contructor.
 
-Returns **[Promise][31]&lt;[number][33]>** The number of aggregated columns.
+Returns **[Promise][32]&lt;[number][34]>** The number of aggregated columns.
 
 ### get_row_expanded
 
@@ -164,7 +182,7 @@ Whether this row at index `idx` is in an expanded or collapsed state.
 
 -   `idx`  
 
-Returns **[Promise][31]&lt;bool>** Whether this row is expanded.
+Returns **[Promise][32]&lt;bool>** Whether this row is expanded.
 
 ### expand
 
@@ -174,7 +192,7 @@ Expands the row at index `idx`.
 
 -   `idx`  
 
-Returns **[Promise][31]&lt;void>** 
+Returns **[Promise][32]&lt;void>** 
 
 ### collapse
 
@@ -184,7 +202,7 @@ Collapses the row at index `idx`.
 
 -   `idx`  
 
-Returns **[Promise][31]&lt;void>** 
+Returns **[Promise][32]&lt;void>** 
 
 ### expand_to_depth
 
@@ -210,9 +228,9 @@ aggregated row deltas.
 
 **Parameters**
 
--   `callback` **[function][37]** A callback function invoked on update.  The
+-   `callback` **[function][39]** A callback function invoked on update.  The
     parameter to this callback shares a structure with the return type of
-    [view#to_json][38].
+    [view#to_json][40].
 
 ### on_delete
 
@@ -221,9 +239,9 @@ is deleted, this callback will be invoked.
 
 **Parameters**
 
--   `callback` **[function][37]** A callback function invoked on update.  The
+-   `callback` **[function][39]** A callback function invoked on update.  The
         parameter to this callback shares a structure with the return type of
-        [view#to_json][38].
+        [view#to_json][40].
 
 ## table
 
@@ -232,48 +250,48 @@ typed - they have an immutable set of column names, and a known type for
 each.
 
 <strong>Note</strong> This constructor is not public - Tables are created
-by invoking the [table][16] factory method, either on the perspective
-module object, or an a [worker][39] instance.
+by invoking the [table][17] factory method, either on the perspective
+module object, or an a [worker][41] instance.
 
 ### delete
 
-Delete this [table][16] and clean up all resources associated with it.
+Delete this [table][17] and clean up all resources associated with it.
 Table objects do not stop consuming resources or processing updates when
 they are garbage collected - you must call this method to reclaim these.
 
 ### on_delete
 
-Register a callback with this [table][16].  Whenever the [view][1]
+Register a callback with this [table][17].  Whenever the [view][1]
 is deleted, this callback will be invoked.
 
 **Parameters**
 
--   `callback` **[function][37]** A callback function invoked on update.  The
+-   `callback` **[function][39]** A callback function invoked on update.  The
         parameter to this callback shares a structure with the return type of
-        [table#to_json][40].
+        [table#to_json][42].
 
 ### size
 
-The number of accumulated rows in this [table][16].  This is affected by
+The number of accumulated rows in this [table][17].  This is affected by
 the "index" configuration parameter supplied to this [view][1]'s
 contructor - as rows will be overwritten when they share an idnex column.
 
-Returns **[Promise][31]&lt;[number][33]>** The number of accumulated rows.
+Returns **[Promise][32]&lt;[number][34]>** The number of accumulated rows.
 
 ### schema
 
-The schema of this [table][16].  A schema is an Object whose keys are the
-columns of this [table][16], and whose values are their string type names.
+The schema of this [table][17].  A schema is an Object whose keys are the
+columns of this [table][17], and whose values are their string type names.
 
-Returns **[Promise][31]&lt;[Object][32]>** A Promise of this [table][16]'s schema.
+Returns **[Promise][32]&lt;[Object][33]>** A Promise of this [table][17]'s schema.
 
 ### computed_schema
 
-The computed schema of this [table][16]. Returns a schema of only computed
+The computed schema of this [table][17]. Returns a schema of only computed
 columns added by the user, the keys of which are computed columns and the values an
 Object containing the associated column_name, column_type, and computation.
 
-Returns **[Promise][31]&lt;[Object][32]>** A Promise of this [table][16]'s computed schema.
+Returns **[Promise][32]&lt;[Object][33]>** A Promise of this [table][17]'s computed schema.
 
 ### view
 
@@ -282,19 +300,19 @@ configuration.
 
 **Parameters**
 
--   `config` **[Object][32]?** The configuration object for this [view][1].
-    -   `config.row_pivot` **[Array][34]&lt;[string][36]>?** An array of column names
-        to use as [Row Pivots][41].
-    -   `config.column_pivot` **[Array][34]&lt;[string][36]>?** An array of column names
-        to use as [Column Pivots][42].
-    -   `config.aggregate` **[Array][34]&lt;[Object][32]>?** An Array of Aggregate configuration objects,
+-   `config` **[Object][33]?** The configuration object for this [view][1].
+    -   `config.row_pivot` **[Array][35]&lt;[string][37]>?** An array of column names
+        to use as [Row Pivots][43].
+    -   `config.column_pivot` **[Array][35]&lt;[string][37]>?** An array of column names
+        to use as [Column Pivots][44].
+    -   `config.aggregate` **[Array][35]&lt;[Object][33]>?** An Array of Aggregate configuration objects,
         each of which should provide an "name" and "op" property, repsresnting the string
         aggregation type and associated column name, respectively.  Aggregates not provided
         will use their type defaults
-    -   `config.filter` **[Array][34]&lt;[Array][34]&lt;[string][36]>>?** An Array of Filter configurations to
+    -   `config.filter` **[Array][35]&lt;[Array][35]&lt;[string][37]>>?** An Array of Filter configurations to
         apply.  A filter configuration is an array of 3 elements:  A column name,
         a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-    -   `config.sort` **[Array][34]&lt;[string][36]>?** An Array of column names by which to sort.
+    -   `config.sort` **[Array][35]&lt;[string][37]>?** An Array of column names by which to sort.
 
 **Examples**
 
@@ -307,33 +325,33 @@ var view = table.view({
 });
 ```
 
-Returns **[view][43]** A new [view][1] object for the supplied configuration,
+Returns **[view][45]** A new [view][1] object for the supplied configuration,
 bound to this table
 
 ### update
 
--   **See: [table][16]**
+-   **See: [table][17]**
 
-Updates the rows of a [table][16].  Updated rows are pushed down to any
+Updates the rows of a [table][17].  Updated rows are pushed down to any
 derived [view][1] objects.
 
 **Parameters**
 
--   `data` **([Object][32]&lt;[string][36], [Array][34]> | [Array][34]&lt;[Object][32]> | [string][36])** The input data
+-   `data` **([Object][33]&lt;[string][37], [Array][35]> | [Array][35]&lt;[Object][33]> | [string][37])** The input data
     for this table.  The supported input types mirror the constructor options, minus
     the ability to pass a schema (Object&lt;string, string>) as this table has.
     already been constructed, thus its types are set in stone.
 
 ### remove
 
--   **See: [table][16]**
+-   **See: [table][17]**
 
-Removes the rows of a [table][16].  Removed rows are pushed down to any
+Removes the rows of a [table][17].  Removed rows are pushed down to any
 derived [view][1] objects.
 
 **Parameters**
 
--   `data` **[Array][34]&lt;[Object][32]>** An array of primary keys to remove.
+-   `data` **[Array][35]&lt;[Object][33]>** An array of primary keys to remove.
 
 ### add_computed
 
@@ -347,7 +365,7 @@ Create a new table with the addition of new computed columns (defined as javascr
 
 The column names of this table.
 
-Returns **[Array][34]&lt;[string][36]>** An array of column names for this table.
+Returns **[Array][35]&lt;[string][37]>** An array of column names for this table.
 
 ### column_metadata
 
@@ -361,23 +379,23 @@ If the column is computed, the `computed` property is an Object containing:
 
     Otherwise, `computed` is `undefined`.
 
-Returns **[Array][34]&lt;[object][32]>** An array of Objects containing metadata for each column.
+Returns **[Array][35]&lt;[object][33]>** An array of Objects containing metadata for each column.
 
 ## table
 
-A factory method for constructing [table][16]s.
+A factory method for constructing [table][17]s.
 
 **Parameters**
 
--   `data` **([Object][32]&lt;[string][36], [Array][34]> | [Object][32]&lt;[string][36], [string][36]> | [Array][34]&lt;[Object][32]> | [string][36])** The input data
+-   `data` **([Object][33]&lt;[string][37], [Array][35]> | [Object][33]&lt;[string][37], [string][37]> | [Array][35]&lt;[Object][33]> | [string][37])** The input data
         for this table.  When supplied an Object with string values, an empty
         table is returned using this Object as a schema.  When an Object with
         Array values is supplied, a table is returned using this object's
         key/value pairs as name/columns respectively.  When an Array is supplied,
         a table is constructed using this Array's objects as rows.  When
         a string is supplied, the parameter as parsed as a CSV.
--   `options` **[Object][32]?** An optional options dictionary.
-    -   `options.index` **[string][36]** The name of the column in the resulting
+-   `options` **[Object][33]?** An optional options dictionary.
+    -   `options.index` **[string][37]** The name of the column in the resulting
             table to treat as an index.  When updating this table, rows sharing an
             index of a new row will be overwritten. `index` is mutually exclusive
             to `limit`
@@ -398,7 +416,7 @@ var table = perspective.table([{x: 1}, {x: 2}]);
 var table = worker.table([{x: 1}, {x: 2}]);
 ```
 
-Returns **[table][44]** A new [table][16] object.
+Returns **[table][46]** A new [table][17] object.
 
 [1]: #view
 
@@ -412,78 +430,82 @@ Returns **[table][44]** A new [table][16] object.
 
 [6]: #to_csv
 
-[7]: #num_rows
+[7]: #col_to_js_typed_array
 
-[8]: #num_columns
+[8]: #num_rows
 
-[9]: #get_row_expanded
+[9]: #num_columns
 
-[10]: #expand
+[10]: #get_row_expanded
 
-[11]: #collapse
+[11]: #expand
 
-[12]: #expand_to_depth
+[12]: #collapse
 
-[13]: #collapse_to_depth
+[13]: #expand_to_depth
 
-[14]: #on_update
+[14]: #collapse_to_depth
 
-[15]: #on_delete
+[15]: #on_update
 
-[16]: #table
+[16]: #on_delete
 
-[17]: #delete-1
+[17]: #table
 
-[18]: #on_delete-1
+[18]: #delete-1
 
-[19]: #size
+[19]: #on_delete-1
 
-[20]: #schema-1
+[20]: #size
 
-[21]: #computed_schema
+[21]: #schema-1
 
-[22]: #view-1
+[22]: #computed_schema
 
-[23]: #update
+[23]: #view-1
 
-[24]: #remove
+[24]: #update
 
-[25]: #add_computed
+[25]: #remove
 
-[26]: #columns
+[26]: #add_computed
 
-[27]: #column_metadata
+[27]: #columns
 
-[28]: #table-1
+[28]: #column_metadata
 
-[29]: #viewdelete
+[29]: #table-1
 
-[30]: #tableview
+[30]: #viewdelete
 
-[31]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[31]: #tableview
 
-[32]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[32]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
-[33]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
+[33]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[34]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[34]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-[35]: https://www.papaparse.com/docs#json-to-csv
+[35]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[36]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[36]: https://www.papaparse.com/docs#json-to-csv
 
-[37]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
+[37]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[38]: #viewto_json
+[38]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
 
-[39]: https://developer.mozilla.org/docs/Web/JavaScript
+[39]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function
 
-[40]: table#to_json
+[40]: #viewto_json
 
-[41]: https://en.wikipedia.org/wiki/Pivot_table#Row_labels
+[41]: https://developer.mozilla.org/docs/Web/JavaScript
 
-[42]: https://en.wikipedia.org/wiki/Pivot_table#Column_labels
+[42]: table#to_json
 
-[43]: #view
+[43]: https://en.wikipedia.org/wiki/Pivot_table#Row_labels
 
-[44]: #table
+[44]: https://en.wikipedia.org/wiki/Pivot_table#Column_labels
+
+[45]: #view
+
+[46]: #table

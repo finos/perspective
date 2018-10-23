@@ -18,7 +18,7 @@
         "build:cjs": "webpack --color --config src/config/highcharts.plugin.cjs.config.js",
         "build": "npm-run-all build:*",
         "test:build": "cp test/html/* build",
-        "watch": "webpack --color --config --watch test/config/highcharts.plugin.config.js",
+        "watch": "webpack --color --watch --config src/config/highcharts.plugin.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete",

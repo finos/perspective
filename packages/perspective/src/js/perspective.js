@@ -730,6 +730,48 @@ module.exports = function(Module) {
     };
 
     /**
+     * Serializes a view column into a TypedArray.
+     *
+     * @async
+     *
+     * @param {string} column_name The name of the column to serialize.
+     *
+     * @returns {Promise<TypedArray>} A promise resolving to a TypedArray
+     * representing the data of the column as retrieved from the {@link view} - all
+     * pivots, aggregates, sorts, and filters have been applied onto the values
+     * inside the TypedArray. The TypedArray will be constructed based on data type -
+     * integers will resolve to Int8Array, Int16Array, or Int32Array. Floats resolve to
+     * Float32Array or Float64Array. If the column cannot be found, or is not of an
+     * integer/float type, the Promise returns undefined.
+     */
+    view.prototype.col_to_js_typed_array = async function(col_name) {
+        const names = await this._column_names();
+        let idx = names.indexOf(col_name);
+
+        // type-checking is handled in c++ to accomodate column-pivoted views
+        if (idx === -1) {
+            return undefined;
+        }
+
+        if (this.sides() === 0) {
+            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx);
+        } else if (this.sides() === 1) {
+            // columns start at 1 for > 0-sided views
+            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1);
+        } else {
+            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.config.column_only === true;
+            let arr = __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1);
+            if (arr !== undefined) {
+                if (column_pivot_only) {
+                    // remove agg of psp_okey
+                    arr = arr.subarray(1, arr.length);
+                }
+            }
+            return arr;
+        }
+    };
+
+    /**
      * The number of aggregated rows in this {@link view}.  This is affected by
      * the "row_pivots" configuration parameter supplied to this {@link view}'s
      * contructor.

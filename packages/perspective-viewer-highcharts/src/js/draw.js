@@ -24,7 +24,6 @@ export const draw = mode =>
         const hidden = this._get_view_hidden(aggregates);
 
         const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
-
         let js;
 
         if (task.cancelled) {

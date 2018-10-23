@@ -168,6 +168,87 @@ _get_aggspecs(val j_aggs) {
     return aggspecs;
 }
 
+// Date parsing
+t_date
+jsdate_to_t_date(val date) {
+    return t_date(date.call<val>("getFullYear").as<t_int32>(),
+        date.call<val>("getMonth").as<t_int32>(), date.call<val>("getDate").as<t_int32>());
+}
+
+val
+t_date_to_jsdate(t_date date) {
+    val jsdate = val::global("Date").new_();
+    jsdate.call<val>("setYear", date.year());
+    jsdate.call<val>("setMonth", date.month());
+    jsdate.call<val>("setDate", date.day());
+    jsdate.call<val>("setHours", 0);
+    jsdate.call<val>("setMinutes", 0);
+    jsdate.call<val>("setSeconds", 0);
+    jsdate.call<val>("setMilliseconds", 0);
+    return jsdate;
+}
+
+/**
+ * Converts a scalar value to its JS representation.
+ *
+ * Params
+ * ------
+ * t_tscalar scalar
+ *
+ * Returns
+ * -------
+ * val
+ */
+val
+scalar_to_val(const t_tscalar scalar) {
+    if (!scalar.is_valid()) {
+        return val::null();
+    }
+    switch (scalar.get_dtype()) {
+        case DTYPE_BOOL: {
+            if (scalar) {
+                return val(true);
+            } else {
+                return val(false);
+            }
+        }
+        case DTYPE_TIME:
+        case DTYPE_FLOAT64:
+        case DTYPE_FLOAT32: {
+            return val(scalar.to_double());
+        }
+        case DTYPE_DATE: {
+            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
+        }
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_UINT32:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32: {
+            return val(static_cast<t_int32>(scalar.to_int64()));
+        }
+        case DTYPE_UINT64:
+        case DTYPE_INT64: {
+            // This could potentially lose precision
+            return val(static_cast<t_int32>(scalar.to_int64()));
+        }
+        case DTYPE_NONE: {
+            return val::null();
+        }
+        case DTYPE_STR:
+        default: {
+            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
+            return val(converter.from_bytes(scalar.to_string()));
+        }
+    }
+}
+
+val
+scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx) {
+    return scalar_to_val(scalars[idx]);
+}
+
 /**
  *
  *
@@ -244,6 +325,73 @@ fill_col_dict(val dictvec, t_col_sptr col) {
     }
 }
 } // namespace arrow
+
+namespace js_typed_array {
+val ArrayBuffer = val::global("ArrayBuffer");
+val Int8Array = val::global("Int8Array");
+val Int16Array = val::global("Int16Array");
+val Int32Array = val::global("Int32Array");
+val Float32Array = val::global("Float32Array");
+val Float64Array = val::global("Float64Array");
+} // namespace js_typed_array
+
+// Given a column index, serialize data to TypedArray
+template <typename T>
+val
+col_to_js_typed_array(T ctx, t_tvidx idx) {
+    t_tscalvec data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
+    auto dtype = ctx->get_column_dtype(idx);
+    int data_size = data.size();
+    val constructor = val::undefined();
+    val sentinel = val::undefined();
+
+    switch (dtype) {
+        case DTYPE_INT8: {
+            data_size *= sizeof(t_int8);
+            sentinel = val(std::numeric_limits<t_int8>::lowest());
+            constructor = js_typed_array::Int8Array;
+        } break;
+        case DTYPE_INT16: {
+            data_size *= sizeof(t_int16);
+            sentinel = val(std::numeric_limits<t_int16>::lowest());
+            constructor = js_typed_array::Int16Array;
+        } break;
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            // scalar_to_val converts int64 into int32
+            data_size *= sizeof(t_int32);
+            sentinel = val(std::numeric_limits<t_int32>::lowest());
+            constructor = js_typed_array::Int32Array;
+        } break;
+        case DTYPE_FLOAT32: {
+            data_size *= sizeof(t_float32);
+            sentinel = val(std::numeric_limits<t_float32>::lowest());
+            constructor = js_typed_array::Float32Array;
+        } break;
+        case DTYPE_TIME:
+        case DTYPE_FLOAT64: {
+            sentinel = val(std::numeric_limits<t_float64>::lowest());
+            data_size *= sizeof(t_float64);
+            constructor = js_typed_array::Float64Array;
+        } break;
+        default:
+            return constructor;
+    }
+
+    val buffer = js_typed_array::ArrayBuffer.new_(data_size);
+    val arr = constructor.new_(buffer);
+
+    for (int idx = 0; idx < data.size(); idx++) {
+        t_tscalar scalar = data[idx];
+        if (scalar.get_dtype() == DTYPE_NONE) {
+            arr.call<void>("fill", sentinel, idx, idx + 1);
+        } else {
+            arr.call<void>("fill", scalar_to_val(scalar), idx, idx + 1);
+        }
+    }
+
+    return arr;
+}
 
 template <typename T>
 void
@@ -322,25 +470,6 @@ _fill_col<t_time>(val dcol, t_col_sptr col, t_bool is_arrow) {
             col->set_nth(i, elem);
         }
     }
-}
-
-t_date
-jsdate_to_t_date(val date) {
-    return t_date(date.call<val>("getFullYear").as<t_int32>(),
-        date.call<val>("getMonth").as<t_int32>(), date.call<val>("getDate").as<t_int32>());
-}
-
-val
-t_date_to_jsdate(t_date date) {
-    val jsdate = val::global("Date").new_();
-    jsdate.call<val>("setYear", date.year());
-    jsdate.call<val>("setMonth", date.month());
-    jsdate.call<val>("setDate", date.day());
-    jsdate.call<val>("setHours", 0);
-    jsdate.call<val>("setMinutes", 0);
-    jsdate.call<val>("setSeconds", 0);
-    jsdate.call<val>("setMilliseconds", 0);
-    return jsdate;
 }
 
 template <>
@@ -747,67 +876,6 @@ sort(t_ctx2_sptr ctx2, val j_sortby) {
     if (svec.size() > 0) {
         ctx2->sort_by(svec);
     }
-}
-
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-val
-scalar_to_val(const t_tscalar scalar) {
-    if (!scalar.is_valid()) {
-        return val::null();
-    }
-    switch (scalar.get_dtype()) {
-        case DTYPE_BOOL: {
-            if (scalar) {
-                return val(true);
-            } else {
-                return val(false);
-            }
-        }
-        case DTYPE_TIME:
-        case DTYPE_FLOAT64:
-        case DTYPE_FLOAT32: {
-            return val(scalar.to_double());
-        }
-        case DTYPE_DATE: {
-            return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
-        }
-        case DTYPE_UINT8:
-        case DTYPE_UINT16:
-        case DTYPE_UINT32:
-        case DTYPE_INT8:
-        case DTYPE_INT16:
-        case DTYPE_INT32: {
-            return val(static_cast<t_int32>(scalar.to_int64()));
-        }
-        case DTYPE_UINT64:
-        case DTYPE_INT64: {
-            // This could potentially lose precision
-            return val(static_cast<t_int32>(scalar.to_int64()));
-        }
-        case DTYPE_NONE: {
-            return val::null();
-        }
-        case DTYPE_STR:
-        default: {
-            std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
-            return val(converter.from_bytes(scalar.to_string()));
-        }
-    }
-}
-
-val
-scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx) {
-    return scalar_to_val(scalars[idx]);
 }
 
 val
@@ -1303,4 +1371,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
+    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0_sptr>);
+    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1_sptr>);
+    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2_sptr>);
 }
