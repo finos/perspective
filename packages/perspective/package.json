@@ -7,7 +7,6 @@
         "access": "public"
     },
     "files": [
-        "src/*",
         "build/*",
         "index.d.ts"
     ],
