@@ -179,7 +179,7 @@ export const draw = mode =>
             }
         }
 
-        element.render(mode, configs);
+        element.render(mode, configs, this);
     };
 
 @bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
@@ -193,43 +193,47 @@ class HighchartsElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector("#container");
     }
 
-    render(mode, configs) {
+    render(mode, configs, callee) {
         if (this._charts.length > 0) {
-            for (let i = 0; i < this._charts.length; i++) {
-                const chart = this._charts[i];
-                const config = configs.splice(0, 1);
+            let idx = 0;
+            for (let chart of this._charts) {
+                let config = configs[idx++];
                 if (mode === "scatter") {
-                    const conf = {
+                    let conf = {
                         series: config.series,
                         plotOptions: {}
                     };
-                    set_tick_size.call(this, conf);
-                    this._charts[i] = () => chart.update(conf);
+                    set_tick_size.call(callee, conf);
+                    chart.update(conf);
                 } else if (mode.indexOf("line") > -1) {
-                    this._charts[i] = () =>
-                        chart.update({
-                            series: config.series
-                        });
+                    chart.update({
+                        series: config.series
+                    });
                 } else {
-                    const opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
-                    this._charts[i] = () => chart.update(opts);
+                    let opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
+                    chart.update(opts);
                 }
             }
         } else {
-            this._charts = [];
+            this.remove();
+            for (let config of configs) {
+                let chart = document.createElement("div");
+                chart.className = "chart";
+                this._container.appendChild(chart);
+                this._charts.push(() => Highcharts.chart(chart, config));
+            }
+
+            for (let i = 0; i < this._charts.length; i++) {
+                this._charts[i] = this._charts[i]();
+            }
         }
 
-        for (let config of configs) {
-            const chart = document.createElement("div");
-            chart.className = "chart";
-            this._container.appendChild(chart);
-            this._charts.push(() => Highcharts.chart(chart, config));
+        if (!this._charts.every(x => this._container.contains(x.renderTo))) {
+            this.remove();
+            this._charts.map(x => this._container.appendChild(x.renderTo));
         }
 
-        for (let i = 0; i < this._charts.length; i++) {
-            this._charts[i] = this._charts[i]();
-        }
-
+        // TODO resize bug in Highcharts?
         if (configs.length > 1) {
             this._charts.map(x => x.reflow());
         }

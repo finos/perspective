@@ -7,6 +7,8 @@
  *
  */
 
+@sans-serif-fonts: Arial, sans-serif;
+
 :host {
     #container {
         position: absolute;
@@ -27,6 +29,7 @@
 
     tspan,
     text {
+        font-family: var(--interface--font-family, @sans-serif-fonts);
         fill: #666 !important;
     }
 
