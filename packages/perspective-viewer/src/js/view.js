@@ -75,7 +75,7 @@ function undrag(event) {
     } else {
         parent = div.parentElement;
     }
-    let idx = Array.prototype.slice.call(parent.children).indexOf(event.target);
+    let idx = Array.prototype.slice.call(parent.children).indexOf(div.tagName === "PERSPECTIVE-ROW" ? div : event.target);
     let attr_name = parent.getAttribute("for");
     let pivots = JSON.parse(this.getAttribute(attr_name));
     pivots.splice(idx, 1);

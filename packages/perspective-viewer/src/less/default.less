@@ -12,7 +12,10 @@
 .psp-text-field {
     position: relative;
     background-color: var(--column-drop-container--background, white);
-    border-bottom: 1px solid @border-color;
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: var(--column--border-color, @border-color);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -39,7 +42,7 @@
     height: var(--column--height, auto);
     line-height: 17px;
     box-sizing: border-box;
-    color: rgb(204, 204, 204);
+    color: var(--column-drop-label--color, rgb(204, 204, 204));
     font-weight: 400;
     white-space: nowrap;
     padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
@@ -79,7 +82,9 @@
 }
 
 .bordered() {
-    border: 1px solid @border-color;
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: var(--column--border-color, #ccc);
     border-top-width: 0px;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -104,6 +109,8 @@
 
 :host {
     font-family: var(--interface--font-family, @sans-serif-fonts);
+    background-color: #eee;
+    color: #333;
 
     #app.columns_horizontal {
         #columns_container {
@@ -175,7 +182,7 @@
                     --active-column--background,
                     white
                 );
-                --row_draggable-border-color: #ccc;
+                --row_draggable-border-color: var(--column--border-color, #ccc);
                 --row_draggable-border-width: 0 0 1px 0;
                 --row_draggable-overflow: hidden;
                 --row_draggable--justify-content: space-evenly;
@@ -283,7 +290,7 @@
     }
 
     #pivot_chart {
-        background-color: white;
+        background-color: var(--plugin--background, white);
     }
 
     #filters perspective-row {
@@ -342,19 +349,15 @@
     }
 
     input::placeholder {
-        color: #ccc;
+        color: var(--column-drop-label--color, #ccc);
     }
 
     option[value=""] {
         color: white !important;
     }
 
-    select:focus {
-        color: #000 !important;
-    }
-
     #app {
-        background-color: #eee;
+        background-color: inherit;
     }
 
     perspective-hypergrid {

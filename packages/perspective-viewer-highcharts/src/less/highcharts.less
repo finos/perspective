@@ -10,6 +10,9 @@
 @sans-serif-fonts: Arial, sans-serif;
 
 :host {
+
+    background-color: var(--plugin--background, white);
+
     #container {
         position: absolute;
         width: calc(~"100% - 30px");
@@ -19,6 +22,7 @@
         justify-content: stretch;
         grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        overflow-y: auto;
     }
 
     .chart {
@@ -30,57 +34,33 @@
     tspan,
     text {
         font-family: var(--interface--font-family, @sans-serif-fonts);
-        fill: #666 !important;
+        fill: var(--highcharts-label--fill, #666) !important;
     }
 
     .highcharts-null-point {
         fill: none;
     }
 
-    .highcharts-heatmap-gradient-full {
-        background: linear-gradient(
-            #4d342f 0%,
-            #e4521b 22.5%,
-            #feeb65 42.5%,
-            #f0f0f0 50%,
-            #dcedc8 57.5%,
-            #42b3d5 67.5%,
-            #1a237e 100%
-        );
+    .highcharts-background {
+        display: none;
     }
 
-    .highcharts-heatmap-gradient-positive {
-        background: linear-gradient(#dcedc8 0%, #42b3d5 35%, #1a237e 100%);
-    }
-
-    .highcharts-heatmap-gradient-negative {
-        background: linear-gradient(#feeb65 100%, #e4521b 70%, #4d342f 0%);
+    .highcharts-yaxis-grid path.highcharts-grid-line {
+        stroke: var(--highcharts-grid-line--stroke, rgb(230, 230, 230));
     }
 
     .highcharts-treemap-series rect,
     .highcharts-sunburst-series path {
-        stroke: #fff;
+        stroke: var(--plugin--background, #fff);
     }
 
     rect,
     svg image {
-        opacity: 0.5;
+        opacity: var(--highcharts-rect--opacity, 0.5);
     }
 
     path,
     circle {
-        opacity: 0.8;
+        opacity: var(--highcharts-circle--opacity, 0.8);
     }
 }
-
-// :host[view="sunburst"] {
-//     path {
-//         stroke: #fff;
-//     }
-// }
-
-// :host[view="treemap"] {
-//     rect {
-//         stroke: #fff;
-//     }
-// }

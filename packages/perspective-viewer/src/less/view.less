@@ -8,6 +8,7 @@
  */
 
 @import "./column_labels.less";
+@import "./variables.less";
 
 :host:hover #config_button {
     opacity: 1;
@@ -43,11 +44,34 @@
         #42b3d5 35%,
         #1a237e 100%
     );
+    
     --highcharts-heatmap-gradient-negative: linear-gradient(
         #feeb65 100%,
         #e4521b 70%,
         #4d342f 0%
     );
+
+    --hypergrid-tree-header--background: #fff;
+    --hypergrid-tree-header--color: #666;
+    --hypergrid-header--background: #fff;
+    --hypergrid-separator--color: #666;
+    --hypergrid-header--color: #666;
+
+    --hypergrid-positive--color: #1078d1;
+    --hypergrid-negative--background: #de3838;
+    --hypergrid-positive--background: #fff;
+    --hypergrid-negative--background: #fff;
+
+    --hypergrid--font-size: 12px;
+    --hypergrid-header--font-size:  12px;
+    --hypergrid--font-family: Helvetica, @sans-serif-fonts;
+    --hypergrid-header--font-family:  Helvetica, @sans-serif-fonts;
+
+    --hypergrid-row-hover--background: #f6f6f6;
+    --hypergrid-row-hover--color: #666;
+    --hypergrid-cell-hover--background: #eeeeee;
+    --hypergrid-cell-hover--color: #666;
+
     #pivot_chart {
         position: absolute;
         width: 100%;
@@ -249,6 +273,7 @@
         background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0b3I6IEFkb2JlIElsbHVzdHJhdG9yIDIwLjAuMCwgU1ZHIEV4cG9ydCBQbHVnLUluIC4gU1ZHIFZlcnNpb246IDYuMDAgQnVpbGQgMCkgIC0tPgo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkxheWVyXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IgoJIHZpZXdCb3g9IjAgMCA0LjkgMTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDQuOSAxMDsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPgoJLnN0MHtmaWxsOiM0NDQ0NDQ7fQo8L3N0eWxlPgo8dGl0bGU+YXJyb3dzPC90aXRsZT4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIxLjQsNC43IDIuNSwzLjIgMy41LDQuNyAiLz4KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSIzLjUsNS4zIDIuNSw2LjggMS40LDUuMyAiLz4KPC9zdmc+Cg==)
             no-repeat 95% 50%;
         background-color: #fff;
+        color: inherit;
         border-radius: 5px;
         height: 24px;
         padding: var(--select--padding, 0px 0px 0px 6px);
