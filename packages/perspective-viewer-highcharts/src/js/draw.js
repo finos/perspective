@@ -205,10 +205,6 @@ class HighchartsElement extends HTMLElement {
                     };
                     set_tick_size.call(callee, conf);
                     chart.update(conf);
-                } else if (mode.indexOf("line") > -1) {
-                    chart.update({
-                        series: config.series
-                    });
                 } else {
                     let opts = {series: config.series, xAxis: config.xAxis, yAxis: config.yAxis};
                     chart.update(opts);
