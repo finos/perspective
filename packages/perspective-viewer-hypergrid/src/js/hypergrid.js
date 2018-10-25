@@ -139,8 +139,6 @@ function null_formatter(formatter, null_value = "") {
     return formatter;
 }
 
-
-
 bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
         set_data(data, hidden, schema, tschema, row_pivots) {
