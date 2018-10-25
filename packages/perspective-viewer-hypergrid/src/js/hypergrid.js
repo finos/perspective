@@ -362,7 +362,7 @@ async function grid_create(div, view, task) {
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
     this.hypergrid.canvas.paintNow();
     let running = true;
-    while (running) {
+    while (nrows > 0 && running) {
         running = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
         if (running) {
             await new Promise(resolve => setTimeout(resolve, 10));

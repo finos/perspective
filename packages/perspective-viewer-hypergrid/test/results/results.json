@@ -14,5 +14,6 @@
     "superstore.html/filters by a numeric column.": "f2bbde9e67461a6607e2630771aed363",
     "superstore.html/pivots by a column.": "fb5e1247513754c9bbf206f002c3b0a3",
     "superstore.html/collapses to depth smaller than viewport": "bdd25c1c40781478bd040d5816b887a6",
-    "regressions.html/saving a computed column does not interrupt update rendering": "6f6bfce96b1120c67bf6145b00225c9e"
+    "regressions.html/saving a computed column does not interrupt update rendering": "6f6bfce96b1120c67bf6145b00225c9e",
+    "empty.html/empty grids do not explode": "77797cda77c9ab250d4c84e7ca44188a"
 }

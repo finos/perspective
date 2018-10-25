@@ -1,0 +1,34 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <script src="perspective.view.js"></script>
+        <script src="hypergrid.plugin.js"></script>
+
+        <link rel='stylesheet' href="demo.css">
+
+    </head>
+    <body>
+
+        <perspective-viewer>
+  
+        </perspective-viewer>
+
+        <script>
+
+            var viewer = document.getElementsByTagName('perspective-viewer')[0];
+            viewer.load({x: "integer"}); 
+
+        </script>
+
+    </body>
+</html>
