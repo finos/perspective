@@ -1454,11 +1454,18 @@ class View extends ViewPrivate {
      * `save`.
      *
      * @param {object} x returned by `save`.
+     * @returns {Promise<void>} A promise which resolves when the changes have
+     * been applied.
      */
-    restore(x) {
+    async restore(x) {
         for (let key in x) {
-            this.setAttribute(key, x[key]);
+            let val = x[key];
+            if (typeof val !== "string") {
+                val = JSON.stringify(val);
+            }
+            this.setAttribute(key, val);
         }
+        await this._debounce_update();
     }
 
     /**
