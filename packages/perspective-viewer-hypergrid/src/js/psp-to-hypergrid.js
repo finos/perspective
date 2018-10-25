@@ -23,8 +23,9 @@ function filter_hidden(hidden, json) {
 
 function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
     data = filter_hidden(hidden, data);
-    const firstcol = Object.keys(data)[0];
-    if (data[firstcol].length === 0) {
+    const colnames = Object.keys(data);
+    const firstcol = colnames.length > 0 ? colnames[0] : undefined;
+    if (colnames.length === 0 || data[firstcol].length === 0) {
         let columns = Object.keys(schema);
         return {
             rows: [],
