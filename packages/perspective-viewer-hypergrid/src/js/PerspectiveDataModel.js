@@ -58,11 +58,11 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     // Called when clicking on a row group expand
-    toggleRow: async function(row, col) {
+    toggleRow: async function(row, col, event) {
         if (this.isTreeCol(col)) {
             let isShift = false;
-            if (window.event) {
-                isShift = !!window.event.detail.primitiveEvent.shiftKey; // typecast to boolean
+            if (event.primitiveEvent.detail.primitiveEvent) {
+                isShift = !!event.primitiveEvent.detail.primitiveEvent.shiftKey; // typecast to boolean
             }
             let is_expanded = await this._view.get_row_expanded(row);
             if (isShift) {

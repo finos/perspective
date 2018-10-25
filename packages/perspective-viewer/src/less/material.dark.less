@@ -10,354 +10,67 @@
 @import "variables";
 @import "material";
 
+@import url("https://fonts.googleapis.com/css?family=Open+Sans");
+@import url("https://fonts.googleapis.com/css?family=Material+Icons");
+@import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+
 perspective-viewer {
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: none;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: #666;
-    }
-
-    &.dragging {
-        #top_panel .dropping {
-            background-color: @blue900 !important;
-            color: white !important;
-        }
-
-        #side_panel
-            #columns_container
-            #active_columns
-            perspective-row[drop-target]
-            .row_draggable {
-            background-color: @blue900 !important;
-            color: white !important;
-        }
-    }
-
-    &[view="treemap"],
-    &[view="heatmap"] {
-        rect {
-            stroke: @coolgrey700 !important;
-        }
-    }
-
-    &[view="heatmap"] image.highcharts-boost-canvas {
-        opacity: 0.8 !important;
-    }
-
-    &[view="treemap"] {
-        rect {
-            stroke: @coolgrey700 !important;
-        }
-    }
-
-    &[view="sunburst"] {
-        path {
-            stroke: @coolgrey700 !important;
-        }
-    }
-
-    image.highcharts-boost-canvas {
-        opacity: 1 !important;
-    }
-
-    #app {
-        background-color: @coolgrey800;
-        border-top-color: @coolgrey900 !important;
-
-        input,
-        select,
-        ul,
-        #filters {
-            border-right: 0px;
-            background-color: @coolgrey800;
-            color: @coolgrey200;
-            border-color: @coolgrey600;
-        }
-
-        select {
-            background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4wLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9Ii0xNzcgMTc2IDQuOSAxMCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAtMTc3IDE3NiA0LjkgMTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjx0aXRsZT5hcnJvd3M8L3RpdGxlPg0KPHBvbHlnb24gY2xhc3M9InN0MCIgcG9pbnRzPSItMTc1LjYsMTgwLjcgLTE3NC41LDE3OS4yIC0xNzMuNSwxODAuNyAiLz4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iLTE3My41LDE4MS4zIC0xNzQuNSwxODIuOCAtMTc1LjYsMTgxLjMgIi8+DQo8L3N2Zz4=)
-                no-repeat 95% 50% !important;
-
-            &:focus {
-                color: @coolgrey200 !important;
-            }
-        }
-
-        input::placeholder {
-            color: #666;
-        }
-
-        label {
-            color: #666;
-        }
-
-        svg {
-            .highcharts-axis tspan {
-                fill: #aaa !important;
-            }
-
-            .highcharts-button-box {
-                fill: @coolgrey900;
-            }
-
-            g.highcharts-axis-labels text {
-                fill: @coolgrey200 !important;
-            }
-
-            .highcharts-tooltip-box {
-                fill: @coolgrey900;
-            }
-
-            .highcharts-legend-box {
-                fill: none !important;
-            }
-        }
-
-        rect.highcharts-background {
-            fill: none;
-        }
-
-        .highcharts-heatmap-gradient-full {
-            background: linear-gradient(
-                #feeb65 0%,
-                #e4521b 22.5%,
-                #4d342f 42.5%,
-                #222222 50%,
-                #1a237e 57.5%,
-                #42b3d5 67.5%,
-                #dcedc8 100%
-            );
-        }
-
-        .highcharts-heatmap-gradient-positive {
-            background: linear-gradient(
-                #222222 0%,
-                #1a237e 35%,
-                #42b3d5 70%,
-                #dcedc8 100%
-            );
-        }
-
-        .highcharts-heatmap-gradient-negative {
-            background: linear-gradient(
-                #feeb65 0%,
-                #e4521b 35%,
-                #4d342f 70%,
-                #222222 100%
-            );
-        }
-
-        .highcharts-yaxis-grid path.highcharts-grid-line {
-            stroke: @coolgrey600;
-        }
-
-        .psp-text-field {
-            border-bottom-color: @coolgrey600;
-        }
-
-        #pivot_chart {
-            background-color: @coolgrey700;
-
-            tspan,
-            text {
-                fill: @coolgrey200 !important;
-            }
-
-            rect,
-            image {
-                opacity: 0.85;
-            }
-        }
-
-        #drop_target {
-            background-color: @coolgrey700;
-        }
-
-        #filters {
-            color: #666;
-        }
-
-        perspective-row {
-            #psp_row {
-                color: @coolgrey200;
-            }
-        }
-
-        #side_panel {
-            #columns_container {
-                #active_columns,
-                #inactive_columns {
-                    perspective-row {
-                        .float:before,
-                        .integer:before {
-                            color: @lightblue600;
-                        }
-
-                        .row_draggable {
-                            border-color: #666;
-                            color: @coolgrey200;
-                        }
-                    }
-                }
-
-                #active_columns {
-                    perspective-row {
-                        .is_visible:before {
-                            color: @lightblue600;
-                        }
-
-                        &:last-child .row_draggable {
-                            border-bottom: 0px solid @coolgrey800;
-                        }
-                    }
-                }
-
-                #inactive_columns {
-                    padding-top: 24px;
-
-                    perspective-row {
-                        margin-top: 0px;
-
-                        &:hover {
-                            .is_visible:before {
-                                color: @lightblue600;
-                            }
-
-                            &.active {
-                                #name {
-                                    color: #eee;
-                                }
-                            }
-
-                            .is_visible {
-                                opacity: 1;
-                            }
-
-                            #name {
-                                color: @coolgrey200;
-                            }
-
-                            #name:before {
-                                opacity: 1 !important;
-                            }
-
-                            .row_computed {
-                                span {
-                                    color: @coolgrey200 !important;
-                                }
-                            }
-                        }
-
-                        &.active {
-                            display: block;
-                            height: 0px;
-                            max-height: 0px;
-                            overflow: hidden;
-                        }
-
-                        #name {
-                            color: @darkgray;
-                        }
-
-                        .row_computed {
-                            span {
-                                color: @darkgray !important;
-                            }
-                        }
-                    }
-                }
-
-                perspective-computed-column {
-                    background: @coolgrey800;
-
-                    .psp-cc__container {
-                        span#psp-cc__close {
-                            color: @coolgrey200;
-                        }
-                    }
-
-                    #psp-cc-computation__type {
-                        span.integer,
-                        span.float {
-                            color: @lightblue600;
-                        }
-
-                        span.string {
-                            color: #fe9292;
-                        }
-                    }
-
-                    #psp-cc-computation__input-column {
-                        background: none;
-                        border-bottom-color: @coolgrey600;
-
-                        &.dropping {
-                            background-color: @blue900 !important;
-                            color: white !important;
-                        }
-                    }
-
-                    perspective-row {
-                        .is_visible:before {
-                            color: @lightblue600;
-                        }
-
-                        div.row_draggable {
-                            color: @coolgrey200;
-                        }
-                    }
-
-                    #psp-cc-button-save {
-                        background: @lightblue600;
-                        color: @coolgrey200;
-
-                        &:hover {
-                            background: @lightblue700;
-                        }
-                    }
-                }
-            }
-
-            #side_panel__actions {
-                button {
-                    color: @coolgrey200 !important;
-
-                    &:hover {
-                        color: @coolgrey100 !important;
-                    }
-                }
-            }
-        }
-
-        #divider {
-            height: 1px;
-            min-height: 1px;
-            max-height: 1px;
-        }
-
-        perspective-hypergrid {
-            color: #eee;
-            background-color: @coolgrey700;
-
-            th {
-                border-color: @coolgrey700;
-                background-color: @coolgrey700;
-            }
-
-            td.hover {
-                background-color: #444;
-            }
-
-            tr.hover {
-                background-color: #555;
-            }
-        }
-    }
+    background-color: @coolgrey800;
+    color: #cfd8dc;
+
+    --plugin--background: @coolgrey700;
+
+    --column-drop-label--color: #666;
+    --column--border-color: @coolgrey600;
+    --column-drop-target--background: @blue900;
+    --active-column-selector--color: @lightblue600;
+
+    --hypergrid-tree-header--background: @coolgrey700;
+    --hypergrid-tree-header--color: #eee;
+    --hypergrid-header--background: @coolgrey700;
+    --hypergrid-separator--color: #eee;
+    --hypergrid-header--color: #eee;
+
+    --hypergrid-positive--color: #1078d1;
+    --hypergrid-negative--background: #de3838;
+    --hypergrid-positive--background: @coolgrey700;
+    --hypergrid-negative--background: @coolgrey700;
+
+    --hypergrid--font-size: 12px;
+    --hypergrid-header--font-size: 12px;
+    --hypergrid--font-family: "Open Sans";
+    --hypergrid-header--font-family: "Open Sans";
+
+    --hypergrid-row-hover--background: #555;
+    --hypergrid-row-hover--color: #eee;
+    --hypergrid-cell-hover--background: #444;
+    --hypergrid-cell-hover--color: #eee;
+
+    --highcharts-label--fill: @coolgrey200;
+    --highcharts-rect--opacity: 0.85;
+    --highcharts-grid-line--stroke: @coolgrey600;
+
+    --highcharts-heatmap-gradient-full: linear-gradient(
+        #feeb65 0%,
+        #e4521b 22.5%,
+        #4d342f 42.5%,
+        #222222 50%,
+        #1a237e 57.5%,
+        #42b3d5 67.5%,
+        #dcedc8 100%
+    );
+
+    --highcharts-heatmap-gradient-positive: linear-gradient(
+        #222222 0%,
+        #1a237e 35%,
+        #42b3d5 70%,
+        #dcedc8 100%
+    );
+
+    --highcharts-heatmap-gradient-negative: linear-gradient(
+        #feeb65 0%,
+        #e4521b 35%,
+        #4d342f 70%,
+        #222222 100%
+    );
 }

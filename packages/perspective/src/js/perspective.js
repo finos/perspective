@@ -1864,7 +1864,7 @@ module.exports = function(Module) {
                     let new_pdata = [];
                     while (pdata.cdata[0].length > 0) {
                         const chunk = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
-                        new_pdata.push(Object.assugn({}, pdata, chunk));
+                        new_pdata.push(Object.assign({}, pdata, chunk));
                     }
                     pdata = new_pdata;
                 } else {

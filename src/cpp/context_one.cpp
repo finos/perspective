@@ -22,7 +22,9 @@
 namespace perspective {
 
 t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx1>(schema, pivot_config), m_depth_set(false), m_depth(0) {}
+    : t_ctxbase<t_ctx1>(schema, pivot_config)
+    , m_depth_set(false)
+    , m_depth(0) {}
 
 t_ctx1::~t_ctx1() {}
 
@@ -72,7 +74,7 @@ t_ctx1::open(t_tvidx idx) {
     // If we manually open/close a node, stop automatically expanding
     m_depth_set = false;
     m_depth = 0;
-    
+
     if (idx >= t_tvidx(m_traversal->size()))
         return 0;
 

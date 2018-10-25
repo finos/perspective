@@ -36,7 +36,7 @@ utils.with_server({}, () => {
                 schema
             );
 
-            await page.click("#config_button");
+            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
 
             await page.evaluate(
                 (viewer, data, schema) => {

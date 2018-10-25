@@ -26,7 +26,8 @@
 namespace perspective {
 
 t_ctx_grouped_pkey::t_ctx_grouped_pkey()
-  : m_depth_set(false), m_depth(0) {}
+    : m_depth_set(false)
+    , m_depth(0) {}
 
 t_ctx_grouped_pkey::~t_ctx_grouped_pkey() {}
 
@@ -444,7 +445,7 @@ t_ctx_grouped_pkey::reset_step_state() {
     m_columns_changed = false;
     if (t_env::log_progress()) {
         std::cout << "t_ctx_grouped_pkey.reset_step_state " << repr() << std::endl;
-    }    
+    }
 }
 
 t_streeptr_vec

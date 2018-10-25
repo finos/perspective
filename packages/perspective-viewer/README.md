@@ -54,14 +54,16 @@ names.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('sort', JSON.stringify([["x","desc"]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer sort='[["x","desc"]]'></perspective-viewer>
@@ -77,14 +79,16 @@ The set of visible columns.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer columns='["x", "y"]'></perspective-viewer>
@@ -100,14 +104,16 @@ The set of visible columns.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
@@ -127,14 +133,16 @@ The set of column aggregate configurations.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
@@ -146,7 +154,8 @@ The set of column filter configurations.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let filters = [
@@ -157,7 +166,8 @@ let elem = document.getElementById('my_viewer');
 elem.setAttribute('filters', JSON.stringify(filters));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
@@ -229,7 +239,8 @@ element, its internal `perspective.table` will also be deleted.
 
 **Examples**
 
-_Load JSON_
+Load JSON
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');
@@ -239,14 +250,16 @@ my_viewer.load([
 ]);
 ```
 
-_Load CSV_
+Load CSV
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');
 my_viewer.load("x,y\n1,a\n2,b");
 ```
 
-_Load perspective.table_
+Load perspective.table
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');

@@ -26,11 +26,11 @@ module.exports = function() {
             rules: [
                 {
                     test: /\.css$/,
-                    use: [{loader: "style-loader"}, {loader: "css-loader"}]
+                    use: [{loader: "css-loader"}]
                 },
                 {
                     test: /\.less$/,
-                    use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
+                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
                 },
                 {
                     test: /\.(html)$/,

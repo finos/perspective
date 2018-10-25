@@ -11,8 +11,11 @@
 
 .psp-text-field {
     position: relative;
-    background-color: white;
-    border-bottom: 1px solid @border-color;
+    background-color: var(--column-drop-container--background, white);
+    border-width: 0;
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: var(--column--border-color, @border-color);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -36,26 +39,28 @@
 }
 
 .psp-text-field__input + label {
+    height: var(--column--height, auto);
     line-height: 17px;
     box-sizing: border-box;
-    color: rgb(204, 204, 204);
+    color: var(--column-drop-label--color, rgb(204, 204, 204));
     font-weight: 400;
     white-space: nowrap;
-    padding: 0px 0px 2px 10px;
+    padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
     font-size: 12px;
     display: inline-block;
 }
 
 .dropping .psp-text-field__input,
 .psp-text-field__input:not(:empty) {
-    display: block;
+    display: block !important;
 }
 
 .dropping .psp-text-field__input::after {
     content: "|";
     width: 0px;
     overflow: visible;
-    margin-top: -2px;
+    margin-top: -1px;
+    position: absolute;
 }
 
 .dropping * {
@@ -66,18 +71,20 @@
 .psp-text-field__input:not(:empty) + label {
     position: absolute;
     top: 0px;
-    line-height: 10px;
-    font-size: 10px;
-    display: none;
+    margin: var(--column-drop-label--margin, 0);
+    font-size: var(--column-drop-label--font-size, 12px);
+    display: var(--column-drop-label--display, none);
 }
 
 .selected_indicator() {
-    font-family: Arial;
+    font-family: var(--interface--font-family, Arial);
     font-weight: 500;
 }
 
 .bordered() {
-    border: 1px solid @border-color;
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: var(--column--border-color, #ccc);
     border-top-width: 0px;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -91,34 +98,26 @@
     border-bottom: 25px solid rgba(0, 0, 0, 0);
 }
 
-perspective-viewer {
-    font-family: @sans-serif-fonts;
+/* These rules needs to be strictly ordered to avoid a bug in IE/ShadyCSS */
+:host perspective-row {
+    height: var(--column--height, 21px);
+    --row_draggable-height: var(--column--height, 21px);
+}
 
-    .awesomplete > ul {
-        border-radius: 0px;
-        margin: 0px;
-        border: none;
-        transform-origin: none;
-        transition: 0;
+:host(:not([row-pivots="[]"])) {
+    #active_columns perspective-row {
+        height: var(--active-column--height, 41px);
+        min-height: var(--active-column--height, 41px);
+        --row_draggable-height: var(--active-column--height, 41px);
+        --column_aggregate-display: inline-block;
+        --is_visible--height: var(--active-column-selector--height, auto);
     }
+}
 
-    .awesomplete > ul:before {
-        content: none;
-    }
-
-    .awesomplete > input {
-        background-color: transparent;
-    }
-
-    perspective-row #psp_row {
-        color: rgb(51, 51, 51);
-    }
-
-    #side_panel perspective-row .row_draggable {
-        padding-right: 10px;
-        color: rgb(51, 51, 51);
-        transition: height 0.2s;
-    }
+:host {
+    font-family: var(--interface--font-family, @sans-serif-fonts);
+    background-color: #eee;
+    color: #333;
 
     #app.columns_horizontal {
         #columns_container {
@@ -136,20 +135,9 @@ perspective-viewer {
         #sub_columns {
             flex-shrink: 1;
 
+            /* TODO broken */
             perspective-row {
-                span#name {
-                    margin-right: 25px;
-                }
-            }
-        }
-
-        #active_columns {
-            margin-right: 8px;
-
-            perspective-row {
-                div#psp_row {
-                    margin-right: 2px;
-                }
+                --column_name-margin: 0 25px 0 0;
             }
         }
 
@@ -159,7 +147,20 @@ perspective-viewer {
 
         perspective-computed-column {
             max-height: none;
+            margin-right: 24px;
         }
+    }
+
+    #side_panel perspective-row {
+        --name-before-display: inline-block;
+        --is_visible-display: inline-block;
+        --row_draggable-padding: 0px 10px 0px 0px;
+        --row_close-display: none;
+        --column_name-max-width: 180px;
+    }
+
+    #top_panel perspective-row {
+        --row_draggable-display: inline-block;
     }
 
     #columns_container {
@@ -168,117 +169,44 @@ perspective-viewer {
 
         #active_columns {
             flex: 0 1 auto;
+
+            perspective-row {
+                margin-bottom: 2px;
+                --row_draggable-background-color: var(
+                    --active-column--background,
+                    white
+                );
+                --row_draggable-border-color: var(--column--border-color, #ccc);
+                --row_draggable-border-width: 0 0 1px 0;
+                --row_draggable-overflow: hidden;
+                --row_draggable--justify-content: space-evenly;
+            }
+
+            perspective-row[drop-target] {
+                --row_draggable_children-opacity: 0;
+            }
         }
+
+        // perspective-row {
+        //     height: var(--inactive-column--height, var(--column--height, 21px));
+        //     --row_draggable-height: var(
+        //         --inactive-column--height,
+        //         var(--column--height, 21px)
+        //     );
+        // }
 
         #active_columns,
         #inactive_columns {
             border: none !important;
         }
-
-        #active_columns perspective-row .row_draggable {
-            .bordered();
-            background-color: white;
-            overflow: hidden;
-        }
-
-        #active_columns perspective-row[drop-target] {
-            .row_draggable {
-                background-color: rgb(240, 240, 255) !important;
-                border: 1px solid #1078d1 !important;
-            }
-        }
-
-        #inactive_columns perspective-row .is_visible::before {
-            content: "\25CB";
-        }
-    }
-
-    #side_panel perspective-row .is_visible {
-        color: #999;
-    }
-
-    #side_panel perspective-row [settings="true"] #app {
-        border-top: 1px solid #ccc;
     }
 
     ul {
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    #filters perspective-row {
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-color: transparent;
-        }
-    }
-
-    #sort perspective-row #sort_order {
-        display: inline-block;
-    }
-
     .column_row() {
-        font-family: monospace;
-    }
-
-    perspective-row {
-        border: 0px solid rgba(0, 0, 0, 0);
-
-        #row_close {
-            color: #999;
-            font-family: Arial;
-            font-size: 10px;
-        }
-
-        #column_aggregate {
-            font-family: Arial;
-        }
-
-        .row_draggable select {
-            border: none;
-        }
-
-        .row_draggable select:focus {
-            outline: none;
-        }
-    }
-
-    #side_panel perspective-row {
-        .is_visible::before {
-            content: "\25CF";
-        }
-
-        .integer::before,
-        .float::before {
-            .column_row();
-            content: "123";
-            color: #016bc6;
-        }
-
-        .string::before {
-            .column_row();
-            content: "abc";
-            color: #fe9292;
-        }
-
-        .boolean::before {
-            .column_row();
-            content: "t/f";
-            color: #999999;
-        }
-
-        .datetime::before {
-            .column_row();
-            content: "mdy";
-            color: #999999;
-        }
-
-        .date::before {
-            .column_row();
-            content: "mdy";
-            color: #999999;
-        }
+        font-family: var(--interface-monospace--font-family, monospace);
     }
 
     #side_panel #side_panel__actions {
@@ -286,11 +214,11 @@ perspective-viewer {
         flex-direction: column;
         flex-shrink: 1000;
         justify-content: flex-start;
-        padding: 5px;
         position: relative;
-        overflow-y: auto;
+        overflow-y: hidden;
         width: 100%;
-        margin-top: 36px;
+        padding-top: 20px;
+        margin: var(--column-container--margin, 8px);
         min-height: 36px;
 
         button.side_panel-action {
@@ -300,7 +228,10 @@ perspective-viewer {
             border: none;
             display: flex;
             flex-direction: row;
-            font-family: @sans-serif-fonts !important;
+            font-family: var(
+                --interface--font-family,
+                @sans-serif-fonts
+            ) !important;
             font-size: 12px;
             padding-right: 10px;
             -webkit-appearance: none;
@@ -334,12 +265,18 @@ perspective-viewer {
     }
 
     svg text {
-        font-family: @sans-serif-fonts !important;
+        font-family: var(
+            --interface--font-family,
+            @sans-serif-fonts
+        ) !important;
     }
 
     svg .highcharts-axis-title,
     svg .highcharts-axis-title {
-        font-family: @sans-serif-fonts !important;
+        font-family: var(
+            --interface--font-family,
+            @sans-serif-fonts
+        ) !important;
     }
 
     svg .highcharts-legend-box {
@@ -347,7 +284,13 @@ perspective-viewer {
     }
 
     #pivot_chart {
-        background-color: white;
+        background-color: var(--plugin--background, white);
+    }
+
+    #filters perspective-row {
+        margin: 0 24px 0 0;
+        --filter_operator-display: inline-block;
+        --filter_operand-display: inline-block;
     }
 
     #divider {
@@ -368,25 +311,28 @@ perspective-viewer {
 
     #config_button {
         font-weight: normal;
-        font-family: Arial;
-        font-size: 16px;
+        font-family: var(--config_button--font-family, Arial);
+        color: var(--config_button--color, inherit);
+        font-size: var(--config_button--font-size, 16px);
         color: #999;
         transition: opacity 0.3s;
+        overflow: hidden;
     }
 
     #config_button:before {
-        content: "\1f527";
+        font-feature-settings: "liga";
+        content: var(--config_button--before, "\1f527");
     }
 
     ul {
         .bordered();
         font-size: 12px;
-        padding: 0px 10px 0px 10px;
+        padding: var(--column-drop-container--padding, 0px 10px 0px 10px);
     }
 
     select {
         border-radius: 0;
-        background-color: white;
+        background-color: var(--select--background-color, white);
         .bordered();
     }
 
@@ -399,29 +345,15 @@ perspective-viewer {
     }
 
     input::placeholder {
-        color: #ccc;
-    }
-
-    rect,
-    svg image {
-        opacity: 0.5;
-    }
-
-    path,
-    circle {
-        opacity: 0.8;
+        color: var(--column-drop-label--color, #ccc);
     }
 
     option[value=""] {
         color: white !important;
     }
 
-    select:focus {
-        color: #000 !important;
-    }
-
     #app {
-        background-color: #eee;
+        background-color: inherit;
     }
 
     perspective-hypergrid {

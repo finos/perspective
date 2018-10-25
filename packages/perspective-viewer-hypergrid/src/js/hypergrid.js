@@ -21,7 +21,7 @@ import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils.js";
 
 const TEMPLATE = require("../html/hypergrid.html");
 
-import "../less/hypergrid.less";
+import style from "../less/hypergrid.less";
 
 const COLUMN_HEADER_FONT = "12px amplitude-regular, Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -139,7 +139,7 @@ function null_formatter(formatter, null_value = "") {
     return formatter;
 }
 
-bindTemplate(TEMPLATE)(
+bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
         set_data(data, hidden, schema, tschema, row_pivots) {
             const hg_data = psp2hypergrid(data, hidden, schema, tschema, row_pivots);
@@ -150,9 +150,17 @@ bindTemplate(TEMPLATE)(
             }
         }
 
+        get_style(name) {
+            if (window.ShadyCSS) {
+                return window.ShadyCSS.getComputedStyleValue(this, name);
+            } else {
+                return getComputedStyle(this).getPropertyValue(name);
+            }
+        }
+
         connectedCallback() {
             if (!this.grid) {
-                const host = this.querySelector("#mainGrid");
+                const host = this.shadowRoot.querySelector("#mainGrid");
 
                 host.setAttribute("hidden", true);
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
@@ -185,39 +193,31 @@ bindTemplate(TEMPLATE)(
                 };
 
                 const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
-                const style = window.getComputedStyle(this, null);
-
-                const header = window.getComputedStyle(this.querySelector("th"), null);
-                const row_hover = window.getComputedStyle(this.querySelector("tr.hover"), null);
-                const cell_hover = window.getComputedStyle(this.querySelector("td.hover"), null);
-                const cell_positive = window.getComputedStyle(this.querySelector("td.positive"), null);
-                const cell_negative = window.getComputedStyle(this.querySelector("td.negative"), null);
-                const table = window.getComputedStyle(this.querySelector("table"));
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
-                grid_properties["treeHeaderBackgroundColor"] = grid_properties["backgroundColor"] = style.getPropertyValue("background-color");
-                grid_properties["treeHeaderColor"] = grid_properties["color"] = style.getPropertyValue("color");
-                grid_properties["columnHeaderBackgroundColor"] = header.getPropertyValue("background-color");
-                grid_properties["columnHeaderSeparatorColor"] = header.getPropertyValue("border-color");
-                grid_properties["columnHeaderColor"] = header.getPropertyValue("color");
+                grid_properties["treeHeaderBackgroundColor"] = grid_properties["backgroundColor"] = this.get_style("--hypergrid-tree-header--background");
+                grid_properties["treeHeaderColor"] = grid_properties["color"] = this.get_style("--hypergrid-tree-header--color");
+                grid_properties["columnHeaderBackgroundColor"] = this.get_style("--hypergrid-header--background");
+                grid_properties["columnHeaderSeparatorColor"] = this.get_style("--hypergrid-separator--color");
+                grid_properties["columnHeaderColor"] = this.get_style("--hypergrid-header--color");
 
-                grid_properties["columnColorNumberPositive"] = cell_positive.getPropertyValue("color");
-                grid_properties["columnColorNumberNegative"] = cell_negative.getPropertyValue("color");
-                grid_properties["columnBackgroundColorNumberPositive"] = cell_positive.getPropertyValue("background-color");
-                grid_properties["columnBackgroundColorNumberNegative"] = cell_negative.getPropertyValue("background-color");
+                grid_properties["columnColorNumberPositive"] = this.get_style("--hypergrid-positive--color");
+                grid_properties["columnColorNumberNegative"] = this.get_style("--hypergrid-negative--color");
+                grid_properties["columnBackgroundColorNumberPositive"] = this.get_style("--hypergrid-positive--background");
+                grid_properties["columnBackgroundColorNumberNegative"] = this.get_style("--hypergrid-negative--background");
 
-                const font = `${table.getPropertyValue("font-size")} ${table.getPropertyValue("font-family")}`;
-                const headerfont = `${header.getPropertyValue("font-size")} ${header.getPropertyValue("font-family")}`;
+                const font = `${this.get_style("--hypergrid--font-size")} ${this.get_style("--hypergrid--font-family")}`;
+                const headerfont = `${this.get_style("--hypergrid-header--font-size")} ${this.get_style("--hypergrid-header--font-family")}`;
 
                 grid_properties["columnHeaderFont"] = headerfont;
                 grid_properties["font"] = font;
                 grid_properties["rowHeaderFont"] = font;
                 grid_properties["treeHeaderFont"] = font;
 
-                grid_properties["hoverRowHighlight"]["backgroundColor"] = row_hover.getPropertyValue("background-color");
-                grid_properties["hoverRowHighlight"]["color"] = row_hover.getPropertyValue("color");
-                grid_properties["hoverCellHighlight"]["backgroundColor"] = cell_hover.getPropertyValue("background-color");
-                grid_properties["hoverCellHighlight"]["color"] = cell_hover.getPropertyValue("color");
+                grid_properties["hoverRowHighlight"]["backgroundColor"] = this.get_style("--hypergrid-row-hover--background");
+                grid_properties["hoverRowHighlight"]["color"] = this.get_style("--hypergrid-row-hover--color");
+                grid_properties["hoverCellHighlight"]["backgroundColor"] = this.get_style("--hypergrid-cell-hover--background");
+                grid_properties["hoverCellHighlight"]["color"] = this.get_style("--hypergrid-cell-hover--color");
 
                 this.grid.addProperties(grid_properties);
 

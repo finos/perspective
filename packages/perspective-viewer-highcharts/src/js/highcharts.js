@@ -7,29 +7,17 @@
  *
  */
 
-import {draw} from "./draw.js";
+import {draw, PRIVATE} from "./draw.js";
 
 function resize() {
-    if (this._charts && this._charts.length > 0 && !this._resize_timer) {
-        this._charts.map(x => x.reflow());
+    if (this[PRIVATE]) {
+        this[PRIVATE].chart.resize();
     }
-    if (this._resize_timer) {
-        clearTimeout(this._resize_timer);
-        this._debounce_resize = true;
-    }
-    this._resize_timer = setTimeout(() => {
-        if (this._charts && this._charts.length > 0 && !document.hidden && this.offsetParent && document.contains(this) && this._debounce_resize) {
-            this._charts.map(x => x.reflow());
-        }
-        this._resize_timer = undefined;
-        this._debounce_resize = false;
-    }, 50);
 }
 
 function delete_chart() {
-    if (this._charts && this._charts.length > 0) {
-        this._charts.map(x => x.destroy());
-        this._charts = [];
+    if (this[PRIVATE]) {
+        this[PRIVATE].chart.delete();
     }
 }
 

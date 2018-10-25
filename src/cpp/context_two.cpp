@@ -18,11 +18,17 @@
 
 namespace perspective {
 t_ctx2::t_ctx2()
-    : m_row_depth_set(false), m_column_depth_set(false), m_row_depth(0), m_column_depth(0) {}
+    : m_row_depth_set(false)
+    , m_column_depth_set(false)
+    , m_row_depth(0)
+    , m_column_depth(0) {}
 
 t_ctx2::t_ctx2(const t_schema& schema, const t_config& pivot_config)
-    : t_ctxbase<t_ctx2>(schema, pivot_config), m_row_depth_set(false), m_column_depth_set(false), 
-      m_row_depth(0), m_column_depth(0) {}
+    : t_ctxbase<t_ctx2>(schema, pivot_config)
+    , m_row_depth_set(false)
+    , m_column_depth_set(false)
+    , m_row_depth(0)
+    , m_column_depth(0) {}
 
 t_ctx2::~t_ctx2() {}
 

@@ -15,7 +15,7 @@ import Computation from "./computed_column/Computation.js";
 
 import template from "../html/computed_column.html";
 
-import "../less/computed_column.less";
+import style from "../less/computed_column.less";
 
 polyfill({});
 
@@ -95,7 +95,7 @@ export const COMPUTATIONS = {
 
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
-@bindTemplate(template) // eslint-disable-next-line no-unused-vars
+@bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
 class ComputedColumn extends HTMLElement {
     constructor() {
         super();
@@ -434,16 +434,16 @@ class ComputedColumn extends HTMLElement {
     }
 
     _register_ids() {
-        this._side_panel_actions = document.querySelector("#side_panel__actions");
-        this._close_button = this.querySelector("#psp-cc__close");
-        this._column_name_input = this.querySelector("#psp-cc-name");
-        this._computation_selector = this.querySelector("#psp-cc-computation__select");
-        this._computation_type = this.querySelector("#psp-cc-computation__type");
-        this._input_columns = this.querySelector("#psp-cc-computation-inputs");
-        //this._delete_button = this.querySelector('#psp-cc-button-delete');
-        this._save_button = this.querySelector("#psp-cc-button-save");
-        this._input_column_error_message = this.querySelector("#psp-cc__error--input");
-        this._save_error_message = this.querySelector("#psp-cc__error--save");
+        this._side_panel_actions = this.parentElement.querySelector("#side_panel__actions");
+        this._close_button = this.shadowRoot.querySelector("#psp-cc__close");
+        this._column_name_input = this.shadowRoot.querySelector("#psp-cc-name");
+        this._computation_selector = this.shadowRoot.querySelector("#psp-cc-computation__select");
+        this._computation_type = this.shadowRoot.querySelector("#psp-cc-computation__type");
+        this._input_columns = this.shadowRoot.querySelector("#psp-cc-computation-inputs");
+        //this._delete_button = this.shadowRoot.querySelector('#psp-cc-button-delete');
+        this._save_button = this.shadowRoot.querySelector("#psp-cc-button-save");
+        this._input_column_error_message = this.shadowRoot.querySelector("#psp-cc__error--input");
+        this._save_error_message = this.shadowRoot.querySelector("#psp-cc__error--save");
     }
 
     _register_callbacks() {

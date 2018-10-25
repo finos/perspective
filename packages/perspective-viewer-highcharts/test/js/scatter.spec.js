@@ -21,27 +21,22 @@ utils.with_server({}, () => {
 
         describe("tooltip tests", () => {
             const point = "path.highcharts-point";
-            const tooltip_selector = ".highcharts-label.highcharts-tooltip";
-            const text = tooltip_selector + " > text";
 
             test.capture("tooltip shows on hover.", async page => {
-                await page.click("#config_button");
-                await page.$("perspective-viewer");
-                await utils.invoke_tooltip(point, page);
-            });
-
-            test.run("tooltip shows proper column labels.", async page => {
-                await page.click("#config_button");
-                await page.$("perspective-viewer");
-                await utils.invoke_tooltip(point, page);
-                return await page.$eval(text, element => {
-                    return element.textContent.includes("Sales") && element.textContent.includes("Profit");
-                });
-            });
-
-            test.run("tooltip shows pivot labels.", async page => {
-                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await utils.invoke_tooltip(point, page);
+            });
+
+            test.capture("tooltip shows proper column labels.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await utils.invoke_tooltip(point, page);
+            });
+
+            test.capture("tooltip shows pivot labels.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
 
                 // set a row pivot and a column pivot
                 await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
@@ -50,9 +45,6 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
 
                 await utils.invoke_tooltip(point, page);
-                return await page.$eval(text, element => {
-                    return element.textContent.includes("State") && element.textContent.includes("Category");
-                });
             });
         });
     });

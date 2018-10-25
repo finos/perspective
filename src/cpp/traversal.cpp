@@ -529,10 +529,10 @@ t_traversal::set_depth(const t_sortsvec& sortby, t_depth depth, t_ctx2* ctx2) {
             }
         }
         // Now collapse any children
-        for (t_ptivec::reverse_iterator rit = collapse.rbegin();
-             rit!= collapse.rend(); ++rit) {
+        for (t_ptivec::reverse_iterator rit = collapse.rbegin(); rit != collapse.rend();
+             ++rit) {
             t_tvidx curidx = *rit;
-            n_changed += collapse_node(curidx);        
+            n_changed += collapse_node(curidx);
         }
     }
 

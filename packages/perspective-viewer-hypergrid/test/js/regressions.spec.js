@@ -24,21 +24,29 @@ utils.with_server({}, () => {
     describe.page("regressions.html", () => {
         describe("Updates", () => {
             test.capture("regular updates", async page => {
-                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
                 await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3, y: "Updated!"}]), viewer));
                 await page.waitFor("perspective-viewer:not([updating])");
             });
 
             test.capture("saving a computed column does not interrupt update rendering", async page => {
-                await page.click("#config_button");
                 const viewer = await page.$("perspective-viewer");
-                await page.click("#add-computed-column");
-                await page.$eval("perspective-computed-column", element => {
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                await page.evaluate(element => {
+                    let com = element.shadowRoot.querySelector("perspective-computed-column");
                     const columns = [{name: "y", type: "string"}];
-                    element._apply_state(columns, element.computations["length"], "new_cc");
-                });
-                await page.click("#psp-cc-button-save");
+                    com._apply_state(columns, com.computations["length"], "new_cc");
+                }, viewer);
+                await page.evaluate(
+                    element =>
+                        element.shadowRoot
+                            .querySelector("perspective-computed-column")
+                            .shadowRoot.querySelector("#psp-cc-button-save")
+                            .click(),
+                    viewer
+                );
                 await page.waitForSelector("perspective-viewer:not([updating])");
                 await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3, y: "Updated!"}]), viewer));
             });
