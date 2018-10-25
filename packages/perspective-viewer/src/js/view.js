@@ -6,12 +6,16 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 import "@webcomponents/webcomponentsjs";
+import "@webcomponents/shadycss/custom-style-interface.min.js";
+
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 
 import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
+import {detectIE} from "../../../perspective/src/js/utils.js";
 
 import template from "../html/view.html";
 
@@ -80,6 +84,10 @@ function undrag(event) {
     let pivots = JSON.parse(this.getAttribute(attr_name));
     pivots.splice(idx, 1);
     this.setAttribute(attr_name, JSON.stringify(pivots));
+
+    if (detectIE()) {
+        window.ShadyCSS.styleDocument();
+    }
 }
 
 function calc_index(event) {

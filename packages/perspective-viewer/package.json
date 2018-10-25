@@ -45,6 +45,7 @@
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
+        "@webcomponents/shadycss": "^1.5.2",
         "awesomplete": "^1.1.2",
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",

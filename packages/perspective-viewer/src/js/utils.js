@@ -18,6 +18,9 @@
  * -------
  * A Template DOM object.
  */
+
+import {detectIE} from "../../../perspective/src/js/utils.js";
+
 export function importTemplate(template) {
     const div = document.createElement("div");
     div.innerHTML = template;
@@ -180,3 +183,32 @@ export function copy_to_clipboard(csv) {
 
 export const json_attribute = _attribute(() => ({}));
 export const array_attribute = _attribute(() => []);
+
+function get(url) {
+    return new Promise(resolve => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", url, true);
+        xhr.onload = () => resolve(xhr.responseText);
+        xhr.send(null);
+    });
+}
+
+async function load_themes() {
+    const themes = document.head.querySelectorAll("link[is=custom-style]");
+    for (let theme of themes) {
+        const url = theme.getAttribute("href");
+        console.log(`Loading theme ${url} asynchronously due to IE`);
+        const css = await get(url);
+        window.ShadyCSS.CustomStyleInterface.addCustomStyle({
+            getStyle() {
+                const style = document.createElement("style");
+                style.textContent = css;
+                return style;
+            }
+        });
+    }
+}
+
+if (detectIE()) {
+    window.addEventListener("load", load_themes);
+}

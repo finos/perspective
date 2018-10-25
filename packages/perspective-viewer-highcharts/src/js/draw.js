@@ -17,6 +17,7 @@ import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 import {bindTemplate} from "../../../perspective-viewer/src/js/utils";
+import { detectIE } from "../../../perspective/src/js/utils";
 
 export const PRIVATE = Symbol("Highcharts private");
 
@@ -44,7 +45,7 @@ export const draw = mode =>
         const hidden = this._get_view_hidden(aggregates);
 
         const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
-        let js;
+        let js, element;
 
         if (task.cancelled) {
             return;
@@ -60,8 +61,6 @@ export const draw = mode =>
             ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
             ytree_type = tschema[ytree_name],
             num_aggregates = aggregates.length - hidden.length;
-
-        const element = get_or_create_element.call(this, el);
 
         try {
             if (mode === "scatter") {
@@ -174,6 +173,7 @@ export const draw = mode =>
                 });
             }
         } finally {
+            element = get_or_create_element.call(this, el);
             if (this.hasAttribute("updating")) {
                 element.delete();
             }
@@ -235,7 +235,11 @@ class HighchartsElement extends HTMLElement {
 
         // TODO resize bug in Highcharts?
         if (configs.length > 1) {
-            this._charts.map(x => x.reflow());
+            this.resize();
+        }
+
+        if (detectIE()) {
+            setTimeout(() => this.resize());
         }
     }
 

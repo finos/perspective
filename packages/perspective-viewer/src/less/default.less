@@ -98,9 +98,16 @@
     border-bottom: 25px solid rgba(0, 0, 0, 0);
 }
 
+/* These rules needs to be strictly ordered to avoid a bug in IE/ShadyCSS */
+:host perspective-row {
+    height: var(--column--height, 21px);
+    --row_draggable-height: var(--column--height, 21px);
+}
+
 :host(:not([row-pivots="[]"])) {
     #active_columns perspective-row {
         height: var(--active-column--height, 41px);
+        min-height: var(--active-column--height, 41px);
         --row_draggable-height: var(--active-column--height, 41px);
         --column_aggregate-display: inline-block;
         --is_visible--height: var(--active-column-selector--height, auto);
@@ -134,20 +141,13 @@
             }
         }
 
-        #active_columns {
-            // margin-right: 8px;
-
-            // perspective-row {
-            //     --psp_row-margin: 0 2px 0 0;
-            // }
-        }
-
         #side_panel #divider {
             display: none;
         }
 
         perspective-computed-column {
             max-height: none;
+            margin-right: 24px;
         }
     }
 
@@ -156,17 +156,11 @@
         --is_visible-display: inline-block;
         --row_draggable-padding: 0px 10px 0px 0px;
         --row_close-display: none;
-        // --psp_row-margin: 0 5px 0 0;
         --column_name-max-width: 180px;
     }
 
     #top_panel perspective-row {
         --row_draggable-display: inline-block;
-    }
-
-    perspective-row {
-        height: var(--column--height, 21px);
-        --row_draggable-height: var(--column--height, 21px);
     }
 
     #columns_container {
@@ -193,13 +187,13 @@
             }
         }
 
-        perspective-row {
-            height: var(--inactive-column--height, var(--column--height, 21px));
-            --row_draggable-height: var(
-                --inactive-column--height,
-                var(--column--height, 21px)
-            );
-        }
+        // perspective-row {
+        //     height: var(--inactive-column--height, var(--column--height, 21px));
+        //     --row_draggable-height: var(
+        //         --inactive-column--height,
+        //         var(--column--height, 21px)
+        //     );
+        // }
 
         #active_columns,
         #inactive_columns {
@@ -221,7 +215,7 @@
         flex-shrink: 1000;
         justify-content: flex-start;
         position: relative;
-        overflow-y: auto;
+        overflow-y: hidden;
         width: 100%;
         padding-top: 20px;
         margin: var(--column-container--margin, 8px);
@@ -322,9 +316,11 @@
         font-size: var(--config_button--font-size, 16px);
         color: #999;
         transition: opacity 0.3s;
+        overflow: hidden;
     }
 
     #config_button:before {
+        font-feature-settings: "liga";
         content: var(--config_button--before, "\1f527");
     }
 
