@@ -108,12 +108,30 @@ exports.default = function() {
         await add_computed_column(page);
     });
 
-    test.capture("saving without parameters should show an error message.", async page => {
+    test.capture("saving without parameters should fail as button is disabled.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
         await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-        await page.$("perspective-viewer");
         await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+        await page.evaluate(
+            element =>
+                element.shadowRoot
+                    .querySelector("perspective-computed-column")
+                    .shadowRoot.querySelector("#psp-cc-button-save")
+                    .click(),
+            viewer
+        );
+    });
+
+    test.capture("saving a duplicate column should fail with error message.", async page => {
+        await add_computed_column(page);
+        const viewer = await page.$("perspective-viewer");
+        await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+        await page.evaluate(element => {
+            let com = element.shadowRoot.querySelector("perspective-computed-column");
+            const columns = [{name: "Order Date", type: "datetime"}];
+            com._apply_state(columns, com.computations["day_of_week"], "new_cc");
+        }, viewer);
         await page.evaluate(
             element =>
                 element.shadowRoot

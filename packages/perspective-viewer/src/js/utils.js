@@ -7,6 +7,33 @@
  *
  */
 
+/******************************************************************************
+ *
+ * Drag & Drop Utils
+ *
+ */
+
+global.dragEnter = function dragEnter(ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    ev.currentTarget.classList.add("dropping");
+};
+
+global.allowDrop = function allowDrop(ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    ev.currentTarget.classList.add("dropping");
+    ev.dataTransfer.dropEffect = "move";
+};
+
+global.disallowDrop = function disallowDrop(ev) {
+    if (ev.currentTarget == ev.target) {
+        ev.stopPropagation();
+        ev.preventDefault();
+        ev.currentTarget.classList.remove("dropping");
+    }
+};
+
 /**
  * Instantiate a Template DOM object from an HTML text string.
  *

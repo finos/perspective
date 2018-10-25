@@ -16,6 +16,7 @@
         "build:webpack:cjs": "webpack --color --config src/config/view.cjs.config.js",
         "build:webpack:viewer": "webpack --color --config src/config/view.config.js",
         "build": "npm-run-all build:webpack:* build:themes:* copy:*",
+        "watch": "webpack --color --watch --config src/config/view.config.js",
         "copy:worker": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js build",
         "copy:sourcemaps": "cp -r node_modules/@jpmorganchase/perspective/build/*.worker.*.js.map build",
         "copy:wasm": "cp -r node_modules/@jpmorganchase/perspective/build/psp.async.wasm build",

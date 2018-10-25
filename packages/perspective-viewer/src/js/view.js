@@ -333,18 +333,18 @@ function _format_computed_data(cc) {
     };
 }
 
-async function loadTable(table, redraw = true) {
+async function loadTable(table, computed = false) {
     this.shadowRoot.querySelector("#app").classList.add("hide_message");
     this.setAttribute("updating", true);
 
-    if (this._table && redraw) {
+    if (this._table && !computed) {
         this.removeAttribute("computed-columns");
     }
     this._clear_state();
 
     this._table = table;
 
-    if (this.hasAttribute("computed-columns") && redraw) {
+    if (this.hasAttribute("computed-columns") && !computed) {
         const computed_columns = JSON.parse(this.getAttribute("computed-columns"));
         if (computed_columns.length > 0) {
             for (let col of computed_columns) {
@@ -356,7 +356,7 @@ async function loadTable(table, redraw = true) {
                     }
                 });
             }
-            this._debounce_update(true);
+            this._debounce_update();
             return;
         }
     }
@@ -502,7 +502,7 @@ async function loadTable(table, redraw = true) {
     this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
 
     this.filters = this.getAttribute("filters");
-    await this._debounce_update(redraw);
+    await this._debounce_update();
 }
 
 function new_row(name, type, aggregate, filter, sort, computed) {
@@ -600,7 +600,7 @@ class CancelTask {
     }
 }
 
-async function update(redraw = true) {
+async function update() {
     if (!this._table) return;
     let row_pivots = this._view_columns("#row_pivots perspective-row");
     let column_pivots = this._view_columns("#column_pivots perspective-row");
@@ -657,37 +657,30 @@ async function update(redraw = true) {
     });
 
     const timer = this._render_time();
-    if (redraw) {
-        this._render_count = (this._render_count || 0) + 1;
-        if (this._task) {
-            this._task.cancel();
-        }
-        const task = (this._task = new CancelTask(() => {
-            this._render_count--;
-        }));
-        task.initial = true;
-
-        await this._plugin.create
-            .call(this, this._datavis, this._view, task)
-            .catch(err => {
-                console.warn(err);
-            })
-            .finally(() => {
-                if (!this.hasAttribute("render_time")) {
-                    this.dispatchEvent(new Event("perspective-view-update"));
-                }
-                timer();
-                task.cancel();
-                if (this._render_count === 0) {
-                    this.removeAttribute("updating");
-                }
-            });
-    } else {
-        timer();
-        if (this._render_count === 0) {
-            this.removeAttribute("updating");
-        }
+    this._render_count = (this._render_count || 0) + 1;
+    if (this._task) {
+        this._task.cancel();
     }
+    const task = (this._task = new CancelTask(() => {
+        this._render_count--;
+    }));
+    task.initial = true;
+
+    await this._plugin.create
+        .call(this, this._datavis, this._view, task)
+        .catch(err => {
+            console.warn(err);
+        })
+        .finally(() => {
+            if (!this.hasAttribute("render_time")) {
+                this.dispatchEvent(new Event("perspective-view-update"));
+            }
+            timer();
+            task.cancel();
+            if (this._render_count === 0) {
+                this.removeAttribute("updating");
+            }
+        });
 }
 
 /******************************************************************************
@@ -885,13 +878,31 @@ class ViewPrivate extends HTMLElement {
         this._update_column_view();
     }
 
+    _validate_computed_column(event) {
+        const new_column = event.detail;
+        let computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+        if (computed_columns === null) {
+            computed_columns = [];
+        }
+        // names cannot be duplicates
+        for (let col of computed_columns) {
+            if (new_column.name === col.name) {
+                console.log("dupe");
+                return;
+            }
+        }
+        computed_columns.push(new_column);
+        this.setAttribute("computed-columns", JSON.stringify(computed_columns));
+    }
+
     async _create_computed_column(event) {
         const data = event.detail;
         let computed_column_name = data.column_name;
 
         const cols = await this._table.columns();
         // edit overwrites last column, otherwise avoid name collision
-        if (cols.includes(computed_column_name) && !data.edit) {
+        if (cols.includes(computed_column_name)) {
+            console.log(computed_column_name);
             computed_column_name += ` ${Math.round(Math.random() * 100)}`;
         }
 
@@ -907,9 +918,8 @@ class ViewPrivate extends HTMLElement {
         ];
 
         const table = this._table.add_computed(params);
-        await loadTable.call(this, table, false);
+        await loadTable.call(this, table, true);
         this._update_column_view();
-        this._computed_column._close_computed_column();
     }
 
     _transpose() {
@@ -954,9 +964,7 @@ class ViewPrivate extends HTMLElement {
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
-        this._computed_column.addEventListener("perspective-computed-column-save", event => {
-            this.setAttribute("computed-columns", JSON.stringify([event.detail]));
-        });
+        this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener("click", this._toggle_config.bind(this));
@@ -988,14 +996,14 @@ class ViewPrivate extends HTMLElement {
     }
 
     _register_debounce_instance() {
-        const _update = _.debounce((redraw, resolve) => {
+        const _update = _.debounce(resolve => {
             update
-                .bind(this)(redraw)
+                .bind(this)()
                 .then(resolve);
         }, 10);
-        this._debounce_update = async redraw => {
+        this._debounce_update = async () => {
             this.setAttribute("updating", true);
-            await new Promise(resolve => _update(redraw, resolve));
+            await new Promise(_update);
         };
     }
 }
@@ -1113,19 +1121,23 @@ class View extends ViewPrivate {
      */
     @array_attribute
     set "computed-columns"(computed_columns) {
-        if (this._table) {
-            for (let col of computed_columns) {
-                this._create_computed_column({
-                    detail: {
-                        column_name: col.name,
-                        input_columns: col.inputs.map(x => ({name: x})),
-                        computation: COMPUTATIONS[col.func]
-                    }
-                });
+        this.setAttribute("updating", true);
+        this._computed_column._close_computed_column();
+        (async () => {
+            if (this._table) {
+                for (let col of computed_columns) {
+                    await this._create_computed_column({
+                        detail: {
+                            column_name: col.name,
+                            input_columns: col.inputs.map(x => ({name: x})),
+                            computation: COMPUTATIONS[col.func]
+                        }
+                    });
+                }
+                await this._debounce_update();
             }
-            this._debounce_update();
-        }
-        this.dispatchEvent(new Event("perspective-config-update"));
+            this.dispatchEvent(new Event("perspective-config-update"));
+        })();
     }
 
     /**

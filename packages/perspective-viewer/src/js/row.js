@@ -19,33 +19,6 @@ import template from "../html/row.html";
 
 import style from "../less/row.less";
 
-/******************************************************************************
- *
- * Drag & Drop Utils
- *
- */
-
-global.dragEnter = function dragEnter(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
-};
-
-global.allowDrop = function allowDrop(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
-    ev.dataTransfer.dropEffect = "move";
-};
-
-global.disallowDrop = function disallowDrop(ev) {
-    if (ev.currentTarget == ev.target) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        ev.currentTarget.classList.remove("dropping");
-    }
-};
-
 function get_text_width(text, max = 0) {
     let span = document.createElement("span");
     // FIXME get these values form the stylesheet

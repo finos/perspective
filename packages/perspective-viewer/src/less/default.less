@@ -151,6 +151,18 @@
         }
     }
 
+    perspective-computed-column {
+        --is_visible--before: var(--active-column-selector--content, "\25CF");
+        --row_draggable-background-color: var(
+            --active-column--background,
+            white
+        );
+        --row_draggable-border-color: var(--column--border-color, #ccc);
+        --row_draggable-border-width: 0 0 1px 0;
+        --row_draggable-overflow: hidden;
+        --column-selector--color: var(--active-column-selector--color, #999);
+    }
+
     #side_panel perspective-row {
         --name-before-display: inline-block;
         --is_visible-display: inline-block;
