@@ -37,50 +37,6 @@
     }
 }
 
-:host-context(#side_panel) {
-    .row_computed {
-        display: none;
-
-        span {
-            color: @darkgray;
-            font-size: 10px;
-        }
-
-        #computation_name {
-            margin-left: 5px;
-        }
-
-        #row_edit {
-            color: @darkgray;
-
-            font-size: 9px;
-            margin-left: 5px;
-
-            &:before {
-                //content: "\01F527"
-            }
-        }
-    }
-
-    &.computed {
-        // #psp_row .row_draggable {
-        //     height: 35px !important;
-        // }
-
-        #name {
-            margin-right: 16px;
-        }
-
-        .row_computed {
-            position: absolute;
-            right: 0px;
-            margin-right: 12px;
-            margin-top: 2px;
-            display: flex !important;
-        }
-    }
-}
-
 .dropping * {
     pointer-events: none;
 }
