@@ -215,7 +215,7 @@ async function loadTable(table, computed = false) {
                     }
                 });
             }
-            this._debounce_update();
+            this._debounce_update({redraw: true, ignore_size_check: false});
             return;
         }
     }
@@ -362,7 +362,7 @@ async function loadTable(table, computed = false) {
     this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
 
     this.filters = this.getAttribute("filters");
-    await this._debounce_update(false, redraw);
+    await this._debounce_update({redraw: redraw, ignore_size_check: false});
 }
 
 // TODO: split into loader.js
@@ -463,6 +463,7 @@ class CancelTask {
 }
 
 async function update(redraw = true, ignore_size_check = false) {
+    this._plugin_information.classList.add("hidden");
     if (!this._table) return;
     let row_pivots = this._get_view_row_pivots();
     let column_pivots = this._get_view_column_pivots();
@@ -493,14 +494,12 @@ async function update(redraw = true, ignore_size_check = false) {
         const num_columns = await this._view.num_columns();
         const num_rows = await this._view.num_rows();
         const count = num_columns * num_rows;
+        console.log(count);
         if (count >= this._plugin.max_size) {
             this._plugin_information.classList.remove("hidden");
             return;
         }
     }
-
-    // be careful where it needs to be - side effects are important
-    // TEST with streaming where datasets are larger than threshold
 
     this._view.on_update(() => {
         if (!this._debounced) {
@@ -901,11 +900,11 @@ class ViewPrivate extends HTMLElement {
             this._debounce_update();
         });
         this._plugin_information_action.addEventListener("mousedown", () => {
-            this._debounce_update(true);
+            this._debounce_update({ignore_size_check: true});
             this._plugin_information.classList.add("hidden");
         });
         this._plugin_information_dismiss.addEventListener("mousedown", () => {
-            this._debounce_update(true);
+            this._debounce_update({ignore_size_check: true});
             this._plugin_information.classList.add("hidden");
             this._show_warnings = false;
         });
@@ -939,8 +938,7 @@ class ViewPrivate extends HTMLElement {
                 .bind(this)(redraw, ignore_size_check)
                 .then(resolve);
         }, 10);
-        // parameter order flipped to prevent ignore specification on every call
-        this._debounce_update = async (ignore_size_check = false, redraw) => {
+        this._debounce_update = async ({redraw = undefined, ignore_size_check = false} = {}) => {
             this.setAttribute("updating", true);
             await new Promise(resolve => _update(redraw, resolve, ignore_size_check));
         };

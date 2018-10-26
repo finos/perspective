@@ -262,3 +262,9 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
         viewer
     );
 };
+
+exports.trigger_render_warning = async function trigger_render_warning(page, col_name) {
+    await page.click("#config_button");
+    const viewer = await page.$("perspective-viewer");
+    await page.evaluate(element => element.setAttribute("columns", `[""${col_name}]`), viewer);
+};

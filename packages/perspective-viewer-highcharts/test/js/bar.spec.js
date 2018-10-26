@@ -55,5 +55,11 @@ utils.with_server({}, () => {
                 await utils.invoke_tooltip(bar, page);
             });
         });
+
+        describe.page("stresstest.html", () => {
+            describe("render warning", () => {
+                test.capture("render warnings should show over size limit");
+            });
+        });
     });
 });
