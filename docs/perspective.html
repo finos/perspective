@@ -14,13 +14,13 @@
 <li><a href="#to_columns">to_columns</a></li>
 <li><a href="#to_json">to_json</a></li>
 <li><a href="#to_csv">to_csv</a></li>
+<li><a href="#col_to_js_typed_array">col_to_js_typed_array</a></li>
 <li><a href="#num_rows">num_rows</a></li>
 <li><a href="#num_columns">num_columns</a></li>
 <li><a href="#get_row_expanded">get_row_expanded</a></li>
 <li><a href="#expand">expand</a></li>
 <li><a href="#collapse">collapse</a></li>
-<li><a href="#expand_to_depth">expand_to_depth</a></li>
-<li><a href="#collapse_to_depth">collapse_to_depth</a></li>
+<li><a href="#set_depth">set_depth</a></li>
 <li><a href="#on_update">on_update</a></li>
 <li><a href="#on_delete">on_delete</a></li>
 </ul></li>
@@ -135,6 +135,20 @@ will have prepended those values specified by this row's
 aggregated path.  If this <a href="#view">view</a> had a &quot;column_pivots&quot; config
 parameter supplied, the keys of this object will be comma-prepended with
 their comma-separated column paths.</p>
+<h3><a class="anchor" aria-hidden="true" id="col-to-js-typed-array"></a><a href="#col-to-js-typed-array" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>col_to_js_typed_array</h3>
+<p>Serializes a view column into a TypedArray.</p>
+<p><strong>Parameters</strong></p>
+<ul>
+<li><code>col_name</code></li>
+<li><code>column_name</code> <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></strong> The name of the column to serialize.</li>
+</ul>
+<p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/TypedArray">TypedArray</a>&gt;</strong> A promise resolving to a TypedArray
+representing the data of the column as retrieved from the <a href="#view">view</a> - all
+pivots, aggregates, sorts, and filters have been applied onto the values
+inside the TypedArray. The TypedArray will be constructed based on data type -
+integers will resolve to Int8Array, Int16Array, or Int32Array. Floats resolve to
+Float32Array or Float64Array. If the column cannot be found, or is not of an
+integer/float type, the Promise returns undefined.</p>
 <h3><a class="anchor" aria-hidden="true" id="num-rows"></a><a href="#num-rows" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>num_rows</h3>
 <p>The number of aggregated rows in this <a href="#view">view</a>.  This is affected by
 the &quot;row_pivots&quot; configuration parameter supplied to this <a href="#view">view</a>'s
@@ -166,14 +180,8 @@ contructor.</p>
 <li><code>idx</code></li>
 </ul>
 <p>Returns <strong><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a>&lt;void&gt;</strong></p>
-<h3><a class="anchor" aria-hidden="true" id="expand-to-depth"></a><a href="#expand-to-depth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>expand_to_depth</h3>
-<p>Expand the tree down to <code>depth</code>.</p>
-<p><strong>Parameters</strong></p>
-<ul>
-<li><code>depth</code></li>
-</ul>
-<h3><a class="anchor" aria-hidden="true" id="collapse-to-depth"></a><a href="#collapse-to-depth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>collapse_to_depth</h3>
-<p>Collapse the tree down to <code>depth</code>.</p>
+<h3><a class="anchor" aria-hidden="true" id="set-depth"></a><a href="#set-depth" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>set_depth</h3>
+<p>Set expansion <code>depth</code> pf the pivot tree.</p>
 <p><strong>Parameters</strong></p>
 <ul>
 <li><code>depth</code></li>
@@ -335,4 +343,4 @@ the order they were inserted.  <code>limit</code> is mutually exclusive to
 <span class="hljs-keyword">var</span> table = worker.table([{<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>}, {<span class="hljs-attr">x</span>: <span class="hljs-number">2</span>}]);
 </code></pre>
 <p>Returns <strong><a href="#table">table</a></strong> A new <a href="#table">table</a> object.</p>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="usage.html">← usage</a><a class="docs-next button" href="perspective-viewer.html">perspective-viewer →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#view">view</a><ul class="toc-headings"><li><a href="#delete">delete</a></li><li><a href="#schema">schema</a></li><li><a href="#to-columns">to_columns</a></li><li><a href="#to-json">to_json</a></li><li><a href="#to-csv">to_csv</a></li><li><a href="#num-rows">num_rows</a></li><li><a href="#num-columns">num_columns</a></li><li><a href="#get-row-expanded">get_row_expanded</a></li><li><a href="#expand">expand</a></li><li><a href="#collapse">collapse</a></li><li><a href="#expand-to-depth">expand_to_depth</a></li><li><a href="#collapse-to-depth">collapse_to_depth</a></li><li><a href="#on-update">on_update</a></li><li><a href="#on-delete">on_delete</a></li></ul></li><li><a href="#table">table</a><ul class="toc-headings"><li><a href="#delete-1">delete</a></li><li><a href="#on-delete-1">on_delete</a></li><li><a href="#size">size</a></li><li><a href="#schema-1">schema</a></li><li><a href="#computed-schema">computed_schema</a></li><li><a href="#view-1">view</a></li><li><a href="#update">update</a></li><li><a href="#remove">remove</a></li><li><a href="#add-computed">add_computed</a></li><li><a href="#columns">columns</a></li><li><a href="#column-metadata">column_metadata</a></li></ul></li><li><a href="#table-1">table</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="usage.html">← usage</a><a class="docs-next button" href="perspective-viewer.html">perspective-viewer →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#view">view</a><ul class="toc-headings"><li><a href="#delete">delete</a></li><li><a href="#schema">schema</a></li><li><a href="#to-columns">to_columns</a></li><li><a href="#to-json">to_json</a></li><li><a href="#to-csv">to_csv</a></li><li><a href="#col-to-js-typed-array">col_to_js_typed_array</a></li><li><a href="#num-rows">num_rows</a></li><li><a href="#num-columns">num_columns</a></li><li><a href="#get-row-expanded">get_row_expanded</a></li><li><a href="#expand">expand</a></li><li><a href="#collapse">collapse</a></li><li><a href="#set-depth">set_depth</a></li><li><a href="#on-update">on_update</a></li><li><a href="#on-delete">on_delete</a></li></ul></li><li><a href="#table">table</a><ul class="toc-headings"><li><a href="#delete-1">delete</a></li><li><a href="#on-delete-1">on_delete</a></li><li><a href="#size">size</a></li><li><a href="#schema-1">schema</a></li><li><a href="#computed-schema">computed_schema</a></li><li><a href="#view-1">view</a></li><li><a href="#update">update</a></li><li><a href="#remove">remove</a></li><li><a href="#add-computed">add_computed</a></li><li><a href="#columns">columns</a></li><li><a href="#column-metadata">column_metadata</a></li></ul></li><li><a href="#table-1">table</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>

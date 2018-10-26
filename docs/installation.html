@@ -43,65 +43,6 @@ via NPM</p>
 from source available on <a href="https://github.com/jpmorganchase/perspective">Github</a>.
 Doing so is quite a bit more complex than a standard pure Javascript NPM
 package, so if you're not looking to hack on Perspective itself, you are likely
-better off choosing the CDN or NPM methods above.</p>
-<p>Perspective is organized as a <a href="https://github.com/babel/babel/blob/master/doc/design/monorepo.md">monorepo</a>,
-and uses <a href="https://lernajs.io/">lerna</a> to manage dependencies. The
-<code>@jpmorganchase/perspective</code> modules has an additional, unmanaged dependency
-however; the <a href="https://github.com/kripken/emscripten">Emscripten</a> compiler, which
-is used to compile the core C++ engine to WebAssembly, and must be installed
-independently.</p>
-<h2><a class="anchor" aria-hidden="true" id="from-source-1"></a><a href="#from-source-1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From source</h2>
-<h3><a class="anchor" aria-hidden="true" id="docker"></a><a href="#docker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Docker</h3>
-<p>For convenience, Perspective provides a Docker container for
-this; To use it, you only need to install <a href="https://docs.docker.com/install/">Docker</a>
-itself, then build perspective via:</p>
-<pre><code class="hljs css bash">npm install
-PSP_DOCKER=1 npm run build
-</code></pre>
-<p>If everything is successful, you should be able to run any of the <code>examples/</code>
-packages, e.g. <code>examples/simple</code> like so:</p>
-<pre><code class="hljs css bash">npm start -- simple
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="emsdk"></a><a href="#emsdk" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>EMSDK</h3>
-<p>If you don't want to use Docker for the build, you'll need to install the
-emscripten SDK, then activate and export the latest <code>emsdk</code> environment via
-<a href="https://github.com/juj/emsdk"><code>emsdk_env.sh</code></a>:</p>
-<pre><code class="hljs css bash"><span class="hljs-built_in">source</span> emsdk/emsdk_env.sh
-</code></pre>
-<h4><a class="anchor" aria-hidden="true" id="osx-specific-instructions"></a><a href="#osx-specific-instructions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>OSX specific instructions</h4>
-<p>Installing and activating the latest <a href="https://github.com/kripken/emscripten">emscripten SDK</a>:</p>
-<pre><code class="hljs css bash">./emsdk install latest
-./emsdk activate latest
-</code></pre>
-<p>You'll also need Boost and CMake, which can be installed from Homebrew:</p>
-<pre><code class="hljs css bash">brew install cmake
-brew install boost
-</code></pre>
-<h4><a class="anchor" aria-hidden="true" id="windows-10-specific-instructions"></a><a href="#windows-10-specific-instructions" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Windows 10 specific instructions</h4>
-<p>You need to use bash in order to build Perspective packages. To successfully
-build on Windows 10, enable <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">Windows Subsystem for Linux</a>
-(WSL) and install the linux distribution of your choice.</p>
-<p>Create symbolic link to easily access Windows directories and projects modified
-via Windows. This way you can modify any of the Perspective files using your
-favorite editors on Windows and build via Linux.</p>
-<p>Follow the Linux specific instructions to install Emscripten and all
-prerequisite tools.</p>
-<h4><a class="anchor" aria-hidden="true" id="ubuntu-debian"></a><a href="#ubuntu-debian" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Ubuntu/Debian</h4>
-<p>When installing Emscripten, make sure to follow <a href="http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#linux">Linux specific instructions</a>.</p>
-<p>On Ubuntu, cmake will mistakenly resolve the system headers in <code>/usr/include</code>
-rather than the emscripten supplied versions. You can resolve this by moving
-boost to somewhere other than <code>/use/include</code> - into perspective's own <code>src</code> dir,
-for example (as per <a href="http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html">here</a>).</p>
-<pre><code class="hljs css bash">apt-get install libboost-all-dev
-cp -r /usr/include/boost ./packages/perspective/src/include/
-</code></pre>
-<h3><a class="anchor" aria-hidden="true" id="build-options"></a><a href="#build-options" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Build Options</h3>
-<p>Whichever method you choose, the build script respects a few environment flags:</p>
-<ul>
-<li><code>PSP_DOCKER</code> will compile C++ source via an Emscripten Docker container.</li>
-<li><code>PSP_DEBUG</code> will run a debug build of the C++ source.</li>
-<li><code>PSP_NO_MINIFY</code> will skip Javascript minification.</li>
-<li><code>PSP_CPU_COUNT</code> will set the concurrency limit for the build.</li>
-<li><code>PACKAGE</code> will restrict the build to only specific <code>@jpmorganchase/</code> packages.</li>
-</ul>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="usage.html">usage →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#an-important-note-about-hosting">(!) An important note about Hosting</a></li><li><a href="#from-cdn">From CDN</a></li><li><a href="#from-npm">From NPM</a></li><li><a href="#from-source">From source</a></li><li><a href="#from-source-1">From source</a><ul class="toc-headings"><li><a href="#docker">Docker</a></li><li><a href="#emsdk">EMSDK</a></li><li><a href="#build-options">Build Options</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>
+better off choosing the CDN or NPM methods above. See the
+<a href="development.html">developer docs</a> for details.</p>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-next button" href="usage.html">usage →</a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#an-important-note-about-hosting">(!) An important note about Hosting</a></li><li><a href="#from-cdn">From CDN</a></li><li><a href="#from-npm">From NPM</a></li><li><a href="#from-source">From source</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/perspective/" class="nav-home"><img src="/perspective/img/perspective.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/perspective/docs/en/installation.html">Installation</a><a href="/perspective/docs/en/usage.html">Usage</a><a href="/perspective/docs/en/perspective_api.html">Perspective API</a><a href="/perspective/docs/en/viewer_api.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/perspective/blog">Blog</a><a href="https://github.com/jpmorganchase/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2018 Perspective Authors</section></footer></div></body></html>
