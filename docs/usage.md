@@ -135,7 +135,7 @@ Hence, there is no `worker()` method, and the module object itself directly
 exports the full `perspective` API.
 
 ```javascript
-const perspective = require("@jpmorganchase/perspective/build/perspective.node.js");
+const perspective = require("@jpmorganchase/perspective");
 ```
 
 ### Loading data with `table()`

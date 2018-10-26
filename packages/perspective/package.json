@@ -2,7 +2,8 @@
     "name": "@jpmorganchase/perspective",
     "version": "0.2.3",
     "description": "Perspective.js",
-    "main": "build/perspective.cjs.js",
+    "main": "build/perspective.node.js",
+    "browser": "build/perspective.cjs.js",
     "publishConfig": {
         "access": "public"
     },

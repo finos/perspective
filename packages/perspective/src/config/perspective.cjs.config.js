@@ -3,7 +3,7 @@ const common = require("./common.config.js");
 
 module.exports = Object.assign({}, common(), {
     entry: "./src/js/perspective.parallel.js",
-    externals: [/^[a-z0-9\@].*$/],
+    externals: [/node_modules\/\@(?!apache-arrow)/, /perspective.node.js/],
     output: {
         filename: "perspective.cjs.js",
         library: "perspective",

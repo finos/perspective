@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
+const {WebSocketHost} = require("@jpmorganchase/perspective");
 const exec = require("child_process").exec;
 
 function execute(command, callback) {

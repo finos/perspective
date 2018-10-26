@@ -9,7 +9,7 @@
 
 import {ScriptPath} from "./utils.js";
 
-import {TYPE_AGGREGATES, AGGREGATE_DEFAULTS, TYPE_FILTERS, FILTER_DEFAULTS, SORT_ORDERS} from "./defaults.js";
+import * as defaults from "./defaults.js";
 
 import {worker} from "./api.js";
 
@@ -175,22 +175,14 @@ class WebSocketWorker extends worker {
     }
 }
 
-export default {
-    worker: function(url) {
-        if (url) {
-            return new WebSocketWorker(url);
-        } else {
-            return new WebWorker();
-        }
-    },
-
-    TYPE_AGGREGATES: TYPE_AGGREGATES,
-
-    TYPE_FILTERS: TYPE_FILTERS,
-
-    AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
-
-    FILTER_DEFAULTS: FILTER_DEFAULTS,
-
-    SORT_ORDERS: SORT_ORDERS
+exports.worker = function(url) {
+    if (url) {
+        return new WebSocketWorker(url);
+    } else {
+        return new WebWorker();
+    }
 };
+
+for (let prop of Object.keys(defaults)) {
+    exports[prop] = defaults[prop];
+}
