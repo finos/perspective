@@ -55,11 +55,17 @@ utils.with_server({}, () => {
                 await utils.invoke_tooltip(bar, page);
             });
         });
-
-        describe.page("stresstest.html", () => {
-            describe("render warning", () => {
-                test.capture("render warnings should show over size limit");
-            });
-        });
     });
+
+    /*describe.page("render_warning.html", () => {
+        test.capture(
+            "render warning should show when size limit is reached.",
+            async page => {
+                console.log(page);
+            },
+            100000,
+            null,
+            100000
+        );
+    });*/
 });
