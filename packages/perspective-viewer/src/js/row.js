@@ -14,7 +14,7 @@ import awesomplete_style from "awesomplete/awesomplete.css";
 
 import {bindTemplate} from "./utils.js";
 
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
 import template from "../html/row.html";
 
 import style from "../less/row.less";

@@ -7,8 +7,6 @@
  *
  */
 
-import buffer from "../../obj/psp.sync.wasm";
-
 const perspective = require("./perspective.js");
 
 const fs = require("fs");
@@ -24,6 +22,10 @@ const load_perspective = require("../../obj/psp.sync.js").load_perspective;
 const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__.resolve : module.require.resolve;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
+
+import wasm from "../../obj/psp.sync.wasm";
+
+const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 
 let Module = load_perspective({
     wasmBinary: buffer,

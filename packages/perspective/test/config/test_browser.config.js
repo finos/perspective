@@ -9,3 +9,8 @@ module.exports = Object.assign({}, common(), {
         path: path.resolve(__dirname, "../../build")
     }
 });
+
+module.exports.module.rules[0] = {
+    test: /\.css$/,
+    use: [{loader: "style-loader"}, {loader: "css-loader"}]
+};

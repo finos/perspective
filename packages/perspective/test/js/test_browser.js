@@ -7,9 +7,10 @@
  *
  */
 
-import perspective_wasm from "../../src/js/perspective.wasm.js";
-import perspective_asmjs from "../../src/js/perspective.asmjs.js";
 import psp_parallel from "../../src/js/perspective.parallel.js";
+const perspective = require("../../src/js/perspective.js");
+const asmjs = require("../../obj/psp.asmjs.js");
+const wasm = require("../../obj/psp.async.js");
 
 import "./jasmine.js";
 
@@ -20,9 +21,22 @@ const filter_tests = require("./filters.js");
 const internal_tests = require("./internal.js");
 
 const RUNTIMES = {
-    WASM: perspective_wasm,
-    ASMJS: perspective_asmjs,
-    Parallel: psp_parallel.worker()
+    ASMJS: perspective(
+        asmjs.load_perspective({
+            wasmJSMethod: "asmjs",
+            filePackagePrefixURL: "",
+            printErr: x => console.error(x),
+            print: x => console.log(x)
+        })
+    ),
+    Parallel: psp_parallel.worker(),
+    WASM: perspective(
+        wasm.load_perspective({
+            wasmJSMethod: "native-wasm",
+            printErr: x => console.error(x),
+            print: x => console.log(x)
+        })
+    )
 };
 
 describe("perspective.js", function() {

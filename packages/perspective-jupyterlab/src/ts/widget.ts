@@ -27,9 +27,6 @@ import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 
-/* embed wasm */
-import "../js/embed.js";
-
 /* css */
 import '../less/material.less';
 

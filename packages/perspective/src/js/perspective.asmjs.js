@@ -7,6 +7,8 @@
  *
  */
 
+import "babel-polyfill";
+
 const load_perspective = require("../../obj/psp.asmjs.js").load_perspective;
 const perspective = require("./perspective.js");
 
@@ -16,4 +18,5 @@ const Module = load_perspective({
     printErr: x => console.error(x),
     print: x => console.log(x)
 });
+
 module.exports = perspective(Module);

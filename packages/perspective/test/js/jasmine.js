@@ -178,7 +178,11 @@ function ConsoleReporter() {
 jasmine.getEnv().addReporter(new ConsoleReporter());
 
 const start = window._onload;
+let started = false;
 
 window.addEventListener("perspective-ready", function() {
-    setTimeout(start, 500);
+    if (!started) {
+        started = true;
+        setTimeout(start, 500);
+    }
 });

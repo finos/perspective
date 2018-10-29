@@ -84,48 +84,6 @@ export function detectChrome() {
     }
 }
 
-/**
- * An Object for capturing details of the invoking script's origin.
- *
- * Returns
- * -------
- * An instance of a ScriptPath object.  Interesting methods on this object
- * include:
- *     fullPath : The complete path of this script.
- *     path : The path (no host).
- *     host : The host (no path).
- *     file : The file name itself.
- */
-export function ScriptPath() {
-    var pathParts;
-    try {
-        throw new Error();
-    } catch (e) {
-        var stackLines = e.stack.split("\n");
-        var callerIndex = 0;
-        for (var i in stackLines) {
-            if (!stackLines[i].match(/http[s]?:\/\//)) continue;
-            callerIndex = Number(i);
-            break;
-        }
-        pathParts = stackLines[callerIndex].match(/((http[s]?:\/\/.+\/)([^\/]+\.(js|html))).*?:/);
-    }
-
-    this.fullPath = function() {
-        return pathParts ? pathParts[1] : window.location.origin + window.location.pathname;
-    };
-    this.path = function() {
-        return pathParts ? pathParts[2] : window.location.pathname;
-    };
-    this.host = function() {
-        let x = this.path().match(/.+?\/\/.+?\//);
-        return x ? x[0] : window.location.hostname;
-    };
-    this.file = function() {
-        return pathParts ? pathParts[3] : "";
-    };
-}
-
 if (!String.prototype.includes) {
     String.prototype.includes = function(search, start) {
         if (typeof start !== "number") {
