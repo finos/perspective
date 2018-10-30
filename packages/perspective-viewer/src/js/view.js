@@ -50,6 +50,10 @@ global.registerPlugin = function registerPlugin(name, plugin) {
     RENDERERS[name] = plugin;
 };
 
+global.getPlugin = function getPlugin(name) {
+    return RENDERERS[name];
+};
+
 function _register_debug_plugin() {
     global.registerPlugin("debug", {
         name: "Debug",
@@ -496,6 +500,7 @@ async function update(ignore_size_check = false) {
         const count = num_columns * num_rows;
         if (count >= this._plugin.max_size) {
             this._plugin_information.classList.remove("hidden");
+            this.removeAttribute("updating");
             return;
         }
     }
@@ -898,11 +903,11 @@ class ViewPrivate extends HTMLElement {
             this.setAttribute("view", this._vis_selector.value);
             this._debounce_update();
         });
-        this._plugin_information_action.addEventListener("mousedown", () => {
+        this._plugin_information_action.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true});
             this._plugin_information.classList.add("hidden");
         });
-        this._plugin_information_dismiss.addEventListener("mousedown", () => {
+        this._plugin_information_dismiss.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true});
             this._plugin_information.classList.add("hidden");
             this._show_warnings = false;

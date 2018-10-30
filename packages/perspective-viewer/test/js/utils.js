@@ -168,7 +168,7 @@ test.run = function run(name, body, viewport = null) {
     });
 };
 
-test.capture = function capture(name, body, timeout = 60000, viewport = null, update_timeout = 30000) {
+test.capture = function capture(name, body, timeout = 60000, viewport = null, wait_for_update = true) {
     let _url = url;
     test(
         name,
@@ -184,12 +184,13 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null, up
 
             await new Promise(setTimeout);
             await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
-            await page.waitForSelector("perspective-viewer:not([updating])", {timeout: update_timeout});
+            const viewer_selector = wait_for_update ? "perspective-viewer:not([updating])" : "perspective-viewer";
+            await page.waitForSelector(viewer_selector);
 
             await body(page);
 
             // let animation run;
-            await page.waitForSelector("perspective-viewer:not([updating])", {timeout: update_timeout});
+            await page.waitForSelector(viewer_selector);
 
             const screenshot = await page.screenshot();
             // await page.close();
@@ -263,8 +264,19 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
     );
 };
 
-exports.trigger_render_warning = async function trigger_render_warning(page, col_name) {
-    const viewer = await page.$("perspective-viewer");
-    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-    await page.evaluate(element => element.setAttribute("columns", `["${col_name}"]`), viewer);
+exports.render_warning = {
+    set_warning_threshold: async function(page, plugin_name, threshold) {
+        await page.evaluate(() => {
+            window.getPlugin(plugin_name).max_size = threshold;
+        });
+    },
+    wait_for_warning: async function(page, viewer) {
+        await page.waitForFunction(
+            element => {
+                return !element.shadowRoot.querySelector(".plugin_information.hidden");
+            },
+            {},
+            viewer
+        );
+    }
 };
