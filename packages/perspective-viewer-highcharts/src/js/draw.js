@@ -16,8 +16,7 @@ import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
-import {bindTemplate} from "../../../perspective-viewer/src/js/utils";
-import {detectIE} from "../../../perspective/src/js/utils";
+import {bindTemplate, detectIE} from "../../../perspective-viewer/src/js/utils";
 
 export const PRIVATE = Symbol("Highcharts private");
 

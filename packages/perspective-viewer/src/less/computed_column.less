@@ -11,7 +11,7 @@
 
 :host {
     display: none;
-    font-family: @sans-serif-fonts !important;
+    font-family: var(--interface--font-family, @sans-serif-fonts);
     flex-direction: column;
     max-height: 35%;
     margin-top: 34px;
@@ -184,7 +184,6 @@
         box-sizing: border-box;
         display: flex;
         align-items: center;
-        background-color: rgba(255, 255, 255, 0.3);
         border-bottom: 1px solid #ccc;
         margin-top: 5px;
         height: 23px;

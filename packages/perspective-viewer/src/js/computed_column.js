@@ -17,6 +17,8 @@ import template from "../html/computed_column.html";
 
 import style from "../less/computed_column.less";
 
+import {disallow_drop} from "./dragdrop.js";
+
 polyfill({});
 
 // Computations
@@ -486,6 +488,7 @@ class ComputedColumn extends HTMLElement {
     _register_callbacks() {
         this._close_button.addEventListener("click", this._close_computed_column.bind(this));
         this._computation_selector.addEventListener("change", this._update_computation.bind(this));
+        this._column_name_input.addEventListener("dragover", disallow_drop.bind(this));
         this._column_name_input.addEventListener("keyup", event => {
             this.state["name_edited"] = this._column_name_input.innerText && this._column_name_input.innerText.length > 0;
             this._set_column_name(event);

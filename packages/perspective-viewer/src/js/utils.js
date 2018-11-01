@@ -7,32 +7,55 @@
  *
  */
 
-/******************************************************************************
+/**
+ * Detect Internet Explorer.
  *
- * Drag & Drop Utils
- *
+ * Returns
+ * -------
+ * True if the current script is running in Internet Explorer.
  */
-
-global.dragEnter = function dragEnter(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
-};
-
-global.allowDrop = function allowDrop(ev) {
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.currentTarget.classList.add("dropping");
-    ev.dataTransfer.dropEffect = "move";
-};
-
-global.disallowDrop = function disallowDrop(ev) {
-    if (ev.currentTarget == ev.target) {
-        ev.stopPropagation();
-        ev.preventDefault();
-        ev.currentTarget.classList.remove("dropping");
+export function detectIE() {
+    if (typeof window === "undefined") return false;
+    var ua = window.navigator.userAgent;
+    var msie = ua.indexOf("MSIE ");
+    if (msie > 0) {
+        return parseInt(ua.substring(msie + 5, ua.indexOf(".", msie)), 10);
     }
-};
+    var trident = ua.indexOf("Trident/");
+    if (trident > 0) {
+        var rv = ua.indexOf("rv:");
+        return parseInt(ua.substring(rv + 3, ua.indexOf(".", rv)), 10);
+    }
+    var edge = ua.indexOf("Edge/");
+    if (edge > 0) {
+        return parseInt(ua.substring(edge + 5, ua.indexOf(".", edge)), 10);
+    }
+    return false;
+}
+
+/**
+ * Detect Chrome.
+ *
+ * Returns
+ * -------
+ * Detect if the current script is running in Chrome.
+ */
+export function detectChrome() {
+    var isChromium = window.chrome,
+        winNav = window.navigator,
+        vendorName = winNav.vendor,
+        isOpera = winNav.userAgent.indexOf("OPR") > -1,
+        isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+        isIOSChrome = winNav.userAgent.match("CriOS");
+
+    if (isIOSChrome) {
+        return true;
+    } else if (isChromium !== null && typeof isChromium !== "undefined" && vendorName === "Google Inc." && isOpera === false && isIEedge === false) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 /**
  * Instantiate a Template DOM object from an HTML text string.
@@ -45,8 +68,6 @@ global.disallowDrop = function disallowDrop(ev) {
  * -------
  * A Template DOM object.
  */
-
-import {detectIE} from "../../../perspective/src/js/utils.js";
 
 export function importTemplate(template) {
     const div = document.createElement("div");
