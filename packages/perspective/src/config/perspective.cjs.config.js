@@ -1,7 +1,7 @@
 const path = require("path");
 const common = require("./common.config.js");
 
-module.exports = Object.assign({}, common(), {
+module.exports = Object.assign({}, common(true), {
     entry: "./src/js/perspective.parallel.js",
     externals: [/node_modules\/\@(?!apache-arrow)/, /perspective.node.js/],
     output: {

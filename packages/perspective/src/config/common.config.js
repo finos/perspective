@@ -17,7 +17,7 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     );
 }
 
-module.exports = function() {
+module.exports = function(build_worker) {
     return {
         plugins: plugins,
         devtool: "source-map",
@@ -48,10 +48,15 @@ module.exports = function() {
                         options: {}
                     }
                 },
-                {
-                    test: /perspective\.(asmjs|wasm)\.js$/,
-                    use: {loader: path.resolve(__dirname, "../loader/blob_worker_loader.js"), options: {name: "[name].worker.js"}}
-                },
+                build_worker
+                    ? {
+                          test: /perspective\.(asmjs|wasm)\.js$/,
+                          use: {loader: path.resolve(__dirname, "../loader/blob_worker_loader.js"), options: {name: "[name].worker.js"}}
+                      }
+                    : {
+                          test: /perspective\.(asmjs|wasm)\.js$/,
+                          use: {loader: path.resolve(__dirname, "../loader/file_worker_loader.js"), options: {name: "[name].js"}}
+                      },
                 {
                     test: /\.wasm$/,
                     use: {loader: path.resolve(__dirname, "../loader/cross_origin_file_loader.js"), options: {name: "[name].wasm"}}
