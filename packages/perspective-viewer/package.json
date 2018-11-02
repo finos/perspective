@@ -4,7 +4,6 @@
     "description": "Perspective.js",
     "main": "build/perspective.view.cjs.js",
     "files": [
-        "src/*",
         "build/*"
     ],
     "scripts": {

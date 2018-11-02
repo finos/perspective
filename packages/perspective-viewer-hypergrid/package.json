@@ -7,7 +7,6 @@
         "test": "test"
     },
     "files": [
-        "src/*",
         "build/*"
     ],
     "scripts": {
