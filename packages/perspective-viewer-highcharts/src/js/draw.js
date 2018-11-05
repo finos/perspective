@@ -39,8 +39,9 @@ function get_or_create_element(div) {
 
 export const draw = mode =>
     async function(el, view, task) {
-        const row_pivots = this._view_columns("#row_pivots perspective-row:not(.off)");
-        const col_pivots = this._view_columns("#column_pivots perspective-row:not(.off)");
+        // FIXME: super tight coupling to private viewer methods
+        const row_pivots = this._get_view_row_pivots();
+        const col_pivots = this._get_view_column_pivots();
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 

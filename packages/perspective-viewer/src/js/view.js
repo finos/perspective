@@ -220,7 +220,7 @@ function column_visibility_clicked(ev) {
     let parent = ev.currentTarget;
     let is_active = parent.parentElement.getAttribute("id") === "active_columns";
     if (is_active) {
-        if (this._visible_column_count() === 1) {
+        if (this._get_visible_column_count() === 1) {
             return;
         }
         if (ev.detail.shiftKey) {
@@ -248,7 +248,7 @@ function column_visibility_clicked(ev) {
         let row = new_row.call(this, parent.getAttribute("name"), parent.getAttribute("type"));
         this._active_columns.appendChild(row);
     }
-    let cols = this._view_columns("#active_columns perspective-row");
+    let cols = this._get_view_columns();
     this._update_column_view(cols);
 }
 
@@ -512,7 +512,7 @@ function new_row(name, type, aggregate, filter, sort, computed) {
     let row = document.createElement("perspective-row");
 
     if (!type) {
-        let all = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
+        let all = this._get_view_dom_columns("#inactive_columns perspective-row");
         if (all.length > 0) {
             type = all.find(x => x.getAttribute("name") === name);
             if (type) {
@@ -605,12 +605,12 @@ class CancelTask {
 
 async function update() {
     if (!this._table) return;
-    let row_pivots = this._view_columns("#row_pivots perspective-row");
-    let column_pivots = this._view_columns("#column_pivots perspective-row");
+    let row_pivots = this._get_view_row_pivots();
+    let column_pivots = this._get_view_column_pivots();
     let filters = this._get_view_filters();
     let aggregates = this._get_view_aggregates();
     if (aggregates.length === 0) return;
-    let sort = this._get_view_sorts("#sort perspective-row");
+    let sort = this._get_view_sorts();
     let hidden = this._get_view_hidden(aggregates, sort);
     for (let s of hidden) {
         let all = this._get_view_aggregates("#inactive_columns perspective-row");
@@ -718,8 +718,8 @@ class ViewPrivate extends HTMLElement {
     }
 
     _set_column_defaults() {
-        let cols = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
-        let current_cols = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row"));
+        let cols = this._get_view_dom_columns("#inactive_columns perspective-row");
+        let current_cols = this._get_view_dom_columns();
         if (cols.length > 0) {
             if (this._plugin.initial) {
                 let pref = [];
@@ -765,22 +765,68 @@ class ViewPrivate extends HTMLElement {
         this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
     }
 
-    _get_view_filters() {
-        return this._view_columns("#filters perspective-row", false, true);
+    // get viewer state
+    _get_view_dom_columns(selector, callback) {
+        selector = selector || "#active_columns perspective-row";
+        let columns = Array.prototype.slice.call(this.shadowRoot.querySelectorAll(selector));
+        if (!callback) {
+            return columns;
+        }
+        return columns.map(callback);
+    }
+
+    _get_view_columns({active = true} = {}) {
+        let selector;
+        if (active) {
+            selector = "#active_columns perspective-row";
+        } else {
+            selector = "#inactive_columns perspective-row";
+        }
+        return this._get_view_dom_columns(selector, col => {
+            return col.getAttribute("name");
+        });
     }
 
     _get_view_aggregates(selector) {
-        return this._view_columns(selector, true);
+        selector = selector || "#active_columns perspective-row";
+        return this._get_view_dom_columns(selector, s => {
+            return {
+                op: s.getAttribute("aggregate"),
+                column: s.getAttribute("name")
+            };
+        });
+    }
+
+    _get_view_row_pivots() {
+        return this._get_view_dom_columns("#row_pivots perspective-row", col => {
+            return col.getAttribute("name");
+        });
+    }
+
+    _get_view_column_pivots() {
+        return this._get_view_dom_columns("#column_pivots perspective-row", col => {
+            return col.getAttribute("name");
+        });
+    }
+
+    _get_view_filters() {
+        return this._get_view_dom_columns("#filters perspective-row", col => {
+            let {operator, operand} = JSON.parse(col.getAttribute("filter"));
+            return [col.getAttribute("name"), operator, operand];
+        });
     }
 
     _get_view_sorts() {
-        return this._view_columns("#sort perspective-row", false, false, true);
+        return this._get_view_dom_columns("#sort perspective-row", col => {
+            let order = col.getAttribute("sort-order") || "asc";
+            return [col.getAttribute("name"), order];
+        });
     }
 
     _get_view_hidden(aggregates, sort) {
         aggregates = aggregates || this._get_view_aggregates();
         let hidden = [];
-        sort = sort || this._get_view_sorts("#sort perspective-row");
+        sort = sort || this._get_view_sorts();
         for (let s of sort) {
             if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
                 hidden.push(s[0]);
@@ -789,32 +835,11 @@ class ViewPrivate extends HTMLElement {
         return hidden;
     }
 
-    _view_columns(selector, types, filters, sort) {
-        selector = selector || "#active_columns perspective-row";
-        let selection = this.shadowRoot.querySelectorAll(selector);
-        let sorted = Array.prototype.slice.call(selection);
-        return sorted.map(s => {
-            let name = s.getAttribute("name");
-            if (types) {
-                let agg = s.getAttribute("aggregate");
-                return {op: agg, column: name};
-            } else if (filters) {
-                let {operator, operand} = JSON.parse(s.getAttribute("filter"));
-                return [name, operator, operand];
-            } else if (sort) {
-                let order = s.getAttribute("sort-order") || "asc";
-                return [name, order];
-            } else {
-                return name;
-            }
-        });
+    _get_visible_column_count() {
+        return this._get_view_dom_columns().length;
     }
 
-    _visible_column_count() {
-        let cols = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row"));
-        return cols.length;
-    }
-
+    // clears view state - state-related action
     _clear_state() {
         if (this._task) {
             this._task.cancel();
@@ -837,10 +862,10 @@ class ViewPrivate extends HTMLElement {
 
     _update_column_view(columns, reset = false) {
         if (!columns) {
-            columns = this._view_columns("#active_columns perspective-row");
+            columns = this._get_view_columns();
         }
         this.setAttribute("columns", JSON.stringify(columns));
-        const lis = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#inactive_columns perspective-row"));
+        const lis = this._get_view_dom_columns("#inactive_columns perspective-row");
         if (columns.length === lis.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
@@ -890,7 +915,6 @@ class ViewPrivate extends HTMLElement {
         // names cannot be duplicates
         for (let col of computed_columns) {
             if (new_column.name === col.name) {
-                console.log("dupe");
                 return;
             }
         }
@@ -1162,7 +1186,7 @@ class View extends ViewPrivate {
      */
     @json_attribute
     set aggregates(show) {
-        let lis = Array.prototype.slice.call(this.shadowRoot.querySelectorAll("#active_columns perspective-row"));
+        let lis = this._get_view_dom_columns();
         lis.map(x => {
             let agg = show[x.getAttribute("name")];
             if (agg) {
