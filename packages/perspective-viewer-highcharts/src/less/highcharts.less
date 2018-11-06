@@ -44,6 +44,10 @@
         display: none;
     }
 
+    .highcharts-label-box.highcharts-tooltip-box:not([isShadow]) {
+        fill: var(--highcharts-tooltip--background, #fff);
+    }
+
     .highcharts-yaxis-grid path.highcharts-grid-line {
         stroke: var(--highcharts-grid-line--stroke, rgb(230, 230, 230));
     }
