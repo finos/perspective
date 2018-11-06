@@ -185,190 +185,6 @@ function set_aggregate_attribute(aggs) {
     );
 }
 
-function _format_computed_data(cc) {
-    return {
-        column_name: cc[0],
-        input_columns: cc[1].input_columns,
-        input_type: cc[1].input_type,
-        computation: cc[1].computation,
-        type: cc[1].type
-    };
-}
-
-// FIXME: flip into ViewPrivate, or updates.js
-async function loadTable(table, computed = false) {
-    this.shadowRoot.querySelector("#app").classList.add("hide_message");
-    this.setAttribute("updating", true);
-
-    if (this._table && !computed) {
-        this.removeAttribute("computed-columns");
-    }
-    this._clear_state();
-
-    this._table = table;
-
-    if (this.hasAttribute("computed-columns") && !computed) {
-        const computed_columns = JSON.parse(this.getAttribute("computed-columns"));
-        if (computed_columns.length > 0) {
-            for (let col of computed_columns) {
-                await this._create_computed_column({
-                    detail: {
-                        column_name: col.name,
-                        input_columns: col.inputs.map(x => ({name: x})),
-                        computation: COMPUTATIONS[col.func]
-                    }
-                });
-            }
-            this._debounce_update({ignore_size_check: false});
-            return;
-        }
-    }
-
-    let [cols, schema, computed_schema] = await Promise.all([table.columns(), table.schema(), table.computed_schema()]);
-
-    // TODO: separate DOM into helper methods?
-    this._inactive_columns.innerHTML = "";
-    this._active_columns.innerHTML = "";
-
-    this._initial_col_order = cols.slice();
-    if (!this.hasAttribute("columns")) {
-        this.setAttribute("columns", JSON.stringify(this._initial_col_order));
-    }
-
-    let type_order = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
-
-    // Sort columns by type and then name
-    cols.sort((a, b) => {
-        let s1 = type_order[schema[a]],
-            s2 = type_order[schema[b]];
-        let r = 0;
-        if (s1 == s2) {
-            let a1 = a.toLowerCase(),
-                b1 = b.toLowerCase();
-            r = a1 < b1 ? -1 : 1;
-        } else {
-            r = s1 < s2 ? -1 : 1;
-        }
-        return r;
-    });
-
-    // Update Aggregates.
-    let aggregates = [];
-    const found = {};
-
-    if (this.hasAttribute("aggregates")) {
-        // Double check that the persisted aggregates actually match the
-        // expected types.
-        aggregates = get_aggregate_attribute
-            .call(this)
-            .map(col => {
-                let _type = schema[col.column];
-                found[col.column] = true;
-                if (_type) {
-                    if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
-                        col.op = perspective.AGGREGATE_DEFAULTS[_type];
-                    }
-                    return col;
-                } else {
-                    console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
-                }
-            })
-            .filter(x => x);
-    }
-
-    // Add columns detected from dataset.
-    for (let col of cols) {
-        if (!found[col]) {
-            aggregates.push({
-                column: col,
-                op: perspective.AGGREGATE_DEFAULTS[schema[col]]
-            });
-        }
-    }
-
-    set_aggregate_attribute.call(this, aggregates);
-
-    // Update column rows.
-    let shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
-
-    // strip computed columns from sorted columns & schema - place at end
-    if (!_.isEmpty(computed_schema)) {
-        const computed_columns = _.keys(computed_schema);
-        for (let i = 0; i < computed_columns.length; i++) {
-            const cc = computed_columns[i];
-            if (cols.includes(cc)) {
-                cols.splice(cols.indexOf(cc), 1);
-            }
-            if (_.has(schema, cc)) {
-                delete schema[cc];
-            }
-        }
-    }
-
-    const computed_cols = _.pairs(computed_schema);
-
-    if (!this.hasAttribute("columns") || shown.length === 0) {
-        for (let x of cols) {
-            let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
-            let row = new_row.call(this, x, schema[x], aggregate);
-            this._inactive_columns.appendChild(row);
-        }
-
-        // fixme better approach please
-        for (let cc of computed_cols) {
-            let cc_data = _format_computed_data(cc);
-            let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
-            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
-            this._inactive_columns.appendChild(row);
-        }
-
-        this._set_column_defaults();
-        shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
-        for (let x in cols) {
-            if (shown.indexOf(x) !== -1) {
-                this._inactive_columns.children[x].classList.add("active");
-            }
-        }
-    } else {
-        for (let x of cols) {
-            let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
-            let row = new_row.call(this, x, schema[x], aggregate);
-            this._inactive_columns.appendChild(row);
-            if (shown.includes(x)) {
-                row.classList.add("active");
-            }
-        }
-
-        // fixme better approach please
-        for (let cc of computed_cols) {
-            let cc_data = _format_computed_data(cc);
-            let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
-            let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
-            this._inactive_columns.appendChild(row);
-            if (shown.includes(cc)) {
-                row.classList.add("active");
-            }
-        }
-
-        for (let x of shown) {
-            let active_row = new_row.call(this, x, schema[x]);
-            this._active_columns.appendChild(active_row);
-        }
-    }
-
-    if (cols.length === shown.length) {
-        this._inactive_columns.parentElement.classList.add("collapse");
-    } else {
-        this._inactive_columns.parentElement.classList.remove("collapse");
-    }
-
-    this.shadowRoot.querySelector("#columns_container").style.visibility = "visible";
-    this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
-
-    this.filters = this.getAttribute("filters");
-    await this._debounce_update({ignore_size_check: false});
-}
-
 // TODO: split into loader.js
 function new_row(name, type, aggregate, filter, sort, computed) {
     let row = document.createElement("perspective-row");
@@ -579,7 +395,179 @@ function _fill_numeric(cols, pref, bypass = false) {
 }
 
 class ViewPrivate extends HTMLElement {
-    // FIXME: why is this inside the class vs. an imported util?
+    // load a new table into perspective-viewer
+    async load_table(table, computed = false) {
+        this.shadowRoot.querySelector("#app").classList.add("hide_message");
+        this.setAttribute("updating", true);
+
+        if (this._table && !computed) {
+            this.removeAttribute("computed-columns");
+        }
+        this._clear_state();
+
+        this._table = table;
+
+        if (this.hasAttribute("computed-columns") && !computed) {
+            const computed_columns = JSON.parse(this.getAttribute("computed-columns"));
+            if (computed_columns.length > 0) {
+                for (let col of computed_columns) {
+                    await this._create_computed_column({
+                        detail: {
+                            column_name: col.name,
+                            input_columns: col.inputs.map(x => ({name: x})),
+                            computation: COMPUTATIONS[col.func]
+                        }
+                    });
+                }
+                this._debounce_update();
+                return;
+            }
+        }
+
+        let [cols, schema, computed_schema] = await Promise.all([table.columns(), table.schema(), table.computed_schema()]);
+
+        // TODO: separate DOM into helper methods?
+        this._inactive_columns.innerHTML = "";
+        this._active_columns.innerHTML = "";
+
+        this._initial_col_order = cols.slice();
+        if (!this.hasAttribute("columns")) {
+            this.setAttribute("columns", JSON.stringify(this._initial_col_order));
+        }
+
+        let type_order = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
+
+        // Sort columns by type and then name
+        cols.sort((a, b) => {
+            let s1 = type_order[schema[a]],
+                s2 = type_order[schema[b]];
+            let r = 0;
+            if (s1 == s2) {
+                let a1 = a.toLowerCase(),
+                    b1 = b.toLowerCase();
+                r = a1 < b1 ? -1 : 1;
+            } else {
+                r = s1 < s2 ? -1 : 1;
+            }
+            return r;
+        });
+
+        // Update Aggregates.
+        let aggregates = [];
+        const found = {};
+
+        if (this.hasAttribute("aggregates")) {
+            // Double check that the persisted aggregates actually match the
+            // expected types.
+            aggregates = get_aggregate_attribute
+                .call(this)
+                .map(col => {
+                    let _type = schema[col.column];
+                    found[col.column] = true;
+                    if (_type) {
+                        if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
+                            col.op = perspective.AGGREGATE_DEFAULTS[_type];
+                        }
+                        return col;
+                    } else {
+                        console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
+                    }
+                })
+                .filter(x => x);
+        }
+
+        // Add columns detected from dataset.
+        for (let col of cols) {
+            if (!found[col]) {
+                aggregates.push({
+                    column: col,
+                    op: perspective.AGGREGATE_DEFAULTS[schema[col]]
+                });
+            }
+        }
+
+        set_aggregate_attribute.call(this, aggregates);
+
+        // Update column rows.
+        let shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
+
+        // strip computed columns from sorted columns & schema - place at end
+        if (!_.isEmpty(computed_schema)) {
+            const computed_columns = _.keys(computed_schema);
+            for (let i = 0; i < computed_columns.length; i++) {
+                const cc = computed_columns[i];
+                if (cols.includes(cc)) {
+                    cols.splice(cols.indexOf(cc), 1);
+                }
+                if (_.has(schema, cc)) {
+                    delete schema[cc];
+                }
+            }
+        }
+
+        const computed_cols = _.pairs(computed_schema);
+
+        if (!this.hasAttribute("columns") || shown.length === 0) {
+            for (let x of cols) {
+                let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
+                let row = new_row.call(this, x, schema[x], aggregate);
+                this._inactive_columns.appendChild(row);
+            }
+
+            // fixme better approach please
+            for (let cc of computed_cols) {
+                let cc_data = this._format_computed_data(cc);
+                let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
+                let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+                this._inactive_columns.appendChild(row);
+            }
+
+            this._set_column_defaults();
+            shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
+            for (let x in cols) {
+                if (shown.indexOf(x) !== -1) {
+                    this._inactive_columns.children[x].classList.add("active");
+                }
+            }
+        } else {
+            for (let x of cols) {
+                let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
+                let row = new_row.call(this, x, schema[x], aggregate);
+                this._inactive_columns.appendChild(row);
+                if (shown.includes(x)) {
+                    row.classList.add("active");
+                }
+            }
+
+            // fixme better approach please
+            for (let cc of computed_cols) {
+                let cc_data = this._format_computed_data(cc);
+                let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
+                let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+                this._inactive_columns.appendChild(row);
+                if (shown.includes(cc)) {
+                    row.classList.add("active");
+                }
+            }
+
+            for (let x of shown) {
+                let active_row = new_row.call(this, x, schema[x]);
+                this._active_columns.appendChild(active_row);
+            }
+        }
+
+        if (cols.length === shown.length) {
+            this._inactive_columns.parentElement.classList.add("collapse");
+        } else {
+            this._inactive_columns.parentElement.classList.remove("collapse");
+        }
+
+        this.shadowRoot.querySelector("#columns_container").style.visibility = "visible";
+        this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
+
+        this.filters = this.getAttribute("filters");
+        await this._debounce_update();
+    }
     _render_time() {
         const t = performance.now();
         return () => this.setAttribute("render_time", performance.now() - t);
@@ -769,6 +757,17 @@ class ViewPrivate extends HTMLElement {
         }
     }
 
+    // Computed Columns
+    _format_computed_data(cc) {
+        return {
+            column_name: cc[0],
+            input_columns: cc[1].input_columns,
+            input_type: cc[1].input_type,
+            computation: cc[1].computation,
+            type: cc[1].type
+        };
+    }
+
     // UI action
     _open_computed_column(event) {
         //const data = event.detail;
@@ -827,7 +826,7 @@ class ViewPrivate extends HTMLElement {
         ];
 
         const table = this._table.add_computed(params);
-        await loadTable.call(this, table, true);
+        await this.load_table(table, true);
         this._update_column_view();
     }
 
@@ -1301,9 +1300,9 @@ class View extends ViewPrivate {
             table = worker.getInstance().table(data, options);
             table._owner_viewer = this;
         }
-        let _promises = [loadTable.call(this, table)];
+        let _promises = [this.load_table(table)];
         for (let slave of this._slaves) {
-            _promises.push(loadTable.call(slave, table));
+            _promises.push(this.load_table.call(slave, table));
         }
         this._slaves = [];
         return Promise.all(_promises);
@@ -1362,7 +1361,7 @@ class View extends ViewPrivate {
         }
 
         if (widget._table) {
-            loadTable.call(this, widget._table);
+            this.load_table(widget._table);
         } else {
             widget._slaves.push(this);
         }

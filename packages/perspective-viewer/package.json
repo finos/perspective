@@ -8,7 +8,9 @@
         "src/**/*"
     ],
     "babel": {
-        "ignore": ["test"],
+        "ignore": [
+            "test"
+        ],
         "presets": [
             [
                 "env",
