@@ -14,7 +14,7 @@ import {worker} from "./api.js";
 import asmjs_worker from "./perspective.asmjs.js";
 import wasm_worker from "./perspective.wasm.js";
 
-import wasm from "../../obj/psp.async.wasm";
+import wasm from "./psp.async.wasm.js";
 
 /******************************************************************************
  *

@@ -11,6 +11,7 @@ var path = require("path");
 
 var loaderUtils = require("loader-utils");
 var validateOptions = require("schema-utils");
+var fs = require("fs");
 
 var schema = {
     type: "object",
@@ -24,13 +25,14 @@ var schema = {
     additionalProperties: true
 };
 
-exports.default = function loader(content) {
-    var options = loaderUtils.getOptions(this) || {};
+exports.default = function loader() {};
 
+exports.pitch = function pitch(request) {
+    var options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "Cross Origin File Loader");
 
     var context = options.context || this.rootContext || (this.options && this.options.context);
-
+    var content = fs.readFileSync(request.replace("build/es5", "build").replace("psp.async.wasm.js", "psp.async.wasm"));
     var url = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
@@ -38,13 +40,10 @@ exports.default = function loader(content) {
     });
 
     var outputPath = url;
-
     var publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
-
     this.emitFile(outputPath, content);
 
     const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
-
     return `
     var utils = require(${utils_path});
     module.exports = (utils.path + ${publicPath});    

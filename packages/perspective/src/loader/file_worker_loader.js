@@ -40,7 +40,11 @@ exports.default = function loader(content) {
     });
 
     var outputPath = url.replace(/\.js/, ".worker.js");
-    var inputPath = this.resourcePath.replace(/\.js/, ".worker.js").replace(/src\/js/, "build");
+    var inputPath = this.resourcePath
+        .replace(/\.js/, ".worker.js")
+        .replace(/\/build/, "")
+        .replace(/(src\/js|es5)/, "build");
+
     var new_content = fs.readFileSync(inputPath);
 
     var publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;

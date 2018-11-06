@@ -24,6 +24,9 @@ module.exports = function(build_worker) {
         node: {
             fs: "empty"
         },
+        resolveLoader: {
+            modules: ["node_modules", path.join(__dirname, "../loader")]
+        },
         module: {
             rules: [
                 {
@@ -51,24 +54,20 @@ module.exports = function(build_worker) {
                 build_worker
                     ? {
                           test: /perspective\.(asmjs|wasm)\.js$/,
-                          use: {loader: path.resolve(__dirname, "../loader/blob_worker_loader.js"), options: {name: "[name].worker.js"}}
+                          use: {loader: "blob_worker_loader", options: {name: "[name].worker.js"}}
                       }
                     : {
                           test: /perspective\.(asmjs|wasm)\.js$/,
-                          use: {loader: path.resolve(__dirname, "../loader/file_worker_loader.js"), options: {name: "[name].js"}}
+                          use: {loader: "file_worker_loader", options: {name: "[name].js"}}
                       },
                 {
                     test: /\.wasm$/,
-                    use: {loader: path.resolve(__dirname, "../loader/cross_origin_file_loader.js"), options: {name: "[name].wasm"}}
+                    use: {loader: "cross_origin_file_loader", options: {name: "[name].wasm"}}
                 },
                 {
                     test: /\.js$/,
                     exclude: /node_modules\/(?!(\@apache|\@jupyterlab))|psp\.(asmjs|async|sync).js/,
-                    loader: "babel-loader",
-                    options: {
-                        presets: [["env", {useBuiltIns: true}]],
-                        plugins: ["transform-decorators-legacy", "transform-custom-element-classes", "transform-runtime", "transform-object-rest-spread", ["transform-es2015-for-of", {loose: true}]]
-                    }
+                    loader: "babel-loader"
                 }
             ]
         }

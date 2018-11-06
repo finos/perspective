@@ -15,10 +15,25 @@ after detecting whether or not WebAssembly is supported by your browser. The
 assets can be found in the `build/` directory of the
 `@jpmorganchase/perspective` and `@jpmorganchase/perspective-viewer` packages.
 
-This can be achieved by using the built-in `WorkerHost` Node.js server, hosting
-the contents of a packages `build/` in your application's build script, using
-`webpack` and `CopyWebpackPlugin`, or otherwise making sure these directories
-are visible to your web server, e.g.:
+When importing from NPM modules, you can use the Perspective Webpack plugin to
+manage the `.worker.*.js` and `.wasm` assets for you.  A sample config:
+
+```javascript
+const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
+
+module.exports = {
+    entry: "./in.js",
+    output: {
+        filename: "out.js",
+        path: "build"
+    },
+    plugins: [new PerspectivePlugin()],
+};
+```
+
+Alternatively, you may use the built-in `WorkerHost` Node.js server, host
+the contents of a package's `build/` in your application's build script, or 
+otherwise making sure these directories are visible to your web server, e.g.:
 
 ```javascript
 cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/

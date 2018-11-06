@@ -3,13 +3,38 @@
     "version": "0.2.3",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
-    "browser": "build/perspective.cjs.js",
+    "browser": "build/es5/perspective.parallel.js",
     "publishConfig": {
         "access": "public"
     },
+    "babel": {
+        "presets": [
+            [
+                "env",
+                {
+                    "useBuiltIns": true
+                }
+            ]
+        ],
+        "plugins": [
+            "transform-decorators-legacy", 
+            "transform-custom-element-classes", 
+            "transform-runtime", 
+            "transform-object-rest-spread", 
+            [
+                "transform-es2015-for-of",
+                {
+                    "loose": true
+                }
+            ]
+        ]
+    },
     "files": [
         "build/*",
-        "index.d.ts"
+        "build/es5/*",
+        "index.d.ts",
+        "src/loader/*",
+        "webpack.plugin.js"
     ],
     "typings": "index.d.ts",
     "scripts": {
@@ -20,10 +45,10 @@
         "bench:run": "node build/benchmark.js",
         "bench": "npm-run-all bench:build bench:run",
         "prebuild": "mkdir -p build",
-        "build": "npm-run-all build:webpack",
+        "build": "npm-run-all build:es5 build:webpack",
         "build:webpack": "npm-run-all -p build:webpack:*",
+        "build:es5": "babel src/js --out-dir build/es5",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
-        "build:webpack:parallel": "webpack --color --config src/config/perspective.cjs.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
         "test:build": "npm-run-all test:build:copy test:build:webpack",
