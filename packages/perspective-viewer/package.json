@@ -16,10 +16,10 @@
             ]
         ],
         "plugins": [
-            "transform-decorators-legacy", 
-            "transform-custom-element-classes", 
-            "transform-runtime", 
-            "transform-object-rest-spread", 
+            "transform-decorators-legacy",
+            "transform-custom-element-classes",
+            "transform-runtime",
+            "transform-object-rest-spread",
             [
                 "transform-es2015-for-of",
                 {
@@ -71,24 +71,5 @@
         "d3-array": "^1.2.1",
         "mobile-drag-drop": "^2.2.0",
         "underscore": "^1.8.3"
-    },
-    "devDependencies": {
-        "babel-core": "^6.26.0",
-        "babel-loader": "^7.1.2",
-        "babel-plugin-transform-custom-element-classes": "^0.1.0",
-        "babel-plugin-transform-es2015-for-of": "^6.23.0",
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-polyfill": "^6.26.0",
-        "babel-preset-env": "^1.6.0",
-        "clean-css-cli": "4.2.1",
-        "css-loader": "^0.28.7",
-        "documentation": "^5.3.3",
-        "html-loader": "^0.5.1",
-        "jest": "^22.0.4",
-        "less": "^2.7.2",
-        "less-loader": "^4.0.5",
-        "style-loader": "^0.18.2",
-        "uglifyjs-webpack-plugin": "^0.4.6",
-        "webpack": "^3.5.6"
     }
 }
