@@ -116,16 +116,6 @@ class CancelTask {
  *
  */
 
-function _fill_numeric(cols, pref, bypass = false) {
-    for (let col of cols) {
-        let type = col.getAttribute("type");
-        let name = col.getAttribute("name");
-        if (bypass || (["float", "integer"].indexOf(type) > -1 && pref.indexOf(name) === -1)) {
-            pref.push(name);
-        }
-    }
-}
-
 class ViewPrivate extends HTMLElement {
     // load a new table into perspective-viewer
     async load_table(table, computed = false) {
@@ -460,6 +450,16 @@ class ViewPrivate extends HTMLElement {
             });
     }
 
+    _fill_numeric(cols, pref, bypass = false) {
+        for (let col of cols) {
+            let type = col.getAttribute("type");
+            let name = col.getAttribute("name");
+            if (bypass || (["float", "integer"].indexOf(type) > -1 && pref.indexOf(name) === -1)) {
+                pref.push(name);
+            }
+        }
+    }
+
     _render_time() {
         const t = performance.now();
         return () => this.setAttribute("render_time", performance.now() - t);
@@ -485,18 +485,18 @@ class ViewPrivate extends HTMLElement {
                     pref = current_cols.map(x => x.getAttribute("name"));
                 } else if (current_cols.length < count) {
                     pref = current_cols.map(x => x.getAttribute("name"));
-                    _fill_numeric(cols, pref);
+                    this._fill_numeric(cols, pref);
                     if (pref.length < count) {
-                        _fill_numeric(cols, pref, true);
+                        this._fill_numeric(cols, pref, true);
                     }
                 } else {
                     if (this._plugin.initial.type === "number") {
-                        _fill_numeric(current_cols, pref);
+                        this._fill_numeric(current_cols, pref);
                         if (pref.length < count) {
-                            _fill_numeric(cols, pref);
+                            this._fill_numeric(cols, pref);
                         }
                         if (pref.length < count) {
-                            _fill_numeric(cols, pref, true);
+                            this._fill_numeric(cols, pref, true);
                         }
                     }
                 }
