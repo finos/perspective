@@ -34,22 +34,30 @@ polyfill({});
  *
  */
 
-const RENDERERS = {};
+let renderers = (function() {
+    let RENDERERS = {};
+    return {
+        getInstance: function() {
+            return RENDERERS;
+        },
+        /**
+         * Register a plugin with the <perspective-viewer> component.
+         *
+         * @param {string} name The logical unique name of the plugin.  This will be
+         * used to set the component's `view` attribute.
+         * @param {object} plugin An object with this plugin's prototype.  Valid keys are:
+         *     name : The display name for this plugin.
+         *     create (required) : The creation function - may return a `Promise`.
+         *     delete : The deletion function.
+         *     mode : The selection mode - may be "toggle" or "select".
+         */
+        registerPlugin: function(name, plugin) {
+            RENDERERS[name] = plugin;
+        }
+    };
+})();
 
-/**
- * Register a plugin with the <perspective-viewer> component.
- *
- * @param {string} name The logical unique name of the plugin.  This will be
- * used to set the component's `view` attribute.
- * @param {object} plugin An object with this plugin's prototype.  Valid keys are:
- *     name : The display name for this plugin.
- *     create (required) : The creation function - may return a `Promise`.
- *     delete : The deletion function.
- *     mode : The selection mode - may be "toggle" or "select".
- */
-global.registerPlugin = function registerPlugin(name, plugin) {
-    RENDERERS[name] = plugin;
-};
+global.registerPlugin = renderers.registerPlugin;
 
 global.getPlugin = function getPlugin(name) {
     return RENDERERS[name];
@@ -467,11 +475,12 @@ class ViewPrivate extends HTMLElement {
 
     get _plugin() {
         let view = this.getAttribute("view");
+        let current_renderers = renderers.getInstance();
         if (!view) {
-            view = Object.keys(RENDERERS)[0];
+            view = Object.keys(current_renderers)[0];
         }
         this.setAttribute("view", view);
-        return RENDERERS[view] || RENDERERS[Object.keys(RENDERERS)[0]];
+        return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
     }
 
     _set_column_defaults() {
@@ -826,8 +835,9 @@ class ViewPrivate extends HTMLElement {
 
     // sets state, manipulates DOM
     _register_view_options() {
-        for (let name in RENDERERS) {
-            const display_name = RENDERERS[name].name || name;
+        let current_renderers = renderers.getInstance();
+        for (let name in current_renderers) {
+            const display_name = current_renderers[name].name || name;
             const opt = `<option value="${name}">${display_name}</option>`;
             this._vis_selector.innerHTML += opt;
         }
@@ -880,7 +890,7 @@ class View extends ViewPrivate {
     }
 
     connectedCallback() {
-        if (Object.keys(RENDERERS).length === 0) {
+        if (Object.keys(renderers.getInstance()).length === 0) {
             _register_debug_plugin();
         }
 
@@ -1347,7 +1357,7 @@ class View extends ViewPrivate {
         } else {
             this.removeAttribute("columns");
         }
-        this.setAttribute("view", Object.keys(RENDERERS)[0]);
+        this.setAttribute("view", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
     }
 
