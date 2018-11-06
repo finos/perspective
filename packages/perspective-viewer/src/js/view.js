@@ -104,7 +104,7 @@ function column_visibility_clicked(ev) {
                 this._active_columns.removeChild(child);
             }
         }
-        let row = new_row.call(this, parent.getAttribute("name"), parent.getAttribute("type"));
+        let row = this.new_row(parent.getAttribute("name"), parent.getAttribute("type"));
         this._active_columns.appendChild(row);
     }
     let cols = this._get_view_columns();
@@ -183,84 +183,6 @@ function set_aggregate_attribute(aggs) {
             }, {})
         )
     );
-}
-
-// TODO: split into loader.js
-function new_row(name, type, aggregate, filter, sort, computed) {
-    let row = document.createElement("perspective-row");
-
-    if (!type) {
-        let all = this._get_view_dom_columns("#inactive_columns perspective-row");
-        if (all.length > 0) {
-            type = all.find(x => x.getAttribute("name") === name);
-            if (type) {
-                type = type.getAttribute("type");
-            } else {
-                type = "integer";
-            }
-        } else {
-            type = "";
-        }
-    }
-
-    if (!aggregate) {
-        let aggregates = get_aggregate_attribute.call(this);
-        if (aggregates) {
-            aggregate = aggregates.find(x => x.column === name);
-            if (aggregate) {
-                aggregate = aggregate.op;
-            } else {
-                aggregate = perspective.AGGREGATE_DEFAULTS[type];
-            }
-        } else {
-            aggregate = perspective.AGGREGATE_DEFAULTS[type];
-        }
-    }
-
-    if (filter) {
-        row.setAttribute("filter", filter);
-        if (type === "string") {
-            const v = this._table.view({row_pivot: [name], aggregate: []});
-            v.to_json().then(json => {
-                row.choices(json.slice(1, json.length).map(x => x.__ROW_PATH__));
-                v.delete();
-            });
-        }
-    }
-
-    if (sort) {
-        row.setAttribute("sort-order", sort);
-    } else {
-        row.setAttribute("sort-order", "asc");
-    }
-
-    row.setAttribute("type", type);
-    row.setAttribute("name", name);
-    row.setAttribute("aggregate", aggregate);
-
-    row.addEventListener("visibility-clicked", column_visibility_clicked.bind(this));
-    row.addEventListener("aggregate-selected", column_aggregate_clicked.bind(this));
-    row.addEventListener("filter-selected", column_filter_clicked.bind(this));
-    row.addEventListener("close-clicked", event => undrag.call(this, event.detail));
-    row.addEventListener("row-drag", () => {
-        this.classList.add("dragging");
-        this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute("name") === name);
-        if (this._original_index !== -1) {
-            this._drop_target_hover = this._active_columns.children[this._original_index];
-            setTimeout(() => row.setAttribute("drop-target", true));
-        } else {
-            this._drop_target_hover = new_row.call(this, name, type, aggregate);
-        }
-    });
-    row.addEventListener("sort-order", sort_order_clicked.bind(this));
-    row.addEventListener("row-dragend", () => this.classList.remove("dragging"));
-
-    if (computed) {
-        row.setAttribute("computed_column", JSON.stringify(computed));
-        row.classList.add("computed");
-    }
-
-    return row;
 }
 
 // TODO: move to separate class/separate plugin API
@@ -510,7 +432,7 @@ class ViewPrivate extends HTMLElement {
         if (!this.hasAttribute("columns") || shown.length === 0) {
             for (let x of cols) {
                 let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
-                let row = new_row.call(this, x, schema[x], aggregate);
+                let row = this.new_row(x, schema[x], aggregate);
                 this._inactive_columns.appendChild(row);
             }
 
@@ -518,7 +440,7 @@ class ViewPrivate extends HTMLElement {
             for (let cc of computed_cols) {
                 let cc_data = this._format_computed_data(cc);
                 let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
-                let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+                let row = this.new_row(cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
                 this._inactive_columns.appendChild(row);
             }
 
@@ -532,7 +454,7 @@ class ViewPrivate extends HTMLElement {
         } else {
             for (let x of cols) {
                 let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
-                let row = new_row.call(this, x, schema[x], aggregate);
+                let row = this.new_row(x, schema[x], aggregate);
                 this._inactive_columns.appendChild(row);
                 if (shown.includes(x)) {
                     row.classList.add("active");
@@ -543,7 +465,7 @@ class ViewPrivate extends HTMLElement {
             for (let cc of computed_cols) {
                 let cc_data = this._format_computed_data(cc);
                 let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
-                let row = new_row.call(this, cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
+                let row = this.new_row(cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
                 this._inactive_columns.appendChild(row);
                 if (shown.includes(cc)) {
                     row.classList.add("active");
@@ -551,7 +473,7 @@ class ViewPrivate extends HTMLElement {
             }
 
             for (let x of shown) {
-                let active_row = new_row.call(this, x, schema[x]);
+                let active_row = this.new_row(x, schema[x]);
                 this._active_columns.appendChild(active_row);
             }
         }
@@ -568,6 +490,84 @@ class ViewPrivate extends HTMLElement {
         this.filters = this.getAttribute("filters");
         await this._debounce_update();
     }
+
+    new_row(name, type, aggregate, filter, sort, computed) {
+        let row = document.createElement("perspective-row");
+
+        if (!type) {
+            let all = this._get_view_dom_columns("#inactive_columns perspective-row");
+            if (all.length > 0) {
+                type = all.find(x => x.getAttribute("name") === name);
+                if (type) {
+                    type = type.getAttribute("type");
+                } else {
+                    type = "integer";
+                }
+            } else {
+                type = "";
+            }
+        }
+
+        if (!aggregate) {
+            let aggregates = get_aggregate_attribute.call(this);
+            if (aggregates) {
+                aggregate = aggregates.find(x => x.column === name);
+                if (aggregate) {
+                    aggregate = aggregate.op;
+                } else {
+                    aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                }
+            } else {
+                aggregate = perspective.AGGREGATE_DEFAULTS[type];
+            }
+        }
+
+        if (filter) {
+            row.setAttribute("filter", filter);
+            if (type === "string") {
+                const v = this._table.view({row_pivot: [name], aggregate: []});
+                v.to_json().then(json => {
+                    row.choices(json.slice(1, json.length).map(x => x.__ROW_PATH__));
+                    v.delete();
+                });
+            }
+        }
+
+        if (sort) {
+            row.setAttribute("sort-order", sort);
+        } else {
+            row.setAttribute("sort-order", "asc");
+        }
+
+        row.setAttribute("type", type);
+        row.setAttribute("name", name);
+        row.setAttribute("aggregate", aggregate);
+
+        row.addEventListener("visibility-clicked", column_visibility_clicked.bind(this));
+        row.addEventListener("aggregate-selected", column_aggregate_clicked.bind(this));
+        row.addEventListener("filter-selected", column_filter_clicked.bind(this));
+        row.addEventListener("close-clicked", event => undrag.call(this, event.detail));
+        row.addEventListener("row-drag", () => {
+            this.classList.add("dragging");
+            this._original_index = Array.prototype.slice.call(this._active_columns.children).findIndex(x => x.getAttribute("name") === name);
+            if (this._original_index !== -1) {
+                this._drop_target_hover = this._active_columns.children[this._original_index];
+                setTimeout(() => row.setAttribute("drop-target", true));
+            } else {
+                this._drop_target_hover = this.new_row(name, type, aggregate);
+            }
+        });
+        row.addEventListener("sort-order", sort_order_clicked.bind(this));
+        row.addEventListener("row-dragend", () => this.classList.remove("dragging"));
+
+        if (computed) {
+            row.setAttribute("computed_column", JSON.stringify(computed));
+            row.classList.add("computed");
+        }
+
+        return row;
+    }
+
     _render_time() {
         const t = performance.now();
         return () => this.setAttribute("render_time", performance.now() - t);
@@ -751,7 +751,7 @@ class ViewPrivate extends HTMLElement {
             columns.map(y => {
                 let ref = lis.find(x => x.getAttribute("name") === y);
                 if (ref) {
-                    this._active_columns.appendChild(new_row.call(this, ref.getAttribute("name"), ref.getAttribute("type")));
+                    this._active_columns.appendChild(this.new_row(ref.getAttribute("name"), ref.getAttribute("type")));
                 }
             });
         }
@@ -781,7 +781,7 @@ class ViewPrivate extends HTMLElement {
 
     // edits state
     _set_computed_column_input(event) {
-        event.detail.target.appendChild(new_row.call(this, event.detail.column.name, event.detail.column.type));
+        event.detail.target.appendChild(this.new_row(event.detail.column.name, event.detail.column.type));
         this._update_column_view();
     }
 
@@ -1018,7 +1018,7 @@ class View extends ViewPrivate {
                         dir = s[1];
                         s = s[0];
                     }
-                    let row = new_row.call(this, s, false, false, false, dir);
+                    let row = this.new_row(s, false, false, false, dir);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -1145,7 +1145,7 @@ class View extends ViewPrivate {
                         operator: pivot[1],
                         operand: pivot[2]
                     });
-                    const row = new_row.call(this, pivot[0], undefined, undefined, fterms);
+                    const row = this.new_row(pivot[0], undefined, undefined, fterms);
                     inner.appendChild(row);
                 });
             }
@@ -1181,7 +1181,7 @@ class View extends ViewPrivate {
         if (pivots.length > 0) {
             pivots.map(
                 function(pivot) {
-                    let row = new_row.call(this, pivot);
+                    let row = this.new_row(pivot);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -1205,7 +1205,7 @@ class View extends ViewPrivate {
         if (pivots.length > 0) {
             pivots.map(
                 function(pivot) {
-                    let row = new_row.call(this, pivot);
+                    let row = this.new_row(pivot);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -1403,7 +1403,7 @@ class View extends ViewPrivate {
     }
 
     /**
-     * Resotre this element to a state as generated by a reciprocal call to
+     * Restore this element to a state as generated by a reciprocal call to
      * `save`.
      *
      * @param {object} x returned by `save`.
