@@ -15,7 +15,8 @@ import {polyfill} from "mobile-drag-drop";
 
 import perspective from "@jpmorganchase/perspective";
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
-import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "./dragdrop.js";
+import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "./view/dragdrop.js";
+import {column_visibility_clicked, column_aggregate_clicked, column_filter_clicked, sort_order_clicked} from "./view/actions.js";
 
 import template from "../html/view.html";
 
@@ -71,82 +72,6 @@ function _register_debug_plugin() {
 
 /******************************************************************************
  *
- * Column Row Utils
- *
- */
-
-function column_visibility_clicked(ev) {
-    let parent = ev.currentTarget;
-    let is_active = parent.parentElement.getAttribute("id") === "active_columns";
-    if (is_active) {
-        if (this._get_visible_column_count() === 1) {
-            return;
-        }
-        if (ev.detail.shiftKey) {
-            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
-                if (child !== parent) {
-                    this._active_columns.removeChild(child);
-                }
-            }
-        } else {
-            this._active_columns.removeChild(parent);
-        }
-    } else {
-        // check if we're manipulating computed column input
-        if (ev.path && ev.path[1].classList.contains("psp-cc-computation__input-column")) {
-            //  this._computed_column._register_inputs();
-            this._computed_column.deselect_column(ev.currentTarget.getAttribute("name"));
-            this._update_column_view();
-            return;
-        }
-        if ((ev.detail.shiftKey && this._plugin.selectMode === "toggle") || (!ev.detail.shiftKey && this._plugin.selectMode === "select")) {
-            for (let child of Array.prototype.slice.call(this._active_columns.children)) {
-                this._active_columns.removeChild(child);
-            }
-        }
-        let row = this.new_row(parent.getAttribute("name"), parent.getAttribute("type"));
-        this._active_columns.appendChild(row);
-    }
-    let cols = this._get_view_columns();
-    this._update_column_view(cols);
-}
-
-function column_aggregate_clicked() {
-    let aggregates = get_aggregate_attribute.call(this);
-    let new_aggregates = this._get_view_aggregates();
-    for (let aggregate of aggregates) {
-        let updated_agg = new_aggregates.find(x => x.column === aggregate.column);
-        if (updated_agg) {
-            aggregate.op = updated_agg.op;
-        }
-    }
-    set_aggregate_attribute.call(this, aggregates);
-    this._update_column_view();
-    this._debounce_update();
-}
-
-function column_filter_clicked() {
-    let new_filters = this._get_view_filters();
-    this._updating_filter = true;
-    this.setAttribute("filters", JSON.stringify(new_filters));
-    this._updating_filter = false;
-    this._debounce_update();
-}
-
-function sort_order_clicked() {
-    let sort = JSON.parse(this.getAttribute("sort"));
-    let new_sort = this._get_view_sorts();
-    for (let s of sort) {
-        let updated_sort = new_sort.find(x => x[0] === s[0]);
-        if (updated_sort) {
-            s[1] = updated_sort[1];
-        }
-    }
-    this.setAttribute("sort", JSON.stringify(sort));
-}
-
-/******************************************************************************
- *
  * Perspective Loading
  *
  */
@@ -167,25 +92,6 @@ if (document.currentScript && document.currentScript.hasAttribute("preload")) {
     worker.getInstance();
 }
 
-// FIXME: split
-function get_aggregate_attribute() {
-    const aggs = JSON.parse(this.getAttribute("aggregates")) || {};
-    return Object.keys(aggs).map(col => ({column: col, op: aggs[col]}));
-}
-
-function set_aggregate_attribute(aggs) {
-    this.setAttribute(
-        "aggregates",
-        JSON.stringify(
-            aggs.reduce((obj, agg) => {
-                obj[agg.column] = agg.op;
-                return obj;
-            }, {})
-        )
-    );
-}
-
-// TODO: move to separate class/separate plugin API
 class CancelTask {
     constructor(on_cancel) {
         this._on_cancel = on_cancel;
@@ -285,8 +191,7 @@ class ViewPrivate extends HTMLElement {
         if (this.hasAttribute("aggregates")) {
             // Double check that the persisted aggregates actually match the
             // expected types.
-            aggregates = get_aggregate_attribute
-                .call(this)
+            aggregates = this.get_aggregate_attribute()
                 .map(col => {
                     let _type = schema[col.column];
                     found[col.column] = true;
@@ -312,7 +217,7 @@ class ViewPrivate extends HTMLElement {
             }
         }
 
-        set_aggregate_attribute.call(this, aggregates);
+        this.set_aggregate_attribute(aggregates);
 
         // Update column rows.
         let shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
@@ -413,7 +318,7 @@ class ViewPrivate extends HTMLElement {
         }
 
         if (!aggregate) {
-            let aggregates = get_aggregate_attribute.call(this);
+            let aggregates = this.get_aggregate_attribute();
             if (aggregates) {
                 aggregate = aggregates.find(x => x.column === name);
                 if (aggregate) {
@@ -690,6 +595,25 @@ class ViewPrivate extends HTMLElement {
 
     _get_visible_column_count() {
         return this._get_view_dom_columns().length;
+    }
+
+    // FIXME: move to state_read
+    get_aggregate_attribute() {
+        const aggs = JSON.parse(this.getAttribute("aggregates")) || {};
+        return Object.keys(aggs).map(col => ({column: col, op: aggs[col]}));
+    }
+
+    // FIXME: move to state_apply
+    set_aggregate_attribute(aggs) {
+        this.setAttribute(
+            "aggregates",
+            JSON.stringify(
+                aggs.reduce((obj, agg) => {
+                    obj[agg.column] = agg.op;
+                    return obj;
+                }, {})
+            )
+        );
     }
 
     // clears view state - state-related action
