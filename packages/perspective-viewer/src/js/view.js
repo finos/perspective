@@ -204,102 +204,6 @@ class CancelTask {
     }
 }
 
-async function update(ignore_size_check = false) {
-    this._plugin_information.classList.add("hidden");
-    if (!this._table) return;
-    let row_pivots = this._get_view_row_pivots();
-    let column_pivots = this._get_view_column_pivots();
-    let filters = this._get_view_filters();
-    let aggregates = this._get_view_aggregates();
-    if (aggregates.length === 0) return;
-    let sort = this._get_view_sorts();
-    let hidden = this._get_view_hidden(aggregates, sort);
-    for (let s of hidden) {
-        let all = this._get_view_aggregates("#inactive_columns perspective-row");
-        aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
-    }
-
-    if (this._view) {
-        this._view.delete();
-        this._view = undefined;
-    }
-    this._view = this._table.view({
-        filter: filters,
-        row_pivot: row_pivots,
-        column_pivot: column_pivots,
-        aggregate: aggregates,
-        sort: sort
-    });
-
-    if (ignore_size_check === false && this._show_warnings === true && this._plugin.max_size !== undefined) {
-        // validate that the render does not slow down the browser
-        const num_columns = await this._view.num_columns();
-        const num_rows = await this._view.num_rows();
-        const count = num_columns * num_rows;
-        if (count >= this._plugin.max_size) {
-            this._plugin_information.classList.remove("hidden");
-            this.removeAttribute("updating");
-            return;
-        }
-    }
-
-    this._view.on_update(() => {
-        if (!this._debounced) {
-            let view_count = document.getElementsByTagName("perspective-viewer").length;
-            let timeout = this.getAttribute("render_time") * view_count * 2;
-            timeout = Math.min(10000, Math.max(0, timeout));
-            this._debounced = setTimeout(() => {
-                this._debounced = undefined;
-                const timer = this._render_time();
-                if (this._task && !this._task.initial) {
-                    this._task.cancel();
-                }
-                const task = (this._task = new CancelTask());
-                let updater = this._plugin.update;
-                if (!updater) {
-                    updater = this._plugin.create;
-                }
-                updater
-                    .call(this, this._datavis, this._view, task)
-                    .then(() => {
-                        timer();
-                        task.cancel();
-                    })
-                    .catch(err => {
-                        console.error("Error rendering plugin.", err);
-                    })
-                    .finally(() => this.dispatchEvent(new Event("perspective-view-update")));
-            }, timeout || 0);
-        }
-    });
-
-    const timer = this._render_time();
-    this._render_count = (this._render_count || 0) + 1;
-    if (this._task) {
-        this._task.cancel();
-    }
-    const task = (this._task = new CancelTask(() => {
-        this._render_count--;
-    }));
-    task.initial = true;
-
-    await this._plugin.create
-        .call(this, this._datavis, this._view, task)
-        .catch(err => {
-            console.warn(err);
-        })
-        .finally(() => {
-            if (!this.hasAttribute("render_time")) {
-                this.dispatchEvent(new Event("perspective-view-update"));
-            }
-            timer();
-            task.cancel();
-            if (this._render_count === 0) {
-                this.removeAttribute("updating");
-            }
-        });
-}
-
 /******************************************************************************
  *
  * <perspective-viewer> Component
@@ -566,6 +470,89 @@ class ViewPrivate extends HTMLElement {
         }
 
         return row;
+    }
+
+    async _viewer_update() {
+        if (!this._table) return;
+        let row_pivots = this._get_view_row_pivots();
+        let column_pivots = this._get_view_column_pivots();
+        let filters = this._get_view_filters();
+        let aggregates = this._get_view_aggregates();
+        if (aggregates.length === 0) return;
+        let sort = this._get_view_sorts();
+        let hidden = this._get_view_hidden(aggregates, sort);
+        for (let s of hidden) {
+            let all = this._get_view_aggregates("#inactive_columns perspective-row");
+            aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+        }
+
+        if (this._view) {
+            this._view.delete();
+            this._view = undefined;
+        }
+        this._view = this._table.view({
+            filter: filters,
+            row_pivot: row_pivots,
+            column_pivot: column_pivots,
+            aggregate: aggregates,
+            sort: sort
+        });
+
+        this._view.on_update(() => {
+            if (!this._debounced) {
+                let view_count = document.getElementsByTagName("perspective-viewer").length;
+                let timeout = this.getAttribute("render_time") * view_count * 2;
+                timeout = Math.min(10000, Math.max(0, timeout));
+                this._debounced = setTimeout(() => {
+                    this._debounced = undefined;
+                    const timer = this._render_time();
+                    if (this._task && !this._task.initial) {
+                        this._task.cancel();
+                    }
+                    const task = (this._task = new CancelTask());
+                    let updater = this._plugin.update;
+                    if (!updater) {
+                        updater = this._plugin.create;
+                    }
+                    updater
+                        .call(this, this._datavis, this._view, task)
+                        .then(() => {
+                            timer();
+                            task.cancel();
+                        })
+                        .catch(err => {
+                            console.error("Error rendering plugin.", err);
+                        })
+                        .finally(() => this.dispatchEvent(new Event("perspective-view-update")));
+                }, timeout || 0);
+            }
+        });
+
+        const timer = this._render_time();
+        this._render_count = (this._render_count || 0) + 1;
+        if (this._task) {
+            this._task.cancel();
+        }
+        const task = (this._task = new CancelTask(() => {
+            this._render_count--;
+        }));
+        task.initial = true;
+
+        await this._plugin.create
+            .call(this, this._datavis, this._view, task)
+            .catch(err => {
+                console.warn(err);
+            })
+            .finally(() => {
+                if (!this.hasAttribute("render_time")) {
+                    this.dispatchEvent(new Event("perspective-view-update"));
+                }
+                timer();
+                task.cancel();
+                if (this._render_count === 0) {
+                    this.removeAttribute("updating");
+                }
+            });
     }
 
     _render_time() {
@@ -936,10 +923,8 @@ class ViewPrivate extends HTMLElement {
 
     // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check) => {
-            update
-                .bind(this)(ignore_size_check)
-                .then(resolve);
+        const _update = _.debounce(resolve => {
+            this._viewer_update().then(resolve);
         }, 10);
         this._debounce_update = async ({ignore_size_check = false} = {}) => {
             this.setAttribute("updating", true);
