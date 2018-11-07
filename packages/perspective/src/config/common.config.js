@@ -1,5 +1,6 @@
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const webpack = require("webpack");
+const PerspectivePlugin = require("../../webpack-plugin");
 
 const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
 
@@ -8,6 +9,7 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
         new UglifyJSPlugin({
             sourceMap: true,
             mangle: false,
+            exclude: /asmjs\.worker\.js$/,
             output: {
                 ascii_only: true
             }
@@ -15,47 +17,13 @@ if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG) {
     );
 }
 
-module.exports = function() {
+module.exports = function(build_worker) {
+    plugins.push(new PerspectivePlugin({build_worker: build_worker}));
     return {
         plugins: plugins,
         devtool: "source-map",
         node: {
             fs: "empty"
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.css$/,
-                    use: [{loader: "css-loader"}]
-                },
-                {
-                    test: /\.less$/,
-                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
-                },
-                {
-                    test: /\.(html)$/,
-                    use: {
-                        loader: "html-loader",
-                        options: {}
-                    }
-                },
-                {
-                    test: /\.(arrow)$/,
-                    use: {
-                        loader: "arraybuffer-loader",
-                        options: {}
-                    }
-                },
-                {
-                    test: /\.js$/,
-                    exclude: /node_modules\/(?!(\@apache-arrow|\@jupyterlab))|psp\.(asmjs|async|sync).js/,
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["env"],
-                        plugins: ["transform-decorators-legacy", "transform-custom-element-classes", "transform-runtime", "transform-object-rest-spread", ["transform-es2015-for-of", {loose: true}]]
-                    }
-                }
-            ]
         }
     };
 };

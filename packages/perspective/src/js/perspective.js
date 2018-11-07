@@ -7,7 +7,7 @@
  *
  */
 
-import {AGGREGATE_DEFAULTS, FILTER_DEFAULTS, SORT_ORDERS, TYPE_AGGREGATES, TYPE_FILTERS, COLUMN_SEPARATOR_STRING} from "./defaults.js";
+import * as defaults from "./defaults.js";
 import {DateParser, is_valid_date} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
@@ -504,7 +504,7 @@ module.exports = function(Module) {
                 }
                 col_name = col_name.reverse();
                 col_name.push(name);
-                col_name = col_name.join(COLUMN_SEPARATOR_STRING);
+                col_name = col_name.join(defaults.COLUMN_SEPARATOR_STRING);
                 col_path.delete();
             }
             col_names.push(col_name);
@@ -538,7 +538,7 @@ module.exports = function(Module) {
         let new_schema = {};
         let col_names = this._column_names();
         for (let col_name of col_names) {
-            col_name = col_name.split(COLUMN_SEPARATOR_STRING);
+            col_name = col_name.split(defaults.COLUMN_SEPARATOR_STRING);
             col_name = col_name[col_name.length - 1];
             if (types[col_name] === 1 || types[col_name] === 2) {
                 new_schema[col_name] = "integer";
@@ -570,7 +570,7 @@ module.exports = function(Module) {
 
         for (let agg in aggregate) {
             let found_agg = aggregate[agg];
-            if (found_agg.column.join(COLUMN_SEPARATOR_STRING) === col_name) {
+            if (found_agg.column.join(defaults.COLUMN_SEPARATOR_STRING) === col_name) {
                 if (INTEGER_AGGS.includes(found_agg.op)) {
                     return "integer";
                 } else if (FLOAT_AGGS.includes(found_agg.op)) {
@@ -1218,7 +1218,7 @@ module.exports = function(Module) {
                 if (!Array.isArray(x)) {
                     return [config.aggregate.map(agg => agg.column).indexOf(x), 1];
                 } else {
-                    return [config.aggregate.map(agg => agg.column).indexOf(x[0]), SORT_ORDERS.indexOf(x[1])];
+                    return [config.aggregate.map(agg => agg.column).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
                 }
             });
             if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
@@ -1246,7 +1246,7 @@ module.exports = function(Module) {
                         throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
                     }
                 }
-                aggregates.push([agg.name || agg.column.join(COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
+                aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
             }
         } else {
             let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
@@ -1762,28 +1762,15 @@ module.exports = function(Module) {
             self.postMessage(msg);
         }
 
-        init(msg) {
+        init({buffer}) {
             if (typeof WebAssembly === "undefined") {
                 console.log("Loading asm.js");
             } else {
                 console.log("Loading wasm");
-                if (msg.data) {
-                    module = {};
-                    module.wasmBinary = msg.data;
-                    module.wasmJSMethod = "native-wasm";
-                    __MODULE__ = __MODULE__(module);
-                } else {
-                    let wasmXHR = new XMLHttpRequest();
-                    wasmXHR.open("GET", msg.path + "psp.async.wasm", true);
-                    wasmXHR.responseType = "arraybuffer";
-                    wasmXHR.onload = function() {
-                        module = {};
-                        module.wasmBinary = wasmXHR.response;
-                        module.wasmJSMethod = "native-wasm";
-                        __MODULE__ = __MODULE__(module);
-                    };
-                    wasmXHR.send(null);
-                }
+                __MODULE__ = __MODULE__({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm"
+                });
             }
         }
     }
@@ -1802,16 +1789,6 @@ module.exports = function(Module) {
         __module__: __MODULE__,
 
         Host: Host,
-
-        TYPE_AGGREGATES: TYPE_AGGREGATES,
-
-        TYPE_FILTERS: TYPE_FILTERS,
-
-        AGGREGATE_DEFAULTS: AGGREGATE_DEFAULTS,
-
-        FILTER_DEFAULTS: FILTER_DEFAULTS,
-
-        SORT_ORDERS: SORT_ORDERS,
 
         worker: function() {},
 
@@ -1917,5 +1894,10 @@ module.exports = function(Module) {
             }
         }
     };
+
+    for (let prop of Object.keys(defaults)) {
+        perspective[prop] = defaults[prop];
+    }
+
     return perspective;
 };

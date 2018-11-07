@@ -2,21 +2,39 @@
     "name": "@jpmorganchase/perspective-viewer-highcharts",
     "version": "0.2.3",
     "description": "Perspective.js",
-    "main": "build/highcharts.plugin.cjs.js",
-    "directories": {
-        "test": "test"
-    },
+    "main": "src/js/highcharts.js",
     "files": [
-        "src/*",
-        "build/*"
+        "build/**/*",
+        "src/**/*"
     ],
+    "babel": {
+        "ignore": ["test"],
+        "presets": [
+            [
+                "env",
+                {
+                    "useBuiltIns": true
+                }
+            ]
+        ],
+        "plugins": [
+            "transform-decorators-legacy",
+            "transform-custom-element-classes",
+            "transform-runtime",
+            "transform-object-rest-spread",
+            [
+                "transform-es2015-for-of",
+                {
+                    "loose": true
+                }
+            ]
+        ]
+    },
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:highcharts": "webpack --color --config src/config/highcharts.plugin.config.js",
-        "build:cjs": "webpack --color --config src/config/highcharts.plugin.cjs.config.js",
-        "build": "npm-run-all build:*",
+        "build": "webpack --color --config src/config/highcharts.plugin.config.js",
         "test:build": "cp test/html/* build",
         "watch": "webpack --color --watch --config src/config/highcharts.plugin.config.js",
         "test:run": "jest --silent --color 2>&1",
@@ -49,22 +67,5 @@
         "highcharts": "6.1.0",
         "highcharts-grouped-categories": "1.1.2",
         "highcharts-more": "^0.1.2"
-    },
-    "devDependencies": {
-        "babel-core": "^6.26.0",
-        "babel-loader": "^7.1.2",
-        "babel-plugin-transform-custom-element-classes": "^0.1.0",
-        "babel-plugin-transform-es2015-for-of": "^6.23.0",
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-polyfill": "^6.26.0",
-        "babel-preset-env": "^1.6.0",
-        "css-loader": "^0.28.7",
-        "html-loader": "^0.5.1",
-        "jest": "^22.0.4",
-        "less": "^2.7.2",
-        "less-loader": "^4.0.5",
-        "style-loader": "^0.18.2",
-        "uglifyjs-webpack-plugin": "^0.4.6",
-        "webpack": "^3.5.6"
     }
 }

@@ -7,8 +7,7 @@
  *
  */
 
-import worker from "worker-loader?inline=true&fallback=false!@jpmorganchase/perspective/src/js/perspective.wasm.js";
-import buffer from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
+const perspective = require("@jpmorganchase/perspective").default;
 
-window.__PSP_WORKER__ = worker;
-window.__PSP_WASM__ = buffer;
+const table = perspective.worker().table([{x: 1}]);
+table.view().to_json(console.log);

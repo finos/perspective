@@ -1,0 +1,15 @@
+{
+    "name": "webpack",
+    "private": true,
+    "version": "0.2.3",
+    "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
+    "scripts": {
+        "start": "node server.js",
+        "webpack": "webpack --config webpack.config.js --color"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@jpmorganchase/perspective": "^0.2.3"
+    }
+}

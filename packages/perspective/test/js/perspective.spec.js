@@ -8,17 +8,20 @@
  */
 
 const perspective = require("../../src/js/perspective.js");
-const asmjs_perspective = require("../../src/js/perspective.asmjs.js");
 const node_perspective = require("../../src/js/perspective.node.js");
+const asmjs = require("../../obj/psp.asmjs.js");
 
 const RUNTIMES = {
-    ASMJS: asmjs_perspective,
+    ASMJS: perspective(
+        asmjs.load_perspective({
+            wasmJSMethod: "asmjs",
+            filePackagePrefixURL: "",
+            printErr: x => console.error(x),
+            print: x => console.log(x)
+        })
+    ),
     NODE: node_perspective
 };
-
-if (typeof WebAssembly !== "undefined") {
-    RUNTIMES["WASM"] = perspective(require("../../obj/psp.sync.js"));
-}
 
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
