@@ -50,6 +50,10 @@ global.registerPlugin = function registerPlugin(name, plugin) {
     RENDERERS[name] = plugin;
 };
 
+global.getPlugin = function getPlugin(name) {
+    return RENDERERS[name];
+};
+
 function _register_debug_plugin() {
     global.registerPlugin("debug", {
         name: "Debug",
@@ -215,7 +219,7 @@ async function loadTable(table, computed = false) {
                     }
                 });
             }
-            this._debounce_update();
+            this._debounce_update({ignore_size_check: false});
             return;
         }
     }
@@ -362,7 +366,7 @@ async function loadTable(table, computed = false) {
     this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
 
     this.filters = this.getAttribute("filters");
-    await this._debounce_update();
+    await this._debounce_update({ignore_size_check: false});
 }
 
 // TODO: split into loader.js
@@ -462,7 +466,8 @@ class CancelTask {
     }
 }
 
-async function update() {
+async function update(ignore_size_check = false) {
+    this._plugin_information.classList.add("hidden");
     if (!this._table) return;
     let row_pivots = this._get_view_row_pivots();
     let column_pivots = this._get_view_column_pivots();
@@ -487,6 +492,18 @@ async function update() {
         aggregate: aggregates,
         sort: sort
     });
+
+    if (ignore_size_check === false && this._show_warnings === true && this._plugin.max_size !== undefined) {
+        // validate that the render does not slow down the browser
+        const num_columns = await this._view.num_columns();
+        const num_rows = await this._view.num_rows();
+        const count = num_columns * num_rows;
+        if (count >= this._plugin.max_size) {
+            this._plugin_information.classList.remove("hidden");
+            this.removeAttribute("updating");
+            return;
+        }
+    }
 
     this._view.on_update(() => {
         if (!this._debounced) {
@@ -842,6 +859,9 @@ class ViewPrivate extends HTMLElement {
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
         this._transpose_button = this.shadowRoot.querySelector("#transpose_button");
+        this._plugin_information = this.shadowRoot.querySelector(".plugin_information");
+        this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
+        this._plugin_information_dismiss = this.shadowRoot.querySelector(".plugin_information__action--dismiss");
     }
 
     // most of these are drag and drop handlers - how to clean up?
@@ -883,6 +903,15 @@ class ViewPrivate extends HTMLElement {
             this.setAttribute("view", this._vis_selector.value);
             this._debounce_update();
         });
+        this._plugin_information_action.addEventListener("click", () => {
+            this._debounce_update({ignore_size_check: true});
+            this._plugin_information.classList.add("hidden");
+        });
+        this._plugin_information_dismiss.addEventListener("click", () => {
+            this._debounce_update({ignore_size_check: true});
+            this._plugin_information.classList.add("hidden");
+            this._show_warnings = false;
+        });
     }
 
     // sets state, manipulates DOM
@@ -908,14 +937,14 @@ class ViewPrivate extends HTMLElement {
 
     // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce(resolve => {
+        const _update = _.debounce((resolve, ignore_size_check) => {
             update
-                .bind(this)()
+                .bind(this)(ignore_size_check)
                 .then(resolve);
         }, 10);
-        this._debounce_update = async () => {
+        this._debounce_update = async ({ignore_size_check = false} = {}) => {
             this.setAttribute("updating", true);
-            await new Promise(_update);
+            await new Promise(resolve => _update(resolve, ignore_size_check));
         };
     }
 }
@@ -936,6 +965,7 @@ class View extends ViewPrivate {
         this._register_debounce_instance();
         this._slaves = [];
         this._show_config = true;
+        this._show_warnings = true;
         const resize_handler = _.debounce(this.notifyResize, 250).bind(this);
         window.addEventListener("load", resize_handler);
         window.addEventListener("resize", resize_handler);
