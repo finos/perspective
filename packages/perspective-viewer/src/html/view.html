@@ -16,7 +16,7 @@
                 </select>
             </div>
             <div id="columns_container" style="visibility: hidden">
-                <ul id='active_columns' ondragenter="dragEnter(event)"></ul>
+                <ul id='active_columns'></ul>
                 <div id='divider'></div>
                 <div id="sub_columns">
                     <ul id='inactive_columns'></ul>
@@ -30,7 +30,7 @@
         <div class="column noselect">
             <div id='top_panel'>
                 <div class="rrow">
-                    <div id="row_pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                    <div id="row_pivots">
                         <div class="psp-text-field">
                             <ul class="psp-text-field__input" for="row-pivots"></ul>
                             <label for="row_pivots"></label>
@@ -39,7 +39,7 @@
                 </div>
                 <span id="transpose_button" class="rrow centered">&#x2715;</span>
                 <div class="rrow">
-                    <div id="column_pivots" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                    <div id="column_pivots">
                         <div class="psp-text-field">
                             <ul class="psp-text-field__input" for="column-pivots"></ul>
                             <label for="column_pivots"></label>
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="rrow">
-                    <div id="sort" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                    <div id="sort">
                         <div class="psp-text-field">
                             <ul class="psp-text-field__input" for="sort"></ul>
                             <label for="sort"></label>
@@ -55,7 +55,7 @@
                     </div>
                 </div>
                 <div class="rrow" style='flex-grow:3;height:auto;flex:1 1 400px;max-width:none'>
-                    <div id="filters" ondragover="allowDrop(event)" ondragleave="disallowDrop(event)" ondragenter="dragEnter(event)">
+                    <div id="filters">
                         <div class="psp-text-field">
                             <ul class="psp-text-field__input" for='filters'></ul>
                             <label for="filters"></label>
@@ -70,7 +70,7 @@
 
         <div id="config_button" class="noselect"></div>
 
-        <div id='drop_target' ondragover="allowDrop(event)">
+        <div id='drop_target'>
             <div id='drop_target_inner'>
 
             </div>
