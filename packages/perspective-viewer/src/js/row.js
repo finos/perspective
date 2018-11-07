@@ -10,11 +10,11 @@
 import _ from "underscore";
 
 import Awesomplete from "awesomplete";
-import awesomplete_style from "awesomplete/awesomplete.css";
+import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
 
 import {bindTemplate} from "./utils.js";
 
-import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
+import perspective from "@jpmorganchase/perspective";
 import template from "../html/row.html";
 
 import style from "../less/row.less";

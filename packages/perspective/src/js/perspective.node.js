@@ -23,7 +23,7 @@ const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 
-import wasm from "../../obj/psp.sync.wasm";
+import wasm from "./psp.sync.wasm.js";
 
 const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 

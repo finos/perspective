@@ -8,16 +8,25 @@
  */
 
 const path = require("path");
-const common = require("@jpmorganchase/perspective/src/config/common.config.js");
+const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
+const webpack = require("webpack");
 
-module.exports = Object.assign({}, common(), {
+module.exports = {
     entry: "./src/ts/index.ts",
     externals: ["@jupyter-widgets/base"],
+    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                use: [{loader: "css-loader"}]
+            },
+            {test: /\.ts?$/, loader: "ts-loader"}
+        ]
+    },
     output: {
         filename: "index.js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../build")
     }
-});
-
-module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"});
+};

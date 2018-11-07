@@ -2,11 +2,13 @@
     "name": "@jpmorganchase/perspective-viewer",
     "version": "0.2.3",
     "description": "Perspective.js",
-    "main": "build/perspective.view.cjs.js",
+    "main": "src/js/view.js",
     "files": [
-        "build/*"
+        "build/**/*",
+        "src/**/*"
     ],
     "babel": {
+        "ignore": ["test"],
         "presets": [
             [
                 "env",
@@ -34,9 +36,8 @@
         "bench:run": "echo \"No Benchmarks\"",
         "build:themes:material": "lessc src/less/material.less | cleancss -O2 > build/material.css 2> /dev/null",
         "build:themes:materialdark": "lessc src/less/material.dark.less | cleancss -O2 > build/material.dark.css 2> /dev/null",
-        "build:webpack:cjs": "webpack --color --config src/config/view.cjs.config.js",
-        "build:webpack:viewer": "webpack --color --config src/config/view.config.js",
-        "build": "npm-run-all build:webpack:* build:themes:*",
+        "build:webpack": "webpack --color --config src/config/view.config.js",
+        "build": "npm-run-all build:webpack build:themes:*",
         "watch": "webpack --color --watch --config src/config/view.config.js",
         "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
         "test:run": "jest --silent --color 2>&1",

@@ -12,11 +12,19 @@ const common = require("@jpmorganchase/perspective/src/config/common.config.js")
 
 module.exports = Object.assign({}, common(), {
     entry: "./src/ts/mimerenderer.ts",
+    module: {
+        rules: [
+            {
+                test: /\.css$/,
+                exclude: ["@jpmorganchase"],
+                use: [{loader: "css-loader"}]
+            },
+            {test: /\.ts?$/, loader: "ts-loader"}
+        ]
+    },
     output: {
         filename: "mime.js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../build")
     }
 });
-
-module.exports.module.rules.push({test: /\.ts?$/, loader: "ts-loader"});

@@ -16,7 +16,7 @@ assets can be found in the `build/` directory of the
 `@jpmorganchase/perspective` and `@jpmorganchase/perspective-viewer` packages.
 
 When importing from NPM modules, you can use the Perspective Webpack plugin to
-manage the `.worker.*.js` and `.wasm` assets for you.  A sample config:
+manage the `.worker.*.js` and `.wasm` assets for you. A sample config:
 
 ```javascript
 const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
@@ -27,12 +27,12 @@ module.exports = {
         filename: "out.js",
         path: "build"
     },
-    plugins: [new PerspectivePlugin()],
+    plugins: [new PerspectivePlugin()]
 };
 ```
 
 Alternatively, you may use the built-in `WorkerHost` Node.js server, host
-the contents of a package's `build/` in your application's build script, or 
+the contents of a package's `build/` in your application's build script, or
 otherwise making sure these directories are visible to your web server, e.g.:
 
 ```javascript

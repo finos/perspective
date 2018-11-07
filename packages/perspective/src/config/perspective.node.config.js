@@ -5,7 +5,6 @@ module.exports = Object.assign({}, common(), {
     entry: "./src/js/perspective.node.js",
     target: "node",
     externals: [/^([a-z0-9]|\@(?!apache\-arrow)).*?(?!wasm)$/g],
-    plugins: [],
     node: {
         __dirname: false,
         __filename: false
