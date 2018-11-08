@@ -354,11 +354,14 @@
         font-weight: 300;
     }
 
-    #config_button {
+    #config_button,
+    #reset_button,
+    #download_button,
+    #copy_button {
         font-weight: normal;
-        font-family: var(--config_button--font-family, Arial);
-        color: var(--config_button--color, inherit);
-        font-size: var(--config_button--font-size, 16px);
+        font-family: var(--button--font-family, Arial);
+        color: var(--button--color, inherit);
+        font-size: var(--button--font-size, 16px);
         color: #999;
         transition: opacity 0.3s;
         overflow: hidden;
@@ -367,6 +370,31 @@
     #config_button:before {
         font-feature-settings: "liga";
         content: var(--config_button--before, "\1f527");
+    }
+
+    #reset_button:before {
+        font-feature-settings: "liga";
+        content: var(--reset_button--before, "Reset");
+    }
+
+    #download_button:before {
+        font-feature-settings: "liga";
+        content: var(--download_button--before, "Save");
+    }
+
+    #copy_button:before {
+        font-feature-settings: "liga";
+        content: var(--copy_button--before, "Copy");
+    }
+
+    #menubar {
+        display: none;
+        flex-direction: column;
+        padding-top: 55px;
+    }
+
+    #app.show_menu #menubar {
+        display: flex;
     }
 
     ul {

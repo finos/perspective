@@ -477,9 +477,9 @@ class View extends ViewPrivate {
      * settings.  The underlying `perspective.table` will be shared between both
      * elements
      *
-     * @param {any} widget A `<perspective-viewer>` instance to copy.
+     * @param {any} widget A `<perspective-viewer>` instance to clone.
      */
-    copy(widget) {
+    clone(widget) {
         if (widget.hasAttribute("index")) {
             this.setAttribute("index", widget.getAttribute("index"));
         }
@@ -567,6 +567,34 @@ class View extends ViewPrivate {
         }
         this.setAttribute("view", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
+        this._hide_context_menu();
+    }
+
+    /**
+     * Download this element's data as a CSV file.
+     *
+     * @param {boolean} [flat=false] Whether to use the element's current view
+     * config, or to use a default "flat" view.
+     * @memberof View
+     */
+    async download(flat = false) {
+        const view = flat ? this._table.view() : this._view;
+        const csv = await view.to_csv();
+        const element = document.createElement("a");
+        const binStr = csv;
+        const len = binStr.length;
+        const arr = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            arr[i] = binStr.charCodeAt(i);
+        }
+        const blob = new Blob([arr]);
+        element.setAttribute("href", URL.createObjectURL(blob));
+        element.setAttribute("download", "perspective.csv");
+        element.style.display = "none";
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        this._hide_context_menu();
     }
 
     /**
@@ -574,16 +602,11 @@ class View extends ViewPrivate {
      * must be called from an event handler, subject to the browser's
      * restrictions on clipboard access.  See
      * {@link https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard}.
-     *
      */
-    handleClipboardCopy(options) {
+    copy(flat = false) {
         let data;
-        if (!this._view) {
-            console.warn("No view to copy - skipping");
-            return;
-        }
-        this._view
-            .to_csv(options)
+        const view = flat ? this._table.view() : this._view;
+        view.to_csv()
             .then(csv => {
                 data = csv;
             })
@@ -603,6 +626,7 @@ class View extends ViewPrivate {
                 }
             };
         f();
+        this._hide_context_menu();
     }
 }
 

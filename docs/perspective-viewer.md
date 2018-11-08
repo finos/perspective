@@ -17,14 +17,15 @@
     -   [load][13]
     -   [update][14]
     -   [notifyResize][15]
-    -   [copy][16]
+    -   [clone][16]
     -   [delete][17]
     -   [save][18]
     -   [restore][19]
     -   [reset][20]
-    -   [handleClipboardCopy][21]
--   [View#perspective-view-update][22]
--   [View#perspective-config-update][23]
+    -   [copy][21]
+    -   [download][22]
+-   [View#perspective-view-update][23]
+-   [View#perspective-config-update][24]
 
 ## View
 
@@ -39,14 +40,16 @@ names.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('sort', JSON.stringify([["x","desc"]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer sort='[["x","desc"]]'></perspective-viewer>
@@ -58,18 +61,20 @@ The set of visible columns.
 
 **Parameters**
 
--   `columns` **[array][24]** An array of strings, the names of visible columns.
+-   `columns` **[array][25]** An array of strings, the names of visible columns.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer columns='["x", "y"]'></perspective-viewer>
@@ -81,18 +86,20 @@ The set of visible columns.
 
 **Parameters**
 
--   `computed-columns` **[array][24]** An array of computed column objects
+-   `computed-columns` **[array][25]** An array of computed column objects
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
@@ -104,22 +111,24 @@ The set of column aggregate configurations.
 
 **Parameters**
 
--   `aggregates` **[object][25]** A dictionary whose keys are column names, and
+-   `aggregates` **[object][26]** A dictionary whose keys are column names, and
     values are valid aggregations.  The `aggergates` attribute works as an
     override;  in lieu of a key for a column supplied by the developers, a
     default will be selected and reflected to the attribute based on the
-    column's type.  See [perspective/src/js/defaults.js][26]
+    column's type.  See [perspective/src/js/defaults.js][27]
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let elem = document.getElementById('my_viewer');
 elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
@@ -131,7 +140,8 @@ The set of column filter configurations.
 
 **Examples**
 
-_via Javascript DOM_
+via Javascript DOM
+
 
 ```javascript
 let filters = [
@@ -142,7 +152,8 @@ let elem = document.getElementById('my_viewer');
 elem.setAttribute('filters', JSON.stringify(filters));
 ```
 
-_via HTML_
+via HTML
+
 
 ```javascript
 <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
@@ -177,7 +188,7 @@ render it hidden until the message is removed.
 
 **Parameters**
 
--   `msg` **[string][27]** The message. This can be HTML - it is not sanitized.
+-   `msg` **[string][28]** The message. This can be HTML - it is not sanitized.
 
 **Examples**
 
@@ -214,7 +225,8 @@ element, its internal `perspective.table` will also be deleted.
 
 **Examples**
 
-_Load JSON_
+Load JSON
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');
@@ -224,14 +236,16 @@ my_viewer.load([
 ]);
 ```
 
-_Load CSV_
+Load CSV
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');
 my_viewer.load("x,y\n1,a\n2,b");
 ```
 
-_Load perspective.table_
+Load perspective.table
+
 
 ```javascript
 const my_viewer = document.getElementById('#my_viewer');
@@ -239,7 +253,7 @@ const tbl = perspective.table("x,y\n1,a\n2,b");
 my_viewer.load(tbl);
 ```
 
-Returns **[Promise][28]&lt;void>** A promise which resolves once the data is
+Returns **[Promise][29]&lt;void>** A promise which resolves once the data is
 loaded and a `perspective.view` has been created.
 
 ### update
@@ -265,7 +279,7 @@ my_viewer.update([
 
 Determine whether to reflow the viewer and redraw.
 
-### copy
+### clone
 
 Duplicate an existing `<perspective-element>`, including data and view
 settings.  The underlying `perspective.table` will be shared between both
@@ -273,7 +287,7 @@ elements
 
 **Parameters**
 
--   `widget` **any** A `<perspective-viewer>` instance to copy.
+-   `widget` **any** A `<perspective-viewer>` instance to clone.
 
 ### delete
 
@@ -281,14 +295,14 @@ Deletes this element's data and clears it's internal state (but not its
 user state).  This (or the underlying `perspective.table`'s equivalent
 method) must be called in order for its memory to be reclaimed.
 
-Returns **[Promise][28]&lt;[boolean][29]>** Whether or not this call resulted in the
+Returns **[Promise][29]&lt;[boolean][30]>** Whether or not this call resulted in the
 underlying `perspective.table` actually being deleted.
 
 ### save
 
 Serialize this element's attribute/interaction state.
 
-Returns **[object][25]** a serialized element.
+Returns **[object][26]** a serialized element.
 
 ### restore
 
@@ -297,9 +311,9 @@ Restore this element to a state as generated by a reciprocal call to
 
 **Parameters**
 
--   `x` **[object][25]** returned by `save`.
+-   `x` **[object][26]** returned by `save`.
 
-Returns **[Promise][28]&lt;void>** A promise which resolves when the changes have
+Returns **[Promise][29]&lt;void>** A promise which resolves when the changes have
 been applied.
 
 ### reset
@@ -308,16 +322,25 @@ Reset's this element's view state and attributes to default.  Does not
 delete this element's `perspective.table` or otherwise modify the data
 state.
 
-### handleClipboardCopy
+### copy
 
 Copies this element's view data (as a CSV) to the clipboard.  This method
 must be called from an event handler, subject to the browser's
 restrictions on clipboard access.  See
-[https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard][30].
+[https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard][31].
 
 **Parameters**
 
--   `options`  
+-   `flat`   (optional, default `false`)
+
+### download
+
+Download this element's data as a CSV file.
+
+**Parameters**
+
+-   `flat` **[boolean][30]** Whether to use the element's current view
+    config, or to use a default "flat" view. (optional, default `false`)
 
 ## View#perspective-view-update
 
@@ -359,7 +382,7 @@ been modified, by the user or otherwise.
 
 [15]: #notifyresize
 
-[16]: #copy
+[16]: #clone
 
 [17]: #delete
 
@@ -369,22 +392,24 @@ been modified, by the user or otherwise.
 
 [20]: #reset
 
-[21]: #handleclipboardcopy
+[21]: #copy
 
-[22]: #viewperspective-view-update
+[22]: #download
 
-[23]: #viewperspective-config-update
+[23]: #viewperspective-view-update
 
-[24]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
+[24]: #viewperspective-config-update
 
-[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
+[25]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array
 
-[26]: perspective/src/js/defaults.js
+[26]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object
 
-[27]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[27]: perspective/src/js/defaults.js
 
-[28]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[28]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
 
-[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[29]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
 
-[30]: https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard
+[30]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[31]: https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard
