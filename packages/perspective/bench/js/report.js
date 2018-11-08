@@ -10,13 +10,11 @@
 import "../less/benchmark.less";
 
 import CodeMirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/eclipse.css';
+import '!!style-loader!css-loader!codemirror/lib/codemirror.css';
+import '!!style-loader!css-loader!codemirror/theme/eclipse.css';
 import 'codemirror/mode/javascript/javascript.js';
 
 import Chart from "chart.js";
-
-import {histogram} from "d3-array";
 
 String.prototype.hashCode = function(){
     var hash = 0;
