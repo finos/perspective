@@ -39,5 +39,5 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Project Site](https://jpmorganchase.github.io/perspective/)
 * [Installation](https://jpmorganchase.github.io/perspective/docs/installation.html)
 * [User's Guide](https://jpmorganchase.github.io/perspective/docs/usage.html)
-* [Perspective API](https://jpmorganchase.github.io/perspective/docs/perspective_api.html)
-* [Perspective Viewer API](https://jpmorganchase.github.io/perspective/docs/viewer_api.html)
+* [Perspective API](https://jpmorganchase.github.io/perspective/docs/perspective.html)
+* [Perspective Viewer API](https://jpmorganchase.github.io/perspective/docs/perspective-viewer.html)

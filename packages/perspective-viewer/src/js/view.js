@@ -13,7 +13,7 @@ import "@webcomponents/shadycss/custom-style-interface.min.js";
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 
-import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
+import perspective from "@jpmorganchase/perspective";
 import {ViewPrivate} from "./view/ViewPrivate.js";
 import "./row.js";
 

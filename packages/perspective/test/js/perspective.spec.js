@@ -7,7 +7,7 @@
  *
  */
 
-const perspective = require("../../src/js/perspective.js");
+const perspective = require("../../src/js/perspective.js").default;
 const node_perspective = require("../../src/js/perspective.node.js");
 const asmjs = require("../../obj/psp.asmjs.js");
 

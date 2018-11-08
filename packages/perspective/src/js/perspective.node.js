@@ -7,7 +7,7 @@
  *
  */
 
-const perspective = require("./perspective.js");
+const perspective = require("./perspective.js").default;
 
 const fs = require("fs");
 const http = require("http");
@@ -23,18 +23,17 @@ const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 
-import wasm from "./psp.sync.wasm.js";
+const wasm = require("./psp.sync.wasm.js");
 
 const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 
-let Module = load_perspective({
-    wasmBinary: buffer,
-    wasmJSMethod: "native-wasm",
-    ENVIRONMENT: "NODE"
-});
-
-module.exports = perspective(Module);
-delete module.exports["worker"];
+module.exports = perspective(
+    load_perspective({
+        wasmBinary: buffer,
+        wasmJSMethod: "native-wasm",
+        ENVIRONMENT: "NODE"
+    })
+);
 
 let CLIENT_ID_GEN = 0;
 

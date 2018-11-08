@@ -7,38 +7,11 @@
     "publishConfig": {
         "access": "public"
     },
-    "babel": {
-        "presets": [
-            [
-                "env",
-                {
-                    "useBuiltIns": true
-                }
-            ]
-        ],
-        "plugins": [
-            "transform-decorators-legacy",
-            "transform-custom-element-classes",
-            [
-                "transform-runtime",
-                {
-                    "polyfill": false
-                }
-            ],
-            "transform-object-rest-spread",
-            [
-                "transform-es2015-for-of",
-                {
-                    "loose": true
-                }
-            ]
-        ]
-    },
     "files": [
         "build/*",
         "index.d.ts",
         "src/**/*",
-        "webpack.plugin.js"
+        "webpack-plugin.js"
     ],
     "typings": "index.d.ts",
     "scripts": {

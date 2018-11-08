@@ -8,7 +8,7 @@
  */
 
 const load_perspective = require("../../obj/psp.async.js").load_perspective;
-const perspective = require("./perspective.js");
+const perspective = require("./perspective.js").default;
 
 if (global.document !== undefined && typeof WebAssembly !== "undefined") {
     module.exports = perspective(

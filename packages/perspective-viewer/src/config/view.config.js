@@ -2,7 +2,7 @@ const path = require("path");
 const common = require("@jpmorganchase/perspective/src/config/common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: ["babel-polyfill", "./src/js/view.js", "./src/less/default.less"],
+    entry: "./src/js/view.js",
     output: {
         filename: "perspective.view.js",
         library: "perspective-view",
