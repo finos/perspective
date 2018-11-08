@@ -7,7 +7,7 @@
  *
  */
 
-import {detectIE} from "./utils.js";
+import {detectIE} from "@jpmorganchase/perspective/src/js/utils.js";
 
 function calc_index(event) {
     if (this._active_columns.children.length == 0) {
@@ -68,7 +68,7 @@ export function drop(ev) {
     }
 
     // Deselect the dropped column
-    if (this._plugin.deselectMode === "pivots" && this._visible_column_count() > 1 && name !== "sort" && name !== "filter") {
+    if (this._plugin.deselectMode === "pivots" && this._get_visible_column_count() > 1 && name !== "sort" && name !== "filter") {
         for (let x of this.shadowRoot.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute("name") === data[0]) {
                 this._active_columns.removeChild(x);
@@ -87,7 +87,7 @@ export function column_undrag(event) {
     Array.prototype.slice.call(this._active_columns.children).map(x => {
         x.className = "";
     });
-    if (this._visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
+    if (this._get_visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
         this._active_columns.removeChild(data);
         this._update_column_view();
     }
