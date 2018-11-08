@@ -19,7 +19,12 @@
         "plugins": [
             "transform-decorators-legacy",
             "transform-custom-element-classes",
-            ["transform-runtime", {"polyfill": false}],
+            [
+                "transform-runtime",
+                {
+                    "polyfill": false
+                }
+            ],
             "transform-object-rest-spread",
             [
                 "transform-es2015-for-of",
