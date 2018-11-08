@@ -15,9 +15,12 @@
 }
 
 #config_button {
-    padding: var(--config_button--padding, 12px 0px 0px 8px);
     background: none;
     opacity: 1 !important;
+}
+
+.button {
+    padding: var(--button--padding, 12px 14px 24px 8px);
 }
 
 [settings="true"] #config_button {
@@ -248,13 +251,15 @@
         position: absolute;
         top: 0;
         left: 0;
-        font-weight: normal;
-        font-size: 16px;
         opacity: 0;
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    .button {
         cursor: pointer;
+        font-size: 16px;
+        font-weight: normal;
     }
     ul {
         padding: 0px;

@@ -441,6 +441,18 @@ export class ViewPrivate extends HTMLElement {
     }
 
     // UI action
+    _show_context_menu(event) {
+        this.shadowRoot.querySelector("#app").classList.toggle("show_menu");
+        event.stopPropagation();
+        event.preventDefault();
+        return false;
+    }
+
+    _hide_context_menu() {
+        this.shadowRoot.querySelector("#app").classList.remove("show_menu");
+    }
+
+    // UI action
     _toggle_config() {
         if (this._show_config) {
             this._side_panel.style.display = "none";
@@ -453,6 +465,7 @@ export class ViewPrivate extends HTMLElement {
         }
         this._show_config = !this._show_config;
         this._plugin.resize.call(this, true);
+        this._hide_context_menu();
         this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
     }
 
@@ -698,6 +711,9 @@ export class ViewPrivate extends HTMLElement {
         this._inner_drop_target = this.shadowRoot.querySelector("#drop_target_inner");
         this._drop_target = this.shadowRoot.querySelector("#drop_target");
         this._config_button = this.shadowRoot.querySelector("#config_button");
+        this._reset_button = this.shadowRoot.querySelector("#reset_button");
+        this._download_button = this.shadowRoot.querySelector("#download_button");
+        this._copy_button = this.shadowRoot.querySelector("#copy_button");
         this._side_panel = this.shadowRoot.querySelector("#side_panel");
         this._top_panel = this.shadowRoot.querySelector("#top_panel");
         this._sort = this.shadowRoot.querySelector("#sort");
@@ -739,6 +755,10 @@ export class ViewPrivate extends HTMLElement {
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
         this._config_button.addEventListener("click", this._toggle_config.bind(this));
+        this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
+        this._reset_button.addEventListener("click", this.reset.bind(this));
+        this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
+        this._download_button.addEventListener("click", event => this.download(event.shiftKey));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._drop_target.addEventListener("dragover", allow_drop.bind(this));
 
