@@ -5,7 +5,6 @@ const PerspectivePlugin = require("../../webpack-plugin");
 const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
 
 module.exports = function({build_worker, no_minify} = {}) {
-    
     if (!process.env.PSP_NO_MINIFY && !process.env.PSP_DEBUG && !no_minify) {
         plugins.push(
             new UglifyJSPlugin({
