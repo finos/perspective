@@ -7,36 +7,6 @@
         "build/**/*",
         "src/**/*"
     ],
-    "babel": {
-        "ignore": [
-            "test"
-        ],
-        "presets": [
-            [
-                "env",
-                {
-                    "useBuiltIns": true
-                }
-            ]
-        ],
-        "plugins": [
-            "transform-decorators-legacy",
-            "transform-custom-element-classes",
-            [
-                "transform-runtime",
-                {
-                    "polyfill": false
-                }
-            ],
-            "transform-object-rest-spread",
-            [
-                "transform-es2015-for-of",
-                {
-                    "loose": true
-                }
-            ]
-        ]
-    },
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",

@@ -12,7 +12,7 @@ import "@webcomponents/shadycss/custom-style-interface.min.js";
 
 import _ from "underscore";
 
-import perspective from "@jpmorganchase/perspective/src/js/perspective.parallel.js";
+import perspective from "@jpmorganchase/perspective";
 import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "../dragdrop.js";
 import {column_visibility_clicked, column_aggregate_clicked, column_filter_clicked, sort_order_clicked} from "./actions.js";
 import {renderers} from "./renderers.js";

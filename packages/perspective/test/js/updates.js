@@ -7,8 +7,8 @@
  *
  */
 
-import _ from "underscore";
-import arrow from "../arrow/test.arrow";
+const _ = require("underscore");
+const arrow = require("../arrow/test.arrow");
 
 var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 

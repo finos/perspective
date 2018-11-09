@@ -7,8 +7,10 @@
  *
  */
 
+require("babel-polyfill");
+
 const load_perspective = require("../../obj/psp.asmjs.js").load_perspective;
-const perspective = require("./perspective.js");
+const perspective = require("./perspective.js").default;
 
 const Module = load_perspective({
     wasmJSMethod: "asmjs",

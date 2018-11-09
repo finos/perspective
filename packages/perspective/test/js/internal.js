@@ -7,7 +7,7 @@
  *
  */
 
-import arrow from "../arrow/test-null.arrow";
+const arrow = require("../arrow/test-null.arrow");
 
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 

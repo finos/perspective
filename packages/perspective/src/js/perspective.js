@@ -28,7 +28,7 @@ if (typeof self !== "undefined" && self.performance === undefined) {
 
 const CHUNKED_THRESHOLD = 100000;
 
-module.exports = function(Module) {
+export default function(Module) {
     let __MODULE__ = Module;
 
     /******************************************************************************
@@ -1900,4 +1900,4 @@ module.exports = function(Module) {
     }
 
     return perspective;
-};
+}
