@@ -15,6 +15,7 @@ import _ from "underscore";
 import perspective from "@jpmorganchase/perspective";
 import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "../dragdrop.js";
 import {column_visibility_clicked, column_aggregate_clicked, column_filter_clicked, sort_order_clicked} from "./actions.js";
+import {_show_context_menu, _toggle_config} from "./dom.js";
 import {renderers} from "./renderers.js";
 import {COMPUTATIONS} from "../computed_column.js";
 
@@ -440,35 +441,6 @@ export class ViewPrivate extends HTMLElement {
         }
     }
 
-    // UI action
-    _show_context_menu(event) {
-        this.shadowRoot.querySelector("#app").classList.toggle("show_menu");
-        event.stopPropagation();
-        event.preventDefault();
-        return false;
-    }
-
-    _hide_context_menu() {
-        this.shadowRoot.querySelector("#app").classList.remove("show_menu");
-    }
-
-    // UI action
-    _toggle_config() {
-        if (this._show_config) {
-            this._side_panel.style.display = "none";
-            this._top_panel.style.display = "none";
-            this.removeAttribute("settings");
-        } else {
-            this._side_panel.style.display = "flex";
-            this._top_panel.style.display = "flex";
-            this.setAttribute("settings", true);
-        }
-        this._show_config = !this._show_config;
-        this._plugin.resize.call(this, true);
-        this._hide_context_menu();
-        this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
-    }
-
     // get viewer state
     _get_view_dom_columns(selector, callback) {
         selector = selector || "#active_columns perspective-row";
@@ -725,6 +697,7 @@ export class ViewPrivate extends HTMLElement {
 
     // most of these are drag and drop handlers - how to clean up?
     _register_callbacks() {
+        this._toggle_config = _toggle_config.bind(this);
         this._sort.addEventListener("drop", drop.bind(this));
         this._sort.addEventListener("dragend", undrag.bind(this));
         this._sort.addEventListener("dragenter", drag_enter.bind(this));
@@ -754,8 +727,8 @@ export class ViewPrivate extends HTMLElement {
         this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
-        this._config_button.addEventListener("click", this._toggle_config.bind(this));
-        this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
+        this._config_button.addEventListener("click", this._toggle_config);
+        this._config_button.addEventListener("contextmenu", _show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));
         this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
         this._download_button.addEventListener("click", event => this.download(event.shiftKey));
