@@ -16,26 +16,9 @@ import perspective from "@jpmorganchase/perspective";
 import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "../dragdrop.js";
 import {column_visibility_clicked, column_aggregate_clicked, column_filter_clicked, sort_order_clicked} from "./actions.js";
 import {_show_context_menu, _toggle_config} from "./dom.js";
+import {CancelTask} from "./CancelTask.js";
 import {renderers} from "./renderers.js";
 import {COMPUTATIONS} from "../computed_column.js";
-
-class CancelTask {
-    constructor(on_cancel) {
-        this._on_cancel = on_cancel;
-        this._cancelled = false;
-    }
-
-    cancel() {
-        if (!this._cancelled && this._on_cancel) {
-            this._on_cancel();
-        }
-        this._cancelled = true;
-    }
-
-    get cancelled() {
-        return this._cancelled;
-    }
-}
 
 export class ViewPrivate extends HTMLElement {
     // load a new table into perspective-viewer
