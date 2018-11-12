@@ -468,7 +468,7 @@ class View extends ViewPrivate {
             this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
         }
 
-        if (!document.hidden && this.offsetParent && document.contains(this)) {
+        if (!document.hidden && this.offsetParent) {
             this._plugin.resize.call(this);
         }
     }

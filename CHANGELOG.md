@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.5] - 2018-11-09
+### Fixes
+* [#301](https://github.com/jpmorganchase/perspective/pull/301) Fixed missing `webpack-plugin` export and `babel-polyfill` import.
+
 ## [0.2.4] - 2018-11-08
 ### Added
 * [#299](https://github.com/jpmorganchase/perspective/pull/299) Added a new Menu bar (accessible via right-click on the config button) for `reset`, `copy` and `download` actions, and an API for `download()` (`copy()` and `reset()` already exist).

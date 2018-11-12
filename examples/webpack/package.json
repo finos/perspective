@@ -10,6 +10,7 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.5"
+        "@jpmorganchase/perspective": "^0.2.5",
+        "@jpmorganchase/perspective-viewer": "^0.2.5"
     }
 }
