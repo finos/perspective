@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.7] - 2018-11-12
+### Fixes
+* [#304](https://github.com/jpmorganchase/perspective/pull/304) Fixed missing file in NPM package.
+
 ## [0.2.6] - 2018-11-12
 ### Fixes
 * [#303](https://github.com/jpmorganchase/perspective/pull/303) Fixed `webpack-plugin` babel-loader configuration issue.
