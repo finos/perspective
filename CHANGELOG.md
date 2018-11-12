@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.6] - 2018-11-12
+### Fixes
+* [#303](https://github.com/jpmorganchase/perspective/pull/303) Fixed `webpack-plugin` babel-loader configuration issue.
+
 ## [0.2.5] - 2018-11-09
 ### Fixes
 * [#301](https://github.com/jpmorganchase/perspective/pull/301) Fixed missing `webpack-plugin` export and `babel-polyfill` import.
