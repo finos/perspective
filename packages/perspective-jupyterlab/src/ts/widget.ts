@@ -94,28 +94,18 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:columnpivots', this.columnpivots_changed, this);
         this.model.on('change:aggregates', this.aggregates_changed, this);
         this.model.on('change:sort', this.sort_changed, this);
-        this.model.on('change:index', this.index_changed, this);
-        this.model.on('change:limit', this.limit_changed, this);
         this.model.on('change:settings', this.settings_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
 
         this.model.on('msg:custom', this._update, this);
 
         this.displayed.then(()=> {
-        let data = this.model.get('_data');
-            if (data.length > 0){
-                this.psp.update(this.model.get('_data'));
-            } else {
-                this.datasrc_changed();
-            }
             this.settings_changed();
             this.dark_changed();
             this.view_changed();
             this.rowpivots_changed();
             this.columnpivots_changed();
             this.sort_changed();
-            this.index_changed();
-            this.limit_changed();
 
             let columns = this.model.get('columns');
             if(columns.length > 0){
@@ -124,6 +114,7 @@ class PerspectiveView extends DOMWidgetView {
 
             // do aggregates after columns
             this.aggregates_changed();
+            this.datasrc_changed();
         });
     }
 
@@ -145,7 +136,18 @@ class PerspectiveView extends DOMWidgetView {
         let data = this.model.get('_data');
 
         if (Object.keys(schema).length > 0 ){
-            this.psp.load(schema);
+            let limit = this.model.get('limit');
+            let index = this.model.get('index');
+            let options = {} as {[key: string]: any};
+
+            if (limit > 0){
+                options['limit'] = limit;
+            }
+            if (index){
+                options['index'] = index;
+            }
+
+            this.psp.load(schema, options);
         }
         if (data.length > 0){
             this.psp.update(this.model.get('_data'));
@@ -225,10 +227,6 @@ class PerspectiveView extends DOMWidgetView {
 
     sort_changed(){
         this.psp.setAttribute('sort', JSON.stringify(this.model.get('sort')));
-    }
-
-    index_changed(){
-        this.psp.setAttribute('index', this.model.get('index'));
     }
 
     limit_changed(){
