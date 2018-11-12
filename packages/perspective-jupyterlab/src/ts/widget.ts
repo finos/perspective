@@ -56,6 +56,8 @@ class PerspectiveModel extends DOMWidgetModel {
             columnpivots: [],
             aggregates: [],
             sort: [],
+            index: '',
+            limit: -1,
             settings: false,
             dark: false
         };
@@ -92,6 +94,8 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:columnpivots', this.columnpivots_changed, this);
         this.model.on('change:aggregates', this.aggregates_changed, this);
         this.model.on('change:sort', this.sort_changed, this);
+        this.model.on('change:index', this.index_changed, this);
+        this.model.on('change:limit', this.limit_changed, this);
         this.model.on('change:settings', this.settings_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
 
@@ -110,6 +114,8 @@ class PerspectiveView extends DOMWidgetView {
             this.rowpivots_changed();
             this.columnpivots_changed();
             this.sort_changed();
+            this.index_changed();
+            this.limit_changed();
 
             let columns = this.model.get('columns');
             if(columns.length > 0){
@@ -219,6 +225,19 @@ class PerspectiveView extends DOMWidgetView {
 
     sort_changed(){
         this.psp.setAttribute('sort', JSON.stringify(this.model.get('sort')));
+    }
+
+    index_changed(){
+        this.psp.setAttribute('index', this.model.get('index'));
+    }
+
+    limit_changed(){
+        let limit = this.model.get('limit');
+        if(limit > 0){
+            this.psp.setAttribute('limit', limit);
+        } else {
+            this.psp.removeAttribute('limit');
+        }
     }
 
     settings_changed(){
