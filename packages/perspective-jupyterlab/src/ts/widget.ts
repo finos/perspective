@@ -18,9 +18,7 @@ import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} fro
 import {PERSPECTIVE_VERSION} from './version.ts';
 
 /* Helper methods */
-import {
-    datasourceToSource, createCopyDl
-} from './utils.ts';
+import {datasourceToSource} from './utils.ts';
 
 /* perspective components */
 import "@jpmorganchase/perspective-viewer";
@@ -251,19 +249,24 @@ namespace Private {
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
 
-        let btns = createCopyDl(psp);
-
         while(node.lastChild){
             node.removeChild(node.lastChild);
         }
 
         node.appendChild(psp);
 
+        // allow perspective's event handlers to do their work
+        psp.addEventListener( 'contextmenu', stop, false );
+        psp.addEventListener( 'mousedown', stop, false );
+        psp.addEventListener( 'mousedown', stop, false );
+
+        function stop( event: MouseEvent ) {
+          event.stopPropagation();
+        }
+
         let div = document.createElement('div');
         div.style.setProperty('display', 'flex');
         div.style.setProperty('flex-direction', 'row');
-        div.appendChild(btns['copy']);
-        div.appendChild(btns['dl']);
         node.appendChild(div);
         return psp;
     }
