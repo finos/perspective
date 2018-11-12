@@ -19,6 +19,7 @@ import "./row.js";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
 import {renderers} from "./view/renderers.js";
+import {_hide_context_menu} from "./view/dom.js";
 import {COMPUTATIONS} from "./computed_column.js";
 
 import template from "../html/view.html";
@@ -108,7 +109,7 @@ class View extends ViewPrivate {
         this._register_callbacks();
         this._register_view_options();
         this._register_data_attribute();
-        this._toggle_config();
+        this.toggleConfig();
 
         for (let attr of ["row-pivots", "column-pivots", "filters", "sort"]) {
             if (!this.hasAttribute(attr)) {
@@ -567,7 +568,7 @@ class View extends ViewPrivate {
         }
         this.setAttribute("view", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
-        this._hide_context_menu();
+        _hide_context_menu.call(this);
     }
 
     /**
@@ -594,7 +595,7 @@ class View extends ViewPrivate {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
-        this._hide_context_menu();
+        _hide_context_menu.call(this);
     }
 
     /**
@@ -626,7 +627,14 @@ class View extends ViewPrivate {
                 }
             };
         f();
-        this._hide_context_menu();
+        _hide_context_menu.call(this);
+    }
+
+    /**
+     * Opens/closes the element's config menu.
+     */
+    toggleConfig() {
+        this._toggle_config();
     }
 }
 

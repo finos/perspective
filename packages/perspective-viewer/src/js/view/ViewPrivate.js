@@ -15,29 +15,116 @@ import _ from "underscore";
 import perspective from "@jpmorganchase/perspective";
 import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "../dragdrop.js";
 import {column_visibility_clicked, column_aggregate_clicked, column_filter_clicked, sort_order_clicked} from "./actions.js";
+import {_show_context_menu, _toggle_config} from "./dom.js";
+import {CancelTask} from "./CancelTask.js";
 import {renderers} from "./renderers.js";
 import {COMPUTATIONS} from "../computed_column.js";
 
-class CancelTask {
-    constructor(on_cancel) {
-        this._on_cancel = on_cancel;
-        this._cancelled = false;
-    }
-
-    cancel() {
-        if (!this._cancelled && this._on_cancel) {
-            this._on_cancel();
-        }
-        this._cancelled = true;
-    }
-
-    get cancelled() {
-        return this._cancelled;
-    }
-}
-
 export class ViewPrivate extends HTMLElement {
-    // load a new table into perspective-viewer
+    get _plugin() {
+        let current_renderers = renderers.getInstance();
+        let view = this.getAttribute("view");
+        if (!view) {
+            view = Object.keys(current_renderers)[0];
+        }
+        this.setAttribute("view", view);
+        return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
+    }
+
+    // get viewer state
+    _get_view_dom_columns(selector, callback) {
+        selector = selector || "#active_columns perspective-row";
+        let columns = Array.prototype.slice.call(this.shadowRoot.querySelectorAll(selector));
+        if (!callback) {
+            return columns;
+        }
+        return columns.map(callback);
+    }
+
+    _get_view_columns({active = true} = {}) {
+        let selector;
+        if (active) {
+            selector = "#active_columns perspective-row";
+        } else {
+            selector = "#inactive_columns perspective-row";
+        }
+        return this._get_view_dom_columns(selector, col => {
+            return col.getAttribute("name");
+        });
+    }
+
+    _get_view_aggregates(selector) {
+        selector = selector || "#active_columns perspective-row";
+        return this._get_view_dom_columns(selector, s => {
+            return {
+                op: s.getAttribute("aggregate"),
+                column: s.getAttribute("name")
+            };
+        });
+    }
+
+    _get_view_row_pivots() {
+        return this._get_view_dom_columns("#row_pivots perspective-row", col => {
+            return col.getAttribute("name");
+        });
+    }
+
+    _get_view_column_pivots() {
+        return this._get_view_dom_columns("#column_pivots perspective-row", col => {
+            return col.getAttribute("name");
+        });
+    }
+
+    _get_view_filters() {
+        return this._get_view_dom_columns("#filters perspective-row", col => {
+            let {operator, operand} = JSON.parse(col.getAttribute("filter"));
+            return [col.getAttribute("name"), operator, operand];
+        });
+    }
+
+    _get_view_sorts() {
+        return this._get_view_dom_columns("#sort perspective-row", col => {
+            let order = col.getAttribute("sort-order") || "asc";
+            return [col.getAttribute("name"), order];
+        });
+    }
+
+    _get_view_hidden(aggregates, sort) {
+        aggregates = aggregates || this._get_view_aggregates();
+        let hidden = [];
+        sort = sort || this._get_view_sorts();
+        for (let s of sort) {
+            if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
+                hidden.push(s[0]);
+            }
+        }
+        return hidden;
+    }
+
+    _get_visible_column_count() {
+        return this._get_view_dom_columns().length;
+    }
+
+    // TODO: move to state_read
+    get_aggregate_attribute() {
+        const aggs = JSON.parse(this.getAttribute("aggregates")) || {};
+        return Object.keys(aggs).map(col => ({column: col, op: aggs[col]}));
+    }
+
+    // TODO: move to state_apply
+    set_aggregate_attribute(aggs) {
+        this.setAttribute(
+            "aggregates",
+            JSON.stringify(
+                aggs.reduce((obj, agg) => {
+                    obj[agg.column] = agg.op;
+                    return obj;
+                }, {})
+            )
+        );
+    }
+
+    // Loads a new table into perspective-viewer
     async load_table(table, computed = false) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
         this.setAttribute("updating", true);
@@ -210,6 +297,7 @@ export class ViewPrivate extends HTMLElement {
         await this._debounce_update();
     }
 
+    // Generates a new row in state + DOM
     new_row(name, type, aggregate, filter, sort, computed) {
         let row = document.createElement("perspective-row");
 
@@ -287,6 +375,7 @@ export class ViewPrivate extends HTMLElement {
         return row;
     }
 
+    // Update viewer with new data.
     async _viewer_update(ignore_size_check = false) {
         if (!this._table) return;
         let row_pivots = this._get_view_row_pivots();
@@ -382,208 +471,6 @@ export class ViewPrivate extends HTMLElement {
             });
     }
 
-    _fill_numeric(cols, pref, bypass = false) {
-        for (let col of cols) {
-            let type = col.getAttribute("type");
-            let name = col.getAttribute("name");
-            if (bypass || (["float", "integer"].indexOf(type) > -1 && pref.indexOf(name) === -1)) {
-                pref.push(name);
-            }
-        }
-    }
-
-    _render_time() {
-        const t = performance.now();
-        return () => this.setAttribute("render_time", performance.now() - t);
-    }
-
-    get _plugin() {
-        let current_renderers = renderers.getInstance();
-        let view = this.getAttribute("view");
-        if (!view) {
-            view = Object.keys(current_renderers)[0];
-        }
-        this.setAttribute("view", view);
-        return current_renderers[view] || current_renderers[Object.keys(current_renderers)[0]];
-    }
-
-    _set_column_defaults() {
-        let cols = this._get_view_dom_columns("#inactive_columns perspective-row");
-        let current_cols = this._get_view_dom_columns();
-        if (cols.length > 0) {
-            if (this._plugin.initial) {
-                let pref = [];
-                let count = this._plugin.initial.count || 2;
-                if (current_cols.length === count) {
-                    pref = current_cols.map(x => x.getAttribute("name"));
-                } else if (current_cols.length < count) {
-                    pref = current_cols.map(x => x.getAttribute("name"));
-                    this._fill_numeric(cols, pref);
-                    if (pref.length < count) {
-                        this._fill_numeric(cols, pref, true);
-                    }
-                } else {
-                    if (this._plugin.initial.type === "number") {
-                        this._fill_numeric(current_cols, pref);
-                        if (pref.length < count) {
-                            this._fill_numeric(cols, pref);
-                        }
-                        if (pref.length < count) {
-                            this._fill_numeric(cols, pref, true);
-                        }
-                    }
-                }
-                this.setAttribute("columns", JSON.stringify(pref.slice(0, count)));
-            } else if (this._plugin.selectMode === "select") {
-                this.setAttribute("columns", JSON.stringify([cols[0].getAttribute("name")]));
-            }
-        }
-    }
-
-    // UI action
-    _show_context_menu(event) {
-        this.shadowRoot.querySelector("#app").classList.toggle("show_menu");
-        event.stopPropagation();
-        event.preventDefault();
-        return false;
-    }
-
-    _hide_context_menu() {
-        this.shadowRoot.querySelector("#app").classList.remove("show_menu");
-    }
-
-    // UI action
-    _toggle_config() {
-        if (this._show_config) {
-            this._side_panel.style.display = "none";
-            this._top_panel.style.display = "none";
-            this.removeAttribute("settings");
-        } else {
-            this._side_panel.style.display = "flex";
-            this._top_panel.style.display = "flex";
-            this.setAttribute("settings", true);
-        }
-        this._show_config = !this._show_config;
-        this._plugin.resize.call(this, true);
-        this._hide_context_menu();
-        this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
-    }
-
-    // get viewer state
-    _get_view_dom_columns(selector, callback) {
-        selector = selector || "#active_columns perspective-row";
-        let columns = Array.prototype.slice.call(this.shadowRoot.querySelectorAll(selector));
-        if (!callback) {
-            return columns;
-        }
-        return columns.map(callback);
-    }
-
-    _get_view_columns({active = true} = {}) {
-        let selector;
-        if (active) {
-            selector = "#active_columns perspective-row";
-        } else {
-            selector = "#inactive_columns perspective-row";
-        }
-        return this._get_view_dom_columns(selector, col => {
-            return col.getAttribute("name");
-        });
-    }
-
-    _get_view_aggregates(selector) {
-        selector = selector || "#active_columns perspective-row";
-        return this._get_view_dom_columns(selector, s => {
-            return {
-                op: s.getAttribute("aggregate"),
-                column: s.getAttribute("name")
-            };
-        });
-    }
-
-    _get_view_row_pivots() {
-        return this._get_view_dom_columns("#row_pivots perspective-row", col => {
-            return col.getAttribute("name");
-        });
-    }
-
-    _get_view_column_pivots() {
-        return this._get_view_dom_columns("#column_pivots perspective-row", col => {
-            return col.getAttribute("name");
-        });
-    }
-
-    _get_view_filters() {
-        return this._get_view_dom_columns("#filters perspective-row", col => {
-            let {operator, operand} = JSON.parse(col.getAttribute("filter"));
-            return [col.getAttribute("name"), operator, operand];
-        });
-    }
-
-    _get_view_sorts() {
-        return this._get_view_dom_columns("#sort perspective-row", col => {
-            let order = col.getAttribute("sort-order") || "asc";
-            return [col.getAttribute("name"), order];
-        });
-    }
-
-    _get_view_hidden(aggregates, sort) {
-        aggregates = aggregates || this._get_view_aggregates();
-        let hidden = [];
-        sort = sort || this._get_view_sorts();
-        for (let s of sort) {
-            if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
-                hidden.push(s[0]);
-            }
-        }
-        return hidden;
-    }
-
-    _get_visible_column_count() {
-        return this._get_view_dom_columns().length;
-    }
-
-    // FIXME: move to state_read
-    get_aggregate_attribute() {
-        const aggs = JSON.parse(this.getAttribute("aggregates")) || {};
-        return Object.keys(aggs).map(col => ({column: col, op: aggs[col]}));
-    }
-
-    // FIXME: move to state_apply
-    set_aggregate_attribute(aggs) {
-        this.setAttribute(
-            "aggregates",
-            JSON.stringify(
-                aggs.reduce((obj, agg) => {
-                    obj[agg.column] = agg.op;
-                    return obj;
-                }, {})
-            )
-        );
-    }
-
-    // clears view state - state-related action
-    _clear_state() {
-        if (this._task) {
-            this._task.cancel();
-        }
-        let all = [];
-        if (this._view) {
-            let view = this._view;
-            this._view = undefined;
-            all.push(view.delete());
-        }
-        if (this._table) {
-            let table = this._table;
-            this._table = undefined;
-            if (table._owner_viewer && table._owner_viewer === this) {
-                all.push(table.delete());
-            }
-        }
-        return Promise.all(all);
-    }
-
-    // edits state
     _update_column_view(columns, reset = false) {
         if (!columns) {
             columns = this._get_view_columns();
@@ -611,6 +498,75 @@ export class ViewPrivate extends HTMLElement {
                     this._active_columns.appendChild(this.new_row(ref.getAttribute("name"), ref.getAttribute("type")));
                 }
             });
+        }
+    }
+
+    _render_time() {
+        const t = performance.now();
+        return () => this.setAttribute("render_time", performance.now() - t);
+    }
+
+    // set viewer state
+    _set_column_defaults() {
+        let cols = this._get_view_dom_columns("#inactive_columns perspective-row");
+        let active_cols = this._get_view_dom_columns();
+        if (cols.length > 0) {
+            if (this._plugin.initial) {
+                let pref = [];
+                let count = this._plugin.initial.count || 2;
+                if (active_cols.length === count) {
+                    pref = active_cols.map(x => x.getAttribute("name"));
+                } else if (active_cols.length < count) {
+                    pref = active_cols.map(x => x.getAttribute("name"));
+                    this._fill_numeric(cols, pref);
+                    if (pref.length < count) {
+                        this._fill_numeric(cols, pref, true);
+                    }
+                } else {
+                    if (this._plugin.initial.type === "number") {
+                        this._fill_numeric(active_cols, pref);
+                        if (pref.length < count) {
+                            this._fill_numeric(cols, pref);
+                        }
+                        if (pref.length < count) {
+                            this._fill_numeric(cols, pref, true);
+                        }
+                    }
+                }
+                this.setAttribute("columns", JSON.stringify(pref.slice(0, count)));
+            } else if (this._plugin.selectMode === "select") {
+                this.setAttribute("columns", JSON.stringify([cols[0].getAttribute("name")]));
+            }
+        }
+    }
+
+    _clear_state() {
+        if (this._task) {
+            this._task.cancel();
+        }
+        let all = [];
+        if (this._view) {
+            let view = this._view;
+            this._view = undefined;
+            all.push(view.delete());
+        }
+        if (this._table) {
+            let table = this._table;
+            this._table = undefined;
+            if (table._owner_viewer && table._owner_viewer === this) {
+                all.push(table.delete());
+            }
+        }
+        return Promise.all(all);
+    }
+
+    _fill_numeric(cols, pref, bypass = false) {
+        for (let col of cols) {
+            let type = col.getAttribute("type");
+            let name = col.getAttribute("name");
+            if (bypass || (["float", "integer"].indexOf(type) > -1 && pref.indexOf(name) === -1)) {
+                pref.push(name);
+            }
         }
     }
 
@@ -725,6 +681,7 @@ export class ViewPrivate extends HTMLElement {
 
     // most of these are drag and drop handlers - how to clean up?
     _register_callbacks() {
+        this._toggle_config = _toggle_config.bind(this);
         this._sort.addEventListener("drop", drop.bind(this));
         this._sort.addEventListener("dragend", undrag.bind(this));
         this._sort.addEventListener("dragenter", drag_enter.bind(this));
@@ -754,8 +711,8 @@ export class ViewPrivate extends HTMLElement {
         this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
-        this._config_button.addEventListener("click", this._toggle_config.bind(this));
-        this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
+        this._config_button.addEventListener("click", this._toggle_config);
+        this._config_button.addEventListener("contextmenu", _show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));
         this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
         this._download_button.addEventListener("click", event => this.download(event.shiftKey));

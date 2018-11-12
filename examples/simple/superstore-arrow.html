@@ -40,7 +40,7 @@
             xhr.onload = function() {
                 var el = document.getElementsByTagName('perspective-viewer')[0];
                 el.load(xhr.response);
-                el._toggle_config();
+                el.toggleConfig();
             }
             xhr.send(null);
         });
