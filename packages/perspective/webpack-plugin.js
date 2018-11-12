@@ -11,6 +11,8 @@ const WORKER_LOADER_PATH = require.resolve("./src/loader/file_worker_loader");
 const WASM_LOADER_PATH = require.resolve("./src/loader/cross_origin_file_loader.js");
 const BLOB_LOADER_PATH = require.resolve("./src/loader/blob_worker_loader.js");
 
+const BABEL_CONFIG = require("./babel.config.js");
+
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
         this.options = options;
@@ -63,7 +65,8 @@ class PerspectiveWebpackPlugin {
             test: /\.js$/,
             include: load_path,
             exclude: /node_modules\/(?!(\@apache|\@jupyterlab))|psp\.(asmjs|async|sync)\.js/,
-            loader: "babel-loader"
+            loader: "babel-loader",
+            options: BABEL_CONFIG
         });
 
         rules.push({
