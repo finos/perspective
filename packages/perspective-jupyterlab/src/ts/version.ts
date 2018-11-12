@@ -8,4 +8,4 @@
  */
 
 export 
-const PERSPECTIVE_VERSION = '0.1.18';
+const PERSPECTIVE_VERSION = '0.2.7';
