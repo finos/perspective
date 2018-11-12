@@ -7,7 +7,8 @@
         "build/*.js.map",
         "build/*.js",
         "build/*.wasm",
-        "src/css/*.css"
+        "src/css/*.css",
+        "babel.config.js"
     ],
     "main": "build/index.js",
     "types": "build/index.d.ts",
