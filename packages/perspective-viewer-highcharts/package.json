@@ -5,7 +5,8 @@
     "main": "src/js/highcharts.js",
     "files": [
         "build/**/*",
-        "src/**/*"
+        "src/**/*",
+        "babel.config.js"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",

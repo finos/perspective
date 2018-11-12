@@ -1,2 +1,2 @@
-import wasm from "../../obj/psp.sync.wasm";
+import wasm from "../../build/psp.sync.wasm";
 export default wasm;

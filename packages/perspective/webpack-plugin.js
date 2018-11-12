@@ -64,7 +64,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /\.js$/,
             include: load_path,
-            exclude: /node_modules\/(?!(\@apache|\@jupyterlab))|psp\.(asmjs|async|sync)\.js/,
+            exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js/,
             loader: "babel-loader",
             options: BABEL_CONFIG
         });

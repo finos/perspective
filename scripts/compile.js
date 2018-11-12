@@ -47,7 +47,7 @@ const RUNTIMES = AVAILABLE_RUNTIMES.filter(runtime => runtime.build).length ? AV
 
 // Directory of Emscripten output
 const BASE_DIRECTORY = path.join(__dirname, "..", "obj", "build");
-const getOuputDir = packageName => path.join(__dirname, "..", "packages", packageName, "obj");
+const getOuputDir = packageName => path.join(__dirname, "..", "packages", packageName);
 
 const templateSource = source => `
 var window = window || {};
@@ -62,11 +62,12 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
 
     const OUTPUT_DIRECTORY = getOuputDir(packageName);
 
-    mkdirp.sync(OUTPUT_DIRECTORY);
+    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "obj"));
+    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "build"));
 
     if (inputWasmFile) {
         console.log("Copying WASM file %s", inputWasmFile);
-        fs.copyFileSync(path.join(BASE_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, inputWasmFile));
+        fs.copyFileSync(path.join(BASE_DIRECTORY, inputWasmFile), path.join(path.join(OUTPUT_DIRECTORY, "build"), inputWasmFile));
     }
 
     console.debug("Creating wrapped js runtime");
@@ -86,7 +87,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         });
     }
 
-    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, inputFile), source);
+    fs.writeFileSync(path.join(path.join(OUTPUT_DIRECTORY, "obj"), inputFile), source);
     console.log("Completed runtime %s", inputFile);
 }
 
