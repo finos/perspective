@@ -69,7 +69,8 @@ exports.with_server = function with_server({paths = DEFAULT}, body) {
     beforeAll(() =>
         server.listen(0, () => {
             __PORT__ = server.address().port;
-        }));
+        })
+    );
 
     afterAll(() => server.close());
 
