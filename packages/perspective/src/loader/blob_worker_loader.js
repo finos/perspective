@@ -14,8 +14,6 @@ const NodeTargetPlugin = require("webpack/lib/node/NodeTargetPlugin");
 const SingleEntryPlugin = require("webpack/lib/SingleEntryPlugin");
 const WebWorkerTemplatePlugin = require("webpack/lib/webworker/WebWorkerTemplatePlugin");
 
-const path = require("path");
-
 class BlobWorkerLoaderError extends Error {
     constructor(err) {
         super(err);
@@ -84,7 +82,6 @@ exports.pitch = function pitch(request) {
             if (!compilation.cache[subCache]) {
                 compilation.cache[subCache] = {};
             }
-
             compilation.cache = compilation.cache[subCache];
         }
     };
@@ -101,21 +98,7 @@ exports.pitch = function pitch(request) {
 
         if (entries[0]) {
             worker.file = entries[0].files[0];
-
-            const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
-
-            return cb(
-                null,
-                `module.exports = function() {
-                    var utils = require(${utils_path});
-                    
-                    if (window.location.origin === utils.host.slice(0, window.location.origin.length)) {
-                        return new Promise(function(resolve) { resolve(new Worker(utils.path + __webpack_public_path__ + ${JSON.stringify(worker.file)})); });
-                    } else {
-                        return new Promise(function(resolve) { new utils.XHRWorker(utils.path + __webpack_public_path__ + ${JSON.stringify(worker.file)}, resolve); });
-                    }
-                };`
-            );
+            return cb(null, this._compilation.assets[worker.file].children[0]._value);
         }
 
         return cb(null, null);

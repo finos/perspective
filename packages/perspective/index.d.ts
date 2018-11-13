@@ -1,3 +1,4 @@
+
 declare module '@jpmorganchase/perspective' {
     /**** object types ****/
     export enum TypeNames {
@@ -133,6 +134,7 @@ declare module '@jpmorganchase/perspective' {
         table(data: TableData, options?: TableOptions): Table;
     }
 
+
     type perspective = {
         TYPE_AGGREGATES: ValuesByType,
         TYPE_FILTERS: ValuesByType,
@@ -140,10 +142,27 @@ declare module '@jpmorganchase/perspective' {
         FILTER_DEFAULTS: ValueByType,
         SORT_ORDERS: SortOrders,
         table(): Table,
-        worker(): PerspectiveWorker
+        worker(): PerspectiveWorker,
+        override: (x: any) => void
     }
 
     const impl: perspective;
 
     export default impl;
 }
+
+
+
+declare module "@jpmorganchase/perspective/build/psp.async.wasm" {
+    const impl: ArrayBuffer;
+    export default impl;
+}
+
+declare module "@jpmorganchase/perspective/build/psp.sync.wasm" {
+    const impl: ArrayBuffer;
+    export default impl;
+}
+
+declare module "@jpmorganchase/perspective/build/perspective.wasm.worker.js" {}
+declare module "@jpmorganchase/perspective/build/perspective.asmjs.worker.js" {}
+

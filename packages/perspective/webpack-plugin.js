@@ -48,7 +48,13 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
                 include: load_path,
-                use: {loader: BLOB_LOADER_PATH, options: {name: "[name].worker.js"}}
+                use: [{
+                    loader: WORKER_LOADER_PATH,
+                    options: {name: "[name].js", compiled: true}
+                }, {
+                    loader: BLOB_LOADER_PATH,
+                    options: {name: "[name].worker.js"}
+                }]
             });
         } else {
             rules.push({
@@ -64,7 +70,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /\.js$/,
             include: load_path,
-            exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js/,
+            exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
             loader: "babel-loader",
             options: BABEL_CONFIG
         });

@@ -55,17 +55,21 @@ module.exports.host = __SCRIPT_PATH__.host();
 
 module.exports.path = __SCRIPT_PATH__.path();
 
+module.exports.BlobWorker = function(responseText, ready) {
+    var blob = new Blob([responseText]);
+    var obj = window.URL.createObjectURL(blob);
+    var worker = new Worker(obj);
+    if (ready) {
+        ready(worker);
+    }
+};
+
 module.exports.XHRWorker = function XHRWorker(url, ready) {
     var oReq = new XMLHttpRequest();
     oReq.addEventListener(
         "load",
         function() {
-            var blob = new Blob([this.responseText]);
-            var obj = window.URL.createObjectURL(blob);
-            var worker = new Worker(obj);
-            if (ready) {
-                ready(worker);
-            }
+            module.exports.BlobWorker(oReq.responseText, ready);
         },
         oReq
     );

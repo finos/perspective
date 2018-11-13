@@ -27,17 +27,38 @@ function detect_iphone() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
-function fetch(url) {
-    return new Promise(resolve => {
-        let wasmXHR = new XMLHttpRequest();
-        wasmXHR.open("GET", url, true);
-        wasmXHR.responseType = "arraybuffer";
-        wasmXHR.onload = () => {
-            resolve(wasmXHR.response);
-        };
-        wasmXHR.send(null);
-    });
-}
+/**
+ * Singleton WASM file download cache.
+ */
+const override = new class {
+    _fetch(url) {
+        return new Promise(resolve => {
+            let wasmXHR = new XMLHttpRequest();
+            wasmXHR.open("GET", url, true);
+            wasmXHR.responseType = "arraybuffer";
+            wasmXHR.onload = () => {
+                resolve(wasmXHR.response);
+            };
+            wasmXHR.send(null);
+        });
+    }
+
+    set({wasm, worker}) {
+        this._wasm = wasm || this._wasm;
+        this._worker = worker || this._worker;
+    }
+
+    worker() {
+        return (this._worker || wasm_worker)();
+    }
+
+    async wasm() {
+        if (!this._wasm) {
+            this._wasm = await this._fetch(wasm);
+        }
+        return this._wasm;
+    }
+}();
 
 class WebWorker extends worker {
     constructor() {
@@ -51,7 +72,7 @@ class WebWorker extends worker {
         if (typeof WebAssembly === "undefined" || detect_iphone()) {
             worker = await asmjs_worker();
         } else {
-            [worker, msg.buffer] = await Promise.all([wasm_worker(), fetch(wasm)]);
+            [worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
         }
         for (var key in this._worker) {
             worker[key] = this._worker[key];
@@ -109,6 +130,8 @@ class WebSocketWorker extends worker {
 }
 
 const mod = {
+    override: x => override.set(x),
+
     worker(url) {
         if (url) {
             return new WebSocketWorker(url);
