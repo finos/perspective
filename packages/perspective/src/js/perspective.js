@@ -108,6 +108,35 @@ export default function(Module) {
     }
 
     /**
+     * Determines a table's limit index.
+     * @private
+     * @param {int} limit_index
+     * @param {int} new_length
+     * @param {int} options_limit
+     */
+    function calc_limit_index(limit_index, new_length, options_limit) {
+        limit_index += new_length;
+        if (options_limit) {
+            limit_index = limit_index % options_limit;
+        }
+        return limit_index;
+    }
+
+    /**
+     * Processes and runs helper functions for a newly-generated table.
+     * @private
+     * @param {*} table
+    
+    function process_table({tbl, gnode, pool, computed}) {
+        if (!gnode) {
+            gnode = __MODULE__.make_gnode(tbl);
+            pool.register_gnode(gnode);
+        }
+        pool.send(gnode.get_id(), 0, tbl);
+        pool.process();
+    } */
+
+    /**
      * Converts any supported input type into a canonical representation for
      * interfacing with perspective.
      *
@@ -158,6 +187,7 @@ export default function(Module) {
                 let name = names[n];
                 let i = 0,
                     inferredType = undefined;
+                // type inferrence
                 if (!preloaded) {
                     while (!inferredType && i < 100 && i < data.length) {
                         if (data[i].hasOwnProperty(name)) {
@@ -176,6 +206,7 @@ export default function(Module) {
                 }
                 let col = [];
                 const parser = new DateParser();
+                // data transformation
                 for (let x = 0; x < data.length; x++) {
                     if (!(name in data[x]) || clean_data(data[x][name]) === undefined) {
                         col.push(undefined);
@@ -249,7 +280,7 @@ export default function(Module) {
                 }
 
                 // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
-                let transformed;
+                let transformed; // data transformation
                 if (data.hasOwnProperty(name)) {
                     transformed = data[name].map(clean_data);
                 } else {
@@ -258,6 +289,8 @@ export default function(Module) {
                 cdata.push(transformed);
             }
         } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
+            // Arrow data/'
+
             //if (this.initialized) {
             //  throw "Cannot update already initialized table with schema.";
             // }
@@ -287,6 +320,7 @@ export default function(Module) {
             throw "Unknown data type";
         }
 
+        // separate methods to return each property
         return {
             row_count: row_count,
             is_arrow: false,
@@ -1371,11 +1405,7 @@ export default function(Module) {
         try {
             for (let chunk of pdata) {
                 tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, false);
-
-                this.limit_index += chunk.cdata[0].length;
-                if (this.limit) {
-                    this.limit_index = this.limit_index % this.limit;
-                }
+                this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
 
                 // Add any computed columns
                 this._calculate_computed(tbl, this.computed);
@@ -1422,11 +1452,7 @@ export default function(Module) {
         try {
             for (let chunk of pdata) {
                 tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, true);
-
-                this.limit_index += chunk.cdata[0].length;
-                if (this.limit) {
-                    this.limit_index = this.limit_index % this.limit;
-                }
+                this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
 
                 this.pool.send(this.gnode.get_id(), 0, tbl);
                 this.pool.process();
@@ -1866,10 +1892,8 @@ export default function(Module) {
                 pool = new __MODULE__.t_pool({_update_callback: function() {}});
                 for (let chunk of pdata) {
                     tbl = __MODULE__.make_table(chunk.cdata[0].length || 0, chunk.names, chunk.types, chunk.cdata, limit_index, options.limit || 4294967295, options.index, chunk.is_arrow, false);
-                    limit_index += chunk.cdata[0].length;
-                    if (options.limit) {
-                        limit_index = limit_index % options.limit;
-                    }
+                    limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, options.limit);
+
                     if (!gnode) {
                         gnode = __MODULE__.make_gnode(tbl);
                         pool.register_gnode(gnode);
