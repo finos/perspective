@@ -126,15 +126,14 @@ export default function(Module) {
      * Processes and runs helper functions for a newly-generated table.
      * @private
      * @param {*} table
-    
-    function process_table({tbl, gnode, pool, computed}) {
-        if (!gnode) {
-            gnode = __MODULE__.make_gnode(tbl);
-            pool.register_gnode(gnode);
+     */
+    function process_table(tbl, gnode, pool, computed) {
+        if (computed) {
+            this._calculate_computed(tbl, computed);
         }
         pool.send(gnode.get_id(), 0, tbl);
         pool.process();
-    } */
+    }
 
     /**
      * Converts any supported input type into a canonical representation for
@@ -1406,12 +1405,7 @@ export default function(Module) {
             for (let chunk of pdata) {
                 tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, false);
                 this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
-
-                // Add any computed columns
-                this._calculate_computed(tbl, this.computed);
-
-                this.pool.send(this.gnode.get_id(), 0, tbl);
-                this.pool.process();
+                process_table.call(this, tbl, this.gnode, this.pool, this.computed);
                 this.initialized = true;
             }
         } catch (e) {
@@ -1453,9 +1447,7 @@ export default function(Module) {
             for (let chunk of pdata) {
                 tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, true);
                 this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
-
-                this.pool.send(this.gnode.get_id(), 0, tbl);
-                this.pool.process();
+                process_table(tbl, this.gnode, this.pool);
                 this.initialized = true;
             }
         } catch (e) {
@@ -1893,13 +1885,11 @@ export default function(Module) {
                 for (let chunk of pdata) {
                     tbl = __MODULE__.make_table(chunk.cdata[0].length || 0, chunk.names, chunk.types, chunk.cdata, limit_index, options.limit || 4294967295, options.index, chunk.is_arrow, false);
                     limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, options.limit);
-
                     if (!gnode) {
                         gnode = __MODULE__.make_gnode(tbl);
                         pool.register_gnode(gnode);
                     }
-                    pool.send(gnode.get_id(), 0, tbl);
-                    pool.process();
+                    process_table(tbl, gnode, pool);
                 }
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
