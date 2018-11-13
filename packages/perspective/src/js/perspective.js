@@ -127,10 +127,7 @@ export default function(Module) {
      * @private
      * @param {*} table
      */
-    function process_table(tbl, gnode, pool, computed) {
-        if (computed) {
-            this._calculate_computed(tbl, computed);
-        }
+    function process_table(tbl, gnode, pool) {
         pool.send(gnode.get_id(), 0, tbl);
         pool.process();
     }
@@ -1403,9 +1400,11 @@ export default function(Module) {
         let tbl;
         try {
             for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, false);
+                tbl = __MODULE__.make_table(chunk, this.limit_index, this.limit || 4294967295, this.index || "", false);
                 this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
-                process_table.call(this, tbl, this.gnode, this.pool, this.computed);
+                // add computed columns
+                this._calculate_computed(tbl, this.computed);
+                process_table(tbl, this.gnode, this.pool);
                 this.initialized = true;
             }
         } catch (e) {
@@ -1445,7 +1444,7 @@ export default function(Module) {
         let tbl;
         try {
             for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, true);
+                tbl = __MODULE__.make_table(chunk, this.limit_index, this.limit || 4294967295, this.index || "", true);
                 this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
                 process_table(tbl, this.gnode, this.pool);
                 this.initialized = true;
@@ -1472,14 +1471,12 @@ export default function(Module) {
 
             // Pull out the t_table from the current gnode
             tbl = __MODULE__.clone_gnode_table(this.gnode);
-
-            // Add new computed columns in place to tbl
             this._calculate_computed(tbl, computed);
 
+            // add computed to gnode and process
             gnode = __MODULE__.make_gnode(tbl);
             pool.register_gnode(gnode);
-            pool.send(gnode.get_id(), 0, tbl);
-            pool.process();
+            process_table(tbl, gnode, pool);
 
             // Merge in definition of previous computed columns
             if (this.computed.length > 0) {
@@ -1883,7 +1880,7 @@ export default function(Module) {
             try {
                 pool = new __MODULE__.t_pool({_update_callback: function() {}});
                 for (let chunk of pdata) {
-                    tbl = __MODULE__.make_table(chunk.cdata[0].length || 0, chunk.names, chunk.types, chunk.cdata, limit_index, options.limit || 4294967295, options.index, chunk.is_arrow, false);
+                    tbl = __MODULE__.make_table(chunk, limit_index, options.limit || 4294967295, options.index, false);
                     limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, options.limit);
                     if (!gnode) {
                         gnode = __MODULE__.make_gnode(tbl);

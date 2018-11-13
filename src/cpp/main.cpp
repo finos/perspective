@@ -681,20 +681,30 @@ _fill_data(t_table_sptr tbl, t_svec ocolnames, val j_data, std::vector<t_dtype> 
  *
  * Params
  * ------
- * j_colnames - a JS Array of column names.
- * j_dtypes - a JS Array of column types.
- * j_data - a JS Array of JS Array columns.
+ * chunk - a JS object containing parsed data and associated metadata
+ * offset 
+ * limit
+ * index
+ * is_delete - sets the table operation
  *
  * Returns
  * -------
  * a populated table.
  */
 t_table_sptr
-make_table(t_uint32 size, val j_colnames, val j_dtypes, val j_data, t_uint32 offset,
-    t_uint32 limit, t_str index, t_bool is_arrow, t_bool is_delete) {
+make_table(val chunk, t_uint32 offset, t_uint32 limit, t_str index, t_bool is_delete) {
+    t_uint32 size;
+    if (!chunk["row_count"].isUndefined()) {
+        size = chunk["row_count"].as<t_uint32>();
+    } else if (!chunk["cdata"][0]["length"].isUndefined()) {
+        size = chunk["cdata"][0]["length"].as<t_uint32>();
+    } else {
+        size = 0;
+    }
+
     // Create the input and port schemas
-    t_svec colnames = vecFromJSArray<std::string>(j_colnames);
-    t_dtypevec dtypes = vecFromJSArray<t_dtype>(j_dtypes);
+    t_svec colnames = vecFromJSArray<std::string>(chunk["names"]);
+    t_dtypevec dtypes = vecFromJSArray<t_dtype>(chunk["types"]);
 
     // Create the table
     // TODO assert size > 0
@@ -702,7 +712,7 @@ make_table(t_uint32 size, val j_colnames, val j_dtypes, val j_data, t_uint32 off
     tbl->init();
     tbl->extend(size);
 
-    _fill_data(tbl, colnames, j_data, dtypes, offset, is_arrow);
+    _fill_data(tbl, colnames, chunk["cdata"], dtypes, offset, chunk["is_arrow"].as<t_bool>());
 
     // Set up pkey and op columns
     if (is_delete) {
