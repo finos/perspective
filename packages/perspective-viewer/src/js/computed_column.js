@@ -7,19 +7,15 @@
  *
  */
 
-import {polyfill} from "mobile-drag-drop";
-
 import {bindTemplate} from "./utils.js";
-import State from "./computed_column/State.js";
-import Computation from "./computed_column/Computation.js";
+import State from "./computed_column/state.js";
+import Computation from "./computed_column/computation.js";
 
 import template from "../html/computed_column.html";
 
 import style from "../less/computed_column.less";
 
-import {disallow_drop} from "./dragdrop.js";
-
-polyfill({});
+import {disallow_drop} from "./viewer/dragdrop.js";
 
 // Computations
 const hour_of_day = function(val) {
