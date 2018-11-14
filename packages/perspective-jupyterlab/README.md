@@ -12,17 +12,8 @@ This extension allows in-lining perspective based charts in jupyterlab notebooks
 jupyter labextension install @jpmorganchase/perspective-jupyterlab
 ```
 
-### From source
-
-First build perspective ala the perspective documentation, then from inside the 
-jlab directory:
-
-```bash
-jupyter labextension install .
-```
-
 ### PIP
 
 ```bash
-pip instal perspective-python
+pip install perspective-python
 ```
