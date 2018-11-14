@@ -18,9 +18,7 @@ import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} fro
 import {PERSPECTIVE_VERSION} from './version.ts';
 
 /* Helper methods */
-import {
-    datasourceToSource, createCopyDl
-} from './utils.ts';
+import {datasourceToSource} from './utils.ts';
 
 /* perspective components */
 import "@jpmorganchase/perspective-viewer";
@@ -58,6 +56,8 @@ class PerspectiveModel extends DOMWidgetModel {
             columnpivots: [],
             aggregates: [],
             sort: [],
+            index: '',
+            limit: -1,
             settings: false,
             dark: false
         };
@@ -100,12 +100,6 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('msg:custom', this._update, this);
 
         this.displayed.then(()=> {
-        let data = this.model.get('_data');
-            if (data.length > 0){
-                this.psp.update(this.model.get('_data'));
-            } else {
-                this.datasrc_changed();
-            }
             this.settings_changed();
             this.dark_changed();
             this.view_changed();
@@ -120,6 +114,7 @@ class PerspectiveView extends DOMWidgetView {
 
             // do aggregates after columns
             this.aggregates_changed();
+            this.datasrc_changed();
         });
     }
 
@@ -141,7 +136,18 @@ class PerspectiveView extends DOMWidgetView {
         let data = this.model.get('_data');
 
         if (Object.keys(schema).length > 0 ){
-            this.psp.load(schema);
+            let limit = this.model.get('limit');
+            let index = this.model.get('index');
+            let options = {} as {[key: string]: any};
+
+            if (limit > 0){
+                options['limit'] = limit;
+            }
+            if (index){
+                options['index'] = index;
+            }
+
+            this.psp.load(schema, options);
         }
         if (data.length > 0){
             this.psp.update(this.model.get('_data'));
@@ -223,6 +229,15 @@ class PerspectiveView extends DOMWidgetView {
         this.psp.setAttribute('sort', JSON.stringify(this.model.get('sort')));
     }
 
+    limit_changed(){
+        let limit = this.model.get('limit');
+        if(limit > 0){
+            this.psp.setAttribute('limit', limit);
+        } else {
+            this.psp.removeAttribute('limit');
+        }
+    }
+
     settings_changed(){
         this.psp.setAttribute('settings', this.model.get('settings'));
     }
@@ -251,19 +266,24 @@ namespace Private {
         psp.className = PSP_CLASS;
         psp.setAttribute('type', MIME_TYPE);
 
-        let btns = createCopyDl(psp);
-
         while(node.lastChild){
             node.removeChild(node.lastChild);
         }
 
         node.appendChild(psp);
 
+        // allow perspective's event handlers to do their work
+        psp.addEventListener( 'contextmenu', stop, false );
+        psp.addEventListener( 'mousedown', stop, false );
+        psp.addEventListener( 'mousedown', stop, false );
+
+        function stop( event: MouseEvent ) {
+          event.stopPropagation();
+        }
+
         let div = document.createElement('div');
         div.style.setProperty('display', 'flex');
         div.style.setProperty('flex-direction', 'row');
-        div.appendChild(btns['copy']);
-        div.appendChild(btns['dl']);
         node.appendChild(div);
         return psp;
     }
