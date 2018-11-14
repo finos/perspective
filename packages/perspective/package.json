@@ -23,7 +23,7 @@
         "bench:run": "node build/benchmark.js",
         "bench": "npm-run-all bench:build bench:run",
         "prebuild": "mkdir -p build && CLICOLOR_FORCE=1 npm run compile",
-        "precompile": "mkdir -p obj",
+        "precompile": "mkdir -p obj && mkdir -p ../../obj/",
         "compile": "cd ../../obj/ && emcmake cmake ../scripts/ && emmake make -j${PSP_CPU_COUNT-8}",
         "postcompile": "node ../../scripts/compile",
         "build": "npm-run-all build:webpack",

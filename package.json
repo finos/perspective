@@ -79,7 +79,6 @@
         "fix:less": "prettier --tab-width 4 --write packages/**/src/less/*.less",
         "fix:html": "html-beautify packages/**/src/html/*.html -r",
         "fix:json": "prettier --tab-width 4 --write **/package.json",
-        "fix:markdown": "prettier --tab-width 4 --write docs/usage.md docs/installation.md",
         "fix": "npm-run-all --silent fix:*",
         "_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "_build_test": "lerna run test:build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",

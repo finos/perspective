@@ -27,8 +27,16 @@ import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 
+
+import perspective from "@jpmorganchase/perspective";
+import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
+import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
+
+perspective.override({wasm, worker});
+
+
 /* css */
-import '../less/material.less';
+import '!!style-loader!css-loader!less-loader!../less/material.less';
 
 export
 class PerspectiveModel extends DOMWidgetModel {

@@ -122,8 +122,8 @@ Highcharts.setOptions({
                 (!point.value // LINE CHANGED
                     ? nullColor
                     : colorAxis && value !== undefined
-                        ? colorAxis.toColor(value, point)
-                        : point.color || series.color);
+                    ? colorAxis.toColor(value, point)
+                    : point.color || series.color);
 
             if (color) {
                 point.color = color;

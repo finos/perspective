@@ -30,7 +30,6 @@ export function _toggle_config() {
     }
     this._show_config = !this._show_config;
     this._plugin.resize.call(this, true);
-    console.log(this._show_config);
     _hide_context_menu.call(this);
     this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
 }
