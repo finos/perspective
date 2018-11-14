@@ -13,10 +13,22 @@ bundled scripts themselves. These are downloaded asynchronously at runtime
 after detecting whether or not WebAssembly is supported by your browser. The
 assets can be found in the <code>build/</code> directory of the
 <code>@jpmorganchase/perspective</code> and <code>@jpmorganchase/perspective-viewer</code> packages.</p>
-<p>This can be achieved by using the built-in <code>WorkerHost</code> Node.js server, hosting
-the contents of a packages <code>build/</code> in your application's build script, using
-<code>webpack</code> and <code>CopyWebpackPlugin</code>, or otherwise making sure these directories
-are visible to your web server, e.g.:</p>
+<p>When importing from NPM modules, you can use the Perspective Webpack plugin to
+manage the <code>.worker.*.js</code> and <code>.wasm</code> assets for you. A sample config:</p>
+<pre><code class="hljs css javascript"><span class="hljs-keyword">const</span> PerspectivePlugin = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@jpmorganchase/perspective/webpack-plugin"</span>);
+
+<span class="hljs-built_in">module</span>.exports = {
+    <span class="hljs-attr">entry</span>: <span class="hljs-string">"./in.js"</span>,
+    <span class="hljs-attr">output</span>: {
+        <span class="hljs-attr">filename</span>: <span class="hljs-string">"out.js"</span>,
+        <span class="hljs-attr">path</span>: <span class="hljs-string">"build"</span>
+    },
+    <span class="hljs-attr">plugins</span>: [<span class="hljs-keyword">new</span> PerspectivePlugin()]
+};
+</code></pre>
+<p>Alternatively, you may use the built-in <code>WorkerHost</code> Node.js server, host
+the contents of a package's <code>build/</code> in your application's build script, or
+otherwise making sure these directories are visible to your web server, e.g.:</p>
 <pre><code class="hljs css javascript">cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/
 </code></pre>
 <h2><a class="anchor" aria-hidden="true" id="from-cdn"></a><a href="#from-cdn" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>From CDN</h2>
