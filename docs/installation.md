@@ -75,3 +75,26 @@ Doing so is quite a bit more complex than a standard pure Javascript NPM
 package, so if you're not looking to hack on Perspective itself, you are likely
 better off choosing the CDN or NPM methods above. See the
 [developer docs](development.html) for details.
+
+## Jupyterlab
+
+Perspective comes bundled with a complete Jupyterlab plugin which can be
+accessed from Python via the complementary 
+[`perspective-python`](https://github.com/timkpaine/perspective-python)
+package.  `perspective-python` implements mostly the same API as 
+`<perspective-viewer>`, and works with static `pandas.DataFrame` objects as well
+as streaming incremental updates via the `update()` method (as in Javascript).
+
+<img src="https://jpmorganchase.github.io/perspective/img/jupyterlab.png"></img>
+
+You'll need to install both to utilize Perspective from Python in Jupyterlab.
+Assuming you've already installed the latter 3, you can install the Perspective 
+plugin as below, or follow the install from source instructions from the 
+`perspective-python` 
+[documentation](https://perspective-python.readthedocs.io/en/latest/index.html).
+
+```bash
+pip install perspective-python
+jupyter labextension install @jpmorganchase/perspective-jupyterlab
+```
+
