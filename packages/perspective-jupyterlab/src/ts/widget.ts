@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright (c) 2017, the Perspective Authors.
+ * Copyright (c) 2018, the Perspective Authors.
  *
  * This file is part of the Perspective library, distributed under the terms of
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
@@ -11,14 +11,9 @@ import {
     DOMWidgetModel, DOMWidgetView, ISerializers
 } from '@jupyter-widgets/base';
 
-import {Session} from '@jupyterlab/services';
-
 /* defines */
 import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from './utils.ts';
 import {PERSPECTIVE_VERSION} from './version.ts';
-
-/* Helper methods */
-import {datasourceToSource} from './utils.ts';
 
 /* perspective components */
 import "@jpmorganchase/perspective-viewer";
@@ -58,7 +53,9 @@ class PerspectiveModel extends DOMWidgetModel {
             sort: [],
             index: '',
             limit: -1,
+            computedcolumns: [],
             settings: false,
+            embed: false,
             dark: false
         };
     }
@@ -80,6 +77,7 @@ class PerspectiveModel extends DOMWidgetModel {
 export
 class PerspectiveView extends DOMWidgetView {
     private psp: any;
+    private embed = false;
 
     render() {
         this.psp = Private.createNode(this.el);
@@ -94,7 +92,9 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:columnpivots', this.columnpivots_changed, this);
         this.model.on('change:aggregates', this.aggregates_changed, this);
         this.model.on('change:sort', this.sort_changed, this);
+        this.model.on('change:computedcolumns', this.computedcolumns_changed, this);
         this.model.on('change:settings', this.settings_changed, this);
+        this.model.on('change:embed', this.embed_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
 
         this.model.on('msg:custom', this._update, this);
@@ -156,36 +156,7 @@ class PerspectiveView extends DOMWidgetView {
 
     datasrc_changed(){
         this.psp.delete();
-        let type = datasourceToSource(this.model.get('datasrc'));
-
-        if (type === 'static') {
-            this.data_changed();
-        } else if (type === 'comm') {
-            //grab session id 
-            let els = this.model.get('datasrc').replace('comm://', '').split('/');
-            let kernelId = els[0];
-            let name = els[1];
-            let channel = els[2];
-
-            Session.listRunning().then(sessionModels => {
-                for (let i=0; i<sessionModels.length; i++) {
-                    if (sessionModels[i].kernel.id === kernelId) {
-                        const session = Session.connectTo(sessionModels[i]);
-                        const comm = session.kernel.connectToComm(name + '/' + channel);
-                
-                        comm.open('ack');
-                        comm.onMsg = (msg: any) => {
-                            let dat = msg['content']['data'];
-                            let tmp = JSON.parse(dat);
-                            this.psp.update(tmp);
-                        };
-                        comm.onClose = (msg: any) => {};
-                    }
-                }
-            });
-        } else {
-            throw new Error('Source not recognized!');
-        }
+        this.data_changed();
     }
 
     schema_changed(){
@@ -207,7 +178,7 @@ class PerspectiveView extends DOMWidgetView {
     columns_changed(){
         let columns = this.model.get('columns');
         if(columns.length > 0){
-            this.psp.setAttribute('columns', JSON.stringify(this.model.get('columns')));
+            this.psp.setAttribute('columns', JSON.stringify(columns));
         } else {
             this.psp.removeAttribute('columns');
         }
@@ -229,6 +200,15 @@ class PerspectiveView extends DOMWidgetView {
         this.psp.setAttribute('sort', JSON.stringify(this.model.get('sort')));
     }
 
+    computedcolumns_changed(){
+        let computedcolumns = this.model.get('computedcolumns');
+        if(computedcolumns.length > 0){
+            this.psp.setAttribute('computed-columns', JSON.stringify(computedcolumns));
+        } else {
+            this.psp.removeAttribute('computed-columns');
+        }
+    }
+
     limit_changed(){
         let limit = this.model.get('limit');
         if(limit > 0){
@@ -240,6 +220,13 @@ class PerspectiveView extends DOMWidgetView {
 
     settings_changed(){
         this.psp.setAttribute('settings', this.model.get('settings'));
+    }
+
+    embed_changed(){
+        this.embed = this.model.get('embed');
+        if(this.embed){
+            console.log('Warning: embed not implemented');
+        }
     }
 
     dark_changed(){
