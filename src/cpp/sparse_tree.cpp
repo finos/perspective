@@ -909,29 +909,34 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
             case AGGTYPE_WEIGHTED_MEAN: {
                 auto pkeys = get_pkeys(nidx);
 
-                t_f64vec values;
-                t_f64vec weights;
+                t_float64 nr = 0;
+                t_float64 dr = 0;
+                t_tscalvec values;
+                t_tscalvec weights;
 
                 gstate.read_column(spec.get_dependencies()[0].name(), pkeys, values);
-
                 gstate.read_column(spec.get_dependencies()[1].name(), pkeys, weights);
 
-                t_float64 init_value = 0.0;
+                auto weights_it = weights.begin();
+                auto values_it = values.begin();
 
-                auto nr = std::inner_product(
-                    weights.begin(), weights.end(), values.begin(), init_value);
-
-                auto dr = std::accumulate(weights.begin(), weights.end(), t_float64(0));
+                for( ; weights_it != weights.end() && values_it != values.end(); ++weights_it, ++values_it )
+                {
+                    if( weights_it->is_valid() && values_it->is_valid() && !weights_it->is_nan() && !values_it->is_nan() )
+                    {
+                        nr += weights_it->to_double() * values_it->to_double();
+                        dr += weights_it->to_double();
+                    }
+                }
 
                 t_f64pair* dst_pair = dst->get_nth<t_f64pair>(dst_ridx);
-
                 old_value.set(dst_pair->first / dst_pair->second);
 
                 dst_pair->first = nr;
                 dst_pair->second = dr;
 
-                dst->set_valid(dst_ridx, true);
-
+                bool valid = (dr != 0);
+                dst->set_valid(dst_ridx, valid);
                 new_value.set(nr / dr);
             } break;
             case AGGTYPE_UNIQUE: {

@@ -199,6 +199,17 @@ module.exports = perspective => {
             let result = await view.to_json();
             expect(result).toEqual(answer);
         });
+
+        it("weighted mean", async function() {
+            var table = perspective.table([{a: "a", x: 1, y: 200}, {a: "a", x: 2, y: 100}, {a: "a", x: 3, y: null}]);
+            var view = table.view({
+                row_pivot: ["a"],
+                aggregate: [{op: "weighted mean", column: ["y", "x"], name: "y"}]
+            });
+            var answer = [{__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)}, {__ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2)}];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+        });
     });
 
     describe("Row pivot", function() {
