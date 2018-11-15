@@ -47,6 +47,7 @@ library can be used directly from
 CDN by simply adding these scripts to your `.html`'s `<head>` section:
 
 ```html
+<script src="https://unpkg.com/@jpmorganchase/perspective/build/perspective.js"></script>
 <script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
 <script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
 <script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
