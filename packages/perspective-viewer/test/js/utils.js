@@ -98,7 +98,7 @@ let browser,
     __name = "";
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]});
+    browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]});
     page = await browser.newPage();
 
     // CSS Animations break our screenshot tests, so set the
