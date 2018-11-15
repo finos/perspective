@@ -1024,16 +1024,18 @@ export default function(Module) {
         return this.gnode.get_table().size();
     };
 
-    table.prototype._schema = function() {
+    table.prototype._schema = function(computed) {
         let schema = this.gnode.get_tblschema();
         let columns = schema.columns();
         let types = schema.types();
         let new_schema = {};
+        const computed_schema = this.computed_schema();
         for (let key = 0; key < columns.size(); key++) {
-            if (columns.get(key) === "psp_okey") {
+            const name = columns.get(key);
+            if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
                 continue;
             }
-            new_schema[columns.get(key)] = get_column_type(types.get(key).value);
+            new_schema[name] = get_column_type(types.get(key).value);
         }
         schema.delete();
         columns.delete();
@@ -1046,41 +1048,33 @@ export default function(Module) {
      * columns of this {@link table}, and whose values are their string type names.
      *
      * @async
-     *
+     * @param {boolean} computed Should computed columns be included?
+     * (default false)
      * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
      */
-    table.prototype.schema = async function() {
-        return this._schema();
+    table.prototype.schema = async function(computed = false) {
+        return this._schema(computed);
     };
 
     table.prototype._computed_schema = function() {
-        let computed = this.computed;
+        if (this.computed.length < 0) return {};
 
-        if (computed.length < 0) return {};
+        const computed_schema = {};
 
-        let schema = this.gnode.get_tblschema();
-        let columns = schema.columns();
-        let types = schema.types();
-
-        let computed_schema = {};
-
-        for (let i = 0; i < computed.length; i++) {
-            const column_name = computed[i].column;
-            const column_type = computed[i].type;
+        for (let i = 0; i < this.computed.length; i++) {
+            const column_name = this.computed[i].column;
+            const column_type = this.computed[i].type;
 
             const column = {};
 
             column.type = column_type;
-            column.input_columns = computed[i].inputs;
-            column.input_type = computed[i].input_type;
-            column.computation = computed[i].computation;
+            column.input_columns = this.computed[i].inputs;
+            column.input_type = this.computed[i].input_type;
+            column.computation = this.computed[i].computation;
 
             computed_schema[column_name] = column;
         }
 
-        schema.delete();
-        columns.delete();
-        types.delete();
         return computed_schema;
     };
 
@@ -1444,6 +1438,8 @@ export default function(Module) {
 
     /**
      * Create a new table with the addition of new computed columns (defined as javascript functions)
+     *
+     * @param {Computation} computed A computation specification object
      */
     table.prototype.add_computed = function(computed) {
         let pool, gnode, tbl;
@@ -1484,14 +1480,14 @@ export default function(Module) {
         }
     };
 
-    table.prototype._columns = function() {
+    table.prototype._columns = function(computed = false) {
         let schema = this.gnode.get_tblschema();
         let computed_schema = this._computed_schema();
         let cols = schema.columns();
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
             let name = cols.get(cidx);
-            if (name !== "psp_okey" && typeof computed_schema[name] === "undefined") {
+            if (name !== "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
                 names.push(name);
             }
         }
@@ -1504,11 +1500,12 @@ export default function(Module) {
      * The column names of this table.
      *
      * @async
-     *
+     * @param {boolean} computed Should computed columns be included?
+     * (default false)
      * @returns {Array<string>} An array of column names for this table.
      */
-    table.prototype.columns = async function() {
-        return this._columns();
+    table.prototype.columns = async function(computed = false) {
+        return this._columns(computed);
     };
 
     table.prototype._column_metadata = function() {

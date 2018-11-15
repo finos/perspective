@@ -39,15 +39,15 @@ if (document.currentScript && document.currentScript.hasAttribute("preload")) {
 
 /******************************************************************************
  *
- * Perspective Loading
+ *  Helpers
  *
  */
 
 let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
 
 const column_sorter = schema => (a, b) => {
-    let s1 = TYPE_ORDER[schema[a]];
-    let s2 = TYPE_ORDER[schema[b]];
+    const s1 = TYPE_ORDER[schema[a]];
+    const s2 = TYPE_ORDER[schema[b]];
     let r = 0;
     if (s1 == s2) {
         r = a.toLowerCase() < b.toLowerCase() ? -1 : 1;
@@ -58,25 +58,24 @@ const column_sorter = schema => (a, b) => {
 };
 
 function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
-    const found = {};
-    const aggregates = aggregate_attribute
-        .map(col => {
-            const _type = schema[col.column];
-            found[col.column] = true;
-            if (_type) {
-                if (col.op === "" || perspective.TYPE_AGGREGATES[_type].indexOf(col.op) === -1) {
-                    col.op = perspective.AGGREGATE_DEFAULTS[_type];
-                }
-                return col;
-            } else {
-                console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
+    const found = new Set();
+    const aggregates = [];
+    for (const col of aggregate_attribute) {
+        const type = schema[col.column];
+        found.add(col.column);
+        if (type) {
+            if (col.op === "" || perspective.TYPE_AGGREGATES[type].indexOf(col.op) === -1) {
+                col.op = perspective.AGGREGATE_DEFAULTS[type];
             }
-        })
-        .filter(x => x);
+            aggregates.push(col);
+        } else {
+            console.warn(`No column "${col.column}" found (specified in aggregates attribute).`);
+        }
+    }
 
     // Add columns detected from dataset.
     for (const col of cols) {
-        if (!found[col]) {
+        if (!found.has(col)) {
             aggregates.push({
                 column: col,
                 op: perspective.AGGREGATE_DEFAULTS[schema[col]]
@@ -87,11 +86,23 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
     return aggregates;
 }
 
+function calculate_throttle_timeout(render_time) {
+    const view_count = document.getElementsByTagName("perspective-viewer").length;
+    const timeout = render_time * view_count * 2;
+    return Math.min(10000, Math.max(0, timeout));
+}
+
+/******************************************************************************
+ *
+ * PerspectiveElement
+ *
+ */
+
 export class PerspectiveElement extends StateElement {
     async _check_recreate_computed_columns() {
         const computed_columns = JSON.parse(this.getAttribute("computed-columns"));
         if (computed_columns.length > 0) {
-            for (let col of computed_columns) {
+            for (const col of computed_columns) {
                 await this._create_computed_column({
                     detail: {
                         column_name: col.name,
@@ -123,7 +134,7 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        const [cols, schema, computed_schema] = await Promise.all([table.columns(), table.schema(), table.computed_schema()]);
+        const [cols, schema, computed_schema] = await Promise.all([table.columns(), table.schema(true), table.computed_schema()]);
 
         this._clear_columns();
 
@@ -135,76 +146,42 @@ export class PerspectiveElement extends StateElement {
         cols.sort(column_sorter(schema));
 
         // Update aggregates
-        const aggregates = get_aggregates_with_defaults(this.get_aggregate_attribute(), schema, cols);
+        const computed_aggregates = Object.entries(computed_schema).map(([column, op]) => ({
+            column,
+            op
+        }));
+
+        const all_cols = cols.concat(Object.keys(computed_schema));
+        const aggregates = get_aggregates_with_defaults(this.get_aggregate_attribute().concat(computed_aggregates), schema, all_cols);
+
+        let shown = JSON.parse(this.getAttribute("columns")).filter(x => all_cols.indexOf(x) > -1);
+        if (shown.length === 0) {
+            shown = this._initial_col_order;
+        }
+
         this.set_aggregate_attribute(aggregates);
 
-        // strip computed columns from sorted columns & schema - place at end
-        if (Object.keys(computed_schema).length > 0) {
-            for (const cc of Object.values(computed_schema)) {
-                if (cols.includes(cc)) {
-                    cols.splice(cols.indexOf(cc), 1);
-                }
-                if (cc in schema) {
-                    delete schema[cc];
-                }
-            }
-        }
-
-        // Update column rows
-        let shown = this.hasAttribute("columns") ? JSON.parse(this.getAttribute("columns")).filter(x => cols.indexOf(x) > -1) : [];
-
-        for (let x of cols) {
-            let aggregate = aggregates.filter(a => a.column === x).map(a => a.op)[0];
-            let row = this._new_row(x, schema[x], aggregate);
+        for (const name of all_cols) {
+            const aggregate = aggregates.find(a => a.column === name).op;
+            const row = this._new_row(name, schema[name], aggregate, null, null, computed_schema[name]);
             this._inactive_columns.appendChild(row);
-            if (shown.includes(x)) {
+            if (shown.includes(name)) {
                 row.classList.add("active");
             }
         }
 
-        const computed_cols = _.pairs(computed_schema);
-
-        // fixme better approach please
-        for (let cc of computed_cols) {
-            let cc_data = {
-                column_name: cc[0],
-                input_columns: cc[1].input_columns,
-                input_type: cc[1].input_type,
-                computation: cc[1].computation,
-                type: cc[1].type
-            };
-            let aggregate = aggregates.filter(a => a.column === cc_data.column_name).map(a => a.op)[0];
-            let row = this._new_row(cc_data.column_name, cc_data.type, aggregate, null, null, cc_data);
-            this._inactive_columns.appendChild(row);
-            if (shown.includes(cc)) {
-                row.classList.add("active");
-            }
+        for (const x of shown) {
+            const active_row = this._new_row(x, schema[x]);
+            this._active_columns.appendChild(active_row);
         }
 
-        if (!this.hasAttribute("columns") || shown.length === 0) {
-            this._set_column_defaults();
-            shown = JSON.parse(this.getAttribute("columns") || "[]").filter(x => cols.indexOf(x) > -1);
-            for (let x in cols) {
-                if (shown.indexOf(x) !== -1) {
-                    this._inactive_columns.children[x].classList.add("active");
-                }
-            }
-        } else {
-            for (let x of shown) {
-                let active_row = this._new_row(x, schema[x]);
-                this._active_columns.appendChild(active_row);
-            }
-        }
-
-        if (cols.length === shown.length) {
+        if (all_cols.length === shown.length) {
             this._inactive_columns.parentElement.classList.add("collapse");
         } else {
             this._inactive_columns.parentElement.classList.remove("collapse");
         }
 
         this._show_column_selectors();
-
-        this.filters = this.getAttribute("filters");
         await this._debounce_update();
     }
 
@@ -224,12 +201,6 @@ export class PerspectiveElement extends StateElement {
         return false;
     }
 
-    _calculate_throttle_timeout() {
-        let view_count = document.getElementsByTagName("perspective-viewer").length;
-        let timeout = this.getAttribute("render_time") * view_count * 2;
-        return Math.min(10000, Math.max(0, timeout));
-    }
-
     _view_on_update() {
         if (!this._debounced) {
             this._debounced = setTimeout(async () => {
@@ -239,10 +210,7 @@ export class PerspectiveElement extends StateElement {
                     this._task.cancel();
                 }
                 const task = (this._task = new CancelTask());
-                let updater = this._plugin.update;
-                if (!updater) {
-                    updater = this._plugin.create;
-                }
+                const updater = this._plugin.update || this._plugin.create;
                 try {
                     await updater.call(this, this._datavis, this._view, task);
                     timer();
@@ -252,21 +220,21 @@ export class PerspectiveElement extends StateElement {
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
-            }, this._calculate_throttle_timeout());
+            }, calculate_throttle_timeout(this.getAttribute("render_time")));
         }
     }
 
     async _new_view(ignore_size_check = false) {
         if (!this._table) return;
-        let row_pivots = this._get_view_row_pivots();
-        let column_pivots = this._get_view_column_pivots();
-        let filters = this._get_view_filters();
-        let aggregates = this._get_view_aggregates();
+        const row_pivots = this._get_view_row_pivots();
+        const column_pivots = this._get_view_column_pivots();
+        const filters = this._get_view_filters();
+        const aggregates = this._get_view_aggregates();
         if (aggregates.length === 0) return;
-        let sort = this._get_view_sorts();
-        let hidden = this._get_view_hidden(aggregates, sort);
-        for (let s of hidden) {
-            let all = this._get_view_aggregates("#inactive_columns perspective-row");
+        const sort = this._get_view_sorts();
+        const hidden = this._get_view_hidden(aggregates, sort);
+        for (const s of hidden) {
+            const all = this._get_view_aggregates("#inactive_columns perspective-row");
             aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
         }
 
@@ -323,14 +291,14 @@ export class PerspectiveElement extends StateElement {
         if (this._task) {
             this._task.cancel();
         }
-        let all = [];
+        const all = [];
         if (this._view) {
-            let view = this._view;
+            const view = this._view;
             this._view = undefined;
             all.push(view.delete());
         }
         if (this._table) {
-            let table = this._table;
+            const table = this._table;
             this._table = undefined;
             if (table._owner_viewer && table._owner_viewer === this) {
                 all.push(table.delete());
