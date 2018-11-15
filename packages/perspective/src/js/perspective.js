@@ -75,13 +75,24 @@ export default function(Module) {
     }
 
     /**
-     * Processes and runs helper functions for a newly-generated table.
-     * @private
-     * @param {*} table
+     * Common logic for creating and registering a gnode/t_table.
+     *
+     * @param {*} pdata
+     * @param {*} pool
+     * @param {*} gnode
+     * @param {*} computed
+     * @param {*} index
+     * @param {*} limit
+     * @param {*} limit_index
+     * @param {*} is_delete
+     * @returns
      */
-    function process_table(tbl, gnode, pool) {
-        pool.send(gnode.get_id(), 0, tbl);
-        pool.process();
+    function make_table(pdata, pool, gnode, computed, index, limit, limit_index, is_delete) {
+        for (let chunk of pdata) {
+            gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_delete);
+            limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
+        }
+        return [gnode, limit_index];
     }
 
     /**
@@ -733,43 +744,6 @@ export default function(Module) {
         }
     };
 
-    table.prototype._calculate_computed = function(tbl, computed_defs) {
-        // tbl is the pointer to the C++ t_table
-
-        for (let i = 0; i < computed_defs.length; ++i) {
-            let coldef = computed_defs[i];
-            let name = coldef["column"];
-            let func = coldef["func"];
-            let inputs = coldef["inputs"];
-            let type = coldef["type"] || "string";
-
-            let dtype;
-            switch (type) {
-                case "integer":
-                    dtype = __MODULE__.t_dtype.DTYPE_INT32;
-                    break;
-                case "float":
-                    dtype = __MODULE__.t_dtype.DTYPE_FLOAT64;
-                    break;
-                case "boolean":
-                    dtype = __MODULE__.t_dtype.DTYPE_BOOL;
-                    break;
-                case "date":
-                    dtype = __MODULE__.t_dtype.DTYPE_DATE;
-                    break;
-                case "datetime":
-                    dtype = __MODULE__.t_dtype.DTYPE_TIME;
-                    break;
-                case "string":
-                default:
-                    dtype = __MODULE__.t_dtype.DTYPE_STR;
-                    break;
-            }
-
-            __MODULE__.table_add_computed_column(tbl, name, dtype, func, inputs);
-        }
-    };
-
     /**
      * Delete this {@link table} and clean up all resources associated with it.
      * Table objects do not stop consuming resources or processing updates when
@@ -1155,22 +1129,12 @@ export default function(Module) {
             }
         }
 
-        let tbl;
         try {
-            for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk, this.limit_index, this.limit || 4294967295, this.index || "", false);
-                this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
-                // add computed columns
-                this._calculate_computed(tbl, this.computed);
-                process_table(tbl, this.gnode, this.pool);
-                this.initialized = true;
-            }
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false);
+            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
-            if (tbl) {
-                tbl.delete();
-            }
             schema.delete();
             names.delete();
             types.delete();
@@ -1199,20 +1163,12 @@ export default function(Module) {
             pdata = [parse_data(__MODULE__, data, [this.index], types)];
         }
 
-        let tbl;
         try {
-            for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk, this.limit_index, this.limit || 4294967295, this.index || "", true);
-                this.limit_index = calc_limit_index(this.limit_index, chunk.cdata[0].length, this.limit);
-                process_table(tbl, this.gnode, this.pool);
-                this.initialized = true;
-            }
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true);
+            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
-            if (tbl) {
-                tbl.delete();
-            }
             types.delete();
         }
     };
@@ -1224,19 +1180,8 @@ export default function(Module) {
         let pool, gnode, tbl;
 
         try {
-            // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {}});
-
-            // Pull out the t_table from the current gnode
-            tbl = __MODULE__.clone_gnode_table(this.gnode);
-            this._calculate_computed(tbl, computed);
-
-            // add computed to gnode and process
-            gnode = __MODULE__.make_gnode(tbl);
-            pool.register_gnode(gnode);
-            process_table(tbl, gnode, pool);
-
-            // Merge in definition of previous computed columns
+            gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
@@ -1630,23 +1575,13 @@ export default function(Module) {
                 throw `Specified index '${options.index}' does not exist in data.`;
             }
 
-            let tbl,
-                gnode,
+            let gnode,
                 pool,
                 limit_index = 0;
 
             try {
                 pool = new __MODULE__.t_pool({_update_callback: function() {}});
-                for (let chunk of pdata) {
-                    tbl = __MODULE__.make_table(chunk, limit_index, options.limit || 4294967295, options.index, false);
-                    limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, options.limit);
-                    if (!gnode) {
-                        gnode = __MODULE__.make_gnode(tbl);
-                        pool.register_gnode(gnode);
-                    }
-                    process_table(tbl, gnode, pool);
-                }
-
+                [gnode, limit_index] = make_table(pdata, pool, gnode, undefined, options.index, options.limit, limit_index, false);
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {
                 if (pool) {
@@ -1656,10 +1591,6 @@ export default function(Module) {
                     gnode.delete();
                 }
                 throw e;
-            } finally {
-                if (tbl) {
-                    tbl.delete();
-                }
             }
         }
     };

@@ -614,12 +614,12 @@ _fill_col<std::string>(val dcol, t_col_sptr col, t_bool is_arrow) {
  *
  */
 void
-_fill_data(t_table_sptr tbl, t_svec ocolnames, val j_data, std::vector<t_dtype> odt,
+_fill_data(t_table& tbl, t_svec ocolnames, val j_data, std::vector<t_dtype> odt,
     t_uint32 offset, t_bool is_arrow) {
     std::vector<val> data_cols = vecFromJSArray<val>(j_data);
     for (auto cidx = 0; cidx < ocolnames.size(); ++cidx) {
         auto name = ocolnames[cidx];
-        auto col = tbl->get_column(name);
+        auto col = tbl.get_column(name);
         auto col_type = odt[cidx];
         auto dcol = data_cols[cidx];
 
@@ -676,69 +676,186 @@ _fill_data(t_table_sptr tbl, t_svec ocolnames, val j_data, std::vector<t_dtype> 
  * Public
  */
 
+void
+set_column_nth(t_column* col, t_uindex idx, val value) {
+
+    // Check if the value is a javascript null
+    if (value.isNull()) {
+        col->unset(idx);
+        return;
+    }
+
+    switch (col->get_dtype()) {
+        case DTYPE_BOOL: {
+            col->set_nth<t_bool>(idx, value.as<t_bool>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_FLOAT64: {
+            col->set_nth<t_float64>(idx, value.as<t_float64>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_FLOAT32: {
+            col->set_nth<t_float32>(idx, value.as<t_float32>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_UINT32: {
+            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_UINT64: {
+            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_INT32: {
+            col->set_nth<t_int32>(idx, value.as<t_int32>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_INT64: {
+            col->set_nth<t_int64>(idx, value.as<t_int64>(), STATUS_VALID);
+            break;
+        }
+        case DTYPE_STR: {
+            std::wstring welem = value.as<std::wstring>();
+
+            std::wstring_convert<utf16convert_type, wchar_t> converter;
+            std::string elem = converter.to_bytes(welem);
+            col->set_nth(idx, elem, STATUS_VALID);
+            break;
+        }
+        case DTYPE_DATE: {
+            col->set_nth<t_date>(idx, jsdate_to_t_date(value), STATUS_VALID);
+            break;
+        }
+        case DTYPE_TIME: {
+            col->set_nth<t_int64>(
+                idx, static_cast<t_int64>(value.as<t_float64>()), STATUS_VALID);
+            break;
+        }
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        default: {
+            // Other types not implemented
+        }
+    }
+}
+
 /**
- * Create a populated table.
+ * Helper function for computed columns
  *
  * Params
  * ------
- * chunk - a JS object containing parsed data and associated metadata
- * offset 
- * limit
- * index
- * is_delete - sets the table operation
+ *
  *
  * Returns
  * -------
- * a populated table.
+ *
  */
-t_table_sptr
-make_table(val chunk, t_uint32 offset, t_uint32 limit, t_str index, t_bool is_delete) {
-    t_uint32 size;
-    if (!chunk["row_count"].isUndefined()) {
-        size = chunk["row_count"].as<t_uint32>();
-    } else if (!chunk["cdata"][0]["length"].isUndefined()) {
-        size = chunk["cdata"][0]["length"].as<t_uint32>();
-    } else {
-        size = 0;
-    }
+void
+table_add_computed_column(t_table& table, val computed_defs) {
+    auto vcomputed_defs = vecFromJSArray<val>(computed_defs);
+    for (auto i = 0; i < vcomputed_defs.size(); ++i) {
+        val coldef = vcomputed_defs[i];
+        t_str name = coldef["column"].as<t_str>();
+        val inputs = coldef["inputs"];
+        val func = coldef["func"];
+        val type = coldef["type"];
 
-    // Create the input and port schemas
-    t_svec colnames = vecFromJSArray<std::string>(chunk["names"]);
-    t_dtypevec dtypes = vecFromJSArray<t_dtype>(chunk["types"]);
+        t_str stype;
 
-    // Create the table
-    // TODO assert size > 0
-    auto tbl = std::make_shared<t_table>(t_schema(colnames, dtypes));
-    tbl->init();
-    tbl->extend(size);
-
-    _fill_data(tbl, colnames, chunk["cdata"], dtypes, offset, chunk["is_arrow"].as<t_bool>());
-
-    // Set up pkey and op columns
-    if (is_delete) {
-        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
-        op_col->raw_fill<t_uint8>(OP_DELETE);
-    } else {
-        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
-        op_col->raw_fill<t_uint8>(OP_INSERT);
-    }
-
-    if (index == "") {
-        // If user doesn't specify an column to use as the pkey index, just use
-        // row number
-        auto key_col = tbl->add_column("psp_pkey", DTYPE_INT32, true);
-        auto okey_col = tbl->add_column("psp_okey", DTYPE_INT32, true);
-
-        for (auto ridx = 0; ridx < tbl->size(); ++ridx) {
-            key_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
-            okey_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
+        if (type.isUndefined()) {
+            stype = "string";
+        } else {
+            stype = type.as<t_str>();
         }
-    } else {
-        tbl->clone_column(index, "psp_pkey");
-        tbl->clone_column(index, "psp_okey");
-    }
 
-    return tbl;
+        t_dtype dtype;
+        if (stype == "integer") {
+            dtype = DTYPE_INT32;
+        } else if (stype == "float") {
+            dtype = DTYPE_FLOAT64;
+        } else if (stype == "boolean") {
+            dtype = DTYPE_BOOL;
+        } else if (stype == "date") {
+            dtype = DTYPE_DATE;
+        } else if (stype == "datetime") {
+            dtype = DTYPE_TIME;
+        } else {
+            dtype = DTYPE_STR;
+        }
+
+        // Get list of input column names
+        auto icol_names = vecFromJSArray<std::string>(inputs);
+
+        // Get t_column* for all input columns
+        t_colcptrvec icols;
+        for (const auto& cc : icol_names) {
+            icols.push_back(table._get_column(cc));
+        }
+
+        int arity = icols.size();
+
+        // Add new column
+        t_column* out = table.add_column(name, dtype, true);
+
+        val i1 = val::undefined(), i2 = val::undefined(), i3 = val::undefined(),
+            i4 = val::undefined();
+
+        t_uindex size = table.size();
+        for (t_uindex ridx = 0; ridx < size; ++ridx) {
+            val value = val::undefined();
+
+            switch (arity) {
+                case 0: {
+                    value = func();
+                    break;
+                }
+                case 1: {
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    if (!i1.isNull()) {
+                        value = func(i1);
+                    }
+                    break;
+                }
+                case 2: {
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull()) {
+                        value = func(i1, i2);
+                    }
+                    break;
+                }
+                case 3: {
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
+                        value = func(i1, i2, i3);
+                    }
+                    break;
+                }
+                case 4: {
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                    i4 = scalar_to_val(icols[3]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
+                        value = func(i1, i2, i3, i4);
+                    }
+                    break;
+                }
+                default: {
+                    // Don't handle other arity values
+                    break;
+                }
+            }
+
+            if (!value.isUndefined()) {
+                set_column_nth(out, ridx, value);
+            }
+        }
+    }
 }
 
 /**
@@ -754,8 +871,8 @@ make_table(val chunk, t_uint32 offset, t_uint32 limit, t_str index, t_bool is_de
  * A gnode.
  */
 t_gnode_sptr
-make_gnode(t_table_sptr table) {
-    auto iscm = table->get_schema();
+make_gnode(const t_table& table) {
+    auto iscm = table.get_schema();
 
     t_svec ocolnames(iscm.columns());
     t_dtypevec odt(iscm.types());
@@ -782,6 +899,88 @@ make_gnode(t_table_sptr table) {
 }
 
 /**
+ * Create a populated table.
+ *
+ * Params
+ * ------
+ * chunk - a JS object containing parsed data and associated metadata
+ * offset
+ * limit
+ * index
+ * is_delete - sets the table operation
+ *
+ * Returns
+ * -------
+ * a populated table.
+ */
+t_gnode_sptr
+make_table(t_pool* pool, val gnode, val chunk, val computed, t_uint32 offset, t_uint32 limit,
+    t_str index, t_bool is_delete) {
+    t_uint32 size;
+    if (!chunk["row_count"].isUndefined()) {
+        size = chunk["row_count"].as<t_uint32>();
+    } else if (!chunk["cdata"][0]["length"].isUndefined()) {
+        size = chunk["cdata"][0]["length"].as<t_uint32>();
+    } else {
+        size = 0;
+    }
+
+    // Create the input and port schemas
+    t_svec colnames = vecFromJSArray<std::string>(chunk["names"]);
+    t_dtypevec dtypes = vecFromJSArray<t_dtype>(chunk["types"]);
+
+    // Create the table
+    // TODO assert size > 0
+    t_table tbl(t_schema(colnames, dtypes));
+    tbl.init();
+    tbl.extend(size);
+
+    _fill_data(tbl, colnames, chunk["cdata"], dtypes, offset, chunk["is_arrow"].as<t_bool>());
+
+    // Set up pkey and op columns
+    if (is_delete) {
+        auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_DELETE);
+    } else {
+        auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<t_uint8>(OP_INSERT);
+    }
+
+    if (index == "") {
+        // If user doesn't specify an column to use as the pkey index, just use
+        // row number
+        auto key_col = tbl.add_column("psp_pkey", DTYPE_INT32, true);
+        auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
+
+        for (auto ridx = 0; ridx < tbl.size(); ++ridx) {
+            key_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
+            okey_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
+        }
+    } else {
+        tbl.clone_column(index, "psp_pkey");
+        tbl.clone_column(index, "psp_okey");
+    }
+
+    t_gnode_sptr new_gnode;
+
+    if (gnode.isUndefined()) {
+        new_gnode = make_gnode(tbl);
+        pool->register_gnode(new_gnode.get());
+    } else {
+        new_gnode = gnode.as<t_gnode_sptr>();
+    }
+
+    if (!computed.isUndefined()) {
+        table_add_computed_column(tbl, computed);
+    }
+
+    pool->send(new_gnode->get_id(), 0, tbl);
+    pool->_process();
+
+    return new_gnode;
+}
+
+/**
  * Copies the internal table from a gnode
  *
  * Params
@@ -789,12 +988,17 @@ make_gnode(t_table_sptr table) {
  *
  * Returns
  * -------
- * A table.
+ * A gnode.
  */
-t_table_sptr
-clone_gnode_table(t_gnode_sptr gnode) {
-    // This creates a copy of the table
-    return t_table_sptr(gnode->_get_pkeyed_table());
+t_gnode_sptr
+clone_gnode_table(t_pool* pool, t_gnode_sptr gnode, val computed) {
+    t_table* tbl = gnode->_get_pkeyed_table();
+    table_add_computed_column(*tbl, computed);
+    t_gnode_sptr new_gnode = make_gnode(*tbl);
+    pool->register_gnode(new_gnode.get());
+    pool->send(new_gnode->get_id(), 0, *tbl);
+    pool->_process();
+    return new_gnode;
 }
 
 /**
@@ -896,158 +1100,6 @@ get_column_data(t_table_sptr table, t_str colname) {
         arr.set(idx, scalar_to_val(col->get_scalar(idx)));
     }
     return arr;
-}
-
-void
-set_column_nth(t_column* col, t_uindex idx, val value) {
-
-    // Check if the value is a javascript null
-    if (value.isNull()) {
-        col->unset(idx);
-        return;
-    }
-
-    switch (col->get_dtype()) {
-        case DTYPE_BOOL: {
-            col->set_nth<t_bool>(idx, value.as<t_bool>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_FLOAT64: {
-            col->set_nth<t_float64>(idx, value.as<t_float64>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_FLOAT32: {
-            col->set_nth<t_float32>(idx, value.as<t_float32>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_UINT32: {
-            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_UINT64: {
-            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_INT32: {
-            col->set_nth<t_int32>(idx, value.as<t_int32>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_INT64: {
-            col->set_nth<t_int64>(idx, value.as<t_int64>(), STATUS_VALID);
-            break;
-        }
-        case DTYPE_STR: {
-            std::wstring welem = value.as<std::wstring>();
-
-            std::wstring_convert<utf16convert_type, wchar_t> converter;
-            std::string elem = converter.to_bytes(welem);
-            col->set_nth(idx, elem, STATUS_VALID);
-            break;
-        }
-        case DTYPE_DATE: {
-            col->set_nth<t_date>(idx, jsdate_to_t_date(value), STATUS_VALID);
-            break;
-        }
-        case DTYPE_TIME: {
-            col->set_nth<t_int64>(
-                idx, static_cast<t_int64>(value.as<t_float64>()), STATUS_VALID);
-            break;
-        }
-        case DTYPE_UINT8:
-        case DTYPE_UINT16:
-        case DTYPE_INT8:
-        case DTYPE_INT16:
-        default: {
-            // Other types not implemented
-        }
-    }
-}
-
-/**
- * Helper function for computed columns
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-
-void
-table_add_computed_column(t_table_sptr table, t_str name, t_dtype dtype, val func, val inputs) {
-
-    // Get list of input column names
-    auto icol_names = vecFromJSArray<std::string>(inputs);
-
-    // Get t_column* for all input columns
-    t_colcptrvec icols;
-    for (const auto& cc : icol_names) {
-        icols.push_back(table->_get_column(cc));
-    }
-
-    int arity = icols.size();
-
-    // Add new column
-    t_column* out = table->add_column(name, dtype, true);
-
-    val i1 = val::undefined(), i2 = val::undefined(), i3 = val::undefined(),
-        i4 = val::undefined();
-
-    t_uindex size = table->size();
-    for (t_uindex ridx = 0; ridx < size; ++ridx) {
-        val value = val::undefined();
-
-        switch (arity) {
-            case 0: {
-                value = func();
-                break;
-            }
-            case 1: {
-                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                if (!i1.isNull()) {
-                    value = func(i1);
-                }
-                break;
-            }
-            case 2: {
-                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                if (!i1.isNull() && !i2.isNull()) {
-                    value = func(i1, i2);
-                }
-                break;
-            }
-            case 3: {
-                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-                if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
-                    value = func(i1, i2, i3);
-                }
-                break;
-            }
-            case 4: {
-                i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-                i4 = scalar_to_val(icols[3]->get_scalar(ridx));
-                if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
-                    value = func(i1, i2, i3, i4);
-                }
-                break;
-            }
-            default: {
-                // Don't handle other arity values
-                break;
-            }
-        }
-
-        if (!value.isUndefined()) {
-            set_column_nth(out, ridx, value);
-        }
-    }
 }
 
 /**
@@ -1368,9 +1420,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("TOTALS_AFTER", TOTALS_AFTER);
 
     function("sort", &sort);
-    function("make_table", &make_table);
+    function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
-    function("clone_gnode_table", &clone_gnode_table);
+    function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());
     function("make_context_zero", &make_context_zero);
     function("make_context_one", &make_context_one);
     function("make_context_two", &make_context_two);
