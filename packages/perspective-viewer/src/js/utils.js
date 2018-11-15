@@ -125,9 +125,10 @@ export function registerElement(templateString, styleString, proto) {
     window.customElements.define(name, _perspective_element);
 }
 
-export function bindTemplate(template, styleString) {
+export function bindTemplate(template, ...styleStrings) {
+    const style = styleStrings.map(x => x.toString()).join("\n");
     return function(cls) {
-        return registerElement(template, styleString, cls);
+        return registerElement(template, {toString: () => style}, cls);
     };
 }
 

@@ -13,80 +13,28 @@ import "@webcomponents/shadycss/custom-style-interface.min.js";
 import _ from "underscore";
 import {polyfill} from "mobile-drag-drop";
 
-import perspective from "@jpmorganchase/perspective";
-import {ViewPrivate} from "./view/ViewPrivate.js";
+import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
+import {renderers, register_debug_plugin} from "./viewer/renderers.js";
+import {COMPUTATIONS} from "./computed_column.js";
 import "./row.js";
 
-import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
-import {renderers} from "./view/renderers.js";
-import {_hide_context_menu} from "./view/dom.js";
-import {COMPUTATIONS} from "./computed_column.js";
+import template from "../html/viewer.html";
 
-import template from "../html/view.html";
-
-import view_style from "../less/view.less";
+import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
+import {ActionElement} from "./viewer/action_element.js";
+
 polyfill({});
-
-/******************************************************************************
- *
- * Plugin API
- *
- */
-
-global.registerPlugin = renderers.registerPlugin;
-
-global.getPlugin = renderers.getPlugin;
-
-function _register_debug_plugin() {
-    global.registerPlugin("debug", {
-        name: "Debug",
-        create: async function(div) {
-            const csv = await this._view.to_csv({config: {delimiter: "|"}});
-            const timer = this._render_time();
-            div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`;
-            timer();
-        },
-        selectMode: "toggle",
-        resize: function() {},
-        delete: function() {}
-    });
-}
-
-/******************************************************************************
- *
- * Perspective Loading
- *
- */
-
-let worker = (function() {
-    let __WORKER__;
-    return {
-        getInstance: function() {
-            if (__WORKER__ === undefined) {
-                __WORKER__ = perspective.worker();
-            }
-            return __WORKER__;
-        }
-    };
-})();
-
-if (document.currentScript && document.currentScript.hasAttribute("preload")) {
-    worker.getInstance();
-}
 
 /**
  * HTMLElement class for `<perspective-viewer` custom element.
  *
- * @class View
- * @extends {ViewPrivate}
+ * @class PerspectiveViewer
+ * @extends {ActionElement}
  */
-
-// Eslint complains here because we don't do anything, but actually we globally
-// register this class as a CustomElement
-@bindTemplate(template, {toString: () => view_style.toString() + "\n" + default_style.toString()}) // eslint-disable-next-line no-unused-vars
-class View extends ViewPrivate {
+@bindTemplate(template, view_style, default_style) // eslint-disable-next-line no-unused-vars
+class PerspectiveViewer extends ActionElement {
     constructor() {
         super();
         this._register_debounce_instance();
@@ -100,7 +48,7 @@ class View extends ViewPrivate {
 
     connectedCallback() {
         if (Object.keys(renderers.getInstance()).length === 0) {
-            _register_debug_plugin();
+            register_debug_plugin();
         }
 
         this.setAttribute("settings", true);
@@ -123,11 +71,11 @@ class View extends ViewPrivate {
      * names.
      *
      * @name sort
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @type {array<string>} Array of arrays tuples of column name and
      * direction, where the possible values are "asc", "desc", "asc abs",
      * "desc abs" and "none".
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('sort', JSON.stringify([["x","desc"]));
@@ -146,7 +94,7 @@ class View extends ViewPrivate {
                         dir = s[1];
                         s = s[0];
                     }
-                    let row = this.new_row(s, false, false, false, dir);
+                    let row = this._new_row(s, false, false, false, dir);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -159,9 +107,9 @@ class View extends ViewPrivate {
      * The set of visible columns.
      *
      * @name columns
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @param {array} columns An array of strings, the names of visible columns.
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('columns', JSON.stringify(["x", "y'"]));
@@ -179,9 +127,9 @@ class View extends ViewPrivate {
      * The set of visible columns.
      *
      * @name computed-columns
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @param {array} computed-columns An array of computed column objects
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('computed-columns', JSON.stringify([{name: "x+y", func: "add", inputs: ["x", "y"]}]));
@@ -213,13 +161,13 @@ class View extends ViewPrivate {
      * The set of column aggregate configurations.
      *
      * @name aggregates
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @param {object} aggregates A dictionary whose keys are column names, and
      * values are valid aggregations.  The `aggergates` attribute works as an
      * override;  in lieu of a key for a column supplied by the developers, a
      * default will be selected and reflected to the attribute based on the
      * column's type.  See {@link perspective/src/js/defaults.js}
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('aggregates', JSON.stringify({x: "distinct count"}));
@@ -243,7 +191,7 @@ class View extends ViewPrivate {
      * The set of column filter configurations.
      *
      * @name filters
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @type {array} filters An arry of filter config objects.  A filter
      * config object is an array of three elements:
      *     * The column name.
@@ -251,7 +199,7 @@ class View extends ViewPrivate {
      *       {@link perspective/src/js/defaults.js}
      *     * The filter argument, as a string, float or Array<string> as the
      *       filter operation demands.
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
      * let filters = [
      *     ["x", "<", 3],
@@ -273,7 +221,7 @@ class View extends ViewPrivate {
                         operator: pivot[1],
                         operand: pivot[2]
                     });
-                    const row = this.new_row(pivot[0], undefined, undefined, fterms);
+                    const row = this._new_row(pivot[0], undefined, undefined, fterms);
                     inner.appendChild(row);
                 });
             }
@@ -286,7 +234,7 @@ class View extends ViewPrivate {
      * Sets the currently selected plugin, via its `name` field.
      *
      * @type {string}
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      */
     set view(v) {
         this._vis_selector.value = this.getAttribute("view");
@@ -298,9 +246,9 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `column_pivots` property.
      *
      * @name column-pivots
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @type {array<string>} Array of column names
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      */
     @array_attribute
     set "column-pivots"(pivots) {
@@ -309,7 +257,7 @@ class View extends ViewPrivate {
         if (pivots.length > 0) {
             pivots.map(
                 function(pivot) {
-                    let row = this.new_row(pivot);
+                    let row = this._new_row(pivot);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -322,9 +270,9 @@ class View extends ViewPrivate {
      * Sets this `perspective.table.view`'s `row_pivots` property.
      *
      * @name row-pivots
-     * @memberof View.prototype
+     * @memberof PerspectiveViewer.prototype
      * @type {array<string>} Array of column names
-     * @fires View#perspective-config-update
+     * @fires PerspectiveViewer#perspective-config-update
      */
     @array_attribute
     set "row-pivots"(pivots) {
@@ -333,7 +281,7 @@ class View extends ViewPrivate {
         if (pivots.length > 0) {
             pivots.map(
                 function(pivot) {
-                    let row = this.new_row(pivot);
+                    let row = this._new_row(pivot);
                     inner.appendChild(row);
                 }.bind(this)
             );
@@ -378,15 +326,12 @@ class View extends ViewPrivate {
      * elem.load(table);
      */
     get worker() {
-        if (this._table) {
-            return this._table._worker;
-        }
-        return worker.getInstance();
+        return this._get_worker();
     }
 
     /**
      * This element's `perspective.table.view` instance.  The instance itself
-     * will change after every `View#perspective-config-update` event.
+     * will change after every `PerspectiveViewer#perspective-config-update` event.
      *
      * @readonly
      */
@@ -402,7 +347,7 @@ class View extends ViewPrivate {
      * supported by `perspective.table`.
      * @returns {Promise<void>} A promise which resolves once the data is
      * loaded and a `perspective.view` has been created.
-     * @fires View#perspective-view-update
+     * @fires PerspectiveViewer#perspective-view-update
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.load([
@@ -425,12 +370,12 @@ class View extends ViewPrivate {
         if (data.hasOwnProperty("_name")) {
             table = data;
         } else {
-            table = worker.getInstance().table(data, options);
+            table = this.worker.table(data, options);
             table._owner_viewer = this;
         }
-        let _promises = [this.load_table(table)];
+        let _promises = [this._load_table(table)];
         for (let slave of this._slaves) {
-            _promises.push(this.load_table.call(slave, table));
+            _promises.push(this._load_table.call(slave, table));
         }
         this._slaves = [];
         return Promise.all(_promises);
@@ -441,7 +386,7 @@ class View extends ViewPrivate {
      *
      * @param {any} data The data to load.  Works with the same input types
      * supported by `perspective.table.update`.
-     * @fires View#perspective-view-update
+     * @fires PerspectiveViewer#perspective-view-update
      * @example
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.update([
@@ -489,7 +434,7 @@ class View extends ViewPrivate {
         }
 
         if (widget._table) {
-            this.load_table(widget._table);
+            this._load_table(widget._table);
         } else {
             widget._slaves.push(this);
         }
@@ -568,7 +513,7 @@ class View extends ViewPrivate {
         }
         this.setAttribute("view", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
-        _hide_context_menu.call(this);
+        this._hide_context_menu();
     }
 
     /**
@@ -576,7 +521,7 @@ class View extends ViewPrivate {
      *
      * @param {boolean} [flat=false] Whether to use the element's current view
      * config, or to use a default "flat" view.
-     * @memberof View
+     * @memberof PerspectiveViewer
      */
     async download(flat = false) {
         const view = flat ? this._table.view() : this._view;
@@ -595,7 +540,7 @@ class View extends ViewPrivate {
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
-        _hide_context_menu.call(this);
+        this._hide_context_menu();
     }
 
     /**
@@ -615,19 +560,19 @@ class View extends ViewPrivate {
                 console.error(err);
                 data = "";
             });
-        let count = 0,
-            f = () => {
-                if (typeof data !== "undefined") {
-                    copy_to_clipboard(data);
-                } else if (count < 200) {
-                    count++;
-                    setTimeout(f, 50);
-                } else {
-                    console.warn("Timeout expired - copy to clipboard cancelled.");
-                }
-            };
+        let count = 0;
+        let f = () => {
+            if (typeof data !== "undefined") {
+                copy_to_clipboard(data);
+            } else if (count < 200) {
+                count++;
+                setTimeout(f, 50);
+            } else {
+                console.warn("Timeout expired - copy to clipboard cancelled.");
+            }
+        };
         f();
-        _hide_context_menu.call(this);
+        this._hide_context_menu();
     }
 
     /**
@@ -642,7 +587,7 @@ class View extends ViewPrivate {
  * `perspective-config-update` is fired whenever an configuration attribute has
  * been modified, by the user or otherwise.
  *
- * @event View#perspective-config-update
+ * @event PerspectiveViewer#perspective-config-update
  * @type {string}
  */
 
@@ -650,6 +595,6 @@ class View extends ViewPrivate {
  * `perspective-view-update` is fired whenever underlying `view`'s data has
  * updated, including every invocation of `load` and `update`.
  *
- * @event View#perspective-view-update
+ * @event PerspectiveViewer#perspective-view-update
  * @type {string}
  */

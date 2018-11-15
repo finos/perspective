@@ -8,9 +8,10 @@
  */
 
 export class CancelTask {
-    constructor(on_cancel) {
+    constructor(on_cancel, initial = false) {
         this._on_cancel = on_cancel;
         this._cancelled = false;
+        this.initial = initial;
     }
 
     cancel() {
