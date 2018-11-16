@@ -436,7 +436,7 @@ module.exports = perspective => {
             expect(answer).toEqual(result2);
         });
 
-        it("['x']", async function() {
+        it("['x'] by ['y']", async function() {
             var table = perspective.table(data);
             var view = table.view({
                 column_pivot: ["y"],
@@ -451,6 +451,37 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);
+        });
+
+        it("['x'] by ['z'], sorted by 'y'", async function() {
+            var table = perspective.table([
+                {x: 1, y: "A", z: true},
+                {x: 2, y: "A", z: false},
+                {x: 3, y: "A", z: true},
+                {x: 4, y: "A", z: false},
+                {x: 5, y: "B", z: true},
+                {x: 6, y: "B", z: false},
+                {x: 7, y: "B", z: true},
+                {x: 8, y: "B", z: false},
+                {x: 9, y: "C", z: true},
+                {x: 10, y: "C", z: false},
+                {x: 11, y: "C", z: true},
+                {x: 12, y: "C", z: false}
+            ]);
+            var view = table.view({
+                column_pivot: ["z"],
+                row_pivot: ["y"],
+                sort: [["x", "desc"]]
+            });
+
+            let answer = [
+                {__ROW_PATH__: [], "false|x": 6, "false|y": 3, "false|z": 1, "true|x": 6, "true|y": 3, "true|z": 1},
+                {__ROW_PATH__: ["A"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1},
+                {__ROW_PATH__: ["B"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1},
+                {__ROW_PATH__: ["C"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1}
+            ];
+            let result2 = await view.to_json();
+            expect(result2).toEqual(answer);
         });
     });
 };

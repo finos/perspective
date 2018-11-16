@@ -281,7 +281,7 @@ export default function(Module) {
         return this.nsides;
     };
 
-    view.prototype._column_names = function() {
+    view.prototype._column_names = function(skip_depth = false) {
         let col_names = [];
         let aggs = this.ctx.get_column_names();
         for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
@@ -297,6 +297,10 @@ export default function(Module) {
                     continue;
                 }
                 let col_path = this.ctx.unity_get_column_path(key + 1);
+                if (skip_depth && col_path.size() < skip_depth) {
+                    col_path.delete();
+                    continue;
+                }
                 col_name = [];
                 for (let cnix = 0; cnix < col_path.size(); cnix++) {
                     col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
@@ -386,8 +390,9 @@ export default function(Module) {
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
         let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
         let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = options.end_col || (viewport.width ? start_row + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
+        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
         let slice;
+        const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
         if (this.config.row_pivot[0] === "psp_okey") {
             end_row += this.config.column_pivot.length;
         }
@@ -395,17 +400,19 @@ export default function(Module) {
             slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
             slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
-        } else {
+        } else if (!sorted) {
             slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
+        } else {
+            slice = __MODULE__.get_data_two_skip_headers(this.ctx, this.config.column_pivot.length, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();
 
-        let col_names = [[]].concat(this._column_names());
+        let col_names = [[]].concat(this._column_names(this.sides() === 2 && sorted ? this.config.column_pivot.length : false));
         let row;
         let ridx = -1;
         for (let idx = 0; idx < slice.length; idx++) {
-            let cidx = idx % (end_col - start_col);
+            let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
             if (cidx === 0) {
                 if (row) {
                     formatter.addRow(data, row);
@@ -967,21 +974,6 @@ export default function(Module) {
             }
         }
 
-        // Sort
-        let sort = [];
-        if (config.sort) {
-            sort = config.sort.map(x => {
-                if (!Array.isArray(x)) {
-                    return [config.aggregate.map(agg => agg.column).indexOf(x), 1];
-                } else {
-                    return [config.aggregate.map(agg => agg.column).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
-                }
-            });
-            if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
-                config.sort = config.sort.filter(x => config.row_pivot.indexOf(x[0]) === -1);
-            }
-        }
-
         let schema = this.gnode.get_tblschema();
 
         // Row Pivots
@@ -1019,12 +1011,27 @@ export default function(Module) {
             t_aggs.delete();
         }
 
+        // Sort
+        let sort = [];
+        if (config.sort) {
+            sort = config.sort.map(x => {
+                if (!Array.isArray(x)) {
+                    return [aggregates.map(agg => agg[0]).indexOf(x), 1];
+                } else {
+                    return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
+                }
+            });
+            if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
+                config.sort = config.sort.filter(x => config.row_pivot.indexOf(x[0]) === -1);
+            }
+        }
+
         let context;
         let sides = 0;
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
                 config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, []);
+                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, [], sort.length > 0);
                 sides = 2;
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
@@ -1040,17 +1047,8 @@ export default function(Module) {
                     context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
                 }
 
-                const groups = context.unity_get_column_count() / aggregates.length;
-                const new_sort = [];
-
-                for (let z = 0; z < groups; z++) {
-                    for (let s of sort) {
-                        new_sort.push([s[0] + z * aggregates.length, s[1]]);
-                    }
-                }
-
                 if (sort.length > 0) {
-                    __MODULE__.sort(context, new_sort);
+                    __MODULE__.sort(context, sort);
                 }
             } else {
                 context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort);

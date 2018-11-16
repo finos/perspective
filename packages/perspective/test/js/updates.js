@@ -564,7 +564,7 @@ module.exports = perspective => {
                 return _.pick(x, "y");
             });
             let result2 = await view.to_json();
-            expect(result.slice(1, 3)).toEqual(result2);
+            expect(result2).toEqual(result.slice(1, 3));
         });
     });
 };
