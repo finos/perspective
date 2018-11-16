@@ -22,6 +22,7 @@ if (PSP_WASM_BUILD)
 
 	set(EXTENDED_FLAGS " \
 		--bind \
+		--source-map-base ./build/ \
 		--memory-init-file 0 \
 		-s NO_EXIT_RUNTIME=1 \
 		-s NO_FILESYSTEM=1 \

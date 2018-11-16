@@ -8,7 +8,8 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DateParser, is_valid_date} from "./date_parser.js";
+import {parse_data, clean_data} from "./parse_data.js";
+import {DateParser} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
@@ -38,42 +39,6 @@ export default function(Module) {
      */
 
     /**
-     * Infer the t_dtype of a value.
-     * @private
-     * @returns A t_dtype.
-     */
-    function infer_type(x) {
-        let t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        if (x === null) {
-            t = null;
-        } else if (typeof x === "number" && x % 1 === 0 && x < 10000 && x !== 0) {
-            t = __MODULE__.t_dtype.DTYPE_INT32;
-        } else if (typeof x === "number") {
-            t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        } else if (typeof x === "boolean") {
-            t = __MODULE__.t_dtype.DTYPE_BOOL;
-        } else if (x instanceof Date) {
-            if (x.getHours() === 0 && x.getMinutes() === 0 && x.getSeconds() === 0 && x.getMilliseconds() === 0) {
-                t = __MODULE__.t_dtype.DTYPE_DATE;
-            } else {
-                t = __MODULE__.t_dtype.DTYPE_TIME;
-            }
-        } else if (!isNaN(Number(x)) && x !== "") {
-            t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        } else if (typeof x === "string" && is_valid_date(x)) {
-            t = __MODULE__.t_dtype.DTYPE_TIME;
-        } else if (typeof x === "string") {
-            let lower = x.toLowerCase();
-            if (lower === "true" || lower === "false") {
-                t = __MODULE__.t_dtype.DTYPE_BOOL;
-            } else {
-                t = __MODULE__.t_dtype.DTYPE_STR;
-            }
-        }
-        return t;
-    }
-
-    /**
      * Gets human-readable types for a column
      * @private
      * @returns {string}
@@ -95,205 +60,39 @@ export default function(Module) {
     }
 
     /**
-     * Coerce string null into value null
+     * Determines a table's limit index.
      * @private
-     * @param {*} value
+     * @param {int} limit_index
+     * @param {int} new_length
+     * @param {int} options_limit
      */
-    function clean_data(value) {
-        if (value === null || value === "null") {
-            return null;
-        } else {
-            return value;
+    function calc_limit_index(limit_index, new_length, options_limit) {
+        limit_index += new_length;
+        if (options_limit) {
+            limit_index = limit_index % options_limit;
         }
+        return limit_index;
     }
 
     /**
-     * Converts any supported input type into a canonical representation for
-     * interfacing with perspective.
+     * Common logic for creating and registering a gnode/t_table.
      *
-     * @private
-     * @param {object} data See docs
-     * @returns An object with 3 properties:
-     *    names - the column names.
-     *    types - the column t_dtypes.
-     *    cdata - an array of columnar data.
+     * @param {*} pdata
+     * @param {*} pool
+     * @param {*} gnode
+     * @param {*} computed
+     * @param {*} index
+     * @param {*} limit
+     * @param {*} limit_index
+     * @param {*} is_delete
+     * @returns
      */
-    function parse_data(data, names, types) {
-        // todo: refactor, treat columnar/row data as the same to marshal values + fix null handling
-        let preloaded = types ? true : false;
-        if (types === undefined) {
-            types = [];
-        } else {
-            let _types = [];
-            for (let t = 0; t < types.size() - 1; t++) {
-                _types.push(types.get(t));
-            }
-            types = _types;
+    function make_table(pdata, pool, gnode, computed, index, limit, limit_index, is_delete) {
+        for (let chunk of pdata) {
+            gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_delete);
+            limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
         }
-        let cdata = [];
-
-        let row_count = 0;
-
-        if (Array.isArray(data)) {
-            // Row oriented
-            if (data.length === 0) {
-                throw "Not yet implemented: instantiate empty grid without column type";
-            }
-            let max_check = 50;
-            if (names === undefined) {
-                names = Object.keys(data[0]);
-                for (let ix = 0; ix < Math.min(max_check, data.length); ix++) {
-                    let next = Object.keys(data[ix]);
-                    if (names.length !== next.length) {
-                        if (next.length > names.length) {
-                            if (max_check === 50) console.warn("Array data has inconsistent rows");
-                            console.warn("Extending from " + names.length + " to " + next.length);
-                            names = next;
-                            max_check *= 2;
-                        }
-                    }
-                }
-            }
-            for (let n in names) {
-                let name = names[n];
-                let i = 0,
-                    inferredType = undefined;
-                if (!preloaded) {
-                    while (!inferredType && i < 100 && i < data.length) {
-                        if (data[i].hasOwnProperty(name)) {
-                            inferredType = infer_type(data[i][name]);
-                        }
-                        i++;
-                    }
-                    inferredType = inferredType || __MODULE__.t_dtype.DTYPE_STR;
-                    types.push(inferredType);
-                } else {
-                    inferredType = types[parseInt(n)];
-                }
-                if (inferredType === undefined) {
-                    console.warn(`Could not infer type for column ${name}`);
-                    inferredType = __MODULE__.t_dtype.DTYPE_STR;
-                }
-                let col = [];
-                const parser = new DateParser();
-                for (let x = 0; x < data.length; x++) {
-                    if (!(name in data[x]) || clean_data(data[x][name]) === undefined) {
-                        col.push(undefined);
-                        continue;
-                    }
-                    if (inferredType.value === __MODULE__.t_dtype.DTYPE_FLOAT64.value) {
-                        let val = clean_data(data[x][name]);
-                        if (val !== null) {
-                            val = Number(val);
-                        }
-                        col.push(val);
-                    } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_INT32.value) {
-                        let val = clean_data(data[x][name]);
-                        if (val !== null) val = Number(val);
-                        col.push(val);
-                        if (val > 2147483647 || val < -2147483648) {
-                            types[n] = __MODULE__.t_dtype.DTYPE_FLOAT64;
-                        }
-                    } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_BOOL.value) {
-                        let cell = clean_data(data[x][name]);
-                        if (cell === null) {
-                            col.push(null);
-                            continue;
-                        }
-
-                        if (typeof cell === "string") {
-                            if (cell.toLowerCase() === "true") {
-                                col.push(true);
-                            } else {
-                                col.push(false);
-                            }
-                        } else {
-                            col.push(!!cell);
-                        }
-                    } else if (inferredType.value === __MODULE__.t_dtype.DTYPE_TIME.value || inferredType.value === __MODULE__.t_dtype.DTYPE_DATE.value) {
-                        let val = clean_data(data[x][name]);
-                        if (val !== null) {
-                            col.push(parser.parse(val));
-                        } else {
-                            col.push(null);
-                        }
-                    } else {
-                        let val = clean_data(data[x][name]);
-                        // types[types.length - 1].value === 19 ? "" : 0
-                        col.push(val === null ? null : "" + val); // TODO this is not right - might not be a string.  Need a data cleaner
-                    }
-                }
-                cdata.push(col);
-                row_count = col.length;
-            }
-        } else if (Array.isArray(data[Object.keys(data)[0]])) {
-            // Column oriented update. Extending schema not supported here.
-
-            const names_in_update = Object.keys(data);
-            row_count = data[names_in_update[0]].length;
-            names = names || names_in_update;
-
-            for (let col_num = 0; col_num < names.length; col_num++) {
-                const name = names[col_num];
-
-                // Infer column type if necessary
-                if (!preloaded) {
-                    let i = 0;
-                    let inferredType = null;
-                    while (inferredType === null && i < 100 && i < data[name].length) {
-                        inferredType = infer_type(data[name][i]);
-                        i++;
-                    }
-                    inferredType = inferredType || __MODULE__.t_dtype.DTYPE_STR;
-                    types.push(inferredType);
-                }
-
-                // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
-                let transformed;
-                if (data.hasOwnProperty(name)) {
-                    transformed = data[name].map(clean_data);
-                } else {
-                    transformed = new Array(row_count);
-                }
-                cdata.push(transformed);
-            }
-        } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
-            //if (this.initialized) {
-            //  throw "Cannot update already initialized table with schema.";
-            // }
-            names = [];
-
-            // Empty type dict
-            for (let name in data) {
-                names.push(name);
-                if (data[name] === "integer") {
-                    types.push(__MODULE__.t_dtype.DTYPE_INT32);
-                } else if (data[name] === "float") {
-                    types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
-                } else if (data[name] === "string") {
-                    types.push(__MODULE__.t_dtype.DTYPE_STR);
-                } else if (data[name] === "boolean") {
-                    types.push(__MODULE__.t_dtype.DTYPE_BOOL);
-                } else if (data[name] === "datetime") {
-                    types.push(__MODULE__.t_dtype.DTYPE_TIME);
-                } else if (data[name] === "date") {
-                    types.push(__MODULE__.t_dtype.DTYPE_DATE);
-                } else {
-                    throw `Unknown type ${data[name]}`;
-                }
-                cdata.push([]);
-            }
-        } else {
-            throw "Unknown data type";
-        }
-
-        return {
-            row_count: row_count,
-            is_arrow: false,
-            names: names,
-            types: types,
-            cdata: cdata
-        };
+        return [gnode, limit_index];
     }
 
     /**
@@ -945,43 +744,6 @@ export default function(Module) {
         }
     };
 
-    table.prototype._calculate_computed = function(tbl, computed_defs) {
-        // tbl is the pointer to the C++ t_table
-
-        for (let i = 0; i < computed_defs.length; ++i) {
-            let coldef = computed_defs[i];
-            let name = coldef["column"];
-            let func = coldef["func"];
-            let inputs = coldef["inputs"];
-            let type = coldef["type"] || "string";
-
-            let dtype;
-            switch (type) {
-                case "integer":
-                    dtype = __MODULE__.t_dtype.DTYPE_INT32;
-                    break;
-                case "float":
-                    dtype = __MODULE__.t_dtype.DTYPE_FLOAT64;
-                    break;
-                case "boolean":
-                    dtype = __MODULE__.t_dtype.DTYPE_BOOL;
-                    break;
-                case "date":
-                    dtype = __MODULE__.t_dtype.DTYPE_DATE;
-                    break;
-                case "datetime":
-                    dtype = __MODULE__.t_dtype.DTYPE_TIME;
-                    break;
-                case "string":
-                default:
-                    dtype = __MODULE__.t_dtype.DTYPE_STR;
-                    break;
-            }
-
-            __MODULE__.table_add_computed_column(tbl, name, dtype, func, inputs);
-        }
-    };
-
     /**
      * Delete this {@link table} and clean up all resources associated with it.
      * Table objects do not stop consuming resources or processing updates when
@@ -1348,9 +1110,9 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            pdata = [parse_data(papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
+            pdata = [parse_data(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
         } else {
-            pdata = [parse_data(data, cols, types)];
+            pdata = [parse_data(__MODULE__, data, cols, types)];
         }
 
         for (let i = names.size() - 1; i >= 0; i--) {
@@ -1361,29 +1123,12 @@ export default function(Module) {
             }
         }
 
-        let tbl;
         try {
-            for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, false);
-
-                this.limit_index += chunk.cdata[0].length;
-                if (this.limit) {
-                    this.limit_index = this.limit_index % this.limit;
-                }
-
-                // Add any computed columns
-                this._calculate_computed(tbl, this.computed);
-
-                this.pool.send(this.gnode.get_id(), 0, tbl);
-                this.pool.process();
-                this.initialized = true;
-            }
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false);
+            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
-            if (tbl) {
-                tbl.delete();
-            }
             schema.delete();
             names.delete();
             types.delete();
@@ -1409,29 +1154,15 @@ export default function(Module) {
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
         } else {
-            pdata = [parse_data(data, [this.index], types)];
+            pdata = [parse_data(__MODULE__, data, [this.index], types)];
         }
 
-        let tbl;
         try {
-            for (let chunk of pdata) {
-                tbl = __MODULE__.make_table(chunk.row_count || 0, chunk.names, chunk.types, chunk.cdata, this.limit_index, this.limit || 4294967295, this.index || "", chunk.is_arrow, true);
-
-                this.limit_index += chunk.cdata[0].length;
-                if (this.limit) {
-                    this.limit_index = this.limit_index % this.limit;
-                }
-
-                this.pool.send(this.gnode.get_id(), 0, tbl);
-                this.pool.process();
-                this.initialized = true;
-            }
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true);
+            this.initialized = true;
         } catch (e) {
             console.error(e);
         } finally {
-            if (tbl) {
-                tbl.delete();
-            }
             types.delete();
         }
     };
@@ -1445,21 +1176,8 @@ export default function(Module) {
         let pool, gnode, tbl;
 
         try {
-            // Create perspective pool
             pool = new __MODULE__.t_pool({_update_callback: function() {}});
-
-            // Pull out the t_table from the current gnode
-            tbl = __MODULE__.clone_gnode_table(this.gnode);
-
-            // Add new computed columns in place to tbl
-            this._calculate_computed(tbl, computed);
-
-            gnode = __MODULE__.make_gnode(tbl);
-            pool.register_gnode(gnode);
-            pool.send(gnode.get_id(), 0, tbl);
-            pool.process();
-
-            // Merge in definition of previous computed columns
+            gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
@@ -1833,7 +1551,7 @@ export default function(Module) {
                     }
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
-                pdata = parse_data(data);
+                pdata = parse_data(__MODULE__, data);
                 if (pdata.row_count > CHUNKED_THRESHOLD) {
                     let new_pdata = [];
                     while (pdata.cdata[0].length > 0) {
@@ -1854,27 +1572,13 @@ export default function(Module) {
                 throw `Specified index '${options.index}' does not exist in data.`;
             }
 
-            let tbl,
-                gnode,
+            let gnode,
                 pool,
                 limit_index = 0;
 
             try {
                 pool = new __MODULE__.t_pool({_update_callback: function() {}});
-                for (let chunk of pdata) {
-                    tbl = __MODULE__.make_table(chunk.cdata[0].length || 0, chunk.names, chunk.types, chunk.cdata, limit_index, options.limit || 4294967295, options.index, chunk.is_arrow, false);
-                    limit_index += chunk.cdata[0].length;
-                    if (options.limit) {
-                        limit_index = limit_index % options.limit;
-                    }
-                    if (!gnode) {
-                        gnode = __MODULE__.make_gnode(tbl);
-                        pool.register_gnode(gnode);
-                    }
-                    pool.send(gnode.get_id(), 0, tbl);
-                    pool.process();
-                }
-
+                [gnode, limit_index] = make_table(pdata, pool, gnode, undefined, options.index, options.limit, limit_index, false);
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {
                 if (pool) {
@@ -1884,10 +1588,6 @@ export default function(Module) {
                     gnode.delete();
                 }
                 throw e;
-            } finally {
-                if (tbl) {
-                    tbl.delete();
-                }
             }
         }
     };
