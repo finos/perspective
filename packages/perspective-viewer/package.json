@@ -9,7 +9,7 @@
         "babel.config.js"
     ],
     "scripts": {
-        "bench": "yarn-run-all bench:build bench:run",
+        "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
         "build:webpack": "webpack --color --config src/config/view.config.js",
@@ -18,7 +18,7 @@
         "watch": "webpack --color --watch --config src/config/view.config.js",
         "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
         "test:run": "jest --silent --color 2>&1",
-        "test": "yarn-run-all test:build test:run",
+        "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete",
         "clean:screenshots": "find screenshots/ \\( -name *.failed.png -o -name *.diff.png \\) -mindepth 1 -delete",
         "docs": "documentation build src/js/view.js -f md --shallow > README.md && cp README.md ../../docs/perspective-viewer.md"

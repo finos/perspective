@@ -9,13 +9,13 @@
         "babel.config.js"
     ],
     "scripts": {
-        "bench": "yarn-run-all bench:build bench:run",
+        "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
         "build": "webpack --color --config src/config/hypergrid.plugin.config.js",
         "test:build": "cp test/html/* build",
         "test:run": "jest --silent --color 2>&1",
-        "test": "yarn-run-all test:build test:run",
+        "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete",
         "clean:screenshots": "find screenshots/ \\( -name *.diff.png -o -name *.failed.png \\) -mindepth 1 -delete"
     },
