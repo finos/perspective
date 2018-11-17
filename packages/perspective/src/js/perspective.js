@@ -997,13 +997,14 @@ export default function(Module) {
                 aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
             }
         } else {
-            let agg_op = __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT;
-            if (config.column_only) {
-                agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
-            }
             let t_aggs = schema.columns();
+            let t_aggtypes = schema.types();
             for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
                 let column = t_aggs.get(aidx);
+                let agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                if (!config.column_only) {
+                    agg_op = _string_to_aggtype[defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)]];
+                }
                 if (column !== "psp_okey") {
                     aggregates.push([column, agg_op, [column]]);
                 }

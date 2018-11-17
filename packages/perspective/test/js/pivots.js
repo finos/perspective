@@ -219,14 +219,14 @@ module.exports = perspective => {
                 row_pivot: ["x"]
             });
             var answer = [
-                {__ROW_PATH__: [], x: 4, y: 4, z: 2},
+                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
                 {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 1, y: 1, z: 1}
+                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [4], x: 4, y: 1, z: 1}
             ];
             let result2 = await view.to_json();
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
 
         it("['x'] test update pkey column", async function() {
@@ -312,9 +312,9 @@ module.exports = perspective => {
             var view = table.view({
                 row_pivot: ["z"]
             });
-            var answer = [{__ROW_PATH__: [], x: 4, y: 4, z: 2}, {__ROW_PATH__: [false], x: 2, y: 2, z: 1}, {__ROW_PATH__: [true], x: 2, y: 2, z: 1}];
+            var answer = [{__ROW_PATH__: [], x: 10, y: 4, z: 2}, {__ROW_PATH__: [false], x: 6, y: 2, z: 1}, {__ROW_PATH__: [true], x: 4, y: 2, z: 1}];
             let result2 = await view.to_json();
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
 
         it("['x', 'z']", async function() {
@@ -322,21 +322,19 @@ module.exports = perspective => {
             var view = table.view({
                 row_pivot: ["x", "z"]
             });
-
             var answer = [
-                {__ROW_PATH__: [], x: 4, y: 4, z: 2},
+                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
                 {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
                 {__ROW_PATH__: [1, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2, false], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4, false], x: 1, y: 1, z: 1}
+                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [2, false], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [3, true], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
+                {__ROW_PATH__: [4, false], x: 4, y: 1, z: 1}
             ];
-
             let result2 = await view.to_json();
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
 
         it("['x', 'z'] windowed", async function() {
@@ -344,19 +342,17 @@ module.exports = perspective => {
             var view = table.view({
                 row_pivot: ["x", "z"]
             });
-
             var answer = [
                 {__ROW_PATH__: [1, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2, false], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3, true], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4, false], x: 1, y: 1, z: 1}
+                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [2, false], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [3, true], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
+                {__ROW_PATH__: [4, false], x: 4, y: 1, z: 1}
             ];
-
             let result2 = await view.to_json({start_row: 2});
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
 
         it("['x', 'z'], pivot_depth = 1", async function() {
@@ -365,17 +361,15 @@ module.exports = perspective => {
                 row_pivot: ["x", "z"],
                 row_pivot_depth: 1
             });
-
             var answer = [
-                {__ROW_PATH__: [], x: 4, y: 4, z: 2},
+                {__ROW_PATH__: [], x: 10, y: 4, z: 2},
                 {__ROW_PATH__: [1], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [2], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [3], x: 1, y: 1, z: 1},
-                {__ROW_PATH__: [4], x: 1, y: 1, z: 1}
+                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [4], x: 4, y: 1, z: 1}
             ];
-
             let result2 = await view.to_json();
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
     });
 
@@ -443,26 +437,26 @@ module.exports = perspective => {
                 row_pivot: ["x"]
             });
             var answer = [
-                {__ROW_PATH__: [], "a|x": 1, "a|y": 1, "a|z": 1, "b|x": 1, "b|y": 1, "b|z": 1, "c|x": 1, "c|y": 1, "c|z": 1, "d|x": 1, "d|y": 1, "d|z": 1},
+                {__ROW_PATH__: [], "a|x": 1, "a|y": 1, "a|z": 1, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": 4, "d|y": 1, "d|z": 1},
                 {__ROW_PATH__: [1], "a|x": 1, "a|y": 1, "a|z": 1, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
-                {__ROW_PATH__: [2], "a|x": null, "a|y": null, "a|z": null, "b|x": 1, "b|y": 1, "b|z": 1, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
-                {__ROW_PATH__: [3], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 1, "c|y": 1, "c|z": 1, "d|x": null, "d|y": null, "d|z": null},
-                {__ROW_PATH__: [4], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 1, "d|y": 1, "d|z": 1}
+                {__ROW_PATH__: [2], "a|x": null, "a|y": null, "a|z": null, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
+                {__ROW_PATH__: [3], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": null, "d|y": null, "d|z": null},
+                {__ROW_PATH__: [4], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 4, "d|y": 1, "d|z": 1}
             ];
             let result2 = await view.to_json();
-            expect(answer).toEqual(result2);
+            expect(result2).toEqual(answer);
         });
 
-        it("['x'] by ['z'], sorted by 'y'", async function() {
+        it("['y'] by ['z'], sorted by 'x'", async function() {
             var table = perspective.table([
-                {x: 1, y: "A", z: true},
+                {x: 7, y: "A", z: true},
                 {x: 2, y: "A", z: false},
-                {x: 3, y: "A", z: true},
+                {x: 5, y: "A", z: true},
                 {x: 4, y: "A", z: false},
-                {x: 5, y: "B", z: true},
-                {x: 6, y: "B", z: false},
-                {x: 7, y: "B", z: true},
+                {x: 1, y: "B", z: true},
                 {x: 8, y: "B", z: false},
+                {x: 3, y: "B", z: true},
+                {x: 6, y: "B", z: false},
                 {x: 9, y: "C", z: true},
                 {x: 10, y: "C", z: false},
                 {x: 11, y: "C", z: true},
@@ -475,10 +469,10 @@ module.exports = perspective => {
             });
 
             let answer = [
-                {__ROW_PATH__: [], "false|x": 6, "false|y": 3, "false|z": 1, "true|x": 6, "true|y": 3, "true|z": 1},
-                {__ROW_PATH__: ["A"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1},
-                {__ROW_PATH__: ["B"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1},
-                {__ROW_PATH__: ["C"], "false|x": 2, "false|y": 1, "false|z": 1, "true|x": 2, "true|y": 1, "true|z": 1}
+                {__ROW_PATH__: [], "false|x": 42, "false|y": 3, "false|z": 1, "true|x": 36, "true|y": 3, "true|z": 1},
+                {__ROW_PATH__: ["C"], "false|x": 22, "false|y": 1, "false|z": 1, "true|x": 20, "true|y": 1, "true|z": 1},
+                {__ROW_PATH__: ["A"], "false|x": 6, "false|y": 1, "false|z": 1, "true|x": 12, "true|y": 1, "true|z": 1},
+                {__ROW_PATH__: ["B"], "false|x": 14, "false|y": 1, "false|z": 1, "true|x": 4, "true|y": 1, "true|z": 1}
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
