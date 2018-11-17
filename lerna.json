@@ -4,5 +4,7 @@
     "packages/*",
     "examples/*"
   ],
+  "npmClient": "yarn",
+  "useWorkspaces": true,
   "version": "0.2.8"
 }

@@ -1,4 +1,9 @@
 {
+    "private": true,
+    "workspaces": [
+        "packages/*",
+        "examples/*"
+    ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.3.1",
         "@babel/core": "^7.1.0",
@@ -72,7 +77,6 @@
         "clean:screenshots": "lerna run clean:screenshots ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
         "start": "lerna run start --stream --scope",
         "write_tests": "WRITE_TESTS=1 npm run test:run",
-        "postinstall": "lerna bootstrap --hoist",
         "precommit": "npm run lint",
         "lint": "npm-run-all --silent lint:*",
         "lint:eslint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js examples/*/*.js",

@@ -6,6 +6,7 @@ node_js:
   - "8"
 
 cache:
+  yarn: true
   directories:
     - node_modules
     - packages/perspective/node_modules
@@ -23,9 +24,6 @@ sudo: required
 
 services:
   - docker
-
-install:
-  - npm install
 
 script:
   - npm run lint
