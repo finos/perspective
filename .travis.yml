@@ -26,7 +26,7 @@ services:
   - docker
 
 script:
-  - npm run lint
-  - PSP_DOCKER=1 npm run build
-  - PSP_DOCKER=1 npm run test:build
-  - npm run test:run_quiet
+  - yarn lint
+  - PSP_DOCKER=1 yarn build
+  - PSP_DOCKER=1 yarn test:build
+  - yarn test:run_quiet

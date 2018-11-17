@@ -28,7 +28,7 @@ itself, then build perspective via:
 
 ```bash
 npm install
-PSP_DOCKER=1 npm run build
+PSP_DOCKER=1 yarn build
 ```
 
 If everything is successful, you should be able to run any of the `examples/`
@@ -143,7 +143,7 @@ the `build/` directory of every package which supports benchmarks, as well as a
 with your changes to preserve them for future comparison.
 
 ```javascript
-npm run bench
+yarn bench
 ```
 
 The benchmarks report and `results.json` show a historgram of current
