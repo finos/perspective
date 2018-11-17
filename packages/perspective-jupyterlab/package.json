@@ -19,10 +19,10 @@
         "access": "public"
     },
     "scripts": {
-        "bench": "npm-run-all bench:build bench:run",
+        "bench": "yarn-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "test": "npm-run-all test:build test:run",
+        "test": "yarn-run-all test:build test:run",
         "test:build": "echo \"No Tests\"",
         "test:run": "echo \"No Tests\"",
         "build": "webpack --color --config src/config/plugin.config.js && webpack --color --config src/config/mimerenderer.config.js",

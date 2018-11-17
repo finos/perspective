@@ -25,6 +25,10 @@ sudo: required
 services:
   - docker
 
+install:
+  - npm install --global yarn
+  - yarn
+
 script:
   - yarn lint
   - PSP_DOCKER=1 yarn build
