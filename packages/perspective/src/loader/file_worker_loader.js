@@ -7,14 +7,14 @@
  *
  */
 
-var path = require("path");
+const path = require("path");
 
-var loaderUtils = require("loader-utils");
-var validateOptions = require("schema-utils");
+const loaderUtils = require("loader-utils");
+const validateOptions = require("schema-utils");
 
-var fs = require("fs");
+const fs = require("fs");
 
-var schema = {
+const schema = {
     type: "object",
     properties: {
         name: {},
@@ -33,15 +33,15 @@ var schema = {
 };
 
 exports.default = function loader(content) {
-    var options = loaderUtils.getOptions(this) || {};
+    const options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "File Worker Loader");
-    var context = options.context || this.rootContext || (this.options && this.options.context);
-
-    var url = loaderUtils.interpolateName(this, options.name, {
+    const context = options.context || this.rootContext || (this.options && this.options.context);
+    const url = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
         regExp: options.regExp
     });
+    const outputPath = url.replace(/\.js/, ".worker.js");
 
     if (!options.compiled) {
         var inputPath = this.resourcePath;
@@ -52,29 +52,33 @@ exports.default = function loader(content) {
                 .replace(/(src\/js)/, "build");
         }
         content = fs.readFileSync(inputPath).toString();
+        if (!options.compiled) {
+            this.emitFile(outputPath, "" + content);
+            const map_file = `${inputPath}.map`;
+            if (fs.existsSync(map_file)) {
+                const map_content = fs.readFileSync(map_file).toString();
+                this.emitFile(`${outputPath}.map`, "" + map_content);
+            }
+        }
     }
 
-    var outputPath = url.replace(/\.js/, ".worker.js");
-    var publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
-    var worker_text = '""';
-
-    if (!options.inline && !options.compiled) {
-        this.emitFile(outputPath, "" + content);
-    }
+    const publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
+    const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
 
     if (options.inline) {
-        worker_text = JSON.stringify(content.toString())
+        const worker_text = JSON.stringify(content.toString())
             .replace(/\u2028/g, "\\u2028")
             .replace(/\u2029/g, "\\u2029");
-    }
 
-    const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
+        return `module.exports = function() {
+            var utils = require(${utils_path});
+            return new Promise(function(resolve) { utils.BlobWorker(${worker_text}, resolve); });
+        };`;
+    }
 
     return `module.exports = function() {
         var utils = require(${utils_path});
-        if (${options.inline}) {
-            return new Promise(function(resolve) { utils.BlobWorker(${worker_text}, resolve); });
-        } else if (window.location.origin === utils.host.slice(0, window.location.origin.length)) {
+        if (window.location.origin === utils.host.slice(0, window.location.origin.length)) {
             return new Promise(function(resolve) { resolve(new Worker(utils.path + ${publicPath})); });
         } else {
             return new Promise(function(resolve) { utils.XHRWorker(utils.path + ${publicPath}, resolve); });
