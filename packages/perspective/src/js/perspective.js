@@ -1175,7 +1175,7 @@ export default function(Module) {
         let pool, gnode, tbl;
 
         try {
-            pool = new __MODULE__.t_pool({_update_callback: function() {}});
+            pool = new __MODULE__.t_pool();
             gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
@@ -1576,7 +1576,7 @@ export default function(Module) {
                 limit_index = 0;
 
             try {
-                pool = new __MODULE__.t_pool({_update_callback: function() {}});
+                pool = new __MODULE__.t_pool();
                 [gnode, limit_index] = make_table(pdata, pool, gnode, undefined, options.index, options.limit, limit_index, false);
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

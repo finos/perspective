@@ -25,9 +25,16 @@ t_updctx::t_updctx(t_uindex gnode_id, const t_str& ctx)
     , m_ctx(ctx) {}
 
 #ifdef PSP_ENABLE_WASM
-t_pool::t_pool(emscripten::val update_delegate)
+emscripten::val
+empty_callback() {
+    emscripten::val callback = emscripten::val::global("Object").new_();
+    callback.set("_update_callback", emscripten::val::global("Function").new_());
+    return callback;
+}
+
+t_pool::t_pool()
     : m_sleep(0)
-    , m_update_delegate(update_delegate)
+    , m_update_delegate(empty_callback())
     , m_has_python_dep(false) {
     m_run.clear();
 }

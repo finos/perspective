@@ -1312,7 +1312,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end);
 
     class_<t_pool>("t_pool")
-        .constructor<emscripten::val>()
+        .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
         .function<unsigned int>("register_gnode", &t_pool::register_gnode, allow_raw_pointers())
         .function<void>("process", &t_pool::_process)
