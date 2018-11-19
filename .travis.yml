@@ -26,7 +26,6 @@ services:
   - docker
 
 install:
-  - npm install --global yarn
   - yarn
 
 script:

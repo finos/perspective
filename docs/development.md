@@ -27,7 +27,7 @@ this; To use it, you only need to install [Docker](https://docs.docker.com/insta
 itself, then build perspective via:
 
 ```bash
-npm install
+yarn
 PSP_DOCKER=1 yarn build
 ```
 
