@@ -44,6 +44,8 @@ public:
 
     t_aggspecvec get_aggregates() const;
 
+    void column_sort_by(const t_sortsvec& sortby);
+
     void set_depth(t_header header, t_depth depth);
 
     using t_ctxbase<t_ctx2>::get_data;

@@ -446,7 +446,9 @@ module.exports = perspective => {
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
         });
+    });
 
+    describe("Column pivot w/sort", function() {
         it("['y'] by ['z'], sorted by 'x'", async function() {
             var table = perspective.table([
                 {x: 7, y: "A", z: true},
@@ -476,6 +478,32 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+        });
+
+        it("['z'] by ['y'], sorted by 'y'", async function() {
+            var table = perspective.table([
+                {x: 7, y: "A", z: true},
+                {x: 2, y: "A", z: false},
+                {x: 5, y: "A", z: true},
+                {x: 4, y: "A", z: false},
+                {x: 1, y: "B", z: true},
+                {x: 8, y: "B", z: false},
+                {x: 3, y: "B", z: true},
+                {x: 6, y: "B", z: false},
+                {x: 9, y: "C", z: true},
+                {x: 10, y: "C", z: false},
+                {x: 11, y: "C", z: true},
+                {x: 12, y: "C", z: false}
+            ]);
+            var view = table.view({
+                column_pivot: ["y"],
+                row_pivot: ["z"],
+                sort: [["y", "desc"]],
+                aggregate: [{column: "x", op: "sum"}, {column: "y", op: "any"}]
+            });
+
+            let result2 = await view.to_columns();
+            expect(Object.keys(result2)).toEqual(["__ROW_PATH__", "C|x", "C|y", "B|x", "B|y", "A|x", "A|y"]);
         });
     });
 };

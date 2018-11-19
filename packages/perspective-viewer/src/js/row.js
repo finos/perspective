@@ -226,7 +226,8 @@ class Row extends HTMLElement {
         });
         this._sort_order.addEventListener("click", event => {
             const current = this.getAttribute("sort-order");
-            const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % 5;
+            const sort_size = this.getAttribute("type") === "string" ? 3 : 5;
+            const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % sort_size;
             this.setAttribute("sort-order", perspective.SORT_ORDERS[order]);
             this.dispatchEvent(new CustomEvent("sort-order", {detail: event}));
         });

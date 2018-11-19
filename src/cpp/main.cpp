@@ -1066,12 +1066,11 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
  */
 t_ctx2_sptr
 make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
-    val j_filters, val j_aggs, val j_sortby, bool show_totals) {
+    val j_filters, val j_aggs, bool show_totals) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto rpivots = vecFromJSArray<std::string>(j_rpivots);
     auto cpivots = vecFromJSArray<std::string>(j_cpivots);
-    auto svec = _get_sort(j_sortby);
     t_totals total = show_totals ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
     auto cfg = t_config(rpivots, cpivots, aggspecs, total, combiner, fvec);
@@ -1079,18 +1078,16 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
 
     ctx2->init();
     ctx2->set_deltas_enabled(true);
-    if (svec.size() > 0) {
-        ctx2->sort_by(svec);
-    }
     return ctx2;
 }
 
 void
-sort(t_ctx2_sptr ctx2, val j_sortby) {
+sort(t_ctx2_sptr ctx2, val j_sortby, val j_column_sortby) {
     auto svec = _get_sort(j_sortby);
     if (svec.size() > 0) {
         ctx2->sort_by(svec);
     }
+    ctx2->column_sort_by(_get_sort(j_column_sortby));
 }
 
 val
@@ -1125,8 +1122,9 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
     return arr;
 }
 
-val 
-get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint32 end_col) {
+val
+get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t_uint32 end_row,
+    t_uint32 start_col, t_uint32 end_col) {
     auto col_length = ctx->unity_get_column_count();
     std::vector<t_uindex> col_nums;
     col_nums.push_back(0);
@@ -1135,7 +1133,8 @@ get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t
             col_nums.push_back(i + 1);
         }
     }
-    col_nums = std::vector<t_uindex>(col_nums.begin() + start_col, col_nums.begin() + std::min(end_col, (t_uint32)col_nums.size()));
+    col_nums = std::vector<t_uindex>(col_nums.begin() + start_col,
+        col_nums.begin() + std::min(end_col, (t_uint32)col_nums.size()));
     auto slice = ctx->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
     val arr = val::array();
     t_uindex i = 0;
@@ -1148,7 +1147,8 @@ get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t
             prev = col_num;
             arr.set(i, scalar_to_val(*iter));
         }
-        if (iter != slice.end()) iter++;
+        if (iter != slice.end())
+            iter++;
     }
     return arr;
 }
