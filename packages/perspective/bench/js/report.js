@@ -7,7 +7,7 @@
  *
  */
 
-import "../less/benchmark.less";
+import "!!style-loader!css-loader!less-loader!../less/benchmark.less";
 
 import CodeMirror from 'codemirror';
 import '!!style-loader!css-loader!codemirror/lib/codemirror.css';

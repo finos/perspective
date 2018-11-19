@@ -1066,14 +1066,15 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
  */
 t_ctx2_sptr
 make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
-    val j_filters, val j_aggs, val j_sortby) {
+    val j_filters, val j_aggs, val j_sortby, bool show_totals) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto rpivots = vecFromJSArray<std::string>(j_rpivots);
     auto cpivots = vecFromJSArray<std::string>(j_cpivots);
     auto svec = _get_sort(j_sortby);
+    t_totals total = show_totals ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
-    auto cfg = t_config(rpivots, cpivots, aggspecs, TOTALS_HIDDEN, combiner, fvec);
+    auto cfg = t_config(rpivots, cpivots, aggspecs, total, combiner, fvec);
     auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
     ctx2->init();
@@ -1124,6 +1125,33 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
     return arr;
 }
 
+val 
+get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint32 end_col) {
+    auto col_length = ctx->unity_get_column_count();
+    std::vector<t_uindex> col_nums;
+    col_nums.push_back(0);
+    for (t_uindex i = 0; i < col_length; ++i) {
+        if (ctx->unity_get_column_path(i + 1).size() == depth) {
+            col_nums.push_back(i + 1);
+        }
+    }
+    col_nums = std::vector<t_uindex>(col_nums.begin() + start_col, col_nums.begin() + std::min(end_col, (t_uint32)col_nums.size()));
+    auto slice = ctx->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
+    val arr = val::array();
+    t_uindex i = 0;
+    auto iter = slice.begin();
+    while (iter != slice.end()) {
+        t_uindex prev = col_nums.front();
+        for (auto idx = col_nums.begin(); idx != col_nums.end(); idx++, i++) {
+            t_uindex col_num = *idx;
+            iter += col_num - prev;
+            prev = col_num;
+            arr.set(i, scalar_to_val(*iter));
+        }
+        if (iter != slice.end()) iter++;
+    }
+    return arr;
+}
 /**
  * Main
  */
@@ -1433,6 +1461,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0_sptr>);
     function("get_data_one", &get_data<t_ctx1_sptr>);
     function("get_data_two", &get_data<t_ctx2_sptr>);
+    function("get_data_two_skip_headers", &get_data_two_skip_headers);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0_sptr>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1_sptr>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2_sptr>);
