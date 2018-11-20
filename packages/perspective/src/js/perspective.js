@@ -1155,7 +1155,6 @@ export default function(Module) {
         let pdata;
         let schema = this.gnode.get_tblschema();
         let types = schema.types();
-        schema.delete();
 
         data = data.map(idx => ({[this.index]: idx}));
 
@@ -1172,6 +1171,7 @@ export default function(Module) {
             console.error(e);
         } finally {
             types.delete();
+            schema.delete();
         }
     };
 

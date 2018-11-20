@@ -25,6 +25,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(json.length).toEqual(2);
+                view.delete();
+                table.delete();
             });
 
             it("x > 2", async function() {
@@ -34,6 +36,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(2)).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("x < 3", async function() {
@@ -43,6 +47,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 2)).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("x > 4", async function() {
@@ -52,6 +58,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("x < 0", async function() {
@@ -61,6 +69,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([]).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -72,6 +82,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 1)).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("x == 5", async function() {
@@ -81,6 +93,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("y == 'a'", async function() {
@@ -90,6 +104,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 1)).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("y == 'e'", async function() {
@@ -99,6 +115,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("z == true", async function() {
@@ -108,6 +126,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([rdata[0], rdata[2]]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("z == false", async function() {
@@ -117,6 +137,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([rdata[1], rdata[3]]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("w == yesterday", async function() {
@@ -126,6 +148,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect([rdata[3]]).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("w != yesterday", async function() {
@@ -135,6 +159,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 3)).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -146,6 +172,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 2)).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -157,6 +185,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 3)).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -168,6 +198,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 1)).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -179,6 +211,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(1, 3)).toEqual(json);
+                view.delete();
+                table.delete();
             });
 
             it("y contains 'a' | y contains 'b'", async function() {
@@ -189,6 +223,8 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(rdata.slice(0, 2)).toEqual(json);
+                view.delete();
+                table.delete();
             });
         });
 
@@ -201,6 +237,8 @@ module.exports = perspective => {
                 var answer = [{x: 3, y: 1}, {x: 4, y: 2}];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
             });
 
             it("x < 3", async function() {
@@ -211,6 +249,8 @@ module.exports = perspective => {
                 var answer = [{x: 2, y: 1}];
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
+                view.delete();
+                table.delete();
             });
 
             it("x > 2", async function() {
@@ -222,6 +262,8 @@ module.exports = perspective => {
                 var answer = [{x: 3.5, y: 1}, {x: 4.5, y: 2}];
                 let result = await view.to_json();
                 expect(answer).toEqual(result);
+                view.delete();
+                table.delete();
             });
         });
     });

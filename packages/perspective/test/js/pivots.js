@@ -35,6 +35,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], sum with new column syntax", async function() {
@@ -46,6 +48,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], weighted_mean", async function() {
@@ -57,6 +61,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 2.5, "x|y": 2.8333333333333335}, {__ROW_PATH__: [false], x: 3, "x|y": 3.3333333333333335}, {__ROW_PATH__: [true], x: 2, "x|y": 2.3333333333333335}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], mean", async function() {
@@ -68,6 +74,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [false], x: 3}, {__ROW_PATH__: [true], x: 2}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], first by index", async function() {
@@ -79,6 +87,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 1}, {__ROW_PATH__: [false], x: 2}, {__ROW_PATH__: [true], x: 1}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], last by index", async function() {
@@ -90,6 +100,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 4}, {__ROW_PATH__: [false], x: 4}, {__ROW_PATH__: [true], x: 3}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("['z'], last", async function() {
@@ -106,6 +118,8 @@ module.exports = perspective => {
             var answerAfterUpdate = [{__ROW_PATH__: [], x: 1}, {__ROW_PATH__: [false], x: 2}, {__ROW_PATH__: [true], x: 1}];
             let result2 = await view.to_json();
             expect(answerAfterUpdate).toEqual(result2);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -119,6 +133,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("mean with 0", async function() {
@@ -130,6 +146,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("mean with 0.0 (floats)", async function() {
@@ -142,6 +160,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("sum", async function() {
@@ -153,6 +173,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 9}, {__ROW_PATH__: [1], x: 5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("mean after update", async function() {
@@ -165,6 +187,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("mean at aggregate level", async function() {
@@ -187,6 +211,8 @@ module.exports = perspective => {
             ];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("null_in_pivot_column", async function() {
@@ -198,6 +224,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: ["x"], x: 1}, {__ROW_PATH__: ["y"], x: 1}, {__ROW_PATH__: [null], x: 1}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("weighted mean", async function() {
@@ -209,6 +237,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], y: (1 * 200 + 2 * 100) / (1 + 2)}, {__ROW_PATH__: ["a"], y: (1 * 200 + 2 * 100) / (1 + 2)}];
             let result = await view.to_json();
             expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -227,6 +257,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] test update pkey column", async function() {
@@ -248,6 +280,8 @@ module.exports = perspective => {
             let result2 = await view.to_json();
             var answer = [{__ROW_PATH__: [], pos: 600}, {__ROW_PATH__: [1], pos: 100}, {__ROW_PATH__: [2], pos: 200}, {__ROW_PATH__: [3], pos: 300}];
             expect(answer).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] has a schema", async function() {
@@ -257,6 +291,8 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual(meta);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] translates type `string` to `integer` when pivoted by row", async function() {
@@ -267,6 +303,8 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual({y: "integer"});
+            view.delete();
+            table.delete();
         });
 
         it("['x'] translates type `integer` to `float` when pivoted by row", async function() {
@@ -277,6 +315,8 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual({x: "float"});
+            view.delete();
+            table.delete();
         });
 
         it("['x'] does not translate type when only pivoted by column", async function() {
@@ -287,6 +327,8 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual({x: "integer"});
+            view.delete();
+            table.delete();
         });
 
         it("['x'] has the correct # of rows", async function() {
@@ -296,6 +338,8 @@ module.exports = perspective => {
             });
             let result2 = await view.num_rows();
             expect(result2).toEqual(5);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] has the correct # of columns", async function() {
@@ -305,6 +349,8 @@ module.exports = perspective => {
             });
             let result2 = await view.num_columns();
             expect(result2).toEqual(3);
+            view.delete();
+            table.delete();
         });
 
         it("['z']", async function() {
@@ -315,6 +361,8 @@ module.exports = perspective => {
             var answer = [{__ROW_PATH__: [], x: 10, y: 4, z: 2}, {__ROW_PATH__: [false], x: 6, y: 2, z: 1}, {__ROW_PATH__: [true], x: 4, y: 2, z: 1}];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("['x', 'z']", async function() {
@@ -335,6 +383,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("['x', 'z'] windowed", async function() {
@@ -353,6 +403,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json({start_row: 2});
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("['x', 'z'], pivot_depth = 1", async function() {
@@ -370,6 +422,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -381,6 +435,8 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(meta).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] only, column-oriented input", async function() {
@@ -395,6 +451,8 @@ module.exports = perspective => {
                 {"true|w": 3.5, "true|x": 3, "true|y": "c", "true|z": true, "false|w": null, "false|x": null, "false|y": null, "false|z": null},
                 {"true|w": null, "true|x": null, "true|y": null, "true|z": null, "false|w": 4.5, "false|x": 4, "false|y": "d", "false|z": false}
             ]);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] only, column-oriented output", async function() {
@@ -413,6 +471,8 @@ module.exports = perspective => {
                 "false|y": [null, "b", null, "d"],
                 "false|z": [null, false, null, false]
             });
+            view.delete();
+            table.delete();
         });
 
         it("['x'] only", async function() {
@@ -428,6 +488,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(answer).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("['x'] by ['y']", async function() {
@@ -445,6 +507,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -478,6 +542,8 @@ module.exports = perspective => {
             ];
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
         });
 
         it("['z'] by ['y'], sorted by 'y'", async function() {
@@ -504,6 +570,8 @@ module.exports = perspective => {
 
             let result2 = await view.to_columns();
             expect(Object.keys(result2)).toEqual(["__ROW_PATH__", "C|x", "C|y", "B|x", "B|y", "A|x", "A|y"]);
+            view.delete();
+            table.delete();
         });
     });
 };
