@@ -8,7 +8,7 @@
  */
 
 import * as defaults from "./defaults.js";
-import {parse_data, clean_data} from "./parse_data.js";
+import {DataParser, parse_data, clean_data} from "./parse_data.js";
 import {DateParser} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
@@ -31,6 +31,7 @@ const CHUNKED_THRESHOLD = 100000;
 
 export default function(Module) {
     let __MODULE__ = Module;
+    let parser = new DataParser();
 
     /******************************************************************************
      *
@@ -1561,7 +1562,11 @@ export default function(Module) {
                     }
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
-                pdata = parse_data(__MODULE__, data);
+                let names = parser.parse_names(data);
+                let [types, typemap] = parser.parse_types(__MODULE__, data, undefined, names);
+                let [cdata, row_count] = parser.make_cdata(__MODULE__, data, names, typemap);
+                pdata = {cdata, names, types, row_count, is_arrow: false}; // pdata = parse_data(__MODULE__, data);
+
                 if (pdata.row_count > CHUNKED_THRESHOLD) {
                     let new_pdata = [];
                     while (pdata.cdata[0].length > 0) {
