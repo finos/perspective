@@ -30,8 +30,7 @@ const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 module.exports = perspective(
     load_perspective({
         wasmBinary: buffer,
-        wasmJSMethod: "native-wasm",
-        ENVIRONMENT: "NODE"
+        wasmJSMethod: "native-wasm"
     })
 );
 

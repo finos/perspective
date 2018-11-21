@@ -15,7 +15,6 @@ const RUNTIMES = {
     ASMJS: perspective(
         asmjs.load_perspective({
             wasmJSMethod: "asmjs",
-            filePackagePrefixURL: "",
             printErr: x => console.error(x),
             print: x => console.log(x)
         })

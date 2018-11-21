@@ -14,7 +14,6 @@ const perspective = require("./perspective.js").default;
 
 const Module = load_perspective({
     wasmJSMethod: "asmjs",
-    filePackagePrefixURL: "",
     printErr: x => console.error(x),
     print: x => console.log(x)
 });
