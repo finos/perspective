@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer",
-    "version": "0.2.7",
+    "version": "0.2.8",
     "description": "Perspective.js",
     "main": "src/js/viewer.js",
     "files": [
@@ -41,7 +41,7 @@
     "author": "",
     "license": "Apache",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.7",
+        "@jpmorganchase/perspective": "^0.2.8",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",

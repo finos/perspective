@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.8] - 2018-11-21
+### Added
+* [#317](https://github.com/jpmorganchase/perspective/pull/317) Applying 'column-pivots' now preserves the sort order.
+* [#319](https://github.com/jpmorganchase/perspective/pull/319) Sorting by a column in 'column-pivots' will apply the sort to column order.
+
+### Fixes
+* [#306](https://github.com/jpmorganchase/perspective/pull/306) Fixed Jupyterlab plugin, updating it to work with the newest [perspective-python 0.1.1](https://github.com/timkpaine/perspective-python/tree/v0.1.1).
+
 ## [0.2.7] - 2018-11-12
 ### Fixes
 * [#304](https://github.com/jpmorganchase/perspective/pull/304) Fixed missing file in NPM package.
