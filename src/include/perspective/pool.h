@@ -38,17 +38,14 @@ class PERSPECTIVE_EXPORT t_pool {
     typedef std::pair<t_uindex, t_str> t_ctx_id;
 
 public:
-#ifdef PSP_ENABLE_WASM
-    t_pool(emscripten::val update_delegate);
-    void set_update_delegate(emscripten::val ud);
+    t_pool();
     t_uindex register_gnode(t_gnode* node);
+#ifdef PSP_ENABLE_WASM
+    void set_update_delegate(emscripten::val ud);
     void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int32 ptr);
     void py_notify_userspace();
 #else
-    t_pool();
-    t_uindex register_gnode(t_gnode* node);
     void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int64 ptr);
-    void set_update_delegate();
     void py_notify_userspace();
 #endif
     t_pool(const t_pool& p) = delete;

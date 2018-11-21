@@ -159,8 +159,11 @@ module.exports = perspective => {
             table.execute(t => {
                 t.update([{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}]);
             });
-            let js = await table.view({}).to_json();
+            let view = table.view({});
+            let js = await view.to_json();
             expect(js).toEqual([{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}]);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -196,6 +199,8 @@ module.exports = perspective => {
             var view = table.view();
             const result = await view.col_to_js_typed_array("int");
             expect(result.byteLength).toEqual(16);
+            view.delete();
+            table.delete();
         });
 
         it("Float, 0-sided view", async function() {
@@ -203,6 +208,8 @@ module.exports = perspective => {
             var view = table.view();
             const result = await view.col_to_js_typed_array("float");
             expect(result.byteLength).toEqual(32);
+            view.delete();
+            table.delete();
         });
 
         it("Datetime, 0-sided view", async function() {
@@ -210,6 +217,8 @@ module.exports = perspective => {
             var view = table.view();
             const result = await view.col_to_js_typed_array("datetime");
             expect(result.byteLength).toEqual(32);
+            view.delete();
+            table.delete();
         });
 
         it("Int, 1-sided view", async function() {
@@ -221,6 +230,8 @@ module.exports = perspective => {
             const result = await view.col_to_js_typed_array("int");
             // should include aggregate row
             expect(result.byteLength).toEqual(20);
+            view.delete();
+            table.delete();
         });
 
         it("Float, 1-sided view", async function() {
@@ -231,6 +242,8 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("float");
             expect(result.byteLength).toEqual(40);
+            view.delete();
+            table.delete();
         });
 
         it("Datetime, 1-sided view", async function() {
@@ -241,6 +254,8 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("datetime");
             expect(result.byteLength).toEqual(24);
+            view.delete();
+            table.delete();
         });
 
         it("Int, 2-sided view with row pivot", async function() {
@@ -252,6 +267,8 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("3.5|int");
             expect(result.byteLength).toEqual(20);
+            view.delete();
+            table.delete();
         });
 
         it("Float, 2-sided view with row pivot", async function() {
@@ -263,6 +280,8 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("3.5|float");
             expect(result.byteLength).toEqual(40);
+            view.delete();
+            table.delete();
         });
 
         it("Int, 2-sided view, no row pivot", async function() {
@@ -271,6 +290,8 @@ module.exports = perspective => {
             const result = await view.col_to_js_typed_array("3.5|int");
             // bytelength should not include the aggregate row
             expect(result.byteLength).toEqual(16);
+            view.delete();
+            table.delete();
         });
 
         it("Float, 2-sided view, no row pivot", async function() {
@@ -278,6 +299,8 @@ module.exports = perspective => {
             var view = table.view({column_pivot: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|float");
             expect(result.byteLength).toEqual(32);
+            view.delete();
+            table.delete();
         });
 
         it("Undefined for non-int/float columns", async function() {
@@ -285,6 +308,8 @@ module.exports = perspective => {
             var view = table.view();
             const result = await view.col_to_js_typed_array("string");
             expect(result).toBeUndefined();
+            view.delete();
+            table.delete();
         });
 
         it("Symmetric output with to_columns, 0-sided", async function() {
@@ -300,6 +325,8 @@ module.exports = perspective => {
                     expect(validate_typed_array(ta, cols[col])).toEqual(true);
                 }
             }
+            view.delete();
+            table.delete();
         });
 
         it("Symmetric output with to_columns, 1-sided", async function() {
@@ -318,6 +345,8 @@ module.exports = perspective => {
                     expect(validate_typed_array(ta, cols[col])).toEqual(true);
                 }
             }
+            view.delete();
+            table.delete();
         });
     });
 
@@ -328,6 +357,8 @@ module.exports = perspective => {
             var answer = `x,y,z\r\n1,a,true\r\n2,b,false\r\n3,c,true\r\n4,d,false`;
             let result2 = await view.to_csv();
             expect(answer).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Serializes 1 sided view to CSV", async function() {
@@ -339,6 +370,8 @@ module.exports = perspective => {
             var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
             let result2 = await view.to_csv();
             expect(answer).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Serializes a 2 sided view to CSV", async function() {
@@ -351,6 +384,8 @@ module.exports = perspective => {
             var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
             let result2 = await view.to_csv();
             expect(answer).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Serializes a simple view to column-oriented JSON", async function() {
@@ -358,6 +393,8 @@ module.exports = perspective => {
             var view = table.view({});
             let result2 = await view.to_columns();
             expect(data_7).toEqual(result2);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -367,6 +404,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("JSON column oriented constructor", async function() {
@@ -374,6 +413,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow constructor", async function() {
@@ -381,6 +422,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow (chunked) constructor", async function() {
@@ -388,6 +431,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result.length).toEqual(10);
+            view.delete();
+            table.delete();
         });
 
         it("CSV constructor", async function() {
@@ -395,6 +440,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(papaparse.parse(csv, {header: true, dynamicTyping: true}).data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Meta constructor", async function() {
@@ -402,6 +449,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect([]).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Handles floats", async function() {
@@ -409,73 +458,95 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data_3).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("has correct size", async function() {
             var table = perspective.table(data);
             let result = await table.size();
             expect(result).toEqual(4);
+            table.delete();
         });
 
         it("has a schema", async function() {
             var table = perspective.table(data);
             let result = await table.schema();
             expect(result).toEqual(meta);
+            table.delete();
         });
 
         it("has columns", async function() {
             var table = perspective.table(data);
             let result = await table.columns();
             expect(result).toEqual(["x", "y", "z"]);
+            table.delete();
         });
 
         it("Handles floats schemas", async function() {
             var table = perspective.table(data_3);
             let result = await table.schema();
             expect(meta_3).toEqual(result);
+            table.delete();
         });
 
         it("Generates correct date schemas", async function() {
             var table = perspective.table(data_4);
             let result = await table.schema();
             expect(meta_4).toEqual(result);
+            table.delete();
         });
 
         it("Handles date updates when constructed from a schema", async function() {
             var table = perspective.table(meta_4);
             table.update(data_4);
-            let result = await table.view({}).to_json();
+            let view = table.view();
+            let result = await view.to_json();
             expect([{v: +data_4[0]["v"]}]).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Handles datetime values", async function() {
             var table = perspective.table(data_4);
-            let result2 = await table.view({}).to_json();
+            let view = table.view();
+            let result2 = await view.to_json();
             expect([{v: +data_4[0]["v"]}]).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Handles datetime strings", async function() {
             var table = perspective.table(data_5);
-            let result2 = await table.view({}).to_json();
+            let view = table.view();
+            let result2 = await view.to_json();
             expect([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Handles date values", async function() {
             var table = perspective.table({v: "date"});
             table.update(data_4);
-            let result2 = await table.view({}).to_json();
+            let view = table.view();
+            let result2 = await view.to_json();
             let d = new Date(data_4[0]["v"]);
             d.setHours(0);
             d.setMinutes(0);
             d.setSeconds(0);
             d.setMilliseconds(0);
             expect([{v: +d}]).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("Handles utf16", async function() {
             var table = perspective.table(data_6);
-            let result = await table.view({}).to_json();
+            let view = table.view({});
+            let result = await view.to_json();
             expect(data_6).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Computed column of arity 0", async function() {
@@ -489,9 +560,13 @@ module.exports = perspective => {
                     inputs: []
                 }
             ]);
-            let result = await table2.view({aggregate: [{op: "count", column: "const"}]}).to_json();
+            let view = table2.view({aggregate: [{op: "count", column: "const"}]});
+            let result = await view.to_json();
             let expected = [{const: 1}, {const: 1}, {const: 1}, {const: 1}];
             expect(expected).toEqual(result);
+            view.delete();
+            table2.delete();
+            table.delete();
         });
 
         it("Computed column of arity 2", async function() {
@@ -505,9 +580,13 @@ module.exports = perspective => {
                     inputs: ["w", "x"]
                 }
             ]);
-            let result = await table2.view({aggregate: [{op: "count", column: "ratio"}]}).to_json();
+            let view = table2.view({aggregate: [{op: "count", column: "ratio"}]});
+            let result = await view.to_json();
             let expected = [{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}];
             expect(expected).toEqual(result);
+            view.delete();
+            table2.delete();
+            table.delete();
         });
 
         it("Computed column of arity 2 with updates on non-dependent columns", async function() {
@@ -531,10 +610,13 @@ module.exports = perspective => {
 
             let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
             table2.update(delta_upd);
-
-            let result = await table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]}).to_json();
+            let view = table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]});
+            let result = await view.to_json();
             let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
             expect(expected).toEqual(result);
+            view.delete();
+            table2.delete();
+            table.delete();
         });
 
         it("String computed column of arity 1", async function() {
@@ -548,9 +630,13 @@ module.exports = perspective => {
                     inputs: ["z"]
                 }
             ]);
-            let result = await table2.view({aggregate: [{op: "count", column: "yes/no"}]}).to_json();
+            let view = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
+            let result = await view.to_json();
             let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
             expect(expected).toEqual(result);
+            view.delete();
+            table2.delete();
+            table.delete();
         });
 
         it("Computed schema returns names and metadata", async function() {
@@ -587,12 +673,15 @@ module.exports = perspective => {
             };
 
             expect(expected).toEqual(result);
+            table2.delete();
+            table.delete();
         });
 
         it("Column metadata returns names and type", async function() {
             let table = perspective.table(data);
             let result = await table.column_metadata();
             expect(result).toEqual(column_meta);
+            table.delete();
         });
 
         it("allocates a large tables", async function() {
@@ -610,6 +699,8 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
             expect(result.length).toEqual(35000);
+            view.delete();
+            table.delete();
         }, 3000);
     });
 };

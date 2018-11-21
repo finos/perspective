@@ -51,6 +51,8 @@ module.exports = perspective => {
             let result = await view.to_json();
             expect(result.length).toEqual(2);
             expect(data.slice(2, 4)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("after a regular data load`", async function() {
@@ -60,6 +62,8 @@ module.exports = perspective => {
             let result = await view.to_json();
             expect(result.length).toEqual(2);
             expect(data.slice(2, 4)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("multiple single element removes", async function() {
@@ -74,6 +78,8 @@ module.exports = perspective => {
             let result = await view.to_json();
             expect(result).toEqual([{x: 0, y: "test", z: false}]);
             expect(result.length).toEqual(1);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -84,6 +90,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual([{x: 1, y: "a"}, {x: 2, y: "b"}, {x: 3, y: "c"}, {x: 4, y: "d"}]);
+            view.delete();
+            table.delete();
         });
 
         it("coerces to string", async function() {
@@ -92,6 +100,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual([{x: "1", y: "a", z: "true"}, {x: "2", y: "b", z: "false"}, {x: "3", y: "c", z: "true"}, {x: "4", y: "d", z: "false"}]);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -102,6 +112,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Meta constructor then column oriented `update()`", async function() {
@@ -110,6 +122,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(data);
+            view.delete();
+            table.delete();
         });
 
         it("Column oriented `update()` with columns in different order to schema", async function() {
@@ -125,6 +139,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(data);
+            view.delete();
+            table.delete();
         });
 
         it("Column data constructor then column oriented `update()`", async function() {
@@ -141,14 +157,19 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
         });
 
         it("`update()` unbound to table", async function() {
             var table = perspective.table(meta);
             var updater = table.update;
             updater(data);
-            let result = await table.view().to_json();
+            let view = table.view();
+            let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Multiple `update()`s", async function() {
@@ -158,6 +179,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data.concat(data)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("`update()` called after `view()`", async function() {
@@ -166,6 +189,8 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow `update()`s", async function() {
@@ -174,6 +199,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result.concat(arrow_result)).toEqual(result);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -190,9 +217,13 @@ module.exports = perspective => {
                 }
             ]);
             table2.update(data);
-            let result = await table2.view({aggregate: [{op: "count", column: "yes/no"}]}).to_json();
+            let view2 = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
+            let result = await view2.to_json();
             let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
             expect(result).toEqual(expected);
+            view2.delete();
+            table.delete();
+            table2.delete();
         });
     });
 
@@ -202,6 +233,8 @@ module.exports = perspective => {
             var view = table.view();
             view.on_update(function(new_data) {
                 expect(data).toEqual(new_data);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(data);
@@ -216,6 +249,8 @@ module.exports = perspective => {
                 if (!ran) {
                     expect(new_data).toEqual(data);
                     ran = true;
+                    view.delete();
+                    table.delete();
                     done();
                 }
             });
@@ -231,6 +266,10 @@ module.exports = perspective => {
                 table2.update(x);
                 let result = await view2.to_json();
                 expect(data).toEqual(result);
+                view1.delete();
+                view2.delete();
+                table1.delete();
+                table2.delete();
                 done();
             });
             table1.update(data);
@@ -248,6 +287,10 @@ module.exports = perspective => {
                 table2.update(x);
                 let result = await view2.to_json();
                 expect(data.concat(data)).toEqual(result);
+                view1.delete();
+                view2.delete();
+                table1.delete();
+                table2.delete();
                 done();
             });
             table1.update(data);
@@ -260,6 +303,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(data.slice(2)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("{limit: 5} with 2 updates of size 4", async function() {
@@ -273,6 +318,8 @@ module.exports = perspective => {
                     .concat(data.slice(3, 4))
                     .concat(data.slice(0, 1))
             ).toEqual(result);
+            view.delete();
+            table.delete();
         });
     });
 
@@ -283,6 +330,8 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("{index: 'y'} (string)", async function() {
@@ -291,6 +340,8 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow with {index: 'i64'} (int)", async function() {
@@ -298,6 +349,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_result).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow with {index: 'char'} (char)", async function() {
@@ -305,6 +358,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_indexed_result).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("Arrow with {index: 'dict'} (dict)", async function() {
@@ -312,6 +367,8 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(arrow_indexed_result).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("multiple updates on {index: 'x'}", async function() {
@@ -322,6 +379,8 @@ module.exports = perspective => {
             table.update(data);
             let result = await view.to_json();
             expect(data).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("{index: 'x'} with overlap", async function() {
@@ -331,6 +390,8 @@ module.exports = perspective => {
             table.update(data_2);
             let result = await view.to_json();
             expect(data.slice(0, 2).concat(data_2)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("update and index (int)", function(done) {
@@ -341,6 +402,8 @@ module.exports = perspective => {
                 expect(data_2).toEqual(new_data);
                 let json = await view.to_json();
                 expect(data.slice(0, 2).concat(data_2)).toEqual(json);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(data_2);
@@ -354,6 +417,8 @@ module.exports = perspective => {
                 expect(data_2).toEqual(new_data);
                 let json = await view.to_json();
                 expect(data.slice(0, 2).concat(data_2)).toEqual(json);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(data_2);
@@ -379,6 +444,8 @@ module.exports = perspective => {
                 {__ROW_PATH__: [true, "c"]}
             ];
             expect(expected).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("partial update", function(done) {
@@ -391,6 +458,8 @@ module.exports = perspective => {
                 expect(new_data).toEqual(expected.slice(0, 2));
                 let json = await view.to_json();
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(partial);
@@ -411,6 +480,8 @@ module.exports = perspective => {
                 expect(new_data).toEqual(expected.slice(0, 2));
                 let json = await view.to_json();
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(partial);
@@ -430,6 +501,8 @@ module.exports = perspective => {
                 expect(new_data).toEqual(expected.slice(0, 2));
                 let json = await view.to_json();
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
             table.update(partial);
@@ -446,6 +519,8 @@ module.exports = perspective => {
             });
             let json = await view.to_json();
             expect(json).toEqual([{__ROW_PATH__: [], y: 1}, {__ROW_PATH__: [1], y: 1}, {__ROW_PATH__: [2], y: 0}]);
+            view.delete();
+            table.delete();
         });
 
         it("can be removed entirely", async function() {
@@ -455,6 +530,8 @@ module.exports = perspective => {
             var view = table.view();
             let json = await view.to_json();
             expect(json).toEqual([{x: 1, y: 1}]);
+            view.delete();
+            table.delete();
         });
 
         it("partial update with null unsets value", function(done) {
@@ -466,6 +543,8 @@ module.exports = perspective => {
             table.update(partial);
             view.to_json().then(json => {
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
         });
@@ -479,6 +558,8 @@ module.exports = perspective => {
             table.update(update);
             view.to_json().then(json => {
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
         });
@@ -496,6 +577,8 @@ module.exports = perspective => {
             table.update(partial);
             view.to_json().then(json => {
                 expect(json).toEqual(expected);
+                view.delete();
+                table.delete();
                 done();
             });
         });
@@ -511,6 +594,8 @@ module.exports = perspective => {
             });
             let result = await view.to_json();
             expect(data.slice(0, 2)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("`top`", async function() {
@@ -522,6 +607,8 @@ module.exports = perspective => {
             });
             let result = await view.to_json();
             expect(data.slice(2)).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("`width`", async function() {
@@ -534,6 +621,8 @@ module.exports = perspective => {
             var result2 = _.map(data, x => _.pick(x, "x", "y"));
             let result = await view.to_json();
             expect(result2).toEqual(result);
+            view.delete();
+            table.delete();
         });
 
         it("`left`", async function() {
@@ -548,6 +637,8 @@ module.exports = perspective => {
             });
             let result2 = await view.to_json();
             expect(result).toEqual(result2);
+            view.delete();
+            table.delete();
         });
 
         it("All", async function() {
@@ -565,6 +656,8 @@ module.exports = perspective => {
             });
             let result2 = await view.to_json();
             expect(result2).toEqual(result.slice(1, 3));
+            view.delete();
+            table.delete();
         });
     });
 };

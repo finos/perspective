@@ -264,6 +264,14 @@ t_ctx2::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx 
 
     return retval;
 }
+
+void
+t_ctx2::column_sort_by(const t_sortsvec& sortby) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    m_ctraversal->sort_by(m_config, sortby, *(ctree().get()));
+}
+
 void
 t_ctx2::sort_by(const t_sortsvec& sortby) {
     PSP_TRACE_SENTINEL();

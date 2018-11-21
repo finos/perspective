@@ -920,10 +920,10 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 auto weights_it = weights.begin();
                 auto values_it = values.begin();
 
-                for( ; weights_it != weights.end() && values_it != values.end(); ++weights_it, ++values_it )
-                {
-                    if( weights_it->is_valid() && values_it->is_valid() && !weights_it->is_nan() && !values_it->is_nan() )
-                    {
+                for (; weights_it != weights.end() && values_it != values.end();
+                     ++weights_it, ++values_it) {
+                    if (weights_it->is_valid() && values_it->is_valid() && !weights_it->is_nan()
+                        && !values_it->is_nan()) {
                         nr += weights_it->to_double() * values_it->to_double();
                         dr += weights_it->to_double();
                     }

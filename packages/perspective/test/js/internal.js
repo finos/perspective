@@ -26,6 +26,7 @@ module.exports = (perspective, mode) => {
                 });
             };
             expect(anon).toThrow();
+            table.delete();
         });
 
         it("Arrow schema types are mapped correctly", async function() {
@@ -49,6 +50,7 @@ module.exports = (perspective, mode) => {
                     stypes.delete();
                 }
             }
+            table.delete();
         });
     });
 };

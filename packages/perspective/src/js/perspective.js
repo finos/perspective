@@ -1013,18 +1013,27 @@ export default function(Module) {
         }
 
         // Sort
-        let sort = [];
+        let sort = [],
+            col_sort = [];
         if (config.sort) {
-            sort = config.sort.map(x => {
-                if (!Array.isArray(x)) {
-                    return [aggregates.map(agg => agg[0]).indexOf(x), 1];
-                } else {
-                    return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
-                }
-            });
-            if (config.column_pivot.length > 0 && config.row_pivot.length > 0) {
-                config.sort = config.sort.filter(x => config.row_pivot.indexOf(x[0]) === -1);
-            }
+            sort = config.sort
+                .filter(x => config.column_pivot.indexOf(x[0]) === -1)
+                .map(x => {
+                    if (!Array.isArray(x)) {
+                        return [aggregates.map(agg => agg[0]).indexOf(x), 1];
+                    } else {
+                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
+                    }
+                });
+            col_sort = config.sort
+                .filter(x => config.column_pivot.indexOf(x[0]) > -1)
+                .map(x => {
+                    if (!Array.isArray(x)) {
+                        return [aggregates.map(agg => agg[0]).indexOf(x), 1];
+                    } else {
+                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
+                    }
+                });
         }
 
         let context;
@@ -1032,7 +1041,7 @@ export default function(Module) {
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
                 config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, [], sort.length > 0);
+                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, sort.length > 0);
                 sides = 2;
                 this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
@@ -1048,8 +1057,8 @@ export default function(Module) {
                     context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
                 }
 
-                if (sort.length > 0) {
-                    __MODULE__.sort(context, sort);
+                if (sort.length > 0 || col_sort.length > 0) {
+                    __MODULE__.sort(context, sort, col_sort);
                 }
             } else {
                 context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort);
@@ -1146,7 +1155,6 @@ export default function(Module) {
         let pdata;
         let schema = this.gnode.get_tblschema();
         let types = schema.types();
-        schema.delete();
 
         data = data.map(idx => ({[this.index]: idx}));
 
@@ -1163,6 +1171,7 @@ export default function(Module) {
             console.error(e);
         } finally {
             types.delete();
+            schema.delete();
         }
     };
 
@@ -1175,7 +1184,7 @@ export default function(Module) {
         let pool, gnode, tbl;
 
         try {
-            pool = new __MODULE__.t_pool({_update_callback: function() {}});
+            pool = new __MODULE__.t_pool();
             gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
@@ -1576,7 +1585,7 @@ export default function(Module) {
                 limit_index = 0;
 
             try {
-                pool = new __MODULE__.t_pool({_update_callback: function() {}});
+                pool = new __MODULE__.t_pool();
                 [gnode, limit_index] = make_table(pdata, pool, gnode, undefined, options.index, options.limit, limit_index, false);
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

@@ -234,8 +234,12 @@ export class PerspectiveElement extends StateElement {
         const sort = this._get_view_sorts();
         const hidden = this._get_view_hidden(aggregates, sort);
         for (const s of hidden) {
-            const all = this._get_view_aggregates("#inactive_columns perspective-row");
-            aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+            const all = this.get_aggregate_attribute();
+            if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
+                aggregates.push({column: s, op: "any"});
+            } else {
+                aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+            }
         }
 
         if (this._view) {
