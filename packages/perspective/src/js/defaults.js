@@ -33,7 +33,9 @@ const STRING_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "d
 
 const BOOLEAN_AGGREGATES = ["any", "count", "distinct count", "distinct leaf", "dominant", "first by index", "last by index", "last", "mean by count", "unique", "and", "or"];
 
-export const SORT_ORDERS = ["asc", "desc", "none", "asc abs", "desc abs"];
+export const SORT_ORDERS = ["none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs"];
+
+export const SORT_ORDER_IDS = [2, 0, 1, 0, 1, 3, 4, 3, 4];
 
 export const TYPE_AGGREGATES = {
     string: STRING_AGGREGATES,

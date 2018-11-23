@@ -1017,21 +1017,23 @@ export default function(Module) {
             col_sort = [];
         if (config.sort) {
             sort = config.sort
-                .filter(x => config.column_pivot.indexOf(x[0]) === -1)
+                .filter(x => x.length === 1 || x[1].indexOf("col") === -1)
                 .map(x => {
                     if (!Array.isArray(x)) {
                         return [aggregates.map(agg => agg[0]).indexOf(x), 1];
                     } else {
-                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
+                        const order = defaults.SORT_ORDER_IDS[defaults.SORT_ORDERS.indexOf(x[1])];
+                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), order];
                     }
                 });
             col_sort = config.sort
-                .filter(x => config.column_pivot.indexOf(x[0]) > -1)
+                .filter(x => x.length === 2 && x[1].indexOf("col") > -1)
                 .map(x => {
                     if (!Array.isArray(x)) {
                         return [aggregates.map(agg => agg[0]).indexOf(x), 1];
                     } else {
-                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), defaults.SORT_ORDERS.indexOf(x[1])];
+                        const order = defaults.SORT_ORDER_IDS[defaults.SORT_ORDERS.indexOf(x[1])];
+                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), order];
                     }
                 });
         }

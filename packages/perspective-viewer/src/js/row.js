@@ -36,8 +36,12 @@ const ICONS = {
     asc: "&#x2191;",
     desc: "&#x2193;",
     none: "-",
-    "asc abs": "&#x2B06;",
-    "desc abs": "&#x2B07;"
+    "asc abs": "&#x21E7;",
+    "desc abs": "&#x21E9;",
+    "col asc": "&#x2192;",
+    "col desc": "&#x2190;",
+    "col asc abs": "&#x21E8;",
+    "col desc abs": "&#x21E6;"
 };
 
 // Eslint complains here because we don't do anything, but actually we globally
@@ -189,6 +193,20 @@ class Row extends HTMLElement {
         this.dispatchEvent(new CustomEvent("filter-selected", {detail: event}));
     }
 
+    _increment_sort_order(column_sorting, abs_sorting) {
+        const current = this.getAttribute("sort-order");
+        let sort_orders = ["asc", "desc"];
+        if (column_sorting) {
+            sort_orders.push("col asc", "col desc");
+        }
+        if (abs_sorting && this.getAttribute("type") !== "string") {
+            sort_orders = sort_orders.map(x => `${x} abs`);
+        }
+        sort_orders.unshift("none");
+        const order = (sort_orders.indexOf(current) + 1) % sort_orders.length;
+        this.setAttribute("sort-order", sort_orders[order]);
+    }
+
     _set_data_transfer(event) {
         if (this.hasAttribute("filter")) {
             let {operator, operand} = JSON.parse(this.getAttribute("filter"));
@@ -225,10 +243,6 @@ class Row extends HTMLElement {
             this.dispatchEvent(new CustomEvent("aggregate-selected", {detail: event}));
         });
         this._sort_order.addEventListener("click", event => {
-            const current = this.getAttribute("sort-order");
-            const sort_size = this.getAttribute("type") === "string" ? 3 : 5;
-            const order = (perspective.SORT_ORDERS.indexOf(current) + 1) % sort_size;
-            this.setAttribute("sort-order", perspective.SORT_ORDERS[order]);
             this.dispatchEvent(new CustomEvent("sort-order", {detail: event}));
         });
 
