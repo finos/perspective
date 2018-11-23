@@ -218,7 +218,35 @@
     #sort perspective-row {
         --sort_order-display: inline-block;
         --sort_order-padding: 0 0 0 10px;
+        &[sort-order="asc"] {
+            --row-sort-order--before: var(--sort-order-asc--before, "\2191");
+        }
+        &[sort-order="desc"] {
+            --row-sort-order--before: var(--sort-order-desc--before, "\2193");
+        }
+        &[sort-order="none"] {
+            --row-sort-order--before: var(--sort-order-none--before, "-");
+        }
+        &[sort-order="asc abs"] {
+            --row-sort-order--before: var(--sort-order-asc-abs--before, "\21E7");
+        }
+        &[sort-order="desc abs"] {
+            --row-sort-order--before: var(--sort-order-desc-abs--before, "\21E9");
+        }
+        &[sort-order="col asc"] {
+            --row-sort-order--before: var(--sort-order-col-asc--before, "\2192");
+        }
+        &[sort-order="col desc"] {
+            --row-sort-order--before: var(--sort-order-col-desc--before, "\2190");
+        }
+        &[sort-order="col asc abs"] {
+            --row-sort-order--before: var(--sort-order-col-asc-abs--before, "\21E8");
+        }
+        &[sort-order="col desc abs"] {
+            --row-sort-order--before: var(--sort-order-col-desc-abs--before, "\21E6");
+        }
     }
+
     #top_panel perspective-row + perspective-row:before {
         content: ",";
         padding: 0px 10px 0px 0px;

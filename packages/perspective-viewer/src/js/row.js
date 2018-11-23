@@ -32,18 +32,6 @@ function get_text_width(text, max = 0) {
     return width;
 }
 
-const ICONS = {
-    asc: "&#x2191;",
-    desc: "&#x2193;",
-    none: "-",
-    "asc abs": "&#x21E7;",
-    "desc abs": "&#x21E9;",
-    "col asc": "&#x2192;",
-    "col desc": "&#x2190;",
-    "col asc abs": "&#x21E8;",
-    "col desc abs": "&#x21E6;"
-};
-
 // Eslint complains here because we don't do anything, but actually we globally
 // register this class as a CustomElement
 @bindTemplate(template, {toString: () => style + "\n" + awesomplete_style}) // eslint-disable-next-line no-unused-vars
@@ -142,11 +130,6 @@ class Row extends HTMLElement {
             let type = this.getAttribute("type");
             agg_dropdown.value = aggregate || perspective.AGGREGATE_DEFAULTS[type];
         }
-    }
-
-    set "sort-order"(sort_dir) {
-        const icon = ICONS[sort_dir];
-        this.shadowRoot.querySelector("#sort_order").innerHTML = icon;
     }
 
     set computed_column(c) {
