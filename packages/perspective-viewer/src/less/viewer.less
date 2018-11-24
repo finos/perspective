@@ -27,6 +27,12 @@
     opacity: 1 !important;
 }
 
+@keyframes expand {
+    from {
+        opacity: 0;
+    }
+}
+
 :host {
     position: relative;
     display: inline-block;
@@ -58,7 +64,7 @@
     --hypergrid-separator--color: #666;
     --hypergrid-header--color: #666;
     --hypergrid-positive--color: #1078d1;
-    --hypergrid-negative--background: #de3838;
+    --hypergrid-negative--color: rgb(255,136,136);
     --hypergrid-positive--background: #fff;
     --hypergrid-negative--background: #fff;
     --hypergrid--font-size: 12px;
@@ -141,12 +147,23 @@
         min-height: 20px;
     }
     #active_columns perspective-row {
+        animation: expand 0.3s ease-out;
         --column-selector--color: var(--active-column-selector--color, #999);
         --is_visible--before: var(--active-column-selector--content, "\25CF");
     }
     #inactive_columns perspective-row {
+        animation: expand 0.3s ease-out;
         --column-selector--color: var(--inactive-column-selector--color, #999);
         --is_visible--before: var(--inactive-column-selector--content, "\25CB");
+        --row_draggable--animation: none;
+        &:hover {
+            transition: none;
+            opacity: 1;
+        }
+    }
+
+    #top_panel perspective-row {
+        animation: expand 0.3s ease-out;
     }
     #active_columns,
     #inactive_columns {
@@ -159,8 +176,15 @@
         position: relative;
     }
     #inactive_columns {
-        .active {
-            display: none;
+        perspective-row {
+            opacity: var(--inactive-column--opacity, 1);
+            transition: opacity 0.3s; // --row_draggable--transition: margin-left 0.5s;
+            &.active {
+                --row_draggable--margin: 0px 0px 0px 10px;
+                opacity: 0;
+                height: 0 !important;
+                overflow: hidden;
+            }
         }
     }
     .columns_horizontal #sub_columns.collapse #side_panel__actions {
@@ -228,25 +252,42 @@
             --row-sort-order--before: var(--sort-order-none--before, "-");
         }
         &[sort-order="asc abs"] {
-            --row-sort-order--before: var(--sort-order-asc-abs--before, "\21E7");
+            --row-sort-order--before: var(
+                --sort-order-asc-abs--before,
+                "\21E7"
+            );
         }
         &[sort-order="desc abs"] {
-            --row-sort-order--before: var(--sort-order-desc-abs--before, "\21E9");
+            --row-sort-order--before: var(
+                --sort-order-desc-abs--before,
+                "\21E9"
+            );
         }
         &[sort-order="col asc"] {
-            --row-sort-order--before: var(--sort-order-col-asc--before, "\2192");
+            --row-sort-order--before: var(
+                --sort-order-col-asc--before,
+                "\2192"
+            );
         }
         &[sort-order="col desc"] {
-            --row-sort-order--before: var(--sort-order-col-desc--before, "\2190");
+            --row-sort-order--before: var(
+                --sort-order-col-desc--before,
+                "\2190"
+            );
         }
         &[sort-order="col asc abs"] {
-            --row-sort-order--before: var(--sort-order-col-asc-abs--before, "\21E8");
+            --row-sort-order--before: var(
+                --sort-order-col-asc-abs--before,
+                "\21E8"
+            );
         }
         &[sort-order="col desc abs"] {
-            --row-sort-order--before: var(--sort-order-col-desc-abs--before, "\21E6");
+            --row-sort-order--before: var(
+                --sort-order-col-desc-abs--before,
+                "\21E6"
+            );
         }
     }
-
     #top_panel perspective-row + perspective-row:before {
         content: ",";
         padding: 0px 10px 0px 0px;
@@ -261,6 +302,7 @@
         position: absolute;
         left: 0px;
         top: 0px;
+
         right: 0px;
         bottom: 0px;
         padding: 30px;
@@ -283,6 +325,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        &:hover {
+            color: var(--button-hover--color, inherit);
+        }
     }
     .button {
         cursor: pointer;
@@ -353,5 +398,8 @@
         color: #999;
         font-family: Arial;
         font-size: 12px;
+        &:hover {
+            color: var(--button-hover--color, inherit);
+        }
     }
 }

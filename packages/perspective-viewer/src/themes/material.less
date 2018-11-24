@@ -24,6 +24,10 @@ perspective-viewer {
     --active-column--height: 51px;
     --inactive-column--height: 24px;
     --active-columns--justify-content: space-evenly;
+    --inactive-column--opacity: 0.3;
+
+    --column_type-float--color: @blue800;
+    --column_type-string--color: rgb(255,136,136);
 
     --config_button--before: "more_vert";
     --button--font-family: "Material Icons";
@@ -31,7 +35,8 @@ perspective-viewer {
     --copy_button--before: "file_copy";
     --download_button--before: "save_alt";
     --reset_button--before: "refresh";
-
+    --row_draggable-border-last-child-width: 0;
+                
     --row_pivots--before: "Group By";
     --column_pivots--before: "Split By";
 
@@ -40,6 +45,7 @@ perspective-viewer {
     --sort-order-none--before: "-";
     --sort-order-col-asc--before: "arrow_back";
     --sort-order-col-desc--before: "arrow_forward";
+    --sort_order-padding: 0 0 0 0px;
 
     --select--background-color: none;
     --select--padding: 0px;
@@ -56,6 +62,7 @@ perspective-viewer {
     --column-add--before: "add";
 
     --column_type--padding: 0px 0px 0px 0px;
+    --column_type--width: 25px;
 
     --column-selector--font-family: "Material Icons";
     --active-column-selector--height: 45px;
@@ -66,6 +73,7 @@ perspective-viewer {
     --side_panel--padding: 24px 24px 24px 17px;
     --button--padding: 24px 17px 0px 17px;
     --button--font-size: 16px;
+    --button-hover--color: @blue800;
 
     --top_panel--padding: 0px 0px 24px 0px;
 }

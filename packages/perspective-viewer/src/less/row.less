@@ -67,6 +67,9 @@
     &:before {
         content: var(--row-sort-order--before, "-");
     }
+    &:hover {
+        color: var(--button-hover--color, inherit);
+    }
 }
 
 :host {
@@ -81,13 +84,15 @@
         margin: 0 0 0 15px;
         display: var(--filter_operator-display, none);
         height: 17px;
+        &:hover {
+            color: var(--button-hover--color, inherit);
+        }
     }
 
     #sort_order {
         cursor: pointer;
         width: 10px;
     }
-    
 }
 
 :host {
@@ -100,6 +105,16 @@
         padding-right: 15px;
         cursor: pointer;
     }
+}
+
+@keyframes expand2 {
+    from {
+        transform: translateX(10px);
+    }
+}
+
+:host(:hover) .is_visible {
+    color: var(--button-hover--color, --column-selector--color);
 }
 
 :host {
@@ -128,6 +143,9 @@
         color: #999;
         font-family: Arial;
         font-size: 10px;
+        &:hover {
+            color: var(--button-hover--color, inherit);
+        }
     }
     #column_aggregate {
         font-family: Arial;
@@ -181,6 +199,7 @@
     }
 
     .row_draggable {
+        animation: var(--row_draggable--animation, expand2 0.5s ease-out);
         cursor: move;
         border-style: solid;
         background-color: var(--row_draggable-background-color, none);
@@ -198,6 +217,8 @@
         display: var(--row_draggable-display, flex);
         flex-direction: column;
         justify-content: var(--row_draggable--justify-content, center);
+        margin: var(--row_draggable--margin, 0);
+        transition: var(--row_draggable--transition, none);
 
         * {
             opacity: var(--row_draggable_children-opacity, 1);
@@ -227,27 +248,27 @@
     .integer:before,
     .float:before {
         content: "123";
-        color: #016bc6;
+        color: var(--column_type-float--color, #016bc6);
     }
 
     .string:before {
         content: "abc";
-        color: #fe9292;
+        color: var(--column_type-string--color, #fe9292);
     }
 
     .boolean:before {
         content: "t/f";
-        color: #999999;
+        color: var(--column_type-boolean--color, #999999);
     }
 
     .date:before {
         content: "mdy";
-        color: #999999;
+        color: var(--column_type-date--color, #999999);
     }
 
     .datetime:before {
         content: "mdy";
-        color: #999999;
+        color: var(--column_type-datetime--color, #999999);
     }
 }
 
@@ -269,6 +290,7 @@
 :host span#name:before {
     .column_row();
     display: var(--name-before-display, none);
+    width: var(--column_type--width, auto);
 }
 
 :host #column_aggregate {

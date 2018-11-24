@@ -20,14 +20,19 @@
     flex-direction: column;
     justify-content: flex-end;
     min-height: 24px;
+    transition: border-color 0.3s ease-out;
 }
 
-.dragging .psp-text-field.dropping {
-    border-bottom: 2px solid #22a0ce;
+:host(.dragging) .psp-text-field.dropping {
+    border-bottom-width: 2px;
+    border-style: solid;
+    border-color: var(--psp-text-field--border-color, @blue800);
 }
 
-.dragging .psp-text-field {
-    border-bottom: 1px solid #22a0ce;
+:host(.dragging) .psp-text-field {
+    border-bottom-width: 1px;
+    border-style: solid;
+    border-color: var(--psp-text-field--border-color, @blue800);
 }
 
 .psp-text-field > .psp-text-field__input {
@@ -48,6 +53,7 @@
     padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
     font-size: 12px;
     display: inline-block;
+    transition: font-size 0.3s, margin 0.3s;
 }
 
 .dropping .psp-text-field__input,
@@ -194,19 +200,15 @@
                 --row_draggable--justify-content: space-evenly;
             }
 
+            perspective-row:last-child {
+                --row_draggable-border-width: var(--row_draggable-border-last-child-width, 0 0 1px 0);                
+            }
+
             perspective-row[drop-target] {
                 --row_draggable_children-opacity: 0;
             }
         }
-
-        // perspective-row {
-        //     height: var(--inactive-column--height, var(--column--height, 21px));
-        //     --row_draggable-height: var(
-        //         --inactive-column--height,
-        //         var(--column--height, 21px)
-        //     );
-        // }
-
+        
         #active_columns,
         #inactive_columns {
             border: none !important;
