@@ -134,13 +134,42 @@ export class DomElement extends PerspectiveElement {
             }
         });
         if (reset) {
-            this._active_columns.innerHTML = "";
-            columns.map(y => {
-                let ref = lis.find(x => x.getAttribute("name") === y);
+            this._update_column_list(columns, this._active_columns, name => {
+                const ref = lis.find(x => x.getAttribute("name") === name);
                 if (ref) {
-                    this._active_columns.appendChild(this._new_row(ref.getAttribute("name"), ref.getAttribute("type")));
+                    return this._new_row(ref.getAttribute("name"), ref.getAttribute("type"));
                 }
             });
+        }
+    }
+
+    _update_column_list(columns, container, callback, accessor) {
+        accessor = accessor || ((x, y) => y.getAttribute("name") === x);
+        const active_columns = Array.prototype.slice.call(container.children);
+        for (let i = 0, j = 0; i < active_columns.length || j < columns.length; i++, j++) {
+            const name = columns[j];
+            const col = active_columns[i];
+            const next_col = active_columns[i + 1];
+            if (!col) {
+                const node = callback(name);
+                if (node) {
+                    container.appendChild(node);
+                }
+            } else if (typeof name === "undefined") {
+                container.removeChild(col);
+            } else if (!accessor(name, col)) {
+                if (next_col && accessor(name, next_col)) {
+                    container.removeChild(col);
+                    i++;
+                    //  j--;
+                } else {
+                    const node = callback(name);
+                    if (node) {
+                        container.insertBefore(node, col);
+                        i--;
+                    }
+                }
+            }
         }
     }
 
