@@ -23,6 +23,7 @@ class PerspectiveWebpackPlugin {
         const rules = [
             {
                 test: /\.less$/,
+                exclude: /themes/,
                 include: load_path,
                 use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
             },
@@ -48,13 +49,16 @@ class PerspectiveWebpackPlugin {
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
                 include: load_path,
-                use: [{
-                    loader: WORKER_LOADER_PATH,
-                    options: {name: "[name].js", compiled: true}
-                }, {
-                    loader: BLOB_LOADER_PATH,
-                    options: {name: "[name].worker.js"}
-                }]
+                use: [
+                    {
+                        loader: WORKER_LOADER_PATH,
+                        options: {name: "[name].js", compiled: true}
+                    },
+                    {
+                        loader: BLOB_LOADER_PATH,
+                        options: {name: "[name].worker.js"}
+                    }
+                ]
             });
         } else {
             rules.push({

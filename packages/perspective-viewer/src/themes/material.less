@@ -7,11 +7,11 @@
  *
  */
 
-@import "variables";
-
-@import url("https://fonts.googleapis.com/css?family=Open+Sans");
+@import "../less/variables";
 @import url("https://fonts.googleapis.com/css?family=Material+Icons");
-@import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+
+@import url("~typeface-open-sans/index.css");
+@import url("~typeface-roboto-mono/index.css");
 
 perspective-viewer {
     --interface--font-family: "Open Sans";
@@ -55,7 +55,7 @@ perspective-viewer {
     --column-add--font-family: "Material Icons";
     --column-add--before: "add";
 
-    --column_type--padding: 0px 5px 0px 0px;
+    --column_type--padding: 0px 0px 0px 0px;
 
     --column-selector--font-family: "Material Icons";
     --active-column-selector--height: 45px;
