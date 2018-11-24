@@ -236,7 +236,7 @@ export class PerspectiveElement extends StateElement {
         for (const s of hidden) {
             const all = this.get_aggregate_attribute();
             if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
-                aggregates.push({column: s, op: "any"});
+                aggregates.push({column: s, op: "unique"});
             } else {
                 aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
             }

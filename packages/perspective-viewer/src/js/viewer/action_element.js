@@ -159,7 +159,8 @@ export class ActionElement extends DomElement {
         this._debounce_update();
     }
 
-    _sort_order_clicked() {
+    _sort_order_clicked(event) {
+        event.target._increment_sort_order(this._get_view_column_pivots().length > 0, event.detail.shiftKey);
         let sort = JSON.parse(this.getAttribute("sort"));
         let new_sort = this._get_view_sorts();
         for (let s of sort) {

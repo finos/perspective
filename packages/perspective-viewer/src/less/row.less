@@ -63,6 +63,10 @@
 
 :host #sort_order {
     display: none;
+    font-family: var(--button--font-family, inherit);
+    &:before {
+        content: var(--row-sort-order--before, "-");
+    }
 }
 
 :host {
@@ -83,6 +87,7 @@
         cursor: pointer;
         width: 10px;
     }
+    
 }
 
 :host {

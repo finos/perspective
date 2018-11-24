@@ -77,7 +77,11 @@ export class DomElement extends PerspectiveElement {
         if (sort) {
             row.setAttribute("sort-order", sort);
         } else {
-            row.setAttribute("sort-order", "asc");
+            if (this._get_view_column_pivots().indexOf(name) > -1) {
+                row.setAttribute("sort-order", "col asc");
+            } else {
+                row.setAttribute("sort-order", "asc");
+            }
         }
 
         row.setAttribute("type", type);

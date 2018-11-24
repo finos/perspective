@@ -564,7 +564,7 @@ module.exports = perspective => {
             var view = table.view({
                 column_pivot: ["y"],
                 row_pivot: ["z"],
-                sort: [["y", "desc"]],
+                sort: [["y", "col desc"]],
                 aggregate: [{column: "x", op: "sum"}, {column: "y", op: "any"}]
             });
 
