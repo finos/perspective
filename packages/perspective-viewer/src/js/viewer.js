@@ -85,20 +85,19 @@ class PerspectiveViewer extends ActionElement {
     @array_attribute
     set sort(sort) {
         var inner = this._sort.querySelector("ul");
-        inner.innerHTML = "";
-        if (sort.length > 0) {
-            sort.map(
-                function(s) {
-                    let dir = "asc";
-                    if (Array.isArray(s)) {
-                        dir = s[1];
-                        s = s[0];
-                    }
-                    let row = this._new_row(s, false, false, false, dir);
-                    inner.appendChild(row);
-                }.bind(this)
-            );
-        }
+        this._update_column_list(
+            sort,
+            inner,
+            s => {
+                let dir = "asc";
+                if (Array.isArray(s)) {
+                    dir = s[1];
+                    s = s[0];
+                }
+                return this._new_row(s, false, false, false, dir);
+            },
+            (sort, node) => node.getAttribute("name") === (sort[0] ? sort[0] : sort)
+        );
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
@@ -214,17 +213,24 @@ class PerspectiveViewer extends ActionElement {
     set filters(filters) {
         if (!this._updating_filter) {
             var inner = this._filters.querySelector("ul");
-            inner.innerHTML = "";
-            if (filters.length > 0) {
-                filters.map(pivot => {
+            this._update_column_list(
+                filters,
+                inner,
+                filter => {
                     const fterms = JSON.stringify({
-                        operator: pivot[1],
-                        operand: pivot[2]
+                        operator: filter[1],
+                        operand: filter[2]
                     });
-                    const row = this._new_row(pivot[0], undefined, undefined, fterms);
-                    inner.appendChild(row);
-                });
-            }
+                    return this._new_row(filter[0], undefined, undefined, fterms);
+                },
+                (filter, node) =>
+                    node.getAttribute("name") === filter[0] &&
+                    node.getAttribute("filter") ===
+                        JSON.stringify({
+                            operator: filter[1],
+                            operand: filter[2]
+                        })
+            );
         }
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
@@ -253,15 +259,7 @@ class PerspectiveViewer extends ActionElement {
     @array_attribute
     set "column-pivots"(pivots) {
         var inner = this._column_pivots.querySelector("ul");
-        inner.innerHTML = "";
-        if (pivots.length > 0) {
-            pivots.map(
-                function(pivot) {
-                    let row = this._new_row(pivot);
-                    inner.appendChild(row);
-                }.bind(this)
-            );
-        }
+        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
@@ -277,15 +275,7 @@ class PerspectiveViewer extends ActionElement {
     @array_attribute
     set "row-pivots"(pivots) {
         var inner = this._row_pivots.querySelector("ul");
-        inner.innerHTML = "";
-        if (pivots.length > 0) {
-            pivots.map(
-                function(pivot) {
-                    let row = this._new_row(pivot);
-                    inner.appendChild(row);
-                }.bind(this)
-            );
-        }
+        this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
     }
