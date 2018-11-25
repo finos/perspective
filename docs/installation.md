@@ -63,9 +63,9 @@ For using Perspective from Node.js, or as a depedency in a `package.json` based
 via NPM
 
 ```bash
-$ npm install --save @jpmorganchase/perspective-viewer \
-@jpmorganchase/perspective-viewer-highcharts \
-@jpmorganchase/perspective-viewer-hypergrid
+yarn @jpmorganchase/perspective-viewer
+yarn @jpmorganchase/perspective-viewer-highcharts
+yarn @jpmorganchase/perspective-viewer-hypergrid
 ```
 
 ## From source

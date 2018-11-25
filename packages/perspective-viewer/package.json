@@ -31,14 +31,16 @@
             "test/js"
         ],
         "verbose": true,
-        "testURL": "http://localhost/"
+        "testURL": "http://localhost/",
+        "transform": {},
+        "automock": false
     },
     "repository": {
         "type": "git",
         "url": "https://github.com/jpmorganchase/perspective"
     },
     "author": "",
-    "license": "Apache",
+    "license": "Apache-2.0",
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.8",
         "@webcomponents/shadycss": "^1.5.2",

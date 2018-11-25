@@ -24,7 +24,9 @@
             "test/js"
         ],
         "verbose": true,
-        "testURL": "http://localhost/"
+        "testURL": "http://localhost/",
+        "transform": {},
+        "automock": false
     },
     "publishConfig": {
         "access": "public"
@@ -34,14 +36,14 @@
         "url": "https://github.com/jpmorganchase/perspective"
     },
     "author": "",
-    "license": "Apache",
+    "license": "Apache-2.0",
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.8",
         "@jpmorganchase/perspective-viewer": "^0.2.8",
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",
         "datasaur-local": "3.0.0",
-        "fin-hypergrid": "^3.0.0",
+        "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
         "rectangular": "1.0.1",
         "underscore": "^1.8.3"

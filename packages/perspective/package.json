@@ -22,7 +22,7 @@
         "bench:build:copy": "cp bench/csv/* build",
         "bench:run": "node build/benchmark.js",
         "bench": "npm-run-all bench:build bench:run",
-        "prebuild": "mkdir -p build && CLICOLOR_FORCE=1 npm run compile",
+        "prebuild": "mkdir -p build && CLICOLOR_FORCE=1 yarn compile",
         "precompile": "mkdir -p obj && mkdir -p ../../obj/",
         "compile": "cd ../../obj/ && emcmake cmake ../scripts/ && emmake make -j${PSP_CPU_COUNT-8}",
         "postcompile": "node ../../scripts/compile",
@@ -34,7 +34,6 @@
         "test:build": "npm-run-all test:build:copy test:build:webpack",
         "test:build:copy": "npm-run-all -p test:build:copy:*",
         "test:build:copy:html": "cp test/html/* build",
-        "test:build:copy:test": "cp test/csv/* build",
         "test:build:webpack": "npm-run-all -p test:build:webpack:*",
         "test:build:webpack:browser": "webpack --color --config test/config/test_browser.config.js",
         "test:build:webpack:node": "webpack --color --config test/config/test_node.config.js",
@@ -46,9 +45,10 @@
         "roots": [
             "build"
         ],
-        "transform": {},
         "verbose": true,
-        "testURL": "http://localhost/"
+        "testURL": "http://localhost/",
+        "transform": {},
+        "automock": false
     },
     "repository": {
         "type": "git",

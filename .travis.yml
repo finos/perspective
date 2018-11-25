@@ -6,6 +6,7 @@ node_js:
   - "8"
 
 cache:
+  yarn: true
   directories:
     - node_modules
     - packages/perspective/node_modules
@@ -25,10 +26,10 @@ services:
   - docker
 
 install:
-  - npm install
+  - yarn
 
 script:
-  - npm run lint
-  - PSP_DOCKER=1 npm run build
-  - PSP_DOCKER=1 npm run test:build
-  - npm run test:run_quiet
+  - yarn lint
+  - PSP_DOCKER=1 yarn build
+  - PSP_DOCKER=1 yarn test:build
+  - yarn test:run_quiet
