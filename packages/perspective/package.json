@@ -59,8 +59,12 @@
     "dependencies": {
         "bufferutil": "~3.0.0",
         "d3-array": "^1.2.1",
+        "flatbuffers": "1.9.0",
+        "json-bignum": "0.0.3",
         "moment": "^2.19.1",
         "papaparse": "^4.3.6",
+        "text-encoding-utf-8": "^1.0.2",
+        "tslib": "1.9.0",
         "underscore": "^1.8.3",
         "utf-8-validate": "~4.0.0"
     }

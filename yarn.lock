@@ -4613,7 +4613,7 @@ fin-hypergrid-grouped-header-plugin@^1.2.4:
   resolved "https://registry.yarnpkg.com/fin-hypergrid-grouped-header-plugin/-/fin-hypergrid-grouped-header-plugin-1.2.4.tgz#f37bfd00ca3209eb04c27293b5d60deecd3581c9"
   integrity sha512-Os05E6wSnslkNptZsL11UQAAA9Kfx+GATc4NYoOl/omVntNhaeXe26iLxNBUp+gU3brkuYqJvHzg6mO0VCe8mA==
 
-fin-hypergrid@^3.0.0:
+fin-hypergrid@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/fin-hypergrid/-/fin-hypergrid-3.2.0.tgz#6ccb8d2ef29740edbe8939e97a11671f69b94e6b"
   integrity sha512-Bv9lUrgRigNSWcsrjxO2RTgt+OJwhRwygRAMHw3tctN93J65srue0T2NlP5Q1oCmYsOxUTjteM93qmxQ6GLk1g==
@@ -4679,6 +4679,11 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     rimraf "~2.6.2"
     write "^0.2.1"
+
+flatbuffers@1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/flatbuffers/-/flatbuffers-1.9.0.tgz#e1ef5267deaab4872c08dbca56a936d6dbc27ecd"
+  integrity sha1-4e9SZ96qtIcsCNvKVqk21tvCfs0=
 
 flatbuffers@trxcllnt/flatbuffers-esm:
   version "1.7.0"

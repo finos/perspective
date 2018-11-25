@@ -1,0 +1,10 @@
+# don't use the cli
+bin
+
+# Files not needed
+*.d.ts
+*.txt
+*.md
+
+# Make sure this doesn't appear as a repo
+package.json 

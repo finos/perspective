@@ -12,9 +12,9 @@ import {parse_data, clean_data} from "./parse_data.js";
 import {DateParser} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
-import {Precision} from "@apache-arrow/es5-esm/type";
-import {Table} from "@apache-arrow/es5-esm/table";
-import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Precision} from "./apache-arrow/type";
+import {Table} from "./apache-arrow/table";
+import {TypeVisitor} from "./apache-arrow/visitor";
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
