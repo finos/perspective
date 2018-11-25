@@ -25,7 +25,9 @@
             "test/js"
         ],
         "verbose": true,
-        "testURL": "http://localhost/"
+        "testURL": "http://localhost/",
+        "transform": {},
+        "automock": false
     },
     "publishConfig": {
         "access": "public"
@@ -35,7 +37,7 @@
         "url": "https://github.com/jpmorganchase/perspective"
     },
     "author": "",
-    "license": "Apache",
+    "license": "Apache-2.0",
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.8",
         "@jpmorganchase/perspective-viewer": "^0.2.8",

@@ -35,7 +35,7 @@
         "html-loader": "^0.5.1",
         "jasmine": "^2.8.0",
         "jasmine-core": "^2.8.0",
-        "jest": "^22.0.4",
+        "jest": "^23.6.0",
         "js-beautify": "^1.8.6",
         "lerna": "^2.11.0",
         "less": "^2.7.2",

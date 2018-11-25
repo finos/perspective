@@ -120,12 +120,12 @@ function create_http_server(assets, host_psp) {
  * file server for easy hosting.
  */
 class WebSocketHost extends module.exports.Host {
-    constructor({port, assets, host_psp}) {
+    constructor({port, assets, host_psp, on_start}) {
         super();
-        port = port || 8080;
+        port = typeof port === "undefined" ? 8080 : port;
         assets = assets || ["./"];
 
-        const server = http.createServer(create_http_server(assets, host_psp));
+        this._server = http.createServer(create_http_server(assets, host_psp));
 
         this.REQS = {};
         this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
@@ -146,7 +146,7 @@ class WebSocketHost extends module.exports.Host {
             ws.on("error", console.error);
         });
 
-        server.on(
+        this._server.on(
             "upgrade",
             function upgrade(request, socket, head) {
                 console.log("200    *** websocket upgrade ***");
@@ -161,8 +161,12 @@ class WebSocketHost extends module.exports.Host {
             }.bind(this)
         );
 
-        server.listen(port);
-        console.log(`Listening on port ${port}`);
+        this._server.listen(port, () => {
+            console.log(`Listening on port ${port}`);
+            if (on_start) {
+                on_start();
+            }
+        });
     }
 
     post(msg) {
@@ -172,6 +176,10 @@ class WebSocketHost extends module.exports.Host {
 
     open(name, data, options) {
         this._tables[name] = module.exports.table(data, options);
+    }
+
+    close() {
+        this._server.close();
     }
 }
 

@@ -7,9 +7,7 @@
  *
  */
 
-const http = require("http");
 const fs = require("fs");
-const path = require("path");
 const crypto = require("crypto");
 const puppeteer = require("puppeteer");
 
@@ -17,60 +15,21 @@ const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
 
+const {WebSocketHost} = require("@jpmorganchase/perspective");
+
 let __PORT__;
 
-function serve(response, contentType, filePath, paths) {
-    if (paths.length === 0) {
-        throw `file not found ${filePath}`;
-    }
-    fs.readFile(paths.shift() + filePath, function(error, content) {
-        if (error) {
-            serve(response, contentType, filePath, paths);
-            return;
-        } else {
-            response.writeHead(200, {"Content-Type": contentType});
-            response.end(content, "utf-8");
-        }
+exports.with_server = function with_server({paths}, body) {
+    let server;
+    beforeAll(() => {
+        server = new WebSocketHost({
+            assets: paths || ["build"],
+            port: 0,
+            on_start: () => {
+                __PORT__ = server._server.address().port;
+            }
+        });
     });
-}
-
-const DEFAULT = ["node_modules/@jpmorganchase/perspective-viewer/", "node_modules/@jpmorganchase/perspective/"];
-
-exports.with_server = function with_server({paths = DEFAULT}, body) {
-    const server = http.createServer(function(request, response) {
-        var filePath = "build" + request.url;
-        var extname = path.extname(filePath);
-        var contentType = "text/html";
-
-        switch (extname) {
-            case ".js":
-                contentType = "text/javascript";
-                break;
-            case ".css":
-                contentType = "text/css";
-                break;
-            case ".json":
-                contentType = "application/json";
-                break;
-            case ".png":
-                contentType = "image/png";
-                break;
-            case ".jpg":
-                contentType = "image/jpg";
-                break;
-            case ".csv":
-                contentType = "test/csv";
-                break;
-        }
-
-        serve(response, contentType, filePath, [""].concat(paths));
-    });
-
-    beforeAll(() =>
-        server.listen(0, () => {
-            __PORT__ = server.address().port;
-        })
-    );
 
     afterAll(() => server.close());
 
