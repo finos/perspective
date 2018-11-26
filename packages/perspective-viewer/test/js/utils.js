@@ -144,13 +144,19 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null, wa
 
             await new Promise(setTimeout);
             await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
-            const viewer_selector = wait_for_update ? "perspective-viewer:not([updating])" : "perspective-viewer";
-            await page.waitForSelector(viewer_selector);
+
+            if (wait_for_update) {
+                await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            } else {
+                await page.waitForSelector("perspective-viewer");
+            }
 
             await body(page);
 
-            // let animation run;
-            await page.waitForSelector(viewer_selector);
+            if (wait_for_update) {
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            }
 
             const screenshot = await page.screenshot();
             // await page.close();

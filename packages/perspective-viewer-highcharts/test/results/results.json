@@ -80,8 +80,8 @@
     "line.html/tooltip shows proper column labels.": "9754ca4d31e51374b6d943669e979616",
     "line.html/tooltip shows pivot labels.": "ef28cd5b4d790c67a47dafc8b976a726",
     "render_warning.html/render warning should not show under size limit.": "fbac6926fcc91ed2d40755b6ec21d9b4",
-    "render_warning.html/render warning should show above size limit.": "ad7814aaa1cd1a6090fc33f323766469",
+    "render_warning.html/render warning should show above size limit.": "b53fd2275c79ccb63afe460ab4b0e786",
     "render_warning.html/dismissing render warning should trigger render.": "964aea475f68e1757f817f7f6d9f0665",
     "render_warning.html/selecting 'do not show again' should stop render warnings.": "964aea475f68e1757f817f7f6d9f0665",
-    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "caf9e95761d19f18f483ed76456e55dc"
+    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "7bdf0c139100e9cd26e9731ddfa5879c"
 }
