@@ -14,7 +14,7 @@ export class DataParser {
         this.data_formats = {
             row: 1,
             column: 2,
-            arrow: 3
+            schema: 3
         };
     }
 
@@ -24,8 +24,7 @@ export class DataParser {
         } else if (Array.isArray(data[Object.keys(data)[0]])) {
             return this.data_formats.column;
         } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
-            // TODO: is this format a schema or an arrow?
-            return this.data_formats.arrow;
+            return this.data_formats.schema;
         } else {
             throw "Unknown data type!";
         }
@@ -49,7 +48,7 @@ export class DataParser {
             }
         } else if (format === this.data_formats.column) {
             column_names = Object.keys(data);
-        } else if (format === this.data_formats.arrow) {
+        } else if (format === this.data_formats.schema) {
             for (let name in data) {
                 column_names.push(name);
             }
@@ -65,32 +64,37 @@ export class DataParser {
             throw "Cannot determine data types without column names!";
         }
 
-        if (format === this.data_formats.arrow) {
+        if (format === this.data_formats.schema) {
             for (let name in data) {
                 types.push(name_to_psp_type(__MODULE__, data[name]));
             }
-        } else {
-            for (let name of column_names) {
-                let type = this.get_data_type(__MODULE__, data, format, name);
-                types.push(type);
-            }
+            return types;
         }
+
+        for (let name of column_names) {
+            let type = this.get_data_type(__MODULE__, data, format, name);
+            types.push(type);
+        }
+
         return types;
     }
 
     get_data_type(__MODULE__, data, format, name) {
         let i = 0;
-        let inferredType = null;
-        let infer_from;
+        let inferredType = undefined;
 
-        while (inferredType === null && i < 100 && i < data.length) {
-            if (format === this.data_formats.row) {
-                infer_from = data[i][name];
-            } else if (format === this.data_formats.column) {
-                infer_from = data[name][i];
+        if (format === this.data_formats.row) {
+            while (inferredType === undefined && i < 100 && i < data.length) {
+                if (data[i].hasOwnProperty(name)) {
+                    inferredType = infer_type(__MODULE__, data[i][name]);
+                }
+                i++;
             }
-            inferredType = infer_type(__MODULE__, infer_from);
-            i++;
+        } else if (format === this.data_formats.column) {
+            while (inferredType === undefined && i < 100 && i < data[name].length) {
+                inferredType = infer_type(__MODULE__, data[name][i]);
+                i++;
+            }
         }
 
         return inferredType || __MODULE__.t_dtype.DTYPE_STR;
@@ -111,7 +115,7 @@ export class DataParser {
                 const date_parser = new DateParser();
 
                 for (let d of data) {
-                    if (!name in d || clean_data(d[name] == undefined)) {
+                    if (!name in d || clean_data(d[name] === undefined)) {
                         col.push(undefined);
                         continue;
                     }
@@ -155,10 +159,10 @@ export class DataParser {
                 row_count = col.length;
             }
         } else if (format === this.data_formats.column) {
+            row_count = data[column_names[0]].length;
             for (let name of column_names) {
                 // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
                 let transformed;
-                row_count = data[name[0]].length;
                 if (data.hasOwnProperty(name)) {
                     transformed = data[name].map(clean_data);
                 } else {
@@ -166,7 +170,7 @@ export class DataParser {
                 }
                 cdata.push(transformed);
             }
-        } else if (format === this.data_formats.arrow) {
+        } else if (format === this.data_formats.schema) {
             // eslint-disable-next-line no-unused-vars
             for (let name in data) {
                 cdata.push([]);
