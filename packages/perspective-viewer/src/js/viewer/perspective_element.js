@@ -17,31 +17,13 @@ import {StateElement} from "./state_element.js";
 
 /******************************************************************************
  *
- * Web Worker Singleton
- *
- */
-
-const WORKER_SINGLETON = (function() {
-    let __WORKER__;
-    return {
-        getInstance: function() {
-            if (__WORKER__ === undefined) {
-                __WORKER__ = perspective.worker();
-            }
-            return __WORKER__;
-        }
-    };
-})();
-
-if (document.currentScript && document.currentScript.hasAttribute("preload")) {
-    WORKER_SINGLETON.getInstance();
-}
-
-/******************************************************************************
- *
  *  Helpers
  *
  */
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
 
@@ -192,6 +174,9 @@ export class PerspectiveElement extends StateElement {
             const count = num_columns * num_rows;
             if (count >= this._plugin.max_size) {
                 this._plugin_information.classList.remove("hidden");
+                const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
+                const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
+                this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
             } else {
@@ -317,8 +302,10 @@ export class PerspectiveElement extends StateElement {
             this._new_view(ignore_size_check).then(resolve);
         }, 10);
         this._debounce_update = async ({ignore_size_check = false} = {}) => {
-            this.setAttribute("updating", true);
-            await new Promise(resolve => _update(resolve, ignore_size_check));
+            if (this._table) {
+                this.setAttribute("updating", true);
+                await new Promise(resolve => _update(resolve, ignore_size_check));
+            }
         };
     }
 
@@ -326,6 +313,6 @@ export class PerspectiveElement extends StateElement {
         if (this._table) {
             return this._table._worker;
         }
-        return WORKER_SINGLETON.getInstance();
+        return perspective.shared_worker();
     }
 }

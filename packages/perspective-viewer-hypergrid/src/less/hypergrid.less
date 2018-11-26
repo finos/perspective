@@ -64,12 +64,12 @@
     }
 
     div.finbar-vertical div.thumb {
-        width: 13px;
+        width: var(--hypergrid-scrollbar--width, 13px);
         right: -1px;
         background-color: rgba(158, 158, 158, 1);
         box-shadow: 0 0 0px #000, 0 0 0px #000, 0 0 0px #000;
-        border-radius: 0px;
         margin: 0px !important;
+        border-radius: var(--hypergrid-scrollbar--border-radius, 0px);
     }
 
     div.finbar-horizontal {
@@ -80,10 +80,10 @@
 
     div.finbar-horizontal div.thumb {
         margin: -3px 2px;
-        height: 13px;
+        height: var(--hypergrid-scrollbar--width, 13px);
         bottom: 4px;
         background-color: rgba(158, 158, 158, 1);
         box-shadow: 0 0 0px #000, 0 0 0px #000, 0 0 0px #000;
-        border-radius: 0px;
+        border-radius: var(--hypergrid-scrollbar--border-radius, 0px);
     }
 }
