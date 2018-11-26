@@ -176,7 +176,7 @@ export class PerspectiveElement extends StateElement {
                 this._plugin_information.classList.remove("hidden");
                 const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
                 const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
-                this.shadowRoot.querySelector("#plugin_information_count").innerText = warning;
+                this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
             } else {
