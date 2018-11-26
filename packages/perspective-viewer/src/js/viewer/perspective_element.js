@@ -192,6 +192,9 @@ export class PerspectiveElement extends StateElement {
             const count = num_columns * num_rows;
             if (count >= this._plugin.max_size) {
                 this._plugin_information.classList.remove("hidden");
+                const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
+                const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
+                this.shadowRoot.querySelector("#plugin_information_count").innerText = warning;
                 this.removeAttribute("updating");
                 return true;
             } else {
@@ -317,8 +320,10 @@ export class PerspectiveElement extends StateElement {
             this._new_view(ignore_size_check).then(resolve);
         }, 10);
         this._debounce_update = async ({ignore_size_check = false} = {}) => {
+            if (this._table) {
             this.setAttribute("updating", true);
             await new Promise(resolve => _update(resolve, ignore_size_check));
+            }
         };
     }
 
