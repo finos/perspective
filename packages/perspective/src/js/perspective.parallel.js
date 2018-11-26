@@ -129,6 +129,28 @@ class WebSocketWorker extends worker {
     }
 }
 
+/******************************************************************************
+ *
+ * Web Worker Singleton
+ *
+ */
+
+const WORKER_SINGLETON = (function() {
+    let __WORKER__;
+    return {
+        getInstance: function() {
+            if (__WORKER__ === undefined) {
+                __WORKER__ = new WebWorker();
+            }
+            return __WORKER__;
+        }
+    };
+})();
+
+if (document.currentScript && document.currentScript.hasAttribute("preload")) {
+    WORKER_SINGLETON.getInstance();
+}
+
 const mod = {
     override: x => override.set(x),
 
@@ -138,6 +160,10 @@ const mod = {
         } else {
             return new WebWorker();
         }
+    },
+
+    shared_worker() {
+        return WORKER_SINGLETON.getInstance();
     }
 };
 

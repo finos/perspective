@@ -17,31 +17,13 @@ import {StateElement} from "./state_element.js";
 
 /******************************************************************************
  *
- * Web Worker Singleton
- *
- */
-
-const WORKER_SINGLETON = (function() {
-    let __WORKER__;
-    return {
-        getInstance: function() {
-            if (__WORKER__ === undefined) {
-                __WORKER__ = perspective.worker();
-            }
-            return __WORKER__;
-        }
-    };
-})();
-
-if (document.currentScript && document.currentScript.hasAttribute("preload")) {
-    WORKER_SINGLETON.getInstance();
-}
-
-/******************************************************************************
- *
  *  Helpers
  *
  */
+
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
 
@@ -321,8 +303,8 @@ export class PerspectiveElement extends StateElement {
         }, 10);
         this._debounce_update = async ({ignore_size_check = false} = {}) => {
             if (this._table) {
-            this.setAttribute("updating", true);
-            await new Promise(resolve => _update(resolve, ignore_size_check));
+                this.setAttribute("updating", true);
+                await new Promise(resolve => _update(resolve, ignore_size_check));
             }
         };
     }
@@ -331,6 +313,6 @@ export class PerspectiveElement extends StateElement {
         if (this._table) {
             return this._table._worker;
         }
-        return WORKER_SINGLETON.getInstance();
+        return perspective.shared_worker();
     }
 }
