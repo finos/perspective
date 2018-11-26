@@ -249,6 +249,7 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information = this.shadowRoot.querySelector(".plugin_information");
         this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
         this._plugin_information_dismiss = this.shadowRoot.querySelector(".plugin_information__action--dismiss");
+        this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
     }
 
     // sets state, manipulates DOM

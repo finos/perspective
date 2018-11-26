@@ -138,6 +138,10 @@
             width: 100%;
         }
 
+        #inactive_columns {
+            flex: 1 1 auto;
+        }
+
         #sub_columns {
             flex-shrink: 1;
 
@@ -217,6 +221,7 @@
 
     ul {
         transition: background-color 0.2s, border-color 0.2s;
+        outline: none;
     }
 
     .column_row() {
@@ -316,9 +321,12 @@
         padding: 0.5rem;
         width: 100%;
         z-index: 10000;
-
+        transition: opacity 0.3s ease-out;
+        opacity: 1;
+        
         &.hidden {
-            display: none !important;
+            display: none;
+            opacity: 0;
         }
 
         &.plugin_information--warning {

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.9] - 2018-11-25
+### Added
+* [#325](https://github.com/jpmorganchase/perspective/pull/325) API and UX for column sorting on arbitrary columns.
+* [#326](https://github.com/jpmorganchase/perspective/pull/326) Fun animations!
+* [#327](https://github.com/jpmorganchase/perspective/pull/327) Render warnings show dataset size.
+
+### Internal
+* [#320](https://github.com/jpmorganchase/perspective/pull/320) Switched to `yarn`.
+
 ## [0.2.8] - 2018-11-21
 ### Added
 * [#317](https://github.com/jpmorganchase/perspective/pull/317) Applying 'column-pivots' now preserves the sort order.

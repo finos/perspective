@@ -33,6 +33,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Streaming](https://jsfiddle.net/texodus/84u926L1/show/) A streaming random data demo.
 * [CSV](https://jsfiddle.net/texodus/pcrnd4jg/show/) Upload a CSV of your own.
 * [NYC Citibike](https://jsfiddle.net/texodus/m2rwz690/) An example of a join on two real-time datasets, from the NYC Citibike feed.
+* [Real-time cryptocurrency charting](https://bl.ocks.org/ColinEberhardt/6e287f871410ecd970b038343b166514) An example that uses the coinbased web socket feed to plot orders in real-time
 
 ## Documentation
 
