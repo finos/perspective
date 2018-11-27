@@ -1121,9 +1121,9 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            pdata = [parse_data(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
+            pdata = [parser.update(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
         } else {
-            pdata = [parse_data(__MODULE__, data, cols, types)];
+            pdata = [parser.update(__MODULE__, data, cols, types)];
         }
 
         for (let i = names.size() - 1; i >= 0; i--) {

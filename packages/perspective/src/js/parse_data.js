@@ -18,6 +18,14 @@ export class DataParser {
         };
     }
 
+    extract_typevec(typevec) {
+        let types = [];
+        for (let i = 0; i < typevec.size() - 1; i++) {
+            types.push(typevec.get(i));
+        }
+        return types;
+    }
+
     is_format(data) {
         if (Array.isArray(data)) {
             return this.data_formats.row;
@@ -115,7 +123,7 @@ export class DataParser {
                 const date_parser = new DateParser();
 
                 for (let d of data) {
-                    if (!name in d || clean_data(d[name] === undefined)) {
+                    if (d[name] === undefined || d[name] === "undefined") {
                         col.push(undefined);
                         continue;
                     }
@@ -159,7 +167,7 @@ export class DataParser {
                 row_count = col.length;
             }
         } else if (format === this.data_formats.column) {
-            row_count = data[column_names[0]].length;
+            row_count = data[Object.keys(data)[0]].length;
             for (let name of column_names) {
                 // Extract the data or fill with undefined if column doesn't exist (nothing in column changed)
                 let transformed;
@@ -184,6 +192,13 @@ export class DataParser {
         const format = this.is_format(data);
         let names = this.column_names(data, format);
         let types = this.data_types(__MODULE__, data, format, names);
+        let [cdata, row_count] = this.make_columnar_data(__MODULE__, data, format, names, types);
+        return {cdata, names, types, row_count, is_arrow: false};
+    }
+
+    update(__MODULE__, data, names, data_types) {
+        let types = this.extract_typevec(data_types);
+        const format = this.is_format(data);
         let [cdata, row_count] = this.make_columnar_data(__MODULE__, data, format, names, types);
         return {cdata, names, types, row_count, is_arrow: false};
     }
