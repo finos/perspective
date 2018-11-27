@@ -8,7 +8,7 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DataParser, parse_data, clean_data} from "./parse_data.js";
+import {DataParser, clean_data} from "./parse_data.js";
 import {DateParser} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
@@ -1164,7 +1164,7 @@ export default function(Module) {
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
         } else {
-            pdata = [parse_data(__MODULE__, data, [this.index], types)];
+            pdata = [parser.update(__MODULE__, data, [this.index], types)];
         }
 
         try {
