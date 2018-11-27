@@ -700,6 +700,10 @@ export default function(Module) {
         });
     };
 
+    view.prototype.remove_update = function(callback) {
+        this.callbacks = this.callbacks.filter(x => x.callback !== callback);
+    };
+
     /**
      * Register a callback with this {@link view}.  Whenever the {@link view}
      * is deleted, this callback will be invoked.
@@ -710,6 +714,10 @@ export default function(Module) {
      */
     view.prototype.on_delete = function(callback) {
         this._delete_callback = callback;
+    };
+
+    view.prototype.remove_delete = function() {
+        this._delete_callback = undefined;
     };
 
     /******************************************************************************

@@ -37,7 +37,11 @@ const add_computed_column = async page => {
         viewer
     );
     await page.waitForSelector("perspective-viewer:not([updating])");
-    await page.evaluate(element => element.setAttribute("aggregates", '{"new_cc":"dominant"}'), viewer);
+    await page.evaluate(element => {
+        const aggs = JSON.parse(element.getAttribute("aggregates"));
+        aggs["new_cc"] = "dominant";
+        element.setAttribute("aggregates", JSON.stringify(aggs));
+    }, viewer);
     await page.waitForSelector("perspective-viewer:not([updating])");
 };
 

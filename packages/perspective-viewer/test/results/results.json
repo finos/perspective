@@ -25,6 +25,7 @@
     "superstore.html/click on close button closes the UI.": "534ea8c090373e6b8aeec01306a09ae4",
     "superstore.html/saving without parameters should show an error message.": "e6eda7825f6443708c1289d2ef3c6a8c",
     "superstore.html/doesn't leak tables.": "85b81ebf58de9d1d3cf667c2bdf9999c",
+    "superstore.html/doesn't leak elements.": "85b81ebf58de9d1d3cf667c2bdf9999c",
     "superstore.html/doesn't leak views when setting row pivots.": "2c416998c8c8263eea80c4106060858b",
     "superstore.html/doesn't leak views when setting filters.": "684adb3f82a3758e5e4ed6f237d416d3",
     "superstore.html/adds computed column via attribute": "f78b106d1a4c6ab6ca02e79869ee5ae9",

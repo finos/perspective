@@ -389,6 +389,11 @@ global.registerPlugin("hypergrid", {
     delete: function() {
         if (this.hypergrid) {
             this.hypergrid.terminate();
+            this.hypergrid.div = undefined;
+            this.hypergrid.canvas.div = undefined;
+            this.hypergrid.canvas.canvas = undefined;
+            this.hypergrid.sbVScroller = undefined;
+            this.hypergrid.sbHScroller = undefined;
             delete this[PRIVATE]["grid"];
         }
     }
