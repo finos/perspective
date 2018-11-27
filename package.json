@@ -26,8 +26,6 @@
         "prettier": "^1.14.2",
         "rimraf": "^2.6.2",
         "ts-loader": "^3.5.0",
-        "typeface-open-sans": "0.0.54",
-        "typeface-roboto-mono": "0.0.54",
         "typescript": "~2.9.2",
         "webpack": "^3.5.6"
     },
