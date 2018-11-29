@@ -8,7 +8,7 @@
  */
 
 import * as defaults from "./defaults.js";
-import {parse_data, clean_data} from "./parse_data.js";
+import {DataParser, clean_data} from "./parse_data.js";
 import {DateParser} from "./date_parser.js";
 import {bindall} from "./utils.js";
 
@@ -31,6 +31,7 @@ const CHUNKED_THRESHOLD = 100000;
 
 export default function(Module) {
     let __MODULE__ = Module;
+    let parser = new DataParser();
 
     /******************************************************************************
      *
@@ -1128,9 +1129,9 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            pdata = [parse_data(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
+            pdata = [parser.update(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
         } else {
-            pdata = [parse_data(__MODULE__, data, cols, types)];
+            pdata = [parser.update(__MODULE__, data, cols, types)];
         }
 
         for (let i = names.size() - 1; i >= 0; i--) {
@@ -1171,7 +1172,7 @@ export default function(Module) {
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
         } else {
-            pdata = [parse_data(__MODULE__, data, [this.index], types)];
+            pdata = [parser.update(__MODULE__, data, [this.index], types)];
         }
 
         try {
@@ -1569,7 +1570,9 @@ export default function(Module) {
                     }
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
-                pdata = parse_data(__MODULE__, data);
+
+                pdata = parser.parse(__MODULE__, data);
+
                 if (pdata.row_count > CHUNKED_THRESHOLD) {
                     let new_pdata = [];
                     while (pdata.cdata[0].length > 0) {
