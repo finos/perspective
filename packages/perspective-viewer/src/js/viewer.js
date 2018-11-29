@@ -41,9 +41,9 @@ class PerspectiveViewer extends ActionElement {
         this._slaves = [];
         this._show_config = true;
         this._show_warnings = true;
-        const resize_handler = _.debounce(this.notifyResize, 250).bind(this);
-        window.addEventListener("load", resize_handler);
-        window.addEventListener("resize", resize_handler);
+        this._resize_handler = _.debounce(this.notifyResize, 250).bind(this);
+        window.addEventListener("load", this._resize_handler);
+        window.addEventListener("resize", this._resize_handler);
     }
 
     connectedCallback() {
@@ -443,9 +443,8 @@ class PerspectiveViewer extends ActionElement {
         if (this._plugin.delete) {
             this._plugin.delete.call(this);
         }
-        const resize_handler = _.debounce(this.notifyResize, 250).bind(this);
-        window.removeEventListener("load", resize_handler);
-        window.removeEventListener("resize", resize_handler);
+        window.removeEventListener("load", this._resize_handler);
+        window.removeEventListener("resize", this._resize_handler);
         return x;
     }
 

@@ -37,6 +37,36 @@ utils.with_server({}, () => {
         );
 
         test.capture(
+            "doesn't leak elements.",
+            async page => {
+                let viewer = await page.$("perspective-viewer");
+                //await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                for (var i = 0; i < 100; i++) {
+                    viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => {
+                        element.delete();
+                        document.innerHTML = "<perspective_viewer></perspective-viewer>";
+                        document.getElementsByTagName("perspective-viewer")[0].load(window.__CSV__);
+                    }, viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                }
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.evaluate(
+                    element =>
+                        element.load(
+                            window.__CSV__
+                                .split("\n")
+                                .slice(0, 10)
+                                .join("\n")
+                        ),
+                    viewer
+                );
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            },
+            60000
+        );
+
+        test.capture(
             "doesn't leak views when setting row pivots.",
             async page => {
                 const viewer = await page.$("perspective-viewer");

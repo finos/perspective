@@ -17,6 +17,7 @@ export class CancelTask {
     cancel() {
         if (!this._cancelled && this._on_cancel) {
             this._on_cancel();
+            this._on_cancel = undefined;
         }
         this._cancelled = true;
     }

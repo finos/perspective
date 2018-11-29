@@ -9,6 +9,23 @@
 
 import {bindall} from "./utils.js";
 
+function unsubscribe(method, cmd) {
+    return function() {
+        let resolve = arguments[arguments.length - 1];
+        let reject = () => {};
+        let args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
+        let msg = {
+            cmd: cmd || "view_method",
+            name: this._name,
+            method: method,
+            args: args,
+            subscribe: true
+        };
+        this._worker.post(msg, resolve, reject);
+        this._worker.unsubscribe(cmd, resolve);
+    };
+}
+
 function subscribe(method, cmd) {
     return function() {
         let resolve = arguments[arguments.length - 1];
@@ -83,7 +100,11 @@ view.prototype.col_to_js_typed_array = async_queue("col_to_js_typed_array");
 
 view.prototype.on_update = subscribe("on_update", "view_method", true);
 
+view.prototype.remove_update = unsubscribe("remove_update", "view_method", true);
+
 view.prototype.on_delete = subscribe("on_delete", "view_method", true);
+
+view.prototype.remove_delete = unsubscribe("remove_delete", "view_method", true);
 
 function table(worker, data, options) {
     this._worker = worker;
@@ -185,6 +206,14 @@ export function worker() {
     };
     bindall(this);
 }
+
+worker.prototype.unsubscribe = function(cmd, handler) {
+    for (let key of Object.keys(this._worker.handlers)) {
+        if (this._worker.handlers[key].resolve === handler) {
+            delete this._worker.handlers[key];
+        }
+    }
+};
 
 worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     if (resolve) {
