@@ -858,6 +858,59 @@ table_add_computed_column(t_table& table, val computed_defs) {
     }
 }
 
+t_bool
+is_valid_date(val moment, val candidates, val x) {
+    return moment
+        .call<val>("call", val::object(), x, candidates, val(true))
+        .call<val>("isValid")
+        .as<t_bool>();
+}
+
+// data parsing
+t_dtype
+infer_type(val x, val moment, val candidates) {
+    t_str jstype = x.typeOf().as<t_str>();
+    t_dtype t = t_dtype::DTYPE_FLOAT64;
+
+    if (x.isNull()) {
+        t = t_dtype::DTYPE_NONE;
+    } else if (jstype == "number") {
+        t_float64 x_float64 = x.as<t_float64>();
+        if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0) && (x_float64 != 0.0)) {
+            t = t_dtype::DTYPE_INT32;
+        } else {
+            t = t_dtype::DTYPE_FLOAT64;
+        }
+    } else if (jstype == "boolean") {
+        t = t_dtype::DTYPE_BOOL;
+    } else if (x.instanceof(val::global("Date"))) {
+        t_int32 hours = x.call<val>("getHours").as<t_int32>();
+        t_int32 minutes = x.call<val>("getMinutes").as<t_int32>();
+        t_int32 seconds = x.call<val>("getSeconds").as<t_int32>();
+        t_int32 milliseconds = x.call<val>("getMilliseconds").as<t_int32>();
+
+        if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
+            t = t_dtype::DTYPE_DATE;
+        } else {
+            t = t_dtype::DTYPE_TIME;
+        }
+    } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
+        t = t_dtype::DTYPE_FLOAT64;
+    } else if (jstype == "string" && is_valid_date(moment, candidates, x)) {
+        // is_valid_date.call<val>("call", val::object(), x).as<t_bool>()
+        t = t_dtype::DTYPE_TIME;
+    } else if (jstype == "string") {
+        t_str lower = x.call<val>("toLowerCase").as<t_str>();
+        if (lower == "true" || lower == "false") {
+            t = t_dtype::DTYPE_BOOL;
+        } else {
+            t = t_dtype::DTYPE_STR;
+        }
+    }
+
+    return t;
+}
+
 /**
  * Create a default gnode.
  *
@@ -1448,6 +1501,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("TOTALS_AFTER", TOTALS_AFTER);
 
     function("sort", &sort);
+    function("infer_type", &infer_type);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());

@@ -7,7 +7,8 @@
  *
  */
 
-import {DateParser, is_valid_date} from "./date_parser.js";
+import {DateParser, DATE_PARSE_CANDIDATES} from "./date_parser.js";
+import moment from "moment";
 
 export class DataParser {
     constructor() {
@@ -16,42 +17,6 @@ export class DataParser {
             column: 2,
             schema: 3
         };
-    }
-
-    /**
-     * Infer the t_dtype of a value.
-     * @private
-     * @returns A t_dtype.
-     */
-    infer_type(__MODULE__, x) {
-        let t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        if (x === null) {
-            t = null;
-        } else if (typeof x === "number" && x % 1 === 0 && x < 10000 && x !== 0) {
-            t = __MODULE__.t_dtype.DTYPE_INT32;
-        } else if (typeof x === "number") {
-            t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        } else if (typeof x === "boolean") {
-            t = __MODULE__.t_dtype.DTYPE_BOOL;
-        } else if (x instanceof Date) {
-            if (x.getHours() === 0 && x.getMinutes() === 0 && x.getSeconds() === 0 && x.getMilliseconds() === 0) {
-                t = __MODULE__.t_dtype.DTYPE_DATE;
-            } else {
-                t = __MODULE__.t_dtype.DTYPE_TIME;
-            }
-        } else if (!isNaN(Number(x)) && x !== "") {
-            t = __MODULE__.t_dtype.DTYPE_FLOAT64;
-        } else if (typeof x === "string" && is_valid_date(x)) {
-            t = __MODULE__.t_dtype.DTYPE_TIME;
-        } else if (typeof x === "string") {
-            let lower = x.toLowerCase();
-            if (lower === "true" || lower === "false") {
-                t = __MODULE__.t_dtype.DTYPE_BOOL;
-            } else {
-                t = __MODULE__.t_dtype.DTYPE_STR;
-            }
-        }
-        return t;
     }
 
     extract_typevec(typevec) {
@@ -155,13 +120,21 @@ export class DataParser {
         if (format === this.data_formats.row) {
             while (inferredType === undefined && i < 100 && i < data.length) {
                 if (data[i].hasOwnProperty(name)) {
-                    inferredType = this.infer_type(__MODULE__, data[i][name]);
+                    if (data[i][name] !== null) {
+                        inferredType = __MODULE__.infer_type(data[i][name], moment, DATE_PARSE_CANDIDATES);
+                    } else {
+                        inferredType = null;
+                    }
                 }
                 i++;
             }
         } else if (format === this.data_formats.column) {
             while (inferredType === undefined && i < 100 && i < data[name].length) {
-                inferredType = this.infer_type(__MODULE__, data[name][i]);
+                if (data[name][i] !== null) {
+                    inferredType = __MODULE__.infer_type(data[name][i], moment, DATE_PARSE_CANDIDATES);
+                } else {
+                    inferredType = null;
+                }
                 i++;
             }
         }
