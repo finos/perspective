@@ -33,7 +33,7 @@ utils.with_server({}, () => {
                 );
                 await page.waitForSelector("perspective-viewer:not([updating])");
             },
-            60000
+            {timeout: 60000}
         );
 
         test.capture(
@@ -63,7 +63,7 @@ utils.with_server({}, () => {
                 );
                 await page.waitForSelector("perspective-viewer:not([updating])");
             },
-            60000
+            {timeout: 60000}
         );
 
         test.capture(
@@ -83,7 +83,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             },
-            60000
+            {timeout: 60000}
         );
 
         test.capture(
@@ -100,7 +100,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("filters", '[["Sales", "<", 10]]'), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             },
-            60000
+            {timeout: 60000}
         );
     });
 });

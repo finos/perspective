@@ -21,7 +21,6 @@ exports.default = function() {
             await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
             await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
         },
-        60000,
-        viewport
+        {timeout: 60000, viewport}
     );
 };

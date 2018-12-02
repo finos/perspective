@@ -13,11 +13,15 @@ const simple_tests = require("./simple_tests.js");
 const responsive_tests = require("./responsive_tests");
 
 utils.with_server({}, () => {
-    describe.page("superstore.html", () => {
-        simple_tests.default();
+    describe.page(
+        "superstore.html",
+        () => {
+            simple_tests.default();
 
-        describe("Responsive Layout", () => {
-            responsive_tests.default();
-        });
-    });
+            describe("Responsive Layout", () => {
+                responsive_tests.default();
+            });
+        },
+        {reload_page: false}
+    );
 });

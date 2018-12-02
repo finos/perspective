@@ -52,7 +52,8 @@ if (!fs.existsSync("screenshots")) {
 
 let browser,
     page,
-    url,
+    page_url,
+    page_reload,
     errors = [],
     __name = "";
 
@@ -98,21 +99,25 @@ afterAll(() => {
     }
 });
 
-describe.page = (_url, body) => {
+describe.page = (url, body, {reload_page = true, name} = {}) => {
+    let _url = url ? url : page_url;
     if (!fs.existsSync("screenshots/" + _url.replace(".html", ""))) {
         fs.mkdirSync("screenshots/" + _url.replace(".html", ""));
     }
-    describe(_url, () => {
-        let old = url;
-        url = _url;
+    describe(name ? name : _url, () => {
+        let old = page_url;
+        let old_reload = page_reload;
+        page_url = _url;
+        page_reload = reload_page;
         let result = body();
-        url = old;
+        page_url = old;
+        page_reload = old_reload;
         return result;
     });
 };
 
 test.run = function run(name, body, viewport = null) {
-    let _url = url;
+    let _url = page_url;
     test(name, async () => {
         if (viewport !== null)
             await page.setViewport({
@@ -128,8 +133,11 @@ test.run = function run(name, body, viewport = null) {
     });
 };
 
-test.capture = function capture(name, body, timeout = 60000, viewport = null, wait_for_update = true) {
-    let _url = url;
+const OLD_SETTINGS = {};
+
+test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true} = {}) {
+    const _url = page_url;
+    const _reload_page = page_reload;
     test(
         name,
         async () => {
@@ -142,14 +150,37 @@ test.capture = function capture(name, body, timeout = 60000, viewport = null, wa
                     height: viewport.height
                 });
 
-            await new Promise(setTimeout);
-            await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+            if (_reload_page) {
+                await new Promise(setTimeout);
+                await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+            } else {
+                if (!OLD_SETTINGS[_url]) {
+                    await new Promise(setTimeout);
+                    await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+                } else {
+                    await page.evaluate(x => {
+                        const viewer = document.querySelector("perspective-viewer");
+                        viewer._show_config = true;
+                        viewer.toggleConfig();
+                        viewer.restore(x);
+                        viewer.notifyResize();
+                    }, OLD_SETTINGS[_url]);
+                }
+            }
 
             if (wait_for_update) {
                 await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
                 await page.waitForSelector("perspective-viewer:not([updating])");
             } else {
                 await page.waitForSelector("perspective-viewer");
+            }
+
+            if (!_reload_page && !OLD_SETTINGS[_url]) {
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                OLD_SETTINGS[_url] = await page.evaluate(() => {
+                    const viewer = document.querySelector("perspective-viewer");
+                    return viewer.save();
+                });
             }
 
             await body(page);

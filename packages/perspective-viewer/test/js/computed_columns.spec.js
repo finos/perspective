@@ -47,82 +47,84 @@ const add_computed_column = async page => {
 
 utils.with_server({}, () => {
     describe.page("superstore.html", () => {
-        test.capture("click on add computed column button opens the UI.", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-            await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
-        });
+        describe.page(
+            undefined,
+            () => {
+                test.capture("click on add computed column button opens the UI.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
+                    await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                });
 
-        test.capture("click on close button closes the UI.", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-            await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
-            await page.evaluate(
-                element =>
-                    element.shadowRoot
-                        .querySelector("perspective-computed-column")
-                        .shadowRoot.querySelector("#psp-cc__close")
-                        .click(),
-                viewer
-            );
-        });
+                test.capture("click on close button closes the UI.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
+                    await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                    await page.evaluate(
+                        element =>
+                            element.shadowRoot
+                                .querySelector("perspective-computed-column")
+                                .shadowRoot.querySelector("#psp-cc__close")
+                                .click(),
+                        viewer
+                    );
+                });
 
-        // input column
-        test.capture("setting a valid column should set it as input.", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-            await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
-            await page.evaluate(element => {
-                let com = element.shadowRoot.querySelector("perspective-computed-column");
-                const columns = [{name: "State", type: "string"}];
-                com._apply_state(columns, com.computations["lowercase"], "new_cc");
-            }, viewer);
-        });
+                // input column
+                test.capture("setting a valid column should set it as input.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
+                    await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                    await page.evaluate(element => {
+                        let com = element.shadowRoot.querySelector("perspective-computed-column");
+                        const columns = [{name: "State", type: "string"}];
+                        com._apply_state(columns, com.computations["lowercase"], "new_cc");
+                    }, viewer);
+                });
 
-        test.capture("setting multiple column parameters should set input.", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-            await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
-            await page.evaluate(element => {
-                let com = element.shadowRoot.querySelector("perspective-computed-column");
-                const columns = [{name: "Quantity", type: "integer"}, {name: "Row ID", type: "integer"}];
-                com._apply_state(columns, com.computations["add"], "new_cc");
-            }, viewer);
-        });
+                test.capture("setting multiple column parameters should set input.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
+                    await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                    await page.evaluate(element => {
+                        let com = element.shadowRoot.querySelector("perspective-computed-column");
+                        const columns = [{name: "Quantity", type: "integer"}, {name: "Row ID", type: "integer"}];
+                        com._apply_state(columns, com.computations["add"], "new_cc");
+                    }, viewer);
+                });
 
-        // computation
-        test.capture("computations should clear input column.", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
-            await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
-            await page.evaluate(element => {
-                let com = element.shadowRoot.querySelector("perspective-computed-column");
-                const columns = [{name: "State", type: "string"}];
-                com._apply_state(columns, com.computations["lowercase"], "new_cc");
-            }, viewer);
-            await page.evaluate(element => {
-                const select = element.shadowRoot.querySelector("perspective-computed-column").shadowRoot.querySelector("#psp-cc-computation__select");
-                select.value = "subtract";
-                select.dispatchEvent(new Event("change"));
-            }, viewer);
-            // await page.select("#psp-cc-computation__select", "subtract");
-        });
+                // computation
+                test.capture("computations should clear input column.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
+                    await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
+                    await page.evaluate(element => {
+                        let com = element.shadowRoot.querySelector("perspective-computed-column");
+                        const columns = [{name: "State", type: "string"}];
+                        com._apply_state(columns, com.computations["lowercase"], "new_cc");
+                    }, viewer);
+                    await page.evaluate(element => {
+                        const select = element.shadowRoot.querySelector("perspective-computed-column").shadowRoot.querySelector("#psp-cc-computation__select");
+                        select.value = "subtract";
+                        select.dispatchEvent(new Event("change"));
+                    }, viewer);
+                    // await page.select("#psp-cc-computation__select", "subtract");
+                });
+            },
+            {reload_page: false, name: "UI interaction"}
+        );
 
         // save
-        test.capture("saving a computed column should add it to inactive columns.", async page => {
-            await add_computed_column(page);
-        });
-
         test.capture("saving without parameters should fail as button is disabled.", async page => {
             const viewer = await page.$("perspective-viewer");
             await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
@@ -136,6 +138,10 @@ utils.with_server({}, () => {
                         .click(),
                 viewer
             );
+        });
+
+        test.capture("saving a computed column should add it to inactive columns.", async page => {
+            await add_computed_column(page);
         });
 
         test.capture("saving a duplicate column should fail with error message.", async page => {

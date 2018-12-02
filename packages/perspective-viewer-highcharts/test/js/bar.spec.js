@@ -12,50 +12,54 @@ const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 utils.with_server({}, () => {
-    describe.page("bar.html", () => {
-        simple_tests.default();
+    describe.page(
+        "bar.html",
+        () => {
+            simple_tests.default();
 
-        describe("tooltip tests", () => {
-            const bar = "rect.highcharts-point";
+            describe("tooltip tests", () => {
+                const bar = "rect.highcharts-point";
 
-            test.capture("tooltip shows on hover.", async page => {
-                await utils.invoke_tooltip(bar, page);
+                test.capture("tooltip shows on hover.", async page => {
+                    await utils.invoke_tooltip(bar, page);
+                });
+
+                test.capture("tooltip shows column label.", async page => {
+                    await utils.invoke_tooltip(bar, page);
+                });
+
+                test.capture("tooltip shows proper column labels based on hover target.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    // set a new column
+                    await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await utils.invoke_tooltip(bar, page);
+                });
+
+                test.capture("tooltip shows proper column labels based on hover target, pt2.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    // set a new column
+                    await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await utils.invoke_tooltip("rect.highcharts-color-1", page);
+                });
+
+                test.capture("tooltip shows pivot labels.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    // set a row pivot and a column pivot
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await utils.invoke_tooltip(bar, page);
+                });
             });
-
-            test.capture("tooltip shows column label.", async page => {
-                await utils.invoke_tooltip(bar, page);
-            });
-
-            test.capture("tooltip shows proper column labels based on hover target.", async page => {
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-                // set a new column
-                await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await utils.invoke_tooltip(bar, page);
-            });
-
-            test.capture("tooltip shows proper column labels based on hover target, pt2.", async page => {
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-                // set a new column
-                await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await utils.invoke_tooltip("rect.highcharts-color-1", page);
-            });
-
-            test.capture("tooltip shows pivot labels.", async page => {
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-                // set a row pivot and a column pivot
-                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await utils.invoke_tooltip(bar, page);
-            });
-        });
-    });
+        },
+        {reload_page: false}
+    );
 
     describe.page("render_warning.html", () => {
         test.capture("render warning should not show under size limit.", async page => {
@@ -79,9 +83,10 @@ utils.with_server({}, () => {
                     viewer
                 );
             },
-            60000,
-            null,
-            false
+            {
+                timeout: 60000,
+                wait_for_update: false
+            }
         );
 
         test.capture(
@@ -103,9 +108,10 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.shadowRoot.querySelector(".plugin_information__action").click(), viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])");
             },
-            100000,
-            null,
-            false
+            {
+                timeout: 100000,
+                wait_for_update: false
+            }
         );
 
         test.capture(
@@ -130,9 +136,10 @@ utils.with_server({}, () => {
                 }, viewer);
                 await page.waitForSelector("perspective-viewer:not([updating])", {timeout: 100000});
             },
-            60000,
-            null,
-            false
+            {
+                timeout: 60000,
+                wait_for_update: false
+            }
         );
 
         test.capture(
@@ -159,9 +166,10 @@ utils.with_server({}, () => {
                     viewer
                 );
             },
-            60000,
-            null,
-            false
+            {
+                timeout: 60000,
+                wait_for_update: false
+            }
         );
     });
 });
