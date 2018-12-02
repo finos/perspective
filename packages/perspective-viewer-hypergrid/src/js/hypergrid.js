@@ -164,6 +164,7 @@ bindTemplate(TEMPLATE, style)(
 
                 host.setAttribute("hidden", true);
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
+                this.grid.canvas.stopResizeLoop();
                 host.removeAttribute("hidden");
 
                 // window.g = this.grid; window.p = g.properties; // for debugging convenience in console
@@ -379,7 +380,7 @@ global.registerPlugin("hypergrid", {
     deselectMode: "pivots",
     resize: async function() {
         if (this.hypergrid) {
-            this.hypergrid.updateSize();
+            this.hypergrid.canvas.checksize();
             this.hypergrid.canvas.paintNow();
             let nrows = await this._view.num_rows();
             this.hypergrid.behavior.dataModel.setDirty(nrows);

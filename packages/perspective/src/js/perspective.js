@@ -1192,7 +1192,7 @@ export default function(Module) {
      * @param {Computation} computed A computation specification object
      */
     table.prototype.add_computed = function(computed) {
-        let pool, gnode, tbl;
+        let pool, gnode;
 
         try {
             pool = new __MODULE__.t_pool();
@@ -1200,7 +1200,6 @@ export default function(Module) {
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
-
             return new table(gnode, pool, this.index, computed, this.limit, this.limit_index);
         } catch (e) {
             if (pool) {
@@ -1210,10 +1209,6 @@ export default function(Module) {
                 gnode.delete();
             }
             throw e;
-        } finally {
-            if (tbl) {
-                tbl.delete();
-            }
         }
     };
 

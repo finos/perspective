@@ -51,8 +51,10 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     setDirty: function(nrows) {
+        if (nrows !== this._nrows) {
+            this.grid.renderer.computeCellsBounds();
+        }
         this._dirty = true;
-        this.grid.renderer.computeCellsBounds();
         this._nrows = nrows;
         this.grid.behaviorChanged();
     },
@@ -88,7 +90,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
-    fetchData: function(rectangles, resolve) {
+    fetchData: async function(rectangles, resolve) {
         // if (!rectangles) {
         rectangles = getSubrects.call(this.grid.renderer);
         // }
@@ -108,26 +110,14 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
 
         const promises = rectangles.map(rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2)));
 
-        Promise.all(promises)
-            .then(() => {
-                return this._view.num_rows();
-            })
-            .then(nrows => {
-                let rects = getSubrects.call(this.grid.renderer, nrows);
-                if (!!rects.find(uncachedRow, this)) {
-                    this.grid.renderer.dataWindow.left = rects[0].left;
-                    this.grid.renderer.dataWindow.top = rects[0].top;
-                    this.grid.renderer.dataWindow.width = rects[0].width;
-                    this.grid.renderer.dataWindow.height = rects[0].height;
-                }
-                resolve(false);
-            })
-            .catch(() => {
-                resolve(true);
-            })
-            .finally(() => {
-                this._outstanding_requested_rects = undefined;
-            });
+        try {
+            await Promise.all(promises);
+            resolve(false);
+        } catch (e) {
+            resolve(e);
+        } finally {
+            this._outstanding_requested_rects = undefined;
+        }
     },
 
     getCell: function(config, rendererName) {
