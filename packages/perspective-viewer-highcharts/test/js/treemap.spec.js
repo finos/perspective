@@ -8,26 +8,31 @@
  */
 
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const path = require("path");
 
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 utils.with_server({}, () => {
-    describe.page("treemap.html", () => {
-        simple_tests.default();
+    describe.page(
+        "treemap.html",
+        () => {
+            simple_tests.default();
 
-        describe("tooltip tests", () => {
-            test.capture("tooltip shows on hover.", async page => {
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+            describe("tooltip tests", () => {
+                test.capture("tooltip shows on hover.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
 
-                // set a row pivot and a column pivot so the graph will render
-                await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
-                await page.waitForSelector("perspective-viewer:not([updating])");
+                    // set a row pivot and a column pivot so the graph will render
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
 
-                await utils.invoke_tooltip(".highcharts-point", page);
+                    await utils.invoke_tooltip(".highcharts-point", page);
+                });
             });
-        });
-    });
+        },
+        {reload_page: false, root: path.join(__dirname, "..", "..")}
+    );
 });

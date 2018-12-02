@@ -35,7 +35,7 @@ If everything is successful, you should be able to run any of the `examples/`
 packages, e.g. `examples/simple` like so:
 
 ```bash
-npm start -- simple
+yarn start simple
 ```
 
 ### Building via EMSDK
@@ -107,7 +107,7 @@ You can run the test suite simply with the standard NPM command, which will both
 build the test suite for every package and run them.
 
 ```bash
-npm test
+yarn test
 ```
 
 The test suite is composed of two sections:  a Node.js test which asserts
@@ -131,7 +131,7 @@ screenshots reflect your change, you can update the new hashes manually in the
 environment variable:
 
 ```bash
-WRITE_TESTS=1 npm test
+WRITE_TESTS=1 yarn test
 ```
 
 ## Benchmarking
