@@ -8,6 +8,7 @@
  */
 
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const path = require("path");
 
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
@@ -50,6 +51,6 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {reload_page: false}
+        {reload_page: false, root: path.join(__dirname, "..", "..")}
     );
 });

@@ -11,6 +11,7 @@ const utils = require("./utils.js");
 
 const simple_tests = require("./simple_tests.js");
 const responsive_tests = require("./responsive_tests");
+const path = require("path");
 
 utils.with_server({}, () => {
     describe.page(
@@ -22,6 +23,6 @@ utils.with_server({}, () => {
                 responsive_tests.default();
             });
         },
-        {reload_page: false}
+        {reload_page: false, root: path.join(__dirname, "..", "..")}
     );
 });

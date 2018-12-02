@@ -8,6 +8,7 @@
  */
 
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const path = require("path");
 
 async function capture_update(page, viewer, body) {
     await page.evaluate(element => {
@@ -25,15 +26,19 @@ async function capture_update(page, viewer, body) {
 }
 
 utils.with_server({}, () => {
-    describe.page("empty.html", () => {
-        test.capture("empty grids do not explode", async page => {
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-            await page.waitFor("perspective-viewer:not([updating])");
-            await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3}]), viewer));
-            await page.waitFor("perspective-viewer:not([updating])");
-        });
-    });
+    describe.page(
+        "empty.html",
+        () => {
+            test.capture("empty grids do not explode", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.waitFor("perspective-viewer:not([updating])");
+                await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3}]), viewer));
+                await page.waitFor("perspective-viewer:not([updating])");
+            });
+        },
+        {root: path.join(__dirname, "..", "..")}
+    );
 
     describe.page(
         "regressions.html",
@@ -68,6 +73,6 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {reload_page: true}
+        {root: path.join(__dirname, "..", "..")}
     );
 });

@@ -32,4 +32,4 @@ script:
   - yarn lint
   - PSP_DOCKER=1 yarn build
   - PSP_DOCKER=1 yarn test:build
-  - yarn test:run_quiet
+  - yarn test:quietrun

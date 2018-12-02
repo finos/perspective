@@ -10,6 +10,7 @@
 const fs = require("fs");
 const crypto = require("crypto");
 const puppeteer = require("puppeteer");
+const path = require("path");
 
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
@@ -22,8 +23,11 @@ let __PORT__;
 exports.with_server = function with_server({paths}, body) {
     let server;
     beforeAll(() => {
+        if (test_root === "") {
+            throw "ERROR";
+        }
         server = new WebSocketHost({
-            assets: paths || ["build"],
+            assets: paths || [path.join(test_root, "build")],
             port: 0,
             on_start: () => {
                 __PORT__ = server._server.address().port;
@@ -36,24 +40,15 @@ exports.with_server = function with_server({paths}, body) {
     body();
 };
 
-const results = (() => {
-    if (fs.existsSync("test/results/results.json")) {
-        return JSON.parse(fs.readFileSync("test/results/results.json"));
-    } else {
-        return {};
-    }
-})();
+let results;
 
 const new_results = {};
-
-if (!fs.existsSync("screenshots")) {
-    fs.mkdirSync("screenshots");
-}
 
 let browser,
     page,
     page_url,
     page_reload,
+    test_root = "",
     errors = [],
     __name = "";
 
@@ -80,14 +75,25 @@ beforeAll(async () => {
         errors.push(msg.message);
         private_console.log(`${__name}: ${msg.message}`);
     });
+
+    results = (() => {
+        const dir_name = path.join(test_root, "test", "results", "results.json");
+        if (fs.existsSync(dir_name)) {
+            return JSON.parse(fs.readFileSync(dir_name));
+        } else if (fs.existsSync(dir_name)) {
+        } else {
+            return {};
+        }
+    })();
 });
 
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
+        const dir_name = path.join(test_root, "test", "results", "results.json");
         const results2 = (() => {
-            if (fs.existsSync("test/results/results.json")) {
-                return JSON.parse(fs.readFileSync("test/results/results.json"));
+            if (fs.existsSync(dir_name)) {
+                return JSON.parse(fs.readFileSync(dir_name));
             } else {
                 return {};
             }
@@ -95,14 +101,29 @@ afterAll(() => {
         for (let key of Object.keys(new_results)) {
             results2[key] = new_results[key];
         }
-        fs.writeFileSync("test/results/results.json", JSON.stringify(results2, null, 4));
+        fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
     }
 });
 
-describe.page = (url, body, {reload_page = true, name} = {}) => {
+function mkdirSyncRec(targetDir) {
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : "";
+    const baseDir = ".";
+    return targetDir.split(sep).reduce((parentDir, childDir) => {
+        const curDir = path.resolve(baseDir, parentDir, childDir);
+        try {
+            fs.mkdirSync(curDir);
+        } catch (err) {}
+        return curDir;
+    }, initDir);
+}
+
+describe.page = (url, body, {reload_page = true, name, root} = {}) => {
     let _url = url ? url : page_url;
-    if (!fs.existsSync("screenshots/" + _url.replace(".html", ""))) {
-        fs.mkdirSync("screenshots/" + _url.replace(".html", ""));
+    test_root = root ? root : test_root;
+    const dir_name = path.join(test_root, "screenshots", _url.replace(".html", ""));
+    if (!fs.existsSync(dir_name)) {
+        mkdirSyncRec(dir_name);
     }
     describe(name ? name : _url, () => {
         let old = page_url;
@@ -154,7 +175,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 await new Promise(setTimeout);
                 await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
             } else {
-                if (!OLD_SETTINGS[_url]) {
+                if (!OLD_SETTINGS[test_root + _url]) {
                     await new Promise(setTimeout);
                     await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
                 } else {
@@ -164,7 +185,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                         viewer.toggleConfig();
                         viewer.restore(x);
                         viewer.notifyResize();
-                    }, OLD_SETTINGS[_url]);
+                    }, OLD_SETTINGS[test_root + _url]);
                 }
             }
 
@@ -175,9 +196,9 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 await page.waitForSelector("perspective-viewer");
             }
 
-            if (!_reload_page && !OLD_SETTINGS[_url]) {
+            if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
                 await page.waitForSelector("perspective-viewer:not([updating])");
-                OLD_SETTINGS[_url] = await page.evaluate(() => {
+                OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
                     const viewer = document.querySelector("perspective-viewer");
                     return viewer.save();
                 });
@@ -195,7 +216,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 .createHash("md5")
                 .update(screenshot)
                 .digest("hex");
-            const filename = `screenshots/${_url.replace(".html", "")}/${name.replace(/ /g, "_").replace(/[\.']/g, "")}`;
+            const filename = path.join(test_root, "screenshots", `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
             if (hash === results[_url + "/" + name]) {
                 fs.writeFileSync(filename + ".png", screenshot);
             } else {

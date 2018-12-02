@@ -8,45 +8,50 @@
  */
 
 const utils = require("./utils.js");
+const path = require("path");
 
 utils.with_server({}, () => {
-    describe.page("blank.html", () => {
-        test.capture("Handles reloading with a schema.", async page => {
-            var schema = {_pkey: "string", a: "string"};
-            var data = {a: "a"};
+    describe.page(
+        "blank.html",
+        () => {
+            test.capture("Handles reloading with a schema.", async page => {
+                var schema = {_pkey: "string", a: "string"};
+                var data = {a: "a"};
 
-            function getData(ver, count) {
-                var rows = [];
-                for (var index = 0; index < count; index++) {
-                    var row = Object.assign({}, data);
-                    row._pkey = String(ver) + "_" + index;
-                    rows.push(row);
+                function getData(ver, count) {
+                    var rows = [];
+                    for (var index = 0; index < count; index++) {
+                        var row = Object.assign({}, data);
+                        row._pkey = String(ver) + "_" + index;
+                        rows.push(row);
+                    }
+                    return rows;
                 }
-                return rows;
-            }
 
-            const viewer = await page.$("perspective-viewer");
-            await page.evaluate(
-                (viewer, data, schema) => {
-                    viewer.load(schema);
-                    viewer.update(data);
-                },
-                viewer,
-                getData(2, 1),
-                schema
-            );
+                const viewer = await page.$("perspective-viewer");
+                await page.evaluate(
+                    (viewer, data, schema) => {
+                        viewer.load(schema);
+                        viewer.update(data);
+                    },
+                    viewer,
+                    getData(2, 1),
+                    schema
+                );
 
-            await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
 
-            await page.evaluate(
-                (viewer, data, schema) => {
-                    viewer.load(schema);
-                    viewer.update(data);
-                },
-                viewer,
-                getData(3, 2),
-                schema
-            );
-        });
-    });
+                await page.evaluate(
+                    (viewer, data, schema) => {
+                        viewer.load(schema);
+                        viewer.update(data);
+                    },
+                    viewer,
+                    getData(3, 2),
+                    schema
+                );
+            });
+        },
+        {root: path.join(__dirname, "..", "..")}
+    );
 });
