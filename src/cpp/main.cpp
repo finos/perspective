@@ -22,6 +22,7 @@
 #include <emscripten/val.h>
 #include <perspective/sym_table.h>
 #include <codecvt>
+#include <boost/format.hpp>
 
 using namespace perspective;
 using namespace emscripten;
@@ -858,6 +859,12 @@ table_add_computed_column(t_table& table, val computed_defs) {
     }
 }
 
+/** 
+ * DataParser
+ * 
+ * parses and converts input data into a canonical format for
+ * interfacing with Perspective.
+ */
 t_bool
 is_valid_date(val moment, val candidates, val x) {
     return moment
@@ -866,7 +873,6 @@ is_valid_date(val moment, val candidates, val x) {
         .as<t_bool>();
 }
 
-// data parsing
 t_dtype
 infer_type(val x, val moment, val candidates) {
     t_str jstype = x.typeOf().as<t_str>();
@@ -897,7 +903,6 @@ infer_type(val x, val moment, val candidates) {
     } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
         t = t_dtype::DTYPE_FLOAT64;
     } else if (jstype == "string" && is_valid_date(moment, candidates, x)) {
-        // is_valid_date.call<val>("call", val::object(), x).as<t_bool>()
         t = t_dtype::DTYPE_TIME;
     } else if (jstype == "string") {
         t_str lower = x.call<val>("toLowerCase").as<t_str>();
@@ -909,6 +914,36 @@ infer_type(val x, val moment, val candidates) {
     }
 
     return t;
+}
+
+val
+column_names(val data, t_int32 format) {
+    val column_names = val::array();
+    val Object = val::global("Object");
+    
+    if (format == 1) {
+        t_int32 max_check = 50;
+        column_names = Object.call<val>("keys", data[0]);
+        t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
+        
+        for (auto ix = 0; ix < check_index; ix++) {
+            val next = Object.call<val>("keys", data[ix]);
+            if (column_names["length"] != next["length"]) {
+                if (max_check == 50) {
+                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
+                }
+                
+                std::cout << boost::format("Extending from %d to %d") % column_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
+                column_names = next;
+                max_check *= 2;
+            }
+
+        }
+    } else if (format == 2 || format == 3) {
+        column_names = Object.call<val>("keys", data);
+    } 
+
+    return column_names;
 }
 
 /**
@@ -1502,6 +1537,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     function("sort", &sort);
     function("infer_type", &infer_type);
+    function("column_names", &column_names);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());
