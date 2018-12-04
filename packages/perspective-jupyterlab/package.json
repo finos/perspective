@@ -3,17 +3,17 @@
     "version": "0.2.9",
     "description": "Perspective.js",
     "files": [
-        "build/*.d.ts",
-        "build/*.js.map",
-        "build/*.js",
-        "build/*.wasm",
+        "dist/*.d.ts",
+        "dist/*.js.map",
+        "dist/*.js",
+        "dist/*.wasm",
         "src/css/*.css",
         "babel.config.js"
     ],
-    "main": "build/index.js",
-    "types": "build/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "directories": {
-        "build": "build/"
+        "dist: "dist/"
     },
     "license": "Apache-2.0",
     "publishConfig": {
@@ -39,6 +39,6 @@
         "@phosphor/widgets": "^1.5.0"
     },
     "jupyterlab": {
-        "extension": "build/index.js"
+        "extension": "dist/index.js"
     }
 }
