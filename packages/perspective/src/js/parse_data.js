@@ -39,33 +39,6 @@ export class DataParser {
         }
     }
 
-    column_names(data, format) {
-        let column_names = [];
-        if (format === this.data_formats.row) {
-            let max_check = 50;
-            column_names = Object.keys(data[0]);
-            for (let ix = 0; ix < Math.min(max_check, data.length); ix++) {
-                let next = Object.keys(data[ix]);
-                if (column_names.length !== next.length) {
-                    if (next.length > column_names.length) {
-                        if (max_check === 50) console.warn("Array data has inconsistent rows");
-                        console.warn("Extending from " + column_names.length + " to " + next.length);
-                        column_names = next;
-                        max_check *= 2;
-                    }
-                }
-            }
-        } else if (format === this.data_formats.column) {
-            column_names = Object.keys(data);
-        } else if (format === this.data_formats.schema) {
-            for (let name in data) {
-                column_names.push(name);
-            }
-        }
-
-        return column_names;
-    }
-
     data_types(__MODULE__, data, format, column_names) {
         let types = [];
 
@@ -106,7 +79,7 @@ export class DataParser {
         }
 
         for (let name of column_names) {
-            let type = this.get_data_type(__MODULE__, data, format, name);
+            let type = __MODULE__.get_data_type(data, format, name, moment, DATE_PARSE_CANDIDATES); //this.get_data_type(__MODULE__, data, format, name);
             types.push(type);
         }
 
@@ -239,7 +212,7 @@ export class DataParser {
      */
     parse(__MODULE__, data) {
         const format = this.is_format(data);
-        let names = __MODULE__.column_names(data, format); //this.column_names(data, format);
+        let names = __MODULE__.column_names(data, format);
         let types = this.data_types(__MODULE__, data, format, names);
         let [cdata, row_count] = this.make_columnar_data(__MODULE__, data, format, names, types);
         return {cdata, names, types, row_count, is_arrow: false};

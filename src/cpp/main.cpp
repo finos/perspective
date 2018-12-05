@@ -23,6 +23,7 @@
 #include <perspective/sym_table.h>
 #include <codecvt>
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
 
 using namespace perspective;
 using namespace emscripten;
@@ -946,6 +947,43 @@ column_names(val data, t_int32 format) {
     return column_names;
 }
 
+t_dtype
+get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) {
+    t_int32 i = 0;
+    boost::optional<t_dtype> inferredType;
+
+    if (format == 1) {
+        // loop parameters differ slightly so rewrite the loop
+        while (!inferredType.is_initialized() && i < 100 && i < data["length"].as<t_int32>()) {
+            if (data[i].call<val>("hasOwnProperty", name).as<t_bool>() == true) {
+                if (!data[i][name].isNull()) {
+                    inferredType = infer_type(data[i][name], moment, candidates);
+                } else {
+                    inferredType = t_dtype::DTYPE_STR;
+                }
+            }
+
+            i++;
+        }
+    } else if (format == 2) {
+        while (!inferredType.is_initialized() && i < 100 && i < data[name]["length"].as<t_int32>()) {
+            if (!data[name][i].isNull()) {
+                inferredType = infer_type(data[name][i], moment, candidates);
+            } else {
+                inferredType = t_dtype::DTYPE_STR;
+            }
+
+            i++;
+        }
+    }
+
+    if (!inferredType.is_initialized()) {
+        return t_dtype::DTYPE_STR;
+    } else {
+        return inferredType.get();
+    }
+}
+
 /**
  * Create a default gnode.
  *
@@ -1538,6 +1576,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("sort", &sort);
     function("infer_type", &infer_type);
     function("column_names", &column_names);
+    function("get_data_type", &get_data_type);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());
