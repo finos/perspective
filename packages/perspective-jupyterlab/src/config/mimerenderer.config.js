@@ -25,6 +25,6 @@ module.exports = Object.assign({}, common(), {
     output: {
         filename: "mime.js",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, "../../build")
+        path: path.resolve(__dirname, "../../dist")
     }
 });

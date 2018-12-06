@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "allowJs": true,
     "target": "ES5",
-    "outDir": "./build",
+    "outDir": "./dist",
     "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
     "types": []
   },
