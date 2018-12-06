@@ -213,7 +213,7 @@ export class DataParser {
     parse(__MODULE__, data) {
         const format = this.is_format(data);
         let names = __MODULE__.column_names(data, format);
-        let types = this.data_types(__MODULE__, data, format, names);
+        let types = __MODULE__.data_types(data, format, names, moment, DATE_PARSE_CANDIDATES);
         let [cdata, row_count] = this.make_columnar_data(__MODULE__, data, format, names, types);
         return {cdata, names, types, row_count, is_arrow: false};
     }
