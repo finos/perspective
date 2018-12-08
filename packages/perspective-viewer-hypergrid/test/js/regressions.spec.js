@@ -31,7 +31,7 @@ utils.with_server({}, () => {
         () => {
             test.capture("empty grids do not explode", async page => {
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.shadow_click("perspective-viewer", "#config_button");
                 await page.waitFor("perspective-viewer:not([updating])");
                 await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3}]), viewer));
                 await page.waitFor("perspective-viewer:not([updating])");
@@ -46,14 +46,14 @@ utils.with_server({}, () => {
             describe("Updates", () => {
                 test.capture("regular updates", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3, y: "Updated!"}]), viewer));
                     await page.waitFor("perspective-viewer:not([updating])");
                 });
 
                 test.capture("saving a computed column does not interrupt update rendering", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.shadowRoot.querySelector("#add-computed-column").click(), viewer);
                     await page.evaluate(element => {
                         let com = element.shadowRoot.querySelector("perspective-computed-column");

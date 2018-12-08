@@ -56,6 +56,29 @@ beforeAll(async () => {
     browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]});
     page = await browser.newPage();
 
+    page.shadow_click = async function(...path) {
+        await this.evaluate(path => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
+            }
+
+            function triggerMouseEvent(node, eventType) {
+                var clickEvent = document.createEvent("MouseEvent");
+                clickEvent.initEvent(eventType, true, true);
+                node.dispatchEvent(clickEvent);
+            }
+
+            triggerMouseEvent(elem, "mouseover");
+            triggerMouseEvent(elem, "mousedown");
+            triggerMouseEvent(elem, "mouseup");
+            triggerMouseEvent(elem, "click");
+        }, path);
+    };
+
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
@@ -263,9 +286,9 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
         viewer,
         svg_selector
     );
+    await handle.asElement().hover();
     const box = await handle.asElement().boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await handle.asElement().hover();
     await page.waitFor(
         element => {
             let elem = element.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(".highcharts-label.highcharts-tooltip");
