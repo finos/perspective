@@ -164,6 +164,8 @@ export class PerspectiveElement extends StateElement {
         }
 
         this._show_column_selectors();
+
+        this.filters = this.getAttribute("filters");
         await this._debounce_update();
     }
 

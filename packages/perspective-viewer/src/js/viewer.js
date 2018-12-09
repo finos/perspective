@@ -216,7 +216,7 @@ class PerspectiveViewer extends ActionElement {
      */
     @array_attribute
     set filters(filters) {
-        if (!this._updating_filter) {
+        if (!this._updating_filter && typeof this._table !== "undefined") {
             var inner = this._filters.querySelector("ul");
             this._update_column_list(
                 filters,
