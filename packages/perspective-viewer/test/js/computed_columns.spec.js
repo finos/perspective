@@ -173,7 +173,7 @@ utils.with_server({}, () => {
             });
 
             // usage
-            test.capture("aggregates by computed column.", async page => {
+            test.skip("aggregates by computed column.", async page => {
                 await add_computed_column(page);
                 const viewer = await page.$("perspective-viewer");
                 await page.evaluate(element => element.setAttribute("row-pivots", '["Quantity"]'), viewer);
