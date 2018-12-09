@@ -91,9 +91,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     fetchData: async function(rectangles, resolve) {
-        // if (!rectangles) {
         rectangles = getSubrects.call(this.grid.renderer);
-        // }
 
         if (!this._dirty && !rectangles.find(uncachedRow, this)) {
             resolve(false);
@@ -108,7 +106,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         this._dirty = false;
         this._outstanding_requested_rects = rectangles;
 
-        const promises = rectangles.map(rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y + 2)));
+        const promises = rectangles.map(rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y)));
 
         try {
             await Promise.all(promises);

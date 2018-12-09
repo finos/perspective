@@ -351,11 +351,12 @@ async function grid_create(div, view, task) {
     dataModel.setDirty(nrows);
     dataModel._view = view;
 
-    dataModel.pspFetch = async function(range) {
+    dataModel.pspFetch = async range => {
+        range.end_row += this.hasAttribute("settings") ? 8 : 2;
         let next_page = await dataModel._view.to_columns(range);
-        this.data = [];
+        dataModel.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
-        const data = this.data;
+        const data = dataModel.data;
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
