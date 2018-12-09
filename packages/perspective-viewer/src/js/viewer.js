@@ -402,12 +402,7 @@ class PerspectiveViewer extends ActionElement {
      *
      */
     notifyResize() {
-        if (this.clientHeight < 500) {
-            this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
-        } else {
-            this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
-        }
-
+        this._check_responsive_layout();
         if (!document.hidden && this.offsetParent) {
             this._plugin.resize.call(this);
         }

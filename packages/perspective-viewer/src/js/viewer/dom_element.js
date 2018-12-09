@@ -222,6 +222,14 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
+    _check_responsive_layout() {
+        if (this.clientHeight < 500 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
+            this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
+        } else {
+            this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
+        }
+    }
+
     // setup functions
     _register_ids() {
         this._aggregate_selector = this.shadowRoot.querySelector("#aggregate_selector");

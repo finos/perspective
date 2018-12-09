@@ -211,6 +211,7 @@ export class PerspectiveElement extends StateElement {
 
     async _new_view(ignore_size_check = false) {
         if (!this._table) return;
+        this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
         const filters = this._get_view_filters();

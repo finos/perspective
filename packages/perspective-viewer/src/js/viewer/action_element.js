@@ -133,6 +133,7 @@ export class ActionElement extends DomElement {
             let row = this._new_row(parent.getAttribute("name"), parent.getAttribute("type"));
             this._active_columns.appendChild(row);
         }
+        this._check_responsive_layout();
         let cols = this._get_view_columns();
         this._update_column_view(cols);
     }
