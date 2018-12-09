@@ -25,6 +25,7 @@ function get_text_width(text, max = 0) {
     span.style.visibility = "hidden";
     span.style.fontFamily = "monospace";
     span.style.fontSize = "12px";
+    span.style.position = "absolute";
     span.innerHTML = text;
     document.body.appendChild(span);
     let width = `${Math.max(max, span.offsetWidth) + 20}px`;

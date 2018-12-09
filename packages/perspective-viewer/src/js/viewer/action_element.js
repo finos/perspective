@@ -211,7 +211,7 @@ export class ActionElement extends DomElement {
         this._computed_column.addEventListener("perspective-computed-column-save", this._validate_computed_column.bind(this));
         this._computed_column.addEventListener("perspective-computed-column-update", this._set_computed_column_input.bind(this));
         //this._side_panel.addEventListener('perspective-computed-column-edit', this._open_computed_column.bind(this));
-        this._config_button.addEventListener("click", this._toggle_config.bind(this));
+        this._config_button.addEventListener("mousedown", this._toggle_config.bind(this));
         this._config_button.addEventListener("contextmenu", this._show_context_menu.bind(this));
         this._reset_button.addEventListener("click", this.reset.bind(this));
         this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
