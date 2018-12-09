@@ -9,7 +9,7 @@
 
 import moment from "moment";
 
-const DATE_PARSE_CANDIDATES = [moment.ISO_8601, moment.RFC_2822, "YYYY-MM-DD\\DHH:mm:ss.SSSS", "MM-DD-YYYY", "MM/DD/YYYY", "M/D/YYYY", "M/D/YY", "DD MMM YYYY", "HH:mm:ss.SSS"];
+export const DATE_PARSE_CANDIDATES = [moment.ISO_8601, moment.RFC_2822, "YYYY-MM-DD\\DHH:mm:ss.SSSS", "MM-DD-YYYY", "MM/DD/YYYY", "M/D/YYYY", "M/D/YY", "DD MMM YYYY", "HH:mm:ss.SSS"];
 
 /**
  *

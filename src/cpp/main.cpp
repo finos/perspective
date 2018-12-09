@@ -22,6 +22,8 @@
 #include <emscripten/val.h>
 #include <perspective/sym_table.h>
 #include <codecvt>
+#include <boost/format.hpp>
+#include <boost/optional.hpp>
 
 using namespace perspective;
 using namespace emscripten;
@@ -858,6 +860,130 @@ table_add_computed_column(t_table& table, val computed_defs) {
     }
 }
 
+/** 
+ * DataParser
+ * 
+ * parses and converts input data into a canonical format for
+ * interfacing with Perspective.
+ */
+t_bool
+is_valid_date(val moment, val candidates, val x) {
+    return moment
+        .call<val>("call", val::object(), x, candidates, val(true))
+        .call<val>("isValid")
+        .as<t_bool>();
+}
+
+t_dtype
+infer_type(val x, val moment, val candidates) {
+    t_str jstype = x.typeOf().as<t_str>();
+    t_dtype t = t_dtype::DTYPE_FLOAT64;
+
+    if (x.isNull()) {
+        t = t_dtype::DTYPE_NONE;
+    } else if (jstype == "number") {
+        t_float64 x_float64 = x.as<t_float64>();
+        if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0) && (x_float64 != 0.0)) {
+            t = t_dtype::DTYPE_INT32;
+        } else {
+            t = t_dtype::DTYPE_FLOAT64;
+        }
+    } else if (jstype == "boolean") {
+        t = t_dtype::DTYPE_BOOL;
+    } else if (x.instanceof(val::global("Date"))) {
+        t_int32 hours = x.call<val>("getHours").as<t_int32>();
+        t_int32 minutes = x.call<val>("getMinutes").as<t_int32>();
+        t_int32 seconds = x.call<val>("getSeconds").as<t_int32>();
+        t_int32 milliseconds = x.call<val>("getMilliseconds").as<t_int32>();
+
+        if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
+            t = t_dtype::DTYPE_DATE;
+        } else {
+            t = t_dtype::DTYPE_TIME;
+        }
+    } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
+        t = t_dtype::DTYPE_FLOAT64;
+    } else if (jstype == "string" && is_valid_date(moment, candidates, x)) {
+        t = t_dtype::DTYPE_TIME;
+    } else if (jstype == "string") {
+        t_str lower = x.call<val>("toLowerCase").as<t_str>();
+        if (lower == "true" || lower == "false") {
+            t = t_dtype::DTYPE_BOOL;
+        } else {
+            t = t_dtype::DTYPE_STR;
+        }
+    }
+
+    return t;
+}
+
+val
+column_names(val data, t_int32 format) {
+    val column_names = val::array();
+    val Object = val::global("Object");
+    
+    if (format == 1) {
+        t_int32 max_check = 50;
+        column_names = Object.call<val>("keys", data[0]);
+        t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
+        
+        for (auto ix = 0; ix < check_index; ix++) {
+            val next = Object.call<val>("keys", data[ix]);
+            if (column_names["length"] != next["length"]) {
+                if (max_check == 50) {
+                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
+                }
+                
+                std::cout << boost::format("Extending from %d to %d") % column_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
+                column_names = next;
+                max_check *= 2;
+            }
+
+        }
+    } else if (format == 2 || format == 3) {
+        column_names = Object.call<val>("keys", data);
+    } 
+
+    return column_names;
+}
+
+t_dtype
+get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) {
+    t_int32 i = 0;
+    boost::optional<t_dtype> inferredType;
+
+    if (format == 1) {
+        // loop parameters differ slightly so rewrite the loop
+        while (!inferredType.is_initialized() && i < 100 && i < data["length"].as<t_int32>()) {
+            if (data[i].call<val>("hasOwnProperty", name).as<t_bool>() == true) {
+                if (!data[i][name].isNull()) {
+                    inferredType = infer_type(data[i][name], moment, candidates);
+                } else {
+                    inferredType = t_dtype::DTYPE_STR;
+                }
+            }
+
+            i++;
+        }
+    } else if (format == 2) {
+        while (!inferredType.is_initialized() && i < 100 && i < data[name]["length"].as<t_int32>()) {
+            if (!data[name][i].isNull()) {
+                inferredType = infer_type(data[name][i], moment, candidates);
+            } else {
+                inferredType = t_dtype::DTYPE_STR;
+            }
+
+            i++;
+        }
+    }
+
+    if (!inferredType.is_initialized()) {
+        return t_dtype::DTYPE_STR;
+    } else {
+        return inferredType.get();
+    }
+}
+
 /**
  * Create a default gnode.
  *
@@ -1448,6 +1574,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("TOTALS_AFTER", TOTALS_AFTER);
 
     function("sort", &sort);
+    function("infer_type", &infer_type);
+    function("column_names", &column_names);
+    function("get_data_type", &get_data_type);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());
