@@ -164,6 +164,8 @@ export class PerspectiveElement extends StateElement {
         }
 
         this._show_column_selectors();
+
+        this.filters = this.getAttribute("filters");
         await this._debounce_update();
     }
 
@@ -211,6 +213,7 @@ export class PerspectiveElement extends StateElement {
 
     async _new_view(ignore_size_check = false) {
         if (!this._table) return;
+        this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
         const filters = this._get_view_filters();

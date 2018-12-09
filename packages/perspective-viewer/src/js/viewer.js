@@ -96,7 +96,12 @@ class PerspectiveViewer extends ActionElement {
                 }
                 return this._new_row(s, false, false, false, dir);
             },
-            (sort, node) => node.getAttribute("name") === (sort[0] ? sort[0] : sort)
+            (sort, node) => {
+                if (Array.isArray(sort)) {
+                    return node.getAttribute("name") === sort[0] && node.getAttribute("sort-order") === sort[1];
+                }
+                return node.getAttribute("name") === sort;
+            }
         );
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
@@ -211,7 +216,7 @@ class PerspectiveViewer extends ActionElement {
      */
     @array_attribute
     set filters(filters) {
-        if (!this._updating_filter) {
+        if (!this._updating_filter && typeof this._table !== "undefined") {
             var inner = this._filters.querySelector("ul");
             this._update_column_list(
                 filters,
@@ -397,12 +402,7 @@ class PerspectiveViewer extends ActionElement {
      *
      */
     notifyResize() {
-        if (this.clientHeight < 500) {
-            this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
-        } else {
-            this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
-        }
-
+        this._check_responsive_layout();
         if (!document.hidden && this.offsetParent) {
             this._plugin.resize.call(this);
         }

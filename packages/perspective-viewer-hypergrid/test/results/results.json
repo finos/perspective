@@ -11,7 +11,7 @@
     "superstore.html/resets viewable area when the logical size expands.": "2f26c0a444eb534abe4a79e1860034e0",
     "superstore.html/resets viewable area when the physical size expands.": "59ecbb591317976232b7dc078b79e164",
     "superstore.html/sorts by a hidden column.": "2258b0f435bdd12418befe543f97ee55",
-    "superstore.html/filters by a numeric column.": "f2bbde9e67461a6607e2630771aed363",
+    "superstore.html/filters by a numeric column.": "acab16646f2a7198610ad906412d43d5",
     "superstore.html/pivots by a column.": "fb5e1247513754c9bbf206f002c3b0a3",
     "superstore.html/collapses to depth smaller than viewport": "bdd25c1c40781478bd040d5816b887a6",
     "regressions.html/saving a computed column does not interrupt update rendering": "6f6bfce96b1120c67bf6145b00225c9e",
