@@ -96,7 +96,12 @@ class PerspectiveViewer extends ActionElement {
                 }
                 return this._new_row(s, false, false, false, dir);
             },
-            (sort, node) => node.getAttribute("name") === (sort[0] ? sort[0] : sort)
+            (sort, node) => {
+                if (Array.isArray(sort)) {
+                    return node.getAttribute("name") === sort[0] && node.getAttribute("sort-order") === sort[1];
+                }
+                return node.getAttribute("name") === sort;
+            }
         );
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
