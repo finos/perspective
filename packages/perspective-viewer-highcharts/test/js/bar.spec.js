@@ -25,13 +25,9 @@ utils.with_server({}, () => {
                     await utils.invoke_tooltip(bar, page);
                 });
 
-                test.capture("tooltip shows column label.", async page => {
-                    await utils.invoke_tooltip(bar, page);
-                });
-
                 test.capture("tooltip shows proper column labels based on hover target.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     // set a new column
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
@@ -40,7 +36,7 @@ utils.with_server({}, () => {
 
                 test.capture("tooltip shows proper column labels based on hover target, pt2.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     // set a new column
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
@@ -49,7 +45,7 @@ utils.with_server({}, () => {
 
                 test.capture("tooltip shows pivot labels.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     // set a row pivot and a column pivot
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
@@ -73,7 +69,7 @@ utils.with_server({}, () => {
                 "render warning should show above size limit.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
                         window.getPlugin("y_bar").max_size = 50;
                         element.setAttribute("columns", '["col_b"]');
@@ -96,7 +92,7 @@ utils.with_server({}, () => {
                 "dismissing render warning should trigger render.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
                         window.getPlugin("y_bar").max_size = 50;
                         element.setAttribute("columns", '["col_b"]');
@@ -121,7 +117,7 @@ utils.with_server({}, () => {
                 "selecting 'do not show again' should stop render warnings.",
                 async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
                         window.getPlugin("y_bar").max_size = 50;
                         element.setAttribute("columns", '["col_a", "col_b"]');
@@ -153,7 +149,7 @@ utils.with_server({}, () => {
                     });
 
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
                         element.setAttribute("columns", '["col_a", "col_b"]');
                     }, viewer);

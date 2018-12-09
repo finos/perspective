@@ -21,7 +21,7 @@ utils.with_server({}, () => {
             describe("tooltip tests", () => {
                 test.capture("tooltip shows on hover.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
 
                     // set a row pivot and a column pivot so the graph will render
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);

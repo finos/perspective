@@ -49,7 +49,7 @@ utils.with_server({}, () => {
                 test.capture("resets viewable area when the logical size expands.", async page => {
                     await set_lazy(page);
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(element => element.setAttribute("row-pivots", '["City"]'), viewer);
@@ -58,11 +58,11 @@ utils.with_server({}, () => {
                 test.capture("resets viewable area when the physical size expands.", async page => {
                     await set_lazy(page);
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(element => element.setAttribute("row-pivots", "[]"), viewer);
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                 });
             });
         },

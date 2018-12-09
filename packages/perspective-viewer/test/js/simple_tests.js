@@ -14,25 +14,25 @@ exports.default = function() {
 
     test.capture("pivots by a row.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
     });
 
     test.capture("pivots by two rows.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("row-pivots", '["Category","Sub-Category"]'), viewer);
     });
 
     test.capture("pivots by a column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
     });
 
     test.capture("pivots by a row and a column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
         await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
@@ -40,7 +40,7 @@ exports.default = function() {
 
     test.capture("pivots by two rows and two columns.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("row-pivots", '["Region","State"]'), viewer);
         await page.waitForSelector("perspective-viewer:not([updating])");
         await page.evaluate(element => element.setAttribute("column-pivots", '["Category","Sub-Category"]'), viewer);
@@ -48,38 +48,37 @@ exports.default = function() {
 
     test.capture("sorts by a hidden column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("columns", '["Row ID","Quantity"]'), viewer);
         await page.evaluate(element => element.setAttribute("sort", '["Sales"]'), viewer);
     });
 
     test.capture("sorts by a numeric column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("sort", '["Sales"]'), viewer);
     });
 
     test.capture("filters by a numeric column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("filters", '[["Sales", ">", 500]]'), viewer);
     });
 
     test.capture("sorts by an alpha column.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("sort", '["State"]'), viewer);
     });
 
     test.capture("displays visible columns.", async page => {
         const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales","Quantity"]'), viewer);
     });
 
     test.skip("pivots by row when drag-and-dropped.", async page => {
-        const viewer = await page.$("perspective-viewer");
-        await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+        await page.shadow_click("perspective-viewer", "#config_button");
         await drag_drop(page, "perspective-row[name=Category]", "#row_pivots");
     });
 };

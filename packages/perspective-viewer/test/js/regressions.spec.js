@@ -39,7 +39,7 @@ utils.with_server({}, () => {
                     schema
                 );
 
-                await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                await page.shadow_click("perspective-viewer", "#config_button");
 
                 await page.evaluate(
                     (viewer, data, schema) => {

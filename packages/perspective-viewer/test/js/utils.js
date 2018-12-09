@@ -56,6 +56,29 @@ beforeAll(async () => {
     browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]});
     page = await browser.newPage();
 
+    page.shadow_click = async function(...path) {
+        await this.evaluate(path => {
+            let elem = document;
+            while (path.length > 0) {
+                if (elem.shadowRoot) {
+                    elem = elem.shadowRoot;
+                }
+                elem = elem.querySelector(path.shift());
+            }
+
+            function triggerMouseEvent(node, eventType) {
+                var clickEvent = document.createEvent("MouseEvent");
+                clickEvent.initEvent(eventType, true, true);
+                node.dispatchEvent(clickEvent);
+            }
+
+            triggerMouseEvent(elem, "mouseover");
+            triggerMouseEvent(elem, "mousedown");
+            triggerMouseEvent(elem, "mouseup");
+            triggerMouseEvent(elem, "click");
+        }, path);
+    };
+
     // CSS Animations break our screenshot tests, so set the
     // animation playback rate to something extreme.
     await page._client.send("Animation.setPlaybackRate", {playbackRate: 100.0});
@@ -171,66 +194,74 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     height: viewport.height
                 });
 
-            if (_reload_page) {
-                await new Promise(setTimeout);
-                await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
-            } else {
-                if (!OLD_SETTINGS[test_root + _url]) {
+            const iterations = process.env.PSP_SATURATE ? 10 : 1;
+
+            for (let x = 0; x < iterations; x++) {
+                if (_reload_page) {
                     await new Promise(setTimeout);
                     await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
                 } else {
-                    await page.evaluate(x => {
+                    if (!OLD_SETTINGS[test_root + _url]) {
+                        await new Promise(setTimeout);
+                        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+                    } else {
+                        await page.evaluate(x => {
+                            const viewer = document.querySelector("perspective-viewer");
+                            viewer._show_config = true;
+                            viewer.toggleConfig();
+                            viewer.restore(x);
+                            viewer.notifyResize();
+                        }, OLD_SETTINGS[test_root + _url]);
+                    }
+                }
+
+                if (wait_for_update) {
+                    await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                } else {
+                    await page.waitForSelector("perspective-viewer");
+                }
+
+                if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
                         const viewer = document.querySelector("perspective-viewer");
-                        viewer._show_config = true;
-                        viewer.toggleConfig();
-                        viewer.restore(x);
-                        viewer.notifyResize();
-                    }, OLD_SETTINGS[test_root + _url]);
+                        return viewer.save();
+                    });
                 }
-            }
 
-            if (wait_for_update) {
-                await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
-                await page.waitForSelector("perspective-viewer:not([updating])");
-            } else {
-                await page.waitForSelector("perspective-viewer");
-            }
+                await body(page);
 
-            if (!_reload_page && !OLD_SETTINGS[test_root + _url]) {
-                await page.waitForSelector("perspective-viewer:not([updating])");
-                OLD_SETTINGS[test_root + _url] = await page.evaluate(() => {
-                    const viewer = document.querySelector("perspective-viewer");
-                    return viewer.save();
-                });
-            }
-
-            await body(page);
-
-            if (wait_for_update) {
-                await page.waitForSelector("perspective-viewer:not([updating])");
-            }
-
-            const screenshot = await page.screenshot();
-            // await page.close();
-            const hash = crypto
-                .createHash("md5")
-                .update(screenshot)
-                .digest("hex");
-            const filename = path.join(test_root, "screenshots", `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
-            if (hash === results[_url + "/" + name]) {
-                fs.writeFileSync(filename + ".png", screenshot);
-            } else {
-                fs.writeFileSync(filename + ".failed.png", screenshot);
-                if (fs.existsSync(filename + ".png")) {
-                    cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
-                    cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
+                if (wait_for_update) {
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                 }
+
+                const screenshot = await page.screenshot();
+                // await page.close();
+                const hash = crypto
+                    .createHash("md5")
+                    .update(screenshot)
+                    .digest("hex");
+
+                const filename = path.join(test_root, "screenshots", `${_url.replace(".html", "")}`, `${name.replace(/ /g, "_").replace(/[\.']/g, "")}`);
+
+                if (hash === results[_url + "/" + name]) {
+                    fs.writeFileSync(filename + ".png", screenshot);
+                } else {
+                    fs.writeFileSync(filename + ".failed.png", screenshot);
+                    if (fs.existsSync(filename + ".png")) {
+                        cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
+                        cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
+                    }
+                }
+
+                if (process.env.WRITE_TESTS) {
+                    new_results[_url + "/" + name] = hash;
+                }
+
+                expect(errors).toEqual([]);
+                expect(hash).toBe(results[_url + "/" + name]);
             }
-            if (process.env.WRITE_TESTS) {
-                new_results[_url + "/" + name] = hash;
-            }
-            expect(errors).toEqual([]);
-            expect(hash).toBe(results[_url + "/" + name]);
         },
         timeout
     );
@@ -251,6 +282,7 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
 };
 
 exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
+    await page.mouse.move(0, 0);
     const viewer = await page.$("perspective-viewer");
     const handle = await page.waitFor(
         (viewer, selector) => {
@@ -263,9 +295,9 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
         viewer,
         svg_selector
     );
+    await handle.asElement().hover();
     const box = await handle.asElement().boundingBox();
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-    await handle.asElement().hover();
     await page.waitFor(
         element => {
             let elem = element.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(".highcharts-label.highcharts-tooltip");

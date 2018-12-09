@@ -110,6 +110,12 @@ build the test suite for every package and run them.
 yarn test
 ```
 
+A Test name regex can be passed to `jest` via the same `-t` flag:
+
+```bash
+yarn test -t 'button test (A|B)'
+``` 
+
 The test suite is composed of two sections:  a Node.js test which asserts
 behavior of the `@jpmorganchase/perspective` library, and a suite of 
 [Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests which 
@@ -131,7 +137,7 @@ screenshots reflect your change, you can update the new hashes manually in the
 environment variable:
 
 ```bash
-WRITE_TESTS=1 yarn test
+yarn test --write
 ```
 
 ## Benchmarking

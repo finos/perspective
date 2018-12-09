@@ -26,20 +26,13 @@ utils.with_server({}, () => {
                 const series = "path.highcharts-graph";
 
                 test.capture("tooltip shows on hover.", async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
-                    await utils.invoke_tooltip(series, page);
-                });
-
-                test.capture("tooltip shows proper column labels.", async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
                     await utils.invoke_tooltip(series, page);
                 });
 
                 test.capture("tooltip shows pivot labels.", async page => {
                     const viewer = await page.$("perspective-viewer");
-                    await page.evaluate(element => element.shadowRoot.querySelector("#config_button").click(), viewer);
+                    await page.shadow_click("perspective-viewer", "#config_button");
 
                     // set a row pivot and a column pivot
                     await page.evaluate(element => element.setAttribute("row-pivots", '["State"]'), viewer);
