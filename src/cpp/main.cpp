@@ -874,6 +874,38 @@ is_valid_date(val moment, val candidates, val x) {
         .as<t_bool>();
 }
 
+// Name parsing
+val
+column_names(val data, t_int32 format) {
+    val column_names = val::array();
+    val Object = val::global("Object");
+    
+    if (format == 1) {
+        t_int32 max_check = 50;
+        column_names = Object.call<val>("keys", data[0]);
+        t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
+        
+        for (auto ix = 0; ix < check_index; ix++) {
+            val next = Object.call<val>("keys", data[ix]);
+            if (column_names["length"] != next["length"]) {
+                if (max_check == 50) {
+                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
+                }
+                
+                std::cout << boost::format("Extending from %d to %d") % column_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
+                column_names = next;
+                max_check *= 2;
+            }
+
+        }
+    } else if (format == 2 || format == 3) {
+        column_names = Object.call<val>("keys", data);
+    } 
+
+    return column_names;
+}
+
+// Type inferrence
 t_dtype
 infer_type(val x, val moment, val candidates) {
     t_str jstype = x.typeOf().as<t_str>();
@@ -917,36 +949,6 @@ infer_type(val x, val moment, val candidates) {
     return t;
 }
 
-val
-column_names(val data, t_int32 format) {
-    val column_names = val::array();
-    val Object = val::global("Object");
-    
-    if (format == 1) {
-        t_int32 max_check = 50;
-        column_names = Object.call<val>("keys", data[0]);
-        t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
-        
-        for (auto ix = 0; ix < check_index; ix++) {
-            val next = Object.call<val>("keys", data[ix]);
-            if (column_names["length"] != next["length"]) {
-                if (max_check == 50) {
-                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
-                }
-                
-                std::cout << boost::format("Extending from %d to %d") % column_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
-                column_names = next;
-                max_check *= 2;
-            }
-
-        }
-    } else if (format == 2 || format == 3) {
-        column_names = Object.call<val>("keys", data);
-    } 
-
-    return column_names;
-}
-
 t_dtype
 get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) {
     t_int32 i = 0;
@@ -982,6 +984,53 @@ get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) 
     } else {
         return inferredType.get();
     }
+}
+
+val
+data_types(val data, t_int32 format, val column_names, val moment, val candidates) {
+    t_int32 names_length = column_names["length"].as<t_int32>();
+    if (names_length == 0) {
+        throw std::invalid_argument("Cannot determine data types without column names!");
+    }
+
+    val types = val::array();
+
+    if (format == 3) {
+        val names_from_data = val::global("Object").call<val>("keys", data);
+
+        for (t_int32 i = 0; i < names_from_data["length"].as<t_int32>(); i++) {
+            t_str value = data[names_from_data[i]].as<t_str>();
+            t_dtype type = t_dtype::DTYPE_PTR; // use a type we don't use in the JS library as a flag
+
+            if (value == "integer") {
+                type = t_dtype::DTYPE_INT32;
+            } else if (value == "float") {
+                type = t_dtype::DTYPE_FLOAT64;
+            } else if (value == "string") {
+                type = t_dtype::DTYPE_STR;
+            } else if (value == "boolean") {
+                type = t_dtype::DTYPE_BOOL;
+            } else if (value == "datetime") {
+                type = t_dtype::DTYPE_TIME;
+            } else if (value == "date") {
+                type = t_dtype::DTYPE_DATE;
+            } else {
+                throw std::logic_error("Unknown type!");
+            }
+
+            types.call<void>("push", type);
+        }
+
+        return types;
+    }
+
+    for (t_int32 i = 0; i < names_length; i++) {
+        t_str name = column_names[i].as<t_str>();
+        t_dtype type = get_data_type(data, format, name, moment, candidates);
+        types.call<void>("push", type);
+    }
+
+    return types;
 }
 
 /**
@@ -1577,6 +1626,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("infer_type", &infer_type);
     function("column_names", &column_names);
     function("get_data_type", &get_data_type);
+    function("data_types", &data_types);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());

@@ -39,82 +39,6 @@ export class DataParser {
         }
     }
 
-    data_types(__MODULE__, data, format, column_names) {
-        let types = [];
-
-        if (!column_names) {
-            throw "Cannot determine data types without column names!";
-        }
-
-        if (format === this.data_formats.schema) {
-            for (let name in data) {
-                const dtypes = __MODULE__.t_dtype;
-                let type = undefined;
-                switch (data[name]) {
-                    case "integer":
-                        type = dtypes.DTYPE_INT32;
-                        break;
-                    case "float":
-                        type = dtypes.DTYPE_FLOAT64;
-                        break;
-                    case "string":
-                        type = dtypes.DTYPE_STR;
-                        break;
-                    case "boolean":
-                        type = dtypes.DTYPE_BOOL;
-                        break;
-                    case "datetime":
-                        type = dtypes.DTYPE_TIME;
-                        break;
-                    case "date":
-                        type = dtypes.DTYPE_DATE;
-                        break;
-                    default:
-                        throw `Unknown type: ${name}`;
-                }
-
-                types.push(type);
-            }
-            return types;
-        }
-
-        for (let name of column_names) {
-            let type = __MODULE__.get_data_type(data, format, name, moment, DATE_PARSE_CANDIDATES); //this.get_data_type(__MODULE__, data, format, name);
-            types.push(type);
-        }
-
-        return types;
-    }
-
-    get_data_type(__MODULE__, data, format, name) {
-        let i = 0;
-        let inferredType = undefined;
-
-        if (format === this.data_formats.row) {
-            while (inferredType === undefined && i < 100 && i < data.length) {
-                if (data[i].hasOwnProperty(name)) {
-                    if (data[i][name] !== null) {
-                        inferredType = __MODULE__.infer_type(data[i][name], moment, DATE_PARSE_CANDIDATES);
-                    } else {
-                        inferredType = null;
-                    }
-                }
-                i++;
-            }
-        } else if (format === this.data_formats.column) {
-            while (inferredType === undefined && i < 100 && i < data[name].length) {
-                if (data[name][i] !== null) {
-                    inferredType = __MODULE__.infer_type(data[name][i], moment, DATE_PARSE_CANDIDATES);
-                } else {
-                    inferredType = null;
-                }
-                i++;
-            }
-        }
-
-        return inferredType || __MODULE__.t_dtype.DTYPE_STR;
-    }
-
     make_columnar_data(__MODULE__, data, format, column_names, data_types) {
         let cdata = [];
         let row_count = 0;
@@ -142,12 +66,16 @@ export class DataParser {
                     }
 
                     switch (type.value) {
-                        case __MODULE__.t_dtype.DTYPE_FLOAT64.value:
+                        case __MODULE__.t_dtype.DTYPE_FLOAT64.value: {
+                            col.push(Number(val));
+                            break;
+                        }
                         case __MODULE__.t_dtype.DTYPE_INT32.value: {
                             col.push(Number(val));
                             if (val > 2147483647 || val < -2147483648) {
-                                // Avoid overflow errors
+                                // FIXME: fully avoid overflow errors
                                 data_types[column_names.indexOf(name)] = __MODULE__.t_dtype.DTYPE_FLOAT64;
+                                console.warn(`Promoting type of column ${name} from Integer to Float type.`);
                             }
                             break;
                         }
@@ -213,7 +141,7 @@ export class DataParser {
     parse(__MODULE__, data) {
         const format = this.is_format(data);
         let names = __MODULE__.column_names(data, format);
-        let types = this.data_types(__MODULE__, data, format, names);
+        let types = __MODULE__.data_types(data, format, names, moment, DATE_PARSE_CANDIDATES);
         let [cdata, row_count] = this.make_columnar_data(__MODULE__, data, format, names, types);
         return {cdata, names, types, row_count, is_arrow: false};
     }

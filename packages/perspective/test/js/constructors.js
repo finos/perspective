@@ -462,6 +462,25 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("Upgrades integer columns with values beyond max/min_int to float", async function() {
+            const schema = {
+                a: "integer"
+            };
+
+            const int_to_float = {
+                a: [1, 2, 3, 2147483667, 5]
+            };
+
+            var table = perspective.table(schema);
+            var schema_1 = await table.schema();
+            expect(schema_1["a"]).toEqual("integer");
+
+            table.update(int_to_float);
+
+            var schema_2 = await table.schema();
+            expect(schema_2["a"]).toEqual("float");
+        });
+
         it("has correct size", async function() {
             var table = perspective.table(data);
             let result = await table.size();
