@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.10] - 2018-12-09
+### Fixes
+* [#328](https://github.com/jpmorganchase/perspective/pull/328) Fixed `<perspective-viewer>` `delete()` method memory leak.
+* [#338](https://github.com/jpmorganchase/perspective/pull/338) Fixed UI interaction quirks.
+
+### Internal
+* [#337](https://github.com/jpmorganchase/perspective/pull/337) Test suite performance improvements, supports `-t` and `--saturate` flags.
+
 ## [0.2.9] - 2018-11-25
 ### Added
 * [#325](https://github.com/jpmorganchase/perspective/pull/325) API and UX for column sorting on arbitrary columns.
