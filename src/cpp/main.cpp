@@ -430,7 +430,7 @@ _fill_col<t_int64>(val dcol, t_col_sptr col, t_bool is_arrow) {
         // arrow packs 64 bit into two 32 bit ints
         arrow::vecFromTypedArray(data, col->get_nth<t_int64>(0), nrows * 2);
     } else {
-        throw std::logic_error(
+        PSP_COMPLAIN_AND_ABORT(
             "Unreachable - can't have DTYPE_INT64 column from non-arrow data");
     }
 }
@@ -990,17 +990,17 @@ val
 data_types(val data, t_int32 format, val column_names, val moment, val candidates) {
     t_int32 names_length = column_names["length"].as<t_int32>();
     if (names_length == 0) {
-        throw std::invalid_argument("Cannot determine data types without column names!");
+        PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
     }
 
     val types = val::array();
 
     if (format == 3) {
-        val names_from_data = val::global("Object").call<val>("keys", data);
-
-        for (t_int32 i = 0; i < names_from_data["length"].as<t_int32>(); i++) {
-            t_str value = data[names_from_data[i]].as<t_str>();
-            t_dtype type = t_dtype::DTYPE_PTR; // use a type we don't use in the JS library as a flag
+        std::vector<t_str> data_names = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
+       
+        for (std::vector<t_str>::iterator name = data_names.begin(); name != data_names.end(); ++name) {
+            t_str value = data[*name].as<t_str>();
+            t_dtype type;
 
             if (value == "integer") {
                 type = t_dtype::DTYPE_INT32;
@@ -1015,19 +1015,19 @@ data_types(val data, t_int32 format, val column_names, val moment, val candidate
             } else if (value == "date") {
                 type = t_dtype::DTYPE_DATE;
             } else {
-                throw std::logic_error("Unknown type!");
+                PSP_COMPLAIN_AND_ABORT("Unknown type '" + value + "' for key '" + *name + "'");
             }
 
             types.call<void>("push", type);
         }
 
         return types;
-    }
-
-    for (t_int32 i = 0; i < names_length; i++) {
-        t_str name = column_names[i].as<t_str>();
-        t_dtype type = get_data_type(data, format, name, moment, candidates);
-        types.call<void>("push", type);
+    } else {
+        std::vector<t_str> names = vecFromJSArray<t_str>(column_names);
+        for (std::vector<t_str>::iterator name = names.begin(); name != names.end(); ++name) {
+            t_dtype type = get_data_type(data, format, *name, moment, candidates);
+            types.call<void>("push", type);
+        }
     }
 
     return types;

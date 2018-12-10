@@ -479,6 +479,24 @@ module.exports = perspective => {
 
             var schema_2 = await table.schema();
             expect(schema_2["a"]).toEqual("float");
+            table.delete();
+        });
+
+        it("Does not infer float column as integers", async function() {
+            const int_to_float = [];
+            for (let x = 0; x < 200; x++) {
+                int_to_float.push({a: 1});
+            }
+            int_to_float.push({a: 2147483667});
+
+            var table = perspective.table(int_to_float);
+            var schema_1 = await table.schema();
+            expect(schema_1["a"]).toEqual("float");
+            let view = table.view();
+            var data = await view.to_json();
+            expect(data).toEqual(int_to_float);
+            view.delete();
+            table.delete();
         });
 
         it("has correct size", async function() {

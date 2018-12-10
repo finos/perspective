@@ -73,9 +73,10 @@ export class DataParser {
                         case __MODULE__.t_dtype.DTYPE_INT32.value: {
                             col.push(Number(val));
                             if (val > 2147483647 || val < -2147483648) {
-                                // FIXME: fully avoid overflow errors
+                                // This handles cases where a long sequence of e.g. 0 preceds a clearly
+                                // float value in an inferred column.  Would not be needed if the type inference
+                                // checked the entire column, or we could reset parsing.
                                 data_types[column_names.indexOf(name)] = __MODULE__.t_dtype.DTYPE_FLOAT64;
-                                console.warn(`Promoting type of column ${name} from Integer to Float type.`);
                             }
                             break;
                         }
