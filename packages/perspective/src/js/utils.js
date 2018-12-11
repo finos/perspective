@@ -8,6 +8,27 @@
  */
 
 /**
+ * Gets human-readable types for a column
+ * @private
+ * @returns {string}
+ */
+export function get_column_type(val) {
+    if (val === 1 || val === 2) {
+        return "integer";
+    } else if (val === 19) {
+        return "string";
+    } else if (val === 10 || val === 9) {
+        return "float";
+    } else if (val === 11) {
+        return "boolean";
+    } else if (val === 12) {
+        return "datetime";
+    } else if (val === 13) {
+        return "date";
+    }
+}
+
+/**
  * Bind all methods in a class to the class instance.  It is sad that this is
  * necessary.
  *

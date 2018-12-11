@@ -8,9 +8,9 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DataParser, clean_data} from "./parse_data.js";
-import {DateParser} from "./date_parser.js";
-import {bindall} from "./utils.js";
+import {DataAccessor, clean_data} from "./Parser/DataAccessor.js";
+import {DateParser} from "./Parser/DateParser.js";
+import {bindall, get_column_type} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -27,38 +27,17 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
-const CHUNKED_THRESHOLD = 100000;
+//const CHUNKED_THRESHOLD = 100000;
 
 export default function(Module) {
     let __MODULE__ = Module;
-    let parser = new DataParser();
+    let accessor = new DataAccessor();
 
     /******************************************************************************
      *
      * Private
      *
      */
-
-    /**
-     * Gets human-readable types for a column
-     * @private
-     * @returns {string}
-     */
-    function get_column_type(val) {
-        if (val === 1 || val === 2) {
-            return "integer";
-        } else if (val === 19) {
-            return "string";
-        } else if (val === 10 || val === 9) {
-            return "float";
-        } else if (val === 11) {
-            return "boolean";
-        } else if (val === 12) {
-            return "datetime";
-        } else if (val === 13) {
-            return "date";
-        }
-    }
 
     /**
      * Determines a table's limit index.
@@ -88,11 +67,17 @@ export default function(Module) {
      * @param {*} is_delete
      * @returns
      */
-    function make_table(pdata, pool, gnode, computed, index, limit, limit_index, is_delete) {
-        for (let chunk of pdata) {
-            gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_delete);
-            limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
+    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, is_delete, is_arrow) {
+        if (is_arrow) {
+            for (let chunk of accessor) {
+                gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_delete, is_arrow);
+                limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
+            }
+        } else {
+            gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_delete, is_arrow);
+            limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
+
         return [gnode, limit_index];
     }
 
@@ -1114,7 +1099,7 @@ export default function(Module) {
      *
      * @param {Object<string, Array>|Array<Object>|string} data The input data
      * for this table.  The supported input types mirror the constructor options, minus
-     * the ability to pass a schema (Object<string, string>) as this table has.
+     * the ability to pass a schema (Object<string, string>) as this table has
      * already been constructed, thus its types are set in stone.
      *
      * @see {@link table}
@@ -1125,31 +1110,39 @@ export default function(Module) {
         let schema = this.gnode.get_tblschema();
         let names = schema.columns();
         let types = schema.types();
+        let is_arrow = false;
+
+        // attach preset names & types
+        accessor.column_names = cols;
+        accessor.data_types = accessor.extract_typevec(types);
+        pdata = accessor;
 
         if (data instanceof ArrayBuffer) {
             if (this.size() === 0) {
                 throw new Error("Overriding Arrow Schema is not supported.");
             }
             pdata = load_arrow_buffer(data, cols, types);
+            is_arrow = true;
         } else if (typeof data === "string") {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            pdata = [parser.update(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data, cols, types)];
+            accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
         } else {
-            pdata = [parser.update(__MODULE__, data, cols, types)];
+            accessor.init(__MODULE__, data);
         }
 
-        for (let i = names.size() - 1; i >= 0; i--) {
+        // TODO: reimplement
+        /* for (let i = names.size() - 1; i >= 0; i--) {
             if (cols.indexOf(names.get(i)) === -1) {
                 for (let chunk of pdata) {
                     chunk.types.splice(i, 1);
                 }
             }
-        }
+        } */
 
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(e);
@@ -1172,17 +1165,24 @@ export default function(Module) {
         let pdata;
         let schema = this.gnode.get_tblschema();
         let types = schema.types();
+        let is_arrow = false;
 
         data = data.map(idx => ({[this.index]: idx}));
 
+        accessor.column_names = [this.index];
+        accessor.data_types = accessor.extract_typevec(types);
+
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
+            is_arrow = true;
         } else {
-            pdata = [parser.update(__MODULE__, data, [this.index], types)];
+            accessor.init(__MODULE__, data);
+            pdata = accessor;
         }
 
+        console.log(pdata);
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(e);
@@ -1560,10 +1560,13 @@ export default function(Module) {
         table: function(data, options) {
             options = options || {};
             options.index = options.index || "";
-            let pdata;
+
+            let data_accessor;
+            let is_arrow = false;
 
             if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
-                pdata = load_arrow_buffer(data);
+                data_accessor = load_arrow_buffer(data);
+                is_arrow = true;
             } else {
                 if (typeof data === "string") {
                     if (data[0] === ",") {
@@ -1572,9 +1575,11 @@ export default function(Module) {
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
 
-                pdata = parser.parse(__MODULE__, data);
+                accessor.init(__MODULE__, data);
+                data_accessor = accessor;
 
-                if (pdata.row_count > CHUNKED_THRESHOLD) {
+                // FIXME: reimplement properly
+                /* if (pdata.row_count > CHUNKED_THRESHOLD) {
                     let new_pdata = [];
                     while (pdata.cdata[0].length > 0) {
                         const chunk = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
@@ -1583,15 +1588,11 @@ export default function(Module) {
                     pdata = new_pdata;
                 } else {
                     pdata = [pdata];
-                }
+                }*/
             }
 
             if (options.index && options.limit) {
                 throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
-            }
-
-            if (options.index && pdata[0].names.indexOf(options.index) === -1) {
-                throw `Specified index '${options.index}' does not exist in data.`;
             }
 
             let gnode,
@@ -1600,7 +1601,9 @@ export default function(Module) {
 
             try {
                 pool = new __MODULE__.t_pool();
-                [gnode, limit_index] = make_table(pdata, pool, gnode, undefined, options.index, options.limit, limit_index, false);
+
+                [gnode, limit_index] = make_table(data_accessor, pool, gnode, undefined, options.index, options.limit, limit_index, false, is_arrow);
+
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {
                 if (pool) {
