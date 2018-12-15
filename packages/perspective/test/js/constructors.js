@@ -462,6 +462,15 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Infers correct type for empty string columns", async function() {
+            var table = perspective.table([{x: "", y: 1}, {x: "", y: 2}, {x: "", y: 3}, {x: "", y: 4}]);
+            var view = table.view();
+            let result = await view.schema();
+            expect(result).toEqual({x: "string", y: "integer"});
+            view.delete();
+            table.delete();
+        });
+
         it.skip("Upgrades integer columns with values beyond max/min_int to float", async function() {
             const schema = {
                 a: "integer"

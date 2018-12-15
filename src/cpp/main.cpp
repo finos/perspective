@@ -909,7 +909,7 @@ column_names(val data, t_int32 format) {
 t_dtype
 infer_type(val x, val moment, val candidates) {
     t_str jstype = x.typeOf().as<t_str>();
-    t_dtype t = t_dtype::DTYPE_FLOAT64;
+    t_dtype t = t_dtype::DTYPE_STR;
 
     if (x.isNull()) {
         t = t_dtype::DTYPE_NONE;
@@ -933,18 +933,21 @@ infer_type(val x, val moment, val candidates) {
         } else {
             t = t_dtype::DTYPE_TIME;
         }
-    } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
-        t = t_dtype::DTYPE_FLOAT64;
-    } else if (jstype == "string" && is_valid_date(moment, candidates, x)) {
-        t = t_dtype::DTYPE_TIME;
     } else if (jstype == "string") {
-        t_str lower = x.call<val>("toLowerCase").as<t_str>();
-        if (lower == "true" || lower == "false") {
-            t = t_dtype::DTYPE_BOOL;
+        if (is_valid_date(moment, candidates, x)) {
+            t = t_dtype::DTYPE_TIME;
         } else {
-            t = t_dtype::DTYPE_STR;
+            t_str lower = x.call<val>("toLowerCase").as<t_str>();
+            if (lower == "true" || lower == "false") {
+                t = t_dtype::DTYPE_BOOL;
+            } else {
+                t = t_dtype::DTYPE_STR;
+            }
         }
-    }
+    } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
+        PSP_COMPLAIN_AND_ABORT("BADLANDS");
+        t = t_dtype::DTYPE_FLOAT64;
+    } 
 
     return t;
 }
