@@ -971,13 +971,19 @@ export default function(Module) {
 
         if (config.filter) {
             let schema = this._schema();
-            filters = config.filter.map(function(filter) {
-                if (schema[filter[0]] === "datetime" || schema[filter[0]] === "date") {
-                    return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
-                } else {
-                    return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
-                }
-            });
+            let isDateFilter = key => schema[key] === "datetime" || schema[key] === "date";
+            filters = config.filter
+                .filter(filter => {
+                    const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
+                    return typeof value !== "undefined" && value !== null;
+                })
+                .map(filter => {
+                    if (isDateFilter(filter[0])) {
+                        return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
+                    } else {
+                        return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+                    }
+                });
             if (config.filter_op) {
                 filter_op = _string_to_filter_op[config.filter_op];
             }
