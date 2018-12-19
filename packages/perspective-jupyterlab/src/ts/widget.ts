@@ -43,7 +43,9 @@ class PerspectiveModel extends DOMWidgetModel {
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
             _data: null,
+            _bin_data: null,
 
+            datasrc: '',
             schema: {},
             view: 'hypergrid',
             columns: [],
@@ -85,6 +87,8 @@ class PerspectiveView extends DOMWidgetView {
         observer.observe(this.el, {attributes: true});
 
         this.model.on('change:_data', this.data_changed, this);
+        this.model.on('change:_bin_data', this.bin_data_changed, this);
+        // Dont trigger on datasrc change until data is updated
         this.model.on('change:schema', this.schema_changed, this);
         this.model.on('change:view', this.view_changed, this);
         this.model.on('change:columns', this.columns_changed, this);
@@ -154,9 +158,38 @@ class PerspectiveView extends DOMWidgetView {
         }
     }
 
+    bin_data_changed() {
+        this.psp.delete();
+        let schema = this.model.get('schema');
+        let data = this.model.get('_bin_data');
+
+        if (Object.keys(schema).length > 0 ){
+            let limit = this.model.get('limit');
+            let index = this.model.get('index');
+            let options = {} as {[key: string]: any};
+
+            if (limit > 0){
+                options['limit'] = limit;
+            }
+            if (index){
+                options['index'] = index;
+            }
+
+            this.psp.load(schema, options);
+        }
+        if (data){
+            this.psp.load(data.buffer);
+        }
+    }
+
     datasrc_changed(){
         this.psp.delete();
-        this.data_changed();
+        let source = this.model.get('datasrc');
+        if(source === 'pyarrow'){ // or other binary formats
+            this.bin_data_changed();
+        } else {
+            this.data_changed();
+        }
     }
 
     schema_changed(){

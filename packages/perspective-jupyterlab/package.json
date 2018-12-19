@@ -26,7 +26,7 @@
         "test": "npm-run-all test:build test:run",
         "test:build": "echo \"No Tests\"",
         "test:run": "echo \"No Tests\"",
-        "build": "webpack --color --config src/config/plugin.config.js && webpack --color --config src/config/mimerenderer.config.js",
+        "build": "webpack --color --config src/config/plugin.config.js",
         "clean": "rimraf build"
     },
     "dependencies": {
