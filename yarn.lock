@@ -4613,7 +4613,7 @@ fin-hypergrid-grouped-header-plugin@^1.2.4:
   resolved "https://registry.yarnpkg.com/fin-hypergrid-grouped-header-plugin/-/fin-hypergrid-grouped-header-plugin-1.2.4.tgz#f37bfd00ca3209eb04c27293b5d60deecd3581c9"
   integrity sha512-Os05E6wSnslkNptZsL11UQAAA9Kfx+GATc4NYoOl/omVntNhaeXe26iLxNBUp+gU3brkuYqJvHzg6mO0VCe8mA==
 
-fin-hypergrid@^3.0.0:
+fin-hypergrid@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/fin-hypergrid/-/fin-hypergrid-3.2.0.tgz#6ccb8d2ef29740edbe8939e97a11671f69b94e6b"
   integrity sha512-Bv9lUrgRigNSWcsrjxO2RTgt+OJwhRwygRAMHw3tctN93J65srue0T2NlP5Q1oCmYsOxUTjteM93qmxQ6GLk1g==
@@ -10307,16 +10307,6 @@ typedarray@^0.0.6, typedarray@~0.0.5:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
-
-typeface-open-sans@0.0.54:
-  version "0.0.54"
-  resolved "https://registry.yarnpkg.com/typeface-open-sans/-/typeface-open-sans-0.0.54.tgz#20f5b5ea5c7f95d89dc1f8b2d2b1457680129cee"
-  integrity sha512-w6wOd6EicZdZKf0jSU/K3EzEi3zFgvWQSN7NOpRIQI5KeMWmC5Pg/lqtBVJHB0pRChYRmLdhf4h8ROur0A3JZQ==
-
-typeface-roboto-mono@0.0.54:
-  version "0.0.54"
-  resolved "https://registry.yarnpkg.com/typeface-roboto-mono/-/typeface-roboto-mono-0.0.54.tgz#78e706e0a4158b2b670ed3cdf2269e7a54e671cd"
-  integrity sha512-UjE3Y4Bk7DRA3m9aCN4pp8OOGFEYbJH2wK1Qj3Xv2TjEqEJo+oEmQcXwnt1/DKSYAWdKxSL3D/4ida7OoBFkwQ==
 
 typescript@=1.0.1:
   version "1.0.1"
