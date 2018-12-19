@@ -265,6 +265,20 @@ module.exports = perspective => {
                 view.delete();
                 table.delete();
             });
+
+            it("x == null", async function() {
+                var table = perspective.table({x: "float", y: "integer"});
+                const dataSet = [{x: 3.5, y: 1}, {x: 2.5, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4.5, y: 2}, {x: null, y: 2}];
+                table.update(dataSet);
+                var view = table.view({
+                    filter: [["x", ">", null]]
+                });
+                var answer = dataSet;
+                let result = await view.to_json();
+                expect(answer).toEqual(result);
+                view.delete();
+                table.delete();
+            });
         });
     });
 };
