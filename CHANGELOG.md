@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.11] - 2018-12-20
+### Added
+* [#345](https://github.com/jpmorganchase/perspective/pull/345) Direct load Apache Arrow support added to Jupyterlab plugin
+
+### Fixes
+* [#343](https://github.com/jpmorganchase/perspective/pull/343) Fixed regression in type inference for empty string columns
+* [#344](https://github.com/jpmorganchase/perspective/pull/344) Fixed UI lock when invalid filters applied
+
+### Internal
+* [#350](https://github.com/jpmorganchase/perspective/pull/350) New benchmark suite
+
 ## [0.2.10] - 2018-12-09
 ### Fixes
 * [#328](https://github.com/jpmorganchase/perspective/pull/328) Fixed `<perspective-viewer>` `delete()` method memory leak.
