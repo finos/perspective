@@ -158,6 +158,7 @@ class PerspectiveViewer extends ActionElement {
                 await this._debounce_update();
             }
             this.dispatchEvent(new Event("perspective-config-update"));
+            this.dispatchEvent(new Event("perspective-computed-column-update"));
         })();
     }
 
