@@ -23,20 +23,22 @@ export class ActionElement extends DomElement {
         this.shadowRoot.querySelector("#app").classList.remove("show_menu");
     }
 
-    _toggle_config() {
-        if (this._show_config) {
-            this._side_panel.style.display = "none";
-            this._top_panel.style.display = "none";
-            this.removeAttribute("settings");
-        } else {
-            this._side_panel.style.display = "flex";
-            this._top_panel.style.display = "flex";
-            this.setAttribute("settings", true);
+    _toggle_config(event) {
+        if (!event || event.button !== 2) {
+            if (this._show_config) {
+                this._side_panel.style.display = "none";
+                this._top_panel.style.display = "none";
+                this.removeAttribute("settings");
+            } else {
+                this._side_panel.style.display = "flex";
+                this._top_panel.style.display = "flex";
+                this.setAttribute("settings", true);
+            }
+            this._show_config = !this._show_config;
+            this._plugin.resize.call(this, true);
+            this._hide_context_menu();
+            this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
         }
-        this._show_config = !this._show_config;
-        this._plugin.resize.call(this, true);
-        this._hide_context_menu();
-        this.dispatchEvent(new CustomEvent("perspective-toggle-settings", {detail: this._show_config}));
     }
 
     // UI action
