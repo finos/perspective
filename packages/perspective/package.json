@@ -16,12 +16,7 @@
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "bench:build": "npm-run-all -p bench:build:*",
-        "bench:build:benchmark": "webpack --color --config bench/config/benchmark.config.js",
-        "bench:build:report": "webpack --color --config bench/config/report.config.js",
-        "bench:build:copy": "cp bench/csv/* build",
-        "bench:run": "node build/benchmark.js",
-        "bench": "npm-run-all bench:build bench:run",
+        "bench": "node ../../scripts/bench.js",
         "prebuild": "mkdir -p build && CLICOLOR_FORCE=1 yarn compile",
         "precompile": "mkdir -p obj && mkdir -p ../../obj/",
         "compile": "cd ../../obj/ && emcmake cmake ../ && emmake make -j${PSP_CPU_COUNT-8}",
