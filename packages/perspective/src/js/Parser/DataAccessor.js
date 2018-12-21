@@ -20,8 +20,8 @@ export class DataAccessor {
         };
         this.format = undefined;
         this.data = undefined;
-        this.column_names = undefined;
-        this.data_types = undefined;
+        this.names = undefined;
+        this.types = undefined;
         this.row_count = undefined;
         this.date_parsers = {};
         // TODO: optimize and refactor out
@@ -63,14 +63,9 @@ export class DataAccessor {
         let value = undefined;
 
         if (this.format === this.data_formats.row) {
-            let d = this.data[row_index];
-            if (d !== undefined && d.hasOwnProperty(column_name)) {
-                value = d[column_name];
-            }
+            value = this.data[row_index][column_name];
         } else if (this.format === this.data_formats.column) {
-            if (this.data.hasOwnProperty(column_name)) {
-                value = this.data[column_name][row_index];
-            }
+            value = this.data[column_name][row_index];
         } else if (this.format === this.data_formats.schema) {
             value = undefined;
         } else {

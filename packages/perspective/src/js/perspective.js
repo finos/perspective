@@ -1113,8 +1113,8 @@ export default function(Module) {
         let is_arrow = false;
 
         // attach preset names & types
-        accessor.column_names = cols;
-        accessor.data_types = accessor.extract_typevec(types);
+        accessor.names = cols;
+        accessor.types = accessor.extract_typevec(types);
         pdata = accessor;
 
         if (data instanceof ArrayBuffer) {
@@ -1169,8 +1169,8 @@ export default function(Module) {
 
         data = data.map(idx => ({[this.index]: idx}));
 
-        accessor.column_names = [this.index];
-        accessor.data_types = accessor.extract_typevec(types);
+        accessor.names = [this.index];
+        accessor.types = accessor.extract_typevec(types);
 
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);

@@ -395,35 +395,68 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
     return arr;
 }
 
-template <typename T>
 void
-_fill_col(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_numeric(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
         val data = accessor["values"];
-        arrow::vecFromTypedArray(data, col->get_nth<T>(0), nrows);
+        
+        switch (type) {
+            case DTYPE_INT8: {
+                arrow::vecFromTypedArray(data, col->get_nth<t_int8>(0), nrows);
+            } break;
+            case DTYPE_INT16: {
+                arrow::vecFromTypedArray(data, col->get_nth<t_int16>(0), nrows);
+            } break;
+            case DTYPE_INT32: {
+                arrow::vecFromTypedArray(data, col->get_nth<t_int32>(0), nrows);
+            } break;
+            case DTYPE_FLOAT32: {
+                arrow::vecFromTypedArray(data, col->get_nth<t_float32>(0), nrows);
+            } break;
+            case DTYPE_FLOAT64: {
+                arrow::vecFromTypedArray(data, col->get_nth<t_float64>(0), nrows);
+            } break;
+            default:
+                break;
+        }
     } else {
         for (auto i = 0; i < nrows; ++i) {
             val item = accessor.call<val>("marshal", name, i, type);
-            
-            if (item.isUndefined())
-                continue;
+
+            if (item.isUndefined()) continue;
 
             if (item.isNull()) {
                 col->unset(i);
                 continue;
             }
 
-            auto elem = item.as<T>();
-            col->set_nth(i, elem);
+            switch (type) {
+                case DTYPE_INT8: {
+                    col->set_nth(i, item.as<t_int8>());
+                } break;
+                case DTYPE_INT16: {
+                    col->set_nth(i, item.as<t_int16>());
+                } break;
+                case DTYPE_INT32: {
+                    col->set_nth(i, item.as<t_int32>());
+                } break;
+                case DTYPE_FLOAT32: {
+                    col->set_nth(i, item.as<t_float32>());
+                } break;
+                case DTYPE_FLOAT64: {
+                    col->set_nth(i, item.as<t_float64>());
+                } break;
+                default:
+                    break;
+            }
         }
     }
 }
 
-template <>
 void
-_fill_col<t_int64>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_int64(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -436,9 +469,8 @@ _fill_col<t_int64>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_boo
     }
 }
 
-template <>
 void
-_fill_col<t_time>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_time(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -477,9 +509,8 @@ _fill_col<t_time>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
     }
 }
 
-template <>
 void
-_fill_col<t_date>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_date(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -517,9 +548,8 @@ _fill_col<t_date>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
     }
 }
 
-template <>
 void
-_fill_col<t_bool>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_bool(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -548,9 +578,8 @@ _fill_col<t_bool>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
     }
 }
 
-template <>
 void
-_fill_col<std::string>(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_string(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
 
     t_uindex nrows = col->size();
 
@@ -646,40 +675,27 @@ _fill_data(t_table& tbl, t_svec ocolnames, val accessor, std::vector<t_dtype> od
             dcol = accessor;
         }
 
-        // TODO: remove template and move mapping to fill_col
         switch (col_type) {
-            case DTYPE_INT8: {
-                _fill_col<t_int8>(dcol, col, name, col_type, is_arrow);
-            } break;
-            case DTYPE_INT16: {
-                _fill_col<t_int16>(dcol, col, name, col_type, is_arrow);
-            } break;
-            case DTYPE_INT32: {
-                _fill_col<t_int32>(dcol, col, name, col_type, is_arrow);
-            } break;
             case DTYPE_INT64: {
-                _fill_col<t_int64>(dcol, col, name, col_type, is_arrow);
+                _fill_col_int64(dcol, col, name, col_type, is_arrow);
             } break;
             case DTYPE_BOOL: {
-                _fill_col<t_bool>(dcol, col, name, col_type, is_arrow);
-            } break;
-            case DTYPE_FLOAT32: {
-                _fill_col<t_float32>(dcol, col, name, col_type, is_arrow);
-            } break;
-            case DTYPE_FLOAT64: {
-                _fill_col<t_float64>(dcol, col, name, col_type, is_arrow);
+                _fill_col_bool(dcol, col, name, col_type, is_arrow);
             } break;
             case DTYPE_DATE: {
-                _fill_col<t_date>(dcol, col, name, col_type, is_arrow);
+                _fill_col_date(dcol, col, name, col_type, is_arrow);
             } break;
             case DTYPE_TIME: {
-                _fill_col<t_time>(dcol, col, name, col_type, is_arrow);
+                _fill_col_time(dcol, col, name, col_type, is_arrow);
             } break;
             case DTYPE_STR: {
-                _fill_col<std::string>(dcol, col, name, col_type, is_arrow);
+                _fill_col_string(dcol, col, name, col_type, is_arrow);
             } break;
-            default:
+            case DTYPE_NONE: {
                 break;
+            }
+            default:
+                _fill_col_numeric(dcol, col, name, col_type, is_arrow);
         }
 
         if (is_arrow) {
@@ -1121,13 +1137,10 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
     t_uint32 size = accessor["row_count"].as<t_int32>();
 
     // names and types can be preset by update/delete
-    val names = accessor["column_names"];
-    val types = accessor["data_types"];
+    val names = accessor["names"];
+    val types = accessor["types"];
 
-    if (is_arrow) {
-        names = accessor["names"];
-        types = accessor["types"];
-    } else if (names.isUndefined() || types.isUndefined()) {
+    if (names.isUndefined() || types.isUndefined()) {
         val data = accessor["data"];
         t_int32 format = accessor["format"].as<t_int32>();
 
