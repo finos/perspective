@@ -12,8 +12,8 @@ import {
 } from '@jupyter-widgets/base';
 
 /* defines */
-import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from './utils.ts';
-import {PERSPECTIVE_VERSION} from './version.ts';
+import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from './utils';
+import {PERSPECTIVE_VERSION} from './version';
 
 /* perspective components */
 import "@jpmorganchase/perspective-viewer";
@@ -25,7 +25,11 @@ import perspective from "@jpmorganchase/perspective";
 import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
 import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
 
-perspective.override({wasm, worker});
+if(perspective){
+    perspective.override({wasm, worker});
+} else {
+    console.warn('Perspective was undefined - wasm load errors may occur');
+}
 
 
 /* css */

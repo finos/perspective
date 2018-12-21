@@ -7,7 +7,7 @@
  *
  */
 
-export * from './plugin.ts';
-export * from './widget.ts';
-export * from './version.ts';
-export * from './utils.ts';
+export * from './plugin';
+export * from './widget';
+export * from './version';
+export * from './utils';

@@ -21,11 +21,11 @@ import {
 
 import {
   PerspectiveModel, PerspectiveView
-} from './widget.ts';
+} from './widget';
 
 import {
   PERSPECTIVE_VERSION
-} from './version.ts';
+} from './version';
 
 
 const pspPlugin: IPlugin<Application<Widget>, void> = {
