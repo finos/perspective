@@ -1112,9 +1112,6 @@ export default function(Module) {
         let types = schema.types();
         let is_arrow = false;
 
-        // attach preset names & types
-        accessor.names = cols;
-        accessor.types = accessor.extract_typevec(types);
         pdata = accessor;
 
         if (data instanceof ArrayBuffer) {
@@ -1128,8 +1125,12 @@ export default function(Module) {
                 data = "_" + data;
             }
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
+            accessor.names = cols;
+            accessor.types = accessor.extract_typevec(types);
         } else {
             accessor.init(__MODULE__, data);
+            accessor.names = cols;
+            accessor.types = accessor.extract_typevec(types);
         }
 
         // TODO: reimplement
@@ -1145,7 +1146,7 @@ export default function(Module) {
             [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false, is_arrow);
             this.initialized = true;
         } catch (e) {
-            console.error(e);
+            console.error(`Update failed: ${e}`);
         } finally {
             schema.delete();
             names.delete();
@@ -1169,23 +1170,21 @@ export default function(Module) {
 
         data = data.map(idx => ({[this.index]: idx}));
 
-        accessor.names = [this.index];
-        accessor.types = accessor.extract_typevec(types);
-
         if (data instanceof ArrayBuffer) {
             pdata = load_arrow_buffer(data, [this.index], types);
             is_arrow = true;
         } else {
             accessor.init(__MODULE__, data);
+            accessor.names = [this.index];
+            accessor.types = accessor.extract_typevec(types);
             pdata = accessor;
         }
 
-        console.log(pdata);
         try {
             [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true, is_arrow);
             this.initialized = true;
         } catch (e) {
-            console.error(e);
+            console.error(`Remove failed: ${e}`);
         } finally {
             types.delete();
             schema.delete();
@@ -1575,6 +1574,9 @@ export default function(Module) {
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
 
+                accessor.date_parsers = {};
+                accessor.names = undefined;
+                accessor.types = undefined;
                 accessor.init(__MODULE__, data);
                 data_accessor = accessor;
 
@@ -1612,6 +1614,7 @@ export default function(Module) {
                 if (gnode) {
                     gnode.delete();
                 }
+                console.error(`Table initialization failed: ${e}`);
                 throw e;
             }
         }

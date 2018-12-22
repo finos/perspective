@@ -440,6 +440,17 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
                     col->set_nth(i, item.as<t_int16>());
                 } break;
                 case DTYPE_INT32: {
+                    /*
+                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
+                    // float value in an inferred column. Would not be needed if the type inference
+                    // checked the entire column/we could reset parsing.
+                    
+                    t_float64 fval = item.as<t_float64>();
+                    if (fval > 2147483647 || fval < -2147483648) {
+                        col->set_nth(i, fval);
+                    } else {
+                    }*/
+
                     col->set_nth(i, item.as<t_int32>());
                 } break;
                 case DTYPE_FLOAT32: {
@@ -938,16 +949,8 @@ column_names(val data, t_int32 format) {
 }
 
 // Type inferrence for fill_col and data_types
-t_bool
-is_valid_date(val moment, val candidates, val x) {
-    return moment
-        .call<val>("call", val::object(), x, candidates, val(true))
-        .call<val>("isValid")
-        .as<t_bool>();
-}
-
 t_dtype
-infer_type(val x, val moment, val candidates) {
+infer_type(val x, val date_validator) {
     t_str jstype = x.typeOf().as<t_str>();
     t_dtype t = t_dtype::DTYPE_STR;
 
@@ -974,7 +977,7 @@ infer_type(val x, val moment, val candidates) {
             t = t_dtype::DTYPE_TIME;
         }
     } else if (jstype == "string") {
-        if (is_valid_date(moment, candidates, x)) {
+        if (date_validator.call<val>("call", val::object(), x).as<t_bool>()) {
             t = t_dtype::DTYPE_TIME;
         } else {
             t_str lower = x.call<val>("toLowerCase").as<t_str>();
@@ -993,7 +996,7 @@ infer_type(val x, val moment, val candidates) {
 }
 
 t_dtype
-get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) {
+get_data_type(val data, t_int32 format, t_str name, val date_validator) {
     t_int32 i = 0;
     boost::optional<t_dtype> inferredType;
 
@@ -1002,7 +1005,7 @@ get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) 
         while (!inferredType.is_initialized() && i < 100 && i < data["length"].as<t_int32>()) {
             if (data[i].call<val>("hasOwnProperty", name).as<t_bool>() == true) {
                 if (!data[i][name].isNull()) {
-                    inferredType = infer_type(data[i][name], moment, candidates);
+                    inferredType = infer_type(data[i][name], date_validator);
                 } else {
                     inferredType = t_dtype::DTYPE_STR;
                 }
@@ -1013,7 +1016,7 @@ get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) 
     } else if (format == 1) {
         while (!inferredType.is_initialized() && i < 100 && i < data[name]["length"].as<t_int32>()) {
             if (!data[name][i].isNull()) {
-                inferredType = infer_type(data[name][i], moment, candidates);
+                inferredType = infer_type(data[name][i], date_validator);
             } else {
                 inferredType = t_dtype::DTYPE_STR;
             }
@@ -1030,7 +1033,7 @@ get_data_type(val data, t_int32 format, t_str name, val moment, val candidates) 
 }
 
 val
-data_types(val data, t_int32 format, val column_names, val moment, val candidates) {
+data_types(val data, t_int32 format, val column_names, val date_validator) {
     t_int32 names_length = column_names["length"].as<t_int32>();
     if (names_length == 0) {
         PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
@@ -1068,7 +1071,7 @@ data_types(val data, t_int32 format, val column_names, val moment, val candidate
     } else {
         std::vector<t_str> names = vecFromJSArray<t_str>(column_names);
         for (std::vector<t_str>::iterator name = names.begin(); name != names.end(); ++name) {
-            t_dtype type = get_data_type(data, format, *name, moment, candidates);
+            t_dtype type = get_data_type(data, format, *name, date_validator);
             types.call<void>("push", type);
         }
     }
@@ -1145,7 +1148,7 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
         t_int32 format = accessor["format"].as<t_int32>();
 
         names = column_names(data, format);
-        types = data_types(data, format, names, accessor["moment"], accessor["candidates"]);
+        types = data_types(data, format, names, accessor["date_validator"]);
     }
 
     // check if index is valid after getting column names
@@ -1676,10 +1679,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("TOTALS_AFTER", TOTALS_AFTER);
 
     function("sort", &sort);
-    function("infer_type", &infer_type);
-    function("column_names", &column_names);
-    function("get_data_type", &get_data_type);
-    function("data_types", &data_types);
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());

@@ -13,7 +13,7 @@
  * @returns {string}
  */
 export function get_column_type(val) {
-    if (val === 1 || val === 2) {
+    if (val >= 1 && val <= 4) {
         return "integer";
     } else if (val === 19) {
         return "string";
@@ -25,6 +25,8 @@ export function get_column_type(val) {
         return "datetime";
     } else if (val === 13) {
         return "date";
+    } else {
+        console.warn(`Unknown type for value ${val} with JS type ${typeof val}`);
     }
 }
 

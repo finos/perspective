@@ -7,9 +7,8 @@
  *
  */
 
-import {DateParser, DATE_PARSE_CANDIDATES} from "./DateParser.js";
+import {DateParser, is_valid_date} from "./DateParser.js";
 import {get_column_type} from "../utils.js";
-import moment from "moment";
 
 export class DataAccessor {
     constructor() {
@@ -24,9 +23,7 @@ export class DataAccessor {
         this.types = undefined;
         this.row_count = undefined;
         this.date_parsers = {};
-        // TODO: optimize and refactor out
-        this.moment = moment;
-        this.candidates = DATE_PARSE_CANDIDATES;
+        this.date_validator = val => is_valid_date(val);
     }
 
     extract_typevec(typevec) {
@@ -63,9 +60,14 @@ export class DataAccessor {
         let value = undefined;
 
         if (this.format === this.data_formats.row) {
-            value = this.data[row_index][column_name];
+            let d = this.data[row_index];
+            if (d.hasOwnProperty(column_name)) {
+                value = d[column_name];
+            }
         } else if (this.format === this.data_formats.column) {
-            value = this.data[column_name][row_index];
+            if (this.data.hasOwnProperty(column_name)) {
+                value = this.data[column_name][row_index];
+            }
         } else if (this.format === this.data_formats.schema) {
             value = undefined;
         } else {
@@ -94,19 +96,9 @@ export class DataAccessor {
         date_parser = this.date_parsers[column_name];
 
         switch (get_column_type(type.value)) {
-            case "float": {
-                val = Number(val);
-                break;
-            }
+            case "float":
             case "integer": {
                 val = Number(val);
-                // FIXME: bring this back in
-                if (val > 2147483647 || val < -2147483648) {
-                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
-                    // float value in an inferred column.  Would not be needed if the type inference
-                    // checked the entire column, or we could reset parsing.
-                    //this.data_types[this.column_names.indexOf(name)] = __MODULE__.t_dtype.DTYPE_FLOAT64;
-                }
                 break;
             }
             case "boolean": {
@@ -123,7 +115,7 @@ export class DataAccessor {
                 break;
             }
             default: {
-                val === null ? (val = null) : (val += ""); // TODO this is not right - might not be a string.  Need a data cleaner
+                val += ""; // TODO this is not right - might not be a string.  Need a data cleaner
             }
         }
 
