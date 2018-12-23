@@ -1,10 +1,6 @@
 import "isomorphic-fetch";
 
-// import { DOMWidgetModel } from '@jupyter-widgets/base';
 jest.mock('@jupyter-widgets/base');
-
-// const myDOMWidgetModel: jest.Mocked<DOMWidgetModel> = new DOMWidgetModel() as any;
-
 
 // first
 Object.defineProperty(window, 'MutationObserver', { value: class {
