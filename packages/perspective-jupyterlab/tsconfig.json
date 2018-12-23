@@ -5,6 +5,7 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "allowJs": true,
     "target": "es2016",
     "outDir": "./dist",

@@ -1,16 +1,7 @@
 import "isomorphic-fetch";
-
-// first
-Object.defineProperty(window, 'MutationObserver', { value: class {
-    constructor(callback: any) {}
-    disconnect() {}
-    observe(element: any, initObject: any) {}
-}});
-
-import {PerspectiveModel, PerspectiveView} from '../../src/ts/widget';
-
 // import * as puppeteer from"puppeteer";
 // import * as path from "path";
+
 describe('Checks browser interactions', () => {
     test("Check extension", () => {
 
@@ -42,12 +33,3 @@ describe('Checks browser interactions', () => {
     //     browser.close();
     // });
 });
-
-
-describe('Checks exports', () => {
-    test("Check import", () => {
-        console.log(PerspectiveModel);
-        console.log(PerspectiveView);
-    });
-});
-

@@ -28,6 +28,7 @@ import {
 } from './version';
 
 
+export
 const pspPlugin: IPlugin<Application<Widget>, void> = {
   id: '@jpmorganchase/perspective-jupyterlab',
   requires: [IJupyterWidgetRegistry],
