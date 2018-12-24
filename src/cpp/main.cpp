@@ -1245,7 +1245,7 @@ clone_gnode_table(t_pool* pool, t_gnode_sptr gnode, val computed) {
  */
 t_ctx0_sptr
 make_context_zero(
-    t_schema schema, t_filter_op combiner, val j_filters, val j_columns, val j_sortby) {
+    t_schema schema, t_filter_op combiner, val j_filters, val j_columns, val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
     auto columns = vecFromJSArray<std::string>(j_columns);
     auto fvec = _get_fterms(schema, j_filters);
     auto svec = _get_sort(j_sortby);
@@ -1253,6 +1253,7 @@ make_context_zero(
     auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
     ctx0->init();
     ctx0->sort_by(svec);
+    pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx0.get())); 
     return ctx0;
 }
 
@@ -1269,7 +1270,7 @@ make_context_zero(
  */
 t_ctx1_sptr
 make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters, val j_aggs,
-    val j_sortby) {
+    val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto pivots = vecFromJSArray<std::string>(j_pivots);
@@ -1279,8 +1280,8 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
     auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
     ctx1->init();
-    ctx1->set_deltas_enabled(true);
     ctx1->sort_by(svec);
+    pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx1.get())); 
     return ctx1;
 }
 
@@ -1297,7 +1298,7 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
  */
 t_ctx2_sptr
 make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
-    val j_filters, val j_aggs, bool show_totals) {
+    val j_filters, val j_aggs, bool show_totals, t_pool* pool, t_gnode_sptr gnode, t_str name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto rpivots = vecFromJSArray<std::string>(j_rpivots);
@@ -1308,7 +1309,7 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
     auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
     ctx2->init();
-    ctx2->set_deltas_enabled(true);
+    pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx2.get())); 
     return ctx2;
 }
 
@@ -1682,9 +1683,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_table", &make_table, allow_raw_pointers());
     function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table, allow_raw_pointers());
-    function("make_context_zero", &make_context_zero);
-    function("make_context_one", &make_context_one);
-    function("make_context_two", &make_context_two);
+    function("make_context_zero", &make_context_zero, allow_raw_pointers());
+    function("make_context_one", &make_context_one, allow_raw_pointers());
+    function("make_context_two", &make_context_two, allow_raw_pointers());
     function("scalar_to_val", &scalar_to_val);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column);

@@ -75,6 +75,7 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
+			--closure 1 \
 			")
 	endif()
 

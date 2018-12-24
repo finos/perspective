@@ -1041,9 +1041,8 @@ export default function(Module) {
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
                 config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, sort.length > 0);
+                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, sort.length > 0, this.pool, this.gnode, name);
                 sides = 2;
-                this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.TWO_SIDED_CONTEXT, context.$$.ptr);
 
                 if (config.row_pivot_depth !== undefined) {
                     context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
@@ -1061,9 +1060,8 @@ export default function(Module) {
                     __MODULE__.sort(context, sort, col_sort);
                 }
             } else {
-                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort);
+                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, this.pool, this.gnode, name);
                 sides = 1;
-                this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ONE_SIDED_CONTEXT, context.$$.ptr);
 
                 if (config.row_pivot_depth !== undefined) {
                     context.set_depth(config.row_pivot_depth - 1);
@@ -1079,9 +1077,11 @@ export default function(Module) {
                 aggregates.map(function(x) {
                     return x[0];
                 }),
-                sort
+                sort,
+                this.pool,
+                this.gnode,
+                name
             );
-            this.pool.register_context(this.gnode.get_id(), name, __MODULE__.t_ctx_type.ZERO_SIDED_CONTEXT, context.$$.ptr);
         }
 
         schema.delete();
