@@ -88,9 +88,11 @@ async function initialize() {
     return {csv, arrow};
 }
 
+const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
+
 function to_name({aggregate, row_pivot, column_pivot}) {
     return {
-        aggregate: {Sales: "number", "Order Date": "datetime", State: "string"}[aggregate[0].column],
+        aggregate: COLUMN_TYPES[aggregate[0].column],
         row_pivot: row_pivot.join("/") || "-",
         column_pivot: column_pivot.join("/") || "-"
     };

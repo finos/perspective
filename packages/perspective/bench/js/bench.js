@@ -13,13 +13,13 @@ const path = require("path");
 
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
-const UNPKG_VERSIONS = ["0.2.0", "0.2.1", "0.2.2", "0.2.3", "0.2.4", "0.2.5", "0.2.6", "0.2.7", "0.2.8", "0.2.9", "0.2.10"];
+const UNPKG_VERSIONS = ["0.2.11", "0.2.10", "0.2.9", "0.2.8", "0.2.7", "0.2.6", "0.2.5", "0.2.4", "0.2.3", "0.2.2", "0.2.1", "0.2.0"];
 const UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${UNPKG_VERSIONS}/build/perspective.js`;
 
 const OLD_FORMAT_UNPKG_VERSIONS = ["0.2.0-beta.3"];
 const OLD_FORMAT_UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective-examples@${OLD_FORMAT_UNPKG_VERSIONS}/build/perspective.js`;
 
-const URLS = [].concat(OLD_FORMAT_UNPKG_URLS, UNPKG_URLS, [["master", "http://localhost:8080/perspective.js"]]);
+const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective.js`]], UNPKG_URLS, OLD_FORMAT_UNPKG_URLS);
 
 const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 
@@ -51,7 +51,7 @@ async function run() {
     for (let [version, url] of URLS) {
         let browser = await puppeteer.launch({
             headless: true,
-            args: ["--no-sandbox"]
+            args: ["--auto-open-devtools-for-tabs", "--no-sandbox"]
         });
         console.log(`Running v${version}   (${url})`);
         let bins = await run_version(browser, url);
