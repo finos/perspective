@@ -160,6 +160,9 @@ export const draw = mode =>
                     allowOverlap: false,
                     padding: 10
                 };
+                if (mode.indexOf("scatter") > -1 || mode.indexOf("line") > -1) {
+                    set_boost(config, xaxis_type, yaxis_type);
+                }
                 set_category_axis(config, "xAxis", xtree_type, top);
                 Object.assign(config, {
                     yAxis: {

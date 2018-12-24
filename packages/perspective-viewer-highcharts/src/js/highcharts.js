@@ -34,7 +34,7 @@ const MAXIMUM_RENDER_SIZE = {
 
 global.registerPlugin("x_bar", {
     name: "X Bar Chart",
-    create: draw("horizontal_bar"),
+    create: draw("x_bar"),
     resize: resize,
     initial: {
         type: "number",
@@ -47,7 +47,7 @@ global.registerPlugin("x_bar", {
 
 global.registerPlugin("y_bar", {
     name: "Y Bar Chart",
-    create: draw("vertical_bar"),
+    create: draw("y_bar"),
     resize: resize,
     initial: {
         type: "number",
