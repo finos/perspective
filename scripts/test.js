@@ -19,17 +19,29 @@ const IS_WRITE = args.indexOf("--write") !== -1 || process.env.WRITE_TESTS;
 const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
 
 function jest() {
-    let cmd = "node_modules/.bin/jest --color --silent";
+    let cmd = "node_modules/.bin/jest --color";
+
     if (args.indexOf("--saturate") > -1) {
         console.log("-- Running the test suite in saturate mode");
         cmd = "PSP_SATURATE=1 " + cmd;
     }
+
+    if (args.indexOf("--bail") > -1) {
+        cmd += " --bail";
+    }
+
+    if (args.indexOf("--debug") > -1) {
+        console.log("Running tests in debug mode - all console.log statements are preserved.");
+    } else {
+        cmd += " --silent 2>&1";
+    }
+
     if (args.indexOf("-t") > -1) {
         const regex = args.slice(args.indexOf("-t") + 1).join(" ");
         console.log(`-- Qualifying search '${regex}'`);
         cmd += ` -t '${regex}'`;
     }
-    cmd += " 2>&1";
+
     return cmd;
 }
 
