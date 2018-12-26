@@ -123,6 +123,18 @@ export class DataAccessor {
     }
 
     /**
+     * Resets the internal state of the accessor, preventing
+     * collisions with previously set data.
+     *
+     * @private
+     */
+    clean() {
+        this.date_parsers = {};
+        this.names = undefined;
+        this.types = undefined;
+    }
+
+    /**
      * Links the accessor to a package of data for processing,
      * calculating its format and size.
      *

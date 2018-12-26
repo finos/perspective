@@ -8,8 +8,8 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DataAccessor, clean_data} from "./Parser/DataAccessor.js";
-import {DateParser} from "./Parser/DateParser.js";
+import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
+import {DateParser} from "./DataAccessor/DateParser.js";
 import {bindall, get_column_type} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
@@ -26,8 +26,6 @@ if (global.performance === undefined) {
 if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
-
-//const CHUNKED_THRESHOLD = 100000;
 
 export default function(Module) {
     let __MODULE__ = Module;
@@ -67,14 +65,14 @@ export default function(Module) {
      * @param {*} is_delete
      * @returns
      */
-    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, is_delete, is_arrow) {
+    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, is_update, is_delete, is_arrow) {
         if (is_arrow) {
             for (let chunk of accessor) {
-                gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_delete, is_arrow);
+                gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
                 limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
             }
         } else {
-            gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_delete, is_arrow);
+            gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
 
@@ -1094,7 +1092,7 @@ export default function(Module) {
     };
 
     /**
-     * Updates the rows of a {@link table}.  Updated rows are pushed down to any
+     * Updates the rows of a {@link table}. Updated rows are pushed down to any
      * derived {@link view} objects.
      *
      * @param {Object<string, Array>|Array<Object>|string} data The input data
@@ -1108,7 +1106,6 @@ export default function(Module) {
         let pdata;
         let cols = this._columns();
         let schema = this.gnode.get_tblschema();
-        let names = schema.columns();
         let types = schema.types();
         let is_arrow = false;
 
@@ -1133,29 +1130,19 @@ export default function(Module) {
             accessor.types = accessor.extract_typevec(types);
         }
 
-        // TODO: reimplement
-        /* for (let i = names.size() - 1; i >= 0; i--) {
-            if (cols.indexOf(names.get(i)) === -1) {
-                for (let chunk of pdata) {
-                    chunk.types.splice(i, 1);
-                }
-            }
-        } */
-
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, false, is_arrow);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, true, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
         } finally {
             schema.delete();
-            names.delete();
             types.delete();
         }
     };
 
     /**
-     * Removes the rows of a {@link table}.  Removed rows are pushed down to any
+     * Removes the rows of a {@link table}. Removed rows are pushed down to any
      * derived {@link view} objects.
      *
      * @param {Array<Object>} data An array of primary keys to remove.
@@ -1181,13 +1168,13 @@ export default function(Module) {
         }
 
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, true, is_arrow);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, false, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed: ${e}`);
         } finally {
-            types.delete();
             schema.delete();
+            types.delete();
         }
     };
 
@@ -1574,23 +1561,9 @@ export default function(Module) {
                     data = papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data;
                 }
 
-                accessor.date_parsers = {};
-                accessor.names = undefined;
-                accessor.types = undefined;
+                accessor.clean();
                 accessor.init(__MODULE__, data);
                 data_accessor = accessor;
-
-                // FIXME: reimplement properly
-                /* if (pdata.row_count > CHUNKED_THRESHOLD) {
-                    let new_pdata = [];
-                    while (pdata.cdata[0].length > 0) {
-                        const chunk = pdata.cdata.map(x => x.splice(0, CHUNKED_THRESHOLD));
-                        new_pdata.push(Object.assign({}, pdata, chunk));
-                    }
-                    pdata = new_pdata;
-                } else {
-                    pdata = [pdata];
-                }*/
             }
 
             if (options.index && options.limit) {
@@ -1604,7 +1577,7 @@ export default function(Module) {
             try {
                 pool = new __MODULE__.t_pool();
 
-                [gnode, limit_index] = make_table(data_accessor, pool, gnode, undefined, options.index, options.limit, limit_index, false, is_arrow);
+                [gnode, limit_index] = make_table(data_accessor, pool, gnode, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

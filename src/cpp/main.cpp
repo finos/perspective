@@ -918,34 +918,35 @@ table_add_computed_column(t_table& table, val computed_defs) {
  */
 
 // Name parsing
-val
+t_svec
 column_names(val data, t_int32 format) {
-    val column_names = val::array();
+    t_svec names;
     val Object = val::global("Object");
     
     if (format == 0) {
         t_int32 max_check = 50;
-        column_names = Object.call<val>("keys", data[0]);
+        val data_names = Object.call<val>("keys", data[0]);
         t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
         
         for (auto ix = 0; ix < check_index; ix++) {
             val next = Object.call<val>("keys", data[ix]);
-            if (column_names["length"] != next["length"]) {
+            if (data_names["length"] != next["length"]) {
                 if (max_check == 50) {
                     std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
                 }
                 
-                std::cout << boost::format("Extending from %d to %d") % column_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
-                column_names = next;
+                std::cout << boost::format("Extending from %d to %d") % data_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
+                data_names = next;
                 max_check *= 2;
             }
 
+        names = vecFromJSArray<std::string>(data_names);
         }
     } else if (format == 1 || format == 2) {
-        column_names = Object.call<val>("keys", data);
+        names = vecFromJSArray<std::string>(Object.call<val>("keys", data));
     } 
 
-    return column_names;
+    return names;
 }
 
 // Type inferrence for fill_col and data_types
@@ -1032,19 +1033,18 @@ get_data_type(val data, t_int32 format, t_str name, val date_validator) {
     }
 }
 
-val
-data_types(val data, t_int32 format, val column_names, val date_validator) {
-    t_int32 names_length = column_names["length"].as<t_int32>();
-    if (names_length == 0) {
+t_dtypevec
+data_types(val data, t_int32 format, t_svec names, val date_validator) {
+    if (names.size() == 0) {
         PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
     }
 
-    val types = val::array();
+    t_dtypevec types;
 
     if (format == 2) {
-        std::vector<t_str> data_names = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
+        t_svec data_names = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
        
-        for (std::vector<t_str>::iterator name = data_names.begin(); name != data_names.end(); ++name) {
+        for (t_svec::iterator name = data_names.begin(); name != data_names.end(); ++name) {
             t_str value = data[*name].as<t_str>();
             t_dtype type;
 
@@ -1064,15 +1064,14 @@ data_types(val data, t_int32 format, val column_names, val date_validator) {
                 PSP_COMPLAIN_AND_ABORT("Unknown type '" + value + "' for key '" + *name + "'");
             }
 
-            types.call<void>("push", type);
+            types.push_back(type);
         }
 
         return types;
     } else {
-        std::vector<t_str> names = vecFromJSArray<t_str>(column_names);
-        for (std::vector<t_str>::iterator name = names.begin(); name != names.end(); ++name) {
+        for (t_svec::iterator name = names.begin(); name != names.end(); ++name) {
             t_dtype type = get_data_type(data, format, *name, date_validator);
-            types.call<void>("push", type);
+            types.push_back(type);
         }
     }
 
@@ -1136,29 +1135,30 @@ make_gnode(const t_table& table) {
  */
 t_gnode_sptr
 make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset, t_uint32 limit,
-    t_str index, t_bool is_delete, t_bool is_arrow) {
+    t_str index, t_bool is_update, t_bool is_delete, t_bool is_arrow) {
     t_uint32 size = accessor["row_count"].as<t_int32>();
 
-    // names and types can be preset by update/delete
-    val names = accessor["names"];
-    val types = accessor["types"];
+    t_svec colnames;
+    t_dtypevec dtypes;
 
-    if (names.isUndefined() || types.isUndefined()) {
+    // Determine metadata
+    if (is_arrow || (is_update || is_delete)) {
+        // TODO: fully remove intermediate passed-through JS arrays for non-arrow data
+        colnames = vecFromJSArray<std::string>(accessor["names"]);
+        dtypes = vecFromJSArray<t_dtype>(accessor["types"]);
+    } else {
+        // Infer names and types
         val data = accessor["data"];
         t_int32 format = accessor["format"].as<t_int32>();
-
-        names = column_names(data, format);
-        types = data_types(data, format, names, accessor["date_validator"]);
+        colnames = column_names(data, format);
+        dtypes = data_types(data, format, colnames, accessor["date_validator"]);
     }
 
-    // check if index is valid after getting column names
-    if (index != "" && names.call<val>("includes", index).as<t_bool>() == false) {
+    // Check if index is valid after getting column names
+    t_bool valid_index = std::find(colnames.begin(), colnames.end(), index) != colnames.end();
+    if (index != "" && !valid_index) {
         PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
     }
-
-    // Create the input and port schemas
-    t_svec colnames = vecFromJSArray<std::string>(names);
-    t_dtypevec dtypes = vecFromJSArray<t_dtype>(types);
 
     // Create the table
     // TODO assert size > 0
@@ -1168,7 +1168,7 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
 
     _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow);
 
-    // Set up pkey and op columns
+    // Set up pkey and op columns 
     if (is_delete) {
         auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
         op_col->raw_fill<t_uint8>(OP_DELETE);
