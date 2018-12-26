@@ -7,7 +7,6 @@
  *
  */
 
-export * from './plugin';
-export * from './widget';
-export * from './version';
-export * from './utils';
+module.exports = {
+    
+};

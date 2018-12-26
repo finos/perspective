@@ -21,13 +21,14 @@ import {
 
 import {
   PerspectiveModel, PerspectiveView
-} from './widget.ts';
+} from './widget';
 
 import {
   PERSPECTIVE_VERSION
-} from './version.ts';
+} from './version';
 
 
+export
 const pspPlugin: IPlugin<Application<Widget>, void> = {
   id: '@jpmorganchase/perspective-jupyterlab',
   requires: [IJupyterWidgetRegistry],

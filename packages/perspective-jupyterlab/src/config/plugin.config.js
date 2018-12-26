@@ -18,6 +18,9 @@ module.exports = {
             "file-worker-loader": "@jpmorganchase/perspective/src/loader/file_worker_loader.js"
         }
     },
+    resolve: {
+        extensions: [".ts", ".js", ".json"]
+    },
     externals: /\@jupyter|\@phosphor/,
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
     module: {

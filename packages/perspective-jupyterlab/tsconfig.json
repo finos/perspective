@@ -5,11 +5,12 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "allowJs": true,
-    "target": "ES5",
+    "target": "es2016",
     "outDir": "./dist",
-    "lib": ["ES5", "ES2015.Promise", "DOM", "ES2015.Collection"],
-    "types": []
+    "lib": ["es2016", "ES2015.Promise", "DOM"],
+    "types": ["jest"]
   },
   "include": ["src/ts/*"]
 }
