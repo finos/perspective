@@ -11,6 +11,7 @@ const CSV = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/
 const ARROW = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
 
 const ITERATIONS = 50;
+const TOSS_ITERATIONS = 10;
 
 const AGG_OPTIONS = [[{column: "Sales", op: "sum"}], [{column: "State", op: "dominant"}], [{column: "Order Date", op: "dominant"}]];
 
@@ -20,18 +21,20 @@ const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
 
 async function* run_table_cases(worker, data, test) {
     console.log(`Benchmarking \`${test}\``);
-    for (let x = 0; x < ITERATIONS; x++) {
+    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
         const start = performance.now();
         const table = worker.table(data.slice ? data.slice() : data);
         await table.size();
-        yield {
-            test,
-            time: performance.now() - start,
-            method: test,
-            row_pivot: "n/a",
-            column_pivot: "n/a",
-            aggregate: "n/a"
-        };
+        if (x >= TOSS_ITERATIONS) {
+            yield {
+                test,
+                time: performance.now() - start,
+                method: test,
+                row_pivot: "n/a",
+                column_pivot: "n/a",
+                aggregate: "n/a"
+            };
+        }
         await table.delete();
     }
 }
@@ -40,16 +43,18 @@ async function* run_view_cases(table, config) {
     const token = to_name(config);
     const test = `view(${JSON.stringify(token)})`;
     console.log(`Benchmarking \`${test}\``);
-    for (let x = 0; x < ITERATIONS; x++) {
+    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
         const start = performance.now();
         const view = table.view(config);
         await view.num_rows();
-        yield {
-            test,
-            time: performance.now() - start,
-            method: "view()",
-            ...token
-        };
+        if (x >= TOSS_ITERATIONS) {
+            yield {
+                test,
+                time: performance.now() - start,
+                method: "view()",
+                ...token
+            };
+        }
         await view.delete();
     }
 }
@@ -62,15 +67,17 @@ async function* run_to_format_cases(table, config, format) {
     await view.schema();
 
     console.log(`Benchmarking \`${name}.${format}()\``);
-    for (let x = 0; x < ITERATIONS; x++) {
+    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
         const start = performance.now();
         await view[format]();
-        yield {
-            time: performance.now() - start,
-            test: `${format}(${name})`,
-            method: `${format}()`,
-            ...token
-        };
+        if (x >= TOSS_ITERATIONS) {
+            yield {
+                time: performance.now() - start,
+                test: `${format}(${name})`,
+                method: `${format}()`,
+                ...token
+            };
+        }
     }
 
     await view.delete();
