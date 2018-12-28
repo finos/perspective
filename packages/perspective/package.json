@@ -33,9 +33,7 @@
         "test:build": "npm-run-all test:build:copy test:build:webpack",
         "test:build:copy": "npm-run-all -p test:build:copy:*",
         "test:build:copy:html": "cp test/html/* build",
-        "test:build:webpack": "npm-run-all -p test:build:webpack:*",
-        "test:build:webpack:browser": "webpack --color --config test/config/test_browser.config.js",
-        "test:build:webpack:node": "webpack --color --config test/config/test_node.config.js",
+        "test:build:webpack": "webpack --color --config test/config/test_node.config.js",
         "test:run": "jest --color --ci",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
