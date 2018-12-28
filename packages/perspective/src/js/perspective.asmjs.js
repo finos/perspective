@@ -18,4 +18,4 @@ const Module = load_perspective({
     print: x => console.log(x)
 });
 
-module.exports = perspective(Module);
+module.exports = global.perspective = perspective(Module);

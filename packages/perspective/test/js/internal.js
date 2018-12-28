@@ -7,7 +7,10 @@
  *
  */
 
-const arrow = require("../arrow/test-null.arrow");
+const fs = require("fs");
+const path = require("path");
+
+const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
 
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 

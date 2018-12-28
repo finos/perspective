@@ -30,21 +30,21 @@
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
         "test:cpp": "npm-run-all build:cpp && ../../cppbuild/test/psp_test",
-        "test:build": "npm-run-all test:build:copy test:build:webpack",
-        "test:build:copy": "npm-run-all -p test:build:copy:*",
-        "test:build:copy:html": "cp test/html/* build",
-        "test:build:webpack": "webpack --color --config test/config/test_node.config.js",
+        "test:build": "cp test/html/* build",
         "test:run": "jest --color --ci",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
     },
     "jest": {
         "roots": [
-            "build"
+            "test/js"
         ],
+        "transform": {
+            ".+\\.js$": "babel-jest"
+        },
+        "transformIgnorePatterns": ["/node_modules/(?!@apache)", "/build/"],
         "verbose": true,
         "testURL": "http://localhost/",
-        "transform": {},
         "automock": false
     },
     "repository": {

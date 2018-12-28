@@ -8,7 +8,9 @@
  */
 
 const _ = require("underscore");
-const arrow = require("../arrow/test.arrow");
+const fs = require("fs");
+const path = require("path");
+const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
 
 var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 
