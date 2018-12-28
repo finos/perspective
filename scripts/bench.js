@@ -15,11 +15,11 @@ const args = process.argv.slice(2);
 
 function docker() {
     console.log("Creating puppeteer docker image");
-    let cmd = "docker run -it --rm --shm-size=2g -u root -e PACKAGE=${PACKAGE} -v $(pwd):/src -w /src";
+    let cmd = "docker run -it --rm --shm-size=2g --cap-add=SYS_NICE -u root -e PACKAGE=${PACKAGE} -e HTTPS_PROXY -e HTTPS_PROXY -v $(pwd):/src -w /src";
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += " perspective/puppeteer node packages/perspective/bench/js/bench.js";
+    cmd += " perspective/puppeteer nice -n -20 node packages/perspective/bench/js/bench.js";
     return cmd;
 }
 

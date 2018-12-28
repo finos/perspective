@@ -25,7 +25,7 @@ const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toS
 
 async function run_version(browser, url) {
     let page = await browser.newPage();
-    page.on("console", msg => console.log(` -> ${msg.text()}`));
+    page.on("console", msg => console.log(` ${msg.type() === "error" ? " !" : "->"} ${msg.text()}`));
     page.on("pageerror", msg => console.log(` -> ${msg.message}`));
 
     await page.setContent(`<html><head><script src="${url}" async></script><script>${RUN_TEST}</script></head><body></body></html>`);
