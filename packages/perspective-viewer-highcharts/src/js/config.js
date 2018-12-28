@@ -84,7 +84,7 @@ export function set_category_axis(config, axis, type, top) {
                 autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
             }
         };
-        if (axis === "yAxis" && !config.hasOwnProperty("boost")) {
+        if (axis === "yAxis" && (!config.hasOwnProperty("boost") || config.chart.type === "heatmap")) {
             Object.assign(opts, {
                 title: null,
                 tickWidth: 1,
