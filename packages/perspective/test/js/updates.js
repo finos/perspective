@@ -198,7 +198,7 @@ module.exports = perspective => {
             table.update(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
-            expect(arrow_result.concat(arrow_result)).toEqual(result);
+            expect(result).toEqual(arrow_result.concat(arrow_result));
             view.delete();
             table.delete();
         });

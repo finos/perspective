@@ -491,7 +491,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Does not infer float column as integers", async function() {
+        it.skip("Does not infer float column as integers", async function() {
             const int_to_float = [];
             for (let x = 0; x < 200; x++) {
                 int_to_float.push({a: 1});
@@ -679,7 +679,7 @@ module.exports = perspective => {
             let view = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
             let result = await view.to_json();
             let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
-            expect(expected).toEqual(result);
+            expect(result).toEqual(expected);
             view.delete();
             table2.delete();
             table.delete();
