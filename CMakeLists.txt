@@ -56,6 +56,8 @@ if (PSP_WASM_BUILD)
 		--bind \
 		--source-map-base ./build/ \
 		--memory-init-file 0 \
+		-fno-rtti \
+		-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 \
 		-s NO_EXIT_RUNTIME=1 \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \

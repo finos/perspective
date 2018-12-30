@@ -396,7 +396,7 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
 }
 
 void
-_fill_col_numeric(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -423,7 +423,7 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
         }
     } else {
         for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", name, i, type);
+            val item = accessor.call<val>("marshal", cidx, i, type);
 
             if (item.isUndefined()) continue;
 
@@ -467,7 +467,7 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool
 }
 
 void
-_fill_col_int64(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_int64(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -481,7 +481,7 @@ _fill_col_int64(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool i
 }
 
 void
-_fill_col_time(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_time(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -504,7 +504,7 @@ _fill_col_time(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
         }
     } else {
         for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", name, i, type);
+            val item = accessor.call<val>("marshal", cidx, i, type);
 
             if (item.isUndefined())
                 continue;
@@ -521,7 +521,7 @@ _fill_col_time(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
 }
 
 void
-_fill_col_date(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_date(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -544,7 +544,7 @@ _fill_col_date(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", name, i, type);
+            val item = accessor.call<val>("marshal", cidx, i, type);
 
             if (item.isUndefined())
                 continue;
@@ -560,7 +560,7 @@ _fill_col_date(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
 }
 
 void
-_fill_col_bool(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_bool(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -573,7 +573,7 @@ _fill_col_bool(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
         }
     } else {
         for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", name, i, type);
+            val item = accessor.call<val>("marshal", cidx, i, type);
 
             if (item.isUndefined())
                 continue;
@@ -590,7 +590,7 @@ _fill_col_bool(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is
 }
 
 void
-_fill_col_string(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool is_arrow) {
+_fill_col_string(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
 
     t_uindex nrows = col->size();
 
@@ -635,7 +635,7 @@ _fill_col_string(val accessor, t_col_sptr col, t_str name, t_dtype type, t_bool 
         }
     } else {
         for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", name, i, type);
+            val item = accessor.call<val>("marshal", cidx, i, type);
 
             if (item.isUndefined())
                 continue;
@@ -688,25 +688,25 @@ _fill_data(t_table& tbl, t_svec ocolnames, val accessor, std::vector<t_dtype> od
 
         switch (col_type) {
             case DTYPE_INT64: {
-                _fill_col_int64(dcol, col, name, col_type, is_arrow);
+                _fill_col_int64(dcol, col, cidx, col_type, is_arrow);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(dcol, col, name, col_type, is_arrow);
+                _fill_col_bool(dcol, col, cidx, col_type, is_arrow);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(dcol, col, name, col_type, is_arrow);
+                _fill_col_date(dcol, col, cidx, col_type, is_arrow);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(dcol, col, name, col_type, is_arrow);
+                _fill_col_time(dcol, col, cidx, col_type, is_arrow);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(dcol, col, name, col_type, is_arrow);
+                _fill_col_string(dcol, col, cidx, col_type, is_arrow);
             } break;
             case DTYPE_NONE: {
                 break;
             }
             default:
-                _fill_col_numeric(dcol, col, name, col_type, is_arrow);
+                _fill_col_numeric(dcol, col, cidx, col_type, is_arrow);
         }
 
         if (is_arrow) {
