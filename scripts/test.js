@@ -52,6 +52,16 @@ function emsdk() {
     return "npm run --silent _emsdk -- node scripts/test.js --private-emsdk " + args.join(" ");
 }
 
+function emsdk() {
+    console.log("-- Creating emsdk docker image");
+    let cmd = "docker run --rm -it";
+    if (process.env.PSP_CPU_COUNT) {
+        cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
+    }
+    cmd += " -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk node scripts/test.js --private-emsdk " + args.join(" ");
+    return cmd;
+}
+
 try {
     if (!IS_PUPPETEER) {
         if (IS_DOCKER && !IS_EMSDK) {

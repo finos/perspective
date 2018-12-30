@@ -60,14 +60,16 @@
     },
     "jest": {
         "roots": [
-            "packages/perspective/build",
+            "packages/perspective/test/js",
             "packages/perspective-viewer/test/js",
             "packages/perspective-viewer-hypergrid/test/js",
-            "packages/perspective-viewer-highcharts/test/js"
+            "packages/perspective-viewer-highcharts/test/js",
+            "packages/perspective-jupyterlab/test/js"
         ],
         "verbose": true,
         "testURL": "http://localhost/",
         "transform": {},
+        "transformIgnorePatterns": ["/node_modules/(?!@apache)", "/build/"],
         "automock": false
     }
 }

@@ -36,9 +36,7 @@
         "roots": [
             "test/js"
         ],
-        "transform": {
-            ".+\\.js$": "babel-jest"
-        },
+        "transform": {},
         "transformIgnorePatterns": ["/node_modules/(?!@apache)", "/build/"],
         "verbose": true,
         "testURL": "http://localhost/",
