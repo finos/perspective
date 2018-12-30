@@ -47,7 +47,7 @@ exports.default = function loader(content) {
         var inputPath = this.resourcePath;
         if (!options.inline) {
             inputPath = inputPath
-                .replace("build", "")
+                .replace(path.join("perspective", "build"), "perspective")
                 .replace(/\.js/, ".worker.js")
                 .replace(/(src\/js)/, "build");
         }
