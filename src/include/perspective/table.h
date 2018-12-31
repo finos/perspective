@@ -119,11 +119,12 @@ public:
 
     void set_column(t_uindex idx, std::shared_ptr<t_column> col);
     void set_column(const std::string& name, std::shared_ptr<t_column> col);
-
     t_column* add_column(const std::string& cname, t_dtype dtype, bool status_enabled);
+    t_column* promote_column(const std::string& cname, t_dtype new_dtype, std::int32_t iter_limit);
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
+    
     void verify() const;
     void set_capacity(t_uindex idx);
 

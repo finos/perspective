@@ -476,7 +476,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("Upgrades integer columns with values beyond max/min_int to float", async function() {
+        it("Upgrades integer columns with values beyond max/min_int to float", async function() {
             const schema = {
                 a: "integer"
             };
@@ -496,7 +496,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("Does not infer float column as integers", async function() {
+        it("Does not infer float column as integers", async function() {
             const int_to_float = [];
             for (let x = 0; x < 200; x++) {
                 int_to_float.push({a: 1});
