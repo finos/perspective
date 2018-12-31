@@ -401,7 +401,7 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
 
     if (is_arrow) {
         val data = accessor["values"];
-        
+
         switch (type) {
             case DTYPE_INT8: {
                 arrow::vecFromTypedArray(data, col->get_nth<t_int8>(0), nrows);
@@ -425,7 +425,8 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
         for (auto i = 0; i < nrows; ++i) {
             val item = accessor.call<val>("marshal", cidx, i, type);
 
-            if (item.isUndefined()) continue;
+            if (item.isUndefined())
+                continue;
 
             if (item.isNull()) {
                 col->unset(i);
@@ -442,9 +443,10 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
                 case DTYPE_INT32: {
                     /*
                     // This handles cases where a long sequence of e.g. 0 precedes a clearly
-                    // float value in an inferred column. Would not be needed if the type inference
+                    // float value in an inferred column. Would not be needed if the type
+                    inference
                     // checked the entire column/we could reset parsing.
-                    
+                    
                     t_float64 fval = item.as<t_float64>();
                     if (fval > 2147483647 || fval < -2147483648) {
                         col->set_nth(i, fval);
@@ -514,7 +516,8 @@ _fill_col_time(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
                 continue;
             }
 
-            auto elem = static_cast<t_int64>(item.call<val>("getTime").as<t_float64>()); //dcol[i].as<T>();
+            auto elem = static_cast<t_int64>(
+                item.call<val>("getTime").as<t_float64>()); // dcol[i].as<T>();
             col->set_nth(i, elem);
         }
     }
@@ -553,7 +556,7 @@ _fill_col_date(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
                 col->unset(i);
                 continue;
             }
-            
+
             col->set_nth(i, jsdate_to_t_date(item));
         }
     }
@@ -662,7 +665,7 @@ _fill_col_string(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_boo
  * ocolnames - vector of column names
  * accessor - the JS data accessor interface
  * odt - vector of data types
- * offset 
+ * offset
  * is_arrow - flag for arrow data
  *
  * Returns
@@ -717,7 +720,7 @@ _fill_data(t_table& tbl, t_svec ocolnames, val accessor, std::vector<t_dtype> od
                 col->valid_raw_fill();
             } else {
                 val validity = dcol["nullBitmap"];
-                arrow::fill_col_valid(validity, col);     
+                arrow::fill_col_valid(validity, col);
             }
         }
     }
@@ -910,9 +913,9 @@ table_add_computed_column(t_table& table, val computed_defs) {
     }
 }
 
-/** 
+/**
  * DataAccessor
- * 
+ *
  * parses and converts input data into a canonical format for
  * interfacing with Perspective.
  */
@@ -922,29 +925,34 @@ t_svec
 column_names(val data, t_int32 format) {
     t_svec names;
     val Object = val::global("Object");
-    
+
     if (format == 0) {
         t_int32 max_check = 50;
         val data_names = Object.call<val>("keys", data[0]);
-        t_int32 check_index = val::global("Math").call<val>("min", val(max_check), val(data["length"])).as<t_int32>();
-        
+        t_int32 check_index = val::global("Math")
+                                  .call<val>("min", val(max_check), val(data["length"]))
+                                  .as<t_int32>();
+
         for (auto ix = 0; ix < check_index; ix++) {
             val next = Object.call<val>("keys", data[ix]);
             if (data_names["length"] != next["length"]) {
                 if (max_check == 50) {
-                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
+                    std::cout << "Data parse warning: Array data has inconsistent rows"
+                              << std::endl;
                 }
-                
-                std::cout << boost::format("Extending from %d to %d") % data_names["length"].as<t_int32>() % next["length"].as<t_int32>() << std::endl;
+
+                std::cout << boost::format("Extending from %d to %d")
+                        % data_names["length"].as<t_int32>() % next["length"].as<t_int32>()
+                          << std::endl;
                 data_names = next;
                 max_check *= 2;
             }
 
-        names = vecFromJSArray<std::string>(data_names);
+            names = vecFromJSArray<std::string>(data_names);
         }
     } else if (format == 1 || format == 2) {
         names = vecFromJSArray<std::string>(Object.call<val>("keys", data));
-    } 
+    }
 
     return names;
 }
@@ -966,7 +974,7 @@ infer_type(val x, val date_validator) {
         }
     } else if (jstype == "boolean") {
         t = t_dtype::DTYPE_BOOL;
-    } else if (x.instanceof(val::global("Date"))) {
+    } else if (x.instanceof (val::global("Date"))) {
         t_int32 hours = x.call<val>("getHours").as<t_int32>();
         t_int32 minutes = x.call<val>("getMinutes").as<t_int32>();
         t_int32 seconds = x.call<val>("getSeconds").as<t_int32>();
@@ -988,10 +996,11 @@ infer_type(val x, val date_validator) {
                 t = t_dtype::DTYPE_STR;
             }
         }
-    } else if (!val::global("isNaN").call<t_bool>("call", val::object(), val::global("Number").call<val>("call", val::object(), x))) {
+    } else if (!val::global("isNaN").call<t_bool>("call", val::object(),
+                   val::global("Number").call<val>("call", val::object(), x))) {
         PSP_COMPLAIN_AND_ABORT("BADLANDS");
         t = t_dtype::DTYPE_FLOAT64;
-    } 
+    }
 
     return t;
 }
@@ -1015,7 +1024,8 @@ get_data_type(val data, t_int32 format, t_str name, val date_validator) {
             i++;
         }
     } else if (format == 1) {
-        while (!inferredType.is_initialized() && i < 100 && i < data[name]["length"].as<t_int32>()) {
+        while (!inferredType.is_initialized() && i < 100
+            && i < data[name]["length"].as<t_int32>()) {
             if (!data[name][i].isNull()) {
                 inferredType = infer_type(data[name][i], date_validator);
             } else {
@@ -1042,8 +1052,9 @@ data_types(val data, t_int32 format, t_svec names, val date_validator) {
     t_dtypevec types;
 
     if (format == 2) {
-        t_svec data_names = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
-       
+        t_svec data_names
+            = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
+
         for (t_svec::iterator name = data_names.begin(); name != data_names.end(); ++name) {
             t_str value = data[*name].as<t_str>();
             t_dtype type;
@@ -1168,7 +1179,7 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
 
     _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow);
 
-    // Set up pkey and op columns 
+    // Set up pkey and op columns
     if (is_delete) {
         auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
         op_col->raw_fill<t_uint8>(OP_DELETE);
@@ -1244,8 +1255,8 @@ clone_gnode_table(t_pool* pool, t_gnode_sptr gnode, val computed) {
  *
  */
 t_ctx0_sptr
-make_context_zero(
-    t_schema schema, t_filter_op combiner, val j_filters, val j_columns, val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
+make_context_zero(t_schema schema, t_filter_op combiner, val j_filters, val j_columns,
+    val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
     auto columns = vecFromJSArray<std::string>(j_columns);
     auto fvec = _get_fterms(schema, j_filters);
     auto svec = _get_sort(j_sortby);
@@ -1253,7 +1264,8 @@ make_context_zero(
     auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
     ctx0->init();
     ctx0->sort_by(svec);
-    pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx0.get())); 
+    pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT,
+        reinterpret_cast<std::uintptr_t>(ctx0.get()));
     return ctx0;
 }
 
@@ -1281,7 +1293,8 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
 
     ctx1->init();
     ctx1->sort_by(svec);
-    pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx1.get())); 
+    pool->register_context(
+        gnode->get_id(), name, ONE_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx1.get()));
     return ctx1;
 }
 
@@ -1309,7 +1322,8 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
     auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
     ctx2->init();
-    pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx2.get())); 
+    pool->register_context(
+        gnode->get_id(), name, TWO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx2.get()));
     return ctx2;
 }
 

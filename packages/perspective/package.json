@@ -37,7 +37,10 @@
             "test/js"
         ],
         "transform": {},
-        "transformIgnorePatterns": ["/node_modules/(?!@apache)", "/build/"],
+        "transformIgnorePatterns": [
+            "/node_modules/(?!@apache)",
+            "/build/"
+        ],
         "verbose": true,
         "testURL": "http://localhost/",
         "automock": false

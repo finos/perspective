@@ -69,7 +69,10 @@
         "verbose": true,
         "testURL": "http://localhost/",
         "transform": {},
-        "transformIgnorePatterns": ["/node_modules/(?!@apache)", "/build/"],
+        "transformIgnorePatterns": [
+            "/node_modules/(?!@apache)",
+            "/build/"
+        ],
         "automock": false
     }
 }
