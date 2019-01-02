@@ -44,11 +44,6 @@ typedef multi_index_container<t_zcdelta,
             BOOST_MULTI_INDEX_MEMBER(t_zcdelta, t_index, m_colidx)>>>>
     t_zcdeltas;
 
-typedef t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter_by_zc_pkey_colidx;
-
-typedef std::pair<iter_by_zc_pkey_colidx, iter_by_zc_pkey_colidx> iterpair_by_zc_pkey_colidx;
-typedef std::shared_ptr<t_zcdeltas> t_sptr_zcdeltas;
-
 struct t_tcdelta {
     t_tcdelta(t_uindex nidx, t_uindex aggidx, t_tscalar old_value, t_tscalar new_value);
 
@@ -66,34 +61,26 @@ typedef multi_index_container<t_tcdelta,
             BOOST_MULTI_INDEX_MEMBER(t_tcdelta, t_uindex, m_aggidx)>>>>
     t_tcdeltas;
 
-typedef t_tcdeltas::index<by_tc_nidx_aggidx>::type::iterator iter_by_tc_nidx_aggidx;
-
-typedef std::pair<iter_by_tc_nidx_aggidx, iter_by_tc_nidx_aggidx> iterpair_by_tc_nidx_aggidx;
-
-typedef std::shared_ptr<t_tcdeltas> t_sptr_tcdeltas;
-
 struct PERSPECTIVE_EXPORT t_cellupd {
     t_cellupd(
         t_index row, t_index column, const t_tscalar& old_value, const t_tscalar& new_value);
 
     t_cellupd();
 
-    t_int32 row;
-    t_int32 column;
+    std::int32_t row;
+    std::int32_t column;
     t_tscalar old_value;
     t_tscalar new_value;
 };
 
-typedef std::vector<t_cellupd> t_cellupdvec;
-
 struct PERSPECTIVE_EXPORT t_stepdelta {
     t_stepdelta();
 
-    t_stepdelta(bool rows_changed, bool columns_changed, const t_cellupdvec& cells);
+    t_stepdelta(bool rows_changed, bool columns_changed, const std::vector<t_cellupd>& cells);
 
     bool rows_changed;
     bool columns_changed;
-    t_cellupdvec cells;
+    std::vector<t_cellupd> cells;
 };
 
 } // end namespace perspective

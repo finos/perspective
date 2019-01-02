@@ -15,6 +15,6 @@
 
 namespace perspective {
 
-PERSPECTIVE_EXPORT void psp_log_time(const t_str& s);
+PERSPECTIVE_EXPORT void psp_log_time(const std::string& s);
 
 } // end namespace perspective

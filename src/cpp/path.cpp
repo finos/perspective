@@ -13,15 +13,15 @@
 namespace perspective {
 t_path::t_path() {}
 
-t_path::t_path(const t_tscalvec& path)
+t_path::t_path(const std::vector<t_tscalar>& path)
     : m_path(path) {}
 
-const t_tscalvec&
+const std::vector<t_tscalar>&
 t_path::path() const {
     return m_path;
 }
 
-t_tscalvec&
+std::vector<t_tscalar>&
 t_path::path() {
     return m_path;
 }

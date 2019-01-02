@@ -22,134 +22,143 @@ namespace perspective {
 struct PERSPECTIVE_EXPORT t_config_recipe {
     t_config_recipe();
 
-    t_pivot_recipevec m_row_pivots;
-    t_pivot_recipevec m_col_pivots;
-    t_sspvec m_sortby;
-    t_aggspec_recipevec m_aggregates;
-    t_svec m_detail_columns;
+    std::vector<t_pivot_recipe> m_row_pivots;
+    std::vector<t_pivot_recipe> m_col_pivots;
+    std::vector<std::pair<std::string, std::string>> m_sortby;
+    std::vector<t_aggspec_recipe> m_aggregates;
+    std::vector<std::string> m_detail_columns;
     t_totals m_totals;
     t_filter_op m_combiner;
-    t_fterm_recipevec m_fterms;
-    t_bool m_handle_nan_sort;
-    t_str m_parent_pkey_column;
-    t_str m_child_pkey_column;
-    t_str m_grouping_label_column;
+    std::vector<t_fterm_recipe> m_fterms;
+    bool m_handle_nan_sort;
+    std::string m_parent_pkey_column;
+    std::string m_child_pkey_column;
+    std::string m_grouping_label_column;
     t_fmode m_fmode;
-    t_svec m_filter_exprs;
+    std::vector<std::string> m_filter_exprs;
 };
 
 class PERSPECTIVE_EXPORT t_config {
 public:
     t_config();
     t_config(const t_config_recipe& r);
-    t_config(const t_pivotvec& row_pivots, const t_aggspecvec& aggregates);
-    t_config(const t_pivotvec& row_pivots, const t_pivotvec& col_pivots,
-        const t_aggspecvec& aggregates, const t_svec& detail_columns, const t_totals totals,
-        const t_svec& sort_pivot, const t_svec& sort_pivot_by, t_filter_op combiner,
-        const t_ftermvec& fterms, t_bool handle_nan_sort, const t_str& parent_pkey_column,
-        const t_str& child_pkey_column, const t_str& grouping_label_column, t_fmode fmode,
-        const t_svec& filter_exprs, const t_str& grand_agg_str);
+    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
+        const std::vector<t_aggspec>& aggregates,
+        const std::vector<std::string>& detail_columns, const t_totals totals,
+        const std::vector<std::string>& sort_pivot,
+        const std::vector<std::string>& sort_pivot_by, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms, bool handle_nan_sort,
+        const std::string& parent_pkey_column, const std::string& child_pkey_column,
+        const std::string& grouping_label_column, t_fmode fmode,
+        const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str);
 
     // grouped_pkeys
-    t_config(const t_svec& row_pivots, const t_svec& detail_columns, t_filter_op combiner,
-        const t_ftermvec& fterms, const t_str& parent_pkey_column,
-        const t_str& child_pkey_column, const t_str& grouping_label_column);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& detail_columns, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms, const std::string& parent_pkey_column,
+        const std::string& child_pkey_column, const std::string& grouping_label_column);
 
     // ctx2
-    t_config(const t_svec& row_pivots, const t_svec& col_pivots, const t_aggspecvec& aggregates,
-        const t_totals totals, t_filter_op combiner, const t_ftermvec& fterms);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
+        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
     // t_ctx1
-    t_config(const t_svec& row_pivots, const t_aggspecvec& aggregates);
+    t_config(
+        const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
 
-    t_config(const t_svec& row_pivots, const t_aggspecvec& aggregates, t_filter_op combiner,
-        const t_ftermvec& fterms);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
 
     // t_ctx0
-    t_config(const t_svec& detail_columns, t_filter_op combiner, const t_ftermvec& fterms);
+    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
 
-    void setup(
-        const t_svec& detail_columns, const t_svec& sort_pivot, const t_svec& sort_pivot_by);
+    void setup(const std::vector<std::string>& detail_columns,
+        const std::vector<std::string>& sort_pivot,
+        const std::vector<std::string>& sort_pivot_by);
 
-    t_index get_colidx(const t_str& colname) const;
+    t_index get_colidx(const std::string& colname) const;
 
-    t_str repr() const;
+    std::string repr() const;
 
     t_uindex get_num_aggregates() const;
 
     t_uindex get_num_columns() const;
 
-    t_str col_at(t_uindex idx) const;
+    std::string col_at(t_uindex idx) const;
 
     bool has_pkey_agg() const;
 
-    t_str get_totals_string() const;
+    std::string get_totals_string() const;
 
-    t_str get_sort_by(const t_str& pivot) const;
+    std::string get_sort_by(const std::string& pivot) const;
 
     bool validate_colidx(t_index idx) const;
 
-    t_svec get_column_names() const;
+    std::vector<std::string> get_column_names() const;
     t_uindex get_num_rpivots() const;
     t_uindex get_num_cpivots() const;
 
-    t_pivotvec get_pivots() const;
-    const t_pivotvec& get_row_pivots() const;
-    const t_pivotvec& get_column_pivots() const;
-    const t_aggspecvec& get_aggregates() const;
+    std::vector<t_pivot> get_pivots() const;
+    const std::vector<t_pivot>& get_row_pivots() const;
+    const std::vector<t_pivot>& get_column_pivots() const;
+    const std::vector<t_aggspec>& get_aggregates() const;
 
-    t_sspvec get_sortby_pairs() const;
+    std::vector<std::pair<std::string, std::string>> get_sortby_pairs() const;
 
-    t_bool has_filters() const;
+    bool has_filters() const;
 
-    const t_ftermvec& get_fterms() const;
+    const std::vector<t_fterm>& get_fterms() const;
 
     t_totals get_totals() const;
 
     t_filter_op get_combiner() const;
 
-    t_bool handle_nan_sort() const;
+    bool handle_nan_sort() const;
 
-    t_str get_parent_pkey_column() const;
+    std::string get_parent_pkey_column() const;
 
-    t_str get_child_pkey_column() const;
+    std::string get_child_pkey_column() const;
 
-    const t_str& get_grouping_label_column() const;
+    const std::string& get_grouping_label_column() const;
 
     t_config_recipe get_recipe() const;
 
-    t_str unity_get_column_name(t_uindex idx) const;
-    t_str unity_get_column_display_name(t_uindex idx) const;
+    std::string unity_get_column_name(t_uindex idx) const;
+    std::string unity_get_column_display_name(t_uindex idx) const;
     t_fmode get_fmode() const;
 
-    inline const t_str&
+    inline const std::string&
     get_grand_agg_str() const {
         return m_grand_agg_str;
     }
 
 protected:
-    void populate_sortby(const t_pivotvec& pivots);
+    void populate_sortby(const std::vector<t_pivot>& pivots);
 
 private:
-    t_pivotvec m_row_pivots;
-    t_pivotvec m_col_pivots;
-    t_ssmap m_sortby;
-    t_aggspecvec m_aggregates;
-    t_svec m_detail_columns;
+    std::vector<t_pivot> m_row_pivots;
+    std::vector<t_pivot> m_col_pivots;
+    std::map<std::string, std::string> m_sortby;
+    std::vector<t_aggspec> m_aggregates;
+    std::vector<std::string> m_detail_columns;
     t_totals m_totals;
-    t_sidxmap m_detail_colmap;
+    std::map<std::string, t_index> m_detail_colmap;
     bool m_has_pkey_agg;
     t_uindex m_row_expand_depth;
     t_uindex m_col_expand_depth;
     t_filter_op m_combiner;
-    t_ftermvec m_fterms;
-    t_bool m_handle_nan_sort;
-    t_str m_parent_pkey_column;
-    t_str m_child_pkey_column;
-    t_str m_grouping_label_column;
+    std::vector<t_fterm> m_fterms;
+    bool m_handle_nan_sort;
+    std::string m_parent_pkey_column;
+    std::string m_child_pkey_column;
+    std::string m_grouping_label_column;
     t_fmode m_fmode;
-    t_svec m_filter_exprs;
-    t_str m_grand_agg_str;
+    std::vector<std::string> m_filter_exprs;
+    std::string m_grand_agg_str;
 };
 
 } // end namespace perspective

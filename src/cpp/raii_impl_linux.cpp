@@ -17,7 +17,7 @@ namespace perspective {
 
 t_file_handle::~t_file_handle() {
     if (valid()) {
-        t_rcode rcode = close(m_value);
+        t_index rcode = close(m_value);
         PSP_VERBOSE_ASSERT(rcode == 0, "Error closing file.");
     }
 }
@@ -34,7 +34,7 @@ t_file_handle::release() {
 
 t_mmap_handle::~t_mmap_handle() {
     if (valid()) {
-        t_rcode rcode = munmap(m_value, m_len);
+        t_index rcode = munmap(m_value, m_len);
         PSP_VERBOSE_ASSERT(rcode == 0, "munmap failed.");
     }
 }

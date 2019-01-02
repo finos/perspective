@@ -12,7 +12,7 @@
 #include <perspective/rlookup.h>
 
 namespace perspective {
-t_rlookup::t_rlookup(t_uindex idx, t_bool exists)
+t_rlookup::t_rlookup(t_uindex idx, bool exists)
     : m_idx(idx)
     , m_exists(exists) {
     PSP_TRACE_SENTINEL();

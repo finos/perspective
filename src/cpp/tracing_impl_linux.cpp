@@ -63,7 +63,7 @@ th_trace_fini() {
     PSP_VERBOSE_ASSERT(iptr != MAP_FAILED, "Error in mmap");
     PSP_VERBOSE_ASSERT(ifsize % sizeof(t_instrec) == 0, "Partial record encountered");
 
-    t_int64 ndrecs = ifsize / sizeof(t_instrec);
+    std::int64_t ndrecs = ifsize / sizeof(t_instrec);
 
     t_instrec* irecs = static_cast<t_instrec*>(iptr);
 
@@ -121,7 +121,7 @@ th_trace_fini() {
 }
 
 void
-flush_thbuffer(perspective::t_int32 elemidx) {
+flush_thbuffer(perspective::std::int32_t elemidx) {
     using namespace std;
     using namespace perspective;
     t_instrec* mbuf = th_trace_buffer;

@@ -15,7 +15,7 @@
 
 namespace perspective {
 
-t_bool
+bool
 curthread_has_gil() {
     auto tstate = _PyThreadState_Current;
     return tstate && (tstate == PyGILState_GetThisThreadState());
@@ -37,10 +37,10 @@ print_python_stack() {
     }
 }
 
-t_str
+std::string
 repr(PyObject* pyo) {
     PyObjectPtr repr(PyObject_Repr(pyo));
-    return t_str(PyString_AsString(repr.get()));
+    return std::string(PyString_AsString(repr.get()));
 }
 
 } // end namespace perspective

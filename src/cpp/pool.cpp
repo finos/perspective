@@ -20,7 +20,7 @@ namespace perspective {
 
 t_updctx::t_updctx() {}
 
-t_updctx::t_updctx(t_uindex gnode_id, const t_str& ctx)
+t_updctx::t_updctx(t_uindex gnode_id, const std::string& ctx)
     : m_gnode_id(gnode_id)
     , m_ctx(ctx) {}
 
@@ -151,9 +151,9 @@ t_pool::py_notify_userspace() {
 #endif
 }
 
-t_streeptr_vec
+std::vector<t_stree*>
 t_pool::get_trees() {
-    t_streeptr_vec rval;
+    std::vector<t_stree*> rval;
     for (auto& g : m_gnodes) {
         if (!g)
             continue;
@@ -179,7 +179,8 @@ t_pool::set_update_delegate(emscripten::val ud) {
 
 #ifdef PSP_ENABLE_WASM
 void
-t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int32 ptr) {
+t_pool::register_context(
+    t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr) {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
         return;
@@ -195,7 +196,8 @@ t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, 
 #else
 
 void
-t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int64 ptr) {
+t_pool::register_context(
+    t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr) {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
         return;
@@ -209,7 +211,7 @@ t_pool::register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, 
 }
 #endif
 void
-t_pool::unregister_context(t_uindex gnode_id, const t_str& name) {
+t_pool::unregister_context(t_uindex gnode_id, const std::string& name) {
     std::lock_guard<std::mutex> lg(m_mtx);
 
     if (t_env::log_progress()) {
@@ -228,12 +230,12 @@ t_pool::get_data_remaining() const {
     return data;
 }
 
-t_tscalvec
-t_pool::get_row_data_pkeys(t_uindex gnode_id, const t_tscalvec& pkeys) {
+std::vector<t_tscalar>
+t_pool::get_row_data_pkeys(t_uindex gnode_id, const std::vector<t_tscalar>& pkeys) {
     std::lock_guard<std::mutex> lg(m_mtx);
 
     if (!validate_gnode_id(gnode_id))
-        return t_tscalvec();
+        return std::vector<t_tscalar>();
 
     auto rv = m_gnodes[gnode_id]->get_row_data_pkeys(pkeys);
 
@@ -246,10 +248,10 @@ t_pool::get_row_data_pkeys(t_uindex gnode_id, const t_tscalvec& pkeys) {
     return rv;
 }
 
-t_updctx_vec
+std::vector<t_updctx>
 t_pool::get_contexts_last_updated() {
     std::lock_guard<std::mutex> lg(m_mtx);
-    t_updctx_vec rval;
+    std::vector<t_updctx> rval;
 
     for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx) {
         if (!m_gnodes[idx])
@@ -270,12 +272,12 @@ t_pool::get_contexts_last_updated() {
     return rval;
 }
 
-t_bool
+bool
 t_pool::validate_gnode_id(t_uindex gnode_id) const {
     return m_gnodes[gnode_id] && gnode_id < m_gnodes.size();
 }
 
-t_str
+std::string
 t_pool::repr() const {
     std::stringstream ss;
     ss << "t_pool<" << this << ">";
@@ -309,9 +311,9 @@ t_pool::inc_epoch() {
     ++m_epoch;
 }
 
-t_bool
+bool
 t_pool::has_python_dep() const {
-    t_bool rv = false;
+    bool rv = false;
     for (auto& g : m_gnodes) {
         if (!g)
             continue;
@@ -345,10 +347,10 @@ t_pool::flush(t_uindex gnode_id) {
     }
 }
 
-t_uidxvec
+std::vector<t_uindex>
 t_pool::get_gnodes_last_updated() {
     std::lock_guard<std::mutex> lg(m_mtx);
-    t_uidxvec rv;
+    std::vector<t_uindex> rv;
 
     for (t_uindex idx = 0, loop_end = m_gnodes.size(); idx < loop_end; ++idx) {
         if (!m_gnodes[idx] || !m_gnodes[idx]->was_updated())

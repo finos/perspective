@@ -13,15 +13,15 @@
 namespace perspective {
 t_data::t_data() {}
 
-t_data::t_data(const t_tscalvec& data)
+t_data::t_data(const std::vector<t_tscalar>& data)
     : m_data(data) {}
 
-const t_tscalvec&
+const std::vector<t_tscalar>&
 t_data::data() const {
     return m_data;
 }
 
-t_tscalvec&
+std::vector<t_tscalar>&
 t_data::data() {
     return m_data;
 }

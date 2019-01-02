@@ -14,7 +14,7 @@
 namespace perspective {
 
 t_mask
-apply_filters(const t_table& tbl, const t_ftermvec& filters) {
+apply_filters(const t_table& tbl, const std::vector<t_fterm>& filters) {
     t_mask mask(tbl.size());
 
     // If filters are defined
@@ -23,7 +23,7 @@ apply_filters(const t_table& tbl, const t_ftermvec& filters) {
         // init indices
         for (int i = 0, loop_end = filters.size(); i < loop_end; i++) {
             const t_fterm& filter = filters[i];
-            const t_str& column = filter.m_colname;
+            const std::string& column = filter.m_colname;
             t_dtype coltype = tbl.get_dtype(column);
             t_tscalar threshold = filter.m_threshold;
 
@@ -34,31 +34,31 @@ apply_filters(const t_table& tbl, const t_ftermvec& filters) {
 
             switch (coltype) {
                 case DTYPE_INT64: {
-                    apply_filters_helper<t_int64, DTYPE_INT64>(
+                    apply_filters_helper<std::int64_t, DTYPE_INT64>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_INT32: {
-                    apply_filters_helper<t_int32, DTYPE_INT32>(
+                    apply_filters_helper<std::int32_t, DTYPE_INT32>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_FLOAT64: {
-                    apply_filters_helper<t_float64, DTYPE_FLOAT64>(
+                    apply_filters_helper<double, DTYPE_FLOAT64>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_FLOAT32: {
-                    apply_filters_helper<t_float32, DTYPE_FLOAT32>(
+                    apply_filters_helper<float, DTYPE_FLOAT32>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_BOOL: {
-                    apply_filters_helper<t_bool, DTYPE_BOOL>(
+                    apply_filters_helper<bool, DTYPE_BOOL>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_DATE: {
-                    apply_filters_helper<t_uint32, DTYPE_DATE>(
+                    apply_filters_helper<std::uint32_t, DTYPE_DATE>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 case DTYPE_TIME: {
-                    apply_filters_helper<t_int64, DTYPE_TIME>(
+                    apply_filters_helper<std::int64_t, DTYPE_TIME>(
                         tbl, column, mask, threshold, filter);
                 } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unknown dtype"); }

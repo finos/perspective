@@ -29,7 +29,7 @@ t_ctx0::t_ctx0(const t_schema& schema, const t_config& config)
 
 t_ctx0::~t_ctx0() { m_traversal.reset(); }
 
-t_str
+std::string
 t_ctx0::repr() const {
     std::stringstream ss;
     ss << "t_ctx0<" << this << ">";
@@ -56,7 +56,7 @@ t_ctx0::step_end() {
     m_traversal->step_end();
 
     t_uindex ncols = m_config.get_num_columns();
-    t_minmaxvec rval(ncols);
+    std::vector<t_minmax> rval(ncols);
 
     auto pkeys = m_traversal->get_pkeys();
     auto stbl = m_state->get_table();
@@ -71,9 +71,8 @@ t_ctx0::step_end() {
             auto colname = m_config.col_at(colidx);
 
             if (stbl->get_dtype(colname) != DTYPE_STR) {
-                auto v = m_state->reduce<
-                    std::function<std::pair<t_tscalar, t_tscalar>(const t_tscalvec&)>>(
-                    pkeys, colname, get_vec_min_max);
+                auto v = m_state->reduce<std::function<std::pair<t_tscalar, t_tscalar>(
+                    const std::vector<t_tscalar>&)>>(pkeys, colname, get_vec_min_max);
 
                 rval[colidx].m_min = v.first;
                 rval[colidx].m_max = v.second;
@@ -97,20 +96,20 @@ t_ctx0::get_column_count() const {
     return m_config.get_num_columns();
 }
 
-t_tscalvec
-t_ctx0::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx end_col) const {
+std::vector<t_tscalar>
+t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
 
     auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
-    t_tscalvec values(nrows * stride);
+    std::vector<t_tscalar> values(nrows * stride);
 
-    t_tscalvec pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
     auto none = mknone();
 
     for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
-        t_tscalvec out_data(pkeys.size());
+        std::vector<t_tscalar> out_data(pkeys.size());
         m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
 
         for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
@@ -133,7 +132,7 @@ t_ctx0::sort_by() {
 }
 
 void
-t_ctx0::sort_by(const t_sortsvec& sortby) {
+t_ctx0::sort_by(const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
     m_traversal->sort_by(m_state, m_config, sortby);
@@ -141,12 +140,12 @@ t_ctx0::sort_by(const t_sortsvec& sortby) {
 
 void
 t_ctx0::reset_sortby() {
-    m_traversal->sort_by(m_state, m_config, t_sortsvec());
+    m_traversal->sort_by(m_state, m_config, std::vector<t_sortspec>());
 }
 
 t_tscalar
 t_ctx0::get_column_name(t_index idx) {
-    t_str empty("");
+    std::string empty("");
 
     if (idx >= get_column_count())
         return m_symtable.get_interned_tscalar(empty.c_str());
@@ -161,28 +160,28 @@ t_ctx0::init() {
     m_init = true;
 }
 
-t_tscalvec
-t_ctx0::get_pkeys(const t_uidxpvec& cells) const {
+std::vector<t_tscalar>
+t_ctx0::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
-        t_tscalvec rval;
+        std::vector<t_tscalar> rval;
         return rval;
     }
     return m_traversal->get_pkeys(cells);
 }
 
-t_tscalvec
-t_ctx0::get_all_pkeys(const t_uidxpvec& cells) const {
+std::vector<t_tscalar>
+t_ctx0::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
-        t_tscalvec rval;
+        std::vector<t_tscalar> rval;
         return rval;
     }
     return m_traversal->get_all_pkeys(cells);
 }
 
-t_tscalvec
-t_ctx0::get_cell_data(const t_uidxpvec& cells) const {
+std::vector<t_tscalar>
+t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     if (!m_traversal->validate_cells(cells)) {
-        t_tscalvec rval;
+        std::vector<t_tscalar> rval;
         return rval;
     }
 
@@ -190,26 +189,26 @@ t_ctx0::get_cell_data(const t_uidxpvec& cells) const {
 
     for (const auto& c : cells) {
         if (c.second >= ncols) {
-            t_tscalvec rval;
+            std::vector<t_tscalar> rval;
             return rval;
         }
     }
 
     // Order aligned with cells
-    t_tscalvec pkeys = get_all_pkeys(cells);
-    t_tscalvec out_data;
+    std::vector<t_tscalar> pkeys = get_all_pkeys(cells);
+    std::vector<t_tscalar> out_data;
     out_data.reserve(cells.size());
 
     for (t_index idx = 0, loop_end = pkeys.size(); idx < loop_end; ++idx) {
-        t_str colname = m_config.col_at(cells[idx].second);
+        std::string colname = m_config.col_at(cells[idx].second);
         out_data.push_back(m_state->get(pkeys[idx], colname));
     }
 
     return out_data;
 }
 
-t_cellupdvec
-t_ctx0::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
+std::vector<t_cellupd>
+t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
     t_tscalset pkeys;
     t_tscalar prev_pkey;
     prev_pkey.set(t_none());
@@ -217,16 +216,18 @@ t_ctx0::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
     bidx = std::min(bidx, m_traversal->size());
     eidx = std::min(eidx, m_traversal->size());
 
-    t_cellupdvec rval;
+    std::vector<t_cellupd> rval;
 
     if (m_traversal->empty_sort_by()) {
-        t_tscalvec pkey_vec = m_traversal->get_pkeys(bidx, eidx);
+        std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
         for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
             const t_tscalar& pkey = pkey_vec[idx];
-            t_tvidx row = bidx + idx;
-            iterpair_by_zc_pkey_colidx iters
-                = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
-            for (iter_by_zc_pkey_colidx iter = iters.first; iter != iters.second; ++iter) {
+            t_index row = bidx + idx;
+            std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
+                t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
+                iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
+            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
+                 iter != iters.second; ++iter) {
                 t_cellupd cellupd;
                 cellupd.row = row;
                 cellupd.column = iter->m_colidx;
@@ -236,7 +237,8 @@ t_ctx0::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
             }
         }
     } else {
-        for (iter_by_zc_pkey_colidx iter = m_deltas->get<by_zc_pkey_colidx>().begin();
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
              iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
             if (prev_pkey != iter->m_pkey) {
                 pkeys.insert(iter->m_pkey);
@@ -247,9 +249,10 @@ t_ctx0::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
         t_tscaltvimap r_indices;
         m_traversal->get_row_indices(pkeys, r_indices);
 
-        for (iter_by_zc_pkey_colidx iter = m_deltas->get<by_zc_pkey_colidx>().begin();
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
              iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
-            t_tvidx row = r_indices[iter->m_pkey];
+            t_index row = r_indices[iter->m_pkey];
             if (bidx <= row && row <= eidx) {
                 t_cellupd cellupd;
                 cellupd.row = row;
@@ -264,7 +267,7 @@ t_ctx0::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
 }
 
 t_stepdelta
-t_ctx0::get_step_delta(t_tvidx bidx, t_tvidx eidx) {
+t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, m_traversal->size());
     eidx = std::min(eidx, m_traversal->size());
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
@@ -274,12 +277,12 @@ t_ctx0::get_step_delta(t_tvidx bidx, t_tvidx eidx) {
     return rval;
 }
 
-t_svec
+std::vector<std::string>
 t_ctx0::get_column_names() const {
     return m_config.get_column_names();
 }
 
-t_sortsvec
+std::vector<t_sortspec>
 t_ctx0::get_sort_by() const {
     return m_traversal->get_sort_by();
 }
@@ -288,7 +291,7 @@ void
 t_ctx0::reset() {
     m_traversal->reset();
     m_deltas = std::make_shared<t_zcdeltas>();
-    m_minmax = t_minmaxvec(m_config.get_num_columns());
+    m_minmax = std::vector<t_minmax>(m_config.get_num_columns());
     m_has_delta = false;
 }
 
@@ -302,15 +305,15 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
     const t_table& curr, const t_table& transitions, const t_table& existed) {
     psp_log_time(repr() + " notify.enter");
     t_uindex nrecs = flattened.size();
-    t_col_csptr pkey_sptr = flattened.get_const_column("psp_pkey");
-    t_col_csptr op_sptr = flattened.get_const_column("psp_op");
+    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
-    t_col_csptr existed_sptr = existed.get_const_column("psp_existed");
+    std::shared_ptr<const t_column> existed_sptr = existed.get_const_column("psp_existed");
     const t_column* existed_col = existed_sptr.get();
 
-    t_bool delete_encountered = false;
+    bool delete_encountered = false;
     if (m_config.has_filters()) {
         t_mask msk_prev = filter_table_for_config(prev, m_config);
         t_mask msk_curr = filter_table_for_config(curr, m_config);
@@ -318,14 +321,14 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
         for (t_uindex idx = 0; idx < nrecs; ++idx) {
             t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
 
-            t_uint8 op_ = *(op_col->get_nth<t_uint8>(idx));
+            std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
             t_op op = static_cast<t_op>(op_);
-            t_bool existed = *(existed_col->get_nth<t_bool>(idx));
+            bool existed = *(existed_col->get_nth<bool>(idx));
 
             switch (op) {
                 case OP_INSERT: {
-                    t_bool filter_curr = msk_curr.get(idx);
-                    t_bool filter_prev = msk_prev.get(idx) && existed;
+                    bool filter_curr = msk_curr.get(idx);
+                    bool filter_prev = msk_prev.get(idx) && existed;
 
                     if (filter_prev) {
                         if (filter_curr) {
@@ -356,9 +359,9 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
 
     for (t_uindex idx = 0; idx < nrecs; ++idx) {
         t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
-        t_uint8 op_ = *(op_col->get_nth<t_uint8>(idx));
+        std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
         t_op op = static_cast<t_op>(op_);
-        t_bool existed = *(existed_col->get_nth<t_bool>(idx));
+        bool existed = *(existed_col->get_nth<bool>(idx));
 
         switch (op) {
             case OP_INSERT: {
@@ -397,15 +400,15 @@ t_ctx0::calc_step_delta(const t_table& flattened, const t_table& prev, const t_t
     t_uindex ncols = m_config.get_num_columns();
 
     for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
-        t_str col = m_config.col_at(cidx);
+        std::string col = m_config.col_at(cidx);
 
         const t_column* tcol = transitions.get_const_column(col).get();
         const t_column* pcol = prev.get_const_column(col).get();
         const t_column* ccol = curr.get_const_column(col).get();
 
         for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
-            const t_uint8* trans_ = tcol->get_nth<t_uint8>(ridx);
-            t_uint8 trans = *trans_;
+            const std::uint8_t* trans_ = tcol->get_nth<std::uint8_t>(ridx);
+            std::uint8_t trans = *trans_;
             t_value_transition tr = static_cast<t_value_transition>(trans);
 
             switch (tr) {
@@ -426,7 +429,7 @@ t_ctx0::calc_step_delta(const t_table& flattened, const t_table& prev, const t_t
     }
 }
 
-t_minmaxvec
+std::vector<t_minmax>
 t_ctx0::get_min_max() const {
     return m_minmax;
 }
@@ -446,12 +449,12 @@ t_ctx0::enable() {
     m_features[CTX_FEAT_ENABLED] = true;
 }
 
-t_streeptr_vec
+std::vector<t_stree*>
 t_ctx0::get_trees() {
-    return t_streeptr_vec();
+    return std::vector<t_stree*>();
 }
 
-t_bool
+bool
 t_ctx0::has_deltas() const {
     return m_has_delta;
 }
@@ -459,8 +462,8 @@ t_ctx0::has_deltas() const {
 void
 t_ctx0::notify(const t_table& flattened) {
     t_uindex nrecs = flattened.size();
-    t_col_csptr pkey_sptr = flattened.get_const_column("psp_pkey");
-    t_col_csptr op_sptr = flattened.get_const_column("psp_op");
+    std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
+    std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
     const t_column* pkey_col = pkey_sptr.get();
     const t_column* op_col = op_sptr.get();
 
@@ -471,7 +474,7 @@ t_ctx0::notify(const t_table& flattened) {
 
         for (t_uindex idx = 0; idx < nrecs; ++idx) {
             t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
-            t_uint8 op_ = *(op_col->get_nth<t_uint8>(idx));
+            std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
             t_op op = static_cast<t_op>(op_);
 
             switch (op) {
@@ -490,7 +493,7 @@ t_ctx0::notify(const t_table& flattened) {
 
     for (t_uindex idx = 0; idx < nrecs; ++idx) {
         t_tscalar pkey = m_symtable.get_interned_tscalar(pkey_col->get_scalar(idx));
-        t_uint8 op_ = *(op_col->get_nth<t_uint8>(idx));
+        std::uint8_t op_ = *(op_col->get_nth<std::uint8_t>(idx));
         t_op op = static_cast<t_op>(op_);
 
         switch (op) {
@@ -517,25 +520,25 @@ t_ctx0::get_column_dtype(t_uindex idx) const {
     return m_schema.get_dtype(cname);
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx0::unity_get_row_data(t_uindex idx) const {
     return get_data(idx, idx + 1, 0, get_column_count());
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx0::unity_get_column_data(t_uindex idx) const {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
-    return t_tscalvec();
+    return std::vector<t_tscalar>();
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx0::unity_get_row_path(t_uindex idx) const {
-    return t_tscalvec(mktscalar(idx));
+    return std::vector<t_tscalar>(mktscalar(idx));
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx0::unity_get_column_path(t_uindex idx) const {
-    return t_tscalvec();
+    return std::vector<t_tscalar>();
 }
 
 t_uindex
@@ -548,22 +551,22 @@ t_ctx0::unity_get_column_depth(t_uindex cidx) const {
     return 0;
 }
 
-t_str
+std::string
 t_ctx0::unity_get_column_name(t_uindex idx) const {
     return m_config.col_at(idx);
 }
 
-t_str
+std::string
 t_ctx0::unity_get_column_display_name(t_uindex idx) const {
     return m_config.col_at(idx);
 }
 
-t_svec
+std::vector<std::string>
 t_ctx0::unity_get_column_names() const {
     return m_config.get_column_names();
 }
 
-t_svec
+std::vector<std::string>
 t_ctx0::unity_get_column_display_names() const {
     return m_config.get_column_names();
 }
@@ -578,12 +581,12 @@ t_ctx0::unity_get_row_count() const {
     return get_row_count();
 }
 
-t_bool
+bool
 t_ctx0::unity_get_row_expanded(t_uindex idx) const {
     return false;
 }
 
-t_bool
+bool
 t_ctx0::unity_get_column_expanded(t_uindex idx) const {
     return false;
 }

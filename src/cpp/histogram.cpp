@@ -22,6 +22,6 @@ t_hist_bucket::t_hist_bucket()
 t_histogram::t_histogram() {}
 
 t_histogram::t_histogram(t_uindex nbuckets)
-    : m_buckets(t_hist_bucket_vec(nbuckets)) {}
+    : m_buckets(std::vector<t_hist_bucket>(nbuckets)) {}
 
 } // end namespace perspective

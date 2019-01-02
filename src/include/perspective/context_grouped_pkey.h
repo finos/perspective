@@ -27,42 +27,42 @@ public:
 
 #include <perspective/context_common_decls.h>
 
-    t_index open(t_header header, t_tvidx idx);
-    t_index open(t_tvidx idx);
+    t_index open(t_header header, t_index idx);
+    t_index open(t_index idx);
 
-    t_index close(t_tvidx idx);
-    t_aggspecvec get_aggregates() const;
-    t_tscalvec get_row_path(t_tvidx idx) const;
-    t_pathvec get_expansion_state() const;
-    void set_expansion_state(const t_pathvec& paths);
-    t_tscalar get_tree_value(t_ptidx idx) const;
+    t_index close(t_index idx);
+    std::vector<t_aggspec> get_aggregates() const;
+    std::vector<t_tscalar> get_row_path(t_index idx) const;
+    std::vector<t_path> get_expansion_state() const;
+    void set_expansion_state(const std::vector<t_path>& paths);
+    t_tscalar get_tree_value(t_index idx) const;
     t_stree* _get_tree();
-    t_ftnvec get_flattened_tree(t_tvidx idx, t_depth stop_depth);
-    t_trav_csptr get_traversal() const;
+    std::vector<t_ftreenode> get_flattened_tree(t_index idx, t_depth stop_depth);
+    std::shared_ptr<const t_traversal> get_traversal() const;
 
     void set_depth(t_depth depth);
 
-    void expand_path(const t_tscalvec& path);
+    void expand_path(const std::vector<t_tscalar>& path);
 
     t_minmax get_agg_min_max(t_uindex aggidx, t_depth depth) const;
 
     // aggregates should be presized to be same size
     // as agg_indices
-    void get_aggregates_for_sorting(
-        t_uindex nidx, const t_idxvec& agg_indices, t_tscalvec& aggregates, t_ctx2*) const;
+    void get_aggregates_for_sorting(t_uindex nidx, const std::vector<t_index>& agg_indices,
+        std::vector<t_tscalar>& aggregates, t_ctx2*) const;
 
     using t_ctxbase<t_ctx_grouped_pkey>::get_data;
 
 private:
     void rebuild();
 
-    t_trav_sptr m_traversal;
-    t_stree_sptr m_tree;
-    t_sortsvec m_sortby;
+    std::shared_ptr<t_traversal> m_traversal;
+    std::shared_ptr<t_stree> m_tree;
+    std::vector<t_sortspec> m_sortby;
     t_symtable m_symtable;
-    t_bool m_has_label;
+    bool m_has_label;
     t_depth m_depth;
-    t_bool m_depth_set;
+    bool m_depth_set;
 };
 
 typedef std::shared_ptr<t_ctx_grouped_pkey> t_ctx_grouped_pkey_sptr;

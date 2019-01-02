@@ -32,31 +32,7 @@ accessors!
 
 namespace perspective {
 
-enum t_column_storage_mode {
-    COL_STORAGE_MODE_FIX,
-    COL_STORAGE_MODE_VAR,
-    COL_STORAGE_MODE_ENUM
-};
-
-enum t_column_growth_mode {
-    COLUMN_GROWTH_MODE_APPEND,
-    COLUMN_GROWTH_MODE_RANDOM_NO_DELETE,
-    COLUMN_GROWTH_MODE_RANDOM_WITH_DELETES
-};
-
-typedef std::vector<t_column_recipe> t_column_recipe_vec;
-
-struct t_colstr_sort {
-    t_uindex m_curidx;
-    t_uindex m_order_idx;
-    const char* m_str;
-};
-
-typedef std::shared_ptr<t_vocab> t_vocab_sptr;
-
 class t_column;
-
-typedef std::shared_ptr<t_column> t_col_sptr;
 
 #ifdef PSP_COLUMN_VERIFY
 #define COLUMN_CHECK_ACCESS(idx) PSP_VERBOSE_ASSERT((idx) <= m_size, "Invalid column access")
@@ -75,9 +51,9 @@ public:
 #endif
     t_column();
     t_column(const t_column_recipe& recipe);
-    t_column(t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a);
+    t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a);
     t_column(
-        t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity);
+        t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity);
     ~t_column();
 
     void column_copy_helper(const t_column& other);
@@ -131,7 +107,7 @@ public:
     template <typename T>
     void set_nth(t_uindex idx, T v, t_status status);
 
-    void set_valid(t_uindex idx, t_bool valid);
+    void set_valid(t_uindex idx, bool valid);
 
     void set_status(t_uindex idx, t_status status);
 
@@ -156,13 +132,13 @@ public:
     t_tscalar get_scalar(t_uindex idx) const;
     void set_scalar(t_uindex idx, t_tscalar value);
 
-    t_bool is_status_enabled() const;
+    bool is_status_enabled() const;
 
-    t_bool is_valid(t_uindex idx) const;
+    bool is_valid(t_uindex idx) const;
 
-    t_bool is_cleared(t_uindex idx) const;
+    bool is_cleared(t_uindex idx) const;
 
-    t_bool is_vlen() const;
+    bool is_vlen() const;
 
     void append(const t_column& other);
 
@@ -191,16 +167,17 @@ public:
     template <typename DATA_T>
     void raw_fill(DATA_T v);
 
-    t_col_sptr clone() const;
+    std::shared_ptr<t_column> clone() const;
 
-    t_col_sptr clone(const t_mask& mask) const;
+    std::shared_ptr<t_column> clone(const t_mask& mask) const;
 
     void valid_raw_fill();
 
     template <typename DATA_T>
-    void copy_helper(const t_column* other, const t_uidxvec& indices, t_uindex offset);
+    void copy_helper(
+        const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
 
-    void copy(const t_column* other, const t_uidxvec& indices, t_uindex offset);
+    void copy(const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
 
     void clear(t_uindex idx);
     void clear(t_uindex idx, t_status status);
@@ -211,7 +188,7 @@ public:
     void verify_size() const;
     void verify_size(t_uindex idx) const;
 
-    t_uindex get_interned(const t_str& s);
+    t_uindex get_interned(const std::string& s);
     t_uindex get_interned(const char* s);
     void _rebuild_map();
 
@@ -219,33 +196,26 @@ public:
 
 private:
     t_dtype m_dtype;
-    t_bool m_init;
-    t_bool m_isvlen;
+    bool m_init;
+    bool m_isvlen;
 
     // For varlen columns this
     // contains t_uindex encoded ids
-    t_lstore_sptr m_data;
+    std::shared_ptr<t_lstore> m_data;
 
-    t_vocab_sptr m_vocab;
+    std::shared_ptr<t_vocab> m_vocab;
 
     // Missing value support
-    t_lstore_sptr m_status;
+    std::shared_ptr<t_lstore> m_status;
 
     t_uindex m_size;
 
     bool m_status_enabled;
 
-    t_bool m_from_recipe;
+    bool m_from_recipe;
 
-    t_uint32 m_elemsize;
+    std::uint32_t m_elemsize;
 };
-
-typedef std::shared_ptr<t_column> t_col_sptr;
-typedef std::shared_ptr<const t_column> t_col_csptr;
-typedef std::vector<t_col_sptr> t_colsptrvec;
-typedef std::vector<t_col_csptr> t_colcsptrvec;
-typedef std::vector<t_col_sptr> t_colsptrvec;
-typedef std::vector<t_col_csptr> t_colcsptrvec;
 
 template <>
 PERSPECTIVE_EXPORT void t_column::push_back<const char*>(const char* elem);
@@ -263,14 +233,15 @@ template <>
 PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(t_uindex idx, const char* elem);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx, t_str elem);
+PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(t_uindex idx, std::string elem);
 
 template <>
 PERSPECTIVE_EXPORT void t_column::set_nth<const char*>(
     t_uindex idx, const char* elem, t_status status);
 
 template <>
-PERSPECTIVE_EXPORT void t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_status status);
+PERSPECTIVE_EXPORT void t_column::set_nth<std::string>(
+    t_uindex idx, std::string elem, t_status status);
 
 template <>
 PERSPECTIVE_EXPORT const char* t_column::get_nth<const char>(t_uindex idx) const;
@@ -403,11 +374,12 @@ t_column::set_vocabulary(const VOCAB_T& vocab, size_t total_size) {
 
 template <>
 void t_column::copy_helper<const char>(
-    const t_column* other, const t_uidxvec& indices, t_uindex offset);
+    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset);
 
 template <typename DATA_T>
 void
-t_column::copy_helper(const t_column* other, const t_uidxvec& indices, t_uindex offset) {
+t_column::copy_helper(
+    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
     t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 
@@ -425,10 +397,6 @@ t_column::copy_helper(const t_column* other, const t_uidxvec& indices, t_uindex 
     }
     COLUMN_CHECK_VALUES();
 }
-
-typedef std::vector<t_column> t_colvec;
-typedef std::vector<t_column*> t_colptrvec;
-typedef std::vector<const t_column*> t_colcptrvec;
 
 inline void
 scol_set(t_column* c, t_uindex row_idx, const char* s) {

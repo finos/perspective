@@ -20,15 +20,15 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_mselem {
     t_mselem();
-    t_mselem(const t_tscalvec& row);
-    t_mselem(const t_tscalvec& row, t_uindex order);
-    t_mselem(const t_tscalar& pkey, const t_tscalvec& row);
+    t_mselem(const std::vector<t_tscalar>& row);
+    t_mselem(const std::vector<t_tscalar>& row, t_uindex order);
+    t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row);
     t_mselem(const t_mselem& other);
     t_mselem(t_mselem&& other);
     t_mselem& operator=(const t_mselem& other);
     t_mselem& operator=(t_mselem&& other);
 
-    t_tscalvec m_row;
+    std::vector<t_tscalar> m_row;
     t_tscalar m_pkey;
     t_uindex m_order;
     bool m_deleted;
@@ -65,13 +65,10 @@ struct PERSPECTIVE_EXPORT t_minmax_idx {
 
 // Given a vector return the indices of the
 // minimum and maximum elements in it.
-PERSPECTIVE_EXPORT t_minmax_idx get_minmax_idx(const t_tscalvec& vec, t_sorttype stype);
+PERSPECTIVE_EXPORT t_minmax_idx get_minmax_idx(
+    const std::vector<t_tscalar>& vec, t_sorttype stype);
 
-typedef std::vector<t_mselem> t_mselemvec;
-typedef std::shared_ptr<t_mselemvec> t_mselemvec_sptr;
-typedef std::shared_ptr<const t_mselemvec> t_mselemvec_csptr;
-
-PERSPECTIVE_EXPORT t_float64 to_double(const t_tscalar& c);
+PERSPECTIVE_EXPORT double to_double(const t_tscalar& c);
 
 struct PERSPECTIVE_EXPORT t_nancmp {
     t_nancmp();
@@ -83,10 +80,10 @@ struct PERSPECTIVE_EXPORT t_nancmp {
 PERSPECTIVE_EXPORT t_nancmp nan_compare(
     t_sorttype order, const t_tscalar& a, const t_tscalar& b);
 
-inline PERSPECTIVE_EXPORT t_bool
-cmp_mselem(
-    const t_mselem& a, const t_mselem& b, const t_sorttvec& sort_order, t_bool handle_nans) {
-    typedef std::pair<t_float64, t_tscalar> dpair;
+inline PERSPECTIVE_EXPORT bool
+cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& sort_order,
+    bool handle_nans) {
+    typedef std::pair<double, t_tscalar> dpair;
 
     if (a.m_row.size() != b.m_row.size() || a.m_row.size() != sort_order.size()) {
         std::cout << "ERROR detected in MultiSort." << std::endl;
@@ -127,13 +124,13 @@ cmp_mselem(
                 return (first > second);
             } break;
             case SORTTYPE_ASCENDING_ABS: {
-                t_float64 val_a = first.to_double();
-                t_float64 val_b = second.to_double();
+                double val_a = first.to_double();
+                double val_b = second.to_double();
                 return dpair(std::abs(val_a), first_pkey) < dpair(std::abs(val_b), second_pkey);
             } break;
             case SORTTYPE_DESCENDING_ABS: {
-                t_float64 val_a = first.to_double();
-                t_float64 val_b = second.to_double();
+                double val_a = first.to_double();
+                double val_b = second.to_double();
                 return dpair(std::abs(val_a), first_pkey) > dpair(std::abs(val_b), second_pkey);
             } break;
             case SORTTYPE_NONE: {
@@ -149,26 +146,27 @@ cmp_mselem(
     return first_pkey < second_pkey;
 }
 
-inline PERSPECTIVE_EXPORT t_bool
-cmp_mselem(
-    const t_mselem* a, const t_mselem* b, const t_sorttvec& sort_order, t_bool handle_nans) {
+inline PERSPECTIVE_EXPORT bool
+cmp_mselem(const t_mselem* a, const t_mselem* b, const std::vector<t_sorttype>& sort_order,
+    bool handle_nans) {
     return cmp_mselem(*a, *b, sort_order, handle_nans);
 }
 
 // Helper for sorting taking multiple sort specifications
 // into account
 struct PERSPECTIVE_EXPORT t_multisorter {
-    t_multisorter(const t_sorttvec& order, t_bool handle_nans);
+    t_multisorter(const std::vector<t_sorttype>& order, bool handle_nans);
 
-    t_multisorter(t_mselemvec_csptr elems, const t_sorttvec& order, t_bool handle_nans);
+    t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
+        const std::vector<t_sorttype>& order, bool handle_nans);
 
     bool operator()(const t_mselem& a, const t_mselem& b) const;
 
     bool operator()(t_index a, t_index b) const;
 
-    t_sorttvec m_sort_order;
-    t_mselemvec_csptr m_elems;
-    t_bool m_handle_nans;
+    std::vector<t_sorttype> m_sort_order;
+    std::shared_ptr<const std::vector<t_mselem>> m_elems;
+    bool m_handle_nans;
 };
 
 } // end namespace perspective

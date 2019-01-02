@@ -17,13 +17,11 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_path {
     t_path();
-    t_path(const t_tscalvec& path);
+    t_path(const std::vector<t_tscalar>& path);
 
-    const t_tscalvec& path() const;
-    t_tscalvec& path();
-    t_tscalvec m_path;
+    const std::vector<t_tscalar>& path() const;
+    std::vector<t_tscalar>& path();
+    std::vector<t_tscalar> m_path;
 };
-
-typedef std::vector<t_path> t_pathvec;
 
 } // end namespace perspective

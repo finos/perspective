@@ -10,35 +10,40 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/exports.h>
-#include <perspective/shared_ptrs.h>
 #include <perspective/config.h>
 #include <perspective/gnode_state.h>
 #include <perspective/traversal.h>
 
 namespace perspective {
 
-PERSPECTIVE_EXPORT void notify_sparse_tree_common(t_table_sptr strands,
-    t_table_sptr strand_deltas, t_stree_sptr tree, t_trav_sptr traversal,
-    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
-    const t_sortsvec& ctx_sortby, const t_gstate& gstate);
+PERSPECTIVE_EXPORT void notify_sparse_tree_common(std::shared_ptr<t_table> strands,
+    std::shared_ptr<t_table> strand_deltas, std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_gstate& gstate);
 
-PERSPECTIVE_EXPORT void notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal,
-    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
-    const t_sortsvec& ctx_sortby, const t_table& flattened, const t_table& delta,
+PERSPECTIVE_EXPORT void notify_sparse_tree(std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_table& delta,
     const t_table& prev, const t_table& current, const t_table& transitions,
     const t_table& existed, const t_config& config, const t_gstate& gstate);
 
-PERSPECTIVE_EXPORT void notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal,
-    t_bool process_traversal, const t_aggspecvec& aggregates, const t_sspvec& tree_sortby,
-    const t_sortsvec& ctx_sortby, const t_table& flattened, const t_config& config,
+PERSPECTIVE_EXPORT void notify_sparse_tree(std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_config& config,
     const t_gstate& gstate);
 
 template <typename CONTEXT_T>
 void
-ctx_expand_path(CONTEXT_T& ctx, t_header header, t_stree_sptr tree, t_trav_sptr traversal,
-    const t_tscalvec& path) {
+ctx_expand_path(CONTEXT_T& ctx, t_header header, std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, const std::vector<t_tscalar>& path) {
     t_index root = 0;
-    t_tvidx bidx = 0;
+    t_index bidx = 0;
 
     for (int j = 0, loop_end = path.size(); j < loop_end; j++) {
         const t_tscalar& datum = path[j];
@@ -48,7 +53,7 @@ ctx_expand_path(CONTEXT_T& ctx, t_header header, t_stree_sptr tree, t_trav_sptr 
             break;
         }
 
-        t_tvidx tvidx = traversal->tree_index_lookup(root, bidx);
+        t_index tvidx = traversal->tree_index_lookup(root, bidx);
 
         bidx = tvidx;
         ctx.open(header, tvidx);
@@ -57,21 +62,22 @@ ctx_expand_path(CONTEXT_T& ctx, t_header header, t_stree_sptr tree, t_trav_sptr 
 
 template <typename CONTEXT_T>
 void
-ctx_set_expansion_state(CONTEXT_T& ctx, t_header header, t_stree_sptr tree,
-    t_trav_sptr traversal, const t_pathvec& paths) {
+ctx_set_expansion_state(CONTEXT_T& ctx, t_header header, std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, const std::vector<t_path>& paths) {
     for (int i = 0, loop_end = paths.size(); i < loop_end; i++) {
         const t_path& path = paths[i];
         ctx_expand_path(ctx, header, tree, traversal, path.m_path);
     }
 }
 
-PERSPECTIVE_EXPORT t_pathvec ctx_get_expansion_state(
-    t_stree_csptr tree, t_trav_csptr traversal);
+PERSPECTIVE_EXPORT std::vector<t_path> ctx_get_expansion_state(
+    std::shared_ptr<const t_stree> tree, std::shared_ptr<const t_traversal> traversal);
 
-PERSPECTIVE_EXPORT t_tscalvec ctx_get_path(
-    t_stree_csptr tree, t_trav_csptr traversal, t_tvidx idx);
+PERSPECTIVE_EXPORT std::vector<t_tscalar> ctx_get_path(std::shared_ptr<const t_stree> tree,
+    std::shared_ptr<const t_traversal> traversal, t_index idx);
 
-PERSPECTIVE_EXPORT t_ftnvec ctx_get_flattened_tree(t_tvidx idx, t_depth stop_depth,
-    t_traversal& trav, const t_config& config, const t_sortsvec& sortby);
+PERSPECTIVE_EXPORT std::vector<t_ftreenode> ctx_get_flattened_tree(t_index idx,
+    t_depth stop_depth, t_traversal& trav, const t_config& config,
+    const std::vector<t_sortspec>& sortby);
 
 } // end namespace perspective

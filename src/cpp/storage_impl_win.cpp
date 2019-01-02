@@ -90,7 +90,7 @@ t_lstore::create_file() {
 
 void*
 t_lstore::create_mapping() {
-    t_szpair capacity = capacity_pair();
+    std::pair<std::uint32_t, std::uint32_t> capacity = capacity_pair();
 
     m_winmapping_handle = CreateFileMapping(m_fd,
         0, // default security

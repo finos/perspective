@@ -27,8 +27,8 @@ t_symtable::~t_symtable() {
     }
 }
 
-const t_char*
-t_symtable::get_interned_cstr(const t_char* s) {
+const char*
+t_symtable::get_interned_cstr(const char* s) {
     auto iter = m_mapping.find(s);
 
     if (iter != m_mapping.end()) {
@@ -41,7 +41,7 @@ t_symtable::get_interned_cstr(const t_char* s) {
 }
 
 t_tscalar
-t_symtable::get_interned_tscalar(const t_char* s) {
+t_symtable::get_interned_tscalar(const char* s) {
     if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);
@@ -78,15 +78,15 @@ get_symtable() {
     return sym;
 }
 
-const t_char*
-get_interned_cstr(const t_char* s) {
+const char*
+get_interned_cstr(const char* s) {
     std::lock_guard<std::mutex> guard(sym_table_mutex);
     auto sym = get_symtable();
     return sym->get_interned_cstr(s);
 }
 
 t_tscalar
-get_interned_tscalar(const t_char* s) {
+get_interned_tscalar(const char* s) {
     if (t_tscalar::can_store_inplace(s)) {
         t_tscalar rval;
         rval.set(s);

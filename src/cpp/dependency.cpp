@@ -19,7 +19,7 @@ t_dep::t_dep(const t_dep_recipe& v)
     , m_imm(v.m_imm)
     , m_dtype(v.m_dtype) {}
 
-t_dep::t_dep(const t_str& name, t_deptype type)
+t_dep::t_dep(const std::string& name, t_deptype type)
     : m_name(name)
     , m_disp_name(name)
     , m_type(type)
@@ -30,18 +30,19 @@ t_dep::t_dep(t_tscalar imm)
     , m_imm(imm)
     , m_dtype(DTYPE_NONE) {}
 
-t_dep::t_dep(const t_str& name, const t_str& disp_name, t_deptype type, t_dtype dtype)
+t_dep::t_dep(
+    const std::string& name, const std::string& disp_name, t_deptype type, t_dtype dtype)
     : m_name(name)
     , m_disp_name(disp_name)
     , m_type(type)
     , m_dtype(dtype) {}
 
-const t_str&
+const std::string&
 t_dep::name() const {
     return m_name;
 }
 
-const t_str&
+const std::string&
 t_dep::disp_name() const {
     return m_disp_name;
 }

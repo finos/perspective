@@ -24,12 +24,12 @@ public:
 
     t_range(); // select all
 
-    t_range(const t_tscalvec& brpath, const t_tscalvec& erpath);
+    t_range(const std::vector<t_tscalar>& brpath, const std::vector<t_tscalar>& erpath);
 
-    t_range(const t_tscalvec& brpath, const t_tscalvec& erpath, const t_tscalvec& bcpath,
-        const t_tscalvec& ecpath);
+    t_range(const std::vector<t_tscalar>& brpath, const std::vector<t_tscalar>& erpath,
+        const std::vector<t_tscalar>& bcpath, const std::vector<t_tscalar>& ecpath);
 
-    t_range(const t_str& expr_name);
+    t_range(const std::string& expr_name);
 
     t_uindex bridx() const;
     t_uindex eridx() const;
@@ -42,11 +42,11 @@ private:
     t_uindex m_eridx;
     t_uindex m_bcidx;
     t_uindex m_ecidx;
-    t_tscalvec m_brpath;
-    t_tscalvec m_erpath;
-    t_tscalvec m_bcpath;
-    t_tscalvec m_ecpath;
-    t_str m_expr_name;
+    std::vector<t_tscalar> m_brpath;
+    std::vector<t_tscalar> m_erpath;
+    std::vector<t_tscalar> m_bcpath;
+    std::vector<t_tscalar> m_ecpath;
+    std::string m_expr_name;
     t_range_mode m_mode;
 };
 

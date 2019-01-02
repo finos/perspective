@@ -21,21 +21,19 @@ enum t_sortspec_type { SORTSPEC_TYPE_IDX, SORTSPEC_TYPE_COLNAME, SORTSPEC_TYPE_P
 struct PERSPECTIVE_EXPORT t_sortspec {
     t_sortspec();
     t_sortspec(t_index agg_index, t_sorttype sort_type);
-    t_sortspec(const t_tscalvec& path, t_index agg_index, t_sorttype sort_type);
+    t_sortspec(const std::vector<t_tscalar>& path, t_index agg_index, t_sorttype sort_type);
 
     bool operator==(const t_sortspec& s2) const;
     bool operator!=(const t_sortspec& s2) const;
 
     t_index m_agg_index;
     t_sorttype m_sort_type;
-    t_bool m_colname;
+    bool m_colname;
     t_sortspec_type m_sortspec_type;
-    t_tscalvec m_path;
+    std::vector<t_tscalar> m_path;
 };
 
-typedef std::vector<t_sortspec> t_sortsvec;
-
-PERSPECTIVE_EXPORT t_sorttvec get_sort_orders(const t_sortsvec& vec);
+PERSPECTIVE_EXPORT std::vector<t_sorttype> get_sort_orders(const std::vector<t_sortspec>& vec);
 
 } // end namespace perspective
 

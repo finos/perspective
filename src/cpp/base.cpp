@@ -60,7 +60,7 @@ is_floating_point(t_dtype dtype) {
     return (dtype == DTYPE_FLOAT32 || dtype == DTYPE_FLOAT64);
 }
 
-t_bool
+bool
 is_deterministic_sized(t_dtype dtype) {
     switch (dtype) {
         case DTYPE_PTR:
@@ -96,11 +96,11 @@ get_dtype_size(t_dtype dtype) {
         }
         case DTYPE_INT64:
         case DTYPE_UINT64: {
-            return sizeof(t_int64);
+            return sizeof(std::int64_t);
         }
         case DTYPE_INT32:
         case DTYPE_UINT32: {
-            return sizeof(t_int32);
+            return sizeof(std::int32_t);
         }
         case DTYPE_INT16:
         case DTYPE_UINT16: {
@@ -113,22 +113,22 @@ get_dtype_size(t_dtype dtype) {
             return 1;
         }
         case DTYPE_FLOAT64: {
-            return sizeof(t_float64);
+            return sizeof(double);
         }
         case DTYPE_FLOAT32: {
-            return sizeof(t_float32);
+            return sizeof(float);
         }
         case DTYPE_STR: {
-            return sizeof(t_stridx);
+            return sizeof(t_uindex);
         }
         case DTYPE_TIME: {
-            return sizeof(t_int64);
+            return sizeof(std::int64_t);
         }
         case DTYPE_DATE: {
-            return sizeof(t_uint32);
+            return sizeof(std::uint32_t);
         }
         case DTYPE_F64PAIR: {
-            return sizeof(t_f64pair);
+            return sizeof(std::pair<double, double>);
         }
         default: { PSP_COMPLAIN_AND_ABORT("Unknown dtype"); }
     }
@@ -137,14 +137,14 @@ get_dtype_size(t_dtype dtype) {
     return sizeof(DTYPE_INT64);
 }
 
-t_bool
+bool
 is_vlen_dtype(t_dtype dtype) {
     if (dtype == DTYPE_STR || dtype == DTYPE_USER_VLEN)
         return true;
     return false;
 }
 
-t_str
+std::string
 get_dtype_descr(t_dtype dtype) {
     switch (dtype) {
         case DTYPE_NONE: {
@@ -213,10 +213,10 @@ get_dtype_descr(t_dtype dtype) {
         default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
     }
 
-    return t_str("dummy");
+    return std::string("dummy");
 }
 
-t_str
+std::string
 filter_op_to_str(t_filter_op op) {
     switch (op) {
         case FILTER_OP_LT: {
@@ -276,11 +276,11 @@ filter_op_to_str(t_filter_op op) {
 }
 
 void
-check_init(t_bool init, const char* file, t_int32 line) {
+check_init(bool init, const char* file, std::int32_t line) {
     PSP_VERBOSE_ASSERT(init, "touching uninited object");
 }
 
-t_bool
+bool
 is_neq_transition(t_value_transition t) {
     return t > VALUE_TRANSITION_EQ_TT;
 }
@@ -290,9 +290,9 @@ root_pidx() {
     return std::numeric_limits<t_uindex>::max();
 }
 
-t_bool
-is_internal_colname(const t_str& c) {
-    return c.compare(t_str("psp_")) == 0;
+bool
+is_internal_colname(const std::string& c) {
+    return c.compare(std::string("psp_")) == 0;
 }
 
 } // end namespace perspective

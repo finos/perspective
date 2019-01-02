@@ -15,10 +15,10 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_rlookup {
     t_rlookup();
-    t_rlookup(t_uindex idx, t_bool exists);
+    t_rlookup(t_uindex idx, bool exists);
     ~t_rlookup();
     t_uindex m_idx;
-    t_bool m_exists;
+    bool m_exists;
 };
 
 } // end namespace perspective

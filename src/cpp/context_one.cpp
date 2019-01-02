@@ -35,7 +35,7 @@ t_ctx1::init() {
     m_tree->init();
     m_traversal
         = std::shared_ptr<t_traversal>(new t_traversal(m_tree, m_config.handle_nan_sort()));
-    m_minmax = t_minmaxvec(m_config.get_num_aggregates());
+    m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
 
@@ -54,13 +54,13 @@ t_ctx1::get_column_count() const {
 }
 
 t_index
-t_ctx1::open(t_header header, t_tvidx idx) {
+t_ctx1::open(t_header header, t_index idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return open(idx);
 }
 
-t_str
+std::string
 t_ctx1::repr() const {
     std::stringstream ss;
     ss << "t_ctx1<" << this << ">";
@@ -68,14 +68,14 @@ t_ctx1::repr() const {
 }
 
 t_index
-t_ctx1::open(t_tvidx idx) {
+t_ctx1::open(t_index idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
     m_depth_set = false;
     m_depth = 0;
 
-    if (idx >= t_tvidx(m_traversal->size()))
+    if (idx >= t_index(m_traversal->size()))
         return 0;
 
     t_index retval = m_traversal->expand_node(m_sortby, idx);
@@ -84,14 +84,14 @@ t_ctx1::open(t_tvidx idx) {
 }
 
 t_index
-t_ctx1::close(t_tvidx idx) {
+t_ctx1::close(t_index idx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     // If we manually open/close a node, stop automatically expanding
     m_depth_set = false;
     m_depth = 0;
 
-    if (idx >= t_tvidx(m_traversal->size()))
+    if (idx >= t_index(m_traversal->size()))
         return 0;
 
     t_index retval = m_traversal->collapse_node(idx);
@@ -99,8 +99,8 @@ t_ctx1::close(t_tvidx idx) {
     return retval;
 }
 
-t_tscalvec
-t_ctx1::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx end_col) const {
+std::vector<t_tscalar>
+t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
@@ -109,25 +109,25 @@ t_ctx1::get_data(t_tvidx start_row, t_tvidx end_row, t_tvidx start_col, t_tvidx 
     t_index stride = ext.m_ecol - ext.m_scol;
 
     t_uindex ncols = get_column_count();
-    t_tscalvec tmpvalues(nrows * ncols);
-    t_tscalvec values(nrows * stride);
+    std::vector<t_tscalar> tmpvalues(nrows * ncols);
+    std::vector<t_tscalar> values(nrows * stride);
 
-    t_colcptrvec aggcols(m_config.get_num_aggregates());
+    std::vector<const t_column*> aggcols(m_config.get_num_aggregates());
 
     auto aggtable = m_tree->get_aggtable();
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
     for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-        const t_str& aggname = aggschema.m_columns[aggidx];
+        const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
 
-    const t_aggspecvec& aggspecs = m_config.get_aggregates();
+    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
     for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
-        t_ptidx nidx = m_traversal->get_tree_index(ridx);
-        t_ptidx pnidx = m_tree->get_parent_idx(nidx);
+        t_index nidx = m_traversal->get_tree_index(ridx);
+        t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
         t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
@@ -193,19 +193,19 @@ t_ctx1::get_aggregate(t_uindex idx) const {
     return m_config.get_aggregates()[idx];
 }
 
-t_aggspecvec
+std::vector<t_aggspec>
 t_ctx1::get_aggregates() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_config.get_aggregates();
 }
 
-t_tscalvec
-t_ctx1::get_row_path(t_tvidx idx) const {
+std::vector<t_tscalar>
+t_ctx1::get_row_path(t_index idx) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (idx < 0)
-        return t_tscalvec();
+        return std::vector<t_tscalar>();
     return ctx_get_path(m_tree, m_traversal, idx);
 }
 
@@ -213,11 +213,11 @@ void
 t_ctx1::reset_sortby() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    m_sortby = t_sortsvec();
+    m_sortby = std::vector<t_sortspec>();
 }
 
 void
-t_ctx1::sort_by(const t_sortsvec& sortby) {
+t_ctx1::sort_by(const std::vector<t_sortspec>& sortby) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_sortby = sortby;
@@ -241,18 +241,18 @@ t_ctx1::set_depth(t_depth depth) {
     m_depth_set = true;
 }
 
-t_tscalvec
-t_ctx1::get_pkeys(const t_uidxpvec& cells) const {
+std::vector<t_tscalar>
+t_ctx1::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_traversal->validate_cells(cells)) {
-        t_tscalvec rval;
+        std::vector<t_tscalar> rval;
         return rval;
     }
 
-    t_tscalvec rval;
-    t_ptivec tindices(cells.size());
+    std::vector<t_tscalar> rval;
+    std::vector<t_index> tindices(cells.size());
     for (const auto& c : cells) {
         auto ptidx = m_traversal->get_tree_index(c.first);
         auto pkeys = m_tree->get_pkeys(ptidx);
@@ -262,21 +262,21 @@ t_ctx1::get_pkeys(const t_uidxpvec& cells) const {
     return rval;
 }
 
-t_tscalvec
-t_ctx1::get_cell_data(const t_uidxpvec& cells) const {
+std::vector<t_tscalar>
+t_ctx1::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (!m_traversal->validate_cells(cells)) {
-        t_tscalvec rval;
+        std::vector<t_tscalar> rval;
         return rval;
     }
 
-    t_tscalvec rval(cells.size());
+    std::vector<t_tscalar> rval(cells.size());
     t_tscalar empty = mknone();
 
     auto aggtable = m_tree->get_aggtable();
     auto aggcols = aggtable->get_const_columns();
-    const t_aggspecvec& aggspecs = m_config.get_aggregates();
+    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
     for (t_index idx = 0, loop_end = cells.size(); idx < loop_end; ++idx) {
         const auto& cell = cells[idx];
@@ -285,10 +285,10 @@ t_ctx1::get_cell_data(const t_uidxpvec& cells) const {
             continue;
         }
 
-        t_ptidx rptidx = m_traversal->get_tree_index(cell.first);
+        t_index rptidx = m_traversal->get_tree_index(cell.first);
         t_uindex aggidx = cell.second - 1;
 
-        t_ptidx p_rptidx = m_tree->get_parent_idx(rptidx);
+        t_index p_rptidx = m_tree->get_parent_idx(rptidx);
         t_uindex agg_ridx = m_tree->get_aggidx(rptidx);
         t_index agg_pridx
             = p_rptidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(p_rptidx);
@@ -300,7 +300,7 @@ t_ctx1::get_cell_data(const t_uidxpvec& cells) const {
 }
 
 void
-t_ctx1::set_feature_state(t_ctx_feature feature, t_bool state) {
+t_ctx1::set_feature_state(t_ctx_feature feature, bool state) {
     m_features[feature] = state;
 }
 
@@ -322,7 +322,7 @@ t_ctx1::set_minmax_enabled(bool enabled_state) {
     m_tree->set_minmax_enabled(enabled_state);
 }
 
-t_minmaxvec
+std::vector<t_minmax>
 t_ctx1::get_min_max() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -330,26 +330,26 @@ t_ctx1::get_min_max() const {
 }
 
 t_stepdelta
-t_ctx1::get_step_delta(t_tvidx bidx, t_tvidx eidx) {
+t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    bidx = std::min(bidx, t_tvidx(m_traversal->size()));
-    eidx = std::min(eidx, t_tvidx(m_traversal->size()));
+    bidx = std::min(bidx, t_index(m_traversal->size()));
+    eidx = std::min(eidx, t_index(m_traversal->size()));
 
     t_stepdelta rval(m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_tree->clear_deltas();
     return rval;
 }
 
-t_cellupdvec
-t_ctx1::get_cell_delta(t_tvidx bidx, t_tvidx eidx) const {
+std::vector<t_cellupd>
+t_ctx1::get_cell_delta(t_index bidx, t_index eidx) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    eidx = std::min(eidx, t_tvidx(m_traversal->size()));
-    t_cellupdvec rval;
+    eidx = std::min(eidx, t_index(m_traversal->size()));
+    std::vector<t_cellupd> rval;
     const auto& deltas = m_tree->get_deltas();
-    for (t_tvidx idx = bidx; idx < eidx; ++idx) {
-        t_ptidx ptidx = m_traversal->get_tree_index(idx);
+    for (t_index idx = bidx; idx < eidx; ++idx) {
+        t_index ptidx = m_traversal->get_tree_index(idx);
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
         for (auto iter = iterators.first; iter != iterators.second; ++iter) {
             rval.push_back(
@@ -383,16 +383,16 @@ t_ctx1::sidedness() const {
     return 1;
 }
 
-t_streeptr_vec
+std::vector<t_stree*>
 t_ctx1::get_trees() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_streeptr_vec rval(1);
+    std::vector<t_stree*> rval(1);
     rval[0] = m_tree.get();
     return rval;
 }
 
-t_bool
+bool
 t_ctx1::has_deltas() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -421,21 +421,21 @@ t_ctx1::pprint() const {
         std::cout << get_aggregate(idx - 1).agg_str() << ", " << std::endl;
     }
 
-    t_colcptrvec aggcols(m_config.get_num_aggregates());
+    std::vector<const t_column*> aggcols(m_config.get_num_aggregates());
     auto aggtable = m_tree->get_aggtable();
     t_schema aggschema = aggtable->get_schema();
     auto none = mknone();
 
     for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
-        const t_str& aggname = aggschema.m_columns[aggidx];
+        const std::string& aggname = aggschema.m_columns[aggidx];
         aggcols[aggidx] = aggtable->get_const_column(aggname).get();
     }
 
-    const t_aggspecvec& aggspecs = m_config.get_aggregates();
+    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
     for (auto ridx = 0; ridx < get_row_count(); ++ridx) {
-        t_ptidx nidx = m_traversal->get_tree_index(ridx);
-        t_ptidx pnidx = m_tree->get_parent_idx(nidx);
+        t_index nidx = m_traversal->get_tree_index(ridx);
+        t_index pnidx = m_tree->get_parent_idx(nidx);
 
         t_uindex agg_ridx = m_tree->get_aggidx(nidx);
         t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
@@ -457,7 +457,7 @@ t_ctx1::pprint() const {
 }
 
 t_index
-t_ctx1::get_row_idx(const t_tscalvec& path) const {
+t_ctx1::get_row_idx(const std::vector<t_tscalar>& path) const {
     auto nidx = m_tree->resolve_path(0, path);
     if (nidx == INVALID_INDEX) {
         return nidx;
@@ -474,33 +474,33 @@ t_ctx1::get_column_dtype(t_uindex idx) const {
 }
 
 t_depth
-t_ctx1::get_trav_depth(t_tvidx idx) const {
+t_ctx1::get_trav_depth(t_index idx) const {
     return m_traversal->get_depth(idx);
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx1::unity_get_row_data(t_uindex idx) const {
     auto rval = get_data(idx, idx + 1, 0, get_column_count());
     if (rval.empty())
-        return t_tscalvec();
+        return std::vector<t_tscalar>();
 
-    return t_tscalvec(rval.begin() + 1, rval.end());
+    return std::vector<t_tscalar>(rval.begin() + 1, rval.end());
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx1::unity_get_column_data(t_uindex idx) const {
     PSP_COMPLAIN_AND_ABORT("Not implemented");
-    return t_tscalvec();
+    return std::vector<t_tscalar>();
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx1::unity_get_row_path(t_uindex idx) const {
     return get_row_path(idx);
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_ctx1::unity_get_column_path(t_uindex idx) const {
-    return t_tscalvec();
+    return std::vector<t_tscalar>();
 }
 
 t_uindex
@@ -513,19 +513,19 @@ t_ctx1::unity_get_column_depth(t_uindex cidx) const {
     return 0;
 }
 
-t_str
+std::string
 t_ctx1::unity_get_column_name(t_uindex idx) const {
     return m_config.unity_get_column_name(idx);
 }
 
-t_str
+std::string
 t_ctx1::unity_get_column_display_name(t_uindex idx) const {
     return m_config.unity_get_column_display_name(idx);
 }
 
-t_svec
+std::vector<std::string>
 t_ctx1::unity_get_column_names() const {
-    t_svec rv;
+    std::vector<std::string> rv;
 
     for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx) {
         rv.push_back(unity_get_column_name(idx));
@@ -533,9 +533,9 @@ t_ctx1::unity_get_column_names() const {
     return rv;
 }
 
-t_svec
+std::vector<std::string>
 t_ctx1::unity_get_column_display_names() const {
-    t_svec rv;
+    std::vector<std::string> rv;
 
     for (t_uindex idx = 0, loop_end = unity_get_column_count(); idx < loop_end; ++idx) {
         rv.push_back(unity_get_column_display_name(idx));
@@ -553,12 +553,12 @@ t_ctx1::unity_get_row_count() const {
     return get_row_count();
 }
 
-t_bool
+bool
 t_ctx1::unity_get_row_expanded(t_uindex idx) const {
     return m_traversal->get_node_expanded(idx);
 }
 
-t_bool
+bool
 t_ctx1::unity_get_column_expanded(t_uindex idx) const {
     return false;
 }

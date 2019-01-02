@@ -96,9 +96,9 @@ struct t_operator_contains {
 };
 
 template <>
-struct t_operator_begins_with<const t_char*, DTYPE_STR> {
+struct t_operator_begins_with<const char*, DTYPE_STR> {
     inline bool
-    operator()(const t_char* value, const t_char* threshold_value) {
+    operator()(const char* value, const char* threshold_value) {
         t_uindex t_vlen = strlen(value);
         t_uindex t_tlen = strlen(threshold_value);
         return t_vlen < t_tlen ? false : strncmp(value, threshold_value, t_tlen) == 0;
@@ -108,7 +108,7 @@ struct t_operator_begins_with<const t_char*, DTYPE_STR> {
 template <>
 struct t_operator_ends_with<t_uindex, DTYPE_STR> {
     inline bool
-    operator()(const t_char* value, const t_char* threshold_value) {
+    operator()(const char* value, const char* threshold_value) {
         t_uindex t_vlen = strlen(value);
         t_uindex t_tlen = strlen(threshold_value);
 
@@ -120,7 +120,7 @@ struct t_operator_ends_with<t_uindex, DTYPE_STR> {
 template <>
 struct t_operator_contains<t_uindex, DTYPE_STR> {
     inline bool
-    operator()(const t_char* value, const t_char* threshold_value) {
+    operator()(const char* value, const char* threshold_value) {
         return strstr(value, threshold_value) != 0;
     }
 };
@@ -128,27 +128,26 @@ struct t_operator_contains<t_uindex, DTYPE_STR> {
 struct PERSPECTIVE_EXPORT t_fterm_recipe {
     t_fterm_recipe() {}
 
-    t_str m_colname;
+    std::string m_colname;
     t_filter_op m_op;
     t_tscalar m_threshold;
-    t_tscalvec m_bag;
+    std::vector<t_tscalar> m_bag;
 };
-
-typedef std::vector<t_fterm_recipe> t_fterm_recipevec;
 
 struct PERSPECTIVE_EXPORT t_fterm {
     t_fterm();
 
     t_fterm(const t_fterm_recipe& v);
 
-    t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag);
+    t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
+        const std::vector<t_tscalar>& bag);
 
-    t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag,
-        t_bool negated, t_bool is_primary);
+    t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
+        const std::vector<t_tscalar>& bag, bool negated, bool is_primary);
 
     inline bool
     operator()(t_tscalar s) const {
-        t_bool rv;
+        bool rv;
         switch (m_op) {
             case FILTER_OP_NOT_IN: {
                 rv = std::find(m_bag.begin(), m_bag.end(), s) == m_bag.end();
@@ -162,35 +161,33 @@ struct PERSPECTIVE_EXPORT t_fterm {
         return m_negated ? (!rv) : rv;
     }
 
-    t_str get_expr() const;
+    std::string get_expr() const;
 
     void coerce_numeric(t_dtype dtype);
     t_fterm_recipe get_recipe() const;
 
-    t_str m_colname;
+    std::string m_colname;
     t_filter_op m_op;
     t_tscalar m_threshold;
-    t_tscalvec m_bag;
-    t_bool m_negated;
-    t_bool m_is_primary;
-    t_bool m_use_interned;
+    std::vector<t_tscalar> m_bag;
+    bool m_negated;
+    bool m_is_primary;
+    bool m_use_interned;
 };
-
-typedef std::vector<t_fterm> t_ftermvec;
 
 class PERSPECTIVE_EXPORT t_filter {
 public:
     t_filter();
-    t_filter(const t_svec& columns);
+    t_filter(const std::vector<std::string>& columns);
 
-    t_filter(const t_svec& columns, t_uindex bidx, t_uindex eidx);
+    t_filter(const std::vector<std::string>& columns, t_uindex bidx, t_uindex eidx);
 
-    t_filter(const t_svec& columns, t_uindex mask_size);
+    t_filter(const std::vector<std::string>& columns, t_uindex mask_size);
     t_filter(const t_mask& mask);
 
     t_uindex num_cols() const;
     bool has_filter() const;
-    const t_svec& columns() const;
+    const std::vector<std::string>& columns() const;
     t_select_mode mode() const;
     t_uindex bidx() const;
     t_uindex eidx() const;
@@ -202,7 +199,7 @@ private:
     t_select_mode m_mode;
     t_uindex m_bidx;
     t_uindex m_eidx;
-    t_svec m_columns;
+    std::vector<std::string> m_columns;
     t_masksptr m_mask;
 };
 

@@ -14,7 +14,7 @@
 
 namespace perspective {
 struct PERSPECTIVE_EXPORT t_stnode {
-    t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value, t_uint8 depth,
+    t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value, std::uint8_t depth,
         const t_tscalar& sort_value, t_uindex nstrands, t_uindex aggidx);
 
     t_stnode();
@@ -24,7 +24,7 @@ struct PERSPECTIVE_EXPORT t_stnode {
 
     t_uindex m_idx;
     t_uindex m_pidx;
-    t_uint8 m_depth;
+    std::uint8_t m_depth;
     t_tscalar m_value;
     t_tscalar m_sort_value;
     t_uindex m_nstrands;
@@ -53,16 +53,14 @@ struct PERSPECTIVE_EXPORT t_stleaves {
 // the forest of trees
 struct t_cellinfo {
     t_cellinfo();
-    t_cellinfo(t_ptidx idx, t_depth treenum, t_index agg_index, t_uindex ridx, t_uindex cidx);
+    t_cellinfo(t_index idx, t_depth treenum, t_index agg_index, t_uindex ridx, t_uindex cidx);
 
-    t_ptidx m_idx;
+    t_index m_idx;
     t_depth m_treenum;
     t_index m_agg_index;
     t_uindex m_ridx;
     t_uindex m_cidx;
 };
-
-typedef std::vector<t_cellinfo> t_cinfovec;
 
 } // end namespace perspective
 

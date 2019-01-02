@@ -36,19 +36,19 @@ struct PERSPECTIVE_EXPORT t_lstore_recipe {
     t_lstore_recipe();
     t_lstore_recipe(t_uindex capacity);
 
-    t_lstore_recipe(const t_str& dirname, const t_str& colname, t_uindex capacity,
+    t_lstore_recipe(const std::string& dirname, const std::string& colname, t_uindex capacity,
         t_backing_store backing_store);
 
-    t_lstore_recipe(const t_str& dirname, const t_str& colname, t_uindex capacity,
+    t_lstore_recipe(const std::string& dirname, const std::string& colname, t_uindex capacity,
         t_fflag fflags, t_fflag fmode, t_fflag creation_disposition, t_fflag mprot,
         t_fflag mflags, t_backing_store backing_store);
 
-    t_lstore_recipe(const t_str& colname, t_uindex capacity, t_fflag mprot, t_fflag mflags,
-        t_backing_store backing_store);
+    t_lstore_recipe(const std::string& colname, t_uindex capacity, t_fflag mprot,
+        t_fflag mflags, t_backing_store backing_store);
 
-    t_str m_dirname;
-    t_str m_colname;
-    t_str m_fname; // use if from recipe
+    std::string m_dirname;
+    std::string m_colname;
+    std::string m_fname; // use if from recipe
     t_uindex m_capacity;
     t_uindex m_size;
     t_uindex m_alignment;
@@ -58,7 +58,7 @@ struct PERSPECTIVE_EXPORT t_lstore_recipe {
     t_fflag m_mprot;
     t_fflag m_mflags;
     t_backing_store m_backing_store;
-    t_bool m_from_recipe;
+    bool m_from_recipe;
 };
 
 typedef std::vector<t_lstore_recipe> t_lstore_argvec;
@@ -91,8 +91,6 @@ class t_lstore;
 struct t_unlock_store;
 
 class t_lstore;
-typedef std::shared_ptr<t_lstore> t_lstore_sptr;
-typedef std::shared_ptr<const t_lstore> t_lstore_csptr;
 
 class PERSPECTIVE_MPROTECT_EXPORT t_lstore : public t_debug_helper
 
@@ -114,7 +112,7 @@ public:
 
     void init();
 
-    t_szpair capacity_pair() const;
+    std::pair<std::uint32_t, std::uint32_t> capacity_pair() const;
 
     // in bytes
     void set_size(t_uindex idx);
@@ -123,8 +121,8 @@ public:
     void reserve(t_uindex capacity);
     void shrink(t_uindex capacity);
     void copy(t_lstore& out);
-    void load(const t_str& fname);
-    void save(const t_str& fname);
+    void load(const std::string& fname);
+    void save(const std::string& fname);
     void warmup();
 
     t_uindex size() const;
@@ -167,12 +165,12 @@ public:
     template <typename T>
     T* extend(t_uindex idx);
 
-    t_str get_fname() const;
+    std::string get_fname() const;
 
     void* get_ptr(t_uindex offset);
     const void* get_ptr(t_uindex offset) const;
 
-    t_str get_desc_fname() const;
+    std::string get_desc_fname() const;
 
     t_uindex get_version() const;
 
@@ -189,11 +187,11 @@ public:
     template <typename DATA_T>
     void raw_fill(DATA_T v);
 
-    t_str repr() const;
+    std::string repr() const;
 
     void pprint() const;
 
-    t_lstore_sptr clone() const;
+    std::shared_ptr<t_lstore> clone() const;
 
 protected:
     void copy_helper_(const t_lstore& other);
@@ -208,9 +206,9 @@ private:
     void destroy_mapping();
 
     void* m_base;
-    t_str m_dirname;
-    t_str m_fname;
-    t_str m_colname;
+    std::string m_dirname;
+    std::string m_fname;
+    std::string m_colname;
     t_handle m_fd;
     t_handle m_winmapping_handle;
     t_uindex m_capacity;  // in bytes
@@ -222,10 +220,10 @@ private:
     t_fflag m_mprot;
     t_fflag m_mflags;
     t_backing_store m_backing_store;
-    t_bool m_init;
-    t_float64 m_resize_factor;
+    bool m_init;
+    double m_resize_factor;
     t_uindex m_version;
-    t_bool m_from_recipe;
+    bool m_from_recipe;
 
 #ifdef PSP_MPROTECT
     // size of padding + size of fields above
@@ -266,7 +264,7 @@ t_lstore::push_back(T value) {
             m_capacity + m_size + sizeof(T)))); // reserve will multiply by m_resize_factor
 
     PSP_VERBOSE_ASSERT(m_size + sizeof(T) < m_capacity, "Insufficient capacity.");
-    T* ptr = reinterpret_cast<T*>(static_cast<t_uchar*>(m_base) + m_size);
+    T* ptr = reinterpret_cast<T*>(static_cast<unsigned char*>(m_base) + m_size);
     *ptr = value;
     {
         t_unlock_store tmp(this);
@@ -280,7 +278,7 @@ template <typename T>
 T*
 t_lstore::get(t_uindex idx) {
     STORAGE_CHECK_ACCESS_GET(idx);
-    T* ptr = reinterpret_cast<T*>(static_cast<t_uchar*>(m_base) + idx);
+    T* ptr = reinterpret_cast<T*>(static_cast<unsigned char*>(m_base) + idx);
     return ptr;
 }
 
@@ -288,7 +286,7 @@ template <typename T>
 const T*
 t_lstore::get(t_uindex idx) const {
     STORAGE_CHECK_ACCESS_GET(idx);
-    T* ptr = reinterpret_cast<T*>(static_cast<t_uchar*>(m_base) + idx);
+    T* ptr = reinterpret_cast<T*>(static_cast<unsigned char*>(m_base) + idx);
     return ptr;
 }
 
@@ -324,7 +322,7 @@ t_lstore::extend(t_uindex idx) {
         t_unlock_store tmp(this);
         m_size = nsize;
     }
-    T* rv = reinterpret_cast<T*>(static_cast<t_uchar*>(m_base) + osize);
+    T* rv = reinterpret_cast<T*>(static_cast<unsigned char*>(m_base) + osize);
     PSP_CHECK_CAPACITY();
     return rv;
 }
@@ -346,14 +344,14 @@ t_lstore::raw_fill(DATA_T v) {
 struct PERSPECTIVE_EXPORT t_column_recipe {
     t_column_recipe();
     t_dtype m_dtype;
-    t_bool m_isvlen;
+    bool m_isvlen;
     t_lstore_recipe m_data;
     t_lstore_recipe m_vlendata;
     t_lstore_recipe m_extents;
     t_lstore_recipe m_status;
     t_uindex m_vlenidx;
     t_uindex m_size;
-    t_bool m_status_enabled;
+    bool m_status_enabled;
 };
 
 } // end namespace perspective

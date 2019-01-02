@@ -18,7 +18,8 @@ t_sortspec::t_sortspec(t_index agg_index, t_sorttype sort_type)
     , m_sort_type(sort_type)
     , m_sortspec_type(SORTSPEC_TYPE_IDX) {}
 
-t_sortspec::t_sortspec(const t_tscalvec& path, t_index agg_index, t_sorttype sort_type)
+t_sortspec::t_sortspec(
+    const std::vector<t_tscalar>& path, t_index agg_index, t_sorttype sort_type)
     : m_agg_index(agg_index)
     , m_sort_type(sort_type)
     , m_sortspec_type(SORTSPEC_TYPE_PATH)
@@ -39,14 +40,14 @@ t_sortspec::operator!=(const t_sortspec& s2) const {
     return !(*this == s2);
 }
 
-t_sorttvec
-get_sort_orders(const t_sortsvec& vec) {
+std::vector<t_sorttype>
+get_sort_orders(const std::vector<t_sortspec>& vec) {
     if (vec.empty())
-        return t_sorttvec();
+        return std::vector<t_sorttype>();
     auto num = vec.size();
-    t_sorttvec sort_orders(num);
+    std::vector<t_sorttype> sort_orders(num);
 
-    for (t_sortsvec::size_type idx = 0; idx < num; ++idx) {
+    for (std::vector<t_sortspec>::size_type idx = 0; idx < num; ++idx) {
         sort_orders[idx] = vec[idx].m_sort_type;
     }
     return sort_orders;

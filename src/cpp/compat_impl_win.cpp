@@ -19,8 +19,8 @@
 
 namespace perspective {
 
-static void map_file_internal_(const t_str& fname, t_fflag fflag, t_fflag fmode,
-    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, t_bool is_read, t_uindex size,
+static void map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
+    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, bool is_read, t_uindex size,
     t_rfmapping& out);
 
 t_uindex
@@ -51,8 +51,8 @@ t_rfmapping::~t_rfmapping() {
 }
 
 static void
-map_file_internal_(const t_str& fname, t_fflag fflag, t_fflag fmode,
-    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, t_bool is_read, t_uindex size,
+map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
+    t_fflag creation_disposition, t_fflag mprot, t_fflag mflag, bool is_read, t_uindex size,
     t_rfmapping& out) {
     t_file_handle fh(CreateFile(fname.c_str(), fflag, FILE_SHARE_READ,
         0, // security
@@ -104,14 +104,14 @@ map_file_internal_(const t_str& fname, t_fflag fflag, t_fflag fmode,
 }
 
 void
-map_file_read(const t_str& fname, t_rfmapping& out) {
+map_file_read(const std::string& fname, t_rfmapping& out) {
     map_file_internal_(fname, GENERIC_READ,
         0, // unused
         OPEN_EXISTING, PAGE_READONLY, FILE_MAP_READ, true, 0, out);
 }
 
 void
-map_file_write(const t_str& fname, t_uindex size, t_rfmapping& out) {
+map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out) {
     map_file_internal_(fname, GENERIC_READ | GENERIC_WRITE,
         0, // unused
         CREATE_ALWAYS, PAGE_READWRITE, FILE_MAP_WRITE, false, static_cast<size_t>(size), out);
@@ -139,7 +139,7 @@ typedef struct t_win_thrstruct {
 #pragma pack(pop)
 
 static void
-set_thread_name_win(t_uint32 thrid, const t_str& name) {
+set_thread_name_win(t_uint32 thrid, const std::string& name) {
     const DWORD MS_VC_EXCEPTION = 0x406D1388;
     t_win_thrstruct thrstruct;
     thrstruct.dwType = 0x1000;
@@ -157,23 +157,23 @@ set_thread_name_win(t_uint32 thrid, const t_str& name) {
 }
 
 void
-set_thread_name(std::thread& thr, const t_str& name) {
+set_thread_name(std::thread& thr, const std::string& name) {
     auto thrid = ::GetThreadId(static_cast<HANDLE>(thr.native_handle()));
     set_thread_name_win(thrid, name);
 }
 
 void
-set_thread_name(const t_str& name) {
+set_thread_name(const std::string& name) {
     set_thread_name_win(GetCurrentThreadId(), name);
 }
 
 void
-rmfile(const t_str& fname) {
+rmfile(const std::string& fname) {
     DeleteFile(fname.c_str());
 }
 
 void
-launch_proc(const t_str& cmdline) {
+launch_proc(const std::string& cmdline) {
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
 
@@ -204,12 +204,12 @@ launch_proc(const t_str& cmdline) {
     CloseHandle(pi.hThread);
 }
 
-t_str
+std::string
 cwd() {
     char path[FILENAME_MAX];
     auto rc = GetCurrentDirectory(FILENAME_MAX, path);
     PSP_VERBOSE_ASSERT(rc, "Error in cwd");
-    return t_str(path);
+    return std::string(path);
 }
 
 t_int64

@@ -16,16 +16,14 @@
 namespace perspective {
 
 class t_schema_column {
-    t_schema_column(
-        const t_str& tblname, const t_str& name, const t_str& altname, t_dtype dtype);
+    t_schema_column(const std::string& tblname, const std::string& name,
+        const std::string& altname, t_dtype dtype);
 
 private:
-    t_str m_tblname;
-    t_str m_name;
-    t_str m_altname;
+    std::string m_tblname;
+    std::string m_name;
+    std::string m_altname;
     t_dtype m_dtype;
 };
-
-typedef std::vector<t_schema_column> t_scolvec;
 
 } // end namespace perspective

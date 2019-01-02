@@ -20,31 +20,31 @@
 #include <locale>
 
 namespace perspective {
-inline t_uint32
-lower32(t_uint64 v) {
-    return static_cast<t_uint32>(v);
+inline std::uint32_t
+lower32(std::uint64_t v) {
+    return static_cast<std::uint32_t>(v);
 }
 
-inline t_uint32
-upper32(t_uint64 v) {
+inline std::uint32_t
+upper32(std::uint64_t v) {
     return v >> 32;
 }
 
 template <typename T>
-t_str
-str_(const T& value, const t_str& fill, t_int32 width) {
+std::string
+str_(const T& value, const std::string& fill, std::int32_t width) {
     std::stringstream ss;
     ss << std::setfill('0') << std::setw(width) << value;
     return ss.str();
 }
 
 template <typename T>
-t_str
+std::string
 str_(const T& value) {
     return str_(value, "0", 2);
 }
 
-t_str unique_path(const t_str& path_prefix);
+std::string unique_path(const std::string& path_prefix);
 
 template <typename DATA_T>
 void
@@ -63,48 +63,48 @@ vec_to_set(const std::vector<DATA_T>& v, std::set<DATA_T>& out_s) {
 }
 
 inline void
-ltrim_inplace(t_str& s) {
+ltrim_inplace(std::string& s) {
     s.erase(s.begin(),
         std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
 }
 
 inline void
-rtrim_inplace(t_str& s) {
+rtrim_inplace(std::string& s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace)))
                 .base(),
         s.end());
 }
 
 inline void
-trim_inplace(t_str& s) {
+trim_inplace(std::string& s) {
     ltrim_inplace(s);
     rtrim_inplace(s);
 }
 
-inline t_str
-ltrimmed(t_str s) {
+inline std::string
+ltrimmed(std::string s) {
     ltrim_inplace(s);
     return s;
 }
 
-inline t_str
-rtrimmed(t_str s) {
+inline std::string
+rtrimmed(std::string s) {
     rtrim_inplace(s);
     return s;
 }
 
-inline t_str
-trimmed(t_str s) {
+inline std::string
+trimmed(std::string s) {
     trim_inplace(s);
     return s;
 }
 
-inline t_svec
-split(const t_str& s, char delim) {
-    t_svec elems;
+inline std::vector<std::string>
+split(const std::string& s, char delim) {
+    std::vector<std::string> elems;
     std::stringstream ss;
     ss.str(s);
-    t_str item;
+    std::string item;
     while (std::getline(ss, item, delim)) {
         if (!item.empty())
             elems.push_back(item);
@@ -156,15 +156,15 @@ struct t_ns_timer {
     }
 };
 
-inline t_str
-join_str(const t_svec& terms, const t_str& sep) {
+inline std::string
+join_str(const std::vector<std::string>& terms, const std::string& sep) {
     if (terms.empty())
         return "";
 
     if (terms.size() == 1)
         return terms[0];
 
-    t_str rv;
+    std::string rv;
 
     for (size_t idx = 0, loop_end = terms.size() - 1; idx < loop_end; ++idx) {
         rv = rv + terms[idx] + sep;

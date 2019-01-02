@@ -16,11 +16,11 @@ namespace perspective {
 t_tdelta::t_tdelta()
     : v(0) {}
 
-t_tdelta::t_tdelta(t_int64 v)
+t_tdelta::t_tdelta(std::int64_t v)
     : v(v) {}
 
 t_tdelta&
-t_tdelta::operator*=(t_int64 multiplier) {
+t_tdelta::operator*=(std::int64_t multiplier) {
     v *= multiplier;
     return *this;
 }
@@ -28,13 +28,13 @@ t_tdelta::operator*=(t_int64 multiplier) {
 t_time::t_time()
     : m_storage(0) {}
 
-t_time::t_time(t_int64 raw_val)
+t_time::t_time(std::int64_t raw_val)
     : m_storage(raw_val) {}
 
 t_time::t_time(int year, int month, int day, int hour, int min, int sec)
     : m_storage(to_gmtime(year, month, day, hour, min, sec) * 1000000LL) {}
 
-t_int64
+std::int64_t
 t_time::raw_value() const {
     return m_storage;
 }
@@ -74,14 +74,14 @@ t_time::as_tm(struct tm& out) const {
     return gmtime(out, as_seconds(), 0) == 1;
 }
 
-t_int32
+std::int32_t
 isleap(long int year) {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) ? 1 : 0;
 }
 
-t_int32
-t_time::gmtime(struct tm& out, t_int64 secs, t_int32 offset) const {
-    t_int64 days, rem, y;
+std::int32_t
+t_time::gmtime(struct tm& out, std::int64_t secs, std::int32_t offset) const {
+    std::int64_t days, rem, y;
     const unsigned short int* ip;
 
     days = secs / SECS_PER_DAY;
@@ -134,49 +134,49 @@ t_time::gmtime(struct tm& out, t_int64 secs, t_int32 offset) const {
     return 1;
 }
 
-t_int32
+std::int32_t
 t_time::year(const struct tm& t) const {
     return t.tm_year + 1900;
 }
-t_int32
+std::int32_t
 t_time::month(const struct tm& t) const {
     return t.tm_mon + 1;
 }
-t_int32
+std::int32_t
 t_time::day(const struct tm& t) const {
     return t.tm_mday;
 }
-t_int32
+std::int32_t
 t_time::hours(const struct tm& t) const {
     return t.tm_hour;
 }
-t_int32
+std::int32_t
 t_time::minutes(const struct tm& t) const {
     return t.tm_min;
 }
-t_int32
+std::int32_t
 t_time::seconds(const struct tm& t) const {
     return t.tm_sec;
 }
-t_int32
+std::int32_t
 t_time::microseconds() const // component
 {
-    t_int32 micros = m_storage % 1000000;
+    std::int32_t micros = m_storage % 1000000;
     return micros + ((micros >> 31) & 1000000);
 }
 
-t_int64
+std::int64_t
 t_time::as_seconds() const {
     if (m_storage < 0 && m_storage % 1000000)
         return m_storage / 1000000 - 1;
     return m_storage / 1000000;
 }
 
-t_str
+std::string
 t_time::str(const struct tm& t) const {
     std::stringstream ss;
 
-    t_float64 s = seconds(t) + microseconds() / 1000000.0;
+    double s = seconds(t) + microseconds() / 1000000.0;
 
     ss << year(t) << "-" << str_(month(t)) << "-" << str_(day(t)) << " " << str_(hours(t))
        << ":" << str_(minutes(t)) << ":" << std::setfill('0') << std::setw(6) << std::fixed
@@ -185,9 +185,9 @@ t_time::str(const struct tm& t) const {
     return ss.str();
 }
 
-t_int32
-days_before_year(t_int32 year) {
-    t_int32 y = year - 1;
+std::int32_t
+days_before_year(std::int32_t year) {
+    std::int32_t y = year - 1;
     if (y >= 0)
         return y * 365 + y / 4 - y / 100 + y / 400;
     else {
@@ -195,24 +195,25 @@ days_before_year(t_int32 year) {
     }
 }
 
-t_int32
-days_before_month(t_int32 year, t_int32 month) {
+std::int32_t
+days_before_month(std::int32_t year, std::int32_t month) {
     if (month < 1 || month > 12)
         return 0;
     return __mon_yday[isleap(year)][month - 1];
 }
 
-t_int32
-ymd_to_ord(t_int32 year, t_int32 month, t_int32 day) {
+std::int32_t
+ymd_to_ord(std::int32_t year, std::int32_t month, std::int32_t day) {
     return days_before_year(year) + days_before_month(year, month) + day;
 }
 
-t_int64
-to_gmtime(t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec) {
-    static t_int32 EPOCH_ORD = ymd_to_ord(1970, 1, 1);
-    t_int64 days = ymd_to_ord(year, month, day) - EPOCH_ORD;
-    t_int64 res = ((days * 24 + hour) * 60 + min) * 60 + sec;
-    return static_cast<t_int64>(res);
+std::int64_t
+to_gmtime(std::int32_t year, std::int32_t month, std::int32_t day, std::int32_t hour,
+    std::int32_t min, std::int32_t sec) {
+    static std::int32_t EPOCH_ORD = ymd_to_ord(1970, 1, 1);
+    std::int64_t days = ymd_to_ord(year, month, day) - EPOCH_ORD;
+    std::int64_t res = ((days * 24 + hour) * 60 + min) * 60 + sec;
+    return static_cast<std::int64_t>(res);
 }
 
 t_time&

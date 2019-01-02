@@ -48,12 +48,12 @@ t_vocab::rebuild_map() {
 void
 t_vocab::reserve(size_t total_string_size, size_t string_count) {
     m_vlendata->reserve(total_string_size);
-    m_extents->reserve(sizeof(t_uidxpair) * string_count);
+    m_extents->reserve(sizeof(std::pair<t_uindex, t_uindex>) * string_count);
     rebuild_map();
 }
 
-t_bool
-t_vocab::string_exists(const char* c, t_stridx& interned) const {
+bool
+t_vocab::string_exists(const char* c, t_uindex& interned) const {
     auto iter = m_map.find(c);
 
     if (iter == m_map.end())
@@ -80,11 +80,11 @@ t_vocab::get_interned(const char* s) {
         bidx = m_vlendata->size();
         eidx = bidx + len;
         const void* obase = m_vlendata->get_nth<const char>(0);
-        const void* oebase = m_extents->get_nth<t_uidxpair>(0);
+        const void* oebase = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
         m_vlendata->push_back(static_cast<const void*>(s), len);
-        m_extents->push_back(t_uidxpair(bidx, eidx));
+        m_extents->push_back(std::pair<t_uindex, t_uindex>(bidx, eidx));
         const void* nbase = m_vlendata->get_nth<const char>(0);
-        const void* nebase = m_extents->get_nth<t_uidxpair>(0);
+        const void* nebase = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(0);
         if ((obase == nbase) && (oebase == nebase)) {
             m_map[unintern_c(idx)] = idx;
         } else {
@@ -95,7 +95,7 @@ t_vocab::get_interned(const char* s) {
     }
 #ifndef PSP_ENABLE_WASM
 #ifdef PSP_COLUMN_VERIFY
-    if (t_str(s) == "") {
+    if (std::string(s) == "") {
         PSP_VERBOSE_ASSERT(idx == 0, "Expected empty string to map to 0");
     }
 #endif
@@ -109,7 +109,7 @@ t_vocab::genidx() {
 }
 
 void
-t_vocab::init(t_bool from_recipe) {
+t_vocab::init(bool from_recipe) {
     m_vlendata->init();
     m_extents->init();
     if (from_recipe) {
@@ -121,27 +121,27 @@ t_vocab::init(t_bool from_recipe) {
 }
 
 t_uindex
-t_vocab::get_interned(const t_str& s) {
+t_vocab::get_interned(const std::string& s) {
     return get_interned(s.c_str());
 }
 
 void
 t_vocab::verify() const {
-    std::map<t_stridx, const char*> rlookup;
+    std::map<t_uindex, const char*> rlookup;
 
     for (const auto& kv : m_map) {
         rlookup[kv.second] = kv.first;
     }
 
 #ifndef PSP_ENABLE_WASM
-    auto zero = rlookup.find(t_stridx(0));
+    auto zero = rlookup.find(t_uindex(0));
     PSP_VERBOSE_ASSERT(zero != rlookup.end(), "0 Not found");
-    PSP_VERBOSE_ASSERT(t_str(zero->second) == "", "0 mapped to unknown");
+    PSP_VERBOSE_ASSERT(std::string(zero->second) == "", "0 mapped to unknown");
 #endif
 
-    std::unordered_set<t_str> seen;
+    std::unordered_set<std::string> seen;
 #ifndef PSP_ENABLE_WASM
-    seen.insert(t_str(""));
+    seen.insert(std::string(""));
 #endif
 
     for (t_uindex idx = 1; idx < m_vlenidx; ++idx) {
@@ -149,11 +149,11 @@ t_vocab::verify() const {
         ss << "idx => " << idx << " not found";
         PSP_VERBOSE_ASSERT(rlookup.find(idx) != rlookup.end(), ss.str());
 
-        t_str curstr = t_str(rlookup.at(idx));
+        std::string curstr = std::string(rlookup.at(idx));
 
         PSP_VERBOSE_ASSERT(seen.find(curstr) == seen.end(), "string encountered again");
 
-        PSP_VERBOSE_ASSERT(t_str(unintern_c(idx)) == curstr, "String mismatch");
+        PSP_VERBOSE_ASSERT(std::string(unintern_c(idx)) == curstr, "String mismatch");
     }
 }
 
@@ -161,7 +161,8 @@ void
 t_vocab::verify_size() const {
     PSP_VERBOSE_ASSERT(m_vlenidx == m_map.size(), "Size and vlenidx size dont line up");
 
-    PSP_VERBOSE_ASSERT(m_vlenidx * sizeof(t_stridxpair) <= m_extents->capacity(),
+    PSP_VERBOSE_ASSERT(
+        m_vlenidx * sizeof(std::pair<t_uindex, t_uindex>) <= m_extents->capacity(),
         "Not enough space reserved for extents");
 }
 
@@ -200,7 +201,8 @@ t_vocab::pprint_vocabulary() const {
 
 const char*
 t_vocab::unintern_c(t_uindex idx) const {
-    const t_uidxpair* p = m_extents->get_nth<t_uidxpair>(idx);
+    const std::pair<t_uindex, t_uindex>* p
+        = m_extents->get_nth<std::pair<t_uindex, t_uindex>>(idx);
     const char* rv = static_cast<const char*>(m_vlendata->get_ptr(p->first));
     return rv;
 }
@@ -223,17 +225,17 @@ t_vocab::get_extents_base() {
     return m_extents->get<t_extent_pair>(0);
 }
 
-t_uchar*
+unsigned char*
 t_vocab::get_vlen_base() {
-    return m_vlendata->get<t_uchar>(0);
+    return m_vlendata->get<unsigned char>(0);
 }
 
-t_lstore_sptr
+std::shared_ptr<t_lstore>
 t_vocab::get_vlendata() {
     return m_vlendata;
 }
 
-t_lstore_sptr
+std::shared_ptr<t_lstore>
 t_vocab::get_extents() {
     return m_extents;
 }

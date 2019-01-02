@@ -18,26 +18,24 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_dep_recipe {
     t_dep_recipe() {}
-    t_str m_name;
-    t_str m_disp_name;
+    std::string m_name;
+    std::string m_disp_name;
     t_deptype m_type;
     t_tscalar m_imm;
     t_dtype m_dtype;
 };
 
-typedef std::vector<t_dep_recipe> t_dep_recipevec;
-
 class PERSPECTIVE_EXPORT t_dep {
 public:
     t_dep(const t_dep_recipe& v);
-    t_dep(const t_str& name, t_deptype type);
+    t_dep(const std::string& name, t_deptype type);
 
-    t_dep(const t_str& name, const t_str& disp_name, t_deptype type, t_dtype dtype);
+    t_dep(const std::string& name, const std::string& disp_name, t_deptype type, t_dtype dtype);
 
     t_dep(t_tscalar dep);
 
-    const t_str& name() const;
-    const t_str& disp_name() const;
+    const std::string& name() const;
+    const std::string& disp_name() const;
 
     t_deptype type() const;
     t_tscalar imm() const;
@@ -45,13 +43,11 @@ public:
     t_dep_recipe get_recipe() const;
 
 private:
-    t_str m_name;
-    t_str m_disp_name;
+    std::string m_name;
+    std::string m_disp_name;
     t_deptype m_type;
     t_tscalar m_imm;
     t_dtype m_dtype;
 };
-
-typedef std::vector<t_dep> t_depvec;
 
 } // end namespace perspective

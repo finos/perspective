@@ -24,14 +24,12 @@ struct PERSPECTIVE_EXPORT t_hist_bucket {
     t_uindex m_count;
 };
 
-typedef std::vector<t_hist_bucket> t_hist_bucket_vec;
-
 struct PERSPECTIVE_EXPORT t_histogram {
 
     t_histogram();
     t_histogram(t_uindex nbuckets);
 
-    t_hist_bucket_vec m_buckets;
+    std::vector<t_hist_bucket> m_buckets;
 };
 
 } // end namespace perspective

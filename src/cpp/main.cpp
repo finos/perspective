@@ -36,12 +36,12 @@ typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
  * Data Loading
  */
 
-t_sortsvec
+std::vector<t_sortspec>
 _get_sort(val j_sortby) {
-    t_sortsvec svec{};
+    std::vector<t_sortspec> svec{};
     std::vector<val> sortbys = vecFromJSArray<val>(j_sortby);
     for (auto idx = 0; idx < sortbys.size(); ++idx) {
-        std::vector<t_int32> sortby = vecFromJSArray<t_int32>(sortbys[idx]);
+        std::vector<std::int32_t> sortby = vecFromJSArray<std::int32_t>(sortbys[idx]);
         t_sorttype sorttype;
         switch (sortby[1]) {
             case 0:
@@ -76,9 +76,9 @@ _get_sort(val j_sortby) {
  * -------
  *
  */
-t_ftermvec
+std::vector<t_fterm>
 _get_fterms(t_schema schema, val j_filters) {
-    t_ftermvec fvec{};
+    std::vector<t_fterm> fvec{};
     std::vector<val> filters = vecFromJSArray<val>(j_filters);
     for (auto fidx = 0; fidx < filters.size(); ++fidx) {
         std::vector<val> filter = vecFromJSArray<val>(filters[fidx]);
@@ -88,7 +88,7 @@ _get_fterms(t_schema schema, val j_filters) {
         switch (comp) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
-                t_tscalvec terms{};
+                std::vector<t_tscalar> terms{};
                 std::vector<std::string> j_terms = vecFromJSArray<std::string>(filter[2]);
                 for (auto jidx = 0; jidx < j_terms.size(); ++jidx) {
                     terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
@@ -99,21 +99,21 @@ _get_fterms(t_schema schema, val j_filters) {
                 t_tscalar term;
                 switch (schema.get_dtype(coln)) {
                     case DTYPE_INT32:
-                        term = mktscalar(filter[2].as<t_int32>());
+                        term = mktscalar(filter[2].as<std::int32_t>());
                         break;
                     case DTYPE_INT64:
                     case DTYPE_FLOAT64:
-                        term = mktscalar(filter[2].as<t_float64>());
+                        term = mktscalar(filter[2].as<double>());
                         break;
                     case DTYPE_BOOL:
                         term = mktscalar(filter[2].as<bool>());
                         break;
                     case DTYPE_DATE:
-                        term = mktscalar(t_date(filter[2].as<t_int32>()));
+                        term = mktscalar(t_date(filter[2].as<std::int32_t>()));
                         break;
                     case DTYPE_TIME:
-                        term = mktscalar(t_time(static_cast<t_int64>(
-                            filter[2].call<val>("getTime").as<t_float64>())));
+                        term = mktscalar(t_time(static_cast<std::int64_t>(
+                            filter[2].call<val>("getTime").as<double>())));
                         break;
                     default: {
                         term
@@ -121,7 +121,7 @@ _get_fterms(t_schema schema, val j_filters) {
                     }
                 }
 
-                fvec.push_back(t_fterm(coln, comp, term, t_tscalvec()));
+                fvec.push_back(t_fterm(coln, comp, term, std::vector<t_tscalar>()));
             }
         }
     }
@@ -139,16 +139,16 @@ _get_fterms(t_schema schema, val j_filters) {
  * -------
  *
  */
-t_aggspecvec
+std::vector<t_aggspec>
 _get_aggspecs(val j_aggs) {
     std::vector<val> aggs = vecFromJSArray<val>(j_aggs);
-    t_aggspecvec aggspecs;
+    std::vector<t_aggspec> aggspecs;
     for (auto idx = 0; idx < aggs.size(); ++idx) {
         std::vector<val> agg_row = vecFromJSArray<val>(aggs[idx]);
         std::string name = agg_row[0].as<std::string>();
         t_aggtype aggtype = agg_row[1].as<t_aggtype>();
 
-        t_depvec dependencies;
+        std::vector<t_dep> dependencies;
         std::vector<val> deps = vecFromJSArray<val>(agg_row[2]);
         for (auto didx = 0; didx < deps.size(); ++didx) {
             if (deps[didx].isUndefined()) {
@@ -173,8 +173,9 @@ _get_aggspecs(val j_aggs) {
 // Date parsing
 t_date
 jsdate_to_t_date(val date) {
-    return t_date(date.call<val>("getFullYear").as<t_int32>(),
-        date.call<val>("getMonth").as<t_int32>(), date.call<val>("getDate").as<t_int32>());
+    return t_date(date.call<val>("getFullYear").as<std::int32_t>(),
+        date.call<val>("getMonth").as<std::int32_t>(),
+        date.call<val>("getDate").as<std::int32_t>());
 }
 
 val
@@ -228,12 +229,12 @@ scalar_to_val(const t_tscalar scalar) {
         case DTYPE_INT8:
         case DTYPE_INT16:
         case DTYPE_INT32: {
-            return val(static_cast<t_int32>(scalar.to_int64()));
+            return val(static_cast<std::int32_t>(scalar.to_int64()));
         }
         case DTYPE_UINT64:
         case DTYPE_INT64: {
             // This could potentially lose precision
-            return val(static_cast<t_int32>(scalar.to_int64()));
+            return val(static_cast<std::int32_t>(scalar.to_int64()));
         }
         case DTYPE_NONE: {
             return val::null();
@@ -247,7 +248,7 @@ scalar_to_val(const t_tscalar scalar) {
 }
 
 val
-scalar_vec_to_val(const t_tscalvec& scalars, t_uint32 idx) {
+scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
     return scalar_to_val(scalars[idx]);
 }
 
@@ -267,7 +268,7 @@ namespace arrow {
 
 void
 vecFromTypedArray(
-    const val& typedArray, void* data, t_int32 length, const char* destType = nullptr) {
+    const val& typedArray, void* data, std::int32_t length, const char* destType = nullptr) {
     val memory = val::module_property("buffer");
     if (destType == nullptr) {
         val memoryView = typedArray["constructor"].new_(
@@ -281,44 +282,44 @@ vecFromTypedArray(
 }
 
 void
-fill_col_valid(val dcol, t_col_sptr col) {
+fill_col_valid(val dcol, std::shared_ptr<t_column> col) {
     // dcol should be the Uint8Array containing the null bitmap
     t_uindex nrows = col->size();
 
     // arrow packs bools into a bitmap
     for (auto i = 0; i < nrows; ++i) {
-        t_uint8 elem = dcol[i / 8].as<t_uint8>();
-        t_bool v = elem & (1 << (i % 8));
+        std::uint8_t elem = dcol[i / 8].as<std::uint8_t>();
+        bool v = elem & (1 << (i % 8));
         col->set_valid(i, v);
     }
 }
 
 void
-fill_col_dict(val dictvec, t_col_sptr col) {
+fill_col_dict(val dictvec, std::shared_ptr<t_column> col) {
     // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it support
     // other Vector types?
     val vdata = dictvec["values"];
-    t_int32 vsize = vdata["length"].as<t_int32>();
-    std::vector<t_uchar> data;
+    std::int32_t vsize = vdata["length"].as<std::int32_t>();
+    std::vector<unsigned char> data;
     data.reserve(vsize);
     data.resize(vsize);
     vecFromTypedArray(vdata, data.data(), vsize);
 
     val voffsets = dictvec["valueOffsets"];
-    t_int32 osize = voffsets["length"].as<t_int32>();
-    std::vector<t_int32> offsets;
+    std::int32_t osize = voffsets["length"].as<std::int32_t>();
+    std::vector<std::int32_t> offsets;
     offsets.reserve(osize);
     offsets.resize(osize);
     vecFromTypedArray(voffsets, offsets.data(), osize);
 
     // Get number of dictionary entries
-    t_uint32 dsize = dictvec["length"].as<t_uint32>();
+    std::uint32_t dsize = dictvec["length"].as<std::uint32_t>();
 
     t_vocab* vocab = col->_get_vocab();
-    t_str elem;
+    std::string elem;
 
-    for (t_uint32 i = 0; i < dsize; ++i) {
-        t_int32 bidx = offsets[i];
+    for (std::uint32_t i = 0; i < dsize; ++i) {
+        std::int32_t bidx = offsets[i];
         std::size_t es = offsets[i + 1] - bidx;
         elem.assign(reinterpret_cast<char*>(data.data()) + bidx, es);
         t_uindex idx = vocab->get_interned(elem);
@@ -340,8 +341,8 @@ val Float64Array = val::global("Float64Array");
 // Given a column index, serialize data to TypedArray
 template <typename T>
 val
-col_to_js_typed_array(T ctx, t_tvidx idx) {
-    t_tscalvec data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
+col_to_js_typed_array(T ctx, t_index idx) {
+    std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
     auto dtype = ctx->get_column_dtype(idx);
     int data_size = data.size();
     val constructor = val::undefined();
@@ -349,31 +350,31 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
 
     switch (dtype) {
         case DTYPE_INT8: {
-            data_size *= sizeof(t_int8);
-            sentinel = val(std::numeric_limits<t_int8>::lowest());
+            data_size *= sizeof(std::int8_t);
+            sentinel = val(std::numeric_limits<std::int8_t>::lowest());
             constructor = js_typed_array::Int8Array;
         } break;
         case DTYPE_INT16: {
-            data_size *= sizeof(t_int16);
-            sentinel = val(std::numeric_limits<t_int16>::lowest());
+            data_size *= sizeof(std::int16_t);
+            sentinel = val(std::numeric_limits<std::int16_t>::lowest());
             constructor = js_typed_array::Int16Array;
         } break;
         case DTYPE_INT32:
         case DTYPE_INT64: {
             // scalar_to_val converts int64 into int32
-            data_size *= sizeof(t_int32);
-            sentinel = val(std::numeric_limits<t_int32>::lowest());
+            data_size *= sizeof(std::int32_t);
+            sentinel = val(std::numeric_limits<std::int32_t>::lowest());
             constructor = js_typed_array::Int32Array;
         } break;
         case DTYPE_FLOAT32: {
-            data_size *= sizeof(t_float32);
-            sentinel = val(std::numeric_limits<t_float32>::lowest());
+            data_size *= sizeof(float);
+            sentinel = val(std::numeric_limits<float>::lowest());
             constructor = js_typed_array::Float32Array;
         } break;
         case DTYPE_TIME:
         case DTYPE_FLOAT64: {
-            sentinel = val(std::numeric_limits<t_float64>::lowest());
-            data_size *= sizeof(t_float64);
+            sentinel = val(std::numeric_limits<double>::lowest());
+            data_size *= sizeof(double);
             constructor = js_typed_array::Float64Array;
         } break;
         default:
@@ -396,7 +397,8 @@ col_to_js_typed_array(T ctx, t_tvidx idx) {
 }
 
 void
-_fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_numeric(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -404,19 +406,19 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
 
         switch (type) {
             case DTYPE_INT8: {
-                arrow::vecFromTypedArray(data, col->get_nth<t_int8>(0), nrows);
+                arrow::vecFromTypedArray(data, col->get_nth<std::int8_t>(0), nrows);
             } break;
             case DTYPE_INT16: {
-                arrow::vecFromTypedArray(data, col->get_nth<t_int16>(0), nrows);
+                arrow::vecFromTypedArray(data, col->get_nth<std::int16_t>(0), nrows);
             } break;
             case DTYPE_INT32: {
-                arrow::vecFromTypedArray(data, col->get_nth<t_int32>(0), nrows);
+                arrow::vecFromTypedArray(data, col->get_nth<std::int32_t>(0), nrows);
             } break;
             case DTYPE_FLOAT32: {
-                arrow::vecFromTypedArray(data, col->get_nth<t_float32>(0), nrows);
+                arrow::vecFromTypedArray(data, col->get_nth<float>(0), nrows);
             } break;
             case DTYPE_FLOAT64: {
-                arrow::vecFromTypedArray(data, col->get_nth<t_float64>(0), nrows);
+                arrow::vecFromTypedArray(data, col->get_nth<double>(0), nrows);
             } break;
             default:
                 break;
@@ -435,10 +437,10 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
 
             switch (type) {
                 case DTYPE_INT8: {
-                    col->set_nth(i, item.as<t_int8>());
+                    col->set_nth(i, item.as<std::int8_t>());
                 } break;
                 case DTYPE_INT16: {
-                    col->set_nth(i, item.as<t_int16>());
+                    col->set_nth(i, item.as<std::int16_t>());
                 } break;
                 case DTYPE_INT32: {
                     /*
@@ -447,19 +449,20 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
                     inference
                     // checked the entire column/we could reset parsing.
                     
-                    t_float64 fval = item.as<t_float64>();
+
+                    double fval = item.as<double>();
                     if (fval > 2147483647 || fval < -2147483648) {
                         col->set_nth(i, fval);
                     } else {
                     }*/
 
-                    col->set_nth(i, item.as<t_int32>());
+                    col->set_nth(i, item.as<std::int32_t>());
                 } break;
                 case DTYPE_FLOAT32: {
-                    col->set_nth(i, item.as<t_float32>());
+                    col->set_nth(i, item.as<float>());
                 } break;
                 case DTYPE_FLOAT64: {
-                    col->set_nth(i, item.as<t_float64>());
+                    col->set_nth(i, item.as<double>());
                 } break;
                 default:
                     break;
@@ -469,13 +472,14 @@ _fill_col_numeric(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bo
 }
 
 void
-_fill_col_int64(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
         val data = accessor["values"];
         // arrow packs 64 bit into two 32 bit ints
-        arrow::vecFromTypedArray(data, col->get_nth<t_int64>(0), nrows * 2);
+        arrow::vecFromTypedArray(data, col->get_nth<std::int64_t>(0), nrows * 2);
     } else {
         PSP_COMPLAIN_AND_ABORT(
             "Unreachable - can't have DTYPE_INT64 column from non-arrow data");
@@ -483,7 +487,8 @@ _fill_col_int64(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool
 }
 
 void
-_fill_col_time(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_time(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -491,17 +496,17 @@ _fill_col_time(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
         // arrow packs 64 bit into two 32 bit ints
         arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
 
-        t_int8 unit = accessor["type"]["unit"].as<t_int8>();
+        std::int8_t unit = accessor["type"]["unit"].as<std::int8_t>();
         if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
             // Slow path - need to convert each value
-            t_int64 factor = 1;
+            std::int64_t factor = 1;
             if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
                 factor = 1e6;
             } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
                 factor = 1e3;
             }
             for (auto i = 0; i < nrows; ++i) {
-                col->set_nth<t_int64>(i, *(col->get_nth<t_int64>(i)) / factor);
+                col->set_nth<std::int64_t>(i, *(col->get_nth<std::int64_t>(i)) / factor);
             }
         }
     } else {
@@ -516,15 +521,16 @@ _fill_col_time(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
                 continue;
             }
 
-            auto elem = static_cast<t_int64>(
-                item.call<val>("getTime").as<t_float64>()); // dcol[i].as<T>();
+            auto elem = static_cast<std::int64_t>(
+                item.call<val>("getTime").as<double>()); // dcol[i].as<T>();
             col->set_nth(i, elem);
         }
     }
 }
 
 void
-_fill_col_date(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_date(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -532,17 +538,17 @@ _fill_col_date(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
         // // arrow packs 64 bit into two 32 bit ints
         // arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
 
-        // t_int8 unit = dcol["type"]["unit"].as<t_int8>();
+        // std::int8_t unit = dcol["type"]["unit"].as<std::int8_t>();
         // if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
         //     // Slow path - need to convert each value
-        //     t_int64 factor = 1;
+        //     std::int64_t factor = 1;
         //     if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
         //         factor = 1e6;
         //     } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
         //         factor = 1e3;
         //     }
         //     for (auto i = 0; i < nrows; ++i) {
-        //         col->set_nth<t_int32>(i, *(col->get_nth<t_int32>(i)) / factor);
+        //         col->set_nth<std::int32_t>(i, *(col->get_nth<std::int32_t>(i)) / factor);
         //     }
         // }
     } else {
@@ -563,15 +569,16 @@ _fill_col_date(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
 }
 
 void
-_fill_col_bool(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
         // arrow packs bools into a bitmap
         val data = accessor["values"];
         for (auto i = 0; i < nrows; ++i) {
-            t_uint8 elem = data[i / 8].as<t_uint8>();
-            t_bool v = elem & (1 << (i % 8));
+            std::uint8_t elem = data[i / 8].as<std::uint8_t>();
+            bool v = elem & (1 << (i % 8));
             col->set_nth(i, v);
         }
     } else {
@@ -586,19 +593,20 @@ _fill_col_bool(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool 
                 continue;
             }
 
-            auto elem = item.as<t_bool>();
+            auto elem = item.as<bool>();
             col->set_nth(i, elem);
         }
     }
 }
 
 void
-_fill_col_string(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_bool is_arrow) {
+_fill_col_string(val accessor, std::shared_ptr<t_column> col, std::int32_t cidx, t_dtype type,
+    bool is_arrow) {
 
     t_uindex nrows = col->size();
 
     if (is_arrow) {
-        if (accessor["constructor"]["name"].as<t_str>() == "DictionaryVector") {
+        if (accessor["constructor"]["name"].as<std::string>() == "DictionaryVector") {
 
             val dictvec = accessor["dictionary"];
             arrow::fill_col_dict(dictvec, col);
@@ -610,27 +618,27 @@ _fill_col_string(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_boo
             val vkeys = accessor["indices"]["values"];
             arrow::vecFromTypedArray(vkeys, col->get_nth<t_uindex>(0), nrows, "Uint32Array");
 
-        } else if (accessor["constructor"]["name"].as<t_str>() == "Utf8Vector"
-            || accessor["constructor"]["name"].as<t_str>() == "BinaryVector") {
+        } else if (accessor["constructor"]["name"].as<std::string>() == "Utf8Vector"
+            || accessor["constructor"]["name"].as<std::string>() == "BinaryVector") {
 
             val vdata = accessor["values"];
-            t_int32 vsize = vdata["length"].as<t_int32>();
-            std::vector<t_uint8> data;
+            std::int32_t vsize = vdata["length"].as<std::int32_t>();
+            std::vector<std::uint8_t> data;
             data.reserve(vsize);
             data.resize(vsize);
             arrow::vecFromTypedArray(vdata, data.data(), vsize);
 
             val voffsets = accessor["valueOffsets"];
-            t_int32 osize = voffsets["length"].as<t_int32>();
-            std::vector<t_int32> offsets;
+            std::int32_t osize = voffsets["length"].as<std::int32_t>();
+            std::vector<std::int32_t> offsets;
             offsets.reserve(osize);
             offsets.resize(osize);
             arrow::vecFromTypedArray(voffsets, offsets.data(), osize);
 
-            t_str elem;
+            std::string elem;
 
-            for (t_int32 i = 0; i < nrows; ++i) {
-                t_int32 bidx = offsets[i];
+            for (std::int32_t i = 0; i < nrows; ++i) {
+                std::int32_t bidx = offsets[i];
                 std::size_t es = offsets[i + 1] - bidx;
                 elem.assign(reinterpret_cast<char*>(data.data()) + bidx, es);
                 col->set_nth(i, elem);
@@ -673,8 +681,8 @@ _fill_col_string(val accessor, t_col_sptr col, t_int32 cidx, t_dtype type, t_boo
  *
  */
 void
-_fill_data(t_table& tbl, t_svec ocolnames, val accessor, std::vector<t_dtype> odt,
-    t_uint32 offset, t_bool is_arrow) {
+_fill_data(t_table& tbl, std::vector<std::string> ocolnames, val accessor,
+    std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow) {
 
     for (auto cidx = 0; cidx < ocolnames.size(); ++cidx) {
         auto name = ocolnames[cidx];
@@ -714,7 +722,7 @@ _fill_data(t_table& tbl, t_svec ocolnames, val accessor, std::vector<t_dtype> od
 
         if (is_arrow) {
             // Fill validity bitmap
-            t_uint32 null_count = dcol["nullCount"].as<t_uint32>();
+            std::uint32_t null_count = dcol["nullCount"].as<std::uint32_t>();
 
             if (null_count == 0) {
                 col->valid_raw_fill();
@@ -742,31 +750,31 @@ set_column_nth(t_column* col, t_uindex idx, val value) {
 
     switch (col->get_dtype()) {
         case DTYPE_BOOL: {
-            col->set_nth<t_bool>(idx, value.as<t_bool>(), STATUS_VALID);
+            col->set_nth<bool>(idx, value.as<bool>(), STATUS_VALID);
             break;
         }
         case DTYPE_FLOAT64: {
-            col->set_nth<t_float64>(idx, value.as<t_float64>(), STATUS_VALID);
+            col->set_nth<double>(idx, value.as<double>(), STATUS_VALID);
             break;
         }
         case DTYPE_FLOAT32: {
-            col->set_nth<t_float32>(idx, value.as<t_float32>(), STATUS_VALID);
+            col->set_nth<float>(idx, value.as<float>(), STATUS_VALID);
             break;
         }
         case DTYPE_UINT32: {
-            col->set_nth<t_uint32>(idx, value.as<t_uint32>(), STATUS_VALID);
+            col->set_nth<std::uint32_t>(idx, value.as<std::uint32_t>(), STATUS_VALID);
             break;
         }
         case DTYPE_UINT64: {
-            col->set_nth<t_uint64>(idx, value.as<t_uint64>(), STATUS_VALID);
+            col->set_nth<std::uint64_t>(idx, value.as<std::uint64_t>(), STATUS_VALID);
             break;
         }
         case DTYPE_INT32: {
-            col->set_nth<t_int32>(idx, value.as<t_int32>(), STATUS_VALID);
+            col->set_nth<std::int32_t>(idx, value.as<std::int32_t>(), STATUS_VALID);
             break;
         }
         case DTYPE_INT64: {
-            col->set_nth<t_int64>(idx, value.as<t_int64>(), STATUS_VALID);
+            col->set_nth<std::int64_t>(idx, value.as<std::int64_t>(), STATUS_VALID);
             break;
         }
         case DTYPE_STR: {
@@ -782,8 +790,8 @@ set_column_nth(t_column* col, t_uindex idx, val value) {
             break;
         }
         case DTYPE_TIME: {
-            col->set_nth<t_int64>(
-                idx, static_cast<t_int64>(value.as<t_float64>()), STATUS_VALID);
+            col->set_nth<std::int64_t>(
+                idx, static_cast<std::int64_t>(value.as<double>()), STATUS_VALID);
             break;
         }
         case DTYPE_UINT8:
@@ -812,17 +820,17 @@ table_add_computed_column(t_table& table, val computed_defs) {
     auto vcomputed_defs = vecFromJSArray<val>(computed_defs);
     for (auto i = 0; i < vcomputed_defs.size(); ++i) {
         val coldef = vcomputed_defs[i];
-        t_str name = coldef["column"].as<t_str>();
+        std::string name = coldef["column"].as<std::string>();
         val inputs = coldef["inputs"];
         val func = coldef["func"];
         val type = coldef["type"];
 
-        t_str stype;
+        std::string stype;
 
         if (type.isUndefined()) {
             stype = "string";
         } else {
-            stype = type.as<t_str>();
+            stype = type.as<std::string>();
         }
 
         t_dtype dtype;
@@ -844,7 +852,7 @@ table_add_computed_column(t_table& table, val computed_defs) {
         auto icol_names = vecFromJSArray<std::string>(inputs);
 
         // Get t_column* for all input columns
-        t_colcptrvec icols;
+        std::vector<const t_column*> icols;
         for (const auto& cc : icol_names) {
             icols.push_back(table._get_column(cc));
         }
@@ -921,17 +929,17 @@ table_add_computed_column(t_table& table, val computed_defs) {
  */
 
 // Name parsing
-t_svec
-column_names(val data, t_int32 format) {
-    t_svec names;
+std::vector<std::string>
+column_names(val data, std::int32_t format) {
+    std::vector<std::string> names;
     val Object = val::global("Object");
 
     if (format == 0) {
-        t_int32 max_check = 50;
+        std::int32_t max_check = 50;
         val data_names = Object.call<val>("keys", data[0]);
-        t_int32 check_index = val::global("Math")
-                                  .call<val>("min", val(max_check), val(data["length"]))
-                                  .as<t_int32>();
+        std::int32_t check_index = val::global("Math")
+                                       .call<val>("min", val(max_check), val(data["length"]))
+                                       .as<std::int32_t>();
 
         for (auto ix = 0; ix < check_index; ix++) {
             val next = Object.call<val>("keys", data[ix]);
@@ -942,7 +950,8 @@ column_names(val data, t_int32 format) {
                 }
 
                 std::cout << boost::format("Extending from %d to %d")
-                        % data_names["length"].as<t_int32>() % next["length"].as<t_int32>()
+                        % data_names["length"].as<std::int32_t>()
+                        % next["length"].as<std::int32_t>()
                           << std::endl;
                 data_names = next;
                 max_check *= 2;
@@ -960,13 +969,13 @@ column_names(val data, t_int32 format) {
 // Type inferrence for fill_col and data_types
 t_dtype
 infer_type(val x, val date_validator) {
-    t_str jstype = x.typeOf().as<t_str>();
+    std::string jstype = x.typeOf().as<std::string>();
     t_dtype t = t_dtype::DTYPE_STR;
 
     if (x.isNull()) {
         t = t_dtype::DTYPE_NONE;
     } else if (jstype == "number") {
-        t_float64 x_float64 = x.as<t_float64>();
+        double x_float64 = x.as<double>();
         if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0) && (x_float64 != 0.0)) {
             t = t_dtype::DTYPE_INT32;
         } else {
@@ -975,10 +984,10 @@ infer_type(val x, val date_validator) {
     } else if (jstype == "boolean") {
         t = t_dtype::DTYPE_BOOL;
     } else if (x.instanceof (val::global("Date"))) {
-        t_int32 hours = x.call<val>("getHours").as<t_int32>();
-        t_int32 minutes = x.call<val>("getMinutes").as<t_int32>();
-        t_int32 seconds = x.call<val>("getSeconds").as<t_int32>();
-        t_int32 milliseconds = x.call<val>("getMilliseconds").as<t_int32>();
+        std::int32_t hours = x.call<val>("getHours").as<std::int32_t>();
+        std::int32_t minutes = x.call<val>("getMinutes").as<std::int32_t>();
+        std::int32_t seconds = x.call<val>("getSeconds").as<std::int32_t>();
+        std::int32_t milliseconds = x.call<val>("getMilliseconds").as<std::int32_t>();
 
         if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
             t = t_dtype::DTYPE_DATE;
@@ -986,17 +995,17 @@ infer_type(val x, val date_validator) {
             t = t_dtype::DTYPE_TIME;
         }
     } else if (jstype == "string") {
-        if (date_validator.call<val>("call", val::object(), x).as<t_bool>()) {
+        if (date_validator.call<val>("call", val::object(), x).as<bool>()) {
             t = t_dtype::DTYPE_TIME;
         } else {
-            t_str lower = x.call<val>("toLowerCase").as<t_str>();
+            std::string lower = x.call<val>("toLowerCase").as<std::string>();
             if (lower == "true" || lower == "false") {
                 t = t_dtype::DTYPE_BOOL;
             } else {
                 t = t_dtype::DTYPE_STR;
             }
         }
-    } else if (!val::global("isNaN").call<t_bool>("call", val::object(),
+    } else if (!val::global("isNaN").call<bool>("call", val::object(),
                    val::global("Number").call<val>("call", val::object(), x))) {
         PSP_COMPLAIN_AND_ABORT("BADLANDS");
         t = t_dtype::DTYPE_FLOAT64;
@@ -1006,14 +1015,15 @@ infer_type(val x, val date_validator) {
 }
 
 t_dtype
-get_data_type(val data, t_int32 format, t_str name, val date_validator) {
-    t_int32 i = 0;
+get_data_type(val data, std::int32_t format, std::string name, val date_validator) {
+    std::int32_t i = 0;
     boost::optional<t_dtype> inferredType;
 
     if (format == 0) {
         // loop parameters differ slightly so rewrite the loop
-        while (!inferredType.is_initialized() && i < 100 && i < data["length"].as<t_int32>()) {
-            if (data[i].call<val>("hasOwnProperty", name).as<t_bool>() == true) {
+        while (!inferredType.is_initialized() && i < 100
+            && i < data["length"].as<std::int32_t>()) {
+            if (data[i].call<val>("hasOwnProperty", name).as<bool>() == true) {
                 if (!data[i][name].isNull()) {
                     inferredType = infer_type(data[i][name], date_validator);
                 } else {
@@ -1025,7 +1035,7 @@ get_data_type(val data, t_int32 format, t_str name, val date_validator) {
         }
     } else if (format == 1) {
         while (!inferredType.is_initialized() && i < 100
-            && i < data[name]["length"].as<t_int32>()) {
+            && i < data[name]["length"].as<std::int32_t>()) {
             if (!data[name][i].isNull()) {
                 inferredType = infer_type(data[name][i], date_validator);
             } else {
@@ -1043,20 +1053,21 @@ get_data_type(val data, t_int32 format, t_str name, val date_validator) {
     }
 }
 
-t_dtypevec
-data_types(val data, t_int32 format, t_svec names, val date_validator) {
+std::vector<t_dtype>
+data_types(val data, std::int32_t format, std::vector<std::string> names, val date_validator) {
     if (names.size() == 0) {
         PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
     }
 
-    t_dtypevec types;
+    std::vector<t_dtype> types;
 
     if (format == 2) {
-        t_svec data_names
-            = vecFromJSArray<t_str>(val::global("Object").call<val>("keys", data));
+        std::vector<std::string> data_names
+            = vecFromJSArray<std::string>(val::global("Object").call<val>("keys", data));
 
-        for (t_svec::iterator name = data_names.begin(); name != data_names.end(); ++name) {
-            t_str value = data[*name].as<t_str>();
+        for (std::vector<std::string>::iterator name = data_names.begin();
+             name != data_names.end(); ++name) {
+            std::string value = data[*name].as<std::string>();
             t_dtype type;
 
             if (value == "integer") {
@@ -1080,7 +1091,8 @@ data_types(val data, t_int32 format, t_svec names, val date_validator) {
 
         return types;
     } else {
-        for (t_svec::iterator name = names.begin(); name != names.end(); ++name) {
+        for (std::vector<std::string>::iterator name = names.begin(); name != names.end();
+             ++name) {
             t_dtype type = get_data_type(data, format, *name, date_validator);
             types.push_back(type);
         }
@@ -1101,12 +1113,12 @@ data_types(val data, t_int32 format, t_svec names, val date_validator) {
  * -------
  * A gnode.
  */
-t_gnode_sptr
+std::shared_ptr<t_gnode>
 make_gnode(const t_table& table) {
     auto iscm = table.get_schema();
 
-    t_svec ocolnames(iscm.columns());
-    t_dtypevec odt(iscm.types());
+    std::vector<std::string> ocolnames(iscm.columns());
+    std::vector<t_dtype> odt(iscm.types());
 
     if (iscm.has_column("psp_pkey")) {
         t_uindex idx = iscm.get_colidx("psp_pkey");
@@ -1144,13 +1156,13 @@ make_gnode(const t_table& table) {
  * -------
  * a populated table.
  */
-t_gnode_sptr
-make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset, t_uint32 limit,
-    t_str index, t_bool is_update, t_bool is_delete, t_bool is_arrow) {
-    t_uint32 size = accessor["row_count"].as<t_int32>();
+std::shared_ptr<t_gnode>
+make_table(t_pool* pool, val gnode, val accessor, val computed, std::uint32_t offset,
+    std::uint32_t limit, std::string index, bool is_update, bool is_delete, bool is_arrow) {
+    std::uint32_t size = accessor["row_count"].as<std::int32_t>();
 
-    t_svec colnames;
-    t_dtypevec dtypes;
+    std::vector<std::string> colnames;
+    std::vector<t_dtype> dtypes;
 
     // Determine metadata
     if (is_arrow || (is_update || is_delete)) {
@@ -1160,13 +1172,13 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
     } else {
         // Infer names and types
         val data = accessor["data"];
-        t_int32 format = accessor["format"].as<t_int32>();
+        std::int32_t format = accessor["format"].as<std::int32_t>();
         colnames = column_names(data, format);
         dtypes = data_types(data, format, colnames, accessor["date_validator"]);
     }
 
     // Check if index is valid after getting column names
-    t_bool valid_index = std::find(colnames.begin(), colnames.end(), index) != colnames.end();
+    bool valid_index = std::find(colnames.begin(), colnames.end(), index) != colnames.end();
     if (index != "" && !valid_index) {
         PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
     }
@@ -1182,10 +1194,10 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
     // Set up pkey and op columns
     if (is_delete) {
         auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-        op_col->raw_fill<t_uint8>(OP_DELETE);
+        op_col->raw_fill<std::uint8_t>(OP_DELETE);
     } else {
         auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-        op_col->raw_fill<t_uint8>(OP_INSERT);
+        op_col->raw_fill<std::uint8_t>(OP_INSERT);
     }
 
     if (index == "") {
@@ -1195,21 +1207,21 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
         auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
 
         for (auto ridx = 0; ridx < tbl.size(); ++ridx) {
-            key_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
-            okey_col->set_nth<t_int32>(ridx, (ridx + offset) % limit);
+            key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
+            okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
         }
     } else {
         tbl.clone_column(index, "psp_pkey");
         tbl.clone_column(index, "psp_okey");
     }
 
-    t_gnode_sptr new_gnode;
+    std::shared_ptr<t_gnode> new_gnode;
 
     if (gnode.isUndefined()) {
         new_gnode = make_gnode(tbl);
         pool->register_gnode(new_gnode.get());
     } else {
-        new_gnode = gnode.as<t_gnode_sptr>();
+        new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
     }
 
     if (!computed.isUndefined()) {
@@ -1232,11 +1244,11 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, t_uint32 offset,
  * -------
  * A gnode.
  */
-t_gnode_sptr
-clone_gnode_table(t_pool* pool, t_gnode_sptr gnode, val computed) {
+std::shared_ptr<t_gnode>
+clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, val computed) {
     t_table* tbl = gnode->_get_pkeyed_table();
     table_add_computed_column(*tbl, computed);
-    t_gnode_sptr new_gnode = make_gnode(*tbl);
+    std::shared_ptr<t_gnode> new_gnode = make_gnode(*tbl);
     pool->register_gnode(new_gnode.get());
     pool->send(new_gnode->get_id(), 0, *tbl);
     pool->_process();
@@ -1254,9 +1266,9 @@ clone_gnode_table(t_pool* pool, t_gnode_sptr gnode, val computed) {
  * -------
  *
  */
-t_ctx0_sptr
+std::shared_ptr<t_ctx0>
 make_context_zero(t_schema schema, t_filter_op combiner, val j_filters, val j_columns,
-    val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
+    val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
     auto columns = vecFromJSArray<std::string>(j_columns);
     auto fvec = _get_fterms(schema, j_filters);
     auto svec = _get_sort(j_sortby);
@@ -1280,9 +1292,9 @@ make_context_zero(t_schema schema, t_filter_op combiner, val j_filters, val j_co
  * -------
  *
  */
-t_ctx1_sptr
+std::shared_ptr<t_ctx1>
 make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters, val j_aggs,
-    val j_sortby, t_pool* pool, t_gnode_sptr gnode, t_str name) {
+    val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto pivots = vecFromJSArray<std::string>(j_pivots);
@@ -1309,9 +1321,10 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
  * -------
  *
  */
-t_ctx2_sptr
+std::shared_ptr<t_ctx2>
 make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
-    val j_filters, val j_aggs, bool show_totals, t_pool* pool, t_gnode_sptr gnode, t_str name) {
+    val j_filters, val j_aggs, bool show_totals, t_pool* pool, std::shared_ptr<t_gnode> gnode,
+    std::string name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
     auto rpivots = vecFromJSArray<std::string>(j_rpivots);
@@ -1328,7 +1341,7 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
 }
 
 void
-sort(t_ctx2_sptr ctx2, val j_sortby, val j_column_sortby) {
+sort(std::shared_ptr<t_ctx2> ctx2, val j_sortby, val j_column_sortby) {
     auto svec = _get_sort(j_sortby);
     if (svec.size() > 0) {
         ctx2->sort_by(svec);
@@ -1337,7 +1350,7 @@ sort(t_ctx2_sptr ctx2, val j_sortby, val j_column_sortby) {
 }
 
 val
-get_column_data(t_table_sptr table, t_str colname) {
+get_column_data(std::shared_ptr<t_table> table, std::string colname) {
     val arr = val::array();
     auto col = table->get_column(colname);
     for (auto idx = 0; idx < col->size(); ++idx) {
@@ -1359,7 +1372,8 @@ get_column_data(t_table_sptr table, t_str colname) {
  */
 template <typename T>
 val
-get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint32 end_col) {
+get_data(T ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
+    std::uint32_t end_col) {
     auto slice = ctx->get_data(start_row, end_row, start_col, end_col);
     val arr = val::array();
     for (auto idx = 0; idx < slice.size(); ++idx) {
@@ -1369,8 +1383,9 @@ get_data(T ctx, t_uint32 start_row, t_uint32 end_row, t_uint32 start_col, t_uint
 }
 
 val
-get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t_uint32 end_row,
-    t_uint32 start_col, t_uint32 end_col) {
+get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
+    std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
+    std::uint32_t end_col) {
     auto col_length = ctx->unity_get_column_count();
     std::vector<t_uindex> col_nums;
     col_nums.push_back(0);
@@ -1380,7 +1395,7 @@ get_data_two_skip_headers(t_ctx2_sptr ctx, t_uint32 depth, t_uint32 start_row, t
         }
     }
     col_nums = std::vector<t_uindex>(col_nums.begin() + start_col,
-        col_nums.begin() + std::min(end_col, (t_uint32)col_nums.size()));
+        col_nums.begin() + std::min(end_col, (std::uint32_t)col_nums.size()));
     auto slice = ctx->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
     val arr = val::array();
     t_uindex i = 0;
@@ -1442,12 +1457,13 @@ EMSCRIPTEN_BINDINGS(perspective) {
             "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
 
     class_<t_schema>("t_schema")
-        .function<const t_svec&>("columns", &t_schema::columns, allow_raw_pointers())
-        .function<const t_dtypevec>("types", &t_schema::types, allow_raw_pointers());
+        .function<const std::vector<std::string>&>(
+            "columns", &t_schema::columns, allow_raw_pointers())
+        .function<const std::vector<t_dtype>>("types", &t_schema::types, allow_raw_pointers());
 
     class_<t_gnode>("t_gnode")
-        .constructor<t_gnode_processing_mode, const t_schema&, const t_schemavec&,
-            const t_schemavec&, const t_ccol_vec&>()
+        .constructor<t_gnode_processing_mode, const t_schema&, const std::vector<t_schema>&,
+            const std::vector<t_schema>&, const std::vector<t_custom_column>&>()
         .smart_ptr<std::shared_ptr<t_gnode>>("shared_ptr<t_gnode>")
         .function<t_uindex>(
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
@@ -1462,28 +1478,31 @@ EMSCRIPTEN_BINDINGS(perspective) {
             reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_row_count))
         .function<unsigned long>("get_column_count",
             reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_column_count))
-        .function<t_tscalvec>("get_data", &t_ctx0::get_data)
+        .function<std::vector<t_tscalar>>("get_data", &t_ctx0::get_data)
         .function<t_stepdelta>("get_step_delta", &t_ctx0::get_step_delta)
-        .function<t_cellupdvec>("get_cell_delta", &t_ctx0::get_cell_delta)
-        .function<t_svec>("get_column_names", &t_ctx0::get_column_names)
-        // .function<t_minmaxvec>("get_min_max", &t_ctx0::get_min_max)
+        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx0::get_cell_delta)
+        .function<std::vector<std::string>>("get_column_names", &t_ctx0::get_column_names)
+        // .function<std::vector<t_minmax>>("get_min_max", &t_ctx0::get_min_max)
         // .function<void>("set_minmax_enabled", &t_ctx0::set_minmax_enabled)
-        .function<t_tscalvec>("unity_get_row_data", &t_ctx0::unity_get_row_data)
-        .function<t_tscalvec>("unity_get_column_data", &t_ctx0::unity_get_column_data)
-        .function<t_tscalvec>("unity_get_row_path", &t_ctx0::unity_get_row_path)
-        .function<t_tscalvec>("unity_get_column_path", &t_ctx0::unity_get_column_path)
+        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx0::unity_get_row_data)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_data", &t_ctx0::unity_get_column_data)
+        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx0::unity_get_row_path)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_path", &t_ctx0::unity_get_column_path)
         .function<t_uindex>("unity_get_row_depth", &t_ctx0::unity_get_row_depth)
         .function<t_uindex>("unity_get_column_depth", &t_ctx0::unity_get_column_depth)
-        .function<t_str>("unity_get_column_name", &t_ctx0::unity_get_column_name)
-        .function<t_str>(
+        .function<std::string>("unity_get_column_name", &t_ctx0::unity_get_column_name)
+        .function<std::string>(
             "unity_get_column_display_name", &t_ctx0::unity_get_column_display_name)
-        .function<t_svec>("unity_get_column_names", &t_ctx0::unity_get_column_names)
-        .function<t_svec>(
+        .function<std::vector<std::string>>(
+            "unity_get_column_names", &t_ctx0::unity_get_column_names)
+        .function<std::vector<std::string>>(
             "unity_get_column_display_names", &t_ctx0::unity_get_column_display_names)
         .function<t_uindex>("unity_get_column_count", &t_ctx0::unity_get_column_count)
         .function<t_uindex>("unity_get_row_count", &t_ctx0::unity_get_row_count)
-        .function<t_bool>("unity_get_row_expanded", &t_ctx0::unity_get_row_expanded)
-        .function<t_bool>("unity_get_column_expanded", &t_ctx0::unity_get_column_expanded)
+        .function<bool>("unity_get_row_expanded", &t_ctx0::unity_get_row_expanded)
+        .function<bool>("unity_get_column_expanded", &t_ctx0::unity_get_column_expanded)
         .function<void>("unity_init_load_step_end", &t_ctx0::unity_init_load_step_end);
 
     class_<t_ctx1>("t_ctx1")
@@ -1494,30 +1513,33 @@ EMSCRIPTEN_BINDINGS(perspective) {
             reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_row_count))
         .function<unsigned long>("get_column_count",
             reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_column_count))
-        .function<t_tscalvec>("get_data", &t_ctx1::get_data)
+        .function<std::vector<t_tscalar>>("get_data", &t_ctx1::get_data)
         .function<t_stepdelta>("get_step_delta", &t_ctx1::get_step_delta)
-        .function<t_cellupdvec>("get_cell_delta", &t_ctx1::get_cell_delta)
+        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx1::get_cell_delta)
         .function<void>("set_depth", &t_ctx1::set_depth)
-        .function("open", select_overload<t_index(t_tvidx)>(&t_ctx1::open))
-        .function("close", select_overload<t_index(t_tvidx)>(&t_ctx1::close))
+        .function("open", select_overload<t_index(t_index)>(&t_ctx1::open))
+        .function("close", select_overload<t_index(t_index)>(&t_ctx1::close))
         .function<t_depth>("get_trav_depth", &t_ctx1::get_trav_depth)
-        .function<t_aggspecvec>("get_column_names", &t_ctx1::get_aggregates)
-        .function<t_tscalvec>("unity_get_row_data", &t_ctx1::unity_get_row_data)
-        .function<t_tscalvec>("unity_get_column_data", &t_ctx1::unity_get_column_data)
-        .function<t_tscalvec>("unity_get_row_path", &t_ctx1::unity_get_row_path)
-        .function<t_tscalvec>("unity_get_column_path", &t_ctx1::unity_get_column_path)
+        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx1::get_aggregates)
+        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx1::unity_get_row_data)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_data", &t_ctx1::unity_get_column_data)
+        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx1::unity_get_row_path)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_path", &t_ctx1::unity_get_column_path)
         .function<t_uindex>("unity_get_row_depth", &t_ctx1::unity_get_row_depth)
         .function<t_uindex>("unity_get_column_depth", &t_ctx1::unity_get_column_depth)
-        .function<t_str>("unity_get_column_name", &t_ctx1::unity_get_column_name)
-        .function<t_str>(
+        .function<std::string>("unity_get_column_name", &t_ctx1::unity_get_column_name)
+        .function<std::string>(
             "unity_get_column_display_name", &t_ctx1::unity_get_column_display_name)
-        .function<t_svec>("unity_get_column_names", &t_ctx1::unity_get_column_names)
-        .function<t_svec>(
+        .function<std::vector<std::string>>(
+            "unity_get_column_names", &t_ctx1::unity_get_column_names)
+        .function<std::vector<std::string>>(
             "unity_get_column_display_names", &t_ctx1::unity_get_column_display_names)
         .function<t_uindex>("unity_get_column_count", &t_ctx1::unity_get_column_count)
         .function<t_uindex>("unity_get_row_count", &t_ctx1::unity_get_row_count)
-        .function<t_bool>("unity_get_row_expanded", &t_ctx1::unity_get_row_expanded)
-        .function<t_bool>("unity_get_column_expanded", &t_ctx1::unity_get_column_expanded)
+        .function<bool>("unity_get_row_expanded", &t_ctx1::unity_get_row_expanded)
+        .function<bool>("unity_get_column_expanded", &t_ctx1::unity_get_column_expanded)
         .function<void>("unity_init_load_step_end", &t_ctx1::unity_init_load_step_end);
 
     class_<t_ctx2>("t_ctx2")
@@ -1529,32 +1551,36 @@ EMSCRIPTEN_BINDINGS(perspective) {
                 select_overload<t_index() const>(&t_ctx2::get_row_count)))
         .function<unsigned long>("get_column_count",
             reinterpret_cast<unsigned long (t_ctx2::*)() const>(&t_ctx2::get_column_count))
-        .function<t_tscalvec>("get_data", &t_ctx2::get_data)
+        .function<std::vector<t_tscalar>>("get_data", &t_ctx2::get_data)
         .function<t_stepdelta>("get_step_delta", &t_ctx2::get_step_delta)
-        //.function<t_cellupdvec>("get_cell_delta", &t_ctx2::get_cell_delta)
+        //.function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx2::get_cell_delta)
         .function<void>("set_depth", &t_ctx2::set_depth)
-        .function("open", select_overload<t_index(t_header, t_tvidx)>(&t_ctx2::open))
-        .function("close", select_overload<t_index(t_header, t_tvidx)>(&t_ctx2::close))
-        .function<t_aggspecvec>("get_column_names", &t_ctx2::get_aggregates)
-        .function<t_tscalvec>("unity_get_row_data", &t_ctx2::unity_get_row_data)
-        .function<t_tscalvec>("unity_get_column_data", &t_ctx2::unity_get_column_data)
-        .function<t_tscalvec>("unity_get_row_path", &t_ctx2::unity_get_row_path)
-        .function<t_tscalvec>("unity_get_column_path", &t_ctx2::unity_get_column_path)
+        .function("open", select_overload<t_index(t_header, t_index)>(&t_ctx2::open))
+        .function("close", select_overload<t_index(t_header, t_index)>(&t_ctx2::close))
+        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx2::get_aggregates)
+        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx2::unity_get_row_data)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_data", &t_ctx2::unity_get_column_data)
+        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx2::unity_get_row_path)
+        .function<std::vector<t_tscalar>>(
+            "unity_get_column_path", &t_ctx2::unity_get_column_path)
         .function<t_uindex>("unity_get_row_depth", &t_ctx2::unity_get_row_depth)
         .function<t_uindex>("unity_get_column_depth", &t_ctx2::unity_get_column_depth)
-        .function<t_str>("unity_get_column_name", &t_ctx2::unity_get_column_name)
-        .function<t_str>(
+        .function<std::string>("unity_get_column_name", &t_ctx2::unity_get_column_name)
+        .function<std::string>(
             "unity_get_column_display_name", &t_ctx2::unity_get_column_display_name)
-        .function<t_svec>("unity_get_column_names", &t_ctx2::unity_get_column_names)
-        .function<t_svec>(
+        .function<std::vector<std::string>>(
+            "unity_get_column_names", &t_ctx2::unity_get_column_names)
+        .function<std::vector<std::string>>(
             "unity_get_column_display_names", &t_ctx2::unity_get_column_display_names)
         .function<t_uindex>("unity_get_column_count", &t_ctx2::unity_get_column_count)
         .function<t_uindex>("unity_get_row_count", &t_ctx2::unity_get_row_count)
-        .function<t_bool>("unity_get_row_expanded", &t_ctx2::unity_get_row_expanded)
-        .function<t_bool>("unity_get_column_expanded", &t_ctx2::unity_get_column_expanded)
+        .function<bool>("unity_get_row_expanded", &t_ctx2::unity_get_row_expanded)
+        .function<bool>("unity_get_column_expanded", &t_ctx2::unity_get_column_expanded)
         .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end)
         .function<t_totals>("get_totals", &t_ctx2::get_totals)
-        .function<t_tscalvec>("get_column_path_userspace", &t_ctx2::get_column_path_userspace)
+        .function<std::vector<t_tscalar>>(
+            "get_column_path_userspace", &t_ctx2::get_column_path_userspace)
         .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end);
 
     class_<t_pool>("t_pool")
@@ -1568,8 +1594,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<void>("set_update_delegate", &t_pool::set_update_delegate)
         .function<void>("register_context", &t_pool::register_context)
         .function<void>("unregister_context", &t_pool::unregister_context)
-        .function<t_updctx_vec>("get_contexts_last_updated", &t_pool::get_contexts_last_updated)
-        .function<t_uidxvec>("get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
+        .function<std::vector<t_updctx>>(
+            "get_contexts_last_updated", &t_pool::get_contexts_last_updated)
+        .function<std::vector<t_uindex>>(
+            "get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
         .function<t_gnode*>("get_gnode", &t_pool::get_gnode, allow_raw_pointers());
 
     class_<t_aggspec>("t_aggspec").function<std::string>("name", &t_aggspec::name);
@@ -1591,13 +1619,13 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .field("columns_changed", &t_stepdelta::columns_changed)
         .field("cells", &t_stepdelta::cells);
 
-    register_vector<t_dtype>("t_dtypevec");
-    register_vector<t_cellupd>("t_cellupdvec");
-    register_vector<t_aggspec>("t_aggspecvec");
-    register_vector<t_tscalar>("t_tscalvec");
+    register_vector<t_dtype>("std::vector<t_dtype>");
+    register_vector<t_cellupd>("std::vector<t_cellupd>");
+    register_vector<t_aggspec>("std::vector<t_aggspec>");
+    register_vector<t_tscalar>("std::vector<t_tscalar>");
     register_vector<std::string>("std::vector<std::string>");
-    register_vector<t_updctx>("t_updctx_vec");
-    register_vector<t_uindex>("t_uidxvec");
+    register_vector<t_updctx>("std::vector<t_updctx>");
+    register_vector<t_uindex>("std::vector<t_uindex>");
 
     enum_<t_header>("t_header")
         .value("HEADER_ROW", HEADER_ROW)
@@ -1704,11 +1732,11 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column);
     function("set_column_nth", &set_column_nth, allow_raw_pointers());
-    function("get_data_zero", &get_data<t_ctx0_sptr>);
-    function("get_data_one", &get_data<t_ctx1_sptr>);
-    function("get_data_two", &get_data<t_ctx2_sptr>);
+    function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);
+    function("get_data_one", &get_data<std::shared_ptr<t_ctx1>>);
+    function("get_data_two", &get_data<std::shared_ptr<t_ctx2>>);
     function("get_data_two_skip_headers", &get_data_two_skip_headers);
-    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0_sptr>);
-    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1_sptr>);
-    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2_sptr>);
+    function("col_to_js_typed_array_zero", &col_to_js_typed_array<std::shared_ptr<t_ctx0>>);
+    function("col_to_js_typed_array_one", &col_to_js_typed_array<std::shared_ptr<t_ctx1>>);
+    function("col_to_js_typed_array_two", &col_to_js_typed_array<std::shared_ptr<t_ctx2>>);
 }

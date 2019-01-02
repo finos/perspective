@@ -20,7 +20,7 @@ t_ctx_handle::t_ctx_handle(void* ctx, t_ctx_type ctx_type)
     : m_ctx_type(ctx_type)
     , m_ctx(ctx) {}
 
-t_str
+std::string
 t_ctx_handle::get_type_descr() const {
     switch (m_ctx_type) {
         case TWO_SIDED_CONTEXT: {

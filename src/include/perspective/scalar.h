@@ -41,20 +41,20 @@ struct PERSPECTIVE_EXPORT t_const_char_comparator {
 const int SCALAR_INPLACE_LEN = 13;
 
 union t_scalar_u {
-    t_int64 m_int64;
-    t_int32 m_int32;
-    t_int16 m_int16;
-    t_int8 m_int8;
+    std::int64_t m_int64;
+    std::int32_t m_int32;
+    std::int16_t m_int16;
+    std::int8_t m_int8;
 
-    t_uint64 m_uint64;
-    t_uint32 m_uint32;
-    t_uint16 m_uint16;
-    t_uint8 m_uint8;
+    std::uint64_t m_uint64;
+    std::uint32_t m_uint32;
+    std::uint16_t m_uint16;
+    std::uint8_t m_uint8;
 
-    t_float64 m_float64;
-    t_float32 m_float32;
+    double m_float64;
+    float m_float32;
 
-    t_bool m_bool;
+    bool m_bool;
 
     const char* m_charptr;
     char m_inplace_char[SCALAR_INPLACE_LEN];
@@ -66,29 +66,29 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     template <typename T>
     T get() const;
 
-    void set(t_int64 v);
-    void set(t_int32 v);
-    void set(t_int16 v);
-    void set(t_int8 v);
+    void set(std::int64_t v);
+    void set(std::int32_t v);
+    void set(std::int16_t v);
+    void set(std::int8_t v);
 
-    void set(t_uint64 v);
-    void set(t_uint32 v);
-    void set(t_uint16 v);
-    void set(t_uint8 v);
+    void set(std::uint64_t v);
+    void set(std::uint32_t v);
+    void set(std::uint16_t v);
+    void set(std::uint8_t v);
 
-    void set(t_bool v);
+    void set(bool v);
     void set(t_date v);
     void set(t_time v);
     void set(const char* v);
     void set(t_none v);
-    void set(t_float64 v);
-    void set(t_float32 v);
+    void set(double v);
+    void set(float v);
     void set(t_tscalar v);
 
     bool is_nan() const;
     bool is_none() const;
     bool is_str() const;
-    bool is_of_type(t_uchar t) const;
+    bool is_of_type(unsigned char t) const;
     bool is_floating_point() const;
     bool is_signed() const;
 
@@ -113,13 +113,13 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar mul(const t_tscalar& other) const;
     t_tscalar difference(const t_tscalar& other) const;
 
-    t_bool cmp(t_filter_op op, const t_tscalar& other) const;
+    bool cmp(t_filter_op op, const t_tscalar& other) const;
 
-    t_str repr() const;
-    t_str to_string(t_bool for_expr = false) const;
-    t_float64 to_double() const;
-    t_int64 to_int64() const;
-    t_uint64 to_uint64() const;
+    std::string repr() const;
+    std::string to_string(bool for_expr = false) const;
+    double to_double() const;
+    std::int64_t to_int64() const;
+    std::uint64_t to_uint64() const;
 
     bool begins_with(const t_tscalar& other) const;
     bool ends_with(const t_tscalar& other) const;
@@ -129,8 +129,8 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     void clear();
     t_dtype get_dtype() const;
     const char* get_char_ptr() const;
-    t_bool is_inplace() const;
-    static t_bool can_store_inplace(const char* s);
+    bool is_inplace() const;
+    static bool can_store_inplace(const char* s);
 
     template <typename DATA_T>
     t_tscalar coerce_numeric() const;
@@ -138,14 +138,13 @@ struct PERSPECTIVE_EXPORT t_tscalar {
     t_tscalar coerce_numeric_dtype(t_dtype dtype) const;
 
     t_scalar_u m_data;
-    t_uchar m_type;
+    unsigned char m_type;
     t_status m_status;
-    t_bool m_inplace;
+    bool m_inplace;
 };
 
-typedef std::vector<t_tscalar> t_tscalvec;
 typedef boost::unordered_set<t_tscalar> t_tscalset;
-typedef boost::unordered_map<t_tscalar, t_tvidx> t_tscaltvimap;
+typedef boost::unordered_map<t_tscalar, t_index> t_tscaltvimap;
 
 PERSPECTIVE_EXPORT t_tscalar mknone();
 
@@ -160,31 +159,31 @@ t_tscalar::coerce_numeric() const {
 }
 
 template <>
-t_tscalar t_tscalar::coerce_numeric<t_bool>() const;
+t_tscalar t_tscalar::coerce_numeric<bool>() const;
 
 template <>
-t_int64 t_tscalar::get() const;
+std::int64_t t_tscalar::get() const;
 
 template <>
-t_int32 t_tscalar::get() const;
+std::int32_t t_tscalar::get() const;
 
 template <>
-t_int16 t_tscalar::get() const;
+std::int16_t t_tscalar::get() const;
 
 template <>
-t_int8 t_tscalar::get() const;
+std::int8_t t_tscalar::get() const;
 
 template <>
-t_uint64 t_tscalar::get() const;
+std::uint64_t t_tscalar::get() const;
 
 template <>
-t_uint32 t_tscalar::get() const;
+std::uint32_t t_tscalar::get() const;
 
 template <>
-t_uint16 t_tscalar::get() const;
+std::uint16_t t_tscalar::get() const;
 
 template <>
-t_uint8 t_tscalar::get() const;
+std::uint8_t t_tscalar::get() const;
 
 template <>
 t_date t_tscalar::get() const;
@@ -199,78 +198,78 @@ template <>
 t_none t_tscalar::get() const;
 
 template <>
-t_float64 t_tscalar::get() const;
+double t_tscalar::get() const;
 
 template <>
-t_float32 t_tscalar::get() const;
+float t_tscalar::get() const;
 
 template <>
-t_bool t_tscalar::get() const;
+bool t_tscalar::get() const;
 
 template <template <typename COMPARED_T> class COMPARER_T>
 bool
 t_tscalar::compare_common(const t_tscalar& rhs) const {
     if (m_type != rhs.m_type) {
-        COMPARER_T<t_uchar> cmp;
+        COMPARER_T<unsigned char> cmp;
         return cmp(m_type, rhs.m_type);
     }
 
     if (m_status != rhs.m_status) {
-        COMPARER_T<t_uchar> cmp;
+        COMPARER_T<unsigned char> cmp;
         return cmp(m_status, rhs.m_status);
     }
 
     switch (m_type) {
         case DTYPE_INT64: {
-            COMPARER_T<t_int64> cmp;
+            COMPARER_T<std::int64_t> cmp;
             return cmp(m_data.m_int64, rhs.m_data.m_int64);
         } break;
         case DTYPE_INT32: {
-            COMPARER_T<t_int32> cmp;
+            COMPARER_T<std::int32_t> cmp;
             return cmp(m_data.m_int32, rhs.m_data.m_int32);
         } break;
         case DTYPE_INT16: {
-            COMPARER_T<t_int16> cmp;
+            COMPARER_T<std::int16_t> cmp;
             return cmp(m_data.m_int16, rhs.m_data.m_int16);
         } break;
         case DTYPE_INT8: {
-            COMPARER_T<t_int8> cmp;
+            COMPARER_T<std::int8_t> cmp;
             return cmp(m_data.m_int8, rhs.m_data.m_int8);
         } break;
         case DTYPE_UINT64: {
-            COMPARER_T<t_uint64> cmp;
+            COMPARER_T<std::uint64_t> cmp;
             return cmp(m_data.m_uint64, rhs.m_data.m_uint64);
         } break;
         case DTYPE_UINT32: {
-            COMPARER_T<t_uint32> cmp;
+            COMPARER_T<std::uint32_t> cmp;
             return cmp(m_data.m_uint32, rhs.m_data.m_uint32);
         } break;
         case DTYPE_UINT16: {
-            COMPARER_T<t_uint16> cmp;
+            COMPARER_T<std::uint16_t> cmp;
             return cmp(m_data.m_uint16, rhs.m_data.m_uint16);
         } break;
         case DTYPE_UINT8: {
-            COMPARER_T<t_uint8> cmp;
+            COMPARER_T<std::uint8_t> cmp;
             return cmp(m_data.m_uint8, rhs.m_data.m_uint8);
         } break;
         case DTYPE_FLOAT64: {
-            COMPARER_T<t_float64> cmp;
+            COMPARER_T<double> cmp;
             return cmp(m_data.m_float64, rhs.m_data.m_float64);
         } break;
         case DTYPE_FLOAT32: {
-            COMPARER_T<t_float32> cmp;
+            COMPARER_T<float> cmp;
             return cmp(m_data.m_float32, rhs.m_data.m_float32);
         } break;
         case DTYPE_DATE: {
-            COMPARER_T<t_uint32> cmp;
+            COMPARER_T<std::uint32_t> cmp;
             return cmp(m_data.m_uint32, rhs.m_data.m_uint32);
         } break;
         case DTYPE_TIME: {
-            COMPARER_T<t_int64> cmp;
+            COMPARER_T<std::int64_t> cmp;
             return cmp(m_data.m_int64, rhs.m_data.m_int64);
         } break;
         case DTYPE_BOOL: {
-            COMPARER_T<t_bool> cmp;
+            COMPARER_T<bool> cmp;
             return cmp(m_data.m_bool, rhs.m_data.m_bool);
         } break;
         case DTYPE_NONE: {
@@ -303,7 +302,7 @@ struct t_tscal_extractor {
     }
 };
 
-t_str repr(const t_tscalar& s);
+std::string repr(const t_tscalar& s);
 
 size_t hash_value(const t_tscalar& s);
 
@@ -331,5 +330,6 @@ struct hash<perspective::t_tscalar> {
 };
 
 PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_tscalar& t);
-PERSPECTIVE_EXPORT std::ostream& operator<<(std::ostream& os, const perspective::t_tscalvec& t);
+PERSPECTIVE_EXPORT std::ostream& operator<<(
+    std::ostream& os, const std::vector<perspective::t_tscalar>& t);
 } // namespace std

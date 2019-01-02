@@ -12,7 +12,7 @@
 
 namespace perspective {
 
-t_stnode::t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value, t_uint8 depth,
+t_stnode::t_stnode(t_uindex idx, t_uindex pidx, const t_tscalar& value, std::uint8_t depth,
     const t_tscalar& sort_value, t_uindex nstrands, t_uindex aggidx)
     : m_idx(idx)
     , m_pidx(pidx)
@@ -50,7 +50,7 @@ t_stleaves::t_stleaves() {}
 t_cellinfo::t_cellinfo() {}
 
 t_cellinfo::t_cellinfo(
-    t_ptidx idx, t_depth treenum, t_index agg_index, t_uindex ridx, t_uindex cidx)
+    t_index idx, t_depth treenum, t_index agg_index, t_uindex ridx, t_uindex cidx)
     : m_idx(idx)
     , m_treenum(treenum)
     , m_agg_index(agg_index)

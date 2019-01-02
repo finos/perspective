@@ -26,8 +26,6 @@ struct PERSPECTIVE_EXPORT t_minmax {
     t_tscalar m_max;
 };
 
-typedef std::vector<t_minmax> t_minmaxvec;
-
 } // end namespace perspective
 
 namespace std {

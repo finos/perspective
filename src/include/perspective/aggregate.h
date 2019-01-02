@@ -103,9 +103,9 @@ public:
     ROLLING_T
     reduce(const RAW_DATA_T* biter, const RAW_DATA_T* eiter) {
 
-        t_float64 sum = std::accumulate(biter, eiter, static_cast<t_float64>(0));
+        double sum = std::accumulate(biter, eiter, static_cast<double>(0));
 
-        t_float64 count = eiter - biter;
+        double count = eiter - biter;
 
         return ROLLING_T(sum, count);
     }
@@ -193,8 +193,9 @@ public:
 
 class PERSPECTIVE_EXPORT t_aggregate {
 public:
-    t_aggregate(
-        const t_dtree& tree, t_aggtype aggtype, t_colcsptrvec icolumns, t_col_sptr column);
+    t_aggregate(const t_dtree& tree, t_aggtype aggtype,
+        std::vector<std::shared_ptr<const t_column>> icolumns,
+        std::shared_ptr<t_column> column);
     void init();
 
     template <typename AGGIMPL_T>
@@ -203,8 +204,8 @@ public:
 private:
     const t_dtree& m_tree;
     t_aggtype m_aggtype;
-    t_colcsptrvec m_icolumns;
-    t_col_sptr m_ocolumn;
+    std::vector<std::shared_ptr<const t_column>> m_icolumns;
+    std::shared_ptr<t_column> m_ocolumn;
 };
 
 template <typename AGGIMPL_T,
@@ -213,7 +214,7 @@ template <typename AGGIMPL_T,
     = 0>
 void
 build_aggregate_helper(
-    AGGIMPL_T& aggimpl, t_ptidx bcidx, t_ptidx ecidx, t_column* ocolumn, t_ptidx nidx) {
+    AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx, t_column* ocolumn, t_index nidx) {
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     const t_rolling* biter = ocolumn->get_nth<t_rolling>(bcidx);
     const t_rolling* eiter = ocolumn->get_nth<t_rolling>(ecidx);
@@ -227,11 +228,11 @@ template <typename AGGIMPL_T,
     = 0>
 void
 build_aggregate_helper(
-    AGGIMPL_T& aggimpl, t_ptidx bcidx, t_ptidx ecidx, t_column* ocolumn, t_ptidx nidx) {
+    AGGIMPL_T& aggimpl, t_index bcidx, t_index ecidx, t_column* ocolumn, t_index nidx) {
     const t_column* c_ocolumn = ocolumn;
     typedef typename AGGIMPL_T::t_rolling t_rolling;
     std::vector<t_rolling> sbuf(ecidx - bcidx);
-    for (t_ptidx sidx = bcidx; sidx < ecidx; ++sidx) {
+    for (t_index sidx = bcidx; sidx < ecidx; ++sidx) {
 
         auto tmpv = c_ocolumn->get_nth<const char>(static_cast<t_uindex>(sidx));
         sbuf[sidx - bcidx] = tmpv;
@@ -273,13 +274,13 @@ t_aggregate::build_aggregate() {
     const t_uindex* base_lcptr = lcptr->get<const t_uindex>(0);
 
     for (t_index level_idx = n_levels; level_idx > -1; level_idx--) {
-        t_ptipair markers = m_tree.get_level_markers(level_idx);
+        std::pair<t_index, t_index> markers = m_tree.get_level_markers(level_idx);
 
-        t_ptidx bidx = markers.first;
-        t_ptidx eidx = markers.second;
+        t_index bidx = markers.first;
+        t_index eidx = markers.second;
 
         if (level_idx == n_levels) {
-            for (t_ptidx nidx = bidx; nidx < eidx; nidx++) {
+            for (t_index nidx = bidx; nidx < eidx; nidx++) {
                 const t_node* n_ = m_tree.get_node_ptr(nidx);
                 const t_tnode& n = *n_;
                 const t_uindex* blptr = base_lcptr + n.m_flidx;
@@ -296,12 +297,12 @@ t_aggregate::build_aggregate() {
             }
         } else {
             // for all nodes in level
-            for (t_ptidx nidx = bidx; nidx < eidx; nidx++) {
+            for (t_index nidx = bidx; nidx < eidx; nidx++) {
                 const t_node* n_ = m_tree.get_node_ptr(nidx);
                 const t_node& n = *n_;
 
-                t_ptidx bcidx = n.m_fcidx;
-                t_ptidx ecidx = bcidx + n.m_nchild;
+                t_index bcidx = n.m_fcidx;
+                t_index ecidx = bcidx + n.m_nchild;
 
                 build_aggregate_helper(aggimpl, bcidx, ecidx, ocolumn, nidx);
             }
