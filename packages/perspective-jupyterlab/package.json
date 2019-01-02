@@ -23,8 +23,7 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "test": "npm-run-all test:build test:run",
-        "test:build": "npm-run-all build",
+        "test": "npm-run-all test:run",
         "test:run": "NODE_ENV=test jest -i --coverage --no-cache --collectCoverageFrom=src/ts/*.{ts} --config=src/config/jest.config.js --rootDir=.",
         "build": "webpack --color --config src/config/plugin.config.js",
         "clean": "rimraf build"

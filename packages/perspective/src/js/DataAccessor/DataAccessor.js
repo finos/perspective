@@ -77,7 +77,8 @@ export class DataAccessor {
         return value;
     }
 
-    marshal(column_name, row_index, type) {
+    marshal(column_index, row_index, type) {
+        const column_name = this.names[column_index];
         let val = clean_data(this.get(column_name, row_index));
         let date_parser;
 
@@ -153,6 +154,13 @@ export class DataAccessor {
         this.data = data;
         this.format = this.is_format(this.data);
         this.row_count = this.get_row_count(this.data);
+        if (this.format === this.data_formats.row) {
+            this.names = Object.keys(data[0]);
+        } else if (this.format === this.data_formats.column || this.format === this.data_formats.schema) {
+            this.names = Object.keys(data);
+        } else {
+            throw "Unknown data format!";
+        }
     }
 }
 

@@ -205,14 +205,17 @@
             }
 
             perspective-row:last-child {
-                --row_draggable-border-width: var(--row_draggable-border-last-child-width, 0 0 1px 0);                
+                --row_draggable-border-width: var(
+                    --row_draggable-border-last-child-width,
+                    0 0 1px 0
+                );
             }
 
             perspective-row[drop-target] {
                 --row_draggable_children-opacity: 0;
             }
         }
-        
+
         #active_columns,
         #inactive_columns {
             border: none !important;
@@ -306,11 +309,11 @@
         background-color: var(--plugin--background, white);
     }
 
-    #drop_target{
-        border: var(--plugin--border,none);
+    #drop_target {
+        border: var(--plugin--border, none);
     }
 
-    #pivot_chart_container{
+    #pivot_chart_container {
         box-shadow: var(--plugin--box-shadow, none);
     }
 
@@ -331,7 +334,7 @@
         z-index: 10000;
         transition: opacity 0.3s ease-out;
         opacity: 1;
-        
+
         &.hidden {
             display: none;
             opacity: 0;

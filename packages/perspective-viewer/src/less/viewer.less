@@ -33,7 +33,6 @@
     }
 }
 
-  
 @keyframes scale_2 {
     from {
         transform: scale(1.01);
@@ -76,7 +75,7 @@
     --hypergrid-separator--color: #666;
     --hypergrid-header--color: #666;
     --hypergrid-positive--color: #1078d1;
-    --hypergrid-negative--color: rgb(255,136,136);
+    --hypergrid-negative--color: rgb(255, 136, 136);
     --hypergrid-positive--background: #fff;
     --hypergrid-negative--background: #fff;
     --hypergrid--font-size: 12px;
@@ -174,7 +173,6 @@
             opacity: 1;
         }
     }
-
     #top_panel perspective-row {
         animation: expand 0.3s ease-out;
     }
@@ -191,7 +189,8 @@
     #inactive_columns {
         perspective-row {
             opacity: var(--inactive-column--opacity, 1);
-            transition: opacity 0.3s; // --row_draggable--transition: margin-left 0.5s;
+            transition: opacity 0.3s;
+            // --row_draggable--transition: margin-left 0.5s;
             &.active {
                 --row_draggable--margin: 0px 0px 0px 10px;
                 opacity: 0;
@@ -315,7 +314,6 @@
         position: absolute;
         left: 0px;
         top: 0px;
-
         right: 0px;
         bottom: 0px;
         padding: 30px;

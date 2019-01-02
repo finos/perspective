@@ -84,7 +84,7 @@ export function set_category_axis(config, axis, type, top) {
                 autoRotation: [-10, -20, -30, -40, -50, -60, -70, -80, -90]
             }
         };
-        if (axis === "yAxis") {
+        if (axis === "yAxis" && (!config.hasOwnProperty("boost") || config.chart.type === "heatmap")) {
             Object.assign(opts, {
                 title: null,
                 tickWidth: 1,
@@ -144,7 +144,7 @@ export function default_config(aggregates, mode) {
     return {
         chart: {
             type: type,
-            inverted: mode.indexOf("horizontal") > -1,
+            inverted: mode.slice(0, 2) === "x_",
             animation: false,
             zoomType: mode === "scatter" ? "xy" : "x",
             resetZoomButton: {

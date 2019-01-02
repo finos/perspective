@@ -6,7 +6,9 @@
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.3.1",
+        "babel-core": "^7.0.0-0",
         "babel-eslint": "^8.2.3",
+        "babel-jest": "^23.6.0",
         "chart.js": "^2.7.1",
         "codemirror": "^5.30.0",
         "codemirror-javascript": "^0.2.0",
@@ -14,8 +16,6 @@
         "eslint": "^4.19.1",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
-        "jasmine": "^2.8.0",
-        "jasmine-core": "^2.8.0",
         "jest": "^23.6.0",
         "js-beautify": "^1.8.6",
         "lerna": "^2.11.0",
@@ -36,7 +36,7 @@
         "build,test": "npm run --silent build && npm run --silent test",
         "build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
         "build,bench": "npm run --silent build && npm run --silent bench",
-        "build": "bash -c '[[ -z \"${PSP_DOCKER}\" ]] && npm run --silent _build || npm run --silent _emsdk -- npm run --silent _build'",
+        "build": "node scripts/build.js",
         "build_cpp": "lerna run build:cpp ${PACKAGE:+--scope=@jpmorganchase/perspective} --stream",
         "bench": "node scripts/bench.js",
         "docs": "lerna run docs --silent --stream",
@@ -56,20 +56,23 @@
         "fix:less": "prettier --tab-width 4 --write packages/**/src/less/*.less",
         "fix:html": "html-beautify packages/**/src/html/*.html -r",
         "fix:json": "prettier --tab-width 4 --write **/package.json",
-        "fix": "npm-run-all --silent fix:*",
-        "_build": "lerna run build ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
-        "_emsdk": "docker run --rm -it ${PSP_CPU_COUNT:+--cpus=\"${PSP_CPU_COUNT}.0\"} -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk"
+        "fix": "npm-run-all --silent fix:*"
     },
     "jest": {
         "roots": [
-            "packages/perspective/build",
+            "packages/perspective/test/js",
             "packages/perspective-viewer/test/js",
             "packages/perspective-viewer-hypergrid/test/js",
-            "packages/perspective-viewer-highcharts/test/js"
+            "packages/perspective-viewer-highcharts/test/js",
+            "packages/perspective-jupyterlab/test/js"
         ],
         "verbose": true,
         "testURL": "http://localhost/",
         "transform": {},
+        "transformIgnorePatterns": [
+            "/node_modules/(?!@apache)",
+            "/build/"
+        ],
         "automock": false
     }
 }

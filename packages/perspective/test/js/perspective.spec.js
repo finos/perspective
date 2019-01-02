@@ -7,18 +7,12 @@
  *
  */
 
-const perspective = require("../../src/js/perspective.js").default;
-const node_perspective = require("../../src/js/perspective.node.js");
-const asmjs = require("../../obj/psp.asmjs.js");
+const node_perspective = require("../../build/perspective.node.js");
+
+require("../../build/perspective.asmjs.worker.js");
 
 const RUNTIMES = {
-    ASMJS: perspective(
-        asmjs.load_perspective({
-            wasmJSMethod: "asmjs",
-            printErr: x => console.error(x),
-            print: x => console.log(x)
-        })
-    ),
+    ASMJS: window.perspective,
     NODE: node_perspective
 };
 

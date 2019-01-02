@@ -6,11 +6,12 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
+const fs = require("fs");
+const path = require("path");
 const papaparse = require("papaparse");
 const moment = require("moment");
-const arrow = require("../arrow/test-null.arrow");
-const chunked = require("../arrow/chunked.arrow");
+const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arrow")).buffer;
+const chunked = fs.readFileSync(path.join(__dirname, "..", "arrow", "chunked.arrow")).buffer;
 
 var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 

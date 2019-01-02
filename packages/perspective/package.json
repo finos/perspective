@@ -17,12 +17,9 @@
     "typings": "index.d.ts",
     "scripts": {
         "bench": "node ../../scripts/bench.js",
-        "prebuild": "mkdir -p build && CLICOLOR_FORCE=1 yarn compile",
-        "precompile": "mkdir -p obj && mkdir -p ../../obj/",
-        "compile": "cd ../../obj/ && emcmake cmake ../ && emmake make -j${PSP_CPU_COUNT-8}",
+        "prebuild": "mkdir -p build && mkdir -p obj",
         "compile:cpp": "mkdir -p ../../cppbuild && cd ../../cppbuild && cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1 && make -j${PSP_CPU_COUNT-8}",
         "cpp": "npm-run-all build:cpp test:cpp",
-        "postcompile": "node ../../scripts/compile",
         "build": "npm-run-all build:webpack",
         "build:cpp": "npm-run-all compile:cpp",
         "build:webpack": "npm-run-all -p build:webpack:*",
@@ -30,23 +27,22 @@
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
         "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
         "test:cpp": "npm-run-all build:cpp && ../../cppbuild/test/psp_test",
-        "test:build": "npm-run-all test:build:copy test:build:webpack",
-        "test:build:copy": "npm-run-all -p test:build:copy:*",
-        "test:build:copy:html": "cp test/html/* build",
-        "test:build:webpack": "npm-run-all -p test:build:webpack:*",
-        "test:build:webpack:browser": "webpack --color --config test/config/test_browser.config.js",
-        "test:build:webpack:node": "webpack --color --config test/config/test_node.config.js",
+        "test:build": "cp test/html/* build",
         "test:run": "jest --color --ci",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
     },
     "jest": {
         "roots": [
-            "build"
+            "test/js"
+        ],
+        "transform": {},
+        "transformIgnorePatterns": [
+            "/node_modules/(?!@apache)",
+            "/build/"
         ],
         "verbose": true,
         "testURL": "http://localhost/",
-        "transform": {},
         "automock": false
     },
     "repository": {
