@@ -66,7 +66,7 @@ if (PSP_WASM_BUILD)
 
 	if(DEFINED ENV{PSP_DEBUG})
 		set(OPT_FLAGS " \
-			-O1 \
+			-O0 \
 			-g4 \
 			-s SAFE_HEAP=1 \
 			-s DISABLE_EXCEPTION_CATCHING=0 \
@@ -78,6 +78,7 @@ if (PSP_WASM_BUILD)
 			-O3 \
 			-g0 \
 			--closure 1 \
+			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \
 			")
 	endif()
 
