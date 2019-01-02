@@ -118,10 +118,14 @@ var arrow_result = [
     }
 ];
 
-var dt = new Date();
-dt.setHours(4);
-dt.setMinutes(12);
-var data_4 = [{v: dt}];
+var dt = () => {
+    let dt = new Date();
+    dt.setHours(4);
+    dt.setMinutes(12);
+    return dt;
+};
+
+var data_4 = [{v: dt()}];
 
 var data_5 = [{v: "11-09-2017"}];
 
@@ -356,8 +360,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({});
             var answer = `x,y,z\r\n1,a,true\r\n2,b,false\r\n3,c,true\r\n4,d,false`;
-            let result2 = await view.to_csv();
-            expect(answer).toEqual(result2);
+            let result = await view.to_csv();
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -369,8 +373,8 @@ module.exports = perspective => {
                 aggregate: [{op: "sum", column: "x"}]
             });
             var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
-            let result2 = await view.to_csv();
-            expect(answer).toEqual(result2);
+            let result = await view.to_csv();
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -383,8 +387,8 @@ module.exports = perspective => {
                 aggregate: [{op: "sum", column: "x"}]
             });
             var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
-            let result2 = await view.to_csv();
-            expect(answer).toEqual(result2);
+            let result = await view.to_csv();
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -392,8 +396,8 @@ module.exports = perspective => {
         it("Serializes a simple view to column-oriented JSON", async function() {
             var table = perspective.table(data_3);
             var view = table.view({});
-            let result2 = await view.to_columns();
-            expect(data_7).toEqual(result2);
+            let result = await view.to_columns();
+            expect(result).toEqual(data_7);
             view.delete();
             table.delete();
         });
@@ -404,7 +408,7 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view();
             let result = await view.to_json();
-            expect(data).toEqual(result);
+            expect(result).toEqual(data);
             view.delete();
             table.delete();
         });
@@ -413,7 +417,7 @@ module.exports = perspective => {
             var table = perspective.table(col_data);
             var view = table.view();
             let result = await view.to_json();
-            expect(data).toEqual(result);
+            expect(result).toEqual(data);
             view.delete();
             table.delete();
         });
@@ -422,7 +426,7 @@ module.exports = perspective => {
             var table = perspective.table(arrow.slice());
             var view = table.view();
             let result = await view.to_json();
-            expect(arrow_result).toEqual(result);
+            expect(result).toEqual(arrow_result);
             view.delete();
             table.delete();
         });
@@ -440,7 +444,7 @@ module.exports = perspective => {
             var table = perspective.table(csv);
             var view = table.view();
             let result = await view.to_json();
-            expect(papaparse.parse(csv, {header: true, dynamicTyping: true}).data).toEqual(result);
+            expect(result).toEqual(papaparse.parse(csv, {header: true, dynamicTyping: true}).data);
             view.delete();
             table.delete();
         });
@@ -449,7 +453,7 @@ module.exports = perspective => {
             var table = perspective.table(meta);
             var view = table.view();
             let result = await view.to_json();
-            expect([]).toEqual(result);
+            expect(result).toEqual([]);
             view.delete();
             table.delete();
         });
@@ -458,7 +462,7 @@ module.exports = perspective => {
             var table = perspective.table(data_3);
             var view = table.view();
             let result = await view.to_json();
-            expect(data_3).toEqual(result);
+            expect(result).toEqual(data_3);
             view.delete();
             table.delete();
         });
@@ -533,14 +537,14 @@ module.exports = perspective => {
         it("Handles floats schemas", async function() {
             var table = perspective.table(data_3);
             let result = await table.schema();
-            expect(meta_3).toEqual(result);
+            expect(result).toEqual(meta_3);
             table.delete();
         });
 
         it("Generates correct date schemas", async function() {
             var table = perspective.table(data_4);
             let result = await table.schema();
-            expect(meta_4).toEqual(result);
+            expect(result).toEqual(meta_4);
             table.delete();
         });
 
@@ -549,7 +553,7 @@ module.exports = perspective => {
             table.update(data_4);
             let view = table.view();
             let result = await view.to_json();
-            expect([{v: +data_4[0]["v"]}]).toEqual(result);
+            expect(result).toEqual([{v: +data_4[0]["v"]}]);
             view.delete();
             table.delete();
         });
@@ -557,8 +561,8 @@ module.exports = perspective => {
         it("Handles datetime values", async function() {
             var table = perspective.table(data_4);
             let view = table.view();
-            let result2 = await view.to_json();
-            expect([{v: +data_4[0]["v"]}]).toEqual(result2);
+            let result = await view.to_json();
+            expect(result).toEqual([{v: +data_4[0]["v"]}]);
             view.delete();
             table.delete();
         });
@@ -566,8 +570,8 @@ module.exports = perspective => {
         it("Handles datetime strings", async function() {
             var table = perspective.table(data_5);
             let view = table.view();
-            let result2 = await view.to_json();
-            expect([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]).toEqual(result2);
+            let result = await view.to_json();
+            expect(result).toEqual([{v: +moment(data_5[0]["v"], "MM-DD-YYYY")}]);
             view.delete();
             table.delete();
         });
@@ -576,13 +580,13 @@ module.exports = perspective => {
             var table = perspective.table({v: "date"});
             table.update(data_4);
             let view = table.view();
-            let result2 = await view.to_json();
+            let result = await view.to_json();
             let d = new Date(data_4[0]["v"]);
             d.setHours(0);
             d.setMinutes(0);
             d.setSeconds(0);
             d.setMilliseconds(0);
-            expect([{v: +d}]).toEqual(result2);
+            expect(result).toEqual([{v: +d}]);
             view.delete();
             table.delete();
         });
@@ -591,7 +595,7 @@ module.exports = perspective => {
             var table = perspective.table(data_6);
             let view = table.view({});
             let result = await view.to_json();
-            expect(data_6).toEqual(result);
+            expect(result).toEqual(data_6);
             view.delete();
             table.delete();
         });
@@ -609,8 +613,7 @@ module.exports = perspective => {
             ]);
             let view = table2.view({aggregate: [{op: "count", column: "const"}]});
             let result = await view.to_json();
-            let expected = [{const: 1}, {const: 1}, {const: 1}, {const: 1}];
-            expect(expected).toEqual(result);
+            expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
             view.delete();
             table2.delete();
             table.delete();
@@ -629,8 +632,7 @@ module.exports = perspective => {
             ]);
             let view = table2.view({aggregate: [{op: "count", column: "ratio"}]});
             let result = await view.to_json();
-            let expected = [{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}];
-            expect(expected).toEqual(result);
+            expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
             view.delete();
             table2.delete();
             table.delete();
@@ -660,7 +662,7 @@ module.exports = perspective => {
             let view = table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]});
             let result = await view.to_json();
             let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
-            expect(expected).toEqual(result);
+            expect(result).toEqual(expected);
             view.delete();
             table2.delete();
             table.delete();
@@ -719,7 +721,7 @@ module.exports = perspective => {
                 }
             };
 
-            expect(expected).toEqual(result);
+            expect(result).toEqual(expected);
             table2.delete();
             table.delete();
         });

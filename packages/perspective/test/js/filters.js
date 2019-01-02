@@ -9,6 +9,7 @@
 
 var yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
+
 var now = new Date();
 
 var data = [{w: now, x: 1, y: "a", z: true}, {w: now, x: 2, y: "b", z: false}, {w: now, x: 3, y: "c", z: true}, {w: yesterday, x: 4, y: "d", z: false}];
@@ -35,7 +36,7 @@ module.exports = perspective => {
                     filter: [["x", ">", 2.0]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(2)).toEqual(json);
+                expect(json).toEqual(rdata.slice(2));
                 view.delete();
                 table.delete();
             });
@@ -46,7 +47,7 @@ module.exports = perspective => {
                     filter: [["x", "<", 3.0]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 2)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 2));
                 view.delete();
                 table.delete();
             });
@@ -57,7 +58,7 @@ module.exports = perspective => {
                     filter: [["x", ">", 4]]
                 });
                 let json = await view.to_json();
-                expect([]).toEqual(json);
+                expect(json).toEqual([]);
                 view.delete();
                 table.delete();
             });
@@ -68,7 +69,7 @@ module.exports = perspective => {
                     filter: [["x", ">", 4]]
                 });
                 let json = await view.to_json();
-                expect([]).toEqual(json);
+                expect(json).toEqual([]);
                 view.delete();
                 table.delete();
             });
@@ -81,7 +82,7 @@ module.exports = perspective => {
                     filter: [["x", "==", 1]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 1)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 1));
                 view.delete();
                 table.delete();
             });
@@ -92,7 +93,7 @@ module.exports = perspective => {
                     filter: [["x", "==", 5]]
                 });
                 let json = await view.to_json();
-                expect([]).toEqual(json);
+                expect(json).toEqual([]);
                 view.delete();
                 table.delete();
             });
@@ -103,7 +104,7 @@ module.exports = perspective => {
                     filter: [["y", "==", "a"]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 1)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 1));
                 view.delete();
                 table.delete();
             });
@@ -114,7 +115,7 @@ module.exports = perspective => {
                     filter: [["y", "==", "e"]]
                 });
                 let json = await view.to_json();
-                expect([]).toEqual(json);
+                expect(json).toEqual([]);
                 view.delete();
                 table.delete();
             });
@@ -125,7 +126,7 @@ module.exports = perspective => {
                     filter: [["z", "==", true]]
                 });
                 let json = await view.to_json();
-                expect([rdata[0], rdata[2]]).toEqual(json);
+                expect(json).toEqual([rdata[0], rdata[2]]);
                 view.delete();
                 table.delete();
             });
@@ -136,7 +137,7 @@ module.exports = perspective => {
                     filter: [["z", "==", false]]
                 });
                 let json = await view.to_json();
-                expect([rdata[1], rdata[3]]).toEqual(json);
+                expect(json).toEqual([rdata[1], rdata[3]]);
                 view.delete();
                 table.delete();
             });
@@ -147,7 +148,7 @@ module.exports = perspective => {
                     filter: [["w", "==", yesterday]]
                 });
                 let json = await view.to_json();
-                expect([rdata[3]]).toEqual(json);
+                expect(json).toEqual([rdata[3]]);
                 view.delete();
                 table.delete();
             });
@@ -158,7 +159,7 @@ module.exports = perspective => {
                     filter: [["w", "!=", yesterday]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 3)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 3));
                 view.delete();
                 table.delete();
             });
@@ -171,7 +172,7 @@ module.exports = perspective => {
                     filter: [["y", "in", ["a", "b"]]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 2)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 2));
                 view.delete();
                 table.delete();
             });
@@ -184,7 +185,7 @@ module.exports = perspective => {
                     filter: [["y", "not in", ["d"]]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 3)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 3));
                 view.delete();
                 table.delete();
             });
@@ -210,7 +211,7 @@ module.exports = perspective => {
                     filter: [["x", ">", 1], ["x", "<", 4]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(1, 3)).toEqual(json);
+                expect(json).toEqual(rdata.slice(1, 3));
                 view.delete();
                 table.delete();
             });
@@ -222,7 +223,7 @@ module.exports = perspective => {
                     filter: [["y", "contains", "a"], ["y", "contains", "b"]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 2)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 2));
                 view.delete();
                 table.delete();
             });
@@ -261,7 +262,7 @@ module.exports = perspective => {
                 });
                 var answer = [{x: 3.5, y: 1}, {x: 4.5, y: 2}];
                 let result = await view.to_json();
-                expect(answer).toEqual(result);
+                expect(result).toEqual(answer);
                 view.delete();
                 table.delete();
             });
@@ -275,7 +276,7 @@ module.exports = perspective => {
                 });
                 var answer = dataSet;
                 let result = await view.to_json();
-                expect(answer).toEqual(result);
+                expect(result).toEqual(answer);
                 view.delete();
                 table.delete();
             });
