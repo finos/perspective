@@ -935,9 +935,7 @@ column_names(val data, std::int32_t format) {
     if (format == 0) {
         std::int32_t max_check = 50;
         val data_names = Object.call<val>("keys", data[0]);
-        std::int32_t check_index = val::global("Math")
-                                       .call<val>("min", val(max_check), val(data["length"]))
-                                       .as<std::int32_t>();
+        std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
 
         for (auto ix = 0; ix < check_index; ix++) {
             val next = Object.call<val>("keys", data[ix]);
