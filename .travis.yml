@@ -7,19 +7,19 @@ services:
   - docker
 
 matrix:
-include:
-  - node_js: "8"
-    language: node_js
-    env: TEST=WASM
+  include:
+    - node_js: "8"
+      language: node_js
+      env: TEST=WASM
 
-  - node_js: "8"
-    language: node_js
-    env: TEST=CPP
+    - node_js: "8"
+      language: node_js
+      env: TEST=CPP
 
-  - python: "3.6"
-    language: python
-    env: TEST=PYTHON
-    cache: pip
+    - python: "3.6"
+      language: python
+      env: TEST=PYTHON
+      cache: pip
 
 cache:
   yarn: true
@@ -46,4 +46,3 @@ script:
   - if [ "$TEST" = "WASM" ]; then yarn test --docker --quiet; fi
   - if [ "$TEST" = "CPP" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "PYTHON" ]; then docker build -f python/Dockerfile .; fi
-
