@@ -38,7 +38,7 @@ env:
 
 
 install:
-  - if [ "$TEST" = "WASM" ]; then yarn; fi
+  - yarn
 
 script:
   - if [ "$TEST" = "WASM" ]; then yarn lint; fi
