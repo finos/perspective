@@ -15,7 +15,7 @@ RUN apt-get update
 RUN apt-get -y install apt-transport-https libtbb-dev cmake
 RUN apt-get -y remove python3
 
-RUN python3.7 -m pip install numpy
+RUN python3.7 -m pip install numpy pandas
 
 RUN ls -al /usr/local/lib/python3.7/site-packages/numpy
 
@@ -30,4 +30,4 @@ RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
 RUN python3 -m pip install codecov nose2 mock flake8
 RUN python3 -m pip install -r python/requirements.txt
 
-RUN DOCKER=true cd python && make test
+RUN DOCKER=true cd python && make build && make test
