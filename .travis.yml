@@ -1,4 +1,25 @@
 dist: trusty
+language: node_js
+node_js: "8"
+sudo: required
+
+services:
+  - docker
+
+matrix:
+include:
+  - node_js: "8"
+    language: node_js
+    env: TEST=WASM
+
+  - node_js: "8"
+    language: node_js
+    env: TEST=CPP
+
+  - python: "3.6"
+    language: python
+    env: TEST=PYTHON
+    cache: pip
 
 cache:
   yarn: true
@@ -15,10 +36,6 @@ env:
   global:
     - EM_USE_GLOBAL_CACHE=1
 
-sudo: required
-
-services:
-  - docker
 
 install:
   - if [ "$TEST" = "WASM" ]; then yarn; fi
@@ -30,17 +47,3 @@ script:
   - if [ "$TEST" = "CPP" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "PYTHON" ]; then docker build -f python/Dockerfile .; fi
 
-matrix:
-include:
-  - node_js: "8"
-    language: node_js
-    env: TEST=WASM
-
-  - node_js: "8"
-    language: node_js
-    env: TEST=CPP
-
-  - python: "3.6"
-    language: python
-    env: TEST=PYTHON
-    cache: pip
