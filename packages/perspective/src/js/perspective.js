@@ -1151,6 +1151,7 @@ export default function(Module) {
      */
     table.prototype.remove = function(data) {
         let pdata;
+        let cols = this._columns();
         let schema = this.gnode.get_tblschema();
         let types = schema.types();
         let is_arrow = false;
@@ -1163,7 +1164,7 @@ export default function(Module) {
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = [this.index];
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = [accessor.extract_typevec(types)[cols.indexOf(this.index)]];
             pdata = accessor;
         }
 
@@ -1171,7 +1172,7 @@ export default function(Module) {
             [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, false, true, is_arrow);
             this.initialized = true;
         } catch (e) {
-            console.error(`Remove failed: ${e}`);
+            console.error(`Remove failed`, e);
         } finally {
             schema.delete();
             types.delete();
