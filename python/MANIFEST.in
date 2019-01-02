@@ -1,0 +1,4 @@
+recursive-include perspective *
+prune examples/
+prune test_data/
+include requirements.txt
