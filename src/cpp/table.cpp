@@ -550,8 +550,6 @@ t_table::promote_column(const t_str& name, t_dtype new_dtype, t_int32 iter_limit
 
     t_uindex idx = m_schema.get_colidx(name);
     t_col_sptr current_col = m_columns[idx];
-    auto current_size = current_col->size();
-
     std::cout << "current: " + current_col->str() << std::endl;
 
     if (new_dtype != DTYPE_FLOAT64 || current_col->get_dtype() != DTYPE_INT32) {
@@ -561,8 +559,8 @@ t_table::promote_column(const t_str& name, t_dtype new_dtype, t_int32 iter_limit
     
     // create the new column and copy data
     t_col_sptr promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
-    promoted_col->reserve(current_size);
-    promoted_col->set_size(current_size);
+    promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
+    promoted_col->set_size(size());
 
     std::cout << "promoted: " + promoted_col->str() << std::endl;
 
