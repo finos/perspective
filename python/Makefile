@@ -1,9 +1,9 @@
 build: ## build the package
-	python3 setup.py build
+	cd .. && python3 setup.py build
 
 inplace: ## copy things inplace
-	cp `find build -name "libbinding.so"` perspective/table/
-	cp `find build -name "libpsp.so"` perspective/table/
+	cp `find ../build -name "libbinding.so"` perspective/table/
+	cp `find ../build -name "libpsp.so"` perspective/table/
 
 tests: inplace ## Clean and Make unit tests
 	python3 -m nose2 -v perspective --with-coverage --coverage=perspective
@@ -31,7 +31,7 @@ clean: ## clean the repository
 	find . -name "*.a"  | xargs rm -rf
 
 install:  ## install to site-packages
-	python3 setup.py install
+	python3 -m pip install ..
 
 preinstall:  ## install dependencies
 	python3 -m pip install -r requirements.txt
@@ -40,7 +40,7 @@ docs:  ## make documentation
 	make -C ./docs html
 
 dist:  ## dist to pypi
-	python3 setup.py sdist upload -r pypi
+	python3 ../setup.py sdist upload -r pypi
 
 # Thanks to Francoise at marmelab.com for this
 .DEFAULT_GOAL := help
