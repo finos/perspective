@@ -13,6 +13,7 @@ if (NOT DEFINED PSP_WASM_BUILD)
 	set(PSP_WASM_BUILD ON)
 	set(PSP_CPP_BUILD OFF)
 	set(PSP_CPP_BUILD_TESTS OFF)
+	set(PSP_PYTHON_BUILD OFF)
 endif()
 
 if (PSP_WASM_BUILD AND PSP_CPP_BUILD)
@@ -23,13 +24,46 @@ if (NOT DEFINED PSP_CPP_BUILD)
 	set(PSP_CPP_BUILD ON)
 endif()
 
+if (NOT DEFINED PSP_PYTHON_BUILD)
+	set(PSP_PYTHON_BUILD OFF)
+elseif(PSP_PYTHON_BUILD)
+	set(PSP_CPP_BUILD ON)
+endif()
+
 if (NOT DEFINED PSP_CPP_BUILD_TESTS)
 	set(PSP_CPP_BUILD_TESTS ON)
 endif()
 
 if (NOT DEFINED PSP_CPP_BUILD_STRICT)
-	message(WARNING "${Cyan}Building CPP without strict warnings${ColorReset}")
 	set(PSP_CPP_BUILD_STRICT OFF)
+endif()
+
+if(PSP_WASM_BUILD)
+	message(WARNING "${Cyan}Building WASM binding${ColorReset}")
+else()
+	message(WARNING "${Cyan}Skipping WASM binding${ColorReset}")
+endif()
+
+if(PSP_CPP_BUILD)
+	message(WARNING "${Cyan}Building C++ binding${ColorReset}")
+else()
+	message(WARNING "${Cyan}Skipping C++ binding${ColorReset}")
+endif()
+
+if (PSP_PYTHON_BUILD)
+	message(WARNING "${Cyan}Building Python binding${ColorReset}")
+else()
+	message(WARNING "${Cyan}Skipping Python binding${ColorReset}")
+endif()
+
+if (PSP_CPP_BUILD_TESTS)
+	message(WARNING "${Cyan}Building CPP tests${ColorReset}")
+else()
+	message(WARNING "${Cyan}Skipping CPP tests${ColorReset}")
+endif()
+
+if (NOT PSP_CPP_BUILD_STRICT)
+	message(WARNING "${Cyan}Building CPP without strict warnings${ColorReset}")
 endif()
 
 #######################
@@ -121,6 +155,27 @@ else()
 
 	include_directories(TBB_INCLUDE_DIRS)
 	include_directories("/usr/local/include")
+
+	if(PSP_PYTHON_BUILD)
+		#########################
+		# PYTHON BINDINGS BUILD #
+		#########################
+		add_definitions(-DPSP_ENABLE_PYTHON)
+		include_directories("/usr/local/include/python3.7m")  # FIXME
+		include_directories("${CMAKE_SOURCE_DIR}/python/perspective/include")
+		find_package( PythonInterp 3.7 REQUIRED )
+		find_package( PythonLibs 3.7 REQUIRED )
+		include_directories( ${PYTHON_INCLUDE_DIRS} )
+		find_package(NumPy)
+
+		find_package( Boost COMPONENTS python REQUIRED )
+		find_library( BOOST_PYTHON boost_python)
+		find_library( BOOST_NUMPY boost_numpy)
+		include_directories( ${Boost_INCLUDE_DIR} )
+
+		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
+		#####################
+	endif()
 endif()
 #####################
 
@@ -230,14 +285,34 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp.asmjs")
 	add_dependencies(perspective.asm perspective.sync)
 else()
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-		set(CMAKE_SHARED_LIBRARY_SUFFIX dylib)
+	if(PSP_PYTHON_BUILD)
+		########################
+		# Python extra targets #
+		########################
+		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/python/perspective/src/numpy.cpp ${HEADER_FILES})
+		target_link_libraries(psp ${BOOST_PYTHON})
+		target_link_libraries(psp ${BOOST_NUMPY})
+		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
+		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/python/perspective/src/binding.cpp)
+		target_link_libraries(binding psp)
+		target_link_libraries(binding tbb)
+		target_link_libraries(binding ${BOOST_PYTHON})
+		target_link_libraries(binding ${BOOST_NUMPY})
+		target_link_libraries(binding ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+		########################
+	else()
+		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
+		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			set(CMAKE_SHARED_LIBRARY_SUFFIX dylib)
+		endif()
 	endif()
-	add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
+
 	if(PSP_CPP_BUILD_STRICT)
 		target_compile_options(psp PRIVATE -Wall -Werror)
 	endif()
+
 	# target_link_libraries(psp ${TBB_LIBRARIES}) // doesnt work on mac
 	target_link_libraries(psp tbb)
 	set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${TBB_LIBRARY})
@@ -250,18 +325,23 @@ endif()
 # helper to grab gtest et al #
 ##############################
 function (psp_build_dep name cmake_file)
-	configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
-	execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-		RESULT_VARIABLE result
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
-	if(result)
-		message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
-	endif()
-	execute_process(COMMAND ${CMAKE_COMMAND} --build .
-		RESULT_VARIABLE result
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
-	if(result)
-		message(FATAL_ERROR "Build step for ${name} failed: ${result}")
+	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
+		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
+
+	else()
+		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
+		execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+			RESULT_VARIABLE result
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+		if(result)
+			message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
+		endif()
+		execute_process(COMMAND ${CMAKE_COMMAND} --build .
+			RESULT_VARIABLE result
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+		if(result)
+			message(FATAL_ERROR "Build step for ${name} failed: ${result}")
+		endif()
 	endif()
 	add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
 		${CMAKE_BINARY_DIR}/${name}-build

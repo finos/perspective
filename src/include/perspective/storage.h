@@ -17,6 +17,11 @@
 #include <perspective/debug_helpers.h>
 #include <cmath>
 
+#ifdef PSP_ENABLE_PYTHON
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#endif
+
 /*
 TODO.
 
@@ -193,6 +198,11 @@ public:
 
     std::shared_ptr<t_lstore> clone() const;
 
+#ifdef PSP_ENABLE_PYTHON
+    /* Python bits */
+    np::ndarray _as_numpy(t_dtype dtype);
+#endif
+
 protected:
     void copy_helper_(const t_lstore& other);
     void freeze_impl();
@@ -353,5 +363,6 @@ struct PERSPECTIVE_EXPORT t_column_recipe {
     t_uindex m_size;
     bool m_status_enabled;
 };
+
 
 } // end namespace perspective

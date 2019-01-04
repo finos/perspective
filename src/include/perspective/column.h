@@ -22,6 +22,11 @@
 #include <cmath>
 #include <unordered_map>
 
+#ifdef PSP_ENABLE_PYTHON
+namespace py = boost::python;
+namespace np = boost::python::numpy;
+#endif
+
 /*
 TODO -
 1. Implement implicit typepunning based on cardinality.
@@ -194,6 +199,10 @@ public:
 
     void borrow_vocabulary(const t_column& o);
 
+#ifdef PSP_ENABLE_PYTHON
+    np::ndarray _as_numpy();
+#endif
+    
 private:
     t_dtype m_dtype;
     bool m_init;
