@@ -68,7 +68,7 @@ class build_ext(build_ext_orig):
 
 
 setup(
-    name='perspective',
+    name='perspective-python',
     version='0.0.1',
     description='Analytics library',
     long_description=long_description,
@@ -89,7 +89,7 @@ setup(
 
     keywords='analytics tools plotting',
     # packages=find_packages(exclude=['tests', ]),
-    packages=find_packages(),
+    packages=['perspective.table'],
     include_package_data=True,
     zip_safe=False,
     ext_modules=[

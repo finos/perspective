@@ -2,8 +2,8 @@ build: ## build the package
 	python3 setup.py build
 
 inplace: ## copy things inplace
-	cp `find build -name "libbinding.so"` perspective/
-	cp `find build -name "libpsp.so"` perspective/
+	cp `find build -name "libbinding.so"` perspective/table/
+	cp `find build -name "libpsp.so"` perspective/table/
 
 tests: inplace ## Clean and Make unit tests
 	python3 -m nose2 -v perspective --with-coverage --coverage=perspective

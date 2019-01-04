@@ -25,10 +25,10 @@ void test(const char* name);
 perspective::t_schema* t_schema_init(py::list& columns, py::list& types);
 
 template<typename T>
-void _fill_col(std::vector<T>& dcol, perspective::t_col_sptr col);
+void _fill_col(std::vector<T>& dcol, std::shared_ptr<perspective::t_column> col);
 
 template<typename T>
-void _fill_col_np(np::ndarray& dcol, perspective::t_col_sptr col);
+void _fill_col_np(np::ndarray& dcol, std::shared_ptr<perspective::t_column> col);
 
 
 void _fill_data_single_column(perspective::t_table& tbl,
@@ -80,7 +80,7 @@ BOOST_PYTHON_MODULE(libbinding)
 
 
     py::class_<perspective::t_schema>("t_schema",
-        py::init<perspective::t_svec, perspective::t_dtypevec>())
+        py::init<std::vector<std::string>, std::vector<perspective::t_dtype> >())
         .def(py::init<>())
         .def(py::init<perspective::t_schema_recipe>())
 
@@ -132,8 +132,8 @@ BOOST_PYTHON_MODULE(libbinding)
         
         .def("pprint", static_cast<void (perspective::t_table::*)() const>(&perspective::t_table::pprint))
         .def("pprint", static_cast<void (perspective::t_table::*)(perspective::t_uindex, std::ostream*) const>(&perspective::t_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_table::*)(const perspective::t_str&) const>(&perspective::t_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_table::*)(const perspective::t_uidxvec&) const>(&perspective::t_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_table::*)(const std::string&) const>(&perspective::t_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_table::*)(const std::vector<perspective::t_uindex>&) const>(&perspective::t_table::pprint))
 
 
         // custom add ins
