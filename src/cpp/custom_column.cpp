@@ -21,8 +21,9 @@ t_custom_column::t_custom_column(const t_custom_column_recipe& ccr)
 
 {}
 
-t_custom_column::t_custom_column(const t_svec& icols, const t_str& ocol, const t_str& expr,
-    const t_svec& where_keys, const t_svec& where_values, const t_str& base_case)
+t_custom_column::t_custom_column(const std::vector<std::string>& icols, const std::string& ocol,
+    const std::string& expr, const std::vector<std::string>& where_keys,
+    const std::vector<std::string>& where_values, const std::string& base_case)
     : m_icols(icols)
     , m_ocol(ocol)
     , m_expr(expr)
@@ -30,17 +31,17 @@ t_custom_column::t_custom_column(const t_svec& icols, const t_str& ocol, const t
     , m_where_values(where_values)
     , m_base_case(base_case) {}
 
-t_str
+std::string
 t_custom_column::get_ocol() const {
     return m_ocol;
 }
 
-t_str
+std::string
 t_custom_column::get_expr() const {
     return m_expr;
 }
 
-const t_svec&
+const std::vector<std::string>&
 t_custom_column::get_icols() const {
     return m_icols;
 }
@@ -57,17 +58,17 @@ t_custom_column::get_recipe() const {
     return rv;
 }
 
-const t_svec&
+const std::vector<std::string>&
 t_custom_column::get_where_keys() const {
     return m_where_keys;
 }
 
-const t_svec&
+const std::vector<std::string>&
 t_custom_column::get_where_values() const {
     return m_where_values;
 }
 
-const t_str&
+const std::string&
 t_custom_column::get_base_case() const {
     return m_base_case;
 }

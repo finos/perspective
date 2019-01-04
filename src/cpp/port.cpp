@@ -32,19 +32,19 @@ t_port::init() {
     m_init = true;
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_port::get_table() {
     return m_table;
 }
 
 void
-t_port::set_table(t_table_sptr table) {
+t_port::set_table(std::shared_ptr<t_table> table) {
     m_table = nullptr;
     m_table = table;
 }
 
 void
-t_port::send(t_table_csptr table) {
+t_port::send(std::shared_ptr<const t_table> table) {
     m_table->append(*table.get());
 }
 
@@ -84,7 +84,7 @@ t_port::release_or_clear()
 
     t_uindex size = m_table->size();
 
-    if (static_cast<t_float64>(size) < 0.4 * t_float64(m_prevsize)) {
+    if (static_cast<double>(size) < 0.4 * double(m_prevsize)) {
         m_table->clear();
     } else {
         release();

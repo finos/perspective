@@ -102,7 +102,7 @@ t_lstore::resize_mapping(t_uindex cap_new) {
 
 void
 t_lstore::destroy_mapping() {
-    t_rcode rc = munmap(m_base, capacity());
+    t_index rc = munmap(m_base, capacity());
     PSP_VERBOSE_ASSERT(!rc, "Failed to destroy mapping");
 }
 

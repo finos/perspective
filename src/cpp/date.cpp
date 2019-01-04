@@ -22,32 +22,34 @@ t_date::set_psp_date(t_uindex dt)
     m_storage = t_rawtype(dt);
 }
 
-t_date::t_date(t_int16 year, t_int8 month, t_int8 day) { set_year_month_day(year, month, day); }
+t_date::t_date(std::int16_t year, std::int8_t month, std::int8_t day) {
+    set_year_month_day(year, month, day);
+}
 
 void
-t_date::set_year_month_day(t_int16 year, t_int8 month, t_int8 day) {
+t_date::set_year_month_day(std::int16_t year, std::int8_t month, std::int8_t day) {
     set_year(year);
     set_month(month);
     set_day(day);
 }
 
 void
-t_date::set_year(t_int16 year) {
+t_date::set_year(std::int16_t year) {
     m_storage = (m_storage & ~YEAR_MASK) | (year << YEAR_SHIFT);
 }
 void
-t_date::set_month(t_int8 month) {
+t_date::set_month(std::int8_t month) {
     m_storage = (m_storage & ~MONTH_MASK) | (month << MONTH_SHIFT);
 }
 void
-t_date::set_day(t_int8 day) {
+t_date::set_day(std::int8_t day) {
     m_storage = (m_storage & ~DAY_MASK) | (day << DAY_SHIFT);
 }
 
-t_date::t_date(t_uint32 raw_val)
+t_date::t_date(std::uint32_t raw_val)
     : m_storage(raw_val) {}
 
-t_uint32
+std::uint32_t
 t_date::raw_value() const {
     return m_storage;
 }
@@ -56,29 +58,29 @@ t_date::raw_value() const {
 // number of days a is after b.
 //(Start point is unspecified, may not be stable and
 // only works for dates after 1900AD.)
-t_int32
+std::int32_t
 t_date::consecutive_day_idx() const {
-    t_int32 m = month();
-    t_int32 y = year();
-    t_int32 yP = y - 1;
-    t_int32 leap_selector = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
+    std::int32_t m = month();
+    std::int32_t y = year();
+    std::int32_t yP = y - 1;
+    std::int32_t leap_selector = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
     return day() + 365 * y + yP / 4 - yP / 100 + yP / 400
         + CUMULATIVE_DAYS[leap_selector][m - 1];
 }
 
 t_date
-from_consecutive_day_idx(t_int32 idx) {
-    t_int32 y = static_cast<t_int32>(idx / 365.2425);
-    t_int32 yP = y - 1;
-    t_int32 idx_year_removed = idx - (y * 365 + yP / 4 - yP / 100 + yP / 400);
-    t_int32 tgt_substraction = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 366 : 365;
+from_consecutive_day_idx(std::int32_t idx) {
+    std::int32_t y = static_cast<std::int32_t>(idx / 365.2425);
+    std::int32_t yP = y - 1;
+    std::int32_t idx_year_removed = idx - (y * 365 + yP / 4 - yP / 100 + yP / 400);
+    std::int32_t tgt_substraction = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 366 : 365;
     if (idx_year_removed > tgt_substraction) {
         idx_year_removed -= tgt_substraction;
         y += 1;
     }
-    t_int32 yearkind = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
-    const t_int32* const pos = std::lower_bound(CUMULATIVE_DAYS[yearkind],
-                                   CUMULATIVE_DAYS[yearkind] + 13, idx_year_removed)
+    std::int32_t yearkind = (y % 4 == 0 && (y % 100 != 0 || y % 400 == 0)) ? 1 : 0;
+    const std::int32_t* const pos = std::lower_bound(CUMULATIVE_DAYS[yearkind],
+                                        CUMULATIVE_DAYS[yearkind] + 13, idx_year_removed)
         - 1;
     return t_date(
         y, std::distance(CUMULATIVE_DAYS[yearkind], pos) + 1, idx_year_removed - *pos /*+1*/);
@@ -109,19 +111,19 @@ operator!=(const t_date& a, const t_date& b) {
     return a.m_storage != b.m_storage;
 }
 
-t_int32
+std::int32_t
 t_date::year() const {
     return ((m_storage & YEAR_MASK) >> YEAR_SHIFT);
 }
-t_int32
+std::int32_t
 t_date::month() const {
     return ((m_storage & MONTH_MASK) >> MONTH_SHIFT);
 }
-t_int32
+std::int32_t
 t_date::day() const {
     return ((m_storage & DAY_MASK) >> DAY_SHIFT);
 }
-t_str
+std::string
 t_date::str() const {
     std::stringstream ss;
     ss << year() << "-" << str_(month()) << "-" << str_(day());

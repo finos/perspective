@@ -12,8 +12,8 @@
 
 namespace perspective {
 
-t_schema_column::t_schema_column(
-    const t_str& tblname, const t_str& name, const t_str& altname, t_dtype dtype)
+t_schema_column::t_schema_column(const std::string& tblname, const std::string& name,
+    const std::string& altname, t_dtype dtype)
     : m_tblname(tblname)
     , m_name(name)
     , m_altname(altname)

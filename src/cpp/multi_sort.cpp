@@ -21,19 +21,19 @@ t_mselem::t_mselem()
     , m_order(0)
     , m_deleted(false) {}
 
-t_mselem::t_mselem(const t_tscalvec& row)
+t_mselem::t_mselem(const std::vector<t_tscalar>& row)
     : m_row(row)
     , m_pkey(mknone())
     , m_order(0)
     , m_deleted(false) {}
 
-t_mselem::t_mselem(const t_tscalvec& row, t_uindex order)
+t_mselem::t_mselem(const std::vector<t_tscalar>& row, t_uindex order)
     : m_row(row)
     , m_pkey(mknone())
     , m_order(order)
     , m_deleted(false) {}
 
-t_mselem::t_mselem(const t_tscalar& pkey, const t_tscalvec& row)
+t_mselem::t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row)
     : m_row(row)
     , m_pkey(pkey)
     , m_order(0)
@@ -78,7 +78,7 @@ t_minmax_idx::t_minmax_idx(t_index mn, t_index mx)
 // Given a vector return the indices of the
 // minimum and maximum elements in it.
 t_minmax_idx
-get_minmax_idx(const t_tscalvec& vec, t_sorttype stype) {
+get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
     t_minmax_idx rval(-1, -1);
 
     if (vec.empty())
@@ -109,9 +109,9 @@ get_minmax_idx(const t_tscalvec& vec, t_sorttype stype) {
         case SORTTYPE_ASCENDING_ABS:
         case SORTTYPE_DESCENDING_ABS: {
             for (t_index idx = 0, loop_end = vec.size(); idx < loop_end; ++idx) {
-                t_float64 val = std::abs(vec[idx].to_double());
-                t_float64 mindbl = std::abs(t_float64(min_max.first));
-                t_float64 maxdbl = std::abs(t_float64(min_max.second));
+                double val = std::abs(vec[idx].to_double());
+                double mindbl = std::abs(double(min_max.first));
+                double maxdbl = std::abs(double(min_max.second));
 
                 if (val <= mindbl) {
                     min_max.first.set(val);
@@ -136,7 +136,7 @@ get_minmax_idx(const t_tscalvec& vec, t_sorttype stype) {
     return rval;
 }
 
-t_float64
+double
 to_double(const t_tscalar& c) {
     return c.to_double();
 }
@@ -148,17 +148,17 @@ t_nancmp::t_nancmp()
 t_nancmp
 nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     t_nancmp rval;
-    t_bool a_fp = a.is_floating_point();
-    t_bool b_fp = b.is_floating_point();
+    bool a_fp = a.is_floating_point();
+    bool b_fp = b.is_floating_point();
 
     if (!a_fp && !b_fp)
         return rval;
 
-    t_float64 a_dbl = a.to_double();
-    t_float64 b_dbl = b.to_double();
+    double a_dbl = a.to_double();
+    double b_dbl = b.to_double();
 
-    t_bool a_nan = boost::math::isnan(a_dbl);
-    t_bool b_nan = boost::math::isnan(b_dbl);
+    bool a_nan = boost::math::isnan(a_dbl);
+    bool b_nan = boost::math::isnan(b_dbl);
 
     rval.m_active = a_nan || b_nan;
 
@@ -200,22 +200,22 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     return rval;
 }
 
-t_multisorter::t_multisorter(const t_sorttvec& order, t_bool handle_nans)
+t_multisorter::t_multisorter(const std::vector<t_sorttype>& order, bool handle_nans)
     : m_sort_order(order)
     , m_handle_nans(handle_nans) {}
 
-t_multisorter::t_multisorter(
-    t_mselemvec_csptr elems, const t_sorttvec& order, t_bool handle_nans)
+t_multisorter::t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
+    const std::vector<t_sorttype>& order, bool handle_nans)
     : m_sort_order(order)
     , m_elems(elems)
     , m_handle_nans(handle_nans) {}
 
-t_bool
+bool
 t_multisorter::operator()(const t_mselem& a, const t_mselem& b) const {
     return cmp_mselem(a, b, m_sort_order, m_handle_nans);
 }
 
-t_bool
+bool
 t_multisorter::operator()(t_index a, t_index b) const {
     return this->operator()((*m_elems)[a], (*m_elems)[b]);
 }

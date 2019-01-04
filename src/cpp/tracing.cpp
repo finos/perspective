@@ -30,7 +30,7 @@
 #define THR_MAX_FUNCNAME_LEN 16000;
 
 static thread_local perspective::t_instrec th_trace_buffer[THR_BUFFER_NELEMS];
-static thread_local perspective::t_int32 th_traceidx;
+static thread_local perspective::std::int32_t th_traceidx;
 static thread_local FILE* th_file;
 
 namespace perspective {

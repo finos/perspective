@@ -22,9 +22,12 @@
 namespace perspective {
 
 void
-notify_sparse_tree_common(t_table_sptr strands, t_table_sptr strand_deltas, t_stree_sptr tree,
-    t_trav_sptr traversal, t_bool process_traversal, const t_aggspecvec& aggregates,
-    const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby, const t_gstate& gstate) {
+notify_sparse_tree_common(std::shared_ptr<t_table> strands,
+    std::shared_ptr<t_table> strand_deltas, std::shared_ptr<t_stree> tree,
+    std::shared_ptr<t_traversal> traversal, bool process_traversal,
+    const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_gstate& gstate) {
     t_filter fltr;
     if (t_env::log_data_nsparse_strands()) {
         std::cout << "nsparse_strands" << std::endl;
@@ -72,10 +75,10 @@ notify_sparse_tree_common(t_table_sptr strands, t_table_sptr strand_deltas, t_st
 
     tree->update_aggs_from_static(dctx, gstate);
 
-    t_uidxset visited;
+    std::set<t_uindex> visited;
 
     struct t_leaf_path {
-        t_tscalvec m_path;
+        std::vector<t_tscalar> m_path;
         t_uindex m_lfidx;
     };
 
@@ -125,11 +128,12 @@ notify_sparse_tree_common(t_table_sptr strands, t_table_sptr strand_deltas, t_st
 }
 
 void
-notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_traversal,
-    const t_aggspecvec& aggregates, const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby,
-    const t_table& flattened, const t_table& delta, const t_table& prev, const t_table& current,
-    const t_table& transitions, const t_table& existed, const t_config& config,
-    const t_gstate& gstate) {
+notify_sparse_tree(std::shared_ptr<t_stree> tree, std::shared_ptr<t_traversal> traversal,
+    bool process_traversal, const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_table& delta,
+    const t_table& prev, const t_table& current, const t_table& transitions,
+    const t_table& existed, const t_config& config, const t_gstate& gstate) {
 
     auto strand_values = tree->build_strand_table(
         flattened, delta, prev, current, transitions, aggregates, config);
@@ -141,9 +145,11 @@ notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_trav
 }
 
 void
-notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_traversal,
-    const t_aggspecvec& aggregates, const t_sspvec& tree_sortby, const t_sortsvec& ctx_sortby,
-    const t_table& flattened, const t_config& config, const t_gstate& gstate) {
+notify_sparse_tree(std::shared_ptr<t_stree> tree, std::shared_ptr<t_traversal> traversal,
+    bool process_traversal, const std::vector<t_aggspec>& aggregates,
+    const std::vector<std::pair<std::string, std::string>>& tree_sortby,
+    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_config& config,
+    const t_gstate& gstate) {
     auto strand_values = tree->build_strand_table(flattened, aggregates, config);
 
     auto strands = strand_values.first;
@@ -152,42 +158,44 @@ notify_sparse_tree(t_stree_sptr tree, t_trav_sptr traversal, t_bool process_trav
         aggregates, tree_sortby, ctx_sortby, gstate);
 }
 
-t_pathvec
-ctx_get_expansion_state(t_stree_csptr tree, t_trav_csptr traversal) {
-    t_pathvec paths;
-    t_ptivec expanded;
+std::vector<t_path>
+ctx_get_expansion_state(
+    std::shared_ptr<const t_stree> tree, std::shared_ptr<const t_traversal> traversal) {
+    std::vector<t_path> paths;
+    std::vector<t_index> expanded;
     traversal->get_expanded(expanded);
 
     for (int i = 0, loop_end = expanded.size(); i < loop_end; i++) {
-        t_tscalvec path;
+        std::vector<t_tscalar> path;
         tree->get_path(expanded[i], path);
         paths.push_back(t_path(path));
     }
     return paths;
 }
 
-t_tscalvec
-ctx_get_path(t_stree_csptr tree, t_trav_csptr traversal, t_tvidx idx) {
-    if (idx < 0 || idx >= t_tvidx(traversal->size())) {
-        t_tscalvec rval;
+std::vector<t_tscalar>
+ctx_get_path(std::shared_ptr<const t_stree> tree, std::shared_ptr<const t_traversal> traversal,
+    t_index idx) {
+    if (idx < 0 || idx >= t_index(traversal->size())) {
+        std::vector<t_tscalar> rval;
         return rval;
     }
 
     auto tree_index = traversal->get_tree_index(idx);
-    t_tscalvec rval;
+    std::vector<t_tscalar> rval;
     tree->get_path(tree_index, rval);
     return rval;
 }
 
-t_ftnvec
-ctx_get_flattened_tree(t_tvidx idx, t_depth stop_depth, t_traversal& trav,
-    const t_config& config, const t_sortsvec& sortby) {
-    t_ptidx ptidx = trav.get_tree_index(idx);
+std::vector<t_ftreenode>
+ctx_get_flattened_tree(t_index idx, t_depth stop_depth, t_traversal& trav,
+    const t_config& config, const std::vector<t_sortspec>& sortby) {
+    t_index ptidx = trav.get_tree_index(idx);
     trav.set_depth(sortby, stop_depth);
     if (!sortby.empty()) {
         trav.sort_by(config, sortby, *(trav.get_tree()));
     }
-    t_tvidx new_tvidx = trav.tree_index_lookup(ptidx, idx);
+    t_index new_tvidx = trav.tree_index_lookup(ptidx, idx);
     return trav.get_flattened_tree(new_tvidx, stop_depth);
 }
 

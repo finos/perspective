@@ -28,7 +28,7 @@ public:
 
     ~t_simple_bitmask() { free(m_ptr); }
 
-    inline t_bool
+    inline bool
     is_set(t_uindex idx) const {
         if (!m_ptr || idx >= m_nentries)
             return false;
@@ -44,7 +44,7 @@ public:
         if (!m_ptr || idx >= m_nentries)
             return;
         t_uindex byte_idx = get_byte_idx(idx);
-        t_uint8& bv = get_block(byte_idx);
+        std::uint8_t& bv = get_block(byte_idx);
         bv |= 1 << get_bit_idx(idx);
     }
 
@@ -53,8 +53,8 @@ public:
         if (!m_ptr || idx >= m_nentries)
             return;
         t_uindex byte_idx = get_byte_idx(idx);
-        t_uint8& bv = get_block(byte_idx);
-        bv &= ~t_uint8(1 << get_bit_idx(idx));
+        std::uint8_t& bv = get_block(byte_idx);
+        bv &= ~std::uint8_t(1 << get_bit_idx(idx));
     }
 
     void*
@@ -83,14 +83,14 @@ private:
         return idx % CHAR_BIT;
     }
 
-    t_uint8&
+    std::uint8_t&
     get_block(t_uindex bidx) {
-        return reinterpret_cast<t_uint8*>(m_ptr)[bidx];
+        return reinterpret_cast<std::uint8_t*>(m_ptr)[bidx];
     }
 
-    const t_uint8&
+    const std::uint8_t&
     get_block(t_uindex bidx) const {
-        return reinterpret_cast<const t_uint8*>(m_ptr)[bidx];
+        return reinterpret_cast<const std::uint8_t*>(m_ptr)[bidx];
     }
 
     t_uindex m_nentries;

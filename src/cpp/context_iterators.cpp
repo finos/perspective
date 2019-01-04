@@ -20,7 +20,7 @@
 namespace perspective {
 
 t_trav_iter_node::t_trav_iter_node(const t_tscalar& value, bool expanded, t_depth depth,
-    t_index ndesc, t_ptidx tnid, t_tvidx ridx, t_tvidx pridx)
+    t_index ndesc, t_index tnid, t_index ridx, t_index pridx)
     : value(value)
     , expanded(expanded)
     , depth(depth)
@@ -37,7 +37,7 @@ t_ctx2_trav_seq_iter::t_ctx2_trav_seq_iter(t_ctx2* ctx, t_header header)
 }
 
 t_leaf_iter_node::t_leaf_iter_node(const t_tscalar& value, bool expanded, t_depth depth,
-    t_index ndesc, t_ptidx tnid, t_tvidx ridx, t_tvidx pridx, t_index nleaves)
+    t_index ndesc, t_index tnid, t_index ridx, t_index pridx, t_index nleaves)
     : value(value)
     , expanded(expanded)
     , depth(depth)
@@ -88,10 +88,10 @@ t_ctx2_leaf_iter::next() {
     return iter_node;
 }
 
-t_ctx1_tree_iter::t_ctx1_tree_iter(t_ctx1* ctx, t_tvidx root, t_depth depth)
+t_ctx1_tree_iter::t_ctx1_tree_iter(t_ctx1* ctx, t_index root, t_depth depth)
     : m_curidx(0)
     , m_ctx(ctx) {
-    m_agg_indices = t_idxvec(ctx->get_aggregates().size());
+    m_agg_indices = std::vector<t_index>(ctx->get_aggregates().size());
 
     for (t_uindex idx = 0, loop_end = m_agg_indices.size(); idx < loop_end; ++idx) {
         m_agg_indices[idx] = idx;
@@ -112,7 +112,7 @@ t_ctx1_tree_iter::t_ctx1_tree_iter(t_ctx1* ctx, t_tvidx root, t_depth depth)
 }
 
 t_ctx1_tree_iter::t_ctx1_tree_iter(
-    t_ctx1* ctx, t_tvidx root, t_depth depth, const t_idxvec& aggregates)
+    t_ctx1* ctx, t_index root, t_depth depth, const std::vector<t_index>& aggregates)
     : m_curidx(0)
     , m_ctx(ctx)
     , m_agg_indices(aggregates) {
@@ -163,11 +163,11 @@ t_ctx1_tree_iter::next() {
     PyArrayObject* array_ = reinterpret_cast<PyArrayObject*>(array.m_pyo);
 
     t_stree* tree = m_ctx->_get_tree();
-    const t_aggspecvec& aggspecs = m_ctx->get_config().get_aggregates();
+    const std::vector<t_aggspec>& aggspecs = m_ctx->get_config().get_aggregates();
 
     for (int i = 0; i < nrows; i++) {
         t_ftreenode& c_ftnode = m_vec[bidx + i];
-        t_ptidx cidx = c_ftnode.m_idx;
+        t_index cidx = c_ftnode.m_idx;
         void* elem_ptr = PyArray_GETPTR1(array_, i);
         t_py_handle val(PyTuple_New(n_aggs + 2));
         PyTuple_SetItem(val.m_pyo, 0, PyInt_FromLong(cidx));
@@ -176,7 +176,7 @@ t_ctx1_tree_iter::next() {
         PyObject* py_tree_value = tscalar_to_python(tree_value);
         PyTuple_SetItem(val.m_pyo, 1, py_tree_value);
 
-        t_ptidx p_cidx = tree->get_parent_idx(cidx);
+        t_index p_cidx = tree->get_parent_idx(cidx);
 
         t_uindex agg_ridx = tree->get_aggidx(cidx);
         t_index agg_pridx = p_cidx == INVALID_INDEX ? INVALID_INDEX : tree->get_aggidx(p_cidx);
@@ -184,7 +184,7 @@ t_ctx1_tree_iter::next() {
         for (int j = 0; j < n_aggs; j++) {
             t_tscalar agg_scalar
                 = extract_aggregate(aggspecs[j], m_aggcols[j], agg_ridx, agg_pridx);
-            t_float64 aggdbl = agg_scalar.to_double();
+            double aggdbl = agg_scalar.to_double();
             PyTuple_SetItem(val.m_pyo, j + 2, PyFloat_FromDouble(aggdbl));
         }
         PyArray_SETITEM(array_, static_cast<char*>(elem_ptr), val.m_pyo);
@@ -194,7 +194,7 @@ t_ctx1_tree_iter::next() {
     m_curidx++;
 
     if (m_vec[m_curidx].m_depth == t_depth(-1) || m_ctx->get_row_pivots().size() == 0
-        || m_edepth == 0 || static_cast<t_uint64>(m_curidx) >= m_vec.size()) {
+        || m_edepth == 0 || static_cast<std::uint64_t>(m_curidx) >= m_vec.size()) {
         m_has_next = false;
     }
     return rval;

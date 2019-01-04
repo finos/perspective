@@ -19,11 +19,11 @@ PSP_THR_LOCAL perspective::t_uindex th_curtime;
 PSP_THR_LOCAL perspective::t_uindex th_curtime_origin;
 PSP_THR_LOCAL perspective::t_uindex th_curmem;
 PSP_THR_LOCAL perspective::t_uindex th_curmem_origin;
-PSP_THR_LOCAL perspective::t_bool th_curtime_initialized;
+PSP_THR_LOCAL bool th_curtime_initialized;
 
 namespace perspective {
 void
-psp_log_time(const t_str& s) {
+psp_log_time(const std::string& s) {
     if (!t_env::log_time()) {
         return;
     }

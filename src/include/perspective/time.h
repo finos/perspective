@@ -36,23 +36,23 @@ class t_time;
 // added/subtracted from another, that DOES NOT do things
 // like account for short months, etc.
 struct t_tdelta {
-    t_int64 v;
+    std::int64_t v;
     t_tdelta();
-    t_tdelta(t_int64 v);
+    t_tdelta(std::int64_t v);
 
     // Gets, say, a time difference twice as long as the
     // current value.
-    t_tdelta& operator*=(t_int64 multiplier);
+    t_tdelta& operator*=(std::int64_t multiplier);
     friend std::ostream& operator<<(std::ostream& s, const t_tdelta& td);
     friend class t_time;
 };
 
-t_int32 isleap(long int year);
-t_int32 days_before_year(t_int32 year);
-t_int32 days_before_month(t_int32 year, t_int32 month);
-t_int32 ymd_to_ord(t_int32 year, t_int32 month, t_int32 day);
-t_int64 to_gmtime(
-    t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec);
+std::int32_t isleap(long int year);
+std::int32_t days_before_year(std::int32_t year);
+std::int32_t days_before_month(std::int32_t year, std::int32_t month);
+std::int32_t ymd_to_ord(std::int32_t year, std::int32_t month, std::int32_t day);
+std::int64_t to_gmtime(std::int32_t year, std::int32_t month, std::int32_t day,
+    std::int32_t hour, std::int32_t min, std::int32_t sec);
 
 // Interal details: m_storage stores "microseconds since the
 // epoch-defined-in-the-class".
@@ -68,13 +68,14 @@ t_int64 to_gmtime(
 // A microseconds() in the range [0..999].
 class PERSPECTIVE_EXPORT t_time {
 public:
-    typedef t_int64 t_rawtype;
+    typedef std::int64_t t_rawtype;
 
     t_time();
-    explicit t_time(t_int64 raw_val);
-    t_time(t_int32 year, t_int32 month, t_int32 day, t_int32 hour, t_int32 min, t_int32 sec);
+    explicit t_time(std::int64_t raw_val);
+    t_time(std::int32_t year, std::int32_t month, std::int32_t day, std::int32_t hour,
+        std::int32_t min, std::int32_t sec);
 
-    t_int64 raw_value() const;
+    std::int64_t raw_value() const;
 
     friend bool operator<(const t_time& a, const t_time& b);
     friend bool operator<=(const t_time& a, const t_time& b);
@@ -86,16 +87,16 @@ public:
 
     bool as_tm(struct tm& out) const;
 
-    t_int32 gmtime(struct tm& out, t_int64 secs, t_int32 offset) const;
+    std::int32_t gmtime(struct tm& out, std::int64_t secs, std::int32_t offset) const;
 
-    t_int32 year(const struct tm& t) const;
-    t_int32 month(const struct tm& t) const;
-    t_int32 day(const struct tm& t) const;
-    t_int32 hours(const struct tm& t) const;
-    t_int32 minutes(const struct tm& t) const;
-    t_int32 seconds(const struct tm& t) const;
-    t_int32 microseconds() const;
-    t_int64 as_seconds() const;
+    std::int32_t year(const struct tm& t) const;
+    std::int32_t month(const struct tm& t) const;
+    std::int32_t day(const struct tm& t) const;
+    std::int32_t hours(const struct tm& t) const;
+    std::int32_t minutes(const struct tm& t) const;
+    std::int32_t seconds(const struct tm& t) const;
+    std::int32_t microseconds() const;
+    std::int64_t as_seconds() const;
 
     friend inline size_t hash_value(const t_time& d);
 
@@ -115,7 +116,7 @@ t_tdelta operator-(const t_time& a, const t_time& b);
 
 inline size_t
 hash_value(const t_time& t) {
-    boost::hash<t_int64> hasher;
+    boost::hash<std::int64_t> hasher;
     return hasher(t.m_storage);
 }
 

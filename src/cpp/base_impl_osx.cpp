@@ -13,10 +13,10 @@
 
 namespace perspective {
 
-t_str
+std::string
 get_error_str() {
     // handled by perror
-    return t_str();
+    return std::string();
 }
 
 } // end namespace perspective

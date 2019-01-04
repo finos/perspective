@@ -62,8 +62,8 @@ t_lstore_recipe::t_lstore_recipe(t_uindex capacity)
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const t_str& dirname, const t_str& colname, t_uindex capacity,
-    t_backing_store backing_store)
+t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& colname,
+    t_uindex capacity, t_backing_store backing_store)
     : m_dirname(dirname)
     , m_colname(colname)
     , m_capacity(capacity)
@@ -80,9 +80,9 @@ t_lstore_recipe::t_lstore_recipe(const t_str& dirname, const t_str& colname, t_u
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const t_str& dirname, const t_str& colname, t_uindex capacity,
-    t_fflag fflags, t_fflag fmode, t_fflag creation_disposition, t_fflag mprot, t_fflag mflags,
-    t_backing_store backing_store)
+t_lstore_recipe::t_lstore_recipe(const std::string& dirname, const std::string& colname,
+    t_uindex capacity, t_fflag fflags, t_fflag fmode, t_fflag creation_disposition,
+    t_fflag mprot, t_fflag mflags, t_backing_store backing_store)
     : m_dirname(dirname)
     , m_colname(colname)
     , m_capacity(capacity)
@@ -99,7 +99,7 @@ t_lstore_recipe::t_lstore_recipe(const t_str& dirname, const t_str& colname, t_u
     LOG_CONSTRUCTOR("t_lstore_recipe");
 }
 
-t_lstore_recipe::t_lstore_recipe(const t_str& colname, t_uindex capacity, t_fflag mprot,
+t_lstore_recipe::t_lstore_recipe(const std::string& colname, t_uindex capacity, t_fflag mprot,
     t_fflag mflags, t_backing_store backing_store)
     : m_dirname("")
     , m_colname(colname)
@@ -156,7 +156,7 @@ t_lstore::t_lstore(const t_lstore& s, t_lstore_tmp_init_tag t) {
 #endif
 }
 
-t_str
+std::string
 t_lstore::repr() const {
     std::stringstream ss;
     ss << "t_lstore<" << this << ">";
@@ -227,7 +227,7 @@ t_lstore::~t_lstore() {
             destroy_mapping();
             close_file(m_fd);
 
-            t_bool dont_delete = std::getenv("PSP_DO_NOT_DELETE_TABLES") != 0;
+            bool dont_delete = std::getenv("PSP_DO_NOT_DELETE_TABLES") != 0;
 
             if (!dont_delete) {
                 rmfile(m_fname);
@@ -330,7 +330,7 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
     PSP_VERBOSE_ASSERT(capacity >= m_size, "reduce size before reducing capacity!");
     capacity = std::max(capacity, m_size);
 
-    capacity = 4 * t_uint64(ceil(t_float64(capacity * m_resize_factor) / 4));
+    capacity = 4 * std::uint64_t(ceil(double(capacity * m_resize_factor) / 4));
     capacity = std::max(capacity, static_cast<t_uindex>(8));
     if (m_alignment > 1)
         capacity = (capacity + m_alignment - 1) & ~(m_alignment - 1);
@@ -390,13 +390,14 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
     }
 
     if (capacity > ocapacity) {
-        memset(static_cast<t_uchar*>(m_base) + ocapacity, 0, size_t(capacity - ocapacity));
+        memset(
+            static_cast<unsigned char*>(m_base) + ocapacity, 0, size_t(capacity - ocapacity));
     }
 }
 
 // Assumes store has been initted
 void
-t_lstore::load(const t_str& fname) {
+t_lstore::load(const std::string& fname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -409,7 +410,7 @@ t_lstore::load(const t_str& fname) {
 }
 
 void
-t_lstore::save(const t_str& fname) {
+t_lstore::save(const std::string& fname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(m_init, "Store not inited.");
@@ -444,14 +445,14 @@ t_lstore::capacity() const {
     return m_capacity;
 }
 
-t_szpair
+std::pair<std::uint32_t, std::uint32_t>
 t_lstore::capacity_pair() const {
     PSP_TRACE_SENTINEL();
     t_uindex cap = capacity();
-    return t_szpair(upper32(cap), lower32(cap));
+    return std::pair<std::uint32_t, std::uint32_t>(upper32(cap), lower32(cap));
 }
 
-t_str
+std::string
 t_lstore::get_fname() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -468,7 +469,7 @@ t_lstore::push_back(const void* ptr, t_uindex len) {
 
     PSP_VERBOSE_ASSERT(m_size + len < m_capacity, "Insufficient capacity.");
 
-    memcpy(static_cast<t_uchar*>(m_base) + m_size, ptr, size_t(len));
+    memcpy(static_cast<unsigned char*>(m_base) + m_size, ptr, size_t(len));
 
     {
         t_unlock_store tmp(this);
@@ -479,15 +480,15 @@ t_lstore::push_back(const void* ptr, t_uindex len) {
 
 void*
 t_lstore::get_ptr(t_uindex offset) {
-    return static_cast<void*>(static_cast<t_uchar*>(m_base) + offset);
+    return static_cast<void*>(static_cast<unsigned char*>(m_base) + offset);
 }
 
 const void*
 t_lstore::get_ptr(t_uindex offset) const {
-    return static_cast<void*>(static_cast<t_uchar*>(m_base) + offset);
+    return static_cast<void*>(static_cast<unsigned char*>(m_base) + offset);
 }
 
-t_str
+std::string
 t_lstore::get_desc_fname() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -550,8 +551,8 @@ t_lstore::fill(const t_lstore& other, const t_mask& mask, t_uindex elem_size) {
 
     t_uindex offset = 0;
 
-    auto src_base = reinterpret_cast<const t_char*>(other.get_ptr(0));
-    auto dst_base = reinterpret_cast<t_char*>(m_base);
+    auto src_base = reinterpret_cast<const char*>(other.get_ptr(0));
+    auto dst_base = reinterpret_cast<char*>(m_base);
 
     for (t_uindex idx = 0, loop_end = mask.size(); idx < loop_end; ++idx) {
         if (mask.get(idx)) {
@@ -566,18 +567,18 @@ t_lstore::fill(const t_lstore& other, const t_mask& mask, t_uindex elem_size) {
 void
 t_lstore::pprint() const {
     std::cout << repr() << std::endl;
-    t_uindex nelems = size() / sizeof(t_uint8);
+    t_uindex nelems = size() / sizeof(std::uint8_t);
     for (t_uindex idx = 0; idx < size() / nelems; ++idx) {
 
-        std::cout << idx << " => " << static_cast<t_uindex>(*(get_nth<t_uint8>(idx)))
+        std::cout << idx << " => " << static_cast<t_uindex>(*(get_nth<std::uint8_t>(idx)))
                   << std::endl;
     }
 }
 
-t_lstore_sptr
+std::shared_ptr<t_lstore>
 t_lstore::clone() const {
     auto recipe = get_recipe();
-    t_lstore_sptr rval(new t_lstore(recipe));
+    std::shared_ptr<t_lstore> rval(new t_lstore(recipe));
     rval->init();
     rval->set_size(m_size);
     rval->fill(*this);

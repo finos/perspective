@@ -17,10 +17,10 @@
 #include <perspective/min_max.h>
 #include <perspective/tracing.h>
 #include <perspective/pivot.h>
-#include <perspective/shared_ptrs.h>
 #include <perspective/step_delta.h>
 #include <perspective/slice.h>
 #include <perspective/range.h>
+#include <perspective/gnode_state.h>
 
 namespace perspective {
 
@@ -31,7 +31,7 @@ public:
         : m_ctx(ctx) {}
 
     t_slice
-    get_data(const t_range& rng, const t_fetchvec& fvec) const {
+    get_data(const t_range& rng, const std::vector<t_fetch>& fvec) const {
         return m_ctx->unity_get_data(rng, fvec);
     }
 
@@ -49,45 +49,47 @@ public:
 
     t_ctxbase(const t_schema& schema, const t_config& config);
 
-    void set_name(const t_str& name);
-    t_str get_name() const;
-    t_int64 get_ptr() const;
-    void set_state(t_gstate_sptr state);
+    void set_name(const std::string& name);
+    std::string get_name() const;
+    std::int64_t get_ptr() const;
+    void set_state(std::shared_ptr<t_gstate> state);
     const t_config& get_config() const;
     t_config& get_config();
-    t_pivotvec get_pivots() const;
+    std::vector<t_pivot> get_pivots() const;
 
-    t_bool get_feature_state(t_ctx_feature feature) const;
+    bool get_feature_state(t_ctx_feature feature) const;
 
     // Backwards compatibility only
     bool get_alerts_enabled() const;
     bool get_deltas_enabled() const;
     bool get_minmax_enabled() const;
 
-    t_bool failed() const;
+    bool failed() const;
 
     t_ctx_common<t_ctxbase>
     common() {
         return t_ctx_common<t_ctxbase>(this);
     }
 
-    void unity_populate_slice_row(t_slice& s, const t_fetchvec& fvec, t_uindex idx) const;
-    void unity_populate_slice_column(t_slice& s, const t_fetchvec& fvec, t_uindex idx) const;
+    void unity_populate_slice_row(
+        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const;
+    void unity_populate_slice_column(
+        t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const;
 
-    t_slice unity_get_data(const t_range& rng, const t_fetchvec& fvec) const;
+    t_slice unity_get_data(const t_range& rng, const std::vector<t_fetch>& fvec) const;
 
-    t_tscalvec get_data() const;
+    std::vector<t_tscalar> get_data() const;
 
 protected:
     t_schema m_schema;
     t_config m_config;
-    t_bool m_rows_changed;
-    t_bool m_columns_changed;
-    t_str m_name;
-    t_gstate_sptr m_state;
-    t_bool m_init;
-    std::vector<t_bool> m_features;
-    t_minmaxvec m_minmax;
+    bool m_rows_changed;
+    bool m_columns_changed;
+    std::string m_name;
+    std::shared_ptr<t_gstate> m_state;
+    bool m_init;
+    std::vector<bool> m_features;
+    std::vector<t_minmax> m_minmax;
 };
 
 template <typename DERIVED_T>
@@ -95,7 +97,7 @@ t_ctxbase<DERIVED_T>::t_ctxbase()
     : m_rows_changed(true)
     , m_columns_changed(true)
     , m_init(false) {
-    m_features = std::vector<t_bool>(CTX_FEAT_LAST_FEATURE);
+    m_features = std::vector<bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
 }
 
@@ -107,31 +109,31 @@ t_ctxbase<DERIVED_T>::t_ctxbase(const t_schema& schema, const t_config& config)
     , m_rows_changed(true)
     , m_columns_changed(true)
     , m_init(false) {
-    m_features = std::vector<t_bool>(CTX_FEAT_LAST_FEATURE);
+    m_features = std::vector<bool>(CTX_FEAT_LAST_FEATURE);
     m_features[CTX_FEAT_ENABLED] = true;
 }
 
 template <typename DERIVED_T>
 void
-t_ctxbase<DERIVED_T>::set_name(const t_str& name) {
+t_ctxbase<DERIVED_T>::set_name(const std::string& name) {
     m_name = name;
 }
 
 template <typename DERIVED_T>
-t_str
+std::string
 t_ctxbase<DERIVED_T>::get_name() const {
     return m_name;
 }
 
 template <typename DERIVED_T>
-t_int64
+std::int64_t
 t_ctxbase<DERIVED_T>::get_ptr() const {
-    return reinterpret_cast<t_int64>(this);
+    return reinterpret_cast<std::int64_t>(this);
 }
 
 template <typename DERIVED_T>
 void
-t_ctxbase<DERIVED_T>::set_state(t_gstate_sptr state) {
+t_ctxbase<DERIVED_T>::set_state(std::shared_ptr<t_gstate> state) {
     m_state = state;
 }
 
@@ -148,37 +150,37 @@ t_ctxbase<DERIVED_T>::get_config() const {
 }
 
 template <typename DERIVED_T>
-t_pivotvec
+std::vector<t_pivot>
 t_ctxbase<DERIVED_T>::get_pivots() const {
     return m_config.get_pivots();
 }
 
 template <typename DERIVED_T>
-t_bool
+bool
 t_ctxbase<DERIVED_T>::get_alerts_enabled() const {
     return m_features[CTX_FEAT_ALERT];
 }
 
 template <typename DERIVED_T>
-t_bool
+bool
 t_ctxbase<DERIVED_T>::get_deltas_enabled() const {
     return m_features[CTX_FEAT_DELTA];
 }
 
 template <typename DERIVED_T>
-t_bool
+bool
 t_ctxbase<DERIVED_T>::get_minmax_enabled() const {
     return m_features[CTX_FEAT_MINMAX];
 }
 
 template <typename DERIVED_T>
-t_bool
+bool
 t_ctxbase<DERIVED_T>::failed() const {
     return false;
 }
 
 template <typename DERIVED_T>
-t_bool
+bool
 t_ctxbase<DERIVED_T>::get_feature_state(t_ctx_feature feature) const {
     return m_features[feature];
 }
@@ -186,7 +188,7 @@ t_ctxbase<DERIVED_T>::get_feature_state(t_ctx_feature feature) const {
 template <typename DERIVED_T>
 void
 t_ctxbase<DERIVED_T>::unity_populate_slice_column(
-    t_slice& s, const t_fetchvec& fvec, t_uindex idx) const {
+    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const {
     for (auto f : fvec) {
         switch (f) {
             case FETCH_COLUMN_DEPTH: {
@@ -212,7 +214,7 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
 template <typename DERIVED_T>
 void
 t_ctxbase<DERIVED_T>::unity_populate_slice_row(
-    t_slice& s, const t_fetchvec& fvec, t_uindex idx) const {
+    t_slice& s, const std::vector<t_fetch>& fvec, t_uindex idx) const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     for (auto f : fvec) {
         switch (f) {
@@ -238,7 +240,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(
 
 template <typename DERIVED_T>
 t_slice
-t_ctxbase<DERIVED_T>::unity_get_data(const t_range& rng, const t_fetchvec& fvec) const {
+t_ctxbase<DERIVED_T>::unity_get_data(
+    const t_range& rng, const std::vector<t_fetch>& fvec) const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     t_uindex row_count = cptr->get_row_count();
     t_uindex bridx, eridx;
@@ -278,7 +281,7 @@ t_ctxbase<DERIVED_T>::unity_get_data(const t_range& rng, const t_fetchvec& fvec)
 }
 
 template <typename DERIVED_T>
-t_tscalvec
+std::vector<t_tscalar>
 t_ctxbase<DERIVED_T>::get_data() const {
     auto cptr = reinterpret_cast<const DERIVED_T*>(this);
     return cptr->get_data(0, cptr->get_row_count(), 0, cptr->get_column_count());

@@ -19,7 +19,7 @@
 #include <algorithm>
 
 namespace perspective {
-static const t_int32 CUMULATIVE_DAYS[2][13] = {
+static const std::int32_t CUMULATIVE_DAYS[2][13] = {
     {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365} /* Normal years.  */,
     {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366} /* Leap
                                                                     years.
@@ -33,37 +33,37 @@ static const t_int32 CUMULATIVE_DAYS[2][13] = {
 // A day() of the month in the range [1..31].
 class PERSPECTIVE_EXPORT t_date {
 public:
-    static const t_int32 YEAR_MASK = 0xFFFF0000;
-    static const t_int32 MONTH_MASK = 0x0000FF00;
-    static const t_int32 DAY_MASK = 0x000000FF;
+    static const std::int32_t YEAR_MASK = 0xFFFF0000;
+    static const std::int32_t MONTH_MASK = 0x0000FF00;
+    static const std::int32_t DAY_MASK = 0x000000FF;
 
-    static const t_int32 YEAR_SHIFT = 16;
-    static const t_int32 MONTH_SHIFT = 8;
-    static const t_int32 DAY_SHIFT = 0;
+    static const std::int32_t YEAR_SHIFT = 16;
+    static const std::int32_t MONTH_SHIFT = 8;
+    static const std::int32_t DAY_SHIFT = 0;
 
 public:
-    typedef t_uint32 t_rawtype;
+    typedef std::uint32_t t_rawtype;
 
     t_date();
 
-    t_date(t_int16 year, t_int8 month, t_int8 day);
+    t_date(std::int16_t year, std::int8_t month, std::int8_t day);
 
-    void set_year_month_day(t_int16 year, t_int8 month, t_int8 day);
+    void set_year_month_day(std::int16_t year, std::int8_t month, std::int8_t day);
 
-    void set_year(t_int16 year);
-    void set_month(t_int8 month);
-    void set_day(t_int8 day);
+    void set_year(std::int16_t year);
+    void set_month(std::int8_t month);
+    void set_day(std::int8_t day);
 
-    explicit t_date(t_uint32 raw_val);
+    explicit t_date(std::uint32_t raw_val);
 
-    t_uint32 raw_value() const;
+    std::uint32_t raw_value() const;
 
     // Index such that
     // a.consecutive_day_idx()-b.consecutive_day_idx() is
     // number of days a is after b.
     //(Start point is unspecified, may not be stable and
     // only works for dates after 1900AD.)
-    t_int32 consecutive_day_idx() const;
+    std::int32_t consecutive_day_idx() const;
 
     friend bool operator<(const t_date& a, const t_date& b);
     friend bool operator<=(const t_date& a, const t_date& b);
@@ -71,11 +71,11 @@ public:
     friend bool operator>=(const t_date& a, const t_date& b);
     friend bool operator==(const t_date& a, const t_date& b);
     friend bool operator!=(const t_date& a, const t_date& b);
-    t_int32 year() const;
-    t_int32 month() const;
-    t_int32 day() const;
+    std::int32_t year() const;
+    std::int32_t month() const;
+    std::int32_t day() const;
 
-    t_str str() const;
+    std::string str() const;
     friend inline size_t hash_value(const t_date& d);
 
     void set_psp_date(t_uindex dt);
@@ -84,11 +84,11 @@ private:
     t_rawtype m_storage;
 };
 
-t_date from_consecutive_day_idx(t_int32 idx);
+t_date from_consecutive_day_idx(std::int32_t idx);
 
 inline size_t
 hash_value(const t_date& d) {
-    boost::hash<t_uint32> hasher;
+    boost::hash<std::uint32_t> hasher;
     return hasher(d.m_storage);
 }
 } // end namespace perspective

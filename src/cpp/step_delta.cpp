@@ -37,7 +37,8 @@ t_cellupd::t_cellupd() {}
 
 t_stepdelta::t_stepdelta() {}
 
-t_stepdelta::t_stepdelta(bool rows_changed, bool columns_changed, const t_cellupdvec& cells)
+t_stepdelta::t_stepdelta(
+    bool rows_changed, bool columns_changed, const std::vector<t_cellupd>& cells)
     : rows_changed(rows_changed)
     , columns_changed(columns_changed)
     , cells(cells) {}

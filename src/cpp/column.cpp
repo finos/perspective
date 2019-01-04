@@ -92,11 +92,11 @@ t_column::operator=(const t_column& c) {
     return *this;
 }
 
-t_column::t_column(t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a)
+t_column::t_column(t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a)
     : t_column(dtype, missing_enabled, a, a.m_capacity / get_dtype_size(dtype)) {}
 
 t_column::t_column(
-    t_dtype dtype, t_bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity)
+    t_dtype dtype, bool missing_enabled, const t_lstore_recipe& a, t_uindex row_capacity)
     : m_dtype(dtype)
     , m_init(false)
     , m_size(0)
@@ -117,8 +117,8 @@ t_column::t_column(
         vlendata_args.m_capacity = DEFAULT_EMPTY_CAPACITY;
         extents_args.m_capacity = DEFAULT_EMPTY_CAPACITY;
 
-        vlendata_args.m_colname = a.m_colname + t_str("_vlendata");
-        extents_args.m_colname = a.m_colname + t_str("_extents");
+        vlendata_args.m_colname = a.m_colname + std::string("_vlendata");
+        extents_args.m_colname = a.m_colname + std::string("_extents");
 
         m_vocab.reset(new t_vocab(vlendata_args, extents_args));
     } else {
@@ -129,7 +129,7 @@ t_column::t_column(
         t_lstore_recipe missing_args(a);
         missing_args.m_capacity = row_capacity;
 
-        missing_args.m_colname = a.m_colname + t_str("_missing");
+        missing_args.m_colname = a.m_colname + std::string("_missing");
         m_status.reset(new t_lstore(missing_args));
     } else {
         m_status.reset(new t_lstore);
@@ -184,7 +184,7 @@ t_column::extend_dtype(t_uindex idx) {
 }
 
 t_uindex
-t_column::get_interned(const t_str& s) {
+t_column::get_interned(const std::string& s) {
     COLUMN_CHECK_STRCOL();
     return m_vocab->get_interned(s);
 }
@@ -262,43 +262,43 @@ t_column::push_back<t_tscalar>(t_tscalar elem) {
             PSP_COMPLAIN_AND_ABORT("Encountered none");
         } break;
         case DTYPE_INT64: {
-            push_back(elem.get<t_int64>(), elem.m_status);
+            push_back(elem.get<std::int64_t>(), elem.m_status);
         } break;
         case DTYPE_INT32: {
-            push_back(elem.get<t_int32>(), elem.m_status);
+            push_back(elem.get<std::int32_t>(), elem.m_status);
         } break;
         case DTYPE_INT16: {
-            push_back(elem.get<t_int16>(), elem.m_status);
+            push_back(elem.get<std::int16_t>(), elem.m_status);
         } break;
         case DTYPE_INT8: {
-            push_back(elem.get<t_int8>(), elem.m_status);
+            push_back(elem.get<std::int8_t>(), elem.m_status);
         } break;
         case DTYPE_UINT64: {
-            push_back(elem.get<t_uint64>(), elem.m_status);
+            push_back(elem.get<std::uint64_t>(), elem.m_status);
         } break;
         case DTYPE_UINT32: {
-            push_back(elem.get<t_uint32>(), elem.m_status);
+            push_back(elem.get<std::uint32_t>(), elem.m_status);
         } break;
         case DTYPE_UINT16: {
-            push_back(elem.get<t_uint16>(), elem.m_status);
+            push_back(elem.get<std::uint16_t>(), elem.m_status);
         } break;
         case DTYPE_UINT8: {
-            push_back(elem.get<t_uint8>(), elem.m_status);
+            push_back(elem.get<std::uint8_t>(), elem.m_status);
         } break;
         case DTYPE_FLOAT64: {
-            push_back(elem.get<t_float64>(), elem.m_status);
+            push_back(elem.get<double>(), elem.m_status);
         } break;
         case DTYPE_FLOAT32: {
-            push_back(elem.get<t_float32>(), elem.m_status);
+            push_back(elem.get<float>(), elem.m_status);
         } break;
         case DTYPE_BOOL: {
-            push_back(elem.get<t_bool>(), elem.m_status);
+            push_back(elem.get<bool>(), elem.m_status);
         } break;
         case DTYPE_TIME: {
-            push_back(elem.get<t_int64>(), elem.m_status);
+            push_back(elem.get<std::int64_t>(), elem.m_status);
         } break;
         case DTYPE_DATE: {
-            push_back(elem.get<t_uint32>(), elem.m_status);
+            push_back(elem.get<std::uint32_t>(), elem.m_status);
         } break;
         case DTYPE_STR: {
             push_back(elem.get<const char*>(), elem.m_status);
@@ -363,39 +363,39 @@ t_column::get_scalar(t_uindex idx) const {
         case DTYPE_NONE: {
         } break;
         case DTYPE_INT64: {
-            rv.set(*(m_data->get_nth<t_int64>(idx)));
+            rv.set(*(m_data->get_nth<std::int64_t>(idx)));
         } break;
         case DTYPE_INT32: {
-            rv.set(*(m_data->get_nth<t_int32>(idx)));
+            rv.set(*(m_data->get_nth<std::int32_t>(idx)));
         } break;
         case DTYPE_INT16: {
-            rv.set(*(m_data->get_nth<t_int16>(idx)));
+            rv.set(*(m_data->get_nth<std::int16_t>(idx)));
         } break;
         case DTYPE_INT8: {
-            rv.set(*(m_data->get_nth<t_int8>(idx)));
+            rv.set(*(m_data->get_nth<std::int8_t>(idx)));
         } break;
 
         case DTYPE_UINT64: {
-            rv.set(*(m_data->get_nth<t_uint64>(idx)));
+            rv.set(*(m_data->get_nth<std::uint64_t>(idx)));
         } break;
         case DTYPE_UINT32: {
-            rv.set(*(m_data->get_nth<t_uint32>(idx)));
+            rv.set(*(m_data->get_nth<std::uint32_t>(idx)));
         } break;
         case DTYPE_UINT16: {
-            rv.set(*(m_data->get_nth<t_uint16>(idx)));
+            rv.set(*(m_data->get_nth<std::uint16_t>(idx)));
         } break;
         case DTYPE_UINT8: {
-            rv.set(*(m_data->get_nth<t_uint8>(idx)));
+            rv.set(*(m_data->get_nth<std::uint8_t>(idx)));
         } break;
 
         case DTYPE_FLOAT64: {
-            rv.set(*(m_data->get_nth<t_float64>(idx)));
+            rv.set(*(m_data->get_nth<double>(idx)));
         } break;
         case DTYPE_FLOAT32: {
-            rv.set(*(m_data->get_nth<t_float32>(idx)));
+            rv.set(*(m_data->get_nth<float>(idx)));
         } break;
         case DTYPE_BOOL: {
-            rv.set(*(m_data->get_nth<t_bool>(idx)));
+            rv.set(*(m_data->get_nth<bool>(idx)));
         } break;
         case DTYPE_TIME: {
             const t_time::t_rawtype* v = m_data->get_nth<t_time::t_rawtype>(idx);
@@ -411,7 +411,8 @@ t_column::get_scalar(t_uindex idx) const {
             rv.set(m_vocab->unintern_c(*sidx));
         } break;
         case DTYPE_F64PAIR: {
-            const t_f64pair* pair = m_data->get_nth<t_f64pair>(idx);
+            const std::pair<double, double>* pair
+                = m_data->get_nth<std::pair<double, double>>(idx);
             rv.set(pair->first / pair->second);
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
@@ -436,39 +437,39 @@ void
 t_column::clear(t_uindex idx, t_status status) {
     switch (m_dtype) {
         case DTYPE_STR: {
-            t_stridx v = 0;
-            set_nth<t_stridx>(idx, v, status);
+            t_uindex v = 0;
+            set_nth<t_uindex>(idx, v, status);
         } break;
         case DTYPE_TIME:
         case DTYPE_FLOAT64:
         case DTYPE_UINT64:
         case DTYPE_INT64: {
-            t_uint64 v = 0;
-            set_nth<t_uint64>(idx, v, status);
+            std::uint64_t v = 0;
+            set_nth<std::uint64_t>(idx, v, status);
         } break;
         case DTYPE_DATE:
         case DTYPE_FLOAT32:
         case DTYPE_UINT32:
         case DTYPE_INT32: {
-            t_uint32 v = 0;
-            set_nth<t_uint32>(idx, v, status);
+            std::uint32_t v = 0;
+            set_nth<std::uint32_t>(idx, v, status);
         } break;
         case DTYPE_UINT16:
         case DTYPE_INT16: {
-            t_uint16 v = 0;
-            set_nth<t_uint16>(idx, v, status);
+            std::uint16_t v = 0;
+            set_nth<std::uint16_t>(idx, v, status);
         } break;
         case DTYPE_BOOL:
         case DTYPE_UINT8:
         case DTYPE_INT8: {
-            t_uint8 v = 0;
-            set_nth<t_uint8>(idx, v, status);
+            std::uint8_t v = 0;
+            set_nth<std::uint8_t>(idx, v, status);
         } break;
         case DTYPE_F64PAIR: {
-            std::pair<t_uint64, t_uint64> v;
+            std::pair<std::uint64_t, std::uint64_t> v;
             v.first = 0;
             v.second = 0;
-            set_nth<std::pair<t_uint64, t_uint64>>(idx, v, status);
+            set_nth<std::pair<std::uint64_t, std::uint64_t>>(idx, v, status);
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
     }
@@ -500,7 +501,7 @@ t_column::get_nth_status(t_uindex idx) const {
     return status;
 }
 
-t_bool
+bool
 t_column::is_valid(t_uindex idx) const {
     PSP_VERBOSE_ASSERT(is_status_enabled(), "Status not available for column");
     COLUMN_CHECK_ACCESS(idx);
@@ -508,7 +509,7 @@ t_column::is_valid(t_uindex idx) const {
     return status == STATUS_VALID;
 }
 
-t_bool
+bool
 t_column::is_cleared(t_uindex idx) const {
     PSP_VERBOSE_ASSERT(is_status_enabled(), "Status not available for column");
     COLUMN_CHECK_ACCESS(idx);
@@ -525,7 +526,7 @@ t_column::set_nth<const char*>(t_uindex idx, const char* elem) {
 
 template <>
 void
-t_column::set_nth<t_str>(t_uindex idx, t_str elem) {
+t_column::set_nth<std::string>(t_uindex idx, std::string elem) {
     COLUMN_CHECK_STRCOL();
     set_nth(idx, elem.c_str(), STATUS_VALID);
 }
@@ -539,13 +540,13 @@ t_column::set_nth<const char*>(t_uindex idx, const char* elem, t_status status) 
 
 template <>
 void
-t_column::set_nth<t_str>(t_uindex idx, t_str elem, t_status status) {
+t_column::set_nth<std::string>(t_uindex idx, std::string elem, t_status status) {
     COLUMN_CHECK_STRCOL();
     set_nth(idx, elem.c_str(), status);
 }
 
 void
-t_column::set_valid(t_uindex idx, t_bool valid) {
+t_column::set_valid(t_uindex idx, bool valid) {
     set_status(idx, valid ? STATUS_VALID : STATUS_INVALID);
 }
 
@@ -563,48 +564,48 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
         case DTYPE_NONE: {
         } break;
         case DTYPE_INT64: {
-            t_int64 tgt = value.get<t_int64>();
-            set_nth<t_int64>(idx, tgt, value.m_status);
+            std::int64_t tgt = value.get<std::int64_t>();
+            set_nth<std::int64_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_INT32: {
-            t_int32 tgt = value.get<t_int32>();
-            set_nth<t_int32>(idx, tgt, value.m_status);
+            std::int32_t tgt = value.get<std::int32_t>();
+            set_nth<std::int32_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_INT16: {
-            t_int16 tgt = value.get<t_int16>();
-            set_nth<t_int16>(idx, tgt, value.m_status);
+            std::int16_t tgt = value.get<std::int16_t>();
+            set_nth<std::int16_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_INT8: {
-            t_int8 tgt = value.get<t_int8>();
-            set_nth<t_int8>(idx, tgt, value.m_status);
+            std::int8_t tgt = value.get<std::int8_t>();
+            set_nth<std::int8_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_UINT64: {
-            t_uint64 tgt = value.get<t_uint64>();
-            set_nth<t_uint64>(idx, tgt, value.m_status);
+            std::uint64_t tgt = value.get<std::uint64_t>();
+            set_nth<std::uint64_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_UINT32: {
-            t_uint32 tgt = value.get<t_uint32>();
-            set_nth<t_uint32>(idx, tgt, value.m_status);
+            std::uint32_t tgt = value.get<std::uint32_t>();
+            set_nth<std::uint32_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_UINT16: {
-            t_uint16 tgt = value.get<t_uint16>();
-            set_nth<t_uint16>(idx, tgt, value.m_status);
+            std::uint16_t tgt = value.get<std::uint16_t>();
+            set_nth<std::uint16_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_UINT8: {
-            t_uint8 tgt = value.get<t_uint8>();
-            set_nth<t_uint8>(idx, tgt, value.m_status);
+            std::uint8_t tgt = value.get<std::uint8_t>();
+            set_nth<std::uint8_t>(idx, tgt, value.m_status);
         } break;
         case DTYPE_FLOAT64: {
-            t_float64 tgt = value.get<t_float64>();
-            set_nth<t_float64>(idx, tgt, value.m_status);
+            double tgt = value.get<double>();
+            set_nth<double>(idx, tgt, value.m_status);
         } break;
         case DTYPE_FLOAT32: {
-            t_float32 tgt = value.get<t_float32>();
-            set_nth<t_float32>(idx, tgt, value.m_status);
+            float tgt = value.get<float>();
+            set_nth<float>(idx, tgt, value.m_status);
         } break;
         case DTYPE_BOOL: {
-            t_bool tgt = value.get<t_bool>();
-            set_nth<t_bool>(idx, tgt, value.m_status);
+            bool tgt = value.get<bool>();
+            set_nth<bool>(idx, tgt, value.m_status);
         } break;
         case DTYPE_TIME: {
             t_time tgt = value.get<t_time>();
@@ -617,7 +618,7 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
         case DTYPE_STR: {
             COLUMN_CHECK_STRCOL();
             const char* tgt = value.get_char_ptr();
-            t_str empty;
+            std::string empty;
 
             if (tgt) {
                 PSP_VERBOSE_ASSERT(
@@ -631,7 +632,7 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
     }
 }
 
-t_bool
+bool
 t_column::is_vlen() const {
     return is_vlen_dtype(m_dtype);
 }
@@ -731,7 +732,7 @@ t_column::pprint_vocabulary() const {
     m_vocab->pprint_vocabulary();
 }
 
-t_col_sptr
+std::shared_ptr<t_column>
 t_column::clone() const {
     auto rval = std::make_shared<t_column>(*this);
     rval->init();
@@ -752,7 +753,7 @@ t_column::clone() const {
     return rval;
 }
 
-t_col_sptr
+std::shared_ptr<t_column>
 t_column::clone(const t_mask& mask) const {
     if (mask.count() == size()) {
         return clone();
@@ -783,7 +784,7 @@ t_column::valid_raw_fill() {
 }
 
 void
-t_column::copy(const t_column* other, const t_uidxvec& indices, t_uindex offset) {
+t_column::copy(const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
     PSP_VERBOSE_ASSERT(m_dtype == other->get_dtype(), "Cannot copy from diff dtype");
 
     switch (m_dtype) {
@@ -791,43 +792,43 @@ t_column::copy(const t_column* other, const t_uidxvec& indices, t_uindex offset)
             return;
         }
         case DTYPE_INT64: {
-            copy_helper<t_int64>(other, indices, offset);
+            copy_helper<std::int64_t>(other, indices, offset);
         } break;
         case DTYPE_INT32: {
-            copy_helper<t_int32>(other, indices, offset);
+            copy_helper<std::int32_t>(other, indices, offset);
         } break;
         case DTYPE_INT16: {
-            copy_helper<t_int16>(other, indices, offset);
+            copy_helper<std::int16_t>(other, indices, offset);
         } break;
         case DTYPE_INT8: {
-            copy_helper<t_int8>(other, indices, offset);
+            copy_helper<std::int8_t>(other, indices, offset);
         } break;
         case DTYPE_UINT64: {
-            copy_helper<t_uint64>(other, indices, offset);
+            copy_helper<std::uint64_t>(other, indices, offset);
         } break;
         case DTYPE_UINT32: {
-            copy_helper<t_uint32>(other, indices, offset);
+            copy_helper<std::uint32_t>(other, indices, offset);
         } break;
         case DTYPE_UINT16: {
-            copy_helper<t_uint16>(other, indices, offset);
+            copy_helper<std::uint16_t>(other, indices, offset);
         } break;
         case DTYPE_UINT8: {
-            copy_helper<t_uint8>(other, indices, offset);
+            copy_helper<std::uint8_t>(other, indices, offset);
         } break;
         case DTYPE_FLOAT64: {
-            copy_helper<t_float64>(other, indices, offset);
+            copy_helper<double>(other, indices, offset);
         } break;
         case DTYPE_FLOAT32: {
-            copy_helper<t_float32>(other, indices, offset);
+            copy_helper<float>(other, indices, offset);
         } break;
         case DTYPE_BOOL: {
-            copy_helper<t_uint8>(other, indices, offset);
+            copy_helper<std::uint8_t>(other, indices, offset);
         } break;
         case DTYPE_TIME: {
-            copy_helper<t_int64>(other, indices, offset);
+            copy_helper<std::int64_t>(other, indices, offset);
         } break;
         case DTYPE_DATE: {
-            copy_helper<t_uint32>(other, indices, offset);
+            copy_helper<std::uint32_t>(other, indices, offset);
         } break;
         case DTYPE_STR: {
             copy_helper<const char>(other, indices, offset);
@@ -839,7 +840,7 @@ t_column::copy(const t_column* other, const t_uidxvec& indices, t_uindex offset)
 template <>
 void
 t_column::copy_helper<const char>(
-    const t_column* other, const t_uidxvec& indices, t_uindex offset) {
+    const t_column* other, const std::vector<t_uindex>& indices, t_uindex offset) {
     t_uindex eidx = std::min(other->size(), static_cast<t_uindex>(indices.size()));
     reserve(eidx + offset);
 

@@ -19,7 +19,7 @@ struct t_ctx_handle {
     t_ctx_handle();
     t_ctx_handle(void* ctx, t_ctx_type ctx_type);
 
-    t_str get_type_descr() const;
+    std::string get_type_descr() const;
     t_ctx_type
     get_type() const {
         return m_ctx_type;
@@ -36,5 +36,5 @@ struct t_ctx_handle {
 };
 
 typedef std::vector<t_ctx_handle> t_sctxhvec;
-typedef std::map<t_str, t_ctx_handle> t_sctxhmap;
+typedef std::map<std::string, t_ctx_handle> t_sctxhmap;
 } // end namespace perspective

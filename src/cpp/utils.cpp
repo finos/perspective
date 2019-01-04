@@ -16,8 +16,8 @@
 
 namespace perspective {
 
-t_str
-unique_path(const t_str& path_prefix) {
+std::string
+unique_path(const std::string& path_prefix) {
     std::stringstream ss;
     ss << path_prefix << boost::uuids::random_generator()();
     return ss.str();

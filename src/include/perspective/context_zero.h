@@ -14,7 +14,9 @@
 #include <perspective/sort_specification.h>
 #include <perspective/histogram.h>
 #include <perspective/sym_table.h>
-#include <perspective/shared_ptrs.h>
+#include <perspective/traversal.h>
+#include <perspective/flat_traversal.h>
+#include <perspective/table.h>
 
 namespace perspective {
 
@@ -31,27 +33,26 @@ public:
 
     t_tscalar get_column_name(t_index idx);
 
-    t_svec get_column_names() const;
+    std::vector<std::string> get_column_names() const;
 
     void sort_by();
-    t_sortsvec get_sort_by() const;
+    std::vector<t_sortspec> get_sort_by() const;
 
     using t_ctxbase<t_ctx0>::get_data;
 
 protected:
-    t_tscalvec get_all_pkeys(const t_uidxpvec& cells) const;
+    std::vector<t_tscalar> get_all_pkeys(
+        const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
     void calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
         const t_table& transitions);
 
 private:
-    t_ftrav_sptr m_traversal;
-    t_sptr_zcdeltas m_deltas;
-    t_minmaxvec m_minmax;
+    std::shared_ptr<t_ftrav> m_traversal;
+    std::shared_ptr<t_zcdeltas> m_deltas;
+    std::vector<t_minmax> m_minmax;
     t_symtable m_symtable;
-    t_bool m_has_delta;
+    bool m_has_delta;
 };
-
-typedef std::shared_ptr<t_ctx0> t_ctx0_sptr;
 
 } // end namespace perspective

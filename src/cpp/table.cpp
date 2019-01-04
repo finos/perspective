@@ -61,8 +61,8 @@ t_table::t_table(const t_schema& s, t_uindex init_cap)
     set_capacity(init_cap);
 }
 
-t_table::t_table(const t_str& name, const t_str& dirname, const t_schema& s, t_uindex init_cap,
-    t_backing_store backing_store)
+t_table::t_table(const std::string& name, const std::string& dirname, const t_schema& s,
+    t_uindex init_cap, t_backing_store backing_store)
     : m_name(name)
     , m_dirname(dirname)
     , m_schema(s)
@@ -80,7 +80,7 @@ t_table::~t_table() {
     LOG_DESTRUCTOR("t_table");
 }
 
-const t_str&
+const std::string&
 t_table::name() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -91,7 +91,7 @@ void
 t_table::init() {
     PSP_TRACE_SENTINEL();
     LOG_INIT("t_table");
-    m_columns = t_colsptrvec(m_schema.size());
+    m_columns = std::vector<std::shared_ptr<t_column>>(m_schema.size());
 
     if (m_from_recipe) {
         t_uindex idx = 0;
@@ -112,7 +112,7 @@ t_table::init() {
     for (t_uindex idx = 0, loop_end = m_schema.size(); idx < loop_end; ++idx)
 #endif
         {
-            const t_str& colname = m_schema.m_columns[idx];
+            const std::string& colname = m_schema.m_columns[idx];
             t_dtype dtype = m_schema.m_types[idx];
             m_columns[idx] = make_column(colname, dtype, m_schema.m_status_enabled[idx]);
             m_columns[idx]->init();
@@ -124,9 +124,9 @@ t_table::init() {
     m_init = true;
 }
 
-t_col_sptr
-t_table::make_column(const t_str& colname, t_dtype dtype, t_bool status_enabled) {
-    t_lstore_recipe a(m_dirname, m_name + t_str("_") + colname,
+std::shared_ptr<t_column>
+t_table::make_column(const std::string& colname, t_dtype dtype, bool status_enabled) {
+    t_lstore_recipe a(m_dirname, m_name + std::string("_") + colname,
         m_capacity * get_dtype_size(dtype), m_backing_store);
     return std::make_shared<t_column>(dtype, status_enabled, a, m_capacity);
 }
@@ -153,38 +153,38 @@ t_table::size() const {
 }
 
 t_dtype
-t_table::get_dtype(const t_str& colname) const {
+t_table::get_dtype(const std::string& colname) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema.get_dtype(colname);
 }
 
-t_col_sptr
-t_table::get_column(const t_str& colname) {
+std::shared_ptr<t_column>
+t_table::get_column(const std::string& colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx];
 }
 
-t_col_csptr
-t_table::get_const_column(const t_str& colname) const {
+std::shared_ptr<const t_column>
+t_table::get_const_column(const std::string& colname) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
     return m_columns[idx];
 }
 
-t_col_csptr
+std::shared_ptr<const t_column>
 t_table::get_const_column(t_uindex idx) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns[idx];
 }
 
-t_colptrvec
+std::vector<t_column*>
 t_table::get_columns() {
-    t_colptrvec rval(m_columns.size());
+    std::vector<t_column*> rval(m_columns.size());
     t_uindex idx = 0;
     for (const auto& c : m_columns) {
         rval[idx] = c.get();
@@ -193,9 +193,9 @@ t_table::get_columns() {
     return rval;
 }
 
-t_colcptrvec
+std::vector<const t_column*>
 t_table::get_const_columns() const {
-    t_colcptrvec rval(m_columns.size());
+    std::vector<const t_column*> rval(m_columns.size());
     t_uindex idx = 0;
     for (const auto& c : m_columns) {
         rval[idx] = c.get();
@@ -236,7 +236,7 @@ t_table::reserve(t_uindex capacity) {
 }
 
 t_column*
-t_table::_get_column(const t_str& colname) {
+t_table::_get_column(const std::string& colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex idx = m_schema.get_colidx(colname);
@@ -250,27 +250,27 @@ t_table::get_schema() const {
     return m_schema;
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_table::flatten() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(is_pkey_table(), "Not a pkeyed table");
 
-    t_table_sptr flattened = std::make_shared<t_table>(
+    std::shared_ptr<t_table> flattened = std::make_shared<t_table>(
         "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     flattened->init();
-    flatten_body<t_table_sptr>(flattened);
+    flatten_body<std::shared_ptr<t_table>>(flattened);
     return flattened;
 }
 
-t_bool
+bool
 t_table::is_pkey_table() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_schema.is_pkey();
 }
 
-t_bool
+bool
 t_table::is_same_shape(t_table& tbl) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -285,7 +285,7 @@ t_table::pprint() const {
 }
 
 void
-t_table::pprint(const t_str& fname) const {
+t_table::pprint(const std::string& fname) const {
 
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -307,7 +307,7 @@ t_table::pprint(t_uindex nrows, std::ostream* os) const {
 
     t_uindex ncols = num_columns();
 
-    t_colcptrvec columns(ncols);
+    std::vector<const t_column*> columns(ncols);
     for (t_uindex idx = 0; idx < ncols; ++idx) {
         columns[idx] = m_columns[idx].get();
         (*os) << m_schema.m_columns[idx] << ", ";
@@ -325,13 +325,13 @@ t_table::pprint(t_uindex nrows, std::ostream* os) const {
 }
 
 void
-t_table::pprint(const t_uidxvec& vec) const {
+t_table::pprint(const std::vector<t_uindex>& vec) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex nrows = vec.size();
     t_uindex ncols = num_columns();
 
-    t_colcptrvec columns(ncols);
+    std::vector<const t_column*> columns(ncols);
     for (t_uindex idx = 0; idx < ncols; ++idx) {
         columns[idx] = m_columns[idx].get();
         std::cout << m_schema.m_columns[idx] << ", ";
@@ -355,10 +355,10 @@ t_table::append(const t_table& other) {
 
     t_uindex cursize = size();
 
-    t_colcptrvec src_cols;
-    t_colptrvec dst_cols;
+    std::vector<const t_column*> src_cols;
+    std::vector<t_column*> dst_cols;
 
-    t_sset incoming;
+    std::set<std::string> incoming;
 
     for (const auto& cname : other.m_schema.m_columns) {
         PSP_VERBOSE_ASSERT(
@@ -412,21 +412,21 @@ t_table::get_recipe() const {
     rval.m_capacity = m_capacity;
     rval.m_backing_store = m_backing_store;
     for (const auto& cname : m_schema.m_columns) {
-        t_col_csptr cptr = get_const_column(cname);
+        std::shared_ptr<const t_column> cptr = get_const_column(cname);
         rval.m_columns.push_back(cptr->get_recipe());
     }
     return rval;
 }
 
 t_mask
-t_table::filter_cpp(t_filter_op combiner, const t_ftermvec& fterms_) const {
+t_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterms_) const {
     auto self = const_cast<t_table*>(this);
     auto fterms = fterms_;
 
     t_mask mask(size());
     t_uindex fterm_size = fterms.size();
-    t_uidxvec indices(fterm_size);
-    t_colcptrvec columns(fterm_size);
+    std::vector<t_uindex> indices(fterm_size);
+    std::vector<const t_column*> columns(fterm_size);
 
     for (t_uindex idx = 0; idx < fterm_size; ++idx) {
         indices[idx] = m_schema.get_colidx(fterms[idx].m_colname);
@@ -445,17 +445,17 @@ t_table::filter_cpp(t_filter_op combiner, const t_ftermvec& fterms_) const {
             t_tscalar cell_val;
 
             for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx) {
-                t_bool pass = true;
+                bool pass = true;
 
                 for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
                     if (!pass)
                         break;
 
                     const auto& ft = fterms[cidx];
-                    t_bool tval;
+                    bool tval;
 
                     if (ft.m_use_interned) {
-                        cell_val.set(*(columns[cidx]->get_nth<t_stridx>(ridx)));
+                        cell_val.set(*(columns[cidx]->get_nth<t_uindex>(ridx)));
                         tval = ft(cell_val);
                     } else {
                         cell_val = columns[cidx]->get_scalar(ridx);
@@ -473,7 +473,7 @@ t_table::filter_cpp(t_filter_op combiner, const t_ftermvec& fterms_) const {
         } break;
         case FILTER_OP_OR: {
             for (t_uindex ridx = 0, rloop_end = size(); ridx < rloop_end; ++ridx) {
-                t_bool pass = false;
+                bool pass = false;
                 for (t_uindex cidx = 0; cidx < fterm_size; ++cidx) {
                     t_tscalar cell_val = columns[cidx]->get_scalar(ridx);
                     if (fterms[cidx](cell_val)) {
@@ -512,16 +512,16 @@ t_table::clone_(const t_mask& mask) const {
     return rval;
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_table::clone(const t_mask& mask) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto tbl = clone_(mask);
-    return t_table_sptr(tbl);
+    return std::shared_ptr<t_table>(tbl);
 }
 
 t_column*
-t_table::add_column(const t_str& name, t_dtype dtype, t_bool status_enabled) {
+t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(
@@ -539,19 +539,19 @@ t_table::add_column(const t_str& name, t_dtype dtype, t_bool status_enabled) {
 }
 
 void
-t_table::set_column(t_uindex idx, t_col_sptr col) {
+t_table::set_column(t_uindex idx, std::shared_ptr<t_column> col) {
     m_columns[idx] = col;
 }
 
 void
-t_table::set_column(const t_str& name, t_col_sptr col) {
+t_table::set_column(const std::string& name, std::shared_ptr<t_column> col) {
 
     t_uindex idx = m_schema.get_colidx(name);
     set_column(idx, col);
 }
 
 t_column*
-t_table::clone_column(const t_str& existing_col, const t_str& new_colname) {
+t_table::clone_column(const std::string& existing_col, const std::string& new_colname) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -572,7 +572,7 @@ t_table::clone_column(const t_str& existing_col, const t_str& new_colname) {
     return m_columns.back().get();
 }
 
-t_str
+std::string
 t_table::repr() const {
     std::stringstream ss;
     ss << "t_table<" << this << ">";

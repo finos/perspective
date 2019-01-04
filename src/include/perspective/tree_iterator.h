@@ -23,17 +23,17 @@ public:
     t_dtiter(const DTREE_T* tree, CONTAINER_T* queue, t_uindex count);
 
     t_dtiter<DTREE_T, CONTAINER_T> operator++();
-    t_bool operator!=(const t_dtiter<DTREE_T, CONTAINER_T>& other);
-    t_ptidx operator*() const;
+    bool operator!=(const t_dtiter<DTREE_T, CONTAINER_T>& other);
+    t_index operator*() const;
 
-    t_ptidx pop(std::vector<t_uindex>& q);
-    void push(std::vector<t_uindex>& q, t_ptidx idx);
-    t_ptidx head(const std::vector<t_uindex>& q) const;
+    t_index pop(std::vector<t_uindex>& q);
+    void push(std::vector<t_uindex>& q, t_index idx);
+    t_index head(const std::vector<t_uindex>& q) const;
     void enqueue_children(const std::vector<t_uindex>& q, const t_tnode* nptr);
 
-    t_ptidx pop(std::queue<t_uindex>& q);
-    void push(std::queue<t_uindex>& q, t_ptidx idx);
-    t_ptidx head(const std::queue<t_uindex>& q) const;
+    t_index pop(std::queue<t_uindex>& q);
+    void push(std::queue<t_uindex>& q, t_index idx);
+    t_index head(const std::queue<t_uindex>& q) const;
     void enqueue_children(const std::queue<t_uindex>& q, const t_tnode* nptr);
 
 private:
@@ -84,7 +84,7 @@ t_dtiter<DTREE_T, CONTAINER_T>
 t_dtiter<DTREE_T, CONTAINER_T>::operator++() {
     t_dtiter<DTREE_T, CONTAINER_T> iter(m_tree, m_queue, ++m_count);
 
-    t_ptidx head_ = pop(*m_queue);
+    t_index head_ = pop(*m_queue);
 
     const t_tnode* nptr = m_tree->get_node_ptr(head_);
     enqueue_children(*m_queue, nptr);
@@ -92,32 +92,32 @@ t_dtiter<DTREE_T, CONTAINER_T>::operator++() {
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_bool
+bool
 t_dtiter<DTREE_T, CONTAINER_T>::operator!=(const t_dtiter& other) {
     return m_count != other.m_count;
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_ptidx t_dtiter<DTREE_T, CONTAINER_T>::operator*() const {
+t_index t_dtiter<DTREE_T, CONTAINER_T>::operator*() const {
     return head(*m_queue);
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_ptidx
+t_index
 t_dtiter<DTREE_T, CONTAINER_T>::pop(std::vector<t_uindex>& q) {
-    t_ptidx rv = q.back();
+    t_index rv = q.back();
     q.pop_back();
     return rv;
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
 void
-t_dtiter<DTREE_T, CONTAINER_T>::push(std::vector<t_uindex>& q, t_ptidx idx) {
+t_dtiter<DTREE_T, CONTAINER_T>::push(std::vector<t_uindex>& q, t_index idx) {
     q.push_back(idx);
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_ptidx
+t_index
 t_dtiter<DTREE_T, CONTAINER_T>::head(const std::vector<t_uindex>& q) const {
     return q.back();
 }
@@ -133,21 +133,21 @@ t_dtiter<DTREE_T, CONTAINER_T>::enqueue_children(
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_ptidx
+t_index
 t_dtiter<DTREE_T, CONTAINER_T>::pop(std::queue<t_uindex>& q) {
-    t_ptidx rv = q.front();
+    t_index rv = q.front();
     q.pop();
     return rv;
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
 void
-t_dtiter<DTREE_T, CONTAINER_T>::push(std::queue<t_uindex>& q, t_ptidx idx) {
+t_dtiter<DTREE_T, CONTAINER_T>::push(std::queue<t_uindex>& q, t_index idx) {
     q.push(idx);
 }
 
 template <typename DTREE_T, typename CONTAINER_T>
-t_ptidx
+t_index
 t_dtiter<DTREE_T, CONTAINER_T>::head(const std::queue<t_uindex>& q) const {
     return q.front();
 }

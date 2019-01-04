@@ -15,23 +15,23 @@ namespace perspective {
 t_tscalar
 extract_aggregate(
     const t_aggspec& aggspec, const t_column* aggcol, t_uindex ridx, t_index pridx) {
-    static t_str non_unique("-");
+    static std::string non_unique("-");
 
     switch (aggspec.agg()) {
         case AGGTYPE_PCT_SUM_PARENT: {
             t_tscalar cv = aggcol->get_scalar(ridx);
 
             if (pridx == INVALID_INDEX) {
-                return mktscalar<t_float64>(100.0);
+                return mktscalar<double>(100.0);
             }
 
             t_tscalar pv = aggcol->get_scalar(pridx);
-            return mktscalar<t_float64>(100.0 * (cv.to_double() / pv.to_double()));
+            return mktscalar<double>(100.0 * (cv.to_double() / pv.to_double()));
         } break;
         case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
             t_tscalar cv = aggcol->get_scalar(ridx);
             t_tscalar pv = aggcol->get_scalar(ROOT_AGGIDX);
-            return mktscalar<t_float64>(100.0 * (cv.to_double() / pv.to_double()));
+            return mktscalar<double>(100.0 * (cv.to_double() / pv.to_double()));
         } break;
         case AGGTYPE_SUM:
         case AGGTYPE_SUM_ABS:
@@ -72,11 +72,12 @@ extract_aggregate(
         case AGGTYPE_MEAN_BY_COUNT:
         case AGGTYPE_WEIGHTED_MEAN:
         case AGGTYPE_MEAN: {
-            const t_f64pair* pair = aggcol->get_nth<t_f64pair>(ridx);
+            const std::pair<double, double>* pair
+                = aggcol->get_nth<std::pair<double, double>>(ridx);
             t_tscalar rval;
-            t_float64 second = pair->second;
+            double second = pair->second;
             if (second > 0) {
-                t_float64 mean = pair->first / second;
+                double mean = pair->first / second;
                 rval.set(mean);
             } else {
                 rval.set(t_none());

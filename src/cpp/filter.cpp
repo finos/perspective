@@ -23,8 +23,8 @@ t_fterm::t_fterm(const t_fterm_recipe& v) {
         = (m_op == FILTER_OP_EQ || m_op == FILTER_OP_NE) && m_threshold.m_type == DTYPE_STR;
 }
 
-t_fterm::t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold,
-    const t_tscalvec& bag, t_bool negated, t_bool is_primary)
+t_fterm::t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
+    const std::vector<t_tscalar>& bag, bool negated, bool is_primary)
     : m_colname(colname)
     , m_op(op)
     , m_threshold(threshold)
@@ -35,8 +35,8 @@ t_fterm::t_fterm(const t_str& colname, t_filter_op op, t_tscalar threshold,
         = (op == FILTER_OP_EQ || op == FILTER_OP_NE) && threshold.m_type == DTYPE_STR;
 }
 
-t_fterm::t_fterm(
-    const t_str& colname, t_filter_op op, t_tscalar threshold, const t_tscalvec& bag)
+t_fterm::t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
+    const std::vector<t_tscalar>& bag)
     : m_colname(colname)
     , m_op(op)
     , m_threshold(threshold)
@@ -65,7 +65,7 @@ t_fterm::get_recipe() const {
     return rv;
 }
 
-t_str
+std::string
 t_fterm::get_expr() const {
     std::stringstream ss;
 
@@ -103,17 +103,17 @@ t_fterm::get_expr() const {
 t_filter::t_filter()
     : m_mode(SELECT_MODE_ALL) {}
 
-t_filter::t_filter(const t_svec& columns)
+t_filter::t_filter(const std::vector<std::string>& columns)
     : m_mode(SELECT_MODE_ALL)
     , m_columns(columns) {}
 
-t_filter::t_filter(const t_svec& columns, t_uindex bidx, t_uindex eidx)
+t_filter::t_filter(const std::vector<std::string>& columns, t_uindex bidx, t_uindex eidx)
     : m_mode(SELECT_MODE_RANGE)
     , m_bidx(bidx)
     , m_eidx(eidx)
     , m_columns(columns) {}
 
-t_filter::t_filter(const t_svec& columns, t_uindex mask_size)
+t_filter::t_filter(const std::vector<std::string>& columns, t_uindex mask_size)
     : m_mode(SELECT_MODE_MASK)
     , m_columns(columns)
     , m_mask(std::make_shared<t_mask>(mask_size)) {}
@@ -128,7 +128,7 @@ t_filter::has_filter() const {
     return m_mode != SELECT_MODE_ALL;
 }
 
-const t_svec&
+const std::vector<std::string>&
 t_filter::columns() const {
     return m_columns;
 }

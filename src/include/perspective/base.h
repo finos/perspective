@@ -31,8 +31,8 @@
 
 namespace perspective {
 
-const t_int32 PSP_VERSION = 67;
-const t_float64 PSP_TABLE_GROW_RATIO = 1.3;
+const std::int32_t PSP_VERSION = 67;
+const double PSP_TABLE_GROW_RATIO = 1.3;
 
 #ifdef WIN32
 #define PSP_RESTRICT __restrict
@@ -158,18 +158,7 @@ enum t_filter_op {
     FILTER_OP_IS_NOT_VALID
 };
 
-PERSPECTIVE_EXPORT t_str filter_op_to_str(t_filter_op op);
-
-enum t_compression_scheme { COMPRESSION_SCHEME_NONE, COMPRESSION_SCHEME_GZIP };
-
-enum t_data_format {
-    DATA_FORMAT_PANDAS,
-    DATA_FORMAT_CSV,
-    DATA_FORMAT_LOL,
-    DATA_FORMAT_LOL_VALID,
-    DATA_FORMAT_EXCEL,
-    DATA_FORMAT_PROTO
-};
+PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);
 
 enum t_header { HEADER_ROW, HEADER_COLUMN };
 
@@ -225,8 +214,6 @@ enum t_ctx_type {
     GROUPED_PKEY_CONTEXT,
     GROUPED_COLUMNS_CONTEXT
 };
-
-enum t_strand_op { STRAND_INSERT, STRAND_DELETE };
 
 enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
 
@@ -292,23 +279,6 @@ enum t_invmode {
     INV_PROPAGATE        // Propagate invalid virally
 };
 
-enum t_pool_trace {
-    PTRACE_REGISTER_GNODE,
-    PTRACE_UNREGISTER_GNODE,
-    PTRACE_SEND,
-    PTRACE_INIT,
-    PTRACE_STOP,
-    PTRACE_SET_SLEEP,
-    PTRACE_SET_UPDATE_DELEGATE,
-    PTRACE_REGISTER_CONTEXT,
-    PTRACE_UNREGISTER_CONTEXT,
-    PTRACE_INSTANCE,
-    PTRACE_POOL_CREATE,
-    PTRACE_LOG_DATAFRAGS
-};
-
-enum t_access_mode { ACCESS_MODE_NONE, ACCESS_MODE_READ, ACCESS_MODE_READ_WRITE };
-
 enum t_range_mode {
     RANGE_ROW,
     RANGE_ROW_COLUMN,
@@ -339,10 +309,6 @@ enum t_fetch {
 
 enum t_fmode { FMODE_SIMPLE_CLAUSES, FMODE_JIT_EXPR };
 
-typedef std::vector<t_fetch> t_fetchvec;
-
-typedef std::vector<t_sorttype> t_sorttvec;
-
 #ifdef WIN32
 #define PSP_NON_COPYABLE(X)
 #else
@@ -351,13 +317,13 @@ typedef std::vector<t_sorttype> t_sorttvec;
     X& operator=(const X&) = delete
 #endif
 
-PERSPECTIVE_EXPORT t_str get_error_str();
+PERSPECTIVE_EXPORT std::string get_error_str();
 PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
-PERSPECTIVE_EXPORT t_str get_dtype_descr(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
-PERSPECTIVE_EXPORT t_bool is_vlen_dtype(t_dtype dtype);
-PERSPECTIVE_EXPORT t_bool is_neq_transition(t_value_transition t);
+PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
+PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);
 
 template <typename T>
 inline std::ostream&
@@ -376,7 +342,7 @@ operator<<(std::ostream& os, const std::pair<FIRST_T, SECOND_T>& p) {
     return os;
 }
 
-void check_init(t_bool init, const char* file, t_int32 line);
+void check_init(bool init, const char* file, std::int32_t line);
 
 t_uindex root_pidx();
 
@@ -401,12 +367,12 @@ struct t_cchar_umap_hash {
     }
 };
 
-t_bool is_internal_colname(const t_str& c);
+bool is_internal_colname(const std::string& c);
 
-t_bool is_deterministic_sized(t_dtype dtype);
+bool is_deterministic_sized(t_dtype dtype);
 
 template <typename DATA_T>
-t_str
+std::string
 psp_to_str(const DATA_T& s) {
     std::stringstream ss;
     ss << s;
@@ -417,8 +383,8 @@ psp_to_str(const DATA_T& s) {
 
 namespace std {
 template <>
-struct hash<perspective::t_uidxpair> {
-    typedef perspective::t_uidxpair argument_type;
+struct hash<std::pair<perspective::t_uindex, perspective::t_uindex>> {
+    typedef std::pair<perspective::t_uindex, perspective::t_uindex> argument_type;
     typedef std::size_t result_type;
 
     result_type

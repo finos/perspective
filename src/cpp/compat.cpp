@@ -19,10 +19,10 @@
 
 namespace perspective {
 
-t_szpair
+std::pair<std::uint32_t, std::uint32_t>
 file_size_pair(t_handle h) {
     t_uindex sz = file_size(h);
-    return t_szpair(upper32(sz), lower32(sz));
+    return std::pair<std::uint32_t, std::uint32_t>(upper32(sz), lower32(sz));
 }
 
 t_rfmapping::t_rfmapping() {}

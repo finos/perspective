@@ -21,7 +21,7 @@ namespace perspective {
 t_uindex file_size(t_handle h);
 void close_file(t_handle h);
 void flush_mapping(void* base, t_uindex len);
-void rmfile(const t_str& fname);
+void rmfile(const std::string& fname);
 
 struct t_rfmapping {
     t_rfmapping();
@@ -35,24 +35,24 @@ struct t_rfmapping {
     PSP_NON_COPYABLE(t_rfmapping);
 };
 
-void map_file_read(const t_str& fname, t_rfmapping& out);
-void map_file_write(const t_str& fname, t_uindex size, t_rfmapping& out);
+void map_file_read(const std::string& fname, t_rfmapping& out);
+void map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out);
 
-void set_thread_name(std::thread& thr, const t_str& name);
-void set_thread_name(const t_str& name);
+void set_thread_name(std::thread& thr, const std::string& name);
+void set_thread_name(const std::string& name);
 
-void launch_proc(const t_str& cmdline);
+void launch_proc(const std::string& cmdline);
 
-t_str cwd();
+std::string cwd();
 
-PERSPECTIVE_EXPORT t_int64 get_page_size();
-PERSPECTIVE_EXPORT t_int64 psp_curtime();
-PERSPECTIVE_EXPORT t_int64 psp_curmem();
+PERSPECTIVE_EXPORT std::int64_t get_page_size();
+PERSPECTIVE_EXPORT std::int64_t psp_curtime();
+PERSPECTIVE_EXPORT std::int64_t psp_curmem();
 
 PERSPECTIVE_EXPORT void* psp_dbg_malloc(size_t size);
 PERSPECTIVE_EXPORT void psp_dbg_free(void* mem);
 
-PERSPECTIVE_EXPORT void* psp_page_aligned_malloc(t_int64 size);
+PERSPECTIVE_EXPORT void* psp_page_aligned_malloc(std::int64_t size);
 PERSPECTIVE_EXPORT void psp_page_aligned_free(void* mem);
 
 } // end namespace perspective

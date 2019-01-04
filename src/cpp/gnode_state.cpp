@@ -104,7 +104,7 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
     }
 
     m_table->set_size(nrows + 1);
-    m_opcol->set_nth<t_uint8>(nrows, OP_INSERT);
+    m_opcol->set_nth<std::uint8_t>(nrows, OP_INSERT);
     m_pkcol->set_scalar(nrows, pkey);
     m_mapping[pkey_] = nrows;
     return nrows;
@@ -121,25 +121,25 @@ t_gstate::update_history(const t_table* tbl) {
     t_uindex ncols = m_table->num_columns();
     auto stable = m_table.get();
 
-    t_uidxvec col_translation(stable->num_columns());
+    std::vector<t_uindex> col_translation(stable->num_columns());
 
-    t_str opname("psp_op");
-    t_str pkeyname("psp_pkey");
+    std::string opname("psp_op");
+    std::string pkeyname("psp_pkey");
 
-    t_colcptrvec fcolumns(tbl->num_columns());
+    std::vector<const t_column*> fcolumns(tbl->num_columns());
 
     t_uindex count = 0;
     for (t_uindex idx = 0, loop_end = fschema.size(); idx < loop_end; ++idx) {
-        const t_str& cname = fschema.m_columns[idx];
+        const std::string& cname = fschema.m_columns[idx];
         col_translation[count] = idx;
         fcolumns[idx] = tbl->get_const_column(cname).get();
         ++count;
     }
 
-    t_colptrvec scolumns(ncols);
+    std::vector<t_column*> scolumns(ncols);
 
     for (t_uindex idx = 0, loop_end = sschema.size(); idx < loop_end; ++idx) {
-        const t_str& cname = sschema.m_columns[idx];
+        const std::string& cname = sschema.m_columns[idx];
         scolumns[idx] = stable->get_column(cname).get();
     }
 
@@ -164,13 +164,13 @@ t_gstate::update_history(const t_table* tbl) {
 
         for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx) {
             t_tscalar pkey = pkey_col->get_scalar(idx);
-            const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
+            const std::uint8_t* op_ptr = op_col->get_nth<std::uint8_t>(idx);
             t_op op = static_cast<t_op>(*op_ptr);
 
             switch (op) {
                 case OP_INSERT: {
                     m_mapping[m_symtable.get_interned_tscalar(pkey)] = idx;
-                    m_opcol->set_nth<t_uint8>(idx, OP_INSERT);
+                    m_opcol->set_nth<std::uint8_t>(idx, OP_INSERT);
                     m_pkcol->set_scalar(idx, pkey);
                 } break;
                 case OP_DELETE: {
@@ -188,17 +188,17 @@ t_gstate::update_history(const t_table* tbl) {
     }
 
     /* size is not zero */
-    t_uidxvec stableidx_vec(tbl->num_rows());
+    std::vector<t_uindex> stableidx_vec(tbl->num_rows());
 
     for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx) {
         t_tscalar pkey = pkey_col->get_scalar(idx);
-        const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
+        const std::uint8_t* op_ptr = op_col->get_nth<std::uint8_t>(idx);
         t_op op = static_cast<t_op>(*op_ptr);
 
         switch (op) {
             case OP_INSERT: {
                 stableidx_vec[idx] = lookup_or_create(pkey);
-                m_opcol->set_nth<t_uint8>(stableidx_vec[idx], OP_INSERT);
+                m_opcol->set_nth<std::uint8_t>(stableidx_vec[idx], OP_INSERT);
                 m_pkcol->set_scalar(stableidx_vec[idx], pkey);
             } break;
             case OP_DELETE: {
@@ -223,18 +223,18 @@ t_gstate::update_history(const t_table* tbl) {
             t_column* scolumn = scolumns[colidx];
 
             for (t_uindex idx = 0, loop_end = tbl->num_rows(); idx < loop_end; ++idx) {
-                t_bool is_valid = fcolumn->is_valid(idx);
+                bool is_valid = fcolumn->is_valid(idx);
                 t_uindex stableidx = stableidx_vec[idx];
 
                 if (!is_valid) {
-                    t_bool is_cleared = fcolumn->is_cleared(idx);
+                    bool is_cleared = fcolumn->is_cleared(idx);
                     if (is_cleared) {
                         scolumn->clear(stableidx);
                     }
                     continue;
                 }
 
-                const t_uint8* op_ptr = op_col->get_nth<t_uint8>(idx);
+                const std::uint8_t* op_ptr = op_col->get_nth<std::uint8_t>(idx);
                 t_op op = static_cast<t_op>(*op_ptr);
 
                 if (op == OP_DELETE)
@@ -244,49 +244,54 @@ t_gstate::update_history(const t_table* tbl) {
                     case DTYPE_NONE: {
                     } break;
                     case DTYPE_INT64: {
-                        scolumn->set_nth<t_int64>(stableidx, *(fcolumn->get_nth<t_int64>(idx)));
+                        scolumn->set_nth<std::int64_t>(
+                            stableidx, *(fcolumn->get_nth<std::int64_t>(idx)));
                     } break;
                     case DTYPE_INT32: {
-                        scolumn->set_nth<t_int32>(stableidx, *(fcolumn->get_nth<t_int32>(idx)));
+                        scolumn->set_nth<std::int32_t>(
+                            stableidx, *(fcolumn->get_nth<std::int32_t>(idx)));
                     } break;
                     case DTYPE_INT16: {
-                        scolumn->set_nth<t_int16>(stableidx, *(fcolumn->get_nth<t_int16>(idx)));
+                        scolumn->set_nth<std::int16_t>(
+                            stableidx, *(fcolumn->get_nth<std::int16_t>(idx)));
                     } break;
                     case DTYPE_INT8: {
-                        scolumn->set_nth<t_int8>(stableidx, *(fcolumn->get_nth<t_int8>(idx)));
+                        scolumn->set_nth<std::int8_t>(
+                            stableidx, *(fcolumn->get_nth<std::int8_t>(idx)));
                     } break;
                     case DTYPE_UINT64: {
-                        scolumn->set_nth<t_uint64>(
-                            stableidx, *(fcolumn->get_nth<t_uint64>(idx)));
+                        scolumn->set_nth<std::uint64_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint64_t>(idx)));
                     } break;
                     case DTYPE_UINT32: {
-                        scolumn->set_nth<t_uint32>(
-                            stableidx, *(fcolumn->get_nth<t_uint32>(idx)));
+                        scolumn->set_nth<std::uint32_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint32_t>(idx)));
                     } break;
                     case DTYPE_UINT16: {
-                        scolumn->set_nth<t_uint16>(
-                            stableidx, *(fcolumn->get_nth<t_uint16>(idx)));
+                        scolumn->set_nth<std::uint16_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint16_t>(idx)));
                     } break;
                     case DTYPE_UINT8: {
-                        scolumn->set_nth<t_uint8>(stableidx, *(fcolumn->get_nth<t_uint8>(idx)));
+                        scolumn->set_nth<std::uint8_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint8_t>(idx)));
                     } break;
                     case DTYPE_FLOAT64: {
-                        scolumn->set_nth<t_float64>(
-                            stableidx, *(fcolumn->get_nth<t_float64>(idx)));
+                        scolumn->set_nth<double>(stableidx, *(fcolumn->get_nth<double>(idx)));
                     } break;
                     case DTYPE_FLOAT32: {
-                        scolumn->set_nth<t_float32>(
-                            stableidx, *(fcolumn->get_nth<t_float32>(idx)));
+                        scolumn->set_nth<float>(stableidx, *(fcolumn->get_nth<float>(idx)));
                     } break;
                     case DTYPE_BOOL: {
-                        scolumn->set_nth<t_uint8>(stableidx, *(fcolumn->get_nth<t_uint8>(idx)));
+                        scolumn->set_nth<std::uint8_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint8_t>(idx)));
                     } break;
                     case DTYPE_TIME: {
-                        scolumn->set_nth<t_int64>(stableidx, *(fcolumn->get_nth<t_int64>(idx)));
+                        scolumn->set_nth<std::int64_t>(
+                            stableidx, *(fcolumn->get_nth<std::int64_t>(idx)));
                     } break;
                     case DTYPE_DATE: {
-                        scolumn->set_nth<t_uint32>(
-                            stableidx, *(fcolumn->get_nth<t_uint32>(idx)));
+                        scolumn->set_nth<std::uint32_t>(
+                            stableidx, *(fcolumn->get_nth<std::uint32_t>(idx)));
                     } break;
                     case DTYPE_STR: {
                         const char* s = fcolumn->get_nth<const char>(idx);
@@ -303,7 +308,7 @@ t_gstate::update_history(const t_table* tbl) {
 
 void
 t_gstate::pprint() const {
-    t_uidxvec indices(m_mapping.size());
+    std::vector<t_uindex> indices(m_mapping.size());
     t_uindex idx = 0;
     for (t_mapping::const_iterator iter = m_mapping.begin(); iter != m_mapping.end(); ++iter) {
         indices[idx] = iter->second;
@@ -322,23 +327,23 @@ t_gstate::get_cpp_mask() const {
     return msk;
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_gstate::get_table() {
     return m_table;
 }
 
-t_table_csptr
+std::shared_ptr<const t_table>
 t_gstate::get_table() const {
     return m_table;
 }
 
 void
-t_gstate::read_column(
-    const t_str& colname, const t_tscalvec& pkeys, t_tscalvec& out_data) const {
+t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    std::vector<t_tscalar>& out_data) const {
     t_index num = pkeys.size();
-    t_col_csptr col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
-    t_tscalvec rval(num);
+    std::vector<t_tscalar> rval(num);
 
     for (t_index idx = 0; idx < num; ++idx) {
         t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
@@ -351,18 +356,19 @@ t_gstate::read_column(
 }
 
 void
-t_gstate::read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data) const {
+t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    std::vector<double>& out_data) const {
     read_column(colname, pkeys, out_data, true);
 }
 
 void
-t_gstate::read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& out_data,
-    bool include_nones) const {
+t_gstate::read_column(const std::string& colname, const std::vector<t_tscalar>& pkeys,
+    std::vector<double>& out_data, bool include_nones) const {
     t_index num = pkeys.size();
-    t_col_csptr col = m_table->get_const_column(colname);
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
 
-    t_f64vec rval;
+    std::vector<double> rval;
     for (t_index idx = 0; idx < num; ++idx) {
         t_mapping::const_iterator iter = m_mapping.find(pkeys[idx]);
         if (iter != m_mapping.end()) {
@@ -376,20 +382,20 @@ t_gstate::read_column(const t_str& colname, const t_tscalvec& pkeys, t_f64vec& o
 }
 
 t_tscalar
-t_gstate::get(t_tscalar pkey, const t_str& colname) const {
+t_gstate::get(t_tscalar pkey, const std::string& colname) const {
     t_mapping::const_iterator iter = m_mapping.find(pkey);
     if (iter != m_mapping.end()) {
-        t_col_csptr col = m_table->get_const_column(colname);
+        std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
         return col->get_scalar(iter->second);
     }
 
     return t_tscalar();
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_gstate::get_row(t_tscalar pkey) const {
     auto columns = m_table->get_const_columns();
-    t_tscalvec rval(columns.size());
+    std::vector<t_tscalar> rval(columns.size());
 
     t_mapping::const_iterator iter = m_mapping.find(pkey);
     PSP_VERBOSE_ASSERT(iter != m_mapping.end(), "Reached end");
@@ -404,9 +410,10 @@ t_gstate::get_row(t_tscalar pkey) const {
     return rval;
 }
 
-t_bool
-t_gstate::is_unique(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value) const {
-    t_col_csptr col = m_table->get_const_column(colname);
+bool
+t_gstate::is_unique(
+    const std::vector<t_tscalar>& pkeys, const std::string& colname, t_tscalar& value) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
     value = mknone();
 
@@ -423,10 +430,10 @@ t_gstate::is_unique(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& va
     return true;
 }
 
-t_bool
-t_gstate::apply(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value,
-    std::function<t_bool(const t_tscalar&, t_tscalar&)> fn) const {
-    t_col_csptr col = m_table->get_const_column(colname);
+bool
+t_gstate::apply(const std::vector<t_tscalar>& pkeys, const std::string& colname,
+    t_tscalar& value, std::function<bool(const t_tscalar&, t_tscalar&)> fn) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
 
     value = mknone();
@@ -435,7 +442,7 @@ t_gstate::apply(const t_tscalvec& pkeys, const t_str& colname, t_tscalar& value,
         t_mapping::const_iterator iter = m_mapping.find(pkey);
         if (iter != m_mapping.end()) {
             auto tmp = col_->get_scalar(iter->second);
-            t_bool done = fn(tmp, value);
+            bool done = fn(tmp, value);
             if (done) {
                 value = tmp;
                 return done;
@@ -459,16 +466,16 @@ t_gstate::get_pkey_dtype() const {
     return iter->first.get_dtype();
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_gstate::get_pkeyed_table(const t_schema& schema) const {
-    return t_table_sptr(_get_pkeyed_table(schema));
+    return std::shared_ptr<t_table>(_get_pkeyed_table(schema));
 }
 
-t_table_sptr
+std::shared_ptr<t_table>
 t_gstate::get_pkeyed_table() const {
     if (m_mapping.size() == m_table->size())
         return m_table;
-    return t_table_sptr(_get_pkeyed_table(m_pkeyed_schema));
+    return std::shared_ptr<t_table>(_get_pkeyed_table(m_pkeyed_schema));
 }
 
 t_table*
@@ -477,12 +484,12 @@ t_gstate::_get_pkeyed_table() const {
 }
 
 t_table*
-t_gstate::_get_pkeyed_table(const t_tscalvec& pkeys) const {
+t_gstate::_get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const {
     return _get_pkeyed_table(m_pkeyed_schema, pkeys);
 }
 
 t_table*
-t_gstate::_get_pkeyed_table(const t_schema& schema, const t_tscalvec& pkeys) const {
+t_gstate::_get_pkeyed_table(const t_schema& schema, const std::vector<t_tscalar>& pkeys) const {
     t_mask mask(size());
 
     for (const auto& pkey : pkeys) {
@@ -521,7 +528,7 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     for (t_uindex colidx = 0; colidx < o_ncols; ++colidx)
 #endif
         {
-            const t_str& c = sch_cols[colidx];
+            const std::string& c = sch_cols[colidx];
             if (c != "psp_op" && c != "psp_pkey") {
                 rval->set_column(c, tbl->get_const_column(c)->clone(mask));
             }
@@ -533,7 +540,7 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     auto pkey_col = rval->get_column("psp_pkey").get();
     auto op_col = rval->get_column("psp_op").get();
 
-    op_col->raw_fill<t_uint8>(OP_INSERT);
+    op_col->raw_fill<std::uint8_t>(OP_INSERT);
     op_col->valid_raw_fill();
     pkey_col->valid_raw_fill();
 
@@ -614,15 +621,15 @@ t_gstate::size() const {
     return m_table->size();
 }
 
-t_tscalvec
-t_gstate::get_row_data_pkeys(const t_tscalvec& pkeys) const {
+std::vector<t_tscalar>
+t_gstate::get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const {
     t_uindex ncols = m_table->num_columns();
     const t_schema& schema = m_table->get_schema();
-    t_tscalvec rval;
+    std::vector<t_tscalar> rval;
 
-    t_colcptrvec columns(ncols);
+    std::vector<const t_column*> columns(ncols);
     for (t_uindex idx = 0, loop_end = schema.size(); idx < loop_end; ++idx) {
-        const t_str& cname = schema.m_columns[idx];
+        const std::string& cname = schema.m_columns[idx];
         columns[idx] = m_table->get_const_column(cname).get();
     }
 
@@ -645,17 +652,17 @@ t_gstate::get_row_data_pkeys(const t_tscalvec& pkeys) const {
     return rval;
 }
 
-t_bool
+bool
 t_gstate::has_pkey(t_tscalar pkey) const {
     return m_mapping.find(pkey) != m_mapping.end();
 }
 
-t_tscalvec
-t_gstate::has_pkeys(const t_tscalvec& pkeys) const {
+std::vector<t_tscalar>
+t_gstate::has_pkeys(const std::vector<t_tscalar>& pkeys) const {
     if (pkeys.empty())
-        return t_tscalvec();
+        return std::vector<t_tscalar>();
 
-    t_tscalvec rval(pkeys.size());
+    std::vector<t_tscalar> rval(pkeys.size());
     t_uindex idx = 0;
 
     for (const auto& p : pkeys) {
@@ -668,9 +675,9 @@ t_gstate::has_pkeys(const t_tscalvec& pkeys) const {
     return rval;
 }
 
-t_tscalvec
+std::vector<t_tscalar>
 t_gstate::get_pkeys() const {
-    t_tscalvec rval(m_mapping.size());
+    std::vector<t_tscalar> rval(m_mapping.size());
     t_uindex idx = 0;
     for (const auto& kv : m_mapping) {
         rval[idx].set(kv.first);
@@ -680,7 +687,7 @@ t_gstate::get_pkeys() const {
 }
 
 std::pair<t_tscalar, t_tscalar>
-get_vec_min_max(const t_tscalvec& vec) {
+get_vec_min_max(const std::vector<t_tscalar>& vec) {
     t_tscalar min = mknone();
     t_tscalar max = mknone();
 
@@ -714,8 +721,8 @@ t_gstate::reset() {
 }
 
 t_tscalar
-t_gstate::get_value(const t_tscalar& pkey, const t_str& colname) const {
-    t_col_csptr col = m_table->get_const_column(colname);
+t_gstate::get_value(const t_tscalar& pkey, const std::string& colname) const {
+    std::shared_ptr<const t_column> col = m_table->get_const_column(colname);
     const t_column* col_ = col.get();
     t_tscalar rval = mknone();
 
@@ -732,9 +739,9 @@ t_gstate::get_port_schema() const {
     return m_pkeyed_schema;
 }
 
-t_uidxvec
-t_gstate::get_pkeys_idx(const t_tscalvec& pkeys) const {
-    t_uidxvec rv;
+std::vector<t_uindex>
+t_gstate::get_pkeys_idx(const std::vector<t_tscalar>& pkeys) const {
+    std::vector<t_uindex> rv;
     rv.reserve(pkeys.size());
 
     for (const auto& p : pkeys) {

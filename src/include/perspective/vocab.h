@@ -30,26 +30,26 @@ public:
     t_vocab(const t_column_recipe& r);
     t_vocab(const t_lstore_recipe& vlendata_recipe, const t_lstore_recipe& extents_recipe);
     void rebuild_map();
-    void init(t_bool from_recipe);
-    t_lstore_sptr get_vlendata();
-    t_lstore_sptr get_extents();
+    void init(bool from_recipe);
+    std::shared_ptr<t_lstore> get_vlendata();
+    std::shared_ptr<t_lstore> get_extents();
     t_uindex get_vlenidx() const;
     t_uindex nbytes() const;
     void verify() const;
     void verify_size() const;
     void fill(const t_lstore& o_vlen, const t_lstore& o_extents, t_uindex vlenidx);
     t_extent_pair* get_extents_base();
-    t_uchar* get_vlen_base();
+    unsigned char* get_vlen_base();
     void set_vlenidx(t_uindex idx);
     void pprint_vocabulary() const;
     void clone(const t_vocab& v);
 
-    t_uindex get_interned(const t_str& s);
+    t_uindex get_interned(const std::string& s);
     t_uindex get_interned(const char* s);
     void copy_vocabulary(const t_vocab& other);
     const char* unintern_c(t_uindex idx) const;
 
-    t_bool string_exists(const char* c, t_stridx& interned) const;
+    bool string_exists(const char* c, t_uindex& interned) const;
 
     void reserve(size_t total_string_size, size_t string_count);
 
@@ -71,7 +71,7 @@ private:
     // Stores the vlen as is. for string
     // the trailing zero byte is stored
     // as well
-    t_lstore_sptr m_vlendata;
+    std::shared_ptr<t_lstore> m_vlendata;
 
     // Stores begin / end offset pairs for
     // given id. Id mapping is implicit.
@@ -79,7 +79,7 @@ private:
     // begin and and t_uindex offsets
     // for string with numeric id j.
     // These offsets index into m_vlendata
-    t_lstore_sptr m_extents;
+    std::shared_ptr<t_lstore> m_extents;
 };
 
 } // end namespace perspective

@@ -17,13 +17,11 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_data {
     t_data();
-    t_data(const t_tscalvec& data);
+    t_data(const std::vector<t_tscalar>& data);
 
-    const t_tscalvec& data() const;
-    t_tscalvec& data();
-    t_tscalvec m_data;
+    const std::vector<t_tscalar>& data() const;
+    std::vector<t_tscalar>& data();
+    std::vector<t_tscalar> m_data;
 };
-
-typedef std::vector<t_data> t_datavec;
 
 } // end namespace perspective

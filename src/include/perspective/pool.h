@@ -23,29 +23,29 @@ namespace perspective {
 
 struct PERSPECTIVE_EXPORT t_updctx {
     t_updctx();
-    t_updctx(t_uindex gnode_id, const t_str& ctx);
+    t_updctx(t_uindex gnode_id, const std::string& ctx);
 
     t_uindex m_gnode_id;
-    t_str m_ctx;
+    std::string m_ctx;
 };
-
-typedef std::vector<t_updctx> t_updctx_vec;
 
 class t_update_task;
 
 class PERSPECTIVE_EXPORT t_pool {
     friend class t_update_task;
-    typedef std::pair<t_uindex, t_str> t_ctx_id;
+    typedef std::pair<t_uindex, std::string> t_ctx_id;
 
 public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 #ifdef PSP_ENABLE_WASM
     void set_update_delegate(emscripten::val ud);
-    void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int32 ptr);
+    void register_context(
+        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
     void py_notify_userspace();
 #else
-    void register_context(t_uindex gnode_id, const t_str& name, t_ctx_type type, t_int64 ptr);
+    void register_context(
+        t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
     void py_notify_userspace();
 #endif
     t_pool(const t_pool& p) = delete;
@@ -55,7 +55,7 @@ public:
 
     void unregister_gnode(t_uindex idx);
 
-    void unregister_context(t_uindex gnode_id, const t_str& name);
+    void unregister_context(t_uindex gnode_id, const std::string& name);
 
     void send(t_uindex gnode_id, t_uindex port_id, const t_table& table);
 
@@ -64,28 +64,29 @@ public:
     void init();
     void stop();
     void set_sleep(t_uindex ms);
-    t_streeptr_vec get_trees();
+    std::vector<t_stree*> get_trees();
 
     bool get_data_remaining() const;
 
-    t_tscalvec get_row_data_pkeys(t_uindex gnode_id, const t_tscalvec& pkeys);
-    t_updctx_vec get_contexts_last_updated();
-    t_str repr() const;
+    std::vector<t_tscalar> get_row_data_pkeys(
+        t_uindex gnode_id, const std::vector<t_tscalar>& pkeys);
+    std::vector<t_updctx> get_contexts_last_updated();
+    std::string repr() const;
 
     void pprint_registered() const;
 
     t_uindex epoch() const;
     void inc_epoch();
-    t_bool has_python_dep() const;
+    bool has_python_dep() const;
     void flush();
     void flush(t_uindex gnode_id);
-    t_uidxvec get_gnodes_last_updated();
+    std::vector<t_uindex> get_gnodes_last_updated();
     t_gnode* get_gnode(t_uindex gnode_id);
 
 protected:
     // Following three functions
     // use the python api
-    t_bool validate_gnode_id(t_uindex gnode_id) const;
+    bool validate_gnode_id(t_uindex gnode_id) const;
 
 private:
     std::mutex m_mtx;
@@ -95,10 +96,10 @@ private:
     emscripten::val m_update_delegate;
 #endif
     std::atomic_flag m_run;
-    std::atomic<t_bool> m_data_remaining;
+    std::atomic<bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;
     std::atomic<t_uindex> m_epoch;
-    t_bool m_has_python_dep;
+    bool m_has_python_dep;
 };
 
 } // end namespace perspective

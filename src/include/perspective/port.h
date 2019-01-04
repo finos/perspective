@@ -24,11 +24,11 @@ public:
     t_port(t_port_mode mode, const t_schema& schema);
     ~t_port();
     void init();
-    t_table_sptr get_table();
-    void set_table(t_table_sptr tbl);
+    std::shared_ptr<t_table> get_table();
+    void set_table(std::shared_ptr<t_table> tbl);
 
     // append to existing table
-    void send(t_table_csptr tbl);
+    void send(std::shared_ptr<const t_table> tbl);
     void send(const t_table& tbl);
 
     t_schema get_schema() const;
@@ -39,12 +39,9 @@ public:
 private:
     t_port_mode m_mode;
     t_schema m_schema;
-    t_bool m_init;
-    t_table_sptr m_table;
+    bool m_init;
+    std::shared_ptr<t_table> m_table;
     t_uindex m_prevsize;
 };
-
-typedef std::shared_ptr<t_port> t_port_sptr;
-typedef std::vector<t_port_sptr> t_port_sptrvec;
 
 } // end namespace perspective

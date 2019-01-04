@@ -17,8 +17,9 @@
 #include <perspective/pivot.h>
 #include <perspective/env_vars.h>
 #include <perspective/custom_column.h>
-#include <perspective/shared_ptrs.h>
 #include <perspective/rlookup.h>
+#include <perspective/gnode_state.h>
+#include <perspective/sparse_tree.h>
 #ifdef PSP_PARALLEL_FOR
 #include <tbb/parallel_sort.h>
 #include <tbb/tbb.h>
@@ -39,8 +40,8 @@ struct PERSPECTIVE_EXPORT t_gnode_recipe {
     t_gnode_recipe() {}
     t_gnode_processing_mode m_mode;
     t_schema_recipe m_tblschema;
-    t_schema_recipevec m_ischemas;
-    t_schema_recipevec m_oschemas;
+    std::vector<t_schema_recipe> m_ischemas;
+    std::vector<t_schema_recipe> m_oschemas;
     t_custom_column_recipevec m_custom_columns;
 };
 
@@ -55,8 +56,8 @@ public:
     t_gnode(const t_gnode_recipe& recipe);
     t_gnode(const t_schema& tblschema, const t_schema& port_schema);
     t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
-        const t_schemavec& ischemas, const t_schemavec& oschemas,
-        const t_ccol_vec& custom_columns);
+        const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
+        const std::vector<t_custom_column>& custom_columns);
     ~t_gnode();
     void init();
 
@@ -65,8 +66,8 @@ public:
     void _send(t_uindex idx, const t_table& fragments);
     void _process();
     void _process_self();
-    void _register_context(const t_str& name, t_ctx_type type, t_int64 ptr);
-    void _unregister_context(const t_str& name);
+    void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
+    void _unregister_context(const std::string& name);
 
     void begin_step();
     void end_step();
@@ -79,42 +80,42 @@ public:
     const t_table* get_table() const;
 
     void pprint() const;
-    t_svec get_registered_contexts() const;
+    std::vector<std::string> get_registered_contexts() const;
     t_schema get_tblschema() const;
-    t_pivotvec get_pivots() const;
+    std::vector<t_pivot> get_pivots() const;
 
-    t_streeptr_vec get_trees();
+    std::vector<t_stree*> get_trees();
 
     void set_id(t_uindex id);
     t_uindex get_id() const;
 
     void release_inputs();
     void release_outputs();
-    t_svec get_contexts_last_updated() const;
+    std::vector<std::string> get_contexts_last_updated() const;
 
     void reset();
-    t_str repr() const;
+    std::string repr() const;
     void clear_input_ports();
     void clear_output_ports();
 
     t_table* _get_pkeyed_table() const;
-    t_bool has_pkey(t_tscalar pkey) const;
+    bool has_pkey(t_tscalar pkey) const;
 
-    t_tscalvec get_row_data_pkeys(const t_tscalvec& pkeys) const;
-    t_tscalvec has_pkeys(const t_tscalvec& pkeys) const;
-    t_tscalvec get_pkeys() const;
+    std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_tscalar> has_pkeys(const std::vector<t_tscalar>& pkeys) const;
+    std::vector<t_tscalar> get_pkeys() const;
 
-    t_ccol_vec get_custom_columns() const;
+    std::vector<t_custom_column> get_custom_columns() const;
 
     t_gnode_recipe get_recipe() const;
-    t_bool has_python_dep() const;
+    bool has_python_dep() const;
     void set_pool_cleanup(std::function<void()> cleanup);
     const t_schema& get_port_schema() const;
-    t_bool was_updated() const;
+    bool was_updated() const;
     void clear_updated();
 
 protected:
-    t_bool have_context(const t_str& name) const;
+    bool have_context(const std::string& name) const;
     void notify_contexts(const t_table& flattened);
 
     template <typename CTX_T>
@@ -133,13 +134,12 @@ protected:
 
     template <typename DATA_T>
     void _process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_uint8* op_base,
-        std::vector<t_rlookup>& lkup, std::vector<t_bool>& prev_pkey_eq_vec,
+        t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
+        std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
         std::vector<t_uindex>& added_vec);
 
-    t_value_transition calc_transition(t_bool prev_existed, t_bool row_pre_existed,
-        t_bool exists, t_bool prev_valid, t_bool cur_valid, t_bool prev_cur_eq,
-        t_bool prev_pkey_eq);
+    t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
+        bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
     void _update_contexts_from_state(const t_table& tbl);
     void _update_contexts_from_state();
@@ -147,30 +147,30 @@ protected:
 
 private:
     void populate_icols_in_flattened(
-        const std::vector<t_rlookup>& lkup, t_table_sptr& flat) const;
+        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_table>& flat) const;
 
     t_gnode_processing_mode m_mode;
     t_schema m_tblschema;
-    t_schemavec m_ischemas;
-    t_schemavec m_oschemas;
-    t_bool m_init;
-    t_port_sptrvec m_iports;
-    t_port_sptrvec m_oports;
+    std::vector<t_schema> m_ischemas;
+    std::vector<t_schema> m_oschemas;
+    bool m_init;
+    std::vector<std::shared_ptr<t_port>> m_iports;
+    std::vector<std::shared_ptr<t_port>> m_oports;
     t_sctxhmap m_contexts;
-    t_gstate_sptr m_state;
+    std::shared_ptr<t_gstate> m_state;
     t_uindex m_id;
     std::chrono::high_resolution_clock::time_point m_epoch;
-    t_ccol_vec m_custom_columns;
-    t_sset m_expr_icols;
+    std::vector<t_custom_column> m_custom_columns;
+    std::set<std::string> m_expr_icols;
     std::function<void()> m_pool_cleanup;
-    t_bool m_was_updated;
+    bool m_was_updated;
 };
 
 template <>
-void t_gnode::_process_helper<t_str>(const t_column* fcolumn, const t_column* scolumn,
+void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* scolumn,
     t_column* dcolumn, t_column* pcolumn, t_column* ccolumn, t_column* tcolumn,
-    const t_uint8* op_base, std::vector<t_rlookup>& lkup, std::vector<t_bool>& prev_pkey_eq_vec,
-    std::vector<t_uindex>& added_vec);
+    const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
+    std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
 template <typename CTX_T>
 void
@@ -220,16 +220,16 @@ t_gnode::update_context_from_state(CTX_T* ctx, const t_table& flattened) {
 template <typename DATA_T>
 void
 t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_column* dcolumn,
-    t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const t_uint8* op_base,
-    std::vector<t_rlookup>& lkup, std::vector<t_bool>& prev_pkey_eq_vec,
+    t_column* pcolumn, t_column* ccolumn, t_column* tcolumn, const std::uint8_t* op_base,
+    std::vector<t_rlookup>& lkup, std::vector<bool>& prev_pkey_eq_vec,
     std::vector<t_uindex>& added_vec) {
     for (t_uindex idx = 0, loop_end = fcolumn->size(); idx < loop_end; ++idx) {
-        t_uint8 op_ = op_base[idx];
+        std::uint8_t op_ = op_base[idx];
         t_op op = static_cast<t_op>(op_);
         t_uindex added_count = added_vec[idx];
 
         const t_rlookup& rlookup = lkup[idx];
-        t_bool row_pre_existed = rlookup.m_exists;
+        bool row_pre_existed = rlookup.m_exists;
 
         switch (op) {
             case OP_INSERT: {
@@ -237,19 +237,19 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
 
                 DATA_T prev_value;
                 memset(&prev_value, 0, sizeof(DATA_T));
-                t_bool prev_valid = false;
+                bool prev_valid = false;
 
                 DATA_T cur_value = *(fcolumn->get_nth<DATA_T>(idx));
-                t_bool cur_valid = fcolumn->is_valid(idx);
+                bool cur_valid = fcolumn->is_valid(idx);
 
                 if (row_pre_existed) {
                     prev_value = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
                     prev_valid = scolumn->is_valid(rlookup.m_idx);
                 }
 
-                t_bool exists = cur_valid;
-                t_bool prev_existed = row_pre_existed && prev_valid;
-                t_bool prev_cur_eq = prev_value == cur_value;
+                bool exists = cur_valid;
+                bool prev_existed = row_pre_existed && prev_valid;
+                bool prev_cur_eq = prev_value == cur_value;
 
                 auto trans = calc_transition(prev_existed, row_pre_existed, exists, prev_valid,
                     cur_valid, prev_cur_eq, prev_pkey_eq_vec[idx]);
@@ -265,12 +265,12 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
 
                 ccolumn->set_valid(added_count, cur_valid ? cur_valid : prev_valid);
 
-                tcolumn->set_nth<t_uint8>(idx, trans);
+                tcolumn->set_nth<std::uint8_t>(idx, trans);
             } break;
             case OP_DELETE: {
                 if (row_pre_existed) {
                     DATA_T prev_value = *(scolumn->get_nth<DATA_T>(rlookup.m_idx));
-                    t_bool prev_valid = scolumn->is_valid(rlookup.m_idx);
+                    bool prev_valid = scolumn->is_valid(rlookup.m_idx);
 
                     pcolumn->set_nth<DATA_T>(added_count, prev_value);
                     pcolumn->set_valid(added_count, prev_valid);
@@ -283,14 +283,12 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                     RESTORE_WARNINGS_VC()
                     dcolumn->set_valid(added_count, true);
 
-                    tcolumn->set_nth<t_uint8>(added_count, VALUE_TRANSITION_NEQ_TDF);
+                    tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
             default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
         }
     }
 }
-
-typedef std::shared_ptr<t_gnode> t_gnode_sptr;
 
 } // end namespace perspective

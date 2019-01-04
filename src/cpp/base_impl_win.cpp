@@ -13,12 +13,12 @@
 
 namespace perspective {
 
-t_str
+std::string
 get_error_str() {
     DWORD errid = ::GetLastError();
 
     if (errid == 0)
-        return t_str();
+        return std::string();
 
     LPSTR buf = 0;
 
@@ -26,7 +26,7 @@ get_error_str() {
             | FORMAT_MESSAGE_IGNORE_INSERTS,
         NULL, errid, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buf, 0, NULL);
 
-    t_str message(buf, size);
+    std::string message(buf, size);
     LocalFree(buf);
 
     return message;

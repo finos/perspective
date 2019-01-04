@@ -17,7 +17,7 @@ namespace perspective {
 t_col_name_type::t_col_name_type()
     : m_type(DTYPE_NONE) {}
 
-t_col_name_type::t_col_name_type(const t_str& name, t_dtype type)
+t_col_name_type::t_col_name_type(const std::string& name, t_dtype type)
     : m_name(name)
     , m_type(type) {}
 
@@ -46,30 +46,31 @@ t_aggspec::t_aggspec(const t_aggspec_recipe& v)
     m_invmode = v.m_invmode;
 }
 
-t_aggspec::t_aggspec(const t_str& name, t_aggtype agg, const t_depvec& dependencies)
+t_aggspec::t_aggspec(
+    const std::string& name, t_aggtype agg, const std::vector<t_dep>& dependencies)
     : m_name(name)
     , m_disp_name(name)
     , m_agg(agg)
     , m_dependencies(dependencies)
     , m_kernel(0) {}
 
-t_aggspec::t_aggspec(const t_str& aggname, t_aggtype agg, const t_str& dep)
+t_aggspec::t_aggspec(const std::string& aggname, t_aggtype agg, const std::string& dep)
     : m_name(aggname)
     , m_disp_name(aggname)
     , m_agg(agg)
-    , m_dependencies(t_depvec{t_dep(dep, DEPTYPE_COLUMN)})
+    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)})
     , m_kernel(0) {}
 
-t_aggspec::t_aggspec(
-    const t_str& name, const t_str& disp_name, t_aggtype agg, const t_depvec& dependencies)
+t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_aggtype agg,
+    const std::vector<t_dep>& dependencies)
     : m_name(name)
     , m_disp_name(disp_name)
     , m_agg(agg)
     , m_dependencies(dependencies)
     , m_kernel(0) {}
 
-t_aggspec::t_aggspec(const t_str& name, const t_str& disp_name, t_aggtype agg,
-    const t_depvec& dependencies, t_sorttype sort_type)
+t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_aggtype agg,
+    const std::vector<t_dep>& dependencies, t_sorttype sort_type)
     : m_name(name)
     , m_disp_name(disp_name)
     , m_agg(agg)
@@ -77,9 +78,8 @@ t_aggspec::t_aggspec(const t_str& name, const t_str& disp_name, t_aggtype agg,
     , m_sort_type(sort_type)
     , m_kernel(0) {}
 
-t_aggspec::t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype agg,
-    t_uindex agg_one_idx, t_uindex agg_two_idx, t_float64 agg_one_weight,
-    t_float64 agg_two_weight)
+t_aggspec::t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
+    t_uindex agg_one_idx, t_uindex agg_two_idx, double agg_one_weight, double agg_two_weight)
     : m_name(aggname)
     , m_disp_name(disp_aggname)
     , m_agg(agg)
@@ -93,12 +93,12 @@ t_aggspec::t_aggspec(const t_str& aggname, const t_str& disp_aggname, t_aggtype 
 
 t_aggspec::~t_aggspec() {}
 
-t_str
+std::string
 t_aggspec::name() const {
     return m_name;
 }
 
-t_str
+std::string
 t_aggspec::disp_name() const {
     return m_disp_name;
 }
@@ -108,7 +108,7 @@ t_aggspec::agg() const {
     return m_agg;
 }
 
-t_str
+std::string
 t_aggspec::agg_str() const {
     switch (m_agg) {
         case AGGTYPE_SUM: {
@@ -216,7 +216,7 @@ t_aggspec::agg_str() const {
     }
 }
 
-const t_depvec&
+const std::vector<t_dep>&
 t_aggspec::get_dependencies() const {
     return m_dependencies;
 }
@@ -262,12 +262,12 @@ t_aggspec::get_agg_two_idx() const {
     return m_agg_two_idx;
 }
 
-t_float64
+double
 t_aggspec::get_agg_one_weight() const {
     return m_agg_one_weight;
 }
 
-t_float64
+double
 t_aggspec::get_agg_two_weight() const {
     return m_agg_two_weight;
 }
@@ -277,25 +277,25 @@ t_aggspec::get_inv_mode() const {
     return m_invmode;
 }
 
-t_svec
+std::vector<std::string>
 t_aggspec::get_input_depnames() const {
-    t_svec rval;
+    std::vector<std::string> rval;
     for (const auto d : m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;
 }
 
-t_svec
+std::vector<std::string>
 t_aggspec::get_output_depnames() const {
-    t_svec rval;
+    std::vector<std::string> rval;
     for (const auto d : m_dependencies) {
         rval.push_back(d.name());
     }
     return rval;
 }
 
-t_col_name_type_vec
+std::vector<t_col_name_type>
 t_aggspec::get_output_specs(const t_schema& schema) const {
     switch (agg()) {
         case AGGTYPE_SUM:
@@ -320,7 +320,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_IDENTITY:
         case AGGTYPE_DISTINCT_LEAF: {
             t_dtype coltype = schema.get_dtype(m_dependencies[0].name());
-            t_col_name_type_vec rval(1);
+            std::vector<t_col_name_type> rval(1);
             rval[0].m_name = name();
             rval[0].m_type = coltype;
             return rval;
@@ -346,7 +346,7 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         }
         case AGGTYPE_UDF_COMBINER:
         case AGGTYPE_UDF_REDUCER: {
-            t_col_name_type_vec rval;
+            std::vector<t_col_name_type> rval;
             for (const auto& d : m_odependencies) {
                 t_col_name_type tp(d.name(), d.dtype());
                 rval.push_back(tp);
@@ -362,28 +362,28 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         default: { PSP_COMPLAIN_AND_ABORT("Unknown agg type"); }
     }
 
-    return t_col_name_type_vec();
+    return std::vector<t_col_name_type>();
 }
 
-t_col_name_type_vec
-t_aggspec::mk_col_name_type_vec(const t_str& name, t_dtype dtype) const {
-    t_col_name_type_vec rval(1);
+std::vector<t_col_name_type>
+t_aggspec::mk_col_name_type_vec(const std::string& name, t_dtype dtype) const {
+    std::vector<t_col_name_type> rval(1);
     rval[0].m_name = name;
     rval[0].m_type = dtype;
     return rval;
 }
 
-t_bool
+bool
 t_aggspec::is_combiner_agg() const {
     return m_agg == AGGTYPE_UDF_COMBINER;
 }
 
-t_bool
+bool
 t_aggspec::is_reducer_agg() const {
     return m_agg == AGGTYPE_UDF_REDUCER;
 }
 
-t_bool
+bool
 t_aggspec::is_non_delta() const {
     switch (m_agg) {
         case AGGTYPE_LAST_VALUE:
@@ -397,7 +397,7 @@ t_aggspec::is_non_delta() const {
     return false;
 }
 
-t_str
+std::string
 t_aggspec::get_first_depname() const {
     if (m_dependencies.empty())
         return "";
