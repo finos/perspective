@@ -39,43 +39,43 @@ get_numpy_typenum_from_dtype(t_dtype dtype)
     {
         case DTYPE_INT8:
         {
-            return np::dtype::get_builtin<t_int8>();
+            return np::dtype::get_builtin<std::int8_t>();
         }
         case DTYPE_UINT8:
         {
-            return np::dtype::get_builtin<t_uint8>();
+            return np::dtype::get_builtin<std::uint8_t>();
         }
         case DTYPE_INT16:
         {
-            return np::dtype::get_builtin<t_int16>();
+            return np::dtype::get_builtin<std::int16_t>();
         }
         case DTYPE_UINT16:
         {
-            return np::dtype::get_builtin<t_uint16>();
+            return np::dtype::get_builtin<std::uint16_t>();
         }
         case DTYPE_INT32:
         {
-            return np::dtype::get_builtin<t_int32>();
+            return np::dtype::get_builtin<std::int32_t>();
         }
         case DTYPE_UINT32:
         {
-            return np::dtype::get_builtin<t_uint32>();
+            return np::dtype::get_builtin<std::uint32_t>();
         }
         case DTYPE_UINT64:
         {
-            return np::dtype::get_builtin<t_uint64>();
+            return np::dtype::get_builtin<std::uint64_t>();
         }
         case DTYPE_INT64:
         {
-            return np::dtype::get_builtin<t_int64>();
+            return np::dtype::get_builtin<std::int64_t>();
         }
         case DTYPE_FLOAT32:
         {
-            return np::dtype::get_builtin<t_float32>();
+            return np::dtype::get_builtin<float>();
         }
         case DTYPE_FLOAT64:
         {
-            return np::dtype::get_builtin<t_float64>();
+            return np::dtype::get_builtin<double>();
         }
         // TODO
         // case DTYPE_STR:
@@ -92,7 +92,7 @@ get_numpy_typenum_from_dtype(t_dtype dtype)
         // }
         case DTYPE_BOOL:
         {
-            return np::dtype::get_builtin<t_bool>();
+            return np::dtype::get_builtin<bool>();
         }
         default:
         {

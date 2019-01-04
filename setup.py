@@ -8,7 +8,7 @@
 import os
 import os.path
 import pathlib
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 from codecs import open
 
@@ -34,7 +34,7 @@ class build_ext(build_ext_orig):
 
     def build_cmake(self, ext):
         cwd = pathlib.Path().absolute()
-        directory = os.path.abspath(os.path.join(pathlib.Path().absolute(), '..'))
+        directory = os.path.abspath(os.path.join(pathlib.Path().absolute()))
 
         # these dirs will be created in build_py, so if you don't have
         # any python sources to bundle, the dirs will be missing
@@ -46,7 +46,7 @@ class build_ext(build_ext_orig):
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'perspective')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'python', 'perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + config,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
@@ -68,12 +68,11 @@ class build_ext(build_ext_orig):
 
 
 setup(
-    name='perspective',
-    version='0.0.1',
+    name='perspective-python.table',
+    version='0.1.3',
     description='Analytics library',
     long_description=long_description,
     url='https://github.com/jpmorganchase/perspective',
-    download_url='https://github.com/jpmorganchase/perspective/archive/v0.0.1.tar.gz',
     author='Tim Paine',
     author_email='timothy.k.paine@gmail.com',
     license='Apache 2.0',
@@ -88,9 +87,8 @@ setup(
     ],
 
     keywords='analytics tools plotting',
-    # packages=find_packages(exclude=['tests', ]),
-    packages=find_packages(),
-    include_package_data=True,
+    package_dir={'': 'python'},
+    packages=['perspective.table'],
     zip_safe=False,
     ext_modules=[
         CMakeExtension('perspective')
