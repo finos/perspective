@@ -6,10 +6,11 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-FROM timkpaine/perspective-cpp
+FROM node:8
 
 WORKDIR /usr/src/app
 ADD . /usr/src/app
 
-RUN yarn
-RUN yarn build_cpp
+RUN apt-get update
+RUN apt-get -y install apt-transport-https libtbb-dev cmake libboost-all-dev
+
