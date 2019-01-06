@@ -46,3 +46,5 @@ script:
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn build_python; fi
+  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn lint_python; fi
+  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn test_python; fi
