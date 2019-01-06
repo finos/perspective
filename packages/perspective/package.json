@@ -69,16 +69,20 @@
         "d3-array": "^1.2.1",
         "extract-text-webpack-plugin": "^3.0.2",
         "file-loader": "^2.0.0",
+        "flatbuffers": "^1.10.2",
         "html-loader": "^0.5.1",
         "less": "^2.7.2",
         "less-loader": "^4.0.5",
         "moment": "^2.19.1",
         "papaparse": "^4.3.6",
         "style-loader": "^0.18.2",
+        "text-encoding-utf-8": "^1.0.2",
+        "tslib": "^1.9.3",
         "uglifyjs-webpack-plugin": "^0.4.6",
         "underscore": "^1.8.3",
         "utf-8-validate": "~4.0.0",
-        "worker-loader": "^2.0.0"
+        "worker-loader": "^2.0.0",
+        "ws": "^6.1.2"
     },
     "peerDependencies": {
         "webpack": ">=3.5 <4"
