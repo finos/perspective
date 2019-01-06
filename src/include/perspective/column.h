@@ -128,8 +128,6 @@ public:
 
     const char* unintern_c(t_uindex idx) const;
 
-    std::string str() const;
-
     // Internal apis
 
     t_lstore* _get_data_lstore();

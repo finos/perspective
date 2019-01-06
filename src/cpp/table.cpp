@@ -569,8 +569,8 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
     }
 
     // finally, mutate schema and columns
-    set_column(idx, promoted_col);
     m_schema.retype_column(name, new_dtype);
+    set_column(idx, promoted_col);
 }
 
 void

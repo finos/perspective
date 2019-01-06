@@ -911,13 +911,6 @@ t_column::unintern_c(t_uindex idx) const {
     return m_vocab->unintern_c(idx);
 }
 
-std::string
-t_column::str() const {
-    std::stringstream ss;
-    ss << this;
-    return ss.str();
-}
-
 void
 t_column::_rebuild_map() {
     m_vocab->rebuild_map();

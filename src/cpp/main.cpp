@@ -445,9 +445,7 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
                 case DTYPE_INT32: {
                     // This handles cases where a long sequence of e.g. 0 precedes a clearly
                     // float value in an inferred column. Would not be needed if the type
-                    // inference
-                    // checked the entire column/we could reset parsing.
-                    
+                    // inference checked the entire column/we could reset parsing.
                     double fval = item.as<double>();
                     if (fval > 2147483647 || fval < -2147483648) {
                         tbl.promote_column(name, DTYPE_FLOAT64, i);
