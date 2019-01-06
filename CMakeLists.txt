@@ -57,13 +57,13 @@ else()
 endif()
 
 if (PSP_CPP_BUILD_TESTS)
-	message(WARNING "${Cyan}Building CPP tests${ColorReset}")
+	message(WARNING "${Cyan}Building C++ tests${ColorReset}")
 else()
-	message(WARNING "${Cyan}Skipping CPP tests${ColorReset}")
+	message(WARNING "${Cyan}Skipping C++ tests${ColorReset}")
 endif()
 
 if (NOT PSP_CPP_BUILD_STRICT)
-	message(WARNING "${Cyan}Building CPP without strict warnings${ColorReset}")
+	message(WARNING "${Cyan}Building C++ without strict warnings${ColorReset}")
 endif()
 
 #######################

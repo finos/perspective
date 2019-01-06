@@ -81,7 +81,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
 
     if (inputWasmFile) {
         console.log("-- Copying WASM file %s", inputWasmFile);
-        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(path.join(OUTPUT_DIRECTORY, "build"), inputWasmFile));
+        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "build", inputWasmFile));
     }
 
     console.debug("-- Creating wrapped js runtime");
@@ -101,23 +101,23 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         });
     }
 
-    fs.writeFileSync(path.join(path.join(OUTPUT_DIRECTORY, "obj"), inputFile), source);
+    fs.writeFileSync(path.join(OUTPUT_DIRECTORY, "obj", inputFile), source);
 }
 
-function emsdk() {
+function docker(image = "emsdk") {
     console.log("-- Creating emsdk docker image");
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += " -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk";
+    cmd += ` -v $(pwd):/src -e PACKAGE=${process.env.PACKAGE} perspective/${image}`;
     return cmd;
 }
 
 function compileCPP() {
     let cmd = `emcmake cmake ../ && emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
     if (process.env.PSP_DOCKER) {
-        cmd = `${emsdk()} bash -c 'cd obj && ${cmd}'`;
+        cmd = `${docker()} bash -c 'cd obj && ${cmd}'`;
     } else {
         cmd = `cd ${BASE_DIRECTORY} && ${cmd}`;
     }

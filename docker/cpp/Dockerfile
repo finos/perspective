@@ -13,6 +13,3 @@ ADD . /usr/src/app
 
 RUN apt-get update
 RUN apt-get -y install apt-transport-https libtbb-dev cmake libboost-all-dev
-
-RUN yarn
-RUN yarn build_cpp
