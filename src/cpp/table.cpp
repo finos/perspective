@@ -538,14 +538,14 @@ t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled)
     return m_columns.back().get();
 }
 
-t_column*
+void
 t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t iter_limit) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_schema.has_column(name)) {
         std::cout << "Cannot promote a column that does not exist." << std::endl;
-        return 0;
+        return;
     }
 
     t_uindex idx = m_schema.get_colidx(name);
@@ -553,17 +553,16 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
 
     if (new_dtype != DTYPE_FLOAT64 || current_col->get_dtype() != DTYPE_INT32) {
         std::cout << "Promotion only works for int to float." << std::endl;
-        return 0;
+        return;
     }
     
     // create the new column and copy data
     std::shared_ptr<t_column> promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
+    promoted_col->init();
     promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
 
-    std::cout << "promoted: " + promoted_col->str() << std::endl;
-
-    for (auto i = 0; i < iter_limit; i++) {
+    for (auto i = 0; i < iter_limit; ++i) {
         std::int32_t* val = current_col->get_nth<std::int32_t>(i);
         double fval = static_cast<double>(*val);
         promoted_col->set_nth(i, fval);
@@ -572,8 +571,6 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
     // finally, mutate schema and columns
     set_column(idx, promoted_col);
     m_schema.retype_column(name, new_dtype);
-
-    return promoted_col.get();
 }
 
 void

@@ -451,9 +451,11 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
                     double fval = item.as<double>();
                     if (fval > 2147483647 || fval < -2147483648) {
                         tbl.promote_column(name, DTYPE_FLOAT64, i);
+                        col = tbl.get_column(name);
+                        type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
                     } else {
-                        col->set_nth(i, item.as<std::int32_t>());
+                        col->set_nth(i, static_cast<std::int32_t>(fval));
                     }     
                 } break;
                 case DTYPE_FLOAT32: {

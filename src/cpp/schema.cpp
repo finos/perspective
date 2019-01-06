@@ -120,9 +120,8 @@ t_schema::retype_column(const std::string& colname, t_dtype dtype) {
     if (!has_column(colname)) {
         PSP_COMPLAIN_AND_ABORT("Cannot retype a column that does not exist.");
     }
-    
+
     t_uindex idx = get_colidx(colname);
-    m_columns[idx] = colname;
     m_types[idx] = dtype;
     m_colidx_map[colname] = idx;
     m_coldt_map[colname] = dtype;
