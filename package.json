@@ -51,6 +51,7 @@
         "clean:screenshots": "lerna run clean:screenshots ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
         "start": "lerna run start --stream --scope",
         "precommit": "npm run lint",
+        "publish_python": "python3 setup.py sdist upload -r pypi",
         "lint": "npm-run-all --silent lint:*",
         "lint:eslint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js examples/*/*.js",
         "lint:clang:cpp": "bash -c 'diff -u <(cat src/cpp/*) <(clang-format -style=file src/cpp/*)'",
