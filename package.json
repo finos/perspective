@@ -56,7 +56,7 @@
         "lint:eslint": "eslint packages/*/src/**/*.js packages/*/test/**/*.js examples/*/*.js",
         "lint:clang:cpp": "bash -c 'diff -u <(cat src/cpp/*) <(clang-format -style=file src/cpp/*)'",
         "lint:clang:include": "bash -c 'diff -u <(cat src/include/perspective/*) <(clang-format -style=file src/include/perspective/*)'",
-        "lint:python": "node scripts/lint_python.js",
+        "lint_python": "node scripts/lint_python.js",
         "fix:es": "npm run lint:eslint -- --fix",
         "fix:clang": "clang-format -i -style=file src/cpp/*.cpp && clang-format -i -style=file src/include/perspective/*.h",
         "fix:less": "prettier --tab-width 4 --write packages/**/src/less/*.less",
