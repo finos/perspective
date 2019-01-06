@@ -24,7 +24,7 @@ function docker(image = "emsdk") {
 try {
     let cmd = "cd python && python3 -m flake8 perspectivev && echo OK";
     if (process.env.PSP_DOCKER) {
-        execute(docker("python") + " " + cmd);
+        execute(docker("python") + " bash -c \"" + cmd + '\"');
     } else {
         execute(cmd);
     }
