@@ -9,12 +9,14 @@
 
 const node_perspective = require("../../build/perspective.node.js");
 
-require("../../build/perspective.asmjs.worker.js");
-
 const RUNTIMES = {
-    ASMJS: window.perspective,
     NODE: node_perspective
 };
+
+if (!process.env.PSP_DEBUG && window.perspective) {
+    require("../../build/perspective.asmjs.worker.js");
+    RUNTIMES.ASMJS = window.perspective;
+}
 
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");

@@ -50,12 +50,16 @@ exports.pitch = function pitch(request) {
 
     this.cacheable(false);
 
-    const cb = this.async();
-
     const filename = loaderUtils.interpolateName(this, options.name || "[hash].worker.js", {
         context: options.context || this.rootContext || this.options.context,
         regExp: options.regExp
     });
+
+    if (process.env.PSP_DEBUG && filename.indexOf("asmjs") > -1) {
+        return;
+    }
+
+    const cb = this.async();
 
     const worker = {};
 

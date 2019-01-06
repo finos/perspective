@@ -33,6 +33,9 @@ const schema = {
 };
 
 exports.default = function loader(content) {
+    if (process.env.PSP_DEBUG && content && content.indexOf("asmjs") > -1) {
+        return "module.exports = function() {};";
+    }
     const options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "File Worker Loader");
     const context = options.context || this.rootContext || (this.options && this.options.context);
