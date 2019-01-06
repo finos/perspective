@@ -124,3 +124,4 @@ website/static/css/material.dark.css
 obj
 packages/perspective/es5
 cppbuild
+.coverage
