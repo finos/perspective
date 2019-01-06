@@ -476,6 +476,9 @@ module.exports = perspective => {
             table.delete();
         });
 
+        // This currently won't work, and I'm unclear we want it to - upgrading
+        // ths column in place is easy, but once the gnode and potentially
+        // contexts have been created, this becomes much more difficult.
         it.skip("Upgrades integer columns with values beyond max/min_int to float", async function() {
             const schema = {
                 a: "integer"
@@ -496,7 +499,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it.skip("Does not infer float column as integers", async function() {
+        it("Does not infer float column as integers", async function() {
             const int_to_float = [];
             for (let x = 0; x < 200; x++) {
                 int_to_float.push({a: 1});
@@ -509,6 +512,7 @@ module.exports = perspective => {
             let view = table.view();
             var data = await view.to_json();
             expect(data).toEqual(int_to_float);
+
             view.delete();
             table.delete();
         });
