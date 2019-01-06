@@ -397,7 +397,7 @@ col_to_js_typed_array(T ctx, t_index idx) {
 }
 
 void
-_fill_col_numeric(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
     bool is_arrow) {
     t_uindex nrows = col->size();
 

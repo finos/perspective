@@ -113,8 +113,8 @@ t_schema::add_column(const std::string& colname, t_dtype dtype) {
 }
 
 void
-t_schema::retype_column(const t_str& colname, t_dtype dtype) {
-    if(colname == t_str("psp_pkey") || colname == t_str("psp_op")) {
+t_schema::retype_column(const std::string& colname, t_dtype dtype) {
+    if(colname == std::string("psp_pkey") || colname == std::string("psp_op")) {
         PSP_COMPLAIN_AND_ABORT("Cannot retype primary key or operation columns.");
     }
     if (!has_column(colname)) {
@@ -122,7 +122,6 @@ t_schema::retype_column(const t_str& colname, t_dtype dtype) {
     }
     
     t_uindex idx = get_colidx(colname);
-    std::cout << "retype " + colname + " with idx " + std::to_string(idx) << std::endl;
     m_columns[idx] = colname;
     m_types[idx] = dtype;
     m_colidx_map[colname] = idx;

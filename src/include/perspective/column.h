@@ -128,7 +128,7 @@ public:
 
     const char* unintern_c(t_uindex idx) const;
 
-    t_str str() const;
+    std::string str() const;
 
     // Internal apis
 

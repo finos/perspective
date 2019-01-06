@@ -539,7 +539,7 @@ t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled)
 }
 
 t_column*
-t_table::promote_column(const t_str& name, t_dtype new_dtype, t_int32 iter_limit) {
+t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t iter_limit) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -549,8 +549,7 @@ t_table::promote_column(const t_str& name, t_dtype new_dtype, t_int32 iter_limit
     }
 
     t_uindex idx = m_schema.get_colidx(name);
-    t_col_sptr current_col = m_columns[idx];
-    std::cout << "current: " + current_col->str() << std::endl;
+    std::shared_ptr<t_column> current_col = m_columns[idx];
 
     if (new_dtype != DTYPE_FLOAT64 || current_col->get_dtype() != DTYPE_INT32) {
         std::cout << "Promotion only works for int to float." << std::endl;
@@ -558,26 +557,22 @@ t_table::promote_column(const t_str& name, t_dtype new_dtype, t_int32 iter_limit
     }
     
     // create the new column and copy data
-    t_col_sptr promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
+    std::shared_ptr<t_column> promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
     promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
 
     std::cout << "promoted: " + promoted_col->str() << std::endl;
 
     for (auto i = 0; i < iter_limit; i++) {
-        t_int32* val = current_col->get_nth<t_int32>(i);
-        t_float64 fval = static_cast<t_float64>(*val);
-        std::cout << "idx: " + std::to_string(i) + ", val: " + std::to_string(*val) + ", fval: " + std::to_string(fval) << std::endl;
+        std::int32_t* val = current_col->get_nth<std::int32_t>(i);
+        double fval = static_cast<double>(*val);
         promoted_col->set_nth(i, fval);
-        std::cout << "get from promoted: " + std::to_string(*(promoted_col->get_nth<t_float64>(i))) + " at index " + std::to_string(i) << std::endl;
     }
 
     // finally, mutate schema and columns
     set_column(idx, promoted_col);
     m_schema.retype_column(name, new_dtype);
 
-    std::cout << "after retype: " + m_columns[idx]->str() << std::endl;
-    std::cout << "curr: " + std::to_string(current_col.use_count()) + ", prom: " + std::to_string(m_columns[idx].use_count()) << std::endl;
     return promoted_col.get();
 }
 

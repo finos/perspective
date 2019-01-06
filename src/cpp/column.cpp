@@ -911,7 +911,7 @@ t_column::unintern_c(t_uindex idx) const {
     return m_vocab->unintern_c(idx);
 }
 
-t_str
+std::string
 t_column::str() const {
     std::stringstream ss;
     ss << this;
