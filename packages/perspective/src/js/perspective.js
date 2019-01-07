@@ -856,11 +856,6 @@ export default function(Module) {
         return computed_schema;
     };
 
-    table.prototype._valid_filter = function(filter, isDateFilter) {
-        const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
-        return typeof value !== "undefined" && value !== null;
-    };
-
     /**
      * The computed schema of this {@link table}. Returns a schema of only computed
      * columns added by the user, the keys of which are computed columns and the values an
@@ -872,6 +867,17 @@ export default function(Module) {
      */
     table.prototype.computed_schema = async function() {
         return this._computed_schema();
+    };
+
+    table.prototype._is_date_filter = function(schema) {
+        return key => schema[key] === "datetime" || schema[key] === "date";
+    };
+
+    table.prototype._valid_filter = function(filter) {
+        const schema = this._schema();
+        const isDateFilter = this._is_date_filter(schema);
+        const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
+        return typeof value !== "undefined" && value !== null;
     };
 
     /**
@@ -976,11 +982,11 @@ export default function(Module) {
 
         if (config.filter) {
             let schema = this._schema();
-            let isDateFilter = key => schema[key] === "datetime" || schema[key] === "date";
+            let isDateFilter = this._is_date_filter(schema);
             let validFilter = this._valid_filter;
             filters = config.filter
                 .filter(filter => {
-                    return validFilter(filter, isDateFilter);
+                    return validFilter(filter);
                 })
                 .map(filter => {
                     if (isDateFilter(filter[0])) {
