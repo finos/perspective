@@ -20,6 +20,7 @@
 #include <csignal>
 #include <iostream>
 #include <cstring>
+#include <cstdint>
 #include <memory>
 #include <functional>
 #include <algorithm>
@@ -60,6 +61,10 @@ const t_index INVALID_INDEX = -1;
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
+
+void psp_log(const char* file, std::uint64_t line_no, const char* msg);
+void psp_abort();
+
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
 #ifdef PSP_DEBUG
@@ -237,6 +242,11 @@ enum t_value_transition {
     VALUE_TRANSITION_NVEQ_FT
 };
 
+enum t_gnode_type {
+    GNODE_TYPE_PKEYED,         // Explicit user set pkey
+    GNODE_TYPE_IMPLICIT_PKEYED // pkey is row based
+};
+
 enum t_gnode_port {
     PSP_PORT_FLATTENED,   // same schema as iport (pkey,op)
     PSP_PORT_DELTA,       // same schema as state
@@ -319,8 +329,10 @@ enum t_fmode { FMODE_SIMPLE_CLAUSES, FMODE_JIT_EXPR };
 
 PERSPECTIVE_EXPORT std::string get_error_str();
 PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
+PERSPECTIVE_EXPORT bool is_floating_point(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);
@@ -379,6 +391,57 @@ psp_to_str(const DATA_T& s) {
     return ss.str();
 }
 
+template <typename T>
+t_dtype
+type_to_dtype() {
+    return DTYPE_NONE;
+}
+
+template <>
+t_dtype type_to_dtype<std::int64_t>();
+
+template <>
+t_dtype type_to_dtype<std::int32_t>();
+
+template <>
+t_dtype type_to_dtype<std::int16_t>();
+
+template <>
+t_dtype type_to_dtype<std::int8_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint64_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint32_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint16_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint8_t>();
+
+template <>
+t_dtype type_to_dtype<double>();
+
+template <>
+t_dtype type_to_dtype<float>();
+
+template <>
+t_dtype type_to_dtype<bool>();
+
+class t_date;
+class t_time;
+
+template <>
+t_dtype type_to_dtype<t_time>();
+
+template <>
+t_dtype type_to_dtype<t_date>();
+
+template <>
+t_dtype type_to_dtype<std::string>();
+
 } // end namespace perspective
 
 namespace std {
@@ -394,5 +457,7 @@ struct hash<std::pair<perspective::t_uindex, perspective::t_uindex>> {
         return h1 ^ (h2 << 1);
     }
 };
+
+void string_to_lower(string& str);
 
 } // end namespace std

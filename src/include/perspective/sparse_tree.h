@@ -276,6 +276,13 @@ public:
 
     std::vector<t_uindex> get_descendents(t_uindex nidx) const;
 
+    t_uindex get_num_leaves(t_uindex depth) const;
+    std::vector<t_index> get_indices_for_depth(t_uindex depth) const;
+
+    t_bfs_iter<t_stree> bfs() const;
+    t_dfs_iter<t_stree> dfs() const;
+    void pprint() const;
+
 protected:
     void mark_zero_desc();
     t_uindex get_num_aggcols() const;

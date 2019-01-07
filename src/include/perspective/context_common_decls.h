@@ -71,6 +71,8 @@ void pprint() const;
 
 t_dtype get_column_dtype(t_uindex idx) const;
 
+std::shared_ptr<t_table> get_table() const;
+
 // Unity api
 std::vector<t_tscalar> unity_get_row_data(t_uindex idx) const;
 std::vector<t_tscalar> unity_get_column_data(t_uindex idx) const;

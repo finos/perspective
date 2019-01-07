@@ -98,4 +98,51 @@ struct t_table_static_ctx {
     }
 };
 
+template <typename T>
+struct t_accumulation_type {
+    using type = T;
+};
+
+template <>
+struct t_accumulation_type<std::int32_t> {
+    using type = std::int64_t;
+};
+
+template <>
+struct t_accumulation_type<std::int16_t> {
+    using type = std::int64_t;
+};
+
+template <>
+struct t_accumulation_type<std::int8_t> {
+    using type = std::int64_t;
+};
+
+template <>
+struct t_accumulation_type<std::uint64_t> {
+    using type = std::int64_t;
+};
+template <>
+struct t_accumulation_type<std::uint32_t> {
+    using type = std::int64_t;
+};
+template <>
+struct t_accumulation_type<std::uint16_t> {
+    using type = std::int64_t;
+};
+template <>
+struct t_accumulation_type<std::uint8_t> {
+    using type = std::int64_t;
+};
+
+template <>
+struct t_accumulation_type<float> {
+    using type = double;
+};
+
+template <>
+struct t_accumulation_type<bool> {
+    using type = std::int64_t;
+};
+
 } // end namespace perspective

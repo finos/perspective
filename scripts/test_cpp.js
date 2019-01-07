@@ -26,7 +26,7 @@ try {
     if (process.env.PSP_DOCKER) {
         execute(docker("cpp") + " ./test/psp_test");
     } else {
-        execute("./test/psp_test");
+        execute("./cppbuild/test/psp_test");
     }
 } catch (e) {
     process.exit(1);
