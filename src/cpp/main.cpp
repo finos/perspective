@@ -968,9 +968,19 @@ infer_type(val x, val date_validator) {
     std::string jstype = x.typeOf().as<std::string>();
     t_dtype t = t_dtype::DTYPE_STR;
 
+    // Unwrap numbers inside strings
+    val x_number = val::global("Number").call<val>("call", val::object(), x);
+    bool number_in_string = (jstype == "string") 
+                            && (x["length"].as<std::int32_t>() != 0) 
+                            && (!val::global("isNaN")
+                                .call<bool>("call", val::object(), x_number));
+
     if (x.isNull()) {
         t = t_dtype::DTYPE_NONE;
-    } else if (jstype == "number") {
+    } else if (jstype == "number" || number_in_string) {
+        if (number_in_string) {
+            x = x_number;
+        }
         double x_float64 = x.as<double>();
         if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0) && (x_float64 != 0.0)) {
             t = t_dtype::DTYPE_INT32;
@@ -1001,10 +1011,6 @@ infer_type(val x, val date_validator) {
                 t = t_dtype::DTYPE_STR;
             }
         }
-    } else if (!val::global("isNaN").call<bool>("call", val::object(),
-                   val::global("Number").call<val>("call", val::object(), x))) {
-        PSP_COMPLAIN_AND_ABORT("BADLANDS");
-        t = t_dtype::DTYPE_FLOAT64;
     }
 
     return t;
