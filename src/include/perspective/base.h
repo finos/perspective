@@ -333,6 +333,7 @@ PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_floating_point(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_neq_transition(t_value_transition t);
@@ -459,5 +460,7 @@ struct hash<std::pair<perspective::t_uindex, perspective::t_uindex>> {
         return h1 ^ (h2 << 1);
     }
 };
+
+void string_to_lower(string& str);
 
 } // end namespace std

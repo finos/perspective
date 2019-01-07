@@ -411,20 +411,20 @@ TEST(SCALAR, scalar_repr)
         mktscalar<t_time>(t_time(0)).repr(), "time:v:1970-01-01 00:00:00.000");
     EXPECT_EQ(mktscalar<const char*>("").repr(), "str:v:");
 
-    EXPECT_EQ(mknull(DTYPE_NONE).repr(), "none:i:0");
-    EXPECT_EQ(mknull(DTYPE_INT64).repr(), "i64:i:0");
-    EXPECT_EQ(mknull(DTYPE_INT32).repr(), "i32:i:0");
-    EXPECT_EQ(mknull(DTYPE_INT16).repr(), "i16:i:0");
-    EXPECT_EQ(mknull(DTYPE_INT8).repr(), "i8:i:0");
-    EXPECT_EQ(mknull(DTYPE_UINT64).repr(), "u64:i:0");
-    EXPECT_EQ(mknull(DTYPE_UINT32).repr(), "u32:i:0");
-    EXPECT_EQ(mknull(DTYPE_UINT16).repr(), "u16:i:0");
-    EXPECT_EQ(mknull(DTYPE_UINT8).repr(), "u8:i:0");
-    EXPECT_EQ(mknull(DTYPE_FLOAT64).repr(), "f64:i:0");
-    EXPECT_EQ(mknull(DTYPE_FLOAT32).repr(), "f32:i:0");
-    EXPECT_EQ(mknull(DTYPE_DATE).repr(), "date:i:0");
-    EXPECT_EQ(mknull(DTYPE_TIME).repr(), "time:i:0");
-    EXPECT_EQ(mknull(DTYPE_STR).repr(), "str:i:0");
+    EXPECT_EQ(mknull(DTYPE_NONE).repr(), "none:i:null");
+    EXPECT_EQ(mknull(DTYPE_INT64).repr(), "i64:i:null");
+    EXPECT_EQ(mknull(DTYPE_INT32).repr(), "i32:i:null");
+    EXPECT_EQ(mknull(DTYPE_INT16).repr(), "i16:i:null");
+    EXPECT_EQ(mknull(DTYPE_INT8).repr(), "i8:i:null");
+    EXPECT_EQ(mknull(DTYPE_UINT64).repr(), "u64:i:null");
+    EXPECT_EQ(mknull(DTYPE_UINT32).repr(), "u32:i:null");
+    EXPECT_EQ(mknull(DTYPE_UINT16).repr(), "u16:i:null");
+    EXPECT_EQ(mknull(DTYPE_UINT8).repr(), "u8:i:null");
+    EXPECT_EQ(mknull(DTYPE_FLOAT64).repr(), "f64:i:null");
+    EXPECT_EQ(mknull(DTYPE_FLOAT32).repr(), "f32:i:null");
+    EXPECT_EQ(mknull(DTYPE_DATE).repr(), "date:i:null");
+    EXPECT_EQ(mknull(DTYPE_TIME).repr(), "time:i:null");
+    EXPECT_EQ(mknull(DTYPE_STR).repr(), "str:i:null");
 }
 
 TEST(SCALAR, scalar_str)
