@@ -1137,6 +1137,28 @@ mknone() {
     return rval;
 }
 
+t_tscalar
+mknull(t_dtype dtype)
+{
+    t_tscalar rval;
+    rval.m_data.m_uint64 = 0;
+    rval.m_status = STATUS_INVALID;
+    rval.m_type = dtype;
+    if (dtype == DTYPE_STR)
+    {
+        rval.m_inplace = true;
+    }
+    return rval;
+}
+
+t_tscalar
+mkclear(t_dtype dtype)
+{
+    t_tscalar rval = mknull(dtype);
+    rval.m_status = STATUS_CLEAR;
+    return rval;
+}
+
 template <>
 t_tscalar
 t_tscalar::coerce_numeric<bool>() const {

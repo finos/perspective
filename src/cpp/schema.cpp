@@ -170,6 +170,35 @@ t_schema::str() const {
     return ss.str();
 }
 
+
+t_schema
+t_schema::drop(const std::set<std::string>& columns) const
+{
+    std::vector<std::string> cols;
+    std::vector<t_dtype> types;
+
+    for (t_uindex idx = 0, loop_end = m_columns.size(); idx < loop_end; ++idx)
+    {
+        if (columns.find(m_columns[idx]) == columns.end())
+        {
+            cols.push_back(m_columns[idx]);
+            types.push_back(m_types[idx]);
+        }
+    }
+    return t_schema(cols, types);
+}
+
+t_schema
+t_schema::operator+(const t_schema& o) const
+{
+    t_schema rv(m_columns, m_types);
+    for (t_uindex idx = 0, loop_end = o.m_columns.size(); idx < loop_end; ++idx)
+    {
+        rv.add_column(o.m_columns[idx], o.m_types[idx]);
+    }
+    return rv;
+}
+
 } // end namespace perspective
 
 namespace std {

@@ -61,20 +61,32 @@ public:
 
     // ctx2
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
-
-    // t_ctx1
-    t_config(
-        const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
+             const std::vector<std::string>& col_pivots,
+             const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+             const std::vector<std::string>& col_pivots,
+             const std::vector<t_aggspec>& aggregates,
+             const t_totals totals, t_filter_op combiner,
+             const std::vector<t_fterm>& fterms);
+
+    // t_ctx1
+    t_config(const std::vector<std::string>& row_pivots,
+             const std::vector<t_aggspec>& aggregates);
+
+    t_config(const std::vector<std::string>& row_pivots,
+             const t_aggspec& agg);
+
+    t_config(const std::vector<std::string>& row_pivots,
+             const std::vector<t_aggspec>& aggregates,
+             t_filter_op combiner,
+             const std::vector<t_fterm>& fterms);
 
     // t_ctx0
-    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+    t_config(const std::vector<std::string>& detail_columns);
+    t_config(const std::vector<std::string>& detail_columns,
+             t_filter_op combiner,
+             const std::vector<t_fterm>& fterms);
 
     void setup(const std::vector<std::string>& detail_columns,
         const std::vector<std::string>& sort_pivot,

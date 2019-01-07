@@ -295,4 +295,102 @@ is_internal_colname(const std::string& c) {
     return c.compare(std::string("psp_")) == 0;
 }
 
+template <>
+t_dtype
+type_to_dtype<std::int64_t>()
+{
+    return DTYPE_INT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int32_t>()
+{
+    return DTYPE_INT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int16_t>()
+{
+    return DTYPE_INT16;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int8_t>()
+{
+    return DTYPE_INT8;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint64_t>()
+{
+    return DTYPE_UINT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint32_t>()
+{
+    return DTYPE_UINT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint16_t>()
+{
+    return DTYPE_UINT16;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint8_t>()
+{
+    return DTYPE_UINT8;
+}
+
+template <>
+t_dtype
+type_to_dtype<double>()
+{
+    return DTYPE_FLOAT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<float>()
+{
+    return DTYPE_FLOAT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<bool>()
+{
+    return DTYPE_BOOL;
+}
+
+template <>
+t_dtype
+type_to_dtype<t_time>()
+{
+    return DTYPE_TIME;
+}
+
+template <>
+t_dtype
+type_to_dtype<t_date>()
+{
+    return DTYPE_DATE;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::string>()
+{
+    return DTYPE_STR;
+}
+
 } // end namespace perspective

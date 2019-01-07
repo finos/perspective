@@ -74,6 +74,54 @@ t_gnode::t_gnode(const t_gnode_recipe& recipe)
     }
 }
 
+t_gnode::t_gnode(const t_gnode_options& options)
+    : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
+    , m_gnode_type(options.m_gnode_type)
+    , m_tblschema(options.m_port_schema.drop({"psp_op", "psp_pkey"}))
+    , m_init(false)
+    , m_id(0)
+    , m_pool_cleanup([]() {})
+{
+    PSP_TRACE_SENTINEL();
+    LOG_CONSTRUCTOR("t_gnode");
+
+    std::vector<t_dtype> trans_types(m_tblschema.size());
+    for (t_uindex idx = 0; idx < trans_types.size(); ++idx)
+    {
+        trans_types[idx] = DTYPE_UINT8;
+    }
+
+    t_schema port_schema(options.m_port_schema);
+    if (m_gnode_type == GNODE_TYPE_IMPLICIT_PKEYED) {
+
+        // Make sure that gnode type is consistent with input schema
+        if (port_schema.is_pkey()) {
+            PSP_COMPLAIN_AND_ABORT("gnode type specified as implicit pkey, however input schema has psp_pkey column.");
+        }
+        port_schema = t_schema{{"psp_op", "psp_pkey"}, {DTYPE_UINT8, DTYPE_INT64}} + port_schema;
+    } else {
+        if (!(port_schema.is_pkey())) {
+            PSP_COMPLAIN_AND_ABORT("gnode type specified as explicit pkey, however input schema is missing required columns.");
+        }
+    }
+
+    t_schema trans_schema(m_tblschema.columns(), trans_types);
+    t_schema existed_schema(
+        std::vector<std::string>{"psp_existed"}, std::vector<t_dtype>{DTYPE_BOOL});
+
+    m_ischemas = std::vector<t_schema>{port_schema};
+    m_oschemas = std::vector<t_schema>{port_schema, m_tblschema, m_tblschema, m_tblschema, trans_schema, existed_schema};
+    m_epoch = std::chrono::high_resolution_clock::now();
+}
+
+std::shared_ptr<t_gnode>
+t_gnode::build(const t_gnode_options& options)
+{
+    auto rv = std::make_shared<t_gnode>(options);
+    rv->init();
+    return rv;
+}
+
 t_gnode::t_gnode(const t_schema& tblschema, const t_schema& portschema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
     , m_tblschema(tblschema)

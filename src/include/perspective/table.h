@@ -63,6 +63,9 @@ public:
     PSP_NON_COPYABLE(t_table);
     t_table(const t_table_recipe& recipe);
     t_table(const t_schema& s, t_uindex capacity = DEFAULT_EMPTY_CAPACITY);
+    // Only use in tests, it inits the table unlike other constructors
+    t_table(const t_schema& s, const std::vector<std::vector<t_tscalar> >& v);
+
     t_table(const std::string& name, const std::string& dirname, const t_schema& s,
         t_uindex init_cap, t_backing_store backing_store);
     ~t_table();
@@ -109,6 +112,7 @@ public:
     t_mask filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fops) const;
     t_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_table> clone(const t_mask& mask) const;
+    std::shared_ptr<t_table> clone() const;
 
     t_column* clone_column(const std::string& existing_col, const std::string& new_colname);
 

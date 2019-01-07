@@ -237,6 +237,12 @@ enum t_value_transition {
     VALUE_TRANSITION_NVEQ_FT
 };
 
+enum t_gnode_type
+{
+    GNODE_TYPE_PKEYED,     // Explicit user set pkey
+    GNODE_TYPE_IMPLICIT_PKEYED  // pkey is row based
+};
+
 enum t_gnode_port {
     PSP_PORT_FLATTENED,   // same schema as iport (pkey,op)
     PSP_PORT_DELTA,       // same schema as state
@@ -378,6 +384,59 @@ psp_to_str(const DATA_T& s) {
     ss << s;
     return ss.str();
 }
+
+template <typename T>
+t_dtype
+type_to_dtype()
+{
+    return DTYPE_NONE;
+}
+
+template <>
+t_dtype type_to_dtype<std::int64_t>();
+
+template <>
+t_dtype type_to_dtype<std::int32_t>();
+
+template <>
+t_dtype type_to_dtype<std::int16_t>();
+
+template <>
+t_dtype type_to_dtype<std::int8_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint64_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint32_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint16_t>();
+
+template <>
+t_dtype type_to_dtype<std::uint8_t>();
+
+template <>
+t_dtype type_to_dtype<double>();
+
+template <>
+t_dtype type_to_dtype<float>();
+
+template <>
+t_dtype type_to_dtype<bool>();
+
+class t_date;
+class t_time;
+
+template <>
+t_dtype type_to_dtype<t_time>();
+
+template <>
+t_dtype type_to_dtype<t_date>();
+
+template <>
+t_dtype type_to_dtype<std::string>();
+
 
 } // end namespace perspective
 
