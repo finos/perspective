@@ -307,7 +307,7 @@ else()
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
 		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			set(CMAKE_SHARED_LIBRARY_SUFFIX dylib)
+			set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
 		endif()
 	endif()
 
