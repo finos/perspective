@@ -20,6 +20,7 @@
 #include <csignal>
 #include <iostream>
 #include <cstring>
+#include <cstdint>
 #include <memory>
 #include <functional>
 #include <algorithm>
@@ -60,6 +61,10 @@ const t_index INVALID_INDEX = -1;
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
+
+void psp_log(const char* file, std::uint64_t line_no, const char* msg);
+void psp_abort();
+
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
 #ifdef PSP_DEBUG
@@ -325,6 +330,7 @@ enum t_fmode { FMODE_SIMPLE_CLAUSES, FMODE_JIT_EXPR };
 
 PERSPECTIVE_EXPORT std::string get_error_str();
 PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
+PERSPECTIVE_EXPORT bool is_floating_point(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);

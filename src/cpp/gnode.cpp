@@ -225,6 +225,13 @@ t_gnode::_send(t_uindex portid, const t_table& fragments) {
     iport->send(fragments);
 }
 
+void
+t_gnode::_send_and_process(const t_table& fragments)
+{
+_send(0, fragments);
+_process();
+}
+
 t_value_transition
 t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, bool prev_valid,
     bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq) {
@@ -1281,5 +1288,39 @@ void
 t_gnode::clear_updated() {
     m_was_updated = false;
 }
+
+std::shared_ptr<t_table>
+t_gnode::get_sorted_pkeyed_table() const
+{
+    return m_state->get_sorted_pkeyed_table();
+}
+
+void
+t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx)
+{
+    _register_context(
+        name, ZERO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+
+void
+t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx)
+{
+    _register_context(
+        name, ONE_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+
+void
+t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx)
+{
+    _register_context(
+        name, TWO_SIDED_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+void
+t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx)
+{
+    _register_context(
+        name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+
 
 } // end namespace perspective

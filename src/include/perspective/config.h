@@ -42,22 +42,32 @@ class PERSPECTIVE_EXPORT t_config {
 public:
     t_config();
     t_config(const t_config_recipe& r);
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
-        const std::vector<t_aggspec>& aggregates,
-        const std::vector<std::string>& detail_columns, const t_totals totals,
-        const std::vector<std::string>& sort_pivot,
-        const std::vector<std::string>& sort_pivot_by, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, bool handle_nan_sort,
-        const std::string& parent_pkey_column, const std::string& child_pkey_column,
-        const std::string& grouping_label_column, t_fmode fmode,
-        const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str);
+    t_config(const std::vector<t_pivot>& row_pivots,
+             const std::vector<t_aggspec>& aggregates);
+    t_config(const std::vector<t_pivot>& row_pivots,
+             const std::vector<t_pivot>& col_pivots,
+             const std::vector<t_aggspec>& aggregates,
+             const std::vector<std::string>& detail_columns,
+             const t_totals totals,
+             const std::vector<std::string>& sort_pivot,
+             const std::vector<std::string>& sort_pivot_by,
+             t_filter_op combiner,
+             const std::vector<t_fterm>& fterms,
+             bool handle_nan_sort,
+             const std::string& parent_pkey_column,
+             const std::string& child_pkey_column,
+             const std::string& grouping_label_column,
+             t_fmode fmode,
+             const std::vector<std::string>& filter_exprs,const std::string& grand_agg_str);
 
     // grouped_pkeys
     t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, const std::string& parent_pkey_column,
-        const std::string& child_pkey_column, const std::string& grouping_label_column);
+             const std::vector<std::string>& detail_columns,
+             t_filter_op combiner,
+             const std::vector<t_fterm>& fterms,
+             const std::string& parent_pkey_column,
+             const std::string& child_pkey_column,
+             const std::string& grouping_label_column);
 
     // ctx2
     t_config(const std::vector<std::string>& row_pivots,

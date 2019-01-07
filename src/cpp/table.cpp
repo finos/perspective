@@ -684,4 +684,36 @@ t_table::reset() {
     init();
 }
 
+std::vector<t_tscalar>
+t_table::get_scalvec() const
+{
+    auto nrows = size();
+    auto cols = get_const_columns();
+    auto ncols = cols.size();
+    std::vector<t_tscalar> rv;
+    for (t_uindex idx = 0; idx < nrows; ++idx)
+        {
+    for (t_uindex cidx = 0; cidx < ncols; ++cidx)
+            {
+                rv.push_back(cols[cidx]->get_scalar(idx));
+            }
+        }
+    return rv;
+}
+
+std::shared_ptr<t_column> t_table::operator[](const std::string& name)
+{
+    if (!m_schema.has_column(name))
+    {
+        return std::shared_ptr<t_column>(nullptr);
+    }
+    return m_columns[m_schema.get_colidx(name)];
+}
+
+bool
+operator==(const t_table& lhs, const t_table& rhs)
+{
+    return lhs.get_scalvec() == rhs.get_scalvec();
+}
+
 } // end namespace perspective

@@ -61,6 +61,9 @@ public:
 
     std::shared_ptr<t_table> get_pkeyed_table() const;
 
+    // Only for tests
+    std::shared_ptr<t_table> get_sorted_pkeyed_table() const;
+
     t_table* _get_pkeyed_table() const;
     t_table* _get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const;
     t_table* _get_pkeyed_table(

@@ -132,6 +132,10 @@ public:
     void verify() const;
     void set_capacity(t_uindex idx);
 
+    std::vector<t_tscalar> get_scalvec() const;
+    std::shared_ptr<t_column> operator[](const std::string& name);
+
+
 protected:
     template <typename FLATTENED_T>
     void flatten_body(FLATTENED_T flattened) const;
@@ -156,6 +160,8 @@ private:
     t_table_recipe m_recipe;
     bool m_from_recipe;
 };
+
+bool operator==(const t_table& lhs, const t_table& rhs);
 
 template <typename FLATTENED_T>
 void

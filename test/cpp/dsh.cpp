@@ -13,6 +13,7 @@
 #include <perspective/date.h>
 #include <perspective/time.h>
 #include <perspective/test_utils.h>
+#include <perspective/context_base.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
 #include <perspective/context_zero.h>
@@ -228,7 +229,7 @@ TEST(CONTEXT_ONE, null_pivot_test_1)
         t_do_pivot::PIVOT_NON_PKEYED, tbl, cfg);
     auto ctx_tbl = ctx->get_table();
     auto got = ctx_tbl->get_scalvec();
-    t_tscalvec expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
+    std::vector<t_tscalar> expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
     ASSERT_EQ(expected, got);
 }
 
@@ -261,7 +262,7 @@ TEST(CONTEXT_ONE, pivot_1)
         t_do_pivot::PIVOT_NON_PKEYED, tbl, cfg);
     auto ctx_tbl = ctx->get_table();
     auto got = ctx_tbl->get_scalvec();
-    t_tscalvec expected{10_ts, bnull, snull, 4_ts, s_true, snull, 3_ts, bnull,
+    std::vector<t_tscalar> expected{10_ts, bnull, snull, 4_ts, s_true, snull, 3_ts, bnull,
         "c"_ts, 1_ts, bnull, "a"_ts, 6_ts, s_false, snull, 4_ts, bnull, "d"_ts,
         2_ts, bnull, "b"_ts};
     // ASSERT_EQ(expected, got);
@@ -280,7 +281,7 @@ TEST(CONTEXT_ONE, pivot_2)
         t_do_pivot::PIVOT_NON_PKEYED, tbl, cfg);
     auto ctx_tbl = ctx->get_table();
     // auto got =  ctx_tbl->get_scalvec();
-    // t_tscalvec expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
+    // std::vector<t_tscalar> expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
     // ASSERT_EQ(expected, got);
 }
 
@@ -297,7 +298,7 @@ TEST(CONTEXT_ONE, pivot_3)
         t_do_pivot::PIVOT_NON_PKEYED, tbl, cfg);
     auto ctx_tbl = ctx->get_table();
     // auto got =  ctx_tbl->get_scalvec();
-    // t_tscalvec expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
+    // std::vector<t_tscalar> expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
     // ASSERT_EQ(expected, got);
 }
 
@@ -314,7 +315,7 @@ TEST(CONTEXT_ONE, pivot_4)
         t_do_pivot::PIVOT_NON_PKEYED, tbl, cfg);
     auto ctx_tbl = ctx->get_table();
     // auto got =  ctx_tbl->get_scalvec();
-    // t_tscalvec expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
+    // std::vector<t_tscalar> expected{2_ts, 1_ns, 1_ts, 1_ts, 1_ts, 1_ns};
     // ASSERT_EQ(expected, got);
 }
 
@@ -585,12 +586,12 @@ TEST(SCALAR, contains)
 class BaseTest : public ::testing::Test
 {
 public:
-    using t_tbldata = std::vector<t_tscalvec>;
+    using t_tbldata = std::vector<std::vector<t_tscalar>>;
     using t_stepdata = std::pair<t_tbldata, t_tbldata>;
     using t_testdata = std::vector<t_stepdata>;
 
 protected:
-    virtual t_table_sptr get_step_otable() = 0;
+    virtual std::shared_ptr<t_table> get_step_otable() = 0;
 
     void
     run(const t_testdata& d)
@@ -605,7 +606,7 @@ protected:
         }
     }
 
-    t_gnode_sptr m_g;
+    std::shared_ptr<t_gnode> m_g;
     t_schema m_ischema;
     t_schema m_oschema;
 };
@@ -628,7 +629,7 @@ public:
         clear = mkclear(DTYPE_T);
     }
 
-    virtual t_table_sptr
+    virtual std::shared_ptr<t_table>
     get_step_otable()
     {
         return m_g->get_sorted_pkeyed_table();
@@ -653,7 +654,7 @@ public:
         m_g = t_gnode::build(options);
     }
 
-    virtual t_table_sptr
+    virtual std::shared_ptr<t_table>
     get_step_otable()
     {
         return m_g->get_sorted_pkeyed_table();
@@ -839,8 +840,8 @@ class CtxTest : public ::testing::Test
 {
 
 public:
-    using t_tbldata = std::vector<t_tscalvec>;
-    using t_stepdata = std::pair<t_tbldata, t_tscalvec>;
+    using t_tbldata = std::vector<std::vector<t_tscalar>>;
+    using t_stepdata = std::pair<t_tbldata, std::vector<t_tscalar>>;
     using t_testdata = std::vector<t_stepdata>;
     CtxTest()
     {
@@ -853,7 +854,7 @@ public:
         this->m_g->register_context("ctx", m_ctx);
     }
 
-    t_tscalvec
+    std::vector<t_tscalar>
     get_data()
     {
         return m_ctx->get_table();
@@ -873,7 +874,7 @@ public:
 protected:
     std::shared_ptr<CTX_T> m_ctx;
     t_schema m_ischema;
-    t_gnode_sptr m_g;
+    std::shared_ptr<t_gnode> m_g;
 };
 
 template <typename T>
@@ -2361,7 +2362,7 @@ TEST(GNODE_TEST, get_registered_contexts)
     gn->register_context("ctx1", ctx1);
     gn->register_context("ctx2", ctx2);
 
-    auto step = [&gn, &sch](const std::vector<t_tscalvec>& data) {
+    auto step = [&gn, &sch](const std::vector<std::vector<t_tscalar>>& data) {
         t_table tbl(sch, data);
         gn->_send_and_process(tbl);
     };
@@ -2381,7 +2382,7 @@ TEST(GNODE_TEST, get_registered_contexts)
 
     auto pkeys = gn->get_pkeys();
     std::sort(pkeys.begin(), pkeys.end());
-    t_tscalvec expected_pkeys{1_ts, 2_ts};
+    std::vector<t_tscalar> expected_pkeys{1_ts, 2_ts};
     EXPECT_EQ(pkeys, expected_pkeys);
 
     EXPECT_EQ(gn->get_table()->size(), 2);
@@ -2396,14 +2397,14 @@ TEST(GNODE_TEST, get_registered_contexts)
     auto ctx2_delta = ctx2->get_step_delta(0, ctx2->get_row_count());
 
     auto ctx0_pkeys = ctx0->get_pkeys({{0, 0}});
-    t_tscalvec expected_ctx0_pkeys{1_ts};
+    std::vector<t_tscalar> expected_ctx0_pkeys{1_ts};
     EXPECT_EQ(ctx0_pkeys, expected_ctx0_pkeys);
 
-    ctx0->sort_by(t_sortsvec{{0, SORTTYPE_DESCENDING}});
-    EXPECT_EQ(ctx0->get_cell_data({{0, 0}}), t_tscalvec{"b"_ts});
+    ctx0->sort_by(std::vector<t_sortspec>{{0, SORTTYPE_DESCENDING}});
+    EXPECT_EQ(ctx0->get_cell_data({{0, 0}}), std::vector<t_tscalar>{"b"_ts});
 
     auto trees = gn->get_trees();
-    t_table_sptr pkeyed_table(gn->_get_pkeyed_table());
+    std::shared_ptr<t_table> pkeyed_table(gn->_get_pkeyed_table());
     EXPECT_EQ(gn->get_custom_columns().size(), 0);
     gn->_unregister_context("ctx0");
     gn->_unregister_context("ctx1");

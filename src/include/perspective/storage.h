@@ -198,6 +198,18 @@ public:
 
     std::shared_ptr<t_lstore> clone() const;
 
+    bool
+    get_init() const
+    {
+        return m_init;
+    }
+
+    bool
+    empty() const
+    {
+        return size() == 0;
+    }
+
 #ifdef PSP_ENABLE_PYTHON
     /* Python bits */
     np::ndarray _as_numpy(t_dtype dtype);

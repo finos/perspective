@@ -66,6 +66,7 @@ public:
     t_dfs_iter<t_dtree> dfs() const;
     t_index get_parent(t_index idx) const;
     const std::vector<t_pivot>& get_pivots() const;
+    void get_child_indices(t_index idx, std::vector<t_index>& out_data) const;
 
 private:
     std::string m_dirname;
