@@ -216,7 +216,6 @@ export class PerspectiveElement extends StateElement {
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
-        const filters = this._get_view_filters();
         const aggregates = this._get_view_aggregates();
         if (aggregates.length === 0) return;
         const sort = this._get_view_sorts();
@@ -227,6 +226,21 @@ export class PerspectiveElement extends StateElement {
                 aggregates.push({column: s, op: "unique"});
             } else {
                 aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+            }
+        }
+
+        const filters = [];
+        const filterNodes = this._get_view_filter_nodes();
+        for (let i = 0; i < filterNodes.length; i++) {
+            const node =  filterNodes[i];
+            const name = node.getAttribute("name");
+            const {operator, operand} = JSON.parse(node.getAttribute("filter"));
+            const filter = [name, operator, operand];
+            if (await this._table.valid_filter(filter)) {
+                filters.push(filter);
+                node.className = "";
+            } else {
+                node.className = "invalid-filter"
             }
         }
 

@@ -880,6 +880,10 @@ export default function(Module) {
         return typeof value !== "undefined" && value !== null;
     };
 
+    table.prototype.valid_filter = function(filter) {
+        return this._valid_filter(filter);
+    };
+
     /**
      * Create a new {@link view} from this table with a specified
      * configuration.

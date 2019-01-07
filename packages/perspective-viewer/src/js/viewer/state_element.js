@@ -63,6 +63,10 @@ export class StateElement extends HTMLElement {
         });
     }
 
+    _get_view_filter_nodes() {
+        return this._get_view_dom_columns("#filters perspective-row");
+    }
+
     _get_view_filters() {
         return this._get_view_dom_columns("#filters perspective-row", col => {
             let {operator, operand} = JSON.parse(col.getAttribute("filter"));
