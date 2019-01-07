@@ -210,7 +210,7 @@ module.exports = perspective => {
                     filter: [["x", ">", 1], ["x", "<", 4]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(1, 3)).toEqual(json);
+                expect(json).toEqual(rdata.slice(1, 3));
                 view.delete();
                 table.delete();
             });
@@ -222,7 +222,7 @@ module.exports = perspective => {
                     filter: [["y", "contains", "a"], ["y", "contains", "b"]]
                 });
                 let json = await view.to_json();
-                expect(rdata.slice(0, 2)).toEqual(json);
+                expect(json).toEqual(rdata.slice(0, 2));
                 view.delete();
                 table.delete();
             });
