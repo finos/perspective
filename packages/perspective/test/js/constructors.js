@@ -36,6 +36,10 @@ var data_7 = {
     z: [true, false, true, false]
 };
 
+var int_in_string = [{a: "1"}, {a: "2"}, {a: "12345"}];
+
+var float_in_string = [{a: "1.5"}, {a: "2.5"}, {a: "12345.56789"}];
+
 var meta_3 = {
     w: "float",
     x: "integer",
@@ -463,6 +467,24 @@ module.exports = perspective => {
             var view = table.view();
             let result = await view.to_json();
             expect(result).toEqual(data_3);
+            view.delete();
+            table.delete();
+        });
+
+        it("Infers ints wrapped in strings", async function() {
+            var table = perspective.table(int_in_string);
+            var view = table.view();
+            let result = await view.schema();
+            expect(result).toEqual({a: "integer"});
+            view.delete();
+            table.delete();
+        });
+
+        it("Infers floats wrapped in strings", async function() {
+            var table = perspective.table(float_in_string);
+            var view = table.view();
+            let result = await view.schema();
+            expect(result).toEqual({a: "float"});
             view.delete();
             table.delete();
         });
