@@ -211,24 +211,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view(ignore_size_check = false) {
-        if (!this._table) return;
-        this._check_responsive_layout();
-        const row_pivots = this._get_view_row_pivots();
-        const column_pivots = this._get_view_column_pivots();
-        const aggregates = this._get_view_aggregates();
-        if (aggregates.length === 0) return;
-        const sort = this._get_view_sorts();
-        const hidden = this._get_view_hidden(aggregates, sort);
-        for (const s of hidden) {
-            const all = this.get_aggregate_attribute();
-            if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
-                aggregates.push({column: s, op: "unique"});
-            } else {
-                aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
-            }
-        }
-
+    async _validate_filters() {
         const filters = [];
         const filterNodes = this._get_view_filter_nodes();
         for (let i = 0; i < filterNodes.length; i++) {
@@ -240,7 +223,29 @@ export class PerspectiveElement extends StateElement {
                 filters.push(filter);
                 node.className = "";
             } else {
-                node.className = "invalid-filter"
+                node.className = "invalid-filter";
+            }
+        }
+
+        return filters;
+    }
+
+    async _new_view(ignore_size_check = false) {
+        if (!this._table) return;
+        this._check_responsive_layout();
+        const row_pivots = this._get_view_row_pivots();
+        const column_pivots = this._get_view_column_pivots();
+        const filters = await this._validate_filters();
+        const aggregates = this._get_view_aggregates();
+        if (aggregates.length === 0) return;
+        const sort = this._get_view_sorts();
+        const hidden = this._get_view_hidden(aggregates, sort);
+        for (const s of hidden) {
+            const all = this.get_aggregate_attribute();
+            if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
+                aggregates.push({column: s, op: "unique"});
+            } else {
+                aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
             }
         }
 
