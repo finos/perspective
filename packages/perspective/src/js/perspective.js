@@ -989,9 +989,7 @@ export default function(Module) {
             let isDateFilter = this._is_date_filter(schema);
             let validFilter = this._valid_filter;
             filters = config.filter
-                .filter(filter => {
-                    return validFilter(filter);
-                })
+                .filter(filter => validFilter(filter))
                 .map(filter => {
                     if (isDateFilter(filter[0])) {
                         return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
