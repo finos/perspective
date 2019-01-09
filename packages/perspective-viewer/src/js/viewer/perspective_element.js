@@ -216,14 +216,18 @@ export class PerspectiveElement extends StateElement {
         const filterNodes = this._get_view_filter_nodes();
         for (let i = 0; i < filterNodes.length; i++) {
             const node =  filterNodes[i];
+            const operandNode = node.shadowRoot.getElementById("filter_operand");
+            const exclamation = node.shadowRoot.getElementById("row_exclamation");
             const name = node.getAttribute("name");
             const {operator, operand} = JSON.parse(node.getAttribute("filter"));
             const filter = [name, operator, operand];
             if (await this._table.valid_filter(filter)) {
                 filters.push(filter);
-                node.className = "";
+                operandNode.style.borderColor = "";
+                exclamation.hidden = true;
             } else {
-                node.className = "invalid-filter";
+                operandNode.style.borderColor = "red";
+                exclamation.hidden = false;
             }
         }
 
