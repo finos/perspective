@@ -223,9 +223,11 @@ export class PerspectiveElement extends StateElement {
             const filter = [name, operator, operand];
             if (await this._table.is_valid_filter(filter)) {
                 filters.push(filter);
+                node.title = "";
                 operandNode.style.borderColor = "";
                 exclamation.hidden = true;
             } else {
+                node.title = "Invalid Filter";
                 operandNode.style.borderColor = "red";
                 exclamation.hidden = false;
             }
