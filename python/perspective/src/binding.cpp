@@ -10,10 +10,6 @@
 #include <perspective/binding.h>
 #include <cstdint>
 
-void test(const char* name) {
-    std::cout << "Hello " <<  name << "!" << std::endl;
-}
-
 perspective::t_schema* t_schema_init(py::list& columns, py::list& types)
 {
     std::vector<std::string> cols;
@@ -30,7 +26,7 @@ perspective::t_schema* t_schema_init(py::list& columns, py::list& types)
     return new perspective::t_schema(cols, ts);
 }
 
-template<typename T>
+template<typename T> 
 void _fill_col(std::vector<T>& dcol, std::shared_ptr<perspective::t_column> col)
 {
     perspective::t_uindex nrows = col->size();
