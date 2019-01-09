@@ -18,21 +18,32 @@ export default class D3FCChart {
   }
 
   render() {
-    let dataset = this._config.series[0].data
-      .map((mainValue, i) => ({
-        mainValue: mainValue,
-        crossValue: this._config.xAxis.categories[i],
-        i: i
-      })
-    );
+
+    let dataset;
+    console.log("config:", this._config);
+    let { series, xAxis } = this._config;
+    if(series.length === 1) {
+      //simple array of data
+      dataset = series[0].data.map(
+        (mainValue, i) => ({
+          mainValue: mainValue,
+          crossValue: xAxis.categories.length > 0 ? xAxis.categories[i] : i
+        })
+      );
+    } else {
+      let arrs = series.map(
+        (series, seriesIndex) => {
+          return series.data.map((mainValue, i) => ({
+            mainValue,
+            crossValue: i,
+            split: series.name
+          }))
+        }
+      );
+      dataset = [].concat.apply([], arrs).filter(a => a.mainValue).sort((x, y) => x.crossValue-y.crossValue);
+    }
 
     console.log("dataset:", dataset);
-
-    // let dataset = [
-    //   { "organisation": "GOOG", "price": 410 },
-    //   { "organisation": "MSFT", "price": 938 },
-    //   { "organisation": "TSLA", "price": 512 }
-    // ];
 
     if (this._mode === "x_bar") {
       renderXBar(this._config, this._container, dataset);
@@ -97,6 +108,8 @@ function renderXBar(config, container, dataset) {
 
 function renderYBar(config, container, dataset) {
   console.log("starting rendering y bar");
+
+  let colours = ["green","blue","orange","red","yellow","purple","brown"];
 
   let chart = fc.chartSvgCartesian(
     d3.scaleBand(), //x axis scales to fit bars equally 
