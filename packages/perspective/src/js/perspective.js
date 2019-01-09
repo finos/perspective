@@ -880,6 +880,13 @@ export default function(Module) {
         return typeof value !== "undefined" && value !== null;
     };
 
+    /**
+     * Determines whether a given filter is valid.
+     *
+     * @param {Array<string>} [filter] A filter configuration array to test
+     *
+     * @returns {boolean} Whether the filter is valid
+     */
     table.prototype.is_valid_filter = function(filter) {
         return this._is_valid_filter(filter);
     };
