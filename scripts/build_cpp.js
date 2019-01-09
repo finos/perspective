@@ -27,8 +27,8 @@ try {
         execute(docker("cpp") + " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
         execute(docker("cpp") + " make -j${PSP_CPU_COUNT-8}");
     } else {
-        execute("cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
-        execute("make -j${PSP_CPU_COUNT-8}");
+        execute("cd cppbuild && cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
+        execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {
     process.exit(1);
