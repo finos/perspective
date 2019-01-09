@@ -877,7 +877,7 @@ export default function(Module) {
         const schema = this._schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
-        return typeof value !== "undefined" && value !== null;
+        return typeof value !== "undefined" && value !== null && value !== "";
     };
 
     /**
