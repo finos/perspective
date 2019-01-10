@@ -294,5 +294,72 @@ module.exports = perspective => {
                 table.delete();
             });
         });
+
+        describe("is_valid_filter", function() {
+            it("x == 2", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "==", 2]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("x < null", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "<", null]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("x > undefined", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", ">", undefined]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it('x == ""', async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "==", ""]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("valid date", async function() {
+                const schema = {
+                    x: "string",
+                    y: "date"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("invalid date", async function() {
+                const schema = {
+                    x: "string",
+                    y: "date"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "<", "1234"]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("valid datetime", async function() {
+                const schema = {
+                    x: "string",
+                    y: "datetime"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("invalid datetime", async function() {
+                const schema = {
+                    x: "string",
+                    y: "datetime"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+        });
     });
 };
