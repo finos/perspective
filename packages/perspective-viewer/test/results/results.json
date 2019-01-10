@@ -30,5 +30,6 @@
     "superstore.html/doesn't leak views when setting filters.": "0516bfcff10dd15dca9c7d2e4923ab10",
     "superstore.html/adds computed column via attribute": "96016d19e8c94accc24f0d613bdbbab1",
     "superstore.html/saving without parameters should fail as button is disabled.": "a26ce038cea02a8e3e53b7e0b74a204d",
-    "superstore.html/saving a duplicate column should fail with error message.": "9d74a59806ad8ec4ab1bcef7c3c94b68"
+    "superstore.html/saving a duplicate column should fail with error message.": "9d74a59806ad8ec4ab1bcef7c3c94b68",
+    "superstore.html/highlights invalid filter.": "3eadf1175e231c1fbcc2bb9ef10ca6ef"
 }
