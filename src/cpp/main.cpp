@@ -944,7 +944,7 @@ column_names(val data, std::int32_t format) {
                               << std::endl;
                 }
 
-                std::cout << "Extending from " << 
+                std::cout << "Extending from "
                           << data_names["length"].as<std::int32_t>()
                           << "to "
                           << next["length"].as<std::int32_t>()
