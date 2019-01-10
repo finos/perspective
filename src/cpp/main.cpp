@@ -22,7 +22,6 @@
 #include <emscripten/val.h>
 #include <perspective/sym_table.h>
 #include <codecvt>
-#include <boost/format.hpp>
 #include <boost/optional.hpp>
 
 using namespace perspective;
@@ -945,9 +944,10 @@ column_names(val data, std::int32_t format) {
                               << std::endl;
                 }
 
-                std::cout << boost::format("Extending from %d to %d")
-                        % data_names["length"].as<std::int32_t>()
-                        % next["length"].as<std::int32_t>()
+                std::cout << "Extending from " << 
+                          << data_names["length"].as<std::int32_t>()
+                          << "to "
+                          << next["length"].as<std::int32_t>()
                           << std::endl;
                 data_names = next;
                 max_check *= 2;
