@@ -63,9 +63,9 @@ export default class D3FCChart {
     console.log("labels:", labels);
 
     if (this._mode === "x_bar") {
-      renderXBar(this._config, this._container, dataset, labels);
+      renderBar(this._config, this._container, dataset, labels, true);
     } else if (this._mode === "y_bar") {
-      renderYBar(this._config, this._container, dataset, labels);
+      renderBar(this._config, this._container, dataset, labels, false);
     } else {
       throw "EXCEPTION: chart type not recognised.";
     }
@@ -78,42 +78,54 @@ export default class D3FCChart {
   calculateCrossValue(labels, xAxis, i) {
     if (labels.crossLabel) {
       return xAxis.categories.length > 0 ? xAxis.categories[i] : i
-    }
-    else {
+    } else {
       return i;
     }
   }
+
 }
 
-function renderXBar(config, container, dataset, labels) {
+function renderBar(config, container, dataset, labels, horizontal) {
   let isSplitBy = labels.splitLabel != null;
   if (isSplitBy) {
-    dataset = stackedXBarChart(config, container, dataset, labels);
+    dataset = stackedBarChart(config, container, dataset, labels, horizontal);
     return;
   }
 
-  let yScale = d3
-    .scaleBand()
-    .domain(dataset.map(x => x.crossValue));
+  let mainScale =
+    d3.scaleLinear()
+      .domain([0, Math.max(...dataset.map(x => x.mainValue))])
 
-  let chart = fc.chartSvgCartesian(
-    d3.scaleLinear(), //y axis scales linearly across values
-    yScale) //x axis scales to fit bars equally 
-    .yPadding(0.5)
-    .xDomain([0, Math.max(...dataset.map(x => x.mainValue))])
-    .yOrient('left') //move the axis to the left;; //from 0 to the maximum value of price
+  let crossScale =
+    d3.scaleBand()
+      .domain(dataset.map(x => x.crossValue))
+      .padding(0.5);
+
+  let mainGrid = (x => x
+    .style("opacity", "0.3")
+    .style("stroke-width", "1.0")
+  );
+
+  let crossGrid = (x => x
+    .style("display", "none")
+  );
+
+  let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
+  let [xGrid, yGrid] = horizontal ? [mainGrid, crossGrid] : [crossGrid, mainGrid];
+  let orientation = horizontal ? "horizontal" : "vertical";
+
+  let gridlines = fc.annotationSvgGridline()
+    .xDecorate(xGrid)
+    .yDecorate(yGrid);
+
+  let chart = fc.chartSvgCartesian(xScale, yScale)
+    .yOrient('left'); //move the axis to the left;
 
   let barSeries = fc.autoBandwidth(fc.seriesSvgBar())
     .align("left")
-    .orient("horizontal")
-    .crossValue(function (d) { return d.crossValue; })
-    .mainValue(function (d) { return d.mainValue; });
-
-  let gridlines = fc.annotationSvgGridline() //Add gridlines
-    .xDecorate(x => x
-      .style("opacity", "0.3")
-      .style("stroke-width", "1.0"))
-    .yDecorate(x => x.style("display", "none"));
+    .orient(orientation)
+    .crossValue(d => d.crossValue)
+    .mainValue(d => d.mainValue);
 
   let multi = fc.seriesSvgMulti()
     .series([gridlines, barSeries]);
@@ -125,71 +137,35 @@ function renderXBar(config, container, dataset, labels) {
   d3.select(container)
     .datum(dataset)
     .call(chart);
-
-  //handleSplitBy(xScale, container, labels); //this should be after the general render to ensure it goes on top?
 }
 
-function renderYBar(config, container, dataset, labels) {
-  let isSplitBy = labels.splitLabel != null;
-  // && config.xAxis.categories.length > 0
-  if (isSplitBy) {
-    stackedBarChart(config, container, dataset, labels);
-    return;
-  }
+function stackedBarChart(config, container, dataset, labels, horizontal) {
+  //Convert data to Stacked Bar Chart Format
+  let keys = config.xAxis.categories.length > 0 ? config.xAxis.categories : [...Array(config.series[0].data.length)].map((_, i) => i)
 
-  let xScale = d3.scaleBand().domain(dataset.map(x => x.crossValue));
+  let stackedBarData = keys.map((group, i) => {
+    let row = { group }
+    config.series.forEach(split => {
+      row[split.name] = split.data[i] || 0;
+    });
+    return row;
+  });
 
-  let chart = fc.chartSvgCartesian(
-    xScale, //x axis scales to fit bars equally 
-    d3.scaleLinear()) //y axis scales linearly across values
-    .xPadding(0.5)
-    .yDomain([0, Math.max(...dataset.map(x => x.mainValue))]) //from 0 to the maximum value of price
-    .yOrient('left') //move the axis to the left;
+  let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
+  let stackedSeries = stack(stackedBarData);
+  let color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
+  let legend = d3Legend.legendColor().shapeWidth(70).orient('vertical').scale(color);
 
-  let barSeries = fc.autoBandwidth(fc.seriesSvgBar())
+  let orientation = horizontal ? "horizontal" : "vertical";
+
+  let stackedBarSeries = fc.autoBandwidth(fc.seriesSvgBar())
     .align("left")
-    .crossValue(function (d) { return d.crossValue; })
-    .mainValue(function (d) { return d.mainValue; });
-
-  let bSeries = isSplitBy ? stackedSeries.map(() => barSeries) : barSeries;
-  let gridlines = fc.annotationSvgGridline() //Add gridlines
-    .yDecorate(x => x
-      .style("opacity", "0.3")
-      .style("stroke-width", "1.0"))
-    .xDecorate(x => x.style("display", "none"));
+    .orient(orientation)
+    .crossValue(d => d.data["group"])
+    .mainValue(d => d[1])
+    .baseValue(d => d[0]);
 
   let multi = fc.seriesSvgMulti()
-    .series([gridlines, barSeries]);
-
-  chart.plotArea(multi);
-  styleDark(chart);
-  handleSplitBy(xScale, container, barSeries, labels);
-  d3.select(container).datum(dataset).call(chart);
-}
-
-function stackedXBarChart(config, container, dataset, labels) {
-  //Convert data to Stacked Bar Chart Format
-  let keys = config.xAxis.categories.length > 0 ? config.xAxis.categories : [...Array(config.series[0].data.length)].map((_, i) => i)
-  let stackedBarData = keys.map((group, i) => {
-    let row = { group }
-    config.series.forEach(split => {
-      row[split.name] = split.data[i] || 0;
-    });
-    return row;
-  });
-  var stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
-  var stackedSeries = stack(stackedBarData);
-  var color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  var legend = d3Legend.legendColor().shapeWidth(70).orient('vertical').scale(color);
-
-  var stackedBarSeries = fc.autoBandwidth(fc.seriesSvgBar())
-    .align("left")
-    .orient("horizontal")
-    .crossValue(d => d.data["group"])
-    .mainValue(d => d[1])
-    .baseValue(d => d[0]);
-
-  var multi = fc.seriesSvgMulti()
     .mapping((data, index) => data[index])
     .series(stackedSeries.map(() => stackedBarSeries))
     .decorate((selection) => {
@@ -199,79 +175,28 @@ function stackedXBarChart(config, container, dataset, labels) {
           .attr('fill', color(stackedSeries[index].key));
       });
     });
-  var xExtent = fc.extentLinear()
-    .accessors([function (a) {
-      return a.map(function (d) { return d[1]; });
-    }])
-    .pad([0, 1])
-    .padUnit('domain');
 
-  let yScale = d3.scaleBand().domain(stackedBarData.map((entry) => entry["group"]));
+  let mainExtent =
+    fc.extentLinear()
+      .accessors([a => a.map(d => d[1])])
+      .pad([0, 1])
+      .padUnit('domain');
 
-  let chart = fc.chartSvgCartesian(
-    d3.scaleLinear(),
-    yScale)
-    .yPadding(0.5)
-    .xDomain(xExtent(stackedSeries))
-    .yOrient('left')
-    .plotArea(multi);
+  let mainScale =
+    d3.scaleLinear()
+      .domain(mainExtent(stackedSeries));
 
-  d3.select(container)
-    .datum(stackedSeries)
-    .call(chart);
+  let crossScale =
+    d3.scaleBand()
+      .domain(stackedBarData.map((entry) => entry["group"]))
+      .padding(0.5);
 
-  d3.select(container)
-    .append("svg")
-    .attr("class", "legend")
-    .attr("z-index", "2")
-    .call(legend);
-}
-
-function stackedBarChart(config, container, dataset, labels) {
-  //Convert data to Stacked Bar Chart Format
-  let keys = config.xAxis.categories.length > 0 ? config.xAxis.categories : [...Array(config.series[0].data.length)].map((_, i) => i)
-  let stackedBarData = keys.map((group, i) => {
-    let row = { group }
-    config.series.forEach(split => {
-      row[split.name] = split.data[i] || 0;
-    });
-    return row;
-  });
-  var stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
-  var stackedSeries = stack(stackedBarData);
-  var color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  var legend = d3Legend.legendColor().shapeWidth(70).orient('vertical').scale(color);
-
-  var stackedBarSeries = fc.autoBandwidth(fc.seriesSvgBar())
-    .align("left")
-    .crossValue(d => d.data["group"])
-    .mainValue(d => d[1])
-    .baseValue(d => d[0]);
-
-  var multi = fc.seriesSvgMulti()
-    .mapping((data, index) => data[index])
-    .series(stackedSeries.map(() => stackedBarSeries))
-    .decorate((selection) => {
-      selection.each((data, index, nodes) => {
-        d3.select(nodes[index])
-          .selectAll('g.bar')
-          .attr('fill', color(stackedSeries[index].key));
-      });
-    });
-  var yExtent = fc.extentLinear()
-    .accessors([function (a) {
-      return a.map(function (d) { return d[1]; });
-    }])
-    .pad([0, 1])
-    .padUnit('domain');
-
-  let xScale = d3.scaleBand().domain(stackedBarData.map((entry) => entry["group"]));
+  let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
+  //let [xGrid, yGrid] = horizontal ? [mainGrid, crossGrid] : [crossGrid, mainGrid];
 
   let chart = fc.chartSvgCartesian(
     xScale,
-    d3.scaleLinear())
-    .xPadding(0.5)
-    .yDomain(yExtent(stackedSeries))
+    yScale)
     .yOrient('left')
     .plotArea(multi);
 
@@ -284,44 +209,6 @@ function stackedBarChart(config, container, dataset, labels) {
     .attr("class", "legend")
     .attr("z-index", "2")
     .call(legend);
-}
-
-function handleSplitBy(scale, container, barSeries, labels) {
-  if (!labels.splitLabel) {
-    return;
-  }
-
-  let green = "#2c8f2d";
-  let blue = "#216ca1";
-  let orange = "#e07314";
-
-  const colors = [green, blue, orange, "red", "yellow", "purple", "brown"];
-
-  //Decorate bars to be different colors.
-  barSeries.decorate(selection =>
-    selection
-      .select(".bar>path")
-      .style("fill", (_, i) => colors[i])
-  );
-
-  let legend = d3Legend
-    .legendColor()
-    .scale(scale);
-
-  // //Decorate legend swatches to be different colors.
-  // legend.decorate(selection => 
-  //   selection
-  //     .select(".swatch")
-  //     .style("fill", (_, i) => colors[i])
-  // );
-
-  d3.select(container)
-    .append("svg")
-    .attr("class", "legend")
-    .attr("z-index", "2")
-    .call(legend);
-
-  console.log("legend rendered thanks.");
 }
 
 function styleDark(chart) {
