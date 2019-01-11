@@ -40,6 +40,10 @@
     fill: black;
   }
 
+  g.multi g.hidden {
+    visibility: hidden;
+  }
+
   .plot-area {
     overflow: visible !important;
   }
@@ -66,6 +70,14 @@
     left: auto;
     width: 150px;
     height: 100px;
+  }
+
+  .legend .cell {
+    cursor:pointer;
+  }
+
+  .legend .cell.hidden circle {    
+    fill: rgb(204, 204, 204) !important;
   }
 
   .legend text {

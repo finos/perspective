@@ -154,8 +154,24 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
   let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
   let stackedSeries = stack(stackedBarData);
   let color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  var legend = d3Legend.legendColor().shape('circle').shapeRadius(10).orient('vertical').scale(color);
-
+  var legend = d3Legend
+    .legendColor()
+    .shape('circle')
+    .shapeRadius(6)
+    .orient('vertical')
+    .scale(color)
+    .on('cellclick', function(d) {
+      toggleBars(d);
+      const legendCell = d3.select(this);
+      legendCell.classed('hidden', !legendCell.classed('hidden'));
+    });;
+    function toggleBars(colorClass) {
+      console.log(colorClass);
+      d3.select(container).selectAll(`g.${colorClass}`)
+        .classed('hidden', function() {  // toggle "hidden" class
+            return !d3.select(this).classed('hidden');
+        });
+    }
   let orientation = horizontal ? "horizontal" : "vertical";
 
   let stackedBarSeries = fc.autoBandwidth(fc.seriesSvgBar())
@@ -168,8 +184,11 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
   let multi = fc.seriesSvgMulti()
     .mapping((data, index) => data[index])
     .series(stackedSeries.map(() => stackedBarSeries))
-    .decorate((selection) => {
+    .decorate((selection,a,b,c) => {
       selection.each((data, index, nodes) => {
+        d3.select(nodes[index])
+          .select('g')
+          .attr('class', stackedSeries[index].key);
         d3.select(nodes[index])
           .selectAll('g.bar')
           .attr('fill', color(stackedSeries[index].key));
