@@ -85,7 +85,7 @@ void psp_abort();
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
-            PSP_ABORT();                                                                       \
+            psp_abort();                                                                       \
         }                                                                                      \
     }
 
