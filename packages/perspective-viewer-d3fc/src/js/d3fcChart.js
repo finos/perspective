@@ -154,7 +154,7 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
   let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
   let stackedSeries = stack(stackedBarData);
   let color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  let legend = d3Legend.legendColor().shapeWidth(70).orient('vertical').scale(color);
+  var legend = d3Legend.legendColor().shape('circle').shapeRadius(10).orient('vertical').scale(color);
 
   let orientation = horizontal ? "horizontal" : "vertical";
 
