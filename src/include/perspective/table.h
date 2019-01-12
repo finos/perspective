@@ -124,7 +124,7 @@ public:
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
-    
+
     void verify() const;
     void set_capacity(t_uindex idx);
 

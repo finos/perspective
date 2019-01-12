@@ -202,7 +202,7 @@ public:
 #ifdef PSP_ENABLE_PYTHON
     np::ndarray _as_numpy();
 #endif
-    
+
 private:
     t_dtype m_dtype;
     bool m_init;

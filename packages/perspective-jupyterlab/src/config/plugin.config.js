@@ -22,10 +22,7 @@ module.exports = {
         extensions: [".ts", ".js", ".json"]
     },
     externals: /\@jupyter|\@phosphor/,
-    plugins: [
-        new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), 
-        new PerspectivePlugin()
-    ],
+    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
     module: {
         rules: [
             {
@@ -57,14 +54,15 @@ module.exports = {
             {
                 test: /\.js$/,
                 exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-                loader: "babel-loader",
+                loader: "babel-loader"
             },
             {
                 test: /\.css$/,
                 use: [{loader: "css-loader"}]
             },
             {
-                test: /\.ts?$/, loader: "ts-loader"
+                test: /\.ts?$/,
+                loader: "ts-loader"
             }
         ]
     },

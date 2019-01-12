@@ -364,5 +364,4 @@ struct PERSPECTIVE_EXPORT t_column_recipe {
     bool m_status_enabled;
 };
 
-
 } // end namespace perspective
