@@ -16,9 +16,13 @@ var fs = require("fs");
 var schema = {
     type: "object",
     properties: {
-        name: {},
-        regExp: {},
+        name: {
+            type: "string"
+        },
         context: {
+            type: "string"
+        },
+        regExp: {
             type: "string"
         }
     },
@@ -29,7 +33,7 @@ exports.default = function loader() {};
 
 exports.pitch = function pitch(request) {
     var options = loaderUtils.getOptions(this) || {};
-    validateOptions(schema, options, "Cross Origin File Loader");
+    validateOptions({ name: "Cross Origin File Loader", schema, target: options });
 
     var context = options.context || this.rootContext || (this.options && this.options.context);
     var content = fs.readFileSync(request.replace("es/js", "build").replace("wasm.js", "wasm"));

@@ -7,9 +7,9 @@
  *
  */
 
-const WORKER_LOADER_PATH = require.resolve("./loader/file_worker_loader");
-const WASM_LOADER_PATH = require.resolve("./loader/cross_origin_file_loader.js");
-const BLOB_LOADER_PATH = require.resolve("./loader/blob_worker_loader.js");
+const FILE_WORKER_LOADER = require.resolve("./loader/file_worker_loader");
+const CROSS_ORIGIN_FILE_LOADER = require.resolve("./loader/cross_origin_file_loader.js");
+const BLOB_LOADER = require.resolve("./loader/blob_worker_loader.js");
 
 const include = [__dirname];
 
@@ -19,17 +19,30 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
+        const rules = [
+            {
+                test: /psp\.(sync|async)\.wasm\.js$/,
+                include,
+                use: {
+                    loader: CROSS_ORIGIN_FILE_LOADER, 
+                    options: {
+                        name: "[name]"
+                    }
+                }
+            }
+        ];
+
         if (this.options.build_worker) {
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
                 include,
                 use: [
                     {
-                        loader: WORKER_LOADER_PATH,
+                        loader: FILE_WORKER_LOADER,
                         options: {name: "[name].js", compiled: true}
                     },
                     {
-                        loader: BLOB_LOADER_PATH,
+                        loader: BLOB_LOADER,
                         options: {
                             name: "[name].worker.js"
                         }
@@ -41,24 +54,13 @@ class PerspectiveWebpackPlugin {
                 test: /perspective\.(wasm|asmjs)\.js$/,
                 include,
                 use: {
-                    loader: WORKER_LOADER_PATH,
+                    loader: FILE_WORKER_LOADER,
                     options: {
                         name: "[name].js"
                     }
                 }
             });
         }
-
-        rules.push({
-            test: /psp\.(sync|async)\.wasm\.js$/,
-            include,
-            use: {
-                loader: WASM_LOADER_PATH, 
-                options: {
-                    name: "[name]"
-                }
-            }
-        });
 
         const compilerOptions = compiler.options;
         const moduleOptions = compilerOptions.module || (compilerOptions.module = {});
