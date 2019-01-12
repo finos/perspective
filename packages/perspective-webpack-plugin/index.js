@@ -1,0 +1,1 @@
+module.exports = require("@jpmorganchase/perspective/webpack-plugin");
