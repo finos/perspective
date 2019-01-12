@@ -122,6 +122,7 @@ website/static/css/material.dark.css
 # CPP Compile
 /src/include/boost
 obj
+lib
 packages/perspective/es5
 cppbuild
 .coverage

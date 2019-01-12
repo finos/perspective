@@ -7,11 +7,11 @@
  *
  */
 
-const WORKER_LOADER_PATH = require.resolve("./src/loader/file_worker_loader");
-const WASM_LOADER_PATH = require.resolve("./src/loader/cross_origin_file_loader.js");
-const BLOB_LOADER_PATH = require.resolve("./src/loader/blob_worker_loader.js");
+const WORKER_LOADER_PATH = require.resolve("./loader/file_worker_loader");
+const WASM_LOADER_PATH = require.resolve("./loader/cross_origin_file_loader.js");
+const BLOB_LOADER_PATH = require.resolve("./loader/blob_worker_loader.js");
 
-const BABEL_CONFIG = require("./babel.config.js");
+const load_path = [__dirname];
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -19,7 +19,7 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
-        const load_path = [__dirname];
+        // FIXME These shouldn't be shipped with perspective as they are perspective-viewer or test dependencies
         const rules = [
             {
                 test: /\.less$/,
@@ -70,14 +70,6 @@ class PerspectiveWebpackPlugin {
                 }
             });
         }
-
-        rules.push({
-            test: /\.js$/,
-            include: load_path,
-            exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-            loader: "babel-loader",
-            options: BABEL_CONFIG
-        });
 
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
