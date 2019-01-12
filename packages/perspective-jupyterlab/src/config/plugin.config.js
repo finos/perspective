@@ -15,21 +15,57 @@ module.exports = {
     entry: "./src/ts/index.ts",
     resolveLoader: {
         alias: {
-            "file-worker-loader": "@jpmorganchase/perspective/src/loader/file_worker_loader.js"
+            "file-worker-loader": "@jpmorganchase/perspective/loader/file_worker_loader.js"
         }
     },
     resolve: {
         extensions: [".ts", ".js", ".json"]
     },
     externals: /\@jupyter|\@phosphor/,
-    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
+    plugins: [
+        new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), 
+        new PerspectivePlugin()
+    ],
     module: {
         rules: [
+            {
+                test: /\.less$/,
+                exclude: /themes/,
+                use: [
+                    {
+                        loader: "css-loader"
+                    },
+                    {
+                        loader: "clean-css-loader",
+                        options: {
+                            level: 2
+                        }
+                    },
+                    {
+                        loader: "less-loader"
+                    }
+                ]
+            },
+            {
+                test: /\.(html)$/,
+                loader: "html-loader"
+            },
+            {
+                test: /\.(arrow)$/,
+                loader: "arraybuffer-loader"
+            },
+            {
+                test: /\.js$/,
+                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
+                loader: "babel-loader",
+            },
             {
                 test: /\.css$/,
                 use: [{loader: "css-loader"}]
             },
-            {test: /\.ts?$/, loader: "ts-loader"}
+            {
+                test: /\.ts?$/, loader: "ts-loader"
+            }
         ]
     },
     output: {
