@@ -3,7 +3,7 @@
     "version": "0.2.11",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
-    "browser": "src/js/perspective.parallel.js",
+    "browser": "es/js/perspective.parallel.js",
     "publishConfig": {
         "access": "public"
     },
