@@ -1,7 +1,7 @@
+const path = require("path");
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const webpack = require("webpack");
 const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
-
 
 module.exports = function({build_worker, no_minify} = {}) {
     const plugins = [
@@ -33,13 +33,13 @@ module.exports = function({build_worker, no_minify} = {}) {
                     use: [
                         {
                             loader: "css-loader"
-                        }, 
+                        },
                         {
-                            loader: "clean-css-loader", 
+                            loader: "clean-css-loader",
                             options: {
                                 level: 2
                             }
-                        }, 
+                        },
                         {
                             loader: "less-loader"
                         }
@@ -53,11 +53,11 @@ module.exports = function({build_worker, no_minify} = {}) {
                     test: /\.(arrow)$/,
                     loader: "arraybuffer-loader"
                 },
-                {	
-                    test: /\.js$/,	
-                    exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,	
-                    loader: "babel-loader",	
-                    options: require(path.join(__dirname, "..", "..", ".babelrc"))	
+                {
+                    test: /\.js$/,
+                    exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
+                    loader: "babel-loader",
+                    options: require(path.join(__dirname, "..", "..", ".babelrc"))
                 }
             ]
         },
