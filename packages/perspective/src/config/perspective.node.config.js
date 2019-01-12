@@ -2,7 +2,7 @@ const path = require("path");
 const common = require("./common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: "./src/js/perspective.node.js",
+    entry: "./es/js/perspective.node.js",
     target: "node",
     externals: [/^([a-z0-9]|\@(?!apache\-arrow)).*?(?!wasm)$/g],
     node: {
