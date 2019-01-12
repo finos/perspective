@@ -10,7 +10,7 @@
 var path = require("path");
 
 var loaderUtils = require("loader-utils");
-var validateOptions = require("schema-utils");
+var validateOptions = require("@webpack-contrib/schema-utils");
 var fs = require("fs");
 
 var schema = {

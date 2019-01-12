@@ -10,7 +10,7 @@
 const path = require("path");
 
 const loaderUtils = require("loader-utils");
-const validateOptions = require("schema-utils");
+const validateOptions = require("@webpack-contrib/schema-utils");
 
 const fs = require("fs");
 

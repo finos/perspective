@@ -11,7 +11,7 @@ const WORKER_LOADER_PATH = require.resolve("./loader/file_worker_loader");
 const WASM_LOADER_PATH = require.resolve("./loader/cross_origin_file_loader.js");
 const BLOB_LOADER_PATH = require.resolve("./loader/blob_worker_loader.js");
 
-const load_path = [__dirname];
+const include = [__dirname];
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -19,36 +19,10 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
-        // FIXME These shouldn't be shipped with perspective as they are perspective-viewer or test dependencies
-        const rules = [
-            {
-                test: /\.less$/,
-                exclude: /themes/,
-                include: load_path,
-                use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
-            },
-            {
-                test: /\.(html)$/,
-                include: load_path,
-                use: {
-                    loader: "html-loader",
-                    options: {}
-                }
-            },
-            {
-                test: /\.(arrow)$/,
-                include: load_path,
-                use: {
-                    loader: "arraybuffer-loader",
-                    options: {}
-                }
-            }
-        ];
-
         if (this.options.build_worker) {
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
-                include: load_path,
+                include,
                 use: [
                     {
                         loader: WORKER_LOADER_PATH,
@@ -56,25 +30,34 @@ class PerspectiveWebpackPlugin {
                     },
                     {
                         loader: BLOB_LOADER_PATH,
-                        options: {name: "[name].worker.js"}
+                        options: {
+                            name: "[name].worker.js"
+                        }
                     }
                 ]
             });
         } else {
             rules.push({
                 test: /perspective\.(wasm|asmjs)\.js$/,
-                include: load_path,
+                include,
                 use: {
                     loader: WORKER_LOADER_PATH,
-                    options: {name: "[name].js"}
+                    options: {
+                        name: "[name].js"
+                    }
                 }
             });
         }
 
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
-            include: load_path,
-            use: {loader: WASM_LOADER_PATH, options: {name: "[name]"}}
+            include,
+            use: {
+                loader: WASM_LOADER_PATH, 
+                options: {
+                    name: "[name]"
+                }
+            }
         });
 
         const compilerOptions = compiler.options;
