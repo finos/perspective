@@ -57,7 +57,7 @@ module.exports = function({build_worker, no_minify} = {}) {
                     test: /\.js$/,
                     exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
                     loader: "babel-loader",
-                    options: require(path.join(__dirname, "..", "..", ".babelrc"))
+                    options: require(path.join(__dirname, "..", "..", "babel.config"))
                 }
             ]
         },
