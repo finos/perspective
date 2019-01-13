@@ -143,7 +143,6 @@ psp_curmem() {
 void
 set_thread_name(std::thread& thr, const std::string& name) {
 #ifdef PSP_PARALLEL_FOR
-    auto handle = thr.native_handle();
     pthread_setname_np(name.c_str());
 #endif
 }

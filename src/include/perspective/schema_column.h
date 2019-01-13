@@ -23,7 +23,6 @@ private:
     std::string m_tblname;
     std::string m_name;
     std::string m_altname;
-    t_dtype m_dtype;
 };
 
 } // end namespace perspective

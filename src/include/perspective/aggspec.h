@@ -106,7 +106,7 @@ private:
     double m_agg_one_weight;
     double m_agg_two_weight;
     t_invmode m_invmode;
-    t_uindex m_kernel;
+    // t_uindex m_kernel;
 };
 
 PERSPECTIVE_EXPORT t_dtype get_simple_accumulator_type(t_dtype coltype);

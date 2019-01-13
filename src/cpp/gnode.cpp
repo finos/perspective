@@ -947,7 +947,7 @@ t_gnode::notify_contexts(const t_table& flattened) {
     } else {
 #ifdef PSP_PARALLEL_FOR
         PSP_PFOR(0, int(num_ctx), 1,
-            [this, &notify_context_helper](int ctxidx)
+            [&notify_context_helper](int ctxidx)
 #else
         for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
 #endif

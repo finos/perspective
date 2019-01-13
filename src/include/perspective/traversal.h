@@ -110,7 +110,6 @@ public:
 private:
     std::shared_ptr<const t_stree> m_tree;
     std::shared_ptr<std::vector<t_tvnode>> m_nodes;
-    t_index m_curidx;
     bool m_handle_nan_sort;
 };
 

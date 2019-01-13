@@ -78,7 +78,6 @@ t_stree::t_stree(const std::vector<t_pivot>& pivots, const std::vector<t_aggspec
     , m_aggspecs(aggspecs)
     , m_schema(schema)
     , m_cur_aggidx(1)
-    , m_dotcount(0)
     , m_minmax(aggspecs.size())
     , m_has_delta(false) {
     auto g_agg_str = cfg.get_grand_agg_str();
@@ -1221,7 +1220,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 new_value.set(
                     gstate.reduce<std::function<std::uint32_t(std::vector<t_tscalar>&)>>(pkeys,
                         spec.get_dependencies()[0].name(),
-                        [this](std::vector<t_tscalar>& values) {
+                        [](std::vector<t_tscalar>& values) {
                             std::unordered_set<t_tscalar> vset;
                             for (const auto& v : values) {
                                 vset.insert(v);

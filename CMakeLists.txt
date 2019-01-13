@@ -82,6 +82,9 @@ endif()
 
 if (PSP_CPP_BUILD AND NOT PSP_CPP_BUILD_STRICT)
 	message(WARNING "${Cyan}Building C++ without strict warnings${ColorReset}")
+else()
+	message(WARNING "${Cyan}Building C++ with strict warnings${ColorReset}")
+	add_definitions(-DPSP_DEBUG)
 endif()
 
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER )

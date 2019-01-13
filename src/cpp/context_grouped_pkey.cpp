@@ -26,8 +26,8 @@
 namespace perspective {
 
 t_ctx_grouped_pkey::t_ctx_grouped_pkey()
-    : m_depth_set(false)
-    , m_depth(0) {}
+    : m_depth(0),
+    m_depth_set(false) {}
 
 t_ctx_grouped_pkey::~t_ctx_grouped_pkey() {}
 
@@ -636,7 +636,7 @@ t_ctx_grouped_pkey::rebuild() {
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(naggs), 1,
-        [&aggtable, &aggindices, &aggspecs, &tbl, naggs, this](int aggnum)
+        [&aggtable, &aggindices, &aggspecs, &tbl](int aggnum)
 #else
     for (t_uindex aggnum = 0; aggnum < naggs; ++aggnum)
 #endif
