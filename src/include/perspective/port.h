@@ -37,7 +37,7 @@ public:
     void release_or_clear();
 
 private:
-    t_port_mode m_mode;
+    // t_port_mode m_mode;
     t_schema m_schema;
     bool m_init;
     std::shared_ptr<t_table> m_table;

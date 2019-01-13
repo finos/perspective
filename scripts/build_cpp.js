@@ -21,13 +21,15 @@ function docker(image = "emsdk") {
     return cmd;
 }
 
+let flags = "-DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1 -DPSP_CPP_BUILD_STRICT=1";
+
 try {
     execute("mkdir -p cppbuild");
     if (process.env.PSP_DOCKER) {
-        execute(docker("cpp") + " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
+        execute(docker("cpp") + " cmake ../ " + flags);
         execute(docker("cpp") + " make -j${PSP_CPU_COUNT-8}");
     } else {
-        execute("cd cppbuild && cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
+        execute("cd cppbuild && cmake ../ " + flags);
         execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {

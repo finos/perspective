@@ -16,6 +16,5 @@ t_schema_column::t_schema_column(const std::string& tblname, const std::string& 
     const std::string& altname, t_dtype dtype)
     : m_tblname(tblname)
     , m_name(name)
-    , m_altname(altname)
-    , m_dtype(dtype) {}
+    , m_altname(altname) {}
 } // namespace perspective
