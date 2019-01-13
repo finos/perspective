@@ -555,10 +555,9 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
         std::cout << "Promotion only works for int to float." << std::endl;
         return;
     }
-
+    
     // create the new column and copy data
-    std::shared_ptr<t_column> promoted_col
-        = make_column(name, new_dtype, current_col->is_status_enabled());
+    std::shared_ptr<t_column> promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
     promoted_col->init();
     promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
