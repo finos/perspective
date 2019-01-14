@@ -66,7 +66,6 @@ if (NOT PSP_CPP_BUILD_STRICT)
 	message(WARNING "${Cyan}Building C++ without strict warnings${ColorReset}")
 else()
 	message(WARNING "${Cyan}Building C++ with strict warnings${ColorReset}")
-	add_definitions(-DPSP_DEBUG)
 endif()
 
 #######################
