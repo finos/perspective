@@ -25,7 +25,9 @@ module.exports = Object.assign({}, common(), {
 });
 
 for (const file of fs.readdirSync("src/themes")) {
-    const extract = new ExtractTextPlugin({filename: file.replace("less", "css")});
+    const extract = new ExtractTextPlugin({
+        filename: file.replace("less", "css")
+    });
     module.exports.module.rules.push({
         test: new RegExp(file),
         loader: extract.extract({
