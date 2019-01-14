@@ -20,6 +20,7 @@
 #include <perspective/sparse_tree.h>
 #include <perspective/arg_sort.h>
 #include <algorithm>
+#include <cstdint>
 #include <queue>
 
 SUPPRESS_WARNINGS_VC(4503)
@@ -173,7 +174,7 @@ t_traversal::sort_by(const t_config& config, const std::vector<t_sortspec>& sort
             t_multisorter sorter(sortelems, sort_orders, m_handle_nan_sort);
             argsort(sorted_idx, sorter);
 
-            auto nchild = n_changed;
+            std::int32_t nchild = n_changed;
             t_index ndesc = head.m_ndesc;
 
             // Fast path - if none of heads children are
