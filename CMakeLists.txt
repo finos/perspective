@@ -300,7 +300,7 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp.sync")
 	add_dependencies(perspective.sync perspective.async)
 
-	if (CMAKE_BUILD_TYPE MATCHES RELEASE)
+	if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		add_executable(perspective.asm src/cpp/main.cpp)
 		target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")

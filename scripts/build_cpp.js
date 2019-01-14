@@ -24,10 +24,12 @@ function docker(image = "emsdk") {
 try {
     execute("mkdir -p cppbuild");
 
+    let cmd;
+
     if (process.env.PSP_DOCKER) {
-        let cmd = " ";
+        cmd = " ";
     } else {
-        let cmd = "cd cppbuild && ";
+        cmd = "cd cppbuild && ";
     }
 
     cmd += " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1";
@@ -44,5 +46,6 @@ try {
         execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {
+    console.log(e);
     process.exit(1);
 }
