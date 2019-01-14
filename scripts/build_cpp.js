@@ -23,11 +23,24 @@ function docker(image = "emsdk") {
 
 try {
     execute("mkdir -p cppbuild");
+
     if (process.env.PSP_DOCKER) {
-        execute(docker("cpp") + " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
+        let cmd = " ";
+    } else {
+        let cmd = "cd cppbuild && ";
+    }
+
+    cmd += " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1";
+
+    if(process.env.PSP_DEBUG){
+        cmd += `-DCMAKE_BUILD_TYPE=debug`;
+    }
+
+    if (process.env.PSP_DOCKER) {
+        execute(docker("cpp") + cmd);
         execute(docker("cpp") + " make -j${PSP_CPU_COUNT-8}");
     } else {
-        execute("cd cppbuild && cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1");
+        execute(cmd);
         execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {
