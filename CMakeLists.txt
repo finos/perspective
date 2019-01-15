@@ -9,6 +9,14 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH} 
 #######################
 find_package(Color)
 
+option(CMAKE_BUILD_TYPE "Release/Debug build" RELEASE)
+option(PSP_WASM_BUILD "Build the WebAssembly Project" ON)
+option(PSP_CPP_BUILD "Build the C++ Project" OFF)
+option(PSP_CPP_BUILD_TESTS "Build the C++ Tests" OFF)
+option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
+option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
+
+
 if (NOT DEFINED PSP_WASM_BUILD)
 	set(PSP_WASM_BUILD ON)
 	set(PSP_CPP_BUILD OFF)
@@ -18,6 +26,14 @@ endif()
 
 if (PSP_WASM_BUILD AND PSP_CPP_BUILD)
 	message(FATAL_ERROR "${Red}CPP and Emscripten builds must be done separately${ColorReset}")
+endif()
+
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+	if(DEFINED ENV{PSP_DEBUG})
+		set(CMAKE_BUILD_TYPE DEBUG)
+	else()
+		set(CMAKE_BUILD_TYPE RELEASE)
+	endif()
 endif()
 
 if (NOT DEFINED PSP_CPP_BUILD)
@@ -62,12 +78,18 @@ else()
 	message(WARNING "${Cyan}Skipping C++ tests${ColorReset}")
 endif()
 
-if (NOT PSP_CPP_BUILD_STRICT)
+if (PSP_CPP_BUILD AND NOT PSP_CPP_BUILD_STRICT)
 	message(WARNING "${Cyan}Building C++ without strict warnings${ColorReset}")
 endif()
 
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER )
+if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
+	message(WARNING "${Red}Building DEBUG${ColorReset}")
+	add_definitions(-DPSP_DEBUG)
+else()
+	message(WARNING "${Cyan}Building RELEASE${ColorReset}")
+endif()
 #######################
-
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
 
@@ -98,7 +120,7 @@ if (PSP_WASM_BUILD)
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
 
-	if(DEFINED ENV{PSP_DEBUG})
+	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 		set(OPT_FLAGS " \
 			-O0 \
 			-g4 \
@@ -123,7 +145,7 @@ else()
 	#####################
 	# VANILLA CPP BUILD #
 	#####################
-	if(DEFINED ENV{PSP_DEBUG})
+	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
 		set(OPT_FLAGS " \
 			-O1 \
 			-g3 \
@@ -278,7 +300,7 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp.sync")
 	add_dependencies(perspective.sync perspective.async)
 
-	if (NOT DEFINED ENV{PSP_DEBUG})
+	if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		add_executable(perspective.asm src/cpp/main.cpp)
 		target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
