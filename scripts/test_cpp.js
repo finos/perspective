@@ -28,5 +28,6 @@ try {
         execute("./cppbuild/test/psp_test");
     }
 } catch (e) {
+    console.log(e);
     process.exit(1);
 }

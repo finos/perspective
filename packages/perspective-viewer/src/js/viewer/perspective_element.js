@@ -211,12 +211,34 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
+    async _validate_filters() {
+        const filters = [];
+        for (const node of this._get_view_filter_nodes()) {
+            const operandNode = node.shadowRoot.getElementById("filter_operand");
+            const exclamation = node.shadowRoot.getElementById("row_exclamation");
+            const {operator, operand} = JSON.parse(node.getAttribute("filter"));
+            const filter = [node.getAttribute("name"), operator, operand];
+            if (await this._table.is_valid_filter(filter)) {
+                filters.push(filter);
+                node.title = "";
+                operandNode.style.borderColor = "";
+                exclamation.hidden = true;
+            } else {
+                node.title = "Invalid Filter";
+                operandNode.style.borderColor = "red";
+                exclamation.hidden = false;
+            }
+        }
+
+        return filters;
+    }
+
     async _new_view(ignore_size_check = false) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
-        const filters = this._get_view_filters();
+        const filters = await this._validate_filters();
         const aggregates = this._get_view_aggregates();
         if (aggregates.length === 0) return;
         const sort = this._get_view_sorts();

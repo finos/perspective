@@ -115,7 +115,11 @@ function docker(image = "emsdk") {
 }
 
 function compileCPP() {
-    let cmd = `emcmake cmake ../ && emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
+    let cmd = `emcmake cmake ../ `;
+    if(process.env.PSP_DEBUG){
+        cmd += `-DCMAKE_BUILD_TYPE=debug`;
+    }
+    cmd += `&& emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
     if (process.env.PSP_DOCKER) {
         cmd = `${docker()} bash -c 'cd obj && ${cmd}'`;
     } else {
@@ -140,5 +144,6 @@ try {
     }
     lerna();
 } catch (e) {
+    console.log(e);
     process.exit(1);
 }
