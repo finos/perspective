@@ -128,7 +128,16 @@ function renderBar(config, container, dataset, labels, horizontal) {
     .mainValue(d => d.mainValue);
 
   let multi = fc.seriesSvgMulti()
-    .series([gridlines, barSeries]);
+    .series([gridlines, barSeries])
+    .decorate((selection) => selection
+      .filter((_, index) => index !== 0)
+      .each((data, index, nodes) => {          
+        d3.select(nodes[index])
+          .selectAll("g.bar")
+          .attr("fill", "#1f78b4")
+          .attr("opacity", 0.9);
+      })
+    );
 
   chart.plotArea(multi);
 
@@ -154,24 +163,27 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
   let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
   let stackedSeries = stack(stackedBarData);
   let color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  var legend = d3Legend
+
+  let legend = d3Legend
     .legendColor()
     .shape('circle')
     .shapeRadius(6)
     .orient('vertical')
     .scale(color)
-    .on('cellclick', function(d) {
+    .on('cellclick', function (d) {
       toggleBars(d);
       const legendCell = d3.select(this);
       legendCell.classed('hidden', !legendCell.classed('hidden'));
-    });;
-    function toggleBars(colorClass) {
-      console.log(colorClass);
-      d3.select(container).selectAll(`g.${colorClass}`)
-        .classed('hidden', function() {  // toggle "hidden" class
-            return !d3.select(this).classed('hidden');
-        });
-    }
+    });
+
+  function toggleBars(colorClass) {
+    console.log(colorClass);
+    d3.select(container).selectAll(`g.${colorClass}`)
+      .classed('hidden', function () {  // toggle "hidden" class
+        return !d3.select(this).classed('hidden');
+      });
+  }
+
   let orientation = horizontal ? "horizontal" : "vertical";
 
   let stackedBarSeries = fc.autoBandwidth(fc.seriesSvgBar())
@@ -181,19 +193,40 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
     .mainValue(d => d[1])
     .baseValue(d => d[0]);
 
-  let multi = fc.seriesSvgMulti()
-    .mapping((data, index) => data[index])
-    .series(stackedSeries.map(() => stackedBarSeries))
-    .decorate((selection,a,b,c) => {
-      selection.each((data, index, nodes) => {
-        d3.select(nodes[index])
-          .select('g')
-          .attr('class', stackedSeries[index].key);
+  let mainGrid = (x => x
+    .style("opacity", "0.3")
+    .style("stroke-width", "1.0")
+  );
+
+  let crossGrid = (x => x
+    .style("display", "none")
+  );
+
+  let [xGrid, yGrid] = horizontal ? [mainGrid, crossGrid] : [crossGrid, mainGrid];
+
+  let gridlines = fc.annotationSvgGridline()
+    .xDecorate(xGrid)
+    .yDecorate(yGrid);
+
+  let series = [];
+  stackedSeries.map(() => stackedBarSeries).forEach(x => series.push(x));
+  console.log("series:", series);
+
+  let multi = fc
+  .seriesSvgMulti()
+  .mapping((data, index, nodes) => data[index])
+  .series(series)
+  .decorate((selection) => {
+    selection
+      .each((data, index, nodes) => {      
         d3.select(nodes[index])
           .selectAll('g.bar')
-          .attr('fill', color(stackedSeries[index].key));
+          .attr('fill', color(stackedSeries[index].key)); //this minus one only if the gridlines are first.      
       });
-    });
+  });
+
+  let multiWithGrid = fc.seriesSvgMulti()
+    .series([gridlines, multi]);
 
   let mainExtent =
     fc.extentLinear()
@@ -211,13 +244,12 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
       .padding(0.5);
 
   let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
-  //let [xGrid, yGrid] = horizontal ? [mainGrid, crossGrid] : [crossGrid, mainGrid];
 
   let chart = fc.chartSvgCartesian(
     xScale,
     yScale)
     .yOrient('left')
-    .plotArea(multi);
+    .plotArea(multiWithGrid);
 
   d3.select(container)
     .datum(stackedSeries)
@@ -226,18 +258,26 @@ function stackedBarChart(config, container, dataset, labels, horizontal) {
   d3.select(container)
     .append("svg")
     .attr("class", "legend")
-    .attr("z-index", "2")
+    .style("z-index", "2")
     .call(legend);
 }
 
 function styleDark(chart) {
+  //todo: invert these depending on horizontal variable which should be passed in.
+
   chart.xDecorate(selection => {
-    selection.select(".domain") // select the axis' line //this one doesn't work
-      .style("stroke", "red")
+    let groups = selection._groups[0];
+    let parent = selection._parents[0];
+    let totalWidth = parent.clientWidth;
+    let tickSpacing = totalWidth / (groups.length);
+
+    selection.attr("transform", "translate(0, 0)")
     selection.select("text")
       .attr("fill", "white")
+      .attr("transform", (x, i) => `translate(${(i * tickSpacing) + (tickSpacing/2)}, 9)`)
     selection.select("path") //select the tick marks
       .attr("stroke", "white")
+      .attr("transform", (x, i) => `translate(${i * tickSpacing}, 0)`)
   });
 
   chart.yDecorate(selection => {
