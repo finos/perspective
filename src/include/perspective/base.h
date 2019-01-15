@@ -64,8 +64,10 @@ void psp_abort();
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
+#define GET_PSP_VERBOSE_ASSERT(_1,_2,_3,NAME,...) NAME
+
 #ifdef PSP_DEBUG
-#define PSP_VERBOSE_ASSERT(COND, MSG)                                                          \
+#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                          \
     {                                                                                          \
         if (!(COND)) {                                                                         \
             std::stringstream ss;                                                              \
@@ -73,6 +75,17 @@ void psp_abort();
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
             psp_abort();                                                                       \
+        }                                                                                      \
+    }
+
+#define PSP_VERBOSE_ASSERT2(COND, EXPR, MSG)                                                          \
+    {                                                                                          \
+        if (!(COND EXPR)) {                                                                         \
+            std::stringstream ss;                                                              \
+            ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
+               << perspective::get_error_str();                                                \
+            perror(ss.str().c_str());                                                          \
+            PSP_ABORT();                                                                       \
         }                                                                                      \
     }
 
@@ -107,13 +120,16 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT(COND, MSG)
+#define PSP_VERBOSE_ASSERT1(COND, MSG)
+#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG) (void) EXPR;
 #define PSP_COMPLAIN_AND_ABORT(X) psp_abort();
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
 #define LOG_INIT(X)
 #endif
+
+#define PSP_VERBOSE_ASSERT(...) GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(__VA_ARGS__)
 
 // Currently only supporting single ports
 enum t_gnode_processing_mode { NODE_PROCESSING_SIMPLE_DATAFLOW, NODE_PROCESSING_KERNEL };

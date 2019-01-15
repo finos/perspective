@@ -681,9 +681,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx) {
 
             sptidx = iter->m_idx;
             node.set_nstrands(nstrands);
-
-            bool replaced = m_nodes->get<by_pidx_hash>().replace(iter, node);
-            PSP_VERBOSE_ASSERT(replaced, "Failed to replace");
+            PSP_VERBOSE_ASSERT(m_nodes->get<by_pidx_hash>().replace(iter, node), , "Failed to replace"); // middle argument ignored
         }
 
         populate_pkey_idx(ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
