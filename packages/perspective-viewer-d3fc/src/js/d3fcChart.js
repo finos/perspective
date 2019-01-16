@@ -19,53 +19,12 @@ export default class D3FCChart {
   }
 
   render() {
-
-    let labels = {
-      mainLabel: null,
-      crossLabel: null,
-      splitLabel: null
-    };
-
-    let dataset;
     console.log("config:", this._config);
-    let { series, xAxis } = this._config;
-
-    labels.mainLabel = series[0].stack;
-    labels.crossLabel = this._config.row_pivots[0];
-    labels.splitLabel = this._config.col_pivots[0];
-
-    //data is not "split-by <something>"
-    if (series.length === 1) {
-      //simple array of data
-      dataset = series[0].data.map(
-        (mainValue, i) => ({
-          mainValue: mainValue,
-          crossValue: xAxis.categories.length > 0 ? xAxis.categories[i] : i
-        })
-      );
-
-      //data is "split-by <something>"
-    } else {
-      let arrs = series.map(
-        (series, seriesIndex) => {
-          return series.data.map((mainValue, i) => ({
-            mainValue,
-            crossValue: this.calculateCrossValue(labels, xAxis, i),
-            split: series.name
-          }))
-        }
-      );
-
-      dataset = [].concat.apply([], arrs).filter(a => a.mainValue).sort((x, y) => x.crossValue - y.crossValue);
-    }
-
-    console.log("dataset:", dataset);
-    console.log("labels:", labels);
 
     if (this._mode === "x_bar") {
-      renderBar(this._config, this._container, dataset, labels, true);
+      renderBar(this._config, this._container, true);
     } else if (this._mode === "y_bar") {
-      renderBar(this._config, this._container, dataset, labels, false);
+      renderBar(this._config, this._container, false);
     } else {
       throw "EXCEPTION: chart type not recognised.";
     }
@@ -75,37 +34,19 @@ export default class D3FCChart {
     this.render();
   }
 
-  calculateCrossValue(labels, xAxis, i) {
-    if (labels.crossLabel) {
-      return xAxis.categories.length > 0 ? xAxis.categories[i] : i
-    } else {
-      return i;
-    }
-  }
-
 }
 
-function renderBar(config, container, dataset, labels, horizontal) {
+function renderBar(config, container, horizontal) {
   let orientation = horizontal ? "horizontal" : "vertical";
 
+  let labels = interpretLabels(config);
   let isSplitBy = labels.splitLabel != null;
 
-  // data
-  // TODO: the data is manipulated in the method that calls this, based on split by, then again here.
-  // TODO: all of this logic should be condensed into a single method called here configureDataSet(...) or something.
-  let stackedBarData;
-  let color;
-  let legend;
-  if (isSplitBy) {
-    [dataset, stackedBarData, color] = prepareStackData(config, container, dataset, labels, horizontal);
-    legend = configureLegend(color);
-  }
+  let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, config);
 
+  let legend = configureLegend(isSplitBy, color, container);
   let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
-  console.log("barSeries:", barSeries);
-
   let gridlines = configureGrid(horizontal);
-
   let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, stackedBarData);
 
   // groups of svgs we need to render
@@ -143,6 +84,9 @@ function configureBarSeries(isSplitBy, orientation, dataset) {
       .crossValue(d => d.crossValue)
       .mainValue(d => d.mainValue);
   }
+
+  console.log("barSeries:", barSeries);
+
   return barSeries;
 }
 
@@ -215,7 +159,7 @@ function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color) {
       });
 
     multi = fc.seriesSvgMulti()
-      .series([gridlines, multiWithOutGrid]);   
+      .series([gridlines, multiWithOutGrid]);
   } else {
     multi = fc.seriesSvgMulti()
       .series([gridlines, barSeries])
@@ -233,7 +177,11 @@ function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color) {
   return multi;
 }
 
-function configureLegend(color) {
+function configureLegend(isSplitBy, color, container) {
+  if (!isSplitBy) {
+    return;
+  }
+
   let legend = d3Legend
     .legendColor()
     .shape('circle')
@@ -271,7 +219,45 @@ function drawLegend(legend, container) {
 
 
 // PREP DATA
-function prepareStackData(config) {
+function interpretLabels(config) {
+  let labels = {
+    mainLabel: null,
+    crossLabel: null,
+    splitLabel: null
+  };
+
+  labels.mainLabel = config.series[0].stack;
+  labels.crossLabel = config.row_pivots[0];
+  labels.splitLabel = config.col_pivots[0];
+
+  console.log("labels:", labels);
+
+  return labels;
+}
+
+function interpretDataset(isSplitBy, config) {
+  if (isSplitBy) {
+    let [dataset, stackedBarData, color] = interpretStackDataset(config);
+    console.log("dataset: ", dataset);
+    return [dataset, stackedBarData, color];
+  }
+
+  let { series, xAxis } = config;
+  let dataset;
+
+  //simple array of data
+  dataset = series[0].data.map(
+    (mainValue, i) => ({
+      mainValue: mainValue,
+      crossValue: xAxis.categories.length > 0 ? xAxis.categories[i] : i
+    })
+  );
+
+  console.log("dataset: ", dataset);
+  return [dataset, null, null];
+}
+
+function interpretStackDataset(config) {
   //Convert data to Stacked Bar Chart Format
   let keys = config.xAxis.categories.length > 0 ? config.xAxis.categories : [...Array(config.series[0].data.length)].map((_, i) => i)
 
@@ -284,9 +270,9 @@ function prepareStackData(config) {
   });
 
   let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
-  let stackedSeries = stack(stackedBarData);
-  let color = d3.scaleOrdinal(d3.schemeCategory10).domain(stackedSeries.map(s => s.key));
-  return [stackedSeries, stackedBarData, color];
+  let dataset = stack(stackedBarData);
+  let color = d3.scaleOrdinal(d3.schemeCategory10).domain(dataset.map(s => s.key));
+  return [dataset, stackedBarData, color];
 }
 
 
