@@ -61,6 +61,11 @@ t_aggspec::t_aggspec(const std::string& aggname, t_aggtype agg, const std::strin
     , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)})
     , m_kernel(0) {}
 
+t_aggspec::t_aggspec(t_aggtype agg, const std::string& dep)
+    : m_agg(agg)
+    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)})
+    , m_kernel(0) {}
+
 t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_aggtype agg,
     const std::vector<t_dep>& dependencies)
     : m_name(name)

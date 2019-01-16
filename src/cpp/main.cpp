@@ -396,8 +396,8 @@ col_to_js_typed_array(T ctx, t_index idx) {
 }
 
 void
-_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -453,7 +453,7 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
                         col->set_nth(i, fval);
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
-                    }     
+                    }
                 } break;
                 case DTYPE_FLOAT32: {
                     col->set_nth(i, item.as<float>());
@@ -469,8 +469,8 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
 }
 
 void
-_fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -484,8 +484,8 @@ _fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name, s
 }
 
 void
-_fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -526,8 +526,8 @@ _fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -566,8 +566,8 @@ _fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -597,8 +597,8 @@ _fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
 
     t_uindex nrows = col->size();
 
@@ -970,10 +970,8 @@ infer_type(val x, val date_validator) {
 
     // Unwrap numbers inside strings
     val x_number = val::global("Number").call<val>("call", val::object(), x);
-    bool number_in_string = (jstype == "string") 
-                            && (x["length"].as<std::int32_t>() != 0) 
-                            && (!val::global("isNaN")
-                                .call<bool>("call", val::object(), x_number));
+    bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
+        && (!val::global("isNaN").call<bool>("call", val::object(), x_number));
 
     if (x.isNull()) {
         t = t_dtype::DTYPE_NONE;

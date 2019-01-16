@@ -157,8 +157,8 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     double a_dbl = a.to_double();
     double b_dbl = b.to_double();
 
-    bool a_nan = boost::math::isnan(a_dbl);
-    bool b_nan = boost::math::isnan(b_dbl);
+    bool a_nan = std::isnan(a_dbl);
+    bool b_nan = std::isnan(b_dbl);
 
     rval.m_active = a_nan || b_nan;
 

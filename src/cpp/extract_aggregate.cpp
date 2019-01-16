@@ -25,13 +25,25 @@ extract_aggregate(
                 return mktscalar<double>(100.0);
             }
 
-            t_tscalar pv = aggcol->get_scalar(pridx);
-            return mktscalar<double>(100.0 * (cv.to_double() / pv.to_double()));
+            double pv = aggcol->get_scalar(pridx).to_double();
+            t_tscalar ret;
+            if (pv == 0) {
+                ret.set(t_none());
+            } else {
+                ret.set(100.0 * (cv.to_double() / pv));
+            }
+            return ret;
         } break;
         case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
             t_tscalar cv = aggcol->get_scalar(ridx);
-            t_tscalar pv = aggcol->get_scalar(ROOT_AGGIDX);
-            return mktscalar<double>(100.0 * (cv.to_double() / pv.to_double()));
+            double pv = aggcol->get_scalar(ROOT_AGGIDX).to_double();
+            t_tscalar ret;
+            if (pv == 0) {
+                ret.set(t_none());
+            } else {
+                ret.set(100.0 * (cv.to_double() / pv));
+            }
+            return ret;
         } break;
         case AGGTYPE_SUM:
         case AGGTYPE_SUM_ABS:

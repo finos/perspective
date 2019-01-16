@@ -1163,7 +1163,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                             rval.set(std::uint64_t(0));
                             rval.m_type = values[0].m_type;
                             for (const auto& v : values) {
-                                if (rval.is_nan())
+                                if (v.is_nan())
                                     continue;
                                 rval = rval.add(v);
                             }
@@ -1865,6 +1865,32 @@ t_stree::get_sortby_path(t_uindex idx, std::vector<t_tscalar>& rval) const {
 void
 t_stree::set_has_deltas(bool v) {
     m_has_delta = v;
+}
+
+t_bfs_iter<t_stree>
+t_stree::bfs() const {
+    return t_bfs_iter<t_stree>(this);
+}
+
+t_dfs_iter<t_stree>
+t_stree::dfs() const {
+    return t_dfs_iter<t_stree>(this);
+}
+
+void
+t_stree::pprint() const {
+    for (auto idx : dfs()) {
+        std::vector<t_tscalar> path;
+        get_path(idx, path);
+        for (t_uindex space_idx = 0; space_idx < path.size(); ++space_idx) {
+            std::cout << "  ";
+        }
+        std::cout << idx << " <" << path << ">";
+        for (t_uindex aidx = 0; aidx < get_num_aggcols(); ++aidx) {
+            std::cout << get_aggregate(idx, aidx) << ", ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 } // end namespace perspective

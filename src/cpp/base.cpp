@@ -13,6 +13,16 @@
 #include <limits>
 
 namespace perspective {
+void
+psp_log(const char* file, std::uint64_t line_no, const char* msg) {
+    std::stringstream ss;
+    std::cout << file << ":" << line_no << ": " << msg << " : " << perspective::get_error_str();
+}
+
+void
+psp_abort() {
+    std::raise(SIGINT);
+}
 
 bool
 is_numeric_type(t_dtype dtype) {
@@ -148,71 +158,70 @@ std::string
 get_dtype_descr(t_dtype dtype) {
     switch (dtype) {
         case DTYPE_NONE: {
-            return "DTYPE_NONE";
+            return "none";
         } break;
         case DTYPE_INT64: {
-            return "DTYPE_INT64";
+            return "i64";
         } break;
         case DTYPE_INT32: {
-            return "DTYPE_INT32";
+            return "i32";
         } break;
         case DTYPE_INT16: {
-            return "DTYPE_INT16";
+            return "i16";
         } break;
         case DTYPE_INT8: {
-            return "DTYPE_INT8";
+            return "i8";
         } break;
         case DTYPE_UINT64: {
-            return "DTYPE_UINT64";
+            return "u64";
         } break;
         case DTYPE_UINT32: {
-            return "DTYPE_UINT32";
+            return "u32";
         } break;
         case DTYPE_UINT16: {
-            return "DTYPE_UINT16";
+            return "u16";
         } break;
         case DTYPE_UINT8: {
-            return "DTYPE_UINT8";
+            return "u8";
         } break;
         case DTYPE_BOOL: {
-            return "DTYPE_BOOL";
+            return "bool";
         } break;
         case DTYPE_FLOAT64: {
-            return "DTYPE_FLOAT64";
+            return "f64";
         } break;
         case DTYPE_FLOAT32: {
-            return "DTYPE_FLOAT32";
+            return "f32";
         } break;
         case DTYPE_STR: {
-            return "DTYPE_STR";
+            return "str";
         } break;
         case DTYPE_TIME: {
-            return "DTYPE_TIME";
+            return "time";
         } break;
         case DTYPE_DATE: {
-            return "DTYPE_DATE";
+            return "date";
         } break;
         case DTYPE_ENUM: {
-            return "DTYPE_ENUM";
+            return "e";
         } break;
         case DTYPE_OID: {
-            return "DTYPE_OID";
+            return "oid";
         } break;
         case DTYPE_USER_FIXED: {
-            return "DTYPE_USER_FIXED";
-        } break;
-        case DTYPE_USER_VLEN: {
-            return "DTYPE_USER_VLEN";
+            return "ufix";
         } break;
         case DTYPE_LAST: {
-            return "DTYPE_LAST";
+            return "last";
+        } break;
+        case DTYPE_USER_VLEN: {
+            return "uvlen";
         } break;
         case DTYPE_F64PAIR: {
-            return "DTYPE_F64PAIR";
+            return "f64pair";
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Encountered unknown dtype"); }
     }
-
     return std::string("dummy");
 }
 
@@ -275,6 +284,23 @@ filter_op_to_str(t_filter_op op) {
     return "";
 }
 
+std::string
+get_status_descr(t_status status) {
+    switch (status) {
+        case STATUS_INVALID: {
+            return "i";
+        }
+        case STATUS_VALID: {
+            return "v";
+        }
+        case STATUS_CLEAR: {
+            return "c";
+        }
+        default: { PSP_COMPLAIN_AND_ABORT("Unexpected status found"); }
+    }
+    return "";
+}
+
 void
 check_init(bool init, const char* file, std::int32_t line) {
     PSP_VERBOSE_ASSERT(init, "touching uninited object");
@@ -295,4 +321,97 @@ is_internal_colname(const std::string& c) {
     return c.compare(std::string("psp_")) == 0;
 }
 
+template <>
+t_dtype
+type_to_dtype<std::int64_t>() {
+    return DTYPE_INT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int32_t>() {
+    return DTYPE_INT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int16_t>() {
+    return DTYPE_INT16;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::int8_t>() {
+    return DTYPE_INT8;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint64_t>() {
+    return DTYPE_UINT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint32_t>() {
+    return DTYPE_UINT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint16_t>() {
+    return DTYPE_UINT16;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::uint8_t>() {
+    return DTYPE_UINT8;
+}
+
+template <>
+t_dtype
+type_to_dtype<double>() {
+    return DTYPE_FLOAT64;
+}
+
+template <>
+t_dtype
+type_to_dtype<float>() {
+    return DTYPE_FLOAT32;
+}
+
+template <>
+t_dtype
+type_to_dtype<bool>() {
+    return DTYPE_BOOL;
+}
+
+template <>
+t_dtype
+type_to_dtype<t_time>() {
+    return DTYPE_TIME;
+}
+
+template <>
+t_dtype
+type_to_dtype<t_date>() {
+    return DTYPE_DATE;
+}
+
+template <>
+t_dtype
+type_to_dtype<std::string>() {
+    return DTYPE_STR;
+}
+
 } // end namespace perspective
+
+namespace std {
+
+void
+string_to_lower(string& str) {
+    transform(str.begin(), str.end(), str.begin(), ::tolower);
+}
+
+} // namespace std

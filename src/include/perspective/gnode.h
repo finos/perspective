@@ -39,11 +39,22 @@ PERSPECTIVE_EXPORT t_tscalar calc_negate(t_tscalar val);
 struct PERSPECTIVE_EXPORT t_gnode_recipe {
     t_gnode_recipe() {}
     t_gnode_processing_mode m_mode;
+    t_gnode_type m_gnode_type;
     t_schema_recipe m_tblschema;
     std::vector<t_schema_recipe> m_ischemas;
     std::vector<t_schema_recipe> m_oschemas;
     t_custom_column_recipevec m_custom_columns;
 };
+
+struct PERSPECTIVE_EXPORT t_gnode_options {
+    t_gnode_type m_gnode_type;
+    t_schema m_port_schema;
+};
+
+class t_ctx0;
+class t_ctx1;
+class t_ctx2;
+class t_ctx_grouped_pkey;
 
 #ifdef PSP_GNODE_VERIFY
 #define PSP_GNODE_VERIFY_TABLE(X) (X)->verify()
@@ -53,7 +64,9 @@ struct PERSPECTIVE_EXPORT t_gnode_recipe {
 
 class PERSPECTIVE_EXPORT t_gnode {
 public:
+    static std::shared_ptr<t_gnode> build(const t_gnode_options& options);
     t_gnode(const t_gnode_recipe& recipe);
+    t_gnode(const t_gnode_options& options);
     t_gnode(const t_schema& tblschema, const t_schema& port_schema);
     t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
         const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
@@ -64,6 +77,7 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_table& fragments);
+    void _send_and_process(const t_table& fragments);
     void _process();
     void _process_self();
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
@@ -99,6 +113,8 @@ public:
     void clear_output_ports();
 
     t_table* _get_pkeyed_table() const;
+    std::shared_ptr<t_table> get_sorted_pkeyed_table() const;
+
     bool has_pkey(t_tscalar pkey) const;
 
     std::vector<t_tscalar> get_row_data_pkeys(const std::vector<t_tscalar>& pkeys) const;
@@ -113,6 +129,15 @@ public:
     const t_schema& get_port_schema() const;
     bool was_updated() const;
     void clear_updated();
+
+    // helper function for tests
+    std::shared_ptr<t_table> tstep(std::shared_ptr<const t_table> input_table);
+
+    // Gnode will steal a reference to the context
+    void register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx);
+    void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
+    void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
+    void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
 protected:
     bool have_context(const std::string& name) const;
@@ -150,6 +175,7 @@ private:
         const std::vector<t_rlookup>& lkup, std::shared_ptr<t_table>& flat) const;
 
     t_gnode_processing_mode m_mode;
+    t_gnode_type m_gnode_type;
     t_schema m_tblschema;
     std::vector<t_schema> m_ischemas;
     std::vector<t_schema> m_oschemas;
