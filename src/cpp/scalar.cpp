@@ -527,8 +527,8 @@ t_tscalar::mul(const t_tscalar& other) const {
 std::string
 t_tscalar::repr() const {
     std::stringstream ss;
-    ss << "t_tscalar< " << get_dtype_descr(static_cast<t_dtype>(m_type)) << ", " << to_string()
-       << " status: " << m_status << " >";
+    ss << get_dtype_descr(static_cast<t_dtype>(m_type)) << ":" << get_status_descr(m_status)
+       << ":" << to_string();
     return ss.str();
 }
 
@@ -902,8 +902,8 @@ t_tscalar::begins_with(const t_tscalar& other) const {
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
-    boost::to_lower(sstr);
-    boost::to_lower(ostr);
+    std::string_to_lower(sstr);
+    std::string_to_lower(ostr);
     return sstr.find(ostr) == 0;
 }
 
@@ -913,8 +913,8 @@ t_tscalar::ends_with(const t_tscalar& other) const {
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
-    boost::to_lower(sstr);
-    boost::to_lower(ostr);
+    std::string_to_lower(sstr);
+    std::string_to_lower(ostr);
     size_t idx = sstr.rfind(ostr);
     return (idx != std::string::npos) && (idx + ostr.size() == sstr.size());
 }
@@ -925,8 +925,8 @@ t_tscalar::contains(const t_tscalar& other) const {
         return false;
     std::string sstr = to_string();
     std::string ostr = other.to_string();
-    boost::to_lower(sstr);
-    boost::to_lower(ostr);
+    std::string_to_lower(sstr);
+    std::string_to_lower(ostr);
     size_t idx = sstr.find(ostr);
     return idx != std::string::npos;
 }
@@ -1134,6 +1134,25 @@ t_tscalar
 mknone() {
     t_tscalar rval;
     rval.set(t_none());
+    return rval;
+}
+
+t_tscalar
+mknull(t_dtype dtype) {
+    t_tscalar rval;
+    rval.m_data.m_uint64 = 0;
+    rval.m_status = STATUS_INVALID;
+    rval.m_type = dtype;
+    if (dtype == DTYPE_STR) {
+        rval.m_inplace = true;
+    }
+    return rval;
+}
+
+t_tscalar
+mkclear(t_dtype dtype) {
+    t_tscalar rval = mknull(dtype);
+    rval.m_status = STATUS_CLEAR;
     return rval;
 }
 

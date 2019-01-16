@@ -53,6 +53,8 @@ public:
 
     t_aggspec(const std::string& aggname, t_aggtype agg, const std::string& dep);
 
+    t_aggspec(t_aggtype agg, const std::string& dep);
+
     t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
         const std::vector<t_dep>& dependencies);
 
