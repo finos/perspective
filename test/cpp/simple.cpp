@@ -172,7 +172,7 @@ typedef test_traits<std::int8_t> tr_i8;
 typedef test_traits<std::uint64_t> tr_u64;
 typedef test_traits<std::uint32_t> tr_u32;
 typedef test_traits<std::uint16_t> tr_u16;
-typedef test_traits<std::int8_t> tr_u8;
+typedef test_traits<std::uint8_t> tr_u8;
 typedef test_traits<double> tr_float64;
 typedef test_traits<float> tr_float32;
 
@@ -1078,7 +1078,7 @@ public:
 TEST_F(F64Ctx1MeanTest, test_1)
 {
     t_testdata data{{{},
-        {"Grand Aggregate"_ts, s_nan64}}};
+        {"Grand Aggregate"_ts, s_none}}};
 
     run(data);
 }
@@ -1614,7 +1614,7 @@ TEST_F(F64Ctx1WMeanTest, test_1) {
     t_testdata data{
         {
             {},
-            {"Grand Aggregate"_ts, s_nan64 }
+            {"Grand Aggregate"_ts, s_none }
         }
     };
 
@@ -1651,7 +1651,7 @@ TEST_F(F64Ctx1WMeanTest, test_4) {
             {{iop, 1_ts, 1_ts, 3_ts},
             {iop, 2_ts, i64_null, 1_ts},
             {iop, 3_ts, 1_ts, 1_ts}},
-            {"Grand Aggregate"_ts, 2._ts, i64_null, s_nan64, 1_ts, 2._ts }
+            {"Grand Aggregate"_ts, 2._ts, i64_null, s_none, 1_ts, 2._ts }
         }
     };
 
@@ -2324,8 +2324,6 @@ TEST_F(Ctx0Test, test_3) {
     run(data);
 }
 // clang-format on
-
-TEST(LOG_TEST, test_1) { psp_log(__FILE__, __LINE__, "log_test"); }
 
 TEST(IS_FLOATING_POINT, test_1)
 {

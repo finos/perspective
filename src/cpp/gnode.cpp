@@ -125,6 +125,7 @@ t_gnode::build(const t_gnode_options& options) {
 
 t_gnode::t_gnode(const t_schema& tblschema, const t_schema& portschema)
     : m_mode(NODE_PROCESSING_SIMPLE_DATAFLOW)
+    , m_gnode_type(GNODE_TYPE_PKEYED)
     , m_tblschema(tblschema)
     , m_ischemas(std::vector<t_schema>{portschema})
     , m_init(false)
@@ -151,6 +152,7 @@ t_gnode::t_gnode(t_gnode_processing_mode mode, const t_schema& tblschema,
     const std::vector<t_schema>& ischemas, const std::vector<t_schema>& oschemas,
     const std::vector<t_custom_column>& custom_columns)
     : m_mode(mode)
+    , m_gnode_type(GNODE_TYPE_PKEYED)
     , m_tblschema(tblschema)
     , m_ischemas(ischemas)
     , m_oschemas(oschemas)
@@ -352,6 +354,18 @@ t_gnode::_process() {
     }
 
     m_was_updated = true;
+
+    if (m_gnode_type == GNODE_TYPE_IMPLICIT_PKEYED) {
+        auto tbl = iport->get_table();
+        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
+        op_col->raw_fill<std::uint8_t>(OP_INSERT);
+
+        auto key_col = tbl->add_column("psp_pkey", DTYPE_INT64, true);
+        std::int64_t start = get_table()->size();
+        for (auto ridx = 0; ridx < tbl->size(); ++ridx) {
+            key_col->set_nth<std::int64_t>(ridx, start + ridx);
+        }
+    }
 
     std::shared_ptr<t_table> flattened(iport->get_table()->flatten());
     PSP_GNODE_VERIFY_TABLE(flattened);

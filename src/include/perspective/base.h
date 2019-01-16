@@ -37,11 +37,9 @@ const double PSP_TABLE_GROW_RATIO = 1.3;
 
 #ifdef WIN32
 #define PSP_RESTRICT __restrict
-#define PSP_ABORT() DebugBreak()
 #define PSP_THR_LOCAL __declspec(thread)
 #else
 #define PSP_RESTRICT __restrict__
-#define PSP_ABORT() std::raise(SIGINT);
 #define PSP_THR_LOCAL __thread
 #endif
 
@@ -75,7 +73,7 @@ void psp_abort();
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
-            PSP_ABORT();                                                                       \
+            psp_abort();                                                                       \
         }                                                                                      \
     }
 
@@ -84,7 +82,7 @@ void psp_abort();
         std::stringstream ss;                                                                  \
         ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
         perror(ss.str().c_str());                                                              \
-        PSP_ABORT();                                                                           \
+        psp_abort();                                                                           \
     }
 
 #define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
@@ -111,7 +109,7 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #endif
 #else
 #define PSP_VERBOSE_ASSERT(COND, MSG)
-#define PSP_COMPLAIN_AND_ABORT(X)
+#define PSP_COMPLAIN_AND_ABORT(X) psp_abort();
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)
