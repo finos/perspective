@@ -321,6 +321,10 @@ function styleDark(chart, horizontal, labels) {
   mainLabel(labels.mainLabel);
   //crossLabel(labels.crossLabel); // not enabled.
 
+  let textDistanceFromXAxis = 9;
+  let textDistanceFromYAxis = -18; //TODO: need to make this reactive to text length.
+  let distanceFromAxis = horizontal ? textDistanceFromYAxis : textDistanceFromXAxis;
+
   mainDecorate(selection => {
     let groups = selection._groups[0];
     let parent = selection._parents[0];
@@ -331,7 +335,7 @@ function styleDark(chart, horizontal, labels) {
     selection._parents[0].firstChild.setAttribute("stroke", "white"); // turn the axis white // TODO: this is too fragile
     selection.select("text")
       .attr("fill", "white")
-      .attr("transform", (x, i) => translate((i * tickSpacing) + (tickSpacing / 2), 9));
+      .attr("transform", (x, i) => translate((i * tickSpacing) + (tickSpacing / 2), distanceFromAxis));
     selection.select("path") // select the tick marks
       .attr("stroke", "white")
       .attr("transform", (x, i) => translate(i * tickSpacing, 0));
