@@ -44,12 +44,12 @@ async function updateConfig(perspecViewerEl, view, configs, mode, row_pivots, co
   const cols = await view.to_columns();
   const config = (configs[0] = default_config.call(perspecViewerEl, aggregates, mode));
 
-  console.log(
-    "col_pivots", col_pivots, 
-    "row_pivots", row_pivots, 
-    "aggregates", aggregates, 
-    "typesAndNames", typesAndNames, 
-    "view", view
+  console.log("From draw.js:\n",
+    "col_pivots: ", col_pivots, 
+    "row_pivots: ", row_pivots, 
+    "aggregates: ", aggregates, 
+    "typesAndNames: ", typesAndNames, 
+    "view: ", view
   );
 
   let [series, top] = make_y_data(cols, row_pivots, hidden);
