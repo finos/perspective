@@ -61,7 +61,7 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
   let orientation = horizontal ? "horizontal" : "vertical";
 
   let labels = interpretLabels(config);
-  let isSplitBy = labels.splitLabel != null;
+  let isSplitBy = labels.splitLabel != "";
 
   let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, config, hiddenElements);
 
