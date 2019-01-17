@@ -20,8 +20,11 @@ export default class D3FCChart {
     this.update = this.update.bind(this);
   }
 
-  render() {
+  render(config) {
     console.log("config:", this._config);
+    if (config) {
+      this._config = config;
+    }
 
     if (this._mode === "x_bar") {
       renderBar(this._config, this._container, true, this._hiddenElements, this.update);
@@ -32,11 +35,26 @@ export default class D3FCChart {
     }
   }
 
-  update() {
+  update(config) {
+    if (this._hiddenElements.length < 1 && config && !areArraysEqual(this._config.col_pivots, config.col_pivots)) {
+      this._hiddenElements = [];
+    }
     d3.select(this._container).selectAll("*").remove();
-    this.render();
+    this.render(config);
   }
 
+}
+
+function areArraysEqual(arr1, arr2) {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  for (let a of arr1) {
+    if (!arr2.includes(a)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 function renderBar(config, container, horizontal, hiddenElements, update) {

@@ -136,16 +136,23 @@ class D3FCElement extends HTMLElement {
   }
 
   render(mode, configs, callee) {
-    this.delete();
-
-    configs.forEach(config => {
-      let chartContainer = document.createElement("div");
-      chartContainer.className = "chart";
-      this._container.appendChild(chartContainer);
-      this._charts.push(new D3FCChart(mode, config, chartContainer));
-    })
-
-    this._charts.forEach(chart => chart.render())
+    if (this._charts.length > 0) {
+      // Update charts
+      this._charts.forEach((chart, i) => {
+        chart.update(configs[i]);
+      });
+    } else {
+      // Create charts
+      this.remove();
+      configs.forEach(config => {
+        let chartContainer = document.createElement("div");
+        const chart = new D3FCChart(mode, config, chartContainer)
+        chartContainer.className = "chart";
+        this._container.appendChild(chartContainer);
+        this._charts.push(chart);
+        chart.render();
+      });
+    }
   }
 
   resize() {
