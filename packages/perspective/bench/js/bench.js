@@ -11,6 +11,9 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 
+const args = process.argv.slice(2);
+const LIMIT = args.indexOf("--limit");
+
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
 const UNPKG_VERSIONS = ["0.2.11", "0.2.10", "0.2.9", "0.2.8", "0.2.7", "0.2.6", "0.2.5", "0.2.4", "0.2.3", "0.2.2", "0.2.1", "0.2.0"];
@@ -46,9 +49,20 @@ function transpose(json) {
 }
 
 async function run() {
+    // Allow users to set a limit on version lookbacks
+    let psp_urls = URLS;
+    console.log(`limit: ${LIMIT}`);
+    if (LIMIT !== -1) {
+        let limit_num = Number(args[LIMIT + 1]);
+        if (!isNaN(limit_num) && limit_num > 0 && limit_num <= psp_urls.length) {
+            console.log(`Benchmarking the last ${limit_num} versions`);
+            psp_urls = URLS.slice(0, limit_num);
+        }
+    }
+
     let data = [],
         version_index = 1;
-    for (let [version, url] of URLS) {
+    for (let [version, url] of psp_urls) {
         let browser = await puppeteer.launch({
             headless: true,
             args: ["--auto-open-devtools-for-tabs", "--no-sandbox"]
