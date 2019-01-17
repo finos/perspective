@@ -630,7 +630,7 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx) {
 
         t_uindex src_ridx = dptidx;
 
-        auto iter = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(p_sptidx, value));
+        auto iter = m_nodes->get<by_pidx_hash>().find(std::make_tuple(p_sptidx, value));
 
         auto nstrands = *(scount->get_nth<std::int64_t>(dptidx));
 
@@ -1020,8 +1020,8 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                         }
 
                         std::stringstream ss;
-                        for (std::unordered_set<t_tscalar>::const_iterator iter = vset.begin(); iter != vset.end();
-                             ++iter) {
+                        for (std::unordered_set<t_tscalar>::const_iterator iter = vset.begin();
+                             iter != vset.end(); ++iter) {
                             ss << *iter << ", ";
                         }
                         return m_symtable.get_interned_tscalar(ss.str().c_str());
@@ -1384,7 +1384,7 @@ t_stree::get_path(t_uindex idx, std::vector<t_tscalar>& rval) const {
 
 t_uindex
 t_stree::resolve_child(t_uindex root, const t_tscalar& datum) const {
-    auto iter = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(root, datum));
+    auto iter = m_nodes->get<by_pidx_hash>().find(std::make_tuple(root, datum));
 
     if (iter == m_nodes->get<by_pidx_hash>().end()) {
         return INVALID_INDEX;
@@ -1446,7 +1446,7 @@ t_stree::add_pkey(t_uindex idx, t_tscalar pkey) {
 
 void
 t_stree::remove_pkey(t_uindex idx, t_tscalar pkey) {
-    auto iter = m_idxpkey->get<by_idx_pkey>().find(boost::make_tuple(idx, pkey));
+    auto iter = m_idxpkey->get<by_idx_pkey>().find(std::make_tuple(idx, pkey));
 
     if (iter == m_idxpkey->get<by_idx_pkey>().end())
         return;
@@ -1462,7 +1462,7 @@ t_stree::add_leaf(t_uindex nidx, t_uindex lfidx) {
 
 void
 t_stree::remove_leaf(t_uindex nidx, t_uindex lfidx) {
-    auto iter = m_idxleaf->get<by_idx_lfidx>().find(boost::make_tuple(nidx, lfidx));
+    auto iter = m_idxleaf->get<by_idx_lfidx>().find(std::make_tuple(nidx, lfidx));
 
     if (iter == m_idxleaf->get<by_idx_lfidx>().end())
         return;
@@ -1627,7 +1627,7 @@ t_stree::resolve_path(t_uindex root, const std::vector<t_tscalar>& path) const {
 
     for (t_index i = path.size() - 1; i >= 0; i--) {
         iter_by_pidx_hash iter
-            = m_nodes->get<by_pidx_hash>().find(boost::make_tuple(curidx, path[i]));
+            = m_nodes->get<by_pidx_hash>().find(std::make_tuple(curidx, path[i]));
         if (iter == m_nodes->get<by_pidx_hash>().end()) {
             return INVALID_INDEX;
         }

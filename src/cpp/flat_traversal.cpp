@@ -145,7 +145,8 @@ t_ftrav::size() const {
 }
 
 void
-t_ftrav::get_row_indices(const std::unordered_set<t_tscalar>& pkeys, std::unordered_map<t_tscalar, t_index>& out_map) const {
+t_ftrav::get_row_indices(const std::unordered_set<t_tscalar>& pkeys,
+    std::unordered_map<t_tscalar, t_index>& out_map) const {
     for (t_index idx = 0, loop_end = size(); idx < loop_end; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
         if (pkeys.find(pkey) != pkeys.end()) {
@@ -155,8 +156,8 @@ t_ftrav::get_row_indices(const std::unordered_set<t_tscalar>& pkeys, std::unorde
 }
 
 void
-t_ftrav::get_row_indices(
-    t_index bidx, t_index eidx, const std::unordered_set<t_tscalar>& pkeys, std::unordered_map<t_tscalar, t_index>& out_map) const {
+t_ftrav::get_row_indices(t_index bidx, t_index eidx, const std::unordered_set<t_tscalar>& pkeys,
+    std::unordered_map<t_tscalar, t_index>& out_map) const {
     for (t_index idx = bidx; idx < eidx; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
         if (pkeys.find(pkey) != pkeys.end()) {
