@@ -308,9 +308,9 @@ function interpretStackDataset(config, hiddenElements) {
 
 // STYLE CHART
 function styleDark(chart, horizontal, labels) {
-  let [mainDecorate, crossDecorate, mainLabel, crossLabel] = horizontal 
-    ? [chart.yDecorate, chart.xDecorate, chart.xLabel, chart.yLabel] 
-    : [chart.xDecorate, chart.yDecorate, chart.yLabel, chart.xLabel];
+  let [crossDecorate, mainDecorate, crossLabel, mainLabel] = horizontal 
+    ? [chart.yDecorate, chart.xDecorate, chart.yLabel, chart.xLabel] 
+    : [chart.xDecorate, chart.yDecorate, chart.xLabel, chart.yLabel];
 
   function translate(perpendicularToAxis, parallelToAxis) {
     return horizontal
@@ -325,28 +325,35 @@ function styleDark(chart, horizontal, labels) {
   let textDistanceFromYAxis = -18; //TODO: need to make this reactive to text length.
   let distanceFromAxis = horizontal ? textDistanceFromYAxis : textDistanceFromXAxis;
 
-  mainDecorate(selection => {
+  crossDecorate(selection => {
     let groups = selection._groups[0];
     let parent = selection._parents[0];
     let totalSpace = horizontal ? parent.clientHeight : parent.clientWidth;
     let tickSpacing = totalSpace / (groups.length);
 
     selection.attr("transform", "translate(0, 0)");
-    selection._parents[0].firstChild.setAttribute("stroke", "white"); // turn the axis white // TODO: this is too fragile
+    parent.firstChild.setAttribute("stroke", "white"); // turn the axis white // TODO: this is too fragile
     selection.select("text")
       .attr("fill", "white")
       .attr("transform", (x, i) => translate((i * tickSpacing) + (tickSpacing / 2), distanceFromAxis));
     selection.select("path") // select the tick marks
       .attr("stroke", "white")
       .attr("transform", (x, i) => translate(i * tickSpacing, 0));
+
+    if (labels.crossLabel === "") {
+      selection.select("text")
+        .attr("display", "none");
+    }
   });
 
-  crossDecorate(selection => {
-    selection._parents[0].firstChild.setAttribute("display", "none"); // hide the axis // TODO: this is too fragile.
+  mainDecorate(selection => {
+    let parent = selection._parents[0];
+
+    parent.firstChild.setAttribute("display", "none"); // hide the axis // TODO: this is too fragile.
     selection.select("path") // select the tick marks
-      .attr("display", "none")
+      .attr("display", "none");
     selection.select("text")
-      .attr("fill", "white")
+      .attr("fill", "white");
   });
 
   styleDarkAxisSpecific(chart);
