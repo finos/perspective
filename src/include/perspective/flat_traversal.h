@@ -57,10 +57,10 @@ public:
 
     t_index size() const;
 
-    void get_row_indices(const t_tscalset& pkeys, t_tscaltvimap& out_map) const;
+    void get_row_indices(const std::unordered_set<t_tscalar>& pkeys, std::unordered_map<t_tscalar, t_index>& out_map) const;
 
     void get_row_indices(
-        t_index bidx, t_index eidx, const t_tscalset& pkeys, t_tscaltvimap& out_map) const;
+        t_index bidx, t_index eidx, const std::unordered_set<t_tscalar>& pkeys, std::unordered_map<t_tscalar, t_index>& out_map) const;
 
     void reset();
 

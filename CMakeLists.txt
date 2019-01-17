@@ -29,10 +29,11 @@ if (PSP_WASM_BUILD AND PSP_CPP_BUILD)
 	message(FATAL_ERROR "${Red}CPP and Emscripten builds must be done separately${ColorReset}")
 endif()
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-	if(DEFINED ENV{PSP_DEBUG})
-		set(CMAKE_BUILD_TYPE DEBUG)
-	else()
+
+if(DEFINED ENV{PSP_DEBUG})
+	set(CMAKE_BUILD_TYPE DEBUG)
+else()
+	if (NOT DEFINED CMAKE_BUILD_TYPE)
 		set(CMAKE_BUILD_TYPE RELEASE)
 	endif()
 endif()
@@ -121,7 +122,7 @@ if (PSP_WASM_BUILD)
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
 
-	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		set(OPT_FLAGS " \
 			-O0 \
 			-g4 \
@@ -146,7 +147,7 @@ else()
 	#####################
 	# VANILLA CPP BUILD #
 	#####################
-	if(CMAKE_BUILD_TYPE MATCHES DEBUG)
+	if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		set(OPT_FLAGS " \
 			-O1 \
 			-g3 \
@@ -216,6 +217,7 @@ set (SOURCE_FILES
 	src/cpp/base.cpp
 	src/cpp/base_impl_linux.cpp
 	src/cpp/base_impl_osx.cpp
+	src/cpp/base_impl_wasm.cpp
 	src/cpp/base_impl_win.cpp
 	src/cpp/build_filter.cpp
 	#src/cpp/calc_agg_dtype.cpp

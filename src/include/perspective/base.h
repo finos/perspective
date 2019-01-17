@@ -60,7 +60,6 @@ const t_index INVALID_INDEX = -1;
 #define CHAR_BIT 8
 #endif
 
-void psp_log(const char* file, std::uint64_t line_no, const char* msg);
 void psp_abort();
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;

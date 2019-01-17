@@ -13,11 +13,6 @@
 #include <limits>
 
 namespace perspective {
-void
-psp_log(const char* file, std::uint64_t line_no, const char* msg) {
-    std::stringstream ss;
-    std::cout << file << ":" << line_no << ": " << msg << " : " << perspective::get_error_str();
-}
 
 void
 psp_abort() {

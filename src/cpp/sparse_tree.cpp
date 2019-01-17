@@ -1014,13 +1014,13 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 new_value.set(gstate.reduce<std::function<t_tscalar(std::vector<t_tscalar>&)>>(
                     pkeys, spec.get_dependencies()[0].name(),
                     [this](std::vector<t_tscalar>& values) {
-                        t_tscalset vset;
+                        std::unordered_set<t_tscalar> vset;
                         for (const auto& v : values) {
                             vset.insert(v);
                         }
 
                         std::stringstream ss;
-                        for (t_tscalset::const_iterator iter = vset.begin(); iter != vset.end();
+                        for (std::unordered_set<t_tscalar>::const_iterator iter = vset.begin(); iter != vset.end();
                              ++iter) {
                             ss << *iter << ", ";
                         }
