@@ -56,6 +56,8 @@ function renderBar(config, container, horizontal) {
     .yOrient('left')
     .plotArea(multi);
 
+    horizontal ? chart.xLabel(labels.mainLabel) : chart.yLabel(labels.mainLabel);
+
   styleDark(chart);
 
   d3.select(container)
@@ -226,7 +228,7 @@ function interpretLabels(config) {
     splitLabel: null
   };
 
-  labels.mainLabel = config.series[0].stack;
+  labels.mainLabel = config.series.map(s => s.stack).join(",");
   labels.crossLabel = config.row_pivots[0];
   labels.splitLabel = config.col_pivots[0];
 
