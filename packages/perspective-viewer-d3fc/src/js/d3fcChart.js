@@ -103,8 +103,6 @@ function configureBarSeries(isSplitBy, orientation, dataset) {
       .mainValue(d => d.mainValue);
   }
 
-  console.log("barSeries:", barSeries);
-
   return barSeries;
 }
 
@@ -156,7 +154,6 @@ function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
         .padding(0.5);
   }
 
-   
   let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
   return [xScale, yScale];
 }
