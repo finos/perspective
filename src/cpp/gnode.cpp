@@ -362,7 +362,7 @@ t_gnode::_process() {
 
         auto key_col = tbl->add_column("psp_pkey", DTYPE_INT64, true);
         std::int64_t start = get_table()->size();
-        for (auto ridx = 0; ridx < tbl->size(); ++ridx) {
+        for (t_uindex ridx = 0; ridx < tbl->size(); ++ridx) {
             key_col->set_nth<std::int64_t>(ridx, start + ridx);
         }
     }

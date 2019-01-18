@@ -120,8 +120,8 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT1(COND, MSG)
-#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG) (void) EXPR;
+#define PSP_VERBOSE_ASSERT1(COND, MSG) { if(!(COND)) psp_abort(); }
+#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG) { if (!(EXPR COND)) psp_abort(); }
 #define PSP_COMPLAIN_AND_ABORT(X) psp_abort();
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
