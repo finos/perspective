@@ -13,12 +13,13 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/table.h>
-#include <perspective/column.h>
-#include <perspective/gnode.h>
  
 
-#ifndef __PSP_BINDING_HPP__
-#define __PSP_BINDING_HPP__
+#ifndef __PSP_PYTHON_HPP__
+#define __PSP_PYTHON_HPP__
+
+
+void test(const char* name);
 
 
 perspective::t_schema* t_schema_init(py::list& columns, py::list& types);
@@ -47,6 +48,8 @@ BOOST_PYTHON_MODULE(libbinding)
 {
     np::initialize(true);
     _import_array();
+
+    py::def("test", test);
 
     py::enum_<perspective::t_dtype>("t_dtype")
         .value("NONE", perspective::DTYPE_NONE)
@@ -98,27 +101,12 @@ BOOST_PYTHON_MODULE(libbinding)
         // when returning const, need return_value_policy<copy_const_reference>
         .def("columns", &perspective::t_schema::columns, py::return_value_policy<py::copy_const_reference>())
         // .def("types", &perspective::t_schema::types, return_value_policy<copy_const_reference>())
-        .def("str", &perspective::t_schema::str)
     ;
 
 
+    //TODO
     py::class_<perspective::t_column>("t_column", 
         py::init<>())
-        .def("pprint", &perspective::t_column::pprint)
-        .def("size", &perspective::t_column::size)
-        .def("get_dtype", &perspective::t_column::get_dtype)
-    ;
-
-    py::class_<perspective::t_gnode>("t_gnode", 
-        py::init<perspective::t_schema, perspective::t_schema>())
-        .def("init", &perspective::t_gnode::init)
-        .def("pprint", &perspective::t_gnode::pprint)
-        // when returning const, need return_value_policy<copy_const_reference>
-        // .def("get_table", static_cast<const perspective::t_table* (perspective::t_gnode::*)() const>(&perspective::t_gnode::get_table), py::return_value_policy<py::copy_const_reference>())
-        // when multiple overloading methods, need to static_cast to specify
-        // .def("get_table", static_cast<perspective::t_table* (perspective::t_gnode::*)()>(&perspective::t_gnode::get_table))
-        .def("get_tblschema", &perspective::t_gnode::get_tblschema)
-        .def("get_pivots", &perspective::t_gnode::get_pivots)
     ;
 
     // need boost:noncopyable for PSP_NON_COPYABLE
@@ -138,7 +126,6 @@ BOOST_PYTHON_MODULE(libbinding)
         // when returning const, need return_value_policy<copy_const_reference>
         .def("name", &perspective::t_table::name, py::return_value_policy<py::copy_const_reference>())
         .def("get_schema", &perspective::t_table::get_schema, py::return_value_policy<py::copy_const_reference>())
-        .def("make_column", &perspective::t_table::make_column)
 
         // when multiple overloading methods, need to static_cast to specify
         .def("num_rows", static_cast<perspective::t_uindex (perspective::t_table::*)() const> (&perspective::t_table::num_rows))
