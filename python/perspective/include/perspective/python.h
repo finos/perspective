@@ -13,13 +13,12 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/table.h>
+#include <perspective/column.h>
+#include <perspective/gnode.h>
  
 
 #ifndef __PSP_PYTHON_HPP__
 #define __PSP_PYTHON_HPP__
-
-
-void test(const char* name);
 
 
 perspective::t_schema* t_schema_init(py::list& columns, py::list& types);
@@ -48,8 +47,6 @@ BOOST_PYTHON_MODULE(libbinding)
 {
     np::initialize(true);
     _import_array();
-
-    py::def("test", test);
 
     py::enum_<perspective::t_dtype>("t_dtype")
         .value("NONE", perspective::DTYPE_NONE)
@@ -109,9 +106,12 @@ BOOST_PYTHON_MODULE(libbinding)
         py::init<>())
     ;
 
+    py::class_<perspective::t_gnode>("t_gnode", py::init<perspective::t_schema, perspective::t_schema>())
+        .def("pprint", static_cast<void (perspective::t_gnode::*)() const>(&perspective::t_gnode::pprint))
+    ;
+
     // need boost:noncopyable for PSP_NON_COPYABLE
     py::class_<perspective::t_table, boost::noncopyable>("t_table", py::init<perspective::t_schema>())
-
         .def("init", &perspective::t_table::init)
         .def("clear", &perspective::t_table::clear)
         .def("reset", &perspective::t_table::reset)

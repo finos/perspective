@@ -11,9 +11,6 @@
 #include <perspective/python.h>
 #include <cstdint>
 
-void test(const char* name) {
-    std::cout << "Hello " <<  name << "!" << std::endl;
-}
 
 perspective::t_schema* t_schema_init(py::list& columns, py::list& types)
 {
