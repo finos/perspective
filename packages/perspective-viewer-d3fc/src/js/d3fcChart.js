@@ -212,10 +212,14 @@ function configureLegend(isSplitBy, color, hiddenElements, update) {
     .orient('vertical')
     .scale(color)
     .on('cellclick', function (d) {
-      const index = hiddenElements.findIndex(e => e === d);
-      index >= 0 ? hiddenElements.splice(index, 1) : hiddenElements.push(d);
+      toggleElements(d);
       update();
     });
+
+  function toggleElements(elementKey) {
+    const index = hiddenElements.findIndex(e => e === elementKey);
+    index >= 0 ? hiddenElements.splice(index, 1) : hiddenElements.push(elementKey);
+  }
 
   return legend;
 }

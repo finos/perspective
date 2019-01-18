@@ -146,7 +146,7 @@ class D3FCElement extends HTMLElement {
       this.remove();
       configs.forEach(config => {
         let chartContainer = document.createElement("div");
-        const chart = new D3FCChart(mode, config, chartContainer)
+        const chart = new D3FCChart(mode, config, chartContainer);
         chartContainer.className = "chart";
         this._container.appendChild(chartContainer);
         this._charts.push(chart);
