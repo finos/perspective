@@ -22,13 +22,6 @@
 #include <perspective/sym_table.h>
 #include <codecvt>
 
-#ifdef PSP_ENABLE_WASM
-#include <perspective/emscripten.h>
-#endif
-
-#ifdef PSP_ENABLE_PYTHON
-#include <perspective/python.h>
-#endif
 
 typedef std::codecvt_utf8<wchar_t> utf8convert_type;
 typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
@@ -75,11 +68,8 @@ template <typename T>
 std::vector<t_aggspec> _get_aggspecs(T j_aggs);
 
 // Date parsing
-template <typename T>
-t_date jsdate_to_t_date(T date);
-
-template <typename T>
-T t_date_to_jsdate(t_date date);
+t_date jsdate_to_t_date(emscripten::val date);
+emscripten::val t_date_to_jsdate(t_date date);
 
 /**
  * Converts a scalar value to its JS representation.
@@ -92,11 +82,8 @@ T t_date_to_jsdate(t_date date);
  * -------
  * val
  */
-template <typename T>
-T scalar_to_val(const t_tscalar scalar);
-
-template <typename T>
-T scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
+emscripten::val scalar_to_val(const t_tscalar scalar);
+emscripten::val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
 
 /**
  *
@@ -111,8 +98,7 @@ T scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
  */
 namespace arrow {
 
-template <typename T>
-void vecFromTypedArray(const T& typedArray, void* data, std::int32_t length, const char* destType = nullptr);
+void vecFromTypedArray(const emscripten::val& typedArray, void* data, std::int32_t length, const char* destType = nullptr);
 
 template <typename T>
 void fill_col_valid(T dcol, std::shared_ptr<t_column> col);

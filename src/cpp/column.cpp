@@ -923,8 +923,7 @@ t_column::borrow_vocabulary(const t_column& o) {
 
 #ifdef PSP_ENABLE_PYTHON
 np::ndarray
-t_column::_as_numpy()
-{
+t_column::_as_numpy() {
     if (is_vlen_dtype(m_dtype))
         return m_data->_as_numpy(DTYPE_UINT64);
     return m_data->_as_numpy(m_dtype);

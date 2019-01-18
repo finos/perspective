@@ -209,9 +209,8 @@ t_gstate::update_history(const t_table* tbl) {
     }
 
 #ifdef PSP_PARALLEL_FOR
-    const t_mapping* m = &m_mapping;
     PSP_PFOR(0, int(ncols), 1,
-        [m, tbl, pkey_col, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](
+        [tbl, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](
             int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
@@ -464,6 +463,35 @@ t_gstate::get_pkey_dtype() const {
         return DTYPE_STR;
     auto iter = m_mapping.begin();
     return iter->first.get_dtype();
+}
+
+std::shared_ptr<t_table>
+t_gstate::get_sorted_pkeyed_table() const {
+    std::map<t_tscalar, t_uindex> ordered(m_mapping.begin(), m_mapping.end());
+    auto sch = m_pkeyed_schema.drop({"psp_op"});
+    auto rv = std::make_shared<t_table>(sch, 0);
+    rv->init();
+    rv->reserve(mapping_size());
+
+    auto pkey_col = rv->get_column("psp_pkey");
+    std::vector<std::shared_ptr<t_column>> icolumns;
+    std::vector<std::shared_ptr<t_column>> ocolumns;
+
+    for (const std::string& cname : m_tblschema.m_columns) {
+        ocolumns.push_back(rv->get_column(cname));
+        icolumns.push_back(m_table->get_column(cname));
+    }
+
+    for (auto it = ordered.begin(); it != ordered.end(); ++it) {
+        auto ridx = it->second;
+        pkey_col->push_back(it->first);
+        for (t_uindex cidx = 0, loop_end = m_tblschema.size(); cidx < loop_end; ++cidx) {
+            auto scalar = icolumns[cidx]->get_scalar(ridx);
+            ocolumns[cidx]->push_back(scalar);
+        }
+    }
+    rv->set_size(mapping_size());
+    return rv;
 }
 
 std::shared_ptr<t_table>

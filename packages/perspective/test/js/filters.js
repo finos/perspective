@@ -267,7 +267,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("x == null", async function() {
+            it("x > null", async function() {
                 var table = perspective.table({x: "float", y: "integer"});
                 const dataSet = [{x: 3.5, y: 1}, {x: 2.5, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4.5, y: 2}, {x: null, y: 2}];
                 table.update(dataSet);
@@ -278,6 +278,87 @@ module.exports = perspective => {
                 let result = await view.to_json();
                 expect(result).toEqual(answer);
                 view.delete();
+                table.delete();
+            });
+
+            it('x == ""', async function() {
+                var table = perspective.table({x: "float", y: "integer"});
+                const dataSet = [{x: 3.5, y: 1}, {x: 2.5, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4.5, y: 2}, {x: null, y: 2}];
+                table.update(dataSet);
+                var view = table.view({
+                    filter: [["x", "==", ""]]
+                });
+                var answer = dataSet;
+                let result = await view.to_json();
+                expect(answer).toEqual(result);
+                view.delete();
+                table.delete();
+            });
+        });
+
+        describe("is_valid_filter", function() {
+            it("x == 2", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "==", 2]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("x < null", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "<", null]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("x > undefined", async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", ">", undefined]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it('x == ""', async function() {
+                var table = perspective.table(data);
+                let isValid = await table.is_valid_filter(["x", "==", ""]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("valid date", async function() {
+                const schema = {
+                    x: "string",
+                    y: "date"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("invalid date", async function() {
+                const schema = {
+                    x: "string",
+                    y: "date"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "<", "1234"]);
+                expect(isValid).toBeFalsy();
+                table.delete();
+            });
+            it("valid datetime", async function() {
+                const schema = {
+                    x: "string",
+                    y: "datetime"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
+                expect(isValid).toBeTruthy();
+                table.delete();
+            });
+            it("invalid datetime", async function() {
+                const schema = {
+                    x: "string",
+                    y: "datetime"
+                };
+                var table = perspective.table(schema);
+                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
+                expect(isValid).toBeFalsy();
                 table.delete();
             });
         });

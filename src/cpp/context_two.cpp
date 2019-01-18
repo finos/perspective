@@ -17,18 +17,19 @@
 #include <perspective/traversal.h>
 
 namespace perspective {
+
 t_ctx2::t_ctx2()
-    : m_row_depth_set(false)
-    , m_column_depth_set(false)
-    , m_row_depth(0)
-    , m_column_depth(0) {}
+    : m_row_depth(0)
+    , m_row_depth_set(false)
+    , m_column_depth(0)
+    , m_column_depth_set(false) {}
 
 t_ctx2::t_ctx2(const t_schema& schema, const t_config& pivot_config)
     : t_ctxbase<t_ctx2>(schema, pivot_config)
-    , m_row_depth_set(false)
-    , m_column_depth_set(false)
     , m_row_depth(0)
-    , m_column_depth(0) {}
+    , m_row_depth_set(false)
+    , m_column_depth(0)
+    , m_column_depth_set(false) {}
 
 t_ctx2::~t_ctx2() {}
 
@@ -564,7 +565,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
 
 std::vector<t_tscalar>
 t_ctx2::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    t_tscalset all_pkeys;
+    std::unordered_set<t_tscalar> all_pkeys;
 
     auto tree_info = resolve_cells(cells);
     for (t_index idx = 0, loop_end = tree_info.size(); idx < loop_end; ++idx) {

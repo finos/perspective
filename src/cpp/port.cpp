@@ -13,8 +13,7 @@
 namespace perspective {
 
 t_port::t_port(t_port_mode mode, const t_schema& schema)
-    : m_mode(mode)
-    , m_schema(schema)
+    : m_schema(schema)
     , m_init(false)
     , m_table(nullptr)
     , m_prevsize(0) {

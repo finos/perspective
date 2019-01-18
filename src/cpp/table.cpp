@@ -75,6 +75,34 @@ t_table::t_table(const std::string& name, const std::string& dirname, const t_sc
     set_capacity(init_cap);
 }
 
+// THIS CONSTRUCTOR INITS. Do not use in production.
+t_table::t_table(const t_schema& s, const std::vector<std::vector<t_tscalar>>& v)
+    : m_name("")
+    , m_dirname("")
+    , m_schema(s)
+    , m_size(0)
+    , m_backing_store(BACKING_STORE_MEMORY)
+    , m_init(false)
+    , m_from_recipe(false) {
+    PSP_TRACE_SENTINEL();
+    LOG_CONSTRUCTOR("t_table");
+    auto ncols = s.size();
+    PSP_VERBOSE_ASSERT(
+        std::all_of(v.begin(), v.end(),
+            [ncols](const std::vector<t_tscalar>& vec) { return vec.size() == ncols; }),
+        "Mismatched row size found");
+    set_capacity(v.size());
+    init();
+    extend(v.size());
+    std::vector<t_column*> cols = get_columns();
+    for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
+        auto col = cols[cidx];
+        for (t_uindex ridx = 0, loop_end = v.size(); ridx < loop_end; ++ridx) {
+            col->set_scalar(ridx, v[ridx][cidx]);
+        }
+    }
+}
+
 t_table::~t_table() {
     PSP_TRACE_SENTINEL();
     LOG_DESTRUCTOR("t_table");
@@ -520,6 +548,21 @@ t_table::clone(const t_mask& mask) const {
     return std::shared_ptr<t_table>(tbl);
 }
 
+std::shared_ptr<t_table>
+t_table::clone() const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_schema schema = m_schema;
+    auto rval = std::make_shared<t_table>("", "", schema, 5, BACKING_STORE_MEMORY);
+    rval->init();
+
+    for (const auto& cname : schema.m_columns) {
+        rval->set_column(cname, get_const_column(cname)->clone());
+    }
+    rval->set_size(size());
+    return rval;
+}
+
 t_column*
 t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
     PSP_TRACE_SENTINEL();
@@ -555,9 +598,10 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
         std::cout << "Promotion only works for int to float." << std::endl;
         return;
     }
-    
+
     // create the new column and copy data
-    std::shared_ptr<t_column> promoted_col = make_column(name, new_dtype, current_col->is_status_enabled());
+    std::shared_ptr<t_column> promoted_col
+        = make_column(name, new_dtype, current_col->is_status_enabled());
     promoted_col->init();
     promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
@@ -620,10 +664,8 @@ t_table::verify() const {
         c->verify();
     }
 
-    auto sz = size();
-
     for (auto& c : m_columns) {
-        PSP_VERBOSE_ASSERT(sz == c->size(), "Ragged table encountered");
+        PSP_VERBOSE_ASSERT(c ,|| (size() == c->size()), "Ragged table encountered");
     }
 }
 
@@ -632,6 +674,32 @@ t_table::reset() {
     m_size = 0;
     m_capacity = DEFAULT_EMPTY_CAPACITY;
     init();
+}
+
+std::vector<t_tscalar>
+t_table::get_scalvec() const {
+    auto nrows = size();
+    auto cols = get_const_columns();
+    auto ncols = cols.size();
+    std::vector<t_tscalar> rv;
+    for (t_uindex idx = 0; idx < nrows; ++idx) {
+        for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
+            rv.push_back(cols[cidx]->get_scalar(idx));
+        }
+    }
+    return rv;
+}
+
+std::shared_ptr<t_column> t_table::operator[](const std::string& name) {
+    if (!m_schema.has_column(name)) {
+        return std::shared_ptr<t_column>(nullptr);
+    }
+    return m_columns[m_schema.get_colidx(name)];
+}
+
+bool
+operator==(const t_table& lhs, const t_table& rhs) {
+    return lhs.get_scalvec() == rhs.get_scalvec();
 }
 
 } // end namespace perspective

@@ -23,8 +23,8 @@ namespace perspective {
 
 t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
     : t_ctxbase<t_ctx1>(schema, pivot_config)
-    , m_depth_set(false)
-    , m_depth(0) {}
+    , m_depth(0)
+    , m_depth_set(false) {}
 
 t_ctx1::~t_ctx1() {}
 
@@ -570,5 +570,37 @@ t_ctx1::clear_deltas() {
 
 void
 t_ctx1::unity_init_load_step_end() {}
+
+std::shared_ptr<t_table>
+t_ctx1::get_table() const {
+    auto schema = m_tree->get_aggtable()->get_schema();
+    auto pivots = m_config.get_row_pivots();
+    auto tbl = std::make_shared<t_table>(schema, m_tree->size());
+    tbl->init();
+    tbl->extend(m_tree->size());
+
+    std::vector<t_column*> aggcols = tbl->get_columns();
+    auto n_aggs = aggcols.size();
+    std::vector<t_column*> pivcols;
+
+    std::stringstream ss;
+    for (const auto& c : pivots) {
+        pivcols.push_back(tbl->add_column(c.colname(), m_schema.get_dtype(c.colname()), true));
+    }
+
+    auto idx = 0;
+    for (auto nidx : m_tree->dfs()) {
+        auto depth = m_tree->get_depth(nidx);
+        if (depth > 0) {
+            pivcols[depth - 1]->set_scalar(idx, m_tree->get_value(nidx));
+        }
+        for (t_uindex aggnum = 0; aggnum < n_aggs; ++aggnum) {
+            auto aggscalar = m_tree->get_aggregate(nidx, aggnum);
+            aggcols[aggnum]->set_scalar(idx, aggscalar);
+        }
+        ++idx;
+    }
+    return tbl;
+}
 
 } // end namespace perspective

@@ -33,28 +33,28 @@ t_uindex
 file_size(t_handle h) {
     struct stat st;
     t_index rcode = fstat(h, &st);
-    PSP_VERBOSE_ASSERT(rcode == 0, "Error in stat");
+    PSP_VERBOSE_ASSERT(rcode, == 0, "Error in stat");
     return st.st_size;
 }
 
 void
 close_file(t_handle h) {
     t_index rcode = close(h);
-    PSP_VERBOSE_ASSERT(rcode == 0, "Error closing file.");
+    PSP_VERBOSE_ASSERT(rcode, == 0, "Error closing file.");
 }
 
 void
 flush_mapping(void* base, t_uindex len) {
     t_index rcode = msync(base, len, MS_SYNC);
-    PSP_VERBOSE_ASSERT(rcode != -1, "Error in msync");
+    PSP_VERBOSE_ASSERT(rcode, != -1, "Error in msync");
 }
 
 t_rfmapping::~t_rfmapping() {
     t_index rcode = munmap(m_base, m_size);
-    PSP_VERBOSE_ASSERT(rcode == 0, "munmap failed.");
+    PSP_VERBOSE_ASSERT(rcode, == 0, "munmap failed.");
 
     rcode = close(m_fd);
-    PSP_VERBOSE_ASSERT(rcode == 0, "Error closing file.");
+    PSP_VERBOSE_ASSERT(rcode, == 0, "Error closing file.");
 }
 
 static void
@@ -69,12 +69,12 @@ map_file_internal_(const std::string& fname, t_fflag fflag, t_fflag fmode,
         size = file_size(fh.value());
     } else {
         t_index rcode = ftruncate(fh.value(), size);
-        PSP_VERBOSE_ASSERT(rcode >= 0, "ftruncate failed.");
+        PSP_VERBOSE_ASSERT(rcode, >= 0, "ftruncate failed.");
     }
 
     void* ptr = mmap(0, size, mprot, mflag, fh.value(), 0);
 
-    PSP_VERBOSE_ASSERT(ptr != MAP_FAILED, "error in mmap");
+    PSP_VERBOSE_ASSERT(ptr, != MAP_FAILED, "error in mmap");
 
     t_handle fd = fh.value();
     fh.release();
@@ -102,7 +102,7 @@ std::int64_t
 psp_curtime() {
     struct timespec t;
     std::int32_t rcode = clock_gettime(CLOCK_MONOTONIC, &t);
-    PSP_VERBOSE_ASSERT(rcode == 0, "Failure in clock_gettime");
+    PSP_VERBOSE_ASSERT(rcode, == 0, "Failure in clock_gettime");
     std::int64_t ns = t.tv_nsec + t.tv_sec * 1000000000;
     return ns;
 }
@@ -143,7 +143,6 @@ psp_curmem() {
 void
 set_thread_name(std::thread& thr, const std::string& name) {
 #ifdef PSP_PARALLEL_FOR
-    auto handle = thr.native_handle();
     pthread_setname_np(name.c_str());
 #endif
 }

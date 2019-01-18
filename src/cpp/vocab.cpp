@@ -135,8 +135,8 @@ t_vocab::verify() const {
 
 #ifndef PSP_ENABLE_WASM
     auto zero = rlookup.find(t_uindex(0));
-    PSP_VERBOSE_ASSERT(zero != rlookup.end(), "0 Not found");
-    PSP_VERBOSE_ASSERT(std::string(zero->second) == "", "0 mapped to unknown");
+    PSP_VERBOSE_ASSERT(zero, != rlookup.end(), "0 Not found");
+    PSP_VERBOSE_ASSERT(std::string(zero->second), == "", "0 mapped to unknown");
 #endif
 
     std::unordered_set<std::string> seen;

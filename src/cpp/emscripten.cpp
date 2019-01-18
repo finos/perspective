@@ -8,15 +8,21 @@
  */
 
 #include <perspective/base.h>
-#include <perspective/binding.h>
 #include <perspective/emscripten.h>
+#include <perspective/gnode.h>
+#include <perspective/table.h>
+#include <perspective/pool.h>
+#include <perspective/context_zero.h>
+#include <perspective/context_one.h>
+#include <perspective/context_two.h>
+#include <random>
+#include <cmath>
 #include <sstream>
 #include <emscripten.h>
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include <perspective/sym_table.h>
 #include <codecvt>
-#include <boost/format.hpp>
 #include <boost/optional.hpp>
 
 using namespace emscripten;
@@ -29,6 +35,7 @@ namespace binding {
  *
  * Data Loading
  */
+
 template <typename T>
 std::vector<t_sortspec> _get_sort(T j_sortby) {
     std::vector<t_sortspec> svec{};
@@ -57,7 +64,6 @@ std::vector<t_sortspec> _get_sort(T j_sortby) {
     }
     return svec;
 }
-
 
 /**
  *
@@ -196,8 +202,7 @@ t_date_to_jsdate(t_date date) {
  * -------
  * val
  */
-template<>
-val scalar_to_val<val>(const t_tscalar scalar) {
+val scalar_to_val(const t_tscalar scalar) {
     if (!scalar.is_valid()) {
         return val::null();
     }
@@ -241,9 +246,8 @@ val scalar_to_val<val>(const t_tscalar scalar) {
     }
 }
 
-template <>
 val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
-    return scalar_to_val<val>(scalars[idx]);
+    return scalar_to_val(scalars[idx]);
 }
 
 /**
@@ -262,7 +266,7 @@ namespace arrow {
 
 void
 vecFromTypedArray(
-    const val& typedArray, void* data, std::int32_t length, const char* destType = nullptr) {
+    const val& typedArray, void* data, std::int32_t length, const char* destType) {
     val memory = val::module_property("buffer");
     if (destType == nullptr) {
         val memoryView = typedArray["constructor"].new_(
@@ -323,20 +327,19 @@ fill_col_dict(val dictvec, std::shared_ptr<t_column> col) {
 }
 } // namespace arrow
 
-
 namespace js_typed_array {
-    val ArrayBuffer = val::global("ArrayBuffer");
-    val Int8Array = val::global("Int8Array");
-    val Int16Array = val::global("Int16Array");
-    val Int32Array = val::global("Int32Array");
-    val Float32Array = val::global("Float32Array");
-    val Float64Array = val::global("Float64Array");
+val ArrayBuffer = val::global("ArrayBuffer");
+val Int8Array = val::global("Int8Array");
+val Int16Array = val::global("Int16Array");
+val Int32Array = val::global("Int32Array");
+val Float32Array = val::global("Float32Array");
+val Float64Array = val::global("Float64Array");
 } // namespace js_typed_array
-
 
 // Given a column index, serialize data to TypedArray
 template <typename T>
-val col_to_js_typed_array(T ctx, t_index idx) {
+val
+col_to_js_typed_array(T ctx, t_index idx) {
     std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
     auto dtype = ctx->get_column_dtype(idx);
     int data_size = data.size();
@@ -356,7 +359,7 @@ val col_to_js_typed_array(T ctx, t_index idx) {
         } break;
         case DTYPE_INT32:
         case DTYPE_INT64: {
-            // scalar_to_val<val> converts int64 into int32
+            // scalar_to_val converts int64 into int32
             data_size *= sizeof(std::int32_t);
             sentinel = val(std::numeric_limits<std::int32_t>::lowest());
             constructor = js_typed_array::Int32Array;
@@ -384,7 +387,7 @@ val col_to_js_typed_array(T ctx, t_index idx) {
         if (scalar.get_dtype() == DTYPE_NONE) {
             arr.call<void>("fill", sentinel, idx, idx + 1);
         } else {
-            arr.call<void>("fill", scalar_to_val<val>(scalar), idx, idx + 1);
+            arr.call<void>("fill", scalar_to_val(scalar), idx, idx + 1);
         }
     }
 
@@ -392,8 +395,8 @@ val col_to_js_typed_array(T ctx, t_index idx) {
 }
 
 void
-_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -449,7 +452,7 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
                         col->set_nth(i, fval);
                     } else {
                         col->set_nth(i, static_cast<std::int32_t>(fval));
-                    }     
+                    }
                 } break;
                 case DTYPE_FLOAT32: {
                     col->set_nth(i, item.as<float>());
@@ -465,8 +468,8 @@ _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std
 }
 
 void
-_fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -480,8 +483,8 @@ _fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name, s
 }
 
 void
-_fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -522,8 +525,8 @@ _fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -562,8 +565,8 @@ _fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx,
+    t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
 
     if (is_arrow) {
@@ -593,8 +596,8 @@ _fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name, st
 }
 
 void
-_fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
-    bool is_arrow) {
+_fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
 
     t_uindex nrows = col->size();
 
@@ -732,7 +735,8 @@ _fill_data(t_table& tbl, std::vector<std::string> ocolnames, val accessor,
  * Public
  */
 template <>
-void set_column_nth(t_column* col, t_uindex idx, val value) {
+void
+set_column_nth(t_column* col, t_uindex idx, val value) {
 
     // Check if the value is a javascript null
     if (value.isNull()) {
@@ -867,34 +871,34 @@ void table_add_computed_column(t_table& table, val computed_defs) {
                     break;
                 }
                 case 1: {
-                    i1 = scalar_to_val<val>(icols[0]->get_scalar(ridx));
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
                     if (!i1.isNull()) {
                         value = func(i1);
                     }
                     break;
                 }
                 case 2: {
-                    i1 = scalar_to_val<val>(icols[0]->get_scalar(ridx));
-                    i2 = scalar_to_val<val>(icols[1]->get_scalar(ridx));
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
                     if (!i1.isNull() && !i2.isNull()) {
                         value = func(i1, i2);
                     }
                     break;
                 }
                 case 3: {
-                    i1 = scalar_to_val<val>(icols[0]->get_scalar(ridx));
-                    i2 = scalar_to_val<val>(icols[1]->get_scalar(ridx));
-                    i3 = scalar_to_val<val>(icols[2]->get_scalar(ridx));
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(icols[2]->get_scalar(ridx));
                     if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
                         value = func(i1, i2, i3);
                     }
                     break;
                 }
                 case 4: {
-                    i1 = scalar_to_val<val>(icols[0]->get_scalar(ridx));
-                    i2 = scalar_to_val<val>(icols[1]->get_scalar(ridx));
-                    i3 = scalar_to_val<val>(icols[2]->get_scalar(ridx));
-                    i4 = scalar_to_val<val>(icols[3]->get_scalar(ridx));
+                    i1 = scalar_to_val(icols[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(icols[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(icols[2]->get_scalar(ridx));
+                    i4 = scalar_to_val(icols[3]->get_scalar(ridx));
                     if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
                         value = func(i1, i2, i3, i4);
                     }
@@ -939,10 +943,8 @@ column_names(val data, std::int32_t format) {
                               << std::endl;
                 }
 
-                std::cout << boost::format("Extending from %d to %d")
-                        % data_names["length"].as<std::int32_t>()
-                        % next["length"].as<std::int32_t>()
-                          << std::endl;
+                std::cout << "Extending from " << data_names["length"].as<std::int32_t>()
+                          << "to " << next["length"].as<std::int32_t>() << std::endl;
                 data_names = next;
                 max_check *= 2;
             }
@@ -964,10 +966,8 @@ infer_type(val x, val date_validator) {
 
     // Unwrap numbers inside strings
     val x_number = val::global("Number").call<val>("call", val::object(), x);
-    bool number_in_string = (jstype == "string") 
-                            && (x["length"].as<std::int32_t>() != 0) 
-                            && (!val::global("isNaN")
-                                .call<bool>("call", val::object(), x_number));
+    bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
+        && (!val::global("isNaN").call<bool>("call", val::object(), x_number));
 
     if (x.isNull()) {
         t = t_dtype::DTYPE_NONE;
@@ -1136,6 +1136,8 @@ make_gnode(const t_table& table) {
 
     return gnode;
 }
+
+
 
 /**
  * Create a populated table.
@@ -1355,7 +1357,7 @@ val get_column_data(std::shared_ptr<t_table> table, std::string colname) {
     val arr = val::array();
     auto col = table->get_column(colname);
     for (auto idx = 0; idx < col->size(); ++idx) {
-        arr.set(idx, scalar_to_val<val>(col->get_scalar(idx)));
+        arr.set(idx, scalar_to_val(col->get_scalar(idx)));
     }
     return arr;
 }
@@ -1377,7 +1379,7 @@ val get_data(T ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_
     auto slice = ctx->get_data(start_row, end_row, start_col, end_col);
     val arr = val::array();
     for (auto idx = 0; idx < slice.size(); ++idx) {
-        arr.set(idx, scalar_to_val<val>(slice[idx]));
+        arr.set(idx, scalar_to_val(slice[idx]));
     }
     return arr;
 }
@@ -1406,7 +1408,7 @@ val get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
             t_uindex col_num = *idx;
             iter += col_num - prev;
             prev = col_num;
-            arr.set(i, scalar_to_val<val>(*iter));
+            arr.set(i, scalar_to_val(*iter));
         }
         if (iter != slice.end())
             iter++;
@@ -1736,8 +1738,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_context_zero", &make_context_zero<val>, allow_raw_pointers());
     function("make_context_one", &make_context_one<val>, allow_raw_pointers());
     function("make_context_two", &make_context_two<val>, allow_raw_pointers());
-    function("scalar_to_val", &scalar_to_val<val>);
-    function("scalar_vec_to_val", &scalar_vec_to_val<val>);
+    function("scalar_to_val", &scalar_to_val);
+    function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
     function("set_column_nth", &set_column_nth<val>, allow_raw_pointers());
     function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);

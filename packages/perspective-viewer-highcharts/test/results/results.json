@@ -83,5 +83,10 @@
     "render_warning.html/render warning should show above size limit.": "6b6f46fd4075987564eee7df17652d3d",
     "render_warning.html/dismissing render warning should trigger render.": "1338b4720cc3374d42fe4c75a9e3dc8b",
     "render_warning.html/selecting 'do not show again' should stop render warnings.": "1338b4720cc3374d42fe4c75a9e3dc8b",
-    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "e606e604c4ade6671319f8d049ee5a63"
+    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "e606e604c4ade6671319f8d049ee5a63",
+    "bar.html/highlights invalid filter.": "55b58961efb8ad7acc4d6613d4a5027e",
+    "scatter.html/highlights invalid filter.": "07814ed1500d1810d934ca8ac9f07486",
+    "line.html/highlights invalid filter.": "1dfcefa55fb5bad1804b1fbb708204de",
+    "treemap.html/highlights invalid filter.": "5b36e9d8a49d330118c2d6079262d268",
+    "heatmap.html/highlights invalid filter.": "1d1971aee71f389067e7f3c732d26a5f"
 }

@@ -276,6 +276,13 @@ public:
 
     std::vector<t_uindex> get_descendents(t_uindex nidx) const;
 
+    t_uindex get_num_leaves(t_uindex depth) const;
+    std::vector<t_index> get_indices_for_depth(t_uindex depth) const;
+
+    t_bfs_iter<t_stree> bfs() const;
+    t_dfs_iter<t_stree> dfs() const;
+    void pprint() const;
+
 protected:
     void mark_zero_desc();
     t_uindex get_num_aggcols() const;
@@ -311,7 +318,6 @@ private:
     std::set<t_uindex> m_newleaves;
     t_sidxmap m_smap;
     std::vector<const t_column*> m_aggcols;
-    t_uindex m_dotcount;
     std::shared_ptr<t_tcdeltas> m_deltas;
     std::vector<t_minmax> m_minmax;
     t_tree_unify_rec_vec m_tree_unification_records;

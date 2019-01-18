@@ -53,7 +53,11 @@ const NODE_OPTIONS = {
 /**
  * Filter for the runtimes we should build
  */
-const AVAILABLE_RUNTIMES = [WEB_ASMJS_OPTIONS, WEB_WASM_OPTIONS, NODE_OPTIONS];
+const AVAILABLE_RUNTIMES = [WEB_WASM_OPTIONS, NODE_OPTIONS];
+
+if (!process.env.PSP_DEBUG) {
+    AVAILABLE_RUNTIMES.push(WEB_ASMJS_OPTIONS);
+}
 
 // Select the runtimes - if no builds are specified then build everything
 const RUNTIMES = AVAILABLE_RUNTIMES.filter(runtime => runtime.build).length ? AVAILABLE_RUNTIMES.filter(runtime => runtime.build) : AVAILABLE_RUNTIMES;
@@ -115,7 +119,11 @@ function docker(image = "emsdk") {
 }
 
 function compileCPP() {
-    let cmd = `emcmake cmake ../ && emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
+    let cmd = `emcmake cmake ../ `;
+    if (process.env.PSP_DEBUG) {
+        cmd += `-DCMAKE_BUILD_TYPE=debug`;
+    }
+    cmd += `&& emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
     if (process.env.PSP_DOCKER) {
         cmd = `${docker()} bash -c 'cd obj && ${cmd}'`;
     } else {
@@ -140,5 +148,6 @@ try {
     }
     lerna();
 } catch (e) {
+    console.log(e.message);
     process.exit(1);
 }
