@@ -142,7 +142,8 @@ function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
     crossScale =
       d3.scaleBand()
         .domain(stackedBarData.map((entry) => entry["group"]))
-        .padding(0.5);
+        .paddingInner(0.4)
+        .paddingOuter(0.2);
   } else {
     mainScale =
       d3.scaleLinear()
@@ -151,7 +152,8 @@ function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
     crossScale =
       d3.scaleBand()
         .domain(dataset.map(x => x.crossValue))
-        .padding(0.5);
+        .paddingInner(0.4)
+        .paddingOuter(0.2);
   }
 
   let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
