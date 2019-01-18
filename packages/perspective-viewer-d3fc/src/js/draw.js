@@ -156,8 +156,8 @@ class D3FCElement extends HTMLElement {
   }
 
   resize() {
-    if (this._charts && this._charts.length > 0) {
-      this._charts.map(x => x.reflow());
+    if (this._charts.length > 0) {
+      this._charts.forEach(chart => chart.update());
     }
   }
 
