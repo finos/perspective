@@ -18,10 +18,10 @@
 #include <cstring>
 #include <cstdio>
 #include <functional>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <vector>
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_set>
+#include <unordered_map>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <sstream>
 #include <functional> //std::hash
@@ -186,9 +186,6 @@ inline t_tscalar operator"" _ns(const char* v, std::size_t len) {
     rv.m_status = STATUS_INVALID;
     return rv;
 }
-
-typedef boost::unordered_set<t_tscalar> t_tscalset;
-typedef boost::unordered_map<t_tscalar, t_index> t_tscaltvimap;
 
 PERSPECTIVE_EXPORT t_tscalar mknone();
 PERSPECTIVE_EXPORT t_tscalar mknull(t_dtype dtype);

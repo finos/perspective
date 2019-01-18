@@ -17,6 +17,9 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
+    if (process.env.PSP_DEBUG) {
+        cmd += ` -e PSP_DEBUG=1`;
+    }
     cmd += ` -v $(pwd):/usr/src/app/cpp -w /usr/src/app/cpp/cppbuild perspective/${image}`;
     return cmd;
 }
@@ -34,7 +37,7 @@ try {
 
     cmd += " cmake ../ -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1";
 
-    if(process.env.PSP_DEBUG){
+    if (process.env.PSP_DEBUG) {
         cmd += `-DCMAKE_BUILD_TYPE=debug`;
     }
 
