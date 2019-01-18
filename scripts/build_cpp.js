@@ -51,6 +51,6 @@ try {
         execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {
-    console.log(e);
+    console.log(e.message);
     process.exit(1);
 }

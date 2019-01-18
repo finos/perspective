@@ -108,6 +108,6 @@ try {
         }
     }
 } catch (e) {
-    console.log(e);
+    console.log(e.message);
     process.exit(1);
 }
