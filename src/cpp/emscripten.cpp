@@ -8,6 +8,7 @@
  */
 
 #include <perspective/base.h>
+#include <perspective/binding.h>
 #include <perspective/emscripten.h>
 #include <perspective/gnode.h>
 #include <perspective/table.h>
@@ -36,12 +37,12 @@ namespace binding {
  * Data Loading
  */
 
-template <typename T>
-std::vector<t_sortspec> _get_sort(T j_sortby) {
+template <>
+std::vector<t_sortspec> _get_sort(val j_sortby) {
     std::vector<t_sortspec> svec{};
-    std::vector<T> sortbys = vecFromJSArray<T>(j_sortby);
+    std::vector<val> sortbys = vecFromArray<val, val>(j_sortby);
     for (auto idx = 0; idx < sortbys.size(); ++idx) {
-        std::vector<std::int32_t> sortby = vecFromJSArray<std::int32_t>(sortbys[idx]);
+        std::vector<std::int32_t> sortby = vecFromArray<val, std::int32_t>(sortbys[idx]);
         t_sorttype sorttype;
         switch (sortby[1]) {
             case 0:
@@ -76,12 +77,13 @@ std::vector<t_sortspec> _get_sort(T j_sortby) {
  * -------
  *
  */
+template <>
 std::vector<t_fterm>
 _get_fterms(t_schema schema, val j_filters) {
     std::vector<t_fterm> fvec{};
-    std::vector<val> filters = vecFromJSArray<val>(j_filters);
+    std::vector<val> filters = vecFromArray<val, val>(j_filters);
     for (auto fidx = 0; fidx < filters.size(); ++fidx) {
-        std::vector<val> filter = vecFromJSArray<val>(filters[fidx]);
+        std::vector<val> filter = vecFromArray<val, val>(filters[fidx]);
         std::string coln = filter[0].as<std::string>();
         t_filter_op comp = filter[1].as<t_filter_op>();
 
@@ -89,7 +91,7 @@ _get_fterms(t_schema schema, val j_filters) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
                 std::vector<t_tscalar> terms{};
-                std::vector<std::string> j_terms = vecFromJSArray<std::string>(filter[2]);
+                std::vector<std::string> j_terms = vecFromArray<val, std::string>(filter[2]);
                 for (auto jidx = 0; jidx < j_terms.size(); ++jidx) {
                     terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
                 }
@@ -141,15 +143,15 @@ _get_fterms(t_schema schema, val j_filters) {
  */
 std::vector<t_aggspec>
 _get_aggspecs(val j_aggs) {
-    std::vector<val> aggs = vecFromJSArray<val>(j_aggs);
+    std::vector<val> aggs = vecFromArray<val, val>(j_aggs);
     std::vector<t_aggspec> aggspecs;
     for (auto idx = 0; idx < aggs.size(); ++idx) {
-        std::vector<val> agg_row = vecFromJSArray<val>(aggs[idx]);
+        std::vector<val> agg_row = vecFromArray<val, val>(aggs[idx]);
         std::string name = agg_row[0].as<std::string>();
         t_aggtype aggtype = agg_row[1].as<t_aggtype>();
 
         std::vector<t_dep> dependencies;
-        std::vector<val> deps = vecFromJSArray<val>(agg_row[2]);
+        std::vector<val> deps = vecFromArray<val, val>(agg_row[2]);
         for (auto didx = 0; didx < deps.size(); ++didx) {
             if (deps[didx].isUndefined()) {
                 continue;
@@ -202,7 +204,7 @@ t_date_to_jsdate(t_date date) {
  * -------
  * val
  */
-val scalar_to_val(const t_tscalar scalar) {
+val scalar_to_val(const t_tscalar& scalar) {
     if (!scalar.is_valid()) {
         return val::null();
     }
@@ -250,6 +252,21 @@ val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) 
     return scalar_to_val(scalars[idx]);
 }
 
+template <typename T, typename U>
+std::vector<U> vecFromArray(T& arr) {
+    return vecFromJSArray<U>(arr);
+}
+
+template <>
+val scalar_to(const t_tscalar& scalar) {
+    return scalar_to_val(scalar);
+}
+
+
+template <>
+val scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
+    return scalar_vec_to_val(scalars, idx);
+}
 /**
  *
  *
@@ -264,8 +281,9 @@ val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) 
 
 namespace arrow {
 
-void
-vecFromTypedArray(
+
+template <>
+void vecFromTypedArray(
     const val& typedArray, void* data, std::int32_t length, const char* destType) {
     val memory = val::module_property("buffer");
     if (destType == nullptr) {
@@ -279,8 +297,8 @@ vecFromTypedArray(
     }
 }
 
-void
-fill_col_valid(val dcol, std::shared_ptr<t_column> col) {
+template <>
+void fill_col_valid(val dcol, std::shared_ptr<t_column> col) {
     // dcol should be the Uint8Array containing the null bitmap
     t_uindex nrows = col->size();
 
@@ -292,8 +310,8 @@ fill_col_valid(val dcol, std::shared_ptr<t_column> col) {
     }
 }
 
-void
-fill_col_dict(val dictvec, std::shared_ptr<t_column> col) {
+template <>
+void fill_col_dict(val dictvec, std::shared_ptr<t_column> col) {
     // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it support
     // other Vector types?
     val vdata = dictvec["values"];
@@ -813,7 +831,7 @@ set_column_nth(t_column* col, t_uindex idx, val value) {
  */
 template <>
 void table_add_computed_column(t_table& table, val computed_defs) {
-    auto vcomputed_defs = vecFromJSArray<val>(computed_defs);
+    auto vcomputed_defs = vecFromArray<val, val>(computed_defs);
     for (auto i = 0; i < vcomputed_defs.size(); ++i) {
         val coldef = vcomputed_defs[i];
         std::string name = coldef["column"].as<std::string>();
@@ -845,7 +863,7 @@ void table_add_computed_column(t_table& table, val computed_defs) {
         }
 
         // Get list of input column names
-        auto icol_names = vecFromJSArray<std::string>(inputs);
+        auto icol_names = vecFromArray<val, std::string>(inputs);
 
         // Get t_column* for all input columns
         std::vector<const t_column*> icols;
@@ -949,10 +967,11 @@ column_names(val data, std::int32_t format) {
                 max_check *= 2;
             }
 
-            names = vecFromJSArray<std::string>(data_names);
+            names = vecFromArray<val, std::string>(data_names);
         }
     } else if (format == 1 || format == 2) {
-        names = vecFromJSArray<std::string>(Object.call<val>("keys", data));
+        val keys = Object.call<val>("keys", data);
+        names = vecFromArray<val, std::string>(keys);
     }
 
     return names;
@@ -1058,8 +1077,9 @@ data_types(val data, std::int32_t format, std::vector<std::string> names, val da
     std::vector<t_dtype> types;
 
     if (format == 2) {
+        val keys = val::global("Object").template call<val>("keys", data);
         std::vector<std::string> data_names
-            = vecFromJSArray<std::string>(val::global("Object").call<val>("keys", data));
+            = vecFromArray<val, std::string>(keys);
 
         for (std::vector<std::string>::iterator name = data_names.begin();
              name != data_names.end(); ++name) {
@@ -1166,8 +1186,10 @@ make_table(t_pool* pool, val gnode, val accessor, val computed, std::uint32_t of
     // Determine metadata
     if (is_arrow || (is_update || is_delete)) {
         // TODO: fully remove intermediate passed-through JS arrays for non-arrow data
-        colnames = vecFromJSArray<std::string>(accessor["names"]);
-        dtypes = vecFromJSArray<t_dtype>(accessor["types"]);
+        val names = accessor["names"];
+        val types = accessor["types"];
+        colnames = vecFromArray<val, std::string>(names);
+        dtypes = vecFromArray<val, t_dtype>(types);
     } else {
         // Infer names and types
         val data = accessor["data"];
@@ -1270,7 +1292,7 @@ template <>
 std::shared_ptr<t_ctx0>
 make_context_zero(t_schema schema, t_filter_op combiner, val j_filters, val j_columns,
     val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
-    auto columns = vecFromJSArray<std::string>(j_columns);
+    auto columns = vecFromArray<val, std::string>(j_columns);
     auto fvec = _get_fterms(schema, j_filters);
     auto svec = _get_sort(j_sortby);
     auto cfg = t_config(columns, combiner, fvec);
@@ -1299,7 +1321,7 @@ make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filt
     val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
-    auto pivots = vecFromJSArray<std::string>(j_pivots);
+    auto pivots = vecFromArray<val, std::string>(j_pivots);
     auto svec = _get_sort(j_sortby);
 
     auto cfg = t_config(pivots, aggspecs, combiner, fvec);
@@ -1330,8 +1352,8 @@ make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op comb
     std::string name) {
     auto fvec = _get_fterms(schema, j_filters);
     auto aggspecs = _get_aggspecs(j_aggs);
-    auto rpivots = vecFromJSArray<std::string>(j_rpivots);
-    auto cpivots = vecFromJSArray<std::string>(j_cpivots);
+    auto rpivots = vecFromArray<val, std::string>(j_rpivots);
+    auto cpivots = vecFromArray<val, std::string>(j_cpivots);
     t_totals total = show_totals ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
     auto cfg = t_config(rpivots, cpivots, aggspecs, total, combiner, fvec);
