@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.12] - 2019-01-18
+### Added
+* [#356](https://github.com/jpmorganchase/perspective/pull/356) Perspective for Python!
+* [#381](https://github.com/jpmorganchase/perspective/pull/381) Perspective for C++ Linux, MacOS and Windows!
+* [#375](https://github.com/jpmorganchase/perspective/pull/375) Filter validation UX for `<perspective-viewer>`.
+
+### Fixes
+* [#353](https://github.com/jpmorganchase/perspective/pull/353) Substantial performance improvements for CSV/JSON data loading.
+* [#355](https://github.com/jpmorganchase/perspective/pull/355) Reduced asset size & removed unnecesary abstraction.
+* [#357](https://github.com/jpmorganchase/perspective/pull/357) Removed regenerator plugin for smaller bundle & better performance.
+* [#359](https://github.com/jpmorganchase/perspective/pull/359) Added missing package.json dependencies.
+* [#367](https://github.com/jpmorganchase/perspective/pull/367) Performance optimization for parsing int/float ambiguous columns.
+* [#370](https://github.com/jpmorganchase/perspective/pull/370) Fixed regression in inferrence for numeric columns.
+    
+### Internal
+* [#351](https://github.com/jpmorganchase/perspective/pull/351) Test coverage for Jupyterlab plugin.
+* [#352](https://github.com/jpmorganchase/perspective/pull/352) JS data parsing API ported to C++ for portability.
+* [#383](https://github.com/jpmorganchase/perspective/pull/383) Tests for C++.
+* [#386](https://github.com/jpmorganchase/perspective/pull/386) Strict builds for C++
+
 ## [0.2.11] - 2018-12-20
 ### Added
 * [#345](https://github.com/jpmorganchase/perspective/pull/345) Direct load Apache Arrow support added to Jupyterlab plugin
