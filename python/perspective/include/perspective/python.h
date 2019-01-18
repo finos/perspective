@@ -94,6 +94,8 @@ BOOST_PYTHON_MODULE(libbinding)
         .def("get_recipe", &perspective::t_schema::get_recipe)
         .def("has_column", &perspective::t_schema::has_column)
         .def("get_table_context", &perspective::t_schema::get_table_context)
+        .def("get_table_context", &perspective::t_schema::get_table_context)
+        .def("str", &perspective::t_schema::str)
 
         // when returning const, need return_value_policy<copy_const_reference>
         .def("columns", &perspective::t_schema::columns, py::return_value_policy<py::copy_const_reference>())
@@ -102,8 +104,8 @@ BOOST_PYTHON_MODULE(libbinding)
 
 
     //TODO
-    py::class_<perspective::t_column>("t_column", 
-        py::init<>())
+    py::class_<perspective::t_column>("t_column", py::init<>())
+        .def("pprint", static_cast<void (perspective::t_column::*)() const>(&perspective::t_column::pprint))
     ;
 
     py::class_<perspective::t_gnode>("t_gnode", py::init<perspective::t_schema, perspective::t_schema>())
