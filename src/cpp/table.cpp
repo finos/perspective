@@ -664,10 +664,8 @@ t_table::verify() const {
         c->verify();
     }
 
-    auto sz = size();
-
     for (auto& c : m_columns) {
-        PSP_VERBOSE_ASSERT(sz == c->size(), "Ragged table encountered");
+        PSP_VERBOSE_ASSERT(c ,|| (size() == c->size()), "Ragged table encountered");
     }
 }
 

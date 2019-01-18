@@ -154,8 +154,8 @@ private:
     t_totals m_totals;
     std::map<std::string, t_index> m_detail_colmap;
     bool m_has_pkey_agg;
-    t_uindex m_row_expand_depth;
-    t_uindex m_col_expand_depth;
+    // t_uindex m_row_expand_depth;
+    // t_uindex m_col_expand_depth;
     t_filter_op m_combiner;
     std::vector<t_fterm> m_fterms;
     bool m_handle_nan_sort;

@@ -23,8 +23,8 @@ namespace perspective {
 
 t_ctx1::t_ctx1(const t_schema& schema, const t_config& pivot_config)
     : t_ctxbase<t_ctx1>(schema, pivot_config)
-    , m_depth_set(false)
-    , m_depth(0) {}
+    , m_depth(0)
+    , m_depth_set(false) {}
 
 t_ctx1::~t_ctx1() {}
 

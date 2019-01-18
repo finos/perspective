@@ -318,7 +318,6 @@ private:
     std::set<t_uindex> m_newleaves;
     t_sidxmap m_smap;
     std::vector<const t_column*> m_aggcols;
-    t_uindex m_dotcount;
     std::shared_ptr<t_tcdeltas> m_deltas;
     std::vector<t_minmax> m_minmax;
     t_tree_unify_rec_vec m_tree_unification_records;

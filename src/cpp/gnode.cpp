@@ -362,7 +362,7 @@ t_gnode::_process() {
 
         auto key_col = tbl->add_column("psp_pkey", DTYPE_INT64, true);
         std::int64_t start = get_table()->size();
-        for (auto ridx = 0; ridx < tbl->size(); ++ridx) {
+        for (t_uindex ridx = 0; ridx < tbl->size(); ++ridx) {
             key_col->set_nth<std::int64_t>(ridx, start + ridx);
         }
     }
@@ -947,7 +947,7 @@ t_gnode::notify_contexts(const t_table& flattened) {
     } else {
 #ifdef PSP_PARALLEL_FOR
         PSP_PFOR(0, int(num_ctx), 1,
-            [this, &notify_context_helper](int ctxidx)
+            [&notify_context_helper](int ctxidx)
 #else
         for (t_index ctxidx = 0; ctxidx < num_ctx; ++ctxidx)
 #endif

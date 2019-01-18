@@ -21,11 +21,9 @@ t_col_name_type::t_col_name_type(const std::string& name, t_dtype type)
     : m_name(name)
     , m_type(type) {}
 
-t_aggspec::t_aggspec()
-    : m_kernel(0) {}
+t_aggspec::t_aggspec(){}
 
-t_aggspec::t_aggspec(const t_aggspec_recipe& v)
-    : m_kernel(0) {
+t_aggspec::t_aggspec(const t_aggspec_recipe& v) {
     m_name = v.m_name;
     m_disp_name = v.m_name;
     m_agg = v.m_agg;
@@ -51,28 +49,24 @@ t_aggspec::t_aggspec(
     : m_name(name)
     , m_disp_name(name)
     , m_agg(agg)
-    , m_dependencies(dependencies)
-    , m_kernel(0) {}
+    , m_dependencies(dependencies) {}
 
 t_aggspec::t_aggspec(const std::string& aggname, t_aggtype agg, const std::string& dep)
     : m_name(aggname)
     , m_disp_name(aggname)
     , m_agg(agg)
-    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)})
-    , m_kernel(0) {}
+    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)}) {}
 
 t_aggspec::t_aggspec(t_aggtype agg, const std::string& dep)
     : m_agg(agg)
-    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)})
-    , m_kernel(0) {}
+    , m_dependencies(std::vector<t_dep>{t_dep(dep, DEPTYPE_COLUMN)}) {}
 
 t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_aggtype agg,
     const std::vector<t_dep>& dependencies)
     : m_name(name)
     , m_disp_name(disp_name)
     , m_agg(agg)
-    , m_dependencies(dependencies)
-    , m_kernel(0) {}
+    , m_dependencies(dependencies) {}
 
 t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_aggtype agg,
     const std::vector<t_dep>& dependencies, t_sorttype sort_type)
@@ -80,8 +74,7 @@ t_aggspec::t_aggspec(const std::string& name, const std::string& disp_name, t_ag
     , m_disp_name(disp_name)
     , m_agg(agg)
     , m_dependencies(dependencies)
-    , m_sort_type(sort_type)
-    , m_kernel(0) {}
+    , m_sort_type(sort_type) {}
 
 t_aggspec::t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
     t_uindex agg_one_idx, t_uindex agg_two_idx, double agg_one_weight, double agg_two_weight)
@@ -91,10 +84,7 @@ t_aggspec::t_aggspec(const std::string& aggname, const std::string& disp_aggname
     , m_agg_one_idx(agg_one_idx)
     , m_agg_two_idx(agg_two_idx)
     , m_agg_one_weight(agg_one_weight)
-    , m_agg_two_weight(agg_two_weight)
-    , m_kernel(0)
-
-{}
+    , m_agg_two_weight(agg_two_weight) {}
 
 t_aggspec::~t_aggspec() {}
 
