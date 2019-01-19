@@ -15,7 +15,15 @@ const include = [__dirname];
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
-        this.options = options;
+        this.options = Object.assign({}, options, {
+            build_worker: false,
+            CORSLoaderOptions: {
+                name: "[name]"
+            },
+            FileWorkerLoaderOptions: {
+                name: "[name].js"
+            },
+        });
     }
 
     apply(compiler) {
@@ -25,14 +33,13 @@ class PerspectiveWebpackPlugin {
                 include,
                 use: {
                     loader: CROSS_ORIGIN_FILE_LOADER, 
-                    options: {
-                        name: "[name]"
-                    }
+                    options: this.options.CORSLoaderOptions
                 }
             }
         ];
 
         if (this.options.build_worker) {
+            // These options are for UMD builds of the library
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
                 include,
@@ -55,9 +62,7 @@ class PerspectiveWebpackPlugin {
                 include,
                 use: {
                     loader: FILE_WORKER_LOADER,
-                    options: {
-                        name: "[name].js"
-                    }
+                    options: this.options.FileWorkerLoaderOptions
                 }
             });
         }
