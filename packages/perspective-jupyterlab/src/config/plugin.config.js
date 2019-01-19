@@ -52,11 +52,6 @@ module.exports = {
                 loader: "arraybuffer-loader"
             },
             {
-                test: /\.js$/,
-                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-                loader: "babel-loader"
-            },
-            {
                 test: /\.css$/,
                 use: [{loader: "css-loader"}]
             },

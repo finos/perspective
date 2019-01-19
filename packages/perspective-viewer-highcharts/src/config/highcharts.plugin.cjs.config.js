@@ -6,9 +6,9 @@ const externals = Object.keys(dependencies).map(external => new RegExp(`^${exter
 
 module.exports = Object.assign({}, common({no_minify: true}), {
     devtool: false,
-    entry: "./src/js/viewer.js",
+    entry: "./src/js/highcharts.js",
     output: {
-        filename: "perspective-viewer.js",
+        filename: "perspective-viewer-plugin-highcharts.js",
         libraryTarget: "commonjs2",
         path: path.resolve(__dirname, "../../cjs")
     },
