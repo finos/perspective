@@ -15,8 +15,8 @@ module.exports = Object.assign({}, common({no_minify: true}), {
     externals: [
         function(context, request, callback) {
             for (let external of externals) {
-                if (external.test(request)){
-                  return callback(null, 'commonjs ' + request);
+                if (external.test(request)) {
+                    return callback(null, "commonjs " + request);
                 }
             }
             callback();

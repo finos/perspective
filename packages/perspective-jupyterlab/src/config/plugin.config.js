@@ -27,7 +27,6 @@ module.exports = {
         rules: [
             {
                 test: /\.less$/,
-                exclude: /themes/,
                 use: [
                     {
                         loader: "css-loader"
@@ -42,18 +41,6 @@ module.exports = {
                         loader: "less-loader"
                     }
                 ]
-            },
-            {
-                test: /\.(html)$/,
-                loader: "html-loader"
-            },
-            {
-                test: /\.(arrow)$/,
-                loader: "arraybuffer-loader"
-            },
-            {
-                test: /\.css$/,
-                use: [{loader: "css-loader"}]
             },
             {
                 test: /\.ts?$/,
