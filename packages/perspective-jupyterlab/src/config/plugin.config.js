@@ -15,7 +15,7 @@ module.exports = {
     entry: "./src/ts/index.ts",
     resolveLoader: {
         alias: {
-            "file-worker-loader": "@jpmorganchase/perspective/loader/file_worker_loader.js"
+            "file-worker-loader": "@jpmorganchase/perspective-webpack-plugin/lib/file-worker-loader.js"
         }
     },
     resolve: {

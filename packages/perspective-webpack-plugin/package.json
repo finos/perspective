@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-webpack-plugin",
-    "version": "0.2.11",
+    "version": "0.2.12",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {

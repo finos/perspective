@@ -7,9 +7,9 @@
  *
  */
 
-const FILE_WORKER_LOADER = require.resolve("./loader/file_worker_loader");
-const CROSS_ORIGIN_FILE_LOADER = require.resolve("./loader/cross_origin_file_loader.js");
-const BLOB_LOADER = require.resolve("./loader/blob_worker_loader.js");
+const FILE_WORKER_LOADER = require.resolve("@jpmorganchase/perspective-webpack-plugin/lib/file-worker-loader");
+const CROSS_ORIGIN_FILE_LOADER = require.resolve("@jpmorganchase/perspective-webpack-plugin/lib/cross-origin-file-loader.js");
+const BLOB_LOADER = require.resolve("@jpmorganchase/perspective-webpack-plugin/lib/blob-worker-loader.js");
 
 const include = [__dirname];
 
