@@ -15,7 +15,7 @@ const include = [__dirname];
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
-        this.options = Object.assign({}, options, {
+        this.options = Object.assign({}, {
             build_worker: false,
             CORSLoaderOptions: {
                 name: "[name]"
@@ -23,7 +23,7 @@ class PerspectiveWebpackPlugin {
             FileWorkerLoaderOptions: {
                 name: "[name].js"
             },
-        });
+        }, options);
     }
 
     apply(compiler) {
