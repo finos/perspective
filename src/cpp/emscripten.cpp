@@ -1476,10 +1476,18 @@ main(int argc, char** argv) {
  */
 
 EMSCRIPTEN_BINDINGS(perspective) {
+    /******************************************************************************
+     *
+     * t_column
+     */
     class_<t_column>("t_column")
         .smart_ptr<std::shared_ptr<t_column>>("shared_ptr<t_column>")
         .function<void>("set_scalar", &t_column::set_scalar);
 
+    /******************************************************************************
+     *
+     * t_table
+     */
     class_<t_table>("t_table")
         .constructor<t_schema, t_uindex>()
         .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
@@ -1488,11 +1496,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<unsigned long>(
             "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
 
+    /******************************************************************************
+     *
+     * t_schema
+     */
     class_<t_schema>("t_schema")
         .function<const std::vector<std::string>&>(
             "columns", &t_schema::columns, allow_raw_pointers())
         .function<const std::vector<t_dtype>>("types", &t_schema::types, allow_raw_pointers());
 
+    /******************************************************************************
+     *
+     * t_gnode
+     */
     class_<t_gnode>("t_gnode")
         .constructor<t_gnode_processing_mode, const t_schema&, const std::vector<t_schema>&,
             const std::vector<t_schema>&, const std::vector<t_custom_column>&>()
@@ -1502,6 +1518,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
         .function<t_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
 
+    /******************************************************************************
+     *
+     * t_ctx0
+     */
     class_<t_ctx0>("t_ctx0")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>")
@@ -1537,6 +1557,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<bool>("unity_get_column_expanded", &t_ctx0::unity_get_column_expanded)
         .function<void>("unity_init_load_step_end", &t_ctx0::unity_init_load_step_end);
 
+    /******************************************************************************
+     *
+     * t_ctx1
+     */
     class_<t_ctx1>("t_ctx1")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>")
@@ -1574,6 +1598,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<bool>("unity_get_column_expanded", &t_ctx1::unity_get_column_expanded)
         .function<void>("unity_init_load_step_end", &t_ctx1::unity_init_load_step_end);
 
+    /******************************************************************************
+     *
+     * t_ctx2
+     */
     class_<t_ctx2>("t_ctx2")
         .constructor<t_schema, t_config>()
         .smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>")
@@ -1609,12 +1637,15 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<t_uindex>("unity_get_row_count", &t_ctx2::unity_get_row_count)
         .function<bool>("unity_get_row_expanded", &t_ctx2::unity_get_row_expanded)
         .function<bool>("unity_get_column_expanded", &t_ctx2::unity_get_column_expanded)
-        .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end)
         .function<t_totals>("get_totals", &t_ctx2::get_totals)
         .function<std::vector<t_tscalar>>(
             "get_column_path_userspace", &t_ctx2::get_column_path_userspace)
         .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end);
 
+    /******************************************************************************
+     *
+     * t_pool
+     */
     class_<t_pool>("t_pool")
         .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
@@ -1623,7 +1654,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<void>("send", &t_pool::send)
         .function<t_uindex>("epoch", &t_pool::epoch)
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
-        .function<void>("set_update_delegate", &t_pool::set_update_delegate)
+        // .function<void>("set_update_delegate", &t_pool::set_update_delegate)
         .function<void>("register_context", &t_pool::register_context)
         .function<void>("unregister_context", &t_pool::unregister_context)
         .function<std::vector<t_updctx>>(
@@ -1632,25 +1663,49 @@ EMSCRIPTEN_BINDINGS(perspective) {
             "get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
         .function<t_gnode*>("get_gnode", &t_pool::get_gnode, allow_raw_pointers());
 
+    /******************************************************************************
+     *
+     * t_aggspec
+     */
     class_<t_aggspec>("t_aggspec").function<std::string>("name", &t_aggspec::name);
 
+    /******************************************************************************
+     *
+     * t_tscalar
+     */
     class_<t_tscalar>("t_tscalar");
 
+    /******************************************************************************
+     *
+     * t_updctx
+     */
     value_object<t_updctx>("t_updctx")
         .field("gnode_id", &t_updctx::m_gnode_id)
         .field("ctx_name", &t_updctx::m_ctx);
 
+    /******************************************************************************
+     *
+     * t_cellupd
+     */
     value_object<t_cellupd>("t_cellupd")
         .field("row", &t_cellupd::row)
         .field("column", &t_cellupd::column)
         .field("old_value", &t_cellupd::old_value)
         .field("new_value", &t_cellupd::new_value);
 
+    /******************************************************************************
+     *
+     * t_stepdelta
+     */
     value_object<t_stepdelta>("t_stepdelta")
         .field("rows_changed", &t_stepdelta::rows_changed)
         .field("columns_changed", &t_stepdelta::columns_changed)
         .field("cells", &t_stepdelta::cells);
 
+    /******************************************************************************
+     *
+     * vector
+     */
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_aggspec>("std::vector<t_aggspec>");
@@ -1659,10 +1714,18 @@ EMSCRIPTEN_BINDINGS(perspective) {
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
 
+    /******************************************************************************
+     *
+     * t_header
+     */
     enum_<t_header>("t_header")
         .value("HEADER_ROW", HEADER_ROW)
         .value("HEADER_COLUMN", HEADER_COLUMN);
 
+    /******************************************************************************
+     *
+     * t_ctx_type
+     */
     enum_<t_ctx_type>("t_ctx_type")
         .value("ZERO_SIDED_CONTEXT", ZERO_SIDED_CONTEXT)
         .value("ONE_SIDED_CONTEXT", ONE_SIDED_CONTEXT)
@@ -1671,6 +1734,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("GROUPED_PKEY_CONTEXT", GROUPED_PKEY_CONTEXT)
         .value("GROUPED_COLUMNS_CONTEXT", GROUPED_COLUMNS_CONTEXT);
 
+    /******************************************************************************
+     *
+     * t_filter_op
+     */
     enum_<t_filter_op>("t_filter_op")
         .value("FILTER_OP_LT", FILTER_OP_LT)
         .value("FILTER_OP_LTEQ", FILTER_OP_LTEQ)
@@ -1690,6 +1757,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("FILTER_OP_IS_VALID", FILTER_OP_IS_VALID)
         .value("FILTER_OP_IS_NOT_VALID", FILTER_OP_IS_NOT_VALID);
 
+    /******************************************************************************
+     *
+     * t_dtype
+     */
     enum_<t_dtype>("t_dtype")
         .value("DTYPE_NONE", DTYPE_NONE)
         .value("DTYPE_INT64", DTYPE_INT64)
@@ -1715,6 +1786,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
         .value("DTYPE_LAST", DTYPE_LAST);
 
+    /******************************************************************************
+     *
+     * t_aggtype
+     */
     enum_<t_aggtype>("t_aggtype")
         .value("AGGTYPE_SUM", AGGTYPE_SUM)
         .value("AGGTYPE_MUL", AGGTYPE_MUL)
@@ -1748,11 +1823,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .value("AGGTYPE_PCT_SUM_PARENT", AGGTYPE_PCT_SUM_PARENT)
         .value("AGGTYPE_PCT_SUM_GRAND_TOTAL", AGGTYPE_PCT_SUM_GRAND_TOTAL);
 
+    /******************************************************************************
+     *
+     * t_totals
+     */
     enum_<t_totals>("t_totals")
         .value("TOTALS_BEFORE", TOTALS_BEFORE)
         .value("TOTALS_HIDDEN", TOTALS_HIDDEN)
         .value("TOTALS_AFTER", TOTALS_AFTER);
 
+    /******************************************************************************
+     *
+     * assorted functions
+     */
     function("sort", &sort<val>);
     function("make_table", &make_table<val>, allow_raw_pointers());
     function("make_gnode", &make_gnode);
