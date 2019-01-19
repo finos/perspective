@@ -53,6 +53,8 @@ public:
 
     t_aggspec(const std::string& aggname, t_aggtype agg, const std::string& dep);
 
+    t_aggspec(t_aggtype agg, const std::string& dep);
+
     t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
         const std::vector<t_dep>& dependencies);
 
@@ -104,7 +106,7 @@ private:
     double m_agg_one_weight;
     double m_agg_two_weight;
     t_invmode m_invmode;
-    t_uindex m_kernel;
+    // t_uindex m_kernel;
 };
 
 PERSPECTIVE_EXPORT t_dtype get_simple_accumulator_type(t_dtype coltype);

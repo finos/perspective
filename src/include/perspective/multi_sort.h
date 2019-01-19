@@ -14,7 +14,6 @@
 #include <perspective/exports.h>
 #include <perspective/comparators.h>
 #include <vector>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace perspective {
 

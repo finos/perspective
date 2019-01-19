@@ -63,6 +63,9 @@ public:
     PSP_NON_COPYABLE(t_table);
     t_table(const t_table_recipe& recipe);
     t_table(const t_schema& s, t_uindex capacity = DEFAULT_EMPTY_CAPACITY);
+    // Only use in tests, it inits the table unlike other constructors
+    t_table(const t_schema& s, const std::vector<std::vector<t_tscalar>>& v);
+
     t_table(const std::string& name, const std::string& dirname, const t_schema& s,
         t_uindex init_cap, t_backing_store backing_store);
     ~t_table();
@@ -109,6 +112,7 @@ public:
     t_mask filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fops) const;
     t_table* clone_(const t_mask& mask) const;
     std::shared_ptr<t_table> clone(const t_mask& mask) const;
+    std::shared_ptr<t_table> clone() const;
 
     t_column* clone_column(const std::string& existing_col, const std::string& new_colname);
 
@@ -124,9 +128,12 @@ public:
 
     std::shared_ptr<t_column> make_column(
         const std::string& colname, t_dtype dtype, bool status_enabled);
-    
+
     void verify() const;
     void set_capacity(t_uindex idx);
+
+    std::vector<t_tscalar> get_scalvec() const;
+    std::shared_ptr<t_column> operator[](const std::string& name);
 
 protected:
     template <typename FLATTENED_T>
@@ -152,6 +159,8 @@ private:
     t_table_recipe m_recipe;
     bool m_from_recipe;
 };
+
+bool operator==(const t_table& lhs, const t_table& rhs);
 
 template <typename FLATTENED_T>
 void

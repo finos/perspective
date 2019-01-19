@@ -852,6 +852,28 @@ export default function(Module) {
         return this._computed_schema();
     };
 
+    table.prototype._is_date_filter = function(schema) {
+        return key => schema[key] === "datetime" || schema[key] === "date";
+    };
+
+    table.prototype._is_valid_filter = function(filter) {
+        const schema = this._schema();
+        const isDateFilter = this._is_date_filter(schema);
+        const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
+        return typeof value !== "undefined" && value !== null && value !== "";
+    };
+
+    /**
+     * Determines whether a given filter is valid.
+     *
+     * @param {Array<string>} [filter] A filter configuration array to test
+     *
+     * @returns {boolean} Whether the filter is valid
+     */
+    table.prototype.is_valid_filter = function(filter) {
+        return this._is_valid_filter(filter);
+    };
+
     /**
      * Create a new {@link view} from this table with a specified
      * configuration.
@@ -954,12 +976,10 @@ export default function(Module) {
 
         if (config.filter) {
             let schema = this._schema();
-            let isDateFilter = key => schema[key] === "datetime" || schema[key] === "date";
+            let isDateFilter = this._is_date_filter(schema);
+            let isValidFilter = this._is_valid_filter;
             filters = config.filter
-                .filter(filter => {
-                    const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
-                    return typeof value !== "undefined" && value !== null;
-                })
+                .filter(filter => isValidFilter(filter))
                 .map(filter => {
                     if (isDateFilter(filter[0])) {
                         return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];

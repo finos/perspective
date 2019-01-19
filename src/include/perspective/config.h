@@ -61,6 +61,9 @@ public:
 
     // ctx2
     t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
+
+    t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
         const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
@@ -68,11 +71,14 @@ public:
     t_config(
         const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
 
+    t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
+
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
         const std::vector<t_fterm>& fterms);
 
     // t_ctx0
+    t_config(const std::vector<std::string>& detail_columns);
     t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
         const std::vector<t_fterm>& fterms);
 
@@ -148,8 +154,8 @@ private:
     t_totals m_totals;
     std::map<std::string, t_index> m_detail_colmap;
     bool m_has_pkey_agg;
-    t_uindex m_row_expand_depth;
-    t_uindex m_col_expand_depth;
+    // t_uindex m_row_expand_depth;
+    // t_uindex m_col_expand_depth;
     t_filter_op m_combiner;
     std::vector<t_fterm> m_fterms;
     bool m_handle_nan_sort;

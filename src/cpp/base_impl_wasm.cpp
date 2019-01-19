@@ -7,14 +7,17 @@
  *
  */
 
-#include <perspective/table.h>
-#include <gtest/gtest.h>
+#ifdef PSP_ENABLE_WASM
+#include <perspective/first.h>
+#include <perspective/base.h>
 
-using namespace perspective;
+namespace perspective {
 
-TEST(TABLE_TEST, simplest_test) {
-    t_table tbl(t_schema({"a", "b"}, {DTYPE_INT64, DTYPE_FLOAT64}), 5);
-    tbl.init();
-    tbl.reserve(5);
+std::string
+get_error_str() {
+    // handled by perror
+    return std::string();
 }
 
+} // end namespace perspective
+#endif

@@ -368,7 +368,7 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
                     void* aligned_base = nullptr;
                     int result = posix_memalign(&aligned_base,
                         std::max(sizeof(void*), size_t(m_alignment)), size_t(capacity));
-                    PSP_VERBOSE_ASSERT(result == 0, "posix_memalign failed");
+                    PSP_VERBOSE_ASSERT(result, == 0, "posix_memalign failed");
 
                     memcpy(aligned_base, base, ocapacity);
                     free(base);
@@ -593,27 +593,20 @@ t_lstore::clone() const {
 
 #ifdef PSP_ENABLE_PYTHON
 np::ndarray
-t_lstore::_as_numpy(t_dtype dtype)
-{
+t_lstore::_as_numpy(t_dtype dtype) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(
-        dtype != DTYPE_STR,
-        "as_numpy not implemented for string columns yet");
+    PSP_VERBOSE_ASSERT(dtype != DTYPE_STR, "as_numpy not implemented for string columns yet");
 
     np::dtype npdtype = get_numpy_typenum_from_dtype(dtype);
-    py::tuple shape = py::make_tuple(m_size/get_dtype_size(dtype));
+    py::tuple shape = py::make_tuple(m_size / get_dtype_size(dtype));
     py::tuple stride = py::make_tuple(get_dtype_size(dtype));
 
-    np::ndarray result = np::from_data(m_base,
-                                       npdtype,
-                                       shape,
-                                       stride,
-                                       py::object());
+    np::ndarray result = np::from_data(m_base, npdtype, shape, stride, py::object());
 
     return result;
     // PSP_VERBOSE_ASSERT(rval, "Null array found!");
-}   
+}
 #endif
 
 } // end namespace perspective
