@@ -11,6 +11,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.11",
-        "@jpmorganchase/perspective-viewer": "^0.2.11"
+        "@jpmorganchase/perspective-viewer": "^0.2.11",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.11",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.11"
     }
 }
