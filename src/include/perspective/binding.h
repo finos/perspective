@@ -8,6 +8,8 @@
  */
 #pragma once
 
+#if defined(PSP_ENABLE_WASM) || defined(PSP_ENABLE_PYTHON)
+
 #include <perspective/base.h>
 #include <perspective/binding.h>
 #include <perspective/gnode.h>
@@ -324,3 +326,5 @@ T get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
 
 }
 }
+
+#endif
