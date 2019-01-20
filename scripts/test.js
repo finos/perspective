@@ -93,7 +93,7 @@ try {
     } else {
         if (args.indexOf("--quiet") > -1) {
             console.log("-- Running test suite in quiet mode");
-            execSync(`output=$(${jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
+            execSync(`p=1; while [ $p -eq 1 ] ; do printf "." && sleep 5; done & output=$(${jest()}); ret=$?; p=0; echo "\${output}"; exit $ret`, {stdio: "inherit"});
         } else if (process.env.PACKAGE) {
             console.log("-- Running test suite in individual mode");
             let cmd = "node_modules/.bin/lerna exec --concurrency 1 --no-bail";
