@@ -7,7 +7,7 @@
  *
  */
 
-import {detectIE} from "@jpmorganchase/perspective/src/js/utils.js";
+import detectIE from "detectie";
 
 /**
  * Instantiate a Template DOM object from an HTML text string.

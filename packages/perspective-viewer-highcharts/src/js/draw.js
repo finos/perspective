@@ -17,7 +17,7 @@ import {color_axis} from "./color_axis.js";
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
-import {detectIE} from "@jpmorganchase/perspective/src/js/utils";
+import detectIE from "detectie";
 
 export const PRIVATE = Symbol("Highcharts private");
 
