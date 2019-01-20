@@ -8,9 +8,6 @@
  */
 
 const perspective = require("@jpmorganchase/perspective").default;
-require("@jpmorganchase/perspective-viewer");
-require("@jpmorganchase/perspective-viewer-highcharts");
-require("@jpmorganchase/perspective-viewer-hypergrid");
 
 (async () => {
     const worker = perspective.worker();

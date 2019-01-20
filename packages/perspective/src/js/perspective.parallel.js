@@ -14,7 +14,7 @@ import {worker} from "./api.js";
 import asmjs_worker from "./perspective.asmjs.js";
 import wasm_worker from "./perspective.wasm.js";
 
-import wasm from "./psp.async.wasm.js";
+import wasm_path from "./psp.async.wasm.js";
 
 /******************************************************************************
  *
@@ -48,13 +48,18 @@ const override = new class {
         this._worker = worker || this._worker;
     }
 
-    worker() {
-        return (this._worker || wasm_worker)();
+    async worker() {
+        if (this._worker) {
+            return this._worker();
+        } else {
+            const worker = await wasm_worker();
+            return worker;
+        }
     }
 
     async wasm() {
         if (!this._wasm) {
-            this._wasm = await this._fetch(wasm);
+            this._wasm = await this._fetch(wasm_path);
         }
         return this._wasm;
     }
@@ -67,20 +72,31 @@ class WebWorker extends worker {
     }
 
     async register() {
-        let worker;
-        const msg = {cmd: "init"};
         if (typeof WebAssembly === "undefined" || detect_iphone()) {
-            worker = await asmjs_worker();
+            const worker = await asmjs_worker();
+            const msg = {
+                cmd: "init"
+            };
+            for (var key in this._worker) {
+                worker[key] = this._worker[key];
+            }
+            this._worker = worker;
+            this._worker.addEventListener("message", this._handle.bind(this));
+            this._worker.postMessage(msg);
+            this._detect_transferable();
         } else {
-            [worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
+            const [worker, buffer] = await Promise.all([override.worker(), override.wasm()]);
+            const msg = {
+                cmd: "init"
+            };
+            for (var key in this._worker) {
+                worker[key] = this._worker[key];
+            }
+            this._worker = worker;
+            this._worker.addEventListener("message", this._handle.bind(this));
+            this._worker.postMessage(msg, [buffer]);
+            this._detect_transferable();
         }
-        for (var key in this._worker) {
-            worker[key] = this._worker[key];
-        }
-        this._worker = worker;
-        this._worker.addEventListener("message", this._handle.bind(this));
-        this._worker.postMessage(msg, [msg.buffer]);
-        this._detect_transferable();
     }
 
     send(msg) {

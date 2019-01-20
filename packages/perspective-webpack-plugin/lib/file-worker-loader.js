@@ -44,7 +44,7 @@ exports.default = function loader(content) {
         content,
         regExp: options.regExp
     });
-    const outputPath = url.replace(/\.js/, ".worker.js");
+    const emitPath = url.replace(/\.js/, ".worker.js");
 
     if (!options.compiled) {
         var inputPath = this.resourcePath;
@@ -56,16 +56,16 @@ exports.default = function loader(content) {
         }
         content = fs.readFileSync(inputPath).toString();
         if (!options.compiled) {
-            this.emitFile(outputPath, "" + content);
+            this.emitFile(emitPath, "" + content);
             const map_file = `${inputPath}.map`;
             if (fs.existsSync(map_file)) {
                 const map_content = fs.readFileSync(map_file).toString();
-                this.emitFile(`${outputPath}.map`, "" + map_content);
+                this.emitFile(`${emitPath}.map`, "" + map_content);
             }
         }
     }
 
-    const publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
+    const outputPath = JSON.stringify(emitPath);
     const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
 
     if (options.inline) {
@@ -77,14 +77,22 @@ exports.default = function loader(content) {
             var utils = require(${utils_path});
             return new Promise(function(resolve) { utils.BlobWorker(${worker_text}, resolve); });
         };`;
+    } else {
+        // TODO: LukeSheard - I think this logic need revisiting in a webpack world.
+        return `module.exports = function() {
+            var utils = require(${utils_path});
+            var publicPath = __webpack_public_path__ || utils.path;
+            var workerPath = publicPath + ${outputPath};
+            if (__webpack_public_path__ || window.location.hostname === utils.host.slice(0, window.location.hostname.length)) {
+                return new Promise(function(resolve) {
+                    resolve(new Worker(workerPath)); 
+                });
+            } else {
+                return new Promise(function(resolve) {
+                    utils.XHRWorker(workerPath, resolve);
+                });
+            }
+        };`;
     }
 
-    return `module.exports = function() {
-        var utils = require(${utils_path});
-        if (window.location.origin === utils.host.slice(0, window.location.origin.length)) {
-            return new Promise(function(resolve) { resolve(new Worker(utils.path + ${publicPath})); });
-        } else {
-            return new Promise(function(resolve) { utils.XHRWorker(utils.path + ${publicPath}, resolve); });
-        }
-    };`;
 };

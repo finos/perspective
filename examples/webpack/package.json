@@ -4,7 +4,7 @@
     "version": "0.2.12",
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
-        "start": "node server.js",
+        "start": "webpack-dev-server --content-base ./ --hot",
         "webpack": "webpack --config webpack.config.js --color"
     },
     "keywords": [],
@@ -13,6 +13,12 @@
         "@jpmorganchase/perspective": "^0.2.12",
         "@jpmorganchase/perspective-viewer": "^0.2.12",
         "@jpmorganchase/perspective-viewer-highcharts": "^0.2.12",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.12"
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.12",
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.12"
+    },
+    "devDependencies": {
+        "webpack": "^4.28.4",
+        "webpack-cli": "3.2.1",
+        "webpack-dev-server": "^3.1.14"
     }
 }

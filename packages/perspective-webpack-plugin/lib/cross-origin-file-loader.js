@@ -37,20 +37,20 @@ exports.pitch = function pitch(request) {
 
     var context = options.context || this.rootContext || (this.options && this.options.context);
     var content = fs.readFileSync(request.replace("es/js", "build").replace("wasm.js", "wasm"));
-    var url = loaderUtils.interpolateName(this, options.name, {
+    var emitPath = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
         regExp: options.regExp
     });
 
-    var outputPath = url;
-    var publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
-    this.emitFile(outputPath, content);
-
+    var outputPath = JSON.stringify(emitPath);
+    this.emitFile(emitPath, content);
+    
     const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
     return `
     var utils = require(${utils_path});
-    module.exports = (utils.path + ${publicPath});    
+    var publicPath = __webpack_public_path__ || utils.path;
+    module.exports = publicPath + ${outputPath};    
     `;
 };
 
