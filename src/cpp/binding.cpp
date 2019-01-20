@@ -6,6 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+#include <perspective/first.h>
+#include <perspective/base.h>
 #include <perspective/binding.h>
 using namespace perspective;
 namespace perspective {
