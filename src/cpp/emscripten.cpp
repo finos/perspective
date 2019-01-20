@@ -1654,7 +1654,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<void>("send", &t_pool::send)
         .function<t_uindex>("epoch", &t_pool::epoch)
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
-        // .function<void>("set_update_delegate", &t_pool::set_update_delegate)
+        .function<void>("set_update_delegate", &t_pool::set_update_delegate)
         .function<void>("register_context", &t_pool::register_context)
         .function<void>("unregister_context", &t_pool::unregister_context)
         .function<std::vector<t_updctx>>(
