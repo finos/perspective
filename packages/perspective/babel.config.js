@@ -1,22 +1,22 @@
 module.exports = {
-    presets: [
+    "presets": [
         [
             "@babel/preset-env",
             {
-                useBuiltIns: "usage"
+                "useBuiltIns": "usage"
             }
         ]
     ],
-    sourceType: "unambiguous",
-    plugins: [
+    "sourceType": "unambiguous",
+    "plugins": [
         "module:fast-async",
-        ["@babel/plugin-proposal-decorators", {legacy: true}],
+        ["@babel/plugin-proposal-decorators", {"legacy": true}],
         "transform-custom-element-classes",
         [
             "@babel/plugin-transform-for-of",
             {
-                loose: true
+                "loose": true
             }
         ]
     ]
-};
+}
