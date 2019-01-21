@@ -11,13 +11,16 @@ const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
 const path = require("path");
 
 module.exports = {
+    context: __dirname,
+    mode: "development",
     entry: "./in.js",
     output: {
         filename: "out.js",
         library: "out",
         libraryTarget: "umd",
         libraryExport: "default",
-        path: path.resolve(__dirname, "./build")
+        path: path.resolve(__dirname, "./build"),
+        publicPath: "http://localhost:8080/build/"
     },
     plugins: [new PerspectivePlugin()],
     devtool: "source-map"
