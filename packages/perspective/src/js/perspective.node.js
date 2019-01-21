@@ -130,8 +130,10 @@ class WebSocketHost extends module.exports.Host {
         this.REQS = {};
         this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
         this._wss.on("connection", ws => {
+            ws.isAlive = true;
             ws.id = CLIENT_ID_GEN++;
             ws.on("message", msg => {
+                ws.isAlive = true;
                 if (msg === "heartbeat") {
                     ws.send("heartbeat");
                     return;
@@ -149,6 +151,16 @@ class WebSocketHost extends module.exports.Host {
             });
             ws.on("error", console.error);
         });
+
+        // clear invalid connections
+        setInterval(() => {
+            this._wss.clients.forEach(function each(ws) {
+                if (ws.isAlive === false) {
+                    return ws.terminate();
+                }
+                ws.isAlive = false;
+            });
+        }, 30000);
 
         this._server.on(
             "upgrade",
