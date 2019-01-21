@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
+import WebsocketHeartbeatJs from "websocket-heartbeat-js";
 import * as defaults from "./defaults.js";
 
 import {worker} from "./api.js";
@@ -111,7 +111,11 @@ class WebWorker extends worker {
 class WebSocketWorker extends worker {
     constructor(url) {
         super();
-        this._ws = new WebSocket(url);
+        this._ws = new WebsocketHeartbeatJs({
+            url,
+            pingTimeout: 15000,
+            pingMsg: "heartbeat"
+        });
         this._ws.onopen = () => {
             this.send({id: -1, cmd: "init"});
         };

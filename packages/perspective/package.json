@@ -1,90 +1,91 @@
 {
-    "name": "@jpmorganchase/perspective",
-    "version": "0.2.11",
-    "description": "Perspective.js",
-    "main": "build/perspective.node.js",
-    "browser": "src/js/perspective.parallel.js",
-    "publishConfig": {
-        "access": "public"
-    },
-    "files": [
-        "build/*",
-        "index.d.ts",
-        "src/**/*",
-        "webpack-plugin.js",
-        "babel.config.js"
+  "name": "@jpmorganchase/perspective",
+  "version": "0.2.11",
+  "description": "Perspective.js",
+  "main": "build/perspective.node.js",
+  "browser": "src/js/perspective.parallel.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "build/*",
+    "index.d.ts",
+    "src/**/*",
+    "webpack-plugin.js",
+    "babel.config.js"
+  ],
+  "typings": "index.d.ts",
+  "scripts": {
+    "bench": "node ../../scripts/bench.js",
+    "prebuild": "mkdir -p build && mkdir -p obj",
+    "cpp": "npm-run-all build:cpp test:cpp",
+    "build": "npm-run-all build:webpack",
+    "build:webpack": "npm-run-all -p build:webpack:*",
+    "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
+    "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
+    "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
+    "test:build": "cp test/html/* build",
+    "test:run": "jest --color --ci",
+    "test": "npm-run-all test:build test:run",
+    "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
+  },
+  "jest": {
+    "roots": [
+      "test/js"
     ],
-    "typings": "index.d.ts",
-    "scripts": {
-        "bench": "node ../../scripts/bench.js",
-        "prebuild": "mkdir -p build && mkdir -p obj",
-        "cpp": "npm-run-all build:cpp test:cpp",
-        "build": "npm-run-all build:webpack",
-        "build:webpack": "npm-run-all -p build:webpack:*",
-        "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
-        "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
-        "docs": "documentation build src/js/perspective.js -f md --shallow > README.md && cp README.md ../../docs/perspective.md",
-        "test:build": "cp test/html/* build",
-        "test:run": "jest --color --ci",
-        "test": "npm-run-all test:build test:run",
-        "clean": "find build -mindepth 1 -delete && find obj -mindepth 1 -delete"
-    },
-    "jest": {
-        "roots": [
-            "test/js"
-        ],
-        "transform": {},
-        "transformIgnorePatterns": [
-            "/node_modules/(?!@apache)",
-            "/build/"
-        ],
-        "verbose": true,
-        "testURL": "http://localhost/",
-        "automock": false
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/jpmorganchase/perspective"
-    },
-    "author": "",
-    "license": "Apache-2.0",
-    "dependencies": {
-        "@babel/core": "^7.1.0",
-        "@babel/plugin-proposal-decorators": "^7.1.2",
-        "@babel/plugin-transform-for-of": "^7.0.0",
-        "@babel/plugin-transform-runtime": "^7.1.0",
-        "@babel/polyfill": "^7.0.0",
-        "@babel/preset-env": "^7.1.5",
-        "@babel/runtime": "^7.1.5",
-        "@webpack-contrib/schema-utils": "^1.0.0-beta.0",
-        "arraybuffer-loader": "^1.0.2",
-        "babel-loader": "^8.0.4",
-        "babel-plugin-transform-custom-element-classes": "^0.1.0",
-        "base64-font-loader": "0.0.4",
-        "bufferutil": "~3.0.0",
-        "clean-css-cli": "4.2.1",
-        "clean-css-loader": "^1.1.0",
-        "core-js": "^2.5.7",
-        "css-loader": "^0.28.7",
-        "d3-array": "^1.2.1",
-        "extract-text-webpack-plugin": "^3.0.2",
-        "file-loader": "^2.0.0",
-        "flatbuffers": "^1.10.2",
-        "html-loader": "^0.5.1",
-        "less": "^2.7.2",
-        "less-loader": "^4.0.5",
-        "moment": "^2.19.1",
-        "papaparse": "^4.3.6",
-        "style-loader": "^0.18.2",
-        "text-encoding-utf-8": "^1.0.2",
-        "tslib": "^1.9.3",
-        "uglifyjs-webpack-plugin": "^0.4.6",
-        "underscore": "^1.8.3",
-        "utf-8-validate": "~4.0.0",
-        "worker-loader": "^2.0.0",
-        "ws": "^6.1.2"
-    },
-    "peerDependencies": {
-        "webpack": ">=3.5 <4"
-    }
+    "transform": {},
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@apache)",
+      "/build/"
+    ],
+    "verbose": true,
+    "testURL": "http://localhost/",
+    "automock": false
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jpmorganchase/perspective"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@babel/core": "^7.1.0",
+    "@babel/plugin-proposal-decorators": "^7.1.2",
+    "@babel/plugin-transform-for-of": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.1.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.1.5",
+    "@babel/runtime": "^7.1.5",
+    "@webpack-contrib/schema-utils": "^1.0.0-beta.0",
+    "arraybuffer-loader": "^1.0.2",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-transform-custom-element-classes": "^0.1.0",
+    "base64-font-loader": "0.0.4",
+    "bufferutil": "~3.0.0",
+    "clean-css-cli": "4.2.1",
+    "clean-css-loader": "^1.1.0",
+    "core-js": "^2.5.7",
+    "css-loader": "^0.28.7",
+    "d3-array": "^1.2.1",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^2.0.0",
+    "flatbuffers": "^1.10.2",
+    "html-loader": "^0.5.1",
+    "less": "^2.7.2",
+    "less-loader": "^4.0.5",
+    "moment": "^2.19.1",
+    "papaparse": "^4.3.6",
+    "style-loader": "^0.18.2",
+    "text-encoding-utf-8": "^1.0.2",
+    "tslib": "^1.9.3",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "underscore": "^1.8.3",
+    "utf-8-validate": "~4.0.0",
+    "websocket-heartbeat-js": "^1.0.7",
+    "worker-loader": "^2.0.0",
+    "ws": "^6.1.2"
+  },
+  "peerDependencies": {
+    "webpack": ">=3.5 <4"
+  }
 }

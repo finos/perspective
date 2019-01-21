@@ -132,6 +132,10 @@ class WebSocketHost extends module.exports.Host {
         this._wss.on("connection", ws => {
             ws.id = CLIENT_ID_GEN++;
             ws.on("message", msg => {
+                if (msg === "heartbeat") {
+                    ws.send("heartbeat");
+                    return;
+                }
                 msg = JSON.parse(msg);
                 this.REQS[msg.id] = ws;
                 try {
