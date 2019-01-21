@@ -46,14 +46,14 @@ global.registerPlugin("d3_x_bar", {
 });
 
 global.registerPlugin("d3_y_bar", {
-  name: "[d3fc] Y Bar Chart",
-  create: draw("y_bar"),
-  resize: resize,
-  initial: {
-      type: "number",
-      count: 1
-  },
-  selectMode: "select",
-  delete: delete_chart,
-  max_size: MAXIMUM_RENDER_SIZE["column"]
+    name: "[d3fc] Y Bar Chart",
+    create: draw("y_bar"),
+    resize: resize,
+    initial: {
+        type: "number",
+        count: 1
+    },
+    selectMode: "select",
+    delete: delete_chart,
+    max_size: MAXIMUM_RENDER_SIZE["column"]
 });
