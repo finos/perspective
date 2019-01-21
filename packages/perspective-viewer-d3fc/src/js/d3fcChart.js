@@ -82,6 +82,8 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
         .call(chart);
 
     drawLegend(legend, container, hiddenElements);
+
+    removeCanvasElement(container);
 }
 
 // CONFIGURE CHART ELEMENTS
@@ -234,6 +236,12 @@ function drawLegend(legend, container, hiddenElements) {
             .selectAll("g.cell")
             .classed("hidden", data => hiddenElements.includes(data));
     }
+}
+
+function removeCanvasElement(container) {
+    // Remove the canvas element; it's empty but blocks direct element selection on the svg viewbox.
+    let canvas = container.getElementsByTagName("d3fc-canvas")[0];
+    canvas.remove();
 }
 
 // PREP DATA
