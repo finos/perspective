@@ -19,8 +19,7 @@ module.exports = {
         library: "out",
         libraryTarget: "umd",
         libraryExport: "default",
-        path: path.resolve(__dirname, "./build"),
-        publicPath: "http://localhost:8080/build/"
+        path: path.resolve(__dirname, "./build")
     },
     plugins: [new PerspectivePlugin()],
     devtool: "source-map"
