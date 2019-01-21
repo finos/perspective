@@ -120,6 +120,9 @@ class WebSocketWorker extends worker {
             this.send({id: -1, cmd: "init"});
         };
         this._ws.onmessage = msg => {
+            if (msg.data === "heartbeat") {
+                return;
+            }
             this._handle({data: JSON.parse(msg.data)});
         };
     }
