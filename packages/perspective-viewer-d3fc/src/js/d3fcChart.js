@@ -9,6 +9,7 @@
 
 import * as fc from "d3fc";
 import * as d3 from "d3";
+import * as d3Legend from "d3-svg-legend";
 
 export default class D3FCChart {
   constructor(mode, config, container) {
@@ -19,10 +20,22 @@ export default class D3FCChart {
 
   render() {
 
+    let labels = {
+      mainLabel: null,
+      crossLabel: null,
+      splitLabel: null
+    };
+
     let dataset;
     console.log("config:", this._config);
     let { series, xAxis } = this._config;
-    if(series.length === 1) {
+
+    labels.mainLabel = series[0].stack;
+    labels.crossLabel = this._config.row_pivots[0];
+    labels.splitLabel = this._config.col_pivots[0];
+
+    //data is not "split-by <something>"
+    if (series.length === 1) {
       //simple array of data
       dataset = series[0].data.map(
         (mainValue, i) => ({
@@ -30,25 +43,29 @@ export default class D3FCChart {
           crossValue: xAxis.categories.length > 0 ? xAxis.categories[i] : i
         })
       );
+
+    //data is "split-by <something>"
     } else {
       let arrs = series.map(
         (series, seriesIndex) => {
           return series.data.map((mainValue, i) => ({
             mainValue,
-            crossValue: i,
+            crossValue: this.calculateCrossValue(labels, xAxis, i),
             split: series.name
           }))
         }
       );
-      dataset = [].concat.apply([], arrs).filter(a => a.mainValue).sort((x, y) => x.crossValue-y.crossValue);
+
+      dataset = [].concat.apply([], arrs).filter(a => a.mainValue).sort((x, y) => x.crossValue - y.crossValue);
     }
 
     console.log("dataset:", dataset);
+    console.log("labels:", labels);
 
     if (this._mode === "x_bar") {
       renderXBar(this._config, this._container, dataset);
     } else if (this._mode === "y_bar") {
-      renderYBar(this._config, this._container, dataset);
+      renderYBar(this._config, this._container, dataset, labels);
     } else {
       throw "EXCEPTION: chart type not recognised.";
     }
@@ -56,6 +73,15 @@ export default class D3FCChart {
 
   update() {
     this.render();
+  }
+
+  calculateCrossValue(labels, xAxis, i) {
+    if (labels.crossLabel) {
+      return xAxis.categories.length > 0 ? xAxis.categories[i] : i
+    }
+    else {
+      return i;
+    }
   }
 }
 
@@ -106,23 +132,33 @@ function renderXBar(config, container, dataset) {
     .attr("fill", "white");
 }
 
-function renderYBar(config, container, dataset) {
+function renderYBar(config, container, dataset, labels) {
   console.log("starting rendering y bar");
 
-  let colours = ["green","blue","orange","red","yellow","purple","brown"];
+  //splitBy stuff
+  let isSplitBy = labels.splitLabel != null;
+  let stack = d3.stack()
+    .keys(dataset.map(x => x.split));
+  let series = stack(dataset);
+
+  let xScale = d3
+    .scaleBand()
+    .domain(dataset.map(x => x.crossValue));
 
   let chart = fc.chartSvgCartesian(
-    d3.scaleBand(), //x axis scales to fit bars equally 
+    xScale, //x axis scales to fit bars equally 
     d3.scaleLinear()) //y axis scales linearly across values
-    .xDomain(dataset.map(x => x.crossValue)) //all values from organisations list
     .xPadding(0.5)
     .yDomain([0, Math.max(...dataset.map(x => x.mainValue))]) //from 0 to the maximum value of price
     .yOrient('left') //move the axis to the left;
 
-  let series = fc.autoBandwidth(fc.seriesSvgBar())
+  let barSeries = fc.autoBandwidth(fc.seriesSvgBar())
     .align("left")
     .crossValue(function (d) { return d.crossValue; })
     .mainValue(function (d) { return d.mainValue; });
+
+  //let bSeries = barSeries;
+  let bSeries = isSplitBy ? series.map(() => barSeries) : barSeries;
 
   let gridlines = fc.annotationSvgGridline() //Add gridlines
     .yDecorate(x => x
@@ -130,22 +166,71 @@ function renderYBar(config, container, dataset) {
       .style("stroke-width", "1.0"))
     .xDecorate(x => x.style("display", "none"));
 
-  let multi = fc.seriesSvgMulti()
-    .series([gridlines, series]);
+  //splitBy based if statement
+  let multi;
+    if (isSplitBy) {
+      multi = fc.seriesSvgMulti()
+      .series(bSeries); //currently can't get the grid as well as the stacked chart
+    } else {
+      multi = fc.seriesSvgMulti()
+      .series([gridlines, barSeries]);
+    }
 
   chart.plotArea(multi);
 
   styleDark(chart);
 
+  handleSplitBy(xScale, container, barSeries, labels);
+
   d3.select(container)
     .datum(dataset)
-    .call(chart);
+    .call(chart);  
+    
+  //handleSplitBy(xScale, container, labels); //this should be after the general render to ensure it goes on top?
 
   console.log("completed rendering y bar");
 }
 
-function styleDark(chart) {
 
+function handleSplitBy(scale, container, barSeries, labels) {
+  if (!labels.splitLabel) {
+    return;
+  }
+
+  let green = "#2c8f2d";
+  let blue = "#216ca1";
+  let orange = "#e07314"; 
+
+  const colors = [green, blue, orange, "red", "yellow", "purple", "brown"];
+
+  //Decorate bars to be different colors.
+  barSeries.decorate(selection => 
+    selection
+      .select(".bar>path")
+      .style("fill", (_, i) => colors[i])
+  );
+
+  let legend = d3Legend
+    .legendColor()
+    .scale(scale);
+
+  // //Decorate legend swatches to be different colors.
+  // legend.decorate(selection => 
+  //   selection
+  //     .select(".swatch")
+  //     .style("fill", (_, i) => colors[i])
+  // );
+
+  d3.select(container)
+    .append("svg")
+    .attr("class", "legend")
+    .attr("z-index", "2")
+    .call(legend);
+  
+  console.log("legend rendered thanks.");
+}
+
+function styleDark(chart) {
   chart.xDecorate(selection => {
     selection.select(".domain") // select the axis' line //this one doesn't work
       .style("stroke", "red")
@@ -153,7 +238,7 @@ function styleDark(chart) {
       .attr("fill", "white")
     selection.select("path") //select the tick marks
       .attr("stroke", "white")
-});
+  });
 
   chart.yDecorate(selection => {
     selection.select("path") //select the tick marks

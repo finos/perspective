@@ -18,7 +18,7 @@
 
   .chart {
     width: 100%;
-    height: 700px;
+    height: 100%;
   }
 
   .label rect {
@@ -42,6 +42,33 @@
 
   .plot-area {
     overflow: visible !important;
+  }
+
+  //GARBAGE ABOVE THIS POINT?
+
+  #container {
+    position: absolute;
+    width: calc(~"100% - 30px");
+    height: calc(~"100% - 30px");
+    display: grid;
+    margin: 15px;
+    justify-content: stretch;
+    grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    overflow-y: auto;
+  }
+
+  .legend {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    left: auto;
+    width: 170px;
+    height: 110px;
+  }
+
+  .legend text {
+    fill: white;
   }
 
   .bar path {
