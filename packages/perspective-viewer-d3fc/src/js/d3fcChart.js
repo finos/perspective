@@ -233,6 +233,8 @@ function drawLegend(legend, container, hiddenElements) {
             .attr("class", "legend")
             .style("z-index", "2")
             .call(legend)
+            .select("g.legendCells")
+            .attr("transform", "translate(20,20)")
             .selectAll("g.cell")
             .classed("hidden", data => hiddenElements.includes(data));
     }
