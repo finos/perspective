@@ -7,13 +7,8 @@
  *
  */
 
-import * as fc from "d3fc";
-import * as d3 from "d3";
-
 import style from "../less/d3fc.less";
 import template from "../html/d3fc.html";
-
-import d3fcChart from "./d3fcChart";
 
 import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
 import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";

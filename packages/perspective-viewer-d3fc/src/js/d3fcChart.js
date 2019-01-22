@@ -368,13 +368,5 @@ function styleDark(chart, horizontal, labels) {
         selection.select("text").attr("fill", "white");
     });
 
-    styleDarkAxisSpecific(chart);
-    return;
-}
-
-//styling that always applies specifically to the x or y axis, rather than being dependent on which axis represents cross/main data.
-function styleDarkAxisSpecific(chart) {
-    //chart.xDecorate(selection => {});
-    //chart.yDecorate(selection => {});
     return;
 }
