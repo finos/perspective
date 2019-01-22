@@ -1,0 +1,50 @@
+{
+    "name": "@jpmorganchase/perspective-viewer-d3fc",
+    "version": "0.2.10",
+    "description": "Perspective.js",
+    "main": "src/js/d3fc.js",
+    "files": [
+        "build/**/*",
+        "src/**/*",
+        "babel.config.js"
+    ],
+    "scripts": {
+        "bench": "npm-run-all bench:build bench:run",
+        "bench:build": "echo \"No Benchmarks\"",
+        "bench:run": "echo \"No Benchmarks\"",
+        "build": "webpack --color --config src/config/d3fc.plugin.config.js",
+        "test:build": "cp test/html/* build",
+        "watch": "webpack --color --watch --config src/config/d3fc.plugin.config.js",
+        "test:run": "jest --silent --color 2>&1",
+        "test": "npm-run-all test:build test:run",
+        "clean": "find build -mindepth 1 -delete",
+        "clean:screenshots": "find screenshots/ \\( -name *.diff.png -o -name *.failed.png \\) -mindepth 1 -delete"
+    },
+    "jest": {
+        "roots": [
+            "test/js"
+        ],
+        "verbose": true,
+        "testURL": "http://localhost/",
+        "transform": {},
+        "automock": false
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jpmorganchase/perspective"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@jpmorganchase/perspective": "^0.2.10",
+        "@jpmorganchase/perspective-viewer": "^0.2.10",
+        "babel-runtime": "^6.26.0",
+        "chroma-js": "^1.3.4",
+        "d3": "^5.7.0",
+        "d3fc": "6.1.0",
+        "gradient-parser": "0.1.5"
+    }
+}
