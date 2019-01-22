@@ -81,7 +81,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     return [xScale, yScale];
 }
 
-export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color) {
+export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container) {
     let multi;
     if (isSplitBy) {
         let multiWithOutGrid = fc
@@ -92,7 +92,10 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
                 selection.each(function(data, index) {
                     d3.select(this)
                         .selectAll("g.bar")
-                        .attr("fill", color(dataset[index].key));
+                        .filter(d => d[0] !== d[1])
+                        .attr("fill", color(dataset[index].key))
+                        .attr("opacity", 0.9)
+                        .each(configureTooltip);
                 });
             });
 
@@ -104,13 +107,44 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             .decorate(selection =>
                 selection
                     .filter((_, index) => index !== 0)
-                    .each((data, index, nodes) => {
-                        d3.select(nodes[index])
+                    .each(function() {
+                        d3.select(this)
                             .selectAll("g.bar")
+                            .filter(d => d[0] !== d[1])
                             .attr("fill", "#1f78b4")
-                            .attr("opacity", 0.9);
+                            .attr("opacity", 0.9)
+                            .each(configureTooltip);
                     })
             );
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const tooltipDiv = d3
+        .select(container)
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    function configureTooltip() {
+        d3.select(this)
+            .on("mouseover", () => {
+                const barRect = this.getBoundingClientRect();
+                const left = barRect.x + barRect.width / 2 - containerRect.x;
+                const top = barRect.y - containerRect.y;
+                tooltipDiv
+                    .style("left", `${left}px`)
+                    .style("top", `${top}px`)
+                    .html("Tooltip text")
+                    .transition()
+                    .duration(200)
+                    .style("opacity", 0.9);
+            })
+            .on("mouseout", () => {
+                tooltipDiv
+                    .transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
     }
 
     return multi;
