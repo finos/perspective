@@ -49,6 +49,7 @@
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",
         "d3-array": "^1.2.1",
+        "detectie": "1.0.0",
         "mobile-drag-drop": "^2.2.0",
         "underscore": "^1.8.3"
     }
