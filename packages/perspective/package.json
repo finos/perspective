@@ -3,14 +3,14 @@
     "version": "0.2.12",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
-    "browser": "src/js/perspective.parallel.js",
+    "browser": "cjs/js/perspective.parallel.js",
     "publishConfig": {
         "access": "public"
     },
     "files": [
         "build/*",
+        "cjs/**/*",
         "index.d.ts",
-        "src/**/*",
         "webpack-plugin.js",
         "babel.config.js"
     ],
@@ -19,7 +19,8 @@
         "bench": "node ../../scripts/bench.js",
         "prebuild": "mkdir -p build && mkdir -p obj",
         "cpp": "npm-run-all build:cpp test:cpp",
-        "build": "npm-run-all build:webpack",
+        "build": "npm-run-all build:babel build:webpack",
+        "build:babel": "babel src/js --out-dir cjs/js",
         "build:webpack": "npm-run-all -p build:webpack:*",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",

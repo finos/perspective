@@ -32,7 +32,7 @@ exports.pitch = function pitch(request) {
     validateOptions(schema, options, "Cross Origin File Loader");
 
     var context = options.context || this.rootContext || (this.options && this.options.context);
-    var content = fs.readFileSync(request.replace("src/js", "build").replace("wasm.js", "wasm"));
+    var content = fs.readFileSync(request.replace("cjs/js", "build").replace("wasm.js", "wasm"));
     var url = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
