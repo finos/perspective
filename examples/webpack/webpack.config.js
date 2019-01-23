@@ -11,6 +11,8 @@ const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
 const path = require("path");
 
 module.exports = {
+    context: __dirname,
+    mode: "development",
     entry: "./in.js",
     output: {
         filename: "out.js",
