@@ -9,6 +9,7 @@
         "babel-core": "^7.0.0-0",
         "babel-eslint": "^8.2.3",
         "babel-jest": "^23.6.0",
+        "@babel/cli": "^7.2.3",
         "chart.js": "^2.7.1",
         "codemirror": "^5.30.0",
         "codemirror-javascript": "^0.2.0",
