@@ -239,7 +239,6 @@ set (SOURCE_FILES
 	src/cpp/context_zero.cpp
 	src/cpp/custom_column.cpp
 	src/cpp/date.cpp
-	src/cpp/date_parser.cpp
 	src/cpp/dense_nodes.cpp
 	src/cpp/dense_tree_context.cpp
 	src/cpp/dense_tree.cpp
