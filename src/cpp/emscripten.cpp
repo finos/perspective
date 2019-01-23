@@ -1030,7 +1030,7 @@ infer_type(val x, val date_validator) {
 }
 
 t_dtype
-get_data_type(val data, std::int32_t format, std::string name, val date_validator) {
+get_data_type(val data, std::int32_t format, const std::string& name, val date_validator) {
     std::int32_t i = 0;
     boost::optional<t_dtype> inferredType;
 
@@ -1069,7 +1069,7 @@ get_data_type(val data, std::int32_t format, std::string name, val date_validato
 }
 
 std::vector<t_dtype>
-data_types(val data, std::int32_t format, std::vector<std::string> names, val date_validator) {
+data_types(val data, std::int32_t format, const std::vector<std::string>& names, val date_validator) {
     if (names.size() == 0) {
         PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
     }
@@ -1081,9 +1081,8 @@ data_types(val data, std::int32_t format, std::vector<std::string> names, val da
         std::vector<std::string> data_names
             = vecFromArray<val, std::string>(keys);
 
-        for (std::vector<std::string>::iterator name = data_names.begin();
-             name != data_names.end(); ++name) {
-            std::string value = data[*name].as<std::string>();
+        for (const std::string& name : data_names) {
+            std::string value = data[name].as<std::string>();
             t_dtype type;
 
             if (value == "integer") {
@@ -1099,7 +1098,7 @@ data_types(val data, std::int32_t format, std::vector<std::string> names, val da
             } else if (value == "date") {
                 type = t_dtype::DTYPE_DATE;
             } else {
-                PSP_COMPLAIN_AND_ABORT("Unknown type '" + value + "' for key '" + *name + "'");
+                PSP_COMPLAIN_AND_ABORT("Unknown type '" + value + "' for key '" + name + "'");
             }
 
             types.push_back(type);
@@ -1107,9 +1106,8 @@ data_types(val data, std::int32_t format, std::vector<std::string> names, val da
 
         return types;
     } else {
-        for (std::vector<std::string>::iterator name = names.begin(); name != names.end();
-             ++name) {
-            t_dtype type = get_data_type(data, format, *name, date_validator);
+        for (const std::string& name : names) {
+            t_dtype type = get_data_type(data, format, name, date_validator);
             types.push_back(type);
         }
     }
