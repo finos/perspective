@@ -6,10 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
+#pragma once
 #if defined(PSP_ENABLE_PYTHON)
 
-#pragma once
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
 #include <perspective/base.h>
