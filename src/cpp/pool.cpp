@@ -174,7 +174,6 @@ void
 t_pool::set_update_delegate(emscripten::val ud) {
     m_update_delegate = ud;
 }
-
 #endif
 
 #ifdef PSP_ENABLE_WASM
