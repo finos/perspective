@@ -626,130 +626,188 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Computed column of arity 0", async function() {
-            var table = perspective.table(data);
+        describe("Datetime constructors", function() {
+            it("Correctly parses an ISO-8601 formatted string", async function() {
+                let table = perspective.table({d: ["2011-10-05T14:48:00.000Z"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
 
-            let table2 = table.add_computed([
-                {
-                    column: "const",
-                    type: "integer",
-                    func: () => 1,
-                    inputs: []
+            it("Correctly parses an ISO-8601 formatted string with timezone", async function() {
+                let table = perspective.table({d: ["2008-09-15T15:53:00+05:00"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            it("Correctly parses an RFC 2822 formatted string", async function() {
+                let table = perspective.table({d: ["Wed, 05 Oct 2011 22:26:12 -0400"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            // Not all formats covered by JS parser, test intended for C++ parser
+            it.skip("Correctly parses all m-d-y formatted strings", async function() {
+                let datestrings = ["08-15-2009", "08/15/2009", "08-15-2009", "02 28 2009", "08/15/10", "31 08 2009"];
+                for (let str of datestrings) {
+                    let table = perspective.table({d: [str]});
+                    let view = table.view({});
+                    let result = await view.schema();
+                    expect(result["d"]).toEqual("datetime");
                 }
-            ]);
-            let view = table2.view({aggregate: [{op: "count", column: "const"}]});
-            let result = await view.to_json();
-            expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
-            view.delete();
-            table2.delete();
-            table.delete();
+            });
+
+            // Only implemented in the C++ date parser - skip
+            it.skip("Correctly parses a 'dd mm yyyy' formatted string", async function() {
+                let table = perspective.table({d: ["15 08 08"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("datetime");
+            });
+
+            it("Does not (for now) parse a date string in non-US formatting", async function() {
+                let table = perspective.table({d: ["2018/07/30"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("string");
+            });
+
+            it("Does not mistakenly parse a date-like string", async function() {
+                let table = perspective.table({d: ["Jan 14, 14"]});
+                let view = table.view({});
+                let result = await view.schema();
+                expect(result["d"]).toEqual("string");
+            });
         });
 
-        it("Computed column of arity 2", async function() {
-            var table = perspective.table(data_3);
+        describe("Computed constructors", function() {
+            it("Computed column of arity 0", async function() {
+                var table = perspective.table(data);
 
-            let table2 = table.add_computed([
-                {
-                    column: "ratio",
-                    type: "float",
-                    func: (w, x) => w / x,
-                    inputs: ["w", "x"]
-                }
-            ]);
-            let view = table2.view({aggregate: [{op: "count", column: "ratio"}]});
-            let result = await view.to_json();
-            expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
-            view.delete();
-            table2.delete();
-            table.delete();
-        });
+                let table2 = table.add_computed([
+                    {
+                        column: "const",
+                        type: "integer",
+                        func: () => 1,
+                        inputs: []
+                    }
+                ]);
+                let view = table2.view({aggregate: [{op: "count", column: "const"}]});
+                let result = await view.to_json();
+                expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
 
-        it("Computed column of arity 2 with updates on non-dependent columns", async function() {
-            var meta = {
-                w: "float",
-                x: "float",
-                y: "string",
-                z: "boolean"
-            };
-            var table = perspective.table(meta, {index: "y"});
-            let table2 = table.add_computed([
-                {
-                    column: "ratio",
-                    type: "float",
-                    func: (w, x) => w / x,
-                    inputs: ["w", "x"]
-                }
-            ]);
+            it("Computed column of arity 2", async function() {
+                var table = perspective.table(data_3);
 
-            table2.update(data_3);
+                let table2 = table.add_computed([
+                    {
+                        column: "ratio",
+                        type: "float",
+                        func: (w, x) => w / x,
+                        inputs: ["w", "x"]
+                    }
+                ]);
+                let view = table2.view({aggregate: [{op: "count", column: "ratio"}]});
+                let result = await view.to_json();
+                expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
 
-            let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
-            table2.update(delta_upd);
-            let view = table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]});
-            let result = await view.to_json();
-            let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
-            expect(result).toEqual(expected);
-            view.delete();
-            table2.delete();
-            table.delete();
-        });
+            it("Computed column of arity 2 with updates on non-dependent columns", async function() {
+                var meta = {
+                    w: "float",
+                    x: "float",
+                    y: "string",
+                    z: "boolean"
+                };
+                var table = perspective.table(meta, {index: "y"});
+                let table2 = table.add_computed([
+                    {
+                        column: "ratio",
+                        type: "float",
+                        func: (w, x) => w / x,
+                        inputs: ["w", "x"]
+                    }
+                ]);
 
-        it("String computed column of arity 1", async function() {
-            var table = perspective.table(data);
+                table2.update(data_3);
 
-            let table2 = table.add_computed([
-                {
-                    column: "yes/no",
-                    type: "string",
-                    func: z => (z === true ? "yes" : "no"),
-                    inputs: ["z"]
-                }
-            ]);
-            let view = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
-            let result = await view.to_json();
-            let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
-            expect(result).toEqual(expected);
-            view.delete();
-            table2.delete();
-            table.delete();
-        });
+                let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
+                table2.update(delta_upd);
+                let view = table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]});
+                let result = await view.to_json();
+                let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
+                expect(result).toEqual(expected);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
 
-        it("Computed schema returns names and metadata", async function() {
-            const func = i => i + 2;
+            it("String computed column of arity 1", async function() {
+                var table = perspective.table(data);
 
-            const computation = {
-                name: "+2",
-                input_type: "integer",
-                return_type: "integer",
-                func: func.toString()
-            };
+                let table2 = table.add_computed([
+                    {
+                        column: "yes/no",
+                        type: "string",
+                        func: z => (z === true ? "yes" : "no"),
+                        inputs: ["z"]
+                    }
+                ]);
+                let view = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
+                let result = await view.to_json();
+                let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
+                expect(result).toEqual(expected);
+                view.delete();
+                table2.delete();
+                table.delete();
+            });
 
-            const table = perspective.table(data);
+            it("Computed schema returns names and metadata", async function() {
+                const func = i => i + 2;
 
-            const table2 = table.add_computed([
-                {
-                    computation: computation,
-                    column: "plus2",
-                    type: "integer",
-                    inputs: ["x"],
+                const computation = {
+                    name: "+2",
                     input_type: "integer",
-                    func: func
-                }
-            ]);
+                    return_type: "integer",
+                    func: func.toString()
+                };
 
-            const result = await table2.computed_schema();
-            const expected = {
-                plus2: {
-                    input_columns: ["x"],
-                    input_type: "integer",
-                    computation: computation,
-                    type: "integer"
-                }
-            };
+                const table = perspective.table(data);
 
-            expect(result).toEqual(expected);
-            table2.delete();
-            table.delete();
+                const table2 = table.add_computed([
+                    {
+                        computation: computation,
+                        column: "plus2",
+                        type: "integer",
+                        inputs: ["x"],
+                        input_type: "integer",
+                        func: func
+                    }
+                ]);
+
+                const result = await table2.computed_schema();
+                const expected = {
+                    plus2: {
+                        input_columns: ["x"],
+                        input_type: "integer",
+                        computation: computation,
+                        type: "integer"
+                    }
+                };
+
+                expect(result).toEqual(expected);
+                table2.delete();
+                table.delete();
+            });
         });
 
         it("Column metadata returns names and type", async function() {
