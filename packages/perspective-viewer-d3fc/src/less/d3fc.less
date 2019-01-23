@@ -10,188 +10,203 @@
 @sans-serif-fonts: Arial, sans-serif;
 
 :host {
+    //stuff copied from the firefox jsfiddle stuff. Probs delete.
+    body {
+        font-family: sans-serif;
+    }
 
-  //stuff copied from the firefox jsfiddle stuff. Probs delete.
-  body {
-    font-family: sans-serif;
-  }
+    .chart {
+        width: 100%;
+        height: 100%;
+    }
 
-  .chart {
-    width: 100%;
-    height: 100%;
-  }
+    .label rect {
+        fill: none;
+    }
 
-  .label rect {
-    fill: none;
-  }
+    .point path {
+        opacity: 0.5;
+    }
 
-  .point path {
-    opacity: 0.5;
-  }
+    .y-label {
+        transform: rotate(-90deg);
+    }
 
-  .y-label {
-    transform: rotate(-90deg);
-  }
+    .point text,
+    g.label text {
+        font-size: 10px;
+        stroke: none;
+        fill: black;
+    }
 
-  .point text,
-  g.label text {
-    font-size: 10px;
-    stroke: none;
-    fill: black;
-  }
+    .plot-area {
+        overflow: visible !important;
+    }
 
-  .plot-area {
-    overflow: visible !important;
-  }
+    //GARBAGE ABOVE THIS POINT?
 
-  //GARBAGE ABOVE THIS POINT?
+    div.tooltip {
+        position: absolute;
+        text-align: center;
+        padding: 0.5em;
+        background: var(--d3fc-tooltip--background, #ffffff);
+        color: var(--d3fc-tooltip--color, black);
+        border: 1px solid #777777;
+        border-radius: 2px;
+        pointer-events: none;
+    }
 
-  div.tooltip {
-    position: absolute;
-    text-align: center;
-    padding: 0.5em;
-    background: var(--d3fc-tooltip--background, #FFFFFF);
-    color: var(--d3fc-tooltip--color, black);
-    border: 1px solid #777777;
-    border-radius: 2px;
-    pointer-events: none;
-  }
+    #container {
+        position: absolute;
+        width: calc(~"100% - 30px");
+        height: calc(~"100% - 30px");
+        display: grid;
+        margin: 15px;
+        justify-content: stretch;
+        grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        overflow-y: auto;
+    }
 
-  #container {
-    position: absolute;
-    width: calc(~"100% - 30px");
-    height: calc(~"100% - 30px");
-    display: grid;
-    margin: 15px;
-    justify-content: stretch;
-    grid-template-rows: repeat(auto-fit, minmax(400px, 1fr));
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    overflow-y: auto;
-  }
+    .legend {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 8pt;
+        left: auto;
+        width: 150px;
+        height: 100px;
+    }
 
-  .legend {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 8pt;
-    left: auto;
-    width: 150px;
-    height: 100px;
-  }
+    .legend .cell {
+        cursor: pointer;
+    }
 
-  .legend .cell {
-    cursor:pointer;
-  }
+    .legend .cell.hidden circle {
+        fill: rgb(204, 204, 204) !important;
+    }
 
-  .legend .cell.hidden circle {    
-    fill: rgb(204, 204, 204) !important;
-  }
+    .legend text {
+        fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+    }
 
-  .legend text {
-    fill: var(--d3fc-legend-text, rgb(51, 51, 51));
-  }
+    // .y-axis>svg>path {
+    //   stroke: #2f3136;
+    // }
 
-  // .y-axis>svg>path {
-  //   stroke: #2f3136;
-  // }
+    // .x-axis>svg>path {
+    //   stroke: #ffffff;
+    // }
 
-  // .x-axis>svg>path {
-  //   stroke: #ffffff;
-  // }
+    d3fc-group.cartesian-chart {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: grid;
+        display: -ms-grid;
+        grid-template-columns: minmax(1em, max-content) auto 1fr auto minmax(
+                1em,
+                max-content
+            );
+        -ms-grid-columns: minmax(1em, max-content) auto 1fr auto
+            minmax(1em, max-content);
+        grid-template-rows: minmax(1em, max-content) auto 1fr auto minmax(
+                1em,
+                max-content
+            );
+        -ms-grid-rows: minmax(1em, max-content) auto 1fr auto
+            minmax(1em, max-content);
+    }
 
-  d3fc-group.cartesian-chart{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    display:grid;
-    display:-ms-grid;
-    grid-template-columns:minmax(1em,max-content) auto 1fr auto minmax(1em,max-content);
-    -ms-grid-columns:minmax(1em,max-content) auto 1fr auto minmax(1em,max-content);
-    grid-template-rows:minmax(1em,max-content) auto 1fr auto minmax(1em,max-content);
-    -ms-grid-rows:minmax(1em,max-content) auto 1fr auto minmax(1em,max-content);
-  }
- 
-  d3fc-group.cartesian-chart>.top-label{
-    align-self:center;
-    -ms-grid-column-align:center;
-    justify-self:center;
-    -ms-grid-row-align:center;
-    grid-column:3;
-    grid-row:1;
-    -ms-grid-column:3;
-    -ms-grid-row:1;
-  }
+    d3fc-group.cartesian-chart > .top-label {
+        align-self: center;
+        -ms-grid-column-align: center;
+        justify-self: center;
+        -ms-grid-row-align: center;
+        grid-column: 3;
+        grid-row: 1;
+        -ms-grid-column: 3;
+        -ms-grid-row: 1;
+    }
 
-  d3fc-group.cartesian-chart>.top-axis{height:2em;
-    grid-column:3;
-    -ms-grid-column:3;
-    grid-row:2;
-    -ms-grid-row:2;
-  }
+    d3fc-group.cartesian-chart > .top-axis {
+        height: 2em;
+        grid-column: 3;
+        -ms-grid-column: 3;
+        grid-row: 2;
+        -ms-grid-row: 2;
+    }
 
-  d3fc-group.cartesian-chart>.left-label{align-self:center;
-    -ms-grid-column-align:center;
-    justify-self:center;
-    -ms-grid-row-align:center;
-    grid-column:1;
-    -ms-grid-column:1;
-    grid-row:3;
-    -ms-grid-row:3;
-  }
+    d3fc-group.cartesian-chart > .left-label {
+        align-self: center;
+        -ms-grid-column-align: center;
+        justify-self: center;
+        -ms-grid-row-align: center;
+        grid-column: 1;
+        -ms-grid-column: 1;
+        grid-row: 3;
+        -ms-grid-row: 3;
+    }
 
-  d3fc-group.cartesian-chart>.left-axis{width:3em;
-    grid-column:2;
-    -ms-grid-column:2;
-    grid-row:3;
-    -ms-grid-row:3;
-  }
+    d3fc-group.cartesian-chart > .left-axis {
+        width: 3em;
+        grid-column: 2;
+        -ms-grid-column: 2;
+        grid-row: 3;
+        -ms-grid-row: 3;
+    }
 
-  d3fc-group.cartesian-chart>.left-axis text {
-    fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
-  }
+    d3fc-group.cartesian-chart > .left-axis text {
+        fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
+    }
 
-  d3fc-group.cartesian-chart>.plot-area{overflow:hidden;
-    grid-column:3;
-    -ms-grid-column:3;
-    grid-row:3;
-    -ms-grid-row:3;
-  }
+    d3fc-group.cartesian-chart > .plot-area {
+        overflow: hidden;
+        grid-column: 3;
+        -ms-grid-column: 3;
+        grid-row: 3;
+        -ms-grid-row: 3;
+    }
 
-  d3fc-group.cartesian-chart>.right-axis{width:3em;
-    grid-column:4;
-    -ms-grid-column:4;
-    grid-row:3;
-    -ms-grid-row:3;
-  }
+    d3fc-group.cartesian-chart > .right-axis {
+        width: 3em;
+        grid-column: 4;
+        -ms-grid-column: 4;
+        grid-row: 3;
+        -ms-grid-row: 3;
+    }
 
-  d3fc-group.cartesian-chart>.right-label{align-self:center;
-    -ms-grid-column-align:center;
-    justify-self:center;
-    -ms-grid-row-align:center;
-    grid-column:5;
-    -ms-grid-column:5;
-    grid-row:3;
-    -ms-grid-row:3;
-  }
+    d3fc-group.cartesian-chart > .right-label {
+        align-self: center;
+        -ms-grid-column-align: center;
+        justify-self: center;
+        -ms-grid-row-align: center;
+        grid-column: 5;
+        -ms-grid-column: 5;
+        grid-row: 3;
+        -ms-grid-row: 3;
+    }
 
-  d3fc-group.cartesian-chart>.bottom-axis{height:2em;
-    grid-column:3;
-    -ms-grid-column:3;
-    grid-row:4;
-    -ms-grid-row:4;
-  }
+    d3fc-group.cartesian-chart > .bottom-axis {
+        height: 2em;
+        grid-column: 3;
+        -ms-grid-column: 3;
+        grid-row: 4;
+        -ms-grid-row: 4;
+    }
 
-  d3fc-group.cartesian-chart>.bottom-axis text {
-    fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
-  }
+    d3fc-group.cartesian-chart > .bottom-axis text {
+        fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
+    }
 
-  d3fc-group.cartesian-chart>.bottom-label{align-self:center;
-    -ms-grid-column-align:center;
-    justify-self:center;
-    -ms-grid-row-align:center;
-    grid-column:3;
-    -ms-grid-column:3;
-    grid-row:5;
-    -ms-grid-row:5;
-  }
+    d3fc-group.cartesian-chart > .bottom-label {
+        align-self: center;
+        -ms-grid-column-align: center;
+        justify-self: center;
+        -ms-grid-row-align: center;
+        grid-column: 3;
+        -ms-grid-column: 3;
+        grid-row: 5;
+        -ms-grid-row: 5;
+    }
 }
