@@ -6,7 +6,6 @@
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.3.1",
-        "babel-core": "^7.0.0-0",
         "babel-eslint": "^8.2.3",
         "babel-jest": "^23.6.0",
         "@babel/cli": "^7.2.3",

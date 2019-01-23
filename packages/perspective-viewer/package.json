@@ -2,9 +2,10 @@
     "name": "@jpmorganchase/perspective-viewer",
     "version": "0.2.12",
     "description": "Perspective.js",
-    "main": "src/js/viewer.js",
+    "main": "cjs/perspective-viewer.js",
     "files": [
         "build/**/*",
+        "cjs/*",
         "src/**/*",
         "babel.config.js"
     ],
@@ -12,7 +13,8 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:webpack": "webpack --color --config src/config/view.config.js",
+        "build:cjs": "webpack --color --config src/config/view.cjs.config.js",
+        "build:umd": "webpack --color --config src/config/view.config.js",
         "build:themes": "webpack --color --config src/config/themes.config.js && rm build/__themes.js",
         "build": "npm-run-all build:*",
         "watch": "webpack --color --watch --config src/config/view.config.js",
@@ -49,6 +51,7 @@
         "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",
         "d3-array": "^1.2.1",
+        "detectie": "1.0.0",
         "mobile-drag-drop": "^2.2.0",
         "underscore": "^1.8.3"
     }

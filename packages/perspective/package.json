@@ -68,6 +68,7 @@
         "core-js": "^2.5.7",
         "css-loader": "^0.28.7",
         "d3-array": "^1.2.1",
+        "detectie": "1.0.0",
         "extract-text-webpack-plugin": "^3.0.2",
         "file-loader": "^2.0.0",
         "flatbuffers": "^1.10.2",
@@ -82,6 +83,7 @@
         "uglifyjs-webpack-plugin": "^0.4.6",
         "underscore": "^1.8.3",
         "utf-8-validate": "~4.0.0",
+        "websocket-heartbeat-js": "^1.0.7",
         "worker-loader": "^2.0.0",
         "ws": "^6.1.2"
     },

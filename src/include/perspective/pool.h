@@ -48,8 +48,7 @@ public:
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
     void py_notify_userspace();
 #endif
-    t_pool(const t_pool& p) = delete;
-    t_pool& operator=(const t_pool& p) = delete;
+    PSP_NON_COPYABLE(t_pool);
 
     ~t_pool();
 

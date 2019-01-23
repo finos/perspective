@@ -221,6 +221,7 @@ set (SOURCE_FILES
 	src/cpp/base_impl_osx.cpp
 	src/cpp/base_impl_wasm.cpp
 	src/cpp/base_impl_win.cpp
+	src/cpp/binding.cpp
 	src/cpp/build_filter.cpp
 	#src/cpp/calc_agg_dtype.cpp
 	src/cpp/column.cpp
@@ -292,13 +293,13 @@ if (PSP_WASM_BUILD)
 	add_library(psp ${SOURCE_FILES})
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 
-	add_executable(perspective.async src/cpp/main.cpp)
+	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 
-	add_executable(perspective.sync src/cpp/main.cpp)
+	add_executable(perspective.sync src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.sync psp "${SYNC_MODE_FLAGS}")
 	set_target_properties(perspective.sync PROPERTIES COMPILE_FLAGS "${SYNC_MODE_FLAGS}")
 	set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
@@ -306,7 +307,7 @@ if (PSP_WASM_BUILD)
 	add_dependencies(perspective.sync perspective.async)
 
 	if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
-		add_executable(perspective.asm src/cpp/main.cpp)
+		add_executable(perspective.asm src/cpp/emscripten.cpp)
 		target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
@@ -324,7 +325,7 @@ else()
 		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
-		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/python/perspective/src/binding.cpp)
+		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/python/perspective/src/python.cpp)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
 		target_link_libraries(binding ${BOOST_PYTHON})

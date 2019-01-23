@@ -7,7 +7,7 @@
  *
  */
 
-import {detectIE} from "@jpmorganchase/perspective/src/js/utils.js";
+import detectIE from "detectie";
 
 function calc_index(event) {
     if (this._active_columns.children.length == 0) {

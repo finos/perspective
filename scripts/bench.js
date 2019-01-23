@@ -12,6 +12,7 @@ const execSync = require("child_process").execSync;
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const args = process.argv.slice(2);
+const LIMIT = args.indexOf("--limit");
 
 function docker() {
     console.log("Creating puppeteer docker image");
@@ -20,6 +21,10 @@ function docker() {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
     cmd += " perspective/puppeteer nice -n -20 node packages/perspective/bench/js/bench.js";
+    if (LIMIT !== -1) {
+        let limit = args[LIMIT + 1];
+        cmd += ` --limit ${limit}`;
+    }
     return cmd;
 }
 

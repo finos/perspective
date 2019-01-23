@@ -8,7 +8,11 @@
  */
 
 const perspective = require("@jpmorganchase/perspective").default;
-require("@jpmorganchase/perspective-viewer");
 
-const table = perspective.worker().table([{x: 1}]);
-table.view().to_json(console.log);
+(async () => {
+    const worker = perspective.worker();
+    const table = worker.table([{x: 1, y: 2}, {x: 2, y: 2}]);
+    const view = await table.view();
+    const json = await view.to_json();
+    console.log(json);
+})();

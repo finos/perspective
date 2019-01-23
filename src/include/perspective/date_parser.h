@@ -6,24 +6,23 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
 #pragma once
-#if defined(PSP_ENABLE_PYTHON)
-
+#include <memory>
+#include <vector>
+#include <locale>
 #include <perspective/first.h>
-#include <perspective/raw_types.h>
-#include <perspective/base.h>
 #include <perspective/exports.h>
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
 
-namespace py = boost::python;
-namespace np = boost::python::numpy;
+namespace perspective {
 
-namespace perspective
-{
+class PERSPECTIVE_EXPORT t_date_parser {
+    public:
+        t_date_parser();
 
-np::dtype get_numpy_typenum_from_dtype(t_dtype dtype);
+        bool is_valid(std::string const& datestring);
 
+    private:
+        static const std::string VALID_FORMATS[12];
+};
 } // end namespace perspective
-
-#endif
