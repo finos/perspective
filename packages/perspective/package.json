@@ -82,6 +82,7 @@
         "uglifyjs-webpack-plugin": "^0.4.6",
         "underscore": "^1.8.3",
         "utf-8-validate": "~4.0.0",
+        "websocket-heartbeat-js": "^1.0.7",
         "worker-loader": "^2.0.0",
         "ws": "^6.1.2"
     },
