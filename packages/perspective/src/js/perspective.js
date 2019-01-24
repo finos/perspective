@@ -228,6 +228,16 @@ export default function(Module) {
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
+
+        this._View = undefined;
+        if (sides === 0) {
+            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name);
+        } else if (sides === 1) {
+            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name);
+        } else if (sides === 2) {
+            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name);
+        }
+
         bindall(this);
     }
 
@@ -237,8 +247,10 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
-        this.pool.unregister_context(this.gnode.get_id(), this.name);
+        this._View.delete_view();
+        this._View.delete();
         this.ctx.delete();
+
         this.table.views.splice(this.table.views.indexOf(this), 1);
         this.table = undefined;
         let i = 0,
@@ -571,7 +583,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated rows.
      */
     view.prototype.num_rows = async function() {
-        return this.ctx.get_row_count();
+        return this._View.num_rows();
     };
 
     /**
@@ -584,7 +596,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated columns.
      */
     view.prototype.num_columns = async function() {
-        return this.ctx.unity_get_column_count();
+        return this._View.num_columns();
     };
 
     /**
@@ -595,7 +607,7 @@ export default function(Module) {
      * @returns {Promise<bool>} Whether this row is expanded.
      */
     view.prototype.get_row_expanded = async function(idx) {
-        return this.ctx.unity_get_row_expanded(idx);
+        return this._View.get_row_expanded(idx);
     };
 
     /**
@@ -606,11 +618,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
-            return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
-        } else if (this.nsides < 2) {
-            return this.ctx.open(idx);
-        }
+        return this._View.expand(idx);
     };
 
     /**
@@ -621,11 +629,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.collapse = async function(idx) {
-        if (this.nsides === 2) {
-            return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
-        } else {
-            return this.ctx.close(idx);
-        }
+        return this._View.collapse(idx);
     };
 
     /**
@@ -633,15 +637,7 @@ export default function(Module) {
      *
      */
     view.prototype.set_depth = async function(depth) {
-        if (this.config.row_pivot.length >= depth) {
-            if (this.nsides === 2) {
-                return this.ctx.set_depth(__MODULE__.t_header.HEADER_ROW, depth);
-            } else {
-                return this.ctx.set_depth(depth);
-            }
-        } else {
-            console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
-        }
+        return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
     /**

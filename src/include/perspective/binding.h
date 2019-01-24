@@ -11,13 +11,13 @@
 #if defined(PSP_ENABLE_WASM) || defined(PSP_ENABLE_PYTHON)
 
 #include <perspective/base.h>
-#include <perspective/binding.h>
 #include <perspective/gnode.h>
 #include <perspective/table.h>
 #include <perspective/pool.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <perspective/View.h>
 #include <random>
 #include <cmath>
 #include <sstream>
@@ -324,7 +324,23 @@ T get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
     std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
     std::uint32_t end_col);
 
-}
-}
+/**
+ * Creates a new View for a zero-sided context.
+ *
+ * Params
+ * ------
+ *
+ * Returns
+ * -------
+ * A shared pointer to a View<t_ctx0>.
+ */
+
+template <typename CTX_T>
+std::shared_ptr<View<CTX_T>>
+make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
+    std::shared_ptr<t_gnode> gnode, std::string name);
+
+} // end namespace binding
+} // end namespace perspective
 
 #endif
