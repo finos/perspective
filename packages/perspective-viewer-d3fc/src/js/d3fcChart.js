@@ -63,7 +63,7 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
     let orientation = horizontal ? "horizontal" : "vertical";
 
     let labels = interpretLabels(config);
-    let isSplitBy = labels.splitLabel != "";
+    let isSplitBy = labels.splitLabel.length !== 0;
 
     let groups = interpretGroups(config.xAxis.categories);
     let series = config.series;
@@ -272,14 +272,9 @@ function interpretLabels(config) {
         splitLabel: null
     };
 
-    labels.mainLabel = config.series
-        .map(s => s.stack)
-        .filter((value, index, self) => self.indexOf(value) === index)
-        .join(", ");
-
-    labels.crossLabel = config.row_pivots.filter((value, index, self) => self.indexOf(value) === index).join(", ");
-
-    labels.splitLabel = config.col_pivots.filter((value, index, self) => self.indexOf(value) === index).join(", ");
+    labels.mainLabel = config.series.map(s => s.stack).filter((value, index, self) => self.indexOf(value) === index);
+    labels.crossLabel = config.row_pivots.filter((value, index, self) => self.indexOf(value) === index);
+    labels.splitLabel = config.col_pivots.filter((value, index, self) => self.indexOf(value) === index);
 
     console.log("labels:", labels);
 
@@ -373,7 +368,7 @@ function styleDark(chart, horizontal, labels) {
         return horizontal ? `translate(${parallelToAxis}, ${perpendicularToAxis})` : `translate(${perpendicularToAxis}, ${parallelToAxis})`;
     }
 
-    mainLabel(labels.mainLabel);
+    mainLabel(labels.mainLabel.join(", "));
     //crossLabel(labels.crossLabel); // not enabled.
 
     let textDistanceFromXAxis = 9;
@@ -394,7 +389,7 @@ function styleDark(chart, horizontal, labels) {
             .attr("stroke", "rgb(187, 187, 187)")
             .attr("transform", (x, i) => translate(i * tickSpacing, 0));
 
-        if (labels.crossLabel === "") {
+        if (labels.crossLabel.length === 0) {
             selection.select("text").attr("display", "none");
         }
     });
