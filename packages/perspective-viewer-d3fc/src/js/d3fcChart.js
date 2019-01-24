@@ -339,14 +339,11 @@ function styleDark(chart, horizontal, labels) {
         let tickSpacing = totalSpace / groups.length;
 
         selection.attr("transform", "translate(0, 0)");
-        parent.firstChild.setAttribute("stroke", "white"); // turn the axis white // TODO: this is too fragile
-        selection
-            .select("text")
-            .attr("fill", "white")
-            .attr("transform", (x, i) => translate(i * tickSpacing + tickSpacing / 2, distanceFromAxis));
+        parent.firstChild.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis white // TODO: this is too fragile
+        selection.select("text").attr("transform", (x, i) => translate(i * tickSpacing + tickSpacing / 2, distanceFromAxis));
         selection
             .select("path") // select the tick marks
-            .attr("stroke", "white")
+            .attr("stroke", "rgb(187, 187, 187)")
             .attr("transform", (x, i) => translate(i * tickSpacing, 0));
 
         if (labels.crossLabel === "") {
