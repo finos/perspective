@@ -85,6 +85,7 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
 
     removeCanvasElement(container);
     removeAxisGap(container);
+    correctAxisClip(container, horizontal);
 }
 
 // CONFIGURE CHART ELEMENTS
@@ -251,6 +252,12 @@ function removeAxisGap(container) {
     d3.select(container)
         .select(".bottom-axis")
         .style("margin-top", "-5px");
+}
+
+function correctAxisClip(container, horizontal) {
+    const selection = d3.select(container);
+    const axis = horizontal ? selection.select(".bottom-axis svg") : selection.select(".left-axis svg");
+    axis.style("overflow", "overlay");
 }
 
 // PREP DATA
