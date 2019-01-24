@@ -84,6 +84,7 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
     drawLegend(legend, container, hiddenElements);
 
     removeCanvasElement(container);
+    removeAxisGap(container);
 }
 
 // CONFIGURE CHART ELEMENTS
@@ -244,6 +245,12 @@ function removeCanvasElement(container) {
     // Remove the canvas element; it's empty but blocks direct element selection on the svg viewbox.
     let canvas = container.getElementsByTagName("d3fc-canvas")[0];
     canvas.remove();
+}
+
+function removeAxisGap(container) {
+    d3.select(container)
+        .select(".bottom-axis")
+        .style("margin-top", "-5px");
 }
 
 // PREP DATA
