@@ -10,6 +10,7 @@
 import * as fc from "d3fc";
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
+import {isNullOrUndefined} from "util";
 
 export default class D3FCChart {
     constructor(mode, config, container) {
@@ -64,7 +65,10 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
     let labels = interpretLabels(config);
     let isSplitBy = labels.splitLabel != "";
 
-    let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, config, hiddenElements);
+    let groups = interpretGroups(config.xAxis.categories);
+    let series = config.series;
+
+    let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, series, groups, hiddenElements);
 
     let legend = configureLegend(isSplitBy, color, hiddenElements, update);
     let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
@@ -282,33 +286,30 @@ function interpretLabels(config) {
     return labels;
 }
 
-function interpretDataset(isSplitBy, config, hiddenElements) {
+function interpretDataset(isSplitBy, series, groups, hiddenElements) {
     if (isSplitBy) {
-        let [dataset, stackedBarData, color] = interpretStackDataset(config, hiddenElements);
+        let [dataset, stackedBarData, color] = interpretStackDataset(series, groups, hiddenElements);
         console.log("dataset: ", dataset);
         return [dataset, stackedBarData, color];
     }
 
-    let {series, xAxis} = config;
-    let dataset;
-
     //simple array of data
-    dataset = series[0].data.map((mainValue, i) => ({
+    let dataset = series[0].data.map((mainValue, i) => ({
         mainValue: mainValue,
-        crossValue: xAxis.categories.length > 0 ? xAxis.categories[i] : i
+        crossValue: interpretCrossValue(i, groups)
     }));
 
     console.log("dataset: ", dataset);
     return [dataset, null, null];
 }
 
-function interpretStackDataset(config, hiddenElements) {
+function interpretStackDataset(series, groups, hiddenElements) {
     //Convert data to Stacked Bar Chart Format
-    let keys = config.xAxis.categories.length > 0 ? config.xAxis.categories : [...Array(config.series[0].data.length)].map((_, i) => i);
+    let keys = groups.length > 0 ? groups : [...Array(series[0].data.length)].map((_, i) => i);
 
     let stackedBarData = keys.map((group, i) => {
         let row = {group};
-        config.series
+        series
             .filter(d => !hiddenElements.includes(d.name))
             .forEach(split => {
                 row[split.name] = split.data[i] || 0;
@@ -318,8 +319,48 @@ function interpretStackDataset(config, hiddenElements) {
 
     let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
     let dataset = stack(stackedBarData);
-    let color = d3.scaleOrdinal(d3.schemeCategory10).domain(config.series.map(s => s.name));
+    let color = d3.scaleOrdinal(d3.schemeCategory10).domain(series.map(s => s.name));
     return [dataset, stackedBarData, color];
+}
+
+function interpretCrossValue(i, categories) {
+    if (categories.length <= 0) {
+        return i;
+    }
+
+    return categories[i];
+}
+
+function interpretGroups(categories) {
+    let flatmap = [];
+
+    if (categories.length === 0) {
+        return flatmap;
+    }
+
+    flattenAllArrays(flatmap, categories.map(subCat => flattenGroup(subCat, [])));
+    return flatmap;
+}
+
+function flattenGroup(category, parentCategories) {
+    if (isNullOrUndefined(category.name)) {
+        // We've reached the end of the nesting!
+        return [...parentCategories, category];
+    }
+
+    let catName = category.name;
+    let flatmap = category.categories.map(subCat => flattenGroup(subCat, [...parentCategories, catName]));
+    return flatmap;
+}
+
+function flattenAllArrays(completeList, array) {
+    if (!Array.isArray(array[0])) {
+        completeList.push(array);
+        return;
+    }
+
+    array.forEach(x => flattenAllArrays(completeList, x));
+    return;
 }
 
 // STYLE CHART
