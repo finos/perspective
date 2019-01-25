@@ -65,10 +65,10 @@ function renderBar(config, container, horizontal, hiddenElements, update) {
     let labels = interpretLabels(config);
     let isSplitBy = labels.splitLabel.length !== 0;
 
-    let groups = interpretGroups(config.xAxis.categories);
+    let groupBys = interpretGroupBys(config.xAxis.categories);
     let series = config.series;
 
-    let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, series, groups, hiddenElements);
+    let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, series, groupBys, hiddenElements);
 
     let legend = configureLegend(isSplitBy, color, hiddenElements, update);
     let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
@@ -281,9 +281,9 @@ function interpretLabels(config) {
     return labels;
 }
 
-function interpretDataset(isSplitBy, series, groups, hiddenElements) {
+function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     if (isSplitBy) {
-        let [dataset, stackedBarData, color] = interpretStackDataset(series, groups, hiddenElements);
+        let [dataset, stackedBarData, color] = interpretStackDataset(series, groupBys, hiddenElements);
         console.log("dataset: ", dataset);
         return [dataset, stackedBarData, color];
     }
@@ -291,16 +291,16 @@ function interpretDataset(isSplitBy, series, groups, hiddenElements) {
     //simple array of data
     let dataset = series[0].data.map((mainValue, i) => ({
         mainValue: mainValue,
-        crossValue: interpretCrossValue(i, groups)
+        crossValue: interpretCrossValue(i, groupBys)
     }));
 
     console.log("dataset: ", dataset);
     return [dataset, null, null];
 }
 
-function interpretStackDataset(series, groups, hiddenElements) {
+function interpretStackDataset(series, groupBys, hiddenElements) {
     //Convert data to Stacked Bar Chart Format
-    let keys = groups.length > 0 ? groups : [...Array(series[0].data.length)].map((_, i) => i);
+    let keys = groupBys.length > 0 ? groupBys : [...Array(series[0].data.length)].map((_, i) => i);
 
     let stackedBarData = keys.map((group, i) => {
         let row = {group};
@@ -326,25 +326,25 @@ function interpretCrossValue(i, categories) {
     return categories[i];
 }
 
-function interpretGroups(categories) {
+function interpretGroupBys(categories) {
     let flatmap = [];
 
     if (categories.length === 0) {
         return flatmap;
     }
 
-    flattenAllArrays(flatmap, categories.map(subCat => flattenGroup(subCat, [])));
+    flattenAllArrays(flatmap, categories.map(subCat => flattenGroupBy(subCat, [])));
     return flatmap;
 }
 
-function flattenGroup(category, parentCategories) {
+function flattenGroupBy(category, parentCategories) {
     if (isNullOrUndefined(category.name)) {
         // We've reached the end of the nesting!
         return [...parentCategories, category];
     }
 
     let catName = category.name;
-    let flatmap = category.categories.map(subCat => flattenGroup(subCat, [...parentCategories, catName]));
+    let flatmap = category.categories.map(subCat => flattenGroupBy(subCat, [...parentCategories, catName]));
     return flatmap;
 }
 
