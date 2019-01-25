@@ -7,7 +7,6 @@
  *
  */
 
-// import {COLUMN_SEPARATOR_STRING} from "@jpmorganchase/perspective/src/js/defaults.js";
 const COLUMN_SEPARATOR_STRING = "|";
 
 const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;

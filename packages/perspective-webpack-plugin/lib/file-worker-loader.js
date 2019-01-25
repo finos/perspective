@@ -52,16 +52,14 @@ exports.default = function loader(content) {
             inputPath = inputPath
                 .replace(path.join("perspective", "build"), "perspective")
                 .replace(/\.js/, ".worker.js")
-                .replace(/(es\/js)/, "build");
+                .replace(/(cjs\/js)/, "build");
         }
         content = fs.readFileSync(inputPath).toString();
-        if (!options.compiled) {
-            this.emitFile(emitPath, "" + content);
-            const map_file = `${inputPath}.map`;
-            if (fs.existsSync(map_file)) {
-                const map_content = fs.readFileSync(map_file).toString();
-                this.emitFile(`${emitPath}.map`, "" + map_content);
-            }
+        this.emitFile(emitPath, "" + content);
+        const map_file = `${inputPath}.map`;
+        if (fs.existsSync(map_file)) {
+            const map_content = fs.readFileSync(map_file).toString();
+            this.emitFile(`${emitPath}.map`, "" + map_content);
         }
     }
 

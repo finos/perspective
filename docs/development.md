@@ -152,9 +152,14 @@ with your changes to preserve them for future comparison.
 yarn bench
 ```
 
+Use the `--limit <NUMBER>` flag to control the number of Perspective versions that the
+benchmark suite will run, where `<NUMBER>` is an integer greater than 0. If `<NUMBER>` 
+cannot be parsed, is 0, or is greater than the number of versions, the benchmark suite
+will run all previous versions of Perspective.
+
 The benchmarks report and `results.json` show a historgram of current
 performance, as well as that of the previous `results.json`.  Running this
 should probably be standard practice after making a large change which may
 affect performance, but please create a baseline `results.json` entry for your
-test machine on a commit before your changes first, such that the affect of your
+test machine on a commit before your changes first, such that the effects of your
 PR can be properly compared.

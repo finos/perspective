@@ -3,14 +3,14 @@
     "version": "0.2.12",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
-    "browser": "es/js/perspective.parallel.js",
+    "browser": "cjs/js/perspective.parallel.js",
     "publishConfig": {
         "access": "public"
     },
     "files": [
         "build/*",
+        "cjs/**/*",
         "index.d.ts",
-        "loader/*",
         "webpack-plugin.js"
     ],
     "typings": "index.d.ts",
@@ -19,7 +19,7 @@
         "prebuild": "mkdir -p build && mkdir -p obj",
         "cpp": "npm-run-all build:cpp test:cpp",
         "build": "npm-run-all build:babel build:webpack",
-        "build:babel": "babel src/js --out-dir es/js",
+        "build:babel": "babel src/js --out-dir cjs/js",
         "build:webpack": "npm-run-all -p build:webpack:*",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
@@ -80,12 +80,21 @@
         "clean-css-loader": "^1.1.0",
         "core-js": "^2.5.7",
         "css-loader": "^0.28.7",
+        "d3-array": "^1.2.1",
+        "detectie": "1.0.0",
         "extract-text-webpack-plugin": "^3.0.2",
         "file-loader": "^2.0.0",
         "html-loader": "^0.5.1",
         "less-loader": "^4.0.5",
         "style-loader": "^0.18.2",
         "uglifyjs-webpack-plugin": "^0.4.6",
-        "worker-loader": "^2.0.0"
+        "underscore": "^1.8.3",
+        "utf-8-validate": "~4.0.0",
+        "websocket-heartbeat-js": "^1.0.7",
+        "worker-loader": "^2.0.0",
+        "ws": "^6.1.2"
+    },
+    "peerDependencies": {
+        "webpack": ">=3.5 <4"
     }
 }
