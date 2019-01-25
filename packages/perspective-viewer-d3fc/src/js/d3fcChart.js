@@ -121,7 +121,7 @@ function removeAxisGap(container) {
 function correctAxisClip(container, horizontal) {
     const selection = d3.select(container);
     const axis = horizontal ? selection.select(".bottom-axis svg") : selection.select(".left-axis svg");
-    axis.style("overflow", "overlay");
+    axis.style("overflow", "visible");
 }
 
 // STYLE CHART
@@ -144,7 +144,16 @@ function styleChart(chart, horizontal, labels) {
     crossDecorate(selection => {
         let groups = selection._groups[0];
         let parent = selection._parents[0];
-        let totalSpace = horizontal ? parent.clientHeight : parent.clientWidth;
+
+        let parentViewBoxVals = parent.attributes.viewBox.value.split(" ");
+        let viewBoxDimensions = {
+            x: 0,
+            y: 1,
+            width: 2,
+            height: 3
+        };
+
+        let totalSpace = horizontal ? parentViewBoxVals[viewBoxDimensions.height] : parentViewBoxVals[viewBoxDimensions.width];
         let tickSpacing = totalSpace / groups.length;
 
         selection.attr("transform", "translate(0, 0)");
