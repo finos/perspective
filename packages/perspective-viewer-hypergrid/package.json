@@ -43,8 +43,8 @@
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.12",
         "@jpmorganchase/perspective-viewer": "^0.2.12",
-        "babel-polyfill": "^6.26.0",
         "babel-runtime": "^6.26.0",
+        "babel-plugin-transform-custom-element-classes": "^0.1.0",
         "datasaur-local": "3.0.0",
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",

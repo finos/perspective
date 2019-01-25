@@ -38,6 +38,7 @@
         "@phosphor/widgets": "^1.5.0"
     },
     "devDependencies": {
+        "babel-plugin-transform-custom-element-classes": "^0.1.0",
         "@jpmorganchase/perspective-webpack-plugin": "^0.2.12",
         "@types/jest": "^23.3.9",
         "css-loader": "^0.26.1",
