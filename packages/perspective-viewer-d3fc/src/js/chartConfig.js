@@ -110,7 +110,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
                     .each(function() {
                         d3.select(this)
                             .selectAll("g.bar")
-                            .filter(d => d[0] !== d[1])
+                            .filter(d => d.mainValue !== d.crossValue)
                             .attr("fill", "#1f78b4")
                             .attr("opacity", 0.9)
                             .each(configureTooltip);
