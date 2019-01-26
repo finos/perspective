@@ -23,8 +23,8 @@ function docker(image = "emsdk") {
 
 // Copy .so in place to perspective package
 try {
-    let cmd1 = "cp `find build -name 'libbinding.so'` python/perspective/table/";
-    let cmd2 = "cp `find build -name 'libpsp.so'` python/perspective/table/";
+    let cmd1 = "cp `find build -name 'libbinding.*'` python/perspective/table/";
+    let cmd2 = "cp `find build -name 'libpsp.*'` python/perspective/table/";
     if (process.env.PSP_DOCKER) {
         execute(docker("python") + ' bash -c "' + cmd1 + '"');
         execute(docker("python") + ' bash -c "' + cmd2 + '"');

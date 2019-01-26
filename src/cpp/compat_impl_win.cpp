@@ -16,6 +16,7 @@
 #include <perspective/utils.h>
 #include <cstdio>
 #include <psapi.h>
+#include <cstdint>
 
 namespace perspective {
 
@@ -117,12 +118,12 @@ map_file_write(const std::string& fname, t_uindex size, t_rfmapping& out) {
         CREATE_ALWAYS, PAGE_READWRITE, FILE_MAP_WRITE, false, static_cast<size_t>(size), out);
 }
 
-t_int64
+int64_t
 psp_curtime() {
-    return GetTickCount() * static_cast<t_int64>(1000000);
+    return GetTickCount() * static_cast<int64_t>(1000000);
 }
 
-t_int64
+int64_t
 psp_curmem() {
     PROCESS_MEMORY_COUNTERS mem;
     GetProcessMemoryInfo(GetCurrentProcess(), &mem, sizeof(mem));
@@ -139,7 +140,7 @@ typedef struct t_win_thrstruct {
 #pragma pack(pop)
 
 static void
-set_thread_name_win(t_uint32 thrid, const std::string& name) {
+set_thread_name_win(uint32_t thrid, const std::string& name) {
     const DWORD MS_VC_EXCEPTION = 0x406D1388;
     t_win_thrstruct thrstruct;
     thrstruct.dwType = 0x1000;
@@ -212,7 +213,7 @@ cwd() {
     return std::string(path);
 }
 
-t_int64
+int64_t
 get_page_size() {
     SYSTEM_INFO info;
     GetSystemInfo(&info);
@@ -224,8 +225,8 @@ psp_dbg_malloc(size_t size) {
     SYSTEM_INFO sys_info;
     GetSystemInfo(&sys_info);
     auto page = 2 * sys_info.dwPageSize;
-    assert((page & (static_cast<ssize_t>(page) - 1)) == 0);
-    auto rounded_size = (size + static_cast<ssize_t>(page) - 1) & (-static_cast<ssize_t>(page));
+    assert((page & (static_cast<size_t>(page) - 1)) == 0);
+    auto rounded_size = (size + static_cast<size_t>(page) - 1) & (-static_cast<size_t>(page));
     BYTE* start = (BYTE*)VirtualAlloc(NULL, rounded_size + page, MEM_COMMIT, PAGE_READWRITE);
     DWORD old_protect;
     BOOL res = VirtualProtect(start + rounded_size, page, PAGE_NOACCESS, &old_protect);
@@ -240,7 +241,7 @@ psp_dbg_free(void* mem) {
 }
 
 void*
-psp_page_aligned_malloc(t_int64 size) {
+psp_page_aligned_malloc(int64_t size) {
     return _aligned_malloc(static_cast<size_t>(size), static_cast<size_t>(get_page_size()));
 }
 

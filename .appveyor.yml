@@ -1,0 +1,48 @@
+max_jobs: 8
+
+image: 
+  - Visual Studio 2015
+  - Visual Studio 2017
+
+configuration:
+  - Release
+  - Debug
+
+platform:
+  - x64
+
+environment:
+  matrix:
+  - arch: Win64
+
+matrix:
+  allow_failures:
+    - platform: x64
+      configuration: Debug
+
+init:
+  - set arch=
+  - if "%arch%"=="Win64" ( set arch= Win64)
+  - echo %arch%
+  - echo %APPVEYOR_BUILD_WORKER_IMAGE%
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2017" ( set generator="Visual Studio 15 2017%arch%" )
+  - if "%APPVEYOR_BUILD_WORKER_IMAGE%"=="Visual Studio 2015" ( set generator="Visual Studio 14 2015%arch%" )
+
+before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    cmake --version
+    cmake .. -G %generator% -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=1 -DPSP_CPP_BUILD_TESTS=1 -DPSP_CPP_BUILD_STRICT=1 -DBOOST_ROOT=C:\Libraries\boost_1_67_0 -DBoost_INCLUDE_DIRS=C:\Libraries\boost_1_67_0
+
+build_script:
+  - msbuild psp.sln /p:Platform=x64 /m /p:Configuration=%CONFIGURATION%
+  - cp %CONFIGURATION%\psp.dll test\%CONFIGURATION%
+  - cp tbb-build\%CONFIGURATION%\tbb.dll test\%CONFIGURATION%
+  - .\test\%CONFIGURATION%\psp_test.exe
+
+# to disable automatic tests
+test: off
+
+# to disable deployment
+deploy: off
