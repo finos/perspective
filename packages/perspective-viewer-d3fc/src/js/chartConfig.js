@@ -11,14 +11,14 @@ import * as fc from "d3fc";
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
 
-export function configureBarSeries(isSplitBy, orientation, dataset, groupBys) {
+export function configureBarSeries(isSplitBy, orientation, dataset) {
     let barSeries;
     if (isSplitBy) {
         let stackedBarSeries = fc
             .autoBandwidth(fc.seriesSvgBar())
             .align("left")
             .orient(orientation)
-            .crossValue((_, i) => groupBys[i])
+            .crossValue(d => d.data["group"])
             .mainValue(d => d[1])
             .baseValue(d => d[0]);
 
@@ -50,7 +50,7 @@ export function configureGrid(horizontal) {
     return gridlines;
 }
 
-export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
+export function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
     let mainScale;
     let crossScale;
     if (isSplitBy) {
@@ -64,7 +64,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
 
         crossScale = d3
             .scaleBand()
-            .domain(groupBys)
+            .domain(stackedBarData.map(entry => entry["group"]))
             .paddingInner(0.4)
             .paddingOuter(0.2);
     } else {
@@ -163,7 +163,9 @@ export function configureMultiColumnBarSeries(orientation, color, keys) {
         });
 }
 
-export function configureScaleMultiColumn(horizontal, dataset, groupedBarData) {
+export function configureScaleMultiColumn(horizontal, dataset) {
+    const group = fc.group().key("crossValue");
+    const groupedDataset = group(dataset);
     const mainExtent = fc
         .extentLinear()
         .accessors([a => a.map(d => d[1])])
@@ -171,15 +173,15 @@ export function configureScaleMultiColumn(horizontal, dataset, groupedBarData) {
         .pad([1, 1])
         .padUnit("domain");
 
-    const mainScale = d3.scaleLinear().domain(mainExtent(dataset));
+    const mainScale = d3.scaleLinear().domain(mainExtent(groupedDataset));
 
     const crossScale = d3
         .scaleBand()
-        .domain(groupedBarData.map(entry => entry.crossValue))
+        .domain(dataset.map(entry => entry["crossValue"]))
         .paddingInner(0.4)
         .paddingOuter(0.2);
     let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
-    return [xScale, yScale];
+    return [xScale, yScale, groupedDataset];
 }
 
 export function configureMultiSeries(series1, series2) {
