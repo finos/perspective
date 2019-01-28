@@ -9,7 +9,7 @@
 
 import * as d3 from "d3";
 import {configureLegend, configureBarSeries, configureGrid, configureScale, configureMultiSvg, configureChart} from "./chartConfig";
-import {interpretLabels, interpretGroupBys, interpretDataset} from "./dataInterpretation";
+import {interpretLabels, interpretGroupBys, interpretDataset, interpretKeysAndColor} from "./dataInterpretation";
 
 const nbsp = "\xa0";
 
@@ -56,7 +56,8 @@ export default class D3FCChart {
         let series = config.series;
         let groupBys = interpretGroupBys(config.xAxis.categories, series);
 
-        let [dataset, color] = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
+        const [keys, color] = interpretKeysAndColor(config);
+        let [dataset, stackedBarData] = interpretDataset(isSplitBy, series, groupBys, hiddenElements);
 
         let legend = configureLegend(isSplitBy, color, hiddenElements, update);
         let barSeries = configureBarSeries(isSplitBy, orientation, dataset, groupBys);
