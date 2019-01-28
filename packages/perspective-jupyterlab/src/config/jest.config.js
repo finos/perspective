@@ -12,7 +12,7 @@ module.exports = {
     transform: {"^.+\\.(ts|tsx)$": "ts-jest", ".+\\.(css|styl|less|sass|scss)$": "jest-transform-css"},
     cache: false,
     testMatch: ["<rootDir>/test/ts/*.test.ts"],
-    testPathIgnorePatterns: ["<rootDir>/dist", "<rootDir>/test/js"],
+    testPathIgnorePatterns: ["<rootDir>/build", "<rootDir>/test/js"],
     transformIgnorePatterns: ["node_modules"],
     moduleNameMapper: {
         "\\.(css|less)$": "<rootDir>/test/js/styleMock.js",

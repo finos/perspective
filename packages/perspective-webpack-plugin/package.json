@@ -1,0 +1,55 @@
+{
+    "name": "@jpmorganchase/perspective-webpack-plugin",
+    "version": "0.2.12",
+    "description": "Perspective.js Webpack Plugin",
+    "main": "index.js",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "src/**/*",
+        "index.js",
+        "babel.config.js"
+    ],
+    "scripts": {
+    },
+    "jest": {
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jpmorganchase/perspective"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@babel/core": "^7.1.0",
+        "@babel/plugin-proposal-decorators": "^7.1.2",
+        "@babel/plugin-transform-for-of": "^7.0.0",
+        "@babel/plugin-transform-runtime": "^7.1.0",
+        "@babel/polyfill": "^7.0.0",
+        "@babel/preset-env": "^7.1.5",
+        "@babel/runtime": "^7.1.5",
+        "@webpack-contrib/schema-utils": "^1.0.0-beta.0",
+        "arraybuffer-loader": "^1.0.2",
+        "babel-loader": "^8.0.4",
+        "babel-plugin-transform-custom-element-classes": "^0.1.0",
+        "base64-font-loader": "0.0.4",
+        "bufferutil": "~3.0.0",
+        "clean-css-cli": "4.2.1",
+        "clean-css-loader": "^1.1.0",
+        "core-js": "^2.5.7",
+        "css-loader": "^0.28.7",
+        "extract-text-webpack-plugin": "^3.0.2",
+        "fast-async": "^6.3.8",
+        "file-loader": "^2.0.0",
+        "html-loader": "^0.5.1",
+        "less": "^2.7.2",
+        "less-loader": "^4.0.5",
+        "style-loader": "^0.18.2",
+        "tslib": "^1.9.3",
+        "worker-loader": "^2.0.0"
+    },
+    "peerDependencies": {
+        "webpack": ">=3.5 <4"
+    }
+}

@@ -28,6 +28,7 @@
         "rimraf": "^2.6.2",
         "ts-loader": "^3.5.0",
         "typescript": "~2.9.2",
+        "uglifyjs-webpack-plugin": "^0.4.6",
         "webpack": "^3.5.6"
     },
     "pre-commit": [
@@ -46,7 +47,9 @@
         "test": "node scripts/test.js",
         "test_cpp": "node scripts/test_cpp.js",
         "test_python": "node scripts/test_python.js",
-        "clean": "find obj -mindepth 1 -delete && find cppbuild -mindepth 1 -delete && lerna run clean ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
+        "clean": "npm-run-all clean:*",
+        "clean:cpp": "find obj -mindepth 1 -delete && find cppbuild -mindepth 1 -delete",
+        "clean:js": "lerna run clean ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}} --stream",
         "preclean:screenshots": "lerna exec -- mkdir -p screenshots",
         "clean:screenshots": "lerna run clean:screenshots ${PACKAGE:+--scope=@jpmorganchase/${PACKAGE}}",
         "start": "lerna run start --stream --scope",

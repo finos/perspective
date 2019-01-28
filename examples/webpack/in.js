@@ -9,10 +9,13 @@
 
 const perspective = require("@jpmorganchase/perspective").default;
 
-(async () => {
+require("@jpmorganchase/perspective-viewer");
+require("@jpmorganchase/perspective-viewer-hypergrid");
+require("@jpmorganchase/perspective-viewer-highcharts");
+
+window.addEventListener("WebComponentsReady", () => {
     const worker = perspective.worker();
     const table = worker.table([{x: 1, y: 2}, {x: 2, y: 2}]);
-    const view = await table.view();
-    const json = await view.to_json();
-    console.log(json);
-})();
+    const elem = document.getElementsByTagName("perspective-viewer")[0];
+    elem.load(table);
+});

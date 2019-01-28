@@ -55,7 +55,7 @@ exports.default = function loader(content) {
                 .replace(/(cjs\/js)/, "build");
         }
         content = fs.readFileSync(inputPath).toString();
-        if (!options.compiled) {
+        if (!options.inline) {
             this.emitFile(outputPath, "" + content);
             const map_file = `${inputPath}.map`;
             if (fs.existsSync(map_file)) {

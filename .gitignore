@@ -121,7 +121,7 @@ website/static/css/material.dark.css
 
 # CPP Compile
 /src/include/boost
-cjs
 obj
+packages/*/cjs
 cppbuild
 .coverage
