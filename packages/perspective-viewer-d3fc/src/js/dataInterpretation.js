@@ -8,7 +8,6 @@
  */
 
 import * as d3 from "d3";
-import * as fc from "d3fc";
 import {isNullOrUndefined} from "util";
 
 export function interpretLabels(config) {
@@ -41,8 +40,7 @@ export function interpretGroupBys(categories) {
 export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     if (isSplitBy) {
         let [dataset, stackedBarData] = interpretStackDataset(series, groupBys, hiddenElements);
-        console.log("stacked dataset: ", dataset);
-        console.log("stacked stackedBarData: ", stackedBarData);
+        console.log("dataset: ", dataset);
         return [dataset, stackedBarData];
     }
 
@@ -59,41 +57,6 @@ export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
 export function interpretKeysAndColor(config) {
     const keys = config.series.map(s => s.name);
     return [keys, d3.scaleOrdinal(d3.schemeCategory10).domain(keys)];
-}
-
-export function interpretMultiColumnDataset(config, hiddenElements) {
-    const {series, xAxis} = config;
-    const groupedDataset = series[0].data.map((mainValue, mainIndex) => {
-        let dataRow = {crossValue: xAxis.categories.length > 0 ? xAxis.categories[mainIndex] : mainIndex};
-        series
-            .filter(d => !hiddenElements.includes(d.name))
-            .forEach((s, rowIndex) => {
-                dataRow[s.name] = series[rowIndex].data[mainIndex];
-            });
-        return dataRow;
-    });
-    
-    const group = fc.group().key("crossValue");
-    const dataset = group(groupedDataset);
-    
-    console.log("In interpretMultiColumnDataset. multi-column dataset: ", dataset);
-    console.log("In interpretMultiColumnDataset. multi-column groupedDataset: ", groupedDataset);
-
-    return [dataset, groupedDataset];
-}
-
-export function interpretIsMultiColumn(config) {
-    const stacks = [];
-
-    config.series
-        .map(s => s.stack)
-        .forEach(stack => {
-            if (!stacks.includes(stack)) stacks.push(stack);
-        });
-
-    console.log("stacks: ", stacks);
-
-    return stacks.length > 1;
 }
 
 function interpretStackDataset(series, groupBys, hiddenElements) {
