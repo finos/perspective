@@ -28,6 +28,7 @@
         "rimraf": "^2.6.2",
         "ts-loader": "^3.5.0",
         "typescript": "~2.9.2",
+        "uglifyjs-webpack-plugin": "^0.4.6",
         "webpack": "^3.5.6"
     },
     "pre-commit": [

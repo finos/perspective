@@ -15,11 +15,12 @@ after detecting whether or not WebAssembly is supported by your browser. The
 assets can be found in the `build/` directory of the
 `@jpmorganchase/perspective` and `@jpmorganchase/perspective-viewer` packages.
 
-When importing from NPM modules, you can use the Perspective Webpack plugin to
-manage the `.worker.*.js` and `.wasm` assets for you. A sample config:
+When importing from NPM modules, you should use
+`@jpmorganchase/perspective-webpack-plugin` to manage the `.worker.*.js` and 
+`.wasm` assets for you. A sample config:
 
 ```javascript
-const PerspectivePlugin = require("@jpmorganchase/perspective/webpack-plugin");
+const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
 
 module.exports = {
     entry: "./in.js",

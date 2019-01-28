@@ -7,9 +7,9 @@
  *
  */
 
-const WORKER_LOADER_PATH = require.resolve("./src/loader/file_worker_loader");
-const WASM_LOADER_PATH = require.resolve("./src/loader/cross_origin_file_loader.js");
-const BLOB_LOADER_PATH = require.resolve("./src/loader/blob_worker_loader.js");
+const WORKER_LOADER_PATH = require.resolve("./src/js/file_worker_loader");
+const WASM_LOADER_PATH = require.resolve("./src/js/cross_origin_file_loader.js");
+const BLOB_LOADER_PATH = require.resolve("./src/js/blob_worker_loader.js");
 
 const BABEL_CONFIG = require("./babel.config.js");
 
@@ -19,7 +19,7 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
-        const load_path = [__dirname];
+        const load_path = [__dirname.replace("-webpack-plugin", "")];
         const rules = [
             {
                 test: /\.less$/,
