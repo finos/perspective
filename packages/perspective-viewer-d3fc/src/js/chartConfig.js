@@ -163,9 +163,7 @@ export function configureMultiColumnBarSeries(orientation, color, keys) {
         });
 }
 
-export function configureScaleMultiColumn(horizontal, dataset) {
-    const group = fc.group().key("crossValue");
-    const groupedDataset = group(dataset);
+export function configureScaleMultiColumn(horizontal, dataset, groupedBarData) {
     const mainExtent = fc
         .extentLinear()
         .accessors([a => a.map(d => d[1])])
@@ -173,15 +171,15 @@ export function configureScaleMultiColumn(horizontal, dataset) {
         .pad([1, 1])
         .padUnit("domain");
 
-    const mainScale = d3.scaleLinear().domain(mainExtent(groupedDataset));
+    const mainScale = d3.scaleLinear().domain(mainExtent(dataset));
 
     const crossScale = d3
         .scaleBand()
-        .domain(dataset.map(entry => entry["crossValue"]))
+        .domain(groupedBarData.map(entry => entry["crossValue"]))
         .paddingInner(0.4)
         .paddingOuter(0.2);
     let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
-    return [xScale, yScale, groupedDataset];
+    return [xScale, yScale];
 }
 
 export function configureMultiSeries(series1, series2) {
