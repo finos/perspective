@@ -71,13 +71,15 @@ class PerspectiveWebpackPlugin {
             });
         }
 
-        rules.push({
-            test: /\.js$/,
-            include: load_path,
-            exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-            loader: "babel-loader",
-            options: BABEL_CONFIG
-        });
+        if (!this.options.build_worker) {
+            rules.push({
+                test: /\.js$/,
+                include: load_path,
+                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
+                loader: "babel-loader",
+                options: BABEL_CONFIG
+            });
+        }
 
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
