@@ -39,9 +39,9 @@ export function interpretGroupBys(categories, series) {
 
 export function interpretDataset(isSplitBy, series, groupNames, groupValues, hiddenElements) {
     if (isSplitBy) {
-        let [dataset, color] = interpretStackDataset(series, groupNames, groupValues, hiddenElements);
+        let [dataset, stackedBarData] = interpretStackDataset(series, groupBys, hiddenElements);
         console.log("dataset: ", dataset);
-        return [dataset, color];
+        return [dataset, stackedBarData];
     }
 
     //simple array of data
@@ -52,6 +52,11 @@ export function interpretDataset(isSplitBy, series, groupNames, groupValues, hid
 
     console.log("dataset: ", dataset);
     return [dataset, null];
+}
+
+export function interpretKeysAndColor(config) {
+    const keys = config.series.map(s => s.name);
+    return [keys, d3.scaleOrdinal(d3.schemeCategory10).domain(keys)];
 }
 
 function interpretStackDataset(series, groupNames, groupValues, hiddenElements) {
@@ -68,8 +73,15 @@ function interpretStackDataset(series, groupNames, groupValues, hiddenElements) 
 
     let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => !groupNames.includes(r)));
     let dataset = stack(stackedBarData);
-    let color = d3.scaleOrdinal(d3.schemeCategory10).domain(series.map(s => s.name));
-    return [dataset, color];
+    return [dataset, stackedBarData];
+}
+
+function interpretCrossValue(i, categories) {
+    if (categories.length <= 0) {
+        return i;
+    }
+
+    return categories[i];
 }
 
 function flattenGroupBy(category, parentCategories) {
