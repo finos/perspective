@@ -2,10 +2,9 @@
     "name": "@jpmorganchase/perspective-viewer-hypergrid",
     "version": "0.2.12",
     "description": "Perspective.js",
-    "main": "cjs/perspective-viewer-plugin-hypergrid.js",
+    "main": "src/js/hypergrid.js",
     "files": [
         "build/**/*",
-        "cjs/*",
         "src/**/*",
         "babel.config.js"
     ],
@@ -13,9 +12,7 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:cjs": "webpack --color --config src/config/hypergrid.plugin.cjs.config.js",
-        "build:umd": "webpack --color --config src/config/hypergrid.plugin.config.js",
-        "build": "npm-run-all build:*",
+        "build": "webpack --color --config src/config/hypergrid.plugin.config.js",
         "test:build": "cp test/html/* build",
         "test:run": "jest --silent --color",
         "test": "npm-run-all test:build test:run",
