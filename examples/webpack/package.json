@@ -5,7 +5,8 @@
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
         "start": "webpack-dev-server --content-base ./ --hot",
-        "webpack": "webpack --config webpack.config.js --color"
+        "webpack": "webpack --config webpack.config.js --color",
+        "clean": "rimraf build"
     },
     "keywords": [],
     "license": "Apache-2.0",
@@ -16,9 +17,9 @@
         "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.12"
     },
     "devDependencies": {
-        "webpack": "^4.28.4",
-        "webpack-cli": "3.2.1",
-        "webpack-dev-server": "^3.1.14"
         "@jpmorganchase/perspective-webpack-plugin": "^0.2.12",
+        "rimraf": "^2.5.2",
+        "webpack": "^3.5.6",
+        "webpack-dev-server": "2.11.3"
     }
 }

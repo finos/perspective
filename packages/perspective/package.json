@@ -10,8 +10,8 @@
     "files": [
         "build/*",
         "cjs/**/*",
+        "src/**/*",
         "index.d.ts",
-        "webpack-plugin.js",
         "babel.config.js"
     ],
     "typings": "index.d.ts",
