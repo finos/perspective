@@ -81,7 +81,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     return [xScale, yScale];
 }
 
-export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container) {
+export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groups) {
     let multi;
     if (isSplitBy) {
         let multiWithOutGrid = fc
@@ -125,7 +125,11 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-    function configureTooltip() {
+    function configureTooltip(data) {
+        let html;
+        if (!isSplitBy) {
+            html = groups.map((group, i) => `${group}: <b>${data.crossValue[i]}</b>`);
+        }
         d3.select(this)
             .on("mouseover", () => {
                 const barRect = this.getBoundingClientRect();
@@ -134,7 +138,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
                 tooltipDiv
                     .style("left", `${left}px`)
                     .style("top", `${top}px`)
-                    .html("Tooltip text")
+                    .html(html.join("<br>"))
                     .transition()
                     .duration(200)
                     .style("opacity", 0.9);
