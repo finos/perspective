@@ -116,8 +116,8 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
     return multi;
 }
 
-export function configureLegend(isSplitBy, color, hiddenElements, update) {
-    if (!isSplitBy) {
+export function configureLegend(hasLegend, color, hiddenElements, update) {
+    if (!hasLegend) {
         return;
     }
 
@@ -147,4 +147,43 @@ export function configureChart(xScale, yScale, multi) {
         .plotArea(multi);
 
     return chart;
+}
+
+export function configureMultiColumnBarSeries(orientation, color, keys) {
+    return fc
+        .autoBandwidth(fc.seriesSvgGrouped(fc.seriesSvgBar()))
+        .align("left")
+        .orient(orientation)
+        .crossValue(d => d[0])
+        .mainValue(d => d[1])
+        .decorate((sel, data, index) => {
+            sel.enter()
+                .select("path")
+                .attr("fill", color(keys[index]));
+        });
+}
+
+export function configureScaleMultiColumn(horizontal, dataset) {
+    const group = fc.group().key("crossValue");
+    const groupedDataset = group(dataset);
+    const mainExtent = fc
+        .extentLinear()
+        .accessors([a => a.map(d => d[1])])
+        .include([0])
+        .pad([1, 1])
+        .padUnit("domain");
+
+    const mainScale = d3.scaleLinear().domain(mainExtent(groupedDataset));
+
+    const crossScale = d3
+        .scaleBand()
+        .domain(dataset.map(entry => entry["crossValue"]))
+        .paddingInner(0.4)
+        .paddingOuter(0.2);
+    let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
+    return [xScale, yScale, groupedDataset];
+}
+
+export function configureMultiSeries(series1, series2) {
+    return fc.seriesSvgMulti().series([series1, series2]);
 }
