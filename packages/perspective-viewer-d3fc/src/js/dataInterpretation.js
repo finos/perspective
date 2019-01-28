@@ -76,7 +76,17 @@ export function interpretMultiColumnDataset(config, hiddenElements) {
 }
 
 export function interpretIsMultiColumn(config) {
-    return config.yAxis.title.text.split(",").length > 1;
+    const stacks = [];
+
+    config.series
+        .map(s => s.stack)
+        .forEach(stack => {
+            if (!stacks.includes(stack)) stacks.push(stack);
+        });
+
+    console.log("stacks: ", stacks);
+
+    return stacks.length > 1;
 }
 
 function interpretStackDataset(series, groupBys, hiddenElements) {
