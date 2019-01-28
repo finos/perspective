@@ -8,6 +8,7 @@
  */
 
 import * as d3 from "d3";
+import * as fc from "d3fc";
 import {isNullOrUndefined} from "util";
 
 export function interpretLabels(config) {
@@ -40,7 +41,8 @@ export function interpretGroupBys(categories, series) {
 export function interpretDataset(isSplitBy, series, groupNames, groupValues, hiddenElements) {
     if (isSplitBy) {
         let [dataset, stackedBarData] = interpretStackDataset(series, groupBys, hiddenElements);
-        console.log("dataset: ", dataset);
+        console.log("stacked dataset: ", dataset);
+        console.log("stacked stackedBarData: ", stackedBarData);
         return [dataset, stackedBarData];
     }
 
@@ -61,7 +63,7 @@ export function interpretKeysAndColor(config) {
 
 export function interpretMultiColumnDataset(config, hiddenElements) {
     const {series, xAxis} = config;
-    const dataset = series[0].data.map((mainValue, mainIndex) => {
+    const groupedDataset = series[0].data.map((mainValue, mainIndex) => {
         let dataRow = {crossValue: xAxis.categories.length > 0 ? xAxis.categories[mainIndex] : mainIndex};
         series
             .filter(d => !hiddenElements.includes(d.name))
@@ -70,9 +72,14 @@ export function interpretMultiColumnDataset(config, hiddenElements) {
             });
         return dataRow;
     });
+    
+    const group = fc.group().key("crossValue");
+    const dataset = group(groupedDataset);
+    
     console.log("In interpretMultiColumnDataset. multi-column dataset: ", dataset);
+    console.log("In interpretMultiColumnDataset. multi-column groupedDataset: ", groupedDataset);
 
-    return dataset;
+    return [dataset, groupedDataset];
 }
 
 export function interpretIsMultiColumn(config) {
