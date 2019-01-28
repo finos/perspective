@@ -126,10 +126,10 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
         .style("opacity", 0);
 
     function configureTooltip(data) {
-        let html;
-        if (!isSplitBy) {
-            html = groups.map((group, i) => `${group}: <b>${data.crossValue[i]}</b>`);
-        }
+        let html = groups.map((group, i) => {
+            const groupValue = isSplitBy ? data.data.group[i] : data.crossValue[i];
+            return `${group}: <b>${groupValue}</b>`;
+        });
         d3.select(this)
             .on("mouseover", () => {
                 const barRect = this.getBoundingClientRect();
