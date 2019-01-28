@@ -81,7 +81,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     return [xScale, yScale];
 }
 
-export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groups) {
+export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groups, splits) {
     let multi;
     if (isSplitBy) {
         let multiWithOutGrid = fc
@@ -130,8 +130,15 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             const groupValue = isSplitBy ? data.data.group[i] : data.crossValue[i];
             return `${group}: <b>${groupValue}</b>`;
         });
+        if (isSplitBy) {
+            const splitValues = Object.entries(data.data)
+                .find(entry => entry[0] !== "group" && entry[1])[0]
+                .split(", ");
+            html = html.concat(splits.map((split, i) => `${split}: <b>${splitValues[i]}</b>`));
+        }
         d3.select(this)
             .on("mouseover", () => {
+                // Bounding rect x and y not supported by edge or IE
                 const barRect = this.getBoundingClientRect();
                 const left = barRect.x + barRect.width / 2 - containerRect.x;
                 const top = barRect.y - containerRect.y;
