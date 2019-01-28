@@ -7,7 +7,7 @@
 [![FINOS - Operating](https://cdn.rawgit.com/finos/contrib-toolbox/master/images/badge-operating.svg)](https://finosfoundation.atlassian.net/wiki/display/FINOS/Operating)
 
 
-A streaming data visualization engine for Javascript, Perspective makes it 
+A streaming data visualization engine for Javascript, Perspective makes it
 simple to build real-time & user configurable analytics entirely in the browser.
 
 <img src="https://jpmorganchase.github.io/perspective/img/demo.gif">
@@ -19,22 +19,22 @@ simple to build real-time & user configurable analytics entirely in the browser.
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
 - An embeddable, framework-agnostic configuration UI, based
-  on [Web Components](https://www.webcomponents.org/), and a WebWorker engine 
+  on [Web Components](https://www.webcomponents.org/), and a WebWorker engine
   host for responsiveness at high frequency.
 
 - A suite of simple visualization plugins for some common Javascript libraries such as
-  [HighCharts](https://github.com/highcharts/highcharts) and 
+  [HighCharts](https://github.com/highcharts/highcharts) and
   [Hypergrid](https://github.com/fin-hypergrid/core).
 
 - Runtimes for the Browser and Node.js.
 
 ## Examples
 
-* [Superstore](https://jsfiddle.net/texodus/gsoybtrp/show/) A static `superstore.arrow` demo.
-* [Olympics](https://jsfiddle.net/texodus/eax9tqbm/show/) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
-* [Streaming](https://jsfiddle.net/texodus/84u926L1/show/) A streaming random data demo.
-* [CSV](https://jsfiddle.net/texodus/pcrnd4jg/show/) Upload a CSV of your own.
-* [NYC Citibike](https://jsfiddle.net/texodus/m2rwz690/) An example of a join on two real-time datasets, from the NYC Citibike feed.
+* [Superstore](https://bl.ocks.org/JHawk/b29192cd425bfc9443dd12626cc2f606) A static `superstore.arrow` demo.
+* [Olympics](https://bl.ocks.org/JHawk/2a29387438af750614cc983f23040732) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
+* [Streaming](https://bl.ocks.org/JHawk/952262145299ffd7fa58d22a51de905d) A streaming random data demo.
+* [CSV](https://bl.ocks.org/JHawk/ef28337d5c96c0360f07ca502b872c10) Upload a CSV of your own.
+* [NYC Citibike](https://bl.ocks.org/JHawk/ade09a2ea62bb708cc0beab8c35609b0) An example of a join on two real-time datasets, from the NYC Citibike feed.
 * [Real-time cryptocurrency charting](https://bl.ocks.org/ColinEberhardt/6e287f871410ecd970b038343b166514) An example that uses the coinbased web socket feed to plot orders in real-time
 
 ## Documentation
