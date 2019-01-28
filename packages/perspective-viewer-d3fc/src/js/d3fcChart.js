@@ -64,11 +64,12 @@ export default class D3FCChart {
         let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, stackedBarData);
         // groups of svgs we need to render
         let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color);
+        let groupedBarData;
 
         if (isMultiColumn) {
-            dataset = interpretMultiColumnDataset(config, hiddenElements);
+            [dataset, groupedBarData] = interpretMultiColumnDataset(config, hiddenElements);
             barSeries = configureMultiColumnBarSeries(orientation, color, keys);
-            [xScale, yScale, dataset] = configureScaleMultiColumn(horizontal, dataset);
+            [xScale, yScale] = configureScaleMultiColumn(horizontal, dataset, groupedBarData);
             multi = configureMultiSeries(gridlines, barSeries);
         }
 
