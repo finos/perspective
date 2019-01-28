@@ -3,17 +3,17 @@
     "version": "0.2.12",
     "description": "Perspective.js",
     "files": [
-        "dist/*.d.ts",
-        "dist/*.js.map",
-        "dist/*.js",
-        "dist/*.wasm",
+        "build/*.d.ts",
+        "build/*.js.map",
+        "build/*.js",
+        "build/*.wasm",
         "src/css/*.css",
         "babel.config.js"
     ],
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
+    "main": "build/index.js",
+    "types": "build/index.d.ts",
     "directories": {
-        "dist": "dist/"
+        "build": "build/"
     },
     "license": "Apache-2.0",
     "publishConfig": {
@@ -53,6 +53,6 @@
         "webpack": "^2.2.1"
     },
     "jupyterlab": {
-        "extension": "dist/index.js"
+        "extension": "build/index.js"
     }
 }

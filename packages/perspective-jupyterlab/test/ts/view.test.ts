@@ -18,7 +18,7 @@ Object.defineProperty(window, 'MutationObserver', { value: class {
     observe(element: any, initObject: any) {}
 }});
 
-import {PerspectiveView} from '../../dist/index';
+import {PerspectiveView} from '../../build/index';
 
 describe('Checks view interface', () => {
     test("Check dom", () => {
