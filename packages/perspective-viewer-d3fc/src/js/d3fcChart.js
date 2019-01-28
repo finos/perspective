@@ -8,8 +8,8 @@
  */
 
 import * as d3 from "d3";
-import {configureLegend, configureBarSeries, configureGrid, configureScale, configureMultiSvg, configureChart} from "./chartConfig";
-import {interpretLabels, interpretGroupBys, interpretDataset, interpretKeysAndColor} from "./dataInterpretation";
+import {configureLegend, configureBarSeries, configureGrid, configureScale, configureMultiSvg, configureChart, configureMultiColumnBarSeries, configureScaleMultiColumn, configureMultiSeries} from "./chartConfig";
+import {interpretLabels, interpretGroupBys, interpretDataset, interpretKeysAndColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
 
 export default class D3FCChart {
     constructor(mode, config, container) {
@@ -50,6 +50,7 @@ export default class D3FCChart {
 
         let labels = interpretLabels(config);
         let isSplitBy = labels.splitLabel.length !== 0;
+        const isMultiColumn = interpretIsMultiColumn(config);
 
         let groupBys = interpretGroupBys(config.xAxis.categories);
         let series = config.series;
@@ -57,13 +58,20 @@ export default class D3FCChart {
         const [keys, color] = interpretKeysAndColor(config);
         let [dataset, stackedBarData] = interpretDataset(isSplitBy, series, groupBys, hiddenElements);
 
-        let legend = configureLegend(isSplitBy, color, hiddenElements, update);
+        let legend = configureLegend(config.legend.enabled, color, hiddenElements, update);
         let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
         let gridlines = configureGrid(horizontal);
         let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, stackedBarData);
-
         // groups of svgs we need to render
         let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color);
+
+        if (isMultiColumn) {
+            dataset = interpretMultiColumnDataset(config, hiddenElements);
+            barSeries = configureMultiColumnBarSeries(orientation, color, keys);
+            [xScale, yScale, dataset] = configureScaleMultiColumn(horizontal, dataset);
+            multi = configureMultiSeries(gridlines, barSeries);
+        }
+
         let chart = configureChart(xScale, yScale, multi);
 
         styleChart(chart, horizontal, labels);

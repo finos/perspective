@@ -59,6 +59,26 @@ export function interpretKeysAndColor(config) {
     return [keys, d3.scaleOrdinal(d3.schemeCategory10).domain(keys)];
 }
 
+export function interpretMultiColumnDataset(config, hiddenElements) {
+    const {series, xAxis} = config;
+    const dataset = series[0].data.map((mainValue, mainIndex) => {
+        let dataRow = {crossValue: xAxis.categories.length > 0 ? xAxis.categories[mainIndex] : mainIndex};
+        series
+            .filter(d => !hiddenElements.includes(d.name))
+            .forEach((s, rowIndex) => {
+                dataRow[s.name] = series[rowIndex].data[mainIndex];
+            });
+        return dataRow;
+    });
+    console.log("In interpretMultiColumnDataset. multi-column dataset: ", dataset);
+
+    return dataset;
+}
+
+export function interpretIsMultiColumn(config) {
+    return config.yAxis.title.text.split(",").length > 1;
+}
+
 function interpretStackDataset(series, groupBys, hiddenElements) {
     //Convert data to Stacked Bar Chart Format
     let keys = groupBys.length > 0 ? groupBys : [...Array(series[0].data.length)].map((_, i) => i);
