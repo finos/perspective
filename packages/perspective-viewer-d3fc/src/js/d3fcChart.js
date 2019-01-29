@@ -135,9 +135,12 @@ function removeCanvasElement(container) {
 }
 
 function removeAxisGap(container) {
-    d3.select(container)
-        .select(".bottom-axis")
-        .style("margin-top", "-5px");
+    // Only remove if not Edge
+    if (!window.StyleMedia) {
+        d3.select(container)
+            .select(".bottom-axis")
+            .style("margin-top", "-5px");
+    }
 }
 
 function correctAxisClip(container, horizontal) {
