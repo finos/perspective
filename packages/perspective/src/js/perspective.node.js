@@ -40,7 +40,8 @@ const DEFAULT_ASSETS = [
     "@jpmorganchase/perspective/build",
     "@jpmorganchase/perspective-viewer/build",
     "@jpmorganchase/perspective-viewer-highcharts/build",
-    "@jpmorganchase/perspective-viewer-hypergrid/build"
+    "@jpmorganchase/perspective-viewer-hypergrid/build",
+    "@jpmorganchase/perspective-viewer-d3fc/build"
 ];
 
 const CONTENT_TYPES = {
