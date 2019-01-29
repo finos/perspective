@@ -33,6 +33,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [Superstore](https://bl.ocks.org/JHawk/b29192cd425bfc9443dd12626cc2f606) A static `superstore.arrow` demo.
 * [Olympics](https://bl.ocks.org/JHawk/2a29387438af750614cc983f23040732) An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.
 * [Streaming](https://bl.ocks.org/JHawk/952262145299ffd7fa58d22a51de905d) A streaming random data demo.
+* [Streaming Stock Trades](https://bl.ocks.org/timkpaine/064a50a309f25b80c9cfb0b2b84fbdf3) A streaming financial data demo.
 * [CSV](https://bl.ocks.org/JHawk/ef28337d5c96c0360f07ca502b872c10) Upload a CSV of your own.
 * [NYC Citibike](https://bl.ocks.org/JHawk/ade09a2ea62bb708cc0beab8c35609b0) An example of a join on two real-time datasets, from the NYC Citibike feed.
 * [Real-time cryptocurrency charting](https://bl.ocks.org/ColinEberhardt/6e287f871410ecd970b038343b166514) An example that uses the coinbased web socket feed to plot orders in real-time
