@@ -131,9 +131,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             return `${group}: <b>${groupValue}</b>`;
         });
         if (isSplitBy) {
-            const splitValues = Object.entries(data.data)
-                .find(entry => entry[0] !== "group" && entry[1])[0]
-                .split(", ");
+            const splitValues = dataset[index].key.split(", ");
             html = html.concat(splits.map((split, i) => `${split}: <b>${splitValues[i]}</b>`));
         }
         d3.select(this)
