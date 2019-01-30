@@ -81,7 +81,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     return [xScale, yScale];
 }
 
-export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groups, splits) {
+export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groupNames, splits) {
     let multi;
     if (isSplitBy) {
         let multiWithOutGrid = fc
@@ -89,13 +89,15 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             .mapping((data, index) => data[index])
             .series(barSeries)
             .decorate(selection => {
-                selection.each(function(data, index) {
+                selection.each(function(_, index) {
                     d3.select(this)
                         .selectAll("g.bar")
                         .filter(d => d[0] !== d[1])
                         .attr("fill", color(dataset[index].key))
                         .attr("opacity", 0.9)
-                        .each(configureTooltip);
+                        .each(function(data) {
+                            configureTooltip.call(this, data, index);
+                        });
                 });
             });
 
@@ -125,9 +127,9 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
         .attr("class", "tooltip")
         .style("opacity", 0);
 
-    function configureTooltip(data) {
-        let html = groups.map((group, i) => {
-            const groupValue = isSplitBy ? data.data.group[i] : data.crossValue[i];
+    function configureTooltip(data, index) {
+        let html = groupNames.map((group, i) => {
+            const groupValue = isSplitBy ? data.data[group] : data.crossValue[i];
             return `${group}: <b>${groupValue}</b>`;
         });
         if (isSplitBy) {
