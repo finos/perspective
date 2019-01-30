@@ -175,7 +175,7 @@ export function configureScaleMultiColumn(horizontal, dataset, groupedBarData) {
 
     const crossScale = d3
         .scaleBand()
-        .domain(groupedBarData.map(entry => entry["crossValue"]))
+        .domain(groupedBarData.map(entry => entry.crossValue))
         .paddingInner(0.4)
         .paddingOuter(0.2);
     let [xScale, yScale] = horizontal ? [mainScale, crossScale] : [crossScale, mainScale];
