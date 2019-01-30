@@ -8,7 +8,17 @@
  */
 
 import * as d3 from "d3";
-import {configureLegend, configureBarSeries, configureGrid, configureScale, configureMultiSvg, configureChart, configureMultiColumnBarSeries, configureScaleMultiColumn, configureMultiSeries} from "./chartConfig";
+import {
+    configureLegend,
+    configureBarSeries,
+    configureGrid,
+    configureScale,
+    configureMultiSvg,
+    configureChart,
+    configureMultiColumnBarSeries,
+    configureScaleMultiColumn,
+    configureMultiSeries
+} from "./chartConfig";
 import {interpretLabels, interpretGroupBys, interpretDataset, interpretKeysAndColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
 
 export default class D3FCChart {
@@ -56,12 +66,12 @@ export default class D3FCChart {
         let series = config.series;
 
         const [keys, color] = interpretKeysAndColor(config);
-        let [dataset, stackedBarData] = interpretDataset(isSplitBy, series, groupBys, hiddenElements);
+        let dataset = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
 
         let legend = configureLegend(config.legend.enabled, color, hiddenElements, update);
-        let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
+        let barSeries = configureBarSeries(isSplitBy, orientation, dataset, groupBys);
         let gridlines = configureGrid(horizontal);
-        let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, stackedBarData);
+        let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, groupBys);
         // groups of svgs we need to render
         let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color);
         let groupedBarData;

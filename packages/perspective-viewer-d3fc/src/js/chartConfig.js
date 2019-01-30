@@ -168,7 +168,7 @@ export function configureScaleMultiColumn(horizontal, dataset, groupedBarData) {
         .extentLinear()
         .accessors([a => a.map(d => d[1])])
         .include([0])
-        .pad([1, 1])
+        .pad([0, 1])
         .padUnit("domain");
 
     const mainScale = d3.scaleLinear().domain(mainExtent(dataset));
