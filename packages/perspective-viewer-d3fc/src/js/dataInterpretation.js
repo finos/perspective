@@ -40,10 +40,9 @@ export function interpretGroupBys(categories) {
 
 export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     if (isSplitBy) {
-        let [dataset, stackedBarData] = interpretStackDataset(series, groupBys, hiddenElements);
+        let dataset = interpretStackDataset(series, groupNames, groupValues, hiddenElements);
         console.log("stacked dataset: ", dataset);
-        console.log("stacked stackedBarData: ", stackedBarData);
-        return [dataset, stackedBarData];
+        return dataset;
     }
 
     //simple array of data
@@ -53,7 +52,7 @@ export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     }));
 
     console.log("dataset: ", dataset);
-    return [dataset, null];
+    return dataset;
 }
 
 export function interpretKeysAndColor(config) {
@@ -72,10 +71,10 @@ export function interpretMultiColumnDataset(config, hiddenElements) {
             });
         return dataRow;
     });
-    
+
     const group = fc.group().key("crossValue");
     const dataset = group(groupedDataset);
-    
+
     console.log("In interpretMultiColumnDataset. multi-column dataset: ", dataset);
     console.log("In interpretMultiColumnDataset. multi-column groupedDataset: ", groupedDataset);
 
@@ -96,7 +95,7 @@ export function interpretIsMultiColumn(config) {
     return stacks.length > 1;
 }
 
-function interpretStackDataset(series, groupBys, hiddenElements) {
+function interpretStackDataset(series, groupNames, groupValues, hiddenElements) {
     //Convert data to Stacked Bar Chart Format
     let keys = groupBys.length > 0 ? groupBys : [...Array(series[0].data.length)].map((_, i) => i);
 
@@ -112,15 +111,7 @@ function interpretStackDataset(series, groupBys, hiddenElements) {
 
     let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
     let dataset = stack(stackedBarData);
-    return [dataset, stackedBarData];
-}
-
-function interpretCrossValue(i, categories) {
-    if (categories.length <= 0) {
-        return i;
-    }
-
-    return categories[i];
+    return dataset;
 }
 
 function flattenGroupBy(category, parentCategories) {
