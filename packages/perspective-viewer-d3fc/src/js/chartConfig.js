@@ -120,7 +120,6 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             );
     }
 
-    const containerRect = container.getBoundingClientRect();
     const tooltipDiv = d3
         .select(container)
         .append("div")
@@ -139,6 +138,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
         d3.select(this)
             .on("mouseover", () => {
                 // Bounding rect x and y not supported by edge or IE
+                const containerRect = container.getBoundingClientRect();
                 const barRect = this.getBoundingClientRect();
                 const left = barRect.x + barRect.width / 2 - containerRect.x;
                 const top = barRect.y - containerRect.y;
