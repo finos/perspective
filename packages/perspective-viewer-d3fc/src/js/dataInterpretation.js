@@ -88,7 +88,7 @@ export function interpretIsMultiColumn(config) {
     config.series
         .map(s => s.stack)
         .forEach(stack => {
-            if (!stacks.includes(stack)) stacks.push(stack);
+            !stacks.includes(stack) && stacks.push(stack);
         });
 
     console.log("stacks: ", stacks);
