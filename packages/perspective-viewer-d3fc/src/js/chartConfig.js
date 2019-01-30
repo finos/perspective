@@ -124,6 +124,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
         .select(container)
         .append("div")
         .attr("class", "tooltip")
+        .style("z-index", 3)
         .style("opacity", 0);
 
     function configureTooltip(data, index) {
@@ -140,8 +141,8 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
                 // Bounding rect x and y not supported by edge or IE
                 const containerRect = container.getBoundingClientRect();
                 const barRect = this.getBoundingClientRect();
-                const left = barRect.x + barRect.width / 2 - containerRect.x;
-                const top = barRect.y - containerRect.y;
+                const left = barRect.left + barRect.width / 2 - containerRect.left;
+                const top = barRect.top - containerRect.top;
                 tooltipDiv
                     .style("left", `${left}px`)
                     .style("top", `${top}px`)
