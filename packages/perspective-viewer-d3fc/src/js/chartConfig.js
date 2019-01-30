@@ -11,14 +11,14 @@ import * as fc from "d3fc";
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
 
-export function configureBarSeries(isSplitBy, orientation, dataset) {
+export function configureBarSeries(isSplitBy, orientation, dataset, groupBys) {
     let barSeries;
     if (isSplitBy) {
         let stackedBarSeries = fc
             .autoBandwidth(fc.seriesSvgBar())
             .align("left")
             .orient(orientation)
-            .crossValue(d => d.data["group"])
+            .crossValue((_, i) => groupBys[i])
             .mainValue(d => d[1])
             .baseValue(d => d[0]);
 
@@ -50,7 +50,7 @@ export function configureGrid(horizontal) {
     return gridlines;
 }
 
-export function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
+export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     let mainScale;
     let crossScale;
     if (isSplitBy) {
@@ -64,7 +64,7 @@ export function configureScale(isSplitBy, horizontal, dataset, stackedBarData) {
 
         crossScale = d3
             .scaleBand()
-            .domain(stackedBarData.map(entry => entry["group"]))
+            .domain(groupBys)
             .paddingInner(0.4)
             .paddingOuter(0.2);
     } else {

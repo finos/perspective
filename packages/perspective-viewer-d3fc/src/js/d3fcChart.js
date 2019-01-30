@@ -53,15 +53,15 @@ export default class D3FCChart {
         let labels = interpretLabels(config);
         let isSplitBy = labels.splitLabel.length !== 0;
 
-        let groupBys = interpretGroupBys(config.xAxis.categories);
         let series = config.series;
+        let groupBys = interpretGroupBys(config.xAxis.categories, series);
 
-        let [dataset, stackedBarData, color] = interpretDataset(isSplitBy, series, groupBys, hiddenElements);
+        let [dataset, color] = interpretDataset(isSplitBy, series, config.row_pivots, groupBys, hiddenElements);
 
         let legend = configureLegend(isSplitBy, color, hiddenElements, update);
-        let barSeries = configureBarSeries(isSplitBy, orientation, dataset);
+        let barSeries = configureBarSeries(isSplitBy, orientation, dataset, groupBys);
         let gridlines = configureGrid(horizontal);
-        let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, stackedBarData);
+        let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, groupBys);
 
         // groups of svgs we need to render
         let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color);
