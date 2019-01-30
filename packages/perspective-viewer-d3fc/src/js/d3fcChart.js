@@ -56,7 +56,7 @@ export default class D3FCChart {
         let series = config.series;
         let groupBys = interpretGroupBys(config.xAxis.categories, series);
 
-        let [dataset, color] = interpretDataset(isSplitBy, series, config.row_pivots, groupBys, hiddenElements);
+        let [dataset, color] = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
 
         let legend = configureLegend(isSplitBy, color, hiddenElements, update);
         let barSeries = configureBarSeries(isSplitBy, orientation, dataset, groupBys);
