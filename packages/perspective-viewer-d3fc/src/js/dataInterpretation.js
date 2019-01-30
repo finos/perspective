@@ -102,6 +102,9 @@ function interpretStackDataset(series, groupNames, groupValues, hiddenElements) 
             .filter(d => !hiddenElements.includes(d.name))
             .forEach(split => {
                 row[split.name] = split.data[i];
+                group.forEach((g, j) => {
+                    row[groupNames[j]] = g;
+                });
             });
         return row;
     });
