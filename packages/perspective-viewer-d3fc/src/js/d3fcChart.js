@@ -19,7 +19,7 @@ import {
     configureScaleMultiColumn,
     configureMultiSeries
 } from "./chartConfig";
-import {interpretLabels, interpretGroupBys, interpretDataset, interpretKeysAndColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
+import {interpretLabels, interpretGroupBys, interpretDataset, interpretColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
 
 export default class D3FCChart {
     constructor(mode, config, container) {
@@ -65,7 +65,7 @@ export default class D3FCChart {
         let groupBys = interpretGroupBys(config.xAxis.categories);
         let series = config.series;
 
-        const [keys, color] = interpretKeysAndColor(config);
+        const color = interpretColor(config);
         let dataset = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
 
         let legend = configureLegend(config.legend.enabled, color, hiddenElements, update);
@@ -78,7 +78,7 @@ export default class D3FCChart {
 
         if (isMultiColumn) {
             [dataset, groupedBarData] = interpretMultiColumnDataset(config, hiddenElements);
-            barSeries = configureMultiColumnBarSeries(orientation, color, keys);
+            barSeries = configureMultiColumnBarSeries(orientation, color, dataset);
             [xScale, yScale] = configureScaleMultiColumn(horizontal, dataset, groupedBarData);
             multi = configureMultiSeries(gridlines, barSeries);
         }
