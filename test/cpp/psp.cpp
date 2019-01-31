@@ -7,6 +7,7 @@
  *
  */
 
+#include <perspective/base.h>
 #include <gtest/gtest.h>
 
 int

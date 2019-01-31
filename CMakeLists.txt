@@ -4,6 +4,41 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH} )
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+	set(WIN32 ON)
+endif()
+
+##############################
+# helper to grab gtest et al #
+##############################
+function (psp_build_dep name cmake_file)
+	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
+		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
+	else()
+		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
+		execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+			RESULT_VARIABLE result
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+		if(result)
+			message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
+		endif()
+		execute_process(COMMAND ${CMAKE_COMMAND} --build .
+			RESULT_VARIABLE result
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
+		if(result)
+			message(FATAL_ERROR "Build step for ${name} failed: ${result}")
+		endif()
+	endif()
+	add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
+		${CMAKE_BINARY_DIR}/${name}-build
+		EXCLUDE_FROM_ALL)
+
+	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/gtest/include)
+	include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
+	include_directories(${CMAKE_BINARY_DIR}/${name}-src)
+endfunction()
+##############################
+
 
 #######################
 # BUILD CONFIGURATION #
@@ -101,7 +136,6 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
-	add_definitions(-DPSP_ENABLE_WASM)
 	set(CMAKE_C_COMPILER emcc)
 	set(CMAKE_CXX_COMPILER em++)
 	set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake")
@@ -170,23 +204,29 @@ else()
 	else()
 		message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
 	endif()
-	include_directories(Boost_INCLUDE_DIRS)
+	include_directories( ${Boost_INCLUDE_DIRS} )
 
 	find_package(TBB)
 	if(NOT TBB_FOUND)
 		message("${Red}TBB could not be located${ColorReset}")
+		psp_build_dep("tbb" "cmake/TBB.txt.in")
 	else()
 		message("${Cyan}Found tbb in ${TBB_INCLUDE_DIRS} ${TBB_LIBRARY_DIRS} ${ColorReset}")
+		include_directories( ${TBB_INCLUDE_DIRS} )
 	endif()
 
-	include_directories(TBB_INCLUDE_DIRS)
-	include_directories("/usr/local/include")
+	if(WIN32)
+		foreach(warning 4244 4251 4267 4275 4290 4786 4305 4996)
+			SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd${warning}")
+		endforeach(warning)
+	else()
+		include_directories("/usr/local/include")
+	endif()
 
 	if(PSP_PYTHON_BUILD)
 		#########################
 		# PYTHON BINDINGS BUILD #
 		#########################
-		add_definitions(-DPSP_ENABLE_PYTHON)
 		include_directories("/usr/local/include/python3.7m")  # FIXME
 		include_directories("${CMAKE_SOURCE_DIR}/python/perspective/include")
 		find_package( PythonInterp 3.7 REQUIRED )
@@ -238,6 +278,7 @@ set (SOURCE_FILES
 	src/cpp/context_two.cpp
 	src/cpp/context_zero.cpp
 	src/cpp/custom_column.cpp
+	src/cpp/data.cpp
 	src/cpp/date.cpp
 	src/cpp/dense_nodes.cpp
 	src/cpp/dense_tree_context.cpp
@@ -287,20 +328,27 @@ set (SOURCE_FILES
 	src/cpp/vocab.cpp
 	)
 
-set(CMAKE_CXX_FLAGS " -std=c++0x ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+if (WIN32)
+	set(CMAKE_CXX_FLAGS " /EHsc")
+else()
+	set(CMAKE_CXX_FLAGS " -std=c++0x ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+endif()
 
 if (PSP_WASM_BUILD)
 	add_library(psp ${SOURCE_FILES})
+	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 
 	add_executable(perspective.async src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.async psp "${ASYNC_MODE_FLAGS}")
+	target_compile_definitions(perspective.async PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.async PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
 	set_target_properties(perspective.async PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.async PROPERTIES OUTPUT_NAME "psp.async")
 
 	add_executable(perspective.sync src/cpp/emscripten.cpp)
 	target_link_libraries(perspective.sync psp "${SYNC_MODE_FLAGS}")
+	target_compile_definitions(perspective.sync PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(perspective.sync PROPERTIES COMPILE_FLAGS "${SYNC_MODE_FLAGS}")
 	set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp.sync")
@@ -308,6 +356,7 @@ if (PSP_WASM_BUILD)
 
 	if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		add_executable(perspective.asm src/cpp/emscripten.cpp)
+		target_compile_definitions(perspective.asm PRIVATE PSP_ENABLE_WASM=1)
 		target_link_libraries(perspective.asm psp "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
@@ -315,17 +364,23 @@ if (PSP_WASM_BUILD)
 		add_dependencies(perspective.asm perspective.sync)
 	endif()
 else()
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+		set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
+	endif()
+
 	if(PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
 		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/python/perspective/src/numpy.cpp ${HEADER_FILES})
+		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(psp ${BOOST_PYTHON})
 		target_link_libraries(psp ${BOOST_NUMPY})
 		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/python/perspective/src/python.cpp)
+		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
 		target_link_libraries(binding ${BOOST_PYTHON})
@@ -334,53 +389,22 @@ else()
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
-		if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-			set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
-		endif()
 	endif()
 
-	if(PSP_CPP_BUILD_STRICT)
+	if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
 		target_compile_options(psp PRIVATE -Wall -Werror)
+		target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+		if(PSP_PYTHON_BUILD)
+			target_compile_options(binding PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
+		endif()
+	elseif(WIN32)
+		target_compile_definitions(psp PRIVATE PERSPECTIVE_EXPORTS=1)
+		target_compile_definitions(psp PRIVATE WIN32=1)
 	endif()
 
-	# target_link_libraries(psp ${TBB_LIBRARIES}) // doesnt work on mac
 	target_link_libraries(psp tbb)
 	set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} ${TBB_LIBRARY})
-
-	target_compile_options(psp PRIVATE $<$<CONFIG:DEBUG>:-fPIC -O0>)
 endif()
-
-
-##############################
-# helper to grab gtest et al #
-##############################
-function (psp_build_dep name cmake_file)
-	if(EXISTS ${CMAKE_BINARY_DIR}/${name}-build)
-		message(WARNING "${Cyan}Dependency found - not rebuilding - ${CMAKE_BINARY_DIR}/${name}-build${ColorReset}")
-
-	else()
-		configure_file(${cmake_file} ${name}-download/CMakeLists.txt)
-		execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-			RESULT_VARIABLE result
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
-		if(result)
-			message(FATAL_ERROR "CMake step for ${name} failed: ${result}")
-		endif()
-		execute_process(COMMAND ${CMAKE_COMMAND} --build .
-			RESULT_VARIABLE result
-			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${name}-download )
-		if(result)
-			message(FATAL_ERROR "Build step for ${name} failed: ${result}")
-		endif()
-	endif()
-	add_subdirectory(${CMAKE_BINARY_DIR}/${name}-src
-		${CMAKE_BINARY_DIR}/${name}-build
-		EXCLUDE_FROM_ALL)
-	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/gtest/include)
-	include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
-	include_directories(${CMAKE_BINARY_DIR}/${name}-src)
-endfunction()
-##############################
 
 
 #############
@@ -388,10 +412,9 @@ endfunction()
 #############
 if (PSP_CPP_BUILD_TESTS)
 	if (WIN32)
-		set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 	endif()
 	psp_build_dep("googletest" "cmake/GTest.txt.in")
-	# psp_build_dep("tbb" "cmake/TBB.txt.in")
 
 	add_subdirectory(test)
 	add_custom_target(gcov

@@ -3,22 +3,26 @@ language: node_js
 node_js: "8"
 sudo: required
 
-services:
-  - docker
-
 matrix:
   include:
     - node_js: "8"
       language: node_js
       env: TEST=WASM
+      services: docker
 
     - language: c++
       env: TEST=CPP
+      services: docker
 
     - python: "3.6"
       language: python
       env: TEST=PYTHON
       cache: pip
+      services: docker
+
+    - language: c++
+      env: TEST=CPP_OSX
+      os: osx
 
 cache:
   yarn: true
@@ -37,6 +41,7 @@ env:
 
 
 install:
+  - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
   - yarn
 
 script:
@@ -48,3 +53,5 @@ script:
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn build_python; fi
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn lint_python; fi
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn test_python; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi
