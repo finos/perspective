@@ -81,7 +81,7 @@ export function configureScale(isSplitBy, horizontal, dataset, groupBys) {
     return [xScale, yScale];
 }
 
-export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groupNames, splits) {
+export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, groupNames, splits, mainLabel) {
     let multi;
     if (isSplitBy) {
         let multiWithOutGrid = fc
@@ -136,6 +136,7 @@ export function configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, colo
             const splitValues = dataset[index].key.split(", ");
             html = html.concat(splits.map((split, i) => `${split}: <b>${splitValues[i]}</b>`));
         }
+        html = html.concat(`${mainLabel}: <b>${data[1] - data[0]}</b>`);
         d3.select(this)
             .on("mouseover", () => {
                 // Bounding rect x and y not supported by edge or IE
