@@ -75,7 +75,7 @@ export default class D3FCChart {
         let gridlines = configureGrid(horizontal);
         let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, groupBys);
         // groups of svgs we need to render
-        let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, labels.crossLabel, labels.splitLabel);
+        let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, labels.crossLabel, labels.splitLabel, labels.mainLabel[0]);
         let groupedBarData;
 
         if (isMultiColumn) {
