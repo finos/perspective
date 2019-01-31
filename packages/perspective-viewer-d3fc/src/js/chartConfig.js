@@ -149,7 +149,7 @@ export function configureChart(xScale, yScale, multi) {
     return chart;
 }
 
-export function configureMultiColumnBarSeries(orientation, color, keys) {
+export function configureMultiColumnBarSeries(orientation, color, dataset) {
     return fc
         .autoBandwidth(fc.seriesSvgGrouped(fc.seriesSvgBar()))
         .align("left")
@@ -159,7 +159,7 @@ export function configureMultiColumnBarSeries(orientation, color, keys) {
         .decorate((sel, data, index) => {
             sel.enter()
                 .select("path")
-                .attr("fill", color(keys[index]));
+                .attr("fill", color(dataset[index].key));
         });
 }
 

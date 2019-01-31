@@ -55,9 +55,8 @@ export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     return dataset;
 }
 
-export function interpretKeysAndColor(config) {
-    const keys = config.series.map(s => s.name);
-    return [keys, d3.scaleOrdinal(d3.schemeCategory10).domain(keys)];
+export function interpretColor(config) {
+    return d3.scaleOrdinal(d3.schemeCategory10).domain(config.series.map(s => s.name));
 }
 
 export function interpretMultiColumnDataset(config, hiddenElements) {
@@ -66,8 +65,8 @@ export function interpretMultiColumnDataset(config, hiddenElements) {
         let dataRow = {crossValue: xAxis.categories.length > 0 ? xAxis.categories[mainIndex] : mainIndex};
         series
             .filter(d => !hiddenElements.includes(d.name))
-            .forEach((s, rowIndex) => {
-                dataRow[s.name] = series[rowIndex].data[mainIndex];
+            .forEach(s => {
+                dataRow[s.name] = s.data[mainIndex];
             });
         return dataRow;
     });
