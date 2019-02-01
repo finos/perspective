@@ -20,6 +20,9 @@ module.exports = {
     },
     plugins: [
         new PerspectivePlugin({
+            wasmLoaderOptions: {
+                name: "[hash].wasm"
+            },
             workerLoaderOptions: {
                 name: "[hash].worker.[ext]"
             }
