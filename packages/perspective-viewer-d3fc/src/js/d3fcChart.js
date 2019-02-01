@@ -20,7 +20,7 @@ import {
     configureMultiSeries
 } from "./chartConfig";
 import {interpretLabels, interpretGroupBys, interpretDataset, interpretColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
-
+import {styleChart} from "./styling/chartStyling";
 const nbsp = "\xa0";
 
 const LABEL_TICK_PADDING = 2;
