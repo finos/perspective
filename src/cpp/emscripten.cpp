@@ -1504,7 +1504,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("delete_view", &View<t_ctx0>::delete_view)
         .function("num_rows", &View<t_ctx0>::num_rows)
         .function("num_columns", &View<t_ctx0>::num_columns)
-        .function("get_row_expanded", &View<t_ctx0>::get_row_expanded);
+        .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
+        .function("schema", &View<t_ctx0>::schema);
         
     class_<View<t_ctx1> >("View_ctx1")
         .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>, std::string>()
@@ -1764,6 +1765,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
     register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
+    
+    /******************************************************************************
+     *
+     * map
+     */
+    register_map<std::string, std::string>("std::map<std::string, std::string>");
 
     /******************************************************************************
      *

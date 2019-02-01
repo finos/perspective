@@ -324,6 +324,20 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
      */
     view.prototype.schema = async function() {
+        let new_schema = {};
+        let col_names = this._column_names();
+
+        if (this.sides() === 0) {
+            let _schema = this._View.schema();
+
+            for (let col_name of col_names) {
+                new_schema[col_name] = _schema.get(col_name);
+            }
+            _schema.delete();
+
+            return new_schema;
+        }
+
         // get type mapping
         let schema = this.gnode.get_tblschema();
         let _types = schema.types();
@@ -334,8 +348,7 @@ export default function(Module) {
         for (let i = 0; i < names.size(); i++) {
             types[names.get(i)] = _types.get(i).value;
         }
-        let new_schema = {};
-        let col_names = this._column_names();
+
         for (let col_name of col_names) {
             col_name = col_name.split(defaults.COLUMN_SEPARATOR_STRING);
             col_name = col_name[col_name.length - 1];

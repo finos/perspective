@@ -148,6 +148,25 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     }
 }
 
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::schema() {
+    t_schema schema = m_gnode->get_tblschema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, std::string> new_schema;
+
+    for (auto i = 0; i < names.size(); ++i) {
+        if (names[i] == "psp_okey") {
+            continue;
+        }
+        new_schema[names[i]] = dtype_to_string(_types[i]);
+    }
+
+    return new_schema;
+}
+
 /*template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() {
@@ -180,9 +199,9 @@ template<>
 std::vector<std::string> 
 View<t_ctx0>::_column_names() {
     std::vector<std::string> names;
-    std::vector<std::string> aggregate_names;
+    std::vector<std::string> aggregate_names = m_ctx->get_column_names();
 
-    for (auto key = 0; key < m_ctx->unity_get_column_count(); ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
         std::stringstream col_name;
 
         col_name << aggregate_names[key];
@@ -208,7 +227,7 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
         aggregate_names.push_back(agg.name());
     }
 
-    for (auto key = 0; key < m_ctx->unity_get_column_count(); ++key) {
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
         std::stringstream col_name;
         
         std::string name = aggregate_names[key % aggregate_names.size()];
