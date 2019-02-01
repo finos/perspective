@@ -1516,7 +1516,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctx1>::get_row_expanded)
         .function("expand", &View<t_ctx1>::expand)
         .function("collapse", &View<t_ctx1>::collapse)
-        .function("set_depth", &View<t_ctx1>::set_depth);
+        .function("set_depth", &View<t_ctx1>::set_depth)
+        .function("schema", &View<t_ctx1>::schema);
 
     class_<View<t_ctx2> >("View_ctx2")
         .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>, std::string>()
@@ -1527,7 +1528,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctx2>::get_row_expanded)
         .function("expand", &View<t_ctx2>::expand)
         .function("collapse", &View<t_ctx2>::collapse)
-        .function("set_depth", &View<t_ctx2>::set_depth);
+        .function("set_depth", &View<t_ctx2>::set_depth)
+        .function("schema", &View<t_ctx2>::schema);
+        
     /******************************************************************************
      *
      * t_column

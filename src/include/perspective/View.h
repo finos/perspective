@@ -17,6 +17,8 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <cstddef>
+#include <codecvt>
 #include <memory>
 #include <map>
 
@@ -40,11 +42,10 @@ public:
     t_index expand(std::int32_t idx);
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
-
+private:
     std::vector<std::string> _column_names();
     std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0);
-private:
-    std::string map_aggregate_types(std::string name, std::string typestring); // FIXME: finish
+    std::string map_aggregate_types(std::string name, std::string typestring);
     std::string dtype_to_string(t_dtype type);
     
     t_pool* m_pool;
@@ -148,6 +149,33 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     }
 }
 
+template <typename CTX_T>
+std::map<std::string, std::string>
+View<CTX_T>::schema() {
+    auto schema = m_gnode->get_tblschema();
+    auto _types = schema.types();
+    auto names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    std::map<std::string, std::string> new_schema;
+
+    for (auto i = 0; i < names.size(); ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    auto col_names = _column_names(false);
+    for (const std::string& name : col_names) {
+        // Pull out the main aggregate column
+        std::size_t last_delimiter = name.find_last_of("|");
+        std::string agg_name = name.substr(last_delimiter + 1);
+
+        std::string type_string = dtype_to_string(types[agg_name]);
+        new_schema[agg_name] = type_string;
+    }
+
+    return new_schema;
+}
+
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() {
@@ -167,33 +195,43 @@ View<t_ctx0>::schema() {
     return new_schema;
 }
 
-/*template <typename CTX_T>
-std::map<std::string, std::string>
-View<CTX_T>::schema() {
-    auto schema = m_gnode->get_tblschema();
-    auto _types = schema.types();
-    auto names = schema.columns();
+// PRIVATE
 
-    std::map<std::string, std::string> types;
-    std::map<std::string, std::string> new_schema;
+template <typename CTX_T>
+std::vector<std::string> 
+View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
+    std::vector<std::string> names;
+    std::vector<std::string> aggregate_names;
 
-    for (auto i = 0; i < names.size(); ++i) {
-        types[names[i]] = _types[i];
+    const std::vector<t_aggspec> aggs = m_ctx->get_aggregates();
+    for (const t_aggspec& agg : aggs) {
+        aggregate_names.push_back(agg.name());
     }
 
-    auto col_names = _column_names();
-    for (const std::string& name : col_names) {
-        // FIXME: split str
-        std::string type_string = dtype_to_string(name);
-        if (sides() > 0) {
-            // FIXME: add && m_config.row_pivot.length > 0
-            type_string = map_aggregate_types(name, type_string);
-        } 
-        new_schema[name] = type_string;
+    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
+        std::stringstream col_name;      
+        std::string name = aggregate_names[key % aggregate_names.size()];;
+        
+        if (name == "psp_okey") {
+            continue;
+        }
+
+        std::vector<t_tscalar> col_path = m_ctx->unity_get_column_path(key + 1);
+        if (skip && col_path.size() < depth) {
+            continue;
+        }
+        
+        for (auto cnix = col_path.size(); cnix > 0; --cnix) {
+            col_name << col_path[cnix].to_string();
+            col_name << "|";
+        }
+
+        col_name << name;
+        names.push_back(col_name.str());
     }
 
-    return new_schema;
-}*/
+    return names;
+}
 
 template<>
 std::vector<std::string> 
@@ -208,8 +246,7 @@ View<t_ctx0>::_column_names() {
         if (col_name.str() == "psp_okey") {
             continue;
         };
-
-        std::cout << col_name.str() << std::endl;
+        
         names.push_back(col_name.str());
     }
 
@@ -217,42 +254,11 @@ View<t_ctx0>::_column_names() {
 }
 
 template <typename CTX_T>
-std::vector<std::string> 
-View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
-    std::vector<std::string> names;
-    std::vector<std::string> aggregate_names;
-
-    const std::vector<t_aggspec> aggs = m_ctx->get_aggregates();
-    for (const t_aggspec& agg : aggs) {
-        aggregate_names.push_back(agg.name());
-    }
-
-    for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
-        std::stringstream col_name;
-        
-        std::string name = aggregate_names[key % aggregate_names.size()];
-        std::cout << name << std::endl;
-        if (name == "psp_okey") {
-            continue;
-        }
-
-        std::vector<t_tscalar> col_path = m_ctx->unity_get_column_path(key + 1);
-        if (skip && col_path.size() < depth) {
-            continue;
-        }
-        
-        for (auto cnix = col_path.size(); cnix > 0; --cnix) {
-            col_name << col_path[cnix].get<std::string>();
-            col_name << "|";
-        }
-
-        col_name << name; 
-        std::cout << col_name.str() << std::endl;
-        names.push_back(col_name.str());
-    }
-
-    return names;
+std::string 
+View<CTX_T>::map_aggregate_types(std::string name, std::string typestring) {
+    return "";
 }
+
 
 // FIXME: how many of these do we need - one centralized one?
 template <typename CTX_T>

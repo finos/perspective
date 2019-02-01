@@ -322,7 +322,7 @@ module.exports = perspective => {
         it("['x'] does not translate type when only pivoted by column", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                col_pivot: ["y"],
+                column_pivot: ["y"],
                 aggregate: [{column: "x", op: "avg"}]
             });
             let result2 = await view.schema();

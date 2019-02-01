@@ -325,53 +325,20 @@ export default function(Module) {
      */
     view.prototype.schema = async function() {
         let new_schema = {};
-        let col_names = this._column_names();
+        let _schema = this._View.schema();
+        let _names = _schema.keys();
 
-        if (this.sides() === 0) {
-            let _schema = this._View.schema();
+        for (let i = 0; i < _names.size(); i++) {
+            let col_name = _names.get(i);
+            new_schema[col_name] = _schema.get(col_name);
 
-            for (let col_name of col_names) {
-                new_schema[col_name] = _schema.get(col_name);
-            }
-            _schema.delete();
-
-            return new_schema;
-        }
-
-        // get type mapping
-        let schema = this.gnode.get_tblschema();
-        let _types = schema.types();
-        let names = schema.columns();
-        schema.delete();
-
-        let types = {};
-        for (let i = 0; i < names.size(); i++) {
-            types[names.get(i)] = _types.get(i).value;
-        }
-
-        for (let col_name of col_names) {
-            col_name = col_name.split(defaults.COLUMN_SEPARATOR_STRING);
-            col_name = col_name[col_name.length - 1];
-            if (types[col_name] === 1 || types[col_name] === 2) {
-                new_schema[col_name] = "integer";
-            } else if (types[col_name] === 19) {
-                new_schema[col_name] = "string";
-            } else if (types[col_name] === 9 || types[col_name] === 10) {
-                new_schema[col_name] = "float";
-            } else if (types[col_name] === 11) {
-                new_schema[col_name] = "boolean";
-            } else if (types[col_name] === 12) {
-                new_schema[col_name] = "datetime";
-            } else if (types[col_name] === 13) {
-                new_schema[col_name] = "date";
-            }
             if (this.sides() > 0 && this.config.row_pivot.length > 0) {
                 new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
             }
         }
 
-        _types.delete();
-        names.delete();
+        _schema.delete();
+        _names.delete();
 
         return new_schema;
     };
