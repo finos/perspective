@@ -10,6 +10,10 @@ export class CrossAxisMap {
         return this._map;
     }
 
+    get levelCount() {
+        return this._map.length;
+    }
+
     generateMap(crossLabels, dataset) {
         let levelMap = [];
 

@@ -48,7 +48,7 @@ export function styleChart(chart, horizontal, labels, dataset) {
         let standardTickLength = STANDARD_TICK_LENGTH;
 
         selection.attr("transform", "translate(0, 0)"); //correctly align ticks on the crossAxis
-        parent.firstChild.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis grey
+        mutateCrossAxisLine(parent, crossAxisMap.levelCount, horizontal);
         mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate);
         mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap, horizontal);
 
@@ -64,6 +64,33 @@ export function styleChart(chart, horizontal, labels, dataset) {
     return;
 }
 
+function mutateCrossAxisLine(parent, levelCount, horizontal) {
+    let axisLine = parent.firstChild;
+    axisLine.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis grey
+
+    // Make the final (or bookend) tick the correct length
+    let bookendTickLength = horizontal ? (levelCount + 1) * HORIZONTAL_STANDARD_TICK_LENGTH : (levelCount + 1) * STANDARD_TICK_LENGTH;
+    let dimensions = axisLine.attributes.d.value;
+    let mutatedDimensions = dimensions.substring(0, dimensions.lastIndexOf(",") + 1) + bookendTickLength;
+
+    // Remove the first tick of the axis line which is overlaid by a formally declared tick anyway
+    mutatedDimensions = removeSuperfluousFirstTick(mutatedDimensions, horizontal);
+
+    axisLine.setAttribute("d", mutatedDimensions);
+}
+
+function removeSuperfluousFirstTick(dimensions, horizontal) {
+    if (horizontal) {
+        return dimensions;
+    }
+
+    // Remove the 2nd element of the svg
+    return dimensions
+        .split(",")
+        .reduce((accumulator, subSec, index) => accumulator + (index !== 1 ? `,${subSec}` : ""), "")
+        .substring(1);
+}
+
 function mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate) {
     selection
         .select("text")
@@ -75,7 +102,7 @@ function mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLen
     function mutateTickDimensionsAccordingToOrientation(i) {
         // eslint-disable-next-line prettier/prettier
         return horizontal 
-            ? `M0,0L-${tickLength(standardTickLength, i, crossAxisMap)},0` 
+            ? `M0,0L-${tickLength(standardTickLength, i, crossAxisMap)},0`
             : `M0,0L0,${tickLength(standardTickLength, i, crossAxisMap)}`;
     }
 
