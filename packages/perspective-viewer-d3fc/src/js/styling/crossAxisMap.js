@@ -1,4 +1,4 @@
-import {LABEL_TICK_PADDING, STANDARD_TICK_LENGTH} from "./chartStyling";
+import {LABEL_TICK_PADDING, STANDARD_TICK_LENGTH, HORIZONTAL_STANDARD_TICK_LENGTH, HORIZONTAL_LABEL_TICK_PADDING} from "./chartStyling";
 import {isNullOrUndefined} from "util";
 
 export class CrossAxisMap {
@@ -49,9 +49,9 @@ export class CrossAxisMap {
         return levelMap;
     }
 
-    calculateLabelPositions(tickList) {
+    calculateLabelPositions(tickList, horizontal) {
         let labelsMappedToTicks = this._map
-            .map(level => level.nodes.map(node => node.calculateLabelPosition(tickList, this._map.length)))
+            .map(level => level.nodes.map(node => node.calculateLabelPosition(tickList, this._map.length, horizontal)))
             .flat()
             .filter(mapping => !isNullOrUndefined(mapping));
 
@@ -132,8 +132,7 @@ class LevelNode {
         return this.isTopLevel() || this._parentNode.nodeContainsTick(proposedChildTickIndex);
     }
 
-    // TODO: rename this - it doesn't just calc, it also draws. Is the responsibility misplaced?
-    calculateLabelPosition(tickList, totalLevels) {
+    calculateLabelPosition(tickList, totalLevels, horizontal) {
         let middleTickIndex = Math.round((this._ticks.length + 1) / 2) - 1;
         let middleTick = this._ticks[middleTickIndex];
 
@@ -145,35 +144,54 @@ class LevelNode {
 
         // eslint-disable-next-line prettier/prettier
         let result = this._ticks.length % 2 !== 1
-            ? placeLabelOnTick(middleTick, tickList, this._name, levelDepth)
-            : placeLabelInSpaceBesideTick(middleTick, tickList, this._name, levelDepth);
+                ? placeLabelOnTick(middleTick, tickList, this._name, levelDepth, horizontal)
+                : placeLabelInSpaceBesideTick(middleTick, tickList, this._name, levelDepth, horizontal);
 
-        console.log(result);
         return result;
     }
 }
 
 // TODO: only handles horizontal for now
-function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth) {
+function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
     let tickElement = tickList[tickIndex];
     let tickStroke = tickElement.firstChild;
-    let [horizontalOffset, verticalOffset] = calculateLabelOffsets(tickStroke, labelDepth);
+
+    // eslint-disable-next-line prettier/prettier
+    let [horizontalOffset, verticalOffset] = horizontal 
+        ? calculateXGraphLabelOffsets(tickStroke, labelDepth) 
+        : calculateYGraphLabelOffsets(tickStroke, labelDepth);
+
     return cloneThenModifyLabel(tickElement, horizontalOffset, verticalOffset, labelText);
 }
 
-function placeLabelInSpaceBesideTick(tickIndex, tickList, labelText, labelDepth) {
+function placeLabelInSpaceBesideTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
     let tickElement = tickList[tickIndex];
     let tickBaseText = tickElement.childNodes[1];
-    let [horizontalOffset, verticalOffset] = calculateLabelOffsets(tickBaseText, labelDepth);
+
+    // eslint-disable-next-line prettier/prettier
+    let [horizontalOffset, verticalOffset] = horizontal 
+        ? calculateXGraphLabelOffsets(tickBaseText, labelDepth) 
+        : calculateYGraphLabelOffsets(tickBaseText, labelDepth);
+
     return cloneThenModifyLabel(tickElement, horizontalOffset, verticalOffset, labelText);
 }
 
-function calculateLabelOffsets(baseElement, labelDepth) {
+function calculateYGraphLabelOffsets(baseElement, labelDepth) {
     let baseElementTransform = baseElement.attributes.transform.value;
 
     let horizontalOffset = baseElementTransform.substring(baseElementTransform.lastIndexOf("(") + 1, baseElementTransform.lastIndexOf(","));
-    let verticalDepthMultiplied = STANDARD_TICK_LENGTH * labelDepth; // TODO: this constant is not super cool.
+    let verticalDepthMultiplied = STANDARD_TICK_LENGTH * labelDepth;
     let verticalOffset = verticalDepthMultiplied + LABEL_TICK_PADDING;
+
+    return [horizontalOffset, verticalOffset];
+}
+
+function calculateXGraphLabelOffsets(baseElement, labelDepth) {
+    let baseElementTransform = baseElement.attributes.transform.value;
+
+    let verticalOffset = baseElementTransform.substring(baseElementTransform.lastIndexOf(",") + 1, baseElementTransform.lastIndexOf(")"));
+    let horizontalDepthMultiplied = HORIZONTAL_STANDARD_TICK_LENGTH * labelDepth;
+    let horizontalOffset = horizontalDepthMultiplied + HORIZONTAL_LABEL_TICK_PADDING;
 
     return [horizontalOffset, verticalOffset];
 }
