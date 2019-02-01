@@ -4,9 +4,10 @@
     "version": "0.2.12",
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
-        "start": "npm-run-all -l -p webpack-dev host",
-        "host": "http-server ./output/public -p 5150 -c-1",
-        "webpack-dev": "webpack-dev-server --content-base ./ --hot"
+        "start": "npm-run-all -l -p webpack-watch host:app host:bundles ",
+        "host:app": "http-server ./output/public -p 5150 -c-1",
+        "host:bundles": "http-server ./output -p 8080 -c-1 --cors",
+        "webpack-watch": "webpack --watch"
     },
     "keywords": [],
     "license": "Apache-2.0",

@@ -39,12 +39,11 @@ exports.default = function loader(content) {
     const options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "File Worker Loader");
     const context = options.context || this.rootContext || (this.options && this.options.context);
-    const url = loaderUtils.interpolateName(this, options.name, {
+    const emitPath = loaderUtils.interpolateName(this, options.name, {
         context,
         content,
         regExp: options.regExp
     });
-    const outputPath = url.replace(/\.js/, ".worker.js");
 
     if (!options.compiled) {
         var inputPath = this.resourcePath;
@@ -55,17 +54,15 @@ exports.default = function loader(content) {
                 .replace(/(cjs\/js)/, "build");
         }
         content = fs.readFileSync(inputPath).toString();
-        if (!options.inline) {
-            this.emitFile(outputPath, "" + content);
-            const map_file = `${inputPath}.map`;
-            if (fs.existsSync(map_file)) {
-                const map_content = fs.readFileSync(map_file).toString();
-                this.emitFile(`${outputPath}.map`, "" + map_content);
-            }
+        this.emitFile(emitPath, "" + content);
+        const map_file = `${inputPath}.map`;
+        if (fs.existsSync(map_file)) {
+            const map_content = fs.readFileSync(map_file).toString();
+            this.emitFile(`${emitPath}.map`, "" + map_content);
         }
     }
 
-    const publicPath = `__webpack_public_path__ + ${JSON.stringify(outputPath)}`;
+    const outputPath = JSON.stringify(emitPath);
     const utils_path = JSON.stringify(`!!${path.join(__dirname, "utils.js")}`);
 
     if (options.inline) {
@@ -77,14 +74,19 @@ exports.default = function loader(content) {
             var utils = require(${utils_path});
             return new Promise(function(resolve) { utils.BlobWorker(${worker_text}, resolve); });
         };`;
+    } else {
+        return `module.exports = function() {
+            var utils = require(${utils_path});
+            var workerPath = utils.publicPath(__webpack_public_path__) + ${outputPath};
+            if (utils.isCrossOrigin(__webpack_public_path__)) {
+                return new Promise(function(resolve) {
+                    utils.XHRWorker(workerPath, resolve);
+                });
+            } else {
+                return new Promise(function(resolve) {
+                    resolve(new Worker(workerPath)); 
+                });
+            }
+        };`;
     }
-
-    return `module.exports = function() {
-        var utils = require(${utils_path});
-        if (window.location.origin === utils.host.slice(0, window.location.origin.length)) {
-            return new Promise(function(resolve) { resolve(new Worker(utils.path + ${publicPath})); });
-        } else {
-            return new Promise(function(resolve) { utils.XHRWorker(utils.path + ${publicPath}, resolve); });
-        }
-    };`;
 };
