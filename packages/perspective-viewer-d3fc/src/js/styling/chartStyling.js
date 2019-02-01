@@ -45,37 +45,58 @@ export function styleChart(chart, horizontal, labels, dataset) {
         let tickSpacing = totalSpace / groups.length;
         let standardTickLength = STANDARD_TICK_LENGTH;
 
-        selection.attr("transform", "translate(0, 0)");
-        parent.firstChild.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis white // TODO: this is too fragile
-        selection
-            .select("text")
-            .attr("transform", (_, i) => translate(i * tickSpacing + tickSpacing / 2, distanceFromAxis))
-            .text(content => returnOnlyMostSubdividedGroup(content));
-        selection
-            .select("path") // select the tick marks
-            .attr("stroke", "rgb(187, 187, 187)")
-            .attr("d", (x, i) => `M0,0L0,${tickLength(standardTickLength, i, crossAxisMap)}`)
-            .attr("transform", (x, i) => translate(i * tickSpacing, 0));
+        selection.attr("transform", "translate(0, 0)"); //correctly align ticks on the crossAxis
+        parent.firstChild.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis grey
+        mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate);
+        mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap);
 
-        if (labels.crossLabel.length === 0) {
-            selection.select("text").attr("display", "none");
-        }
-
-        let groupByLabelsToAppend = crossAxisMap.calculateLabelPositions(groups);
-        groupByLabelsToAppend.forEach(labelTick => labelTick.tick.appendChild(labelTick.label));
+        hidecrossAxisTextInAbsenceOfLabels(selection, labels);
+        addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups);
     });
 
     mainDecorate(selection => {
-        let parent = selection._parents[0];
-
-        parent.firstChild.setAttribute("display", "none"); // hide the axis // TODO: this is too fragile.
-        selection
-            .select("path") // select the tick marks
-            .attr("display", "none");
-        selection.select("text").attr("fill", "white");
+        hideMainAxisLine(selection);
+        hideMainAxisTicks(selection);
     });
 
     return;
+}
+
+function mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate) {
+    selection
+        .select("text")
+        .attr("transform", (_, i) => translate(i * tickSpacing + tickSpacing / 2, distanceFromAxis))
+        .text(content => returnOnlyMostSubdividedGroup(content));
+}
+
+function mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap) {
+    selection
+        .select("path") // select the tick marks
+        .attr("stroke", "rgb(187, 187, 187)")
+        .attr("d", (x, i) => `M0,0L0,${tickLength(standardTickLength, i, crossAxisMap)}`)
+        .attr("transform", (x, i) => translate(i * tickSpacing, 0));
+}
+
+function hideMainAxisTicks(selection) {
+    selection
+        .select("path") // select the tick marks
+        .attr("display", "none");
+}
+
+function hideMainAxisLine(selection) {
+    let parent = selection._parents[0];
+    parent.firstChild.setAttribute("display", "none"); // hide the axis // TODO: this is too fragile.
+}
+
+function hidecrossAxisTextInAbsenceOfLabels(selection, labels) {
+    if (labels.crossLabel.length === 0) {
+        selection.select("text").attr("display", "none");
+    }
+}
+
+function addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups) {
+    let groupByLabelsToAppend = crossAxisMap.calculateLabelPositions(groups);
+    groupByLabelsToAppend.forEach(labelTick => labelTick.tick.appendChild(labelTick.label));
 }
 
 function tickLength(oneStandardTickLength, tickIndex, tickLengthMap) {
