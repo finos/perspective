@@ -7,9 +7,9 @@
  *
  */
 
-const WORKER_LOADER_PATH = require.resolve("./src/js/file_worker_loader");
-const WASM_LOADER_PATH = require.resolve("./src/js/cross_origin_file_loader.js");
-const BLOB_LOADER_PATH = require.resolve("./src/js/blob_worker_loader.js");
+const PSP_WORKER_LOADER = require.resolve("./src/js/psp-worker-loader");
+const WASM_LOADER = require.resolve("./src/js/wasm-loader.js");
+const PSP_WORKER_COMPILER_LOADER = require.resolve("./src/js/psp-worker-compiler-loader.js");
 
 const BABEL_CONFIG = require("./babel.config.js");
 
@@ -51,11 +51,11 @@ class PerspectiveWebpackPlugin {
                 include: load_path,
                 use: [
                     {
-                        loader: WORKER_LOADER_PATH,
-                        options: {name: "[name].js", compiled: true}
+                        loader: PSP_WORKER_LOADER,
+                        options: {name: "[name].worker.js", compiled: true}
                     },
                     {
-                        loader: BLOB_LOADER_PATH,
+                        loader: PSP_WORKER_COMPILER_LOADER,
                         options: {name: "[name].worker.js"}
                     }
                 ]
@@ -65,8 +65,8 @@ class PerspectiveWebpackPlugin {
                 test: /perspective\.(wasm|asmjs)\.js$/,
                 include: load_path,
                 use: {
-                    loader: WORKER_LOADER_PATH,
-                    options: {name: "[name].js"}
+                    loader: PSP_WORKER_LOADER,
+                    options: {name: "[name].worker.js"}
                 }
             });
         }
@@ -84,7 +84,7 @@ class PerspectiveWebpackPlugin {
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
             include: load_path,
-            use: {loader: WASM_LOADER_PATH, options: {name: "[name]"}}
+            use: {loader: WASM_LOADER, options: {name: "[name]"}}
         });
 
         const compilerOptions = compiler.options;
