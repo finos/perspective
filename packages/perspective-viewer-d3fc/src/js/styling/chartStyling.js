@@ -11,6 +11,8 @@ import {CrossAxisMap} from "./crossAxisMap";
 
 export const LABEL_TICK_PADDING = 2;
 export const STANDARD_TICK_LENGTH = 9; // 9 // TODO: make this 16 - that is right but hard to analyse for now as it exceeds my working area.
+export const HORIZONTAL_STANDARD_TICK_LENGTH = -STANDARD_TICK_LENGTH * 2;
+export const HORIZONTAL_LABEL_TICK_PADDING = -LABEL_TICK_PADDING;
 
 // STYLE CHART
 export function styleChart(chart, horizontal, labels, dataset) {
@@ -26,7 +28,7 @@ export function styleChart(chart, horizontal, labels, dataset) {
     //crossLabel(labels.crossLabel); // not enabled.
 
     let textDistanceFromXAxis = STANDARD_TICK_LENGTH + LABEL_TICK_PADDING; // TODO: make this standard vertical tick length, or make it somehow calculated.
-    let textDistanceFromYAxis = -18; //TODO: need to make this reactive to text length.
+    let textDistanceFromYAxis = HORIZONTAL_STANDARD_TICK_LENGTH + HORIZONTAL_LABEL_TICK_PADDING; // -18; //TODO: need to make this reactive to text length.
     let distanceFromAxis = horizontal ? textDistanceFromYAxis : textDistanceFromXAxis;
 
     crossDecorate(selection => {
@@ -48,10 +50,10 @@ export function styleChart(chart, horizontal, labels, dataset) {
         selection.attr("transform", "translate(0, 0)"); //correctly align ticks on the crossAxis
         parent.firstChild.setAttribute("stroke", "rgb(187, 187, 187)"); // turn the axis grey
         mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate);
-        mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap);
+        mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap, horizontal);
 
         hidecrossAxisTextInAbsenceOfLabels(selection, labels);
-        addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups);
+        addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups, horizontal);
     });
 
     mainDecorate(selection => {
@@ -69,11 +71,18 @@ function mutateCrossAxisText(selection, tickSpacing, distanceFromAxis, translate
         .text(content => returnOnlyMostSubdividedGroup(content));
 }
 
-function mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap) {
+function mutateCrossAxisTicks(selection, tickSpacing, translate, standardTickLength, crossAxisMap, horizontal) {
+    function mutateTickDimensionsAccordingToOrientation(i) {
+        // eslint-disable-next-line prettier/prettier
+        return horizontal 
+            ? `M0,0L-${tickLength(standardTickLength, i, crossAxisMap)},0` 
+            : `M0,0L0,${tickLength(standardTickLength, i, crossAxisMap)}`;
+    }
+
     selection
         .select("path") // select the tick marks
         .attr("stroke", "rgb(187, 187, 187)")
-        .attr("d", (x, i) => `M0,0L0,${tickLength(standardTickLength, i, crossAxisMap)}`)
+        .attr("d", (x, i) => mutateTickDimensionsAccordingToOrientation(i))
         .attr("transform", (x, i) => translate(i * tickSpacing, 0));
 }
 
@@ -94,8 +103,8 @@ function hidecrossAxisTextInAbsenceOfLabels(selection, labels) {
     }
 }
 
-function addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups) {
-    let groupByLabelsToAppend = crossAxisMap.calculateLabelPositions(groups);
+function addCrossAxisLabelsForNestedGroupBys(crossAxisMap, groups, horizontal) {
+    let groupByLabelsToAppend = crossAxisMap.calculateLabelPositions(groups, horizontal);
     groupByLabelsToAppend.forEach(labelTick => labelTick.tick.appendChild(labelTick.label));
 }
 
@@ -104,7 +113,7 @@ function tickLength(oneStandardTickLength, tickIndex, tickLengthMap) {
 
     // ticks are shorter in the case where we're not dubdividing by groups.
     if (tickLengthMap.length <= 1) {
-        return multiplier / 2;
+        return multiplier / 3;
     }
 
     let depth = 1;
