@@ -18,7 +18,13 @@ module.exports = {
         publicPath: "http://localhost:8080/",
         path: path.resolve(__dirname, "./output")
     },
-    plugins: [new PerspectivePlugin()],
+    plugins: [
+        new PerspectivePlugin({
+            workerLoaderOptions: {
+                name: "[hash].worker.[ext]"
+            }
+        })
+    ],
     devtool: "source-map",
     devServer: {
         historyApiFallback: true,

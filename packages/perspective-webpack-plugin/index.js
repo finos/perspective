@@ -15,21 +15,28 @@ const BABEL_CONFIG = require("./babel.config.js");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
-        this.options = options;
+        this.options = Object.assign({}, {
+            include: [__dirname.replace("-webpack-plugin", "")],
+            workerLoaderOptions: {
+                name: "[name].worker.js",
+            },
+            wasmLoaderOptions: {
+                name: "[name]"
+            }
+        }, options);
     }
 
     apply(compiler) {
-        const load_path = [__dirname.replace("-webpack-plugin", "")];
         const rules = [
             {
                 test: /\.less$/,
                 exclude: /themes/,
-                include: load_path,
+                include: this.options.load_path,
                 use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
             },
             {
                 test: /\.(html)$/,
-                include: load_path,
+                include: this.options.load_path,
                 use: {
                     loader: "html-loader",
                     options: {}
@@ -37,7 +44,7 @@ class PerspectiveWebpackPlugin {
             },
             {
                 test: /\.(arrow)$/,
-                include: load_path,
+                include: this.options.load_path,
                 use: {
                     loader: "arraybuffer-loader",
                     options: {}
@@ -48,11 +55,11 @@ class PerspectiveWebpackPlugin {
         if (this.options.build_worker) {
             rules.push({
                 test: /perspective\.(asmjs|wasm)\.js$/,
-                include: load_path,
+                include: this.options.load_path,
                 use: [
                     {
                         loader: PSP_WORKER_LOADER,
-                        options: {name: "[name].worker.js", compiled: true}
+                        options: Object.assign({}, this.options.workerLoaderOptions, { compiled: true })
                     },
                     {
                         loader: PSP_WORKER_COMPILER_LOADER,
@@ -63,10 +70,10 @@ class PerspectiveWebpackPlugin {
         } else {
             rules.push({
                 test: /perspective\.(wasm|asmjs)\.js$/,
-                include: load_path,
+                include: this.options.load_path,
                 use: {
                     loader: PSP_WORKER_LOADER,
-                    options: {name: "[name].worker.js"}
+                    options: this.options.workerLoaderOptions
                 }
             });
         }
@@ -74,7 +81,7 @@ class PerspectiveWebpackPlugin {
         if (!this.options.build_worker) {
             rules.push({
                 test: /\.js$/,
-                include: load_path,
+                include: this.options.load_path,
                 exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
                 loader: "babel-loader",
                 options: BABEL_CONFIG
@@ -83,8 +90,11 @@ class PerspectiveWebpackPlugin {
 
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
-            include: load_path,
-            use: {loader: WASM_LOADER, options: {name: "[name]"}}
+            include: this.options.load_path,
+            use: {
+                loader: WASM_LOADER, 
+                options: this.options.wasmLoaderOptions
+            }
         });
 
         const compilerOptions = compiler.options;
