@@ -37,7 +37,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 * [CSV](https://bl.ocks.org/JHawk/ef28337d5c96c0360f07ca502b872c10) Upload a CSV of your own.
 * [NYC Citibike](https://bl.ocks.org/JHawk/ade09a2ea62bb708cc0beab8c35609b0) An example of a join on two real-time datasets, from the NYC Citibike feed.
 * [Real-time cryptocurrency charting](https://bl.ocks.org/ColinEberhardt/6e287f871410ecd970b038343b166514) An example that uses the coinbased web socket feed to plot orders in real-time
-*  [Financial Data from IEX](https://gist.github.com/timkpaine/97e0e7389875f3d21095e434e361a18f) An example that uses the [IEX cloud](https://iexcloud.io) api to build a financial dashboard.
+*  [Financial Data from IEX](https://bl.ocks.org/timkpaine/97e0e7389875f3d21095e434e361a18f) An example that uses the [IEX cloud](https://iexcloud.io) api to build a financial dashboard.
 
 ## Documentation
 
