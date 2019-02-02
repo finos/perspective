@@ -54,11 +54,13 @@ exports.default = function loader(content) {
                 .replace(/(cjs\/js)/, "build");
         }
         content = fs.readFileSync(inputPath).toString();
-        this.emitFile(emitPath, "" + content);
-        const map_file = `${inputPath}.map`;
-        if (fs.existsSync(map_file)) {
-            const map_content = fs.readFileSync(map_file).toString();
-            this.emitFile(`${emitPath}.map`, "" + map_content);
+        if (!options.inline) {
+            this.emitFile(emitPath, "" + content);
+            const map_file = `${inputPath}.map`;
+            if (fs.existsSync(map_file)) {
+                const map_content = fs.readFileSync(map_file).toString();
+                this.emitFile(`${emitPath}.map`, "" + map_content);
+            }
         }
     }
 
