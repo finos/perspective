@@ -33,17 +33,6 @@
     }
 }
 
-@keyframes scale_2 {
-    from {
-        transform: scale(1.01);
-    }
-}
-
-:host([settings="true"]) #pivot_chart_container {
-    transform-origin: bottom right;
-    animation: scale_2 0.1s ease-out;
-}
-
 :host {
     position: relative;
     display: inline-block;
@@ -130,6 +119,7 @@
     }
     #app {
         display: flex;
+        position: relative;
         width: 100%;
         height: 100%;
     }
