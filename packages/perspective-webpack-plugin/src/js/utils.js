@@ -55,6 +55,32 @@ module.exports.host = __SCRIPT_PATH__.host();
 
 module.exports.path = __SCRIPT_PATH__.path();
 
+module.exports.isCrossOrigin = function(webpackOrigin) {
+    var inWebpack = !!(webpackOrigin && webpackOrigin.length);
+    if (inWebpack) {
+        var link = document.createElement("a");
+        link.href = webpackOrigin;
+
+        if (link.href.startsWith(window.location.origin)) {
+            return false;
+        } else {
+            // we're CORS
+            return true;
+        }
+    } else {
+        return window.location.hostname === module.exports.host.slice(0, window.location.hostname.length);
+    }
+};
+
+module.exports.publicPath = function(webpackOrigin) {
+    var inWebpack = !!(webpackOrigin && webpackOrigin.length);
+    if (inWebpack) {
+        return webpackOrigin;
+    } else {
+        return module.exports.path;
+    }
+};
+
 module.exports.BlobWorker = function(responseText, ready) {
     var blob = new Blob([responseText]);
     var obj = window.URL.createObjectURL(blob);

@@ -14,12 +14,28 @@ module.exports = {
     context: __dirname,
     entry: "./in.js",
     output: {
-        filename: "out.js",
-        library: "out",
-        libraryTarget: "umd",
-        libraryExport: "default",
-        path: path.resolve(__dirname, "./build")
+        filename: "public/bundle.js",
+        publicPath: "http://localhost:8080/",
+        path: path.resolve(__dirname, "./output")
     },
-    plugins: [new PerspectivePlugin()],
-    devtool: "source-map"
+    plugins: [
+        new PerspectivePlugin({
+            wasmLoaderOptions: {
+                name: "[hash].wasm"
+            },
+            workerLoaderOptions: {
+                name: "[hash].worker.[ext]"
+            }
+        })
+    ],
+    devtool: "source-map",
+    devServer: {
+        historyApiFallback: true,
+        watchOptions: {aggregateTimeout: 300, poll: 1000},
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+            "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+        }
+    }
 };
