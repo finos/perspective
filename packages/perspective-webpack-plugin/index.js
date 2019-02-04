@@ -15,15 +15,19 @@ const BABEL_CONFIG = require("./babel.config.js");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
-        this.options = Object.assign({}, {
-            include: [__dirname.replace("-webpack-plugin", "")],
-            workerLoaderOptions: {
-                name: "[name].worker.js",
+        this.options = Object.assign(
+            {},
+            {
+                load_path: [__dirname.replace("-webpack-plugin", "")],
+                workerLoaderOptions: {
+                    name: "[name].worker.js"
+                },
+                wasmLoaderOptions: {
+                    name: "[name]"
+                }
             },
-            wasmLoaderOptions: {
-                name: "[name]"
-            }
-        }, options);
+            options
+        );
     }
 
     apply(compiler) {
@@ -59,7 +63,7 @@ class PerspectiveWebpackPlugin {
                 use: [
                     {
                         loader: PSP_WORKER_LOADER,
-                        options: Object.assign({}, this.options.workerLoaderOptions, { compiled: true })
+                        options: Object.assign({}, this.options.workerLoaderOptions, {compiled: true})
                     },
                     {
                         loader: PSP_WORKER_COMPILER_LOADER,
@@ -92,7 +96,7 @@ class PerspectiveWebpackPlugin {
             test: /psp\.(sync|async)\.wasm\.js$/,
             include: this.options.load_path,
             use: {
-                loader: WASM_LOADER, 
+                loader: WASM_LOADER,
                 options: this.options.wasmLoaderOptions
             }
         });
