@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "description": "Perspective.js",
     "main": "src/js/viewer.js",
     "files": [
@@ -42,7 +42,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.12",
+        "@jpmorganchase/perspective": "^0.2.13",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
@@ -52,5 +52,8 @@
         "detectie": "1.0.0",
         "mobile-drag-drop": "^2.2.0",
         "underscore": "^1.8.3"
+    },
+    "devDependencies": {
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.13"
     }
 }

@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
     "browser": "cjs/js/perspective.parallel.js",
@@ -66,8 +66,7 @@
         "websocket-heartbeat-js": "^1.0.7",
         "ws": "^6.1.2"
     },
-    "peerDependencies": {
-        "webpack": ">=3.5 <4",
-        "@jpmorganchase/perspective-webpack-plugin": "0.2.12"
+    "devDependencies": {
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.13"
     }
 }
