@@ -602,6 +602,16 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Handles datetime values with mixed formats", async function() {
+            var table = perspective.table({datetime: "datetime"});
+            table.update([{datetime: new Date(1549257586108)}, {datetime: "2019-01-30"}, {datetime: 11}]);
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{datetime: 1549257586108}, {datetime: 1548806400000}, {datetime: 11}]);
+            view.delete();
+            table.delete();
+        });
+
         it("Handles date values", async function() {
             var table = perspective.table({v: "date"});
             table.update(data_4);
