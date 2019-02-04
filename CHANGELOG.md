@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.14] - 2019-02-04
+### Added
+* [#408](https://github.com/jpmorganchase/perspective/pull/408) Added `flush()` method to `<perspective-viewer>`
+
+### Fixes
+* [#409](https://github.com/jpmorganchase/perspective/pull/409) Fixed `perspective-webpack-plugin` conflicts with external loaders.
+
 ## [0.2.13] - 2019-02-04
 ### Added
 * [#399](https://github.com/jpmorganchase/perspective/pull/399) New package `perspective-webpack-plugin` for webpack integration
