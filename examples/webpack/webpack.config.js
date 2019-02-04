@@ -12,7 +12,7 @@ const path = require("path");
 
 module.exports = {
     context: __dirname,
-    entry: "./in.js",
+    entry: "./index.js",
     output: {
         filename: "public/bundle.js",
         publicPath: "http://localhost:8080/",
@@ -28,6 +28,15 @@ module.exports = {
             }
         })
     ],
+    module: {
+        rules: [
+            {
+                test: /\.less$/,
+                exclude: /packages/,
+                use: [{loader: "style-loader"}, {loader: "css-loader"}, {loader: "less-loader"}]
+            }
+        ]
+    },
     devtool: "source-map",
     devServer: {
         historyApiFallback: true,
