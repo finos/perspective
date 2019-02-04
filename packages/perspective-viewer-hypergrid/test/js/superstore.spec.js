@@ -43,6 +43,20 @@ utils.with_server({}, () => {
                     }, viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });
+
+                test.capture("handles flush().", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => {
+                        element.setAttribute("column-pivots", '["Category"]');
+                        element.setAttribute("row-pivots", '["City"]');
+                        element.flush().then(() => {
+                            element.view.set_depth(0);
+                            element.notifyResize();
+                        });
+                    }, viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
             });
 
             describe("lazy render mode", () => {

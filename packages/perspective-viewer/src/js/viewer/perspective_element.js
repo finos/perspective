@@ -101,7 +101,7 @@ export class PerspectiveElement extends StateElement {
 
     async _load_table(table, computed = false) {
         this.shadowRoot.querySelector("#app").classList.add("hide_message");
-        this.setAttribute("updating", true);
+        const resolve = this._set_updating();
 
         if (this._table && !computed) {
             this.removeAttribute("computed-columns");
@@ -167,6 +167,7 @@ export class PerspectiveElement extends StateElement {
 
         this.filters = this.getAttribute("filters");
         await this._debounce_update();
+        resolve();
     }
 
     async _warn_render_size_exceeded() {
@@ -218,7 +219,7 @@ export class PerspectiveElement extends StateElement {
             const exclamation = node.shadowRoot.getElementById("row_exclamation");
             const {operator, operand} = JSON.parse(node.getAttribute("filter"));
             const filter = [node.getAttribute("name"), operator, operand];
-            if (await this._table.is_valid_filter(filter) && operand !== "") {
+            if ((await this._table.is_valid_filter(filter)) && operand !== "") {
                 filters.push(filter);
                 node.title = "";
                 operandNode.style.borderColor = "";
@@ -326,15 +327,25 @@ export class PerspectiveElement extends StateElement {
         return Promise.all(all);
     }
 
+    _set_updating() {
+        this.setAttribute("updating", true);
+        let resolve;
+        this._updating_promise = new Promise(_resolve => {
+            resolve = _resolve;
+        });
+        return resolve;
+    }
+
     // setup for update
     _register_debounce_instance() {
         const _update = _.debounce((resolve, ignore_size_check) => {
             this._new_view(ignore_size_check).then(resolve);
-        }, 10);
+        }, 0);
         this._debounce_update = async ({ignore_size_check = false} = {}) => {
             if (this._table) {
-                this.setAttribute("updating", true);
+                let resolve = this._set_updating();
                 await new Promise(resolve => _update(resolve, ignore_size_check));
+                resolve();
             }
         };
     }
