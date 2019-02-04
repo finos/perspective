@@ -32,7 +32,7 @@ t_ctx_grouped_pkey::t_ctx_grouped_pkey()
 t_ctx_grouped_pkey::t_ctx_grouped_pkey(t_schema schema, t_config config)
 	: m_depth(0),
 	m_depth_set(false) {
-	PSP_COMPLAIN_AND_ABORT('Not Implemented');
+	PSP_COMPLAIN_AND_ABORT("Not Implemented");
 }
 
 t_ctx_grouped_pkey::~t_ctx_grouped_pkey() {}

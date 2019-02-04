@@ -40,7 +40,10 @@ export class DateParser {
             return null;
         } else {
             let val = input;
-            if (typeof val === "string") {
+            const type = typeof val;
+            if (val.getMonth) {
+                return val;
+            } else if (type === "string") {
                 val = moment(input, this.date_types, true);
                 if (!val.isValid() || this.date_types.length === 0) {
                     for (let candidate of this.date_candidates) {
@@ -55,8 +58,10 @@ export class DateParser {
                     return null;
                 }
                 return val.toDate();
+            } else if (type === "number") {
+                return new Date(val);
             }
-            return val;
+            throw new Error(`Unparseable date ${val}`);
         }
     }
 }
