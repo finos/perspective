@@ -142,7 +142,7 @@ class PerspectiveViewer extends ActionElement {
      */
     @array_attribute
     set "computed-columns"(computed_columns) {
-        this.setAttribute("updating", true);
+        const resolve = this._set_updating();
         this._computed_column._close_computed_column();
         (async () => {
             if (this._table) {
@@ -156,6 +156,7 @@ class PerspectiveViewer extends ActionElement {
                     });
                 }
                 await this._debounce_update();
+                resolve();
             }
             this.dispatchEvent(new Event("perspective-config-update"));
             this.dispatchEvent(new Event("perspective-computed-column-update"));
@@ -482,6 +483,19 @@ class PerspectiveViewer extends ActionElement {
             this.setAttribute(key, val);
         }
         await this._debounce_update();
+    }
+
+    /**
+     * Flush any pending attribute modifications to this element.
+     *
+     * @returns {Promise<void>} A promise which resolves when the current
+     * attribute state has been applied.
+     */
+    async flush() {
+        await new Promise(setTimeout);
+        while (this.hasAttribute("updating")) {
+            await this._updating_promise;
+        }
     }
 
     /**
