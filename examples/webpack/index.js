@@ -8,6 +8,7 @@
  */
 
 const perspective = require("@jpmorganchase/perspective").default;
+require("./index.less");
 
 require("@jpmorganchase/perspective-viewer");
 require("@jpmorganchase/perspective-viewer-hypergrid");
