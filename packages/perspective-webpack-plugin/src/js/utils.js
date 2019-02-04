@@ -68,7 +68,7 @@ module.exports.isCrossOrigin = function(webpackOrigin) {
             return true;
         }
     } else {
-        return window.location.hostname === module.exports.host.slice(0, window.location.hostname.length);
+        return window.location.hostname !== module.exports.host.slice(0, window.location.hostname.length);
     }
 };
 
