@@ -25,7 +25,7 @@ module.exports = {
             },
             workerLoaderOptions: {
                 name: "[hash].worker.[ext]"
-            },
+            }
         })
     ],
     devtool: "source-map",
