@@ -1284,14 +1284,13 @@ clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, val computed) {
  *
  * Returns
  * -------
- * A shared pointer to a View<t_ctx0>.
+ * A shared pointer to a View<CTX_T>.
  */
 template <typename CTX_T>
 std::shared_ptr<View<CTX_T>>
 make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name) {
-            auto view_ptr = std::make_shared<View<CTX_T>>(pool, ctx, sides, gnode, name);
-            //auto names = view_ptr->_column_names();
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator) {
+            auto view_ptr = std::make_shared<View<CTX_T>>(pool, ctx, sides, gnode, name, separator);
             return view_ptr;
 }
 
@@ -1499,16 +1498,17 @@ EMSCRIPTEN_BINDINGS(perspective) {
     // Bind a View for each context type
     
     class_<View<t_ctx0> >("View_ctx0")
-        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::int32_t, std::shared_ptr<t_gnode>, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
         .smart_ptr<std::shared_ptr<View<t_ctx0> > >("shared_ptr<View_ctx0>")
         .function("delete_view", &View<t_ctx0>::delete_view)
         .function("num_rows", &View<t_ctx0>::num_rows)
         .function("num_columns", &View<t_ctx0>::num_columns)
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
-        .function("schema", &View<t_ctx0>::schema);
+        .function("schema", &View<t_ctx0>::schema)
+        .function("_column_names", &View<t_ctx0>::_column_names);
         
     class_<View<t_ctx1> >("View_ctx1")
-        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
         .smart_ptr<std::shared_ptr<View<t_ctx1> > >("shared_ptr<View_ctx1>")
         .function("delete_view", &View<t_ctx1>::delete_view)
         .function("num_rows", &View<t_ctx1>::num_rows)
@@ -1517,10 +1517,11 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("expand", &View<t_ctx1>::expand)
         .function("collapse", &View<t_ctx1>::collapse)
         .function("set_depth", &View<t_ctx1>::set_depth)
-        .function("schema", &View<t_ctx1>::schema);
+        .function("schema", &View<t_ctx1>::schema)
+        .function("_column_names", &View<t_ctx1>::_column_names);
 
     class_<View<t_ctx2> >("View_ctx2")
-        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
         .smart_ptr<std::shared_ptr<View<t_ctx2> > >("shared_ptr<View_ctx2>")
         .function("delete_view", &View<t_ctx2>::delete_view)
         .function("num_rows", &View<t_ctx2>::num_rows)
@@ -1529,7 +1530,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("expand", &View<t_ctx2>::expand)
         .function("collapse", &View<t_ctx2>::collapse)
         .function("set_depth", &View<t_ctx2>::set_depth)
-        .function("schema", &View<t_ctx2>::schema);
+        .function("schema", &View<t_ctx2>::schema)
+        .function("_column_names", &View<t_ctx2>::_column_names);
         
     /******************************************************************************
      *

@@ -338,7 +338,7 @@ T get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
 template <typename CTX_T>
 std::shared_ptr<View<CTX_T>>
 make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-    std::shared_ptr<t_gnode> gnode, std::string name);
+    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator);
 
 } // end namespace binding
 } // end namespace perspective

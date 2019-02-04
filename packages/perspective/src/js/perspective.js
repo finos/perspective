@@ -10,6 +10,7 @@
 import * as defaults from "./defaults.js";
 import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
+import {extract_map, extract_vector} from "./translator.js";
 import {bindall, get_column_type} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
@@ -231,11 +232,11 @@ export default function(Module) {
 
         this._View = undefined;
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name);
+            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name);
+            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name);
+            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
         }
 
         bindall(this);
@@ -278,38 +279,15 @@ export default function(Module) {
     };
 
     view.prototype._column_names = function(skip_depth = false) {
-        let col_names = [];
-        let aggs = this.ctx.get_column_names();
-        for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
-            let col_name;
-            if (this.sides() === 0) {
-                col_name = aggs.get(key);
-                if (col_name === "psp_okey") {
-                    continue;
-                }
-            } else {
-                let name = aggs.get(key % aggs.size()).name();
-                if (name === "psp_okey") {
-                    continue;
-                }
-                let col_path = this.ctx.unity_get_column_path(key + 1);
-                if (skip_depth && col_path.size() < skip_depth) {
-                    col_path.delete();
-                    continue;
-                }
-                col_name = [];
-                for (let cnix = 0; cnix < col_path.size(); cnix++) {
-                    col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
-                }
-                col_name = col_name.reverse();
-                col_name.push(name);
-                col_name = col_name.join(defaults.COLUMN_SEPARATOR_STRING);
-                col_path.delete();
-            }
-            col_names.push(col_name);
+        let skip = false,
+            depth = 0;
+
+        if (skip_depth !== false) {
+            skip = true;
+            depth = Number(skip_depth);
         }
-        aggs.delete();
-        return col_names;
+
+        return extract_vector(this._View._column_names(skip, depth));
     };
 
     /**
@@ -324,21 +302,13 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
      */
     view.prototype.schema = async function() {
-        let new_schema = {};
-        let _schema = this._View.schema();
-        let _names = _schema.keys();
+        let new_schema = extract_map(this._View.schema());
 
-        for (let i = 0; i < _names.size(); i++) {
-            let col_name = _names.get(i);
-            new_schema[col_name] = _schema.get(col_name);
-
+        for (let name in new_schema) {
             if (this.sides() > 0 && this.config.row_pivot.length > 0) {
-                new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
+                new_schema[name] = map_aggregate_types(name, new_schema[name], this.config.aggregate);
             }
         }
-
-        _schema.delete();
-        _names.delete();
 
         return new_schema;
     };

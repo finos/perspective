@@ -28,7 +28,7 @@ template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
     View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name);
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator);
 
     void delete_view();
 
@@ -42,9 +42,9 @@ public:
     t_index expand(std::int32_t idx);
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
-private:
-    std::vector<std::string> _column_names();
+    
     std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0);
+private:
     std::string map_aggregate_types(std::string name, std::string typestring);
     std::string dtype_to_string(t_dtype type);
     
@@ -53,6 +53,7 @@ private:
     std::int32_t m_nsides;
     std::shared_ptr<t_gnode> m_gnode;
     std::string m_name;
+    std::string m_separator;
 };
 
 /******************************************************************************
@@ -62,12 +63,13 @@ private:
 
 template <typename CTX_T>
 View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name)
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator)
         : m_pool(pool)
         , m_ctx(ctx)
         , m_nsides(sides)
         , m_gnode(gnode)
         , m_name(name)
+        , m_separator(separator)
 {
 }
 
@@ -149,6 +151,17 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     }
 }
 
+ /**
+ * The schema of this View.  A schema is an std::map, the keys of which
+ * are the columns of this View, and the values are their string type names.
+ * If this View is aggregated, theses will be the aggregated types;
+ * otherwise these types will be the same as the columns in the underlying
+ * Table.
+ *
+ * Returns
+ * -------
+ * std::map<std::string, std::string> schema of the View
+ */
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() {
@@ -159,14 +172,14 @@ View<CTX_T>::schema() {
     std::map<std::string, t_dtype> types;
     std::map<std::string, std::string> new_schema;
 
-    for (auto i = 0; i < names.size(); ++i) {
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
         types[names[i]] = _types[i];
     }
 
     auto col_names = _column_names(false);
     for (const std::string& name : col_names) {
         // Pull out the main aggregate column
-        std::size_t last_delimiter = name.find_last_of("|");
+        std::size_t last_delimiter = name.find_last_of(m_separator);
         std::string agg_name = name.substr(last_delimiter + 1);
 
         std::string type_string = dtype_to_string(types[agg_name]);
@@ -176,6 +189,15 @@ View<CTX_T>::schema() {
     return new_schema;
 }
 
+ /**
+ * The schema of this View. Output and logic is as the above
+ * schema(), but this version is specialized for zero-sided
+ * contexts.
+ * 
+ * Returns
+ * -------
+ * std::map<std::string, std::string> schema of the View
+ */
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() {
@@ -185,7 +207,7 @@ View<t_ctx0>::schema() {
 
     std::map<std::string, std::string> new_schema;
 
-    for (auto i = 0; i < names.size(); ++i) {
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
         if (names[i] == "psp_okey") {
             continue;
         }
@@ -195,8 +217,15 @@ View<t_ctx0>::schema() {
     return new_schema;
 }
 
-// PRIVATE
-
+/**
+ * The column names of the View. If the View is aggregated, the
+ * individual column names will be joined with a separator character
+ * specified by the user, or defaulting to "|".
+ * 
+ * Returns
+ * -------
+ * std::vector<std::string> containing all column names
+ */
 template <typename CTX_T>
 std::vector<std::string> 
 View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
@@ -210,8 +239,8 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
         std::stringstream col_name;      
-        std::string name = aggregate_names[key % aggregate_names.size()];;
-        
+        std::string name = aggregate_names[key % aggregate_names.size()];
+
         if (name == "psp_okey") {
             continue;
         }
@@ -221,9 +250,19 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
             continue;
         }
         
-        for (auto cnix = col_path.size(); cnix > 0; --cnix) {
-            col_name << col_path[cnix].to_string();
-            col_name << "|";
+        for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
+            std::string path_name = path->to_string();
+            // ensure that boolean columns are correctly represented
+            if (path->get_dtype() == DTYPE_BOOL) {
+                if (path_name == "0") {
+                    col_name << "false";
+                } else {
+                    col_name << "true";
+                }
+            } else {
+                col_name << path_name;
+            }
+            col_name << m_separator;
         }
 
         col_name << name;
@@ -233,9 +272,17 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
     return names;
 }
 
+/**
+ * The column names of the View. Same as above but 
+ * specialized for zero-sided contexts.
+ * 
+ * Returns
+ * -------
+ * std::vector<std::string> containing all column names
+ */
 template<>
 std::vector<std::string> 
-View<t_ctx0>::_column_names() {
+View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
     std::vector<std::string> names;
     std::vector<std::string> aggregate_names = m_ctx->get_column_names();
 
@@ -253,14 +300,7 @@ View<t_ctx0>::_column_names() {
     return names;
 }
 
-template <typename CTX_T>
-std::string 
-View<CTX_T>::map_aggregate_types(std::string name, std::string typestring) {
-    return "";
-}
-
-
-// FIXME: how many of these do we need - one centralized one?
+// PRIVATE
 template <typename CTX_T>
 std::string
 View<CTX_T>::dtype_to_string(t_dtype type) {
