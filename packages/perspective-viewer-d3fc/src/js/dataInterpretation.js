@@ -39,20 +39,30 @@ export function interpretGroupBys(categories, series) {
 }
 
 export function interpretDataset(isSplitBy, series, groupNames, groupValues, hiddenElements) {
-    if (isSplitBy) {
-        let dataset = interpretStackDataset(series, groupNames, groupValues, hiddenElements);
-        console.log("stacked dataset: ", dataset);
-        return dataset;
-    }
+    let datasets = {};
 
     //simple array of data
-    let dataset = series[0].data.map((mainValue, i) => ({
+    //let datamap = series[0].data.map((mainValue, i) => ({
+    let datamap = series[series.length - 1].data.map((mainValue, i) => ({
         mainValue: mainValue,
         crossValue: groupValues[i]
     }));
 
-    console.log("dataset: ", dataset);
-    return dataset;
+    datasets.datamap = datamap;
+
+    if (!isSplitBy) {
+        datasets.active = datamap;
+        datasets.splitBy = false;
+        console.log("datasets: ", datasets);
+        return datasets;
+    }
+
+    datasets.splitBy = true;
+    let dataset = interpretStackDataset(series, groupNames, groupValues, hiddenElements);
+    datasets.active = dataset;
+    console.log("datasets: ", datasets);
+
+    return datasets;
 }
 
 export function interpretColor(config) {

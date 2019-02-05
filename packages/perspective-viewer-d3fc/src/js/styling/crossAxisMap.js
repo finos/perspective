@@ -1,3 +1,12 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import {LABEL_TICK_PADDING, STANDARD_TICK_LENGTH, HORIZONTAL_STANDARD_TICK_LENGTH, HORIZONTAL_LABEL_TICK_PADDING} from "./chartStyling";
 import {isNullOrUndefined} from "util";
 
@@ -155,10 +164,24 @@ class LevelNode {
     }
 }
 
-// TODO: only handles horizontal for now
 function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
+    // eslint-disable-next-line prettier/prettier
+    console.log(
+        "tickList: ", tickList, 
+        "\ntickIndex: ", tickIndex, 
+        "\nlabelText: ", labelText, 
+        "\nlabelDepth: ", labelDepth);
+
     let tickElement = tickList[tickIndex];
     let tickStroke = tickElement.firstChild;
+
+    // eslint-disable-next-line prettier/prettier
+    console.log(
+        "tickElement: ", tickElement, 
+        "\ntickStroke: ", tickStroke, 
+        "\ntickIndex: ", tickIndex, 
+        "\nlabelText: ", labelText, 
+        "\nlabelDepth: ", labelDepth);
 
     // eslint-disable-next-line prettier/prettier
     let [horizontalOffset, verticalOffset] = horizontal 
@@ -169,6 +192,13 @@ function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth, horizontal
 }
 
 function placeLabelInSpaceBesideTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
+    // eslint-disable-next-line prettier/prettier
+    console.log(
+        "tickList: ", tickList, 
+        "\ntickIndex: ", tickIndex, 
+        "\nlabelText: ", labelText, 
+        "\nlabelDepth: ", labelDepth);
+
     let tickElement = tickList[tickIndex];
     let tickBaseText = tickElement.childNodes[1];
 
