@@ -69,29 +69,29 @@ export default class D3FCChart {
         let groupBys = interpretGroupBys(config.xAxis.categories, series);
 
         const color = interpretColor(config);
-        let dataset = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
+        let datasets = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
 
         let legend = configureLegend(config.legend.enabled, color, hiddenElements, update);
-        let barSeries = configureBarSeries(isSplitBy, orientation, dataset, groupBys);
+        let barSeries = configureBarSeries(isSplitBy, orientation, datasets.active, groupBys);
         let gridlines = configureGrid(horizontal);
-        let [xScale, yScale] = configureScale(isSplitBy, horizontal, dataset, groupBys);
+        let [xScale, yScale] = configureScale(isSplitBy, horizontal, datasets.active, groupBys);
         // groups of svgs we need to render
-        let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, dataset, color, container, labels.crossLabel, labels.splitLabel, labels.mainLabel[0]);
+        let multi = configureMultiSvg(isSplitBy, gridlines, barSeries, datasets.active, color, container, labels.crossLabel, labels.splitLabel, labels.mainLabel[0]);
         let groupedBarData;
 
         if (isMultiColumn) {
-            [dataset, groupedBarData] = interpretMultiColumnDataset(config, hiddenElements);
-            barSeries = configureMultiColumnBarSeries(orientation, color, dataset);
-            [xScale, yScale] = configureScaleMultiColumn(horizontal, dataset, groupedBarData);
+            [datasets.active, groupedBarData] = interpretMultiColumnDataset(config, hiddenElements);
+            barSeries = configureMultiColumnBarSeries(orientation, color, datasets.active);
+            [xScale, yScale] = configureScaleMultiColumn(horizontal, datasets.active, groupedBarData);
             multi = configureMultiSeries(gridlines, barSeries);
         }
 
         let chart = configureChart(xScale, yScale, multi);
 
-        styleChart(chart, horizontal, labels, dataset);
+        styleChart(chart, horizontal, labels, datasets.datamap);
 
         d3.select(container)
-            .datum(dataset)
+            .datum(datasets.active)
             .call(chart);
 
         drawLegend(legend, container, hiddenElements);
