@@ -16,5 +16,6 @@
     "superstore.html/collapses to depth smaller than viewport": "bdd25c1c40781478bd040d5816b887a6",
     "regressions.html/saving a computed column does not interrupt update rendering": "da13afb4284b9c3da21ed57c6ba69301",
     "empty.html/empty grids do not explode": "423ca653bbcbc21a28029c149a37b8ec",
-    "superstore.html/highlights invalid filter.": "e244cca8fc2278cb2477d0a46ab5331f"
+    "superstore.html/highlights invalid filter.": "e244cca8fc2278cb2477d0a46ab5331f",
+    "superstore.html/handles flush().": "a5d1bad309edf83ceef190dd19d867ec"
 }

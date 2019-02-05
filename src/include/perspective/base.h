@@ -16,6 +16,7 @@
 #endif
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
+#include <perspective/exports.h>
 #include <sstream>
 #include <csignal>
 #include <iostream>
@@ -60,14 +61,16 @@ const t_index INVALID_INDEX = -1;
 #define CHAR_BIT 8
 #endif
 
-void psp_abort();
+PERSPECTIVE_EXPORT void psp_abort();
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
-#define GET_PSP_VERBOSE_ASSERT(_1,_2,_3,NAME,...) NAME
+#define _ID(x)                                                                                 \
+    x // https://stackoverflow.com/questions/25144589/c-macro-overloading-is-not-working
+#define GET_PSP_VERBOSE_ASSERT(_1, _2, _3, NAME, ...) NAME
 
 #ifdef PSP_DEBUG
-#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                          \
+#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
     {                                                                                          \
         if (!(COND)) {                                                                         \
             std::stringstream ss;                                                              \
@@ -78,9 +81,9 @@ void psp_abort();
         }                                                                                      \
     }
 
-#define PSP_VERBOSE_ASSERT2(COND, EXPR, MSG)                                                          \
+#define PSP_VERBOSE_ASSERT2(COND, EXPR, MSG)                                                   \
     {                                                                                          \
-        if (!(COND EXPR)) {                                                                         \
+        if (!(COND EXPR)) {                                                                    \
             std::stringstream ss;                                                              \
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
@@ -120,8 +123,16 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_INIT(X)
 #endif
 #else
-#define PSP_VERBOSE_ASSERT1(COND, MSG) { if(!(COND)) psp_abort(); }
-#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG) { if (!(EXPR COND)) psp_abort(); }
+#define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
+    {                                                                                          \
+        if (!(COND))                                                                           \
+            psp_abort();                                                                       \
+    }
+#define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                                   \
+    {                                                                                          \
+        if (!(EXPR COND))                                                                      \
+            psp_abort();                                                                       \
+    }
 #define PSP_COMPLAIN_AND_ABORT(X) psp_abort();
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
@@ -129,7 +140,9 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define LOG_INIT(X)
 #endif
 
-#define PSP_VERBOSE_ASSERT(...) GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(__VA_ARGS__)
+#define PSP_VERBOSE_ASSERT(...)                                                                \
+    _ID(GET_PSP_VERBOSE_ASSERT(__VA_ARGS__, PSP_VERBOSE_ASSERT2, PSP_VERBOSE_ASSERT1)(         \
+        __VA_ARGS__))
 
 // Currently only supporting single ports
 enum t_gnode_processing_mode { NODE_PROCESSING_SIMPLE_DATAFLOW, NODE_PROCESSING_KERNEL };
@@ -405,55 +418,52 @@ psp_to_str(const DATA_T& s) {
 }
 
 template <typename T>
-t_dtype
-type_to_dtype() {
-    return DTYPE_NONE;
-}
+PERSPECTIVE_EXPORT t_dtype type_to_dtype();
 
 template <>
-t_dtype type_to_dtype<std::int64_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::int64_t>();
 
 template <>
-t_dtype type_to_dtype<std::int32_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::int32_t>();
 
 template <>
-t_dtype type_to_dtype<std::int16_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::int16_t>();
 
 template <>
-t_dtype type_to_dtype<std::int8_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::int8_t>();
 
 template <>
-t_dtype type_to_dtype<std::uint64_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::uint64_t>();
 
 template <>
-t_dtype type_to_dtype<std::uint32_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::uint32_t>();
 
 template <>
-t_dtype type_to_dtype<std::uint16_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::uint16_t>();
 
 template <>
-t_dtype type_to_dtype<std::uint8_t>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::uint8_t>();
 
 template <>
-t_dtype type_to_dtype<double>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<double>();
 
 template <>
-t_dtype type_to_dtype<float>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<float>();
 
 template <>
-t_dtype type_to_dtype<bool>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<bool>();
 
 class t_date;
 class t_time;
 
 template <>
-t_dtype type_to_dtype<t_time>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<t_time>();
 
 template <>
-t_dtype type_to_dtype<t_date>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<t_date>();
 
 template <>
-t_dtype type_to_dtype<std::string>();
+PERSPECTIVE_EXPORT t_dtype type_to_dtype<std::string>();
 
 } // end namespace perspective
 

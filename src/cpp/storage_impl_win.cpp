@@ -10,14 +10,10 @@
 #ifdef WIN32
 
 #include <perspective/first.h>
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
-#include <numpy/arrayobject.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
 #include <perspective/storage.h>
 #include <perspective/raii.h>
-#include <perspective/numpy.h>
 #include <perspective/defaults.h>
 #include <perspective/compat.h>
 #include <perspective/utils.h>

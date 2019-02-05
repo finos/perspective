@@ -7,12 +7,12 @@
  *
  */
 
-t_index get_row_count() const;
+perspective::t_index get_row_count() const;
 
-t_index get_column_count() const;
+perspective::t_index get_column_count() const;
 
 std::vector<t_tscalar> get_data(
-    t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
+	t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
 
 void sort_by(const std::vector<t_sortspec>& sortby);
 
@@ -22,7 +22,7 @@ void reset_sortby();
 void notify(const t_table& flattened);
 
 void notify(const t_table& flattened, const t_table& delta, const t_table& prev,
-    const t_table& current, const t_table& transitions, const t_table& existed);
+	const t_table& current, const t_table& transitions, const t_table& existed);
 
 void step_begin();
 
@@ -47,7 +47,7 @@ void set_feature_state(t_ctx_feature feature, bool state);
 std::vector<t_tscalar> get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 std::vector<t_tscalar> get_cell_data(
-    const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
+	const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
 std::vector<t_minmax> get_min_max() const;
 

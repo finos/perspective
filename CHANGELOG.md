@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.14] - 2019-02-04
+### Added
+* [#408](https://github.com/jpmorganchase/perspective/pull/408) Added `flush()` method to `<perspective-viewer>`
+
+### Fixes
+* [#409](https://github.com/jpmorganchase/perspective/pull/409) Fixed `perspective-webpack-plugin` conflicts with external loaders.
+
+## [0.2.13] - 2019-02-04
+### Added
+* [#399](https://github.com/jpmorganchase/perspective/pull/399) New package `perspective-webpack-plugin` for webpack integration
+* [#394](https://github.com/jpmorganchase/perspective/pull/394) Websocket server supports reconnects/heartbeat.
+
+### Fixes
+* [#407](https://github.com/jpmorganchase/perspective/pull/407) Slightly better date parsing.
+* [#403](https://github.com/jpmorganchase/perspective/pull/403) Fixed webpack cross path loading.
+
 ## [0.2.12] - 2019-01-18
 ### Added
 * [#356](https://github.com/jpmorganchase/perspective/pull/356) Perspective for Python!

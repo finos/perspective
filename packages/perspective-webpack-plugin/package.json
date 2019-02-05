@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-webpack-plugin",
-    "version": "0.2.12",
+    "version": "0.2.14",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -11,10 +11,8 @@
         "index.js",
         "babel.config.js"
     ],
-    "scripts": {
-    },
-    "jest": {
-    },
+    "scripts": {},
+    "jest": {},
     "repository": {
         "type": "git",
         "url": "https://github.com/jpmorganchase/perspective"
