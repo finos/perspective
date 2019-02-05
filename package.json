@@ -6,9 +6,9 @@
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.3.1",
+        "@babel/cli": "^7.2.3",
         "babel-eslint": "^8.2.3",
         "babel-jest": "^23.6.0",
-        "@babel/cli": "^7.2.3",
         "chart.js": "^2.7.1",
         "codemirror": "^5.30.0",
         "codemirror-javascript": "^0.2.0",
@@ -16,7 +16,6 @@
         "eslint": "^4.19.1",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
-        "fast-async": "^6.3.8",
         "jest": "^23.6.0",
         "js-beautify": "^1.8.6",
         "lerna": "^2.11.0",

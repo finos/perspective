@@ -38,7 +38,7 @@
         "core-js": "^2.5.7",
         "css-loader": "^0.28.7",
         "extract-text-webpack-plugin": "^3.0.2",
-        "fast-async": "^6.3.8",
+        "fast-async": "7",
         "file-loader": "^2.0.0",
         "html-loader": "^0.5.1",
         "less": "^2.7.2",
