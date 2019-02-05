@@ -45,7 +45,7 @@ function drawChart(chart) {
       crossValues: row_pivots.map(r => ({ name: r, type: tschema[r] })),
       mainValues: aggregates.map(a => ({ name: a.column, type: tschema[a.column] })),
       splitValues: col_pivots.map(r => ({ name: r, type: tschema[r] })),
-      data: json.filter(col => col.__ROW_PATH__.length > 0)
+      data: json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0)
     };
 
     createOrUpdateChart.call(this, el, chart, settings);
