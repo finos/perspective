@@ -48,6 +48,14 @@ function column_to_series(data, sname, gname) {
     return s;
 }
 
+function replace_null(str) {
+    if (str === null) {
+        return "-";
+    } else {
+        return "" + str;
+    }
+}
+
 // Row-based axis generator
 class TreeAxisIterator {
     constructor(depth, json) {
@@ -85,7 +93,7 @@ class TreeAxisIterator {
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);
+                label.categories.push(replace_null(path[path.length - 1]));
                 yield row;
             }
         }
@@ -132,7 +140,7 @@ class ChartAxis {
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);
+                label.categories.push(replace_null(path[path.length - 1]));
                 continue;
             }
         }
@@ -252,11 +260,7 @@ class TickClean {
         if (this.type === "string") {
             if (!(val in this.dict)) {
                 this.dict[val] = Object.keys(this.dict).length;
-                if (val === null) {
-                    this.names.push("-");
-                } else {
-                    this.names.push(val);
-                }
+                this.names.push(replace_null(val));
             }
             return this.dict[val];
         } else if (val === undefined || val === "" || isNaN(val)) {
@@ -583,7 +587,7 @@ class TreeIterator extends TreeAxisIterator {
             if (path.length > 0 && path.length < this.depth) {
                 label = this.add_label(path);
             } else if (path.length >= this.depth) {
-                label.categories.push(path[path.length - 1]);
+                label.categories.push(replace_null(path[path.length - 1]));
             }
             yield row;
         }
