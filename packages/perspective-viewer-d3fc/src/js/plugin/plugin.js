@@ -49,7 +49,6 @@ function drawChart(chart) {
     };
 
     settings.data = cols.__ROW_PATH__ && cols.__ROW_PATH__
-      .filter(col => col.length > 0)
       .map((col, i) => {
         const datum = {};
         row_pivots.forEach((r, j) => {
@@ -59,7 +58,8 @@ function drawChart(chart) {
           datum[key] = cols[key][i]
         });
         return datum;
-      });
+      })
+      .filter(col => col.__ROW_PATH__.length > 0);
 
     createOrUpdateChart.call(this, el, chart, settings);
   }
