@@ -58,6 +58,19 @@ utils.with_server({}, () => {
         {reload_page: false, root: path.join(__dirname, "..", "..")}
     );
 
+    describe.page("null.html", () => {
+        test.capture(
+            "should handle null categories in a pivot",
+            async page => {
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            },
+            {
+                timeout: 60000,
+                wait_for_update: false
+            }
+        );
+    });
+
     describe.page(
         "render_warning.html",
         () => {
