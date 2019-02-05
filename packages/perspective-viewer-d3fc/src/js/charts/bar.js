@@ -6,15 +6,17 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as fc from "d3fc";
+import * as fc from 'd3fc';
 import * as crossAxis from '../axis/crossAxis';
 import * as mainAxis from '../axis/mainAxis';
 import { barSeries, barColours } from '../series/barSeries';
 import { groupAndStackData } from '../series/groupAndStackData';
+import { legend } from '../legend/legend';
 
 function barChart(container, settings) {
   const data = groupAndStackData(settings);
   const colour = barColours(settings);
+  legend(container, settings, colour);
 
   const series = fc.seriesSvgMulti()
     .mapping((data, index) => data[index])
