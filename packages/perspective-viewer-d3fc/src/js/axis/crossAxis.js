@@ -12,7 +12,6 @@ export const scale = settings => d3.scaleBand();
 
 export const domain = settings => settings.data.map(labelFunction(settings));
 
-export const labelFunction = settings =>
-  (d => settings.crossValues.map(v => d[v.name]).join(','));
+export const labelFunction = settings => (d => d.__ROW_PATH__.join(','));
 
 export const label = settings => settings.crossValues.map(v => v.name).join(', ');

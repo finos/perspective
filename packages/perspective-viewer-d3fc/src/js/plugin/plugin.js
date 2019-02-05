@@ -34,32 +34,19 @@ function drawChart(chart) {
     const row_pivots = this._get_view_row_pivots();
     const col_pivots = this._get_view_column_pivots();
     const aggregates = this._get_view_aggregates();
-    const hidden = this._get_view_hidden(aggregates);
+    // const hidden = this._get_view_hidden(aggregates);
 
-    const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
-    const cols = await view.to_columns();
+    const [tschema, json] = await Promise.all([this._table.schema(), view.to_json()]);
     if (task.cancelled) {
         return;
     }
 
     let settings = {
-      crossValues: row_pivots.map(r => ({ name: r, type: schema[r] })),
-      mainValues: aggregates.map(a => ({ name: a.column, type: schema[a.column] })),
-      splitValues: col_pivots.map(r => ({ name: r, type: schema[r] }))
+      crossValues: row_pivots.map(r => ({ name: r, type: tschema[r] })),
+      mainValues: aggregates.map(a => ({ name: a.column, type: tschema[a.column] })),
+      splitValues: col_pivots.map(r => ({ name: r, type: tschema[r] })),
+      data: json.filter(col => col.__ROW_PATH__.length > 0)
     };
-
-    settings.data = cols.__ROW_PATH__ && cols.__ROW_PATH__
-      .map((col, i) => {
-        const datum = {};
-        row_pivots.forEach((r, j) => {
-          datum[r] = col[j];
-        })
-        Object.keys(cols).forEach(key => {
-          datum[key] = cols[key][i]
-        });
-        return datum;
-      })
-      .filter(col => col.__ROW_PATH__.length > 0);
 
     createOrUpdateChart.call(this, el, chart, settings);
   }
