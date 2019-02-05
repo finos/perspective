@@ -21,21 +21,6 @@ function docker(image = "emsdk") {
     return cmd;
 }
 
-// Copy .so in place to perspective package
-try {
-    let cmd1 = "cp `find build -name 'libbinding.so'` python/perspective/table/";
-    let cmd2 = "cp `find build -name 'libpsp.so'` python/perspective/table/";
-    if (process.env.PSP_DOCKER) {
-        execute(docker("python") + ' bash -c "' + cmd1 + '"');
-        execute(docker("python") + ' bash -c "' + cmd2 + '"');
-    } else {
-        execute(cmd1);
-        execute(cmd2);
-    }
-} catch (e) {
-    process.exit(1);
-}
-
 try {
     let cmd = "cd python && python3 -m nose2 -v perspective --with-coverage --coverage=perspective";
     if (process.env.PSP_DOCKER) {
