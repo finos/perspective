@@ -125,3 +125,8 @@ obj
 packages/*/cjs
 cppbuild
 .coverage
+
+# generated
+docs/_build
+docs/modules.rst
+docs/perspective.*.rst

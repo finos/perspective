@@ -51,6 +51,7 @@ option(PSP_CPP_BUILD "Build the C++ Project" OFF)
 option(PSP_CPP_BUILD_TESTS "Build the C++ Tests" OFF)
 option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
+option(PSP_BUILD_DOCS "Build the Perspective documentation" OFF)
 
 
 if (NOT DEFINED PSP_WASM_BUILD)
@@ -128,6 +129,12 @@ if(CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 else()
 	message(WARNING "${Cyan}Building RELEASE${ColorReset}")
 endif()
+
+if(PSP_BUILD_DOCS)
+	message(WARNING "${Cyan}Building Perspective Documentation${ColorReset}")
+else()
+	message(WARNING "${Cyan}Skipping Perspective Documentation${ColorReset}")
+endif()
 #######################
 include_directories("${CMAKE_SOURCE_DIR}/src/include")
 
@@ -179,7 +186,7 @@ if (PSP_WASM_BUILD)
 	set(SYNC_MODE_FLAGS "-s ENVIRONMENT=node -s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
 	set(ASYNC_MODE_FLAGS "-s ENVIRONMENT=worker -s BINARYEN_ASYNC_COMPILATION=1 -s BINARYEN_METHOD='\"native-wasm\"' -s WASM=1")
 	set(ASMJS_MODE_FLAGS "-s ENVIRONMENT=worker -s LEGACY_VM_SUPPORT=1 -s BINARYEN_ASYNC_COMPILATION=0 -s BINARYEN_METHOD='\"asmjs\"' -Wno-almost-asm -s WASM=0")
-else()
+elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	#####################
 	# VANILLA CPP BUILD #
 	#####################
@@ -363,7 +370,7 @@ if (PSP_WASM_BUILD)
 		set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp.asmjs")
 		add_dependencies(perspective.asm perspective.sync)
 	endif()
-else()
+elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .dylib)
 	endif()
@@ -429,3 +436,24 @@ if (PSP_CPP_BUILD_TESTS)
 	)
 endif()
 #############
+
+########
+# Docs #
+########
+if(PSP_BUILD_DOCS)
+	add_custom_target(doxygen)
+	add_custom_command(TARGET doxygen
+	    COMMAND doxygen doxygen.conf
+	    WORKING_DIRECTORY ../docs
+	    COMMENT "Build doxygen xml files used by sphinx/breathe."
+	)
+
+    add_custom_target(docs-html ALL)
+    add_custom_command(TARGET docs-html
+	    COMMAND sphinx-build -b html . _build/html
+        WORKING_DIRECTORY ../docs
+        COMMENT "Build html documentation"
+    	)
+   	add_dependencies(docs-html doxygen)
+endif()
+##########
