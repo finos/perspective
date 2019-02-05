@@ -29,6 +29,8 @@ class D3FCChartElement extends HTMLElement {
     }
 
     resize() {
+      const d3fcGroup = this._container.querySelector("d3fc-group");
+      d3fcGroup.requestRedraw();
     }
 
     remove() {
