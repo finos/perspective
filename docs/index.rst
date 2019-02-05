@@ -15,6 +15,7 @@ Perspective
 
    python
    cpp
+   js
 
 .. |build-status| image:: https://travis-ci.org/jpmorganchase/perspective.svg?branch=master
     :alt: Build Status

@@ -47,11 +47,24 @@ extensions = [
     'sphinx.ext.autodoc',  # autodocument python
     'breathe',  # integrate with doxygen
     'sphinx.ext.napoleon',  # google style docstrings
+    'sphinx_js',  # jsdoc
 ]
 
 breathe_projects = {"perspective": os.path.abspath(os.path.join(os.path.dirname(__file__), '_build', 'xml'))}
 breathe_default_project = "perspective"
 
+js_source_path = [
+  # '../packages/perspective/src/js',
+  # '../packages/perspective/src/js/DataAccessor',
+  '../packages/perspective-viewer/src/js',
+  '../packages/perspective-viewer/src/js/computed_column',
+  '../packages/perspective-viewer/src/js/viewer',
+  # '../packages/perspective-viewer-highcharts/src/js',
+  # '../packages/perspective-viewer-hypergrid/src/js',
+  # '../packages/perspective-webpack-plugin/src/js',
+]
+root_for_relative_js_paths = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+jsdoc_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'jsdoc.conf'))
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -203,8 +216,6 @@ def run_apidoc(_):
                            '-o',
                            o_dir,
                            psp_dir,
-                           '--tocfile',
-                           'python',
                            '--force'])
 
 
