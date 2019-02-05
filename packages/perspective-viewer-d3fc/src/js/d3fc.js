@@ -8,6 +8,7 @@
  */
 
 import {draw, PRIVATE} from "./draw.js";
+import "./plugin/plugin";
 
 function resize() {
     if (this[PRIVATE]) {
