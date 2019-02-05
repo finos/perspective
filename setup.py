@@ -48,7 +48,7 @@ class build_ext(build_ext_orig):
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'python', 'perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + config,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
