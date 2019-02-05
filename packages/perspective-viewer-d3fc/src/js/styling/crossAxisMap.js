@@ -165,23 +165,8 @@ class LevelNode {
 }
 
 function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
-    // eslint-disable-next-line prettier/prettier
-    console.log(
-        "tickList: ", tickList, 
-        "\ntickIndex: ", tickIndex, 
-        "\nlabelText: ", labelText, 
-        "\nlabelDepth: ", labelDepth);
-
     let tickElement = tickList[tickIndex];
     let tickStroke = tickElement.firstChild;
-
-    // eslint-disable-next-line prettier/prettier
-    console.log(
-        "tickElement: ", tickElement, 
-        "\ntickStroke: ", tickStroke, 
-        "\ntickIndex: ", tickIndex, 
-        "\nlabelText: ", labelText, 
-        "\nlabelDepth: ", labelDepth);
 
     // eslint-disable-next-line prettier/prettier
     let [horizontalOffset, verticalOffset] = horizontal 
@@ -192,13 +177,6 @@ function placeLabelOnTick(tickIndex, tickList, labelText, labelDepth, horizontal
 }
 
 function placeLabelInSpaceBesideTick(tickIndex, tickList, labelText, labelDepth, horizontal) {
-    // eslint-disable-next-line prettier/prettier
-    console.log(
-        "tickList: ", tickList, 
-        "\ntickIndex: ", tickIndex, 
-        "\nlabelText: ", labelText, 
-        "\nlabelDepth: ", labelDepth);
-
     let tickElement = tickList[tickIndex];
     let tickBaseText = tickElement.childNodes[1];
 
