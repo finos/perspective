@@ -48,16 +48,18 @@ function drawChart(chart) {
       splitValues: col_pivots.map(r => ({ name: r, type: schema[r] }))
     };
 
-    settings.data = cols.__ROW_PATH__.map((col, i) => {
-      const datum = {};
-      row_pivots.forEach((r, j) => {
-        datum[r] = col[j];
-      })
-      Object.keys(cols).forEach(key => {
-        datum[key] = cols[key][i]
+    settings.data = cols.__ROW_PATH__ && cols.__ROW_PATH__
+      .filter(col => col.length > 0)
+      .map((col, i) => {
+        const datum = {};
+        row_pivots.forEach((r, j) => {
+          datum[r] = col[j];
+        })
+        Object.keys(cols).forEach(key => {
+          datum[key] = cols[key][i]
+        });
+        return datum;
       });
-      return datum;
-    });
 
     createOrUpdateChart.call(this, el, chart, settings);
   }

@@ -42,6 +42,7 @@ function splitData(settings) {
           __BASE_VALUE__: baseValue
         };
         dataPoint[label] = baseValue + (col[key] || 0);
+        dataPoint.key = key;
         baseValues[label] = dataPoint[label];
 
         Object.keys(col).forEach(k => {
@@ -56,24 +57,29 @@ function splitData(settings) {
   return split.map(s => s.series);
 }
 
-function groupBarData(settings, data) {
+function seriesDataFn(settings, data) {
   const labelfn = labelFunction(settings);
 
-  if (settings.mainValues.length > 1) {
-    return settings.mainValues.map(mainValue => {
-      const series = data.map(col => ([
+  return mainValue => {
+    const series = data
+      .filter(col => !!col[mainValue.name])
+      .map(col => ([
         labelfn(col),
         col[mainValue.name],
-        col.__BASE_VALUE__ || 0
+        col.__BASE_VALUE__ || 0,
+        col.key || mainValue.name
       ]));
-      series.key = mainValue.name;
-      return series;
-    });
+    series.key = mainValue.name;
+    return series;
+  };
+}
+
+function groupBarData(settings, data) {
+  const seriesFn = seriesDataFn(settings, data);
+
+  if (settings.mainValues.length > 1) {
+    return settings.mainValues.map(seriesFn);
   } else {
-    return data.map(col => ([
-      labelfn(col),
-      col[settings.mainValues[0].name],
-      col.__BASE_VALUE__ || 0
-    ]));
+    return seriesFn(settings.mainValues[0]);
   }
 }

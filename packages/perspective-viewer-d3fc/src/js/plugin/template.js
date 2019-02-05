@@ -23,7 +23,9 @@ class D3FCChartElement extends HTMLElement {
     render(chart, settings) {
       this.remove();
 
-      chart(d3.select(this._container), settings);
+      if (settings.data) {
+        chart(d3.select(this._container), settings);
+      }
     }
 
     resize() {

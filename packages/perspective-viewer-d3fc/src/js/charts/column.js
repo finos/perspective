@@ -9,16 +9,17 @@
 import * as fc from "d3fc";
 import * as crossAxis from '../axis/crossAxis';
 import * as mainAxis from '../axis/mainAxis';
-import { barSeries } from '../series/barSeries';
+import { barSeries, barColours } from '../series/barSeries';
 import { groupAndStackData } from '../series/groupAndStackData';
 
 function columnChart(container, settings) {
   const data = groupAndStackData(settings);
+  const colour = barColours(settings);
 
   const series = fc.seriesSvgMulti()
     .mapping((data, index) => data[index])
     .series(data.map(() =>
-      barSeries(settings).align('left').orient('vertical')
+      barSeries(settings, colour).align('left').orient('vertical')
     ));
 
   const chart = fc.chartSvgCartesian(
