@@ -14,6 +14,8 @@ export const STANDARD_TICK_LENGTH = 9; // 9 // TODO: make this 16 - that is righ
 export const HORIZONTAL_STANDARD_TICK_LENGTH = -STANDARD_TICK_LENGTH * 2;
 export const HORIZONTAL_LABEL_TICK_PADDING = -LABEL_TICK_PADDING;
 
+const NBSP = "\xa0";
+
 // STYLE CHART
 export function styleChart(chart, horizontal, labels, dataset) {
     let [crossDecorate, mainDecorate, crossLabel, mainLabel] = horizontal
@@ -24,7 +26,7 @@ export function styleChart(chart, horizontal, labels, dataset) {
         return horizontal ? `translate(${parallelToAxis}, ${perpendicularToAxis})` : `translate(${perpendicularToAxis}, ${parallelToAxis})`;
     }
 
-    mainLabel(labels.mainLabel.join(", "));
+    mainLabel(labels.mainLabel.join(`,${NBSP}`));
     //crossLabel(labels.crossLabel); // not enabled.
 
     let textDistanceFromXAxis = STANDARD_TICK_LENGTH + LABEL_TICK_PADDING; // TODO: make this standard vertical tick length, or make it somehow calculated.

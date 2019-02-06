@@ -22,8 +22,6 @@ import {
 import {interpretLabels, interpretGroupBys, interpretDataset, interpretColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
 import {styleChart} from "./styling/chartStyling";
 
-const nbsp = "\xa0";
-
 export default class D3FCChart {
     constructor(mode, config, container) {
         this._mode = mode;
