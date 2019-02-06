@@ -16,14 +16,14 @@ export function barSeries(settings, colour) {
 
   if (colour) {
     series = series.decorate((selection) => {
-      selection.style('fill', d => colour(d[3]));
+      selection.style('fill', d => colour(d.key));
     });
   }
 
   return fc.autoBandwidth(series)
-      .crossValue(d => d[0])
-      .mainValue(d => d[1])
-      .baseValue(d => d[2]);
+      .crossValue(d => d.crossValue)
+      .mainValue(d => d.mainValue)
+      .baseValue(d => d.baseValue);
 }
 
 export function barColours(settings) {

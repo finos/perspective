@@ -13,12 +13,12 @@ export const scale = settings => d3.scaleLinear();
 
 export const domain = (settings, data) => {
     const accessors = (settings.mainValues.length > 1)
-        ? settings.mainValues.map((m, i) => (d => d.reduce((max, v) => Math.max(max, v[1]), 0)))
-        : [d => d[1]];
+        ? settings.mainValues.map((m, i) => (d => d.reduce((max, v) => Math.max(max, v.mainValue), 0)))
+        : [d => d.mainValue];
     
     return fc.extentLinear()
         .include([0])
-        .pad([0, 0.5])
+        .pad([0, 0.1])
         .accessors(accessors)
         (data[data.length -1]);
     }

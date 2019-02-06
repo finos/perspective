@@ -10,51 +10,52 @@ import { labelFunction } from '../axis/crossAxis';
 
 export function groupAndStackData(settings) {
   if (settings.splitValues.length > 0) {
-    const split = splitData(settings);
+    const split = splitIntoMultiSeries(settings);
     return split.map(data => groupBarData(settings, data));
   }
   return [groupBarData(settings, settings.data)];
 }
 
-function splitData(settings) {
-  const split = [];
-  const getOrCreateSplitSeries = label => {
-    const existing = split.find(s => s.label === label);
-    if (existing)
-      return existing.series;
-    split.push({ label, series: [] });
-    return split[split.length - 1].series;
-  };
-
-  const isSplitValue = k => k !== '__ROW_PATH__' && !settings.crossValues.find(v => v.name === k);
+function splitIntoMultiSeries(settings) {
+  // Create a series for each "split" value, each one containing all the "aggregate" values,
+  // and "base" values to offset it from the previous series
+  const multiSeries = {};
 
   settings.data.forEach(col => {
+    // Split this column by "split", including multiple aggregates for each
     const baseValues = {};
+    const split = {};
 
-    Object.keys(col).forEach(key => {
-      if (isSplitValue(key)) {
-        const series = getOrCreateSplitSeries(key);
+    // Keys are of the form "split1|split2|aggregate"
+    Object.keys(col)
+      .filter(key => key !== '__ROW_PATH__')
+      .forEach(key => {
         const labels = key.split('|');
+        // label="aggregate"
         const label = labels[labels.length - 1];
-        let baseValue = baseValues[label] || 0;
+        // splitName="split1|split2"
+        const splitName = labels.slice(0, labels.length - 1).join('|');
 
-        const dataPoint = {
-          __BASE_VALUE__: baseValue
-        };
-        dataPoint[label] = baseValue + (col[key] || 0);
-        dataPoint.key = key;
-        baseValues[label] = dataPoint[label];
+        // Combine aggregate values for the same split in a single object
+        const splitValues = split[splitName] = (split[splitName] || { __ROW_PATH__: col.__ROW_PATH__ });
+        const baseValue = baseValues[label] || 0;
 
-        Object.keys(col).forEach(k => {
-          if (!isSplitValue(k)) dataPoint[k] = col[k];
-        });
+        // Assign the values for this split/aggregate
+        splitValues[label] = baseValue + (col[key] || 0);
+        splitValues[`__BASE_VALUE__${label}`] = baseValue;
+        splitValues.__KEY__ = splitName;
 
-        series.push(dataPoint)
-      }
-    });
+        baseValues[label] = splitValues[label];
+      });
+
+      // Push each object onto the correct series
+      Object.keys(split).forEach(splitName => {
+        const series = multiSeries[splitName] = (multiSeries[splitName] || []);
+        series.push(split[splitName]);
+      });
   });
 
-  return split.map(s => s.series);
+  return Object.keys(multiSeries).map(k => multiSeries[k]);
 }
 
 function seriesDataFn(settings, data) {
@@ -63,18 +64,19 @@ function seriesDataFn(settings, data) {
   return mainValue => {
     const series = data
       .filter(col => !!col[mainValue.name])
-      .map(col => ([
-        labelfn(col),
-        col[mainValue.name],
-        col.__BASE_VALUE__ || 0,
-        col.key || mainValue.name
-      ]));
+      .map(col => ({
+        crossValue: labelfn(col),
+        mainValue: col[mainValue.name],
+        baseValue: col[`__BASE_VALUE__${mainValue.name}`] || 0,
+        key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
+      }));
     series.key = mainValue.name;
     return series;
   };
 }
 
 function groupBarData(settings, data) {
+  // Split data into a group for each aggregate (mainValue)
   const seriesFn = seriesDataFn(settings, data);
 
   if (settings.mainValues.length > 1) {
