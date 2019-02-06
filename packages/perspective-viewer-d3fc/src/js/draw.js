@@ -10,10 +10,9 @@
 import style from "../less/d3fc.less";
 import template from "../html/d3fc.html";
 
-import {make_tree_data, make_y_data, make_xy_data, make_xyz_data, make_xy_column_data} from "./series.js";
-import {set_boost, set_category_axis, set_both_axis, default_config, set_tick_size} from "./config.js";
+import {make_y_data} from "./series.js";
+import {set_category_axis, default_config} from "./config.js";
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
-import {detectIE} from "@jpmorganchase/perspective/src/js/utils";
 import D3FCChart from "./d3fcChart";
 
 export const PRIVATE = Symbol("D3FC private");
@@ -74,8 +73,8 @@ export const draw = mode =>
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 
-        const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
-        let js, element;
+        const [schema] = await Promise.all([view.schema(), this._table.schema()]);
+        let element;
 
         if (task.cancelled) {
             return;
@@ -124,7 +123,7 @@ class D3FCElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector("#container");
     }
 
-    render(mode, configs, callee) {
+    render(mode, configs) {
         if (this._charts.length > 0) {
             // Update charts
             this._charts.forEach((chart, i) => {
@@ -160,9 +159,6 @@ class D3FCElement extends HTMLElement {
     }
 
     delete() {
-        //doesn't appear to require that anything be destroyed to prevent memory leaks. Pending further investigation.
-        for (let chart of this._charts) {
-        }
         this.remove();
     }
 }

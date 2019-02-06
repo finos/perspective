@@ -95,42 +95,27 @@ export function set_category_axis(config, axis, type, top) {
 
 export function default_config(aggregates, mode) {
     let type = "scatter";
-    let hover_type = "xy";
     if (mode === "y_line") {
-        hover_type = "y";
         type = "line";
     } else if (mode === "y_area") {
-        hover_type = "y";
         type = "area";
     } else if (mode === "y_scatter") {
-        hover_type = "y";
         type = "scatter";
     } else if (mode.indexOf("bar") > -1) {
-        hover_type = "y";
         type = "column";
     } else if (mode == "treemap") {
-        hover_type = "hierarchy";
         type = "treemap";
     } else if (mode == "sunburst") {
-        hover_type = "hierarchy";
         type = "sunburst";
     } else if (mode === "scatter") {
-        hover_type = "xy";
         if (aggregates.length <= 3) {
             type = "scatter";
         } else {
             type = "bubble";
         }
     } else if (mode === "heatmap") {
-        hover_type = "xyz";
         type = "heatmap";
     }
-
-    const that = this,
-        config = that._view._config;
-
-    const axis_titles = get_axis_titles(config.aggregate);
-    const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
 
     return {
         chart: {
@@ -217,22 +202,5 @@ export function default_config(aggregates, mode) {
                 }
             }
         }
-    };
-}
-
-function get_axis_titles(aggs) {
-    let titles = [];
-
-    for (let i = 0; i < aggs.length; i++) {
-        let axis_title = aggs[i].column;
-        titles.push(axis_title);
-    }
-    return titles;
-}
-
-function get_pivot_titles(row_pivots, column_pivots) {
-    return {
-        row: row_pivots,
-        column: column_pivots
     };
 }
