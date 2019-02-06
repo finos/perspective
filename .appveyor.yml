@@ -2,11 +2,11 @@ max_jobs: 8
 
 image: 
   - Visual Studio 2015
-  - Visual Studio 2017
+  # - Visual Studio 2017
 
 configuration:
   - Release
-  - Debug
+  # - Debug
 
 platform:
   - x64
