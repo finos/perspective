@@ -18,16 +18,13 @@ const NBSP = "\xa0";
 
 // STYLE CHART
 export function styleChart(chart, horizontal, labels, dataset) {
-    let [crossDecorate, mainDecorate, crossLabel, mainLabel] = horizontal
-        ? [chart.yDecorate, chart.xDecorate, chart.yLabel, chart.xLabel]
-        : [chart.xDecorate, chart.yDecorate, chart.xLabel, chart.yLabel];
+    let [crossDecorate, mainDecorate, mainLabel] = horizontal ? [chart.yDecorate, chart.xDecorate, chart.xLabel] : [chart.xDecorate, chart.yDecorate, chart.yLabel];
 
     function translate(perpendicularToAxis, parallelToAxis) {
         return horizontal ? `translate(${parallelToAxis}, ${perpendicularToAxis})` : `translate(${perpendicularToAxis}, ${parallelToAxis})`;
     }
 
     mainLabel(labels.mainLabel.join(`,${NBSP}`));
-    //crossLabel(labels.crossLabel); // not enabled.
 
     let textDistanceFromXAxis = STANDARD_TICK_LENGTH + LABEL_TICK_PADDING; // TODO: make this standard vertical tick length, or make it somehow calculated.
     let textDistanceFromYAxis = HORIZONTAL_STANDARD_TICK_LENGTH + HORIZONTAL_LABEL_TICK_PADDING; // -18; //TODO: need to make this reactive to text length.
