@@ -27,18 +27,18 @@ export function interpretLabels(config) {
     return labels;
 }
 
-export function interpretGroupBys(categories) {
+export function interpretGroupBys(categories, series) {
     let flatmap = [];
 
     if (categories.length === 0) {
-        return flatmap;
+        return [...Array(series[0].data.length)].map((_, i) => i);
     }
 
     flattenAllArrays(flatmap, categories.map(subCat => flattenGroupBy(subCat, [])));
     return flatmap;
 }
 
-export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
+export function interpretDataset(isSplitBy, series, groupNames, groupValues, hiddenElements) {
     if (isSplitBy) {
         let dataset = interpretStackDataset(series, groupNames, groupValues, hiddenElements);
         console.log("stacked dataset: ", dataset);
@@ -48,7 +48,7 @@ export function interpretDataset(isSplitBy, series, groupBys, hiddenElements) {
     //simple array of data
     let dataset = series[0].data.map((mainValue, i) => ({
         mainValue: mainValue,
-        crossValue: interpretCrossValue(i, groupBys)
+        crossValue: groupValues[i]
     }));
 
     console.log("dataset: ", dataset);
@@ -96,19 +96,17 @@ export function interpretIsMultiColumn(config) {
 
 function interpretStackDataset(series, groupNames, groupValues, hiddenElements) {
     //Convert data to Stacked Bar Chart Format
-    let keys = groupBys.length > 0 ? groupBys : [...Array(series[0].data.length)].map((_, i) => i);
-
-    let stackedBarData = keys.map((group, i) => {
-        let row = {group};
+    let stackedBarData = groupValues.map((group, i) => {
+        let row = {};
         series
             .filter(d => !hiddenElements.includes(d.name))
             .forEach(split => {
-                row[split.name] = split.data[i] || 0;
+                row[split.name] = split.data[i];
             });
         return row;
     });
 
-    let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => r !== "group"));
+    let stack = d3.stack().keys(Object.keys(stackedBarData[0]).filter(r => !groupNames.includes(r)));
     let dataset = stack(stackedBarData);
     return dataset;
 }

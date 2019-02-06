@@ -21,6 +21,8 @@ import {
 } from "./chartConfig";
 import {interpretLabels, interpretGroupBys, interpretDataset, interpretColor, interpretMultiColumnDataset, interpretIsMultiColumn} from "./dataInterpretation";
 
+const nbsp = "\xa0";
+
 export default class D3FCChart {
     constructor(mode, config, container) {
         this._mode = mode;
@@ -62,8 +64,8 @@ export default class D3FCChart {
         let isSplitBy = labels.splitLabel.length !== 0;
         const isMultiColumn = interpretIsMultiColumn(config);
 
-        let groupBys = interpretGroupBys(config.xAxis.categories);
         let series = config.series;
+        let groupBys = interpretGroupBys(config.xAxis.categories, series);
 
         const color = interpretColor(config);
         let dataset = interpretDataset(isSplitBy, series, labels.crossLabel, groupBys, hiddenElements);
@@ -154,7 +156,7 @@ function styleChart(chart, horizontal, labels) {
         return horizontal ? `translate(${parallelToAxis}, ${perpendicularToAxis})` : `translate(${perpendicularToAxis}, ${parallelToAxis})`;
     }
 
-    mainLabel(labels.mainLabel.join(", "));
+    mainLabel(labels.mainLabel.join(`,${nbsp}`));
     //crossLabel(labels.crossLabel); // not enabled.
 
     let textDistanceFromXAxis = 9;
