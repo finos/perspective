@@ -8,7 +8,7 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/View.h>
+#include <perspective/view.h>
 #include <sstream>
 
 namespace perspective {

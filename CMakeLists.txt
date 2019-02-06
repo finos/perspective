@@ -325,7 +325,7 @@ set (SOURCE_FILES
 	src/cpp/tree_context_common.cpp
 	src/cpp/utils.cpp
 	src/cpp/update_task.cpp
-	src/cpp/View.cpp
+	src/cpp/view.cpp
 	src/cpp/vocab.cpp
 	)
 

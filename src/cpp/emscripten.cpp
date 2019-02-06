@@ -16,7 +16,7 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
-#include <perspective/View.h>
+#include <perspective/view.h>
 #include <random>
 #include <cmath>
 #include <sstream>
