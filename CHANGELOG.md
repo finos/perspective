@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.15] - 2019-02-07
+### Fixes
+* [#416](https://github.com/jpmorganchase/perspective/pull/416) Fixed highcharts bug which caused `null` groups to not render.
+* [#419](https://github.com/jpmorganchase/perspective/pull/419) Fixed regression in cross-origin loading.
+* [#421](https://github.com/jpmorganchase/perspective/pull/421) Fixed JSON/CSV loading when columns contain mixed numeric/string values.
+
 ## [0.2.14] - 2019-02-04
 ### Added
 * [#408](https://github.com/jpmorganchase/perspective/pull/408) Added `flush()` method to `<perspective-viewer>`
