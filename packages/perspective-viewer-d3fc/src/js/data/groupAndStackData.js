@@ -33,19 +33,21 @@ function splitIntoMultiSeries(settings) {
         const labels = key.split('|');
         // label="aggregate"
         const label = labels[labels.length - 1];
+        const value = (col[key] || 0);
+        const baseKey = `${label}${value >= 0 ? '+ve' : '-ve'}`;
         // splitName="split1|split2"
         const splitName = labels.slice(0, labels.length - 1).join('|');
 
         // Combine aggregate values for the same split in a single object
         const splitValues = split[splitName] = (split[splitName] || { __ROW_PATH__: col.__ROW_PATH__ });
-        const baseValue = baseValues[label] || 0;
+        const baseValue = baseValues[baseKey] || 0;
 
         // Assign the values for this split/aggregate
-        splitValues[label] = baseValue + (col[key] || 0);
+        splitValues[label] = baseValue + value;
         splitValues[`__BASE_VALUE__${label}`] = baseValue;
         splitValues.__KEY__ = splitName;
 
-        baseValues[label] = splitValues[label];
+        baseValues[baseKey] = splitValues[label];
       });
 
       // Push each object onto the correct series

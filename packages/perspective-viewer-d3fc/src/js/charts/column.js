@@ -10,7 +10,7 @@ import * as fc from 'd3fc';
 import * as crossAxis from '../axis/crossAxis';
 import * as mainAxis from '../axis/mainAxis';
 import { barSeries, barColours } from '../series/barSeries';
-import { groupAndStackData } from '../series/groupAndStackData';
+import { groupAndStackData } from '../data/groupAndStackData';
 import { legend } from '../legend/legend';
 
 function columnChart(container, settings) {
