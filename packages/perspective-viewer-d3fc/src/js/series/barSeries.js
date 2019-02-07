@@ -27,9 +27,7 @@ export function barSeries(settings, colour) {
 }
 
 export function barColours(settings) {
-  const isSplitValue = k => k !== '__ROW_PATH__' && !settings.crossValues.find(v => v.name === k);
-
   const col = (settings.data && settings.data.length > 0) ? settings.data[0] : {};
-  const domain = Object.keys(col).filter(isSplitValue);
+  const domain = Object.keys(col).filter(k => k !== '__ROW_PATH__');
   return (domain.length > 1) ? d3.scaleOrdinal(d3.schemeCategory10).domain(domain) : null;
 }
