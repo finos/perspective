@@ -7,7 +7,9 @@
 #
 import os
 import os.path
+import fnmatch
 import pathlib
+from shutil import copy
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext as build_ext_orig
 from codecs import open
@@ -46,7 +48,7 @@ class build_ext(build_ext_orig):
         # example of cmake args
         config = 'Debug' if self.debug else 'Release'
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'python', 'perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir.parent.absolute(), 'perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + config,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
@@ -65,6 +67,14 @@ class build_ext(build_ext_orig):
         if not self.dry_run:
             self.spawn(['cmake', '--build', '.', ] + build_args)
         os.chdir(str(cwd))
+
+        def find(pattern, path):
+            for root, dirs, files in os.walk(path):
+                for name in files:
+                    if fnmatch.fnmatch(name, pattern):
+                        return os.path.join(root, name)
+        copy(find('libbinding.*', 'build'), 'python/perspective/table')
+        copy(find('libpsp.*', 'build'), 'python/perspective/table')
 
 
 setup(
