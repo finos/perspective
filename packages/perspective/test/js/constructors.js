@@ -498,6 +498,58 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it.skip("Handles inconsistent rows with same width", async function() {
+            const int_to_float = [{x: 1, y: 2}, {y: 2, z: 3}];
+            var table = perspective.table(int_to_float);
+            var view = table.view();
+            var json = await view.to_json();
+            expect(json).toEqual([{x: 1, y: 2, z: null}, {x: null, y: 2, z: 3}]);
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("Handles inconsistent rows", async function() {
+            const int_to_float = [{x: 1}, {y: 2, z: 3}];
+            var table = perspective.table(int_to_float);
+            var schema = await table.schema();
+            expect(schema).toEqual({x: "integer", y: "integer", z: "integer"});
+            var view = table.view();
+            var json = await view.to_json();
+            expect(json).toEqual([{x: 1, y: null, z: null}, {x: null, y: 2, z: 3}]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Upgrades integer columns to strings", async function() {
+            const int_to_float = {
+                a: [1, 2, 3, "x", "y"]
+            };
+
+            var table = perspective.table(int_to_float);
+            var schema_1 = await table.schema();
+            expect(schema_1["a"]).toEqual("string");
+            var view = table.view();
+            var json = await view.to_json();
+            expect(json).toEqual([{a: "1"}, {a: "2"}, {a: "3"}, {a: "x"}, {a: "y"}]);
+            view.delete();
+            table.delete();
+        });
+
+        it("Upgrades integer columns with values beyond max/min_int to float", async function() {
+            const int_to_float = {
+                a: [1, 2, 3, 2147483667, 5]
+            };
+
+            var table = perspective.table(int_to_float);
+            var view = table.view();
+            var json = await view.to_columns();
+            expect(json).toEqual(int_to_float);
+            var schema_2 = await table.schema();
+            expect(schema_2["a"]).toEqual("float");
+            view.delete();
+            table.delete();
+        });
+
         // This currently won't work, and I'm unclear we want it to - upgrading
         // ths column in place is easy, but once the gnode and potentially
         // contexts have been created, this becomes much more difficult.
