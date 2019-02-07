@@ -43,6 +43,7 @@
         "html-loader": "^0.5.1",
         "less": "^2.7.2",
         "less-loader": "^4.0.5",
+        "source-map-loader": "^0.2.4",
         "style-loader": "^0.18.2",
         "tslib": "^1.9.3",
         "worker-loader": "^2.0.0"
