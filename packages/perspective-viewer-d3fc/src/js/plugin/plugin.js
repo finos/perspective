@@ -33,22 +33,36 @@ function drawChart(chart) {
         const row_pivots = this._get_view_row_pivots();
         const col_pivots = this._get_view_column_pivots();
         const aggregates = this._get_view_aggregates();
-        // const hidden = this._get_view_hidden(aggregates);
+        const hidden = this._get_view_hidden(aggregates);
 
         const [tschema, json] = await Promise.all([this._table.schema(), view.to_json()]);
         if (task.cancelled) {
             return;
         }
 
+        const data = json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0).map(col => removeHiddenData(col, hidden));
+
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: aggregates.map(a => ({name: a.column, type: tschema[a.column]})),
             splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
-            data: json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0)
+            data
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
     };
+}
+
+function removeHiddenData(col, hidden) {
+    if (hidden && hidden.length > 0) {
+        Object.keys(col).forEach(key => {
+            const labels = key.split("|");
+            if (hidden.includes(labels[labels.length - 1])) {
+                delete col[key];
+            }
+        });
+        return col;
+    }
 }
 
 function createOrUpdateChart(div, chart, settings) {
