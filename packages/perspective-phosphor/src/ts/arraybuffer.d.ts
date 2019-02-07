@@ -7,19 +7,5 @@
  *
  */
 
-perspective-viewer.jp-PSPViewer {
-    display: block;
-    height: 95%;
-}
-
-div.jp-PSPContainer {
-    overflow: auto;
-    resize: both;
-    padding-right: 20px;
-    padding-bottom: 20px;
-    height: 450px;
-}
-
-div.jp-PSPContainer {
-    @import "../../../perspective-viewer/build/material.css";
-}
+declare module 'arraybuffer-loader!*';
+declare module 'file-worker-loader?inline=true!*';
