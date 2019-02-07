@@ -7,11 +7,8 @@
  *
  */
 
-import barChart from './bar';
-import columnChart from './column';
+import barChart from "./bar";
+import columnChart from "./column";
 
-const chartClasses = [
-  barChart,
-  columnChart
-];
+const chartClasses = [barChart, columnChart];
 export default chartClasses;

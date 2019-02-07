@@ -15,34 +15,33 @@ import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
 
 @bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
 class D3FCChartElement extends HTMLElement {
-
-  connectedCallback() {
+    connectedCallback() {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
     }
 
     render(chart, settings) {
-      this.remove();
+        this.remove();
 
-      this._chart = chart;
-      this._settings = settings;
-      this.draw();
+        this._chart = chart;
+        this._settings = settings;
+        this.draw();
     }
 
     draw() {
-      if (this._settings.data) {
-        this._chart(d3.select(this._container), this._settings);
-      }
+        if (this._settings.data) {
+            this._chart(d3.select(this._container), this._settings);
+        }
     }
 
     resize() {
-      const d3fcGroup = this._container.querySelector("d3fc-group");
-      d3fcGroup.requestRedraw();
+        const d3fcGroup = this._container.querySelector("d3fc-group");
+        d3fcGroup.requestRedraw();
     }
 
     remove() {
-      this._container.innerHTML = "";
+        this._container.innerHTML = "";
     }
 
     delete() {
