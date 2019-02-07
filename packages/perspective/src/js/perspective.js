@@ -10,6 +10,7 @@
 import * as defaults from "./defaults.js";
 import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
+import {extract_map, extract_vector} from "./translator.js";
 import {bindall, get_column_type} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/type";
@@ -228,6 +229,16 @@ export default function(Module) {
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
+
+        this._View = undefined;
+        if (sides === 0) {
+            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+        } else if (sides === 1) {
+            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+        } else if (sides === 2) {
+            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+        }
+
         bindall(this);
     }
 
@@ -237,8 +248,10 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
-        this.pool.unregister_context(this.gnode.get_id(), this.name);
+        this._View.delete_view();
+        this._View.delete();
         this.ctx.delete();
+
         this.table.views.splice(this.table.views.indexOf(this), 1);
         this.table = undefined;
         let i = 0,
@@ -266,38 +279,15 @@ export default function(Module) {
     };
 
     view.prototype._column_names = function(skip_depth = false) {
-        let col_names = [];
-        let aggs = this.ctx.get_column_names();
-        for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
-            let col_name;
-            if (this.sides() === 0) {
-                col_name = aggs.get(key);
-                if (col_name === "psp_okey") {
-                    continue;
-                }
-            } else {
-                let name = aggs.get(key % aggs.size()).name();
-                if (name === "psp_okey") {
-                    continue;
-                }
-                let col_path = this.ctx.unity_get_column_path(key + 1);
-                if (skip_depth && col_path.size() < skip_depth) {
-                    col_path.delete();
-                    continue;
-                }
-                col_name = [];
-                for (let cnix = 0; cnix < col_path.size(); cnix++) {
-                    col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
-                }
-                col_name = col_name.reverse();
-                col_name.push(name);
-                col_name = col_name.join(defaults.COLUMN_SEPARATOR_STRING);
-                col_path.delete();
-            }
-            col_names.push(col_name);
+        let skip = false,
+            depth = 0;
+
+        if (skip_depth !== false) {
+            skip = true;
+            depth = Number(skip_depth);
         }
-        aggs.delete();
-        return col_names;
+
+        return extract_vector(this._View._column_names(skip, depth));
     };
 
     /**
@@ -312,41 +302,13 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
      */
     view.prototype.schema = async function() {
-        // get type mapping
-        let schema = this.gnode.get_tblschema();
-        let _types = schema.types();
-        let names = schema.columns();
-        schema.delete();
+        let new_schema = extract_map(this._View.schema());
 
-        let types = {};
-        for (let i = 0; i < names.size(); i++) {
-            types[names.get(i)] = _types.get(i).value;
-        }
-        let new_schema = {};
-        let col_names = this._column_names();
-        for (let col_name of col_names) {
-            col_name = col_name.split(defaults.COLUMN_SEPARATOR_STRING);
-            col_name = col_name[col_name.length - 1];
-            if (types[col_name] === 1 || types[col_name] === 2) {
-                new_schema[col_name] = "integer";
-            } else if (types[col_name] === 19) {
-                new_schema[col_name] = "string";
-            } else if (types[col_name] === 9 || types[col_name] === 10) {
-                new_schema[col_name] = "float";
-            } else if (types[col_name] === 11) {
-                new_schema[col_name] = "boolean";
-            } else if (types[col_name] === 12) {
-                new_schema[col_name] = "datetime";
-            } else if (types[col_name] === 13) {
-                new_schema[col_name] = "date";
-            }
+        for (let name in new_schema) {
             if (this.sides() > 0 && this.config.row_pivot.length > 0) {
-                new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
+                new_schema[name] = map_aggregate_types(name, new_schema[name], this.config.aggregate);
             }
         }
-
-        _types.delete();
-        names.delete();
 
         return new_schema;
     };
@@ -571,7 +533,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated rows.
      */
     view.prototype.num_rows = async function() {
-        return this.ctx.get_row_count();
+        return this._View.num_rows();
     };
 
     /**
@@ -584,7 +546,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated columns.
      */
     view.prototype.num_columns = async function() {
-        return this.ctx.unity_get_column_count();
+        return this._View.num_columns();
     };
 
     /**
@@ -595,7 +557,7 @@ export default function(Module) {
      * @returns {Promise<bool>} Whether this row is expanded.
      */
     view.prototype.get_row_expanded = async function(idx) {
-        return this.ctx.unity_get_row_expanded(idx);
+        return this._View.get_row_expanded(idx);
     };
 
     /**
@@ -606,11 +568,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
-            return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
-        } else if (this.nsides < 2) {
-            return this.ctx.open(idx);
-        }
+        return this._View.expand(idx);
     };
 
     /**
@@ -621,11 +579,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.collapse = async function(idx) {
-        if (this.nsides === 2) {
-            return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
-        } else {
-            return this.ctx.close(idx);
-        }
+        return this._View.collapse(idx);
     };
 
     /**
@@ -633,15 +587,7 @@ export default function(Module) {
      *
      */
     view.prototype.set_depth = async function(depth) {
-        if (this.config.row_pivot.length >= depth) {
-            if (this.nsides === 2) {
-                return this.ctx.set_depth(__MODULE__.t_header.HEADER_ROW, depth);
-            } else {
-                return this.ctx.set_depth(depth);
-            }
-        } else {
-            console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
-        }
+        return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
     /**

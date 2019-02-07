@@ -699,7 +699,6 @@ t_tscalar::to_string(bool for_expr) const {
             if (for_expr) {
                 ss << "'";
             }
-
             return ss.str();
         } break;
         default: { PSP_COMPLAIN_AND_ABORT("Unrecognized dtype"); }

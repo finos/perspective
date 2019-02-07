@@ -679,6 +679,15 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("Handles utf16 column names", async function() {
+            var table = perspective.table({š: [1, 2, 3]});
+            let view = table.view({});
+            let result = await view.schema();
+            expect(result).toEqual({š: "integer"});
+            view.delete();
+            table.delete();
+        });
+
         it("Handles utf16", async function() {
             var table = perspective.table(data_6);
             let view = table.view({});

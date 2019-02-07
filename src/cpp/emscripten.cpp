@@ -16,6 +16,7 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <perspective/view.h>
 #include <random>
 #include <cmath>
 #include <sstream>
@@ -1288,6 +1289,24 @@ clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, val computed) {
 }
 
 /**
+ * Creates a new View.
+ *
+ * Params
+ * ------
+ *
+ * Returns
+ * -------
+ * A shared pointer to a View<CTX_T>.
+ */
+template <typename CTX_T>
+std::shared_ptr<View<CTX_T>>
+make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator) {
+            auto view_ptr = std::make_shared<View<CTX_T>>(pool, ctx, sides, gnode, name, separator);
+            return view_ptr;
+}
+
+/**
  *
  *
  * Params
@@ -1448,10 +1467,8 @@ val get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
     return arr;
 }
 
-}
-}
-
-
+} // end namespace binding
+} // end namespace perspective
 
 using namespace perspective::binding;
 
@@ -1486,6 +1503,48 @@ main(int argc, char** argv) {
  */
 
 EMSCRIPTEN_BINDINGS(perspective) {
+    /******************************************************************************
+     *
+     * View
+     */
+    // Bind a View for each context type
+    
+    class_<View<t_ctx0> >("View_ctx0")
+        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
+        .smart_ptr<std::shared_ptr<View<t_ctx0> > >("shared_ptr<View_ctx0>")
+        .function("delete_view", &View<t_ctx0>::delete_view)
+        .function("num_rows", &View<t_ctx0>::num_rows)
+        .function("num_columns", &View<t_ctx0>::num_columns)
+        .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
+        .function("schema", &View<t_ctx0>::schema)
+        .function("_column_names", &View<t_ctx0>::_column_names);
+        
+    class_<View<t_ctx1> >("View_ctx1")
+        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
+        .smart_ptr<std::shared_ptr<View<t_ctx1> > >("shared_ptr<View_ctx1>")
+        .function("delete_view", &View<t_ctx1>::delete_view)
+        .function("num_rows", &View<t_ctx1>::num_rows)
+        .function("num_columns", &View<t_ctx1>::num_columns)
+        .function("get_row_expanded", &View<t_ctx1>::get_row_expanded)
+        .function("expand", &View<t_ctx1>::expand)
+        .function("collapse", &View<t_ctx1>::collapse)
+        .function("set_depth", &View<t_ctx1>::set_depth)
+        .function("schema", &View<t_ctx1>::schema)
+        .function("_column_names", &View<t_ctx1>::_column_names);
+
+    class_<View<t_ctx2> >("View_ctx2")
+        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>, std::string, std::string>()
+        .smart_ptr<std::shared_ptr<View<t_ctx2> > >("shared_ptr<View_ctx2>")
+        .function("delete_view", &View<t_ctx2>::delete_view)
+        .function("num_rows", &View<t_ctx2>::num_rows)
+        .function("num_columns", &View<t_ctx2>::num_columns)
+        .function("get_row_expanded", &View<t_ctx2>::get_row_expanded)
+        .function("expand", &View<t_ctx2>::expand)
+        .function("collapse", &View<t_ctx2>::collapse)
+        .function("set_depth", &View<t_ctx2>::set_depth)
+        .function("schema", &View<t_ctx2>::schema)
+        .function("_column_names", &View<t_ctx2>::_column_names);
+        
     /******************************************************************************
      *
      * t_column
@@ -1723,6 +1782,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
     register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
+    
+    /******************************************************************************
+     *
+     * map
+     */
+    register_map<std::string, std::string>("std::map<std::string, std::string>");
 
     /******************************************************************************
      *
@@ -1864,4 +1929,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<std::shared_ptr<t_ctx0>>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<std::shared_ptr<t_ctx1>>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<std::shared_ptr<t_ctx2>>);
+    function("make_view_zero", &make_view<t_ctx0>, allow_raw_pointers());
+    function("make_view_one", &make_view<t_ctx1>, allow_raw_pointers());
+    function("make_view_two", &make_view<t_ctx2>, allow_raw_pointers());
 }
