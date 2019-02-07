@@ -10,7 +10,7 @@
 import * as defaults from "./defaults.js";
 import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
-import {extract_map, extract_vector} from "./translator.js";
+import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
@@ -225,11 +225,11 @@ export default function(Module) {
 
         this._View = undefined;
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING);
+            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
         }
 
         bindall(this);
@@ -325,6 +325,7 @@ export default function(Module) {
     };
 
     const to_format = async function(options, formatter) {
+        // TODO: port
         options = options || {};
         let viewport = this.config.viewport ? this.config.viewport : {};
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
@@ -864,7 +865,7 @@ export default function(Module) {
      * @param {Array<string>} [config.column_pivot] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
      * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
-     * each of which should provide an "name" and "op" property, repsresnting the string
+     * each of which should provide a "column" and "op" property, representing the string
      * aggregation type and associated column name, respectively.  Aggregates not provided
      * will use their type defaults
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to

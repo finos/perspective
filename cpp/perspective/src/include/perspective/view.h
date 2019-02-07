@@ -27,7 +27,13 @@ template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
     View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator);
+        std::shared_ptr<t_gnode> gnode, std::string name, 
+        std::string separator,
+        std::vector<std::string> row_pivot, 
+        std::vector<std::string> column_pivot,
+        std::vector<std::pair<std::vector<std::string>, std::string> > aggregate,
+        std::vector<std::vector<std::string> > filter,
+        std::vector<std::vector<std::string> > sort);
 
     void delete_view();
 
@@ -54,5 +60,11 @@ private:
     std::shared_ptr<t_gnode> m_gnode;
     std::string m_name;
     std::string m_separator;
+
+    std::vector<std::string> m_row_pivots;
+    std::vector<std::string> m_column_pivots;
+    std::vector<std::pair<std::vector<std::string>, std::string> > m_aggregates;
+    std::vector<std::vector<std::string> > m_filters;
+    std::vector<std::vector<std::string> > m_sort;
 };
 } // end namespace perspective
