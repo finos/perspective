@@ -8,20 +8,22 @@
  */
 import { labelFunction } from '../axis/crossAxis';
 
-export function groupAndStackData(settings) {
+export function groupAndStackData(settings, data) {
+  const useData = data || settings.data;
+
   if (settings.splitValues.length > 0) {
-    const split = splitIntoMultiSeries(settings);
+    const split = splitIntoMultiSeries(settings, useData);
     return split.map(data => groupBarData(settings, data));
   }
-  return [groupBarData(settings, settings.data)];
+  return [groupBarData(settings, useData)];
 }
 
-function splitIntoMultiSeries(settings) {
+function splitIntoMultiSeries(settings, data) {
   // Create a series for each "split" value, each one containing all the "aggregate" values,
   // and "base" values to offset it from the previous series
   const multiSeries = {};
 
-  settings.data.forEach(col => {
+  data.forEach(col => {
     // Split this column by "split", including multiple aggregates for each
     const baseValues = {};
     const split = {};

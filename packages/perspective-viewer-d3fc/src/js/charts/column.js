@@ -11,10 +11,10 @@ import * as crossAxis from '../axis/crossAxis';
 import * as mainAxis from '../axis/mainAxis';
 import { barSeries, barColours } from '../series/barSeries';
 import { groupAndStackData } from '../data/groupAndStackData';
-import { legend } from '../legend/legend';
+import { legend, filterData } from '../legend/legend';
 
 function columnChart(container, settings) {
-  const data = groupAndStackData(settings);
+  const data = groupAndStackData(settings, filterData(settings));
   const colour = barColours(settings);
   legend(container, settings, colour);
 

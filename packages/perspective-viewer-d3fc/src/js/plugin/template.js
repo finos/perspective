@@ -18,13 +18,21 @@ class D3FCChartElement extends HTMLElement {
 
   connectedCallback() {
         this._container = this.shadowRoot.querySelector(".chart");
+        this._chart = null;
+        this._settings = null;
     }
 
     render(chart, settings) {
       this.remove();
 
-      if (settings.data) {
-        chart(d3.select(this._container), settings);
+      this._chart = chart;
+      this._settings = settings;
+      this.draw();
+    }
+
+    draw() {
+      if (this._settings.data) {
+        this._chart(d3.select(this._container), this._settings);
       }
     }
 

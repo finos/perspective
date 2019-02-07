@@ -54,26 +54,26 @@
      opacity: 0.5;
    }
  
-   .legend {
-     position: absolute;
-     top: 15px;
-     right: 15px;
-     font-size: 8pt;
-     left: auto;
-     width: 150px;
-     height: 100px;
-   }
+  .legend {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 8pt;
+    left: auto;
+    width: 150px;
+    height: 100px;
  
-   .legend .cell {
-     cursor:pointer;
-   }
- 
-   .legend .cell.hidden circle {    
-     fill: rgb(204, 204, 204) !important;
-   }
- 
-   .legend text {
-     fill: var(--d3fc-legend-text, rgb(51, 51, 51));
-   }
+    & .cell {
+      cursor:pointer;
+  
+      &.hidden circle {    
+        fill: rgb(204, 204, 204) !important;
+      }
+    }
+  
+    & text {
+      fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+    }
+  }
  }
  
