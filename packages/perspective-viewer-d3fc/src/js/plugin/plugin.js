@@ -61,8 +61,8 @@ function removeHiddenData(col, hidden) {
                 delete col[key];
             }
         });
-        return col;
     }
+    return col;
 }
 
 function createOrUpdateChart(div, chart, settings) {
