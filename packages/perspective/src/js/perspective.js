@@ -1598,7 +1598,7 @@ export default function(Module) {
             try {
                 pool = new __MODULE__.t_pool();
 
-                [gnode, limit_index] = make_table(data_accessor, pool, gnode, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
+                [gnode, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

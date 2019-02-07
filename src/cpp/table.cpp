@@ -582,7 +582,7 @@ t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled)
 }
 
 void
-t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t iter_limit) {
+t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t iter_limit, bool fill) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -594,11 +594,6 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
     t_uindex idx = m_schema.get_colidx(name);
     std::shared_ptr<t_column> current_col = m_columns[idx];
 
-    if (new_dtype != DTYPE_FLOAT64 || current_col->get_dtype() != DTYPE_INT32) {
-        std::cout << "Promotion only works for int to float." << std::endl;
-        return;
-    }
-
     // create the new column and copy data
     std::shared_ptr<t_column> promoted_col
         = make_column(name, new_dtype, current_col->is_status_enabled());
@@ -606,10 +601,25 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
     promoted_col->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     promoted_col->set_size(size());
 
-    for (auto i = 0; i < iter_limit; ++i) {
-        std::int32_t* val = current_col->get_nth<std::int32_t>(i);
-        double fval = static_cast<double>(*val);
-        promoted_col->set_nth(i, fval);
+    if (fill) {
+        for (auto i = 0; i < iter_limit; ++i) {
+            switch (new_dtype) {
+                case DTYPE_FLOAT64: {
+                    std::int32_t* val = current_col->get_nth<std::int32_t>(i);
+                    double fval = static_cast<double>(*val);
+                    promoted_col->set_nth(i, fval);
+                } break;
+                case DTYPE_STR: {
+                    std::int32_t* val = current_col->get_nth<std::int32_t>(i);
+                    std::string fval = std::to_string(*val);
+                    promoted_col->set_nth(i, fval);
+                } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Bad promotion");
+                }
+
+            }
+        }
     }
 
     // finally, mutate schema and columns

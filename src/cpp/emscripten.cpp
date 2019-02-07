@@ -413,79 +413,6 @@ col_to_js_typed_array(T ctx, t_index idx) {
 }
 
 void
-_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name,
-    std::int32_t cidx, t_dtype type, bool is_arrow) {
-    t_uindex nrows = col->size();
-
-    if (is_arrow) {
-        val data = accessor["values"];
-
-        switch (type) {
-            case DTYPE_INT8: {
-                arrow::vecFromTypedArray(data, col->get_nth<std::int8_t>(0), nrows);
-            } break;
-            case DTYPE_INT16: {
-                arrow::vecFromTypedArray(data, col->get_nth<std::int16_t>(0), nrows);
-            } break;
-            case DTYPE_INT32: {
-                arrow::vecFromTypedArray(data, col->get_nth<std::int32_t>(0), nrows);
-            } break;
-            case DTYPE_FLOAT32: {
-                arrow::vecFromTypedArray(data, col->get_nth<float>(0), nrows);
-            } break;
-            case DTYPE_FLOAT64: {
-                arrow::vecFromTypedArray(data, col->get_nth<double>(0), nrows);
-            } break;
-            default:
-                break;
-        }
-    } else {
-        for (auto i = 0; i < nrows; ++i) {
-            val item = accessor.call<val>("marshal", cidx, i, type);
-
-            if (item.isUndefined())
-                continue;
-
-            if (item.isNull()) {
-                col->unset(i);
-                continue;
-            }
-
-            switch (type) {
-                case DTYPE_INT8: {
-                    col->set_nth(i, item.as<std::int8_t>());
-                } break;
-                case DTYPE_INT16: {
-                    col->set_nth(i, item.as<std::int16_t>());
-                } break;
-                case DTYPE_INT32: {
-                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
-                    // float value in an inferred column. Would not be needed if the type
-                    // inference checked the entire column/we could reset parsing.
-                    double fval = item.as<double>();
-                    if (fval > 2147483647 || fval < -2147483648) {
-                        tbl.promote_column(name, DTYPE_FLOAT64, i);
-                        col = tbl.get_column(name);
-                        type = DTYPE_FLOAT64;
-                        col->set_nth(i, fval);
-                    } else {
-                        col->set_nth(i, static_cast<std::int32_t>(fval));
-                    }
-                } break;
-                case DTYPE_FLOAT32: {
-                    col->set_nth(i, item.as<float>());
-                } break;
-                case DTYPE_FLOAT64: {
-                    col->set_nth(i, item.as<double>());
-                } break;
-                default:
-                    break;
-            }
-        }
-    }
-}
-
-void
 _fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name,
     std::int32_t cidx, t_dtype type, bool is_arrow) {
     t_uindex nrows = col->size();
@@ -674,6 +601,86 @@ _fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name,
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);
+        }
+    }
+}
+
+void
+_fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col, std::string name,
+    std::int32_t cidx, t_dtype type, bool is_arrow) {
+    t_uindex nrows = col->size();
+
+    if (is_arrow) {
+        val data = accessor["values"];
+
+        switch (type) {
+            case DTYPE_INT8: {
+                arrow::vecFromTypedArray(data, col->get_nth<std::int8_t>(0), nrows);
+            } break;
+            case DTYPE_INT16: {
+                arrow::vecFromTypedArray(data, col->get_nth<std::int16_t>(0), nrows);
+            } break;
+            case DTYPE_INT32: {
+                arrow::vecFromTypedArray(data, col->get_nth<std::int32_t>(0), nrows);
+            } break;
+            case DTYPE_FLOAT32: {
+                arrow::vecFromTypedArray(data, col->get_nth<float>(0), nrows);
+            } break;
+            case DTYPE_FLOAT64: {
+                arrow::vecFromTypedArray(data, col->get_nth<double>(0), nrows);
+            } break;
+            default:
+                break;
+        }
+    } else {
+        for (auto i = 0; i < nrows; ++i) {
+            val item = accessor.call<val>("marshal", cidx, i, type);
+
+            if (item.isUndefined())
+                continue;
+
+            if (item.isNull()) {
+                col->unset(i);
+                continue;
+            }
+
+            switch (type) {
+                case DTYPE_INT8: {
+                    col->set_nth(i, item.as<std::int8_t>());
+                } break;
+                case DTYPE_INT16: {
+                    col->set_nth(i, item.as<std::int16_t>());
+                } break;
+                case DTYPE_INT32: {
+                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
+                    // float value in an inferred column. Would not be needed if the type
+                    // inference checked the entire column/we could reset parsing.
+                    double fval = item.as<double>();
+                    if (fval > 2147483647 || fval < -2147483648) {
+                        std::cout << "Promoting to float" << std::endl;
+                        tbl.promote_column(name, DTYPE_FLOAT64, i, true);
+                        col = tbl.get_column(name);
+                        type = DTYPE_FLOAT64;
+                        col->set_nth(i, fval);
+                    } else if (isnan(fval)) {
+                        std::cout << "Promoting to string" << std::endl;
+                        tbl.promote_column(name, DTYPE_STR, i, false);
+                        col = tbl.get_column(name);
+                        _fill_col_string(accessor, col, name, cidx, DTYPE_STR, is_arrow);
+                        return;
+                    } else {
+                        col->set_nth(i, static_cast<std::int32_t>(fval));
+                    }
+                } break;
+                case DTYPE_FLOAT32: {
+                    col->set_nth(i, item.as<float>());
+                } break;
+                case DTYPE_FLOAT64: {
+                    col->set_nth(i, item.as<double>());
+                } break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -951,23 +958,28 @@ column_names(val data, std::int32_t format) {
     if (format == 0) {
         std::int32_t max_check = 50;
         val data_names = Object.call<val>("keys", data[0]);
+        names = vecFromArray<val, std::string>(data_names);
         std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
 
         for (auto ix = 0; ix < check_index; ix++) {
             val next = Object.call<val>("keys", data[ix]);
-            if (data_names["length"] != next["length"]) {
+  
+            if (names.size() != next["length"].as<std::int32_t>()) {
+                auto old_size = names.size();
+                auto new_names = vecFromJSArray<std::string>(next);
                 if (max_check == 50) {
-                    std::cout << "Data parse warning: Array data has inconsistent rows"
-                              << std::endl;
+                    std::cout << "Data parse warning: Array data has inconsistent rows" << std::endl;
                 }
 
-                std::cout << "Extending from " << data_names["length"].as<std::int32_t>()
-                          << "to " << next["length"].as<std::int32_t>() << std::endl;
-                data_names = next;
+                for (auto s = new_names.begin(); s != new_names.end(); ++s) {                    
+                    if (std::find(names.begin(), names.end(), *s) == names.end()) {
+                        names.push_back(*s);
+                    }
+                }
+
+                std::cout << "Extended from " << old_size << "to " << names.size() << std::endl;
                 max_check *= 2;
             }
-
-            names = vecFromArray<val, std::string>(data_names);
         }
     } else if (format == 1 || format == 2) {
         val keys = Object.call<val>("keys", data);

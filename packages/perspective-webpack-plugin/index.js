@@ -90,6 +90,13 @@ class PerspectiveWebpackPlugin {
                 loader: "babel-loader",
                 options: BABEL_CONFIG
             });
+        } else {
+            rules.push({
+                test: /\.js$/,
+                include: this.options.load_path,
+                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
+                loader: "source-map-loader"
+            });
         }
 
         rules.push({

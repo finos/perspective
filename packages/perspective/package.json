@@ -20,7 +20,7 @@
         "prebuild": "mkdir -p build && mkdir -p obj",
         "cpp": "npm-run-all build:cpp test:cpp",
         "build": "npm-run-all build:babel build:webpack",
-        "build:babel": "babel src/js --out-dir cjs/js",
+        "build:babel": "babel src/js --source-maps --out-dir cjs/js",
         "build:webpack": "npm-run-all -p build:webpack:*",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
