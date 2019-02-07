@@ -33,9 +33,6 @@ const schema = {
 };
 
 exports.default = function loader(content) {
-    if (process.env.PSP_DEBUG && content && content.indexOf("asmjs") > -1) {
-        return "module.exports = function() {};";
-    }
     const options = loaderUtils.getOptions(this) || {};
     validateOptions(schema, options, "File Worker Loader");
     const context = options.context || this.rootContext || (this.options && this.options.context);
@@ -44,6 +41,10 @@ exports.default = function loader(content) {
         content,
         regExp: options.regExp
     });
+
+    if (process.env.PSP_DEBUG && emitPath.indexOf("asmjs") > -1) {
+        return `module.exports = function() {  throw new Error('asm.js disabled in debug mode.'); };`;
+    }
 
     if (!options.compiled) {
         var inputPath = this.resourcePath;
