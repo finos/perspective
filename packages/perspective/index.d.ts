@@ -97,7 +97,8 @@ declare module '@jpmorganchase/perspective' {
     export type TableData = string | Array<object> | { [key: string]: Array<object> } | { [key: string]: string }
 
     export type TableOptions = {
-        index: string
+        index: string,
+        limit?: number
     }
 
     export type AggregateConfig = {

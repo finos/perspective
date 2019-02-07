@@ -7,15 +7,6 @@
  *
  */
 
-/* defines */
-export
-const MIME_TYPE = 'application/psp+json';
+module.exports = {
 
-export
-const PSP_CLASS = 'jp-PSPViewer';
-
-export
-const PSP_CONTAINER_CLASS = 'jp-PSPContainer';
-
-export
-const PSP_CONTAINER_CLASS_DARK = 'jp-PSPContainer-dark';
+};

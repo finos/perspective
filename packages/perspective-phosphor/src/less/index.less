@@ -7,10 +7,10 @@
  *
  */
 
-export * from './plugin';
-export * from './widget';
-export * from './version';
+div.PSPContainer perspective-viewer {
+    @import (inline) "../../../perspective-viewer/build/material.css";
+}
 
-/* css */
-import '!!style-loader!css-loader!less-loader!../less/index.less';
-
+div.PSPContainer-dark perspective-viewer {
+    @import (inline) "../../../perspective-viewer/build/material.dark.css";
+}

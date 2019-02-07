@@ -7,10 +7,15 @@
  *
  */
 
-export * from './plugin';
-export * from './widget';
-export * from './version';
+/* defines */
+export
+const MIME_TYPE = 'application/psp+json';
 
-/* css */
-import '!!style-loader!css-loader!less-loader!../less/index.less';
+export
+const PSP_CLASS = 'PSPViewer';
 
+export
+const PSP_CONTAINER_CLASS = 'PSPContainer';
+
+export
+const PSP_CONTAINER_CLASS_DARK = 'PSPContainer-dark';
