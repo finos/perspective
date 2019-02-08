@@ -13,15 +13,14 @@ import template from "../../html/d3fc-chart.html";
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
 
-@bindTemplate(template, style) // eslint-disable-next-line no-unused-vars
+const styleWithD3FC = `${style}${getD3FCStyles()}`;
+
+@bindTemplate(template, styleWithD3FC) // eslint-disable-next-line no-unused-vars
 class D3FCChartElement extends HTMLElement {
     connectedCallback() {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
-
-        // Append D3FC styles from the document
-        getD3FCStyles().forEach(s => this.shadowRoot.appendChild(s));
     }
 
     render(chart, settings) {
@@ -52,13 +51,13 @@ class D3FCChartElement extends HTMLElement {
     }
 }
 
-const getD3FCStyles = () => {
+function getD3FCStyles() {
     const headerStyles = document.querySelector("head").querySelectorAll("style");
     const d3fcStyles = [];
     headerStyles.forEach(s => {
         if (s.innerText.indexOf("d3fc-") !== -1) {
-            d3fcStyles.push(s);
+            d3fcStyles.push(s.innerText);
         }
     });
-    return d3fcStyles;
-};
+    return d3fcStyles.join("");
+}
