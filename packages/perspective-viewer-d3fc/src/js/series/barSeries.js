@@ -14,7 +14,7 @@ export function barSeries(settings, colour) {
 
     if (colour) {
         series = series.decorate(selection => {
-            selection.style("fill", d => colour(d.key));
+            selection.style("fill", d => colour(d.key)).style("stroke", d => colour(d.key));
         });
     }
 

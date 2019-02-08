@@ -27,15 +27,17 @@ export const scale = settings => {
     }
 };
 
-export const domain = (settings, data) => {
-    const flatData = data.reduce((r, v) => r.concat(v), []);
+export const domain = settings => {
+    const accessData = extent => {
+        return extent.accessors([labelFunction(settings)])(settings.data);
+    };
     switch (axisType(settings)) {
         case AXIS_TYPES.time:
-            return fc.extentTime().accessors([d => d.crossValue])(flatData);
+            return accessData(fc.extentTime());
         case AXIS_TYPES.linear:
-            return fc.extentLinear().accessors([d => d.crossValue])(flatData);
+            return accessData(fc.extentLinear());
         default:
-            return flatData.map(d => d.crossValue);
+            return settings.data.map(labelFunction(settings));
     }
 };
 
