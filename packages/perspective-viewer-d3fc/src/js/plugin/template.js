@@ -10,6 +10,7 @@ import * as d3 from "d3";
 
 import style from "../../less/chart.less";
 import template from "../../html/d3fc-chart.html";
+import {configureHidden} from "../legend/legend";
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
 
@@ -27,7 +28,7 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
 
         this._chart = chart;
-        this._settings = settings;
+        this._settings = configureHidden(this._settings, settings);
         this.draw();
     }
 

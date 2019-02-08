@@ -46,6 +46,7 @@
         "d3": "^5.7.0",
         "d3-svg-legend": "^2.25.6",
         "d3fc": "^14.0.25",
-        "gradient-parser": "0.1.5"
+        "gradient-parser": "0.1.5",
+        "underscore": "^1.9.1"
     }
 }
