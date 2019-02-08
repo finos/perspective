@@ -19,6 +19,9 @@ class D3FCChartElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
+
+        // Append D3FC styles from the document
+        getD3FCStyles().forEach(s => this.shadowRoot.appendChild(s));
     }
 
     render(chart, settings) {
@@ -48,3 +51,14 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
     }
 }
+
+const getD3FCStyles = () => {
+    const headerStyles = document.querySelector("head").querySelectorAll("style");
+    const d3fcStyles = [];
+    headerStyles.forEach(s => {
+        if (s.innerText.indexOf("d3fc-group.cartesian-chart") !== -1) {
+            d3fcStyles.push(s);
+        }
+    });
+    return d3fcStyles;
+};
