@@ -21,7 +21,7 @@ export const domain = (settings, data) => {
         .extentLinear()
         .include([0])
         .pad([0, 0.1])
-        .accessors(accessors)(data.flat());
+        .accessors(accessors)(data.reduce((r, v) => r.concat(v), []));
 };
 
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");
