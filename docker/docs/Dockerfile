@@ -28,6 +28,8 @@ RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
 
 # docs dependencies
 RUN python3 -m pip install breathe sphinx sphinx_rtd_theme
+RUN npm install @babel/cli @babel/core @babel/plugin-proposal-decorators @babel/plugin-transform-for-of  @babel/preset-env babel-plugin-transform-custom-element-classes jsdoc jsdoc-babel --save-dev
+RUN yarn
 
 # install from here from now, waiting on https://github.com/mozilla/sphinx-js/issues/94
 RUN python3 -m pip install git+https://github.com/timkpaine/sphinx-js
