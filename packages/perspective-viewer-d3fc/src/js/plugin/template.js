@@ -56,7 +56,7 @@ const getD3FCStyles = () => {
     const headerStyles = document.querySelector("head").querySelectorAll("style");
     const d3fcStyles = [];
     headerStyles.forEach(s => {
-        if (s.innerText.indexOf("d3fc-group.cartesian-chart") !== -1) {
+        if (s.innerText.indexOf("d3fc-") !== -1) {
             d3fcStyles.push(s);
         }
     });
