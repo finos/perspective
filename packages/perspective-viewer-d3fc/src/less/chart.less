@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
+@import (inline) "d3fc-lib.css";
  @sans-serif-fonts: Arial, sans-serif;
 
  :host {
@@ -32,7 +32,7 @@
         line-height: 1em;
       }
     }
-    & .x-axis-label {
+    & .x-label {
       height: 1.2em!important;
     }
     & d3fc-canvas.plot-area {
@@ -47,7 +47,7 @@
       stroke: var(--d3fc-axis--ticks, rgb(51, 51, 51));
     }
 
-    & .y-axis-label {
+    & .y-label {
       white-space: nowrap;
     }
   
