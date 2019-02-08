@@ -10,7 +10,6 @@
  @sans-serif-fonts: Arial, sans-serif;
 
  :host {
- 
   .chart {
     position: absolute;
     box-sizing: border-box;
@@ -21,14 +20,25 @@
     padding: 15px;
     overflow: hidden;
 
-    // Workaround for resizing issues
-    & .cartesian-chart>div, & .cartesian-chart>div>div, & .cartesian-chart .plot-area {
-      overflow: hidden;
+    /////////////////////////////////////
+    // Address d3fc display/positioning issues
+    d3fc-svg>svg {
+      overflow: visible;
     }
+    & .y-axis, & .plot-area {
+      line-height: 0;
 
+      & svg {
+        line-height: 1em;
+      }
+    }
+    & .x-axis-label {
+      height: 1.2em!important;
+    }
     & d3fc-canvas.plot-area {
       display: none;
     }
+    /////////////////////////////////////
 
     & .y-axis text, & .x-axis text {
       fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));

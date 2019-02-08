@@ -28,6 +28,13 @@ export function legend(container, settings, colour) {
                 getChartElement(this).draw();
             });
 
+        if (settings.mainValues.length <= 1) {
+            legend.labels(options => {
+                const parts = options.domain[options.i].split("|");
+                return parts.slice(0, parts.length - 1).join("|");
+            });
+        }
+
         let legendSelection = container.select("svg.legend");
         if (legendSelection.size() === 0) {
             legendSelection = container.append("svg");
