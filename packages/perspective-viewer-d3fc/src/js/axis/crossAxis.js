@@ -7,11 +7,62 @@
  *
  */
 import * as d3 from "d3";
+import * as fc from "d3fc";
 
-export const scale = () => d3.scaleBand();
+const AXIS_TYPES = {
+    none: "none",
+    string: "string",
+    time: "time",
+    linear: "linear"
+};
 
-export const domain = settings => settings.data.map(labelFunction());
+export const scale = settings => {
+    switch (axisType(settings)) {
+        case AXIS_TYPES.time:
+            return d3.scaleTime();
+        case AXIS_TYPES.linear:
+            return d3.scaleLinear();
+        default:
+            return d3.scaleBand().padding(0.5);
+    }
+};
 
-export const labelFunction = () => d => d.__ROW_PATH__.join(",");
+export const domain = (settings, data) => {
+    const flatData = data.reduce((r, v) => r.concat(v), []);
+    switch (axisType(settings)) {
+        case AXIS_TYPES.time:
+            return fc.extentTime().accessors([d => d.crossValue])(flatData);
+        case AXIS_TYPES.linear:
+            return fc.extentLinear().accessors([d => d.crossValue])(flatData);
+        default:
+            return flatData.map(d => d.crossValue);
+    }
+};
+
+export const labelFunction = settings => {
+    switch (axisType(settings)) {
+        case AXIS_TYPES.none:
+            return (d, i) => i;
+        case AXIS_TYPES.time:
+            return d => new Date(d.__ROW_PATH__[0]);
+        case AXIS_TYPES.linear:
+            return d => d.__ROW_PATH__[0];
+        default:
+            return d => d.__ROW_PATH__.join(",");
+    }
+};
 
 export const label = settings => settings.crossValues.map(v => v.name).join(", ");
+
+const axisType = settings => {
+    if (settings.crossValues.length === 0) {
+        return AXIS_TYPES.none;
+    } else if (settings.crossValues.length === 1) {
+        if (settings.crossValues[0].type === "datetime") {
+            return AXIS_TYPES.time;
+        } else if (["integer", "float"].includes(settings.crossValues[0].type)) {
+            return AXIS_TYPES.linear;
+        }
+    }
+    return AXIS_TYPES.string;
+};

@@ -40,13 +40,13 @@ function drawChart(chart) {
             return;
         }
 
-        const data = json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0).map(col => removeHiddenData(col, hidden));
+        const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0) : json;
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: aggregates.map(a => ({name: a.column, type: tschema[a.column]})),
             splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
-            data
+            data: filtered.map(col => removeHiddenData(col, hidden))
         };
 
         createOrUpdateChart.call(this, el, chart, settings);

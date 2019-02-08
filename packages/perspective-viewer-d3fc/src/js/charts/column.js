@@ -31,8 +31,7 @@ function columnChart(container, settings) {
 
     const chart = fc
         .chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings))
-        .xPadding(0.5)
+        .xDomain(crossAxis.domain(settings, data))
         .xLabel(crossAxis.label(settings))
         .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
