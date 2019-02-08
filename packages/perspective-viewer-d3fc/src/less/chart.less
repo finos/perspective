@@ -7,83 +7,85 @@
  *
  */
 @import (inline) "d3fc-lib.css";
- @sans-serif-fonts: Arial, sans-serif;
+@sans-serif-fonts: Arial, sans-serif;
 
- :host {
-  .chart {
-    position: absolute;
-    box-sizing: border-box;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    padding: 15px;
-    overflow: hidden;
+:host {
+    .chart {
+        position: absolute;
+        box-sizing: border-box;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 15px;
+        overflow: hidden;
 
-    /////////////////////////////////////
-    // Address d3fc display/positioning issues
-    d3fc-svg>svg {
-      overflow: visible;
-    }
-    & .y-axis, & .plot-area {
-      line-height: 0;
+        /////////////////////////////////////
+        // Address d3fc display/positioning issues
+        d3fc-svg > svg {
+            overflow: visible;
+        }
+        & .y-axis,
+        & .plot-area {
+            line-height: 0;
 
-      & svg {
-        line-height: 1em;
-      }
-    }
-    & .x-label {
-      height: 1.2em!important;
-    }
-    & d3fc-canvas.plot-area {
-      display: none;
-    }
-    /////////////////////////////////////
+            & svg {
+                line-height: 1em;
+            }
+        }
+        & .x-label {
+            height: 1.2em !important;
+        }
+        & d3fc-canvas.plot-area {
+            display: none;
+        }
+        /////////////////////////////////////
 
-    & .y-axis text, & .x-axis text {
-      fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
-    }
-    & .y-axis path, & .x-axis path {
-      stroke: var(--d3fc-axis--ticks, rgb(51, 51, 51));
+        & .y-axis text,
+        & .x-axis text {
+            fill: var(--d3fc-axis--ticks, rgb(51, 51, 51));
+        }
+        & .y-axis path,
+        & .x-axis path {
+            stroke: var(--d3fc-axis--ticks, rgb(51, 51, 51));
+        }
+
+        & .y-label {
+            white-space: nowrap;
+        }
+
+        & .bar {
+            fill: rgb(31, 119, 180);
+        }
     }
 
-    & .y-label {
-      white-space: nowrap;
+    .label rect {
+        fill: none;
     }
-  
-    & .bar {
-      fill: rgb(31, 119, 180);
+
+    .point path {
+        opacity: 0.5;
     }
-   }
- 
-   .label rect {
-     fill: none;
-   }
- 
-   .point path {
-     opacity: 0.5;
-   }
- 
-  .legend {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 8pt;
-    left: auto;
-    width: 150px;
-    height: 100px;
- 
-    & .cell {
-      cursor:pointer;
-  
-      &.hidden circle {    
-        fill: rgb(204, 204, 204) !important;
-      }
+
+    .legend {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 8pt;
+        left: auto;
+        width: 150px;
+        height: 100px;
+
+        & .cell {
+            cursor: pointer;
+
+            &.hidden circle {
+                fill: rgb(204, 204, 204) !important;
+            }
+        }
+
+        & text {
+            fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+        }
     }
-  
-    & text {
-      fill: var(--d3fc-legend-text, rgb(51, 51, 51));
-    }
-  }
- }
- 
+}
