@@ -190,6 +190,7 @@ enum t_filter_op {
 };
 
 PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);
+PERSPECTIVE_EXPORT t_filter_op str_to_filter_op(std::string str);
 
 enum t_header { HEADER_ROW, HEADER_COLUMN };
 
@@ -234,6 +235,8 @@ enum t_aggtype {
     AGGTYPE_PCT_SUM_PARENT,
     AGGTYPE_PCT_SUM_GRAND_TOTAL
 };
+
+PERSPECTIVE_EXPORT t_aggtype str_to_aggtype(std::string str);
 
 enum t_totals { TOTALS_BEFORE, TOTALS_HIDDEN, TOTALS_AFTER };
 

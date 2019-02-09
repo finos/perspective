@@ -889,58 +889,18 @@ export default function(Module) {
     table.prototype.view = function(config) {
         config = {...config};
 
-        const _string_to_filter_op = {
-            "&": __MODULE__.t_filter_op.FILTER_OP_AND,
-            "|": __MODULE__.t_filter_op.FILTER_OP_OR,
-            "<": __MODULE__.t_filter_op.FILTER_OP_LT,
-            ">": __MODULE__.t_filter_op.FILTER_OP_GT,
-            "==": __MODULE__.t_filter_op.FILTER_OP_EQ,
-            contains: __MODULE__.t_filter_op.FILTER_OP_CONTAINS,
-            "<=": __MODULE__.t_filter_op.FILTER_OP_LTEQ,
-            ">=": __MODULE__.t_filter_op.FILTER_OP_GTEQ,
-            "!=": __MODULE__.t_filter_op.FILTER_OP_NE,
-            "begins with": __MODULE__.t_filter_op.FILTER_OP_BEGINS_WITH,
-            "ends with": __MODULE__.t_filter_op.FILTER_OP_ENDS_WITH,
-            or: __MODULE__.t_filter_op.FILTER_OP_OR,
-            in: __MODULE__.t_filter_op.FILTER_OP_IN,
-            "not in": __MODULE__.t_filter_op.FILTER_OP_NOT_IN,
-            and: __MODULE__.t_filter_op.FILTER_OP_AND,
-            "is nan": __MODULE__.t_filter_op.FILTER_OP_IS_NAN,
-            "is not nan": __MODULE__.t_filter_op.FILTER_OP_IS_NOT_NAN
-        };
-
-        const _string_to_aggtype = {
-            "distinct count": __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            distinctcount: __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            distinct: __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            sum: __MODULE__.t_aggtype.AGGTYPE_SUM,
-            mul: __MODULE__.t_aggtype.AGGTYPE_MUL,
-            avg: __MODULE__.t_aggtype.AGGTYPE_MEAN,
-            mean: __MODULE__.t_aggtype.AGGTYPE_MEAN,
-            count: __MODULE__.t_aggtype.AGGTYPE_COUNT,
-            "weighted mean": __MODULE__.t_aggtype.AGGTYPE_WEIGHTED_MEAN,
-            unique: __MODULE__.t_aggtype.AGGTYPE_UNIQUE,
-            any: __MODULE__.t_aggtype.AGGTYPE_ANY,
-            median: __MODULE__.t_aggtype.AGGTYPE_MEDIAN,
-            join: __MODULE__.t_aggtype.AGGTYPE_JOIN,
-            div: __MODULE__.t_aggtype.AGGTYPE_SCALED_DIV,
-            add: __MODULE__.t_aggtype.AGGTYPE_SCALED_ADD,
-            dominant: __MODULE__.t_aggtype.AGGTYPE_DOMINANT,
-            "first by index": __MODULE__.t_aggtype.AGGTYPE_FIRST,
-            "last by index": __MODULE__.t_aggtype.AGGTYPE_LAST,
-            and: __MODULE__.t_aggtype.AGGTYPE_AND,
-            or: __MODULE__.t_aggtype.AGGTYPE_OR,
-            last: __MODULE__.t_aggtype.AGGTYPE_LAST_VALUE,
-            high: __MODULE__.t_aggtype.AGGTYPE_HIGH_WATER_MARK,
-            low: __MODULE__.t_aggtype.AGGTYPE_LOW_WATER_MARK,
-            "sum abs": __MODULE__.t_aggtype.AGGTYPE_SUM_ABS,
-            "sum not null": __MODULE__.t_aggtype.AGGTYPE_SUM_NOT_NULL,
-            "mean by count": __MODULE__.t_aggtype.AGGTYPE_MEAN_BY_COUNT,
-            identity: __MODULE__.t_aggtype.AGGTYPE_IDENTITY,
-            "distinct leaf": __MODULE__.t_aggtype.AGGTYPE_DISTINCT_LEAF,
-            "pct sum parent": __MODULE__.t_aggtype.AGGTYPE_PCT_SUM_PARENT,
-            "pct sum grand total": __MODULE__.t_aggtype.AGGTYPE_PCT_SUM_GRAND_TOTAL
-        };
+        /**
+         * TODO:
+         * 0. move term maps above into base.cpp - done
+         * 1. move filter, sort, agg parsing and construction into C++
+         *    - make_sort, make_fterms, make_aggspec
+         *    - converts vals + arrays to native DS, constructs vectors of
+         *      t_sortspec, t_fterm, t_aggspec objects.
+         * 2. remove _get_fterms, _get_sort, _get_aggspecs, and pass through
+         *    the js arrays into make_context, and use the new methods to parse
+         *    i.e. `make_context_zero(config.row_pivots) etc.
+         * 3. change the structure of view, remove all references to pool, gnode, etc.
+         */
 
         let name = Math.random() + "";
 
@@ -965,26 +925,26 @@ export default function(Module) {
                 .filter(filter => isValidFilter(filter))
                 .map(filter => {
                     if (isDateFilter(filter[0])) {
-                        return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
+                        return [filter[0], filter[1], new DateParser().parse(filter[2])];
                     } else {
-                        return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
+                        return [filter[0], filter[1], filter[2]];
                     }
                 });
             if (config.filter_op) {
-                filter_op = _string_to_filter_op[config.filter_op];
+                filter_op = __MODULE__.str_to_filter_op(config.filter_op);
             }
         }
 
         let schema = this.gnode.get_tblschema();
 
-        // Row Pivots
+        // Aggregates
         let aggregates = [];
         if (typeof config.aggregate === "object") {
             for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
                 let agg = config.aggregate[aidx];
-                let agg_op = _string_to_aggtype[agg.op];
+                let agg_op = agg.op;
                 if (config.column_only) {
-                    agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                    agg_op = "any";
                     config.aggregate[aidx].op = "any";
                 }
                 if (typeof agg.column === "string") {
@@ -1046,33 +1006,29 @@ export default function(Module) {
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
                 config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, sort.length > 0, this.pool, this.gnode, name);
+                context = __MODULE__.make_context_two(
+                    schema,
+                    config.row_pivot,
+                    config.column_pivot,
+                    filter_op,
+                    filters,
+                    aggregates,
+                    config.row_pivot_depth,
+                    config.column_pivot_depth,
+                    sort.length > 0,
+                    this.pool,
+                    this.gnode,
+                    name
+                );
+
                 sides = 2;
-
-                if (config.row_pivot_depth !== undefined) {
-                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
-                } else {
-                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot.length);
-                }
-
-                if (config.column_pivot_depth !== undefined) {
-                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot_depth - 1);
-                } else {
-                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
-                }
 
                 if (sort.length > 0 || col_sort.length > 0) {
                     __MODULE__.sort(context, sort, col_sort);
                 }
             } else {
-                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, this.pool, this.gnode, name);
+                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, config.row_pivot_depth, this.pool, this.gnode, name);
                 sides = 1;
-
-                if (config.row_pivot_depth !== undefined) {
-                    context.set_depth(config.row_pivot_depth - 1);
-                } else {
-                    context.set_depth(config.row_pivot.length);
-                }
             }
         } else {
             context = __MODULE__.make_context_zero(

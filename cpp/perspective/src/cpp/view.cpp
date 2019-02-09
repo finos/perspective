@@ -14,25 +14,21 @@
 namespace perspective {
 template <typename CTX_T>
 View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator,
-        std::vector<std::string> row_pivot, 
-        std::vector<std::string> column_pivot,
-        std::vector<std::pair<std::vector<std::string>, std::string> > aggregate,
-        std::vector<std::vector<std::string> > filter,
-        std::vector<std::vector<std::string> > sort)
-        : m_pool(pool)
-        , m_ctx(ctx)
-        , m_nsides(sides)
-        , m_gnode(gnode)
-        , m_name(name)
-        , m_separator(separator)
-        , m_row_pivots(row_pivot)
-        , m_column_pivots(column_pivot)
-        , m_aggregates(aggregate)
-        , m_filters(filter)
-        , m_sort(sort)
-{
-}
+    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator,
+    std::vector<std::string> row_pivot, std::vector<std::string> column_pivot,
+    std::vector<std::pair<std::vector<std::string>, std::string>> aggregate,
+    std::vector<std::vector<std::string>> filter, std::vector<std::vector<std::string>> sort)
+    : m_pool(pool)
+    , m_ctx(ctx)
+    , m_nsides(sides)
+    , m_gnode(gnode)
+    , m_name(name)
+    , m_separator(separator)
+    , m_row_pivots(row_pivot)
+    , m_column_pivots(column_pivot)
+    , m_aggregates(aggregate)
+    , m_filters(filter)
+    , m_sort(sort) {}
 
 template <typename CTX_T>
 void
