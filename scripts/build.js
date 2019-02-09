@@ -63,8 +63,8 @@ if (!process.env.PSP_DEBUG) {
 const RUNTIMES = AVAILABLE_RUNTIMES.filter(runtime => runtime.build).length ? AVAILABLE_RUNTIMES.filter(runtime => runtime.build) : AVAILABLE_RUNTIMES;
 
 // Directory of Emscripten output
-const BASE_DIRECTORY = path.join(__dirname, "..", "obj");
-const BUILD_DIRECTORY = path.join(BASE_DIRECTORY, "build");
+const getBaseDir = packageName => path.join(__dirname, "..", "cpp", packageName, "obj");
+const getBuildDir = packageName => path.join(getBaseDir(packageName), "build");
 const getOuputDir = packageName => path.join(__dirname, "..", "packages", packageName);
 
 const templateSource = source => `
@@ -79,6 +79,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     console.log("-- Building %s", inputFile);
 
     const OUTPUT_DIRECTORY = getOuputDir(packageName);
+    const BUILD_DIRECTORY = getBuildDir(packageName);
 
     mkdirp.sync(path.join(OUTPUT_DIRECTORY, "obj"));
     mkdirp.sync(path.join(OUTPUT_DIRECTORY, "build"));
@@ -118,7 +119,8 @@ function docker(image = "emsdk") {
     return cmd;
 }
 
-function compileCPP() {
+function compileCPP(packageName) {
+    const BASE_DIRECTORY = getBaseDir(packageName);
     let cmd = `emcmake cmake ../ `;
     if (process.env.PSP_DEBUG) {
         cmd += `-DCMAKE_BUILD_TYPE=debug`;
@@ -142,8 +144,8 @@ function lerna() {
 
 try {
     if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        execute("mkdir -p obj");
-        compileCPP();
+        execute("mkdir -p cpp/perspective/obj");
+        compileCPP("perspective");
         RUNTIMES.map(compileRuntime);
     }
     lerna();
