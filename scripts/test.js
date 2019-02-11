@@ -87,7 +87,7 @@ try {
             execute(cmd);
         }
         if (!IS_EMSDK) {
-            execute(`yarn --silent clean:screenshots`);
+            execute(`yarn --silent clean --screenshots`);
             execute(docker() + " " + args.join(" "));
         }
     } else {

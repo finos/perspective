@@ -17,7 +17,7 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/usr/src/app/cpp -w /usr/src/app/cpp/cppbuild perspective/${image}`;
+    cmd += ` -v $(pwd):/usr/src/app/cpp -w /usr/src/app/cpp/cpp/perspective/cppbuild perspective/${image}`;
     return cmd;
 }
 

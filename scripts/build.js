@@ -127,7 +127,7 @@ function compileCPP(packageName) {
     }
     cmd += `&& emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
     if (process.env.PSP_DOCKER) {
-        cmd = `${docker()} bash -c 'cd obj && ${cmd}'`;
+        cmd = `${docker()} bash -c 'cd cpp/${packageName}/obj && ${cmd}'`;
     } else {
         cmd = `cd ${BASE_DIRECTORY} && ${cmd}`;
     }

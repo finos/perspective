@@ -12,6 +12,9 @@ const path = require("path");
 const fs = require("fs");
 const rimraf = require("rimraf");
 const minimatch = require("minimatch");
+const args = process.argv.slice(2);
+
+const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
@@ -32,7 +35,7 @@ function clean_screenshots() {
 }
 
 try {
-    if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
+    if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
         clean(path.join(".", "cpp", "perspective", "obj"));
         clean(path.join(".", "cpp", "perspective", "cppbuild"));
     }
