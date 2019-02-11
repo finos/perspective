@@ -40,7 +40,7 @@ function drawChart(chart) {
             return;
         }
 
-        const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length > 0) : json;
+        const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
