@@ -11,7 +11,7 @@ import * as fc from "d3fc";
 
 const AXIS_TYPES = {
     none: "none",
-    string: "string",
+    ordinal: "ordinal",
     time: "time",
     linear: "linear"
 };
@@ -19,7 +19,7 @@ const AXIS_TYPES = {
 export const scale = settings => {
     switch (axisType(settings)) {
         case AXIS_TYPES.none:
-            return d3.scaleSequential();
+            return scaleBandWithoutTicks();
         case AXIS_TYPES.time:
             return d3.scaleTime();
         case AXIS_TYPES.linear:
@@ -34,6 +34,11 @@ export const domain = settings => {
         return extent.accessors([labelFunction(settings)])(settings.data);
     };
     switch (axisType(settings)) {
+        // case AXIS_TYPES.none: {
+        //     const d = accessData(fc.extentLinear());
+        //     console.log(d);
+        //     return d;
+        // }
         case AXIS_TYPES.time:
             return accessData(fc.extentTime());
         case AXIS_TYPES.linear:
@@ -64,9 +69,15 @@ const axisType = settings => {
     } else if (settings.crossValues.length === 1) {
         if (settings.crossValues[0].type === "datetime") {
             return AXIS_TYPES.time;
-        } else if (["integer", "float"].includes(settings.crossValues[0].type)) {
-            return AXIS_TYPES.linear;
         }
     }
-    return AXIS_TYPES.string;
+    return AXIS_TYPES.ordinal;
+};
+
+const scaleBandWithoutTicks = () => {
+    const scale = d3.scaleBand().padding(0.5);
+    scale.ticks = function() {
+        return [];
+    };
+    return scale;
 };
