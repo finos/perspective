@@ -18,6 +18,8 @@ const AXIS_TYPES = {
 
 export const scale = settings => {
     switch (axisType(settings)) {
+        case AXIS_TYPES.none:
+            return d3.scaleSequential();
         case AXIS_TYPES.time:
             return d3.scaleTime();
         case AXIS_TYPES.linear:
