@@ -11,10 +11,5 @@
 #include <perspective/binding.h>
 using namespace perspective;
 namespace perspective {
-namespace binding {
-
-
-
-
-}
-}
+namespace binding {}
+} // namespace perspective

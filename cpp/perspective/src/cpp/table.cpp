@@ -582,7 +582,8 @@ t_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled)
 }
 
 void
-t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t iter_limit, bool fill) {
+t_table::promote_column(
+    const std::string& name, t_dtype new_dtype, std::int32_t iter_limit, bool fill) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -614,10 +615,7 @@ t_table::promote_column(const std::string& name, t_dtype new_dtype, std::int32_t
                     std::string fval = std::to_string(*val);
                     promoted_col->set_nth(i, fval);
                 } break;
-                default: {
-                    PSP_COMPLAIN_AND_ABORT("Bad promotion");
-                }
-
+                default: { PSP_COMPLAIN_AND_ABORT("Bad promotion"); }
             }
         }
     }
@@ -675,7 +673,7 @@ t_table::verify() const {
     }
 
     for (auto& c : m_columns) {
-        PSP_VERBOSE_ASSERT(c ,|| (size() == c->size()), "Ragged table encountered");
+        PSP_VERBOSE_ASSERT(c, || (size() == c->size()), "Ragged table encountered");
     }
 }
 

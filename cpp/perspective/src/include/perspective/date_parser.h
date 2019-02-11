@@ -17,12 +17,12 @@
 namespace perspective {
 
 class PERSPECTIVE_EXPORT t_date_parser {
-    public:
-        t_date_parser();
+public:
+    t_date_parser();
 
-        bool is_valid(std::string const& datestring);
+    bool is_valid(std::string const& datestring);
 
-    private:
-        static const std::string VALID_FORMATS[12];
+private:
+    static const std::string VALID_FORMATS[12];
 };
 } // end namespace perspective

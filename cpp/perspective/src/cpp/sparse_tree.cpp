@@ -681,7 +681,8 @@ t_stree::update_shape_from_static(const t_dtree_ctx& ctx) {
 
             sptidx = iter->m_idx;
             node.set_nstrands(nstrands);
-            PSP_VERBOSE_ASSERT(m_nodes->get<by_pidx_hash>().replace(iter, node), , "Failed to replace"); // middle argument ignored
+            PSP_VERBOSE_ASSERT(m_nodes->get<by_pidx_hash>().replace(iter, node), ,
+                "Failed to replace"); // middle argument ignored
         }
 
         populate_pkey_idx(ctx, dtree, dptidx, sptidx, ndepth, new_idx_pkey);
@@ -1217,8 +1218,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
 
                 new_value.set(
                     gstate.reduce<std::function<std::uint32_t(std::vector<t_tscalar>&)>>(pkeys,
-                        spec.get_dependencies()[0].name(),
-                        [](std::vector<t_tscalar>& values) {
+                        spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
                             std::unordered_set<t_tscalar> vset;
                             for (const auto& v : values) {
                                 vset.insert(v);
