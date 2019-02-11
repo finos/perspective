@@ -33,8 +33,7 @@ function barChart(container, settings) {
         .chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
         .xDomain(mainAxis.domain(settings, data))
         .xLabel(mainAxis.label(settings))
-        .yDomain(crossAxis.domain(settings))
-        .yPadding(0.5)
+        .yDomain(crossAxis.domain(settings, data))
         .yOrient("left")
         .yLabel(crossAxis.label(settings))
         .plotArea(series);

@@ -68,8 +68,8 @@ function seriesDataFn(settings, data) {
     return mainValue => {
         const series = data
             .filter(col => !!col[mainValue.name])
-            .map(col => ({
-                crossValue: labelfn(col),
+            .map((col, i) => ({
+                crossValue: labelfn(col, i),
                 mainValue: col[mainValue.name],
                 baseValue: col[`__BASE_VALUE__${mainValue.name}`] || 0,
                 key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
