@@ -7,7 +7,7 @@
  *
  */
 
-import _ from "underscore";
+import _ from "lodash";
 
 import perspective from "@jpmorganchase/perspective";
 import {CancelTask} from "./cancel_task.js";

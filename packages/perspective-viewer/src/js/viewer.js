@@ -10,7 +10,7 @@
 import "@webcomponents/webcomponentsjs";
 import "@webcomponents/shadycss/custom-style-interface.min.js";
 
-import _ from "underscore";
+import _ from "lodash";
 import {polyfill} from "mobile-drag-drop";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";

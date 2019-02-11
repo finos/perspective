@@ -7,7 +7,7 @@
  *
  */
 
-import _ from "underscore";
+import _ from "lodash";
 
 import Awesomplete from "awesomplete";
 import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
