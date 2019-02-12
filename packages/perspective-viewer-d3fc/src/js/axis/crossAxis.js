@@ -31,7 +31,7 @@ export const scale = settings => {
     }
 };
 
-const defaultScaleBand = () => minBandwidth(d3.scaleBand().padding(0.5));
+const defaultScaleBand = () => minBandwidth(d3.scaleBand());
 
 export const domain = settings => {
     const accessData = extent => {

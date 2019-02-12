@@ -8,18 +8,14 @@
  */
 import * as fc from "d3fc";
 
-export function barSeries(settings, colour) {
-    let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
+export function lineSeries(settings, colour) {
+    let series = fc.seriesSvgLine();
 
     if (colour) {
         series = series.decorate(selection => {
-            selection.style("fill", d => colour(d.key));
+            selection.style("stroke", d => colour(d[0] && d[0].key));
         });
     }
 
-    return fc
-        .autoBandwidth(series)
-        .crossValue(d => d.crossValue)
-        .mainValue(d => d.mainValue)
-        .baseValue(d => d.baseValue);
+    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
 }

@@ -9,26 +9,17 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import {barSeries} from "../series/barSeries";
 import {seriesColours} from "../series/seriesColours";
-import {groupAndStackData} from "../data/groupAndStackData";
+import {lineSeries} from "../series/lineSeries";
+import {splitData} from "../data/splitData";
 import {legend, filterData} from "../legend/legend";
 
-function columnChart(container, settings) {
-    const data = groupAndStackData(settings, filterData(settings));
+function lineChart(container, settings) {
+    const data = splitData(settings, filterData(settings));
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, colour)
-                    .align("left")
-                    .orient("vertical")
-            )
-        );
+    const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 
     const chart = fc
         .chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
@@ -39,15 +30,15 @@ function columnChart(container, settings) {
         .yLabel(mainAxis.label(settings))
         .plotArea(series);
 
-    chart.xPadding && chart.xPadding(0.5);
+    chart.xAlign && chart.xPadding(1);
 
     // render
     container.datum(data).call(chart);
 }
-columnChart.plugin = {
-    type: "d3_y_bar_2",
-    name: "[d3fc] Y Bar Chart 2",
+lineChart.plugin = {
+    type: "d3_y_line_2",
+    name: "[d3fc] Y Line Chart 2",
     maxRenderSize: 25000
 };
 
-export default columnChart;
+export default lineChart;
