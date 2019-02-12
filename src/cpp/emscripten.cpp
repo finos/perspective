@@ -1585,6 +1585,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<t_uindex>(
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
         .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
+        .function<void>("reset", &t_gnode::reset)
         .function<t_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
 
     /******************************************************************************

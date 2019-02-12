@@ -689,6 +689,10 @@ export default function(Module) {
         }
     };
 
+    table.prototype.clear = function() {
+        this.gnode.reset();
+    };
+
     /**
      * Delete this {@link table} and clean up all resources associated with it.
      * Table objects do not stop consuming resources or processing updates when
