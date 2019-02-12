@@ -45,8 +45,8 @@ function columnChart(container, settings) {
     container.datum(data).call(chart);
 }
 columnChart.plugin = {
-    type: "d3_y_bar_2",
-    name: "[d3fc] Y Bar Chart 2",
+    type: "d3_y_bar",
+    name: "[d3fc] Y Bar Chart",
     maxRenderSize: 25000
 };
 

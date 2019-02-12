@@ -2,7 +2,7 @@
     "name": "@jpmorganchase/perspective-viewer-d3fc",
     "version": "0.2.10",
     "description": "Perspective.js",
-    "main": "src/js/d3fc.js",
+    "main": "src/js/plugin/plugin.js",
     "files": [
         "build/**/*",
         "src/**/*",
