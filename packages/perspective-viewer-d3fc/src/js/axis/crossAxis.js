@@ -51,7 +51,7 @@ export const domain = settings => {
 export const labelFunction = settings => {
     switch (axisType(settings)) {
         case AXIS_TYPES.none:
-            return (d, i) => i;
+            return d => d.__ROW_PATH__[0];
         case AXIS_TYPES.time:
             return d => new Date(d.__ROW_PATH__[0]);
         case AXIS_TYPES.linear:
