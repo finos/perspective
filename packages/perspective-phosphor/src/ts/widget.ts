@@ -92,8 +92,6 @@ class PerspectiveWidget extends Widget {
     this.id = `${name}-` + _increment;
     _increment += 1;
 
-    this.node.classList.add('p-Widget');
-    this.node.classList.add(PSP_CONTAINER_CLASS);
     this._load(options);
   }
 
@@ -442,8 +440,10 @@ class PerspectiveWidget extends Widget {
     this._dark = dark
     if(this._dark){
       this.node.classList.add(PSP_CONTAINER_CLASS_DARK);
-    } else {
       this.node.classList.remove(PSP_CONTAINER_CLASS);
+    } else {
+      this.node.classList.add(PSP_CONTAINER_CLASS);
+      this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
     }
   }
 
@@ -476,6 +476,8 @@ namespace Private {
     export let _loaded = false;
 
     export function createNode(node: HTMLDivElement): PerspectiveViewer {
+        node.classList.add('p-Widget');
+        node.classList.add(PSP_CONTAINER_CLASS);
         let psp = (document.createElement('perspective-viewer') as any) as PerspectiveViewer;
         psp.classList.add(PSP_CLASS);
         psp.setAttribute('type', MIME_TYPE);
