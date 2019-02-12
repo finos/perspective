@@ -51,6 +51,10 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
     }
 
+    getContainer() {
+        return this._container;
+    }
+
     _configureSettings(oldSettings, newSettings) {
         if (oldSettings) {
             const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];

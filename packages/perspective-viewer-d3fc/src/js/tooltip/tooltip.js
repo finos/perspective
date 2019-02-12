@@ -1,12 +1,17 @@
-export function tooltip(container, selection, settings) {
+import {select} from "d3";
+import {getChartElement} from "../plugin/plugin";
+
+export function tooltip(selection, settings) {
     selection
         .filter(d => d.baseValue !== d.mainValue)
         .on("mouseover", function(data) {
+            const container = select(getChartElement(this).getContainer());
             const tooltipDiv = getTooltipDiv(container);
             const html = generateHtml(data, settings);
             showTooltip(container.node(), this, tooltipDiv, html);
         })
-        .on("mouseout", () => {
+        .on("mouseout", function() {
+            const container = select(getChartElement(this).getContainer());
             const tooltipDiv = getTooltipDiv(container);
             hideTooltip(tooltipDiv);
         });

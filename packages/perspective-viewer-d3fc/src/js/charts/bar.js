@@ -25,7 +25,7 @@ function barChart(container, settings) {
         .mapping((data, index) => data[index])
         .series(
             data.map(() =>
-                barSeries(container, settings, colour)
+                barSeries(settings, colour)
                     .align("left")
                     .orient("horizontal")
             )
