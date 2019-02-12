@@ -31,5 +31,10 @@ const getDataExtentFromValue = value => {
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");
 
 function flattenExtent(array) {
-    return array.reduce((r, v) => [r[0] !== undefined ? Math.min(r[0], v[0]) : v[0], r[1] !== undefined ? Math.max(r[1], v[1]) : v[1]], [undefined, undefined]);
+    const withUndefined = fn => (a, b) => {
+        if (a === undefined) return b;
+        if (b === undefined) return a;
+        return fn(a, b);
+    };
+    return array.reduce((r, v) => [withUndefined(Math.min)(r[0], v[0]), withUndefined(Math.max)(r[1], v[1])], [undefined, undefined]);
 }
