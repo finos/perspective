@@ -9,13 +9,14 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import {barSeries, barColours} from "../series/barSeries";
+import {barSeries} from "../series/barSeries";
+import {seriesColours} from "../series/seriesColours";
 import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
-    const colour = barColours(settings);
+    const colour = seriesColours(settings);
     legend(container, settings, colour);
 
     const series = fc
@@ -37,6 +38,8 @@ function barChart(container, settings) {
         .yOrient("left")
         .yLabel(crossAxis.label(settings))
         .plotArea(series);
+
+    chart.yPadding && chart.yPadding(0.5);
 
     // render
     container.datum(data).call(chart);

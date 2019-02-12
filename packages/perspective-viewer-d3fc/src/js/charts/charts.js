@@ -9,6 +9,7 @@
 
 import barChart from "./bar";
 import columnChart from "./column";
+import lineChart from "./line";
 
-const chartClasses = [barChart, columnChart];
+const chartClasses = [barChart, columnChart, lineChart];
 export default chartClasses;

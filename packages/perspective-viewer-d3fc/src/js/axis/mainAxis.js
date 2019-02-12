@@ -7,21 +7,34 @@
  *
  */
 import * as d3 from "d3";
-import * as fc from "d3fc";
 
 export const scale = () => d3.scaleLinear();
 
 export const domain = (settings, data) => {
-    // For multiple main values, we need to check the maximum and minimum (+ve and -ve)
-    const mainValueAccessors = aggFn => settings.mainValues.map(() => d => d.reduce((max, v) => aggFn(max, v.mainValue), 0));
+    const extent = getDataExtentFromArray(data);
+    return [extent[0] > 0 ? 0 : extent[0] * 1.1, extent[1] < 0 ? 0 : extent[1] * 1.1];
+};
 
-    const accessors = settings.mainValues.length > 1 ? mainValueAccessors(Math.max).concat(mainValueAccessors(Math.min)) : [d => d.mainValue];
+const getDataExtentFromArray = array => {
+    const dataExtent = array.map(getDataExtentFromValue);
+    const extent = flattenExtent(dataExtent);
+    return extent;
+};
 
-    return fc
-        .extentLinear()
-        .include([0])
-        .pad([0, 0.1])
-        .accessors(accessors)(data.reduce((r, v) => r.concat(v), []));
+const getDataExtentFromValue = value => {
+    if (Array.isArray(value)) {
+        return getDataExtentFromArray(value);
+    }
+    return [value.mainValue, value.mainValue];
 };
 
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");
+
+function flattenExtent(array) {
+    const withUndefined = fn => (a, b) => {
+        if (a === undefined) return b;
+        if (b === undefined) return a;
+        return fn(a, b);
+    };
+    return array.reduce((r, v) => [withUndefined(Math.min)(r[0], v[0]), withUndefined(Math.max)(r[1], v[1])], [undefined, undefined]);
+}
