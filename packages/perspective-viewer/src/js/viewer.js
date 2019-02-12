@@ -499,6 +499,20 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
+     * Clears the rows in the current {@link table}.
+     */
+    clear() {
+        this._table.clear();
+    }
+
+    /**
+     * Replaces all rows in the current {@link table}.
+     */
+    replace(data) {
+        this._table.replace(data);
+    }
+
+    /**
      * Reset's this element's view state and attributes to default.  Does not
      * delete this element's `perspective.table` or otherwise modify the data
      * state.

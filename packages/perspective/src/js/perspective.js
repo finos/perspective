@@ -689,8 +689,20 @@ export default function(Module) {
         }
     };
 
+    /**
+     * Remove all rows in this {@link table} while preserving the schema and
+     * construction options.
+     */
     table.prototype.clear = function() {
         this.gnode.reset();
+    };
+
+    /**
+     * Replace all rows in this {@link table} the input data.
+     */
+    table.prototype.replace = function(data) {
+        this.gnode.reset();
+        this.update(data);
     };
 
     /**
