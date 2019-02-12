@@ -9,25 +9,31 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import {barSeries, barColours} from "../series/barSeries";
-import {groupAndStackData} from "../data/groupAndStackData";
-import {legend, filterData} from "../legend/legend";
+import { barSeries, barColours } from "../series/barSeries";
+import { groupAndStackData } from "../data/groupAndStackData";
+import { legend, filterData } from "../legend/legend";
+import { mainGrid, crossGrid, gridlinesAnnotation, withGridLines } from "../gridlines/gridlines";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = barColours(settings);
     legend(container, settings, colour);
 
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, colour)
-                    .align("left")
-                    .orient("horizontal")
+    const gridlines = gridlinesAnnotation(mainGrid, crossGrid);
+
+    const series = withGridLines(
+        gridlines,
+        fc
+            .seriesSvgMulti()
+            .mapping((data, index) => data[index])
+            .series(
+                data.map(() =>
+                    barSeries(settings, colour)
+                        .align("left")
+                        .orient("horizontal")
+                )
             )
-        );
+    );
 
     const chart = fc
         .chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
