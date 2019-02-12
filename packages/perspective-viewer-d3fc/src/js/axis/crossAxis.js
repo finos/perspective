@@ -8,6 +8,8 @@
  */
 import * as d3 from "d3";
 import * as fc from "d3fc";
+import minBandwidth from "./minBandwidth";
+import withoutTicks from "./withoutTicks";
 
 const AXIS_TYPES = {
     none: "none",
@@ -19,26 +21,23 @@ const AXIS_TYPES = {
 export const scale = settings => {
     switch (axisType(settings)) {
         case AXIS_TYPES.none:
-            return scaleBandWithoutTicks();
+            return withoutTicks(defaultScaleBand());
         case AXIS_TYPES.time:
             return d3.scaleTime();
         case AXIS_TYPES.linear:
             return d3.scaleLinear();
         default:
-            return d3.scaleBand().padding(0.5);
+            return defaultScaleBand();
     }
 };
+
+const defaultScaleBand = () => minBandwidth(d3.scaleBand().padding(0.5));
 
 export const domain = settings => {
     const accessData = extent => {
         return extent.accessors([labelFunction(settings)])(settings.data);
     };
     switch (axisType(settings)) {
-        // case AXIS_TYPES.none: {
-        //     const d = accessData(fc.extentLinear());
-        //     console.log(d);
-        //     return d;
-        // }
         case AXIS_TYPES.time:
             return accessData(fc.extentTime());
         case AXIS_TYPES.linear:
@@ -72,12 +71,4 @@ const axisType = settings => {
         }
     }
     return AXIS_TYPES.ordinal;
-};
-
-const scaleBandWithoutTicks = () => {
-    const scale = d3.scaleBand().padding(0.5);
-    scale.ticks = function() {
-        return [];
-    };
-    return scale;
 };
