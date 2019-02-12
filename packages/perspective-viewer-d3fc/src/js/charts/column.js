@@ -25,7 +25,7 @@ function columnChart(container, settings) {
         .mapping((data, index) => data[index])
         .series(
             data.map(() =>
-                barSeries(settings, colour)
+                barSeries(container, settings, colour)
                     .align("left")
                     .orient("vertical")
             )

@@ -1,13 +1,27 @@
-export function tooltip(selection, settings) {
+export function tooltip(container, selection, settings) {
     selection
         .filter(d => d.baseValue !== d.mainValue)
         .on("mouseover", function(data) {
-            console.log(data);
-            console.log(settings);
+            const tooltipDiv = getTooltipDiv(container);
             const html = generateHtml(data, settings);
-            console.log(html);
+            showTooltip(container.node(), this, tooltipDiv, html);
         })
-        .on("mouseout", () => console.log("leave"));
+        .on("mouseout", () => {
+            const tooltipDiv = getTooltipDiv(container);
+            hideTooltip(tooltipDiv);
+        });
+}
+
+function getTooltipDiv(container) {
+    let tooltipDiv = container.select("div.tooltip");
+    if (tooltipDiv.size() === 0) {
+        tooltipDiv = container
+            .append("div")
+            .attr("class", "tooltip")
+            .style("z-index", 3)
+            .style("opacity", 0);
+    }
+    return tooltipDiv;
 }
 
 function generateHtml(data, settings) {
@@ -29,4 +43,25 @@ function generateHtml(data, settings) {
     html.push(`${splits[splits.length - 1]}: <b>${data.mainValue - data.baseValue}</b>`);
 
     return html.join("</br>");
+}
+
+function showTooltip(containerNode, barNode, tooltipDiv, html) {
+    const containerRect = containerNode.getBoundingClientRect();
+    const barRect = barNode.getBoundingClientRect();
+    const left = barRect.left + barRect.width / 2 - containerRect.left;
+    const top = barRect.top - containerRect.top;
+    tooltipDiv
+        .style("left", `${left}px`)
+        .style("top", `${top}px`)
+        .html(html)
+        .transition()
+        .duration(200)
+        .style("opacity", 0.9);
+}
+
+function hideTooltip(tooltipDiv) {
+    tooltipDiv
+        .transition()
+        .duration(500)
+        .style("opacity", 0);
 }
