@@ -36,8 +36,8 @@ function lineChart(container, settings) {
     container.datum(data).call(chart);
 }
 lineChart.plugin = {
-    type: "d3_y_line_2",
-    name: "[d3fc] Y Line Chart 2",
+    type: "d3_y_line",
+    name: "[d3fc] Y Line Chart",
     maxRenderSize: 25000
 };
 
