@@ -42,8 +42,8 @@ function barChart(container, settings) {
     container.datum(data).call(chart);
 }
 barChart.plugin = {
-    type: "d3_x_bar_2",
-    name: "[d3fc] X Bar Chart 2",
+    type: "d3_x_bar",
+    name: "[d3fc] X Bar Chart",
     maxRenderSize: 25000
 };
 
