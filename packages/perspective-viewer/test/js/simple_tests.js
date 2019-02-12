@@ -83,23 +83,6 @@ exports.default = function() {
         await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales","Quantity"]'), viewer);
     });
 
-    test.capture("replaces all rows.", async page => {
-        const viewer = await page.$("perspective-viewer");
-        await page.shadow_click("perspective-viewer", "#config_button");
-        const json = await page.evaluate(async element => {
-            let json = await element.view.to_json();
-            return json.slice(10, 20);
-        }, viewer);
-        expect(json.length).toEqual(10);
-        await page.evaluate(
-            async (element, json) => {
-                element.replace(json);
-            },
-            viewer,
-            json
-        );
-    });
-
     test.skip("pivots by row when drag-and-dropped.", async page => {
         await page.shadow_click("perspective-viewer", "#config_button");
         await drag_drop(page, "perspective-row[name=Category]", "#row_pivots");
