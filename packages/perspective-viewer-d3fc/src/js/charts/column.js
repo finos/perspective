@@ -9,31 +9,26 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import { barSeries, barColours } from "../series/barSeries";
-import { groupAndStackData } from "../data/groupAndStackData";
-import { legend, filterData } from "../legend/legend";
-import { mainGrid, crossGrid, gridlinesAnnotation, withGridLines } from "../gridlines/gridlines";
+import {barSeries, barColours} from "../series/barSeries";
+import {groupAndStackData} from "../data/groupAndStackData";
+import {legend, filterData} from "../legend/legend";
+import {withGridLines} from "../gridlines/gridlines";
 
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = barColours(settings);
     legend(container, settings, colour);
 
-    const gridlines = gridlinesAnnotation(crossGrid, mainGrid);
-
-    const series = withGridLines(
-        gridlines,
-        fc
-            .seriesSvgMulti()
-            .mapping((data, index) => data[index])
-            .series(
-                data.map(() =>
-                    barSeries(settings, colour)
-                        .align("left")
-                        .orient("vertical")
-                )
+    const series = fc
+        .seriesSvgMulti()
+        .mapping((data, index) => data[index])
+        .series(
+            data.map(() =>
+                barSeries(settings, colour)
+                    .align("left")
+                    .orient("vertical")
             )
-    );
+        );
 
     const chart = fc
         .chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
@@ -42,7 +37,7 @@ function columnChart(container, settings) {
         .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
         .yLabel(mainAxis.label(settings))
-        .plotArea(series);
+        .plotArea(withGridLines(series).orient("vertical"));
 
     // render
     container.datum(data).call(chart);

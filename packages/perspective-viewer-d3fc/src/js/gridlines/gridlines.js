@@ -1,14 +1,35 @@
 import * as fc from "d3fc";
 
-export const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
+const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
 
-export const crossGrid = x => x.style("display", "none");
+const crossGrid = x => x.style("display", "none");
 
-export const gridlinesAnnotation = (xStyle, yStyle) => {
-    return fc
-        .annotationSvgGridline()
-        .xDecorate(xStyle)
-        .yDecorate(yStyle);
+export const withGridLines = series => {
+    let orient = "vertical";
+
+    const svgMulti = fc.seriesSvgMulti();
+
+    const _withGridLines = function(...args) {
+        const xStyle = orient === "vertical" ? crossGrid : mainGrid;
+        const yStyle = orient === "vertical" ? mainGrid : crossGrid;
+
+        const gridlines = fc
+            .annotationSvgGridline()
+            .xDecorate(xStyle)
+            .yDecorate(yStyle);
+
+        return svgMulti.series([gridlines, series])(...args);
+    };
+
+    fc.rebindAll(_withGridLines, svgMulti);
+
+    _withGridLines.orient = (...args) => {
+        if (!args.length) {
+            return orient;
+        }
+        orient = args[0];
+        return _withGridLines;
+    };
+
+    return _withGridLines;
 };
-
-export const withGridLines = (gridlines, originalSeries) => fc.seriesSvgMulti().series([gridlines, originalSeries])
