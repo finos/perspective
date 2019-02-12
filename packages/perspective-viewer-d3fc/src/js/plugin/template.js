@@ -28,11 +28,7 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
 
         this._chart = chart;
-        this._settings =
-            this._settings &&
-            areArraysEqualSimple([this._settings.crossValues, this._settings.mainValues, this._settings.splitValues], [settings.crossValues, settings.mainValues, settings.splitValues])
-                ? {...this._settings, data: settings.data}
-                : settings;
+        this._settings = this._configureSettings(this._settings, settings);
         this.draw();
     }
 
@@ -53,6 +49,16 @@ class D3FCChartElement extends HTMLElement {
 
     delete() {
         this.remove();
+    }
+
+    _configureSettings(oldSettings, newSettings) {
+        if (oldSettings) {
+            const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];
+            const newValues = [newSettings.crossValues, newSettings.mainValues, newSettings.splitValues];
+            if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data};
+        }
+        this.remove();
+        return newSettings;
     }
 }
 
