@@ -7,7 +7,7 @@
  *
  */
 import * as d3Legend from "d3-svg-legend";
-import {getChartElement} from "../plugin/plugin";
+import {getChartElement} from "../plugin/root";
 
 export function legend(container, settings, colour) {
     if (colour) {

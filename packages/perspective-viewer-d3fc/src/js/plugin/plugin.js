@@ -96,7 +96,3 @@ function deleteChart() {
         perspective_d3fc_element.delete();
     }
 }
-
-export function getChartElement(element) {
-    return element.getRootNode().host;
-}
