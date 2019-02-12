@@ -6,7 +6,6 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import _ from "underscore";
 import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/plugin";
 
@@ -65,10 +64,4 @@ export function filterData(settings, data) {
         });
     }
     return useData;
-}
-
-export function configureHidden(oldSettings, newSettings) {
-    const areSplitsEqual = oldSettings && oldSettings.splitValues && _.isEqual(oldSettings.splitValues, newSettings.splitValues);
-    const hideKeys = areSplitsEqual ? oldSettings.hideKeys : [];
-    return {...newSettings, hideKeys};
 }

@@ -10,7 +10,7 @@ import * as d3 from "d3";
 
 import style from "../../less/chart.less";
 import template from "../../html/d3fc-chart.html";
-import {configureHidden} from "../legend/legend";
+import {areArraysEqualSimple} from "../utils/utils";
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
 
@@ -28,7 +28,11 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
 
         this._chart = chart;
-        this._settings = configureHidden(this._settings, settings);
+        this._settings =
+            this._settings &&
+            areArraysEqualSimple([this._settings.crossValues, this._settings.mainValues, this._settings.splitValues], [settings.crossValues, settings.mainValues, settings.splitValues])
+                ? {...this._settings, data: settings.data}
+                : settings;
         this.draw();
     }
 
