@@ -1,5 +1,5 @@
 import {select} from "d3";
-import {getChartElement} from "../plugin/plugin";
+import {getChartElement} from "../plugin/root";
 
 export function tooltip(selection, settings) {
     selection
