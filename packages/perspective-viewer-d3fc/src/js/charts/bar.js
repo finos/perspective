@@ -17,8 +17,8 @@ import {withGridLines} from "../gridlines/gridlines";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
-    const colour = seriesColours(settings);
-    legend(container, settings, colour);
+    const [colour, domain] = seriesColours(settings);
+    legend(container, settings, colour, domain);
 
     const series = fc
         .seriesSvgMulti()

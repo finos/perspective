@@ -8,48 +8,84 @@
  */
 import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/root";
+import legendControlsTemplate from "../../html/legend-controls.html";
 
-export function legend(container, settings, colour) {
+export function legend(container, settings, colour, domain) {
     if (colour) {
-        var legend = d3Legend
-            .legendColor()
-            .scale(colour)
-            .shape("circle")
-            .shapeRadius(6)
-            .orient("vertical")
-            .on("cellclick", function(d) {
-                settings.hideKeys = settings.hideKeys || [];
-                if (settings.hideKeys.includes(d)) {
-                    settings.hideKeys = settings.hideKeys.filter(k => k !== d);
-                } else {
-                    settings.hideKeys.push(d);
-                }
+        const groupSize = 10;
+        const numberOfGroups = Math.ceil(domain.length / groupSize);
+        let groupIndex = 0;
 
-                getChartElement(this).draw();
-            });
+        const legendControls = container
+            .append("div")
+            .attr("class", "legend-controls")
+            .html(legendControlsTemplate);
 
-        if (settings.mainValues.length <= 1) {
-            legend.labels(options => {
-                const parts = options.domain[options.i].split("|");
-                return parts.slice(0, parts.length - 1).join("|");
-            });
-        }
+        const setPageText = () => legendControls.select("#page-text").text(`${groupIndex + 1}/${numberOfGroups}`);
+        setPageText();
+        legendControls.select("#up-arrow").on("click", () => {
+            if (groupIndex > 0) {
+                groupIndex--;
+                createLegend(container, settings, colour, groupSize, groupIndex);
+                setPageText();
+            }
+        });
+        legendControls.select("#down-arrow").on("click", () => {
+            if (groupIndex < numberOfGroups - 1) {
+                groupIndex++;
+                createLegend(container, settings, colour, groupSize, groupIndex);
+                setPageText();
+            }
+        });
 
-        let legendSelection = container.select("svg.legend");
-        if (legendSelection.size() === 0) {
-            legendSelection = container.append("svg");
-        }
-
-        // render the legend
-        legendSelection
-            .attr("class", "legend")
-            .style("z-index", "2")
-            .call(legend)
-            .select("g.legendCells")
-            .attr("transform", "translate(20,20)")
-            .selectAll("g.cell")
-            .classed("hidden", data => settings.hideKeys && settings.hideKeys.includes(data));
+        createLegend(container, settings, colour, groupSize, groupIndex);
     }
+}
+
+function createLegend(container, settings, colour, groupSize, groupIndex) {
+    var legend = d3Legend
+        .legendColor()
+        .scale(colour)
+        .shape("circle")
+        .shapeRadius(6)
+        .orient("vertical")
+        .on("cellclick", function(d) {
+            settings.hideKeys = settings.hideKeys || [];
+            if (settings.hideKeys.includes(d)) {
+                settings.hideKeys = settings.hideKeys.filter(k => k !== d);
+            } else {
+                settings.hideKeys.push(d);
+            }
+
+            getChartElement(this).draw();
+        })
+        .cellFilter(cellFilter(groupSize, groupIndex));
+
+    if (settings.mainValues.length <= 1) {
+        legend.labels(options => {
+            const parts = options.domain[options.i].split("|");
+            return parts.slice(0, -1).join("|");
+        });
+    }
+
+    let legendSelection = container.select("svg.legend");
+    if (legendSelection.size() === 0) {
+        legendSelection = container.append("svg");
+    }
+
+    // render the legend
+    legendSelection
+        .attr("class", "legend")
+        .style("z-index", "2")
+        .call(legend)
+        .select("g.legendCells")
+        .attr("transform", "translate(20,20)")
+        .selectAll("g.cell")
+        .classed("hidden", data => settings.hideKeys && settings.hideKeys.includes(data));
+}
+
+function cellFilter(groupSize, groupIndex) {
+    return (_, i) => i >= groupSize * groupIndex && i < groupSize * groupIndex + groupSize;
 }
 
 export function filterData(settings, data) {

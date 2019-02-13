@@ -62,7 +62,8 @@
         font-size: 8pt;
         left: auto;
         width: 150px;
-        height: 100px;
+        overflow-x: unset;
+        overflow-y: visible;
 
         & .cell {
             cursor: pointer;
@@ -75,6 +76,12 @@
         & text {
             fill: var(--d3fc-legend-text, rgb(51, 51, 51));
         }
+    }
+
+    .legend-controls {
+        position: absolute;
+        top: 0;
+        right: 15px;
     }
 
     div.tooltip {

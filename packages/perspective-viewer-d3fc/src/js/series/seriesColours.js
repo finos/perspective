@@ -11,5 +11,5 @@ import * as d3 from "d3";
 export function seriesColours(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
-    return domain.length > 1 ? d3.scaleOrdinal(d3.schemeCategory10).domain(domain) : null;
+    return [domain.length > 1 ? d3.scaleOrdinal(d3.schemeCategory10).domain(domain) : null, domain];
 }
