@@ -18,10 +18,11 @@ function seriesToPoints(settings, data) {
 
     const mappedSeries = data.map((col, i) => ({
         crossValue: labelfn(col, i),
-        mainValues: settings.mainValues.map(v => col[v]).join("|"),
+        mainValues: settings.mainValues.map(v => col[v.name]),
         x: col[settings.mainValues[0].name],
         y: col[settings.mainValues[1].name],
-        size: settings.mainValues.length > 2 ? col[settings.mainValues[2].name] : undefined
+        size: settings.mainValues.length > 2 ? col[settings.mainValues[2].name] : undefined,
+        key: data.key
     }));
     mappedSeries.key = data.key;
     return mappedSeries;

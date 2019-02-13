@@ -6,7 +6,7 @@ export function tooltip(selection, settings) {
     const container = select(getChartElement(selection.node()).getContainer());
     const tooltipDiv = getTooltipDiv(container);
     selection
-        .filter(d => d.baseValue !== d.mainValue)
+        //        .filter(d => d.baseValue !== d.mainValue)
         .on("mouseover", function(data) {
             generateHtml(tooltipDiv, data, settings);
             showTooltip(container.node(), this, tooltipDiv);
@@ -30,8 +30,6 @@ function getTooltipDiv(container) {
 }
 
 function generateHtml(tooltipDiv, data, settings) {
-    const splits = data.key.split("|");
-
     // Add group data
     if (settings.crossValues.length) {
         const groups = data.crossValue.split(",");
@@ -43,31 +41,60 @@ function generateHtml(tooltipDiv, data, settings) {
             .each(eachValue(settings.crossValues));
     }
 
-    // Add split data
-    if (settings.splitValues.length) {
-        tooltipDiv
-            .select("#split-values")
-            .selectAll("li")
-            .data(splits.slice(0, -1))
-            .join("li")
-            .each(eachValue(settings.splitValues));
-    }
-
+    const splitValues = getSplitValues(settings, data);
     // Add data value
     tooltipDiv
-        .select("#data-value")
-        .text(`${splits[splits.length - 1]}: `)
-        .append("b")
-        .text(data.mainValue - data.baseValue);
+        .select("#split-values")
+        .selectAll("li")
+        .data(splitValues.values)
+        .join("li")
+        .each(eachValue(splitValues.labels));
 
-    function eachValue(list) {
-        return function(d, i) {
-            select(this)
-                .text(`${list[i].name}: `)
-                .append("b")
-                .text(d);
+    const dataValues = getDataValues(settings, data);
+    // Add data value
+    tooltipDiv
+        .select("#data-values")
+        .selectAll("li")
+        .data(dataValues.values)
+        .join("li")
+        .each(eachValue(dataValues.labels));
+}
+
+function getSplitValues(settings, data) {
+    const splits = data.key ? data.key.split("|") : [];
+
+    return {
+        values: data.mainValues ? splits : splits.slice(0, -1),
+        labels: settings.splitValues
+    };
+}
+
+function getDataValues(settings, data) {
+    if (data.mainValues) {
+        return {
+            values: data.mainValues,
+            labels: settings.mainValues
+        };
+    } else {
+        const splits = data.key.split("|");
+        return {
+            values: [data.mainValue - data.baseValue],
+            labels: [{name: splits[splits.length - 1]}]
         };
     }
+}
+
+function eachValue(list) {
+    return function(d, i) {
+        select(this)
+            .text(`${list[i].name}: `)
+            .append("b")
+            .text(formatNumber(d));
+    };
+}
+
+function formatNumber(value) {
+    return value.toLocaleString(undefined, {style: "decimal"});
 }
 
 function showTooltip(containerNode, barNode, tooltipDiv) {

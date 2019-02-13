@@ -7,6 +7,7 @@
  *
  */
 import * as fc from "d3fc";
+import {tooltip} from "../tooltip/tooltip";
 
 export function pointSeries(settings, colour, seriesKey, size) {
     let series = fc
@@ -19,6 +20,7 @@ export function pointSeries(settings, colour, seriesKey, size) {
     }
 
     series.decorate(selection => {
+        tooltip(selection, settings);
         if (colour) {
             selection.style("stroke", () => colour(seriesKey)).style("fill", () => withOpacity(colour(seriesKey)));
         }
