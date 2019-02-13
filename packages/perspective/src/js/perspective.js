@@ -13,9 +13,9 @@ import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./translator.js";
 import {bindall, get_column_type} from "./utils.js";
 
-import {Precision} from "@apache-arrow/es5-esm/type";
+import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
-import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Visitor} from "@apache-arrow/es5-esm/visitor";
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -94,37 +94,25 @@ export default function(Module) {
         let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
             return loader.loadColumn(field, arrow.getColumnAt(colIdx));
         }, new ArrowColumnLoader());
-        if (typeof loader.cdata[0].values === "undefined") {
-            let nchunks = loader.cdata[0].data.chunkVectors.length;
-            let chunks = [];
-            for (let x = 0; x < nchunks; x++) {
-                chunks.push({
-                    row_count: loader.cdata[0].data.chunkVectors[x].length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata.map(y => y.data.chunkVectors[x])
-                });
-            }
-            return chunks;
-        } else {
-            return [
-                {
-                    row_count: arrow.length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata
-                }
-            ];
+        let nchunks = loader.cdata[0].chunks.length;
+        let chunks = [];
+        for (let x = 0; x < nchunks; x++) {
+            chunks.push({
+                row_count: loader.cdata[0].chunks[x].length,
+                is_arrow: true,
+                names: loader.names,
+                types: loader.types,
+                cdata: loader.cdata.map(y => y.chunks[x])
+            });
         }
+        return chunks;
     }
 
     /**
      *
      * @private
      */
-    class ArrowColumnLoader extends TypeVisitor {
+    class ArrowColumnLoader extends Visitor {
         constructor(cdata, names, types) {
             super();
             this.cdata = cdata || [];

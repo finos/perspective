@@ -2,20 +2,21 @@
 # yarn lockfile v1
 
 
-"@apache-arrow/es5-esm@^0.3.1":
-  version "0.3.1"
-  resolved "https://registry.yarnpkg.com/@apache-arrow/es5-esm/-/es5-esm-0.3.1.tgz#d2c9ce5b739a650e6b3d58bf945841f826e16c6d"
-  integrity sha512-3icc/KKklnW55o0ab0bwJG1gnBRtkdpYd7KzizPO5fwOFY6E1Cw89UbLMfLzogl0+Pn3pbYK0wK/OM/nzweCVw==
+"@apache-arrow/es5-esm@^0.4.0":
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/@apache-arrow/es5-esm/-/es5-esm-0.4.0.tgz#1014883c75e3a28e6b0938dcb882ce38b9e0fc09"
+  integrity sha512-x+ayezWWuamqasm+Ddo14XdOy1xfibzoN39zACAyiayeXr+IN+cTwj9Hy3/KC9U7dKos4Wz3ghv/Hng+70lbLQ==
   dependencies:
-    "@types/flatbuffers" "1.6.5"
-    "@types/node" "9.3.0"
-    "@types/text-encoding-utf-8" "1.0.1"
-    command-line-args "5.0.1"
-    command-line-usage "4.1.0"
-    flatbuffers trxcllnt/flatbuffers-esm
+    "@types/flatbuffers" "^1.9.0"
+    "@types/node" "^10.12.18"
+    "@types/text-encoding-utf-8" "^1.0.1"
+    command-line-args "5.0.2"
+    command-line-usage "5.0.5"
+    flatbuffers "^1.10.2"
     json-bignum "0.0.3"
-    text-encoding-utf-8 "^1.0.2"
-    tslib "1.9.0"
+    pad-left "2.1.0"
+    text-encoding-utf-8 "1.0.2"
+    tslib "^1.9.3"
 
 "@babel/cli@^7.2.3":
   version "7.2.3"
@@ -917,10 +918,10 @@
     "@types/jquery" "*"
     "@types/underscore" "*"
 
-"@types/flatbuffers@1.6.5":
-  version "1.6.5"
-  resolved "https://registry.yarnpkg.com/@types/flatbuffers/-/flatbuffers-1.6.5.tgz#3516467dffa5c4af4befed0ce7cc25877fea92ba"
-  integrity sha512-HIRbmm+hJToGFK+IeC2vkH769Sr6OO5WRlOYLFCRXeJuwdS9xG5GvKdTOl+ZDO4r4BRiaVdlGc/Nu9fjzx9Duw==
+"@types/flatbuffers@^1.9.0":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@types/flatbuffers/-/flatbuffers-1.9.1.tgz#1910bebfc15c8f67a287fae07bfc061f94e9d291"
+  integrity sha512-TC3X0Nkj5wgvuY217VkodBtjbD3Yr0JNApDY1GW9IU5Mzm5ie1IJErqe4vRm+wy08IRz3bemaDATrdEw1CJlVQ==
 
 "@types/jest@^23.3.9":
   version "23.3.10"
@@ -939,15 +940,15 @@
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.118.tgz#247bab39bfcc6d910d4927c6e06cbc70ec376f27"
   integrity sha512-iiJbKLZbhSa6FYRip/9ZDX6HXhayXLDGY2Fqws9cOkEQ6XeKfaxB0sC541mowZJueYyMnVUmmG+al5/4fCDrgw==
 
-"@types/node@9.3.0":
-  version "9.3.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
-  integrity sha512-wNBfvNjzsJl4tswIZKXCFQY0lss9nKUyJnG6T94X/eqjRgI2jHZ4evdjhQYBSan/vGtF6XVXPApOmNH2rf0KKw==
-
 "@types/node@^10.11.7":
   version "10.12.10"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.10.tgz#4fa76e6598b7de3f0cb6ec3abacc4f59e5b3a2ce"
   integrity sha512-8xZEYckCbUVgK8Eg7lf5Iy4COKJ5uXlnIOnePN0WUwSQggy9tolM+tDJf7wMOnT/JT/W9xDYIaYggt3mRV2O5w==
+
+"@types/node@^10.12.18":
+  version "10.12.26"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.26.tgz#2dec19f1f7981c95cb54bab8f618ecb5dc983d0e"
+  integrity sha512-nMRqS+mL1TOnIJrL6LKJcNZPB8V3eTfRo9FQA2b5gDvrHurC8XbSA86KNe0dShlEL7ReWJv/OU9NL7Z0dnqWTg==
 
 "@types/semver@^5.5.0":
   version "5.5.0"
@@ -959,7 +960,7 @@
   resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.2.tgz#a811b8c18e2babab7d542b3365887ae2e4d9de47"
   integrity sha512-7EJYyKTL7tFR8+gDbB6Wwz/arpGa0Mywk1TJbNzKzHtzbwVmY4HR9WqS5VV7dsBUKQmPNr192jHr/VpBluj/hg==
 
-"@types/text-encoding-utf-8@1.0.1":
+"@types/text-encoding-utf-8@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/text-encoding-utf-8/-/text-encoding-utf-8-1.0.1.tgz#908d884af1114e5d8df47597b1e04f833383d23d"
   integrity sha512-GpIEYaS+yNfYqpowLLziiY42pyaL+lThd/wMh6tTubaKuG4IRkXqqyxK7Nddn3BvpUg2+go3Gv/jbXvAFMRjiQ==
@@ -1149,13 +1150,6 @@ alphanum-sort@^1.0.1, alphanum-sort@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/alphanum-sort/-/alphanum-sort-1.0.2.tgz#97a1119649b211ad33691d9f9f486a8ec9fbe0a3"
   integrity sha1-l6ERlkmyEa0zaR2fn0hqjsn74KM=
-
-ansi-escape-sequences@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/ansi-escape-sequences/-/ansi-escape-sequences-4.0.1.tgz#6c3f85b55491c81cd7fc30c617a0cb2529a12efc"
-  integrity sha512-G3Aona26cXv8nWIwID6MP11WSishqnyOPQjYaVJ7CfY2Xgu5sHOXM39nQg6XtyfF9++oLV6l2uFGojBb4zglGA==
-  dependencies:
-    array-back "^2.0.0"
 
 ansi-escapes@^3.0.0:
   version "3.1.0"
@@ -3256,10 +3250,10 @@ command-join@^2.0.0:
   resolved "https://registry.yarnpkg.com/command-join/-/command-join-2.0.0.tgz#52e8b984f4872d952ff1bdc8b98397d27c7144cf"
   integrity sha1-Uui5hPSHLZUv8b3IuYOX0nxxRM8=
 
-command-line-args@5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/command-line-args/-/command-line-args-5.0.1.tgz#1610ba1a30b566081ce3f51268c1888c058587bd"
-  integrity sha512-gRJDcIjFSzMcmG/GrJlgL0wWoAxr11mVzCq32bjka0endupm9meLwvoJUKc4HDeFiEIB2X3GvNrhF5cKO4Bd4A==
+command-line-args@5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/command-line-args/-/command-line-args-5.0.2.tgz#c4e56b016636af1323cf485aa25c3cb203dfbbe4"
+  integrity sha512-/qPcbL8zpqg53x4rAaqMFlRV4opN3pbla7I7k9x8kyOBMQoGT6WltjN6sXZuxOXw6DgdK7Ad+ijYS5gjcr7vlA==
   dependencies:
     argv-tools "^0.1.1"
     array-back "^2.0.0"
@@ -3267,14 +3261,14 @@ command-line-args@5.0.1:
     lodash.camelcase "^4.3.0"
     typical "^2.6.1"
 
-command-line-usage@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/command-line-usage/-/command-line-usage-4.1.0.tgz#a6b3b2e2703b4dcf8bd46ae19e118a9a52972882"
-  integrity sha512-MxS8Ad995KpdAC0Jopo/ovGIroV/m0KHwzKfXxKag6FHOkGsH8/lv5yjgablcRxCJJC0oJeUMuO/gmaq+Wq46g==
+command-line-usage@5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/command-line-usage/-/command-line-usage-5.0.5.tgz#5f25933ffe6dedd983c635d38a21d7e623fda357"
+  integrity sha512-d8NrGylA5oCXSbGoKz05FkehDAzSmIm4K03S5VDh4d5lZAtTWfc3D1RuETtuQCn8129nYfJfDdF7P/lwcz1BlA==
   dependencies:
-    ansi-escape-sequences "^4.0.0"
     array-back "^2.0.0"
-    table-layout "^0.4.2"
+    chalk "^2.4.1"
+    table-layout "^0.4.3"
     typical "^2.6.1"
 
 commander@2.11.0:
@@ -5112,10 +5106,6 @@ flatbuffers@^1.10.2:
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/flatbuffers/-/flatbuffers-1.10.2.tgz#f1012af6728a0ed6e7e6ddf2013b565b039c5e86"
   integrity sha512-VK7lHZF/corkykjXZ0+dqViI8Wk1YpwPCFN2wrnTs+PMCMG5+uHRvkRW14fuA7Smkhkgx+Dj5UdS3YXktJL+qw==
-
-flatbuffers@trxcllnt/flatbuffers-esm:
-  version "1.7.0"
-  resolved "https://codeload.github.com/trxcllnt/flatbuffers-esm/tar.gz/0ed890546a45c361665b1778f856b4a48cc22c8a"
 
 flatten@^1.0.2:
   version "1.0.2"
@@ -8608,6 +8598,13 @@ package-json@^4.0.1:
     registry-url "^3.0.3"
     semver "^5.1.0"
 
+pad-left@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/pad-left/-/pad-left-2.1.0.tgz#16e6a3b2d44a8e138cb0838cc7cb403a4fc9e994"
+  integrity sha1-FuajstRKjhOMsIOMx8tAOk/J6ZQ=
+  dependencies:
+    repeat-string "^1.5.4"
+
 pako@~1.0.5:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.7.tgz#2473439021b57f1516c82f58be7275ad8ef1bb27"
@@ -11019,7 +11016,7 @@ synonomous@^2.1.2:
   resolved "https://registry.yarnpkg.com/synonomous/-/synonomous-2.1.2.tgz#d4c0bcf42b2d98cec605973533a3b9022c7272b8"
   integrity sha512-oHkJKckUyE1ajo5lg/N3kPA7FmBQflGs1vE5HbnFbQuVgF5ocWbUVvSGjEs3/grqKLZI3RKnkYOi+ic8AapYlw==
 
-table-layout@^0.4.2:
+table-layout@^0.4.3:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/table-layout/-/table-layout-0.4.4.tgz#bc5398b2a05e58b67b05dd9238354b89ef27be0f"
   integrity sha512-uNaR3SRMJwfdp9OUr36eyEi6LLsbcTqTO/hfTsNviKsNeyMBPICJCC7QXRF3+07bAP6FRwA8rczJPBqXDc0CkQ==
@@ -11155,7 +11152,7 @@ test-value@^3.0.0:
     array-back "^2.0.0"
     typical "^2.6.1"
 
-text-encoding-utf-8@^1.0.2:
+text-encoding-utf-8@1.0.2, text-encoding-utf-8@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/text-encoding-utf-8/-/text-encoding-utf-8-1.0.2.tgz#585b62197b0ae437e3c7b5d0af27ac1021e10d13"
   integrity sha512-8bw4MY9WjdsD2aMtO0OzOCY3pXGYNx2d2FfHRVUKkiCPDWjKuOlhLVASS+pD7VkLTVjW268LYJHwsnPFlBpbAg==
@@ -11389,11 +11386,6 @@ ts-loader@^3.5.0:
     loader-utils "^1.0.2"
     micromatch "^3.1.4"
     semver "^5.0.1"
-
-tslib@1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
-  integrity sha512-f/qGG2tUkrISBlQZEjEqoZ3B2+npJjIf04H1wuAv9iA8i04Icp+61KRXxFdha22670NJopsZCIjhC3SnjPRKrQ==
 
 tslib@^1.9.3:
   version "1.9.3"
