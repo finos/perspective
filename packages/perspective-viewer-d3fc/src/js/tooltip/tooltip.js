@@ -40,9 +40,12 @@ function generateHtml(tooltipDiv, data, settings) {
             .selectAll("li")
             .data(groups)
             .join("li")
-            .text((_, i) => `${settings.crossValues[i].name}: `)
-            .append("b")
-            .text(d => d);
+            .each(function(d, i) {
+                select(this)
+                    .text(`${settings.crossValues[i].name}: `)
+                    .append("b")
+                    .text(d);
+            });
     }
 
     // Add split data
@@ -52,9 +55,12 @@ function generateHtml(tooltipDiv, data, settings) {
             .selectAll("li")
             .data(splits.slice(0, -1))
             .join("li")
-            .text((_, i) => `${settings.splitValues[i].name}: `)
-            .append("b")
-            .text(d => d);
+            .each(function(d, i) {
+                select(this)
+                    .text(`${settings.splitValues[i].name}: `)
+                    .append("b")
+                    .text(d);
+            });
     }
 
     // Add data value
