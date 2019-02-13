@@ -9,6 +9,7 @@
 import * as d3 from "d3";
 
 import style from "../../less/chart.less";
+import perspectiveStyle from "../../less/perspective-view.less";
 import template from "../../html/d3fc-chart.html";
 import {areArraysEqualSimple} from "../utils/utils";
 
@@ -22,6 +23,12 @@ class D3FCChartElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
+
+        // Add the additional styles needed for the perspective-viewer host
+        var style = document.createElement("style");
+        style.setAttribute("scope", "perspective-viewer");
+        style.textContent = perspectiveStyle;
+        this.shadowRoot.host.getRootNode().appendChild(style);
     }
 
     render(chart, settings) {

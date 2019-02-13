@@ -12,18 +12,21 @@ import "./template";
 
 export const PRIVATE = Symbol("D3FC chart");
 
+const DEFAULT_PLUGIN_SETTINGS = {
+    initial: {
+        type: "number",
+        count: 1
+    },
+    selectMode: "select"
+};
+
 charts.forEach(chart => {
     global.registerPlugin(chart.plugin.type, {
-        name: chart.plugin.name,
+        ...DEFAULT_PLUGIN_SETTINGS,
+        ...chart.plugin,
         create: drawChart(chart),
         resize: resizeChart,
-        initial: {
-            type: "number",
-            count: 1
-        },
-        selectMode: "select",
-        delete: deleteChart,
-        max_size: chart.plugin.maxRenderSize
+        delete: deleteChart
     });
 });
 

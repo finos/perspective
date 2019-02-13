@@ -10,22 +10,22 @@ import * as d3 from "d3";
 
 export const scale = () => d3.scaleLinear();
 
-export const domain = (settings, data) => {
-    const extent = getDataExtentFromArray(data);
+export const domain = (settings, data, valueName = "mainValue") => {
+    const extent = getDataExtentFromArray(data, valueName);
     return [extent[0] > 0 ? 0 : extent[0] * 1.1, extent[1] < 0 ? 0 : extent[1] * 1.1];
 };
 
-const getDataExtentFromArray = array => {
-    const dataExtent = array.map(getDataExtentFromValue);
+const getDataExtentFromArray = (array, valueName) => {
+    const dataExtent = array.map(v => getDataExtentFromValue(v, valueName));
     const extent = flattenExtent(dataExtent);
     return extent;
 };
 
-const getDataExtentFromValue = value => {
+const getDataExtentFromValue = (value, valueName) => {
     if (Array.isArray(value)) {
-        return getDataExtentFromArray(value);
+        return getDataExtentFromArray(value, valueName);
     }
-    return [value.mainValue, value.mainValue];
+    return [value[valueName], value[valueName]];
 };
 
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");
