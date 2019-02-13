@@ -40,7 +40,9 @@ function generateHtml(tooltipDiv, data, settings) {
             .selectAll("li")
             .data(groups)
             .join("li")
-            .text((d, i) => `${settings.crossValues[i].name}: ${d}`);
+            .text((_, i) => `${settings.crossValues[i].name}: `)
+            .append("span")
+            .text(d => d);
     }
 
     // Add split data
@@ -50,11 +52,17 @@ function generateHtml(tooltipDiv, data, settings) {
             .selectAll("li")
             .data(splits.slice(0, -1))
             .join("li")
-            .text((d, i) => `${settings.splitValues[i].name}: ${d}`);
+            .text((_, i) => `${settings.splitValues[i].name}: `)
+            .append("span")
+            .text(d => d);
     }
 
     // Add data value
-    tooltipDiv.select("#data-value").text(`${splits[splits.length - 1]}: ${data.mainValue - data.baseValue}`);
+    tooltipDiv
+        .select("#data-value")
+        .text(`${splits[splits.length - 1]}: `)
+        .append("span")
+        .text(data.mainValue - data.baseValue);
 }
 
 function showTooltip(containerNode, barNode, tooltipDiv) {
