@@ -18,6 +18,7 @@ if (!process.env.PSP_DEBUG && window.perspective) {
     RUNTIMES.ASMJS = window.perspective;
 }
 
+const clear_tests = require("./clear.js");
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
 const update_tests = require("./updates.js");
@@ -27,6 +28,7 @@ const internal_tests = require("./internal.js");
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
         (typeof WebAssembly === "undefined" && mode === "WASM" ? xdescribe : describe)(mode, function() {
+            clear_tests(RUNTIMES[mode]);
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);
             update_tests(RUNTIMES[mode]);

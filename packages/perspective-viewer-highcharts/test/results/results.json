@@ -89,5 +89,6 @@
     "line.html/highlights invalid filter.": "1dfcefa55fb5bad1804b1fbb708204de",
     "treemap.html/highlights invalid filter.": "5b36e9d8a49d330118c2d6079262d268",
     "heatmap.html/highlights invalid filter.": "1d1971aee71f389067e7f3c732d26a5f",
-    "null.html/should handle null categories in a pivot": "5574f2c3e83ed24577e5ce72626f175c"
+    "null.html/should handle null categories in a pivot": "5574f2c3e83ed24577e5ce72626f175c",
+    "line.html/replaces all rows.": "c799ce879d22a1ca89a6266575920d3a"
 }

@@ -690,6 +690,22 @@ export default function(Module) {
     };
 
     /**
+     * Remove all rows in this {@link table} while preserving the schema and
+     * construction options.
+     */
+    table.prototype.clear = function() {
+        this.gnode.reset();
+    };
+
+    /**
+     * Replace all rows in this {@link table} the input data.
+     */
+    table.prototype.replace = function(data) {
+        this.gnode.reset();
+        this.update(data);
+    };
+
+    /**
      * Delete this {@link table} and clean up all resources associated with it.
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
