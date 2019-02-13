@@ -14,32 +14,37 @@ export function legend(container, settings, colour, domain) {
     if (colour) {
         const groupSize = 10;
         const numberOfGroups = Math.ceil(domain.length / groupSize);
-        let groupIndex = 0;
+        const reloadLegend = index => createLegend(container, settings, colour, groupSize, index);
 
-        const legendControls = container
-            .append("div")
-            .attr("class", "legend-controls")
-            .html(legendControlsTemplate);
-
-        const setPageText = () => legendControls.select("#page-text").text(`${groupIndex + 1}/${numberOfGroups}`);
-        setPageText();
-        legendControls.select("#up-arrow").on("click", () => {
-            if (groupIndex > 0) {
-                groupIndex--;
-                createLegend(container, settings, colour, groupSize, groupIndex);
-                setPageText();
-            }
-        });
-        legendControls.select("#down-arrow").on("click", () => {
-            if (groupIndex < numberOfGroups - 1) {
-                groupIndex++;
-                createLegend(container, settings, colour, groupSize, groupIndex);
-                setPageText();
-            }
-        });
-
-        createLegend(container, settings, colour, groupSize, groupIndex);
+        legendScrolling(container, numberOfGroups, reloadLegend);
+        createLegend(container, settings, colour, groupSize);
     }
+}
+
+function legendScrolling(container, numberOfGroups, reloadLegend) {
+    let groupIndex = 0;
+
+    const legendControls = container
+        .append("div")
+        .attr("class", "legend-controls")
+        .html(legendControlsTemplate);
+
+    const setPageText = () => legendControls.select("#page-text").text(`${groupIndex + 1}/${numberOfGroups}`);
+    setPageText();
+    legendControls.select("#up-arrow").on("click", () => {
+        if (groupIndex > 0) {
+            groupIndex--;
+            reloadLegend(groupIndex);
+            setPageText();
+        }
+    });
+    legendControls.select("#down-arrow").on("click", () => {
+        if (groupIndex < numberOfGroups - 1) {
+            groupIndex++;
+            reloadLegend(groupIndex);
+            setPageText();
+        }
+    });
 }
 
 function createLegend(container, settings, colour, groupSize, groupIndex) {
@@ -59,7 +64,7 @@ function createLegend(container, settings, colour, groupSize, groupIndex) {
 
             getChartElement(this).draw();
         })
-        .cellFilter(cellFilter(groupSize, groupIndex));
+        .cellFilter(cellFilter(groupSize, groupIndex || 0));
 
     if (settings.mainValues.length <= 1) {
         legend.labels(options => {
