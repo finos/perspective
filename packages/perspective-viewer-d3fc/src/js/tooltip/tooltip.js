@@ -41,7 +41,7 @@ function generateHtml(tooltipDiv, data, settings) {
             .data(groups)
             .join("li")
             .text((_, i) => `${settings.crossValues[i].name}: `)
-            .append("span")
+            .append("b")
             .text(d => d);
     }
 
@@ -53,7 +53,7 @@ function generateHtml(tooltipDiv, data, settings) {
             .data(splits.slice(0, -1))
             .join("li")
             .text((_, i) => `${settings.splitValues[i].name}: `)
-            .append("span")
+            .append("b")
             .text(d => d);
     }
 
@@ -61,7 +61,7 @@ function generateHtml(tooltipDiv, data, settings) {
     tooltipDiv
         .select("#data-value")
         .text(`${splits[splits.length - 1]}: `)
-        .append("span")
+        .append("b")
         .text(data.mainValue - data.baseValue);
 }
 
