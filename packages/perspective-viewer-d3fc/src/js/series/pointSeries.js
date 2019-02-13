@@ -11,8 +11,8 @@ import * as fc from "d3fc";
 export function pointSeries(settings, colour, seriesKey, size) {
     let series = fc
         .seriesSvgPoint()
-        .crossValue(d => d.crossValue)
-        .mainValue(d => d.mainValue);
+        .crossValue(d => d.x)
+        .mainValue(d => d.y);
 
     if (size) {
         series.size(d => size(d.size));

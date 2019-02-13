@@ -28,9 +28,9 @@ function xyScatter(container, settings) {
 
     const chart = fc
         .chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data, "crossValue"))
+        .xDomain(mainAxis.domain(settings, data, "x"))
         .xLabel(settings.mainValues[0].name)
-        .yDomain(mainAxis.domain(settings, data))
+        .yDomain(mainAxis.domain(settings, data, "y"))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
         .plotArea(series);
