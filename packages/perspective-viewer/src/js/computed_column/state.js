@@ -7,7 +7,7 @@
  *
  */
 
-import {values} from "underscore";
+import {values} from "lodash";
 
 export default class State {
     constructor() {

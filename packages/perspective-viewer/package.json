@@ -51,7 +51,7 @@
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "mobile-drag-drop": "^2.2.0",
-        "underscore": "^1.8.3"
+        "lodash": "^4.17.4"
     },
     "devDependencies": {
         "@jpmorganchase/perspective-webpack-plugin": "^0.2.15"
