@@ -13,6 +13,7 @@ import {barSeries} from "../series/barSeries";
 import {seriesColours} from "../series/seriesColours";
 import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
+import {withGridLines} from "../gridlines/gridlines";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -37,7 +38,7 @@ function barChart(container, settings) {
         .yDomain(crossAxis.domain(settings, data))
         .yOrient("left")
         .yLabel(crossAxis.label(settings))
-        .plotArea(series);
+        .plotArea(withGridLines(series).orient("horizontal"));
 
     chart.yPadding && chart.yPadding(0.5);
 

@@ -13,6 +13,7 @@ import {barSeries} from "../series/barSeries";
 import {seriesColours} from "../series/seriesColours";
 import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
+import {withGridLines} from "../gridlines/gridlines";
 
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -37,7 +38,7 @@ function columnChart(container, settings) {
         .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
         .yLabel(mainAxis.label(settings))
-        .plotArea(series);
+        .plotArea(withGridLines(series).orient("vertical"));
 
     chart.xPadding && chart.xPadding(0.5);
 
