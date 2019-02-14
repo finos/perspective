@@ -6,7 +6,6 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {select} from "d3";
 import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/root";
 import legendControlsTemplate from "../../html/legend-controls.html";
@@ -15,63 +14,70 @@ export function legend(container, settings, colour, domain) {
     if (colour) {
         const groupSize = 15;
         const numberOfGroups = Math.ceil(domain.length / groupSize);
+        const doesLegendScroll = numberOfGroups > 1;
 
-        if (numberOfGroups > 1) {
-            const reloadLegend = index => createLegend(container, settings, colour, groupSize, index);
-            legendScrolling(container, numberOfGroups, reloadLegend);
+        if (doesLegendScroll) {
+            const reloadLegend = index => createLegend(container, settings, colour, doesLegendScroll, groupSize, index);
+            legendScrolling(container, settings, numberOfGroups, reloadLegend);
         }
-        createLegend(container, settings, colour, groupSize);
+        createLegend(container, settings, colour, doesLegendScroll, groupSize, settings.legendGroupIndex);
     }
 }
 
-function legendScrolling(container, numberOfGroups, reloadLegend) {
-    let groupIndex = 0;
+function legendScrolling(container, settings, numberOfGroups, reloadLegend) {
+    if (!settings.legendGroupIndex) settings.legendGroupIndex = 0;
+    const legendControls = getLegendControls(container);
 
-    const legendControls = container
-        .append("div")
-        .attr("class", "legend-controls")
-        .html(legendControlsTemplate);
-
-    const setPageText = () => legendControls.select("#page-text").text(`${groupIndex + 1}/${numberOfGroups}`);
+    const setPageText = () => legendControls.select("#page-text").text(`${settings.legendGroupIndex + 1}/${numberOfGroups}`);
     setPageText();
-    legendControls.select("#up-arrow").on("click", function() {
-        if (groupIndex > 0) {
-            groupIndex--;
-            legendPage("#down-arrow");
-        }
-        deactivateArrow.call(this, 0);
-    });
-    legendControls
-        .select("#down-arrow")
-        .on("click", function() {
-            if (groupIndex < numberOfGroups - 1) {
-                groupIndex++;
-                legendPage("#up-arrow");
-            }
-            deactivateArrow.call(this, numberOfGroups - 1);
-        })
-        .style("color", "rgb(63, 127, 253)")
-        .style("cursor", "pointer");
+    const upArrow = legendControls.select("#up-arrow");
+    const downArrow = legendControls.select("#down-arrow");
 
-    function legendPage(arrowSelector) {
-        reloadLegend(groupIndex);
+    upArrow.on("click", function() {
+        if (settings.legendGroupIndex > 0) {
+            settings.legendGroupIndex--;
+            legendPage(downArrow);
+        }
+        deactivateArrow(upArrow, 0);
+    });
+    deactivateArrow(upArrow, 0);
+
+    downArrow.on("click", function() {
+        if (settings.legendGroupIndex < numberOfGroups - 1) {
+            settings.legendGroupIndex++;
+            legendPage(upArrow);
+        }
+        deactivateArrow(downArrow, numberOfGroups - 1);
+    });
+    if (settings.legendGroupIndex < numberOfGroups - 1) activateArrow(downArrow);
+
+    function legendPage(arrow) {
+        reloadLegend(settings.legendGroupIndex);
         setPageText();
-        legendControls
-            .select(arrowSelector)
-            .style("color", "rgb(63, 127, 253)")
-            .style("cursor", "pointer");
+        activateArrow(arrow);
     }
 
-    function deactivateArrow(threshold) {
-        if (groupIndex === threshold) {
-            select(this)
-                .style("color", null)
-                .style("cursor", "default");
-        }
+    function activateArrow(arrow) {
+        arrow.style("color", "rgb(63, 127, 253)").style("cursor", "pointer");
+    }
+
+    function deactivateArrow(arrow, threshold) {
+        if (settings.legendGroupIndex === threshold) arrow.style("color", null).style("cursor", "default");
     }
 }
 
-function createLegend(container, settings, colour, groupSize, groupIndex) {
+function getLegendControls(container) {
+    let legendControls = container.select(".legend-controls");
+    if (legendControls.size() === 0) {
+        legendControls = container
+            .append("div")
+            .attr("class", "legend-controls")
+            .html(legendControlsTemplate);
+    }
+    return legendControls;
+}
+
+function createLegend(container, settings, colour, doesLegendScroll, groupSize, groupIndex) {
     var legend = d3Legend
         .legendColor()
         .scale(colour)
@@ -87,8 +93,8 @@ function createLegend(container, settings, colour, groupSize, groupIndex) {
             }
 
             getChartElement(this).draw();
-        })
-        .cellFilter(cellFilter(groupSize, groupIndex || 0));
+        });
+    if (doesLegendScroll) legend.cellFilter(cellFilter(groupSize, groupIndex));
 
     if (settings.mainValues.length <= 1) {
         legend.labels(options => {
