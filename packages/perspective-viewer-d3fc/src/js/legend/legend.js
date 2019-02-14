@@ -13,7 +13,7 @@ import legendControlsTemplate from "../../html/legend-controls.html";
 
 export function legend(container, settings, colour, domain) {
     if (colour) {
-        const groupSize = 10;
+        const groupSize = 15;
         const numberOfGroups = Math.ceil(domain.length / groupSize);
 
         if (numberOfGroups > 1) {
@@ -37,39 +37,38 @@ function legendScrolling(container, numberOfGroups, reloadLegend) {
     legendControls.select("#up-arrow").on("click", function() {
         if (groupIndex > 0) {
             groupIndex--;
-            reloadLegend(groupIndex);
-            setPageText();
-            legendControls
-                .select("#down-arrow")
-                .style("color", "rgb(63, 127, 253)")
-                .style("cursor", "pointer");
+            legendPage("#down-arrow");
         }
-        if (groupIndex === 0) {
-            select(this)
-                .style("color", null)
-                .style("cursor", "default");
-        }
+        deactivateArrow.call(this, 0);
     });
     legendControls
         .select("#down-arrow")
         .on("click", function() {
             if (groupIndex < numberOfGroups - 1) {
                 groupIndex++;
-                reloadLegend(groupIndex);
-                setPageText();
-                legendControls
-                    .select("#up-arrow")
-                    .style("color", "rgb(63, 127, 253)")
-                    .style("cursor", "pointer");
+                legendPage("#up-arrow");
             }
-            if (groupIndex === numberOfGroups - 1) {
-                select(this)
-                    .style("color", null)
-                    .style("cursor", "default");
-            }
+            deactivateArrow.call(this, numberOfGroups - 1);
         })
         .style("color", "rgb(63, 127, 253)")
         .style("cursor", "pointer");
+
+    function legendPage(arrowSelector) {
+        reloadLegend(groupIndex);
+        setPageText();
+        legendControls
+            .select(arrowSelector)
+            .style("color", "rgb(63, 127, 253)")
+            .style("cursor", "pointer");
+    }
+
+    function deactivateArrow(threshold) {
+        if (groupIndex === threshold) {
+            select(this)
+                .style("color", null)
+                .style("cursor", "default");
+        }
+    }
 }
 
 function createLegend(container, settings, colour, groupSize, groupIndex) {
