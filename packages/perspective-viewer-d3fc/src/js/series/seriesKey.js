@@ -7,10 +7,9 @@
  *
  */
 
-import barChart from "./bar";
-import columnChart from "./column";
-import lineChart from "./line";
-import xyScatter from "./xy-scatter";
-
-const chartClasses = [barChart, columnChart, lineChart, xyScatter];
-export default chartClasses;
+export function groupFromKey(key) {
+    return key
+        .split("|")
+        .slice(0, -1)
+        .join("|");
+}

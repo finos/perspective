@@ -6,11 +6,9 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import * as d3 from "d3";
+import {domain} from "../axis/mainAxis";
 
-import barChart from "./bar";
-import columnChart from "./column";
-import lineChart from "./line";
-import xyScatter from "./xy-scatter";
-
-const chartClasses = [barChart, columnChart, lineChart, xyScatter];
-export default chartClasses;
+export function seriesLinearRange(settings, data, valueName) {
+    return d3.scaleLinear().domain(domain(settings, data, valueName));
+}
