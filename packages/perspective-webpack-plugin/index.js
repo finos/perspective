@@ -33,10 +33,19 @@ class PerspectiveWebpackPlugin {
     apply(compiler) {
         const rules = [
             {
+                test: /\.css$/,
+                include: this.options.load_path,
+                loader: "css-loader"
+            },
+            {
                 test: /\.less$/,
                 exclude: /themes/,
                 include: this.options.load_path,
-                use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
+                use: [
+                    {loader: "css-loader"}, 
+                    {loader: "clean-css-loader", options: {level: 2}}, 
+                    {loader: "less-loader"}
+                ]
             },
             {
                 test: /\.(html)$/,
