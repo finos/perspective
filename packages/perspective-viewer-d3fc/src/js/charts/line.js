@@ -13,6 +13,7 @@ import {seriesColours} from "../series/seriesColours";
 import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
 import {legend, filterData} from "../legend/legend";
+import {withGridLines} from "../gridlines/gridlines";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
@@ -28,7 +29,7 @@ function lineChart(container, settings) {
         .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
         .yLabel(mainAxis.label(settings))
-        .plotArea(series);
+        .plotArea(withGridLines(series).orient("vertical"));
 
     chart.xAlign && chart.xPadding(1);
 

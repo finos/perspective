@@ -13,6 +13,7 @@ import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
 import {seriesLinearRange} from "../series/seriesLinearRange";
 import {legend, filterDataByGroup} from "../legend/legend";
+import {withGridLines} from "../gridlines/gridlines";
 
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -33,7 +34,7 @@ function xyScatter(container, settings) {
         .yDomain(mainAxis.domain(settings, data, "y"))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
-        .plotArea(series);
+        .plotArea(withGridLines(series));
 
     // render
     container.datum(data).call(chart);

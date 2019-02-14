@@ -5,13 +5,13 @@ const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
 const crossGrid = x => x.style("display", "none");
 
 export const withGridLines = series => {
-    let orient = "vertical";
+    let orient = "both";
 
     const svgMulti = fc.seriesSvgMulti();
 
     const _withGridLines = function(...args) {
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
-        const yStyle = orient === "vertical" ? mainGrid : crossGrid;
+        const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
         const gridlines = fc
             .annotationSvgGridline()
