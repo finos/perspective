@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import {select} from "d3";
 import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/root";
 import legendControlsTemplate from "../../html/legend-controls.html";
@@ -14,9 +15,11 @@ export function legend(container, settings, colour, domain) {
     if (colour) {
         const groupSize = 10;
         const numberOfGroups = Math.ceil(domain.length / groupSize);
-        const reloadLegend = index => createLegend(container, settings, colour, groupSize, index);
 
-        legendScrolling(container, numberOfGroups, reloadLegend);
+        if (numberOfGroups > 1) {
+            const reloadLegend = index => createLegend(container, settings, colour, groupSize, index);
+            legendScrolling(container, numberOfGroups, reloadLegend);
+        }
         createLegend(container, settings, colour, groupSize);
     }
 }
@@ -31,20 +34,42 @@ function legendScrolling(container, numberOfGroups, reloadLegend) {
 
     const setPageText = () => legendControls.select("#page-text").text(`${groupIndex + 1}/${numberOfGroups}`);
     setPageText();
-    legendControls.select("#up-arrow").on("click", () => {
+    legendControls.select("#up-arrow").on("click", function() {
         if (groupIndex > 0) {
             groupIndex--;
             reloadLegend(groupIndex);
             setPageText();
+            legendControls
+                .select("#down-arrow")
+                .style("color", "rgb(63, 127, 253)")
+                .style("cursor", "pointer");
+        }
+        if (groupIndex === 0) {
+            select(this)
+                .style("color", null)
+                .style("cursor", "default");
         }
     });
-    legendControls.select("#down-arrow").on("click", () => {
-        if (groupIndex < numberOfGroups - 1) {
-            groupIndex++;
-            reloadLegend(groupIndex);
-            setPageText();
-        }
-    });
+    legendControls
+        .select("#down-arrow")
+        .on("click", function() {
+            if (groupIndex < numberOfGroups - 1) {
+                groupIndex++;
+                reloadLegend(groupIndex);
+                setPageText();
+                legendControls
+                    .select("#up-arrow")
+                    .style("color", "rgb(63, 127, 253)")
+                    .style("cursor", "pointer");
+            }
+            if (groupIndex === numberOfGroups - 1) {
+                select(this)
+                    .style("color", null)
+                    .style("cursor", "default");
+            }
+        })
+        .style("color", "rgb(63, 127, 253)")
+        .style("cursor", "pointer");
 }
 
 function createLegend(container, settings, colour, groupSize, groupIndex) {
