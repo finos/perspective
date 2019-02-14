@@ -3,7 +3,10 @@ import {getChartElement} from "../plugin/root";
 import tooltipTemplate from "../../html/tooltip.html";
 
 export function tooltip(selection, settings) {
-    const container = select(getChartElement(selection.node()).getContainer());
+    const node = selection.node();
+    if (!node) return;
+
+    const container = select(getChartElement(node).getContainer());
     const tooltipDiv = getTooltipDiv(container);
     selection
         .filter(d => d.baseValue !== d.mainValue)
