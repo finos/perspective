@@ -1,5 +1,6 @@
 import {select} from "d3";
 import {getChartElement} from "../plugin/root";
+import {getOrCreateElement} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 
 export function tooltip(selection, settings) {
@@ -20,16 +21,14 @@ export function tooltip(selection, settings) {
 }
 
 function getTooltipDiv(container) {
-    let tooltipDiv = container.select("div.tooltip");
-    if (tooltipDiv.size() === 0) {
-        tooltipDiv = container
+    return getOrCreateElement(container, "div.tooltip", () =>
+        container
             .append("div")
             .attr("class", "tooltip")
             .style("z-index", 3)
             .style("opacity", 0)
-            .html(tooltipTemplate);
-    }
-    return tooltipDiv;
+            .html(tooltipTemplate)
+    );
 }
 
 function generateHtml(tooltipDiv, data, settings) {

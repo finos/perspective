@@ -8,6 +8,7 @@
  */
 import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/root";
+import {getOrCreateElement} from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
 
 export function legend(container, settings, colour) {
@@ -67,14 +68,12 @@ function legendScrolling(container, settings, numberOfGroups, reloadLegend) {
 }
 
 function getLegendControls(container) {
-    let legendControls = container.select(".legend-controls");
-    if (legendControls.size() === 0) {
-        legendControls = container
+    return getOrCreateElement(container, ".legend-controls", () =>
+        container
             .append("div")
             .attr("class", "legend-controls")
-            .html(legendControlsTemplate);
-    }
-    return legendControls;
+            .html(legendControlsTemplate)
+    );
 }
 
 function createLegend(container, settings, colour, doesLegendScroll, groupSize, groupIndex) {
@@ -103,10 +102,7 @@ function createLegend(container, settings, colour, doesLegendScroll, groupSize, 
         });
     }
 
-    let legendSelection = container.select("svg.legend");
-    if (legendSelection.size() === 0) {
-        legendSelection = container.append("svg");
-    }
+    const legendSelection = getOrCreateElement(container, "svg.legend", () => container.append("svg"));
 
     // render the legend
     legendSelection
