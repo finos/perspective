@@ -6,14 +6,16 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as d3Legend from "d3-svg-legend";
+
+import scrollableLegend from "./scrollableLegend";
 import {getChartElement} from "../plugin/root";
 import {groupFromKey} from "../series/seriesKey";
+import {getOrCreateElement} from "../utils/utils";
 
+const scrollLegend = scrollableLegend();
 export function legend(container, settings, colour) {
     if (colour) {
-        var legend = d3Legend
-            .legendColor()
+        scrollLegend
             .scale(colour)
             .shape("circle")
             .shapeRadius(6)
@@ -30,22 +32,19 @@ export function legend(container, settings, colour) {
             });
 
         if (settings.mainValues.length <= 1) {
-            legend.labels(options => {
+            scrollLegend.labels(options => {
                 const parts = options.domain[options.i].split("|");
                 return parts.slice(0, parts.length - 1).join("|");
             });
         }
 
-        let legendSelection = container.select("svg.legend");
-        if (legendSelection.size() === 0) {
-            legendSelection = container.append("svg");
-        }
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
 
         // render the legend
         legendSelection
-            .attr("class", "legend")
+            .attr("class", "legend-container")
             .style("z-index", "2")
-            .call(legend)
+            .call(scrollLegend)
             .select("g.legendCells")
             .attr("transform", "translate(20,20)")
             .selectAll("g.cell")
