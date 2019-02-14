@@ -9,6 +9,7 @@
 
 import scrollableLegend from "./scrollableLegend";
 import {getChartElement} from "../plugin/root";
+import {getOrCreateElement} from "../utils/utils";
 
 const scrollLegend = scrollableLegend();
 export function legend(container, settings, colour) {
@@ -36,10 +37,7 @@ export function legend(container, settings, colour) {
             });
         }
 
-        let legendSelection = container.select("div.legend-container");
-        if (legendSelection.size() === 0) {
-            legendSelection = container.append("div");
-        }
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
 
         // render the legend
         legendSelection
