@@ -62,23 +62,27 @@ public:
         return (*this);
     }
 
-    t_iter<DATA_T>& operator++() {
+    t_iter<DATA_T>&
+    operator++() {
         ++m_ptr;
         return (*this);
     }
 
-    t_iter<DATA_T>& operator--() {
+    t_iter<DATA_T>&
+    operator--() {
         --m_ptr;
         return (*this);
     }
 
-    t_iter<DATA_T> operator++(int) {
+    t_iter<DATA_T>
+    operator++(int) {
         auto temp(*this);
         ++m_ptr;
         return temp;
     }
 
-    t_iter<DATA_T> operator--(int) {
+    t_iter<DATA_T>
+    operator--(int) {
         auto temp(*this);
         --m_ptr;
         return temp;
