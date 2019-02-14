@@ -16,8 +16,8 @@ import {legend, filterData} from "../legend/legend";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
-    const [colour, domain] = seriesColours(settings);
-    legend(container, settings, colour, domain);
+    const colour = seriesColours(settings);
+    legend(container, settings, colour);
 
     const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 

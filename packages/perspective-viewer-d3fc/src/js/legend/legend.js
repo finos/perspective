@@ -10,10 +10,10 @@ import * as d3Legend from "d3-svg-legend";
 import {getChartElement} from "../plugin/root";
 import legendControlsTemplate from "../../html/legend-controls.html";
 
-export function legend(container, settings, colour, domain) {
+export function legend(container, settings, colour) {
     if (colour) {
         const groupSize = 15;
-        const numberOfGroups = Math.ceil(domain.length / groupSize);
+        const numberOfGroups = Math.ceil(colour.domain().length / groupSize);
         const doesLegendScroll = numberOfGroups > 1;
 
         if (doesLegendScroll) {

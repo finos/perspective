@@ -17,8 +17,8 @@ import {withGridLines} from "../gridlines/gridlines";
 
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
-    const [colour, domain] = seriesColours(settings);
-    legend(container, settings, colour, domain);
+    const colour = seriesColours(settings);
+    legend(container, settings, colour);
 
     const series = fc
         .seriesSvgMulti()
