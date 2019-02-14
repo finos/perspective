@@ -78,8 +78,7 @@ t_dtiter<TREE_T, CONTAINER_T>::t_dtiter(const TREE_T* tree, CONTAINER_T* queue, 
     , m_count(count) {}
 
 template <typename TREE_T, typename CONTAINER_T>
-t_dtiter<TREE_T, CONTAINER_T>
-t_dtiter<TREE_T, CONTAINER_T>::operator++() {
+t_dtiter<TREE_T, CONTAINER_T> t_dtiter<TREE_T, CONTAINER_T>::operator++() {
     t_dtiter<TREE_T, CONTAINER_T> iter(m_tree, m_queue, ++m_count);
     t_index head_ = pop(*m_queue);
     enqueue_children(*m_queue, head_);

@@ -34,7 +34,7 @@ try {
     if (process.env.PSP_DOCKER) {
         cmd = " ";
     } else {
-        cmd = "cd cppbuild && ";
+        cmd = "cd cpp/perspective/cppbuild && ";
     }
 
     cmd += ` cmake ../ ${flags}`;
@@ -48,7 +48,7 @@ try {
         execute(docker("cpp") + " make -j${PSP_CPU_COUNT-8}");
     } else {
         execute(cmd);
-        execute("cd cppbuild && make -j${PSP_CPU_COUNT-8}");
+        execute("cd cpp/perspective/cppbuild && make -j${PSP_CPU_COUNT-8}");
     }
 } catch (e) {
     console.log(e.message);
