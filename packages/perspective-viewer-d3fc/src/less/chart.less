@@ -55,33 +55,42 @@
         opacity: 0.5;
     }
 
-    .legend {
+    .legend-container {
         position: absolute;
         top: 15px;
         right: 15px;
-        font-size: 8pt;
         left: auto;
         width: 150px;
-        overflow-x: unset;
-        overflow-y: visible;
 
-        & .cell {
-            cursor: pointer;
+        & .legend {
+            font-size: 8pt;
 
-            &.hidden circle {
-                fill: rgb(204, 204, 204) !important;
+            & .cell {
+                cursor: pointer;
+
+                &.hidden circle {
+                    fill: rgb(204, 204, 204) !important;
+                }
+            }
+
+            & text {
+                fill: var(--d3fc-legend-text, rgb(51, 51, 51));
             }
         }
 
-        & text {
-            fill: var(--d3fc-legend-text, rgb(51, 51, 51));
-        }
-    }
+        & .legend-controls {
+            margin-left: 12px;
 
-    .legend-controls {
-        position: absolute;
-        top: 0;
-        right: 15px;
+            & #up-arrow, & #down-arrow {
+                cursor: pointer;
+                color: rgb(31, 119, 180);
+            }
+
+            & #up-arrow.disabled, & #down-arrow.disabled {
+                cursor: default;
+                color: rgb(51, 51, 51);
+            }
+        }
     }
 
     div.tooltip {
