@@ -30,6 +30,7 @@ init:
 
 before_build:
 - cmd: |-
+    cd cpp\perspective
     mkdir build
     cd build
     cmake --version

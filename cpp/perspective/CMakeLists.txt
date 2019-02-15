@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.8.11)
 project (psp)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules/" ${CMAKE_MODULE_PATH} )
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules/" ${CMAKE_MODULE_PATH} )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
@@ -216,7 +216,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	find_package(TBB)
 	if(NOT TBB_FOUND)
 		message("${Red}TBB could not be located${ColorReset}")
-		psp_build_dep("tbb" "cmake/TBB.txt.in")
+		psp_build_dep("tbb" "../../cmake/TBB.txt.in")
 	else()
 		message("${Cyan}Found tbb in ${TBB_INCLUDE_DIRS} ${TBB_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${TBB_INCLUDE_DIRS} )
@@ -235,7 +235,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("/usr/local/include/python3.7m")  # FIXME
-		include_directories("${CMAKE_SOURCE_DIR}/python/perspective/include")
+		include_directories("${CMAKE_SOURCE_DIR}/../../python/perspective/include")
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
@@ -380,14 +380,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
-		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/python/perspective/src/numpy.cpp ${HEADER_FILES})
+		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/../../python/perspective/src/numpy.cpp ${HEADER_FILES})
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(psp ${BOOST_PYTHON})
 		target_link_libraries(psp ${BOOST_NUMPY})
 		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
-		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/python/perspective/src/python.cpp)
+		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/../../python/perspective/src/python.cpp)
 		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
@@ -422,7 +422,7 @@ if (PSP_CPP_BUILD_TESTS)
 	if (WIN32)
 	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 	endif()
-	psp_build_dep("googletest" "cmake/GTest.txt.in")
+	psp_build_dep("googletest" "../../cmake/GTest.txt.in")
 
 	add_subdirectory(test)
 	add_custom_target(gcov

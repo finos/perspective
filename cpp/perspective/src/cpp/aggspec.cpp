@@ -21,7 +21,7 @@ t_col_name_type::t_col_name_type(const std::string& name, t_dtype type)
     : m_name(name)
     , m_type(type) {}
 
-t_aggspec::t_aggspec(){}
+t_aggspec::t_aggspec() {}
 
 t_aggspec::t_aggspec(const t_aggspec_recipe& v) {
     m_name = v.m_name;

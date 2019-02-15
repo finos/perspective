@@ -36,7 +36,7 @@ class build_ext(build_ext_orig):
 
     def build_cmake(self, ext):
         cwd = pathlib.Path().absolute()
-        directory = os.path.abspath(os.path.join(pathlib.Path().absolute()))
+        directory = os.path.abspath(os.path.join(pathlib.Path().absolute(), "cpp", "perspective"))
 
         # these dirs will be created in build_py, so if you don't have
         # any python sources to bundle, the dirs will be missing

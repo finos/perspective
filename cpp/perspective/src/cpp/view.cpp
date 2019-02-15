@@ -14,15 +14,13 @@
 namespace perspective {
 template <typename CTX_T>
 View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator)
-        : m_pool(pool)
-        , m_ctx(ctx)
-        , m_nsides(sides)
-        , m_gnode(gnode)
-        , m_name(name)
-        , m_separator(separator)
-{
-}
+    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator)
+    : m_pool(pool)
+    , m_ctx(ctx)
+    , m_nsides(sides)
+    , m_gnode(gnode)
+    , m_name(name)
+    , m_separator(separator) {}
 
 template <typename CTX_T>
 void
@@ -66,7 +64,7 @@ View<t_ctx0>::expand(std::int32_t idx) {
     return idx;
 }
 
-template<>
+template <>
 t_index
 View<t_ctx2>::expand(std::int32_t idx) {
     return m_ctx->open(t_header::HEADER_ROW, idx);
@@ -84,7 +82,7 @@ View<t_ctx0>::collapse(std::int32_t idx) {
     return idx;
 }
 
-template<>
+template <>
 t_index
 View<t_ctx2>::collapse(std::int32_t idx) {
     return m_ctx->close(t_header::HEADER_ROW, idx);
@@ -96,31 +94,25 @@ View<CTX_T>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(depth);
     } else {
-        std::cout << "Cannot expand past " 
-        << std::to_string(row_pivot_length) 
-        << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
     }
 }
 
 template <>
 void
-View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
-}
+View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
 
-
-template<>
+template <>
 void
 View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(t_header::HEADER_ROW, depth);
     } else {
-        std::cout << "Cannot expand past " 
-        << std::to_string(row_pivot_length) 
-        << std::endl;
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
     }
 }
 
- /**
+/**
  * The schema of this View.  A schema is an std::map, the keys of which
  * are the columns of this View, and the values are their string type names.
  * If this View is aggregated, theses will be the aggregated types;
@@ -158,11 +150,11 @@ View<CTX_T>::schema() {
     return new_schema;
 }
 
- /**
+/**
  * The schema of this View. Output and logic is as the above
  * schema(), but this version is specialized for zero-sided
  * contexts.
- * 
+ *
  * Returns
  * -------
  * std::map<std::string, std::string> schema of the View
@@ -190,13 +182,13 @@ View<t_ctx0>::schema() {
  * The column names of the View. If the View is aggregated, the
  * individual column names will be joined with a separator character
  * specified by the user, or defaulting to "|".
- * 
+ *
  * Returns
  * -------
  * std::vector<std::string> containing all column names
  */
 template <typename CTX_T>
-std::vector<std::string> 
+std::vector<std::string>
 View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
     std::vector<std::string> names;
     std::vector<std::string> aggregate_names;
@@ -207,7 +199,7 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
     }
 
     for (t_uindex key = 0, max = m_ctx->unity_get_column_count(); key != max; ++key) {
-        std::stringstream col_name;      
+        std::stringstream col_name;
         std::string name = aggregate_names[key % aggregate_names.size()];
 
         if (name == "psp_okey") {
@@ -218,7 +210,7 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
         if (skip && col_path.size() < static_cast<unsigned int>(depth)) {
             continue;
         }
-        
+
         for (auto path = col_path.rbegin(); path != col_path.rend(); ++path) {
             std::string path_name = path->to_string();
             // ensure that boolean columns are correctly represented
@@ -242,15 +234,15 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
 }
 
 /**
- * The column names of the View. Same as above but 
+ * The column names of the View. Same as above but
  * specialized for zero-sided contexts.
- * 
+ *
  * Returns
  * -------
  * std::vector<std::string> containing all column names
  */
-template<>
-std::vector<std::string> 
+template <>
+std::vector<std::string>
 View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
     std::vector<std::string> names;
     std::vector<std::string> aggregate_names = m_ctx->get_column_names();
@@ -262,7 +254,7 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
         if (col_name.str() == "psp_okey") {
             continue;
         };
-        
+
         names.push_back(col_name.str());
     }
 
@@ -297,11 +289,9 @@ View<CTX_T>::dtype_to_string(t_dtype type) {
         case DTYPE_STR: {
             str_dtype = "string";
         } break;
-        default: {
-            PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!");
-        }
+        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
     }
-    
+
     return str_dtype;
 }
 

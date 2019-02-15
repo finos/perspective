@@ -41,12 +41,13 @@ public:
     t_index expand(std::int32_t idx);
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
-    
+
     std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0);
+
 private:
     std::string map_aggregate_types(std::string name, std::string typestring);
     std::string dtype_to_string(t_dtype type);
-    
+
     t_pool* m_pool;
     std::shared_ptr<CTX_T> m_ctx;
     std::int32_t m_nsides;

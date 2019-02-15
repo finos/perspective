@@ -14,7 +14,8 @@
 
 namespace perspective {
 
-void psp_abort() {
+void
+psp_abort() {
     std::raise(SIGINT);
 }
 
@@ -315,13 +316,11 @@ is_internal_colname(const std::string& c) {
     return c.compare(std::string("psp_")) == 0;
 }
 
-
 template <typename T>
 t_dtype
 type_to_dtype() {
     return DTYPE_NONE;
 }
-
 
 template <>
 t_dtype

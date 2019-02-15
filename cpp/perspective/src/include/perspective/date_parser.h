@@ -6,15 +6,23 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+
+#pragma once
+#include <memory>
+#include <vector>
+#include <locale>
 #include <perspective/first.h>
-#include <perspective/base.h>
-#include <perspective/binding.h>
-using namespace perspective;
+#include <perspective/exports.h>
+
 namespace perspective {
-namespace binding {
 
+class PERSPECTIVE_EXPORT t_date_parser {
+public:
+    t_date_parser();
 
+    bool is_valid(std::string const& datestring);
 
-
-}
-}
+private:
+    static const std::string VALID_FORMATS[12];
+};
+} // end namespace perspective

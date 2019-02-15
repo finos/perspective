@@ -8,26 +8,35 @@
  */
 
 const execSync = require("child_process").execSync;
+const path = require("path");
+const minimatch = require("minimatch");
 
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 function docker(image = "emsdk") {
-    console.log(`-- Creating ${image} docker image`);
+    console.log("-- Creating emsdk docker image");
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/usr/src/app/cpp -w /usr/src/app/cpp/cpp/perspective/cppbuild perspective/${image}`;
+    cmd += ` -v $(pwd):/src -e PACKAGE=${process.env.PACKAGE} perspective/${image}`;
     return cmd;
 }
 
-try {
+function lint(dir) {
     if (process.env.PSP_DOCKER) {
-        execute(docker("cpp") + " ./test/psp_test");
+        execute(docker() + ` bash -c 'diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)'`);
     } else {
-        execute("./cpp/perspective/cppbuild/test/psp_test");
+        execute(`bash -c 'diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)'`);
+    }
+}
+
+try {
+    if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
+        lint(path.join(".", "cpp", "perspective", "src", "cpp"));
+        lint(path.join(".", "cpp", "perspective", "src", "include", "perspective"));
     }
 } catch (e) {
-    console.log(e.message);
+    console.error(e.message);
     process.exit(1);
 }

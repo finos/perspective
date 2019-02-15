@@ -210,8 +210,7 @@ t_gstate::update_history(const t_table* tbl) {
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(ncols), 1,
-        [tbl, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](
-            int colidx)
+        [tbl, op_col, &col_translation, &fcolumns, &scolumns, &stableidx_vec](int colidx)
 #else
     for (t_uindex colidx = 0; colidx < ncols; ++colidx)
 #endif
