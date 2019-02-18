@@ -78,16 +78,17 @@ export const styleAxis = (chart, prefix, settings) => {
 
     const valueSize = v => v.length * 5;
     const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
-    const labelSize = prefix === "x" ? 17 : domain(settings).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
+    const labelSize = prefix === "x" ? 25 : domain(settings).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
 
     switch (axisType(settings)) {
         case AXIS_TYPES.ordinal:
-            chart[`${prefix}Padding`](0.5)
+            chart[`${prefix}PaddingInner`](0.5)
+                [`${prefix}PaddingOuter`](0.25)
                 [`${prefix}TickGrouping`](t => t.split("|"))
-                [`${prefix}TickSizeInner`](labelSize)
+                [`${prefix}TickSizeInner`](settings.crossValues.length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)
-                [`${prefix}TickPadding`](6)
-                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 10);
+                [`${prefix}TickPadding`](8)
+                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 5);
             break;
     }
 };
