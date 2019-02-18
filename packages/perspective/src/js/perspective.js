@@ -852,14 +852,16 @@ export default function(Module) {
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
      * apply.  A filter configuration is an array of 3 elements:  A column name,
      * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-     * @param {Array<string>} [config.sort] An Array of column names by which to sort.
+     * @param {Array<string>} [config.sort] An Array of Sort configurations to apply.
+     * A sort configuration is an array of 2 elements: A column name, and a sort direction,
+     * which are: "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
      *
      * @example
      * var view = table.view({
      *      row_pivot: ['region'],
      *      aggregate: [{op: 'dominant', column:'region'}],
      *      filter: [['client', 'contains', 'fred']],
-     *      sort: ['value']
+     *      sort: [['value', 'asc']]
      * });
      *
      * @returns {view} A new {@link view} object for the supplied configuration,
