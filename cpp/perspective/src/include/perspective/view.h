@@ -48,7 +48,8 @@ public:
     std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0);
 
 private:
-    std::string map_aggregate_types(std::string name, std::string typestring);
+    // std::vector<std::string> _get_aggregate_names();
+    std::string _map_aggregate_types(const std::string& name, const std::string& typestring);
 
     t_pool* m_pool;
     std::shared_ptr<CTX_T> m_ctx;
@@ -57,7 +58,6 @@ private:
     std::string m_name;
     std::string m_separator;
 
-    // FIXME: refactor to be vectors of t_aggspec, etc.
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     std::vector<t_aggspec> m_aggregates;

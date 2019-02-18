@@ -44,8 +44,13 @@ namespace binding {
      *
      * Data Loading
      */
+    t_index _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name);
+
+    std::vector<std::string> _get_aggregate_names(const std::vector<t_aggspec>& aggs);
+
     template <typename T>
-    std::vector<t_sortspec> _get_sort(T j_sortby);
+    std::vector<t_sortspec> _get_sort(
+        std::vector<std::string>& col_names, bool is_column_sort, T j_sortby);
 
     /**
      *
@@ -298,12 +303,12 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<t_ctx2> make_context_two(t_schema schema, T j_rpivots, T j_cpivots,
-        t_filter_op combiner, T j_filters, T j_aggs, T j_rpivot_depth, T j_cpivot_depth,
-        bool j_column_only, bool show_totals, t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        t_filter_op combiner, T j_filters, T j_aggs, T j_sortby, T j_rpivot_depth,
+        T j_cpivot_depth, bool j_column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode,
         std::string name);
 
     template <typename T>
-    void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby, T j_column_sortby);
+    void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby);
 
     template <typename T>
     T get_column_data(std::shared_ptr<t_table> table, std::string colname);

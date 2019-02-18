@@ -158,7 +158,7 @@ View<CTX_T>::schema() {
         new_schema[agg_name] = type_string;
 
         if (m_row_pivots.size() > 0) {
-            new_schema[agg_name] = map_aggregate_types(agg_name, new_schema[agg_name]);
+            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
         }
     }
 
@@ -279,7 +279,7 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
 // PRIVATE
 template <typename CTX_T>
 std::string
-View<CTX_T>::map_aggregate_types(std::string name, std::string typestring) {
+View<CTX_T>::_map_aggregate_types(const std::string& name, const std::string& typestring) {
     std::vector<std::string> INTEGER_AGGS
         = {"distinct_count", "distinct count", "distinctcount", "distinct", "count"};
     std::vector<std::string> FLOAT_AGGS

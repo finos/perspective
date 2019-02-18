@@ -355,9 +355,28 @@ str_to_filter_op(std::string str) {
     }
 }
 
+t_sorttype
+str_to_sorttype(std::string str) {
+    if (str == "none") {
+        return SORTTYPE_NONE;
+    } else if (str == "asc" || str == "col asc") {
+        return SORTTYPE_ASCENDING;
+    } else if (str == "desc" || str == "col desc") {
+        return SORTTYPE_DESCENDING;
+    } else if (str == "asc abs" || str == "col asc abs") {
+        return SORTTYPE_ASCENDING_ABS;
+    } else if (str == "desc abs" || str == "col desc abs") {
+        return SORTTYPE_DESCENDING_ABS;
+    } else {
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown sort type string");
+        return SORTTYPE_DESCENDING;
+    }
+}
+
 t_aggtype
 str_to_aggtype(std::string str) {
-    if (str == "distinct count" || str == "distinctcount" || str == "distinct") {
+    if (str == "distinct count" || str == "distinctcount" || str == "distinct"
+        || str == "distinct_count") {
         return t_aggtype::AGGTYPE_DISTINCT_COUNT;
     } else if (str == "sum") {
         return t_aggtype::AGGTYPE_SUM;
@@ -393,7 +412,7 @@ str_to_aggtype(std::string str) {
         return t_aggtype::AGGTYPE_AND;
     } else if (str == "or") {
         return t_aggtype::AGGTYPE_OR;
-    } else if (str == "last") {
+    } else if (str == "last" || str == "last_value") {
         return t_aggtype::AGGTYPE_LAST_VALUE;
     } else if (str == "high" || str == "high_water_mark") {
         return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
@@ -401,18 +420,22 @@ str_to_aggtype(std::string str) {
         return t_aggtype::AGGTYPE_LOW_WATER_MARK;
     } else if (str == "sub abs") {
         return t_aggtype::AGGTYPE_SUM_ABS;
-    } else if (str == "sum not null") {
+    } else if (str == "sum not null" || str == "sum_not_null") {
         return t_aggtype::AGGTYPE_SUM_NOT_NULL;
-    } else if (str == "mean by count") {
+    } else if (str == "mean by count" || str == "mean_by_count") {
         return t_aggtype::AGGTYPE_MEAN_BY_COUNT;
     } else if (str == "identity") {
         return t_aggtype::AGGTYPE_IDENTITY;
-    } else if (str == "distinct leaf") {
+    } else if (str == "distinct leaf" || str == "distinct_leaf") {
         return t_aggtype::AGGTYPE_DISTINCT_LEAF;
-    } else if (str == "pct sum parent") {
+    } else if (str == "pct sum parent" || str == "pct_sum_parent") {
         return t_aggtype::AGGTYPE_PCT_SUM_PARENT;
-    } else if (str == "pct sum grand total") {
+    } else if (str == "pct sum grand total" || str == "pct_sum_grand_total") {
         return t_aggtype::AGGTYPE_PCT_SUM_GRAND_TOTAL;
+    } else if (str.find("udf_combiner_") != std::string::npos) {
+        return t_aggtype::AGGTYPE_UDF_COMBINER;
+    } else if (str.find("udf_reducer_") != std::string::npos) {
+        return t_aggtype::AGGTYPE_UDF_REDUCER;
     } else {
         PSP_COMPLAIN_AND_ABORT("Encountered unknown aggregate operation.");
         // use any as default

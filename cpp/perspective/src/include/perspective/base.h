@@ -202,6 +202,9 @@ enum t_sorttype {
     SORTTYPE_DESCENDING_ABS
 };
 
+PERSPECTIVE_EXPORT t_sorttype str_to_sorttype(std::string str);
+PERSPECTIVE_EXPORT std::string sorttype_to_str(t_sorttype type);
+
 enum t_aggtype {
     AGGTYPE_SUM,
     AGGTYPE_MUL,
