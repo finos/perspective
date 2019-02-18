@@ -14,9 +14,11 @@ export function tooltip(selection, settings) {
         .on("mouseover", function(data) {
             generateHtml(tooltipDiv, data, settings);
             showTooltip(container.node(), this, tooltipDiv);
+            select(this).style("opacity", "0.7");
         })
         .on("mouseout", function() {
             hideTooltip(tooltipDiv);
+            select(this).style("opacity", "1");
         });
 }
 

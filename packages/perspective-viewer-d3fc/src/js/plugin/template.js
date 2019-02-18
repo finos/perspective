@@ -41,7 +41,7 @@ class D3FCChartElement extends HTMLElement {
 
     draw() {
         if (this._settings.data) {
-            this._chart(d3.select(this._container), this._settings);
+            this._chart(d3.select(this._container).attr("class", `chart ${this._chart.plugin.type}`), this._settings);
         }
     }
 
