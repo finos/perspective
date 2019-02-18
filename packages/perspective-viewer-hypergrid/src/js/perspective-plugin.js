@@ -108,6 +108,48 @@ function setColumnPropsByType(column) {
 exports.install = function(grid) {
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
     Object.getPrototypeOf(grid.behavior).cellClicked = function(event) {
+        event.primitiveEvent.preventDefault();
+        event.handled = true;
+        const {x, y} = event.dataCell;
+        const config = this.dataModel.getConfig();
+        const row_pivots = config.row_pivot;
+        const column_pivots = config.column_pivot;
+        const start_row = y >= 0 ? y : 0;
+        const end_row = start_row + 1;
+        this.dataModel._view.to_json({start_row, end_row}).then(r => {
+            const row_paths = r.map(x => x.__ROW_PATH__);
+            const row_pivot_values = row_paths[0] || [];
+            const row_filters = row_pivots
+                .map((pivot, index) => {
+                    const pivot_value = row_pivot_values[index];
+                    return pivot_value ? [pivot, "==", pivot_value] : undefined;
+                })
+                .filter(x => x);
+            const column_index = row_pivots.length > 0 ? x + 1 : x;
+            const column_paths = Object.keys(r[0])[column_index];
+            let column_filters = [];
+            if (column_paths) {
+                const column_pivot_values = column_paths.split("|");
+                column_filters = column_pivots
+                    .map((pivot, index) => {
+                        const pivot_value = column_pivot_values[index];
+                        return pivot_value ? [pivot, "==", pivot_value] : undefined;
+                    })
+                    .filter(x => x);
+            }
+
+            const filters = config.filter.concat(row_filters).concat(column_filters);
+            grid.canvas.dispatchEvent(
+                new CustomEvent("perspective-click", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        filters
+                    }
+                })
+            );
+        });
+
         return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
     };
 
