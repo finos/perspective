@@ -10,4 +10,7 @@
 export * from './plugin';
 export * from './widget';
 export * from './version';
-export * from './utils';
+
+/* css */
+import '!!style-loader!css-loader!less-loader!../less/index.less';
+

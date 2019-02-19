@@ -13,24 +13,28 @@ const RUNTIMES = {
     NODE: node_perspective
 };
 
-if (!process.env.PSP_DEBUG && window.perspective) {
+if (!process.env.PSP_DEBUG) {
     require("../../build/perspective.asmjs.worker.js");
-    RUNTIMES.ASMJS = window.perspective;
+    RUNTIMES.ASMJS = global.perspective;
 }
 
+const clear_tests = require("./clear.js");
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
 const update_tests = require("./updates.js");
 const filter_tests = require("./filters.js");
 const internal_tests = require("./internal.js");
+const toformat_tests = require("./to_format.js");
 
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
         (typeof WebAssembly === "undefined" && mode === "WASM" ? xdescribe : describe)(mode, function() {
+            clear_tests(RUNTIMES[mode]);
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
+            toformat_tests(RUNTIMES[mode]);
             internal_tests(RUNTIMES[mode], mode);
         });
     });

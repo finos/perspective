@@ -17,5 +17,6 @@
     "regressions.html/saving a computed column does not interrupt update rendering": "da13afb4284b9c3da21ed57c6ba69301",
     "empty.html/empty grids do not explode": "423ca653bbcbc21a28029c149a37b8ec",
     "superstore.html/highlights invalid filter.": "e244cca8fc2278cb2477d0a46ab5331f",
-    "superstore.html/handles flush().": "a5d1bad309edf83ceef190dd19d867ec"
+    "superstore.html/handles flush().": "a5d1bad309edf83ceef190dd19d867ec",
+    "superstore.html/replaces all rows.": "2c41d623f03b2417da7b5dcf7f31e364"
 }

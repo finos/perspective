@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective",
-    "version": "0.2.14",
+    "version": "0.2.16",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
     "browser": "cjs/js/perspective.parallel.js",
@@ -20,7 +20,7 @@
         "prebuild": "mkdir -p build && mkdir -p obj",
         "cpp": "npm-run-all build:cpp test:cpp",
         "build": "npm-run-all build:babel build:webpack",
-        "build:babel": "babel src/js --out-dir cjs/js",
+        "build:babel": "babel src/js --source-maps --out-dir cjs/js",
         "build:webpack": "npm-run-all -p build:webpack:*",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
@@ -56,17 +56,15 @@
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
-        "less": "^2.7.2",
+        "lodash": "^4.17.4",
         "moment": "^2.19.1",
         "papaparse": "^4.3.6",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
-        "underscore": "^1.8.3",
-        "utf-8-validate": "~4.0.0",
         "websocket-heartbeat-js": "^1.0.7",
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.14"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16"
     }
 }

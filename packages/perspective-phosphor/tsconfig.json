@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "target": "es2016",
+    "outDir": "",
+    "lib": [
+      "es2016",
+      "ES2015.Promise",
+      "DOM"
+    ],
+    "types": [
+      "jest",
+      "@jpmorganchase/perspective-viewer"
+    ]
+  },
+  "include": ["src/ts/*"]
+}

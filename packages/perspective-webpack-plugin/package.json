@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-webpack-plugin",
-    "version": "0.2.14",
+    "version": "0.2.16",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -43,6 +43,8 @@
         "html-loader": "^0.5.1",
         "less": "^2.7.2",
         "less-loader": "^4.0.5",
+        "source-map-loader": "^0.2.4",
+        "string-replace-loader": "^2.1.1",
         "style-loader": "^0.18.2",
         "tslib": "^1.9.3",
         "worker-loader": "^2.0.0"

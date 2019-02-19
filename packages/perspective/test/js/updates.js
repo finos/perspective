@@ -7,7 +7,7 @@
  *
  */
 
-const _ = require("underscore");
+const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
 const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
