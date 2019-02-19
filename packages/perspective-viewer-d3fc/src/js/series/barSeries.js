@@ -8,9 +8,10 @@
  */
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
+import seriesSvgGrouped from "../d3fc/series/svg/grouped";
 
 export function barSeries(settings, colour) {
-    let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
+    let series = settings.mainValues.length > 1 ? seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
 
     series = series.decorate(selection => {
         tooltip(selection, settings);
