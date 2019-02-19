@@ -34,17 +34,37 @@ export const scale = settings => {
 const defaultScaleBand = () => minBandwidth(d3.scaleBand());
 
 export const domain = settings => {
-    const accessData = extent => {
-        return extent.accessors([labelFunction(settings)])(settings.data);
+    let valueName = "crossValue";
+
+    let extentLinear = fc.extentLinear();
+    let extentTime = fc.extentTime();
+
+    const _domain = function(data) {
+        const accessData = extent => {
+            return extent.accessors([labelFunction(settings)])(data);
+        };
+        switch (axisType(settings)) {
+            case AXIS_TYPES.time:
+                return accessData(extentTime);
+            case AXIS_TYPES.linear:
+                return accessData(extentLinear);
+            default:
+                return settings.data.map(labelFunction(settings));
+        }
     };
-    switch (axisType(settings)) {
-        case AXIS_TYPES.time:
-            return accessData(fc.extentTime());
-        case AXIS_TYPES.linear:
-            return accessData(fc.extentLinear());
-        default:
-            return settings.data.map(labelFunction(settings));
-    }
+
+    fc.rebindAll(_domain, extentLinear);
+    fc.rebindAll(_domain, extentTime);
+
+    _domain.valueName = (...args) => {
+        if (!args.length) {
+            return valueName;
+        }
+        valueName = args[0];
+        return _domain;
+    };
+
+    return _domain;
 };
 
 export const labelFunction = settings => {
@@ -78,7 +98,7 @@ export const styleAxis = (chart, prefix, settings) => {
 
     const valueSize = v => v.length * 5;
     const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
-    const labelSize = prefix === "x" ? 25 : domain(settings).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
+    const labelSize = prefix === "x" ? 25 : domain(settings)(settings.data).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
 
     switch (axisType(settings)) {
         case AXIS_TYPES.ordinal:

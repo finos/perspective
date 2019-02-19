@@ -25,7 +25,7 @@ function lineChart(container, settings) {
     const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings, data))
+        .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(mainAxis.domain(settings).pad([0.1, 0.1])(data))
         .yOrient("left")
         .plotArea(withGridLines(series).orient("vertical"));
