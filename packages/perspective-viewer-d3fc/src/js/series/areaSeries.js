@@ -9,7 +9,7 @@
 import * as fc from "d3fc";
 
 export function areaSeries(settings, colour) {
-    let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgArea()) : fc.seriesSvgArea();
+    let series = fc.seriesSvgArea();
 
     series = series.decorate(selection => {
         if (colour) {
@@ -17,8 +17,5 @@ export function areaSeries(settings, colour) {
         }
     });
 
-    return series
-        .crossValue(d => d.crossValue)
-        .mainValue(d => d.mainValue)
-        .baseValue(d => d.baseValue);
+    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
 }
