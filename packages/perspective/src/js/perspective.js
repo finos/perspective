@@ -13,9 +13,14 @@ import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./translator.js";
 import {bindall, get_column_type} from "./utils.js";
 
-import {Precision} from "@apache-arrow/es5-esm/type";
+import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
-import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Visitor} from "@apache-arrow/es5-esm/visitor";
+import {Data} from "@apache-arrow/es5-esm/data";
+import {Vector} from "@apache-arrow/es5-esm/vector";
+
+import {Utf8, Uint32, Float64, Int32, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
+
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -94,37 +99,25 @@ export default function(Module) {
         let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
             return loader.loadColumn(field, arrow.getColumnAt(colIdx));
         }, new ArrowColumnLoader());
-        if (typeof loader.cdata[0].values === "undefined") {
-            let nchunks = loader.cdata[0].data.chunkVectors.length;
-            let chunks = [];
-            for (let x = 0; x < nchunks; x++) {
-                chunks.push({
-                    row_count: loader.cdata[0].data.chunkVectors[x].length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata.map(y => y.data.chunkVectors[x])
-                });
-            }
-            return chunks;
-        } else {
-            return [
-                {
-                    row_count: arrow.length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata
-                }
-            ];
+        let nchunks = loader.cdata[0].chunks.length;
+        let chunks = [];
+        for (let x = 0; x < nchunks; x++) {
+            chunks.push({
+                row_count: loader.cdata[0].chunks[x].length,
+                is_arrow: true,
+                names: loader.names,
+                types: loader.types,
+                cdata: loader.cdata.map(y => y.chunks[x])
+            });
         }
+        return chunks;
     }
 
     /**
      *
      * @private
      */
-    class ArrowColumnLoader extends TypeVisitor {
+    class ArrowColumnLoader extends Visitor {
         constructor(cdata, names, types) {
             super();
             this.cdata = cdata || [];
@@ -316,7 +309,6 @@ export default function(Module) {
     const map_aggregate_types = function(col_name, orig_type, aggregate) {
         const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
         const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
-
         for (let agg in aggregate) {
             let found_agg = aggregate[agg];
             if (found_agg.column.join(defaults.COLUMN_SEPARATOR_STRING) === col_name) {
@@ -324,10 +316,12 @@ export default function(Module) {
                     return "integer";
                 } else if (FLOAT_AGGS.includes(found_agg.op)) {
                     return "float";
+                } else {
+                    return orig_type;
                 }
             }
         }
-        return orig_type;
+        throw new Error("Shouldn't be here");
     };
 
     const to_format = async function(options, formatter) {
@@ -506,21 +500,45 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx);
+            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx, false);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1);
+            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1, false);
         } else {
             const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.config.column_only === true;
-            let arr = __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1);
-            if (arr !== undefined) {
-                if (column_pivot_only) {
-                    // remove agg of psp_okey
-                    arr = arr.subarray(1, arr.length);
-                }
-            }
-            return arr;
+            return __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1, column_pivot_only);
         }
+    };
+
+    view.prototype.to_arrow = async function() {
+        const names = await this._column_names();
+        const schema = await this.schema();
+
+        const vectors = [];
+
+        for (let name of names) {
+            const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
+            const type = schema[col_path[col_path.length - 1]];
+            if (type === "float") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "integer") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "date" || type === "datetime") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "string") {
+                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
+                const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
+                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
+            } else {
+                throw new Error(`Type ${type} not supported`);
+            }
+        }
+
+        return Table.fromVectors(vectors, names).serialize().buffer;
     };
 
     /**
@@ -979,16 +997,18 @@ export default function(Module) {
                 aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
             }
         } else {
+            config.aggregate = [];
             let t_aggs = schema.columns();
             let t_aggtypes = schema.types();
             for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
                 let column = t_aggs.get(aidx);
-                let agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                let agg_op = "any";
                 if (!config.column_only) {
-                    agg_op = _string_to_aggtype[defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)]];
+                    agg_op = defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)];
                 }
                 if (column !== "psp_okey") {
-                    aggregates.push([column, agg_op, [column]]);
+                    aggregates.push([column, _string_to_aggtype[agg_op], [column]]);
+                    config.aggregate.push({column: [column], op: agg_op});
                 }
             }
             t_aggs.delete();
@@ -1107,11 +1127,11 @@ export default function(Module) {
             }
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         }
 
         try {
@@ -1440,10 +1460,20 @@ export default function(Module) {
                                 if (msg.method === "delete") {
                                     delete this._views[msg.name];
                                 }
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
+                                if (msg.method === "to_arrow") {
+                                    this.post(
+                                        {
+                                            id: msg.id,
+                                            data: result
+                                        },
+                                        [result]
+                                    );
+                                } else {
+                                    this.post({
+                                        id: msg.id,
+                                        data: result
+                                    });
+                                }
                             })
                             .catch(error => {
                                 this.post({
@@ -1464,8 +1494,8 @@ export default function(Module) {
             self.addEventListener("message", e => this.process(e.data), false);
         }
 
-        post(msg) {
-            self.postMessage(msg);
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
         }
 
         init({buffer}) {

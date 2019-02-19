@@ -290,7 +290,7 @@ module.exports = perspective => {
                 row_pivot: ["x"]
             });
             let result2 = await view.schema();
-            expect(result2).toEqual(meta);
+            expect(result2).toEqual({x: "integer", y: "integer", z: "integer"});
             view.delete();
             table.delete();
         });

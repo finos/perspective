@@ -208,7 +208,7 @@ namespace binding {
      * val
      */
     val
-    scalar_to_val(const t_tscalar& scalar) {
+    scalar_to_val(const t_tscalar& scalar, bool cast_double) {
         if (!scalar.is_valid()) {
             return val::null();
         }
@@ -223,7 +223,13 @@ namespace binding {
             case DTYPE_TIME:
             case DTYPE_FLOAT64:
             case DTYPE_FLOAT32: {
-                return val(scalar.to_double());
+                if (cast_double) {
+                    auto x = scalar.to_uint64();
+                    double y = *reinterpret_cast<double*>(&x);
+                    return val(y);
+                } else {
+                    return val(scalar.to_double());
+                }
             }
             case DTYPE_DATE: {
                 return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
@@ -274,6 +280,20 @@ namespace binding {
     scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
         return scalar_vec_to_val(scalars, idx);
     }
+
+    /**
+     * Converts a std::vector<T> to a Typed Array, slicing directly from the
+     * WebAssembly heap.
+     */
+    template <typename T>
+    val
+    vector_to_typed_array(std::vector<T>& xs) {
+        T* st = &xs[0];
+        uintptr_t offset = reinterpret_cast<uintptr_t>(st);
+        return val::module_property("HEAPU8").call<val>(
+            "slice", offset, offset + (sizeof(T) * xs.size()));
+    }
+
     /**
      *
      *
@@ -359,66 +379,187 @@ namespace binding {
         val Int8Array = val::global("Int8Array");
         val Int16Array = val::global("Int16Array");
         val Int32Array = val::global("Int32Array");
+        val UInt8Array = val::global("Uint8Array");
+        val UInt32Array = val::global("Uint32Array");
         val Float32Array = val::global("Float32Array");
         val Float64Array = val::global("Float64Array");
     } // namespace js_typed_array
 
+    template <typename T>
+    const val typed_array = val::null();
+
+    template <>
+    const val typed_array<double> = js_typed_array::Float64Array;
+    template <>
+    const val typed_array<float> = js_typed_array::Float32Array;
+    template <>
+    const val typed_array<std::int8_t> = js_typed_array::Int8Array;
+    template <>
+    const val typed_array<std::int16_t> = js_typed_array::Int16Array;
+    template <>
+    const val typed_array<std::int32_t> = js_typed_array::Int32Array;
+    template <>
+    const val typed_array<std::uint32_t> = js_typed_array::UInt32Array;
+
+    template <typename F, typename T = F>
+    T get_scalar(t_tscalar& t);
+
+    template <>
+    double
+    get_scalar<double>(t_tscalar& t) {
+        return t.to_double();
+    }
+    template <>
+    float
+    get_scalar<float>(t_tscalar& t) {
+        return t.to_double();
+    }
+    template <>
+    std::int8_t
+    get_scalar<std::int8_t>(t_tscalar& t) {
+        return static_cast<std::int8_t>(t.to_int64());
+    }
+    template <>
+    std::int16_t
+    get_scalar<std::int16_t>(t_tscalar& t) {
+        return static_cast<std::int16_t>(t.to_int64());
+    }
+    template <>
+    std::int32_t
+    get_scalar<std::int32_t>(t_tscalar& t) {
+        return static_cast<std::int32_t>(t.to_int64());
+    }
+    template <>
+    std::uint32_t
+    get_scalar<std::uint32_t>(t_tscalar& t) {
+        return static_cast<std::uint32_t>(t.to_int64());
+    }
+    template <>
+    double
+    get_scalar<t_date, double>(t_tscalar& t) {
+        auto x = t.to_uint64();
+        return *reinterpret_cast<double*>(&x);
+    }
+
+    template <typename T, typename F = T, typename O = T>
+    val
+    col_to_typed_array(std::vector<t_tscalar> data, bool column_pivot_only) {
+        int start_idx = column_pivot_only ? 1 : 0;
+        int data_size = data.size() - start_idx;
+        std::vector<T> vals;
+        vals.reserve(data.size());
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::uint32_t> validityMap;
+        validityMap.resize(nullSize);
+        for (int idx = 0; idx < data.size() - start_idx; idx++) {
+            t_tscalar scalar = data[idx + start_idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                vals.push_back(get_scalar<F, T>(scalar));
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                vals.push_back({});
+                nullCount++;
+            }
+        }
+        val arr = val::global("Array").new_();
+        arr.call<void>("push", typed_array<O>.new_(vector_to_typed_array(vals)["buffer"]));
+        arr.call<void>("push", nullCount);
+        arr.call<void>("push", vector_to_typed_array(validityMap));
+        return arr;
+    }
+
+    template <>
+    val
+    col_to_typed_array<std::string>(std::vector<t_tscalar> data, bool column_pivot_only) {
+        int start_idx = column_pivot_only ? 1 : 0;
+        int data_size = data.size() - start_idx;
+
+        t_vocab vocab;
+        vocab.init(false);
+
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::uint32_t> validityMap; // = new std::uint32_t[nullSize];
+        validityMap.resize(nullSize);
+        val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
+        val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
+
+        for (int idx = 0; idx < data.size(); idx++) {
+            t_tscalar scalar = data[idx + start_idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                auto adx = vocab.get_interned(scalar.to_string());
+                indexArray.call<void>("fill", val(adx), idx, idx + 1);
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                nullCount++;
+            }
+        }
+        val dictBuffer = js_typed_array::ArrayBuffer.new_(
+            vocab.get_vlendata()->size() - vocab.get_vlenidx());
+        val dictArray = js_typed_array::UInt8Array.new_(dictBuffer);
+        std::vector<std::uint32_t> offsets;
+        offsets.reserve(vocab.get_vlenidx() + 1);
+        std::uint32_t index = 0;
+        for (auto i = 0; i < vocab.get_vlenidx(); i++) {
+            const char* str = vocab.unintern_c(i);
+            offsets.push_back(index);
+            while (*str) {
+                dictArray.call<void>("fill", val(*str++), index, index + 1);
+                index++;
+            }
+        }
+        offsets.push_back(index);
+
+        val arr = val::global("Array").new_();
+        arr.call<void>("push", dictArray);
+        arr.call<void>(
+            "push", js_typed_array::UInt32Array.new_(vector_to_typed_array(offsets)["buffer"]));
+        arr.call<void>("push", indexArray);
+        arr.call<void>("push", nullCount);
+        arr.call<void>("push", vector_to_typed_array(validityMap));
+        return arr;
+    }
+
     // Given a column index, serialize data to TypedArray
     template <typename T>
     val
-    col_to_js_typed_array(T ctx, t_index idx) {
+    col_to_js_typed_array(T ctx, t_index idx, bool column_pivot_only) {
         std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
         auto dtype = ctx->get_column_dtype(idx);
-        int data_size = data.size();
-        val constructor = val::undefined();
-        val sentinel = val::undefined();
 
         switch (dtype) {
             case DTYPE_INT8: {
-                data_size *= sizeof(std::int8_t);
-                sentinel = val(std::numeric_limits<std::int8_t>::lowest());
-                constructor = js_typed_array::Int8Array;
+                return col_to_typed_array<std::int8_t>(data, column_pivot_only);
             } break;
             case DTYPE_INT16: {
-                data_size *= sizeof(std::int16_t);
-                sentinel = val(std::numeric_limits<std::int16_t>::lowest());
-                constructor = js_typed_array::Int16Array;
+                return col_to_typed_array<std::int16_t>(data, column_pivot_only);
+            } break;
+            case DTYPE_TIME: {
+                return col_to_typed_array<double, t_date, std::int32_t>(
+                    data, column_pivot_only);
             } break;
             case DTYPE_INT32:
+            case DTYPE_UINT32: {
+                return col_to_typed_array<std::uint32_t>(data, column_pivot_only);
+            } break;
             case DTYPE_INT64: {
-                // scalar_to_val converts int64 into int32
-                data_size *= sizeof(std::int32_t);
-                sentinel = val(std::numeric_limits<std::int32_t>::lowest());
-                constructor = js_typed_array::Int32Array;
+                return col_to_typed_array<std::int32_t>(data, column_pivot_only);
             } break;
             case DTYPE_FLOAT32: {
-                data_size *= sizeof(float);
-                sentinel = val(std::numeric_limits<float>::lowest());
-                constructor = js_typed_array::Float32Array;
+                return col_to_typed_array<float>(data, column_pivot_only);
             } break;
-            case DTYPE_TIME:
             case DTYPE_FLOAT64: {
-                sentinel = val(std::numeric_limits<double>::lowest());
-                data_size *= sizeof(double);
-                constructor = js_typed_array::Float64Array;
+                return col_to_typed_array<double>(data, column_pivot_only);
             } break;
-            default:
-                return constructor;
-        }
-
-        val buffer = js_typed_array::ArrayBuffer.new_(data_size);
-        val arr = constructor.new_(buffer);
-
-        for (int idx = 0; idx < data.size(); idx++) {
-            t_tscalar scalar = data[idx];
-            if (scalar.get_dtype() == DTYPE_NONE) {
-                arr.call<void>("fill", sentinel, idx, idx + 1);
-            } else {
-                arr.call<void>("fill", scalar_to_val(scalar), idx, idx + 1);
+            case DTYPE_STR: {
+                return col_to_typed_array<std::string>(data, column_pivot_only);
+            } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unhandled aggregate type");
+                return val::undefined();
             }
         }
-
-        return arr;
     }
 
     void

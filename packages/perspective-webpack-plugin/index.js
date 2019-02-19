@@ -90,14 +90,33 @@ class PerspectiveWebpackPlugin {
                 loader: "babel-loader",
                 options: BABEL_CONFIG
             });
+            rules.push({
+                test: /\.js$/,
+                include: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
+                loader: "source-map-loader"
+            });
         } else {
             rules.push({
                 test: /\.js$/,
-                include: this.options.load_path,
-                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
                 loader: "source-map-loader"
             });
         }
+        
+        // FIXME Workaround for performance regression in @apache-arrow 4.0
+        rules.push({
+            test: /\.js$/,
+            include: /\@apache-arrow[/\\]es5-esm/,
+            use: [
+                {loader: "source-map-loader"},
+                {
+                    loader: "string-replace-loader",
+                    options: {
+                        search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
+                        replace: ''
+                    }
+                }
+            ]
+        });
 
         rules.push({
             test: /psp\.(sync|async)\.wasm\.js$/,
