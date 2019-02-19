@@ -82,9 +82,7 @@ export const styleAxis = (chart, prefix, settings) => {
 
     switch (axisType(settings)) {
         case AXIS_TYPES.ordinal:
-            chart[`${prefix}PaddingInner`](0.5)
-                [`${prefix}PaddingOuter`](0.25)
-                [`${prefix}TickGrouping`](t => t.split("|"))
+            chart[`${prefix}TickGrouping`](t => t.split("|"))
                 [`${prefix}TickSizeInner`](settings.crossValues.length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)
                 [`${prefix}TickPadding`](8)

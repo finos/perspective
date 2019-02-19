@@ -33,8 +33,8 @@ function lineChart(container, settings) {
     crossAxis.styleAxis(chart, "x", settings);
     mainAxis.styleAxis(chart, "y", settings);
 
-    chart.xPadding && chart.xPaddingInner(1);
-    chart.xPadding && chart.xPaddingOuter(0.5);
+    chart.xPaddingInner && chart.xPaddingInner(1);
+    chart.xPaddingOuter && chart.xPaddingOuter(0.5);
 
     // render
     container.datum(data).call(chart);
