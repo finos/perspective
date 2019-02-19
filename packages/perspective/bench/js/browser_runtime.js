@@ -144,6 +144,7 @@ async function* run_all_cases() {
                 yield* run_view_cases(table, config);
                 yield* run_to_format_cases(table, config, "to_json");
                 yield* run_to_format_cases(table, config, "to_columns");
+                yield* run_to_format_cases(table, config, "to_arrow");
             }
         }
     }

@@ -141,7 +141,7 @@ var data_6 = [{x: "š"}];
 
 var int_float_data = [{int: 1, float: 2.25}, {int: 2, float: 3.5}, {int: 3, float: 4.75}, {int: 4, float: 5.25}];
 var int_float_string_data = [{int: 1, float: 2.25, string: "a"}, {int: 2, float: 3.5, string: "b"}, {int: 3, float: 4.75, string: "c"}, {int: 4, float: 5.25, string: "d"}];
-var datetime_data = [{datetime: +new Date(), int: 1}, {datetime: +new Date(), int: 1}, {datetime: +new Date(), int: 2}, {datetime: +new Date(), int: 2}];
+var datetime_data = [{datetime: new Date(), int: 1}, {datetime: new Date(), int: 1}, {datetime: new Date(), int: 2}, {datetime: new Date(), int: 2}];
 
 // utility for checking typed arrays
 function validate_typed_array(typed_array, column_data) {
@@ -207,7 +207,7 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view();
             const result = await view.col_to_js_typed_array("int");
-            expect(result.byteLength).toEqual(16);
+            expect(result[0].byteLength).toEqual(16);
             view.delete();
             table.delete();
         });
@@ -216,7 +216,7 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view();
             const result = await view.col_to_js_typed_array("float");
-            expect(result.byteLength).toEqual(32);
+            expect(result[0].byteLength).toEqual(32);
             view.delete();
             table.delete();
         });
@@ -224,8 +224,10 @@ module.exports = perspective => {
         it("Datetime, 0-sided view", async function() {
             var table = perspective.table(datetime_data);
             var view = table.view();
+            var schema = await view.schema();
+            expect(schema).toEqual({datetime: "datetime", int: "integer"});
             const result = await view.col_to_js_typed_array("datetime");
-            expect(result.byteLength).toEqual(32);
+            expect(result[0].byteLength).toEqual(32);
             view.delete();
             table.delete();
         });
@@ -238,7 +240,7 @@ module.exports = perspective => {
             });
             const result = await view.col_to_js_typed_array("int");
             // should include aggregate row
-            expect(result.byteLength).toEqual(20);
+            expect(result[0].byteLength).toEqual(20);
             view.delete();
             table.delete();
         });
@@ -250,7 +252,7 @@ module.exports = perspective => {
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("float");
-            expect(result.byteLength).toEqual(40);
+            expect(result[0].byteLength).toEqual(40);
             view.delete();
             table.delete();
         });
@@ -262,7 +264,7 @@ module.exports = perspective => {
                 aggregate: [{op: "high", column: "datetime"}]
             });
             const result = await view.col_to_js_typed_array("datetime");
-            expect(result.byteLength).toEqual(24);
+            expect(result[0].byteLength).toEqual(24);
             view.delete();
             table.delete();
         });
@@ -275,7 +277,7 @@ module.exports = perspective => {
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("3.5|int");
-            expect(result.byteLength).toEqual(20);
+            expect(result[0].byteLength).toEqual(20);
             view.delete();
             table.delete();
         });
@@ -288,7 +290,7 @@ module.exports = perspective => {
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("3.5|float");
-            expect(result.byteLength).toEqual(40);
+            expect(result[0].byteLength).toEqual(40);
             view.delete();
             table.delete();
         });
@@ -298,7 +300,7 @@ module.exports = perspective => {
             var view = table.view({column_pivot: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|int");
             // bytelength should not include the aggregate row
-            expect(result.byteLength).toEqual(16);
+            expect(result[0].byteLength).toEqual(16);
             view.delete();
             table.delete();
         });
@@ -307,22 +309,13 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view({column_pivot: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|float");
-            expect(result.byteLength).toEqual(32);
-            view.delete();
-            table.delete();
-        });
-
-        it("Undefined for non-int/float columns", async function() {
-            var table = perspective.table(int_float_string_data);
-            var view = table.view();
-            const result = await view.col_to_js_typed_array("string");
-            expect(result).toBeUndefined();
+            expect(result[0].byteLength).toEqual(32);
             view.delete();
             table.delete();
         });
 
         it("Symmetric output with to_columns, 0-sided", async function() {
-            let table = perspective.table(int_float_string_data);
+            let table = perspective.table(int_float_data);
             let view = table.view();
             let cols = await view.to_columns();
 
@@ -330,8 +323,8 @@ module.exports = perspective => {
                 let ta = await view.col_to_js_typed_array(col);
                 let column = cols[col];
                 if (ta !== undefined && column !== undefined) {
-                    expect(ta.length).toEqual(cols[col].length);
-                    expect(validate_typed_array(ta, cols[col])).toEqual(true);
+                    expect(ta[0].length).toEqual(cols[col].length);
+                    expect(validate_typed_array(ta[0], cols[col])).toEqual(true);
                 }
             }
             view.delete();
@@ -350,8 +343,8 @@ module.exports = perspective => {
                 let ta = await view.col_to_js_typed_array(col);
                 let column = cols[col];
                 if (ta !== undefined && column !== undefined) {
-                    expect(ta.length).toEqual(cols[col].length);
-                    expect(validate_typed_array(ta, cols[col])).toEqual(true);
+                    expect(ta[0].length).toEqual(cols[col].length);
+                    expect(validate_typed_array(ta[0], cols[col])).toEqual(true);
                 }
             }
             view.delete();
