@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective",
-    "version": "0.2.15",
+    "version": "0.2.16",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
     "browser": "cjs/js/perspective.parallel.js",
@@ -56,15 +56,15 @@
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
+        "lodash": "^4.17.4",
         "moment": "^2.19.1",
         "papaparse": "^4.3.6",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
-        "lodash": "^4.17.4",
         "websocket-heartbeat-js": "^1.0.7",
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.15"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16"
     }
 }

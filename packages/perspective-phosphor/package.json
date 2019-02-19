@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-phosphor",
-    "version": "0.2.15",
+    "version": "0.2.16",
     "description": "Perspective.js",
     "files": [
         "build/*.d.ts",
@@ -27,29 +27,43 @@
     },
     "jest": {
         "verbose": true,
-        "transform": {"^.+\\.(ts|tsx)$": "ts-jest", ".+\\.(css|styl|less|sass|scss)$": "jest-transform-css"},
+        "transform": {
+            "^.+\\.(ts|tsx)$": "ts-jest",
+            ".+\\.(css|styl|less|sass|scss)$": "jest-transform-css"
+        },
         "cache": false,
-        "testMatch": ["<rootDir>/test/ts/*.spec.ts"],
-        "testPathIgnorePatterns": ["<rootDir>/build", "<rootDir>/test/js"],
-        "transformIgnorePatterns": ["node_modules"],
+        "testMatch": [
+            "<rootDir>/test/ts/*.spec.ts"
+        ],
+        "testPathIgnorePatterns": [
+            "<rootDir>/build",
+            "<rootDir>/test/js"
+        ],
+        "transformIgnorePatterns": [
+            "node_modules"
+        ],
         "moduleNameMapper": {
             "\\.(css|less)$": "<rootDir>/test/js/styleMock.js",
             "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|wasm|wasm.worker.js)$": "<rootDir>/test/js/fileMock.js"
         },
         "preset": "ts-jest",
         "testEnvironment": "jsdom",
-        "globals": {"ts-jest": {"tsConfig": "<rootDir>/tsconfig.json"}}
+        "globals": {
+            "ts-jest": {
+                "tsConfig": "<rootDir>/tsconfig.json"
+            }
+        }
     },
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.15",
-        "@jpmorganchase/perspective-viewer": "^0.2.15",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.15",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.15",
+        "@jpmorganchase/perspective": "^0.2.16",
+        "@jpmorganchase/perspective-viewer": "^0.2.16",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.16",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.16",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.15",
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16",
         "@types/jest": "^23.3.9",
         "css-loader": "^0.26.1",
         "file-loader": "^0.11.1",

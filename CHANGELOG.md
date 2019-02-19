@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.16] - 2019-02-19
+### Added
+* [#431](https://github.com/jpmorganchase/perspective/pull/431) Added `clear()` and `replace()` APIs to `perspective` and `<perspective-viewer>`.
+* [#435](https://github.com/jpmorganchase/perspective/pull/435) Added `to_arrow()` method to `view()` for writing Apache Arrow `ArrayBuffer`s.
+* [#436](https://github.com/jpmorganchase/perspective/pull/436) New module `perspective-phosphor`, which adds bindings for the Phosphor.js framework.
+
+### Fixes
+* [#434](https://github.com/jpmorganchase/perspective/pull/434) Deprecated `[column]` sort syntax for `perspective` and `<perspective-viewer>`.
+
+### Internal
+* [#426](https://github.com/jpmorganchase/perspective/pull/426) Refactored C++ projects into separate repo structure.
+* [#413](https://github.com/jpmorganchase/perspective/pull/413) Moved structure of `view()` to C++.
+
 ## [0.2.15] - 2019-02-07
 ### Fixes
 * [#416](https://github.com/jpmorganchase/perspective/pull/416) Fixed highcharts bug which caused `null` groups to not render.
