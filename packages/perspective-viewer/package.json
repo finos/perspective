@@ -6,8 +6,10 @@
     "files": [
         "build/**/*",
         "src/**/*",
-        "babel.config.js"
+        "babel.config.js",
+        "index.d.ts"
     ],
+    "typings": "index.d.ts",
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",

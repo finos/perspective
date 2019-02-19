@@ -101,6 +101,7 @@ Gemfile.lock
 Vagrantfile
 /packages/sigma
 /packages/fin-hypergrid
+coverage
 
 .DS_Store
 

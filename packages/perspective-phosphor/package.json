@@ -1,5 +1,5 @@
 {
-    "name": "@jpmorganchase/perspective-jupyterlab",
+    "name": "@jpmorganchase/perspective-phosphor",
     "version": "0.2.15",
     "description": "Perspective.js",
     "files": [
@@ -12,9 +12,6 @@
     ],
     "main": "build/index.js",
     "types": "build/index.d.ts",
-    "directories": {
-        "build": "build/"
-    },
     "license": "Apache-2.0",
     "publishConfig": {
         "access": "public"
@@ -24,7 +21,7 @@
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
         "test": "npm-run-all test:run",
-        "test:run": "jest -i --no-cache --rootDir=. --env=jsdom",
+        "test:run": "NODE_ENV=test jest -i --no-cache --rootDir=.",
         "build": "webpack --color --config src/config/plugin.config.js",
         "clean": "rimraf build"
     },
@@ -44,8 +41,10 @@
         "globals": {"ts-jest": {"tsConfig": "<rootDir>/tsconfig.json"}}
     },
     "dependencies": {
-        "@jpmorganchase/perspective-phosphor": "^0.2.15",
-        "@jupyter-widgets/base": "^1.1.10",
+        "@jpmorganchase/perspective": "^0.2.15",
+        "@jpmorganchase/perspective-viewer": "^0.2.15",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.15",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.15",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
@@ -64,8 +63,5 @@
         "ts-jest": "^23.10.4",
         "typescript": "^3.2.4",
         "webpack": "^2.2.1"
-    },
-    "jupyterlab": {
-        "extension": "build/index.js"
     }
 }

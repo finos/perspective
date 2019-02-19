@@ -7,10 +7,6 @@
  *
  */
 
-export * from './plugin';
-export * from './widget';
-export * from './version';
-
-/* css */
-import '!!style-loader!css-loader!less-loader!../less/index.less';
-
+module.exports = {
+    
+};

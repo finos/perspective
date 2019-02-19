@@ -20,6 +20,6 @@ import {PERSPECTIVE_VERSION} from '../../src/ts/version';
 
 describe('Checks version', () => {
     test("Check version", () => {
-        expect(PERSPECTIVE_VERSION).toBe('0.2.11');
+        expect(PERSPECTIVE_VERSION).toBe('0.2.15');
     });
 });
