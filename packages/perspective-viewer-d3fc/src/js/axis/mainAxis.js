@@ -7,12 +7,16 @@
  *
  */
 import * as d3 from "d3";
+import * as fc from "d3fc";
 
 export const scale = () => d3.scaleLinear();
 
 export const domain = (settings, data, valueName = "mainValue") => {
     const extent = getDataExtentFromArray(data, valueName);
-    return [extent[0] > 0 ? 0 : extent[0] * 1.1, extent[1] < 0 ? 0 : extent[1] * 1.1];
+    const extLinear = fc.extentLinear().include([0]);
+    return extLinear(extent);
+    //return calculateExtent(extent, settings, data);
+    //return [extent[0] > 0 ? 0 : extent[0] * 1.1, extent[1] < 0 ? 0 : extent[1] * 1.1];
 };
 
 const getDataExtentFromArray = (array, valueName) => {
