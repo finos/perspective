@@ -15,7 +15,6 @@
       "DOM"
     ],
     "types": [
-      "jest",
       "@jpmorganchase/perspective-viewer"
     ]
   },
