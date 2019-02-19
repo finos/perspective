@@ -36,7 +36,7 @@ function getTooltipDiv(container) {
 function generateHtml(tooltipDiv, data, settings) {
     // Add group data
     if (settings.crossValues.length) {
-        const groups = data.crossValue.split(",");
+        const groups = data.crossValue.split("|");
         tooltipDiv
             .select("#cross-values")
             .selectAll("li")

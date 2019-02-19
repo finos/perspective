@@ -38,3 +38,7 @@ function flattenExtent(array) {
     };
     return array.reduce((r, v) => [withUndefined(Math.min)(r[0], v[0]), withUndefined(Math.max)(r[1], v[1])], [undefined, undefined]);
 }
+
+export const styleAxis = (chart, prefix, settings) => {
+    chart[`${prefix}Label`](label(settings));
+};

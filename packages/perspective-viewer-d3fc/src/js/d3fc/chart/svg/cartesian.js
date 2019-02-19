@@ -30,9 +30,9 @@ export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
                     .select("svg")
                     .call(yAxisStore(axisLeft(yScale)));
             });
-
-        selection.selectAll("d3fc-svg.x-axis").style("width", yAxisSize ? `${yAxisSize}px` : "");
     };
+
+    rebindAll(cartesian, cartesianBase);
 
     cartesian.xAxisSize = (...args) => {
         if (!args.length) {
@@ -53,7 +53,6 @@ export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
         /range\w*/, // the scale range is set via the component layout
         /tickFormat/ // use axis.tickFormat instead (only present on linear scales)
     );
-    rebindAll(cartesian, cartesianBase);
     rebindAll(cartesian, xScale, scaleExclusions, prefix("x"));
     rebindAll(cartesian, yScale, scaleExclusions, prefix("y"));
     rebindAll(cartesian, xAxisStore, prefix("x"));

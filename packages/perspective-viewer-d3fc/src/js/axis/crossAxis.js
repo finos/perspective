@@ -56,7 +56,7 @@ export const labelFunction = settings => {
         case AXIS_TYPES.linear:
             return d => d.__ROW_PATH__[0];
         default:
-            return d => d.__ROW_PATH__.join(",");
+            return d => d.__ROW_PATH__.join("|");
     }
 };
 
@@ -71,4 +71,23 @@ const axisType = settings => {
         }
     }
     return AXIS_TYPES.ordinal;
+};
+
+export const styleAxis = (chart, prefix, settings) => {
+    chart[`${prefix}Label`](label(settings));
+
+    const valueSize = v => v.length * 5;
+    const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
+    const labelSize = prefix === "x" ? 17 : domain(settings).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
+
+    switch (axisType(settings)) {
+        case AXIS_TYPES.ordinal:
+            chart[`${prefix}Padding`](0.5)
+                [`${prefix}TickGrouping`](t => t.split("|"))
+                [`${prefix}TickSizeInner`](labelSize)
+                [`${prefix}TickSizeOuter`](0)
+                [`${prefix}TickPadding`](6)
+                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 10);
+            break;
+    }
 };

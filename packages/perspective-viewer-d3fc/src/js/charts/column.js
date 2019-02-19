@@ -35,13 +35,12 @@ function columnChart(container, settings) {
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings, data))
-        .xLabel(crossAxis.label(settings))
         .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
-        .yLabel(mainAxis.label(settings))
         .plotArea(withGridLines(series).orient("vertical"));
 
-    chart.xPadding && chart.xPadding(0.5);
+    crossAxis.styleAxis(chart, "x", settings);
+    mainAxis.styleAxis(chart, "y", settings);
 
     // render
     container.datum(data).call(chart);
