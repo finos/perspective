@@ -29,10 +29,12 @@ function xyScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(series => pointSeries(settings, colour, series.key, size)));
 
+    const domainDefault = mainAxis.domain(settings).pad([0.1, 0.1]);
+
     const chart = chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data, "x"))
+        .xDomain(domainDefault.valueName("x")(data))
         .xLabel(settings.mainValues[0].name)
-        .yDomain(mainAxis.domain(settings, data, "y"))
+        .yDomain(domainDefault.valueName("y")(data))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
         .plotArea(withGridLines(series));

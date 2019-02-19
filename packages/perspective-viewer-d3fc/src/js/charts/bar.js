@@ -34,7 +34,7 @@ function barChart(container, settings) {
         );
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data))
+        .xDomain(mainAxis.domain(settings).include([0])(data))
         .yDomain(crossAxis.domain(settings, data))
         .yOrient("left")
         .plotArea(withGridLines(series).orient("horizontal"));
