@@ -68,10 +68,7 @@ const axis = (orient, scale) => {
     const groupLineOffset = (d, arr, direction = 1) => {
         if (!tickGrouping) return arr;
 
-        let bandwidth = scale.bandwidth ? scale.bandwidth() : 0;
-        if (scale.padding()) {
-            bandwidth /= scale.padding();
-        }
+        let bandwidth = scale.step ? scale.step() : 0;
         if (d.domain) bandwidth *= d.domain.length;
 
         return arr.map(d => [d[0] + (direction * bandwidth) / 2, d[1]]);
