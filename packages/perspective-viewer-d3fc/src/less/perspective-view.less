@@ -1,0 +1,26 @@
+:host([view=d3_xy_scatter]) #app {
+  &.columns_horizontal #side_panel #inactive_columns {
+    padding-top:28px
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(1) {
+    margin-top:23px;
+    &:before {
+      content:"X Axis"
+    }
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(2) {
+    margin-top:23px;
+    &:before {
+      content:"Y Axis"
+    }
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(3) {
+    margin-top:23px;
+    &:before {
+      content:"Size"
+    }
+  }
+}

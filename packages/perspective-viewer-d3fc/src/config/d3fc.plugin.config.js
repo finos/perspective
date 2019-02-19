@@ -2,7 +2,7 @@ const path = require("path");
 const common = require("@jpmorganchase/perspective/src/config/common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: "./src/js/d3fc.js",
+    entry: "./src/js/plugin/plugin.js",
     output: {
         filename: "d3fc.plugin.js",
         library: "perspective-view-d3fc",
