@@ -35,13 +35,12 @@ function barChart(container, settings) {
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
         .xDomain(mainAxis.domain(settings, data))
-        .xLabel(mainAxis.label(settings))
         .yDomain(crossAxis.domain(settings, data))
         .yOrient("left")
-        .yLabel(crossAxis.label(settings))
         .plotArea(withGridLines(series).orient("horizontal"));
 
-    chart.yPadding && chart.yPadding(0.5);
+    crossAxis.styleAxis(chart, "y", settings);
+    mainAxis.styleAxis(chart, "x", settings);
 
     // render
     container.datum(data).call(chart);
