@@ -9,7 +9,7 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import {barSeries} from "../series/barSeries";
+import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
 import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
@@ -17,7 +17,7 @@ import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 
-function barChart(container, settings) {
+function areaChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = seriesColours(settings);
     legend(container, settings, colour);
@@ -25,33 +25,27 @@ function barChart(container, settings) {
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, colour)
-                    .align("left")
-                    .orient("horizontal")
-            )
-        );
+        .series(data.map(() => areaSeries(settings, colour).orient("vertical")));
 
-    const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data))
-        .yDomain(crossAxis.domain(settings, data))
+    const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
+        .xDomain(crossAxis.domain(settings, data))
+        .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
-        .plotArea(withGridLines(series).orient("horizontal"));
+        .plotArea(withGridLines(series).orient("vertical"));
 
-    crossAxis.styleAxis(chart, "y", settings);
-    mainAxis.styleAxis(chart, "x", settings);
+    crossAxis.styleAxis(chart, "x", settings);
+    mainAxis.styleAxis(chart, "y", settings);
 
-    chart.yPaddingInner && chart.yPaddingInner(0.5);
-    chart.yPaddingOuter && chart.yPaddingOuter(0.25);
+    chart.xPaddingInner && chart.xPaddingInner(1);
+    chart.xPaddingOuter && chart.xPaddingOuter(0.5);
 
     // render
     container.datum(data).call(chart);
 }
-barChart.plugin = {
-    type: "d3_x_bar",
-    name: "[d3fc] X Bar Chart",
+areaChart.plugin = {
+    type: "d3_y_area",
+    name: "[d3fc] Y Area Chart",
     max_size: 25000
 };
 
-export default barChart;
+export default areaChart;

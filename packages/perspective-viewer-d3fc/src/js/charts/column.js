@@ -42,6 +42,9 @@ function columnChart(container, settings) {
     crossAxis.styleAxis(chart, "x", settings);
     mainAxis.styleAxis(chart, "y", settings);
 
+    chart.xPaddingInner && chart.xPaddingInner(0.5);
+    chart.xPaddingOuter && chart.xPaddingOuter(0.25);
+
     // render
     container.datum(data).call(chart);
 }
