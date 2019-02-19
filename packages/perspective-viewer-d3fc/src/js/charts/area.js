@@ -11,21 +11,18 @@ import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
-import {groupAndStackData} from "../data/groupAndStackData";
+import {splitData} from "../data/splitData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 
 function areaChart(container, settings) {
-    const data = groupAndStackData(settings, filterData(settings));
+    const data = splitData(settings, filterData(settings));
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(data.map(() => areaSeries(settings, colour).orient("vertical")));
+    const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings, data))
