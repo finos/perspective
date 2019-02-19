@@ -198,7 +198,7 @@ utils.with_server({}, () => {
             test.capture("sorts by computed column.", async page => {
                 await add_computed_column(page);
                 const viewer = await page.$("perspective-viewer");
-                await page.evaluate(element => element.setAttribute("sort", '["new_cc"]'), viewer);
+                await page.evaluate(element => element.setAttribute("sort", '[["new_cc", "asc"]]'), viewer);
             });
 
             test.capture("filters by computed column.", async page => {
