@@ -15,6 +15,8 @@ import {seriesLinearRange} from "../series/seriesLinearRange";
 import {legend, filterDataByGroup} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
+import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const colour = seriesColoursFromGroups(settings);
@@ -27,8 +29,7 @@ function xyScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(series => pointSeries(settings, colour, series.key, size)));
 
-    const chart = fc
-        .chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
+    const chart = chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(mainAxis.domain(settings, data, "x"))
         .xLabel(settings.mainValues[0].name)
         .yDomain(mainAxis.domain(settings, data, "y"))

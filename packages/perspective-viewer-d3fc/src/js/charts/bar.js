@@ -15,6 +15,8 @@ import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
+import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = seriesColours(settings);
@@ -31,8 +33,7 @@ function barChart(container, settings) {
             )
         );
 
-    const chart = fc
-        .chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
+    const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
         .xDomain(mainAxis.domain(settings, data))
         .xLabel(mainAxis.label(settings))
         .yDomain(crossAxis.domain(settings, data))

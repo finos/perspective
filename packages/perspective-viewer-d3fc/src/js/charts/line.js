@@ -15,6 +15,8 @@ import {splitData} from "../data/splitData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
+import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
     const colour = seriesColours(settings);
@@ -22,8 +24,7 @@ function lineChart(container, settings) {
 
     const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 
-    const chart = fc
-        .chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
+    const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings, data))
         .xLabel(crossAxis.label(settings))
         .yDomain(mainAxis.domain(settings, data))
