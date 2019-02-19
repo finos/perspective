@@ -12,6 +12,21 @@ const path = require("path");
 
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
+const click_details = async page => {
+    const viewer = await page.$("perspective-viewer");
+
+    const click_event = page.evaluate(element => {
+        return new Promise(resolve => {
+            element.addEventListener("perspective-click", e => {
+                resolve(e.detail);
+            });
+        });
+    }, viewer);
+
+    await page.mouse.click(300, 300);
+    return await click_event;
+};
+
 utils.with_server({}, () => {
     describe.page(
         "hypergrid.html",
@@ -20,46 +35,60 @@ utils.with_server({}, () => {
 
             describe("clicking on a cell in the grid", () => {
                 describe("when no filters are present", () => {
-                    test.capture("Dispatches perspective-click event with NO filters.", async page => {
-                        const viewer = await page.$("perspective-viewer");
-                        const click_event = page.evaluate(element => {
-                            return new Promise(resolve => {
-                                element.addEventListener("perspective-click", e => {
-                                    console.error(JSON.stringify(e.detail));
-                                    resolve(e.detail);
-                                });
-                            });
-                        }, viewer);
+                    test.capture("perspective dispatches perspective-click event with the data row.", async page => {
+                        const detail = await click_details(page);
+                        expect(detail.row).toEqual({
+                            Category: "Technology",
+                            City: "Los Angeles",
+                            Country: "United States",
+                            "Customer ID": "BH-11710",
+                            Discount: 0.2,
+                            "Order Date": 1307577600000,
+                            "Order ID": "CA-2011-115812",
+                            "Postal Code": 90032,
+                            "Product ID": "TEC-PH-10002033",
+                            Profit: 68.3568,
+                            Quantity: 4,
+                            Region: "West",
+                            "Row ID": 12,
+                            Sales: 911.424,
+                            Segment: "Consumer",
+                            "Ship Date": 1308009600000,
+                            "Ship Mode": "Standard Class",
+                            State: "California",
+                            "Sub-Category": "Phones"
+                        });
+                    });
 
-                        await page.mouse.click(300, 300);
-                        const config = await click_event;
-                        expect(config).toEqual({filters: []});
-                        await page.waitFor(100);
+                    test.capture("perspective dispatches perspective-click event with NO filters.", async page => {
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({filters: []});
                     });
                 });
 
                 describe("when a filter is present", () => {
-                    test.capture("Dispatches perspective-click event with filters.", async page => {
+                    test.capture("perspective dispatches perspective-click event with one filter.", async page => {
                         const viewer = await page.$("perspective-viewer");
+                        page.evaluate(element => element.setAttribute("filters", '[["Segment", "==", "Consumer"]]'), viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
 
-                        await page.evaluate(element => {
-                            const filters = [["Segment", "==", "Consumer"]];
-                            element.setAttribute("filters", JSON.stringify(filters));
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({filters: [["Segment", "==", "Consumer"]]});
+                    });
+
+                    test.capture("perspective dispatches perspective-click event with filters.", async page => {
+                        const viewer = await page.$("perspective-viewer");
+                        page.evaluate(element => {
+                            element.setAttribute("filters", '[["Segment", "==", "Consumer"]]');
+                            element.setAttribute("column-pivots", '["Region"]');
+                            element.setAttribute("row-pivots", '["Country", "City"]');
                         }, viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
 
-                        const click_event = page.evaluate(element => {
-                            return new Promise(resolve => {
-                                element.addEventListener("perspective-click", e => {
-                                    console.error(JSON.stringify(e.detail));
-                                    resolve(e.detail);
-                                });
-                            });
-                        }, viewer);
-
-                        await page.mouse.click(300, 300);
-                        const config = await click_event;
-                        expect(config).toEqual({filters: []});
-                        await page.waitFor(100);
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({
+                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Madison"], ["Region", "==", "Central"]]
+                        });
                     });
                 });
             });

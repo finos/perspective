@@ -19,5 +19,7 @@
     "superstore.html/highlights invalid filter.": "e244cca8fc2278cb2477d0a46ab5331f",
     "superstore.html/handles flush().": "a5d1bad309edf83ceef190dd19d867ec",
     "superstore.html/replaces all rows.": "2c41d623f03b2417da7b5dcf7f31e364",
-    "hypergrid.html/Dispatches perspective-click event with filters.": "a7c1a04d948ea5a3464fe1f5b3594eb2"
+    "hypergrid.html/Dispatches perspective-click event with filters.": "3025f83c828d468207b04d8454e94fda",
+    "hypergrid.html/Dispatches perspective-click event with NO filters.": "f5d6bf82299b2e5f403cdb69b67645fe",
+    "hypergrid.html/Dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d"
 }

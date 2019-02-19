@@ -107,7 +107,9 @@ function setColumnPropsByType(column) {
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
-    Object.getPrototypeOf(grid.behavior).cellClicked = function(event) {
+
+    // column name, data row, config
+    Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
         event.handled = true;
         const {x, y} = event.dataCell;
@@ -139,12 +141,14 @@ exports.install = function(grid) {
             }
 
             const filters = config.filter.concat(row_filters).concat(column_filters);
+
             grid.canvas.dispatchEvent(
                 new CustomEvent("perspective-click", {
                     bubbles: true,
                     composed: true,
                     detail: {
-                        filters
+                        config: {filters},
+                        row: r[0]
                     }
                 })
             );
