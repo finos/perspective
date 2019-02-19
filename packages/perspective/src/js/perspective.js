@@ -304,7 +304,6 @@ export default function(Module) {
     const map_aggregate_types = function(col_name, orig_type, aggregate) {
         const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
         const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
-
         for (let agg in aggregate) {
             let found_agg = aggregate[agg];
             if (found_agg.column.join(defaults.COLUMN_SEPARATOR_STRING) === col_name) {
@@ -312,10 +311,12 @@ export default function(Module) {
                     return "integer";
                 } else if (FLOAT_AGGS.includes(found_agg.op)) {
                     return "float";
+                } else {
+                    return orig_type;
                 }
             }
         }
-        return orig_type;
+        throw new Error("Shouldn't be here");
     };
 
     const to_format = async function(options, formatter) {
@@ -965,16 +966,18 @@ export default function(Module) {
                 aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
             }
         } else {
+            config.aggregate = [];
             let t_aggs = schema.columns();
             let t_aggtypes = schema.types();
             for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
                 let column = t_aggs.get(aidx);
-                let agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
+                let agg_op = "any";
                 if (!config.column_only) {
-                    agg_op = _string_to_aggtype[defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)]];
+                    agg_op = defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)];
                 }
                 if (column !== "psp_okey") {
-                    aggregates.push([column, agg_op, [column]]);
+                    aggregates.push([column, _string_to_aggtype[agg_op], [column]]);
+                    config.aggregate.push({column: [column], op: agg_op});
                 }
             }
             t_aggs.delete();
