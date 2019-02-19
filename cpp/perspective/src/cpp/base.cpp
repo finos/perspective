@@ -16,6 +16,7 @@ namespace perspective {
 
 void
 psp_abort() {
+    std::cerr << "abort()" << std::endl;
     std::raise(SIGINT);
 }
 

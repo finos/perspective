@@ -76,6 +76,8 @@ function view(worker, table_name, config) {
 
 view.prototype.to_json = async_queue("to_json");
 
+view.prototype.to_arrow = async_queue("to_arrow");
+
 view.prototype.to_columns = async_queue("to_columns");
 
 view.prototype.to_csv = async_queue("to_csv");

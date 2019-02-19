@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (psp)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules/" ${CMAKE_MODULE_PATH} )
 

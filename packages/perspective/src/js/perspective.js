@@ -16,6 +16,11 @@ import {bindall, get_column_type} from "./utils.js";
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
 import {Visitor} from "@apache-arrow/es5-esm/visitor";
+import {Data} from "@apache-arrow/es5-esm/data";
+import {Vector} from "@apache-arrow/es5-esm/vector";
+
+import {Utf8, Uint32, Float64, Int32, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
+
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -495,21 +500,45 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx);
+            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx, false);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1);
+            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1, false);
         } else {
             const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.config.column_only === true;
-            let arr = __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1);
-            if (arr !== undefined) {
-                if (column_pivot_only) {
-                    // remove agg of psp_okey
-                    arr = arr.subarray(1, arr.length);
-                }
-            }
-            return arr;
+            return __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1, column_pivot_only);
         }
+    };
+
+    view.prototype.to_arrow = async function() {
+        const names = await this._column_names();
+        const schema = await this.schema();
+
+        const vectors = [];
+
+        for (let name of names) {
+            const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
+            const type = schema[col_path[col_path.length - 1]];
+            if (type === "float") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "integer") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "date" || type === "datetime") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "string") {
+                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
+                const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
+                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
+            } else {
+                throw new Error(`Type ${type} not supported`);
+            }
+        }
+
+        return Table.fromVectors(vectors, names).serialize().buffer;
     };
 
     /**
@@ -1096,11 +1125,11 @@ export default function(Module) {
             }
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         }
 
         try {
@@ -1429,10 +1458,20 @@ export default function(Module) {
                                 if (msg.method === "delete") {
                                     delete this._views[msg.name];
                                 }
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
+                                if (msg.method === "to_arrow") {
+                                    this.post(
+                                        {
+                                            id: msg.id,
+                                            data: result
+                                        },
+                                        [result]
+                                    );
+                                } else {
+                                    this.post({
+                                        id: msg.id,
+                                        data: result
+                                    });
+                                }
                             })
                             .catch(error => {
                                 this.post({
@@ -1453,8 +1492,8 @@ export default function(Module) {
             self.addEventListener("message", e => this.process(e.data), false);
         }
 
-        post(msg) {
-            self.postMessage(msg);
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
         }
 
         init({buffer}) {
