@@ -7,12 +7,34 @@
  *
  */
 import * as d3 from "d3";
+import * as fc from "d3fc";
 
 export const scale = () => d3.scaleLinear();
 
-export const domain = (settings, data, valueName = "mainValue") => {
-    const extent = getDataExtentFromArray(data, valueName);
-    return [extent[0] > 0 ? 0 : extent[0] * 1.1, extent[1] < 0 ? 0 : extent[1] * 1.1];
+export const domain = () => {
+    let valueName = "mainValue";
+
+    const extentLinear = fc
+        .extentLinear()
+        .pad([0, 0.1])
+        .padUnit("percent");
+
+    const _domain = function(data) {
+        const extent = getDataExtentFromArray(data, valueName);
+        return extentLinear(extent);
+    };
+
+    fc.rebindAll(_domain, extentLinear);
+
+    _domain.valueName = (...args) => {
+        if (!args.length) {
+            return valueName;
+        }
+        valueName = args[0];
+        return _domain;
+    };
+
+    return _domain;
 };
 
 const getDataExtentFromArray = (array, valueName) => {

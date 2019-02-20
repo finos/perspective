@@ -34,8 +34,8 @@ function columnChart(container, settings) {
         );
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings, data))
-        .yDomain(mainAxis.domain(settings, data))
+        .xDomain(crossAxis.domain(settings)(settings.data))
+        .yDomain(mainAxis.domain(settings).include([0])(data))
         .yOrient("left")
         .plotArea(withGridLines(series).orient("vertical"));
 
