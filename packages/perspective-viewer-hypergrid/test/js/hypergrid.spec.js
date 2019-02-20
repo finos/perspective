@@ -60,6 +60,11 @@ utils.with_server({}, () => {
                         });
                     });
 
+                    test.capture("perspective dispatches perspective-click event with the column name.", async page => {
+                        const detail = await click_details(page);
+                        expect(detail.column_name).toEqual("Order Date");
+                    });
+
                     test.capture("perspective dispatches perspective-click event with NO filters.", async page => {
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({filters: []});

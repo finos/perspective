@@ -21,5 +21,10 @@
     "superstore.html/replaces all rows.": "2c41d623f03b2417da7b5dcf7f31e364",
     "hypergrid.html/Dispatches perspective-click event with filters.": "3025f83c828d468207b04d8454e94fda",
     "hypergrid.html/Dispatches perspective-click event with NO filters.": "f5d6bf82299b2e5f403cdb69b67645fe",
-    "hypergrid.html/Dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d"
+    "hypergrid.html/Dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d",
+    "hypergrid.html/perspective dispatches perspective-click event with the data row.": "f5d6bf82299b2e5f403cdb69b67645fe",
+    "hypergrid.html/perspective dispatches perspective-click event with NO filters.": "f5d6bf82299b2e5f403cdb69b67645fe",
+    "hypergrid.html/perspective dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d",
+    "hypergrid.html/perspective dispatches perspective-click event with filters.": "3025f83c828d468207b04d8454e94fda",
+    "hypergrid.html/perspective dispatches perspective-click event with the column name.": "f5d6bf82299b2e5f403cdb69b67645fe"
 }
