@@ -11,14 +11,15 @@ import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
-import {splitData} from "../data/splitData";
+import {splitAndBaseData} from "../data/splitAndBaseData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 
 function areaChart(container, settings) {
-    const data = splitData(settings, filterData(settings));
+    const data = splitAndBaseData(settings, filterData(settings));
+
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 

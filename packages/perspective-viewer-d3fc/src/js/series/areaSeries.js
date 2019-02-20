@@ -17,5 +17,8 @@ export function areaSeries(settings, colour) {
         }
     });
 
-    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
+    return series
+        .crossValue(d => d.crossValue)
+        .mainValue(d => d.mainValue)
+        .baseValue(d => d.baseValue);
 }
