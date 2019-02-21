@@ -10,8 +10,6 @@
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const path = require("path");
 
-const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
-
 const click_details = async page => {
     const viewer = await page.$("perspective-viewer");
 
@@ -31,11 +29,10 @@ utils.with_server({}, () => {
     describe.page(
         "hypergrid.html",
         () => {
-            simple_tests.default();
-
             describe("clicking on a cell in the grid", () => {
                 describe("when no filters are present", () => {
-                    test.capture("perspective dispatches perspective-click event with the data row.", async page => {
+                    test.capture("perspective dispatches perspective-click event with correct properties.", async page => {
+                        await page.waitFor(100);
                         const detail = await click_details(page);
                         expect(detail.row).toEqual({
                             Category: "Technology",
@@ -58,21 +55,14 @@ utils.with_server({}, () => {
                             State: "California",
                             "Sub-Category": "Phones"
                         });
-                    });
-
-                    test.capture("perspective dispatches perspective-click event with the column name.", async page => {
-                        const detail = await click_details(page);
                         expect(detail.column_name).toEqual("Order Date");
-                    });
-
-                    test.capture("perspective dispatches perspective-click event with NO filters.", async page => {
-                        const detail = await click_details(page);
                         expect(detail.config).toEqual({filters: []});
                     });
                 });
 
                 describe("when a filter is present", () => {
                     test.capture("perspective dispatches perspective-click event with one filter.", async page => {
+                        await page.waitFor(100);
                         const viewer = await page.$("perspective-viewer");
                         page.evaluate(element => element.setAttribute("filters", '[["Segment", "==", "Consumer"]]'), viewer);
                         await page.waitForSelector("perspective-viewer:not([updating])");
@@ -82,6 +72,7 @@ utils.with_server({}, () => {
                     });
 
                     test.capture("perspective dispatches perspective-click event with filters.", async page => {
+                        await page.waitFor(100);
                         const viewer = await page.$("perspective-viewer");
                         page.evaluate(element => {
                             element.setAttribute("filters", '[["Segment", "==", "Consumer"]]');
@@ -98,6 +89,6 @@ utils.with_server({}, () => {
                 });
             });
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..")}
+        {reload_page: true, root: path.join(__dirname, "..", "..")}
     );
 });
