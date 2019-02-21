@@ -44,7 +44,7 @@ utils.with_server({}, () => {
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 });
 
-                test.capture("handles flush().", async page => {
+                test.capture("handles flush", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
