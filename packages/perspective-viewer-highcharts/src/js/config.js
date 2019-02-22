@@ -216,6 +216,67 @@ export function default_config(aggregates, mode) {
                         lineWidthPlus: 0
                     }
                 },
+                point: {
+                    events: {
+                        click: function(event) {
+                            const category = this.category;
+
+                            const row_pivot_values_by_category = category => {
+                                let _category = category;
+                                const row_pivot_values = [_category.name];
+
+                                let parent;
+                                while ((parent = _category.parent)) {
+                                    row_pivot_values.unshift(parent.name);
+                                    _category = parent;
+                                }
+                                return row_pivot_values;
+                            };
+
+                            let row_pivot_values = [];
+                            let column_pivot_values = [];
+                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                                column_pivot_values = this.series.userOptions.name.split(", ");
+                                row_pivot_values = this.name.split(", ");
+                            } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
+                                column_pivot_values = this.series.userOptions.name.split(", ");
+                                row_pivot_values = row_pivot_values_by_category(category);
+                            } else {
+                                console.log(`Click dispatch for ${mode} ${type} not supported.`);
+                                return;
+                            }
+
+                            const row_filters = config.row_pivot.map((c, index) => [c, "==", row_pivot_values[index]]);
+                            const column_filters = config.column_pivot.map((c, index) => [c, "==", column_pivot_values[index]]);
+                            const filters = config.filter
+                                .concat(row_filters)
+                                .concat(column_filters)
+                                .filter(f => !!f[f.length - 1]);
+
+                            const stack = this.series.userOptions ? this.series.userOptions.stack : "";
+                            const start_row = this.index + 1;
+                            const end_row = start_row + 1;
+                            const column_name = column_pivot_values[column_pivot_values.length - 1];
+
+                            const is_empty = str => str.replace(/\s/g, "") == "";
+
+                            that._view.to_json({start_row, end_row}).then(r => {
+                                const detail = {
+                                    column_name: is_empty(column_name) ? stack : column_name,
+                                    config: {filters},
+                                    row: r[0]
+                                };
+                                event.target.dispatchEvent(
+                                    new CustomEvent("perspective-click", {
+                                        bubbles: true,
+                                        composed: true,
+                                        detail
+                                    })
+                                );
+                            });
+                        }
+                    }
+                },
                 events: {
                     legendItemClick: function() {
                         console.log(this);
