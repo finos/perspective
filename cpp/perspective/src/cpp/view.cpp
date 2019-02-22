@@ -52,28 +52,26 @@ View<CTX_T>::get_row_expanded(std::int32_t idx) {
     return m_ctx->unity_get_row_expanded(idx);
 }
 
-template <typename CTX_T>
-t_index
-View<CTX_T>::expand(std::int32_t idx) {
-    return m_ctx->open(idx);
-}
-
 template <>
 t_index
-View<t_ctx0>::expand(std::int32_t idx) {
+View<t_ctx0>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
     return idx;
 }
 
 template <>
 t_index
-View<t_ctx2>::expand(std::int32_t idx) {
-    return m_ctx->open(t_header::HEADER_ROW, idx);
+View<t_ctx1>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
+    return m_ctx->open(idx);
 }
 
-template <typename CTX_T>
+template <>
 t_index
-View<CTX_T>::collapse(std::int32_t idx) {
-    return m_ctx->close(idx);
+View<t_ctx2>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
+    if (m_ctx->unity_get_row_depth(idx) < t_uindex(row_pivot_length)) {
+        return m_ctx->open(t_header::HEADER_ROW, idx);
+    } else {
+        return idx;
+    }
 }
 
 template <>
@@ -84,23 +82,29 @@ View<t_ctx0>::collapse(std::int32_t idx) {
 
 template <>
 t_index
+View<t_ctx1>::collapse(std::int32_t idx) {
+    return m_ctx->close(idx);
+}
+
+template <>
+t_index
 View<t_ctx2>::collapse(std::int32_t idx) {
     return m_ctx->close(t_header::HEADER_ROW, idx);
 }
 
-template <typename CTX_T>
+template <>
 void
-View<CTX_T>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
+View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
+
+template <>
+void
+View<t_ctx1>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
     if (row_pivot_length >= depth) {
         m_ctx->set_depth(depth);
     } else {
         std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
     }
 }
-
-template <>
-void
-View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
 
 template <>
 void

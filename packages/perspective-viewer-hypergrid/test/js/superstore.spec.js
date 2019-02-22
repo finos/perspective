@@ -32,6 +32,21 @@ utils.with_server({}, () => {
             simple_tests.default();
 
             describe("expand/collapse", () => {
+                test.capture("should not be able to expand past number of row pivots", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Region"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["Sub-Category"]'), viewer);
+
+                    await page.evaluate(element => {
+                        // 2 is greater than no. of row pivots
+                        element.view.expand(2);
+                        element.notifyResize();
+                    }, viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
                 test.capture("collapses to depth smaller than viewport", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.evaluate(element => element.setAttribute("row-pivots", '["Category","State"]'), viewer);
