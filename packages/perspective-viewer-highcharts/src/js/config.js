@@ -141,6 +141,8 @@ export function default_config(aggregates, mode) {
     const axis_titles = get_axis_titles(config.aggregate);
     const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
 
+    const is_empty = str => str.replace(/\s/g, "") == "";
+
     return {
         chart: {
             type: type,
@@ -219,20 +221,6 @@ export function default_config(aggregates, mode) {
                 point: {
                     events: {
                         click: function(event) {
-                            const category = this.category;
-
-                            const row_pivot_values_by_category = category => {
-                                let _category = category;
-                                const row_pivot_values = [_category.name];
-
-                                let parent;
-                                while ((parent = _category.parent)) {
-                                    row_pivot_values.unshift(parent.name);
-                                    _category = parent;
-                                }
-                                return row_pivot_values;
-                            };
-
                             let row_pivot_values = [];
                             let column_pivot_values = [];
                             if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
@@ -240,7 +228,7 @@ export function default_config(aggregates, mode) {
                                 row_pivot_values = this.name.split(", ");
                             } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivot_values = row_pivot_values_by_category(category);
+                                row_pivot_values = tooltip.get_pivot_values(this.category);
                             } else {
                                 console.log(`Click dispatch for ${mode} ${type} not supported.`);
                                 return;
@@ -253,24 +241,23 @@ export function default_config(aggregates, mode) {
                                 .concat(column_filters)
                                 .filter(f => !!f[f.length - 1]);
 
-                            const stack = this.series.userOptions ? this.series.userOptions.stack : "";
                             const start_row = this.index + 1;
                             const end_row = start_row + 1;
-                            const column_name = column_pivot_values[column_pivot_values.length - 1];
 
-                            const is_empty = str => str.replace(/\s/g, "") == "";
+                            const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
+                            let column_name = column_pivot_values[column_pivot_values.length - 1];
+                            column_name = is_empty(column_name) ? stack_name : column_name;
 
                             that._view.to_json({start_row, end_row}).then(r => {
-                                const detail = {
-                                    column_name: is_empty(column_name) ? stack : column_name,
-                                    config: {filters},
-                                    row: r[0]
-                                };
                                 event.target.dispatchEvent(
                                     new CustomEvent("perspective-click", {
                                         bubbles: true,
                                         composed: true,
-                                        detail
+                                        detail: {
+                                            column_name,
+                                            config: {filters},
+                                            row: r[0]
+                                        }
                                     })
                                 );
                             });

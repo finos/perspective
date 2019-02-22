@@ -119,7 +119,7 @@ function collate_multiple_values(titles, values) {
     return output.join("");
 }
 
-function get_pivot_values(pivots) {
+export function get_pivot_values(pivots) {
     let values = [],
         parent = pivots.parent;
 
