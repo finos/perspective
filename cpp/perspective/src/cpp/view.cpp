@@ -67,7 +67,7 @@ View<t_ctx1>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
 template <>
 t_index
 View<t_ctx2>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
-    if (m_ctx->unity_get_row_depth(idx) < row_pivot_length) {
+    if (m_ctx->unity_get_row_depth(idx) < t_uindex(row_pivot_length)) {
         return m_ctx->open(t_header::HEADER_ROW, idx);
     } else {
         return idx;
