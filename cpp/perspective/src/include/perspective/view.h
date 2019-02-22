@@ -38,7 +38,7 @@ public:
 
     std::map<std::string, std::string> schema();
 
-    t_index expand(std::int32_t idx);
+    t_index expand(std::int32_t idx, std::int32_t row_pivot_length);
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 

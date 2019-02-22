@@ -586,7 +586,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        return this._View.expand(idx);
+        return this._View.expand(idx, this.config.row_pivot.length);
     };
 
     /**
