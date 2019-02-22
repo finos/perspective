@@ -574,4 +574,17 @@ module.exports = perspective => {
             table.delete();
         });
     });
+
+    describe("Pivot table operations", function() {
+        it("Should not expand past number of row pivots", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ["x"],
+                column_pivot: ["y"]
+            });
+            var expanded_idx = await view.expand(2);
+            // invalid expands return the index
+            expect(expanded_idx).toEqual(2);
+        });
+    });
 };

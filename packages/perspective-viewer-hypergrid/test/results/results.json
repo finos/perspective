@@ -21,5 +21,6 @@
     "hypergrid.html/perspective dispatches perspective-click event with correct properties.": "f5d6bf82299b2e5f403cdb69b67645fe",
     "hypergrid.html/perspective dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d",
     "hypergrid.html/perspective dispatches perspective-click event with filters.": "3025f83c828d468207b04d8454e94fda",
-    "superstore.html/handles flush": "a5d1bad309edf83ceef190dd19d867ec"
+    "superstore.html/handles flush": "a5d1bad309edf83ceef190dd19d867ec",
+    "superstore.html/should not be able to expand past number of row pivots": "2db398671e7d98f2fa3c7ebabf4a3176"
 }
