@@ -243,10 +243,15 @@ export function default_config(aggregates, mode) {
 
                             const start_row = this.index + 1;
                             const end_row = start_row + 1;
-
-                            const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
-                            let column_name = column_pivot_values[column_pivot_values.length - 1];
-                            column_name = is_empty(column_name) ? stack_name : column_name;
+                            let column_names = [];
+                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                                column_names = axis_titles;
+                            } else {
+                                const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
+                                const column_name = column_pivot_values[column_pivot_values.length - 1];
+                                if (is_empty(column_name)) column_names.push(stack_name);
+                                else column_names.push(column_name);
+                            }
 
                             that._view.to_json({start_row, end_row}).then(r => {
                                 event.target.dispatchEvent(
@@ -254,7 +259,7 @@ export function default_config(aggregates, mode) {
                                         bubbles: true,
                                         composed: true,
                                         detail: {
-                                            column_name,
+                                            column_names,
                                             config: {filters},
                                             row: r[0]
                                         }

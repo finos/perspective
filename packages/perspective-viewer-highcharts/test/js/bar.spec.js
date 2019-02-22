@@ -43,7 +43,7 @@ utils.with_server({}, () => {
 
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({filters: []});
-                        expect(detail.column_name).toEqual("Profit");
+                        expect(detail.column_names).toEqual(["Profit"]);
                         expect(detail.row).toEqual({Profit: 219.582, Sales: 731.94});
                     });
                 });
@@ -59,7 +59,7 @@ utils.with_server({}, () => {
 
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({filters: [["Segment", "==", "Consumer"]]});
-                        expect(detail.column_name).toEqual("Profit");
+                        expect(detail.column_names).toEqual(["Profit"]);
                         expect(detail.row).toEqual({Profit: 219.582, Sales: 731.94});
                     });
 
@@ -77,7 +77,7 @@ utils.with_server({}, () => {
                         expect(detail.config).toEqual({
                             filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Houston"], ["Region", "==", "Central"]]
                         });
-                        expect(detail.column_name).toEqual("Profit");
+                        expect(detail.column_names).toEqual(["Profit"]);
                     });
                 });
             });
