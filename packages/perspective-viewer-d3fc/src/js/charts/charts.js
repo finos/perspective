@@ -11,6 +11,7 @@ import barChart from "./bar";
 import columnChart from "./column";
 import lineChart from "./line";
 import xyScatter from "./xy-scatter";
+import heatmap from "./heatmap";
 
-const chartClasses = [barChart, columnChart, lineChart, xyScatter];
+const chartClasses = [barChart, columnChart, lineChart, xyScatter, heatmap];
 export default chartClasses;
