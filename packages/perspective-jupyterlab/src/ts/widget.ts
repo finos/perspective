@@ -6,13 +6,22 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {
-    DOMWidgetModel, DOMWidgetView, ISerializers
-} from '@jupyter-widgets/base';
 
-/* defines */
+import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base';
+
 import {PERSPECTIVE_VERSION} from './version';
-import {PerspectiveWidget} from '@jpmorganchase/perspective-phosphor';
+
+import perspective from "@jpmorganchase/perspective";
+import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
+import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
+
+if (perspective) {
+    perspective.override({wasm, worker});
+} else {
+    console.warn('Perspective was undefined - wasm load errors may occur');
+}
+
+import {PerspectiveWidget} from '@jpmorganchase/perspective-phosphor/src/ts/index';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
