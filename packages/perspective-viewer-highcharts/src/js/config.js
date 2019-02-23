@@ -58,7 +58,7 @@ export function set_category_axis(config, axis, type, top) {
     if (type === "datetime") {
         Object.assign(config, {
             [axis]: {
-                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})),
+                categories: top.categories.map(x => new Date(new Number(x)).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric", hour: "numeric", minute: "numeric"})),
                 labels: {
                     enabled: top.categories.length > 0,
                     autoRotation: [-5]
@@ -68,7 +68,7 @@ export function set_category_axis(config, axis, type, top) {
     } else if (type === "date") {
         Object.assign(config, {
             [axis]: {
-                categories: top.categories.map(x => new Date(x).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"})),
+                categories: top.categories.map(x => new Date(new Number(x)).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"})),
                 labels: {
                     enabled: top.categories.length > 0,
                     autoRotation: [-5]
