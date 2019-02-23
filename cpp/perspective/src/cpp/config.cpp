@@ -83,6 +83,26 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     setup(detail_columns, sort_pivot, sort_pivot_by);
 }
 
+// view config
+t_config::t_config(const std::vector<std::string>& row_pivots,
+    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
+    const std::vector<t_sortspec>& sortspecs, t_filter_op combiner,
+    const std::vector<t_fterm>& fterms, const std::vector<std::string>& col_names,
+    bool column_only)
+    : m_column_only(column_only)
+    , m_sortspecs(sortspecs)
+    , m_aggregates(aggregates)
+    , m_detail_columns(col_names)
+    , m_combiner(combiner)
+    , m_fterms(fterms) {
+    for (const auto& p : row_pivots) {
+        m_row_pivots.push_back(t_pivot(p));
+    }
+    for (const auto& p : col_pivots) {
+        m_col_pivots.push_back(t_pivot(p));
+    }
+};
+
 t_config::t_config(
     const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates)
     : m_row_pivots(row_pivots)
@@ -119,6 +139,20 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     : t_config(row_pivots, col_pivots, aggregates, TOTALS_HIDDEN, FILTER_OP_AND, {})
 
 {}
+
+t_config::t_config(const std::vector<t_pivot>& row_pivots,
+    const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
+    const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms)
+    : m_row_pivots(row_pivots)
+    , m_col_pivots(col_pivots)
+    , m_aggregates(aggregates)
+    , m_totals(totals)
+    , m_combiner(combiner)
+    , m_fterms(fterms)
+    , m_handle_nan_sort(true)
+    , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
+}
 
 t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
@@ -165,6 +199,19 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
         m_row_pivots.push_back(t_pivot(p));
     }
 
+    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
+}
+
+t_config::t_config(const std::vector<t_pivot>& row_pivots,
+    const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
+    const std::vector<t_fterm>& fterms)
+    : m_row_pivots(row_pivots)
+    , m_aggregates(aggregates)
+    , m_totals(TOTALS_BEFORE)
+    , m_combiner(combiner)
+    , m_fterms(fterms)
+    , m_handle_nan_sort(true)
+    , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 
@@ -348,6 +395,11 @@ t_config::get_num_cpivots() const {
     return m_col_pivots.size();
 }
 
+bool
+t_config::get_column_only() const {
+    return m_column_only;
+}
+
 const std::vector<t_pivot>&
 t_config::get_row_pivots() const {
     return m_row_pivots;
@@ -369,6 +421,11 @@ t_config::get_sortby_pairs() const {
         ++idx;
     }
     return rval;
+}
+
+const std::vector<t_sortspec>&
+t_config::get_sortspecs() const {
+    return m_sortspecs;
 }
 
 const std::vector<t_aggspec>&

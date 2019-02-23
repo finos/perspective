@@ -64,7 +64,7 @@ namespace binding {
      *
      */
     template <typename T>
-    std::vector<t_fterm> _get_fterms(t_schema schema, T j_filters);
+    std::vector<t_fterm> _get_fterms(t_schema schema, T j_date_parser, T j_filters);
 
     /**
      *
@@ -78,7 +78,8 @@ namespace binding {
      *
      */
     template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(t_schema schema, bool column_only, T j_aggs);
+    std::vector<t_aggspec> _get_aggspecs(
+        t_schema schema, std::string separator, bool column_only, T j_aggs);
 
     /**
      * Converts a scalar value to its language-specific representation.
@@ -259,6 +260,68 @@ namespace binding {
         t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed);
 
     /**
+     * Creates the configuration object for a new View.
+     *
+     * Params
+     * ------
+     *
+     * Returns
+     * -------
+     * A t_config object.
+     */
+    template <typename T>
+    t_config make_view_config(
+        const t_schema& schema, std::string separator, T date_parser, T config);
+
+    /**
+     * Creates a new zero-sided View.
+     *
+     * Params
+     * ------
+     *
+     * Returns
+     * -------
+     * A shared pointer to a View<CTX_T>.
+     */
+
+    template <typename T>
+    std::shared_ptr<View<t_ctx0>> make_view_zero(t_pool* pool, std::int32_t sides,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
+
+    /**
+     * Creates a new one-sided View.
+     *
+     * Params
+     * ------
+     *
+     * Returns
+     * -------
+     * A shared pointer to a View<t_ctx1>.
+     */
+
+    template <typename T>
+    std::shared_ptr<View<t_ctx1>> make_view_one(t_pool* pool, std::int32_t sides,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
+
+    /**
+     * Creates a new two-sided View.
+     *
+     * Params
+     * ------
+     *
+     * Returns
+     * -------
+     * A shared pointer to a View<t_ctx2>.
+     */
+
+    template <typename T>
+    std::shared_ptr<View<t_ctx2>> make_view_two(t_pool* pool, std::int32_t sides,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
+
+    /**
      *
      *
      * Params
@@ -269,9 +332,9 @@ namespace binding {
      * -------
      *
      */
-    template <typename T>
     std::shared_ptr<t_ctx0> make_context_zero(t_schema schema, t_filter_op combiner,
-        T j_filters, T j_columns, T j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        std::vector<std::string> columns, std::vector<t_fterm> filters,
+        std::vector<t_sortspec> sorts, t_pool* pool, std::shared_ptr<t_gnode> gnode,
         std::string name);
 
     /**
@@ -285,9 +348,9 @@ namespace binding {
      * -------
      *
      */
-    template <typename T>
-    std::shared_ptr<t_ctx1> make_context_one(t_schema schema, T j_pivots, t_filter_op combiner,
-        T j_filters, T j_aggs, T j_sortby, T j_pivot_depth, bool j_column_only, t_pool* pool,
+    std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
+        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name);
 
     /**
@@ -301,11 +364,11 @@ namespace binding {
      * -------
      *
      */
-    template <typename T>
-    std::shared_ptr<t_ctx2> make_context_two(t_schema schema, T j_rpivots, T j_cpivots,
-        t_filter_op combiner, T j_filters, T j_aggs, T j_sortby, T j_rpivot_depth,
-        T j_cpivot_depth, bool j_column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name);
+    std::shared_ptr<t_ctx2> make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
+        std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
+        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
+        std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
+        t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name);
 
     template <typename T>
     void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby);
@@ -332,22 +395,6 @@ namespace binding {
     T get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
         std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
         std::uint32_t end_col);
-
-    /**
-     * Creates a new View.
-     *
-     * Params
-     * ------
-     *
-     * Returns
-     * -------
-     * A shared pointer to a View<CTX_T>.
-     */
-
-    template <typename CTX_T, typename T>
-    std::shared_ptr<View<CTX_T>> make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx,
-        std::int32_t sides, std::shared_ptr<t_gnode> gnode, std::string name,
-        std::string separator, T config);
 
 } // end namespace binding
 } // end namespace perspective

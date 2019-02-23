@@ -91,7 +91,12 @@ export default function(Module) {
      *
      * @private
      * @param {object} data Array buffer
-     * @returns An object with 3 properties:
+     * @returns An array containing chunked data objects with five properties:
+     * row_count: the number of rows in the chunk
+     * is_arrow: internal flag for marking arrow data
+     * names: column names for the arrow data
+     * types: type mapping for each column
+     * cdata: the actual data we load
      */
     function load_arrow_buffer(data) {
         // TODO Need to validate that the names/types passed in match those in the buffer
@@ -213,25 +218,27 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(pool, ctx, sides, gnode, config, name, callbacks, table) {
-        this.ctx = ctx;
+    function view(pool, sides, gnode, config, name, callbacks, table) {
+        this._View = undefined;
+        this.date_parser = new DateParser();
+        this.config = config || {};
+
+        if (sides === 0) {
+            this._View = __MODULE__.make_view_zero(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        } else if (sides === 1) {
+            this._View = __MODULE__.make_view_one(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        } else if (sides === 2) {
+            this._View = __MODULE__.make_view_two(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        }
+
+        this.ctx = this._View.get_context();
+        this.column_only = this._View.is_column_only();
         this.nsides = sides;
         this.gnode = gnode;
-        this.config = config || {};
         this.pool = pool;
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
-
-        this._View = undefined;
-        if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
-        } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
-        } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(pool, ctx, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config);
-        }
-
         bindall(this);
     }
 
@@ -299,7 +306,6 @@ export default function(Module) {
     };
 
     const to_format = async function(options, formatter) {
-        // TODO: port
         options = options || {};
         let viewport = this.config.viewport ? this.config.viewport : {};
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
@@ -308,7 +314,7 @@ export default function(Module) {
         let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
         let slice;
         const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
-        if (this.config.row_pivot[0] === "psp_okey") {
+        if (this.column_only) {
             end_row += this.config.column_pivot.length;
         }
         if (this.sides() === 0) {
@@ -340,7 +346,7 @@ export default function(Module) {
                 formatter.setColumnValue(data, row, col_name, slice[idx]);
             } else {
                 if (cidx === 0) {
-                    if (this.config.row_pivot[0] !== "psp_okey") {
+                    if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
                         let row_path = this.ctx.unity_get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
@@ -360,7 +366,7 @@ export default function(Module) {
         if (row) {
             formatter.addRow(data, row);
         }
-        if (this.config.row_pivot[0] === "psp_okey") {
+        if (this.column_only) {
             data = formatter.slice(data, this.config.column_pivot.length);
         }
 
@@ -480,11 +486,19 @@ export default function(Module) {
             // columns start at 1 for > 0-sided views
             return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1, false);
         } else {
-            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.config.column_only === true;
+            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
             return __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1, column_pivot_only);
         }
     };
 
+    /**
+     * Serializes a view to arrow.
+     *
+     * @async
+     *
+     * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
+     * data from the view.
+     */
     view.prototype.to_arrow = async function() {
         const names = await this._column_names();
         const schema = await this.schema();
@@ -861,95 +875,27 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(config) {
-        // FIXME: sort config does not actually work? or the documentation for sort config is bad
-        // FIXME: adding value in config does NOT translate to correctly set view elems/actual operations
-        // FIXME: does perspective-viewer respect config passed into table.prototype.view
-        // FIXME: view config format should be canonical to viewer options
         config = {...config};
-
-        // FIXME: remove this after sort is ported
-        const get_aggname = function(agg) {
-            let agg_name;
-            if (typeof agg.column === "object") {
-                agg_name = agg.column.join(defaults.COLUMN_SEPARATOR_STRING);
-            } else if (agg.name) {
-                agg_name = agg.name;
-            } else {
-                agg_name = agg.column;
-            }
-            return agg_name;
-        };
 
         let name = Math.random() + "";
 
         config.row_pivot = config.row_pivot || [];
         config.column_pivot = config.column_pivot || [];
+        config.filter = config.filter || [];
 
-        // Column only mode
-        if (config.row_pivot.length === 0 && config.column_pivot.length > 0) {
-            config.row_pivot = ["psp_okey"];
-            config.column_only = true;
-        }
+        let sides;
 
-        // Filters
-        let filters = config.filter || [];
-        let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
-
-        if (config.filter) {
-            if (config.filter_op) {
-                filter_op = __MODULE__.str_to_filter_op(config.filter_op);
-            }
-        }
-
-        let schema = this.gnode.get_tblschema();
-
-        // Aggregates
-        let aggregates = config.aggregate;
-
-        // Sort
-        let sort = config.sort || [];
-
-        let context;
-        let sides = 0;
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
-                config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(
-                    schema,
-                    config.row_pivot,
-                    config.column_pivot,
-                    filter_op,
-                    filters,
-                    aggregates,
-                    sort,
-                    config.row_pivot_depth,
-                    config.column_pivot_depth,
-                    config.column_only,
-                    this.pool,
-                    this.gnode,
-                    name
-                );
-
                 sides = 2;
             } else {
-                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, config.row_pivot_depth, config.column_only, this.pool, this.gnode, name);
                 sides = 1;
             }
         } else {
-            // If aggs specified, use them because schema.columns() does not reflect which cols we show/hide
-            let columns;
-            if (aggregates) {
-                columns = aggregates.map(agg => get_aggname(agg));
-            } else {
-                let t_aggs = schema.columns();
-                columns = extract_vector(t_aggs).filter(name => name !== "psp_okey");
-            }
-            context = __MODULE__.make_context_zero(schema, filter_op, filters, columns, sort, this.pool, this.gnode, name);
+            sides = 0;
         }
 
-        schema.delete();
-
-        let v = new view(this.pool, context, sides, this.gnode, config, name, this.callbacks, this);
+        let v = new view(this.pool, sides, this.gnode, config, name, this.callbacks, this);
         this.views.push(v);
         return v;
     };
