@@ -8,8 +8,7 @@
     },
     "files": [
         "src/**/*",
-        "index.js",
-        "babel.config.js"
+        "index.js"
     ],
     "scripts": {},
     "jest": {},
@@ -29,7 +28,6 @@
         "@babel/runtime": "^7.1.5",
         "@webpack-contrib/schema-utils": "^1.0.0-beta.0",
         "arraybuffer-loader": "^1.0.2",
-        "babel-loader": "^8.0.4",
         "babel-plugin-transform-custom-element-classes": "^0.1.0",
         "base64-font-loader": "0.0.4",
         "bufferutil": "~3.0.0",

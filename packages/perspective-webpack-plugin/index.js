@@ -11,8 +11,6 @@ const PSP_WORKER_LOADER = require.resolve("./src/js/psp-worker-loader");
 const WASM_LOADER = require.resolve("./src/js/wasm-loader.js");
 const PSP_WORKER_COMPILER_LOADER = require.resolve("./src/js/psp-worker-compiler-loader.js");
 
-const BABEL_CONFIG = require("./babel.config.js");
-
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
         this.options = Object.assign(
@@ -82,26 +80,11 @@ class PerspectiveWebpackPlugin {
             });
         }
 
-        if (!this.options.build_worker) {
-            rules.push({
-                test: /\.js$/,
-                include: this.options.load_path,
-                exclude: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-                loader: "babel-loader",
-                options: BABEL_CONFIG
-            });
-            rules.push({
-                test: /\.js$/,
-                include: /node_modules[/\\](?!\@jpmorganchase)|psp\.(asmjs|async|sync)\.js|perspective\.(asmjs|wasm)\.worker\.js/,
-                loader: "source-map-loader"
-            });
-        } else {
-            rules.push({
-                test: /\.js$/,
-                loader: "source-map-loader"
-            });
-        }
-        
+        rules.push({
+            test: /\.js$/,
+            loader: "source-map-loader"
+        });
+
         // FIXME Workaround for performance regression in @apache-arrow 4.0
         rules.push({
             test: /\.js$/,
@@ -112,7 +95,7 @@ class PerspectiveWebpackPlugin {
                     loader: "string-replace-loader",
                     options: {
                         search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
-                        replace: ''
+                        replace: ""
                     }
                 }
             ]
