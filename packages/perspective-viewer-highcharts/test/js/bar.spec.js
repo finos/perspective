@@ -89,6 +89,13 @@ utils.with_server({}, () => {
                     await utils.invoke_tooltip(bar, page);
                 });
 
+                test.capture("dates on the x-axis display correctly.", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Order Date"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+
                 test.capture("tooltip shows proper column labels based on hover target.", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
