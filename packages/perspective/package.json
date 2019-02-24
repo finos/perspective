@@ -50,8 +50,6 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@babel/polyfill": "^7.0.0",
-        "@babel/runtime": "^7.1.5",
         "bufferutil": "~3.0.0",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
