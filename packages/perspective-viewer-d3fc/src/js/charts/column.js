@@ -37,6 +37,7 @@ function columnChart(container, settings) {
         .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(mainAxis.domain(settings).include([0])(data))
         .yOrient("left")
+        .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);

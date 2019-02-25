@@ -37,6 +37,8 @@ function xyScatter(container, settings) {
         .yDomain(domainDefault.valueName("y")(data))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
+        .yNice()
+        .xNice()
         .plotArea(withGridLines(series));
 
     // render

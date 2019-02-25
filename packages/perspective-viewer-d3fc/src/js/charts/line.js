@@ -28,6 +28,7 @@ function lineChart(container, settings) {
         .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(mainAxis.domain(settings).pad([0.1, 0.1])(data))
         .yOrient("left")
+        .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);
