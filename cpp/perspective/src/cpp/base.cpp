@@ -222,6 +222,38 @@ get_dtype_descr(t_dtype dtype) {
 }
 
 std::string
+dtype_to_str(t_dtype dtype) {
+    std::stringstream str_dtype;
+    switch (dtype) {
+        case DTYPE_FLOAT32:
+        case DTYPE_FLOAT64: {
+            str_dtype << "float";
+        } break;
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            str_dtype << "integer";
+        } break;
+        case DTYPE_BOOL: {
+            str_dtype << "boolean";
+        } break;
+        case DTYPE_DATE: {
+            str_dtype << "date";
+        } break;
+        case DTYPE_TIME: {
+            str_dtype << "datetime";
+        } break;
+        case DTYPE_STR: {
+            str_dtype << "string";
+        } break;
+        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+    }
+
+    return str_dtype.str();
+}
+
+std::string
 filter_op_to_str(t_filter_op op) {
     switch (op) {
         case FILTER_OP_LT: {

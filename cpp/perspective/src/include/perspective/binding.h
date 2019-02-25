@@ -37,22 +37,15 @@ namespace binding {
     template <typename T, typename U>
     std::vector<U> vecFromArray(T& arr);
 
+    template <typename T>
+    bool hasValue(T val);
+
     /******************************************************************************
      *
      * Data Loading
      */
     template <typename T>
     std::vector<t_sortspec> _get_sort(T j_sortby);
-
-    /**
-     * @brief specify sort parameters
-     *
-     * @tparam T
-     * @param j_fterms
-     * @return std::vector<t_sortspec>
-     */
-    template <typename T>
-    std::vector<t_sortspec> make_sort(T j_fterms);
 
     /**
      *
@@ -69,16 +62,6 @@ namespace binding {
     std::vector<t_fterm> _get_fterms(t_schema schema, T j_filters);
 
     /**
-     * @brief specify filter terms
-     *
-     * @tparam T
-     * @param j_fterms
-     * @return std::vector<t_fterm>
-     */
-    template <typename T>
-    std::vector<t_fterm> _make_fterms(T j_fterms);
-
-    /**
      *
      *
      * Params
@@ -90,17 +73,7 @@ namespace binding {
      *
      */
     template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(T j_aggs);
-
-    /**
-     * @brief specify aggregations
-     *
-     * @tparam T
-     * @param j_aggs
-     * @return std::vector<t_aggspec>
-     */
-    template <typename T>
-    std::vector<t_aggspec> _make_aggspecs(T j_aggs);
+    std::vector<t_aggspec> _get_aggspecs(t_schema schema, bool column_only, T j_aggs);
 
     /**
      * Converts a scalar value to its language-specific representation.
@@ -309,7 +282,7 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<t_ctx1> make_context_one(t_schema schema, T j_pivots, t_filter_op combiner,
-        T j_filters, T j_aggs, T j_sortby, T j_pivot_depth, t_pool* pool,
+        T j_filters, T j_aggs, T j_sortby, T j_pivot_depth, bool j_column_only, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name);
 
     /**
@@ -326,7 +299,8 @@ namespace binding {
     template <typename T>
     std::shared_ptr<t_ctx2> make_context_two(t_schema schema, T j_rpivots, T j_cpivots,
         t_filter_op combiner, T j_filters, T j_aggs, T j_rpivot_depth, T j_cpivot_depth,
-        bool show_totals, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name);
+        bool j_column_only, bool show_totals, t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        std::string name);
 
     template <typename T>
     void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby, T j_column_sortby);

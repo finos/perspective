@@ -361,6 +361,7 @@ PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_floating_point(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string dtype_to_str(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);

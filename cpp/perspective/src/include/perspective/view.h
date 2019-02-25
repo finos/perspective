@@ -29,9 +29,8 @@ public:
     View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
         std::shared_ptr<t_gnode> gnode, std::string name, std::string separator,
         std::vector<std::string> row_pivot, std::vector<std::string> column_pivot,
-        std::vector<std::pair<std::vector<std::string>, std::string>> aggregate,
-        std::vector<std::vector<std::string>> filter,
-        std::vector<std::vector<std::string>> sort);
+        std::vector<t_aggspec> aggregate, std::vector<t_fterm> filter,
+        std::vector<t_sortspec> sort);
 
     void delete_view();
 
@@ -50,7 +49,6 @@ public:
 
 private:
     std::string map_aggregate_types(std::string name, std::string typestring);
-    std::string dtype_to_string(t_dtype type);
 
     t_pool* m_pool;
     std::shared_ptr<CTX_T> m_ctx;
@@ -62,8 +60,8 @@ private:
     // FIXME: refactor to be vectors of t_aggspec, etc.
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
-    std::vector<std::pair<std::vector<std::string>, std::string>> m_aggregates;
-    std::vector<std::vector<std::string>> m_filters;
-    std::vector<std::vector<std::string>> m_sort;
+    std::vector<t_aggspec> m_aggregates;
+    std::vector<t_fterm> m_filters;
+    std::vector<t_sortspec> m_sort;
 };
 } // end namespace perspective

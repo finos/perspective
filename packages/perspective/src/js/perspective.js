@@ -295,33 +295,7 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
      */
     view.prototype.schema = async function() {
-        let new_schema = extract_map(this._View.schema());
-
-        for (let name in new_schema) {
-            if (this.sides() > 0 && this.config.row_pivot.length > 0) {
-                new_schema[name] = map_aggregate_types(name, new_schema[name], this.config.aggregate);
-            }
-        }
-
-        return new_schema;
-    };
-
-    const map_aggregate_types = function(col_name, orig_type, aggregate) {
-        const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
-        const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
-        for (let agg in aggregate) {
-            let found_agg = aggregate[agg];
-            if (found_agg.column.join(defaults.COLUMN_SEPARATOR_STRING) === col_name) {
-                if (INTEGER_AGGS.includes(found_agg.op)) {
-                    return "integer";
-                } else if (FLOAT_AGGS.includes(found_agg.op)) {
-                    return "float";
-                } else {
-                    return orig_type;
-                }
-            }
-        }
-        throw new Error("Shouldn't be here");
+        return extract_map(this._View.schema());
     };
 
     const to_format = async function(options, formatter) {
@@ -914,22 +888,10 @@ export default function(Module) {
         }
 
         // Filters
-        let filters = [];
+        let filters = config.filter || [];
         let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
 
         if (config.filter) {
-            let schema = this._schema();
-            let isDateFilter = this._is_date_filter(schema);
-            let isValidFilter = this._is_valid_filter;
-            filters = config.filter
-                .filter(filter => isValidFilter(filter))
-                .map(filter => {
-                    if (isDateFilter(filter[0])) {
-                        return [filter[0], filter[1], new DateParser().parse(filter[2])];
-                    } else {
-                        return [filter[0], filter[1], filter[2]];
-                    }
-                });
             if (config.filter_op) {
                 filter_op = __MODULE__.str_to_filter_op(config.filter_op);
             }
@@ -938,42 +900,7 @@ export default function(Module) {
         let schema = this.gnode.get_tblschema();
 
         // Aggregates
-        let aggregates = [];
-        if (typeof config.aggregate === "object") {
-            for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
-                let agg = config.aggregate[aidx];
-                let agg_op = agg.op;
-                if (config.column_only) {
-                    agg_op = "any";
-                    config.aggregate[aidx].op = "any";
-                }
-                if (typeof agg.column === "string") {
-                    agg.column = [agg.column];
-                } else {
-                    let dep_length = agg.column.length;
-                    if ((agg.op === "weighted mean" && dep_length != 2) || (agg.op !== "weighted mean" && dep_length != 1)) {
-                        throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
-                    }
-                }
-                aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
-            }
-        } else {
-            config.aggregate = [];
-            let t_aggs = schema.columns();
-            let t_aggtypes = schema.types();
-            for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-                let column = t_aggs.get(aidx);
-                let agg_op = "any";
-                if (!config.column_only) {
-                    agg_op = defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)];
-                }
-                if (column !== "psp_okey") {
-                    aggregates.push([column, _string_to_aggtype[agg_op], [column]]);
-                    config.aggregate.push({column: [column], op: agg_op});
-                }
-            }
-            t_aggs.delete();
-        }
+        let aggregates = config.aggregate;
 
         // Sort
         let sort = [],
@@ -1015,6 +942,7 @@ export default function(Module) {
                     aggregates,
                     config.row_pivot_depth,
                     config.column_pivot_depth,
+                    config.column_only,
                     sort.length > 0,
                     this.pool,
                     this.gnode,
@@ -1027,22 +955,19 @@ export default function(Module) {
                     __MODULE__.sort(context, sort, col_sort);
                 }
             } else {
-                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, config.row_pivot_depth, this.pool, this.gnode, name);
+                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, config.row_pivot_depth, config.column_only, this.pool, this.gnode, name);
                 sides = 1;
             }
         } else {
-            context = __MODULE__.make_context_zero(
-                schema,
-                filter_op,
-                filters,
-                aggregates.map(function(x) {
-                    return x[0];
-                }),
-                sort,
-                this.pool,
-                this.gnode,
-                name
-            );
+            // If aggs specified, use them because schema.columns() does not reflect which cols we show/hide
+            let columns;
+            if (aggregates) {
+                columns = aggregates.map(agg => agg.column);
+            } else {
+                let t_aggs = schema.columns();
+                columns = extract_vector(t_aggs).filter(name => name !== "psp_okey");
+            }
+            context = __MODULE__.make_context_zero(schema, filter_op, filters, columns, sort, this.pool, this.gnode, name);
         }
 
         schema.delete();

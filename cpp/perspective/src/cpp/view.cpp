@@ -16,8 +16,7 @@ template <typename CTX_T>
 View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
     std::shared_ptr<t_gnode> gnode, std::string name, std::string separator,
     std::vector<std::string> row_pivot, std::vector<std::string> column_pivot,
-    std::vector<std::pair<std::vector<std::string>, std::string>> aggregate,
-    std::vector<std::vector<std::string>> filter, std::vector<std::vector<std::string>> sort)
+    std::vector<t_aggspec> aggregate, std::vector<t_fterm> filter, std::vector<t_sortspec> sort)
     : m_pool(pool)
     , m_ctx(ctx)
     , m_nsides(sides)
@@ -155,8 +154,12 @@ View<CTX_T>::schema() {
         std::size_t last_delimiter = name.find_last_of(m_separator);
         std::string agg_name = name.substr(last_delimiter + 1);
 
-        std::string type_string = dtype_to_string(types[agg_name]);
+        std::string type_string = dtype_to_str(types[agg_name]);
         new_schema[agg_name] = type_string;
+
+        if (m_row_pivots.size() > 0) {
+            new_schema[agg_name] = map_aggregate_types(agg_name, new_schema[agg_name]);
+        }
     }
 
     return new_schema;
@@ -184,7 +187,7 @@ View<t_ctx0>::schema() {
         if (names[i] == "psp_okey") {
             continue;
         }
-        new_schema[names[i]] = dtype_to_string(_types[i]);
+        new_schema[names[i]] = dtype_to_str(_types[i]);
     }
 
     return new_schema;
@@ -276,35 +279,30 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
 // PRIVATE
 template <typename CTX_T>
 std::string
-View<CTX_T>::dtype_to_string(t_dtype type) {
-    std::string str_dtype;
-    switch (type) {
-        case DTYPE_FLOAT32:
-        case DTYPE_FLOAT64: {
-            str_dtype = "float";
-        } break;
-        case DTYPE_INT8:
-        case DTYPE_INT16:
-        case DTYPE_INT32:
-        case DTYPE_INT64: {
-            str_dtype = "integer";
-        } break;
-        case DTYPE_BOOL: {
-            str_dtype = "boolean";
-        } break;
-        case DTYPE_DATE: {
-            str_dtype = "date";
-        } break;
-        case DTYPE_TIME: {
-            str_dtype = "datetime";
-        } break;
-        case DTYPE_STR: {
-            str_dtype = "string";
-        } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+View<CTX_T>::map_aggregate_types(std::string name, std::string typestring) {
+    std::vector<std::string> INTEGER_AGGS
+        = {"distinct_count", "distinct count", "distinctcount", "distinct", "count"};
+    std::vector<std::string> FLOAT_AGGS
+        = {"avg", "mean", "mean by count", "mean_by_count", "weighted mean", "weighted_mean",
+            "pct sum parent", "pct_sum_parent", "pct sum grand total", "pct_sum_grand_total"};
+
+    for (const t_aggspec& agg : m_aggregates) {
+        if (agg.name() == name) {
+            std::string agg_str = agg.agg_str();
+            bool int_agg = std::find(INTEGER_AGGS.begin(), INTEGER_AGGS.end(), agg_str)
+                != INTEGER_AGGS.end();
+            bool float_agg
+                = std::find(FLOAT_AGGS.begin(), FLOAT_AGGS.end(), agg_str) != FLOAT_AGGS.end();
+
+            if (int_agg) {
+                return "integer";
+            } else if (float_agg) {
+                return "float";
+            }
+        }
     }
 
-    return str_dtype;
+    return typestring;
 }
 
 // Explicitly instantiate View for each context
