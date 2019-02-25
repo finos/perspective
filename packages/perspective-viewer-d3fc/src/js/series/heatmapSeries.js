@@ -18,5 +18,7 @@ export function heatmapSeries(colorInterpolate) {
         .yValue(d => d.mainValue)
         .colorValue(d => d.colorValue)
         .colorInterpolate(colorInterpolate)
+        .xAlign("right")
+        .yAlign("top")
         .widthFraction(1.0);
 }
