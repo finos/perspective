@@ -144,6 +144,7 @@ declare module '@jpmorganchase/perspective' {
         SORT_ORDERS: SortOrders,
         table(): Table,
         worker(): PerspectiveWorker,
+        shared_worker(): PerspectiveWorker,
         override: (x: any) => void
     }
 
