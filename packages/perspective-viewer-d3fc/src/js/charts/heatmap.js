@@ -16,6 +16,7 @@ import {filterData} from "../legend/legend";
 import {getOrCreateElement} from "../utils/utils";
 import scrollableLegend from "../legend/scrollableLegend";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {withGridLines} from "../gridlines/gridlines";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
@@ -33,7 +34,7 @@ function heatmapChart(container, settings) {
         .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(uniqueYDomain)
         .yOrient("left")
-        .plotArea(series);
+        .plotArea(withGridLines(series).orient("vertical"));
 
     const xAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0, PaddingOuter: 0, TickPadding: 0};
     const yAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0};
@@ -58,7 +59,8 @@ function legend(container, colorInterpolate, domain) {
         .scale(sequentialScale)
         .shapeWidth(30)
         .cells(10)
-        .orient("vertical");
+        .orient("vertical")
+        .ascending(true);
 
     const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
 
