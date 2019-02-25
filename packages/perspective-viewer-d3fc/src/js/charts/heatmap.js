@@ -25,7 +25,6 @@ function heatmapChart(container, settings) {
     const series = heatmapSeries(settings, colorInterpolate);
 
     const uniqueYDomain = [...new Set(data.map(d => d.mainValue))];
-    console.log("uniqueYDomain:", uniqueYDomain);
     const extent = fc.extentLinear().accessors([d => d.colorValue]);
 
     const colourDomain = extent(data);
@@ -37,8 +36,14 @@ function heatmapChart(container, settings) {
         .yOrient("left")
         .plotArea(withGridLines(series));
 
-    const xAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0, PaddingOuter: 0};
-    const yAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0, PaddingOuter: 0};
+    const xAxisOptions = otherAxis
+        .styleOptions()
+        .paddingInner(0)
+        .paddingOuter(0)();
+    const yAxisOptions = otherAxis
+        .styleOptions()
+        .paddingInner(0)
+        .paddingOuter(0)();
 
     otherAxis.styleAxis(chart, "x", settings, "crossValues", xAxisOptions);
     otherAxis.styleAxis(chart, "y", settings, "splitValues", yAxisOptions, uniqueYDomain);
