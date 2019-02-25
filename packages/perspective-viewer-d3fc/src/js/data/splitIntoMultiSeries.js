@@ -7,16 +7,16 @@
  *
  */
 
-export function splitIntoMultiSeries(settings, data, {stack = false, includeAggregates = true} = {}) {
+export function splitIntoMultiSeries(settings, data, {stack = false, excludeEmpty = false} = {}) {
     const useData = data || settings.data;
 
     if (settings.splitValues.length > 0) {
-        return splitByValuesIntoMultiSeries(settings, useData, {stack, includeAggregates});
+        return splitByValuesIntoMultiSeries(settings, useData, {stack, excludeEmpty});
     }
     return [useData];
 }
 
-function splitByValuesIntoMultiSeries(settings, data, {stack = false, includeAggregates = true}) {
+function splitByValuesIntoMultiSeries(settings, data, {stack = false, excludeEmpty = false}) {
     // Create a series for each "split" value, each one containing all the "aggregate" values,
     // and "base" values to offset it from the previous series
     const multiSeries = {};
@@ -29,7 +29,7 @@ function splitByValuesIntoMultiSeries(settings, data, {stack = false, includeAgg
         // Keys are of the form "split1|split2|aggregate"
         Object.keys(col)
             .filter(key => key !== "__ROW_PATH__")
-            .filter(key => includeAggregates || (col[key] != null && col[key] != undefined))
+            .filter(key => !excludeEmpty || (col[key] != null && col[key] != undefined))
             .forEach(key => {
                 const labels = key.split("|");
                 // label="aggregate"
