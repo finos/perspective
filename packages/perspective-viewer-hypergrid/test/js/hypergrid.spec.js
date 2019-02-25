@@ -55,7 +55,7 @@ utils.with_server({}, () => {
                             State: "California",
                             "Sub-Category": "Phones"
                         });
-                        expect(detail.column_name).toEqual("Order Date");
+                        expect(detail.column_names).toEqual(["Order Date"]);
                         expect(detail.config).toEqual({filters: []});
                     });
                 });

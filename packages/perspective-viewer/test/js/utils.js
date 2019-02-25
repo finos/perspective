@@ -281,7 +281,7 @@ exports.drag_drop = async function drag_drop(page, origin, target) {
     await page.mouse.up();
 };
 
-exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
+const highcharts_selector_center = async function(svg_selector, page) {
     await page.mouse.move(0, 0);
     const viewer = await page.$("perspective-viewer");
     const handle = await page.waitFor(
@@ -297,7 +297,13 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
     );
     await handle.asElement().hover();
     const box = await handle.asElement().boundingBox();
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    return {x: box.x + box.width / 2, y: box.y + box.height / 2};
+};
+
+exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
+    const viewer = await page.$("perspective-viewer");
+    const coords = await highcharts_selector_center(svg_selector, page);
+    await page.mouse.move(coords.x, coords.y);
     await page.waitFor(
         element => {
             let elem = element.shadowRoot.querySelector("perspective-highcharts").shadowRoot.querySelector(".highcharts-label.highcharts-tooltip");
@@ -312,6 +318,11 @@ exports.invoke_tooltip = async function invoke_tooltip(svg_selector, page) {
         {},
         viewer
     );
+};
+
+exports.click_highcharts = async function click_highcharts(svg_selector, page) {
+    const coords = await highcharts_selector_center(svg_selector, page);
+    await page.mouse.click(coords.x, coords.y);
 };
 
 exports.render_warning = {

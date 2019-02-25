@@ -12,11 +12,75 @@ const path = require("path");
 
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
+const click_details = async page => {
+    const viewer = await page.$("perspective-viewer");
+
+    const click_event = page.evaluate(element => {
+        return new Promise(resolve => {
+            element.addEventListener("perspective-click", e => {
+                resolve(e.detail);
+            });
+        });
+    }, viewer);
+
+    await utils.click_highcharts("rect.highcharts-color-1", page);
+
+    return await click_event;
+};
+
 utils.with_server({}, () => {
     describe.page(
         "bar.html",
         () => {
             simple_tests.default();
+
+            describe("clicking on a bar", () => {
+                describe("when no filters are present", () => {
+                    test.capture("perspective dispatches perspective-click event with NO filters.", async page => {
+                        const viewer = await page.$("perspective-viewer");
+                        await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({filters: []});
+                        expect(detail.column_names).toEqual(["Profit"]);
+                        expect(detail.row).toEqual({Profit: 219.582, Sales: 731.94});
+                    });
+                });
+
+                describe("when a filter is present", () => {
+                    test.capture("perspective dispatches perspective-click event with one filter.", async page => {
+                        const viewer = await page.$("perspective-viewer");
+                        await page.evaluate(element => {
+                            element.setAttribute("columns", '["Sales", "Profit"]');
+                            element.setAttribute("filters", '[["Segment", "==", "Consumer"]]');
+                        }, viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({filters: [["Segment", "==", "Consumer"]]});
+                        expect(detail.column_names).toEqual(["Profit"]);
+                        expect(detail.row).toEqual({Profit: 219.582, Sales: 731.94});
+                    });
+
+                    test.capture("perspective dispatches perspective-click event with filters.", async page => {
+                        const viewer = await page.$("perspective-viewer");
+                        await page.evaluate(element => {
+                            element.setAttribute("columns", '["Sales", "Profit"]');
+                            element.setAttribute("filters", '[["Segment", "==", "Consumer"]]');
+                            element.setAttribute("column-pivots", '["Region"]');
+                            element.setAttribute("row-pivots", '["Country", "City"]');
+                        }, viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+
+                        const detail = await click_details(page);
+                        expect(detail.config).toEqual({
+                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Houston"], ["Region", "==", "Central"]]
+                        });
+                        expect(detail.column_names).toEqual(["Profit"]);
+                    });
+                });
+            });
 
             describe("tooltip tests", () => {
                 const bar = "rect.highcharts-point";

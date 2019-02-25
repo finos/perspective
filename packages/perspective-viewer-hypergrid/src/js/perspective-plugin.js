@@ -129,10 +129,10 @@ exports.install = function(grid) {
             const column_index = row_pivots.length > 0 ? x + 1 : x;
             const column_paths = Object.keys(r[0])[column_index];
             let column_filters = [];
-            let column_name;
+            let column_names;
             if (column_paths) {
                 const column_pivot_values = column_paths.split("|");
-                column_name = column_pivot_values[column_pivot_values.length - 1];
+                column_names = [column_pivot_values[column_pivot_values.length - 1]];
                 column_filters = column_pivots
                     .map((pivot, index) => {
                         const pivot_value = column_pivot_values[index];
@@ -149,7 +149,7 @@ exports.install = function(grid) {
                     composed: true,
                     detail: {
                         config: {filters},
-                        column_name,
+                        column_names,
                         row: r[0]
                     }
                 })
