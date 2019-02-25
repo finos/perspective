@@ -6,31 +6,28 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import * as d3 from "d3";
+import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as otherAxis from "../axis/otherAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/legend";
-//import {withGridLines} from "../gridlines/gridlines";
-//import {getOrCreateElement} from "../utils/utils";
-import * as fc from "d3fc";
-
+import {getOrCreateElement} from "../utils/utils";
+import scrollableLegend from "../legend/scrollableLegend";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
-    console.log("Raw Data: ", settings);
-    console.log("heatMapData: ", data);
+    const colorInterpolate = d3.interpolateViridis;
 
-    const series = heatmapSeries(settings);
+    const series = heatmapSeries(colorInterpolate);
 
     const uniqueYDomain = [...new Set(data.map(d => d.mainValue))];
     const extent = fc.extentLinear().accessors([d => d.colorValue]);
 
     const colourDomain = extent(data);
-    //legend(container,colourDomain);
-
-    console.log("colourDomain: ", colourDomain);
+    legend(container, colorInterpolate, colourDomain);
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), otherAxis.scale(settings, "splitValues"))
         .xDomain(crossAxis.domain(settings)(settings.data))
@@ -53,24 +50,23 @@ heatmapChart.plugin = {
     max_size: 25000
 };
 
-// const legend = (container, domain) => {
-//     //https://bl.ocks.org/d3indepth/89ced137bece23b908cf51580d5e082d
-//     const linear = d3.scaleLinear()
-//     .domain(domain)
-//     .range(["rgb(46, 73, 123)", "rgb(71, 187, 94)"])
+const scrollLegend = scrollableLegend();
+function legend(container, colorInterpolate, domain) {
+    const sequentialScale = d3.scaleSequential(colorInterpolate).domain(domain);
 
-//         const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
+    scrollLegend
+        .scale(sequentialScale)
+        .shapeWidth(30)
+        .cells(10)
+        .orient("vertical");
 
-//         // render the legend
-//         legendSelection
-//             .attr("class", "legend-container")
-//             .style("z-index", "2")
-//             .call(scrollLegend)
-//             .select("g.legendCells")
-//             .attr("transform", "translate(20,20)")
-//             .selectAll("g.cell")
-//             .classed("hidden", data => settings.hideKeys && settings.hideKeys.includes(data));
+    const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
 
-// }
+    // render the legend
+    legendSelection
+        .attr("class", "legend-container")
+        .style("z-index", "2")
+        .call(scrollLegend);
+}
 
 export default heatmapChart;
