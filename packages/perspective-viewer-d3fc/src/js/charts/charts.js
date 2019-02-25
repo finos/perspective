@@ -10,7 +10,8 @@
 import barChart from "./bar";
 import columnChart from "./column";
 import lineChart from "./line";
+import areaChart from "./area";
 import xyScatter from "./xy-scatter";
 
-const chartClasses = [barChart, columnChart, lineChart, xyScatter];
+const chartClasses = [barChart, columnChart, lineChart, areaChart, xyScatter];
 export default chartClasses;

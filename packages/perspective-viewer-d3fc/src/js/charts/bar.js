@@ -42,6 +42,9 @@ function barChart(container, settings) {
     crossAxis.styleAxis(chart, "y", settings);
     mainAxis.styleAxis(chart, "x", settings);
 
+    chart.yPaddingInner && chart.yPaddingInner(0.5);
+    chart.yPaddingOuter && chart.yPaddingOuter(0.25);
+
     // render
     container.datum(data).call(chart);
 }

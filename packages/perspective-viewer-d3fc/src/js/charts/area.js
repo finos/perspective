@@ -9,49 +9,41 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
-import {barSeries} from "../series/barSeries";
+import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
-import {groupAndStackData} from "../data/groupAndStackData";
+import {splitAndBaseData} from "../data/splitAndBaseData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 
-function columnChart(container, settings) {
-    const data = groupAndStackData(settings, filterData(settings));
+function areaChart(container, settings) {
+    const data = splitAndBaseData(settings, filterData(settings));
+
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 
-    const series = fc
-        .seriesSvgMulti()
-        .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, colour)
-                    .align("left")
-                    .orient("vertical")
-            )
-        );
+    const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings)(settings.data))
-        .yDomain(mainAxis.domain(settings).include([0])(data))
+        .xDomain(crossAxis.domain(settings, data))
+        .yDomain(mainAxis.domain(settings, data))
         .yOrient("left")
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);
     mainAxis.styleAxis(chart, "y", settings);
 
-    chart.xPaddingInner && chart.xPaddingInner(0.5);
-    chart.xPaddingOuter && chart.xPaddingOuter(0.25);
+    chart.xPaddingInner && chart.xPaddingInner(1);
+    chart.xPaddingOuter && chart.xPaddingOuter(0.5);
 
     // render
     container.datum(data).call(chart);
 }
-columnChart.plugin = {
-    type: "d3_y_bar",
-    name: "[d3fc] Y Bar Chart",
+areaChart.plugin = {
+    type: "d3_y_area",
+    name: "[d3fc] Y Area Chart",
     max_size: 25000
 };
 
-export default columnChart;
+export default areaChart;
