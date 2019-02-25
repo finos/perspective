@@ -13,7 +13,7 @@ export function barSeries(settings, colour) {
     let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
 
     series = series.decorate(selection => {
-        tooltip(selection, settings);
+        tooltip()(selection, settings);
         if (colour) {
             selection.style("fill", d => colour(d.key));
         }
