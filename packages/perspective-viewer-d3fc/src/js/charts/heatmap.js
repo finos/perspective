@@ -22,7 +22,7 @@ function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
     const colorInterpolate = d3.interpolateViridis;
 
-    const series = heatmapSeries(colorInterpolate);
+    const series = heatmapSeries(settings, colorInterpolate);
 
     const uniqueYDomain = [...new Set(data.map(d => d.mainValue))];
     const extent = fc.extentLinear().accessors([d => d.colorValue]);
@@ -34,10 +34,16 @@ function heatmapChart(container, settings) {
         .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(uniqueYDomain)
         .yOrient("left")
-        .plotArea(withGridLines(series).orient("vertical"));
+        .plotArea(withGridLines(series));
 
-    const xAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0, PaddingOuter: 0, TickPadding: 0};
-    const yAxisOptions = {...otherAxis.styleOptions, PaddingInner: 0};
+    const xAxisOptions = otherAxis
+        .styleOptions()
+        .paddingInner(0)
+        .paddingOuter(0)();
+    const yAxisOptions = otherAxis
+        .styleOptions()
+        .paddingInner(0)
+        .paddingOuter(0)();
 
     otherAxis.styleAxis(chart, "x", settings, "crossValues", xAxisOptions);
     otherAxis.styleAxis(chart, "y", settings, "splitValues", yAxisOptions, uniqueYDomain);

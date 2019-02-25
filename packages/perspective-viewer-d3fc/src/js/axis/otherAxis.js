@@ -7,7 +7,6 @@
  *
  */
 import * as d3 from "d3";
-import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
 
@@ -32,45 +31,6 @@ export const scale = (settings, typeField = "crossValues") => {
 };
 
 const defaultScaleBand = () => minBandwidth(d3.scaleBand());
-
-export const domain = (settings, labelField = "__ROW_PATH__", typeField = "crossValues") => {
-    let valueName = "crossValue";
-    let _labelField = labelField;
-
-    console.log("labelField", labelField);
-    console.log("typeField", typeField);
-
-    let extentLinear = fc.extentLinear();
-    let extentTime = fc.extentTime();
-
-    const _domain = function(data) {
-        const accessData = extent => {
-            return extent.accessors([labelFunction(settings, _labelField, typeField)])(data);
-        };
-        switch (axisType(settings, typeField)) {
-            case AXIS_TYPES.time:
-                return accessData(extentTime);
-            case AXIS_TYPES.linear:
-                return accessData(extentLinear);
-            default:
-                console.log("Default domain: ", _labelField);
-                return settings.data.map(d => d[_labelField]);
-        }
-    };
-
-    fc.rebindAll(_domain, extentLinear);
-    fc.rebindAll(_domain, extentTime);
-
-    _domain.valueName = (...args) => {
-        if (!args.length) {
-            return valueName;
-        }
-        valueName = args[0];
-        return _domain;
-    };
-
-    return _domain;
-};
 
 export const labelFunction = (settings, labelField = "__ROW_PATH__", typeField = "crossValues") => {
     switch (axisType(settings, typeField)) {
@@ -111,7 +71,7 @@ const getMaxLengthsFromDomain = (domain, valueCount) => {
     return maxLengths;
 };
 
-export const styleOptions = {
+const defaultStyleOptions = {
     PaddingInner: 0.5,
     PaddingOuter: 0.25,
     TickSplitter: "|",
@@ -121,12 +81,72 @@ export const styleOptions = {
     AxisSizeDefault: 5
 };
 
-export const styleAxis = (chart, prefix, settings, labelField = "crossValues", options = styleOptions, domain) => {
-    chart[`${prefix}Label`](label(settings, labelField));
+export const styleOptions = () => {
+    let _styleOptions = {...defaultStyleOptions};
 
-    //const valueSize = v => v.length * 5;
-    //const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
-    //const labelSize = prefix === "x" ? 25 : domain(settings)(settings.data).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
+    const options = () => _styleOptions;
+
+    options.paddingInner = (...args) => {
+        if (!args.length) {
+            return _styleOptions.PaddingInner;
+        }
+        _styleOptions.PaddingInner = args[0];
+        return options;
+    };
+
+    options.paddingOuter = (...args) => {
+        if (!args.length) {
+            return _styleOptions.PaddingOuter;
+        }
+        _styleOptions.PaddingOuter = args[0];
+        return options;
+    };
+
+    options.tickSplitter = (...args) => {
+        if (!args.length) {
+            return _styleOptions.TickSplitter;
+        }
+        _styleOptions.TickSplitter = args[0];
+        return options;
+    };
+
+    options.tickSizeInnerDefault = (...args) => {
+        if (!args.length) {
+            return _styleOptions.TickSizeInnerDefault;
+        }
+        _styleOptions.TickSizeInnerDefault = args[0];
+        return options;
+    };
+
+    options.tickSizeOuter = (...args) => {
+        if (!args.length) {
+            return _styleOptions.TickSizeOuter;
+        }
+        _styleOptions.TickSizeOuter = args[0];
+        return options;
+    };
+
+    options.tickPadding = (...args) => {
+        if (!args.length) {
+            return _styleOptions.TickPadding;
+        }
+        _styleOptions.TickPadding = args[0];
+        return options;
+    };
+
+    options.axisSizeDefault = (...args) => {
+        if (!args.length) {
+            return _styleOptions.AxisSizeDefault;
+        }
+        _styleOptions.AxisSizeDefault = args[0];
+        return options;
+    };
+
+    return options;
+};
+
+export const styleAxis = (chart, prefix, settings, labelField = "crossValues", options = defaultStyleOptions, domain) => {
+    chart[`${prefix}Label`](label(settings, labelField));
 
     let labelSize = 25;
 

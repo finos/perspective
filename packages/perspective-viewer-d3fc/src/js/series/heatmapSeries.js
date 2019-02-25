@@ -7,10 +7,15 @@
  *
  */
 import * as fc from "d3fc";
-//import {tooltip} from "../tooltip/tooltip";
+import {tooltip} from "../tooltip/tooltip";
+import {generateHtmlForHeatmap} from "../tooltip/generateHTML";
 
-export function heatmapSeries(colorInterpolate) {
+export function heatmapSeries(settings, colorInterpolate) {
     let series = fc.seriesSvgHeatmap();
+
+    series.decorate(selection => {
+        tooltip().generateHtml(generateHtmlForHeatmap)(selection, settings);
+    });
 
     return fc
         .autoBandwidth(series)
