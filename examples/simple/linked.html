@@ -1,0 +1,80 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="perspective.view.js"></script>
+    <script src="hypergrid.plugin.js"></script>
+    <script src="highcharts.plugin.js"></script>
+
+    <script src="perspective.js"></script>
+
+    <style>
+
+        body {
+            display: flex;
+            flex-direction: row;
+            justify-content:stretch;
+            align-items: stretch;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        perspective-viewer {
+            flex: 1 1 100%;
+            box-sizing: border-box;
+            margin: 12px;
+            box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.2);
+            border: 1px solid #eaeaea;
+
+        }
+    
+    </style>
+    <link rel='stylesheet' href="material.css" is="custom-style">
+    
+</head>
+
+<body>
+
+    <perspective-viewer row-pivots='["Sub-Category","Region","Segment"]' sort='[["Profit","desc"]]' columns='["Sales", "Profit"]'>
+
+    </perspective-viewer>
+
+    <perspective-viewer view="sunburst" row-pivots='["Sub-Category","Region","Segment"]' sort='[["Profit","desc"]]' columns='["Sales", "Profit"]'>
+
+    </perspective-viewer>
+
+    <script>
+        window.addEventListener('WebComponentsReady', function() {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'superstore.arrow', true);
+            xhr.responseType = "arraybuffer"
+            xhr.onload = function() {
+                var el1 = document.getElementsByTagName('perspective-viewer')[0];
+                var el2 = document.getElementsByTagName('perspective-viewer')[1];
+                var table = perspective.shared_worker().table(xhr.response);
+                el1.load(table);
+                el2.load(table);
+                el1.addEventListener("perspective-click", e => el2.restore(e.detail.config));
+            }
+            xhr.send(null);
+        });
+    </script>
+
+</body>
+
+</html>
