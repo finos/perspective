@@ -11,6 +11,7 @@
     "superstore.html/sorts by a hidden column.": "042756bbc39aeb729bc4108cde465ec8",
     "superstore.html/sorts by a numeric column.": "3838ecb375fe4450079c1f54969d2239",
     "superstore.html/filters by a numeric column.": "a100080f91cae951339cf5b956b5c2cc",
+    "superstore.html/filters by a datetime column.": "4cc9c6ccaecd2befa3da5ff92a325632",
     "superstore.html/highlights invalid filter.": "e244cca8fc2278cb2477d0a46ab5331f",
     "superstore.html/sorts by an alpha column.": "0c65ce1fbb1035414fd98ca6bb26c493",
     "superstore.html/displays visible columns.": "5dd292347e4a969425d8c2b216e802ae",

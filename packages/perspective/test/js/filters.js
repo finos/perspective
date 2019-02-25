@@ -16,6 +16,21 @@ var data = [{w: now, x: 1, y: "a", z: true}, {w: now, x: 2, y: "b", z: false}, {
 
 var rdata = [{w: +now, x: 1, y: "a", z: true}, {w: +now, x: 2, y: "b", z: false}, {w: +now, x: 3, y: "c", z: true}, {w: +yesterday, x: 4, y: "d", z: false}];
 
+// starting from 09/01/2018 to 12/01/2018
+var date_range_data = [
+    {w: new Date(1535778060000), x: 1, y: "a", z: true},
+    {w: new Date(1538370060000), x: 2, y: "b", z: false},
+    {w: new Date(1541048460000), x: 3, y: "c", z: true},
+    {w: new Date(1543644060000), x: 4, y: "d", z: false}
+];
+
+var r_date_range_data = [
+    {w: +new Date(1535778060000), x: 1, y: "a", z: true},
+    {w: +new Date(1538370060000), x: 2, y: "b", z: false},
+    {w: +new Date(1541048460000), x: 3, y: "c", z: true},
+    {w: +new Date(1543644060000), x: 4, y: "d", z: false}
+];
+
 module.exports = perspective => {
     describe("Filters", function() {
         describe("GT & LT", function() {
@@ -70,6 +85,28 @@ module.exports = perspective => {
                 });
                 let json = await view.to_json();
                 expect(json).toEqual([]);
+                view.delete();
+                table.delete();
+            });
+
+            it("w > datetime as string", async function() {
+                var table = perspective.table(date_range_data);
+                var view = table.view({
+                    filter: [["w", ">", "10/01/2018"]]
+                });
+                let json = await view.to_json();
+                expect(json).toEqual(r_date_range_data.slice(1, 4));
+                view.delete();
+                table.delete();
+            });
+
+            it("w < datetime as string", async function() {
+                var table = perspective.table(date_range_data);
+                var view = table.view({
+                    filter: [["w", "<", "10/01/2018"]]
+                });
+                let json = await view.to_json();
+                expect(json).toEqual([r_date_range_data[0]]);
                 view.delete();
                 table.delete();
             });
