@@ -10,7 +10,7 @@ import {labelFunction} from "../axis/crossAxis";
 import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
 
 export function pointData(settings, data) {
-    return splitIntoMultiSeries(settings, data, {includeAggregates: false}).map(data => seriesToPoints(settings, data));
+    return splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(data => seriesToPoints(settings, data));
 }
 
 function seriesToPoints(settings, data) {
