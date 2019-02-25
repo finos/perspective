@@ -9,10 +9,10 @@
         <generator>Feed for Node.js</generator>
         <image>
             <title>Perspective Blog</title>
-            <url>https://jpmorganchase.github.io//perspective/img/perspective.svg</url>
+            <url>https://jpmorganchase.github.io//perspective/img/perspective2.svg</url>
             <link>https://jpmorganchase.github.io//perspective/blog</link>
         </image>
-        <copyright>Copyright © 2018 Perspective Authors</copyright>
+        <copyright>Copyright © 2019 Perspective Authors</copyright>
         <item>
             <title><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
             <link>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</link>
