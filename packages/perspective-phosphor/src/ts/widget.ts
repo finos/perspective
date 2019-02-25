@@ -12,18 +12,6 @@ import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
 import "@jpmorganchase/perspective-viewer-highcharts";
 
-import perspective from "@jpmorganchase/perspective";
-import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
-import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
-
-if (perspective) {
-    perspective.override({ wasm, worker });
-} else {
-    console.warn('Perspective was undefined - wasm load errors may occur');
-}
-/**************************/
-
-
 import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import { MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK } from './utils';

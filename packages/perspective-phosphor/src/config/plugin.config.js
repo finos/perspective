@@ -13,11 +13,6 @@ const webpack = require("webpack");
 
 module.exports = {
     entry: "./src/ts/index.ts",
-    resolveLoader: {
-        alias: {
-            "file-worker-loader": "@jpmorganchase/perspective-webpack-plugin/src/js/psp-worker-loader.js"
-        }
-    },
     resolve: {
         extensions: [".ts", ".js", ".json"]
     },

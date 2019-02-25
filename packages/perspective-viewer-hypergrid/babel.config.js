@@ -9,7 +9,6 @@ module.exports = {
     ],
     sourceType: "unambiguous",
     plugins: [
-        "module:fast-async",
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
         [

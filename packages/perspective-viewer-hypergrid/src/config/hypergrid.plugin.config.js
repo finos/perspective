@@ -2,7 +2,7 @@ const path = require("path");
 const common = require("@jpmorganchase/perspective/src/config/common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: "./src/js/hypergrid.js",
+    entry: "./cjs/js/hypergrid.js",
     output: {
         filename: "hypergrid.plugin.js",
         library: "perspective-view-hypergrid",
