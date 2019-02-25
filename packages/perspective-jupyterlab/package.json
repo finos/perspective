@@ -3,17 +3,17 @@
     "version": "0.2.16",
     "description": "Perspective.js",
     "files": [
-        "build/*.d.ts",
-        "build/*.js.map",
-        "build/*.js",
-        "build/*.wasm",
+        "dist/*.d.ts",
+        "dist/*.js.map",
+        "dist/*.js",
+        "dist/*.wasm",
         "src/css/*.css",
         "babel.config.js"
     ],
-    "main": "build/index.js",
-    "types": "build/index.d.ts",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "directories": {
-        "build": "build/"
+        "dist": "dist/"
     },
     "license": "Apache-2.0",
     "publishConfig": {
@@ -26,7 +26,7 @@
         "test": "npm-run-all test:run",
         "test:run": "echo done",
         "build": "webpack --color --config src/config/plugin.config.js",
-        "clean": "rimraf build"
+        "clean": "rimraf dist"
     },
     "dependencies": {
         "@jpmorganchase/perspective-phosphor": "^0.2.16",
