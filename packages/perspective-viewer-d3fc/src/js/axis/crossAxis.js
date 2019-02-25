@@ -53,8 +53,14 @@ export const domain = settings => {
         }
     };
 
-    fc.rebindAll(_domain, extentLinear);
-    fc.rebindAll(_domain, extentTime);
+    switch (axisType(settings)) {
+        case AXIS_TYPES.time:
+            fc.rebindAll(_domain, extentTime);
+            break;
+        case AXIS_TYPES.linear:
+            fc.rebindAll(_domain, extentLinear);
+            break;
+    }
 
     _domain.valueName = (...args) => {
         if (!args.length) {
