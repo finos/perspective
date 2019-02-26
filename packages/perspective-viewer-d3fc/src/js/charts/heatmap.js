@@ -9,7 +9,7 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
-import * as otherAxis from "../axis/otherAxis";
+//import * as otherAxis from "../axis/otherAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/legend";
@@ -30,23 +30,19 @@ function heatmapChart(container, settings) {
     const colourDomain = extent(data);
     legend(container, colorInterpolate, colourDomain);
 
-    const chart = chartSvgCartesian(crossAxis.scale(settings), otherAxis.scale(settings, "splitValues"))
+    const chart = chartSvgCartesian(crossAxis.scale(settings), crossAxis.scale(settings, "splitValues"))
         .xDomain(crossAxis.domain(settings)(settings.data))
         .yDomain(uniqueYDomain)
         .yOrient("left")
         .plotArea(withGridLines(series));
 
-    const xAxisOptions = otherAxis
-        .styleOptions()
-        .paddingInner(0)
-        .paddingOuter(0)();
-    const yAxisOptions = otherAxis
-        .styleOptions()
-        .paddingInner(0)
-        .paddingOuter(0)();
+    crossAxis.styleAxis(chart, "x", settings, "crossValues");
+    crossAxis.styleAxis(chart, "y", settings, "splitValues", uniqueYDomain);
 
-    otherAxis.styleAxis(chart, "x", settings, "crossValues", xAxisOptions);
-    otherAxis.styleAxis(chart, "y", settings, "splitValues", yAxisOptions, uniqueYDomain);
+    chart.xPaddingInner && chart.xPaddingInner(0);
+    chart.xPaddingOuter && chart.xPaddingOuter(0);
+    chart.yPaddingInner && chart.yPaddingInner(0);
+    chart.yPaddingOuter && chart.yPaddingOuter(0);
 
     // render
     container.datum(data).call(chart);
