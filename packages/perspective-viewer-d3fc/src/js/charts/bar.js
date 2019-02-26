@@ -34,7 +34,12 @@ function barChart(container, settings) {
         );
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings).include([0])(data))
+        .xDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .padAcrossZero(false)(data)
+        )
         .yDomain(crossAxis.domain(settings)(settings.data))
         .yOrient("left")
         .xNice()

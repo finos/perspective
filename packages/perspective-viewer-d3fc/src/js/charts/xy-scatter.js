@@ -32,9 +32,9 @@ function xyScatter(container, settings) {
     const domainDefault = mainAxis.domain(settings).pad([0.1, 0.1]);
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(domainDefault.valueName("x")(data))
+        .xDomain(domainDefault.valueName("x").padAcrossZero(false)(data))
         .xLabel(settings.mainValues[0].name)
-        .yDomain(domainDefault.valueName("y")(data))
+        .yDomain(domainDefault.valueName("y").padAcrossZero(false)(data))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
         .yNice()

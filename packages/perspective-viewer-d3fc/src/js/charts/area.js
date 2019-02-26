@@ -27,7 +27,12 @@ function areaChart(container, settings) {
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(settings.data))
-        .yDomain(mainAxis.domain(settings).include([0])(data))
+        .yDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .padAcrossZero(false)(data)
+        )
         .yOrient("left")
         .plotArea(withGridLines(series).orient("vertical"));
 
