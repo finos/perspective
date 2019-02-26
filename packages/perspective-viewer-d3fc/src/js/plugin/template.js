@@ -13,7 +13,7 @@ import perspectiveStyle from "../../less/perspective-view.less";
 import template from "../../html/d3fc-chart.html";
 import {areArraysEqualSimple} from "../utils/utils";
 
-import {bindTemplate} from "@jpmorganchase/perspective-viewer/src/js/utils";
+import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils";
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
 
