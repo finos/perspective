@@ -120,12 +120,11 @@ export const styleAxis = (chart, prefix, settings, labelField = "crossValues", s
     if (prefix !== "x") {
         if (suppliedDomain) {
             const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[labelField].length);
-            labelSize = prefix === "x" ? 25 : maxLengths.reduce((m, v) => m + v, 0) * 5;
+            labelSize = maxLengths.reduce((m, v) => m + v, 0) * 5;
         } else {
             const valueSize = v => v.length * 5;
             const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
             labelSize = domain(settings)(settings.data).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
-            labelSize *= settings[labelField].length;
         }
     }
 
@@ -135,7 +134,7 @@ export const styleAxis = (chart, prefix, settings, labelField = "crossValues", s
                 [`${prefix}TickSizeInner`](settings[labelField].length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)
                 [`${prefix}TickPadding`](8)
-                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 5)
+                [`${prefix}AxisSize`](settings[labelField].length * labelSize + 5)
                 [`${prefix}Decorate`](hideOverlappingLabels);
             break;
     }
