@@ -278,20 +278,8 @@ export default function(Module) {
         return this.nsides;
     };
 
-    view.prototype._column_names = function(skip_depth = false) {
-        let skip = false,
-            depth = 0;
-
-        if (skip_depth !== false) {
-            skip = true;
-            depth = Number(skip_depth);
-        }
-
-        return extract_vector(this._View._column_names(skip, depth));
-    };
-
     /**
-     * The schema of this {@link view}.  A schema is an Object, the keys of which
+     * The schema of this {@link view}. A schema is an Object, the keys of which
      * are the columns of this {@link view}, and the values are their string type names.
      * If this {@link view} is aggregated, theses will be the aggregated types;
      * otherwise these types will be the same as the columns in the underlying
@@ -305,6 +293,10 @@ export default function(Module) {
         return extract_map(this._View.schema());
     };
 
+    view.prototype._column_names = function(skip = false, depth = 0) {
+        return extract_vector(this._View._column_names(skip, depth));
+    };
+
     const to_format = async function(options, formatter) {
         options = options || {};
         let viewport = this.config.viewport ? this.config.viewport : {};
@@ -313,10 +305,13 @@ export default function(Module) {
         let start_col = options.start_col || (viewport.left ? viewport.left : 0);
         let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
         let slice;
+
         const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
+
         if (this.column_only) {
             end_row += this.config.column_pivot.length;
         }
+
         if (this.sides() === 0) {
             slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
@@ -329,7 +324,15 @@ export default function(Module) {
 
         let data = formatter.initDataValue();
 
-        let col_names = [[]].concat(this._column_names(this.sides() === 2 && sorted ? this.config.column_pivot.length : false));
+        // determine which level we stop pulling column names
+        let skip = false,
+            depth = 0;
+        if (this.sides() == 2 && sorted) {
+            skip = true;
+            depth = this.config.column_pivot.length;
+        }
+
+        let col_names = [[]].concat(this._column_names(skip, depth));
         let row;
         let ridx = -1;
         for (let idx = 0; idx < slice.length; idx++) {
