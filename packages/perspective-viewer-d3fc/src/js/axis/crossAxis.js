@@ -18,8 +18,8 @@ const AXIS_TYPES = {
     linear: "linear"
 };
 
-export const scale = (settings, typeField = "crossValues") => {
-    switch (axisType(settings, typeField)) {
+export const scale = (settings, settingName = "crossValues") => {
+    switch (axisType(settings, settingName)) {
         case AXIS_TYPES.none:
             return withoutTicks(defaultScaleBand());
         case AXIS_TYPES.time:
@@ -73,26 +73,26 @@ export const domain = settings => {
     return _domain;
 };
 
-export const labelFunction = (settings, labelField = "__ROW_PATH__", typeField = "crossValues") => {
-    switch (axisType(settings, typeField)) {
+export const labelFunction = (settings, valueName = "__ROW_PATH__", settingName = "crossValues") => {
+    switch (axisType(settings, settingName)) {
         case AXIS_TYPES.none:
-            return d => d[labelField][0];
+            return d => d[valueName][0];
         case AXIS_TYPES.time:
-            return d => new Date(d[labelField][0]);
+            return d => new Date(d[valueName][0]);
         case AXIS_TYPES.linear:
-            return d => d[labelField][0];
+            return d => d[valueName][0];
         default:
-            return d => d[labelField].join("|");
+            return d => d[valueName].join("|");
     }
 };
 
-export const label = (settings, labelField = "crossValues") => settings[labelField].map(v => v.name).join(", ");
+export const label = (settings, settingName = "crossValues") => settings[settingName].map(v => v.name).join(", ");
 
-const axisType = (settings, typeField = "crossValues") => {
-    if (settings[typeField].length === 0) {
+const axisType = (settings, settingName = "crossValues") => {
+    if (settings[settingName].length === 0) {
         return AXIS_TYPES.none;
-    } else if (settings[typeField].length === 1) {
-        if (settings[typeField][0].type === "datetime") {
+    } else if (settings[settingName].length === 1) {
+        if (settings[settingName][0].type === "datetime") {
             return AXIS_TYPES.time;
         }
     }
@@ -112,14 +112,14 @@ const getMaxLengthsFromDomain = (domain, valueCount) => {
     return maxLengths;
 };
 
-export const styleAxis = (chart, prefix, settings, labelField = "crossValues", suppliedDomain) => {
-    chart[`${prefix}Label`](label(settings, labelField));
+export const styleAxis = (chart, prefix, settings, settingName = "crossValues", suppliedDomain) => {
+    chart[`${prefix}Label`](label(settings, settingName));
 
     let labelSize = 25;
 
     if (prefix !== "x") {
         if (suppliedDomain) {
-            const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[labelField].length);
+            const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[settingName].length);
             labelSize = maxLengths.reduce((m, v) => m + v, 0) * 5;
         } else {
             const valueSize = v => v.length * 5;
@@ -128,13 +128,13 @@ export const styleAxis = (chart, prefix, settings, labelField = "crossValues", s
         }
     }
 
-    switch (axisType(settings)) {
+    switch (axisType(settings, settingName)) {
         case AXIS_TYPES.ordinal:
             chart[`${prefix}TickGrouping`](t => t.split("|"))
-                [`${prefix}TickSizeInner`](settings[labelField].length > 1 ? labelSize : 5)
+                [`${prefix}TickSizeInner`](settings[settingName].length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)
                 [`${prefix}TickPadding`](8)
-                [`${prefix}AxisSize`](settings[labelField].length * labelSize + 5);
+                [`${prefix}AxisSize`](settings[settingName].length * labelSize + 5);
             break;
     }
 };
