@@ -34,6 +34,7 @@ function areaChart(container, settings) {
                 .padAcrossZero(false)(data)
         )
         .yOrient("left")
+        .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);
