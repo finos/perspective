@@ -9,19 +9,8 @@
 import {select} from "d3";
 
 export function generateHtmlDefault(tooltipDiv, data, settings) {
-    console.log("data", data);
-    console.log("settings", settings);
-
-    // Add group data
-    if (settings.crossValues.length) {
-        const groups = data.crossValue.split ? data.crossValue.split("|") : [data.crossValue];
-        tooltipDiv
-            .select("#cross-values")
-            .selectAll("li")
-            .data(groups)
-            .join("li")
-            .each(eachValue(settings.crossValues));
-    }
+    // Add cross value(s)
+    addValuesFromData(tooltipDiv, data, settings, "crossValues", "crossValue", "#cross-values");
 
     const splitValues = getSplitValues(settings, data);
     // Add data value
@@ -44,32 +33,12 @@ export function generateHtmlDefault(tooltipDiv, data, settings) {
 }
 
 export function generateHtmlForHeatmap(tooltipDiv, data, settings) {
-    console.log("data", data);
-    console.log("settings", settings);
-
     // Add cross value(s)
-    if (settings.crossValues.length) {
-        const groups = data.crossValue.split ? data.crossValue.split("|") : [data.crossValue];
-        tooltipDiv
-            .select("#cross-values")
-            .selectAll("li")
-            .data(groups)
-            .join("li")
-            .each(eachValue(settings.crossValues));
-    }
+    addValuesFromData(tooltipDiv, data, settings, "crossValues", "crossValue", "#cross-values");
 
     // Add main value(s)
-    if (settings.splitValues.length) {
-        const splits = data.mainValue.split ? data.mainValue.split("|") : [data.mainValue];
-        tooltipDiv
-            .select("#split-values")
-            .selectAll("li")
-            .data(splits)
-            .join("li")
-            .each(eachValue(settings.splitValues));
-    }
+    addValuesFromData(tooltipDiv, data, settings, "splitValues", "mainValue", "#split-values");
 
-    //const dataValues = getDataValues(settings, data);
     const dataValues = {
         values: [data.colorValue],
         labels: settings.mainValues
@@ -81,6 +50,18 @@ export function generateHtmlForHeatmap(tooltipDiv, data, settings) {
         .data(dataValues.values)
         .join("li")
         .each(eachValue(dataValues.labels));
+}
+
+function addValuesFromData(tooltipDiv, data, settings, settingName, valueName, tag) {
+    if (settings[settingName].length) {
+        const groups = data[valueName].split ? data[valueName].split("|") : [data[valueName]];
+        tooltipDiv
+            .select(tag)
+            .selectAll("li")
+            .data(groups)
+            .join("li")
+            .each(eachValue(settings[settingName]));
+    }
 }
 
 function getSplitValues(settings, data) {
