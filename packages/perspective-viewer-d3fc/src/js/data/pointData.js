@@ -1,0 +1,29 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+import {labelFunction} from "../axis/crossAxis";
+import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
+
+export function pointData(settings, data) {
+    return splitIntoMultiSeries(settings, data).map(data => seriesToPoints(settings, data));
+}
+
+function seriesToPoints(settings, data) {
+    const labelfn = labelFunction(settings);
+
+    const mappedSeries = data.map((col, i) => ({
+        crossValue: labelfn(col, i),
+        mainValues: settings.mainValues.map(v => col[v.name]),
+        x: col[settings.mainValues[0].name],
+        y: col[settings.mainValues[1].name],
+        size: settings.mainValues.length > 2 ? col[settings.mainValues[2].name] : undefined,
+        key: data.key
+    }));
+    mappedSeries.key = data.key;
+    return mappedSeries;
+}

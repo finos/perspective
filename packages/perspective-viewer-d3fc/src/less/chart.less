@@ -1,0 +1,123 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+@sans-serif-fonts: Arial, sans-serif;
+
+:host {
+    .chart {
+        position: absolute;
+        box-sizing: border-box;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 15px;
+        overflow: hidden;
+
+        & .x-label {
+            height: 1.2em !important;
+        }
+        & d3fc-canvas.plot-area {
+            display: none;
+        }
+
+        & .y-axis text,
+        & .x-axis text {
+            fill: var(--d3fc-axis--ticks, rgb(80, 80, 80));
+            font-size: 11px;
+        }
+        & .y-axis path,
+        & .x-axis path {
+            stroke: var(--d3fc-axis--lines, rgb(150, 160, 175));
+        }
+
+        &.d3_y_bar .y-axis path,
+        &.d3_y_line .y-axis path,
+        &.d3_xy_scatter .y-axis path,
+        &.d3_xy_scatter .x-axis path,
+        &.d3_x_bar .x-axis path {
+            visibility: hidden;
+        }
+
+        & .y-label {
+            white-space: nowrap;
+        }
+
+        & .bar {
+            fill: rgb(31, 119, 180);
+        }
+        & .line {
+            stroke: rgb(31, 119, 180);
+        }
+        & .point {
+            fill: rgba(31, 119, 180, 0.5);
+            stroke: rgb(31, 119, 180);
+        }
+    }
+
+    .label rect {
+        fill: none;
+    }
+
+    .legend-container {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        left: auto;
+        width: 150px;
+
+        & .legend {
+            font-size: 8pt;
+
+            & .cell {
+                cursor: pointer;
+
+                &.hidden circle {
+                    fill: rgb(204, 204, 204) !important;
+                }
+            }
+
+            & text {
+                fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+            }
+        }
+
+        & .legend-controls {
+            margin-left: 12px;
+
+            & #up-arrow, & #down-arrow {
+                cursor: pointer;
+                color: rgb(31, 119, 180);
+            }
+
+            & #up-arrow.disabled, & #down-arrow.disabled {
+                cursor: default;
+                color: rgb(51, 51, 51);
+            }
+        }
+    }
+
+    div.tooltip {
+        position: absolute;
+        text-align: left;
+        font-size: 10pt;
+        word-break: break-word;
+        padding: 0.5em;
+        background: var(--d3fc-tooltip--background, #ffffff);
+        color: var(--d3fc-tooltip--color, black);
+        border: 1px solid #777777;
+        border-radius: 2px;
+        pointer-events: none;
+    }
+
+    div.tooltip ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+}
