@@ -15,20 +15,22 @@ export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
 
         selection
             .selectAll("d3fc-svg.x-axis")
-            .style("height", xAxisSize ? `${xAxisSize}px` : "")
+            .style("height", Number.isInteger(xAxisSize) ? `${xAxisSize}px` : xAxisSize)
             .on("draw", (d, i, nodes) => {
+                const xAxis = axisBottom(xScale).decorate(cartesianBase.xDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(xAxisStore(axisBottom(xScale)));
+                    .call(xAxisStore(xAxis));
             });
 
         selection
             .selectAll("d3fc-svg.y-axis")
-            .style("width", yAxisSize ? `${yAxisSize}px` : "")
+            .style("width", Number.isInteger(yAxisSize) ? `${yAxisSize}px` : yAxisSize)
             .on("draw", (d, i, nodes) => {
+                const yAxis = axisLeft(yScale).decorate(cartesianBase.yDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(yAxisStore(axisLeft(yScale)));
+                    .call(yAxisStore(yAxis));
             });
     };
 
