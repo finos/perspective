@@ -112,7 +112,34 @@ export const styleAxis = (chart, prefix, settings) => {
                 [`${prefix}TickSizeInner`](settings.crossValues.length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)
                 [`${prefix}TickPadding`](8)
-                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 5);
+                [`${prefix}AxisSize`](settings.crossValues.length * labelSize + 5)
+                [`${prefix}Decorate`](hideOverlappingLabels);
             break;
     }
 };
+
+function hideOverlappingLabels(s) {
+    const getTransformCoords = transform =>
+        transform
+            .substring(transform.indexOf("(") + 1, transform.indexOf(")"))
+            .split(",")
+            .map(c => parseInt(c));
+    const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
+
+    const previousRectangles = [];
+    s.each((d, i, nodes) => {
+        const tick = d3.select(nodes[i]);
+        const text = tick.select("text");
+        const textRect = text.node().getBBox();
+
+        const transformCoords = getTransformCoords(tick.attr("transform"));
+
+        const rect = {x: textRect.x + transformCoords[0], y: textRect.y + transformCoords[1], width: textRect.width, height: textRect.height};
+        const overlap = !!previousRectangles.find(r => rectanglesOverlap(r, rect));
+
+        text.attr("visibility", overlap ? "hidden" : "");
+        if (!overlap) {
+            previousRectangles.push(rect);
+        }
+    });
+}
