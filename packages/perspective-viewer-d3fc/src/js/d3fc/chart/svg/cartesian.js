@@ -5,8 +5,8 @@ import {axisBottom, axisLeft} from "../../axis/axis";
 
 export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
     const cartesianBase = chartSvgCartesian(xScale, yScale);
-    let xAxisSize = 0;
-    let yAxisSize = 0;
+    let xAxisSize = null;
+    let yAxisSize = null;
     let xAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
     let yAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
 
@@ -15,20 +15,22 @@ export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
 
         selection
             .selectAll("d3fc-svg.x-axis")
-            .style("height", xAxisSize ? `${xAxisSize}px` : "")
+            .style("height", Number.isInteger(xAxisSize) ? `${xAxisSize}px` : xAxisSize)
             .on("draw", (d, i, nodes) => {
+                const xAxis = axisBottom(xScale).decorate(cartesianBase.xDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(xAxisStore(axisBottom(xScale)));
+                    .call(xAxisStore(xAxis));
             });
 
         selection
             .selectAll("d3fc-svg.y-axis")
-            .style("width", yAxisSize ? `${yAxisSize}px` : "")
+            .style("width", Number.isInteger(yAxisSize) ? `${yAxisSize}px` : yAxisSize)
             .on("draw", (d, i, nodes) => {
+                const yAxis = axisLeft(yScale).decorate(cartesianBase.yDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(yAxisStore(axisLeft(yScale)));
+                    .call(yAxisStore(yAxis));
             });
     };
 
