@@ -7,12 +7,17 @@
  *
  */
 
+import {defaultPadding} from "./default";
+import * as fc from "d3fc";
+
 export const hardLimitZeroPadding = () => {
-    let pad = [0, 0];
-    let padUnit = "percent";
     let padAcrossZero = false;
+    const _defaultPadding = defaultPadding();
 
     const padding = extent => {
+        let pad = _defaultPadding.pad();
+        let padUnit = _defaultPadding.padUnit();
+
         let delta = 1;
         switch (padUnit) {
             case "domain": {
@@ -34,27 +39,13 @@ export const hardLimitZeroPadding = () => {
         extent[1] = !padAcrossZero && extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
     };
 
+    fc.rebindAll(padding, _defaultPadding);
+
     padding.padAcrossZero = function() {
         if (!arguments.length) {
             return padAcrossZero;
         }
         padAcrossZero = arguments.length <= 0 ? undefined : arguments[0];
-        return padding;
-    };
-
-    padding.pad = function() {
-        if (!arguments.length) {
-            return pad;
-        }
-        pad = arguments.length <= 0 ? undefined : arguments[0];
-        return padding;
-    };
-
-    padding.padUnit = function() {
-        if (!arguments.length) {
-            return padUnit;
-        }
-        padUnit = arguments.length <= 0 ? undefined : arguments[0];
         return padding;
     };
 
