@@ -68,6 +68,9 @@ async function* run_to_format_cases(table, config, format) {
     const name = `view(${JSON.stringify(token)})`;
 
     const view = table.view(config);
+    if (!view[format]) {
+        return;
+    }
     await view.schema();
 
     console.log(`Benchmarking \`${name}.${format}()\``);
