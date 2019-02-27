@@ -224,18 +224,15 @@ export default function(Module) {
         this.config = config || {};
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_one(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(pool, sides, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_two(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         }
 
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
-        this.nsides = sides;
-        this.gnode = gnode;
-        this.pool = pool;
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
@@ -248,7 +245,6 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
-        this._View.delete_view();
         this._View.delete();
         this.ctx.delete();
 
@@ -275,7 +271,7 @@ export default function(Module) {
      * @returns {number} sides The number of sides of this `View`.
      */
     view.prototype.sides = function() {
-        return this.nsides;
+        return this._View.sides();
     };
 
     /**
@@ -301,9 +297,9 @@ export default function(Module) {
         options = options || {};
         let viewport = this.config.viewport ? this.config.viewport : {};
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
+        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this._View.num_rows());
         let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
+        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this._View.num_columns() + (this.sides() === 0 ? 0 : 1));
         let slice;
 
         const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
@@ -351,7 +347,7 @@ export default function(Module) {
                 if (cidx === 0) {
                     if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
-                        let row_path = this.ctx.unity_get_row_path(start_row + ridx);
+                        let row_path = this._View.get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
@@ -484,13 +480,13 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx, false);
+            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1, false);
+            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false);
         } else {
             const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
-            return __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1, column_pivot_only);
+            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only);
         }
     };
 
@@ -613,8 +609,8 @@ export default function(Module) {
         this.callbacks.push({
             view: this,
             callback: () => {
-                if (this.ctx.get_step_delta) {
-                    let delta = this.ctx.get_step_delta(0, 2147483647);
+                if (this._View.get_step_delta) {
+                    let delta = this._View.get_step_delta(0, 2147483647);
                     if (delta.cells.size() === 0) {
                         this.to_json().then(callback);
                     } else {

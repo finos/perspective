@@ -642,7 +642,8 @@ namespace binding {
     // Given a column index, serialize data to TypedArray
     template <typename T>
     val
-    col_to_js_typed_array(T ctx, t_index idx, bool column_pivot_only) {
+    col_to_js_typed_array(std::shared_ptr<View<T>> view, t_index idx, bool column_pivot_only) {
+        std::shared_ptr<T> ctx = view->get_context();
         std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
         auto dtype = ctx->get_column_dtype(idx);
 
@@ -1636,8 +1637,8 @@ namespace binding {
      */
     template <>
     std::shared_ptr<View<t_ctx0>>
-    make_view_zero(t_pool* pool, std::int32_t sides, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, val config, val date_parser) {
+    make_view_zero(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
@@ -1648,16 +1649,16 @@ namespace binding {
         auto ctx = make_context_zero(
             schema, filter_op, col_names, filters, sorts, pool, gnode, name);
 
-        auto view_ptr = std::make_shared<View<t_ctx0>>(
-            pool, ctx, sides, gnode, name, separator, view_config);
+        auto view_ptr
+            = std::make_shared<View<t_ctx0>>(pool, ctx, gnode, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx1>>
-    make_view_one(t_pool* pool, std::int32_t sides, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, val config, val date_parser) {
+    make_view_one(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
@@ -1676,16 +1677,16 @@ namespace binding {
         auto ctx = make_context_one(schema, row_pivots, filter_op, filters, aggregates, sorts,
             pivot_depth, column_only, pool, gnode, name);
 
-        auto view_ptr = std::make_shared<View<t_ctx1>>(
-            pool, ctx, sides, gnode, name, separator, view_config);
+        auto view_ptr
+            = std::make_shared<View<t_ctx1>>(pool, ctx, gnode, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx2>>
-    make_view_two(t_pool* pool, std::int32_t sides, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, val config, val date_parser) {
+    make_view_two(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
@@ -1718,8 +1719,8 @@ namespace binding {
         auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
             aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, pool, gnode, name);
 
-        auto view_ptr = std::make_shared<View<t_ctx2>>(
-            pool, ctx, sides, gnode, name, separator, view_config);
+        auto view_ptr
+            = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
 
         return view_ptr;
     }
@@ -1940,10 +1941,10 @@ EMSCRIPTEN_BINDINGS(perspective) {
     // Bind a View for each context type
 
     class_<View<t_ctx0>>("View_ctx0")
-        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx0>>>("shared_ptr<View_ctx0>")
-        .function("delete_view", &View<t_ctx0>::delete_view)
+        .function("sides", &View<t_ctx0>::sides)
         .function("num_rows", &View<t_ctx0>::num_rows)
         .function("num_columns", &View<t_ctx0>::num_columns)
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
@@ -1955,13 +1956,15 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx0>::get_aggregates)
         .function("get_filters", &View<t_ctx0>::get_filters)
         .function("get_sorts", &View<t_ctx0>::get_sorts)
+        .function("get_row_path", &View<t_ctx0>::get_row_path)
+        .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
-        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx1>>>("shared_ptr<View_ctx1>")
-        .function("delete_view", &View<t_ctx1>::delete_view)
+        .function("sides", &View<t_ctx1>::sides)
         .function("num_rows", &View<t_ctx1>::num_rows)
         .function("num_columns", &View<t_ctx1>::num_columns)
         .function("get_row_expanded", &View<t_ctx1>::get_row_expanded)
@@ -1976,13 +1979,15 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx1>::get_aggregates)
         .function("get_filters", &View<t_ctx1>::get_filters)
         .function("get_sorts", &View<t_ctx1>::get_sorts)
+        .function("get_row_path", &View<t_ctx1>::get_row_path)
+        .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
-        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx2>>>("shared_ptr<View_ctx2>")
-        .function("delete_view", &View<t_ctx2>::delete_view)
+        .function("sides", &View<t_ctx2>::sides)
         .function("num_rows", &View<t_ctx2>::num_rows)
         .function("num_columns", &View<t_ctx2>::num_columns)
         .function("get_row_expanded", &View<t_ctx2>::get_row_expanded)
@@ -1997,25 +2002,16 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx2>::get_aggregates)
         .function("get_filters", &View<t_ctx2>::get_filters)
         .function("get_sorts", &View<t_ctx2>::get_sorts)
+        .function("get_row_path", &View<t_ctx2>::get_row_path)
+        .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
-
-    /******************************************************************************
-     *
-     * t_column
-     */
-    class_<t_column>("t_column")
-        .smart_ptr<std::shared_ptr<t_column>>("shared_ptr<t_column>")
-        .function<void>("set_scalar", &t_column::set_scalar);
 
     /******************************************************************************
      *
      * t_table
      */
     class_<t_table>("t_table")
-        .constructor<t_schema, t_uindex>()
         .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
-        .function<t_column*>("add_column", &t_table::add_column, allow_raw_pointers())
-        .function<void>("pprint", &t_table::pprint)
         .function<unsigned long>(
             "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
 
@@ -2033,8 +2029,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * t_gnode
      */
     class_<t_gnode>("t_gnode")
-        .constructor<t_gnode_processing_mode, const t_schema&, const std::vector<t_schema>&,
-            const std::vector<t_schema>&, const std::vector<t_custom_column>&>()
         .smart_ptr<std::shared_ptr<t_gnode>>("shared_ptr<t_gnode>")
         .function<t_uindex>(
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
@@ -2046,125 +2040,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * t_ctx0
      */
-    class_<t_ctx0>("t_ctx0")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>")
-        .function<t_index>("sidedness", &t_ctx0::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_row_count))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx0::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx0::get_step_delta)
-        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx0::get_cell_delta)
-        .function<std::vector<std::string>>("get_column_names", &t_ctx0::get_column_names)
-        // .function<std::vector<t_minmax>>("get_min_max", &t_ctx0::get_min_max)
-        // .function<void>("set_minmax_enabled", &t_ctx0::set_minmax_enabled)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx0::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx0::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx0::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx0::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx0::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx0::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx0::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx0::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx0::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx0::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx0::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx0::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx0::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx0::unity_get_column_expanded)
-        .function<void>("unity_init_load_step_end", &t_ctx0::unity_init_load_step_end);
+    class_<t_ctx0>("t_ctx0").smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>");
 
     /******************************************************************************
      *
      * t_ctx1
      */
-    class_<t_ctx1>("t_ctx1")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>")
-        .function<t_index>("sidedness", &t_ctx1::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_row_count))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx1::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx1::get_step_delta)
-        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx1::get_cell_delta)
-        .function<void>("set_depth", &t_ctx1::set_depth)
-        .function("open", select_overload<t_index(t_index)>(&t_ctx1::open))
-        .function("close", select_overload<t_index(t_index)>(&t_ctx1::close))
-        .function<t_depth>("get_trav_depth", &t_ctx1::get_trav_depth)
-        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx1::get_aggregates)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx1::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx1::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx1::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx1::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx1::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx1::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx1::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx1::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx1::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx1::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx1::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx1::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx1::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx1::unity_get_column_expanded)
-        .function<void>("unity_init_load_step_end", &t_ctx1::unity_init_load_step_end);
+    class_<t_ctx1>("t_ctx1").smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>");
 
     /******************************************************************************
      *
      * t_ctx2
      */
-    class_<t_ctx2>("t_ctx2")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>")
-        .function<t_index>("sidedness", &t_ctx2::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx2::*)() const>(
-                select_overload<t_index() const>(&t_ctx2::get_row_count)))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx2::*)() const>(&t_ctx2::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx2::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx2::get_step_delta)
-        //.function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx2::get_cell_delta)
-        .function<void>("set_depth", &t_ctx2::set_depth)
-        .function("open", select_overload<t_index(t_header, t_index)>(&t_ctx2::open))
-        .function("close", select_overload<t_index(t_header, t_index)>(&t_ctx2::close))
-        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx2::get_aggregates)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx2::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx2::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx2::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx2::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx2::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx2::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx2::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx2::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx2::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx2::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx2::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx2::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx2::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx2::unity_get_column_expanded)
-        .function<t_totals>("get_totals", &t_ctx2::get_totals)
-        .function<std::vector<t_tscalar>>(
-            "get_column_path_userspace", &t_ctx2::get_column_path_userspace)
-        .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end);
+    class_<t_ctx2>("t_ctx2").smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>");
 
     /******************************************************************************
      *
@@ -2173,25 +2061,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_pool>("t_pool")
         .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
-        .function<unsigned int>("register_gnode", &t_pool::register_gnode, allow_raw_pointers())
-        .function<void>("process", &t_pool::_process)
-        .function<void>("send", &t_pool::send)
-        .function<t_uindex>("epoch", &t_pool::epoch)
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
-        .function<void>("set_update_delegate", &t_pool::set_update_delegate)
-        .function<void>("register_context", &t_pool::register_context)
-        .function<void>("unregister_context", &t_pool::unregister_context)
-        .function<std::vector<t_updctx>>(
-            "get_contexts_last_updated", &t_pool::get_contexts_last_updated)
-        .function<std::vector<t_uindex>>(
-            "get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
-        .function<t_gnode*>("get_gnode", &t_pool::get_gnode, allow_raw_pointers());
-
-    /******************************************************************************
-     *
-     * t_aggspec
-     */
-    class_<t_aggspec>("t_aggspec").function<std::string>("name", &t_aggspec::name);
+        .function<void>("set_update_delegate", &t_pool::set_update_delegate);
 
     /******************************************************************************
      *
@@ -2232,7 +2103,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
-    register_vector<t_aggspec>("std::vector<t_aggspec>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
     register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
@@ -2243,49 +2113,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * map
      */
     register_map<std::string, std::string>("std::map<std::string, std::string>");
-
-    /******************************************************************************
-     *
-     * t_header
-     */
-    enum_<t_header>("t_header")
-        .value("HEADER_ROW", HEADER_ROW)
-        .value("HEADER_COLUMN", HEADER_COLUMN);
-
-    /******************************************************************************
-     *
-     * t_ctx_type
-     */
-    enum_<t_ctx_type>("t_ctx_type")
-        .value("ZERO_SIDED_CONTEXT", ZERO_SIDED_CONTEXT)
-        .value("ONE_SIDED_CONTEXT", ONE_SIDED_CONTEXT)
-        .value("TWO_SIDED_CONTEXT", TWO_SIDED_CONTEXT)
-        .value("GROUPED_ZERO_SIDED_CONTEXT", GROUPED_ZERO_SIDED_CONTEXT)
-        .value("GROUPED_PKEY_CONTEXT", GROUPED_PKEY_CONTEXT)
-        .value("GROUPED_COLUMNS_CONTEXT", GROUPED_COLUMNS_CONTEXT);
-
-    /******************************************************************************
-     *
-     * t_filter_op
-     */
-    enum_<t_filter_op>("t_filter_op")
-        .value("FILTER_OP_LT", FILTER_OP_LT)
-        .value("FILTER_OP_LTEQ", FILTER_OP_LTEQ)
-        .value("FILTER_OP_GT", FILTER_OP_GT)
-        .value("FILTER_OP_GTEQ", FILTER_OP_GTEQ)
-        .value("FILTER_OP_EQ", FILTER_OP_EQ)
-        .value("FILTER_OP_NE", FILTER_OP_NE)
-        .value("FILTER_OP_BEGINS_WITH", FILTER_OP_BEGINS_WITH)
-        .value("FILTER_OP_ENDS_WITH", FILTER_OP_ENDS_WITH)
-        .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
-        .value("FILTER_OP_OR", FILTER_OP_OR)
-        .value("FILTER_OP_IN", FILTER_OP_IN)
-        .value("FILTER_OP_NOT_IN", FILTER_OP_NOT_IN)
-        .value("FILTER_OP_AND", FILTER_OP_AND)
-        .value("FILTER_OP_IS_NAN", FILTER_OP_IS_NAN)
-        .value("FILTER_OP_IS_NOT_NAN", FILTER_OP_IS_NOT_NAN)
-        .value("FILTER_OP_IS_VALID", FILTER_OP_IS_VALID)
-        .value("FILTER_OP_IS_NOT_VALID", FILTER_OP_IS_NOT_VALID);
 
     /******************************************************************************
      *
@@ -2318,77 +2145,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_aggtype
-     */
-    enum_<t_aggtype>("t_aggtype")
-        .value("AGGTYPE_SUM", AGGTYPE_SUM)
-        .value("AGGTYPE_MUL", AGGTYPE_MUL)
-        .value("AGGTYPE_COUNT", AGGTYPE_COUNT)
-        .value("AGGTYPE_MEAN", AGGTYPE_MEAN)
-        .value("AGGTYPE_WEIGHTED_MEAN", AGGTYPE_WEIGHTED_MEAN)
-        .value("AGGTYPE_UNIQUE", AGGTYPE_UNIQUE)
-        .value("AGGTYPE_ANY", AGGTYPE_ANY)
-        .value("AGGTYPE_MEDIAN", AGGTYPE_MEDIAN)
-        .value("AGGTYPE_JOIN", AGGTYPE_JOIN)
-        .value("AGGTYPE_SCALED_DIV", AGGTYPE_SCALED_DIV)
-        .value("AGGTYPE_SCALED_ADD", AGGTYPE_SCALED_ADD)
-        .value("AGGTYPE_SCALED_MUL", AGGTYPE_SCALED_MUL)
-        .value("AGGTYPE_DOMINANT", AGGTYPE_DOMINANT)
-        .value("AGGTYPE_FIRST", AGGTYPE_FIRST)
-        .value("AGGTYPE_LAST", AGGTYPE_LAST)
-        .value("AGGTYPE_PY_AGG", AGGTYPE_PY_AGG)
-        .value("AGGTYPE_AND", AGGTYPE_AND)
-        .value("AGGTYPE_OR", AGGTYPE_OR)
-        .value("AGGTYPE_LAST_VALUE", AGGTYPE_LAST_VALUE)
-        .value("AGGTYPE_HIGH_WATER_MARK", AGGTYPE_HIGH_WATER_MARK)
-        .value("AGGTYPE_LOW_WATER_MARK", AGGTYPE_LOW_WATER_MARK)
-        .value("AGGTYPE_UDF_COMBINER", AGGTYPE_UDF_COMBINER)
-        .value("AGGTYPE_UDF_REDUCER", AGGTYPE_UDF_REDUCER)
-        .value("AGGTYPE_SUM_ABS", AGGTYPE_SUM_ABS)
-        .value("AGGTYPE_SUM_NOT_NULL", AGGTYPE_SUM_NOT_NULL)
-        .value("AGGTYPE_MEAN_BY_COUNT", AGGTYPE_MEAN_BY_COUNT)
-        .value("AGGTYPE_IDENTITY", AGGTYPE_IDENTITY)
-        .value("AGGTYPE_DISTINCT_COUNT", AGGTYPE_DISTINCT_COUNT)
-        .value("AGGTYPE_DISTINCT_LEAF", AGGTYPE_DISTINCT_LEAF)
-        .value("AGGTYPE_PCT_SUM_PARENT", AGGTYPE_PCT_SUM_PARENT)
-        .value("AGGTYPE_PCT_SUM_GRAND_TOTAL", AGGTYPE_PCT_SUM_GRAND_TOTAL);
-
-    /******************************************************************************
-     *
-     * t_totals
-     */
-    enum_<t_totals>("t_totals")
-        .value("TOTALS_BEFORE", TOTALS_BEFORE)
-        .value("TOTALS_HIDDEN", TOTALS_HIDDEN)
-        .value("TOTALS_AFTER", TOTALS_AFTER);
-
-    /******************************************************************************
-     *
-     * data loading
-     */
-    function("str_to_filter_op", &str_to_filter_op);
-
-    /******************************************************************************
-     *
      * assorted functions
      */
     function("make_table", &make_table<val>, allow_raw_pointers());
-    function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
-    // function("make_context_zero", &make_context_zero<val>, allow_raw_pointers());
-    // function("make_context_one", &make_context_one<val>, allow_raw_pointers());
-    // function("make_context_two", &make_context_two<val>, allow_raw_pointers());
-    function("scalar_to_val", &scalar_to_val);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("set_column_nth", &set_column_nth<val>, allow_raw_pointers());
     function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);
     function("get_data_one", &get_data<std::shared_ptr<t_ctx1>>);
     function("get_data_two", &get_data<std::shared_ptr<t_ctx2>>);
     function("get_data_two_skip_headers", &get_data_two_skip_headers<val>);
-    function("col_to_js_typed_array_zero", &col_to_js_typed_array<std::shared_ptr<t_ctx0>>);
-    function("col_to_js_typed_array_one", &col_to_js_typed_array<std::shared_ptr<t_ctx1>>);
-    function("col_to_js_typed_array_two", &col_to_js_typed_array<std::shared_ptr<t_ctx2>>);
+    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
+    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
+    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);
     function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
     function("make_view_one", &make_view_one<val>, allow_raw_pointers());
     function("make_view_two", &make_view_two<val>, allow_raw_pointers());

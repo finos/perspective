@@ -285,9 +285,8 @@ namespace binding {
      */
 
     template <typename T>
-    std::shared_ptr<View<t_ctx0>> make_view_zero(t_pool* pool, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx0>> make_view_zero(t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        std::string name, std::string separator, T config, T date_parser);
 
     /**
      * Creates a new one-sided View.
@@ -301,9 +300,8 @@ namespace binding {
      */
 
     template <typename T>
-    std::shared_ptr<View<t_ctx1>> make_view_one(t_pool* pool, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx1>> make_view_one(t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        std::string name, std::string separator, T config, T date_parser);
 
     /**
      * Creates a new two-sided View.
@@ -317,9 +315,8 @@ namespace binding {
      */
 
     template <typename T>
-    std::shared_ptr<View<t_ctx2>> make_view_two(t_pool* pool, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx2>> make_view_two(t_pool* pool, std::shared_ptr<t_gnode> gnode,
+        std::string name, std::string separator, T config, T date_parser);
 
     /**
      *
