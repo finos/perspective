@@ -16,6 +16,7 @@ import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
@@ -31,7 +32,7 @@ function areaChart(container, settings) {
             mainAxis
                 .domain(settings)
                 .include([0])
-                .padAcrossZero(false)(data)
+                .paddingStrategy(hardLimitZeroPadding())(data)
         )
         .yOrient("left")
         .yNice()

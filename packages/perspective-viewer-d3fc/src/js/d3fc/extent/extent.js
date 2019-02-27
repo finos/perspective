@@ -8,6 +8,7 @@
  */
 
 import * as d3Array from "d3-array";
+import {defaultPadding} from "../padding/default";
 
 export const linearExtent = function() {
     let accessors = [
@@ -15,11 +16,9 @@ export const linearExtent = function() {
             return d;
         }
     ];
-    let pad = [0, 0];
-    let padUnit = "percent";
     let symmetricalAbout = null;
     let include = [];
-    let padAcrossZero = true;
+    let paddingStrategy = defaultPadding();
 
     const instance = function instance(data) {
         let values = new Array(data.length);
@@ -67,7 +66,7 @@ export const linearExtent = function() {
             extent$$1[1] = symmetricalAbout + halfRange;
         }
 
-        applyPadding(padUnit, pad, padAcrossZero, extent$$1);
+        paddingStrategy(extent$$1);
 
         return extent$$1;
     };
@@ -80,19 +79,21 @@ export const linearExtent = function() {
         return instance;
     };
 
+    //This function points directly at the paddingStrategy child object's properties for backwards-compatibility. DEPRECATED.
     instance.pad = function() {
         if (!arguments.length) {
-            return pad;
+            return paddingStrategy.pad;
         }
-        pad = arguments.length <= 0 ? undefined : arguments[0];
+        paddingStrategy.pad(arguments.length <= 0 ? undefined : arguments[0]);
         return instance;
     };
 
+    //This function points directly at the paddingStrategy child object's properties for backwards-compatibility. DEPRECATED.
     instance.padUnit = function() {
         if (!arguments.length) {
-            return padUnit;
+            return paddingStrategy.padUnit;
         }
-        padUnit = arguments.length <= 0 ? undefined : arguments[0];
+        paddingStrategy.padUnit(arguments.length <= 0 ? undefined : arguments[0]);
         return instance;
     };
 
@@ -112,11 +113,11 @@ export const linearExtent = function() {
         return instance;
     };
 
-    instance.padAcrossZero = function() {
+    instance.paddingStrategy = function() {
         if (!arguments.length) {
-            return padAcrossZero;
+            return paddingStrategy;
         }
-        padAcrossZero = arguments.length <= 0 ? undefined : arguments[0];
+        paddingStrategy = arguments.length <= 0 ? undefined : arguments[0];
         return instance;
     };
 
@@ -133,26 +134,4 @@ let toConsumableArray = function(arr) {
     } else {
         return Array.from(arr);
     }
-};
-
-let applyPadding = (padUnit, pad, padAcrossZero, extent) => {
-    let delta = 1;
-    switch (padUnit) {
-        case "domain": {
-            break;
-        }
-        case "percent": {
-            delta = extent[1] - extent[0];
-            break;
-        }
-        default:
-            throw new Error("Unknown padUnit: " + padUnit);
-    }
-
-    let paddedLowerExtent = extent[0] - pad[0] * delta;
-    let paddedUpperExtent = extent[1] + pad[1] * delta;
-
-    // If datapoints are exclusively negative or positive and padAcrossZero is set false, hard limit extent to 0.
-    extent[0] = !padAcrossZero && extent[0] >= 0 && paddedLowerExtent < 0 ? 0 : paddedLowerExtent;
-    extent[1] = !padAcrossZero && extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
 };
