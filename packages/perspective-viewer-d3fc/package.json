@@ -17,7 +17,7 @@
         "build:webpack": "webpack --color --config src/config/d3fc.plugin.config.js",
         "build": "npm-run-all build:babel build:webpack",
         "test:build": "cp test/html/* build",
-        "watch": "webpack --color --watch --config src/config/d3fc.plugin.config.js",
+        "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "find build -mindepth 1 -delete",
@@ -50,5 +50,8 @@
         "d3-svg-legend": "^2.25.6",
         "d3fc": "^14.0.26",
         "gradient-parser": "0.1.5"
+    },
+    "devDependencies": {
+        "babel-loader": "^8.0.5"
     }
 }
