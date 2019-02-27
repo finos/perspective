@@ -190,6 +190,7 @@ enum t_filter_op {
 };
 
 PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);
+PERSPECTIVE_EXPORT t_filter_op str_to_filter_op(std::string str);
 
 enum t_header { HEADER_ROW, HEADER_COLUMN };
 
@@ -200,6 +201,9 @@ enum t_sorttype {
     SORTTYPE_ASCENDING_ABS,
     SORTTYPE_DESCENDING_ABS
 };
+
+PERSPECTIVE_EXPORT t_sorttype str_to_sorttype(std::string str);
+PERSPECTIVE_EXPORT std::string sorttype_to_str(t_sorttype type);
 
 enum t_aggtype {
     AGGTYPE_SUM,
@@ -234,6 +238,8 @@ enum t_aggtype {
     AGGTYPE_PCT_SUM_PARENT,
     AGGTYPE_PCT_SUM_GRAND_TOTAL
 };
+
+PERSPECTIVE_EXPORT t_aggtype str_to_aggtype(std::string str);
 
 enum t_totals { TOTALS_BEFORE, TOTALS_HIDDEN, TOTALS_AFTER };
 
@@ -358,6 +364,7 @@ PERSPECTIVE_EXPORT bool is_numeric_type(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_floating_point(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_linear_order_type(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_dtype_descr(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string dtype_to_str(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string get_status_descr(t_status dtype);
 PERSPECTIVE_EXPORT t_uindex get_dtype_size(t_dtype dtype);
 PERSPECTIVE_EXPORT bool is_vlen_dtype(t_dtype dtype);

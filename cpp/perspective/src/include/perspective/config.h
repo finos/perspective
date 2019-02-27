@@ -16,6 +16,7 @@
 #include <perspective/config.h>
 #include <perspective/pivot.h>
 #include <perspective/filter.h>
+#include <perspective/sort_specification.h>
 
 namespace perspective {
 
@@ -53,6 +54,13 @@ public:
         const std::string& grouping_label_column, t_fmode fmode,
         const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str);
 
+    // view config
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& column_pivots, const std::vector<t_aggspec>& aggregates,
+        const std::vector<t_sortspec>& sortspecs, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms, const std::vector<std::string>& col_names,
+        bool column_only);
+
     // grouped_pkeys
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& detail_columns, t_filter_op combiner,
@@ -63,6 +71,10 @@ public:
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
 
+    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
+        const std::vector<t_aggspec>& aggregates, const t_totals totals, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
+
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
         const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
@@ -72,6 +84,9 @@ public:
         const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
+
+    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
@@ -107,6 +122,7 @@ public:
     std::vector<std::string> get_column_names() const;
     t_uindex get_num_rpivots() const;
     t_uindex get_num_cpivots() const;
+    bool get_column_only() const;
 
     std::vector<t_pivot> get_pivots() const;
     const std::vector<t_pivot>& get_row_pivots() const;
@@ -114,6 +130,7 @@ public:
     const std::vector<t_aggspec>& get_aggregates() const;
 
     std::vector<std::pair<std::string, std::string>> get_sortby_pairs() const;
+    const std::vector<t_sortspec>& get_sortspecs() const;
 
     bool has_filters() const;
 
@@ -148,7 +165,9 @@ protected:
 private:
     std::vector<t_pivot> m_row_pivots;
     std::vector<t_pivot> m_col_pivots;
+    bool m_column_only;
     std::map<std::string, std::string> m_sortby;
+    std::vector<t_sortspec> m_sortspecs;
     std::vector<t_aggspec> m_aggregates;
     std::vector<std::string> m_detail_columns;
     t_totals m_totals;

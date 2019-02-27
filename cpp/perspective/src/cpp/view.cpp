@@ -13,42 +13,69 @@
 
 namespace perspective {
 template <typename CTX_T>
-View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator)
+View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gnode> gnode,
+    std::string name, std::string separator, t_config config)
     : m_pool(pool)
     , m_ctx(ctx)
-    , m_nsides(sides)
     , m_gnode(gnode)
     , m_name(name)
-    , m_separator(separator) {}
+    , m_separator(separator)
+    , m_config(config) {
+
+    // We should deprecate t_pivot and just use string column names throughout
+    for (const t_pivot& rp : m_config.get_row_pivots()) {
+        m_row_pivots.push_back(rp.name());
+    }
+
+    for (const t_pivot& cp : m_config.get_column_pivots()) {
+        m_column_pivots.push_back(cp.name());
+    }
+
+    m_aggregates = m_config.get_aggregates();
+    m_filters = m_config.get_fterms();
+    m_sorts = m_config.get_sortspecs();
+    m_column_only = m_config.get_column_only();
+}
 
 template <typename CTX_T>
-void
-View<CTX_T>::delete_view() {
+View<CTX_T>::~View() {
     m_pool->unregister_context(m_gnode->get_id(), m_name);
 }
 
-template <typename CTX_T>
+template <>
 std::int32_t
-View<CTX_T>::sides() {
-    return m_nsides;
+View<t_ctx0>::sides() const {
+    return 0;
+}
+
+template <>
+std::int32_t
+View<t_ctx1>::sides() const {
+    return 1;
+}
+
+template <>
+std::int32_t
+View<t_ctx2>::sides() const {
+    return 2;
 }
 
 template <typename CTX_T>
 std::int32_t
-View<CTX_T>::num_rows() {
+View<CTX_T>::num_rows() const {
     return m_ctx->get_row_count();
 }
 
 template <typename CTX_T>
 std::int32_t
-View<CTX_T>::num_columns() {
+View<CTX_T>::num_columns() const {
     return m_ctx->unity_get_column_count();
 }
 
+// Pivot table operations
 template <typename CTX_T>
 std::int32_t
-View<CTX_T>::get_row_expanded(std::int32_t idx) {
+View<CTX_T>::get_row_expanded(std::int32_t idx) const {
     return m_ctx->unity_get_row_expanded(idx);
 }
 
@@ -117,19 +144,17 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
 }
 
 /**
- * The schema of this View.  A schema is an std::map, the keys of which
+ * @brief The schema of this View.  A schema is an std::map, the keys of which
  * are the columns of this View, and the values are their string type names.
  * If this View is aggregated, theses will be the aggregated types;
  * otherwise these types will be the same as the columns in the underlying
  * Table.
  *
- * Returns
- * -------
- * std::map<std::string, std::string> schema of the View
+ * @return std::map<std::string, std::string>
  */
 template <typename CTX_T>
 std::map<std::string, std::string>
-View<CTX_T>::schema() {
+View<CTX_T>::schema() const {
     auto schema = m_gnode->get_tblschema();
     auto _types = schema.types();
     auto names = schema.columns();
@@ -147,25 +172,26 @@ View<CTX_T>::schema() {
         std::size_t last_delimiter = name.find_last_of(m_separator);
         std::string agg_name = name.substr(last_delimiter + 1);
 
-        std::string type_string = dtype_to_string(types[agg_name]);
+        std::string type_string = dtype_to_str(types[agg_name]);
         new_schema[agg_name] = type_string;
+
+        if (m_row_pivots.size() > 0 && !is_column_only()) {
+            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
+        }
     }
 
     return new_schema;
 }
-
 /**
- * The schema of this View. Output and logic is as the above
+ * @brief The schema of this View. Output and logic is as the above
  * schema(), but this version is specialized for zero-sided
  * contexts.
  *
- * Returns
- * -------
- * std::map<std::string, std::string> schema of the View
+ * @return std::map<std::string, std::string>
  */
 template <>
 std::map<std::string, std::string>
-View<t_ctx0>::schema() {
+View<t_ctx0>::schema() const {
     t_schema schema = m_gnode->get_tblschema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
@@ -176,24 +202,22 @@ View<t_ctx0>::schema() {
         if (names[i] == "psp_okey") {
             continue;
         }
-        new_schema[names[i]] = dtype_to_string(_types[i]);
+        new_schema[names[i]] = dtype_to_str(_types[i]);
     }
 
     return new_schema;
 }
 
 /**
- * The column names of the View. If the View is aggregated, the
+ * @brief The column names of the View. If the View is aggregated, the
  * individual column names will be joined with a separator character
  * specified by the user, or defaulting to "|".
  *
- * Returns
- * -------
- * std::vector<std::string> containing all column names
+ * @return std::vector<std::string>
  */
 template <typename CTX_T>
 std::vector<std::string>
-View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
+View<CTX_T>::_column_names(bool skip, std::int32_t depth) const {
     std::vector<std::string> names;
     std::vector<std::string> aggregate_names;
 
@@ -238,16 +262,14 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) {
 }
 
 /**
- * The column names of the View. Same as above but
+ * @brief The column names of the View. Same as above but
  * specialized for zero-sided contexts.
  *
- * Returns
- * -------
- * std::vector<std::string> containing all column names
+ * @return std::vector<std::string> containing all column names
  */
 template <>
 std::vector<std::string>
-View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
+View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
     std::vector<std::string> names;
     std::vector<std::string> aggregate_names = m_ctx->get_column_names();
 
@@ -265,38 +287,107 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) {
     return names;
 }
 
-// PRIVATE
+// Getters
+template <typename CTX_T>
+std::shared_ptr<CTX_T>
+View<CTX_T>::get_context() const {
+    return m_ctx;
+}
+
+template <typename CTX_T>
+std::vector<std::string>
+View<CTX_T>::get_row_pivots() const {
+    return m_row_pivots;
+}
+
+template <typename CTX_T>
+std::vector<std::string>
+View<CTX_T>::get_column_pivots() const {
+    return m_column_pivots;
+}
+
+template <typename CTX_T>
+std::vector<t_aggspec>
+View<CTX_T>::get_aggregates() const {
+    return m_aggregates;
+}
+
+template <typename CTX_T>
+std::vector<t_fterm>
+View<CTX_T>::get_filters() const {
+    return m_filters;
+}
+
+template <typename CTX_T>
+std::vector<t_sortspec>
+View<CTX_T>::get_sorts() const {
+    return m_sorts;
+}
+
+template <>
+std::vector<t_tscalar>
+View<t_ctx0>::get_row_path(t_uindex idx) const {
+    return std::vector<t_tscalar>();
+}
+
+template <typename CTX_T>
+std::vector<t_tscalar>
+View<CTX_T>::get_row_path(t_uindex idx) const {
+    return m_ctx->unity_get_row_path(idx);
+}
+
+template <typename CTX_T>
+t_stepdelta
+View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
+    return m_ctx->get_step_delta(bidx, eidx);
+}
+
+template <typename CTX_T>
+bool
+View<CTX_T>::is_column_only() const {
+    return m_column_only;
+}
+
+/******************************************************************************
+ *
+ * Private
+ */
+
+/**
+ * @brief Gets the correct type for the specified aggregate, thus remapping columns
+ * when they are pivoted. This ensures that we display aggregates with the correct type.
+ *
+ * @return std::string
+ */
 template <typename CTX_T>
 std::string
-View<CTX_T>::dtype_to_string(t_dtype type) {
-    std::string str_dtype;
-    switch (type) {
-        case DTYPE_FLOAT32:
-        case DTYPE_FLOAT64: {
-            str_dtype = "float";
-        } break;
-        case DTYPE_INT8:
-        case DTYPE_INT16:
-        case DTYPE_INT32:
-        case DTYPE_INT64: {
-            str_dtype = "integer";
-        } break;
-        case DTYPE_BOOL: {
-            str_dtype = "boolean";
-        } break;
-        case DTYPE_DATE: {
-            str_dtype = "date";
-        } break;
-        case DTYPE_TIME: {
-            str_dtype = "datetime";
-        } break;
-        case DTYPE_STR: {
-            str_dtype = "string";
-        } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+View<CTX_T>::_map_aggregate_types(
+    const std::string& name, const std::string& typestring) const {
+    std::vector<std::string> INTEGER_AGGS
+        = {"distinct_count", "distinct count", "distinctcount", "distinct", "count"};
+    std::vector<std::string> FLOAT_AGGS
+        = {"avg", "mean", "mean by count", "mean_by_count", "weighted mean", "weighted_mean",
+            "pct sum parent", "pct_sum_parent", "pct sum grand total", "pct_sum_grand_total"};
+
+    for (const t_aggspec& agg : m_aggregates) {
+        if (agg.name() == name) {
+            std::string agg_str = agg.agg_str();
+            bool int_agg = std::find(INTEGER_AGGS.begin(), INTEGER_AGGS.end(), agg_str)
+                != INTEGER_AGGS.end();
+            bool float_agg
+                = std::find(FLOAT_AGGS.begin(), FLOAT_AGGS.end(), agg_str) != FLOAT_AGGS.end();
+
+            if (int_agg) {
+                return "integer";
+            } else if (float_agg) {
+                return "float";
+            } else {
+                return typestring;
+            }
+        }
     }
 
-    return str_dtype;
+    return typestring;
 }
 
 // Explicitly instantiate View for each context

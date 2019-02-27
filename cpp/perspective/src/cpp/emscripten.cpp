@@ -32,38 +32,73 @@ using namespace perspective;
 
 namespace perspective {
 namespace binding {
+    /******************************************************************************
+     *
+     * Utility
+     */
+    template <>
+    bool
+    hasValue(val item) {
+        return (!item.isUndefined() && !item.isNull());
+    }
 
     /******************************************************************************
      *
      * Data Loading
      */
+    t_index
+    _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name) {
+        for (std::size_t idx = 0, max = agg_names.size(); idx != max; ++idx) {
+            if (agg_names[idx] == name) {
+                return t_index(idx);
+            }
+        }
+
+        return t_index();
+    }
+
+    std::vector<std::string>
+    _get_aggregate_names(const std::vector<t_aggspec>& aggs) {
+        std::vector<std::string> names;
+        for (const t_aggspec& agg : aggs) {
+            names.push_back(agg.name());
+        }
+        return names;
+    }
 
     template <>
     std::vector<t_sortspec>
-    _get_sort(val j_sortby) {
+    _get_sort(std::vector<std::string>& col_names, bool is_column_sort, val j_sortby) {
         std::vector<t_sortspec> svec{};
         std::vector<val> sortbys = vecFromArray<val, val>(j_sortby);
+
+        auto _is_valid_sort = [is_column_sort](val sort_item) {
+            /**
+             * If column sort, make sure string matches. Otherwise make
+             * sure string is *not* a column sort.
+             */
+            std::string op = sort_item[1].as<std::string>();
+            bool is_col_sortop = op.find("col") != std::string::npos;
+            return (is_column_sort && is_col_sortop) || !is_col_sortop;
+        };
+
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
-            std::vector<std::int32_t> sortby = vecFromArray<val, std::int32_t>(sortbys[idx]);
+            val sort_item = sortbys[idx];
+            t_index agg_index;
+            std::string col_name;
             t_sorttype sorttype;
-            switch (sortby[1]) {
-                case 0:
-                    sorttype = SORTTYPE_ASCENDING;
-                    break;
-                case 1:
-                    sorttype = SORTTYPE_DESCENDING;
-                    break;
-                case 2:
-                    sorttype = SORTTYPE_NONE;
-                    break;
-                case 3:
-                    sorttype = SORTTYPE_ASCENDING_ABS;
-                    break;
-                case 4:
-                    sorttype = SORTTYPE_DESCENDING_ABS;
-                    break;
+
+            std::string sort_op_str;
+            if (!_is_valid_sort(sort_item)) {
+                continue;
             }
-            svec.push_back(t_sortspec(sortby[0], sorttype));
+
+            col_name = sort_item[0].as<std::string>();
+            sort_op_str = sort_item[1].as<std::string>();
+            sorttype = str_to_sorttype(sort_op_str);
+
+            agg_index = _get_aggregate_index(col_names, col_name);
+            svec.push_back(t_sortspec(agg_index, sorttype));
         }
         return svec;
     }
@@ -81,13 +116,31 @@ namespace binding {
      */
     template <>
     std::vector<t_fterm>
-    _get_fterms(t_schema schema, val j_filters) {
+    _get_fterms(t_schema schema, val j_date_parser, val j_filters) {
         std::vector<t_fterm> fvec{};
         std::vector<val> filters = vecFromArray<val, val>(j_filters);
+
+        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<val> filter) {
+            if (type == DTYPE_DATE || type == DTYPE_TIME) {
+                val parsed_date = j_date_parser.call<val>("parse", filter[2]);
+                return hasValue(parsed_date);
+            } else {
+                return hasValue(filter[2]);
+            }
+        };
+
         for (auto fidx = 0; fidx < filters.size(); ++fidx) {
             std::vector<val> filter = vecFromArray<val, val>(filters[fidx]);
-            std::string coln = filter[0].as<std::string>();
-            t_filter_op comp = filter[1].as<t_filter_op>();
+            std::string col = filter[0].as<std::string>();
+            t_filter_op comp = str_to_filter_op(filter[1].as<std::string>());
+
+            // check validity and if_date
+            t_dtype col_type = schema.get_dtype(col);
+            bool is_valid = _is_valid_filter(col_type, filter);
+
+            if (!is_valid) {
+                continue;
+            }
 
             switch (comp) {
                 case FILTER_OP_NOT_IN:
@@ -98,35 +151,36 @@ namespace binding {
                     for (auto jidx = 0; jidx < j_terms.size(); ++jidx) {
                         terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
                     }
-                    fvec.push_back(t_fterm(coln, comp, mktscalar(0), terms));
+                    fvec.push_back(t_fterm(col, comp, mktscalar(0), terms));
                 } break;
                 default: {
                     t_tscalar term;
-                    switch (schema.get_dtype(coln)) {
-                        case DTYPE_INT32:
+                    switch (col_type) {
+                        case DTYPE_INT32: {
                             term = mktscalar(filter[2].as<std::int32_t>());
-                            break;
+                        } break;
                         case DTYPE_INT64:
-                        case DTYPE_FLOAT64:
+                        case DTYPE_FLOAT64: {
                             term = mktscalar(filter[2].as<double>());
-                            break;
-                        case DTYPE_BOOL:
+                        } break;
+                        case DTYPE_BOOL: {
                             term = mktscalar(filter[2].as<bool>());
-                            break;
-                        case DTYPE_DATE:
+                        } break;
+                        case DTYPE_DATE: {
                             term = mktscalar(t_date(filter[2].as<std::int32_t>()));
-                            break;
-                        case DTYPE_TIME:
+                        } break;
+                        case DTYPE_TIME: {
+                            val parsed_date = j_date_parser.call<val>("parse", filter[2]);
                             term = mktscalar(t_time(static_cast<std::int64_t>(
-                                filter[2].call<val>("getTime").as<double>())));
-                            break;
+                                parsed_date.call<val>("getTime").as<double>())));
+                        } break;
                         default: {
                             term = mktscalar(
                                 get_interned_cstr(filter[2].as<std::string>().c_str()));
                         }
                     }
 
-                    fvec.push_back(t_fterm(coln, comp, term, std::vector<t_tscalar>()));
+                    fvec.push_back(t_fterm(col, comp, term, std::vector<t_tscalar>()));
                 }
             }
         }
@@ -145,37 +199,101 @@ namespace binding {
      *
      */
     std::vector<t_aggspec>
-    _get_aggspecs(val j_aggs) {
-        std::vector<val> aggs = vecFromArray<val, val>(j_aggs);
+    _get_aggspecs(t_schema schema, std::string separator, bool column_only, val j_aggs) {
         std::vector<t_aggspec> aggspecs;
-        for (auto idx = 0; idx < aggs.size(); ++idx) {
-            std::vector<val> agg_row = vecFromArray<val, val>(aggs[idx]);
-            std::string name = agg_row[0].as<std::string>();
-            t_aggtype aggtype = agg_row[1].as<t_aggtype>();
 
-            std::vector<t_dep> dependencies;
-            std::vector<val> deps = vecFromArray<val, val>(agg_row[2]);
-            for (auto didx = 0; didx < deps.size(); ++didx) {
-                if (deps[didx].isUndefined()) {
-                    continue;
+        if (j_aggs.typeOf().as<std::string>() == "object") {
+            // Construct aggregates from array
+            std::vector<val> aggs = vecFromArray<val, val>(j_aggs);
+
+            for (auto idx = 0; idx < aggs.size(); ++idx) {
+                val agg = aggs[idx];
+                val col = agg["column"];
+                std::string col_name;
+                std::string agg_op = agg["op"].as<std::string>();
+                std::vector<t_dep> dependencies;
+
+                if (column_only) {
+                    agg_op = "any";
                 }
-                std::string dep = deps[didx].as<std::string>();
-                dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
+
+                if (col.typeOf().as<std::string>() == "string") {
+                    col_name = col.as<std::string>();
+                    dependencies.push_back(t_dep(col_name, DEPTYPE_COLUMN));
+                } else {
+                    std::vector<val> deps = vecFromArray<val, val>(col);
+
+                    if ((agg_op != "weighted mean" && deps.size() != 1)
+                        || (agg_op == "weighted mean" && deps.size() != 2)) {
+                        PSP_COMPLAIN_AND_ABORT(agg_op + " has incorrect arity ("
+                            + std::to_string(deps.size()) + ") for column dependencies.");
+                    }
+
+                    std::ostringstream oss;
+
+                    for (auto didx = 0; didx < deps.size(); ++didx) {
+                        if (!hasValue(deps[didx])) {
+                            continue;
+                        }
+                        std::string dep = deps[didx].as<std::string>();
+                        dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
+                        oss << dep;
+                        oss << separator;
+                    }
+
+                    col_name = oss.str();
+                    col_name.pop_back();
+
+                    if (hasValue(agg["name"])) {
+                        col_name = agg["name"].as<std::string>();
+                    }
+                }
+
+                t_aggtype aggtype = str_to_aggtype(agg_op);
+
+                if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
+                    if (dependencies.size() == 1) {
+                        dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
+                    }
+                    aggspecs.push_back(t_aggspec(
+                        col_name, col_name, aggtype, dependencies, SORTTYPE_ASCENDING));
+                } else {
+                    aggspecs.push_back(t_aggspec(col_name, aggtype, dependencies));
+                }
             }
-            if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
-                if (dependencies.size() == 1) {
-                    dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
+        } else {
+            // No specified aggregates - set defaults for each column
+            auto col_names = schema.columns();
+            auto col_types = schema.types();
+
+            for (std::size_t aidx = 0, max = col_names.size(); aidx != max; ++aidx) {
+                std::string name = col_names[aidx];
+                std::vector<t_dep> dependencies{t_dep(name, DEPTYPE_COLUMN)};
+                std::string agg_op = "any";
+
+                if (!column_only) {
+                    std::string type_str = dtype_to_str(col_types[aidx]);
+                    if (type_str == "float" || type_str == "integer") {
+                        agg_op = "sum";
+                    } else {
+                        agg_op = "distinct count";
+                    }
                 }
-                aggspecs.push_back(
-                    t_aggspec(name, name, aggtype, dependencies, SORTTYPE_ASCENDING));
-            } else {
-                aggspecs.push_back(t_aggspec(name, aggtype, dependencies));
+
+                if (name != "psp_okey") {
+                    aggspecs.push_back(t_aggspec(name, str_to_aggtype(agg_op), dependencies));
+                }
             }
         }
+
         return aggspecs;
     }
 
-    // Date parsing
+    /******************************************************************************
+     *
+     * Date Parsing
+     */
+
     t_date
     jsdate_to_t_date(val date) {
         return t_date(date.call<val>("getFullYear").as<std::int32_t>(),
@@ -524,7 +642,8 @@ namespace binding {
     // Given a column index, serialize data to TypedArray
     template <typename T>
     val
-    col_to_js_typed_array(T ctx, t_index idx, bool column_pivot_only) {
+    col_to_js_typed_array(std::shared_ptr<View<T>> view, t_index idx, bool column_pivot_only) {
+        std::shared_ptr<T> ctx = view->get_context();
         std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
         auto dtype = ctx->get_column_dtype(idx);
 
@@ -1442,21 +1561,167 @@ namespace binding {
         return new_gnode;
     }
 
+    template <>
+    t_config
+    make_view_config(
+        const t_schema& schema, std::string separator, val date_parser, val config) {
+        val j_row_pivot = config["row_pivot"];
+        val j_column_pivot = config["column_pivot"];
+        val j_aggregate = config["aggregate"];
+        val j_filter = config["filter"];
+        val j_sort = config["sort"];
+
+        std::vector<std::string> row_pivots;
+        std::vector<std::string> column_pivots;
+        std::vector<t_aggspec> aggregates;
+        std::vector<t_fterm> filters;
+        std::vector<t_sortspec> sorts;
+
+        t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
+
+        if (hasValue(j_row_pivot)) {
+            row_pivots = vecFromArray<val, std::string>(j_row_pivot);
+        }
+
+        if (hasValue(j_column_pivot)) {
+            column_pivots = vecFromArray<val, std::string>(j_column_pivot);
+        }
+
+        bool column_only = false;
+
+        if (row_pivots.size() == 0 && column_pivots.size() > 0) {
+            row_pivots.push_back("psp_okey");
+            column_only = true;
+        }
+
+        aggregates = _get_aggspecs(schema, separator, column_only, j_aggregate);
+
+        std::vector<std::string> col_names;
+        if (aggregates.size() > 0) {
+            col_names = _get_aggregate_names(aggregates);
+        } else {
+            auto t_aggs = schema.columns();
+            auto okey_itr = std::find(t_aggs.begin(), t_aggs.end(), "psp_okey");
+            if (okey_itr != t_aggs.end())
+                t_aggs.erase(okey_itr);
+            col_names = t_aggs;
+        }
+
+        if (hasValue(j_filter)) {
+            filters = _get_fterms(schema, date_parser, j_filter);
+            if (hasValue(config["filter_op"])) {
+                filter_op = str_to_filter_op(config["filter_op"].as<std::string>());
+            }
+        }
+
+        if (hasValue(j_sort)) {
+            sorts = _get_sort(col_names, false, j_sort);
+        }
+
+        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, filter_op,
+            filters, col_names, column_only);
+
+        return view_config;
+    }
+
     /**
      * Creates a new View.
      *
      * Params
      * ------
      *
+     *
      * Returns
      * -------
      * A shared pointer to a View<CTX_T>.
      */
-    template <typename CTX_T>
-    std::shared_ptr<View<CTX_T>>
-    make_view(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::int32_t sides,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator) {
-        auto view_ptr = std::make_shared<View<CTX_T>>(pool, ctx, sides, gnode, name, separator);
+    template <>
+    std::shared_ptr<View<t_ctx0>>
+    make_view_zero(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
+        auto schema = gnode->get_tblschema();
+        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+
+        auto col_names = view_config.get_column_names();
+        auto filter_op = view_config.get_combiner();
+        auto filters = view_config.get_fterms();
+        auto sorts = view_config.get_sortspecs();
+        auto ctx = make_context_zero(
+            schema, filter_op, col_names, filters, sorts, pool, gnode, name);
+
+        auto view_ptr
+            = std::make_shared<View<t_ctx0>>(pool, ctx, gnode, name, separator, view_config);
+
+        return view_ptr;
+    }
+
+    template <>
+    std::shared_ptr<View<t_ctx1>>
+    make_view_one(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
+        auto schema = gnode->get_tblschema();
+        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+
+        bool column_only = view_config.get_column_only();
+        auto aggregates = view_config.get_aggregates();
+        auto row_pivots = view_config.get_row_pivots();
+        auto filter_op = view_config.get_combiner();
+        auto filters = view_config.get_fterms();
+        auto sorts = view_config.get_sortspecs();
+
+        std::int32_t pivot_depth = -1;
+        if (hasValue(config["row_pivot_depth"])) {
+            pivot_depth = config["row_pivot_depth"].as<std::int32_t>();
+        }
+
+        auto ctx = make_context_one(schema, row_pivots, filter_op, filters, aggregates, sorts,
+            pivot_depth, column_only, pool, gnode, name);
+
+        auto view_ptr
+            = std::make_shared<View<t_ctx1>>(pool, ctx, gnode, name, separator, view_config);
+
+        return view_ptr;
+    }
+
+    template <>
+    std::shared_ptr<View<t_ctx2>>
+    make_view_two(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
+        std::string separator, val config, val date_parser) {
+        auto schema = gnode->get_tblschema();
+        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+
+        bool column_only = view_config.get_column_only();
+        auto column_names = view_config.get_column_names();
+        auto row_pivots = view_config.get_row_pivots();
+        auto column_pivots = view_config.get_column_pivots();
+        auto aggregates = view_config.get_aggregates();
+        auto filter_op = view_config.get_combiner();
+        auto filters = view_config.get_fterms();
+        auto sorts = view_config.get_sortspecs();
+
+        std::int32_t rpivot_depth = -1;
+        std::int32_t cpivot_depth = -1;
+
+        if (hasValue(config["row_pivot_depth"])) {
+            rpivot_depth = config["row_pivot_depth"].as<std::int32_t>();
+        }
+
+        if (hasValue(config["column_pivot_depth"])) {
+            cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
+        }
+
+        val j_sort = config["sort"];
+        std::vector<t_sortspec> col_sorts;
+        if (hasValue(j_sort)) {
+            col_sorts = _get_sort(column_names, true, j_sort);
+        }
+
+        auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
+            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, pool, gnode, name);
+
+        auto view_ptr
+            = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
+
         return view_ptr;
     }
 
@@ -1471,17 +1736,14 @@ namespace binding {
      * -------
      *
      */
-    template <>
     std::shared_ptr<t_ctx0>
-    make_context_zero(t_schema schema, t_filter_op combiner, val j_filters, val j_columns,
-        val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
-        auto columns = vecFromArray<val, std::string>(j_columns);
-        auto fvec = _get_fterms(schema, j_filters);
-        auto svec = _get_sort(j_sortby);
-        auto cfg = t_config(columns, combiner, fvec);
+    make_context_zero(t_schema schema, t_filter_op combiner, std::vector<std::string> columns,
+        std::vector<t_fterm> filters, std::vector<t_sortspec> sorts, t_pool* pool,
+        std::shared_ptr<t_gnode> gnode, std::string name) {
+        auto cfg = t_config(columns, combiner, filters);
         auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
         ctx0->init();
-        ctx0->sort_by(svec);
+        ctx0->sort_by(sorts);
         pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx0.get()));
         return ctx0;
@@ -1498,23 +1760,25 @@ namespace binding {
      * -------
      *
      */
-    template <>
     std::shared_ptr<t_ctx1>
-    make_context_one(t_schema schema, val j_pivots, t_filter_op combiner, val j_filters,
-        val j_aggs, val j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name) {
-        auto fvec = _get_fterms(schema, j_filters);
-        auto aggspecs = _get_aggspecs(j_aggs);
-        auto pivots = vecFromArray<val, std::string>(j_pivots);
-        auto svec = _get_sort(j_sortby);
-
-        auto cfg = t_config(pivots, aggspecs, combiner, fvec);
+    make_context_one(t_schema schema, std::vector<t_pivot> pivots, t_filter_op combiner,
+        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
+        std::shared_ptr<t_gnode> gnode, std::string name) {
+        auto cfg = t_config(pivots, aggregates, combiner, filters);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
-        ctx1->sort_by(svec);
+        ctx1->sort_by(sorts);
         pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx1.get()));
+
+        if (pivot_depth > -1) {
+            ctx1->set_depth(pivot_depth - 1);
+        } else {
+            ctx1->set_depth(pivots.size());
+        }
+
         return ctx1;
     }
 
@@ -1529,34 +1793,42 @@ namespace binding {
      * -------
      *
      */
-    template <>
     std::shared_ptr<t_ctx2>
-    make_context_two(t_schema schema, val j_rpivots, val j_cpivots, t_filter_op combiner,
-        val j_filters, val j_aggs, bool show_totals, t_pool* pool,
-        std::shared_ptr<t_gnode> gnode, std::string name) {
-        auto fvec = _get_fterms(schema, j_filters);
-        auto aggspecs = _get_aggspecs(j_aggs);
-        auto rpivots = vecFromArray<val, std::string>(j_rpivots);
-        auto cpivots = vecFromArray<val, std::string>(j_cpivots);
-        t_totals total = show_totals ? TOTALS_BEFORE : TOTALS_HIDDEN;
+    make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
+        std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
+        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
+        std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
+        t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
+        t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
-        auto cfg = t_config(rpivots, cpivots, aggspecs, total, combiner, fvec);
+        auto cfg = t_config(rpivots, cpivots, aggregates, total, combiner, filters);
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();
         pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx2.get()));
-        return ctx2;
-    }
 
-    template <>
-    void
-    sort(std::shared_ptr<t_ctx2> ctx2, val j_sortby, val j_column_sortby) {
-        auto svec = _get_sort(j_sortby);
-        if (svec.size() > 0) {
-            ctx2->sort_by(svec);
+        if (rpivot_depth > -1) {
+            ctx2->set_depth(t_header::HEADER_ROW, rpivot_depth - 1);
+        } else {
+            ctx2->set_depth(t_header::HEADER_ROW, rpivots.size());
         }
-        ctx2->column_sort_by(_get_sort(j_column_sortby));
+
+        if (cpivot_depth > -1) {
+            ctx2->set_depth(t_header::HEADER_COLUMN, cpivot_depth - 1);
+        } else {
+            ctx2->set_depth(t_header::HEADER_COLUMN, cpivots.size());
+        }
+
+        if (sorts.size() > 0) {
+            ctx2->sort_by(sorts);
+        }
+
+        if (col_sorts.size() > 0) {
+            ctx2->column_sort_by(col_sorts);
+        }
+
+        return ctx2;
     }
 
     template <>
@@ -1639,20 +1911,20 @@ main(int argc, char** argv) {
     std::cout << "Perspective initialized successfully" << std::endl;
 
     // clang-format off
-    EM_ASM({
+EM_ASM({
 
-        if (typeof self !== "undefined") {
-            if (self.dispatchEvent && !self._perspective_initialized && self.document) {
-                self._perspective_initialized = true;
-                var event = self.document.createEvent("Event");
-                event.initEvent("perspective-ready", false, true);
-                self.dispatchEvent(event);
-            } else if (!self.document && self.postMessage) {
-                self.postMessage({});
-            }
+    if (typeof self !== "undefined") {
+        if (self.dispatchEvent && !self._perspective_initialized && self.document) {
+            self._perspective_initialized = true;
+            var event = self.document.createEvent("Event");
+            event.initEvent("perspective-ready", false, true);
+            self.dispatchEvent(event);
+        } else if (!self.document && self.postMessage) {
+            self.postMessage({});
         }
+    }
 
-    });
+});
     // clang-format on
 }
 
@@ -1669,21 +1941,30 @@ EMSCRIPTEN_BINDINGS(perspective) {
     // Bind a View for each context type
 
     class_<View<t_ctx0>>("View_ctx0")
-        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx0>>>("shared_ptr<View_ctx0>")
-        .function("delete_view", &View<t_ctx0>::delete_view)
+        .function("sides", &View<t_ctx0>::sides)
         .function("num_rows", &View<t_ctx0>::num_rows)
         .function("num_columns", &View<t_ctx0>::num_columns)
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .function("schema", &View<t_ctx0>::schema)
-        .function("_column_names", &View<t_ctx0>::_column_names);
+        .function("_column_names", &View<t_ctx0>::_column_names)
+        .function("get_context", &View<t_ctx0>::get_context, allow_raw_pointers())
+        .function("get_row_pivots", &View<t_ctx0>::get_row_pivots)
+        .function("get_column_pivots", &View<t_ctx0>::get_column_pivots)
+        .function("get_aggregates", &View<t_ctx0>::get_aggregates)
+        .function("get_filters", &View<t_ctx0>::get_filters)
+        .function("get_sorts", &View<t_ctx0>::get_sorts)
+        .function("get_row_path", &View<t_ctx0>::get_row_path)
+        .function("get_step_delta", &View<t_ctx0>::get_step_delta)
+        .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
-        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx1>>>("shared_ptr<View_ctx1>")
-        .function("delete_view", &View<t_ctx1>::delete_view)
+        .function("sides", &View<t_ctx1>::sides)
         .function("num_rows", &View<t_ctx1>::num_rows)
         .function("num_columns", &View<t_ctx1>::num_columns)
         .function("get_row_expanded", &View<t_ctx1>::get_row_expanded)
@@ -1691,13 +1972,22 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("collapse", &View<t_ctx1>::collapse)
         .function("set_depth", &View<t_ctx1>::set_depth)
         .function("schema", &View<t_ctx1>::schema)
-        .function("_column_names", &View<t_ctx1>::_column_names);
+        .function("_column_names", &View<t_ctx1>::_column_names)
+        .function("get_context", &View<t_ctx1>::get_context, allow_raw_pointers())
+        .function("get_row_pivots", &View<t_ctx1>::get_row_pivots)
+        .function("get_column_pivots", &View<t_ctx1>::get_column_pivots)
+        .function("get_aggregates", &View<t_ctx1>::get_aggregates)
+        .function("get_filters", &View<t_ctx1>::get_filters)
+        .function("get_sorts", &View<t_ctx1>::get_sorts)
+        .function("get_row_path", &View<t_ctx1>::get_row_path)
+        .function("get_step_delta", &View<t_ctx1>::get_step_delta)
+        .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
-        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::int32_t, std::shared_ptr<t_gnode>,
-            std::string, std::string>()
+        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::shared_ptr<t_gnode>, std::string,
+            std::string, t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx2>>>("shared_ptr<View_ctx2>")
-        .function("delete_view", &View<t_ctx2>::delete_view)
+        .function("sides", &View<t_ctx2>::sides)
         .function("num_rows", &View<t_ctx2>::num_rows)
         .function("num_columns", &View<t_ctx2>::num_columns)
         .function("get_row_expanded", &View<t_ctx2>::get_row_expanded)
@@ -1705,25 +1995,23 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("collapse", &View<t_ctx2>::collapse)
         .function("set_depth", &View<t_ctx2>::set_depth)
         .function("schema", &View<t_ctx2>::schema)
-        .function("_column_names", &View<t_ctx2>::_column_names);
-
-    /******************************************************************************
-     *
-     * t_column
-     */
-    class_<t_column>("t_column")
-        .smart_ptr<std::shared_ptr<t_column>>("shared_ptr<t_column>")
-        .function<void>("set_scalar", &t_column::set_scalar);
+        .function("_column_names", &View<t_ctx2>::_column_names)
+        .function("get_context", &View<t_ctx2>::get_context, allow_raw_pointers())
+        .function("get_row_pivots", &View<t_ctx2>::get_row_pivots)
+        .function("get_column_pivots", &View<t_ctx2>::get_column_pivots)
+        .function("get_aggregates", &View<t_ctx2>::get_aggregates)
+        .function("get_filters", &View<t_ctx2>::get_filters)
+        .function("get_sorts", &View<t_ctx2>::get_sorts)
+        .function("get_row_path", &View<t_ctx2>::get_row_path)
+        .function("get_step_delta", &View<t_ctx2>::get_step_delta)
+        .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
      *
      * t_table
      */
     class_<t_table>("t_table")
-        .constructor<t_schema, t_uindex>()
         .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
-        .function<t_column*>("add_column", &t_table::add_column, allow_raw_pointers())
-        .function<void>("pprint", &t_table::pprint)
         .function<unsigned long>(
             "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
 
@@ -1741,8 +2029,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * t_gnode
      */
     class_<t_gnode>("t_gnode")
-        .constructor<t_gnode_processing_mode, const t_schema&, const std::vector<t_schema>&,
-            const std::vector<t_schema>&, const std::vector<t_custom_column>&>()
         .smart_ptr<std::shared_ptr<t_gnode>>("shared_ptr<t_gnode>")
         .function<t_uindex>(
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
@@ -1754,125 +2040,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * t_ctx0
      */
-    class_<t_ctx0>("t_ctx0")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>")
-        .function<t_index>("sidedness", &t_ctx0::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_row_count))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx0::*)() const>(&t_ctx0::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx0::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx0::get_step_delta)
-        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx0::get_cell_delta)
-        .function<std::vector<std::string>>("get_column_names", &t_ctx0::get_column_names)
-        // .function<std::vector<t_minmax>>("get_min_max", &t_ctx0::get_min_max)
-        // .function<void>("set_minmax_enabled", &t_ctx0::set_minmax_enabled)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx0::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx0::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx0::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx0::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx0::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx0::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx0::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx0::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx0::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx0::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx0::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx0::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx0::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx0::unity_get_column_expanded)
-        .function<void>("unity_init_load_step_end", &t_ctx0::unity_init_load_step_end);
+    class_<t_ctx0>("t_ctx0").smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>");
 
     /******************************************************************************
      *
      * t_ctx1
      */
-    class_<t_ctx1>("t_ctx1")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>")
-        .function<t_index>("sidedness", &t_ctx1::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_row_count))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx1::*)() const>(&t_ctx1::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx1::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx1::get_step_delta)
-        .function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx1::get_cell_delta)
-        .function<void>("set_depth", &t_ctx1::set_depth)
-        .function("open", select_overload<t_index(t_index)>(&t_ctx1::open))
-        .function("close", select_overload<t_index(t_index)>(&t_ctx1::close))
-        .function<t_depth>("get_trav_depth", &t_ctx1::get_trav_depth)
-        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx1::get_aggregates)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx1::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx1::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx1::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx1::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx1::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx1::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx1::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx1::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx1::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx1::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx1::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx1::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx1::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx1::unity_get_column_expanded)
-        .function<void>("unity_init_load_step_end", &t_ctx1::unity_init_load_step_end);
+    class_<t_ctx1>("t_ctx1").smart_ptr<std::shared_ptr<t_ctx1>>("shared_ptr<t_ctx1>");
 
     /******************************************************************************
      *
      * t_ctx2
      */
-    class_<t_ctx2>("t_ctx2")
-        .constructor<t_schema, t_config>()
-        .smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>")
-        .function<t_index>("sidedness", &t_ctx2::sidedness)
-        .function<unsigned long>("get_row_count",
-            reinterpret_cast<unsigned long (t_ctx2::*)() const>(
-                select_overload<t_index() const>(&t_ctx2::get_row_count)))
-        .function<unsigned long>("get_column_count",
-            reinterpret_cast<unsigned long (t_ctx2::*)() const>(&t_ctx2::get_column_count))
-        .function<std::vector<t_tscalar>>("get_data", &t_ctx2::get_data)
-        .function<t_stepdelta>("get_step_delta", &t_ctx2::get_step_delta)
-        //.function<std::vector<t_cellupd>>("get_cell_delta", &t_ctx2::get_cell_delta)
-        .function<void>("set_depth", &t_ctx2::set_depth)
-        .function("open", select_overload<t_index(t_header, t_index)>(&t_ctx2::open))
-        .function("close", select_overload<t_index(t_header, t_index)>(&t_ctx2::close))
-        .function<std::vector<t_aggspec>>("get_column_names", &t_ctx2::get_aggregates)
-        .function<std::vector<t_tscalar>>("unity_get_row_data", &t_ctx2::unity_get_row_data)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_data", &t_ctx2::unity_get_column_data)
-        .function<std::vector<t_tscalar>>("unity_get_row_path", &t_ctx2::unity_get_row_path)
-        .function<std::vector<t_tscalar>>(
-            "unity_get_column_path", &t_ctx2::unity_get_column_path)
-        .function<t_uindex>("unity_get_row_depth", &t_ctx2::unity_get_row_depth)
-        .function<t_uindex>("unity_get_column_depth", &t_ctx2::unity_get_column_depth)
-        .function<std::string>("unity_get_column_name", &t_ctx2::unity_get_column_name)
-        .function<std::string>(
-            "unity_get_column_display_name", &t_ctx2::unity_get_column_display_name)
-        .function<std::vector<std::string>>(
-            "unity_get_column_names", &t_ctx2::unity_get_column_names)
-        .function<std::vector<std::string>>(
-            "unity_get_column_display_names", &t_ctx2::unity_get_column_display_names)
-        .function<t_uindex>("unity_get_column_count", &t_ctx2::unity_get_column_count)
-        .function<t_uindex>("unity_get_row_count", &t_ctx2::unity_get_row_count)
-        .function<bool>("unity_get_row_expanded", &t_ctx2::unity_get_row_expanded)
-        .function<bool>("unity_get_column_expanded", &t_ctx2::unity_get_column_expanded)
-        .function<t_totals>("get_totals", &t_ctx2::get_totals)
-        .function<std::vector<t_tscalar>>(
-            "get_column_path_userspace", &t_ctx2::get_column_path_userspace)
-        .function<void>("unity_init_load_step_end", &t_ctx2::unity_init_load_step_end);
+    class_<t_ctx2>("t_ctx2").smart_ptr<std::shared_ptr<t_ctx2>>("shared_ptr<t_ctx2>");
 
     /******************************************************************************
      *
@@ -1881,25 +2061,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_pool>("t_pool")
         .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
-        .function<unsigned int>("register_gnode", &t_pool::register_gnode, allow_raw_pointers())
-        .function<void>("process", &t_pool::_process)
-        .function<void>("send", &t_pool::send)
-        .function<t_uindex>("epoch", &t_pool::epoch)
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
-        .function<void>("set_update_delegate", &t_pool::set_update_delegate)
-        .function<void>("register_context", &t_pool::register_context)
-        .function<void>("unregister_context", &t_pool::unregister_context)
-        .function<std::vector<t_updctx>>(
-            "get_contexts_last_updated", &t_pool::get_contexts_last_updated)
-        .function<std::vector<t_uindex>>(
-            "get_gnodes_last_updated", &t_pool::get_gnodes_last_updated)
-        .function<t_gnode*>("get_gnode", &t_pool::get_gnode, allow_raw_pointers());
-
-    /******************************************************************************
-     *
-     * t_aggspec
-     */
-    class_<t_aggspec>("t_aggspec").function<std::string>("name", &t_aggspec::name);
+        .function<void>("set_update_delegate", &t_pool::set_update_delegate);
 
     /******************************************************************************
      *
@@ -1940,7 +2103,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
-    register_vector<t_aggspec>("std::vector<t_aggspec>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
     register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
@@ -1951,49 +2113,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * map
      */
     register_map<std::string, std::string>("std::map<std::string, std::string>");
-
-    /******************************************************************************
-     *
-     * t_header
-     */
-    enum_<t_header>("t_header")
-        .value("HEADER_ROW", HEADER_ROW)
-        .value("HEADER_COLUMN", HEADER_COLUMN);
-
-    /******************************************************************************
-     *
-     * t_ctx_type
-     */
-    enum_<t_ctx_type>("t_ctx_type")
-        .value("ZERO_SIDED_CONTEXT", ZERO_SIDED_CONTEXT)
-        .value("ONE_SIDED_CONTEXT", ONE_SIDED_CONTEXT)
-        .value("TWO_SIDED_CONTEXT", TWO_SIDED_CONTEXT)
-        .value("GROUPED_ZERO_SIDED_CONTEXT", GROUPED_ZERO_SIDED_CONTEXT)
-        .value("GROUPED_PKEY_CONTEXT", GROUPED_PKEY_CONTEXT)
-        .value("GROUPED_COLUMNS_CONTEXT", GROUPED_COLUMNS_CONTEXT);
-
-    /******************************************************************************
-     *
-     * t_filter_op
-     */
-    enum_<t_filter_op>("t_filter_op")
-        .value("FILTER_OP_LT", FILTER_OP_LT)
-        .value("FILTER_OP_LTEQ", FILTER_OP_LTEQ)
-        .value("FILTER_OP_GT", FILTER_OP_GT)
-        .value("FILTER_OP_GTEQ", FILTER_OP_GTEQ)
-        .value("FILTER_OP_EQ", FILTER_OP_EQ)
-        .value("FILTER_OP_NE", FILTER_OP_NE)
-        .value("FILTER_OP_BEGINS_WITH", FILTER_OP_BEGINS_WITH)
-        .value("FILTER_OP_ENDS_WITH", FILTER_OP_ENDS_WITH)
-        .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
-        .value("FILTER_OP_OR", FILTER_OP_OR)
-        .value("FILTER_OP_IN", FILTER_OP_IN)
-        .value("FILTER_OP_NOT_IN", FILTER_OP_NOT_IN)
-        .value("FILTER_OP_AND", FILTER_OP_AND)
-        .value("FILTER_OP_IS_NAN", FILTER_OP_IS_NAN)
-        .value("FILTER_OP_IS_NOT_NAN", FILTER_OP_IS_NOT_NAN)
-        .value("FILTER_OP_IS_VALID", FILTER_OP_IS_VALID)
-        .value("FILTER_OP_IS_NOT_VALID", FILTER_OP_IS_NOT_VALID);
 
     /******************************************************************************
      *
@@ -2026,73 +2145,20 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_aggtype
-     */
-    enum_<t_aggtype>("t_aggtype")
-        .value("AGGTYPE_SUM", AGGTYPE_SUM)
-        .value("AGGTYPE_MUL", AGGTYPE_MUL)
-        .value("AGGTYPE_COUNT", AGGTYPE_COUNT)
-        .value("AGGTYPE_MEAN", AGGTYPE_MEAN)
-        .value("AGGTYPE_WEIGHTED_MEAN", AGGTYPE_WEIGHTED_MEAN)
-        .value("AGGTYPE_UNIQUE", AGGTYPE_UNIQUE)
-        .value("AGGTYPE_ANY", AGGTYPE_ANY)
-        .value("AGGTYPE_MEDIAN", AGGTYPE_MEDIAN)
-        .value("AGGTYPE_JOIN", AGGTYPE_JOIN)
-        .value("AGGTYPE_SCALED_DIV", AGGTYPE_SCALED_DIV)
-        .value("AGGTYPE_SCALED_ADD", AGGTYPE_SCALED_ADD)
-        .value("AGGTYPE_SCALED_MUL", AGGTYPE_SCALED_MUL)
-        .value("AGGTYPE_DOMINANT", AGGTYPE_DOMINANT)
-        .value("AGGTYPE_FIRST", AGGTYPE_FIRST)
-        .value("AGGTYPE_LAST", AGGTYPE_LAST)
-        .value("AGGTYPE_PY_AGG", AGGTYPE_PY_AGG)
-        .value("AGGTYPE_AND", AGGTYPE_AND)
-        .value("AGGTYPE_OR", AGGTYPE_OR)
-        .value("AGGTYPE_LAST_VALUE", AGGTYPE_LAST_VALUE)
-        .value("AGGTYPE_HIGH_WATER_MARK", AGGTYPE_HIGH_WATER_MARK)
-        .value("AGGTYPE_LOW_WATER_MARK", AGGTYPE_LOW_WATER_MARK)
-        .value("AGGTYPE_UDF_COMBINER", AGGTYPE_UDF_COMBINER)
-        .value("AGGTYPE_UDF_REDUCER", AGGTYPE_UDF_REDUCER)
-        .value("AGGTYPE_SUM_ABS", AGGTYPE_SUM_ABS)
-        .value("AGGTYPE_SUM_NOT_NULL", AGGTYPE_SUM_NOT_NULL)
-        .value("AGGTYPE_MEAN_BY_COUNT", AGGTYPE_MEAN_BY_COUNT)
-        .value("AGGTYPE_IDENTITY", AGGTYPE_IDENTITY)
-        .value("AGGTYPE_DISTINCT_COUNT", AGGTYPE_DISTINCT_COUNT)
-        .value("AGGTYPE_DISTINCT_LEAF", AGGTYPE_DISTINCT_LEAF)
-        .value("AGGTYPE_PCT_SUM_PARENT", AGGTYPE_PCT_SUM_PARENT)
-        .value("AGGTYPE_PCT_SUM_GRAND_TOTAL", AGGTYPE_PCT_SUM_GRAND_TOTAL);
-
-    /******************************************************************************
-     *
-     * t_totals
-     */
-    enum_<t_totals>("t_totals")
-        .value("TOTALS_BEFORE", TOTALS_BEFORE)
-        .value("TOTALS_HIDDEN", TOTALS_HIDDEN)
-        .value("TOTALS_AFTER", TOTALS_AFTER);
-
-    /******************************************************************************
-     *
      * assorted functions
      */
-    function("sort", &sort<val>);
     function("make_table", &make_table<val>, allow_raw_pointers());
-    function("make_gnode", &make_gnode);
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
-    function("make_context_zero", &make_context_zero<val>, allow_raw_pointers());
-    function("make_context_one", &make_context_one<val>, allow_raw_pointers());
-    function("make_context_two", &make_context_two<val>, allow_raw_pointers());
-    function("scalar_to_val", &scalar_to_val);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("set_column_nth", &set_column_nth<val>, allow_raw_pointers());
     function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);
     function("get_data_one", &get_data<std::shared_ptr<t_ctx1>>);
     function("get_data_two", &get_data<std::shared_ptr<t_ctx2>>);
     function("get_data_two_skip_headers", &get_data_two_skip_headers<val>);
-    function("col_to_js_typed_array_zero", &col_to_js_typed_array<std::shared_ptr<t_ctx0>>);
-    function("col_to_js_typed_array_one", &col_to_js_typed_array<std::shared_ptr<t_ctx1>>);
-    function("col_to_js_typed_array_two", &col_to_js_typed_array<std::shared_ptr<t_ctx2>>);
-    function("make_view_zero", &make_view<t_ctx0>, allow_raw_pointers());
-    function("make_view_one", &make_view<t_ctx1>, allow_raw_pointers());
-    function("make_view_two", &make_view<t_ctx2>, allow_raw_pointers());
+    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
+    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
+    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);
+    function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
+    function("make_view_one", &make_view_one<val>, allow_raw_pointers());
+    function("make_view_two", &make_view_two<val>, allow_raw_pointers());
 }

@@ -15,6 +15,22 @@ var int_float_string_data = [
 ];
 
 module.exports = perspective => {
+    describe("to_json", function() {
+        it("should emit same number of column names as number of pivots", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivot: ["int"],
+                column_pivot: ["float", "string"],
+                sort: [["int", "asc"]]
+            });
+            let json = await view.to_json();
+            // Get the first emitted column name that is not __ROW_PATH__
+            let name = Object.keys(json[0])[1];
+            // make sure that number of separators = num of column pivots
+            expect((name.match(/\|/g) || []).length).toEqual(2);
+        });
+    });
+
     describe("to_arrow()", function() {
         it("Transitive arrow output 0-sided", async function() {
             let table = perspective.table(int_float_string_data);

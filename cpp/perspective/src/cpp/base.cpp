@@ -222,6 +222,38 @@ get_dtype_descr(t_dtype dtype) {
 }
 
 std::string
+dtype_to_str(t_dtype dtype) {
+    std::stringstream str_dtype;
+    switch (dtype) {
+        case DTYPE_FLOAT32:
+        case DTYPE_FLOAT64: {
+            str_dtype << "float";
+        } break;
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            str_dtype << "integer";
+        } break;
+        case DTYPE_BOOL: {
+            str_dtype << "boolean";
+        } break;
+        case DTYPE_DATE: {
+            str_dtype << "date";
+        } break;
+        case DTYPE_TIME: {
+            str_dtype << "datetime";
+        } break;
+        case DTYPE_STR: {
+            str_dtype << "string";
+        } break;
+        default: { PSP_COMPLAIN_AND_ABORT("Cannot convert unknown dtype to string!"); }
+    }
+
+    return str_dtype.str();
+}
+
+std::string
 filter_op_to_str(t_filter_op op) {
     switch (op) {
         case FILTER_OP_LT: {
@@ -278,6 +310,137 @@ filter_op_to_str(t_filter_op op) {
     }
     PSP_COMPLAIN_AND_ABORT("Reached end of function");
     return "";
+}
+
+t_filter_op
+str_to_filter_op(std::string str) {
+    if (str == "<") {
+        return t_filter_op::FILTER_OP_LT;
+    } else if (str == "<=") {
+        return t_filter_op::FILTER_OP_LTEQ;
+    } else if (str == ">") {
+        return t_filter_op::FILTER_OP_GT;
+    } else if (str == ">=") {
+        return t_filter_op::FILTER_OP_GTEQ;
+    } else if (str == "==") {
+        return t_filter_op::FILTER_OP_EQ;
+    } else if (str == "!=") {
+        return t_filter_op::FILTER_OP_NE;
+    } else if (str == "begins with" || str == "startswith") {
+        return t_filter_op::FILTER_OP_BEGINS_WITH;
+    } else if (str == "ends with" || str == "endswith") {
+        return t_filter_op::FILTER_OP_ENDS_WITH;
+    } else if (str == "in") {
+        return t_filter_op::FILTER_OP_IN;
+    } else if (str == "contains") {
+        return t_filter_op::FILTER_OP_CONTAINS;
+    } else if (str == "not in") {
+        return t_filter_op::FILTER_OP_NOT_IN;
+    } else if (str == "&" || str == "and") {
+        return t_filter_op::FILTER_OP_AND;
+    } else if (str == "|") {
+        return t_filter_op::FILTER_OP_OR;
+    } else if (str == "is nan" || str == "is_nan") {
+        return t_filter_op::FILTER_OP_IS_NAN;
+    } else if (str == "is not nan" || str == "!is_nan") {
+        return t_filter_op::FILTER_OP_IS_NOT_NAN;
+    } else if (str == "is not None") {
+        return t_filter_op::FILTER_OP_IS_VALID;
+    } else if (str == "is None") {
+        return t_filter_op::FILTER_OP_IS_NOT_VALID;
+    } else {
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown filter operation.");
+        // use and as default
+        return t_filter_op::FILTER_OP_AND;
+    }
+}
+
+t_sorttype
+str_to_sorttype(std::string str) {
+    if (str == "none") {
+        return SORTTYPE_NONE;
+    } else if (str == "asc" || str == "col asc") {
+        return SORTTYPE_ASCENDING;
+    } else if (str == "desc" || str == "col desc") {
+        return SORTTYPE_DESCENDING;
+    } else if (str == "asc abs" || str == "col asc abs") {
+        return SORTTYPE_ASCENDING_ABS;
+    } else if (str == "desc abs" || str == "col desc abs") {
+        return SORTTYPE_DESCENDING_ABS;
+    } else {
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown sort type string");
+        return SORTTYPE_DESCENDING;
+    }
+}
+
+t_aggtype
+str_to_aggtype(std::string str) {
+    if (str == "distinct count" || str == "distinctcount" || str == "distinct"
+        || str == "distinct_count") {
+        return t_aggtype::AGGTYPE_DISTINCT_COUNT;
+    } else if (str == "sum") {
+        return t_aggtype::AGGTYPE_SUM;
+    } else if (str == "mul") {
+        return t_aggtype::AGGTYPE_MUL;
+    } else if (str == "avg" || str == "mean") {
+        return t_aggtype::AGGTYPE_MEAN;
+    } else if (str == "count") {
+        return t_aggtype::AGGTYPE_COUNT;
+    } else if (str == "weighted mean" || str == "weighted_mean") {
+        return t_aggtype::AGGTYPE_WEIGHTED_MEAN;
+    } else if (str == "unique") {
+        return t_aggtype::AGGTYPE_UNIQUE;
+    } else if (str == "any") {
+        return t_aggtype::AGGTYPE_ANY;
+    } else if (str == "median") {
+        return t_aggtype::AGGTYPE_MEDIAN;
+    } else if (str == "join") {
+        return t_aggtype::AGGTYPE_JOIN;
+    } else if (str == "div") {
+        return t_aggtype::AGGTYPE_SCALED_DIV;
+    } else if (str == "add") {
+        return t_aggtype::AGGTYPE_SCALED_ADD;
+    } else if (str == "dominant") {
+        return t_aggtype::AGGTYPE_DOMINANT;
+    } else if (str == "first by index" || str == "first") {
+        return t_aggtype::AGGTYPE_FIRST;
+    } else if (str == "last by index") {
+        return t_aggtype::AGGTYPE_LAST;
+    } else if (str == "py_agg") {
+        return t_aggtype::AGGTYPE_PY_AGG;
+    } else if (str == "and") {
+        return t_aggtype::AGGTYPE_AND;
+    } else if (str == "or") {
+        return t_aggtype::AGGTYPE_OR;
+    } else if (str == "last" || str == "last_value") {
+        return t_aggtype::AGGTYPE_LAST_VALUE;
+    } else if (str == "high" || str == "high_water_mark") {
+        return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
+    } else if (str == "low" || str == "low_water_mark") {
+        return t_aggtype::AGGTYPE_LOW_WATER_MARK;
+    } else if (str == "sub abs") {
+        return t_aggtype::AGGTYPE_SUM_ABS;
+    } else if (str == "sum not null" || str == "sum_not_null") {
+        return t_aggtype::AGGTYPE_SUM_NOT_NULL;
+    } else if (str == "mean by count" || str == "mean_by_count") {
+        return t_aggtype::AGGTYPE_MEAN_BY_COUNT;
+    } else if (str == "identity") {
+        return t_aggtype::AGGTYPE_IDENTITY;
+    } else if (str == "distinct leaf" || str == "distinct_leaf") {
+        return t_aggtype::AGGTYPE_DISTINCT_LEAF;
+    } else if (str == "pct sum parent" || str == "pct_sum_parent") {
+        return t_aggtype::AGGTYPE_PCT_SUM_PARENT;
+    } else if (str == "pct sum grand total" || str == "pct_sum_grand_total") {
+        return t_aggtype::AGGTYPE_PCT_SUM_GRAND_TOTAL;
+    } else if (str.find("udf_combiner_") != std::string::npos) {
+        return t_aggtype::AGGTYPE_UDF_COMBINER;
+    } else if (str.find("udf_reducer_") != std::string::npos) {
+        return t_aggtype::AGGTYPE_UDF_REDUCER;
+    } else {
+        PSP_COMPLAIN_AND_ABORT("Encountered unknown aggregate operation.");
+        // use any as default
+        return t_aggtype::AGGTYPE_ANY;
+    }
 }
 
 std::string
