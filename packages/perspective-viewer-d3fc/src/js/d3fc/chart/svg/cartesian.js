@@ -5,8 +5,8 @@ import {axisBottom, axisLeft} from "../../axis/axis";
 
 export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
     const cartesianBase = chartSvgCartesian(xScale, yScale);
-    let xAxisSize = 0;
-    let yAxisSize = 0;
+    let xAxisSize = null;
+    let yAxisSize = null;
     let xAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
     let yAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
 
