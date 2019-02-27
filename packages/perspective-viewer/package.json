@@ -47,6 +47,7 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
+        "@babel/runtime": "^7.3.4",
         "@jpmorganchase/perspective": "^0.2.17",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
