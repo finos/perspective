@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective",
-    "version": "0.2.17",
+    "version": "0.2.18",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
     "browser": "cjs/js/perspective.parallel.js",

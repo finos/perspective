@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.17] - 2019-02-27
+## [0.2.18] - 2019-02-27
 ### Added
 * [#420](https://github.com/jpmorganchase/perspective/pull/420) New plugin based on D3FC - `perspective-viewer-d3fc`.
 * [#439](https://github.com/jpmorganchase/perspective/pull/439) Added `perspective-click` event for all plugins, which in addition to the basic click details also generates the reciprocal filter matching the rows in any aggregate, such that `<perspective-viewer>`s can be linked.
