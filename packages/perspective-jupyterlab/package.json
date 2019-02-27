@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-jupyterlab",
-    "version": "0.2.16",
+    "version": "0.2.17",
     "description": "Perspective.js",
     "files": [
         "dist/*.d.ts",
@@ -29,13 +29,13 @@
         "clean": "rimraf dist"
     },
     "dependencies": {
-        "@jpmorganchase/perspective-phosphor": "^0.2.16",
+        "@jpmorganchase/perspective-phosphor": "^0.2.17",
         "@jupyter-widgets/base": "^1.1.10",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16",
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.17",
         "@types/jest": "^23.3.9",
         "css-loader": "^0.26.1",
         "file-loader": "^0.11.1",

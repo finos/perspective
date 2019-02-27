@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.17] - 2019-02-27
+### Added
+* [#420](https://github.com/jpmorganchase/perspective/pull/420) New plugin based on D3FC - `perspective-viewer-d3fc`.
+* [#439](https://github.com/jpmorganchase/perspective/pull/439) Added `perspective-click` event for all plugins, which in addition to the basic click details also generates the reciprocal filter matching the rows in any aggregate, such that `<perspective-viewer>`s can be linked.
+
+### Fixes
+* [#445](https://github.com/jpmorganchase/perspective/pull/445) Fixed expand/collapse bug.
+* [#448](https://github.com/jpmorganchase/perspective/pull/448) Fixed 'Invalid Date' axis issue in `perspective-viewer-highcharts` plugin.
+* [#450](https://github.com/jpmorganchase/perspective/pull/450) Fixed `perspective-jupyterlab` plugin to inexplicably build to `didst/`.
+* [#453](https://github.com/jpmorganchase/perspective/pull/453) Fixed missing type definition for `shared_worker` in `perspective`.
+* [#451](https://github.com/jpmorganchase/perspective/pull/451) Fixed github-reported dependency vulnerabilites.
+
 ## [0.2.16] - 2019-02-19
 ### Added
 * [#431](https://github.com/jpmorganchase/perspective/pull/431) Added `clear()` and `replace()` APIs to `perspective` and `<perspective-viewer>`.
