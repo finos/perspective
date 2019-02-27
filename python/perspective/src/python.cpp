@@ -200,7 +200,8 @@ std::vector<U> vecFromArray(T& arr){
  * Data Loading
  */
 template <>
-std::vector<t_sortspec> _get_sort(py::object j_sortby) {
+std::vector<t_sortspec> _get_sort(
+        std::vector<std::string>& col_names, bool is_column_sort, py::object j_sortby) {
     // TODO
     std::vector<t_sortspec> svec{};
     return svec;
@@ -219,7 +220,7 @@ std::vector<t_sortspec> _get_sort(py::object j_sortby) {
  */
 template <> 
 std::vector<t_fterm>
-_get_fterms(t_schema schema, py::object j_filters) {
+_get_fterms(t_schema schema, py::object j_date_parser, py::object j_filters) {
     // TODO
     std::vector<t_fterm> fvec{};
     return fvec;
@@ -481,96 +482,8 @@ clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed) {
     return new_gnode;
 }
 
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-template<typename T>
-std::shared_ptr<t_ctx0>
-make_context_zero(t_schema schema, t_filter_op combiner, T j_filters, T j_columns,
-    T j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
-    auto columns = std::vector<std::string>();
-    auto fvec = _get_fterms(schema, j_filters);
-    auto svec = _get_sort(j_sortby);
-    auto cfg = t_config(columns, combiner, fvec);
-    auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
-    ctx0->init();
-    ctx0->sort_by(svec);
-    pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT,
-        reinterpret_cast<std::uintptr_t>(ctx0.get()));
-    return ctx0;
-}
-
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-template<typename T>
-std::shared_ptr<t_ctx1>
-make_context_one(t_schema schema, T j_pivots, t_filter_op combiner, T j_filters, T j_aggs,
-    T j_sortby, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
-    auto fvec = _get_fterms(schema, j_filters);
-    auto aggspecs = _get_aggspecs(j_aggs);
-    auto pivots = vecFromArray<py::object, std::string>(j_pivots);
-    auto svec = _get_sort(j_sortby);
-
-    auto cfg = t_config(pivots, aggspecs, combiner, fvec);
-    auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
-
-    ctx1->init();
-    ctx1->sort_by(svec);
-    pool->register_context(
-        gnode->get_id(), name, ONE_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx1.get()));
-    return ctx1;
-}
-
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-template<typename T>
-std::shared_ptr<t_ctx2>
-make_context_two(t_schema schema, T j_rpivots, T j_cpivots, t_filter_op combiner,
-    T j_filters, T j_aggs, bool show_totals, t_pool* pool, std::shared_ptr<t_gnode> gnode,
-    std::string name) {
-    auto fvec = _get_fterms(schema, j_filters);
-    auto aggspecs = _get_aggspecs(j_aggs);
-    auto rpivots = vecFromArray<py::object, std::string>(j_rpivots);
-    auto cpivots = vecFromArray<py::object, std::string>(j_cpivots);
-    t_totals total = show_totals ? TOTALS_BEFORE : TOTALS_HIDDEN;
-
-    auto cfg = t_config(rpivots, cpivots, aggspecs, total, combiner, fvec);
-    auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
-
-    ctx2->init();
-    pool->register_context(
-        gnode->get_id(), name, TWO_SIDED_CONTEXT, reinterpret_cast<std::uintptr_t>(ctx2.get()));
-    return ctx2;
-}
-
-template<typename T>
-void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby, T j_column_sortby) {
+template<>
+void sort(std::shared_ptr<t_ctx2> ctx2, py::object j_sortby){
 
 }
 

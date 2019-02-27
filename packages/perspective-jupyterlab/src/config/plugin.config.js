@@ -29,12 +29,15 @@ module.exports = {
                 test: /\.css$/,
                 use: [{loader: "css-loader"}]
             },
-            {test: /\.ts?$/, loader: "ts-loader"}
+            {
+                test: /\.ts?$/,
+                loader: "ts-loader"
+            }
         ]
     },
     output: {
         filename: "index.js",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, "../../build")
+        path: path.resolve(__dirname, "../../dist")
     }
 };

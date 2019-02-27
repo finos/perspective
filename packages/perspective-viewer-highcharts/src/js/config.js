@@ -141,6 +141,8 @@ export function default_config(aggregates, mode) {
     const axis_titles = get_axis_titles(config.aggregate);
     const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
 
+    const is_empty = str => str.replace(/\s/g, "") == "";
+
     return {
         chart: {
             type: type,
@@ -214,6 +216,57 @@ export function default_config(aggregates, mode) {
                 states: {
                     hover: {
                         lineWidthPlus: 0
+                    }
+                },
+                point: {
+                    events: {
+                        click: function(event) {
+                            let row_pivot_values = [];
+                            let column_pivot_values = [];
+                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                                column_pivot_values = this.series.userOptions.name.split(", ");
+                                row_pivot_values = this.name.split(", ");
+                            } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
+                                column_pivot_values = this.series.userOptions.name.split(", ");
+                                row_pivot_values = tooltip.get_pivot_values(this.category);
+                            } else {
+                                console.log(`Click dispatch for ${mode} ${type} not supported.`);
+                                return;
+                            }
+
+                            const row_filters = config.row_pivot.map((c, index) => [c, "==", row_pivot_values[index]]);
+                            const column_filters = config.column_pivot.map((c, index) => [c, "==", column_pivot_values[index]]);
+                            const filters = config.filter
+                                .concat(row_filters)
+                                .concat(column_filters)
+                                .filter(f => !!f[f.length - 1]);
+
+                            const start_row = this.index + 1;
+                            const end_row = start_row + 1;
+                            let column_names = [];
+                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                                column_names = axis_titles;
+                            } else {
+                                const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
+                                const column_name = column_pivot_values[column_pivot_values.length - 1];
+                                if (is_empty(column_name)) column_names.push(stack_name);
+                                else column_names.push(column_name);
+                            }
+
+                            that._view.to_json({start_row, end_row}).then(r => {
+                                event.target.dispatchEvent(
+                                    new CustomEvent("perspective-click", {
+                                        bubbles: true,
+                                        composed: true,
+                                        detail: {
+                                            column_names,
+                                            config: {filters},
+                                            row: r[0]
+                                        }
+                                    })
+                                );
+                            });
+                        }
                     }
                 },
                 events: {

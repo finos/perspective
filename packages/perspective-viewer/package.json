@@ -1,20 +1,25 @@
 {
     "name": "@jpmorganchase/perspective-viewer",
-    "version": "0.2.14",
+    "version": "0.2.16",
     "description": "Perspective.js",
-    "main": "src/js/viewer.js",
+    "main": "cjs/js/viewer.js",
+    "browser": "cjs/js/viewer.js",
+    "module": "cjs/js/viewer.js",
     "files": [
         "build/**/*",
-        "src/**/*",
-        "babel.config.js"
+        "cjs/**/*",
+        "index.d.ts"
     ],
+    "typings": "index.d.ts",
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build:webpack": "webpack --color --config src/config/view.config.js",
-        "build:themes": "webpack --color --config src/config/themes.config.js && rm build/__themes.js",
-        "build": "npm-run-all build:*",
+        "prebuild": "mkdir -p cjs",
+        "build:babel": "cp -r src/* cjs && babel src/js --source-maps --out-dir cjs/js",
+        "build:webpack:viewer": "webpack --color --config src/config/view.config.js",
+        "build:webpack:themes": "webpack --color --config src/config/themes.config.js && rm build/__themes.js",
+        "build": "npm-run-all build:babel build:webpack:*",
         "watch": "webpack --color --watch --config src/config/view.config.js",
         "test:build": "cp test/html/* build && cp test/csv/* build && cp test/css/* build",
         "test:run": "jest --silent --color",
@@ -42,18 +47,16 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.14",
+        "@jpmorganchase/perspective": "^0.2.16",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
-        "babel-polyfill": "^6.26.0",
-        "babel-runtime": "^6.26.0",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
-        "mobile-drag-drop": "^2.2.0",
-        "underscore": "^1.8.3"
+        "lodash": "^4.17.4",
+        "mobile-drag-drop": "^2.2.0"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.14"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16"
     }
 }

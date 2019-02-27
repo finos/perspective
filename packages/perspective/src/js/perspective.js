@@ -10,11 +10,17 @@
 import * as defaults from "./defaults.js";
 import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
+import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 
-import {Precision} from "@apache-arrow/es5-esm/type";
+import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
-import {TypeVisitor} from "@apache-arrow/es5-esm/visitor";
+import {Visitor} from "@apache-arrow/es5-esm/visitor";
+import {Data} from "@apache-arrow/es5-esm/data";
+import {Vector} from "@apache-arrow/es5-esm/vector";
+
+import {Utf8, Uint32, Float64, Int32, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
+
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
 
@@ -85,7 +91,12 @@ export default function(Module) {
      *
      * @private
      * @param {object} data Array buffer
-     * @returns An object with 3 properties:
+     * @returns An array containing chunked data objects with five properties:
+     * row_count: the number of rows in the chunk
+     * is_arrow: internal flag for marking arrow data
+     * names: column names for the arrow data
+     * types: type mapping for each column
+     * cdata: the actual data we load
      */
     function load_arrow_buffer(data) {
         // TODO Need to validate that the names/types passed in match those in the buffer
@@ -93,37 +104,25 @@ export default function(Module) {
         let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
             return loader.loadColumn(field, arrow.getColumnAt(colIdx));
         }, new ArrowColumnLoader());
-        if (typeof loader.cdata[0].values === "undefined") {
-            let nchunks = loader.cdata[0].data.chunkVectors.length;
-            let chunks = [];
-            for (let x = 0; x < nchunks; x++) {
-                chunks.push({
-                    row_count: loader.cdata[0].data.chunkVectors[x].length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata.map(y => y.data.chunkVectors[x])
-                });
-            }
-            return chunks;
-        } else {
-            return [
-                {
-                    row_count: arrow.length,
-                    is_arrow: true,
-                    names: loader.names,
-                    types: loader.types,
-                    cdata: loader.cdata
-                }
-            ];
+        let nchunks = loader.cdata[0].chunks.length;
+        let chunks = [];
+        for (let x = 0; x < nchunks; x++) {
+            chunks.push({
+                row_count: loader.cdata[0].chunks[x].length,
+                is_arrow: true,
+                names: loader.names,
+                types: loader.types,
+                cdata: loader.cdata.map(y => y.chunks[x])
+            });
         }
+        return chunks;
     }
 
     /**
      *
      * @private
      */
-    class ArrowColumnLoader extends TypeVisitor {
+    class ArrowColumnLoader extends Visitor {
         constructor(cdata, names, types) {
             super();
             this.cdata = cdata || [];
@@ -219,12 +218,21 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(pool, ctx, sides, gnode, config, name, callbacks, table) {
-        this.ctx = ctx;
-        this.nsides = sides;
-        this.gnode = gnode;
+    function view(pool, sides, gnode, config, name, callbacks, table) {
+        this._View = undefined;
+        this.date_parser = new DateParser();
         this.config = config || {};
-        this.pool = pool;
+
+        if (sides === 0) {
+            this._View = __MODULE__.make_view_zero(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        } else if (sides === 1) {
+            this._View = __MODULE__.make_view_one(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        } else if (sides === 2) {
+            this._View = __MODULE__.make_view_two(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+        }
+
+        this.ctx = this._View.get_context();
+        this.column_only = this._View.is_column_only();
         this.callbacks = callbacks;
         this.name = name;
         this.table = table;
@@ -237,8 +245,9 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
-        this.pool.unregister_context(this.gnode.get_id(), this.name);
+        this._View.delete();
         this.ctx.delete();
+
         this.table.views.splice(this.table.views.indexOf(this), 1);
         this.table = undefined;
         let i = 0,
@@ -262,46 +271,11 @@ export default function(Module) {
      * @returns {number} sides The number of sides of this `View`.
      */
     view.prototype.sides = function() {
-        return this.nsides;
-    };
-
-    view.prototype._column_names = function(skip_depth = false) {
-        let col_names = [];
-        let aggs = this.ctx.get_column_names();
-        for (let key = 0; key < this.ctx.unity_get_column_count(); key++) {
-            let col_name;
-            if (this.sides() === 0) {
-                col_name = aggs.get(key);
-                if (col_name === "psp_okey") {
-                    continue;
-                }
-            } else {
-                let name = aggs.get(key % aggs.size()).name();
-                if (name === "psp_okey") {
-                    continue;
-                }
-                let col_path = this.ctx.unity_get_column_path(key + 1);
-                if (skip_depth && col_path.size() < skip_depth) {
-                    col_path.delete();
-                    continue;
-                }
-                col_name = [];
-                for (let cnix = 0; cnix < col_path.size(); cnix++) {
-                    col_name.push(__MODULE__.scalar_vec_to_val(col_path, cnix));
-                }
-                col_name = col_name.reverse();
-                col_name.push(name);
-                col_name = col_name.join(defaults.COLUMN_SEPARATOR_STRING);
-                col_path.delete();
-            }
-            col_names.push(col_name);
-        }
-        aggs.delete();
-        return col_names;
+        return this._View.sides();
     };
 
     /**
-     * The schema of this {@link view}.  A schema is an Object, the keys of which
+     * The schema of this {@link view}. A schema is an Object, the keys of which
      * are the columns of this {@link view}, and the values are their string type names.
      * If this {@link view} is aggregated, theses will be the aggregated types;
      * otherwise these types will be the same as the columns in the underlying
@@ -312,74 +286,28 @@ export default function(Module) {
      * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
      */
     view.prototype.schema = async function() {
-        // get type mapping
-        let schema = this.gnode.get_tblschema();
-        let _types = schema.types();
-        let names = schema.columns();
-        schema.delete();
-
-        let types = {};
-        for (let i = 0; i < names.size(); i++) {
-            types[names.get(i)] = _types.get(i).value;
-        }
-        let new_schema = {};
-        let col_names = this._column_names();
-        for (let col_name of col_names) {
-            col_name = col_name.split(defaults.COLUMN_SEPARATOR_STRING);
-            col_name = col_name[col_name.length - 1];
-            if (types[col_name] === 1 || types[col_name] === 2) {
-                new_schema[col_name] = "integer";
-            } else if (types[col_name] === 19) {
-                new_schema[col_name] = "string";
-            } else if (types[col_name] === 9 || types[col_name] === 10) {
-                new_schema[col_name] = "float";
-            } else if (types[col_name] === 11) {
-                new_schema[col_name] = "boolean";
-            } else if (types[col_name] === 12) {
-                new_schema[col_name] = "datetime";
-            } else if (types[col_name] === 13) {
-                new_schema[col_name] = "date";
-            }
-            if (this.sides() > 0 && this.config.row_pivot.length > 0) {
-                new_schema[col_name] = map_aggregate_types(col_name, new_schema[col_name], this.config.aggregate);
-            }
-        }
-
-        _types.delete();
-        names.delete();
-
-        return new_schema;
+        return extract_map(this._View.schema());
     };
 
-    const map_aggregate_types = function(col_name, orig_type, aggregate) {
-        const INTEGER_AGGS = ["distinct count", "distinctcount", "distinct", "count"];
-        const FLOAT_AGGS = ["avg", "mean", "mean by count", "weighted_mean", "pct sum parent", "pct sum grand total"];
-
-        for (let agg in aggregate) {
-            let found_agg = aggregate[agg];
-            if (found_agg.column.join(defaults.COLUMN_SEPARATOR_STRING) === col_name) {
-                if (INTEGER_AGGS.includes(found_agg.op)) {
-                    return "integer";
-                } else if (FLOAT_AGGS.includes(found_agg.op)) {
-                    return "float";
-                }
-            }
-        }
-        return orig_type;
+    view.prototype._column_names = function(skip = false, depth = 0) {
+        return extract_vector(this._View._column_names(skip, depth));
     };
 
     const to_format = async function(options, formatter) {
         options = options || {};
         let viewport = this.config.viewport ? this.config.viewport : {};
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this.ctx.get_row_count());
+        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this._View.num_rows());
         let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this.ctx.unity_get_column_count() + (this.sides() === 0 ? 0 : 1));
+        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this._View.num_columns() + (this.sides() === 0 ? 0 : 1));
         let slice;
+
         const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
-        if (this.config.row_pivot[0] === "psp_okey") {
+
+        if (this.column_only) {
             end_row += this.config.column_pivot.length;
         }
+
         if (this.sides() === 0) {
             slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
@@ -392,7 +320,15 @@ export default function(Module) {
 
         let data = formatter.initDataValue();
 
-        let col_names = [[]].concat(this._column_names(this.sides() === 2 && sorted ? this.config.column_pivot.length : false));
+        // determine which level we stop pulling column names
+        let skip = false,
+            depth = 0;
+        if (this.sides() == 2 && sorted) {
+            skip = true;
+            depth = this.config.column_pivot.length;
+        }
+
+        let col_names = [[]].concat(this._column_names(skip, depth));
         let row;
         let ridx = -1;
         for (let idx = 0; idx < slice.length; idx++) {
@@ -409,9 +345,9 @@ export default function(Module) {
                 formatter.setColumnValue(data, row, col_name, slice[idx]);
             } else {
                 if (cidx === 0) {
-                    if (this.config.row_pivot[0] !== "psp_okey") {
+                    if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
-                        let row_path = this.ctx.unity_get_row_path(start_row + ridx);
+                        let row_path = this._View.get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
@@ -429,7 +365,7 @@ export default function(Module) {
         if (row) {
             formatter.addRow(data, row);
         }
-        if (this.config.row_pivot[0] === "psp_okey") {
+        if (this.column_only) {
             data = formatter.slice(data, this.config.column_pivot.length);
         }
 
@@ -544,21 +480,53 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this.ctx, idx);
+            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this.ctx, idx + 1);
+            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false);
         } else {
-            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.config.column_only === true;
-            let arr = __MODULE__.col_to_js_typed_array_two(this.ctx, idx + 1);
-            if (arr !== undefined) {
-                if (column_pivot_only) {
-                    // remove agg of psp_okey
-                    arr = arr.subarray(1, arr.length);
-                }
-            }
-            return arr;
+            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
+            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only);
         }
+    };
+
+    /**
+     * Serializes a view to arrow.
+     *
+     * @async
+     *
+     * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
+     * data from the view.
+     */
+    view.prototype.to_arrow = async function() {
+        const names = await this._column_names();
+        const schema = await this.schema();
+
+        const vectors = [];
+
+        for (let name of names) {
+            const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
+            const type = schema[col_path[col_path.length - 1]];
+            if (type === "float") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "integer") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "date" || type === "datetime") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "string") {
+                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
+                const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
+                vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
+            } else {
+                throw new Error(`Type ${type} not supported`);
+            }
+        }
+
+        return Table.fromVectors(vectors, names).serialize().buffer;
     };
 
     /**
@@ -571,7 +539,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated rows.
      */
     view.prototype.num_rows = async function() {
-        return this.ctx.get_row_count();
+        return this._View.num_rows();
     };
 
     /**
@@ -584,7 +552,7 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated columns.
      */
     view.prototype.num_columns = async function() {
-        return this.ctx.unity_get_column_count();
+        return this._View.num_columns();
     };
 
     /**
@@ -595,7 +563,7 @@ export default function(Module) {
      * @returns {Promise<bool>} Whether this row is expanded.
      */
     view.prototype.get_row_expanded = async function(idx) {
-        return this.ctx.unity_get_row_expanded(idx);
+        return this._View.get_row_expanded(idx);
     };
 
     /**
@@ -606,11 +574,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        if (this.nsides === 2 && this.ctx.unity_get_row_depth(idx) < this.config.row_pivot.length) {
-            return this.ctx.open(__MODULE__.t_header.HEADER_ROW, idx);
-        } else if (this.nsides < 2) {
-            return this.ctx.open(idx);
-        }
+        return this._View.expand(idx, this.config.row_pivot.length);
     };
 
     /**
@@ -621,11 +585,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.collapse = async function(idx) {
-        if (this.nsides === 2) {
-            return this.ctx.close(__MODULE__.t_header.HEADER_ROW, idx);
-        } else {
-            return this.ctx.close(idx);
-        }
+        return this._View.collapse(idx);
     };
 
     /**
@@ -633,15 +593,7 @@ export default function(Module) {
      *
      */
     view.prototype.set_depth = async function(depth) {
-        if (this.config.row_pivot.length >= depth) {
-            if (this.nsides === 2) {
-                return this.ctx.set_depth(__MODULE__.t_header.HEADER_ROW, depth);
-            } else {
-                return this.ctx.set_depth(depth);
-            }
-        } else {
-            console.warn(`Cannot expand past ${this.config.row_pivot.length}`);
-        }
+        return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
     /**
@@ -657,8 +609,8 @@ export default function(Module) {
         this.callbacks.push({
             view: this,
             callback: () => {
-                if (this.ctx.get_step_delta) {
-                    let delta = this.ctx.get_step_delta(0, 2147483647);
+                if (this._View.get_step_delta) {
+                    let delta = this._View.get_step_delta(0, 2147483647);
                     if (delta.cells.size() === 0) {
                         this.to_json().then(callback);
                     } else {
@@ -741,6 +693,22 @@ export default function(Module) {
         for (let e in this.callbacks) {
             this.callbacks[e].callback();
         }
+    };
+
+    /**
+     * Remove all rows in this {@link table} while preserving the schema and
+     * construction options.
+     */
+    table.prototype.clear = function() {
+        this.gnode.reset();
+    };
+
+    /**
+     * Replace all rows in this {@link table} the input data.
+     */
+    table.prototype.replace = function(data) {
+        this.gnode.reset();
+        this.update(data);
     };
 
     /**
@@ -884,20 +852,22 @@ export default function(Module) {
      * @param {Array<string>} [config.column_pivot] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
      * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
-     * each of which should provide an "name" and "op" property, repsresnting the string
+     * each of which should provide a "column" and "op" property, representing the string
      * aggregation type and associated column name, respectively.  Aggregates not provided
      * will use their type defaults
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
      * apply.  A filter configuration is an array of 3 elements:  A column name,
      * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
-     * @param {Array<string>} [config.sort] An Array of column names by which to sort.
+     * @param {Array<string>} [config.sort] An Array of Sort configurations to apply.
+     * A sort configuration is an array of 2 elements: A column name, and a sort direction,
+     * which are: "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", "col asc abs", "col desc abs".
      *
      * @example
      * var view = table.view({
      *      row_pivot: ['region'],
      *      aggregate: [{op: 'dominant', column:'region'}],
      *      filter: [['client', 'contains', 'fred']],
-     *      sort: ['value']
+     *      sort: [['value', 'asc']]
      * });
      *
      * @returns {view} A new {@link view} object for the supplied configuration,
@@ -906,207 +876,25 @@ export default function(Module) {
     table.prototype.view = function(config) {
         config = {...config};
 
-        const _string_to_filter_op = {
-            "&": __MODULE__.t_filter_op.FILTER_OP_AND,
-            "|": __MODULE__.t_filter_op.FILTER_OP_OR,
-            "<": __MODULE__.t_filter_op.FILTER_OP_LT,
-            ">": __MODULE__.t_filter_op.FILTER_OP_GT,
-            "==": __MODULE__.t_filter_op.FILTER_OP_EQ,
-            contains: __MODULE__.t_filter_op.FILTER_OP_CONTAINS,
-            "<=": __MODULE__.t_filter_op.FILTER_OP_LTEQ,
-            ">=": __MODULE__.t_filter_op.FILTER_OP_GTEQ,
-            "!=": __MODULE__.t_filter_op.FILTER_OP_NE,
-            "begins with": __MODULE__.t_filter_op.FILTER_OP_BEGINS_WITH,
-            "ends with": __MODULE__.t_filter_op.FILTER_OP_ENDS_WITH,
-            or: __MODULE__.t_filter_op.FILTER_OP_OR,
-            in: __MODULE__.t_filter_op.FILTER_OP_IN,
-            "not in": __MODULE__.t_filter_op.FILTER_OP_NOT_IN,
-            and: __MODULE__.t_filter_op.FILTER_OP_AND,
-            "is nan": __MODULE__.t_filter_op.FILTER_OP_IS_NAN,
-            "is not nan": __MODULE__.t_filter_op.FILTER_OP_IS_NOT_NAN
-        };
-
-        const _string_to_aggtype = {
-            "distinct count": __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            distinctcount: __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            distinct: __MODULE__.t_aggtype.AGGTYPE_DISTINCT_COUNT,
-            sum: __MODULE__.t_aggtype.AGGTYPE_SUM,
-            mul: __MODULE__.t_aggtype.AGGTYPE_MUL,
-            avg: __MODULE__.t_aggtype.AGGTYPE_MEAN,
-            mean: __MODULE__.t_aggtype.AGGTYPE_MEAN,
-            count: __MODULE__.t_aggtype.AGGTYPE_COUNT,
-            "weighted mean": __MODULE__.t_aggtype.AGGTYPE_WEIGHTED_MEAN,
-            unique: __MODULE__.t_aggtype.AGGTYPE_UNIQUE,
-            any: __MODULE__.t_aggtype.AGGTYPE_ANY,
-            median: __MODULE__.t_aggtype.AGGTYPE_MEDIAN,
-            join: __MODULE__.t_aggtype.AGGTYPE_JOIN,
-            div: __MODULE__.t_aggtype.AGGTYPE_SCALED_DIV,
-            add: __MODULE__.t_aggtype.AGGTYPE_SCALED_ADD,
-            dominant: __MODULE__.t_aggtype.AGGTYPE_DOMINANT,
-            "first by index": __MODULE__.t_aggtype.AGGTYPE_FIRST,
-            "last by index": __MODULE__.t_aggtype.AGGTYPE_LAST,
-            and: __MODULE__.t_aggtype.AGGTYPE_AND,
-            or: __MODULE__.t_aggtype.AGGTYPE_OR,
-            last: __MODULE__.t_aggtype.AGGTYPE_LAST_VALUE,
-            high: __MODULE__.t_aggtype.AGGTYPE_HIGH_WATER_MARK,
-            low: __MODULE__.t_aggtype.AGGTYPE_LOW_WATER_MARK,
-            "sum abs": __MODULE__.t_aggtype.AGGTYPE_SUM_ABS,
-            "sum not null": __MODULE__.t_aggtype.AGGTYPE_SUM_NOT_NULL,
-            "mean by count": __MODULE__.t_aggtype.AGGTYPE_MEAN_BY_COUNT,
-            identity: __MODULE__.t_aggtype.AGGTYPE_IDENTITY,
-            "distinct leaf": __MODULE__.t_aggtype.AGGTYPE_DISTINCT_LEAF,
-            "pct sum parent": __MODULE__.t_aggtype.AGGTYPE_PCT_SUM_PARENT,
-            "pct sum grand total": __MODULE__.t_aggtype.AGGTYPE_PCT_SUM_GRAND_TOTAL
-        };
-
         let name = Math.random() + "";
 
         config.row_pivot = config.row_pivot || [];
         config.column_pivot = config.column_pivot || [];
+        config.filter = config.filter || [];
 
-        // Column only mode
-        if (config.row_pivot.length === 0 && config.column_pivot.length > 0) {
-            config.row_pivot = ["psp_okey"];
-            config.column_only = true;
-        }
+        let sides;
 
-        // Filters
-        let filters = [];
-        let filter_op = __MODULE__.t_filter_op.FILTER_OP_AND;
-
-        if (config.filter) {
-            let schema = this._schema();
-            let isDateFilter = this._is_date_filter(schema);
-            let isValidFilter = this._is_valid_filter;
-            filters = config.filter
-                .filter(filter => isValidFilter(filter))
-                .map(filter => {
-                    if (isDateFilter(filter[0])) {
-                        return [filter[0], _string_to_filter_op[filter[1]], new DateParser().parse(filter[2])];
-                    } else {
-                        return [filter[0], _string_to_filter_op[filter[1]], filter[2]];
-                    }
-                });
-            if (config.filter_op) {
-                filter_op = _string_to_filter_op[config.filter_op];
-            }
-        }
-
-        let schema = this.gnode.get_tblschema();
-
-        // Row Pivots
-        let aggregates = [];
-        if (typeof config.aggregate === "object") {
-            for (let aidx = 0; aidx < config.aggregate.length; aidx++) {
-                let agg = config.aggregate[aidx];
-                let agg_op = _string_to_aggtype[agg.op];
-                if (config.column_only) {
-                    agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
-                    config.aggregate[aidx].op = "any";
-                }
-                if (typeof agg.column === "string") {
-                    agg.column = [agg.column];
-                } else {
-                    let dep_length = agg.column.length;
-                    if ((agg.op === "weighted mean" && dep_length != 2) || (agg.op !== "weighted mean" && dep_length != 1)) {
-                        throw `'${agg.op}' has incorrect arity ('${dep_length}') for column dependencies.`;
-                    }
-                }
-                aggregates.push([agg.name || agg.column.join(defaults.COLUMN_SEPARATOR_STRING), agg_op, agg.column]);
-            }
-        } else {
-            let t_aggs = schema.columns();
-            let t_aggtypes = schema.types();
-            for (let aidx = 0; aidx < t_aggs.size(); aidx++) {
-                let column = t_aggs.get(aidx);
-                let agg_op = __MODULE__.t_aggtype.AGGTYPE_ANY;
-                if (!config.column_only) {
-                    agg_op = _string_to_aggtype[defaults.AGGREGATE_DEFAULTS[get_column_type(t_aggtypes.get(aidx).value)]];
-                }
-                if (column !== "psp_okey") {
-                    aggregates.push([column, agg_op, [column]]);
-                }
-            }
-            t_aggs.delete();
-        }
-
-        // Sort
-        let sort = [],
-            col_sort = [];
-        if (config.sort) {
-            sort = config.sort
-                .filter(x => x.length === 1 || x[1].indexOf("col") === -1)
-                .map(x => {
-                    if (!Array.isArray(x)) {
-                        return [aggregates.map(agg => agg[0]).indexOf(x), 1];
-                    } else {
-                        const order = defaults.SORT_ORDER_IDS[defaults.SORT_ORDERS.indexOf(x[1])];
-                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), order];
-                    }
-                });
-            col_sort = config.sort
-                .filter(x => x.length === 2 && x[1].indexOf("col") > -1)
-                .map(x => {
-                    if (!Array.isArray(x)) {
-                        return [aggregates.map(agg => agg[0]).indexOf(x), 1];
-                    } else {
-                        const order = defaults.SORT_ORDER_IDS[defaults.SORT_ORDERS.indexOf(x[1])];
-                        return [aggregates.map(agg => agg[0]).indexOf(x[0]), order];
-                    }
-                });
-        }
-
-        let context;
-        let sides = 0;
         if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
             if (config.column_pivot && config.column_pivot.length > 0) {
-                config.row_pivot = config.row_pivot || [];
-                context = __MODULE__.make_context_two(schema, config.row_pivot, config.column_pivot, filter_op, filters, aggregates, sort.length > 0, this.pool, this.gnode, name);
                 sides = 2;
-
-                if (config.row_pivot_depth !== undefined) {
-                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot_depth - 1);
-                } else {
-                    context.set_depth(__MODULE__.t_header.HEADER_ROW, config.row_pivot.length);
-                }
-
-                if (config.column_pivot_depth !== undefined) {
-                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot_depth - 1);
-                } else {
-                    context.set_depth(__MODULE__.t_header.HEADER_COLUMN, config.column_pivot.length);
-                }
-
-                if (sort.length > 0 || col_sort.length > 0) {
-                    __MODULE__.sort(context, sort, col_sort);
-                }
             } else {
-                context = __MODULE__.make_context_one(schema, config.row_pivot, filter_op, filters, aggregates, sort, this.pool, this.gnode, name);
                 sides = 1;
-
-                if (config.row_pivot_depth !== undefined) {
-                    context.set_depth(config.row_pivot_depth - 1);
-                } else {
-                    context.set_depth(config.row_pivot.length);
-                }
             }
         } else {
-            context = __MODULE__.make_context_zero(
-                schema,
-                filter_op,
-                filters,
-                aggregates.map(function(x) {
-                    return x[0];
-                }),
-                sort,
-                this.pool,
-                this.gnode,
-                name
-            );
+            sides = 0;
         }
 
-        schema.delete();
-
-        let v = new view(this.pool, context, sides, this.gnode, config, name, this.callbacks, this);
+        let v = new view(this.pool, sides, this.gnode, config, name, this.callbacks, this);
         this.views.push(v);
         return v;
     };
@@ -1143,11 +931,11 @@ export default function(Module) {
             }
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         }
 
         try {
@@ -1476,10 +1264,20 @@ export default function(Module) {
                                 if (msg.method === "delete") {
                                     delete this._views[msg.name];
                                 }
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
+                                if (msg.method === "to_arrow") {
+                                    this.post(
+                                        {
+                                            id: msg.id,
+                                            data: result
+                                        },
+                                        [result]
+                                    );
+                                } else {
+                                    this.post({
+                                        id: msg.id,
+                                        data: result
+                                    });
+                                }
                             })
                             .catch(error => {
                                 this.post({
@@ -1500,8 +1298,8 @@ export default function(Module) {
             self.addEventListener("message", e => this.process(e.data), false);
         }
 
-        post(msg) {
-            self.postMessage(msg);
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
         }
 
         init({buffer}) {
@@ -1598,7 +1396,7 @@ export default function(Module) {
             try {
                 pool = new __MODULE__.t_pool();
 
-                [gnode, limit_index] = make_table(data_accessor, pool, gnode, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
+                [gnode, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

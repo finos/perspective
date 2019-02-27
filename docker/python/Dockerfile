@@ -8,11 +8,8 @@
 
 FROM python:3.7
 
-WORKDIR /usr/src/app
-ADD . /usr/src/app
-
 RUN apt-get update
-RUN apt-get -y install apt-transport-https libtbb-dev cmake
+RUN apt-get -y install apt-transport-https libtbb-dev cmake nodejs npm
 RUN apt-get -y remove python3
 
 RUN python3.7 -m pip install numpy pandas

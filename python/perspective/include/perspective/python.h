@@ -449,13 +449,13 @@ BOOST_PYTHON_MODULE(libbinding)
      *
      * assorted functions
      */
-    py::def("sort", sort<py::object>);
+    // py::def("sort", sort<py::object>);
     py::def("make_table", make_table<py::object>);
     py::def("make_gnode", make_gnode);
     py::def("clone_gnode_table", clone_gnode_table<py::object>);
-    py::def("make_context_zero", make_context_zero<py::object>);
-    py::def("make_context_one", make_context_one<py::object>);
-    py::def("make_context_two", make_context_two<py::object>);
+    // py::def("make_context_zero", make_context_zero);
+    // py::def("make_context_one", make_context_one);
+    // py::def("make_context_two", make_context_two);
     // py::def("scalar_to_val", scalar_to_val);
     // py::def("scalar_vec_to_val", scalar_vec_to_val);
     py::def("table_add_computed_column", table_add_computed_column<py::object>);

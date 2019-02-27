@@ -1,18 +1,22 @@
 {
     "name": "@jpmorganchase/perspective-viewer-highcharts",
-    "version": "0.2.14",
+    "version": "0.2.16",
     "description": "Perspective.js",
-    "main": "src/js/highcharts.js",
+    "main": "cjs/js/highcharts.js",
+    "browser": "cjs/js/highcharts.js",
+    "module": "cjs/js/highcharts.js",
     "files": [
         "build/**/*",
-        "src/**/*",
-        "babel.config.js"
+        "cjs/**/*"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "build": "webpack --color --config src/config/highcharts.plugin.config.js",
+        "prebuild": "mkdir -p cjs",
+        "build:babel": "cp -r src/* cjs && babel src/js --source-maps --out-dir cjs/js",
+        "build:webpack": "webpack --color --config src/config/highcharts.plugin.config.js",
+        "build": "npm-run-all build:babel build:webpack",
         "test:build": "cp test/html/* build",
         "watch": "webpack --color --watch --config src/config/highcharts.plugin.config.js",
         "test:run": "jest --silent --color 2>&1",
@@ -39,9 +43,8 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.14",
-        "@jpmorganchase/perspective-viewer": "^0.2.14",
-        "babel-runtime": "^6.26.0",
+        "@jpmorganchase/perspective": "^0.2.16",
+        "@jpmorganchase/perspective-viewer": "^0.2.16",
         "chroma-js": "^1.3.4",
         "detectie": "1.0.0",
         "gradient-parser": "0.1.5",
@@ -50,6 +53,6 @@
         "highcharts-more": "^0.1.2"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.14"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16"
     }
 }

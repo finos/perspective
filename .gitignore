@@ -101,6 +101,7 @@ Gemfile.lock
 Vagrantfile
 /packages/sigma
 /packages/fin-hypergrid
+coverage
 
 .DS_Store
 
@@ -124,4 +125,11 @@ website/static/css/material.dark.css
 obj
 packages/*/cjs
 cppbuild
+docsbuild
 .coverage
+
+# docs generated
+docs/_build
+docs/modules.rst
+docs/perspective.*.rst
+docs/python

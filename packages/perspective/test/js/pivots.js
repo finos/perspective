@@ -290,7 +290,7 @@ module.exports = perspective => {
                 row_pivot: ["x"]
             });
             let result2 = await view.schema();
-            expect(result2).toEqual(meta);
+            expect(result2).toEqual({x: "integer", y: "integer", z: "integer"});
             view.delete();
             table.delete();
         });
@@ -322,7 +322,7 @@ module.exports = perspective => {
         it("['x'] does not translate type when only pivoted by column", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                col_pivot: ["y"],
+                column_pivot: ["y"],
                 aggregate: [{column: "x", op: "avg"}]
             });
             let result2 = await view.schema();
@@ -572,6 +572,19 @@ module.exports = perspective => {
             expect(Object.keys(result2)).toEqual(["__ROW_PATH__", "C|x", "C|y", "B|x", "B|y", "A|x", "A|y"]);
             view.delete();
             table.delete();
+        });
+    });
+
+    describe("Pivot table operations", function() {
+        it("Should not expand past number of row pivots", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                row_pivot: ["x"],
+                column_pivot: ["y"]
+            });
+            var expanded_idx = await view.expand(2);
+            // invalid expands return the index
+            expect(expanded_idx).toEqual(2);
         });
     });
 };

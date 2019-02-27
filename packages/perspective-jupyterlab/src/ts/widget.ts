@@ -7,33 +7,21 @@
  *
  */
 
-import {
-    DOMWidgetModel, DOMWidgetView, ISerializers
-} from '@jupyter-widgets/base';
+import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base';
 
-/* defines */
-import {MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK} from './utils';
 import {PERSPECTIVE_VERSION} from './version';
-
-/* perspective components */
-import "@jpmorganchase/perspective-viewer";
-import "@jpmorganchase/perspective-viewer-hypergrid";
-import "@jpmorganchase/perspective-viewer-highcharts";
-
 
 import perspective from "@jpmorganchase/perspective";
 import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
 import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
 
-if(perspective){
+if (perspective) {
     perspective.override({wasm, worker});
 } else {
     console.warn('Perspective was undefined - wasm load errors may occur');
 }
 
-
-/* css */
-import '!!style-loader!css-loader!less-loader!../less/material.less';
+import {PerspectiveWidget} from '@jpmorganchase/perspective-phosphor/src/ts/index';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
@@ -46,8 +34,8 @@ class PerspectiveModel extends DOMWidgetModel {
             _view_name: PerspectiveModel.view_name,
             _view_module: PerspectiveModel.view_module,
             _view_module_version: PerspectiveModel.view_module_version,
-            _data: null,
-            _bin_data: null,
+            _data: [],
+            _bin_data: [],
 
             datasrc: '',
             schema: {},
@@ -82,13 +70,30 @@ class PerspectiveModel extends DOMWidgetModel {
 
 export
 class PerspectiveView extends DOMWidgetView {
-    private psp: any;
-    private embed = false;
+    private psp: PerspectiveWidget;
 
     render() {
-        this.psp = Private.createNode(this.el);
-        let observer = new MutationObserver(this.psp.notifyResize.bind(this.psp));
-        observer.observe(this.el, {attributes: true});
+        this.psp = new PerspectiveWidget(undefined,
+            {datasrc: this.model.get('datasrc'),
+             data: this.model.get('datasrc') == 'arrow'?this.model.get('_bin_data') : this.model.get('_data'),
+             schema: this.model.get('schema'),
+             view: this.model.get('view'),
+             columns: this.model.get('columns'),
+             rowpivots: this.model.get('rowpivots'),
+             columnpivots: this.model.get('columnpivots'),
+             aggregates: this.model.get('aggregates'),
+             sort: this.model.get('sort'),
+             index: this.model.get('index'),
+             limit: this.model.get('limit'),
+             computedcolumns: this.model.get('computedcolumns'),
+             settings: this.model.get('settings'),
+             embed: this.model.get('embed'),
+             dark: this.model.get('dark'),
+             bindto: this.el,
+             key: '', // key: handled by perspective-python
+             wrap: false, // wrap: handled by perspective-python
+             delete_: true, // delete_: handled by perspective-python
+        });
 
         this.model.on('change:_data', this.data_changed, this);
         this.model.on('change:_bin_data', this.bin_data_changed, this);
@@ -108,21 +113,7 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('msg:custom', this._update, this);
 
         this.displayed.then(()=> {
-            this.settings_changed();
-            this.dark_changed();
-            this.view_changed();
-            this.rowpivots_changed();
-            this.columnpivots_changed();
-            this.sort_changed();
-
-            let columns = this.model.get('columns');
-            if(columns.length > 0){
-                this.columns_changed();
-            }
-
-            // do aggregates after columns
-            this.aggregates_changed();
-            this.datasrc_changed();
+            this.psp._render();
         });
     }
 
@@ -132,183 +123,74 @@ class PerspectiveView extends DOMWidgetView {
 
     _update(msg: any) {
         if (msg.type === 'update') {
-            this.psp.update(msg.data);
+            this.psp.pspNode.update(msg.data);
         } else if (msg.type === 'delete') {
             this.psp.delete();
         }
     }
 
     data_changed() {
-        this.psp.delete();
-        let schema = this.model.get('schema');
-        let data = this.model.get('_data');
-
-        if (Object.keys(schema).length > 0 ){
-            let limit = this.model.get('limit');
-            let index = this.model.get('index');
-            let options = {} as {[key: string]: any};
-
-            if (limit > 0){
-                options['limit'] = limit;
-            }
-            if (index){
-                options['index'] = index;
-            }
-
-            this.psp.load(schema, options);
-        }
-        if (data.length > 0){
-            this.psp.update(this.model.get('_data'));
-        }
+        this.psp.data = this.model.get('_data');
+        this.psp._render();
     }
 
     bin_data_changed() {
-        this.psp.delete();
-        let schema = this.model.get('schema');
-        let data = this.model.get('_bin_data');
-
-        if (Object.keys(schema).length > 0 ){
-            let limit = this.model.get('limit');
-            let index = this.model.get('index');
-            let options = {} as {[key: string]: any};
-
-            if (limit > 0){
-                options['limit'] = limit;
-            }
-            if (index){
-                options['index'] = index;
-            }
-
-            this.psp.load(schema, options);
-        }
-        if (data){
-            this.psp.load(data.buffer);
-        }
+        this.psp.data = this.model.get('_bin_data');
+        this.psp._render();
     }
 
     datasrc_changed(){
-        this.psp.delete();
-        let source = this.model.get('datasrc');
-        if(source === 'pyarrow'){ // or other binary formats
-            this.bin_data_changed();
-        } else {
-            this.data_changed();
-        }
+        this.psp.datasrc = this.model.get('datasrc');
+        this.psp._render();
     }
 
+    
     schema_changed(){
-        this.psp.delete();
-        let schema = this.model.get('schema');
-        let data = this.model.get('_data');
-        if (Object.keys(schema).length > 0 ){
-            this.psp.load(schema);
-        }
-        if (data.length > 0){
-            this.psp.update(this.model.get('_data'));
-        }
+        this.psp.schema = this.model.get('schema');
+        this.psp._render();
     }
-
+    
     view_changed(){
-        this.psp.setAttribute('view', this.model.get('view'));
+        this.psp.view = this.model.get('view');
     }
-
+    
     columns_changed(){
-        let columns = this.model.get('columns');
-        if(columns.length > 0){
-            this.psp.setAttribute('columns', JSON.stringify(columns));
-        } else {
-            this.psp.removeAttribute('columns');
-        }
+        this.psp.columns = this.model.get('columns');
     }
-
+    
     rowpivots_changed(){
-        this.psp.setAttribute('row-pivots', JSON.stringify(this.model.get('rowpivots')));
+        this.psp.rowpivots = this.model.get('rowpivots');
     }
-
+    
     columnpivots_changed(){
-        this.psp.setAttribute('column-pivots', JSON.stringify(this.model.get('columnpivots')));
+        this.psp.columnpivots = this.model.get('columnpivots');
     }
-
+    
     aggregates_changed(){
-        this.psp.setAttribute('aggregates', JSON.stringify(this.model.get('aggregates')));
+        this.psp.aggregates = this.model.get('aggregates');
     }
-
+    
     sort_changed(){
-        this.psp.setAttribute('sort', JSON.stringify(this.model.get('sort')));
+        this.psp.sort = this.model.get('sort');
     }
-
+    
     computedcolumns_changed(){
-        let computedcolumns = this.model.get('computedcolumns');
-        if(computedcolumns.length > 0){
-            this.psp.setAttribute('computed-columns', JSON.stringify(computedcolumns));
-        } else {
-            this.psp.removeAttribute('computed-columns');
-        }
+        this.psp.computedcolumns = this.model.get('computedcolumns');
     }
-
+    
     limit_changed(){
-        let limit = this.model.get('limit');
-        if(limit > 0){
-            this.psp.setAttribute('limit', limit);
-        } else {
-            this.psp.removeAttribute('limit');
-        }
+        this.psp.limit = this.model.get('limit');
     }
-
+    
     settings_changed(){
-        this.psp.setAttribute('settings', this.model.get('settings'));
+        this.psp.settings = this.model.get('settings');
     }
-
+    
     embed_changed(){
-        this.embed = this.model.get('embed');
-        if(this.embed){
-            console.log('Warning: embed not implemented');
-        }
+        this.psp.embed = this.model.get('embed');
     }
-
+    
     dark_changed(){
-        let dark = this.model.get('dark');
-        if(dark){
-            this.el.classList.add(PSP_CONTAINER_CLASS_DARK);
-        } else {
-            this.el.classList.remove(PSP_CONTAINER_CLASS_DARK);
-        }
-
-        //FIXME dont do this, force a repaint instead
-        this.data_changed();
-    }
-}
-
-
-
-namespace Private {
-    export let _loaded = false;
-
-    export function createNode(node: HTMLDivElement): any {
-        node.className = PSP_CONTAINER_CLASS;
-        let psp = document.createElement('perspective-viewer');
-        psp.className = PSP_CLASS;
-        psp.setAttribute('type', MIME_TYPE);
-
-        while(node.lastChild){
-            node.removeChild(node.lastChild);
-        }
-
-        node.appendChild(psp);
-
-        // allow perspective's event handlers to do their work
-        psp.addEventListener( 'contextmenu', stop, false );
-        psp.addEventListener( 'mousedown', stop, false );
-        psp.addEventListener( 'mousedown', stop, false );
-
-        function stop( event: MouseEvent ) {
-          event.stopPropagation();
-        }
-
-        let div = document.createElement('div');
-        div.style.setProperty('display', 'flex');
-        div.style.setProperty('flex-direction', 'row');
-        node.appendChild(div);
-        return psp;
+        this.psp.dark = this.model.get('dark');
     }
 }

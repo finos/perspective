@@ -45,6 +45,10 @@ function jest() {
     return cmd;
 }
 
+function slow_jest() {
+    return 'node_modules/.bin/lerna exec --scope="@jpmorganchase/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+}
+
 function docker() {
     console.log("-- Creating puppeteer docker image");
     let cmd = "docker run -it --rm --shm-size=2g -u root -e PACKAGE=${PACKAGE} -v $(pwd):/src -w /src";
@@ -87,13 +91,14 @@ try {
             execute(cmd);
         }
         if (!IS_EMSDK) {
-            execute(`yarn --silent clean:screenshots`);
+            execute(`yarn --silent clean --screenshots`);
             execute(docker() + " " + args.join(" "));
         }
     } else {
         if (args.indexOf("--quiet") > -1) {
             console.log("-- Running test suite in quiet mode");
             execSync(`output=$(${jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
+            execSync(`output=$(${slow_jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
         } else if (process.env.PACKAGE) {
             console.log("-- Running test suite in individual mode");
             let cmd = "node_modules/.bin/lerna exec --concurrency 1 --no-bail";
@@ -102,9 +107,11 @@ try {
             }
             cmd += " -- yarn --silent test:run";
             execute(cmd);
+            execute(slow_jest());
         } else {
             console.log("-- Running test suite in fast mode");
             execute(jest());
+            execute(slow_jest());
         }
     }
 } catch (e) {

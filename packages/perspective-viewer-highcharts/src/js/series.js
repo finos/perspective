@@ -52,7 +52,7 @@ function replace_null(str) {
     if (str === null) {
         return "-";
     } else {
-        return "" + str;
+        return str;
     }
 }
 

@@ -4,6 +4,7 @@ node_js: "8"
 sudo: required
 
 matrix:
+  fast_finish: true
   include:
     - node_js: "8"
       language: node_js
@@ -20,6 +21,11 @@ matrix:
       cache: pip
       services: docker
 
+    - language: c++
+      env: TEST=CPP_OSX
+      os: osx
+
+  allow_failures:
     - language: c++
       env: TEST=CPP_OSX
       os: osx
@@ -45,7 +51,7 @@ install:
   - yarn
 
 script:
-  - if [ "$TEST" = "WASM" ]; then yarn lint; fi
+  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn lint; fi
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn build; fi
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn test --quiet; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi

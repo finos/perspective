@@ -76,6 +76,8 @@ function view(worker, table_name, config) {
 
 view.prototype.to_json = async_queue("to_json");
 
+view.prototype.to_arrow = async_queue("to_arrow");
+
 view.prototype.to_columns = async_queue("to_columns");
 
 view.prototype.to_csv = async_queue("to_csv");
@@ -170,6 +172,10 @@ table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method")
 table.prototype.size = async_queue("size", "table_method");
 
 table.prototype.columns = async_queue("columns", "table_method");
+
+table.prototype.clear = async_queue("clear", "table_method");
+
+table.prototype.replace = async_queue("replace", "table_method");
 
 table.prototype.delete = async_queue("delete", "table_method");
 

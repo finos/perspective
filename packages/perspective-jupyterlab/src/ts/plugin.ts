@@ -8,41 +8,41 @@
  */
 
 import {
-  Application, IPlugin
+    Application, IPlugin
 } from '@phosphor/application';
 
 import {
-  Widget
+    Widget
 } from '@phosphor/widgets';
 
 import {
-  IJupyterWidgetRegistry
- } from '@jupyter-widgets/base';
+    IJupyterWidgetRegistry
+} from '@jupyter-widgets/base';
 
 import {
-  PerspectiveModel, PerspectiveView
+    PerspectiveModel, PerspectiveView
 } from './widget';
 
 import {
-  PERSPECTIVE_VERSION
+    PERSPECTIVE_VERSION
 } from './version';
 
 
 export
-const pspPlugin: IPlugin<Application<Widget>, void> = {
-  id: '@jpmorganchase/perspective-jupyterlab',
-  requires: [IJupyterWidgetRegistry],
-  activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
-    registry.registerWidget({
-      name: '@jpmorganchase/perspective-jupyterlab',
-      version: PERSPECTIVE_VERSION,
-      exports: {
-        PerspectiveModel: PerspectiveModel,
-        PerspectiveView: PerspectiveView
-      }
-    });
-  },
-  autoStart: true
-};
+    const pspPlugin: IPlugin<Application<Widget>, void> = {
+        id: '@jpmorganchase/perspective-jupyterlab',
+        requires: [IJupyterWidgetRegistry],
+        activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
+            registry.registerWidget({
+                name: '@jpmorganchase/perspective-jupyterlab',
+                version: PERSPECTIVE_VERSION,
+                exports: {
+                    PerspectiveModel: PerspectiveModel,
+                    PerspectiveView: PerspectiveView
+                }
+            });
+        },
+        autoStart: true
+    };
 
 export default pspPlugin;
