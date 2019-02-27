@@ -30,21 +30,9 @@ matrix:
       env: TEST=CPP_OSX
       os: osx
 
-cache:
-  yarn: true
-  directories:
-    - node_modules
-    - packages/perspective/node_modules
-    - packages/perspective-examples/node_modules
-    - packages/perspective-jupyterlab/node_modules
-    - packages/perspective-viewer/node_modules
-    - packages/perspective-viewer-highcharts/node_modules
-    - packages/perspective-viewer-hypergrid/node_modules
-
 env:
   global:
     - EM_USE_GLOBAL_CACHE=1
-
 
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
