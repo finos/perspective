@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer-d3fc",
-    "version": "0.2.10",
+    "version": "0.2.16",
     "description": "Perspective.js",
     "main": "cjs/js/plugin/plugin.js",
     "files": [
@@ -20,7 +20,7 @@
         "watch": "webpack --color --watch --config src/config/d3fc.plugin.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
-        "clean": "find build -mindepth 1 -delete",
+        "clean": "find build -mindepth 1 -delete && find cjs -mindepth 1 -delete",
         "clean:screenshots": "find screenshots/ \\( -name *.diff.png -o -name *.failed.png \\) -mindepth 1 -delete"
     },
     "jest": {

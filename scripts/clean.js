@@ -39,6 +39,9 @@ try {
         clean(path.join(".", "cpp", "perspective", "obj"));
         clean(path.join(".", "cpp", "perspective", "cppbuild"));
     }
+    if (!IS_SCREENSHOTS) {
+        execute("lerna run clean");
+    }
     clean_screenshots();
 } catch (e) {
     console.error(e.message);
