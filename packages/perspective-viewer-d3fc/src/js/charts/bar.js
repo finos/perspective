@@ -16,6 +16,7 @@ import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -34,9 +35,15 @@ function barChart(container, settings) {
         );
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings).include([0])(data))
+        .xDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .paddingStrategy(hardLimitZeroPadding())(data)
+        )
         .yDomain(crossAxis.domain(settings)(settings.data))
         .yOrient("left")
+        .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
 
     crossAxis.styleAxis(chart, "y", settings);

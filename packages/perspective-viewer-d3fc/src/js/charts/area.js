@@ -16,6 +16,7 @@ import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
@@ -27,8 +28,14 @@ function areaChart(container, settings) {
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(settings.data))
-        .yDomain(mainAxis.domain(settings).include([0])(data))
+        .yDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .paddingStrategy(hardLimitZeroPadding())(data)
+        )
         .yOrient("left")
+        .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);
