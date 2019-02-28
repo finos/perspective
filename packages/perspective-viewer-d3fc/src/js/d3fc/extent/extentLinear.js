@@ -10,7 +10,7 @@
 import * as d3Array from "d3-array";
 import {defaultPadding} from "../padding/default";
 
-export const linearExtent = function() {
+export const extentLinear = function() {
     let accessors = [
         function(d) {
             return d;
@@ -66,9 +66,7 @@ export const linearExtent = function() {
             extent$$1[1] = symmetricalAbout + halfRange;
         }
 
-        paddingStrategy(extent$$1);
-
-        return extent$$1;
+        return paddingStrategy(extent$$1);
     };
 
     instance.accessors = function() {

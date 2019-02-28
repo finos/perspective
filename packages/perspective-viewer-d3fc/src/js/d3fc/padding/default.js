@@ -27,6 +27,7 @@ export const defaultPadding = () => {
             default:
                 throw new Error("Unknown padUnit: " + padUnit);
         }
+        return extent;
     };
 
     padding.pad = function() {

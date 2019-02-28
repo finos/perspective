@@ -34,9 +34,10 @@ export const hardLimitZeroPadding = () => {
         let paddedLowerExtent = extent[0] - pad[0] * delta;
         let paddedUpperExtent = extent[1] + pad[1] * delta;
 
-        // If datapoints are exclusively negative or positive and padAcrossZero is set false, hard limit extent to 0.
+        // If datapoints are exclusively negative or exclusively positive and padAcrossZero is set false, hard limit extent to 0.
         extent[0] = !padAcrossZero && extent[0] >= 0 && paddedLowerExtent < 0 ? 0 : paddedLowerExtent;
         extent[1] = !padAcrossZero && extent[1] <= 0 && paddedUpperExtent > 0 ? 0 : paddedUpperExtent;
+        return extent;
     };
 
     fc.rebindAll(padding, _defaultPadding);

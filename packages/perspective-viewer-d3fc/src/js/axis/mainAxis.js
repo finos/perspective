@@ -8,14 +8,14 @@
  */
 import * as d3 from "d3";
 import * as fc from "d3fc";
-import {linearExtent} from "../d3fc/extent/extent";
+import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
 
 export const scale = () => d3.scaleLinear();
 
 export const domain = () => {
     let valueName = "mainValue";
 
-    const extentLinear = linearExtent()
+    const extentLinear = customExtent()
         .pad([0, 0.1])
         .padUnit("percent");
 
