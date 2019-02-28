@@ -41,12 +41,12 @@ function barChart(container, settings) {
                 .include([0])
                 .paddingStrategy(hardLimitZeroPadding())(data)
         )
-        .yDomain(crossAxis.domain(settings)(settings.data))
+        .yDomain(crossAxis.domain(settings)(data))
         .yOrient("left")
         .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
 
-    crossAxis.styleAxis(chart, "y", settings);
+    crossAxis.styleAxis(chart, "y", settings, "crossValues");
     mainAxis.styleAxis(chart, "x", settings);
 
     chart.yPaddingInner && chart.yPaddingInner(0.5);

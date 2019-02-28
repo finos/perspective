@@ -20,7 +20,7 @@ export function pointSeries(settings, colour, seriesKey, size) {
     }
 
     series.decorate(selection => {
-        tooltip(selection, settings);
+        tooltip()(selection, settings);
         if (colour) {
             selection.style("stroke", () => withOutOpacity(colour(seriesKey))).style("fill", () => colour(seriesKey));
         }

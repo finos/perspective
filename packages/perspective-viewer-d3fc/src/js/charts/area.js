@@ -27,7 +27,7 @@ function areaChart(container, settings) {
     const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings)(settings.data))
+        .xDomain(crossAxis.domain(settings)(data))
         .yDomain(
             mainAxis
                 .domain(settings)
