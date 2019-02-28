@@ -22,8 +22,6 @@ function barChart(container, settings) {
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 
-    const yDomain = crossAxis.domain(settings)(data);
-
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
@@ -37,11 +35,11 @@ function barChart(container, settings) {
 
     const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
         .xDomain(mainAxis.domain(settings).include([0])(data))
-        .yDomain(yDomain)
+        .yDomain(crossAxis.domain(settings)(data))
         .yOrient("left")
         .plotArea(withGridLines(series).orient("horizontal"));
 
-    crossAxis.styleAxis(chart, "y", settings, "crossValues", yDomain);
+    crossAxis.styleAxis(chart, "y", settings, "crossValues");
     mainAxis.styleAxis(chart, "x", settings);
 
     chart.yPaddingInner && chart.yPaddingInner(0.5);

@@ -34,8 +34,6 @@ export const scale = (settings, settingName = "crossValues") => {
 const defaultScaleBand = () => minBandwidth(d3.scaleBand());
 
 export const domain = settings => {
-    console.log("settings", settings);
-
     let valueName = "crossValue";
     let settingName = "crossValues";
 
@@ -115,8 +113,10 @@ const getMaxLengthsFromDomain = (domain, valueCount) => {
     return maxLengths;
 };
 
-export const styleAxis = (chart, prefix, settings, settingName = "crossValues", suppliedDomain) => {
+export const styleAxis = (chart, prefix, settings, settingName = "crossValues") => {
     chart[`${prefix}Label`](label(settings, settingName));
+
+    const suppliedDomain = chart[`${prefix}Domain`]();
 
     let labelSize = 25;
 

@@ -13,10 +13,9 @@ import * as crossAxis from "../axis/crossAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/legend";
-import {getOrCreateElement} from "../utils/utils";
-import scrollableLegend from "../legend/scrollableLegend";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {withGridLines} from "../gridlines/gridlines";
+import {legend} from "../legend/colorLegend";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
@@ -24,10 +23,6 @@ function heatmapChart(container, settings) {
 
     const series = heatmapSeries(settings, colorInterpolate);
 
-    const yDomain = crossAxis
-        .domain(settings)
-        .settingName("splitValues")
-        .valueName("mainValue")(data);
     const extent = fc.extentLinear().accessors([d => d.colorValue]);
 
     const colourDomain = extent(data);
@@ -35,12 +30,17 @@ function heatmapChart(container, settings) {
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), crossAxis.scale(settings, "splitValues"))
         .xDomain(crossAxis.domain(settings)(data))
-        .yDomain(yDomain)
+        .yDomain(
+            crossAxis
+                .domain(settings)
+                .settingName("splitValues")
+                .valueName("mainValue")(data)
+        )
         .yOrient("left")
         .plotArea(withGridLines(series));
 
     crossAxis.styleAxis(chart, "x", settings, "crossValues");
-    crossAxis.styleAxis(chart, "y", settings, "splitValues", yDomain);
+    crossAxis.styleAxis(chart, "y", settings, "splitValues");
 
     chart.xPaddingInner && chart.xPaddingInner(0);
     chart.xPaddingOuter && chart.xPaddingOuter(0);
@@ -55,25 +55,5 @@ heatmapChart.plugin = {
     name: "[d3fc] Heatmap",
     max_size: 25000
 };
-
-const scrollLegend = scrollableLegend();
-function legend(container, colorInterpolate, domain) {
-    const sequentialScale = d3.scaleSequential(colorInterpolate).domain(domain);
-
-    scrollLegend
-        .scale(sequentialScale)
-        .shapeWidth(30)
-        .cells(10)
-        .orient("vertical")
-        .ascending(true);
-
-    const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
-
-    // render the legend
-    legendSelection
-        .attr("class", "legend-container")
-        .style("z-index", "2")
-        .call(scrollLegend);
-}
 
 export default heatmapChart;
