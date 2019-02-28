@@ -309,13 +309,13 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
         } else if (!sorted) {
-            slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         } else {
-            slice = __MODULE__.get_data_two_skip_headers(this.ctx, this.config.column_pivot.length, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_two_skip_headers(this._View, this.config.column_pivot.length, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();
