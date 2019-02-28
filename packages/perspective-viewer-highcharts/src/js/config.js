@@ -220,7 +220,7 @@ export function default_config(aggregates, mode) {
                 },
                 point: {
                     events: {
-                        click: function(event) {
+                        click: async function() {
                             let row_pivot_values = [];
                             let column_pivot_values = [];
                             if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
@@ -253,28 +253,19 @@ export function default_config(aggregates, mode) {
                                 else column_names.push(column_name);
                             }
 
-                            that._view.to_json({start_row, end_row}).then(r => {
-                                event.target.dispatchEvent(
-                                    new CustomEvent("perspective-click", {
-                                        bubbles: true,
-                                        composed: true,
-                                        detail: {
-                                            column_names,
-                                            config: {filters},
-                                            row: r[0]
-                                        }
-                                    })
-                                );
-                            });
+                            const r = await that._view.to_json({start_row, end_row});
+                            that.dispatchEvent(
+                                new CustomEvent("perspective-click", {
+                                    bubbles: true,
+                                    composed: true,
+                                    detail: {
+                                        column_names,
+                                        config: {filters},
+                                        row: r[0]
+                                    }
+                                })
+                            );
                         }
-                    }
-                },
-                events: {
-                    legendItemClick: function() {
-                        console.log(this);
-                    },
-                    click: function() {
-                        console.log(this);
                     }
                 }
             }
