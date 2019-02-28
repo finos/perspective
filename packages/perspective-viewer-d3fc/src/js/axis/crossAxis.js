@@ -42,9 +42,7 @@ export const domain = settings => {
     const extentTime = fc.extentTime().accessors([d => new Date(d[valueName])]);
 
     const _domain = function(data) {
-        console.log("data", data);
         const flattenedData = data.flat(2);
-        console.log("flattenedData", flattenedData);
         switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
                 return extentTime(flattenedData);
