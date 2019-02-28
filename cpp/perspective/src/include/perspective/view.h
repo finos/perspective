@@ -45,6 +45,10 @@ public:
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
+    // Data serialization
+    std::vector<t_tscalar> get_data(std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col);
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;

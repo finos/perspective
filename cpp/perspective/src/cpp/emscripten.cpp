@@ -1853,11 +1853,11 @@ namespace binding {
      * -------
      *
      */
-    template <typename T>
+    template <typename CTX_T>
     val
-    get_data(T ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col) {
-        auto slice = ctx->get_data(start_row, end_row, start_col, end_col);
+    get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col) {
+        auto slice = view->get_data(start_row, end_row, start_col, end_col);
         val arr = val::array();
         for (auto idx = 0; idx < slice.size(); ++idx) {
             arr.set(idx, scalar_to_val(slice[idx]));
@@ -1867,9 +1867,10 @@ namespace binding {
 
     template <>
     val
-    get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
+    get_data_two_skip_headers(std::shared_ptr<View<t_ctx2>> view, std::uint32_t depth,
         std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
         std::uint32_t end_col) {
+        auto ctx = view->get_context();
         auto col_length = ctx->unity_get_column_count();
         std::vector<t_uindex> col_nums;
         col_nums.push_back(0);
@@ -1880,7 +1881,7 @@ namespace binding {
         }
         col_nums = std::vector<t_uindex>(col_nums.begin() + start_col,
             col_nums.begin() + std::min(end_col, (std::uint32_t)col_nums.size()));
-        auto slice = ctx->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
+        auto slice = view->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
         val arr = val::array();
         t_uindex i = 0;
         auto iter = slice.begin();
@@ -2151,9 +2152,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);
-    function("get_data_one", &get_data<std::shared_ptr<t_ctx1>>);
-    function("get_data_two", &get_data<std::shared_ptr<t_ctx2>>);
+    function("get_data_zero", &get_data<t_ctx0>);
+    function("get_data_one", &get_data<t_ctx1>);
+    function("get_data_two", &get_data<t_ctx2>);
     function("get_data_two_skip_headers", &get_data_two_skip_headers<val>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);

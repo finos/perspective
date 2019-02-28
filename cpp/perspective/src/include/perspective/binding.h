@@ -384,12 +384,12 @@ namespace binding {
      * -------
      *
      */
-    template <typename T, typename U>
-    T get_data(U ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col);
+    template <typename CTX_T, typename T>
+    T get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
+        std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col);
 
     template <typename T>
-    T get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
+    T get_data_two_skip_headers(std::shared_ptr<View<t_ctx2>> view, std::uint32_t depth,
         std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
         std::uint32_t end_col);
 
