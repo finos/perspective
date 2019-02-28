@@ -34,31 +34,28 @@ export const scale = (settings, settingName = "crossValues") => {
 const defaultScaleBand = () => minBandwidth(d3.scaleBand());
 
 export const domain = settings => {
-    let valueName = "crossValue";
+    console.log("settings", settings);
 
-    let extentLinear = fc.extentLinear();
-    let extentTime = fc.extentTime();
+    let valueName = "crossValue";
+    let settingName = "crossValues";
+
+    const extentTime = fc.extentTime().accessors([d => new Date(d[valueName])]);
 
     const _domain = function(data) {
-        const accessData = extent => {
-            return extent.accessors([labelFunction(settings)])(data);
-        };
-        switch (axisType(settings)) {
+        console.log("data", data);
+        const flattenedData = data.flat(2);
+        console.log("flattenedData", flattenedData);
+        switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
-                return accessData(extentTime);
-            case AXIS_TYPES.linear:
-                return accessData(extentLinear);
+                return extentTime(flattenedData);
             default:
-                return settings.data.map(labelFunction(settings));
+                return [...new Set(flattenedData.map(d => d[valueName]))];
         }
     };
 
     switch (axisType(settings)) {
         case AXIS_TYPES.time:
             fc.rebindAll(_domain, extentTime);
-            break;
-        case AXIS_TYPES.linear:
-            fc.rebindAll(_domain, extentLinear);
             break;
     }
 
@@ -67,6 +64,14 @@ export const domain = settings => {
             return valueName;
         }
         valueName = args[0];
+        return _domain;
+    };
+
+    _domain.settingName = (...args) => {
+        if (!args.length) {
+            return settingName;
+        }
+        settingName = args[0];
         return _domain;
     };
 
@@ -117,19 +122,14 @@ export const styleAxis = (chart, prefix, settings, settingName = "crossValues", 
 
     let labelSize = 25;
 
-    if (prefix !== "x") {
-        if (suppliedDomain) {
-            const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[settingName].length);
-            labelSize = maxLengths.reduce((m, v) => m + v, 0) * 5;
-        } else {
-            const valueSize = v => v.length * 5;
-            const valueSetSize = s => s.split && s.split("|").reduce((m, v) => Math.max(m, valueSize(v)), 0);
-            labelSize = domain(settings)(settings.data).reduce((m, v) => Math.max(m, valueSetSize(v)), 0);
-        }
-    }
-
     switch (axisType(settings, settingName)) {
         case AXIS_TYPES.ordinal:
+            if (prefix !== "x" && suppliedDomain) {
+                // calculate the label size from the data
+                const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[settingName].length);
+                labelSize = maxLengths.reduce((m, v) => m + v, 0) * 5;
+            }
+
             chart[`${prefix}TickGrouping`](t => t.split("|"))
                 [`${prefix}TickSizeInner`](settings[settingName].length > 1 ? labelSize : 5)
                 [`${prefix}TickSizeOuter`](0)

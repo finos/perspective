@@ -24,20 +24,23 @@ function heatmapChart(container, settings) {
 
     const series = heatmapSeries(settings, colorInterpolate);
 
-    const uniqueYDomain = [...new Set(data.map(d => d.mainValue))];
+    const yDomain = crossAxis
+        .domain(settings)
+        .settingName("splitValues")
+        .valueName("mainValue")(data);
     const extent = fc.extentLinear().accessors([d => d.colorValue]);
 
     const colourDomain = extent(data);
     legend(container, colorInterpolate, colourDomain);
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), crossAxis.scale(settings, "splitValues"))
-        .xDomain(crossAxis.domain(settings)(settings.data))
-        .yDomain(uniqueYDomain)
+        .xDomain(crossAxis.domain(settings)(data))
+        .yDomain(yDomain)
         .yOrient("left")
         .plotArea(withGridLines(series));
 
     crossAxis.styleAxis(chart, "x", settings, "crossValues");
-    crossAxis.styleAxis(chart, "y", settings, "splitValues", uniqueYDomain);
+    crossAxis.styleAxis(chart, "y", settings, "splitValues", yDomain);
 
     chart.xPaddingInner && chart.xPaddingInner(0);
     chart.xPaddingOuter && chart.xPaddingOuter(0);
