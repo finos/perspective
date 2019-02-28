@@ -16,6 +16,7 @@ import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
@@ -24,10 +25,15 @@ function lineChart(container, settings) {
 
     const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 
+    const paddingStrategy = hardLimitZeroPadding()
+        .pad([0.1, 0.1])
+        .padUnit("percent");
+
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(data))
-        .yDomain(mainAxis.domain(settings).pad([0.1, 0.1])(data))
+        .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
         .yOrient("left")
+        .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
     crossAxis.styleAxis(chart, "x", settings);
