@@ -513,3 +513,21 @@ elem.addEventListener("perspective-config-update", function() {
     console.log("The view() config has changed to " + JSON.stringify(config));
 });
 ```
+
+### Click events
+
+Whenever a `<perspective-viewer>`'s grid or chart are clicked, a 
+`perspective-click` DOM event is fired containing a detail object with `config`,
+`column_names` and `row`.
+The `config` object contains an array of `filters` that can be applied to a 
+`<perspective-viewer>` through the use of `restore()` updating it to show the 
+filtered subset of data.
+The `column_names` property contains an array of matching columns and the `row` 
+property returns the associated row data.
+
+```javascript
+elem.addEventListener("perspective-click", function(event) {
+    var config = event.detail.config;
+    elem.restore(config);
+});
+```
