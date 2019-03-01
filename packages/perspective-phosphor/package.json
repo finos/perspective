@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-phosphor",
-    "version": "0.2.18",
+    "version": "0.2.19",
     "description": "Perspective.js",
     "files": [
         "build/*.d.ts",
@@ -28,8 +28,8 @@
     "dependencies": {
         "@jpmorganchase/perspective": "^0.2.18",
         "@jpmorganchase/perspective-viewer": "^0.2.18",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.18",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.18",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.19",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.19",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },

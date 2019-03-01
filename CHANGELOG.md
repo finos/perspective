@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.19] - 2019-03-01
+### Fixes
+* [#461](https://github.com/jpmorganchase/perspective/pull/461) Fixed click event bugs in `perspective-viewer-hypergrid` and `perspective-viewer-highcharts`
+
 ## [0.2.18] - 2019-02-27
 ### Added
 * [#420](https://github.com/jpmorganchase/perspective/pull/420) New plugin based on D3FC - `perspective-viewer-d3fc`.

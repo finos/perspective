@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer-highcharts",
-    "version": "0.2.18",
+    "version": "0.2.19",
     "description": "Perspective.js",
     "main": "cjs/js/highcharts.js",
     "browser": "cjs/js/highcharts.js",
