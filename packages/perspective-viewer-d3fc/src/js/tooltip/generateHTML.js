@@ -82,7 +82,7 @@ function getDataValues(settings, data) {
     } else {
         const splits = data.key.split("|");
         return {
-            values: [data.mainValue - data.baseValue],
+            values: !!data.baseValue ? [data.mainValue - data.baseValue] : [data.mainValue],
             labels: [{name: splits[splits.length - 1]}]
         };
     }
