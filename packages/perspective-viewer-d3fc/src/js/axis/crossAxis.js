@@ -10,6 +10,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
+import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
 
 const AXIS_TYPES = {
     none: "none",
@@ -117,7 +118,6 @@ export const styleAxis = (chart, prefix, settings, settingName = "crossValues") 
     chart[`${prefix}Label`](label(settings, settingName));
 
     const suppliedDomain = chart[`${prefix}Domain`]();
-
     let labelSize = 25;
 
     switch (axisType(settings, settingName)) {
@@ -125,15 +125,26 @@ export const styleAxis = (chart, prefix, settings, settingName = "crossValues") 
             if (prefix !== "x" && suppliedDomain) {
                 // calculate the label size from the data
                 const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[settingName].length);
-                labelSize = maxLengths.reduce((m, v) => m + v, 0) * 5;
+                labelSize = Math.max(...maxLengths) * 5 + 10;
             }
 
-            chart[`${prefix}TickGrouping`](t => t.split("|"))
-                [`${prefix}TickSizeInner`](settings[settingName].length > 1 ? labelSize : 5)
-                [`${prefix}TickSizeOuter`](0)
+            const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
+            const tickSize = multiLevel ? labelSize : 5;
+
+            chart[`${prefix}CenterAlignTicks`](true)
+                [`${prefix}TickSizeInner`](tickSize)
+                [`${prefix}TickSizeOuter`](tickSize)
                 [`${prefix}TickPadding`](8)
-                [`${prefix}AxisSize`](settings[settingName].length * labelSize + 5)
+                [`${prefix}Axis${prefix === "x" ? "Height" : "Width"}`](settings[settingName].length * labelSize + 5)
                 [`${prefix}Decorate`](hideOverlappingLabels);
+
+            if (multiLevel) {
+                chart[`${prefix}Axis`](scale => {
+                    const multiAxis = prefix === "x" ? multiAxisBottom(scale) : multiAxisLeft(scale);
+                    multiAxis.groups(axisGroups(suppliedDomain));
+                    return multiAxis;
+                });
+            }
             break;
     }
 };
@@ -163,3 +174,21 @@ function hideOverlappingLabels(s) {
         }
     });
 }
+
+const axisGroups = domain => {
+    const groups = [];
+    domain.forEach(tick => {
+        const split = tick.split("|");
+        split.forEach((s, i) => {
+            while (groups.length <= i) groups.push([]);
+
+            const group = groups[i];
+            if (group.length > 0 && group[group.length - 1].text === s) {
+                group[group.length - 1].domain.push(tick);
+            } else {
+                group.push({text: s, domain: [tick]});
+            }
+        });
+    });
+    return groups.length > 1 ? groups.reverse() : null;
+};
