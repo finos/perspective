@@ -59,10 +59,7 @@ const multiAxis = (orient, baseAxis, scale) => {
                 return sum;
             };
 
-            // enter
-            g.enter().attr("transform", (d, i) => translate(0, sign * getAxisOffset(i)));
-
-            g.each((group, i, nodes) => {
+            g.attr("transform", (d, i) => translate(0, sign * getAxisOffset(i))).each((group, i, nodes) => {
                 const groupElement = select(nodes[i]);
                 const groupScale = scaleFromGroup(scale, group);
                 const useAxis = axisStore(baseAxis(groupScale))
