@@ -5,7 +5,7 @@ import tooltipTemplate from "../../html/tooltip.html";
 
 export function tooltip(selection, settings) {
     const node = selection.node();
-    if (!node) return;
+    if (!node || !node.isConnected) return;
 
     const container = select(getChartElement(node).getContainer());
     const tooltipDiv = getTooltipDiv(container);
