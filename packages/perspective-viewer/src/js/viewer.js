@@ -602,6 +602,19 @@ class PerspectiveViewer extends ActionElement {
 }
 
 /**
+ * `perspective-click` is fired whenever underlying `view`'s grid or chart are
+ * clicked providing a detail that includes a config, column_names and row.
+ *
+ * @event PerspectiveViewer#perspective-click
+ * @type {object}
+ * @property {array} column_names - Includes a list of column names.
+ * @property {object} config - Contains a property `filters` that can be applied
+ * to a `<perspective-viewer>` through the use of `restore()` updating it to
+ * show the filtered subset of data..
+ * @property {array} row - Includes the data row.
+ */
+
+/**
  * `perspective-config-update` is fired whenever an configuration attribute has
  * been modified, by the user or otherwise.
  *
