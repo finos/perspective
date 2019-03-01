@@ -1857,45 +1857,45 @@ namespace binding {
     val
     get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row, std::uint32_t end_row,
         std::uint32_t start_col, std::uint32_t end_col) {
-        auto slice = view->get_data(start_row, end_row, start_col, end_col);
         val arr = val::array();
-        for (auto idx = 0; idx < slice.size(); ++idx) {
-            arr.set(idx, scalar_to_val(slice[idx]));
+        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
+        auto slice = data_slice.slice;
+        for (auto idx = 0; idx < slice->size(); ++idx) {
+            arr.set(idx, scalar_to_val(slice->at(idx)));
         }
         return arr;
     }
 
     template <>
     val
-    get_data_two_skip_headers(std::shared_ptr<View<t_ctx2>> view, std::uint32_t depth,
-        std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col) {
-        auto ctx = view->get_context();
-        auto col_length = ctx->unity_get_column_count();
-        std::vector<t_uindex> col_nums;
-        col_nums.push_back(0);
-        for (t_uindex i = 0; i < col_length; ++i) {
-            if (ctx->unity_get_column_path(i + 1).size() == depth) {
-                col_nums.push_back(i + 1);
-            }
-        }
-        col_nums = std::vector<t_uindex>(col_nums.begin() + start_col,
-            col_nums.begin() + std::min(end_col, (std::uint32_t)col_nums.size()));
-        auto slice = view->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
+    get_data(std::shared_ptr<View<t_ctx2>> view, std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
-        t_uindex i = 0;
-        auto iter = slice.begin();
-        while (iter != slice.end()) {
-            t_uindex prev = col_nums.front();
-            for (auto idx = col_nums.begin(); idx != col_nums.end(); idx++, i++) {
-                t_uindex col_num = *idx;
-                iter += col_num - prev;
-                prev = col_num;
-                arr.set(i, scalar_to_val(*iter));
+        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
+        auto slice = data_slice.slice;
+        auto column_indices = data_slice.column_indices;
+
+        if (column_indices->size() > 0) {
+            t_uindex i = 0;
+            auto iter = slice->begin();
+            while (iter != slice->end()) {
+                t_uindex prev = column_indices->front();
+                for (auto idx = column_indices->begin(); idx != column_indices->end();
+                     idx++, i++) {
+                    t_uindex col_num = *idx;
+                    iter += col_num - prev;
+                    prev = col_num;
+                    arr.set(i, scalar_to_val(*iter));
+                }
+                if (iter != slice->end())
+                    iter++;
             }
-            if (iter != slice.end())
-                iter++;
+        } else {
+            for (auto idx = 0; idx < slice->size(); ++idx) {
+                arr.set(idx, scalar_to_val(slice->at(idx)));
+            }
         }
+
         return arr;
     }
 
@@ -2155,7 +2155,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("get_data_zero", &get_data<t_ctx0>);
     function("get_data_one", &get_data<t_ctx1>);
     function("get_data_two", &get_data<t_ctx2>);
-    function("get_data_two_skip_headers", &get_data_two_skip_headers<val>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);

@@ -23,6 +23,15 @@
 #include <map>
 
 namespace perspective {
+/**
+ * @brief t_data_slice contains a slice of the View's underlying data
+ * with the metadata required to correctly parse it.
+ *
+ */
+struct t_data_slice {
+    std::shared_ptr<std::vector<t_tscalar>> slice;
+    std::shared_ptr<std::vector<t_uindex>> column_indices;
+};
 
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
@@ -46,7 +55,7 @@ public:
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
     // Data serialization
-    std::vector<t_tscalar> get_data(std::uint32_t start_row, std::uint32_t end_row,
+    t_data_slice get_data(std::uint32_t start_row, std::uint32_t end_row,
         std::uint32_t start_col, std::uint32_t end_col);
 
     // Getters
