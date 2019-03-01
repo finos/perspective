@@ -118,25 +118,26 @@ export const styleAxis = (chart, prefix, settings, settingName = "crossValues") 
     chart[`${prefix}Label`](label(settings, settingName));
 
     const suppliedDomain = chart[`${prefix}Domain`]();
-    let labelSize = 25;
 
     switch (axisType(settings, settingName)) {
         case AXIS_TYPES.ordinal:
+            const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
+            let tickSizeInner = multiLevel ? 25 : 5;
+            let tickSizeOuter = multiLevel ? settings[settingName].length * 25 : 5;
+
             if (prefix !== "x" && suppliedDomain) {
                 // calculate the label size from the data
                 const maxLengths = getMaxLengthsFromDomain(suppliedDomain, settings[settingName].length);
-                labelSize = Math.max(...maxLengths) * 5 + 10;
+                tickSizeInner = maxLengths.reverse().map(l => l * 5 + 10);
+                tickSizeOuter = tickSizeInner.reduce((s, v) => s + v, 0);
             }
 
-            const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
-            const tickSize = multiLevel ? labelSize : 5;
-
             chart[`${prefix}CenterAlignTicks`](true)
-                [`${prefix}TickSizeInner`](tickSize)
-                [`${prefix}TickSizeOuter`](tickSize)
+                [`${prefix}TickSizeInner`](tickSizeInner)
+                [`${prefix}TickSizeOuter`](tickSizeOuter)
                 [`${prefix}TickPadding`](8)
-                [`${prefix}Axis${prefix === "x" ? "Height" : "Width"}`](settings[settingName].length * labelSize + 5)
-                [`${prefix}Decorate`](hideOverlappingLabels);
+                [`${prefix}Axis${prefix === "x" ? "Height" : "Width"}`](tickSizeOuter + 10)
+                [`${prefix}Decorate`](d => hideOverlappingLabels(d));
 
             if (multiLevel) {
                 chart[`${prefix}Axis`](scale => {
