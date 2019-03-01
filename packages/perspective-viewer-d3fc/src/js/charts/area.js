@@ -9,29 +9,31 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
+import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
-import {lineSeries} from "../series/lineSeries";
-import {splitData} from "../data/splitData";
+import {splitAndBaseData} from "../data/splitAndBaseData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
-function lineChart(container, settings) {
-    const data = splitData(settings, filterData(settings));
+function areaChart(container, settings) {
+    const data = splitAndBaseData(settings, filterData(settings));
+
     const colour = seriesColours(settings);
     legend(container, settings, colour);
 
-    const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
-
-    const paddingStrategy = hardLimitZeroPadding()
-        .pad([0.1, 0.1])
-        .padUnit("percent");
+    const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
     const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(data))
-        .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
+        .yDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .paddingStrategy(hardLimitZeroPadding())(data)
+        )
         .yOrient("left")
         .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
@@ -45,10 +47,10 @@ function lineChart(container, settings) {
     // render
     container.datum(data).call(chart);
 }
-lineChart.plugin = {
-    type: "d3_y_line",
-    name: "[d3fc] Y Line Chart",
+areaChart.plugin = {
+    type: "d3_y_area",
+    name: "[d3fc] Y Area Chart",
     max_size: 25000
 };
 
-export default lineChart;
+export default areaChart;

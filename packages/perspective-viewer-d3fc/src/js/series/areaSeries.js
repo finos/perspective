@@ -7,20 +7,17 @@
  *
  */
 import * as fc from "d3fc";
-import {tooltip} from "../tooltip/tooltip";
 
-export function barSeries(settings, colour) {
-    let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
+export function areaSeries(settings, colour) {
+    let series = fc.seriesSvgArea();
 
     series = series.decorate(selection => {
-        tooltip()(selection, settings);
         if (colour) {
-            selection.style("fill", d => colour(d.key));
+            selection.style("fill", d => colour(d[0].key));
         }
     });
 
-    return fc
-        .autoBandwidth(series)
+    return series
         .crossValue(d => d.crossValue)
         .mainValue(d => d.mainValue)
         .baseValue(d => d.baseValue);

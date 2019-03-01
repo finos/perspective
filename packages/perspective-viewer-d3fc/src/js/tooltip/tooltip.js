@@ -2,25 +2,41 @@ import {select} from "d3";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
+import {generateHtmlDefault} from "./generateHTML";
 
-export function tooltip(selection, settings) {
-    const node = selection.node();
-    if (!node || !node.isConnected) return;
+export const tooltip = () => {
+    let generateHtml = generateHtmlDefault;
 
-    const container = select(getChartElement(node).getContainer());
-    const tooltipDiv = getTooltipDiv(container);
-    selection
-        //        .filter(d => d.baseValue !== d.mainValue)
-        .on("mouseover", function(data) {
-            generateHtml(tooltipDiv, data, settings);
-            showTooltip(container.node(), this, tooltipDiv);
-            select(this).style("opacity", "0.7");
-        })
-        .on("mouseout", function() {
-            hideTooltip(tooltipDiv);
-            select(this).style("opacity", "1");
-        });
-}
+    const _tooltip = (selection, settings) => {
+        const node = selection.node();
+
+        if (!node || !node.isConnected) return;
+
+        const container = select(getChartElement(node).getContainer());
+        const tooltipDiv = getTooltipDiv(container);
+        selection
+            //        .filter(d => d.baseValue !== d.mainValue)
+            .on("mouseover", function(data) {
+                generateHtml(tooltipDiv, data, settings);
+                showTooltip(container.node(), this, tooltipDiv);
+                select(this).style("opacity", "0.7");
+            })
+            .on("mouseout", function() {
+                hideTooltip(tooltipDiv);
+                select(this).style("opacity", "1");
+            });
+    };
+
+    _tooltip.generateHtml = (...args) => {
+        if (!args.length) {
+            return generateHtml;
+        }
+        generateHtml = args[0];
+        return _tooltip;
+    };
+
+    return _tooltip;
+};
 
 function getTooltipDiv(container) {
     return getOrCreateElement(container, "div.tooltip", () =>
@@ -31,74 +47,6 @@ function getTooltipDiv(container) {
             .style("opacity", 0)
             .html(tooltipTemplate)
     );
-}
-
-function generateHtml(tooltipDiv, data, settings) {
-    // Add group data
-    if (settings.crossValues.length) {
-        const groups = data.crossValue.split(",");
-        tooltipDiv
-            .select("#cross-values")
-            .selectAll("li")
-            .data(groups)
-            .join("li")
-            .each(eachValue(settings.crossValues));
-    }
-
-    const splitValues = getSplitValues(settings, data);
-    // Add data value
-    tooltipDiv
-        .select("#split-values")
-        .selectAll("li")
-        .data(splitValues.values)
-        .join("li")
-        .each(eachValue(splitValues.labels));
-
-    const dataValues = getDataValues(settings, data);
-    // Add data value
-    tooltipDiv
-        .select("#data-values")
-        .selectAll("li")
-        .data(dataValues.values)
-        .join("li")
-        .each(eachValue(dataValues.labels));
-}
-
-function getSplitValues(settings, data) {
-    const splits = data.key ? data.key.split("|") : [];
-
-    return {
-        values: data.mainValues ? splits : splits.slice(0, -1),
-        labels: settings.splitValues
-    };
-}
-
-function getDataValues(settings, data) {
-    if (data.mainValues) {
-        return {
-            values: data.mainValues,
-            labels: settings.mainValues
-        };
-    } else {
-        const splits = data.key.split("|");
-        return {
-            values: [data.mainValue - data.baseValue],
-            labels: [{name: splits[splits.length - 1]}]
-        };
-    }
-}
-
-function eachValue(list) {
-    return function(d, i) {
-        select(this)
-            .text(`${list[i].name}: `)
-            .append("b")
-            .text(formatNumber(d));
-    };
-}
-
-function formatNumber(value) {
-    return value.toLocaleString(undefined, {style: "decimal"});
 }
 
 function showTooltip(containerNode, barNode, tooltipDiv) {

@@ -15,6 +15,9 @@ import {seriesLinearRange} from "../series/seriesLinearRange";
 import {legend, filterDataByGroup} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
+import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const colour = seriesColoursFromGroups(settings);
@@ -27,13 +30,16 @@ function xyScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(series => pointSeries(settings, colour, series.key, size)));
 
-    const chart = fc
-        .chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data, "x"))
+    const domainDefault = mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
+
+    const chart = chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
+        .xDomain(domainDefault.valueName("x")(data))
         .xLabel(settings.mainValues[0].name)
-        .yDomain(mainAxis.domain(settings, data, "y"))
+        .yDomain(domainDefault.valueName("y")(data))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
+        .yNice()
+        .xNice()
         .plotArea(withGridLines(series));
 
     // render

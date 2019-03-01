@@ -15,6 +15,9 @@ import {groupAndStackData} from "../data/groupAndStackData";
 import {legend, filterData} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
+import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
+import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = seriesColours(settings);
@@ -31,16 +34,23 @@ function barChart(container, settings) {
             )
         );
 
-    const chart = fc
-        .chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
-        .xDomain(mainAxis.domain(settings, data))
-        .xLabel(mainAxis.label(settings))
-        .yDomain(crossAxis.domain(settings, data))
+    const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
+        .xDomain(
+            mainAxis
+                .domain(settings)
+                .include([0])
+                .paddingStrategy(hardLimitZeroPadding())(data)
+        )
+        .yDomain(crossAxis.domain(settings)(data))
         .yOrient("left")
-        .yLabel(crossAxis.label(settings))
+        .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
 
-    chart.yPadding && chart.yPadding(0.5);
+    crossAxis.styleAxis(chart, "y", settings, "crossValues");
+    mainAxis.styleAxis(chart, "x", settings);
+
+    chart.yPaddingInner && chart.yPaddingInner(0.5);
+    chart.yPaddingOuter && chart.yPaddingOuter(0.25);
 
     // render
     container.datum(data).call(chart);
