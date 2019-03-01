@@ -41,13 +41,13 @@ class D3FCChartElement extends HTMLElement {
 
     draw() {
         if (this._settings.data) {
+            this._settings.size = this._container.getBoundingClientRect();
             this._chart(d3.select(this._container).attr("class", `chart ${this._chart.plugin.type}`), this._settings);
         }
     }
 
     resize() {
-        const d3fcGroup = this._container.querySelector("d3fc-group");
-        if (d3fcGroup) d3fcGroup.requestRedraw();
+        this.draw();
     }
 
     remove() {
