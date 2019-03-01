@@ -312,10 +312,8 @@ export default function(Module) {
             slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
             slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
-        } else if (!sorted) {
-            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         } else {
-            slice = __MODULE__.get_data_two_skip_headers(this._View, this.config.column_pivot.length, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();

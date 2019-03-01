@@ -293,51 +293,47 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
  * @return std::vector<t_tscalar>
  */
 template <typename CTX_T>
-std::vector<t_tscalar>
+t_data_slice
 View<CTX_T>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
     std::uint32_t end_col) {
-    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
-    return slice;
+    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
+        m_ctx->get_data(start_row, end_row, start_col, end_col));
+    auto data_slice = t_data_slice{slice_ptr};
+    return data_slice;
 }
 
-/*template <>
-std::vector<t_tscalar>
+template <>
+t_data_slice
 View<t_ctx2>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-std::uint32_t end_col) { auto column_indices = std::vector<t_uindex>{0}; bool is_sorted =
-m_sorts.size() > 0;
+    std::uint32_t end_col) {
+    std::vector<t_tscalar> slice;
+    std::vector<t_uindex> column_indices;
+    bool is_sorted = m_sorts.size() > 0;
 
     if (is_sorted) {
         auto depth = m_column_pivots.size();
         auto col_length = m_ctx->unity_get_column_count();
+        column_indices.push_back(0);
         for (t_uindex i = 0; i < col_length; ++i) {
             if (m_ctx->unity_get_column_path(i + 1).size() == depth) {
                 column_indices.push_back(i + 1);
             }
         }
-    }
 
-    column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
+        column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
             column_indices.begin() + std::min(end_col, (std::uint32_t)column_indices.size()));
 
-    auto slice = m_ctx->get_data(start_row, end_row, column_indices.front(),
-column_indices.back() + 1);
-
-    t_uindex i = 0;
-    auto iter = slice.begin();
-    while (iter != slice.end()) {
-        t_uindex prev = column_indices.front();
-        for (auto idx = column_indices.begin(); idx != column_indices.end(); idx++, i++) {
-            t_uindex col_num = *idx;
-            iter += col_num - prev;
-            prev = col_num;
-            arr.set(i, scalar_to_val(*iter));
-        }
-        if (iter != slice.end())
-            iter++;
+        slice = m_ctx->get_data(
+            start_row, end_row, column_indices.front(), column_indices.back() + 1);
+    } else {
+        slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     }
 
-    return slice;
-}*/
+    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
+    auto col_indices_ptr = std::make_shared<std::vector<t_uindex>>(column_indices);
+    auto data_slice = t_data_slice{slice_ptr, col_indices_ptr};
+    return data_slice;
+}
 
 // Getters
 template <typename CTX_T>
