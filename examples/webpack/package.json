@@ -1,7 +1,7 @@
 {
     "name": "webpack",
     "private": true,
-    "version": "0.2.16",
+    "version": "0.2.19",
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
         "start": "npm-run-all -l -p webpack-watch host:app host:bundles",
@@ -12,13 +12,13 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.16",
-        "@jpmorganchase/perspective-viewer": "^0.2.16",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.16",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.16"
+        "@jpmorganchase/perspective": "^0.2.18",
+        "@jpmorganchase/perspective-viewer": "^0.2.18",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.19",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.19"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16",
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.17",
         "css-loader": "^0.28.7",
         "http-server": "^0.11.1",
         "less-loader": "^4.0.5",

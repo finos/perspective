@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer-hypergrid",
-    "version": "0.2.16",
+    "version": "0.2.19",
     "description": "Perspective.js",
     "main": "cjs/js/hypergrid.js",
     "module": "cjs/js/hypergrid.js",
@@ -20,7 +20,7 @@
         "test:build": "cp test/html/* build",
         "test:run": "jest --silent --color",
         "test": "npm-run-all test:build test:run",
-        "clean": "find build -mindepth 1 -delete",
+        "clean": "find build -mindepth 1 -delete && find cjs -mindepth 1 -delete",
         "clean:screenshots": "find screenshots/ \\( -name *.diff.png -o -name *.failed.png \\) -mindepth 1 -delete"
     },
     "jest": {
@@ -42,8 +42,9 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.16",
-        "@jpmorganchase/perspective-viewer": "^0.2.16",
+        "@babel/runtime": "^7.3.4",
+        "@jpmorganchase/perspective": "^0.2.18",
+        "@jpmorganchase/perspective-viewer": "^0.2.18",
         "datasaur-local": "3.0.0",
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
@@ -51,6 +52,6 @@
         "rectangular": "1.0.1"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.16"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.17"
     }
 }
