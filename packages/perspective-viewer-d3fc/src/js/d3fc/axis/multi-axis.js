@@ -55,7 +55,11 @@ const multiAxis = (orient, baseAxis, scale) => {
             g.each((group, i, nodes) => {
                 const groupElement = select(nodes[i]);
                 const groupScale = scaleFromGroup(scale, group);
-                axisStore(baseAxis(groupScale).decorate(decorate)).tickOffset(d => groupScale.step(d) / 2)(groupElement);
+                const useAxis = axisStore(baseAxis(groupScale))
+                    .decorate(decorate)
+                    .tickOffset(d => groupScale.step(d) / 2);
+
+                useAxis(groupElement);
 
                 groupElement.select("path.domain").attr("visibility", "hidden");
             });
@@ -77,10 +81,11 @@ const multiAxis = (orient, baseAxis, scale) => {
         customScale.tickFormat = () => d => {
             return d.text;
         };
+        customScale.copy = () => scaleFromGroup(scale, group);
 
         customScale.step = value => value.domain.length * scale.step();
 
-        rebindAll(customScale, scale, exclude("ticks", "step"));
+        rebindAll(customScale, scale, exclude("ticks", "step", "copy"));
         return customScale;
     };
 
