@@ -603,7 +603,8 @@ class PerspectiveViewer extends ActionElement {
 
 /**
  * `perspective-click` is fired whenever underlying `view`'s grid or chart are
- * clicked providing a detail that includes a config, column_names and row.
+ * clicked providing a detail that includes a `config`, `column_names` and
+ * `row`.
  *
  * @event PerspectiveViewer#perspective-click
  * @type {object}
