@@ -326,6 +326,19 @@ export default function(Module) {
             depth = this.config.column_pivot.length;
         }
 
+        /*
+        let num_rows = this.num_rows();
+        let num_cols = this.num_cols();
+        let column_names = extract_vector(data_slice.get_column_names());
+        for (let ridx = 0; ridx < num_rows; ridx++) {
+            row = {}; // or array for col, etc;
+            for (let cidx = 0; cidx < num_cols; cidx++) {
+                row[column_names[cidx]] = data_slice.get(ridx, cidx);
+            }
+            data.push(row);
+        }
+        */
+
         let col_names = [[]].concat(this._column_names(skip, depth));
         let row;
         let ridx = -1;
