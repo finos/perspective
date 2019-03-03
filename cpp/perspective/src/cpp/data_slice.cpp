@@ -92,6 +92,19 @@ t_data_slice<CTX_T>::get_column_indices() const {
     return m_column_indices;
 }
 
+template <typename CTX_T>
+bool
+t_data_slice<CTX_T>::is_column_only() const {
+    auto config = m_ctx->get_config();
+    return config.is_column_only();
+}
+
+template <>
+bool
+t_data_slice<t_ctx0>::is_column_only() const {
+    return false;
+}
+
 // Explicitly instantiate data slice for each context
 template class t_data_slice<t_ctx0>;
 template class t_data_slice<t_ctx1>;

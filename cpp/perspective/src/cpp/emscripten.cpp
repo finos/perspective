@@ -1662,7 +1662,7 @@ namespace binding {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
-        bool column_only = view_config.get_column_only();
+        bool column_only = view_config.is_column_only();
         auto aggregates = view_config.get_aggregates();
         auto row_pivots = view_config.get_row_pivots();
         auto filter_op = view_config.get_combiner();
@@ -1690,7 +1690,7 @@ namespace binding {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
-        bool column_only = view_config.get_column_only();
+        bool column_only = view_config.is_column_only();
         auto column_names = view_config.get_column_names();
         auto row_pivots = view_config.get_row_pivots();
         auto column_pivots = view_config.get_column_pivots();
@@ -1717,7 +1717,8 @@ namespace binding {
         }
 
         auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
-            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, pool, gnode, name);
+            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, pool, gnode,
+            name);
 
         auto view_ptr
             = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
@@ -1765,7 +1766,7 @@ namespace binding {
         std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
         std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name) {
-        auto cfg = t_config(pivots, aggregates, combiner, filters);
+        auto cfg = t_config(pivots, aggregates, combiner, filters, column_only);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
@@ -1798,10 +1799,11 @@ namespace binding {
         std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
         std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
         std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
+        bool column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
         t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
-        auto cfg = t_config(rpivots, cpivots, aggregates, total, combiner, filters);
+        auto cfg
+            = t_config(rpivots, cpivots, aggregates, total, combiner, filters, column_only);
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();

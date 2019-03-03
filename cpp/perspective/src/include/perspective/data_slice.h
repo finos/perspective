@@ -59,6 +59,7 @@ public:
     std::shared_ptr<std::vector<t_tscalar>> get_slice() const;
     std::shared_ptr<std::vector<std::string>> get_column_names() const;
     std::shared_ptr<std::vector<t_uindex>> get_column_indices() const;
+    bool is_column_only() const;
 
 private:
     std::shared_ptr<CTX_T> m_ctx;

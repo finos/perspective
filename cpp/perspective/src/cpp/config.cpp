@@ -142,9 +142,11 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
 
 t_config::t_config(const std::vector<t_pivot>& row_pivots,
     const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms)
+    const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+    bool column_only)
     : m_row_pivots(row_pivots)
     , m_col_pivots(col_pivots)
+    , m_column_only(column_only)
     , m_aggregates(aggregates)
     , m_totals(totals)
     , m_combiner(combiner)
@@ -204,8 +206,9 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
 
 t_config::t_config(const std::vector<t_pivot>& row_pivots,
     const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
+    const std::vector<t_fterm>& fterms, bool column_only)
     : m_row_pivots(row_pivots)
+    , m_column_only(column_only)
     , m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)
@@ -396,7 +399,7 @@ t_config::get_num_cpivots() const {
 }
 
 bool
-t_config::get_column_only() const {
+t_config::is_column_only() const {
     return m_column_only;
 }
 
