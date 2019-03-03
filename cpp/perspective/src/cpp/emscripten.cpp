@@ -1831,6 +1831,19 @@ namespace binding {
         return ctx2;
     }
 
+    /******************************************************************************
+     *
+     * Data serialization
+     */
+
+    /**
+     * @brief Get a slice of data for a single column, serialized to val.
+     *
+     * @tparam
+     * @param table
+     * @param colname
+     * @return val
+     */
     template <>
     val
     get_column_data(std::shared_ptr<t_table> table, std::string colname) {
@@ -1843,15 +1856,16 @@ namespace binding {
     }
 
     /**
+     * @brief Get a slice of data foe each column from the underlying view,
+     * serialized to val.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @tparam CTX_T
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
      */
     template <typename CTX_T>
     val
@@ -1859,21 +1873,33 @@ namespace binding {
         std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
         auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice.slice;
+        auto slice = data_slice.get_slice();
         for (auto idx = 0; idx < slice->size(); ++idx) {
             arr.set(idx, scalar_to_val(slice->at(idx)));
         }
         return arr;
     }
 
+    /**
+     * @brief Get a slice of data from the underlying view, serlializing to val
+     * and, for sorted views, ignoring the sort headers which aren't part of the
+     * underlying data.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
     template <>
     val
     get_data(std::shared_ptr<View<t_ctx2>> view, std::uint32_t start_row, std::uint32_t end_row,
         std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
         auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice.slice;
-        auto column_indices = data_slice.column_indices;
+        auto slice = data_slice.get_slice();
+        auto column_indices = data_slice.get_column_indices();
 
         if (column_indices->size() > 0) {
             t_uindex i = 0;
@@ -2037,6 +2063,13 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function<void>("reset", &t_gnode::reset)
         .function<t_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
 
+    /******************************************************************************
+     *
+     * t_data_slice
+     */
+    class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0");
+    class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1");
+    class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2");
     /******************************************************************************
      *
      * t_ctx0
