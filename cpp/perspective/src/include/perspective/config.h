@@ -73,7 +73,7 @@ public:
 
     t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
         const std::vector<t_aggspec>& aggregates, const t_totals totals, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+        const std::vector<t_fterm>& fterms, bool column_only);
 
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
@@ -86,7 +86,7 @@ public:
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 
     t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms);
+        t_filter_op combiner, const std::vector<t_fterm>& fterms, bool column_only);
 
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
@@ -122,7 +122,7 @@ public:
     std::vector<std::string> get_column_names() const;
     t_uindex get_num_rpivots() const;
     t_uindex get_num_cpivots() const;
-    bool get_column_only() const;
+    bool is_column_only() const;
 
     std::vector<t_pivot> get_pivots() const;
     const std::vector<t_pivot>& get_row_pivots() const;

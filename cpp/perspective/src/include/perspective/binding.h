@@ -365,7 +365,7 @@ namespace binding {
         std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
         std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
         std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name);
+        bool column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name);
 
     template <typename T>
     void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby);
