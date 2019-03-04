@@ -299,7 +299,8 @@ View<CTX_T>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint3
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
         m_ctx->get_data(start_row, end_row, start_col, end_col));
     auto names_ptr = std::make_shared<std::vector<std::string>>(_column_names());
-    auto data_slice = t_data_slice<CTX_T>(m_ctx, slice_ptr, names_ptr);
+    auto data_slice = t_data_slice<CTX_T>(
+        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, names_ptr);
     return data_slice;
 }
 
@@ -336,7 +337,8 @@ View<t_ctx2>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
     auto names_ptr = std::make_shared<std::vector<std::string>>(column_names);
     auto indices_ptr = std::make_shared<std::vector<t_uindex>>(column_indices);
-    auto data_slice = t_data_slice<t_ctx2>(m_ctx, slice_ptr, names_ptr, indices_ptr);
+    auto data_slice = t_data_slice<t_ctx2>(
+        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, names_ptr, indices_ptr);
     return data_slice;
 }
 

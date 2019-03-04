@@ -51,7 +51,6 @@ function transpose(json) {
 async function run() {
     // Allow users to set a limit on version lookbacks
     let psp_urls = URLS;
-    console.log(`limit: ${LIMIT}`);
     if (LIMIT !== -1) {
         let limit_num = Number(args[LIMIT + 1]);
         if (!isNaN(limit_num) && limit_num > 0 && limit_num <= psp_urls.length) {
