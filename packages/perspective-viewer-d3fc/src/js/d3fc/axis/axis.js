@@ -1,5 +1,6 @@
-import {select, line} from "d3";
-import {dataJoin as _dataJoin} from "d3fc";
+import {select} from "d3-selection";
+import {line} from "d3-shape";
+import {dataJoin as _dataJoin} from "@d3fc/d3fc-data-join";
 
 const identity = d => d;
 
@@ -11,15 +12,14 @@ const axis = (orient, scale) => {
     let tickSizeOuter = 6;
     let tickSizeInner = 6;
     let tickPadding = 3;
-    let tickGrouping = null;
+    let centerAlignTicks = false;
+    let tickOffset = () => (centerAlignTicks && scale.step ? scale.step() / 2 : 0);
 
     const svgDomainLine = line();
 
     const dataJoin = _dataJoin("g", "tick").key(identity);
 
     const domainPathDataJoin = _dataJoin("path", "domain");
-
-    const groupDataJoin = _dataJoin("g", "group");
 
     // returns a function that creates a translation based on
     // the bound data
@@ -31,11 +31,7 @@ const axis = (orient, scale) => {
                 offset = Math.round(offset);
             }
         }
-        return d => trans((d.domain ? centerOf(scale, d.domain) : scale(d)) + offset, 0);
-    };
-
-    const centerOf = (scale, values) => {
-        return values.reduce((s, v) => s + scale(v), 0) / values.length;
+        return d => trans(scale(d) + offset, 0);
     };
 
     const translate = (x, y) => (isVertical() ? `translate(${y}, ${x})` : `translate(${x}, ${y})`);
@@ -45,34 +41,6 @@ const axis = (orient, scale) => {
     const isVertical = () => orient === "left" || orient === "right";
 
     const tryApply = (fn, args, defaultVal) => (scale[fn] ? scale[fn].apply(scale, args) : defaultVal);
-
-    // Uses the tickGrouping function to group tick labels in rows
-    const groupTicks = ticksArray => {
-        const groups = [];
-        ticksArray.forEach(tick => {
-            const split = tickGrouping(tick);
-            split.forEach((s, i) => {
-                while (groups.length <= i) groups.push([]);
-
-                const group = groups[i];
-                if (group.length > 0 && group[group.length - 1].text === s) {
-                    group[group.length - 1].domain.push(tick);
-                } else {
-                    group.push({text: s, domain: [tick]});
-                }
-            });
-        });
-        return groups;
-    };
-
-    const groupLineOffset = (d, arr, direction = 1) => {
-        if (!tickGrouping) return arr;
-
-        let bandwidth = scale.step ? scale.step() : 0;
-        if (d.domain) bandwidth *= d.domain.length;
-
-        return arr.map(d => [d[0] + (direction * bandwidth) / 2, d[1]]);
-    };
 
     const axis = selection => {
         if (selection.selection) {
@@ -100,8 +68,6 @@ const axis = (orient, scale) => {
             const tickFormatter = tickFormat == null ? tryApply("tickFormat", tickArguments, identity) : tickFormat;
             const sign = orient === "bottom" || orient === "right" ? 1 : -1;
 
-            const tickGroups = tickGrouping ? groupTicks(ticksArray) : [ticksArray];
-
             // add the domain line
             const range = scale.range();
             const domainPathData = pathTranspose([[range[0], sign * tickSizeOuter], [range[0], 0], [range[1], 0], [range[1], sign * tickSizeOuter]]);
@@ -109,64 +75,47 @@ const axis = (orient, scale) => {
             const domainLine = domainPathDataJoin(container, [data]);
             domainLine.attr("d", svgDomainLine(domainPathData)).attr("stroke", "#000");
 
-            const groupSelection = groupDataJoin(container, tickGroups);
+            const g = dataJoin(container, ticksArray);
 
-            if (tickGrouping) {
-                groupSelection
-                    .enter()
-                    .append("g")
-                    .attr("class", "first-tick")
-                    .append("path")
-                    .attr("stroke", "#000");
+            // enter
+            g.enter()
+                .attr("transform", containerTranslate(scaleOld, translate))
+                .append("path")
+                .attr("stroke", "#000");
 
-                groupSelection
-                    .select("g.first-tick")
-                    .attr("transform", d => containerTranslate(scaleOld, translate)(d[0]))
-                    .select("path")
-                    .attr("d", d => svgDomainLine(pathTranspose(groupLineOffset(d[0], [[0, 0], [0, sign * tickSizeInner]], sign * -1))));
-            }
+            const labelOffset = sign * ((centerAlignTicks ? 0 : tickSizeInner) + tickPadding);
+            g.enter()
+                .append("text")
+                .attr("transform", translate(0, labelOffset))
+                .attr("fill", "#000");
 
-            groupSelection
-                .attr("transform", (d, i) => translate(0, sign * (tickGroups.length - 1 - i) * tickSizeInner))
-                .each((data, index, group) => {
-                    const element = group[index];
-                    const g = dataJoin(select(element), data);
+            // exit
+            g.exit().attr("transform", containerTranslate(scale, translate));
 
-                    // enter
-                    g.enter()
-                        .attr("transform", containerTranslate(scaleOld, translate))
-                        .append("path")
-                        .attr("stroke", "#000");
-
-                    const labelOffset = sign * ((tickGrouping ? 0 : tickSizeInner) + tickPadding);
-                    g.enter()
-                        .append("text")
-                        .attr("transform", translate(0, labelOffset))
-                        .attr("fill", "#000");
-
-                    // exit
-                    g.exit().attr("transform", containerTranslate(scale, translate));
-
-                    // update
-                    g.select("path").attr("d", d => svgDomainLine(pathTranspose(groupLineOffset(d, [[0, 0], [0, sign * tickSizeInner]], sign))));
-
-                    g.select("text")
-                        .attr("transform", translate(0, labelOffset))
-                        .attr("dy", () => {
-                            let offset = "0em";
-                            if (isVertical()) {
-                                offset = "0.32em";
-                            } else if (orient === "bottom") {
-                                offset = "0.71em";
-                            }
-                            return offset;
-                        })
-                        .text(d => tickFormatter(d.text || d));
-
-                    g.attr("transform", containerTranslate(scale, translate));
-
-                    decorate(g, data, index);
+            // update
+            g.select("path")
+                .attr("visibility", (d, i) => (i === ticksArray.length - 1 && centerAlignTicks ? "hidden" : ""))
+                .attr("d", d => {
+                    const offset = sign * tickOffset(d);
+                    return svgDomainLine(pathTranspose([[offset, 0], [offset, sign * tickSizeInner]]));
                 });
+
+            g.select("text")
+                .attr("transform", translate(0, labelOffset))
+                .attr("dy", () => {
+                    let offset = "0em";
+                    if (isVertical()) {
+                        offset = "0.32em";
+                    } else if (orient === "bottom") {
+                        offset = "0.71em";
+                    }
+                    return offset;
+                })
+                .text(tickFormatter);
+
+            g.attr("transform", containerTranslate(scale, translate));
+
+            decorate(g, data, index);
         });
     };
 
@@ -210,6 +159,22 @@ const axis = (orient, scale) => {
         return axis;
     };
 
+    axis.centerAlignTicks = (...args) => {
+        if (!args.length) {
+            return centerAlignTicks;
+        }
+        centerAlignTicks = args[0];
+        return axis;
+    };
+
+    axis.tickOffset = (...args) => {
+        if (!args.length) {
+            return tickOffset;
+        }
+        tickOffset = args[0];
+        return axis;
+    };
+
     axis.decorate = (...args) => {
         if (!args.length) {
             return decorate;
@@ -244,14 +209,6 @@ const axis = (orient, scale) => {
             return tickValues.slice();
         }
         tickValues = args[0] == null ? [] : [...args[0]];
-        return axis;
-    };
-
-    axis.tickGrouping = (...args) => {
-        if (!args.length) {
-            return tickGrouping;
-        }
-        tickGrouping = args[0];
         return axis;
     };
 
