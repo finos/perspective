@@ -22,8 +22,9 @@ export function colourRangeLegend() {
 
     function legend(container) {
         const domain = scale.domain();
-        const min = domain[0] - 1;
-        const max = domain[1] + 1;
+        const pad = Math.ceil((domain[1] - domain[0]) * 0.1);
+        const min = domain[0] - pad;
+        const max = domain[1] + pad;
         const expandedDomain = d3.range(min, max, (max - min) / height);
 
         const yScale = d3
