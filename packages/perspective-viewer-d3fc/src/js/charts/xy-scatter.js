@@ -8,11 +8,11 @@
  */
 import * as fc from "d3fc";
 import * as mainAxis from "../axis/mainAxis";
-import {pointSeries} from "../series/pointSeries";
+import {pointSeries, symbolTypeFromGroups} from "../series/pointSeries";
 import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
 import {seriesLinearRange} from "../series/seriesLinearRange";
-import {legend, filterDataByGroup} from "../legend/legend";
+import {symbolLegend, filterDataByGroup} from "../legend/legend";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
@@ -20,15 +20,20 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
+    const symbols = symbolTypeFromGroups(settings);
     const colour = seriesColoursFromGroups(settings);
-    legend(container, settings, colour);
+
+    const legend = symbolLegend()
+        .settings(settings)
+        .scale(symbols)
+        .colour(colour);
 
     const size = settings.mainValues.length > 2 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
 
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeries(settings, colour, series.key, size)));
+        .series(data.map(series => pointSeries(settings, series.key, size, colour, symbols)));
 
     const domainDefault = mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
 
@@ -44,6 +49,7 @@ function xyScatter(container, settings) {
 
     // render
     container.datum(data).call(chart);
+    container.call(legend);
 }
 xyScatter.plugin = {
     type: "d3_xy_scatter",

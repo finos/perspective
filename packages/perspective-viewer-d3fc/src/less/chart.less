@@ -80,6 +80,15 @@
             & .cell {
                 cursor: pointer;
 
+                & path {
+                    fill: rgba(31, 119, 180, 0.5);
+                    stroke: rgb(31, 119, 180);
+                }
+                &.hidden  path {
+                    fill: rgba(204, 204, 204, 0.5);
+                    stroke: rgb(204, 204, 204);
+                }
+
                 &.hidden circle {
                     fill: rgb(204, 204, 204) !important;
                 }
