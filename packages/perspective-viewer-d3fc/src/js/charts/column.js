@@ -12,7 +12,8 @@ import * as mainAxis from "../axis/mainAxis";
 import {barSeries} from "../series/barSeries";
 import {seriesColours} from "../series/seriesColours";
 import {groupAndStackData} from "../data/groupAndStackData";
-import {legend, filterData} from "../legend/legend";
+import {colourLegend} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
@@ -21,7 +22,10 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
     const colour = seriesColours(settings);
-    legend(container, settings, colour);
+
+    const legend = colourLegend()
+        .settings(settings)
+        .scale(colour);
 
     const series = fc
         .seriesSvgMulti()
@@ -54,6 +58,7 @@ function columnChart(container, settings) {
 
     // render
     container.datum(data).call(chart);
+    container.call(legend);
 }
 columnChart.plugin = {
     type: "d3_y_bar",

@@ -12,7 +12,8 @@ import * as mainAxis from "../axis/mainAxis";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
 import {splitAndBaseData} from "../data/splitAndBaseData";
-import {legend, filterData} from "../legend/legend";
+import {colourLegend} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
@@ -22,7 +23,9 @@ function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
 
     const colour = seriesColours(settings);
-    legend(container, settings, colour);
+    const legend = colourLegend()
+        .settings(settings)
+        .scale(colour);
 
     const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
@@ -46,6 +49,7 @@ function areaChart(container, settings) {
 
     // render
     container.datum(data).call(chart);
+    container.call(legend);
 }
 areaChart.plugin = {
     type: "d3_y_area",

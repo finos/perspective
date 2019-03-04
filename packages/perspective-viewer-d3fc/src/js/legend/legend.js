@@ -10,8 +10,8 @@
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
 import scrollableLegend from "./scrollableLegend";
+import {withoutOpacity} from "../series/seriesColours";
 import {getChartElement} from "../plugin/root";
-import {groupFromKey} from "../series/seriesKey";
 import {getOrCreateElement} from "../utils/utils";
 
 const scrollColourLegend = scrollableLegend(
@@ -27,13 +27,7 @@ const scrollSymbolLegend = scrollableLegend(
         .labelOffset(3)
 );
 
-export function legend(container, settings, colour) {
-    container.call(
-        legendComponent(scrollColourLegend)
-            .settings(settings)
-            .scale(colour)
-    );
-}
+export const colourLegend = () => legendComponent(scrollColourLegend);
 export const symbolLegend = () => legendComponent(scrollSymbolLegend, symbolScale);
 
 function symbolScale(fromScale) {
@@ -97,7 +91,7 @@ function legendComponent(scrollLegend, scaleModifier) {
             cells
                 .select("path")
                 .style("fill", d => (isHidden(d) ? null : colour(d)))
-                .style("stroke", d => (isHidden(d) ? null : withOutOpacity(colour(d))));
+                .style("stroke", d => (isHidden(d) ? null : withoutOpacity(colour(d))));
         }
     });
 
@@ -126,39 +120,4 @@ function legendComponent(scrollLegend, scaleModifier) {
     };
 
     return legend;
-}
-
-export function filterData(settings, data) {
-    const useData = data || settings.data;
-    if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map(col => {
-            const clone = {...col};
-            settings.hideKeys.forEach(k => {
-                delete clone[k];
-            });
-            return clone;
-        });
-    }
-    return useData;
-}
-
-export function filterDataByGroup(settings, data) {
-    const useData = data || settings.data;
-    if (settings.hideKeys && settings.hideKeys.length > 0) {
-        return useData.map(col => {
-            const clone = {};
-            Object.keys(col).map(key => {
-                if (!settings.hideKeys.includes(groupFromKey(key))) {
-                    clone[key] = col[key];
-                }
-            });
-            return clone;
-        });
-    }
-    return useData;
-}
-
-function withOutOpacity(colour) {
-    const lastComma = colour.lastIndexOf(",");
-    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
 }

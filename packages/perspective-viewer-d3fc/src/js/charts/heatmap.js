@@ -12,7 +12,7 @@ import * as crossAxis from "../axis/crossAxis";
 //import * as otherAxis from "../axis/otherAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {heatmapData} from "../data/heatmapData";
-import {filterData} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {withGridLines} from "../gridlines/gridlines";
 import {legend} from "../legend/colorLegend";
