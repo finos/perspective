@@ -73,7 +73,7 @@
         top: 15px;
         right: 15px;
         left: auto;
-        width: 150px;
+        max-width: 150px;
 
         & .legend {
             font-size: 8pt;
@@ -103,12 +103,14 @@
         & .legend-controls {
             margin-left: 12px;
 
-            & #up-arrow, & #down-arrow {
+            & #up-arrow,
+            & #down-arrow {
                 cursor: pointer;
                 color: rgb(31, 119, 180);
             }
 
-            & #up-arrow.disabled, & #down-arrow.disabled {
+            & #up-arrow.disabled,
+            & #down-arrow.disabled {
                 cursor: default;
                 color: rgb(51, 51, 51);
             }
