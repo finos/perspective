@@ -8,7 +8,7 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/context_common.h>
+#include <perspective/get_data_extents.h>
 #include <perspective/context_two.h>
 #include <perspective/extract_aggregate.h>
 #include <perspective/sparse_tree.h>
@@ -194,7 +194,10 @@ t_ctx2::get_ctraversal_indices() const {
 
 std::vector<t_tscalar>
 t_ctx2::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
-    auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
 
     std::vector<std::pair<t_uindex, t_uindex>> cells;
     for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
@@ -615,7 +618,10 @@ t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
     rval.columns_changed = true;
     std::vector<t_cellupd>& updvec = rval.cells;
 
-    auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
 
     std::vector<std::pair<t_uindex, t_uindex>> cells;
 

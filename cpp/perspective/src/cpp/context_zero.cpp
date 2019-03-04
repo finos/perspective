@@ -9,7 +9,7 @@
 
 #include <perspective/first.h>
 #include <perspective/context_base.h>
-#include <perspective/context_common.h>
+#include <perspective/get_data_extents.h>
 #include <perspective/context_zero.h>
 #include <perspective/flat_traversal.h>
 #include <perspective/sym_table.h>
@@ -98,8 +98,10 @@ t_ctx0::get_column_count() const {
 
 std::vector<t_tscalar>
 t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
-
-    auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
