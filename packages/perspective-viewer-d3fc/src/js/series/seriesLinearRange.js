@@ -10,5 +10,5 @@ import * as d3 from "d3";
 import {domain} from "../axis/mainAxis";
 
 export function seriesLinearRange(settings, data, valueName) {
-    return d3.scaleLinear().domain(domain(settings, data, valueName));
+    return d3.scaleLinear().domain(domain().valueName(valueName)(data));
 }
