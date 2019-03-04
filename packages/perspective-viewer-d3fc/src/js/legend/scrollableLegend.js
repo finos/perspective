@@ -11,12 +11,13 @@ import {rebindAll} from "d3fc";
 import {areArraysEqualSimple, getOrCreateElement} from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
 
-export default () => {
-    const legend = d3Legend.legendColor();
+export default fromLegend => {
+    const legend = fromLegend || d3Legend.legendColor();
     let domain = [];
     let pageCount = 1;
     let pageSize = 15;
     let pageIndex = 0;
+    let decorate = () => {};
 
     const scrollableLegend = selection => {
         const newDomain = legend.scale().domain();
@@ -63,6 +64,8 @@ export default () => {
 
     const renderLegend = selection => {
         if (pageCount > 1) legend.cellFilter(cellFilter());
+        selection.select("g.legendCells").remove();
+
         const legendElement = getLegendElement(selection);
         legendElement.call(legend);
 
@@ -71,6 +74,8 @@ export default () => {
             .node()
             .getBBox();
         legendElement.attr("height", cellSize.height + 20);
+
+        decorate(selection);
     };
 
     const cellFilter = () => {
@@ -86,6 +91,14 @@ export default () => {
         );
 
     const getLegendElement = container => getOrCreateElement(container, ".legend", () => container.append("svg").attr("class", "legend"));
+
+    scrollableLegend.decorate = (...args) => {
+        if (!args.length) {
+            return decorate;
+        }
+        decorate = args[0];
+        return scrollableLegend;
+    };
 
     rebindAll(scrollableLegend, legend);
     return scrollableLegend;
