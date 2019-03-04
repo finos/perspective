@@ -11,8 +11,6 @@ import {labelFunction} from "../axis/crossAxis";
 export function splitAndBaseData(settings, data) {
     const labelfn = labelFunction(settings);
 
-    console.log("In splitData - data:", data);
-
     return data.map((col, i) => {
         const baseValues = {};
 
