@@ -33,7 +33,12 @@ function fromDomain(domain) {
     return domain.length > 1 ? d3.scaleOrdinal(d3.schemeCategory10.map(withOpacity)).domain(domain) : null;
 }
 
-function withOpacity(colour) {
+export function withoutOpacity(colour) {
+    const lastComma = colour.lastIndexOf(",");
+    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
+}
+
+export function withOpacity(colour) {
     const toInt = offset => parseInt(colour.substring(offset, offset + 2), 16);
     return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
 }

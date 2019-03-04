@@ -12,7 +12,8 @@ import * as mainAxis from "../axis/mainAxis";
 import {seriesColours} from "../series/seriesColours";
 import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
-import {legend, filterData} from "../legend/legend";
+import {colourLegend} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
@@ -21,7 +22,10 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
     const colour = seriesColours(settings);
-    legend(container, settings, colour);
+
+    const legend = colourLegend()
+        .settings(settings)
+        .scale(colour);
 
     const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
 
@@ -44,6 +48,7 @@ function lineChart(container, settings) {
 
     // render
     container.datum(data).call(chart);
+    container.call(legend);
 }
 lineChart.plugin = {
     type: "d3_y_line",

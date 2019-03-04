@@ -12,7 +12,8 @@ import {pointSeries, symbolTypeFromGroups} from "../series/pointSeries";
 import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
 import {seriesLinearRange} from "../series/seriesLinearRange";
-import {symbolLegend, filterDataByGroup} from "../legend/legend";
+import {symbolLegend} from "../legend/legend";
+import {filterDataByGroup} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
