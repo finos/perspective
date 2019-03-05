@@ -16,9 +16,9 @@ import {symbolLegend} from "../legend/legend";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import zoomableChart from "../zoom/zoomableChart";
 
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -46,20 +46,29 @@ function xyScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(series => pointSeries(settings, series.key, size, colour, symbols)));
 
-    const domainDefault = mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
+    const domainDefault = () => mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
 
-    const chart = chartSvgCartesian(mainAxis.scale(settings), mainAxis.scale(settings))
-        .xDomain(domainDefault.valueName("x")(data))
+    const xScale = mainAxis.scale(settings);
+    const yScale = mainAxis.scale(settings);
+
+    const chart = chartSvgCartesian(xScale, yScale)
+        .xDomain(domainDefault().valueName("x")(data))
         .xLabel(settings.mainValues[0].name)
-        .yDomain(domainDefault.valueName("y")(data))
+        .yDomain(domainDefault().valueName("y")(data))
         .yLabel(settings.mainValues[1].name)
         .yOrient("left")
         .yNice()
         .xNice()
         .plotArea(withGridLines(series));
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
     if (legend) container.call(legend);
 }
 xyScatter.plugin = {
