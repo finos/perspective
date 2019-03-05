@@ -12,3 +12,7 @@ import {domain} from "../axis/mainAxis";
 export function seriesLinearRange(settings, data, valueName) {
     return d3.scaleLinear().domain(domain().valueName(valueName)(data));
 }
+
+export function seriesColourRange(settings, data, valueName) {
+    return d3.scaleSequential(d3.interpolateViridis).domain(domain().valueName(valueName)(data));
+}

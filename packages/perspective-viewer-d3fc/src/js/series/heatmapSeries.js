@@ -10,7 +10,7 @@ import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 import {generateHtmlForHeatmap} from "../tooltip/generateHTML";
 
-export function heatmapSeries(settings, colorInterpolate) {
+export function heatmapSeries(settings, colour) {
     let series = fc.seriesSvgHeatmap();
 
     series.decorate(selection => {
@@ -22,7 +22,7 @@ export function heatmapSeries(settings, colorInterpolate) {
         .xValue(d => d.crossValue)
         .yValue(d => d.mainValue)
         .colorValue(d => d.colorValue)
-        .colorInterpolate(colorInterpolate)
+        .colorInterpolate(colour.interpolator())
         .xAlign("right")
         .yAlign("top")
         .widthFraction(1.0);
