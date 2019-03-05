@@ -52,23 +52,19 @@ export function colourRangeLegend() {
                 return formatFunc(d);
             });
 
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
-
-        const legendSvg = legendSelection
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"))
             .attr("class", "legend-container")
-            .style("z-index", "2")
-            .append("svg")
+            .style("z-index", "2");
+        const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)
             .style("height", height);
-        const legendBar = legendSvg
-            .append("g")
+        const legendBar = getOrCreateElement(legendSvg, "g", () => legendSvg.append("g"))
             .datum(expandedDomain)
             .call(svgBar);
 
         const barWidth = Math.abs(legendBar.node().getBBox().x);
-        legendSvg
-            .append("svg")
-            .append("g")
+        const axisLabelSvg = getOrCreateElement(legendSvg, "svg", () => legendSvg.append("svg"));
+        getOrCreateElement(axisLabelSvg, "g", () => axisLabelSvg.append("g"))
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)
             .call(axisLabel);
