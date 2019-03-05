@@ -8,6 +8,8 @@
  */
 
 import * as d3 from "d3";
+import {getOrCreateElement} from "../utils/utils";
+import template from "../../html/zoom-controls.html";
 
 export default () => {
     let chart = null;
@@ -29,6 +31,13 @@ export default () => {
 
             applyTransform(transform);
             selection.call(chart);
+
+            getZoomControls(selection)
+                .style("display", transform.k === 1 ? "none" : "")
+                .select("#zoom-reset")
+                .on("click", () => {
+                    selection.select(".plot-area").call(zoom.transform, d3.zoomIdentity);
+                });
         });
 
         chart.decorate(sel => {
@@ -102,6 +111,15 @@ export default () => {
             yScale.domain([yZoomDomain[1], yZoomDomain[0]]);
         }
     };
+
+    const getZoomControls = container =>
+        getOrCreateElement(container, ".zoom-controls", () =>
+            container
+                .append("div")
+                .attr("class", "zoom-controls")
+                .style("display", "none")
+                .html(template)
+        );
 
     return zoomableChart;
 };
