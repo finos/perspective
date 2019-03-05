@@ -20,6 +20,8 @@ export function colourRangeLegend() {
         .domain([0, 1])
         .range([0, width]);
 
+    const formatFunc = d => (d === 1 || d % 2 === 0 ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
+
     function legend(container) {
         const domain = scale.domain();
         const pad = (domain[1] - domain[0]) * 0.1;
@@ -47,14 +49,15 @@ export function colourRangeLegend() {
             .axisRight(yScale)
             .tickValues([...domain, (domain[1] + domain[0]) / 2])
             .tickSizeOuter(0)
-            .tickFormat(d => {
-                const formatFunc = d === 1 || d % 2 === 0 ? d3.format(",.0f") : d3.format(",.2f");
-                return formatFunc(d);
-            });
+            .tickFormat(d => formatFunc(d));
 
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"))
-            .attr("class", "legend-container")
-            .style("z-index", "2");
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
+            container
+                .append("div")
+                .attr("class", "legend-container")
+                .style("z-index", "2")
+        );
+
         const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)
             .style("height", height);
