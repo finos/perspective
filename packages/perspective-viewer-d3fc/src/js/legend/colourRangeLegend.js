@@ -69,7 +69,9 @@ export function colourRangeLegend() {
         getOrCreateElement(legendSvg, "#legend-axis", () => legendSvg.append("g").attr("id", "legend-axis"))
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)
-            .call(axisLabel);
+            .call(axisLabel)
+            .select(".domain")
+            .attr("visibility", "hidden");
     }
 
     legend.scale = (...args) => {
