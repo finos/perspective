@@ -20,16 +20,16 @@ export function pointSeries(settings, colour, seriesKey, size) {
     }
 
     series.decorate(selection => {
-        tooltip(selection, settings);
+        tooltip()(selection, settings);
         if (colour) {
-            selection.style("stroke", () => colour(seriesKey)).style("fill", () => withOpacity(colour(seriesKey)));
+            selection.style("stroke", () => withOutOpacity(colour(seriesKey))).style("fill", () => colour(seriesKey));
         }
     });
 
     return series;
 }
 
-function withOpacity(colour) {
-    const toInt = offset => parseInt(colour.substring(offset, offset + 2), 16);
-    return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
+function withOutOpacity(colour) {
+    const lastComma = colour.lastIndexOf(",");
+    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
 }
