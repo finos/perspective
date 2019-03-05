@@ -94,10 +94,14 @@
                     fill: rgb(204, 204, 204) !important;
                 }
             }
+        }
 
-            & text {
-                fill: var(--d3fc-legend-text, rgb(51, 51, 51));
-            }
+        & text {
+            fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+        }
+
+        & #legend-axis path {
+            stroke: var(--d3fc-legend-text, rgb(51, 51, 51));
         }
 
         & .legend-controls {
