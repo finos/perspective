@@ -20,7 +20,7 @@ export function colourRangeLegend() {
         .domain([0, 1])
         .range([0, width]);
 
-    const formatFunc = d => (d === 1 || d % 2 === 0 ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
+    const formatFunc = d => (Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
 
     function legend(container) {
         const domain = scale.domain();
