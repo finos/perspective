@@ -11,8 +11,9 @@ import * as mainAxis from "../axis/mainAxis";
 import {pointSeries, symbolTypeFromGroups} from "../series/pointSeries";
 import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
-import {seriesLinearRange} from "../series/seriesLinearRange";
+import {seriesLinearRange, seriesColourRange} from "../series/seriesRange";
 import {symbolLegend} from "../legend/legend";
+import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
@@ -22,14 +23,23 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
-    const colour = seriesColoursFromGroups(settings);
+    const useGroupColours = settings.mainValues.length <= 2;
+    let colour = null;
+    let legend = null;
 
-    const legend = symbolLegend()
-        .settings(settings)
-        .scale(symbols)
-        .colour(colour);
+    if (useGroupColours) {
+        colour = seriesColoursFromGroups(settings);
 
-    const size = settings.mainValues.length > 2 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
+        legend = symbolLegend()
+            .settings(settings)
+            .scale(symbols)
+            .colour(useGroupColours ? colour : null);
+    } else {
+        colour = seriesColourRange(settings, data, "colorValue");
+        legend = colourRangeLegend().scale(colour);
+    }
+
+    const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
 
     const series = fc
         .seriesSvgMulti()
@@ -50,7 +60,7 @@ function xyScatter(container, settings) {
 
     // render
     container.datum(data).call(chart);
-    container.call(legend);
+    if (legend) container.call(legend);
 }
 xyScatter.plugin = {
     type: "d3_xy_scatter",
