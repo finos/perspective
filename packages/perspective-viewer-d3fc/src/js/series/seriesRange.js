@@ -10,9 +10,17 @@ import * as d3 from "d3";
 import {domain} from "../axis/mainAxis";
 
 export function seriesLinearRange(settings, data, valueName) {
-    return d3.scaleLinear().domain(domain().valueName(valueName)(data));
+    return d3.scaleLinear().domain(
+        domain()
+            .valueName(valueName)(data)
+            .pad([0, 0])(data)
+    );
 }
 
 export function seriesColourRange(settings, data, valueName) {
-    return d3.scaleSequential(d3.interpolateViridis).domain(domain().valueName(valueName)(data));
+    return d3.scaleSequential(d3.interpolateViridis).domain(
+        domain()
+            .valueName(valueName)
+            .pad([0, 0])(data)
+    );
 }
