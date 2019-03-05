@@ -14,6 +14,7 @@ import {filterData} from "../legend/filter";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {withGridLines} from "../gridlines/gridlines";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
+import zoomableChart from "../zoom/zoomableChart";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
@@ -23,7 +24,9 @@ function heatmapChart(container, settings) {
 
     const legend = colourRangeLegend().scale(colour);
 
-    const chart = chartSvgCartesian(crossAxis.scale(settings), crossAxis.scale(settings, "splitValues"))
+    const xScale = crossAxis.scale(settings);
+    const yScale = crossAxis.scale(settings, "splitValues");
+    const chart = chartSvgCartesian(xScale, yScale)
         .xDomain(crossAxis.domain(settings)(data))
         .yDomain(
             crossAxis
@@ -42,8 +45,14 @@ function heatmapChart(container, settings) {
     chart.yPaddingInner && chart.yPaddingInner(0);
     chart.yPaddingOuter && chart.yPaddingOuter(0);
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
     container.call(legend);
 }
 heatmapChart.plugin = {

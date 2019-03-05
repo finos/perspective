@@ -15,9 +15,9 @@ import {groupAndStackData} from "../data/groupAndStackData";
 import {colourLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import zoomableChart from "../zoom/zoomableChart";
 
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -38,7 +38,8 @@ function columnChart(container, settings) {
             )
         );
 
-    const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
+    const xScale = crossAxis.scale(settings);
+    const chart = chartSvgCartesian(xScale, mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(data))
         .yDomain(
             mainAxis
@@ -56,8 +57,13 @@ function columnChart(container, settings) {
     chart.xPaddingInner && chart.xPaddingInner(0.5);
     chart.xPaddingOuter && chart.xPaddingOuter(0.25);
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
     container.call(legend);
 }
 columnChart.plugin = {

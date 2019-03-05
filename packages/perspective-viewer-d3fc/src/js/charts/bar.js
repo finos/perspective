@@ -18,6 +18,7 @@ import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import zoomableChart from "../zoom/zoomableChart";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -38,7 +39,8 @@ function barChart(container, settings) {
             )
         );
 
-    const chart = chartSvgCartesian(mainAxis.scale(settings), crossAxis.scale(settings))
+    const yScale = crossAxis.scale(settings);
+    const chart = chartSvgCartesian(mainAxis.scale(settings), yScale)
         .xDomain(
             mainAxis
                 .domain(settings)
@@ -56,8 +58,13 @@ function barChart(container, settings) {
     chart.yPaddingInner && chart.yPaddingInner(0.5);
     chart.yPaddingOuter && chart.yPaddingOuter(0.25);
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .yScale(yScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
     container.call(legend);
 }
 barChart.plugin = {
