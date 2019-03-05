@@ -12,7 +12,7 @@ import {domain} from "../axis/mainAxis";
 export function seriesLinearRange(settings, data, valueName) {
     return d3.scaleLinear().domain(
         domain()
-            .valueName(valueName)(data)
+            .valueName(valueName)
             .pad([0, 0])(data)
     );
 }
