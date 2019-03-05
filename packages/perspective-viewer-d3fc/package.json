@@ -52,6 +52,7 @@
         "gradient-parser": "0.1.5"
     },
     "devDependencies": {
-        "babel-loader": "^8.0.5"
+        "babel-loader": "^8.0.5",
+        "webpack": "^3.5.6"
     }
 }
