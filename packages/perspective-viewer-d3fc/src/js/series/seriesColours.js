@@ -39,6 +39,8 @@ export function withoutOpacity(colour) {
 }
 
 export function withOpacity(colour) {
+    if (colour.includes("rgba")) return colour;
+
     const toInt = offset => parseInt(colour.substring(offset, offset + 2), 16);
     return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
 }

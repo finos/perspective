@@ -10,7 +10,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 import {groupFromKey} from "./seriesKey";
-import {withoutOpacity} from "./seriesColours";
+import {withOpacity, withoutOpacity} from "./seriesColours";
 
 const symbols = [d3.symbolCircle, d3.symbolCross, d3.symbolDiamond, d3.symbolSquare, d3.symbolStar, d3.symbolTriangle, d3.symbolWye];
 
@@ -30,7 +30,7 @@ export function pointSeries(settings, seriesKey, size, colour, symbols) {
     series.decorate(selection => {
         tooltip()(selection, settings);
         if (colour) {
-            selection.style("stroke", d => withoutOpacity(colour(d.colorValue || seriesKey))).style("fill", d => colour(d.colorValue || seriesKey));
+            selection.style("stroke", d => withoutOpacity(colour(d.colorValue || seriesKey))).style("fill", d => withOpacity(colour(d.colorValue || seriesKey)));
         }
     });
 
