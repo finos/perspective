@@ -1,6 +1,6 @@
 import {select} from "d3-selection";
 import {line} from "d3-shape";
-import {dataJoin as _dataJoin} from "@d3fc/d3fc-data-join";
+import {dataJoin as _dataJoin} from "d3fc";
 
 const identity = d => d;
 
