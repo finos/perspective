@@ -125,6 +125,27 @@
         }
     }
 
+    .zoom-controls {
+        position: absolute;
+        top: 10px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+
+        & button {
+            -webkit-appearance: none;
+            background: rgb(247, 247, 247);
+            border: 1px solid rgb(204, 204, 204);
+            padding: 10px;
+            opacity: 0.5;
+            cursor: pointer;
+
+            &:hover {
+                background: rgb(230, 230, 230);
+            }
+        }
+    }
+
     div.tooltip {
         position: absolute;
         text-align: left;
