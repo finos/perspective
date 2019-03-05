@@ -63,8 +63,12 @@ export function colourRangeLegend() {
             .call(svgBar);
 
         const barWidth = Math.abs(legendBar.node().getBBox().x);
-        const axisLabelSvg = getOrCreateElement(legendSvg, "svg", () => legendSvg.append("svg"));
-        getOrCreateElement(axisLabelSvg, "g", () => axisLabelSvg.append("g"))
+        getOrCreateElement(legendSvg, "#legend-axis", () =>
+            legendSvg
+                .append("svg")
+                .append("g")
+                .attr("id", "legend-axis")
+        )
             .attr("transform", `translate(${barWidth})`)
             .datum(expandedDomain)
             .call(axisLabel);
