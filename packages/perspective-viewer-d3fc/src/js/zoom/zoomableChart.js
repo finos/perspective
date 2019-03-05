@@ -21,44 +21,46 @@ export default () => {
     let bound = false;
 
     function zoomableChart(selection) {
-        const zoom = d3.zoom().on("zoom", () => {
-            const {transform} = d3.event;
-            settings.zoom = {
-                k: transform.k,
-                x: transform.x,
-                y: transform.y
-            };
+        if (xScale || yScale) {
+            const zoom = d3.zoom().on("zoom", () => {
+                const {transform} = d3.event;
+                settings.zoom = {
+                    k: transform.k,
+                    x: transform.x,
+                    y: transform.y
+                };
 
-            applyTransform(transform);
-            selection.call(chart);
+                applyTransform(transform);
+                selection.call(chart);
 
-            getZoomControls(selection)
-                .style("display", transform.k === 1 ? "none" : "")
-                .select("#zoom-reset")
-                .on("click", () => {
-                    selection.select(".plot-area").call(zoom.transform, d3.zoomIdentity);
-                });
-        });
+                getZoomControls(selection)
+                    .style("display", transform.k === 1 ? "none" : "")
+                    .select("#zoom-reset")
+                    .on("click", () => {
+                        selection.select(".plot-area").call(zoom.transform, d3.zoomIdentity);
+                    });
+            });
 
-        chart.decorate(sel => {
-            if (!bound) {
-                bound = true;
-                // add the zoom interaction on the enter selection
-                const plotArea = sel.select(".plot-area");
+            chart.decorate(sel => {
+                if (!bound) {
+                    bound = true;
+                    // add the zoom interaction on the enter selection
+                    const plotArea = sel.select(".plot-area");
 
-                plotArea
-                    .on("measure.zoom-range", () => {
-                        if (xCopy) xCopy.range([0, d3.event.detail.width]);
-                        if (yCopy) yCopy.range([0, d3.event.detail.height]);
+                    plotArea
+                        .on("measure.zoom-range", () => {
+                            if (xCopy) xCopy.range([0, d3.event.detail.width]);
+                            if (yCopy) yCopy.range([0, d3.event.detail.height]);
 
-                        if (settings.zoom) {
-                            const initialTransform = d3.zoomIdentity.translate(settings.zoom.x, settings.zoom.y).scale(settings.zoom.k);
-                            plotArea.call(zoom.transform, initialTransform);
-                        }
-                    })
-                    .call(zoom);
-            }
-        });
+                            if (settings.zoom) {
+                                const initialTransform = d3.zoomIdentity.translate(settings.zoom.x, settings.zoom.y).scale(settings.zoom.k);
+                                plotArea.call(zoom.transform, initialTransform);
+                            }
+                        })
+                        .call(zoom);
+                }
+            });
+        }
 
         selection.call(chart);
     }
@@ -83,7 +85,7 @@ export default () => {
         if (!args.length) {
             return xScale;
         }
-        xScale = args[0];
+        xScale = zoomableScale(args[0]);
         xCopy = xScale ? xScale.copy() : null;
         return zoomableChart;
     };
@@ -92,7 +94,7 @@ export default () => {
         if (!args.length) {
             return yScale;
         }
-        yScale = args[0];
+        yScale = zoomableScale(args[0]);
         yCopy = yScale ? yScale.copy() : null;
         if (yCopy) {
             const yDomain = yCopy.domain();
@@ -120,6 +122,13 @@ export default () => {
                 .style("display", "none")
                 .html(template)
         );
+
+    const zoomableScale = scale => {
+        if (scale && scale.nice) {
+            return scale;
+        }
+        return null;
+    };
 
     return zoomableChart;
 };
