@@ -25,9 +25,9 @@ function docker(image = "emsdk") {
 
 function lint(dir) {
     if (process.env.PSP_DOCKER) {
-        execute(docker() + ` bash -c 'diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)'`);
+        execute(docker() + ` bash -c "diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)"`);
     } else {
-        execute(`bash -c 'diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)'`);
+        execute(`bash -c "diff -u <(cat ${dir}/*) <(clang-format -style=file ${dir}/*)"`);
     }
 }
 

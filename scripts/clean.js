@@ -30,7 +30,7 @@ function clean(dir) {
 }
 
 function clean_screenshots() {
-    execute("lerna exec -- mkdir -p screenshots");
+    execute("lerna exec -- mkdirp screenshots");
     execute(`lerna run clean:screenshots --ignore-missing ${process.env.PACKAGE ? `--scope=@jpmorganchase/${process.env.PACKAGE}` : ""}`);
 }
 

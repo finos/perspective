@@ -51,7 +51,7 @@ function slow_jest() {
 
 function docker() {
     console.log("-- Creating puppeteer docker image");
-    let cmd = "docker run -it --rm --shm-size=2g -u root -e PACKAGE=${PACKAGE} -v $(pwd):/src -w /src";
+    let cmd = `docker run -it --rm --shm-size=2g -u root ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} -v ${process.cwd()}:/src -w /src`;
     if (IS_WRITE) {
         console.log("-- Running the test suite in Write mode");
         cmd += " -e WRITE_TESTS=1";
@@ -74,7 +74,7 @@ function emsdk() {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += " -v $(pwd):/src -e PACKAGE=${PACKAGE} perspective/emsdk node scripts/test.js --private-emsdk " + args.join(" ");
+    cmd += ` -v ${process.cwd()}:/src ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} perspective/emsdk node scripts/test.js --private-emsdk ` + args.join(" ");
     return cmd;
 }
 

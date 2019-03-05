@@ -52,7 +52,7 @@ exports.default = function loader(content) {
             inputPath = inputPath
                 .replace(path.join("perspective", "build"), "perspective")
                 .replace(/\.js/, ".worker.js")
-                .replace(/(cjs\/js)/, "build");
+                .replace(path.join("cjs", "js"), "build");
         }
         content = fs.readFileSync(inputPath).toString();
         if (!options.inline) {

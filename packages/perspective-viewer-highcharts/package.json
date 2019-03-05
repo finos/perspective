@@ -13,16 +13,16 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "prebuild": "mkdir -p cjs",
-        "build:babel": "cp -r src/* cjs && babel src/js --source-maps --out-dir cjs/js",
+        "prebuild": "mkdirp cjs",
+        "build:babel": "cpx \"src/**/*\" cjs && babel src/js --source-maps --out-dir cjs/js",
         "build:webpack": "webpack --color --config src/config/highcharts.plugin.config.js",
         "build": "npm-run-all build:babel build:webpack",
-        "test:build": "cp test/html/* build",
+        "test:build": "cpx \"test/html/*\" build",
         "watch": "webpack --color --watch --config src/config/highcharts.plugin.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
-        "clean": "find build -mindepth 1 -delete && find cjs -mindepth 1 -delete",
-        "clean:screenshots": "find screenshots/ \\( -name *.diff.png -o -name *.failed.png \\) -mindepth 1 -delete"
+        "clean": "rimraf build && rimraf cjs",
+        "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
     },
     "jest": {
         "roots": [

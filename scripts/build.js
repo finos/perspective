@@ -115,7 +115,7 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/src -e PACKAGE=${process.env.PACKAGE} perspective/${image}`;
+    cmd += ` -v ${process.cwd()}:/src -e PACKAGE=${process.env.PACKAGE} perspective/${image}`;
     return cmd;
 }
 
@@ -127,7 +127,7 @@ function compileCPP(packageName) {
     }
     cmd += `&& emmake make -j${process.env.PSP_CPU_COUNT || os.cpus().length}`;
     if (process.env.PSP_DOCKER) {
-        cmd = `${docker()} bash -c 'cd cpp/${packageName}/obj && ${cmd}'`;
+        cmd = `${docker()} bash -c "cd cpp/${packageName}/obj && ${cmd}"`;
     } else {
         cmd = `cd ${BASE_DIRECTORY} && ${cmd}`;
     }
@@ -144,7 +144,7 @@ function lerna() {
 
 try {
     if (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE)) {
-        execute("mkdir -p cpp/perspective/obj");
+        mkdirp("cpp/perspective/obj");
         compileCPP("perspective");
         RUNTIMES.map(compileRuntime);
     }

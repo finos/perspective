@@ -37,7 +37,7 @@ env:
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
   - yarn
-
+ 
 script:
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn lint; fi
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn build; fi
