@@ -17,7 +17,7 @@
         "build:webpack": "webpack --color --config src/config/d3fc.plugin.config.js",
         "build": "npm-run-all build:babel build:webpack",
         "test:build": "cpx \"test/html/*\" build",
-        "watch": "webpack --color --watch --config src/config/d3fc.plugin.config.js",
+        "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf build && rimraf cjs",
