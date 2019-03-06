@@ -13,6 +13,8 @@ import {pointSeriesCanvas} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
 import {seriesLinearRange, seriesColourRange} from "../series/seriesRange";
+import {symbolLegend} from "../legend/legend";
+import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
@@ -21,11 +23,18 @@ function xyScatterCanvas(container, settings) {
     const symbols = symbolTypeFromGroups(settings);
     const useGroupColours = settings.mainValues.length <= 2;
     let colour = null;
+    let legend = null;
 
     if (useGroupColours) {
         colour = seriesColoursFromGroups(settings);
+
+        legend = symbolLegend()
+            .settings(settings)
+            .scale(symbols)
+            .colour(useGroupColours ? colour : null);
     } else {
         colour = seriesColourRange(settings, data, "colorValue");
+        legend = colourRangeLegend().scale(colour);
     }
 
     const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
@@ -52,6 +61,7 @@ function xyScatterCanvas(container, settings) {
         .plotArea(series);
 
     container.datum(data).call(chart);
+    if (legend) container.call(legend);
 }
 xyScatterCanvas.plugin = {
     type: "d3_xy_scatter_canvas",
