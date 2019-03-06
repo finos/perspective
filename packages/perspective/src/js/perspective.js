@@ -929,7 +929,7 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            accessor.init(__MODULE__, papaparse.parse(data.trim(), {dynamicTyping: true, header: true}).data);
+            accessor.init(__MODULE__, papaparse.parse(data.trim(), {header: true}).data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         } else {
