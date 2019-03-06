@@ -11,7 +11,7 @@ import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {barSeries} from "../series/barSeries";
 import {seriesColours} from "../series/seriesColours";
-import {groupAndStackData} from "../data/groupAndStackData";
+import {groupAndStackData} from "../data/groupData";
 import {colourLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";

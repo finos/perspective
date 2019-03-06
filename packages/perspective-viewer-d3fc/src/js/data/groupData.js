@@ -10,7 +10,8 @@ import {labelFunction} from "../axis/crossAxis";
 import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
 
 export function groupData(settings, data) {
-    const groupedSeries = splitIntoMultiSeries(settings, data, {stack: false}).map(data => groupPointDataByMainValue(settings, data));
+    const stack = {stack: false};
+    const groupedSeries = splitIntoMultiSeries(settings, data, stack).map(data => groupPointDataByMainValue(settings, data, stack));
 
     if (settings.mainValues.length > 1) {
         const flattenedSeries = groupedSeries.reduce((a, b) => a.concat(b));
@@ -20,26 +21,30 @@ export function groupData(settings, data) {
     return groupedSeries;
 }
 
-function seriesDataFn(settings, data) {
+export function groupAndStackData(settings, data) {
+    const stack = {stack: true};
+    return splitIntoMultiSeries(settings, data, stack).map(data => groupPointDataByMainValue(settings, data, stack));
+}
+
+function seriesDataFn(settings, data, {stack = false}) {
     const labelfn = labelFunction(settings);
 
     return mainValue => {
-        const baseValue = 0;
+        const baseValue = col => (stack ? col[`__BASE_VALUE__${mainValue.name}`] || 0 : 0);
         const series = data.map((col, i) => ({
             crossValue: labelfn(col, i),
             mainValue: !!col[mainValue.name] ? col[mainValue.name] : null,
-            baseValue: baseValue,
+            baseValue: baseValue(col),
             key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
         }));
-
         series.key = series[0].key;
         return series;
     };
 }
 
-function groupPointDataByMainValue(settings, data) {
+function groupPointDataByMainValue(settings, data, {stack = false}) {
     // Split data into a group for each aggregate (mainValue)
-    const seriesFn = seriesDataFn(settings, data);
+    const seriesFn = seriesDataFn(settings, data, {stack});
 
     if (settings.mainValues.length > 1) {
         return settings.mainValues.map(seriesFn);
