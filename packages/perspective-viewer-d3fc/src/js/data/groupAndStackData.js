@@ -17,14 +17,13 @@ function seriesDataFn(settings, data) {
     const labelfn = labelFunction(settings);
 
     return mainValue => {
-        const series = data
-            .filter(col => !!col[mainValue.name])
-            .map((col, i) => ({
-                crossValue: labelfn(col, i),
-                mainValue: col[mainValue.name],
-                baseValue: col[`__BASE_VALUE__${mainValue.name}`] || 0,
-                key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
-            }));
+        const baseValue = col => col[`__BASE_VALUE__${mainValue.name}`] || 0;
+        const series = data.map((col, i) => ({
+            crossValue: labelfn(col, i),
+            mainValue: col[mainValue.name] || baseValue(col),
+            baseValue: baseValue(col),
+            key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
+        }));
         series.key = mainValue.name;
         return series;
     };
