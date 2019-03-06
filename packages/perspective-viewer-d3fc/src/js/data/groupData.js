@@ -25,14 +25,12 @@ function seriesDataFn(settings, data) {
 
     return mainValue => {
         const baseValue = 0;
-        const series = data
-            .filter(col => !!col[mainValue.name])
-            .map((col, i) => ({
-                crossValue: labelfn(col, i),
-                mainValue: col[mainValue.name],
-                baseValue: baseValue,
-                key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
-            }));
+        const series = data.map((col, i) => ({
+            crossValue: labelfn(col, i),
+            mainValue: !!col[mainValue.name] ? col[mainValue.name] : null,
+            baseValue: baseValue,
+            key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
+        }));
 
         series.key = series[0].key;
         return series;
