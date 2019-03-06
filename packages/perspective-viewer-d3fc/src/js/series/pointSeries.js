@@ -37,19 +37,6 @@ export function pointSeries(settings, seriesKey, size, colour, symbols) {
     return series;
 }
 
-export function categoricalPointSeries(settings, colour, symbols) {
-    let series = fc.seriesSvgPoint().size(100);
-
-    series.decorate(selection => {
-        tooltip()(selection, settings);
-        if (colour) {
-            selection.style("stroke", d => withoutOpacity(colour(d.key))).style("fill", d => colour(d.key));
-        }
-    });
-
-    return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);
-}
-
 export function symbolTypeFromGroups(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = [];

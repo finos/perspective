@@ -10,24 +10,28 @@ import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {seriesColours} from "../series/seriesColours";
-import {categoricalPointSeries} from "../series/pointSeries";
-import {splitData} from "../data/splitData";
-import {colourLegend} from "../legend/legend";
+import {categoryPointSeries, symbolType} from "../series/categoryPointSeries";
+import {groupData} from "../data/groupData";
+import {symbolLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 
 function yScatter(container, settings) {
-    const data = splitData(settings, filterData(settings));
+    const data = groupData(settings, filterData(settings));
+    const symbols = symbolType(settings);
     const colour = seriesColours(settings);
 
-    const legend = colourLegend()
+    const legend = symbolLegend()
         .settings(settings)
-        .scale(colour);
+        .scale(symbols)
+        .colour(colour);
 
-    const series = fc.seriesSvgRepeat().series(categoricalPointSeries(settings, colour).orient("vertical"));
+    const series = fc
+        .seriesSvgMulti()
+        .mapping((data, index) => data[index])
+        .series(data.map(series => categoryPointSeries(settings, series.key, colour, symbols)));
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.1, 0.1])
@@ -48,7 +52,9 @@ function yScatter(container, settings) {
 
     // render
     container.datum(data).call(chart);
-    container.call(legend);
+    if (legend) {
+        container.call(legend);
+    }
 }
 yScatter.plugin = {
     type: "d3_y_scatter",
