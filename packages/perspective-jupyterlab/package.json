@@ -51,6 +51,6 @@
         "webpack": "^2.2.1"
     },
     "jupyterlab": {
-        "extension": "build/index.js"
+        "extension": "dist/index.js"
     }
 }
