@@ -33,8 +33,10 @@ export default () => {
                 applyTransform(transform);
                 selection.call(chart);
 
+                const noZoom = transform.k === 1 && transform.x === 0 && transform.y === 0;
+
                 getZoomControls(selection)
-                    .style("display", transform.k === 1 ? "none" : "")
+                    .style("display", noZoom ? "none" : "")
                     .select("#zoom-reset")
                     .on("click", () => {
                         selection.select(".plot-area").call(zoom.transform, d3.zoomIdentity);
