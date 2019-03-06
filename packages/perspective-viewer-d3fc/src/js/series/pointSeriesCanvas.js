@@ -6,12 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as fc from "d3fc";
+import seriesCanvasPoint from "../d3fc/series/canvas/point";
 import {withOpacity, withoutOpacity} from "./seriesColours";
 
 export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
-    let series = fc
-        .seriesCanvasPoint()
+    let series = seriesCanvasPoint()
         .crossValue(d => d.x)
         .mainValue(d => d.y);
 
