@@ -155,7 +155,11 @@ export class DataAccessor {
         this.format = this.is_format(this.data);
         this.row_count = this.get_row_count(this.data);
         if (this.format === this.data_formats.row) {
-            this.names = Object.keys(data[0]);
+            if (data.length > 0) {
+                this.names = Object.keys(data[0]);
+            } else {
+                this.clean.names = [];
+            }
         } else if (this.format === this.data_formats.column || this.format === this.data_formats.schema) {
             this.names = Object.keys(data);
         } else {

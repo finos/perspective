@@ -174,6 +174,16 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("`update([])` does not error", async function() {
+            let table = perspective.table(meta);
+            let view = table.view();
+            table.update([]);
+            let result = await view.to_json();
+            expect(result).toEqual([]);
+            view.delete();
+            table.delete();
+        });
+
         it("Multiple `update()`s", async function() {
             var table = perspective.table(meta);
             table.update(data);
