@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost} = require("@jpmorganchase/perspective/build/perspective.node.js");
+const {WebSocketHost, table} = require("@jpmorganchase/perspective/build/perspective.node.js");
 const exec = require("child_process").exec;
 
 const OPEN = `
@@ -45,16 +45,16 @@ process.stdin
     .on("end", function() {
         const buf = Buffer.concat(ret, len);
         if (buf.slice(0, 6).toString() === "ARROW1") {
-            host.open("data_source_one", buf.buffer);
+            host.open("data_source_one", table(buf.buffer));
             console.log("Loaded Arrow");
         } else {
             let text = buf.toString();
             try {
                 let json = JSON.parse(text);
-                host.open("data_source_one", json);
+                host.open("data_source_one", table(json));
                 console.log("Loaded JSON");
             } catch (e) {
-                host.open("data_source_one", text);
+                host.open("data_source_one", table(text));
                 console.log("Loaded CSV");
             }
         }

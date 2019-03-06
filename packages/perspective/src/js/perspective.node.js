@@ -191,8 +191,8 @@ class WebSocketHost extends module.exports.Host {
         delete this.REQS[msg.id];
     }
 
-    open(name, data, options) {
-        this._tables[name] = module.exports.table(data, options);
+    open(name, table) {
+        this._tables[name] = table;
     }
 
     close() {

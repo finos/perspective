@@ -423,7 +423,8 @@ In Node.js:
 
 ```javascript
 const {
-    WebSocketHost
+    WebSocketHost,
+    table
 } = require("@jpmorganchase/perspective/build/perspective.node.js");
 const fs = require("fs");
 
@@ -434,7 +435,7 @@ const host = new WebSocketHost({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and load it as a named data source.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
-host.open("data_source_one", arr);
+host.open("data_source_one", table(arr));
 ```
 
 In the browser:
