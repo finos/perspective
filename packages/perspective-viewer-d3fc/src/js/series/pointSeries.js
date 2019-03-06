@@ -6,13 +6,11 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as d3 from "d3";
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 import {groupFromKey} from "./seriesKey";
 import {withOpacity, withoutOpacity} from "./seriesColours";
-
-const symbols = [d3.symbolCircle, d3.symbolCross, d3.symbolDiamond, d3.symbolSquare, d3.symbolStar, d3.symbolTriangle, d3.symbolWye];
+import {fromDomain} from "./seriesSymbols";
 
 export function pointSeries(settings, seriesKey, size, colour, symbols) {
     let series = fc
@@ -49,13 +47,4 @@ export function symbolTypeFromGroups(settings) {
         }
     });
     return fromDomain(domain);
-}
-
-function fromDomain(domain) {
-    return domain.length > 1
-        ? d3
-              .scaleOrdinal()
-              .domain(domain)
-              .range(symbols)
-        : null;
 }

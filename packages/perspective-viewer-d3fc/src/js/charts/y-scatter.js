@@ -35,7 +35,7 @@ function yScatter(container, settings) {
         .series(data.map(series => categoryPointSeries(settings, series.key, colour, symbols)));
 
     const paddingStrategy = hardLimitZeroPadding()
-        .pad([0.1, 0.1])
+        .pad([0.05, 0.05])
         .padUnit("percent");
 
     const xScale = crossAxis.scale(settings);
