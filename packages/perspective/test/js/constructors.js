@@ -400,6 +400,18 @@ module.exports = perspective => {
         });
     });
 
+    describe("CSV parsing", function() {
+        it("Does not lose leading 0's when a CSV column is declared as a string", async function() {
+            let table = perspective.table({x: "string", y: "integer"});
+            table.update("x,y\n000123,000123");
+            let view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([{x: "000123", y: 123}]);
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Constructors", function() {
         it("JSON constructor", async function() {
             var table = perspective.table(data);
