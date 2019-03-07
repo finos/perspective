@@ -33,6 +33,7 @@ function heatmapChart(container, settings) {
                 .domain(settings)
                 .settingName("splitValues")
                 .valueName("mainValue")(data)
+                .reverse()
         )
         .yOrient("left")
         .plotArea(withGridLines(series));
