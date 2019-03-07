@@ -110,6 +110,23 @@ module.exports = perspective => {
                 view.delete();
                 table.delete();
             });
+
+            it("w < date as string", async function() {
+                const schema = {
+                    w: "date",
+                    x: "integer",
+                    y: "string",
+                    z: "boolean"
+                };
+                var table = perspective.table(schema);
+                var view = table.view({
+                    filter: [["w", "<", "10/01/2018"]]
+                });
+                let json = await view.to_json();
+                expect(json).toEqual([r_date_range_data[0]]);
+                view.delete();
+                table.delete();
+            });
         });
 
         describe("EQ", function() {
