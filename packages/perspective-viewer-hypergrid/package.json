@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer-hypergrid",
-    "version": "0.2.19",
+    "version": "0.2.20",
     "description": "Perspective.js",
     "main": "cjs/js/hypergrid.js",
     "module": "cjs/js/hypergrid.js",
@@ -43,8 +43,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@jpmorganchase/perspective": "^0.2.18",
-        "@jpmorganchase/perspective-viewer": "^0.2.18",
+        "@jpmorganchase/perspective": "^0.2.20",
+        "@jpmorganchase/perspective-viewer": "^0.2.20",
         "datasaur-local": "3.0.0",
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
@@ -52,6 +52,6 @@
         "rectangular": "1.0.1"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.17"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.20"
     }
 }

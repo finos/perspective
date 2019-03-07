@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.20] - 2019-03-07
+### Added
+* [#463](https://github.com/jpmorganchase/perspective/pull/463) D3FC plugin features Area and Heatmap charts, hierarchial axes have been added to all chart types, as well as a host of additioanl improvements.
+* [#473](https://github.com/jpmorganchase/perspective/pull/473) Performance improvement to `to_*()` output methods.
+* [#469](https://github.com/jpmorganchase/perspective/pull/469) `open()` in the node.js API now takes a `table()` argument so it may be retained in the invoking code.
+* [#475](https://github.com/jpmorganchase/perspective/pull/475) Added `not in` filter type to `<perspective-viewer>`.
+  
+### Fixed
+* [#470](https://github.com/jpmorganchase/perspective/pull/470) Fixed Jupyterlab extension dist
+* [#471](https://github.com/jpmorganchase/perspective/pull/471) Fixed CSV parse issue when converting `integer` to `string` via schema.
+
+### Internal
+* [#468](https://github.com/jpmorganchase/perspective/pull/468) Perspective JS can now be built on Windows (with Docker).
+
 ## [0.2.19] - 2019-03-01
 ### Fixes
 * [#461](https://github.com/jpmorganchase/perspective/pull/461) Fixed click event bugs in `perspective-viewer-hypergrid` and `perspective-viewer-highcharts`
@@ -12,7 +26,7 @@
 ### Fixes
 * [#445](https://github.com/jpmorganchase/perspective/pull/445) Fixed expand/collapse bug.
 * [#448](https://github.com/jpmorganchase/perspective/pull/448) Fixed 'Invalid Date' axis issue in `perspective-viewer-highcharts` plugin.
-* [#450](https://github.com/jpmorganchase/perspective/pull/450) Fixed `perspective-jupyterlab` plugin to inexplicably build to `didst/`.
+* [#450](https://github.com/jpmorganchase/perspective/pull/450) Fixed `perspective-jupyterlab` plugin to inexplicably build to `dist/`.
 * [#453](https://github.com/jpmorganchase/perspective/pull/453) Fixed missing type definition for `shared_worker` in `perspective`.
 * [#451](https://github.com/jpmorganchase/perspective/pull/451) Fixed github-reported dependency vulnerabilites.
 
