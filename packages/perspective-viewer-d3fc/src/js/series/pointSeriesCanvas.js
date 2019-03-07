@@ -21,10 +21,10 @@ export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
         series.type(symbols(seriesKey));
     }
 
-    series.decorate((context, datum) => {
+    series.decorate((context, d) => {
         if (colour) {
-            context.strokeStyle = withoutOpacity(colour(datum.colorValue || seriesKey));
-            context.fillStyle = withOpacity(colour(datum.colorValue || seriesKey));
+            context.strokeStyle = withoutOpacity(colour(d.colorValue || seriesKey));
+            context.fillStyle = withOpacity(colour(d.colorValue || seriesKey));
         } else {
             context.strokeStyle = "rgba(31, 119, 180, 0.5)";
             context.fillStyle = "rgba(31, 119, 180, 0.5)";
