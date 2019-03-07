@@ -11,6 +11,7 @@
 
 #include <perspective/first.h>
 #include <perspective/raw_types.h>
+#include <algorithm>
 
 namespace perspective {
 
