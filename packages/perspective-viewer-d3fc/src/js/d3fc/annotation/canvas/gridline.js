@@ -38,7 +38,7 @@ export default () => {
             context.fillStyle = "transparent";
 
             xDecorate(context);
-            lineData.context(context)(yScale.domain().map(d => [xScale(d), yScale(yTick)]));
+            lineData.context(context)(xScale.domain().map(d => [xScale(d), yScale(yTick)]));
 
             context.fill();
             context.stroke();
