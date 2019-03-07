@@ -1,6 +1,6 @@
 import {line as lineShape} from "d3-shape";
 import ticks from "../ticks";
-import {prefix, rebindAll, rebind} from "@d3fc/d3fc-rebind";
+import {prefix, rebindAll, rebind} from "d3fc";
 
 export default () => {
     let xDecorate = () => {};
