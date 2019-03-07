@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-viewer",
-    "version": "0.2.18",
+    "version": "0.2.20",
     "description": "Perspective.js",
     "main": "cjs/js/viewer.js",
     "browser": "cjs/js/viewer.js",
@@ -24,7 +24,7 @@
         "test:build": "cpx \"test/html/*\" build && cpx \"test/csv/*\" build && cpx \"test/css/*\" build",
         "test:run": "jest --silent --color",
         "test": "npm-run-all test:build test:run",
-        "clean": "rimraf build",
+        "clean": "rimraf build && rimraf cjs",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
         "docs": "documentation build src/js/viewer.js -f md --shallow > README.md && cp README.md ../../docs/perspective-viewer.md"
     },
@@ -48,7 +48,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@jpmorganchase/perspective": "^0.2.18",
+        "@jpmorganchase/perspective": "^0.2.20",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
@@ -58,6 +58,6 @@
         "mobile-drag-drop": "^2.2.0"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.17"
+        "@jpmorganchase/perspective-webpack-plugin": "^0.2.20"
     }
 }
