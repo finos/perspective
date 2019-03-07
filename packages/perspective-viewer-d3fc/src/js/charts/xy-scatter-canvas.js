@@ -17,6 +17,7 @@ import {symbolLegend} from "../legend/legend";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import zoomableChart from "../zoom/zoomableChart";
 
 function xyScatterCanvas(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -60,7 +61,14 @@ function xyScatterCanvas(container, settings) {
         .xNice()
         .plotArea(series);
 
-    container.datum(data).call(chart);
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale);
+
+    // render
+    container.datum(data).call(zoomChart);
     if (legend) container.call(legend);
 }
 xyScatterCanvas.plugin = {

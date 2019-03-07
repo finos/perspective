@@ -39,7 +39,7 @@ export default () => {
                     .style("display", noZoom ? "none" : "")
                     .select("#zoom-reset")
                     .on("click", () => {
-                        selection.select(".plot-area").call(zoom.transform, d3.zoomIdentity);
+                        selection.selectAll(".plot-area").call(zoom.transform, d3.zoomIdentity);
                     });
             });
 
@@ -47,7 +47,7 @@ export default () => {
                 if (!bound) {
                     bound = true;
                     // add the zoom interaction on the enter selection
-                    const plotArea = sel.select(".plot-area");
+                    const plotArea = sel.selectAll(".plot-area");
 
                     plotArea
                         .on("measure.zoom-range", () => {
