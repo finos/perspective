@@ -65,7 +65,6 @@ function columnChart(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
-    container.select("d3fc-canvas.plot-area").style("display", "none");
 }
 columnChart.plugin = {
     type: "d3_y_bar",

@@ -70,7 +70,6 @@ function xyScatter(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     if (legend) container.call(legend);
-    container.select("d3fc-canvas.plot-area").style("display", "none");
 }
 xyScatter.plugin = {
     type: "d3_xy_scatter",
