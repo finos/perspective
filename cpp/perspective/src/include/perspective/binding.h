@@ -393,6 +393,36 @@ namespace binding {
         std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
         std::uint32_t end_col);
 
+    /**
+     * @brief Get the t_data_slice object, which contains an underlying slice of data and
+     * metadata required to interact with it.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     */
+    template <typename CTX_T>
+    std::shared_ptr<t_data_slice<CTX_T>> get_data_slice(std::shared_ptr<View<CTX_T>> view,
+        std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
+        std::uint32_t end_col);
+
+    /**
+     * @brief Retrieve a single value from the data slice and serialize it to an output
+     * type that interfaces with the binding language.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
+    template <typename CTX_T, typename T>
+    T get_from_data_slice(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_index ridx, t_index cidx);
+
 } // end namespace binding
 } // end namespace perspective
 

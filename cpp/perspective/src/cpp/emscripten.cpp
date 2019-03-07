@@ -1876,7 +1876,7 @@ namespace binding {
         std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
         auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice.get_slice();
+        auto slice = data_slice->get_slice();
         for (auto idx = 0; idx < slice->size(); ++idx) {
             arr.set(idx, scalar_to_val(slice->at(idx)));
         }
@@ -1901,15 +1901,15 @@ namespace binding {
         std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
         auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice.get_slice();
-        auto column_indices = data_slice.get_column_indices();
+        auto slice = data_slice->get_slice();
+        auto column_indices = data_slice->get_column_indices();
 
-        if (column_indices->size() > 0) {
+        if (column_indices.size() > 0) {
             t_uindex i = 0;
             auto iter = slice->begin();
             while (iter != slice->end()) {
-                t_uindex prev = column_indices->front();
-                for (auto idx = column_indices->begin(); idx != column_indices->end();
+                t_uindex prev = column_indices.front();
+                for (auto idx = column_indices.begin(); idx != column_indices.end();
                      idx++, i++) {
                     t_uindex col_num = *idx;
                     iter += col_num - prev;
@@ -1926,6 +1926,45 @@ namespace binding {
         }
 
         return arr;
+    }
+
+    /**
+     * @brief Get the t_data_slice object, which contains an underlying slice of data and
+     * metadata required to interact with it.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
+    template <typename CTX_T>
+    std::shared_ptr<t_data_slice<CTX_T>>
+    get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
+        std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
+        val arr = val::array();
+        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
+        return data_slice;
+    }
+
+    /**
+     * @brief Retrieve a single value from the data slice and serialize it to an output
+     * type that interfaces with the binding language.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
+    template <typename CTX_T>
+    val
+    get_from_data_slice(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_index ridx, t_index cidx) {
+        auto sc = data_slice->get(ridx, cidx);
+        return scalar_to_val(sc);
     }
 
 } // end namespace binding
@@ -2070,9 +2109,18 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * t_data_slice
      */
-    class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0");
-    class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1");
-    class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2");
+    class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
+        .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
+        .function<const std::vector<std::string>&>(
+            "get_column_names", &t_data_slice<t_ctx0>::get_column_names, allow_raw_pointers());
+    class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
+        .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
+        .function<const std::vector<std::string>&>(
+            "get_column_names", &t_data_slice<t_ctx1>::get_column_names, allow_raw_pointers());
+    class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
+        .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
+        .function<const std::vector<std::string>&>(
+            "get_column_names", &t_data_slice<t_ctx2>::get_column_names, allow_raw_pointers());
     /******************************************************************************
      *
      * t_ctx0
@@ -2197,4 +2245,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
     function("make_view_one", &make_view_one<val>, allow_raw_pointers());
     function("make_view_two", &make_view_two<val>, allow_raw_pointers());
+    function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
+    function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
 }
