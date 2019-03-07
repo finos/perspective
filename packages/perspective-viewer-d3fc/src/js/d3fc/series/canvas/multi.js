@@ -1,4 +1,4 @@
-import {rebindAll} from "@d3fc/d3fc-rebind";
+import {rebindAll} from "d3fc";
 import multiBase from "../multiBase";
 
 export default () => {
