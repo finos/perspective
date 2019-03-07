@@ -27,6 +27,18 @@
             height: 1.2em !important;
         }
 
+        & d3fc-canvas.plot-area {
+            display: none;
+        }
+        &.d3_xy_scatter_canvas {
+            & d3fc-canvas.plot-area {
+                display: block;
+            }
+            & d3fc-svg.plot-area {
+                display: none;
+            }
+        }
+
         & .y-axis text,
         & .x-axis text {
             fill: var(--d3fc-axis--ticks, rgb(80, 80, 80));

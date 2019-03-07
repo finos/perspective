@@ -54,7 +54,6 @@ function heatmapChart(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
-    container.select("d3fc-canvas.plot-area").style("display", "none");
 }
 heatmapChart.plugin = {
     type: "d3_heatmap",

@@ -57,7 +57,6 @@ function areaChart(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
-    container.select("d3fc-canvas.plot-area").style("display", "none");
 }
 areaChart.plugin = {
     type: "d3_y_area",

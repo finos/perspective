@@ -56,7 +56,6 @@ function lineChart(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
-    container.select("d3fc-canvas.plot-area").style("display", "none");
 }
 lineChart.plugin = {
     type: "d3_y_line",
