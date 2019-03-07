@@ -47,7 +47,11 @@ function barChart(container, settings) {
                 .include([0])
                 .paddingStrategy(hardLimitZeroPadding())(data)
         )
-        .yDomain(crossAxis.domain(settings)(data))
+        .yDomain(
+            crossAxis
+                .domain(settings)(data)
+                .reverse()
+        )
         .yOrient("left")
         .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
