@@ -743,14 +743,14 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@d3fc/d3fc-annotation@^2.0.16":
-  version "2.0.16"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-annotation/-/d3fc-annotation-2.0.16.tgz#89b4477ba8cc2f6e974d6ebb7602b30a817162a2"
-  integrity sha512-Hm2PRiVE5GG+gbk4p5UKXKqnv72iDy5IJKO6QdA9HuG9z8a/0Ok6IxcZ7Sf7u8x04ATdmAkeoDPS1VkbOuS6hQ==
+"@d3fc/d3fc-annotation@^2.0.17":
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-annotation/-/d3fc-annotation-2.0.17.tgz#2faa672e3964a59bd6335b4cfcd607c4f260bf92"
+  integrity sha512-w3R6CbNXjG4AZmULQG5b9QPP/c99ch6a8A5B8Y7GNo37T9xIFsKRrDYY1S8q2Jdt1XPIGWmpQ+XPfewUmPzUDQ==
   dependencies:
     "@d3fc/d3fc-data-join" "^5.0.7"
     "@d3fc/d3fc-rebind" "^5.0.6"
-    "@d3fc/d3fc-series" "^4.0.14"
+    "@d3fc/d3fc-series" "^4.0.15"
     "@d3fc/d3fc-shape" "^5.0.7"
     d3-scale "^1.0.1"
     d3-selection "^1.0.2"
@@ -766,10 +766,10 @@
     d3-selection "^1.0.2"
     d3-shape "^1.0.3"
 
-"@d3fc/d3fc-brush@^2.0.23":
-  version "2.0.23"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-brush/-/d3fc-brush-2.0.23.tgz#e5f1169d4454cd70f2717430e76dcf7f7ebb7def"
-  integrity sha512-qd5hQfWPYEgGU9+ae6PLrJHTESzcpPB6q5yryiLsAx3FBZNxn8WIrmFDMOcoH+VAkeZVfzK8+Vgz8G/OFwiKjQ==
+"@d3fc/d3fc-brush@^2.0.24":
+  version "2.0.24"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-brush/-/d3fc-brush-2.0.24.tgz#6824874631f7cee5796d8886be0c91739808af97"
+  integrity sha512-DQwB4SN6pPiMcEr1aThHqmJ7peZwKdYtMNmZTtqQffhlaodtow1YNKybZrm1C2ITMdyfM7aE8JUWry53TzSR/w==
   dependencies:
     "@d3fc/d3fc-data-join" "^5.0.7"
     "@d3fc/d3fc-rebind" "^5.0.6"
@@ -778,16 +778,16 @@
     d3-scale "^1.0.3"
     d3-selection "^1.0.2"
 
-"@d3fc/d3fc-chart@^2.1.5":
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-chart/-/d3fc-chart-2.1.5.tgz#6e0af3f6466a92457cd65e798712f4478c0f3c99"
-  integrity sha512-oHA74ozBkc7Uc9ehKg/WBWRB3D3xgzLkUWhy0S4KTaRrMFOz2dNf81Nae9jrYzVEm6kk6qku8cGAemixlyK54g==
+"@d3fc/d3fc-chart@^2.1.6":
+  version "2.1.6"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-chart/-/d3fc-chart-2.1.6.tgz#5d6c5e6eafe5098454f8b3549176ffda48c3bb2e"
+  integrity sha512-eUb30SJMbLsQx6UE6XnYgyrrdIHqLoeP55tVPxHoLaz1Whll3dQBN3x8aZvDDwgT9y2q/6XbCp6rb+8YSAAgVw==
   dependencies:
     "@d3fc/d3fc-axis" "^2.0.10"
     "@d3fc/d3fc-data-join" "^5.0.7"
-    "@d3fc/d3fc-element" "^5.1.5"
+    "@d3fc/d3fc-element" "^5.1.6"
     "@d3fc/d3fc-rebind" "^5.0.6"
-    "@d3fc/d3fc-series" "^4.0.14"
+    "@d3fc/d3fc-series" "^4.0.15"
     d3-scale "^1.0.3"
     d3-selection "^1.0.2"
 
@@ -807,10 +807,10 @@
     d3-scale "^1.0.0"
     d3-time "^1.0.0"
 
-"@d3fc/d3fc-element@^5.1.5":
-  version "5.1.5"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-element/-/d3fc-element-5.1.5.tgz#f4e896a165f969b98e60506d24f1ed34919ae69a"
-  integrity sha512-yEgMX8+FIcAK/01Ay9AT7iZpIA081Z3ofDJ5DuK9ayQKziL8gbB3YS+igdBOajOKVB3bnDwH44zf3fen6w9ZvA==
+"@d3fc/d3fc-element@^5.1.6":
+  version "5.1.6"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-element/-/d3fc-element-5.1.6.tgz#8936d9a7066a4735bed8f620e9a7f348c7b86d41"
+  integrity sha512-zX85I78EorIUK4FaQswQZnjXuFlk8xXkD0W1a+pHeqaA7fhEhAin/6qjB+6Hj67XNVSyQnAUMgGyzBQTlAEMGQ==
 
 "@d3fc/d3fc-extent@^3.1.2":
   version "3.1.2"
@@ -873,10 +873,10 @@
     "@d3fc/d3fc-rebind" "^5.0.6"
     d3-array "^1.0.0"
 
-"@d3fc/d3fc-series@^4.0.14":
-  version "4.0.14"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-series/-/d3fc-series-4.0.14.tgz#3b9834c879a7fa30adf94e5670b072c81fcfd0e5"
-  integrity sha512-0eUcRlQSljRqV4GDfibibcQbyE2nbeUc+hySRuMUhWQbpg5AmG9S13Rzdx769xURTYxj34fMLlooOHH0mRZmIg==
+"@d3fc/d3fc-series@^4.0.15":
+  version "4.0.15"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-series/-/d3fc-series-4.0.15.tgz#88b5f116ec70befa15b30cf91456df60c4d52fb7"
+  integrity sha512-y26nhzJxJ5h9eVoE2RS1Ivp+VpJfNOzWl2YD7BeH541DhCCclRM1ZsJl5AtpvOfQzCo79+XQtDKf2oNgKL1vlw==
   dependencies:
     "@d3fc/d3fc-data-join" "^5.0.7"
     "@d3fc/d3fc-rebind" "^5.0.6"
@@ -893,10 +893,10 @@
   dependencies:
     d3-path "^1.0.0"
 
-"@d3fc/d3fc-technical-indicator@^7.0.16":
-  version "7.0.16"
-  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-technical-indicator/-/d3fc-technical-indicator-7.0.16.tgz#9de4ca5c3277822ca701990e0b2a4a396a37e69f"
-  integrity sha512-xITitoImNvcxS0iU06jQDKJ8tDRt3jmwspkyknNeJJ0AaammkTStwuqiD6Xi4qxyE2IWrdd9NVBphDfC/Uzl9g==
+"@d3fc/d3fc-technical-indicator@^7.0.17":
+  version "7.0.17"
+  resolved "https://registry.yarnpkg.com/@d3fc/d3fc-technical-indicator/-/d3fc-technical-indicator-7.0.17.tgz#826c20f69fcd2c39bbe9206d6f82fbb4dffcb45e"
+  integrity sha512-epIQP4pLihaWTGyMhq0CAzz9oiR5rJCPOygByxc4spVU87lH4D61UTLuktH8HtfRRDCNAjqyPp4EFqZ6Hm6QtQ==
   dependencies:
     "@d3fc/d3fc-rebind" "^5.0.6"
     d3-array "^1.0.0"
@@ -4340,18 +4340,18 @@ d3@^5.7.0:
     d3-voronoi "1"
     d3-zoom "1"
 
-d3fc@^14.0.26:
-  version "14.0.26"
-  resolved "https://registry.yarnpkg.com/d3fc/-/d3fc-14.0.26.tgz#eb8ccd81a4ea69715638f557571a19d3cb749d9e"
-  integrity sha512-VeM1b31bgOt6RfzakvA6MAas1gHgmGqsBQtw+B0oOLxlH7PC2g/6owRxTd69rdrkdqUkML1Ar8UudOAfZ/IbXw==
+d3fc@^14.0.27:
+  version "14.0.27"
+  resolved "https://registry.yarnpkg.com/d3fc/-/d3fc-14.0.27.tgz#ce9d076d985624a1eebeaee0fc402a890f040f7c"
+  integrity sha512-u8xkC4Ws3PhPphmKF7h21T+rnnQKeTYytQVl1W/QGjU2dc7j2f8yZKlmnIZLB7oLOo4IPGaNlLCH+7CA6KF1yA==
   dependencies:
-    "@d3fc/d3fc-annotation" "^2.0.16"
+    "@d3fc/d3fc-annotation" "^2.0.17"
     "@d3fc/d3fc-axis" "^2.0.10"
-    "@d3fc/d3fc-brush" "^2.0.23"
-    "@d3fc/d3fc-chart" "^2.1.5"
+    "@d3fc/d3fc-brush" "^2.0.24"
+    "@d3fc/d3fc-chart" "^2.1.6"
     "@d3fc/d3fc-data-join" "^5.0.7"
     "@d3fc/d3fc-discontinuous-scale" "^3.0.7"
-    "@d3fc/d3fc-element" "^5.1.5"
+    "@d3fc/d3fc-element" "^5.1.6"
     "@d3fc/d3fc-extent" "^3.1.2"
     "@d3fc/d3fc-financial-feed" "^6.0.0"
     "@d3fc/d3fc-group" "^2.0.6"
@@ -4360,9 +4360,9 @@ d3fc@^14.0.26:
     "@d3fc/d3fc-random-data" "^3.0.7"
     "@d3fc/d3fc-rebind" "^5.0.6"
     "@d3fc/d3fc-sample" "^4.0.7"
-    "@d3fc/d3fc-series" "^4.0.14"
+    "@d3fc/d3fc-series" "^4.0.15"
     "@d3fc/d3fc-shape" "^5.0.7"
-    "@d3fc/d3fc-technical-indicator" "^7.0.16"
+    "@d3fc/d3fc-technical-indicator" "^7.0.17"
 
 d@1:
   version "1.0.0"
@@ -5608,7 +5608,7 @@ find-cache-dir@^2.0.0:
     commondir "^1.0.1"
     make-dir "^1.0.0"
     pkg-dir "^3.0.0"
-    
+
 find-index@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/find-index/-/find-index-0.1.1.tgz#675d358b2ca3892d795a1ab47232f8b6e2e0dde4"
