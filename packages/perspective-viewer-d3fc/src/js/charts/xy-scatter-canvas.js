@@ -16,6 +16,7 @@ import {seriesLinearRange, seriesColourRange} from "../series/seriesRange";
 import {symbolLegend} from "../legend/legend";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
+import {withCanvasGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -59,7 +60,7 @@ function xyScatterCanvas(container, settings) {
         .yOrient("left")
         .yNice()
         .xNice()
-        .plotArea(series);
+        .plotArea(withCanvasGridLines(series));
 
     const zoomChart = zoomableChart()
         .chart(chart)
