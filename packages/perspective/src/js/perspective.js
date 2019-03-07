@@ -309,7 +309,7 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
             slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
         } else {
@@ -317,45 +317,36 @@ export default function(Module) {
         }
 
         let data = formatter.initDataValue();
-
-        // determine which level we stop pulling column names
-        let skip = false,
-            depth = 0;
-        if (this.sides() == 2 && sorted) {
-            skip = true;
-            depth = this.config.column_pivot.length;
-        }
-
-        /*
-        let num_rows = this.num_rows();
-        let num_cols = this.num_cols();
-        let column_names = extract_vector(data_slice.get_column_names());
-        for (let ridx = 0; ridx < num_rows; ridx++) {
-            row = {}; // or array for col, etc;
-            for (let cidx = 0; cidx < num_cols; cidx++) {
-                row[column_names[cidx]] = data_slice.get(ridx, cidx);
-            }
-            data.push(row);
-        }
-        */
-
-        let col_names = [[]].concat(this._column_names(skip, depth));
         let row;
-        let ridx = -1;
-        for (let idx = 0; idx < slice.length; idx++) {
-            let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
-            if (cidx === 0) {
-                if (row) {
-                    formatter.addRow(data, row);
-                }
+
+        if (this.sides() === 0) {
+            let col_names = extract_vector(slice.get_column_names());
+            for (let ridx = start_row; ridx < end_row; ridx++) {
                 row = formatter.initRowValue();
-                ridx++;
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    let col_name = col_names[cidx];
+                    formatter.setColumnValue(data, row, col_name, __MODULE__.get_from_data_slice_zero(slice, ridx, cidx));
+                }
+                formatter.addRow(data, row);
             }
-            if (this.sides() === 0) {
-                let col_name = col_names[start_col + cidx + 1];
-                formatter.setColumnValue(data, row, col_name, slice[idx]);
-            } else {
+        } else {
+            // determine which level we stop pulling column names
+            let skip = false,
+                depth = 0;
+            if (this.sides() == 2 && sorted) {
+                skip = true;
+                depth = this.config.column_pivot.length;
+            }
+            let col_names = [[]].concat(this._column_names(skip, depth));
+            let ridx = -1;
+            for (let idx = 0; idx < slice.length; idx++) {
+                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
                 if (cidx === 0) {
+                    if (row) {
+                        formatter.addRow(data, row);
+                    }
+                    row = formatter.initRowValue();
+                    ridx++;
                     if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
                         let row_path = this._View.get_row_path(start_row + ridx);
@@ -371,13 +362,13 @@ export default function(Module) {
                     formatter.setColumnValue(data, row, col_name, clean_data(slice[idx]));
                 }
             }
-        }
 
-        if (row) {
-            formatter.addRow(data, row);
-        }
-        if (this.column_only) {
-            data = formatter.slice(data, this.config.column_pivot.length);
+            if (row) {
+                formatter.addRow(data, row);
+            }
+            if (this.column_only) {
+                data = formatter.slice(data, this.config.column_pivot.length);
+            }
         }
 
         return formatter.formatData(data, options.config);
