@@ -59,7 +59,7 @@ const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];
 
 const NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is nan", "is not nan"];
 
-const STRING_FILTERS = ["==", "contains", "!=", "in", "begins with", "ends with"];
+const STRING_FILTERS = ["==", "contains", "!=", "in", "not in", "begins with", "ends with"];
 
 const DATETIME_FILTERS = ["<", ">", "==", "<=", ">=", "!="];
 
