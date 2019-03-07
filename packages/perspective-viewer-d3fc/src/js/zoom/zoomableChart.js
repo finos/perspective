@@ -19,8 +19,10 @@ export default () => {
     let yScale = null;
     let yCopy = null;
     let bound = false;
+    let canvas = false;
 
     function zoomableChart(selection) {
+        const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
         if (xScale || yScale) {
             const zoom = d3.zoom().on("zoom", () => {
                 const {transform} = d3.event;
@@ -39,7 +41,7 @@ export default () => {
                     .style("display", noZoom ? "none" : "")
                     .select("#zoom-reset")
                     .on("click", () => {
-                        selection.selectAll(".plot-area").call(zoom.transform, d3.zoomIdentity);
+                        selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity);
                     });
             });
 
@@ -47,7 +49,7 @@ export default () => {
                 if (!bound) {
                     bound = true;
                     // add the zoom interaction on the enter selection
-                    const plotArea = sel.selectAll(".plot-area");
+                    const plotArea = sel.select(chartPlotArea);
 
                     plotArea
                         .on("measure.zoom-range", () => {
@@ -102,6 +104,14 @@ export default () => {
             const yDomain = yCopy.domain();
             yCopy.domain([yDomain[1], yDomain[0]]);
         }
+        return zoomableChart;
+    };
+
+    zoomableChart.canvas = (...args) => {
+        if (!args.length) {
+            return canvas;
+        }
+        canvas = args[0];
         return zoomableChart;
     };
 
