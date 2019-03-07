@@ -167,7 +167,8 @@ namespace binding {
                             term = mktscalar(filter[2].as<bool>());
                         } break;
                         case DTYPE_DATE: {
-                            term = mktscalar(t_date(filter[2].as<std::int32_t>()));
+                            val parsed_date = j_date_parser.call<val>("parse", filter[2]);
+                            term = mktscalar(jsdate_to_t_date(parsed_date));
                         } break;
                         case DTYPE_TIME: {
                             val parsed_date = j_date_parser.call<val>("parse", filter[2]);

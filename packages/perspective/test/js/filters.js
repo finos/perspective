@@ -18,10 +18,10 @@ var rdata = [{w: +now, x: 1, y: "a", z: true}, {w: +now, x: 2, y: "b", z: false}
 
 // starting from 09/01/2018 to 12/01/2018
 var date_range_data = [
-    {w: new Date(1535778060000), x: 1, y: "a", z: true},
-    {w: new Date(1538370060000), x: 2, y: "b", z: false},
-    {w: new Date(1541048460000), x: 3, y: "c", z: true},
-    {w: new Date(1543644060000), x: 4, y: "d", z: false}
+    {w: new Date(1535778060000), x: 1, y: "a", z: true}, // Sat Sep 01 2018 01:01:00 GMT-0400
+    {w: new Date(1538370060000), x: 2, y: "b", z: false}, // Mon Oct 01 2018 01:01:00 GMT-0400
+    {w: new Date(1541048460000), x: 3, y: "c", z: true}, // Thu Nov 01 2018 01:01:00 GMT-0400
+    {w: new Date(1543644060000), x: 4, y: "d", z: false} // Sat Dec 01 2018 01:01:00 GMT-0500
 ];
 
 var r_date_range_data = [
@@ -109,6 +109,43 @@ module.exports = perspective => {
                 expect(json).toEqual([r_date_range_data[0]]);
                 view.delete();
                 table.delete();
+            });
+
+            describe("filtering on date column", function() {
+                const schema = {
+                    w: "date"
+                };
+
+                const date_results = [
+                    {w: +new Date(1535760000000)}, // Fri Aug 31 2018 20:00:00 GMT-0400
+                    {w: +new Date(1538352000000)}, // Sun Sep 30 2018 20:00:00 GMT-0400
+                    {w: +new Date(1541030400000)}, // Wed Oct 31 2018 20:00:00 GMT-0400
+                    {w: +new Date(1543622400000)} // Fri Nov 30 2018 19:00:00 GMT-0500
+                ];
+
+                it("w > date as string", async function() {
+                    var table = perspective.table(schema);
+                    table.update(date_range_data);
+                    var view = table.view({
+                        filter: [["w", ">", "10/01/2018"]]
+                    });
+                    let json = await view.to_json();
+                    expect(json).toEqual(date_results.slice(2, 4));
+                    view.delete();
+                    table.delete();
+                });
+
+                it("w < date as string", async function() {
+                    var table = perspective.table(schema);
+                    table.update(date_range_data);
+                    var view = table.view({
+                        filter: [["w", "<", "10/01/2018"]]
+                    });
+                    let json = await view.to_json();
+                    expect(json).toEqual([date_results[0]]);
+                    view.delete();
+                    table.delete();
+                });
             });
         });
 
