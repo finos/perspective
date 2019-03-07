@@ -18,6 +18,7 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <perspective/data_slice.h>
 #include <cstddef>
 #include <memory>
 #include <map>
@@ -44,6 +45,10 @@ public:
     t_index expand(std::int32_t idx, std::int32_t row_pivot_length);
     t_index collapse(std::int32_t idx);
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
+
+    // Data serialization
+    t_data_slice<CTX_T> get_data(std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col);
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

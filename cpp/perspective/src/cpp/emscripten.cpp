@@ -1662,7 +1662,7 @@ namespace binding {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
-        bool column_only = view_config.get_column_only();
+        bool column_only = view_config.is_column_only();
         auto aggregates = view_config.get_aggregates();
         auto row_pivots = view_config.get_row_pivots();
         auto filter_op = view_config.get_combiner();
@@ -1690,7 +1690,7 @@ namespace binding {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
-        bool column_only = view_config.get_column_only();
+        bool column_only = view_config.is_column_only();
         auto column_names = view_config.get_column_names();
         auto row_pivots = view_config.get_row_pivots();
         auto column_pivots = view_config.get_column_pivots();
@@ -1717,7 +1717,8 @@ namespace binding {
         }
 
         auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
-            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, pool, gnode, name);
+            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, pool, gnode,
+            name);
 
         auto view_ptr
             = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
@@ -1765,7 +1766,7 @@ namespace binding {
         std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
         std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name) {
-        auto cfg = t_config(pivots, aggregates, combiner, filters);
+        auto cfg = t_config(pivots, aggregates, combiner, filters, column_only);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
@@ -1798,10 +1799,11 @@ namespace binding {
         std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
         std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
         std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
+        bool column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
         t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
-        auto cfg = t_config(rpivots, cpivots, aggregates, total, combiner, filters);
+        auto cfg
+            = t_config(rpivots, cpivots, aggregates, total, combiner, filters, column_only);
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();
@@ -1831,6 +1833,19 @@ namespace binding {
         return ctx2;
     }
 
+    /******************************************************************************
+     *
+     * Data serialization
+     */
+
+    /**
+     * @brief Get a slice of data for a single column, serialized to val.
+     *
+     * @tparam
+     * @param table
+     * @param colname
+     * @return val
+     */
     template <>
     val
     get_column_data(std::shared_ptr<t_table> table, std::string colname) {
@@ -1843,58 +1858,72 @@ namespace binding {
     }
 
     /**
+     * @brief Get a slice of data foe each column from the underlying view,
+     * serialized to val.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @tparam CTX_T
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
      */
-    template <typename T>
+    template <typename CTX_T>
     val
-    get_data(T ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col) {
-        auto slice = ctx->get_data(start_row, end_row, start_col, end_col);
+    get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
-        for (auto idx = 0; idx < slice.size(); ++idx) {
-            arr.set(idx, scalar_to_val(slice[idx]));
+        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
+        auto slice = data_slice.get_slice();
+        for (auto idx = 0; idx < slice->size(); ++idx) {
+            arr.set(idx, scalar_to_val(slice->at(idx)));
         }
         return arr;
     }
 
+    /**
+     * @brief Get a slice of data from the underlying view, serlializing to val
+     * and, for sorted views, ignoring the sort headers which aren't part of the
+     * underlying data.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
     template <>
     val
-    get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
-        std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col) {
-        auto col_length = ctx->unity_get_column_count();
-        std::vector<t_uindex> col_nums;
-        col_nums.push_back(0);
-        for (t_uindex i = 0; i < col_length; ++i) {
-            if (ctx->unity_get_column_path(i + 1).size() == depth) {
-                col_nums.push_back(i + 1);
-            }
-        }
-        col_nums = std::vector<t_uindex>(col_nums.begin() + start_col,
-            col_nums.begin() + std::min(end_col, (std::uint32_t)col_nums.size()));
-        auto slice = ctx->get_data(start_row, end_row, col_nums.front(), col_nums.back() + 1);
+    get_data(std::shared_ptr<View<t_ctx2>> view, std::uint32_t start_row, std::uint32_t end_row,
+        std::uint32_t start_col, std::uint32_t end_col) {
         val arr = val::array();
-        t_uindex i = 0;
-        auto iter = slice.begin();
-        while (iter != slice.end()) {
-            t_uindex prev = col_nums.front();
-            for (auto idx = col_nums.begin(); idx != col_nums.end(); idx++, i++) {
-                t_uindex col_num = *idx;
-                iter += col_num - prev;
-                prev = col_num;
-                arr.set(i, scalar_to_val(*iter));
+        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
+        auto slice = data_slice.get_slice();
+        auto column_indices = data_slice.get_column_indices();
+
+        if (column_indices->size() > 0) {
+            t_uindex i = 0;
+            auto iter = slice->begin();
+            while (iter != slice->end()) {
+                t_uindex prev = column_indices->front();
+                for (auto idx = column_indices->begin(); idx != column_indices->end();
+                     idx++, i++) {
+                    t_uindex col_num = *idx;
+                    iter += col_num - prev;
+                    prev = col_num;
+                    arr.set(i, scalar_to_val(*iter));
+                }
+                if (iter != slice->end())
+                    iter++;
             }
-            if (iter != slice.end())
-                iter++;
+        } else {
+            for (auto idx = 0; idx < slice->size(); ++idx) {
+                arr.set(idx, scalar_to_val(slice->at(idx)));
+            }
         }
+
         return arr;
     }
 
@@ -2038,6 +2067,13 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_data_slice
+     */
+    class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0");
+    class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1");
+    class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2");
+    /******************************************************************************
+     *
      * t_ctx0
      */
     class_<t_ctx0>("t_ctx0").smart_ptr<std::shared_ptr<t_ctx0>>("shared_ptr<t_ctx0>");
@@ -2151,10 +2187,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("get_data_zero", &get_data<std::shared_ptr<t_ctx0>>);
-    function("get_data_one", &get_data<std::shared_ptr<t_ctx1>>);
-    function("get_data_two", &get_data<std::shared_ptr<t_ctx2>>);
-    function("get_data_two_skip_headers", &get_data_two_skip_headers<val>);
+    function("get_data_zero", &get_data<t_ctx0>);
+    function("get_data_one", &get_data<t_ctx1>);
+    function("get_data_two", &get_data<t_ctx2>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);

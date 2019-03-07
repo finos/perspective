@@ -6,29 +6,15 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
-#pragma once
-
 #include <perspective/first.h>
-#include <perspective/raw_types.h>
+#include <perspective/get_data_extents.h>
 
 namespace perspective {
-
-struct t_get_data_extents {
-    t_index m_srow;
-    t_index m_erow;
-    t_index m_scol;
-    t_index m_ecol;
-};
-
-template <typename CONTEXT_T>
 t_get_data_extents
-sanitize_get_data_extents(const CONTEXT_T& ctx, t_index start_row, t_index end_row,
+sanitize_get_data_extents(t_index nrows, t_index ncols, t_index start_row, t_index end_row,
     t_index start_col, t_index end_col) {
-    t_index ncols = ctx.get_column_count();
-
-    start_row = std::min(start_row, ctx.get_row_count());
-    end_row = std::min(end_row, ctx.get_row_count());
+    start_row = std::min(start_row, nrows);
+    end_row = std::min(end_row, nrows);
 
     start_row = std::max(t_index(0), start_row);
     end_row = std::max(t_index(0), end_row);

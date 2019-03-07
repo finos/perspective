@@ -285,6 +285,7 @@ set (SOURCE_FILES
 	src/cpp/context_two.cpp
 	src/cpp/context_zero.cpp
 	src/cpp/custom_column.cpp
+	src/cpp/data_slice.cpp
 	src/cpp/data.cpp
 	src/cpp/date.cpp
 	src/cpp/dense_nodes.cpp
@@ -294,6 +295,7 @@ set (SOURCE_FILES
 	src/cpp/extract_aggregate.cpp
 	src/cpp/filter.cpp
 	src/cpp/flat_traversal.cpp
+	src/cpp/get_data_extents.cpp
 	src/cpp/gnode.cpp
 	src/cpp/gnode_state.cpp
 	src/cpp/histogram.cpp

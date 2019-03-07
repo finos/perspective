@@ -504,15 +504,15 @@ py::object get_column_data(std::shared_ptr<t_table> table, std::string colname) 
  * -------
  *
  */
-template <typename T>
-py::object get_data(T ctx, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
+template <typename CTX_T>
+py::object get_data(std::shared_ptr<View<CTX_T> > view, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
     std::uint32_t end_col) {
     py::list arr;
     return arr;
 }
 
 template <>
-py::object get_data_two_skip_headers(std::shared_ptr<t_ctx2> ctx, std::uint32_t depth,
+py::object get_data_two_skip_headers(std::shared_ptr<View<t_ctx2> > view, std::uint32_t depth,
     std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
     std::uint32_t end_col) {
     py::list arr;

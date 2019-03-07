@@ -309,13 +309,11 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            slice = __MODULE__.get_data_zero(this.ctx, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_one(this.ctx, start_row, end_row, start_col, end_col);
-        } else if (!sorted) {
-            slice = __MODULE__.get_data_two(this.ctx, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
         } else {
-            slice = __MODULE__.get_data_two_skip_headers(this.ctx, this.config.column_pivot.length, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();
@@ -327,6 +325,19 @@ export default function(Module) {
             skip = true;
             depth = this.config.column_pivot.length;
         }
+
+        /*
+        let num_rows = this.num_rows();
+        let num_cols = this.num_cols();
+        let column_names = extract_vector(data_slice.get_column_names());
+        for (let ridx = 0; ridx < num_rows; ridx++) {
+            row = {}; // or array for col, etc;
+            for (let cidx = 0; cidx < num_cols; cidx++) {
+                row[column_names[cidx]] = data_slice.get(ridx, cidx);
+            }
+            data.push(row);
+        }
+        */
 
         let col_names = [[]].concat(this._column_names(skip, depth));
         let row;

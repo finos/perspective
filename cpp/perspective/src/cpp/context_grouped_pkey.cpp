@@ -8,7 +8,7 @@
  */
 
 #include <perspective/first.h>
-#include <perspective/context_common.h>
+#include <perspective/get_data_extents.h>
 #include <perspective/context_grouped_pkey.h>
 #include <perspective/extract_aggregate.h>
 #include <perspective/filter.h>
@@ -113,11 +113,13 @@ t_ctx_grouped_pkey::get_data(
     t_index start_row, t_index end_row, t_index start_col, t_index end_col) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    auto ext = sanitize_get_data_extents(*this, start_row, end_row, start_col, end_col);
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ncols = get_column_count();
+    auto ext
+        = sanitize_get_data_extents(ctx_nrows, ncols, start_row, end_row, start_col, end_col);
 
     t_index nrows = ext.m_erow - ext.m_srow;
     t_index stride = ext.m_ecol - ext.m_scol;
-    t_uindex ncols = get_column_count();
     std::vector<t_tscalar> values(nrows * stride);
     std::vector<t_tscalar> tmpvalues(nrows * ncols);
 
