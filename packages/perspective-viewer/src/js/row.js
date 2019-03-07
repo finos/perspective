@@ -77,11 +77,7 @@ class Row extends HTMLElement {
         }
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._callback = event => this._update_filter(event);
-        filter_operand.addEventListener("keyup", event => {
-            if (filter_operand.value !== "in") {
-                this._callback(event);
-            }
-        });
+        filter_operand.addEventListener("keyup", this._callback.bind(this));
     }
 
     choices(choices) {
@@ -99,7 +95,7 @@ class Row extends HTMLElement {
             },
             replace: function(text) {
                 let before = this.input.value.match(/^.+,\s*|/)[0];
-                if (filter_operator.value === "in") {
+                if (filter_operator.value === "in" || filter_operator.value === "not in") {
                     this.input.value = before + text + ", ";
                 } else {
                     this.input.value = before + text;
@@ -170,7 +166,7 @@ class Row extends HTMLElement {
             case "string":
             default:
         }
-        if (filter_operator.value === "in") {
+        if (filter_operator.value === "in" || filter_operator.value === "not in") {
             val = val.split(",").map(x => x.trim());
         }
         this.setAttribute("filter", JSON.stringify({operator: filter_operator.value, operand: val}));
