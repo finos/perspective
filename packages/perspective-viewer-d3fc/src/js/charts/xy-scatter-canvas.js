@@ -65,7 +65,8 @@ function xyScatterCanvas(container, settings) {
         .chart(chart)
         .settings(settings)
         .xScale(xScale)
-        .yScale(yScale);
+        .yScale(yScale)
+        .canvas(true);
 
     // render
     container.datum(data).call(zoomChart);
