@@ -37,3 +37,8 @@ function withOpacity(colour) {
     const toInt = offset => parseInt(colour.substring(offset, offset + 2), 16);
     return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
 }
+
+export function withOutOpacity(colour) {
+    const lastComma = colour.lastIndexOf(",");
+    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
+}

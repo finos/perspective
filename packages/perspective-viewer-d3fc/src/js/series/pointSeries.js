@@ -8,6 +8,7 @@
  */
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
+import {withOutOpacity} from "./seriesColours.js";
 
 export function pointSeries(settings, colour, seriesKey, size) {
     let series = fc
@@ -27,9 +28,4 @@ export function pointSeries(settings, colour, seriesKey, size) {
     });
 
     return series;
-}
-
-function withOutOpacity(colour) {
-    const lastComma = colour.lastIndexOf(",");
-    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
 }
