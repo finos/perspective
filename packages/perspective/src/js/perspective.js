@@ -938,6 +938,11 @@ export default function(Module) {
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
         }
 
+        if (accessor.row_count === 0) {
+            console.warn("table.update called with no data - ignoring");
+            return;
+        }
+
         try {
             [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, true, false, is_arrow);
             this.initialized = true;
