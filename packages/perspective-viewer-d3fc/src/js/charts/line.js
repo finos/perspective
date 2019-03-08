@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import * as d3 from "d3";
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
@@ -19,16 +20,37 @@ import {withGridLines} from "../gridlines/gridlines";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import {tooltipPointSeries} from "../series/tooltipSeries";
+import {getSVGPlotAreaValues} from "../utils/utils";
+import {getClosestDataPoint} from "../data/getClosestDataPoint";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
     const colour = seriesColours(settings);
+    let tooltipData = [];
+    //tooltipData = [{key: "gold", crossValue: "2008", mainValue: 125}];
 
     const legend = colourLegend()
         .settings(settings)
         .scale(colour);
 
-    const series = fc.seriesSvgRepeat().series(lineSeries(settings, colour).orient("vertical"));
+    const point = tooltipPointSeries(settings, colour);
+
+    const line = lineSeries(settings, colour).orient("vertical");
+
+    const multi = fc
+        .seriesSvgMulti()
+        .series([point, line])
+        .mapping((data, index, series) => {
+            switch (series[index]) {
+                case line:
+                    return data;
+                case point:
+                    return tooltipData;
+            }
+        });
+
+    const series = fc.seriesSvgRepeat().series(multi);
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.1, 0.1])
@@ -56,7 +78,29 @@ function lineChart(container, settings) {
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
+
+    const {xOffset, yOffset, clientHeight} = getSVGPlotAreaValues(container);
+
+    const pointer = fc.pointer().on("point", event => {
+        if (event.length) {
+            const yScale = d3
+                .scaleLinear()
+                .domain(zoomChart.chart().yDomain())
+                .range([clientHeight, 0])
+                .nice();
+
+            const xPos = event[0].x - xOffset;
+            const yPos = event[0].y - yOffset;
+
+            tooltipData = getClosestDataPoint(data, xScale, yScale, xPos, yPos);
+
+            container.datum(data).call(zoomChart);
+        }
+    });
+
+    container.call(pointer);
 }
+
 lineChart.plugin = {
     type: "d3_y_line",
     name: "[d3fc] Y Line Chart",

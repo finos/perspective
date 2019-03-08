@@ -38,6 +38,33 @@ export const tooltip = () => {
     return _tooltip;
 };
 
+export const remoteTooltip = () => {
+    let generateHtml = generateHtmlDefault;
+
+    const _tooltip = (selection, data, settings) => {
+        const node = selection.node();
+
+        if (!node || !node.isConnected) return;
+
+        const container = select(getChartElement(node).getContainer());
+        const tooltipDiv = getTooltipDiv(container);
+
+        generateHtmlDefault(tooltipDiv, data, settings);
+        showTooltip(container.node(), node, tooltipDiv);
+        select(node).style("opacity", "0.7");
+    };
+
+    _tooltip.generateHtml = (...args) => {
+        if (!args.length) {
+            return generateHtml;
+        }
+        generateHtml = args[0];
+        return _tooltip;
+    };
+
+    return _tooltip;
+};
+
 function getTooltipDiv(container) {
     return getOrCreateElement(container, "div.tooltip", () =>
         container
