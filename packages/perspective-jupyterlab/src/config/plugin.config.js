@@ -19,7 +19,7 @@ module.exports = {
         }
     },
     resolve: {
-        extensions: [".ts", ".js", ".json"]
+        extensions: [".ts", ".js"]
     },
     externals: /\@jupyter|\@phosphor/,
     plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
@@ -30,7 +30,11 @@ module.exports = {
                 use: [{loader: "css-loader"}]
             },
             {
-                test: /\.ts?$/,
+                test: /\.json$/,
+                loader: "json-loader"
+            },
+            {
+                test: /\.ts$/,
                 loader: "ts-loader"
             }
         ]
