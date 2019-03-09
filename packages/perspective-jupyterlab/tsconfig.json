@@ -5,7 +5,6 @@
     "noUnusedLocals": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
     "allowJs": true,
     "target": "es2016",
     "outDir": "./build",
@@ -15,8 +14,9 @@
       "DOM"
     ],
     "types": [
-      "@jpmorganchase/perspective-phosphor"
+      "@jpmorganchase/perspective-phosphor",
+      "node"
     ]
   },
-  "include": ["src/ts/*"]
+  "include": ["package.json", "src/ts/*"]
 }

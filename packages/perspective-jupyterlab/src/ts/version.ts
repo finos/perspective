@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+var pkg_json = require("../../package.json");
 
 export 
-const PERSPECTIVE_VERSION = '0.2.15';
+const PERSPECTIVE_VERSION = pkg_json.version;
