@@ -317,15 +317,15 @@ export default function(Module) {
         }
 
         let data = formatter.initDataValue();
-        let row;
 
         if (this.sides() === 0) {
             let col_names = extract_vector(slice.get_column_names());
             for (let ridx = start_row; ridx < end_row; ridx++) {
-                row = formatter.initRowValue();
+                let row = formatter.initRowValue();
                 for (let cidx = start_col; cidx < end_col; cidx++) {
                     let col_name = col_names[cidx];
-                    formatter.setColumnValue(data, row, col_name, __MODULE__.get_from_data_slice_zero(slice, ridx, cidx));
+                    let value = clean_data(__MODULE__.get_from_data_slice_zero(slice, ridx, cidx));
+                    formatter.setColumnValue(data, row, col_name, value);
                 }
                 formatter.addRow(data, row);
             }
@@ -338,6 +338,7 @@ export default function(Module) {
                 depth = this.config.column_pivot.length;
             }
             let col_names = [[]].concat(this._column_names(skip, depth));
+            let row;
             let ridx = -1;
             for (let idx = 0; idx < slice.length; idx++) {
                 let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);

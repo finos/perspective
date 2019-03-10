@@ -49,40 +49,19 @@ t_data_slice<CTX_T>::~t_data_slice() {}
  * @brief Returns the t_tscalar at the declared indices in the data slice,
  * or an invalid t_tscalar if the indices should be skipped.
  *
+ * // TODO: re-specialize for t_ctx2 in order to implement skip logic
+ *
  * @param ridx row index into the slice
  * @param cidx column index into the slice
  *
  * @return t_tscalar a valid scalar containing the underlying data, or a new
  * t_tscalar initialized with an invalid flag.
  */
-template <>
+template <typename CTX_T>
 t_tscalar
-t_data_slice<t_ctx0>::get(t_index ridx, t_index cidx) const {
+t_data_slice<CTX_T>::get(t_index ridx, t_index cidx) const {
     t_index idx = get_slice_idx(ridx, cidx);
-    t_tscalar rv = m_slice->at(idx);
-    return rv;
-}
-
-template <>
-t_tscalar
-t_data_slice<t_ctx1>::get(t_index ridx, t_index cidx) const {
-    t_index idx = get_slice_idx(ridx, cidx);
-    t_tscalar rv = m_slice->at(idx);
-    return rv;
-}
-
-template <>
-t_tscalar
-t_data_slice<t_ctx2>::get(t_index ridx, t_index cidx) const {
-    t_index idx = get_slice_idx(ridx, cidx);
-    t_tscalar rv;
-    if (m_column_indices.size() > 0) {
-        // Skip data for header rows
-        // rv.clear()
-        rv = m_slice->at(idx);
-    } else {
-        rv = m_slice->at(idx);
-    }
+    t_tscalar rv = m_slice->operator[](idx);
     return rv;
 }
 
