@@ -1943,7 +1943,6 @@ namespace binding {
     std::shared_ptr<t_data_slice<CTX_T>>
     get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
         std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col) {
-        val arr = val::array();
         auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
         return data_slice;
     }
@@ -1963,8 +1962,8 @@ namespace binding {
     val
     get_from_data_slice(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_index ridx, t_index cidx) {
-        auto sc = data_slice->get(ridx, cidx);
-        return scalar_to_val(sc);
+        auto d = data_slice->get(ridx, cidx);
+        return scalar_to_val(d);
     }
 
 } // end namespace binding
@@ -2247,4 +2246,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_view_two", &make_view_two<val>, allow_raw_pointers());
     function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
+    function("get_data_slice_one", &get_data_slice<t_ctx1>, allow_raw_pointers());
+    function("get_from_data_slice_one", &get_from_data_slice<t_ctx1>, allow_raw_pointers());
+    function("get_data_slice_two", &get_data_slice<t_ctx2>, allow_raw_pointers());
+    function("get_from_data_slice_two", &get_from_data_slice<t_ctx2>, allow_raw_pointers());
 }
