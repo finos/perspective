@@ -458,10 +458,10 @@ case it is over a Web Socket.
 
 ### Setting & reading viewer configuration via Attributes
 
-`<perspective-view>` uses the DOM's regular attribute API to set it's
+`<perspective-viewer>` uses the DOM's regular attribute API to set it's
 initial state, by reading JSON encoded properties from attributes for each
 `perspective` configuration property. For example, this HTML will apply
-`row_pivot` and `filter` confiuration to the initial `view()` created when
+`row_pivot` and `filter` configuration to the initial `view()` created when
 data is loaded via the `load()` method, as well as set the UI controls to
 reflect this config. See the
 [full Attribute API documentation](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer)
