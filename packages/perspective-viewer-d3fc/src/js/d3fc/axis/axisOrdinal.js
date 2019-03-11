@@ -4,7 +4,7 @@ import {dataJoin as _dataJoin} from "d3fc";
 
 const identity = d => d;
 
-const axis = (orient, scale) => {
+const axisOrdinal = (orient, scale) => {
     let tickArguments = [10];
     let tickValues = null;
     let decorate = () => {};
@@ -12,8 +12,8 @@ const axis = (orient, scale) => {
     let tickSizeOuter = 6;
     let tickSizeInner = 6;
     let tickPadding = 3;
-    let centerAlignTicks = false;
-    let tickOffset = () => (centerAlignTicks && scale.step ? scale.step() / 2 : 0);
+    let tickLineAlign = "center";
+    let tickOffset = () => (tickLineAlign == "right" && scale.step ? scale.step() / 2 : 0);
 
     const svgDomainLine = line();
 
@@ -83,7 +83,7 @@ const axis = (orient, scale) => {
                 .append("path")
                 .attr("stroke", "#000");
 
-            const labelOffset = sign * ((centerAlignTicks ? 0 : tickSizeInner) + tickPadding);
+            const labelOffset = sign * ((tickLineAlign == "right" ? 0 : tickSizeInner) + tickPadding);
             g.enter()
                 .append("text")
                 .attr("transform", translate(0, labelOffset))
@@ -94,7 +94,7 @@ const axis = (orient, scale) => {
 
             // update
             g.select("path")
-                .attr("visibility", (d, i) => (i === ticksArray.length - 1 && centerAlignTicks ? "hidden" : ""))
+                .attr("visibility", (d, i) => (i === ticksArray.length - 1 && tickLineAlign == "right" ? "hidden" : ""))
                 .attr("d", d => {
                     const offset = sign * tickOffset(d);
                     return svgDomainLine(pathTranspose([[offset, 0], [offset, sign * tickSizeInner]]));
@@ -159,11 +159,11 @@ const axis = (orient, scale) => {
         return axis;
     };
 
-    axis.centerAlignTicks = (...args) => {
+    axis.tickLineAlign = (...args) => {
         if (!args.length) {
-            return centerAlignTicks;
+            return tickLineAlign;
         }
-        centerAlignTicks = args[0];
+        tickLineAlign = args[0];
         return axis;
     };
 
@@ -215,10 +215,10 @@ const axis = (orient, scale) => {
     return axis;
 };
 
-export const axisTop = scale => axis("top", scale);
+export const axisOrdinalTop = scale => axisOrdinal("top", scale);
 
-export const axisBottom = scale => axis("bottom", scale);
+export const axisOrdinalBottom = scale => axisOrdinal("bottom", scale);
 
-export const axisLeft = scale => axis("left", scale);
+export const axisOrdinalLeft = scale => axisOrdinal("left", scale);
 
-export const axisRight = scale => axis("right", scale);
+export const axisOrdinalRight = scale => axisOrdinal("right", scale);

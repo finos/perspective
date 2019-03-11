@@ -16,7 +16,6 @@ import {colourLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
-import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -39,25 +38,34 @@ function barChart(container, settings) {
             )
         );
 
+    const yDomain = crossAxis
+        .domain(settings)(data)
+        .reverse();
     const yScale = crossAxis.scale(settings);
-    const chart = chartSvgCartesian(mainAxis.scale(settings), yScale)
+    const yAxis = crossAxis
+        .axisFactory(settings)
+        .domain(yDomain)
+        .orient("vertical")();
+
+    const chart = fc
+        .chartSvgCartesian({
+            xScale: mainAxis.scale(settings),
+            yScale,
+            yAxis
+        })
         .xDomain(
             mainAxis
                 .domain(settings)
                 .include([0])
                 .paddingStrategy(hardLimitZeroPadding())(data)
         )
-        .yDomain(
-            crossAxis
-                .domain(settings)(data)
-                .reverse()
-        )
+        .xLabel(mainAxis.label(settings))
+        .yDomain(yDomain)
+        .yLabel(crossAxis.label(settings))
+        .yAxisWidth(yAxis.size)
         .yOrient("left")
         .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
-
-    crossAxis.styleAxis(chart, "y", settings, "crossValues");
-    mainAxis.styleAxis(chart, "x", settings);
 
     chart.yPaddingInner && chart.yPaddingInner(0.5);
     chart.yPaddingOuter && chart.yPaddingOuter(0.25);
