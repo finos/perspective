@@ -16,12 +16,10 @@ export function getOrCreateElement(container, selector, createCallback) {
     return element.size() > 0 ? element : createCallback();
 }
 
-export function getSVGPlotAreaValues(container) {
-    const plotArea = container.select(".plot-area");
-    const yAxis = container.select("d3fc-svg.y-axis");
-    const xOffset = yAxis._groups[0][0].offsetWidth + yAxis._groups[0][0].offsetLeft;
-    const {offsetTop, clientHeight} = plotArea._groups[0][0];
-    const yOffset = offsetTop;
-
-    return {xOffset, yOffset, clientHeight};
-}
+export const chainCallback = (property, fn) => {
+    const oldFn = property();
+    property((...args) => {
+        if (oldFn) oldFn(...args);
+        fn(...args);
+    });
+};
