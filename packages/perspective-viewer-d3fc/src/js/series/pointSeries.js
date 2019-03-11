@@ -8,9 +8,11 @@
  */
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
-import {withOutOpacity} from "./seriesColours.js";
+import {groupFromKey} from "./seriesKey";
+import {withOpacity, withoutOpacity} from "./seriesColours";
+import {fromDomain} from "./seriesSymbols";
 
-export function pointSeries(settings, colour, seriesKey, size) {
+export function pointSeries(settings, seriesKey, size, colour, symbols) {
     let series = fc
         .seriesSvgPoint()
         .crossValue(d => d.x)
@@ -19,13 +21,30 @@ export function pointSeries(settings, colour, seriesKey, size) {
     if (size) {
         series.size(d => size(d.size));
     }
+    if (symbols) {
+        series.type(symbols(seriesKey));
+    }
 
     series.decorate(selection => {
         tooltip()(selection, settings);
         if (colour) {
-            selection.style("stroke", () => withOutOpacity(colour(seriesKey))).style("fill", () => colour(seriesKey));
+            selection.style("stroke", d => withoutOpacity(colour(d.colorValue || seriesKey))).style("fill", d => withOpacity(colour(d.colorValue || seriesKey)));
         }
     });
 
     return series;
+}
+
+export function symbolTypeFromGroups(settings) {
+    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const domain = [];
+    Object.keys(col).forEach(key => {
+        if (key !== "__ROW_PATH__") {
+            const group = groupFromKey(key);
+            if (!domain.includes(group)) {
+                domain.push(group);
+            }
+        }
+    });
+    return fromDomain(domain);
 }

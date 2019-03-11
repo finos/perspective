@@ -12,21 +12,26 @@ import * as mainAxis from "../axis/mainAxis";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColours} from "../series/seriesColours";
 import {splitAndBaseData} from "../data/splitAndBaseData";
-import {legend, filterData} from "../legend/legend";
+import {colourLegend} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
+import zoomableChart from "../zoom/zoomableChart";
 
 function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
 
     const colour = seriesColours(settings);
-    legend(container, settings, colour);
+    const legend = colourLegend()
+        .settings(settings)
+        .scale(colour);
 
     const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
 
-    const chart = chartSvgCartesian(crossAxis.scale(settings), mainAxis.scale(settings))
+    const xScale = crossAxis.scale(settings);
+    const chart = chartSvgCartesian(xScale, mainAxis.scale(settings))
         .xDomain(crossAxis.domain(settings)(data))
         .yDomain(
             mainAxis
@@ -44,8 +49,14 @@ function areaChart(container, settings) {
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
+    container.call(legend);
 }
 areaChart.plugin = {
     type: "d3_y_area",

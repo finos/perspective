@@ -5,49 +5,67 @@ import {axisBottom, axisLeft} from "../../axis/axis";
 
 export default (xScale = scaleIdentity(), yScale = scaleIdentity()) => {
     const cartesianBase = chartSvgCartesian(xScale, yScale);
-    let xAxisSize = null;
-    let yAxisSize = null;
-    let xAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
-    let yAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "tickGrouping");
+    let xAxisHeight = null;
+    let yAxisWidth = null;
+    let xAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "centerAlignTicks");
+    let yAxisStore = store("tickFormat", "ticks", "tickArguments", "tickSize", "tickSizeInner", "tickSizeOuter", "tickValues", "tickPadding", "centerAlignTicks");
+
+    let xAxis = scale => axisBottom(scale);
+    let yAxis = scale => axisLeft(scale);
 
     const cartesian = selection => {
         cartesianBase(selection);
 
         selection
             .selectAll("d3fc-svg.x-axis")
-            .style("height", Number.isInteger(xAxisSize) ? `${xAxisSize}px` : xAxisSize)
+            .style("height", Number.isInteger(xAxisHeight) ? `${xAxisHeight}px` : xAxisHeight)
             .on("draw", (d, i, nodes) => {
-                const xAxis = axisBottom(xScale).decorate(cartesianBase.xDecorate());
+                const xAxisComponent = xAxis(xScale).decorate(cartesianBase.xDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(xAxisStore(xAxis));
+                    .call(xAxisStore(xAxisComponent));
             });
 
         selection
             .selectAll("d3fc-svg.y-axis")
-            .style("width", Number.isInteger(yAxisSize) ? `${yAxisSize}px` : yAxisSize)
+            .style("width", Number.isInteger(yAxisWidth) ? `${yAxisWidth}px` : yAxisWidth)
             .on("draw", (d, i, nodes) => {
-                const yAxis = axisLeft(yScale).decorate(cartesianBase.yDecorate());
+                const yAxisComponent = yAxis(yScale).decorate(cartesianBase.yDecorate());
                 select(nodes[i])
                     .select("svg")
-                    .call(yAxisStore(yAxis));
+                    .call(yAxisStore(yAxisComponent));
             });
     };
 
     rebindAll(cartesian, cartesianBase);
 
-    cartesian.xAxisSize = (...args) => {
+    cartesian.xAxisHeight = (...args) => {
         if (!args.length) {
-            return xAxisSize;
+            return xAxisHeight;
         }
-        xAxisSize = args[0];
+        xAxisHeight = args[0];
         return cartesian;
     };
-    cartesian.yAxisSize = (...args) => {
+    cartesian.yAxisWidth = (...args) => {
         if (!args.length) {
-            return yAxisSize;
+            return yAxisWidth;
         }
-        yAxisSize = args[0];
+        yAxisWidth = args[0];
+        return cartesian;
+    };
+
+    cartesian.xAxis = (...args) => {
+        if (!args.length) {
+            return xAxis;
+        }
+        xAxis = args[0];
+        return cartesian;
+    };
+    cartesian.yAxis = (...args) => {
+        if (!args.length) {
+            return yAxis;
+        }
+        yAxis = args[0];
         return cartesian;
     };
 

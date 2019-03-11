@@ -17,7 +17,7 @@
         "build:webpack": "webpack --color --config src/config/d3fc.plugin.config.js",
         "build": "npm-run-all build:babel build:webpack",
         "test:build": "cpx \"test/html/*\" build",
-        "watch": "webpack --color --watch --config src/config/d3fc.plugin.config.js",
+        "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
         "test:run": "jest --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf build && rimraf cjs",
@@ -48,10 +48,11 @@
         "chroma-js": "^1.3.4",
         "d3": "^5.7.0",
         "d3-svg-legend": "^2.25.6",
-        "d3fc": "^14.0.26",
+        "d3fc": "^14.0.27",
         "gradient-parser": "0.1.5"
     },
     "devDependencies": {
-        "babel-loader": "^8.0.5"
+        "babel-loader": "^8.0.5",
+        "webpack": "^3.5.6"
     }
 }

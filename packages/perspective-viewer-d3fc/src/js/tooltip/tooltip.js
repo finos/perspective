@@ -52,14 +52,32 @@ function getTooltipDiv(container) {
 function showTooltip(containerNode, barNode, tooltipDiv) {
     const containerRect = containerNode.getBoundingClientRect();
     const barRect = barNode.getBoundingClientRect();
+
     const left = barRect.left + barRect.width / 2 - containerRect.left;
     const top = barRect.top - containerRect.top;
+
     tooltipDiv
         .style("left", `${left}px`)
         .style("top", `${top}px`)
         .transition()
         .duration(200)
         .style("opacity", 0.9);
+
+    shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top);
+}
+
+function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
+    const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
+
+    if (containerRect.right < tooltipDivRect.right) {
+        const leftAdjust = tooltipDivRect.right - containerRect.right;
+        tooltipDiv.style("left", `${left - leftAdjust}px`);
+    }
+
+    if (containerRect.bottom < tooltipDivRect.bottom) {
+        const topAdjust = tooltipDivRect.bottom - containerRect.bottom;
+        tooltipDiv.style("top", `${top - topAdjust}px`);
+    }
 }
 
 function hideTooltip(tooltipDiv) {

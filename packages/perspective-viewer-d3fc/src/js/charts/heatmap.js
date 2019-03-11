@@ -6,35 +6,34 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as d3 from "d3";
-import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
-//import * as otherAxis from "../axis/otherAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
+import {seriesColourRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
-import {filterData} from "../legend/legend";
+import {filterData} from "../legend/filter";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {withGridLines} from "../gridlines/gridlines";
-import {legend} from "../legend/colorLegend";
+import {colourRangeLegend} from "../legend/colourRangeLegend";
+import zoomableChart from "../zoom/zoomableChart";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
-    const colorInterpolate = d3.interpolateViridis;
 
-    const series = heatmapSeries(settings, colorInterpolate);
+    const colour = seriesColourRange(settings, data, "colorValue");
+    const series = heatmapSeries(settings, colour);
 
-    const extent = fc.extentLinear().accessors([d => d.colorValue]);
+    const legend = colourRangeLegend().scale(colour);
 
-    const colourDomain = extent(data);
-    legend(container, colorInterpolate, colourDomain);
-
-    const chart = chartSvgCartesian(crossAxis.scale(settings), crossAxis.scale(settings, "splitValues"))
+    const xScale = crossAxis.scale(settings);
+    const yScale = crossAxis.scale(settings, "splitValues");
+    const chart = chartSvgCartesian(xScale, yScale)
         .xDomain(crossAxis.domain(settings)(data))
         .yDomain(
             crossAxis
                 .domain(settings)
                 .settingName("splitValues")
                 .valueName("mainValue")(data)
+                .reverse()
         )
         .yOrient("left")
         .plotArea(withGridLines(series));
@@ -47,8 +46,15 @@ function heatmapChart(container, settings) {
     chart.yPaddingInner && chart.yPaddingInner(0);
     chart.yPaddingOuter && chart.yPaddingOuter(0);
 
+    const zoomChart = zoomableChart()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale);
+
     // render
-    container.datum(data).call(chart);
+    container.datum(data).call(zoomChart);
+    container.call(legend);
 }
 heatmapChart.plugin = {
     type: "d3_heatmap",
