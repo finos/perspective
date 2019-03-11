@@ -16,7 +16,6 @@ import {symbolLegend} from "../legend/legend";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -51,7 +50,8 @@ function xyScatter(container, settings) {
     const xScale = mainAxis.scale(settings);
     const yScale = mainAxis.scale(settings);
 
-    const chart = chartSvgCartesian(xScale, yScale)
+    const chart = fc
+        .chartSvgCartesian(xScale, yScale)
         .xDomain(domainDefault().valueName("x")(data))
         .xLabel(settings.mainValues[0].name)
         .yDomain(domainDefault().valueName("y")(data))
