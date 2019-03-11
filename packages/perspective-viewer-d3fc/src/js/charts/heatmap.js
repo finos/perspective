@@ -6,12 +6,12 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
 import {seriesColourRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/filter";
-import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {withGridLines} from "../gridlines/gridlines";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
@@ -24,22 +24,37 @@ function heatmapChart(container, settings) {
 
     const legend = colourRangeLegend().scale(colour);
 
+    const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
+    const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
+
+    const yDomain = crossAxis
+        .domain(settings)
+        .settingName("splitValues")
+        .valueName("mainValue")(data)
+        .reverse();
     const yScale = crossAxis.scale(settings, "splitValues");
-    const chart = chartSvgCartesian(xScale, yScale)
-        .xDomain(crossAxis.domain(settings)(data))
-        .yDomain(
-            crossAxis
-                .domain(settings)
-                .settingName("splitValues")
-                .valueName("mainValue")(data)
-                .reverse()
-        )
+    const yAxis = crossAxis
+        .axisFactory(settings)
+        .settingName("splitValues")
+        .orient("vertical")
+        .domain(yDomain)();
+
+    const chart = fc
+        .chartSvgCartesian({
+            xScale,
+            yScale,
+            xAxis,
+            yAxis
+        })
+        .xDomain(xDomain)
+        .xLabel(crossAxis.label(settings))
+        .xAxisHeight(xAxis.size)
+        .yDomain(yDomain)
+        .yLabel(crossAxis.label(settings, "splitValues"))
+        .yAxisWidth(yAxis.size)
         .yOrient("left")
         .plotArea(withGridLines(series));
-
-    crossAxis.styleAxis(chart, "x", settings, "crossValues");
-    crossAxis.styleAxis(chart, "y", settings, "splitValues");
 
     chart.xPaddingInner && chart.xPaddingInner(0);
     chart.xPaddingOuter && chart.xPaddingOuter(0);
