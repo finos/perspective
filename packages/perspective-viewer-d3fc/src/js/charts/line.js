@@ -37,11 +37,12 @@ function lineChart(container, settings) {
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
     const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
+    const yScale = mainAxis.scale(settings);
 
     const chart = fc
         .chartSvgCartesian({
             xScale,
-            yScale: mainAxis.scale(settings),
+            yScale,
             xAxis
         })
         .xDomain(xDomain)
