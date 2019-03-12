@@ -311,7 +311,7 @@ export default function(Module) {
         if (this.sides() === 0) {
             slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
         } else {
             slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         }
@@ -329,11 +329,37 @@ export default function(Module) {
                 }
                 formatter.addRow(data, row);
             }
+        } else if (this.sides() === 1) {
+            let col_names = extract_vector(slice.get_column_names());
+            col_names.unshift("");
+            for (let ridx = start_row; ridx < end_row; ridx++) {
+                let row = formatter.initRowValue();
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    let col_name;
+                    if (cidx === 0) {
+                        if (!this.column_only) {
+                            col_name = "__ROW_PATH__";
+                            let row_path = slice.get_row_path(ridx);
+                            formatter.initColumnValue(data, row, col_name);
+                            for (let i = 0; i < row_path.size(); i++) {
+                                const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
+                                formatter.addColumnValue(data, row, col_name, value);
+                            }
+                            row_path.delete();
+                        }
+                    } else {
+                        col_name = col_names[cidx];
+                        let value = clean_data(__MODULE__.get_from_data_slice_one(slice, ridx, cidx));
+                        formatter.setColumnValue(data, row, col_name, value);
+                    }
+                }
+                formatter.addRow(data, row);
+            }
         } else {
             // determine which level we stop pulling column names
             let skip = false,
                 depth = 0;
-            if (this.sides() == 2 && sorted) {
+            if (sorted) {
                 skip = true;
                 depth = this.config.column_pivot.length;
             }

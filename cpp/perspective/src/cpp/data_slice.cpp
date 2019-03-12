@@ -13,8 +13,8 @@
 namespace perspective {
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_index start_row,
-    t_index end_row, t_index start_col, t_index end_col,
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
+    t_uindex end_row, t_uindex start_col, t_uindex end_col,
     const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
@@ -27,10 +27,10 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_index start_row,
 }
 
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_index start_row,
-    t_index end_row, t_index start_col, t_index end_col,
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
+    t_uindex end_row, t_uindex start_col, t_uindex end_col,
     const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names,
-    std::vector<t_index> column_indices)
+    std::vector<t_uindex> column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -49,8 +49,6 @@ t_data_slice<CTX_T>::~t_data_slice() {}
  * @brief Returns the t_tscalar at the declared indices in the data slice,
  * or an invalid t_tscalar if the indices should be skipped.
  *
- * // TODO: re-specialize for t_ctx2 in order to implement skip logic
- *
  * @param ridx row index into the slice
  * @param cidx column index into the slice
  *
@@ -59,22 +57,40 @@ t_data_slice<CTX_T>::~t_data_slice() {}
  */
 template <typename CTX_T>
 t_tscalar
-t_data_slice<CTX_T>::get(t_index ridx, t_index cidx) const {
-    t_index idx = get_slice_idx(ridx, cidx);
+t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = get_slice_idx(ridx, cidx);
+    t_tscalar rv;
+    if (idx >= m_slice->size()) {
+        rv.clear();
+    } else {
+        rv = m_slice->at(idx);
+    }
+    return rv;
+}
+
+template <>
+t_tscalar
+t_data_slice<t_ctx2>::get(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = get_slice_idx(ridx, cidx);
     t_tscalar rv = m_slice->operator[](idx);
+    /* if (m_column_indices.size() > 0) {
+        t_uindex idx_skip_headers;
+    } else {
+
+    } */
     return rv;
 }
 
 template <typename CTX_T>
 std::vector<t_tscalar>
-t_data_slice<CTX_T>::get_row_path(t_index idx) const {
+t_data_slice<CTX_T>::get_row_path(t_uindex idx) const {
     return m_ctx->unity_get_row_path(idx);
 }
 
 template <typename CTX_T>
-t_index
-t_data_slice<CTX_T>::get_slice_idx(t_index ridx, t_index cidx) const {
-    t_index idx = (ridx - m_start_row) * m_stride + (cidx - m_start_col);
+t_uindex
+t_data_slice<CTX_T>::get_slice_idx(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = (ridx - m_start_row) * m_stride + (cidx - m_start_col);
     return idx;
 }
 
@@ -98,7 +114,7 @@ t_data_slice<CTX_T>::get_column_names() const {
 }
 
 template <typename CTX_T>
-const std::vector<t_index>&
+const std::vector<t_uindex>&
 t_data_slice<CTX_T>::get_column_indices() const {
     return m_column_indices;
 }
@@ -117,7 +133,7 @@ t_data_slice<t_ctx0>::is_column_only() const {
 }
 
 template <typename CTX_T>
-t_index
+t_uindex
 t_data_slice<CTX_T>::get_stride() const {
     return m_stride;
 }
