@@ -24,14 +24,16 @@ export function colorRangeLegend() {
 
     function legend(container) {
         const domain = scale.domain();
-        const pad = (domain[1] - domain[0]) * 0.1;
-        const min = domain[0] - pad;
-        const max = domain[1] + pad;
+        const paddedDomain = fc
+            .extentLinear()
+            .pad([0.1, 0.1])
+            .padUnit("percent")(domain);
+        const [min, max] = paddedDomain;
         const expandedDomain = d3.range(min, max, (max - min) / height);
 
         const yScale = d3
             .scaleLinear()
-            .domain(fc.extentLinear()(expandedDomain))
+            .domain(paddedDomain)
             .range([height, 0]);
 
         const svgBar = fc
