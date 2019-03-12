@@ -294,7 +294,8 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
  */
 template <typename CTX_T>
 std::shared_ptr<t_data_slice<CTX_T>>
-View<CTX_T>::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) {
+View<CTX_T>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
         m_ctx->get_data(start_row, end_row, start_col, end_col));
     auto col_names = _column_names();
@@ -305,9 +306,10 @@ View<CTX_T>::get_data(t_index start_row, t_index end_row, t_index start_col, t_i
 
 template <>
 std::shared_ptr<t_data_slice<t_ctx2>>
-View<t_ctx2>::get_data(t_index start_row, t_index end_row, t_index start_col, t_index end_col) {
+View<t_ctx2>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
     std::vector<t_tscalar> slice;
-    std::vector<t_index> column_indices;
+    std::vector<t_uindex> column_indices;
     std::vector<std::string> column_names;
     bool is_sorted = m_sorts.size() > 0;
 
@@ -322,8 +324,8 @@ View<t_ctx2>::get_data(t_index start_row, t_index end_row, t_index start_col, t_
         }
 
         column_names = _column_names(true, depth);
-        column_indices = std::vector<t_index>(column_indices.begin() + start_col,
-            column_indices.begin() + std::min(end_col, (t_index)column_indices.size()));
+        column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
+            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
 
         slice = m_ctx->get_data(
             start_row, end_row, column_indices.front(), column_indices.back() + 1);

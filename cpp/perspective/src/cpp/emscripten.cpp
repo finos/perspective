@@ -1961,7 +1961,7 @@ namespace binding {
     template <typename CTX_T>
     val
     get_from_data_slice(
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_index ridx, t_index cidx) {
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx) {
         auto d = data_slice->get(ridx, cidx);
         return scalar_to_val(d);
     }
@@ -2024,7 +2024,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx0>::get_aggregates)
         .function("get_filters", &View<t_ctx0>::get_filters)
         .function("get_sorts", &View<t_ctx0>::get_sorts)
-        .function("get_row_path", &View<t_ctx0>::get_row_path)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
@@ -2047,7 +2046,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_aggregates", &View<t_ctx1>::get_aggregates)
         .function("get_filters", &View<t_ctx1>::get_filters)
         .function("get_sorts", &View<t_ctx1>::get_sorts)
-        .function("get_row_path", &View<t_ctx1>::get_row_path)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
@@ -2115,7 +2113,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx1>::get_column_names, allow_raw_pointers());
+            "get_column_names", &t_data_slice<t_ctx1>::get_column_names, allow_raw_pointers())
+        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
         .function<const std::vector<std::string>&>(

@@ -48,7 +48,7 @@ public:
 
     // Data serialization
     std::shared_ptr<t_data_slice<CTX_T>> get_data(
-        t_index start_row, t_index end_row, t_index start_col, t_index end_col);
+        t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

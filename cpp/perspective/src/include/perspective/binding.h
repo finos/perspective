@@ -421,7 +421,7 @@ namespace binding {
      */
     template <typename CTX_T, typename T>
     T get_from_data_slice(
-        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_index ridx, t_index cidx);
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx);
 
 } // end namespace binding
 } // end namespace perspective
