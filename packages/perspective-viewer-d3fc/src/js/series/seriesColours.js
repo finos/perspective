@@ -35,11 +35,12 @@ function fromDomain(domain) {
 
 export function withoutOpacity(colour) {
     const lastComma = colour.lastIndexOf(",");
-    return lastComma !== -1 ? `${colour.substring(0, lastComma)})` : colour;
+    const valueIndex = colour.indexOf("(");
+    return valueIndex !== -1 && lastComma !== -1 ? `rgb(${colour.substring(valueIndex + 1, lastComma)})` : colour;
 }
 
 export function withOpacity(colour) {
-    if (colour.includes("rgba")) return colour;
+    if (colour.includes("rgb")) return colour;
 
     const toInt = offset => parseInt(colour.substring(offset, offset + 2), 16);
     return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;

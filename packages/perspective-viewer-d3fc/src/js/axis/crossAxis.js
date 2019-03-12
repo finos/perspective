@@ -35,6 +35,14 @@ export const scale = (settings, settingName = "crossValues") => {
 
 const defaultScaleBand = () => minBandwidth(d3.scaleBand());
 
+const flattenArray = array => {
+    if (Array.isArray(array)) {
+        return [].concat(...array.map(flattenArray));
+    } else {
+        return [array];
+    }
+};
+
 export const domain = settings => {
     let valueName = "crossValue";
     let settingName = "crossValues";
@@ -42,7 +50,7 @@ export const domain = settings => {
     const extentTime = fc.extentTime().accessors([d => new Date(d[valueName])]);
 
     const _domain = function(data) {
-        const flattenedData = data.flat(2);
+        const flattenedData = flattenArray(data);
         switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
                 return extentTime(flattenedData);
