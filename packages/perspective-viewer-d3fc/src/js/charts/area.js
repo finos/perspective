@@ -18,6 +18,7 @@ import {withGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
@@ -31,12 +32,13 @@ function areaChart(container, settings) {
 
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
+    const yScale = mainAxis.scale(settings);
     const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
 
     const chart = fc
         .chartSvgCartesian({
             xScale,
-            yScale: mainAxis.scale(settings),
+            yScale,
             xAxis
         })
         .xDomain(xDomain)
@@ -62,6 +64,15 @@ function areaChart(container, settings) {
         .chart(chart)
         .settings(settings)
         .xScale(xScale);
+
+    const toolTip = nearbyTip()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale)
+        .colour(colour)
+        .data(data);
+    container.call(toolTip);
 
     // render
     container.datum(data).call(zoomChart);
