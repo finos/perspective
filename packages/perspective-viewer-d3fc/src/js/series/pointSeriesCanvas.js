@@ -7,11 +7,11 @@
  *
  */
 import {seriesCanvasPoint} from "d3fc";
-import {withOpacity, withoutOpacity} from "./seriesColours";
+import {withOpacity, withoutOpacity} from "./seriesColors";
 import {groupFromKey} from "./seriesKey";
 import {fromDomain} from "./seriesSymbols";
 
-export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
+export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
     let series = seriesCanvasPoint()
         .crossValue(d => d.x)
         .mainValue(d => d.y);
@@ -24,11 +24,11 @@ export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
     }
 
     series.decorate((context, d) => {
-        if (colour) {
-            const color = colour(d.colorValue !== undefined ? d.colorValue : seriesKey);
+        if (color) {
+            const colorValue = color(d.colorValue !== undefined ? d.colorValue : seriesKey);
 
-            context.strokeStyle = withoutOpacity(color);
-            context.fillStyle = withOpacity(color);
+            context.strokeStyle = withoutOpacity(colorValue);
+            context.fillStyle = withOpacity(colorValue);
         } else {
             context.strokeStyle = "rgb(31, 119, 180)";
             context.fillStyle = "rgba(31, 119, 180, 0.5)";

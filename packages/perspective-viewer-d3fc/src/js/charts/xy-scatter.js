@@ -10,10 +10,10 @@ import * as fc from "d3fc";
 import * as mainAxis from "../axis/mainAxis";
 import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
-import {seriesColoursFromGroups} from "../series/seriesColours";
-import {seriesLinearRange, seriesColourRange} from "../series/seriesRange";
+import {seriesColorsFromGroups} from "../series/seriesColors";
+import {seriesLinearRange, seriesColorRange} from "../series/seriesRange";
 import {symbolLegend} from "../legend/legend";
-import {colourRangeLegend} from "../legend/colourRangeLegend";
+import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
 import {withCanvasGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
@@ -23,20 +23,20 @@ import nearbyTip from "../tooltip/nearbyTip";
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
     const symbols = symbolTypeFromGroups(settings);
-    const useGroupColours = settings.mainValues.length <= 2;
-    let colour = null;
+    const useGroupColors = settings.mainValues.length <= 2;
+    let color = null;
     let legend = null;
 
-    if (useGroupColours) {
-        colour = seriesColoursFromGroups(settings);
+    if (useGroupColors) {
+        color = seriesColorsFromGroups(settings);
 
         legend = symbolLegend()
             .settings(settings)
             .scale(symbols)
-            .colour(useGroupColours ? colour : null);
+            .color(useGroupColors ? color : null);
     } else {
-        colour = seriesColourRange(settings, data, "colorValue");
-        legend = colourRangeLegend().scale(colour);
+        color = seriesColorRange(settings, data, "colorValue");
+        legend = colorRangeLegend().scale(color);
     }
 
     const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
@@ -44,7 +44,7 @@ function xyScatter(container, settings) {
     const series = fc
         .seriesCanvasMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, colour, symbols)));
+        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols)));
 
     const domainDefault = () => mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
 
@@ -77,7 +77,7 @@ function xyScatter(container, settings) {
         .xValueName("x")
         .yValueName("y")
         .yScale(yScale)
-        .colour(useGroupColours && colour)
+        .color(useGroupColors && color)
         .data(data);
     container.call(toolTip);
 
