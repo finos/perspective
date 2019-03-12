@@ -10,9 +10,9 @@ import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {barSeries} from "../series/barSeries";
-import {seriesColours} from "../series/seriesColours";
+import {seriesColors} from "../series/seriesColors";
 import {groupAndStackData} from "../data/groupData";
-import {colourLegend} from "../legend/legend";
+import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
@@ -21,18 +21,18 @@ import zoomableChart from "../zoom/zoomableChart";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
-    const colour = seriesColours(settings);
+    const color = seriesColors(settings);
 
-    const legend = colourLegend()
+    const legend = colorLegend()
         .settings(settings)
-        .scale(colour);
+        .scale(color);
 
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
         .series(
             data.map(() =>
-                barSeries(settings, colour)
+                barSeries(settings, color)
                     .align("left")
                     .orient("horizontal")
             )

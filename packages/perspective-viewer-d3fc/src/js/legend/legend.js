@@ -10,11 +10,11 @@
 import * as d3 from "d3";
 import * as d3Legend from "d3-svg-legend";
 import scrollableLegend from "./scrollableLegend";
-import {withoutOpacity} from "../series/seriesColours";
+import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 
-const scrollColourLegend = scrollableLegend(
+const scrollColorLegend = scrollableLegend(
     d3Legend
         .legendColor()
         .shape("circle")
@@ -27,7 +27,7 @@ const scrollSymbolLegend = scrollableLegend(
         .labelOffset(3)
 );
 
-export const colourLegend = () => legendComponent(scrollColourLegend);
+export const colorLegend = () => legendComponent(scrollColorLegend);
 export const symbolLegend = () => legendComponent(scrollSymbolLegend, symbolScale);
 
 function symbolScale(fromScale) {
@@ -44,7 +44,7 @@ function symbolScale(fromScale) {
 function legendComponent(scrollLegend, scaleModifier) {
     let settings = {};
     let scale = null;
-    let colour = null;
+    let color = null;
 
     function legend(container) {
         if (scale) {
@@ -87,11 +87,11 @@ function legendComponent(scrollLegend, scaleModifier) {
 
         cells.classed("hidden", isHidden);
 
-        if (colour) {
+        if (color) {
             cells
                 .select("path")
-                .style("fill", d => (isHidden(d) ? null : colour(d)))
-                .style("stroke", d => (isHidden(d) ? null : withoutOpacity(colour(d))));
+                .style("fill", d => (isHidden(d) ? null : color(d)))
+                .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
         }
     });
 
@@ -111,11 +111,11 @@ function legendComponent(scrollLegend, scaleModifier) {
         return legend;
     };
 
-    legend.colour = (...args) => {
+    legend.color = (...args) => {
         if (!args.length) {
-            return colour;
+            return color;
         }
-        colour = args[0];
+        color = args[0];
         return legend;
     };
 
