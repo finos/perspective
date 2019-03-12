@@ -78,7 +78,7 @@ function xyScatterCanvas(container, settings) {
         .xValueName("x")
         .yValueName("y")
         .yScale(yScale)
-        .colour(colour)
+        .colour(useGroupColours && colour)
         .data(data);
     container.call(toolTip);
 
