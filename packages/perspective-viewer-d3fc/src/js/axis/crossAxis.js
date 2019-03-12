@@ -148,7 +148,8 @@ export const axisFactory = settings => {
         // Default axis
         return {
             bottom: fc.axisBottom,
-            left: fc.axisLeft
+            left: fc.axisLeft,
+            decorate: () => {}
         };
     };
 
