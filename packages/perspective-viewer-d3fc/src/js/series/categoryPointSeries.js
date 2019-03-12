@@ -7,7 +7,6 @@
  *
  */
 import * as fc from "d3fc";
-import {tooltip} from "../tooltip/tooltip";
 import {withOpacity, withoutOpacity} from "./seriesColors";
 import {fromDomain} from "./seriesSymbols";
 
@@ -19,7 +18,6 @@ export function categoryPointSeries(settings, seriesKey, color, symbols) {
     }
 
     series.decorate(selection => {
-        tooltip()(selection, settings);
         if (color) {
             selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey)));
         }
