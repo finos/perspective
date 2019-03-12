@@ -42,6 +42,7 @@ function areaChart(container, settings) {
         .xDomain(xDomain)
         .xLabel(crossAxis.label(settings))
         .xAxisHeight(xAxis.size)
+        .xDecorate(xAxis.decorate)
         .yDomain(
             mainAxis
                 .domain(settings)

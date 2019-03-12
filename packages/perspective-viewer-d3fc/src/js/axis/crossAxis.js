@@ -121,13 +121,7 @@ export const axisFactory = settings => {
 
                 const createAxis = scale => {
                     const axis = pickAxis(multiLevel)(scale);
-                    axis.tickLineAlign("right")
-                        .tickPadding(8)
-                        .decorate((s, data, index) => {
-                            const rotated = groupTickLayout[index].rotate;
-                            hideOverlappingLabels(s, rotated);
-                            if (orient === "horizontal") applyLabelRotation(s, rotated);
-                        });
+                    axis.tickLineAlign("right").tickPadding(8);
 
                     if (multiLevel) {
                         axis.groups(levelGroups)
@@ -137,10 +131,17 @@ export const axisFactory = settings => {
                     return axis;
                 };
 
+                const decorate = (s, data, index) => {
+                    const rotated = groupTickLayout[index].rotate;
+                    hideOverlappingLabels(s, rotated);
+                    if (orient === "horizontal") applyLabelRotation(s, rotated);
+                };
+
                 return {
                     bottom: createAxis,
                     left: createAxis,
-                    size: `${tickSizeOuter + 10}px`
+                    size: `${tickSizeOuter + 10}px`,
+                    decorate
                 };
         }
 
