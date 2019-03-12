@@ -63,6 +63,7 @@ function barChart(container, settings) {
         .yDomain(yDomain)
         .yLabel(crossAxis.label(settings))
         .yAxisWidth(yAxis.size)
+        .yDecorate(yAxis.decorate)
         .yOrient("left")
         .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));

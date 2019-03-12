@@ -50,9 +50,11 @@ function heatmapChart(container, settings) {
         .xDomain(xDomain)
         .xLabel(crossAxis.label(settings))
         .xAxisHeight(xAxis.size)
+        .xDecorate(xAxis.decorate)
         .yDomain(yDomain)
         .yLabel(crossAxis.label(settings, "splitValues"))
         .yAxisWidth(yAxis.size)
+        .yDecorate(yAxis.decorate)
         .yOrient("left")
         .plotArea(withGridLines(series));
 

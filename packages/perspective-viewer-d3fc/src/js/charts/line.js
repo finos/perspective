@@ -47,7 +47,7 @@ function lineChart(container, settings) {
         .xDomain(xDomain)
         .xLabel(crossAxis.label(settings))
         .xAxisHeight(xAxis.size)
-    const yScale = mainAxis.scale(settings);
+        .xDecorate(xAxis.decorate)
         .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
         .yLabel(mainAxis.label(settings))
         .yOrient("left")

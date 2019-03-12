@@ -50,6 +50,7 @@ function yScatter(container, settings) {
         .xDomain(xDomain)
         .xLabel(crossAxis.label(settings))
         .xAxisHeight(xAxis.size)
+        .xDecorate(xAxis.decorate)
         .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
         .yLabel(mainAxis.label(settings))
         .yOrient("left")
