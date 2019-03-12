@@ -9,20 +9,20 @@
 import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import {heatmapSeries} from "../series/heatmapSeries";
-import {seriesColourRange} from "../series/seriesRange";
+import {seriesColorRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-import {colourRangeLegend} from "../legend/colourRangeLegend";
+import {colorRangeLegend} from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 
 function heatmapChart(container, settings) {
     const data = heatmapData(settings, filterData(settings));
 
-    const colour = seriesColourRange(settings, data, "colorValue");
-    const series = heatmapSeries(settings, colour);
+    const color = seriesColorRange(settings, data, "colorValue");
+    const series = heatmapSeries(settings, color);
 
-    const legend = colourRangeLegend().scale(colour);
+    const legend = colorRangeLegend().scale(color);
 
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);

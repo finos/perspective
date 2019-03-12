@@ -9,13 +9,13 @@
 import * as fc from "d3fc";
 import {tooltip} from "../tooltip/tooltip";
 
-export function barSeries(settings, colour) {
+export function barSeries(settings, color) {
     let series = settings.mainValues.length > 1 ? fc.seriesSvgGrouped(fc.seriesSvgBar()) : fc.seriesSvgBar();
 
     series = series.decorate(selection => {
         tooltip()(selection, settings);
-        if (colour) {
-            selection.style("fill", d => colour(d.key));
+        if (color) {
+            selection.style("fill", d => color(d.key));
         }
     });
 

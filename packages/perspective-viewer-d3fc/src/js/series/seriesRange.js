@@ -17,7 +17,7 @@ export function seriesLinearRange(settings, data, valueName) {
     );
 }
 
-export function seriesColourRange(settings, data, valueName) {
+export function seriesColorRange(settings, data, valueName) {
     return d3.scaleSequential(d3.interpolateViridis).domain(
         domain()
             .valueName(valueName)

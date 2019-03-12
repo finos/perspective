@@ -7,14 +7,14 @@
  *
  */
 import * as fc from "d3fc";
-import {withoutOpacity} from "./seriesColours.js";
+import {withoutOpacity} from "./seriesColors.js";
 
-export function lineSeries(settings, colour) {
+export function lineSeries(settings, color) {
     let series = fc.seriesSvgLine();
 
-    if (colour) {
+    if (color) {
         series = series.decorate(selection => {
-            selection.style("stroke", d => withoutOpacity(colour(d[0] && d[0].key)));
+            selection.style("stroke", d => withoutOpacity(color(d[0] && d[0].key)));
         });
     }
 

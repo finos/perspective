@@ -11,7 +11,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import {chainCallback} from "../utils/utils";
 import {tooltip} from "./tooltip";
-import {withOpacity} from "../series/seriesColours.js";
+import {withOpacity} from "../series/seriesColors.js";
 import {findBestFromData} from "../data/findBest";
 
 export default () => {
@@ -21,7 +21,7 @@ export default () => {
     let xCopy = null;
     let yScale = null;
     let yCopy = null;
-    let colour = null;
+    let color = null;
     let canvas = false;
     let data = null;
     let xValueName = "crossValue";
@@ -63,7 +63,7 @@ export default () => {
             .merge(tips)
             .attr("transform", d => `translate(${xScale(d[xValueName])},${yScale(d[yValueName])})`)
             .style("stroke", "none")
-            .style("fill", d => colour && withOpacity(colour(d.key)));
+            .style("fill", d => color && withOpacity(color(d.key)));
 
         showTooltip(tips, settings);
     };
@@ -114,11 +114,11 @@ export default () => {
         return nearbyTip;
     };
 
-    nearbyTip.colour = (...args) => {
+    nearbyTip.color = (...args) => {
         if (!args.length) {
-            return colour;
+            return color;
         }
-        colour = args[0];
+        color = args[0];
         return nearbyTip;
     };
 
