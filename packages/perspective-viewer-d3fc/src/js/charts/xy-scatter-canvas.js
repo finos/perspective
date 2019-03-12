@@ -19,6 +19,7 @@ import {filterDataByGroup} from "../legend/filter";
 import {withCanvasGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function xyScatterCanvas(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -68,6 +69,18 @@ function xyScatterCanvas(container, settings) {
         .xScale(xScale)
         .yScale(yScale)
         .canvas(true);
+
+    const toolTip = nearbyTip()
+        .chart(chart)
+        .settings(settings)
+        .canvas(true)
+        .xScale(xScale)
+        .xValueName("x")
+        .yValueName("y")
+        .yScale(yScale)
+        .colour(useGroupColours && colour)
+        .data(data);
+    container.call(toolTip);
 
     // render
     container.datum(data).call(zoomChart);

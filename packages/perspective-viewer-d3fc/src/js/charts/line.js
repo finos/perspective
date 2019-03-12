@@ -19,6 +19,7 @@ import {withGridLines} from "../gridlines/gridlines";
 import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
@@ -35,7 +36,8 @@ function lineChart(container, settings) {
         .padUnit("percent");
 
     const xScale = crossAxis.scale(settings);
-    const chart = chartSvgCartesian(xScale, mainAxis.scale(settings))
+    const yScale = mainAxis.scale(settings);
+    const chart = chartSvgCartesian(xScale, yScale)
         .xDomain(crossAxis.domain(settings)(data))
         .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
         .yOrient("left")
@@ -53,10 +55,20 @@ function lineChart(container, settings) {
         .settings(settings)
         .xScale(xScale);
 
+    const toolTip = nearbyTip()
+        .chart(chart)
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale)
+        .colour(colour)
+        .data(data);
+    container.call(toolTip);
+
     // render
     container.datum(data).call(zoomChart);
     container.call(legend);
 }
+
 lineChart.plugin = {
     type: "d3_y_line",
     name: "[d3fc] Y Line Chart",
