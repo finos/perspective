@@ -10,6 +10,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
+import {axisOrdinalBottom, axisOrdinalLeft} from "../d3fc/axis/axisOrdinal";
 import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
 
 const AXIS_TYPES = {
@@ -101,12 +102,87 @@ const axisType = (settings, settingName = "crossValues") => {
     return AXIS_TYPES.ordinal;
 };
 
-export const styleAxis = (chart, prefix, settings, settingName = "crossValues") => {
+export const axisFactory = settings => {
+    let orient = "horizontal";
+    let settingName = "crossValues";
+    let domain = null;
+
+    const factory = () => {
+        switch (axisType(settings, settingName)) {
+            case AXIS_TYPES.ordinal:
+                const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
+
+                // Calculate the label groups and corresponding group sizes
+                const levelGroups = axisGroups(domain);
+                const groupTickLayout = levelGroups.map(getGroupTickLayout);
+
+                const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
+                const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
+
+                const createAxis = scale => {
+                    const axis = pickAxis(multiLevel)(scale);
+                    axis.tickLineAlign("right").tickPadding(8);
+
+                    if (multiLevel) {
+                        axis.groups(levelGroups)
+                            .tickSizeInner(tickSizeInner)
+                            .tickSizeOuter(tickSizeOuter);
+                    }
+                    return axis;
+                };
+
+                const decorate = (s, data, index) => {
+                    const rotated = groupTickLayout[index].rotate;
+                    hideOverlappingLabels(s, rotated);
+                    if (orient === "horizontal") applyLabelRotation(s, rotated);
+                };
+
+                return {
+                    bottom: createAxis,
+                    left: createAxis,
+                    size: `${tickSizeOuter + 10}px`,
+                    decorate
+                };
+        }
+
+        // Default axis
+        return {
+            bottom: fc.axisBottom,
+            left: fc.axisLeft,
+            decorate: () => {}
+        };
+    };
+
+    const pickAxis = multiLevel => {
+        if (multiLevel) {
+            return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
+        }
+        return orient === "horizontal" ? axisOrdinalBottom : axisOrdinalLeft;
+    };
+
+    const axisGroups = domain => {
+        const groups = [];
+        domain.forEach(tick => {
+            const split = tick.split("|");
+            split.forEach((s, i) => {
+                while (groups.length <= i) groups.push([]);
+
+                const group = groups[i];
+                if (group.length > 0 && group[group.length - 1].text === s) {
+                    group[group.length - 1].domain.push(tick);
+                } else {
+                    group.push({text: s, domain: [tick]});
+                }
+            });
+        });
+        return groups.reverse();
+    };
+
     const getGroupTickLayout = group => {
         const width = settings.size.width;
         const maxLength = Math.max(...group.map(g => g.text.length));
 
-        if (prefix === "x") {
+        if (orient === "horizontal") {
             // x-axis may rotate labels and expand the available height
             if (group.length * (maxLength * 6 + 10) > width - 100) {
                 return {
@@ -127,101 +203,73 @@ export const styleAxis = (chart, prefix, settings, settingName = "crossValues") 
         }
     };
 
-    chart[`${prefix}Label`](label(settings, settingName));
+    const hideOverlappingLabels = (s, rotated) => {
+        const getTransformCoords = transform =>
+            transform
+                .substring(transform.indexOf("(") + 1, transform.indexOf(")"))
+                .split(",")
+                .map(c => parseInt(c));
 
-    const suppliedDomain = chart[`${prefix}Domain`]();
+        const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
+        const rotatedLabelsOverlap = (r1, r2) => r1.x + 14 > r2.x;
 
-    switch (axisType(settings, settingName)) {
-        case AXIS_TYPES.ordinal:
-            const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
+        const previousRectangles = [];
+        s.each((d, i, nodes) => {
+            const tick = d3.select(nodes[i]);
+            const text = tick.select("text");
 
-            // Calculate the label groups and corresponding group sizes
-            const levelGroups = axisGroups(suppliedDomain);
-            const groupTickLayout = levelGroups.map(getGroupTickLayout);
+            const transformCoords = getTransformCoords(tick.attr("transform"));
 
-            const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
-            const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
-
-            chart[`${prefix}CenterAlignTicks`](true)
-                [`${prefix}TickSizeInner`](tickSizeInner)
-                [`${prefix}TickSizeOuter`](tickSizeOuter)
-                [`${prefix}TickPadding`](8)
-                [`${prefix}Axis${prefix === "x" ? "Height" : "Width"}`](tickSizeOuter + 10)
-                [`${prefix}Decorate`]((s, data, index) => {
-                    const rotated = groupTickLayout[index].rotate;
-                    hideOverlappingLabels(s, rotated);
-                    if (prefix === "x") applyLabelRotation(s, rotated);
-                });
-
-            if (multiLevel) {
-                chart[`${prefix}Axis`](scale => {
-                    const multiAxis = prefix === "x" ? multiAxisBottom(scale) : multiAxisLeft(scale);
-                    multiAxis.groups(levelGroups);
-                    return multiAxis;
-                });
-            }
-            break;
-    }
-};
-
-function hideOverlappingLabels(s, rotated) {
-    const getTransformCoords = transform =>
-        transform
-            .substring(transform.indexOf("(") + 1, transform.indexOf(")"))
-            .split(",")
-            .map(c => parseInt(c));
-
-    const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
-    const rotatedLabelsOverlap = (r1, r2) => r1.x + 14 > r2.x;
-
-    const previousRectangles = [];
-    s.each((d, i, nodes) => {
-        const tick = d3.select(nodes[i]);
-        const text = tick.select("text");
-
-        const transformCoords = getTransformCoords(tick.attr("transform"));
-
-        let rect = {};
-        let overlap = false;
-        if (rotated) {
-            rect = {x: transformCoords[0], y: transformCoords[1]};
-            overlap = previousRectangles.some(r => rotatedLabelsOverlap(r, rect));
-        } else {
-            const textRect = text.node().getBBox();
-            rect = {x: textRect.x + transformCoords[0], y: textRect.y + transformCoords[1], width: textRect.width, height: textRect.height};
-            overlap = previousRectangles.some(r => rectanglesOverlap(r, rect));
-        }
-
-        text.attr("visibility", overlap ? "hidden" : "");
-        if (!overlap) {
-            previousRectangles.push(rect);
-        }
-    });
-}
-
-function applyLabelRotation(s, rotate) {
-    s.each((d, i, nodes) => {
-        const tick = d3.select(nodes[i]);
-        const text = tick.select("text");
-
-        text.attr("transform", rotate ? "rotate(-45 5 5)" : "translate(0, 8)").style("text-anchor", rotate ? "end" : "");
-    });
-}
-
-const axisGroups = domain => {
-    const groups = [];
-    domain.forEach(tick => {
-        const split = tick.split("|");
-        split.forEach((s, i) => {
-            while (groups.length <= i) groups.push([]);
-
-            const group = groups[i];
-            if (group.length > 0 && group[group.length - 1].text === s) {
-                group[group.length - 1].domain.push(tick);
+            let rect = {};
+            let overlap = false;
+            if (rotated) {
+                rect = {x: transformCoords[0], y: transformCoords[1]};
+                overlap = previousRectangles.some(r => rotatedLabelsOverlap(r, rect));
             } else {
-                group.push({text: s, domain: [tick]});
+                const textRect = text.node().getBBox();
+                rect = {x: textRect.x + transformCoords[0], y: textRect.y + transformCoords[1], width: textRect.width, height: textRect.height};
+                overlap = previousRectangles.some(r => rectanglesOverlap(r, rect));
+            }
+
+            text.attr("visibility", overlap ? "hidden" : "");
+            if (!overlap) {
+                previousRectangles.push(rect);
             }
         });
-    });
-    return groups.reverse();
+    };
+
+    const applyLabelRotation = (s, rotate) => {
+        s.each((d, i, nodes) => {
+            const tick = d3.select(nodes[i]);
+            const text = tick.select("text");
+
+            text.attr("transform", rotate ? "rotate(-45 5 5)" : "translate(0, 8)").style("text-anchor", rotate ? "end" : "");
+        });
+    };
+
+    factory.orient = (...args) => {
+        if (!args.length) {
+            return orient;
+        }
+        orient = args[0];
+        return factory;
+    };
+
+    factory.settingName = (...args) => {
+        if (!args.length) {
+            return settingName;
+        }
+        settingName = args[0];
+        return factory;
+    };
+
+    factory.domain = (...args) => {
+        if (!args.length) {
+            return domain;
+        }
+        domain = args[0];
+        return factory;
+    };
+
+    return factory;
 };

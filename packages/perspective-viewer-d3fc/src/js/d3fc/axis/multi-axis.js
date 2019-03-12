@@ -1,12 +1,12 @@
 import {select, line} from "d3";
 import {dataJoin, rebindAll, exclude} from "d3fc";
-import {axisTop, axisBottom, axisLeft, axisRight} from "./axis";
+import {axisOrdinalTop, axisOrdinalBottom, axisOrdinalLeft, axisOrdinalRight} from "./axisOrdinal";
 import store from "../chart/store";
 
 const multiAxis = (orient, baseAxis, scale) => {
     let tickSizeOuter = 6;
     let tickSizeInner = 6;
-    let axisStore = store("tickFormat", "ticks", "tickArguments", "tickValues", "tickPadding", "centerAlignTicks");
+    let axisStore = store("tickFormat", "ticks", "tickArguments", "tickValues", "tickPadding", "tickLineAlign");
     let decorate = () => {};
 
     let groups = null;
@@ -141,10 +141,10 @@ const multiAxis = (orient, baseAxis, scale) => {
     return multiAxis;
 };
 
-export const multiAxisTop = scale => multiAxis("top", axisTop, scale);
+export const multiAxisTop = scale => multiAxis("top", axisOrdinalTop, scale);
 
-export const multiAxisBottom = scale => multiAxis("bottom", axisBottom, scale);
+export const multiAxisBottom = scale => multiAxis("bottom", axisOrdinalBottom, scale);
 
-export const multiAxisLeft = scale => multiAxis("left", axisLeft, scale);
+export const multiAxisLeft = scale => multiAxis("left", axisOrdinalLeft, scale);
 
-export const multiAxisRight = scale => multiAxis("right", axisRight, scale);
+export const multiAxisRight = scale => multiAxis("right", axisOrdinalRight, scale);

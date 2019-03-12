@@ -15,7 +15,6 @@ import {groupData} from "../data/groupData";
 import {symbolLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
-import chartSvgCartesian from "../d3fc/chart/svg/cartesian";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -38,16 +37,25 @@ function yScatter(container, settings) {
         .pad([0.05, 0.05])
         .padUnit("percent");
 
+    const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
-    const chart = chartSvgCartesian(xScale, mainAxis.scale(settings))
-        .xDomain(crossAxis.domain(settings)(data))
+    const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
+
+    const chart = fc
+        .chartSvgCartesian({
+            xScale,
+            yScale: mainAxis.scale(settings),
+            xAxis
+        })
+        .xDomain(xDomain)
+        .xLabel(crossAxis.label(settings))
+        .xAxisHeight(xAxis.size)
+        .xDecorate(xAxis.decorate)
         .yDomain(mainAxis.domain(settings).paddingStrategy(paddingStrategy)(data))
+        .yLabel(mainAxis.label(settings))
         .yOrient("left")
         .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
-
-    crossAxis.styleAxis(chart, "x", settings);
-    mainAxis.styleAxis(chart, "y", settings);
 
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);
