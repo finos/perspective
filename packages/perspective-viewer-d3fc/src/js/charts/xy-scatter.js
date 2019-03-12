@@ -8,16 +8,17 @@
  */
 import * as fc from "d3fc";
 import * as mainAxis from "../axis/mainAxis";
-import {pointSeries, symbolTypeFromGroups} from "../series/pointSeries";
+import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
 import {seriesColoursFromGroups} from "../series/seriesColours";
 import {seriesLinearRange, seriesColourRange} from "../series/seriesRange";
 import {symbolLegend} from "../legend/legend";
 import {colourRangeLegend} from "../legend/colourRangeLegend";
 import {filterDataByGroup} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withCanvasGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -41,9 +42,9 @@ function xyScatter(container, settings) {
     const size = settings.mainValues.length > 3 ? seriesLinearRange(settings, data, "size").range([10, 10000]) : null;
 
     const series = fc
-        .seriesSvgMulti()
+        .seriesCanvasMulti()
         .mapping((data, index) => data[index])
-        .series(data.map(series => pointSeries(settings, series.key, size, colour, symbols)));
+        .series(data.map(series => pointSeriesCanvas(settings, series.key, size, colour, symbols)));
 
     const domainDefault = () => mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
 
@@ -51,7 +52,7 @@ function xyScatter(container, settings) {
     const yScale = mainAxis.scale(settings);
 
     const chart = fc
-        .chartSvgCartesian(xScale, yScale)
+        .chartCanvasCartesian(xScale, yScale)
         .xDomain(domainDefault().valueName("x")(data))
         .xLabel(settings.mainValues[0].name)
         .yDomain(domainDefault().valueName("y")(data))
@@ -59,13 +60,26 @@ function xyScatter(container, settings) {
         .yOrient("left")
         .yNice()
         .xNice()
-        .plotArea(withGridLines(series));
+        .plotArea(withCanvasGridLines(series));
 
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
         .xScale(xScale)
-        .yScale(yScale);
+        .yScale(yScale)
+        .canvas(true);
+
+    const toolTip = nearbyTip()
+        .chart(chart)
+        .settings(settings)
+        .canvas(true)
+        .xScale(xScale)
+        .xValueName("x")
+        .yValueName("y")
+        .yScale(yScale)
+        .colour(useGroupColours && colour)
+        .data(data);
+    container.call(toolTip);
 
     // render
     container.datum(data).call(zoomChart);

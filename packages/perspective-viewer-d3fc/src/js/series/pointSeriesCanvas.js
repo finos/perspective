@@ -8,6 +8,8 @@
  */
 import {seriesCanvasPoint} from "d3fc";
 import {withOpacity, withoutOpacity} from "./seriesColours";
+import {groupFromKey} from "./seriesKey";
+import {fromDomain} from "./seriesSymbols";
 
 export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
     let series = seriesCanvasPoint()
@@ -23,8 +25,10 @@ export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
 
     series.decorate((context, d) => {
         if (colour) {
-            context.strokeStyle = withoutOpacity(colour(d.colorValue || seriesKey));
-            context.fillStyle = withOpacity(colour(d.colorValue || seriesKey));
+            const color = colour(d.colorValue !== undefined ? d.colorValue : seriesKey);
+
+            context.strokeStyle = withoutOpacity(color);
+            context.fillStyle = withOpacity(color);
         } else {
             context.strokeStyle = "rgb(31, 119, 180)";
             context.fillStyle = "rgba(31, 119, 180, 0.5)";
@@ -32,4 +36,18 @@ export function pointSeriesCanvas(settings, seriesKey, size, colour, symbols) {
     });
 
     return series;
+}
+
+export function symbolTypeFromGroups(settings) {
+    const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
+    const domain = [];
+    Object.keys(col).forEach(key => {
+        if (key !== "__ROW_PATH__") {
+            const group = groupFromKey(key);
+            if (!domain.includes(group)) {
+                domain.push(group);
+            }
+        }
+    });
+    return fromDomain(domain);
 }
