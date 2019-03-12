@@ -10,9 +10,9 @@ import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {areaSeries} from "../series/areaSeries";
-import {seriesColours} from "../series/seriesColours";
+import {seriesColors} from "../series/seriesColors";
 import {splitAndBaseData} from "../data/splitAndBaseData";
-import {colourLegend} from "../legend/legend";
+import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
@@ -23,12 +23,12 @@ import nearbyTip from "../tooltip/nearbyTip";
 function areaChart(container, settings) {
     const data = splitAndBaseData(settings, filterData(settings));
 
-    const colour = seriesColours(settings);
-    const legend = colourLegend()
+    const color = seriesColors(settings);
+    const legend = colorLegend()
         .settings(settings)
-        .scale(colour);
+        .scale(color);
 
-    const series = fc.seriesSvgRepeat().series(areaSeries(settings, colour).orient("vertical"));
+    const series = fc.seriesSvgRepeat().series(areaSeries(settings, color).orient("vertical"));
 
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
@@ -70,7 +70,7 @@ function areaChart(container, settings) {
         .settings(settings)
         .xScale(xScale)
         .yScale(yScale)
-        .colour(colour)
+        .color(color)
         .data(data);
     container.call(toolTip);
 
