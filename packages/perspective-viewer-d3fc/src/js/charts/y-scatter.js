@@ -17,6 +17,7 @@ import {filterData} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 
 function yScatter(container, settings) {
     const data = groupData(settings, filterData(settings));
@@ -40,11 +41,12 @@ function yScatter(container, settings) {
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
     const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
+    const yScale = mainAxis.scale(settings);
 
     const chart = fc
         .chartSvgCartesian({
             xScale,
-            yScale: mainAxis.scale(settings),
+            yScale,
             xAxis
         })
         .xDomain(xDomain)
@@ -65,8 +67,16 @@ function yScatter(container, settings) {
         .settings(settings)
         .xScale(xScale);
 
+    const toolTip = nearbyTip()
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale)
+        .color(color)
+        .data(data);
+
     // render
     container.datum(data).call(zoomChart);
+    container.call(toolTip);
     if (legend) {
         container.call(legend);
     }

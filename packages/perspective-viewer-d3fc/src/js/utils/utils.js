@@ -15,11 +15,3 @@ export function getOrCreateElement(container, selector, createCallback) {
     let element = container.select(selector);
     return element.size() > 0 ? element : createCallback();
 }
-
-export const chainCallback = (property, fn) => {
-    const oldFn = property();
-    property((...args) => {
-        if (oldFn) oldFn(...args);
-        fn(...args);
-    });
-};

@@ -14,7 +14,9 @@ export function heatmapSeries(settings, color) {
     let series = fc.seriesSvgHeatmap();
 
     series.decorate(selection => {
-        tooltip().generateHtml(generateHtmlForHeatmap)(selection, settings);
+        tooltip()
+            .generateHtml(generateHtmlForHeatmap)
+            .settings(settings)(selection);
     });
 
     return fc
