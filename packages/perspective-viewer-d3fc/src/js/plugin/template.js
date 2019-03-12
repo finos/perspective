@@ -37,6 +37,12 @@ class D3FCChartElement extends HTMLElement {
         this._chart = chart;
         this._settings = this._configureSettings(this._settings, settings);
         this.draw();
+
+        if (window.navigator.userAgent.indexOf("Edge") > -1) {
+            // Workaround for MS Edge issue that doesn't draw content in the
+            // plot-area until the chart D3 object is redrawn
+            setTimeout(() => this.draw());
+        }
     }
 
     draw() {
