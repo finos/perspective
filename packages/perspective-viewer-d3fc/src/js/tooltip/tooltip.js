@@ -8,8 +8,9 @@ export const tooltip = () => {
     let generateHtml = generateHtmlDefault;
     let alwaysShow = false;
     let tooltipDiv = null;
+    let settings = null;
 
-    const _tooltip = (selection, settings) => {
+    const _tooltip = selection => {
         const node = selection.node();
 
         if (!node || !node.isConnected) {
@@ -53,6 +54,14 @@ export const tooltip = () => {
             return alwaysShow;
         }
         alwaysShow = args[0];
+        return _tooltip;
+    };
+
+    _tooltip.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
         return _tooltip;
     };
 

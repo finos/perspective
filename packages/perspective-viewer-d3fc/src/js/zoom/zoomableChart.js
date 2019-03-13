@@ -10,7 +10,6 @@
 import * as d3 from "d3";
 import {getOrCreateElement} from "../utils/utils";
 import template from "../../html/zoom-controls.html";
-import {chainCallback} from "../utils/utils";
 
 export default () => {
     let chart = null;
@@ -46,7 +45,7 @@ export default () => {
                     });
             });
 
-            chainCallback(chart.decorate, sel => {
+            chart.decorate(sel => {
                 if (!bound) {
                     bound = true;
                     // add the zoom interaction on the enter selection

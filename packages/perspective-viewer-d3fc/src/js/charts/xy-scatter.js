@@ -70,7 +70,6 @@ function xyScatter(container, settings) {
         .canvas(true);
 
     const toolTip = nearbyTip()
-        .chart(chart)
         .settings(settings)
         .canvas(true)
         .xScale(xScale)
@@ -78,11 +77,12 @@ function xyScatter(container, settings) {
         .yValueName("y")
         .yScale(yScale)
         .color(useGroupColors && color)
+        .size(size)
         .data(data);
-    container.call(toolTip);
 
     // render
     container.datum(data).call(zoomChart);
+    container.call(toolTip);
     if (legend) container.call(legend);
 }
 xyScatter.plugin = {

@@ -7,27 +7,22 @@
  *
  */
 
-import * as d3 from "d3";
 import * as fc from "d3fc";
-import {chainCallback} from "../utils/utils";
 import {tooltip} from "./tooltip";
 import {withOpacity} from "../series/seriesColors.js";
 import {findBestFromData} from "../data/findBest";
 
 export default () => {
-    let chart = null;
-    let settings = null;
+    const base = tooltip().alwaysShow(true);
+
     let xScale = null;
-    let xCopy = null;
     let yScale = null;
-    let yCopy = null;
     let color = null;
+    let size = null;
     let canvas = false;
     let data = null;
     let xValueName = "crossValue";
     let yValueName = "mainValue";
-
-    const showTooltip = tooltip().alwaysShow(true);
 
     function nearbyTip(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
@@ -38,14 +33,10 @@ export default () => {
                 renderTip(selection, tooltipData);
             });
 
-            chainCallback(chart.decorate, sel => {
-                sel.select(chartPlotArea)
-                    .on("measure.nearby-tip", () => {
-                        if (xCopy) xCopy.range([0, d3.event.detail.width]);
-                        if (yCopy) yCopy.range([0, d3.event.detail.height]);
-                    })
-                    .call(pointer);
-            });
+            selection
+                .select(chartPlotArea)
+                .on("measure.nearbyTip", () => renderTip(selection, []))
+                .call(pointer);
         }
     }
 
@@ -59,13 +50,13 @@ export default () => {
         tips.enter()
             .append("circle")
             .attr("class", "nearbyTip")
-            .attr("r", 10)
             .merge(tips)
+            .attr("r", d => (size ? Math.sqrt(size(d.size)) : 10))
             .attr("transform", d => `translate(${xScale(d[xValueName])},${yScale(d[yValueName])})`)
             .style("stroke", "none")
             .style("fill", d => color && withOpacity(color(d.key)));
 
-        showTooltip(tips, settings);
+        base(tips);
     };
 
     const getClosestDataPoint = pos => {
@@ -80,28 +71,11 @@ export default () => {
         );
     };
 
-    nearbyTip.chart = (...args) => {
-        if (!args.length) {
-            return chart;
-        }
-        chart = args[0];
-        return nearbyTip;
-    };
-
-    nearbyTip.settings = (...args) => {
-        if (!args.length) {
-            return settings;
-        }
-        settings = args[0];
-        return nearbyTip;
-    };
-
     nearbyTip.xScale = (...args) => {
         if (!args.length) {
             return xScale;
         }
         xScale = args[0];
-        xCopy = xScale ? xScale.copy() : null;
         return nearbyTip;
     };
 
@@ -110,7 +84,6 @@ export default () => {
             return yScale;
         }
         yScale = args[0];
-        yCopy = yScale ? yScale.copy() : null;
         return nearbyTip;
     };
 
@@ -119,6 +92,14 @@ export default () => {
             return color;
         }
         color = args[0];
+        return nearbyTip;
+    };
+
+    nearbyTip.size = (...args) => {
+        if (!args.length) {
+            return size;
+        }
+        size = args[0] ? args[0].copy().range([40, 4000]) : null;
         return nearbyTip;
     };
 
@@ -154,5 +135,6 @@ export default () => {
         return nearbyTip;
     };
 
+    fc.rebindAll(nearbyTip, base);
     return nearbyTip;
 };

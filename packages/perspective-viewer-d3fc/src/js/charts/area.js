@@ -66,16 +66,15 @@ function areaChart(container, settings) {
         .xScale(xScale);
 
     const toolTip = nearbyTip()
-        .chart(chart)
         .settings(settings)
         .xScale(xScale)
         .yScale(yScale)
         .color(color)
         .data(data);
-    container.call(toolTip);
 
     // render
     container.datum(data).call(zoomChart);
+    container.call(toolTip);
     container.call(legend);
 }
 areaChart.plugin = {
