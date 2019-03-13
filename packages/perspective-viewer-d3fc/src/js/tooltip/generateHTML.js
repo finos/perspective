@@ -9,9 +9,9 @@
 import {select} from "d3";
 
 export function generateHtml(tooltipDiv, data, settings) {
-    let tooltipValues = getGroupValues(data, settings);
-    tooltipValues = tooltipValues.concat(getSplitValues(data, settings));
-    tooltipValues = tooltipValues.concat(getDataValues(data, settings));
+    const tooltipValues = getGroupValues(data, settings)
+        .concat(getSplitValues(data, settings))
+        .concat(getDataValues(data, settings));
     addDataValues(tooltipDiv, tooltipValues);
 }
 
