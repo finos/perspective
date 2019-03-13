@@ -9,15 +9,15 @@
 import {select} from "d3";
 
 export function generateHtml(tooltipDiv, data, settings) {
-    let tooltipValues = getGroupValues(data, settings);
-    tooltipValues = tooltipValues.concat(getSplitValues(data, settings));
-    tooltipValues = tooltipValues.concat(getDataValues(data, settings));
+    const tooltipValues = getGroupValues(data, settings)
+        .concat(getSplitValues(data, settings))
+        .concat(getDataValues(data, settings));
     addDataValues(tooltipDiv, tooltipValues);
 }
 
 function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
-    const groupValues = data.crossValue.split("|");
+    const groupValues = (data.crossValue.split ? data.crossValue.split("|") : [data.crossValue]) || [data.key];
     return settings.crossValues.map((cross, i) => ({name: cross.name, value: groupValues[i]}));
 }
 
@@ -29,11 +29,17 @@ function getSplitValues(data, settings) {
 
 function getDataValues(data, settings) {
     if (settings.mainValues.length > 1) {
+        if (data.mainValue) {
+            return {
+                name: data.key,
+                value: data.mainValue
+            };
+        }
         return settings.mainValues.map((main, i) => ({name: main.name, value: data.mainValues[i]}));
     }
     return {
         name: settings.mainValues[0].name,
-        value: data.colorValue || data.mainValue - data.baseValue
+        value: data.colorValue || data.mainValue - data.baseValue || data.mainValue
     };
 }
 
@@ -51,4 +57,4 @@ function addDataValues(tooltipDiv, values) {
         });
 }
 
-const formatNumber = value => value.toLocaleString(undefined, {style: "decimal"});
+const formatNumber = value => (typeof value === "number" ? value.toLocaleString(undefined, {style: "decimal"}) : value);
