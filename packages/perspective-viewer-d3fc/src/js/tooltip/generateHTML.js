@@ -29,11 +29,17 @@ function getSplitValues(data, settings) {
 
 function getDataValues(data, settings) {
     if (settings.mainValues.length > 1) {
+        if (data.mainValue) {
+            return {
+                name: data.key,
+                value: data.mainValue
+            };
+        }
         return settings.mainValues.map((main, i) => ({name: main.name, value: data.mainValues[i]}));
     }
     return {
         name: settings.mainValues[0].name,
-        value: data.colorValue || data.mainValue - data.baseValue
+        value: data.colorValue || data.mainValue - data.baseValue || data.mainValue
     };
 }
 
