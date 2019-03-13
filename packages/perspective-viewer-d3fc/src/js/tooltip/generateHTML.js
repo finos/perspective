@@ -17,7 +17,7 @@ export function generateHtml(tooltipDiv, data, settings) {
 
 function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
-    const groupValues = data.crossValue.split ? data.crossValue.split("|") : [data.crossValue];
+    const groupValues = (data.crossValue.split ? data.crossValue.split("|") : [data.crossValue]) || [data.key];
     return settings.crossValues.map((cross, i) => ({name: cross.name, value: groupValues[i]}));
 }
 
@@ -57,4 +57,4 @@ function addDataValues(tooltipDiv, values) {
         });
 }
 
-const formatNumber = value => value.toLocaleString(undefined, {style: "decimal"});
+const formatNumber = value => (typeof value === "number" ? value.toLocaleString(undefined, {style: "decimal"}) : value);
