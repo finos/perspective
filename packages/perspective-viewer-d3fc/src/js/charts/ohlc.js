@@ -64,7 +64,8 @@ function ohlc(container, settings) {
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
-        .xScale(xScale);
+        .xScale(xScale)
+        .yScale(yScale);
 
     const toolTip = nearbyTip()
         .settings(settings)
