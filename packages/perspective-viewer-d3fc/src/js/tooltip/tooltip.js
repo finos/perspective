@@ -33,10 +33,7 @@ export const tooltip = () => {
         if (alwaysShow) {
             selection.each(showTip);
         } else {
-            selection
-                //        .filter(d => d.baseValue !== d.mainValue)
-                .on("mouseover", showTip)
-                .on("mouseout", hideTip);
+            selection.on("mouseover", showTip).on("mouseout", hideTip);
         }
     };
 
