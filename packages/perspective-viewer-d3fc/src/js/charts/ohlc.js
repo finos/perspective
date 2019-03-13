@@ -15,12 +15,11 @@ import {withGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
+import nearbyTip from "../tooltip/nearbyTip";
 import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
 
 function ohlc(container, settings) {
     const data = ohlcData(settings, filterData(settings));
-
-    console.log("data", data);
 
     const series = fc
         .seriesSvgOhlc()
@@ -67,8 +66,16 @@ function ohlc(container, settings) {
         .settings(settings)
         .xScale(xScale);
 
+    const toolTip = nearbyTip()
+        .settings(settings)
+        .xScale(xScale)
+        .yScale(yScale)
+        .yValueName("closeValue")
+        .data(data);
+
     // render
     container.datum(data).call(zoomChart);
+    container.call(toolTip);
 }
 
 ohlc.plugin = {
