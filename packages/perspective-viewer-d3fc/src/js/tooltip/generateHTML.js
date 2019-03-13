@@ -17,7 +17,7 @@ export function generateHtml(tooltipDiv, data, settings) {
 
 function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
-    const groupValues = data.crossValue.split("|");
+    const groupValues = data.crossValue.split ? data.crossValue.split("|") : [data.crossValue];
     return settings.crossValues.map((cross, i) => ({name: cross.name, value: groupValues[i]}));
 }
 
