@@ -31,3 +31,37 @@
     }
   }
 }
+
+:host([view=d3_ohlc]) #app {
+  &.columns_horizontal #side_panel #inactive_columns {
+    padding-top:28px
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(1) {
+    margin-top:23px;
+    &:before {
+      content:"Open"
+    }
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(2) {
+    margin-top:23px;
+    &:before {
+      content:"High"
+    }
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(3) {
+    margin-top:23px;
+    &:before {
+      content:"Low"
+    }
+  }
+
+  & #side_panel #active_columns perspective-row:nth-child(4) {
+    margin-top:23px;
+    &:before {
+      content:"Close"
+    }
+  }
+}
