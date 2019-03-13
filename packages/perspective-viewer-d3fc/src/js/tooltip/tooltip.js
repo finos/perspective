@@ -2,10 +2,9 @@ import {select} from "d3";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
-import {generateHtmlDefault} from "./generateHTML";
+import {generateHtml} from "./generateHTML";
 
 export const tooltip = () => {
-    let generateHtml = generateHtmlDefault;
     let alwaysShow = false;
     let tooltipDiv = null;
     let settings = null;
@@ -39,14 +38,6 @@ export const tooltip = () => {
                 .on("mouseover", showTip)
                 .on("mouseout", hideTip);
         }
-    };
-
-    _tooltip.generateHtml = (...args) => {
-        if (!args.length) {
-            return generateHtml;
-        }
-        generateHtml = args[0];
-        return _tooltip;
     };
 
     _tooltip.alwaysShow = (...args) => {

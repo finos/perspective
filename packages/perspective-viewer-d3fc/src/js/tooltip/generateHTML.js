@@ -8,93 +8,47 @@
  */
 import {select} from "d3";
 
-export function generateHtmlDefault(tooltipDiv, data, settings) {
-    // Add cross value(s)
-    addValuesFromData(tooltipDiv, data, settings, "crossValues", "crossValue", "#cross-values");
-
-    const splitValues = getSplitValues(settings, data);
-    // Add data value
-    tooltipDiv
-        .select("#split-values")
-        .selectAll("li")
-        .data(splitValues.values)
-        .join("li")
-        .each(eachValue(splitValues.labels));
-
-    const dataValues = getDataValues(settings, data);
-
-    // Add data value
-    tooltipDiv
-        .select("#data-values")
-        .selectAll("li")
-        .data(dataValues.values)
-        .join("li")
-        .each(eachValue(dataValues.labels));
+export function generateHtml(tooltipDiv, data, settings) {
+    let tooltipValues = getGroupValues(data, settings);
+    tooltipValues = tooltipValues.concat(getSplitValues(data, settings));
+    tooltipValues = tooltipValues.concat(getDataValues(data, settings));
+    addDataValues(tooltipDiv, tooltipValues);
 }
 
-export function generateHtmlForHeatmap(tooltipDiv, data, settings) {
-    // Add cross value(s)
-    addValuesFromData(tooltipDiv, data, settings, "crossValues", "crossValue", "#cross-values");
-
-    // Add main value(s)
-    addValuesFromData(tooltipDiv, data, settings, "splitValues", "mainValue", "#split-values");
-
-    const dataValues = {
-        values: [data.colorValue],
-        labels: settings.mainValues
-    };
-    // Add data value
-    tooltipDiv
-        .select("#data-values")
-        .selectAll("li")
-        .data(dataValues.values)
-        .join("li")
-        .each(eachValue(dataValues.labels));
+function getGroupValues(data, settings) {
+    if (settings.crossValues.length === 0) return [];
+    const groupValues = data.crossValue.split("|");
+    return settings.crossValues.map((cross, i) => ({name: cross.name, value: groupValues[i]}));
 }
 
-function addValuesFromData(tooltipDiv, data, settings, settingName, valueName, tag) {
-    if (settings[settingName].length) {
-        const groups = data[valueName].split ? data[valueName].split("|") : [data[valueName]];
-        tooltipDiv
-            .select(tag)
-            .selectAll("li")
-            .data(groups)
-            .join("li")
-            .each(eachValue(settings[settingName]));
+function getSplitValues(data, settings) {
+    if (settings.splitValues.length === 0) return [];
+    const splitValues = data.key ? data.key.split("|").slice(0, -1) : data.mainValue.split("|");
+    return settings.splitValues.map((split, i) => ({name: split.name, value: splitValues[i]}));
+}
+
+function getDataValues(data, settings) {
+    if (settings.mainValues.length > 1) {
+        return settings.mainValues.map((main, i) => ({name: main.name, value: data.mainValues[i]}));
     }
-}
-
-function getSplitValues(settings, data) {
-    const splits = data.key ? data.key.split("|") : [];
-
     return {
-        values: data.mainValues ? splits : splits.slice(0, -1),
-        labels: settings.splitValues
+        name: settings.mainValues[0].name,
+        value: data.colorValue || data.mainValue - data.baseValue
     };
 }
 
-function getDataValues(settings, data) {
-    if (data.mainValues) {
-        return {
-            values: data.mainValues,
-            labels: settings.mainValues
-        };
-    } else {
-        const splits = data.key.split("|");
-        return {
-            values: !!data.baseValue ? [data.mainValue - data.baseValue] : [data.mainValue],
-            labels: [{name: splits[splits.length - 1]}]
-        };
-    }
-}
-
-function eachValue(list) {
-    return function(d, i) {
-        select(this)
-            .text(`${list[i].name}: `)
-            .append("b")
-            .text(formatNumber(d));
-    };
+function addDataValues(tooltipDiv, values) {
+    tooltipDiv
+        .select("#tooltip-values")
+        .selectAll("li")
+        .data(values)
+        .join("li")
+        .each(function(d) {
+            select(this)
+                .text(`${d.name}: `)
+                .append("b")
+                .text(formatNumber(d.value));
+        });
 }
 
 function formatNumber(value) {
