@@ -78,6 +78,7 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .call(scrollLegend);
 
             enableDragging(legendSelection);
+            drawBorderBoxOnHover(legendSelection);
             postProcessLegend(legendSelection);
         }
     }
