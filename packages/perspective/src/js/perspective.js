@@ -8,7 +8,7 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
+import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
@@ -309,75 +309,88 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
         } else {
             slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();
 
-        // determine which level we stop pulling column names
-        let skip = false,
-            depth = 0;
-        if (this.sides() == 2 && sorted) {
-            skip = true;
-            depth = this.config.column_pivot.length;
-        }
-
-        /*
-        let num_rows = this.num_rows();
-        let num_cols = this.num_cols();
-        let column_names = extract_vector(data_slice.get_column_names());
-        for (let ridx = 0; ridx < num_rows; ridx++) {
-            row = {}; // or array for col, etc;
-            for (let cidx = 0; cidx < num_cols; cidx++) {
-                row[column_names[cidx]] = data_slice.get(ridx, cidx);
-            }
-            data.push(row);
-        }
-        */
-
-        let col_names = [[]].concat(this._column_names(skip, depth));
-        let row;
-        let ridx = -1;
-        for (let idx = 0; idx < slice.length; idx++) {
-            let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
-            if (cidx === 0) {
-                if (row) {
-                    formatter.addRow(data, row);
+        if (this.sides() === 0) {
+            const col_names = extract_vector(slice.get_column_names());
+            for (let ridx = start_row; ridx < end_row; ridx++) {
+                const row = formatter.initRowValue();
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    const col_name = col_names[cidx];
+                    const value = __MODULE__.get_from_data_slice_zero(slice, ridx, cidx);
+                    formatter.setColumnValue(data, row, col_name, value);
                 }
-                row = formatter.initRowValue();
-                ridx++;
+                formatter.addRow(data, row);
             }
-            if (this.sides() === 0) {
-                let col_name = col_names[start_col + cidx + 1];
-                formatter.setColumnValue(data, row, col_name, slice[idx]);
-            } else {
+        } else if (this.sides() === 1) {
+            const col_names = extract_vector(slice.get_column_names());
+            for (let ridx = start_row; ridx < end_row; ridx++) {
+                const row = formatter.initRowValue();
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    const col_name = col_names[cidx];
+                    if (cidx === 0) {
+                        const row_path = slice.get_row_path(ridx);
+                        formatter.initColumnValue(data, row, col_name);
+                        for (let i = 0; i < row_path.size(); i++) {
+                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                            formatter.addColumnValue(data, row, col_name, value);
+                        }
+                        row_path.delete();
+                    } else {
+                        const value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
+                        formatter.setColumnValue(data, row, col_name, value);
+                    }
+                }
+                formatter.addRow(data, row);
+            }
+        } else {
+            // determine which level we stop pulling column names
+            let skip = false,
+                depth = 0;
+            if (sorted) {
+                skip = true;
+                depth = this.config.column_pivot.length;
+            }
+            let col_names = [[]].concat(this._column_names(skip, depth));
+            let row;
+            let ridx = -1;
+            for (let idx = 0; idx < slice.length; idx++) {
+                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
                 if (cidx === 0) {
+                    if (row) {
+                        formatter.addRow(data, row);
+                    }
+                    row = formatter.initRowValue();
+                    ridx++;
                     if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
                         let row_path = this._View.get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
+                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
                             formatter.addColumnValue(data, row, col_name, value);
                         }
                         row_path.delete();
                     }
                 } else {
                     let col_name = col_names[start_col + cidx];
-                    formatter.setColumnValue(data, row, col_name, clean_data(slice[idx]));
+                    formatter.setColumnValue(data, row, col_name, slice[idx]);
                 }
             }
-        }
 
-        if (row) {
-            formatter.addRow(data, row);
-        }
-        if (this.column_only) {
-            data = formatter.slice(data, this.config.column_pivot.length);
+            if (row) {
+                formatter.addRow(data, row);
+            }
+            if (this.column_only) {
+                data = formatter.slice(data, this.config.column_pivot.length);
+            }
         }
 
         return formatter.formatData(data, options.config);

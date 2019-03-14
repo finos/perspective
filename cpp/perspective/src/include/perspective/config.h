@@ -86,7 +86,7 @@ public:
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 
     t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms, bool column_only);
+        t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<t_aggspec>& aggregates, t_filter_op combiner,

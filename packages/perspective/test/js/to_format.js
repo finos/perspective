@@ -15,6 +15,65 @@ var int_float_string_data = [
 ];
 
 module.exports = perspective => {
+    describe("data slice", function() {
+        it("data slice should respect start/end rows", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 2,
+                end_row: 3
+            });
+            let comparator = int_float_string_data[2];
+            comparator.datetime = +comparator.datetime;
+            expect(json[0]).toEqual(comparator);
+        });
+
+        it("data slice should respect start/end columns", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_columns({
+                start_col: 2,
+                end_col: 3
+            });
+            let comparator = {string: int_float_string_data.map(d => d.string)};
+            expect(json).toEqual(comparator);
+        });
+
+        it("one-sided views should have row paths", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivot: ["int"]
+            });
+            let json = await view.to_json();
+            for (let d of json) {
+                expect(d.__ROW_PATH__).toBeDefined();
+            }
+        });
+
+        it("one-sided column-only views should not have row paths", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                column_pivot: ["int"]
+            });
+            let json = await view.to_json();
+            for (let d of json) {
+                expect(d.__ROW_PATH__).toBeUndefined();
+            }
+        });
+
+        it("two-sided views should have row paths", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivot: ["int"],
+                column_pivot: ["string"]
+            });
+            let json = await view.to_json();
+            for (let d of json) {
+                expect(d.__ROW_PATH__).toBeDefined();
+            }
+        });
+    });
+
     describe("to_json", function() {
         it("should emit same number of column names as number of pivots", async function() {
             let table = perspective.table(int_float_string_data);

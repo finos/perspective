@@ -15,22 +15,22 @@ namespace perspective {
 template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    std::shared_ptr<std::vector<t_tscalar>> slice,
-    std::shared_ptr<std::vector<std::string>> column_names)
+    const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
     , m_start_col(start_col)
     , m_end_col(end_col)
     , m_slice(slice)
-    , m_column_names(column_names) {}
+    , m_column_names(column_names) {
+    m_stride = m_end_col - m_start_col;
+}
 
 template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    std::shared_ptr<std::vector<t_tscalar>> slice,
-    std::shared_ptr<std::vector<std::string>> column_names,
-    std::shared_ptr<std::vector<t_uindex>> column_indices)
+    const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names,
+    std::vector<t_uindex> column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -38,7 +38,9 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
     , m_end_col(end_col)
     , m_slice(slice)
     , m_column_names(column_names)
-    , m_column_indices(column_indices) {}
+    , m_column_indices(column_indices) {
+    m_stride = m_end_col - m_start_col;
+}
 
 template <typename CTX_T>
 t_data_slice<CTX_T>::~t_data_slice() {}
@@ -53,40 +55,43 @@ t_data_slice<CTX_T>::~t_data_slice() {}
  * @return t_tscalar a valid scalar containing the underlying data, or a new
  * t_tscalar initialized with an invalid flag.
  */
-template <>
+template <typename CTX_T>
 t_tscalar
-t_data_slice<t_ctx0>::get(t_uindex ridx, t_uindex col) const {
+t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = get_slice_idx(ridx, cidx);
     t_tscalar rv;
-    rv.clear();
-    return rv;
-}
-
-template <>
-t_tscalar
-t_data_slice<t_ctx1>::get(t_uindex ridx, t_uindex cidx) const {
-    t_tscalar rv;
-    rv.clear();
+    if (idx >= m_slice->size()) {
+        rv.clear();
+    } else {
+        rv = m_slice->at(idx);
+    }
     return rv;
 }
 
 template <>
 t_tscalar
 t_data_slice<t_ctx2>::get(t_uindex ridx, t_uindex cidx) const {
-    t_tscalar rv;
-    rv.clear();
-    return rv;
-}
+    t_uindex idx = get_slice_idx(ridx, cidx);
+    t_tscalar rv = m_slice->operator[](idx);
+    /* if (m_column_indices.size() > 0) {
+        t_uindex idx_skip_headers;
+    } else {
 
-template <>
-std::vector<t_tscalar>
-t_data_slice<t_ctx0>::get_row_path(t_uindex idx) const {
-    return std::vector<t_tscalar>();
+    } */
+    return rv;
 }
 
 template <typename CTX_T>
 std::vector<t_tscalar>
 t_data_slice<CTX_T>::get_row_path(t_uindex idx) const {
     return m_ctx->unity_get_row_path(idx);
+}
+
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::get_slice_idx(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = (ridx - m_start_row) * m_stride + (cidx - m_start_col);
+    return idx;
 }
 
 // Getters
@@ -103,13 +108,13 @@ t_data_slice<CTX_T>::get_slice() const {
 }
 
 template <typename CTX_T>
-std::shared_ptr<std::vector<std::string>>
+const std::vector<std::string>&
 t_data_slice<CTX_T>::get_column_names() const {
     return m_column_names;
 }
 
 template <typename CTX_T>
-std::shared_ptr<std::vector<t_uindex>>
+const std::vector<t_uindex>&
 t_data_slice<CTX_T>::get_column_indices() const {
     return m_column_indices;
 }
@@ -117,14 +122,20 @@ t_data_slice<CTX_T>::get_column_indices() const {
 template <typename CTX_T>
 bool
 t_data_slice<CTX_T>::is_column_only() const {
-    auto config = m_ctx->get_config();
-    return config.is_column_only();
+    return false;
 }
 
 template <>
 bool
-t_data_slice<t_ctx0>::is_column_only() const {
-    return false;
+t_data_slice<t_ctx2>::is_column_only() const {
+    auto config = m_ctx->get_config();
+    return config.is_column_only();
+}
+
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::get_stride() const {
+    return m_stride;
 }
 
 template <typename CTX_T>
