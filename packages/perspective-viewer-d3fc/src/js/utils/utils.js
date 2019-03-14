@@ -15,3 +15,7 @@ export function getOrCreateElement(container, selector, createCallback) {
     let element = container.select(selector);
     return element.size() > 0 ? element : createCallback();
 }
+
+export function isElementOverflowing(containerRect, innerElementRect, direction = "right") {
+    return containerRect[direction] < innerElementRect[direction] ? true : false;
+}

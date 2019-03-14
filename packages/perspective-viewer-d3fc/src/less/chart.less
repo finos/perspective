@@ -88,13 +88,18 @@
         top: 15px;
         right: 15px;
         left: auto;
-        max-width: 150px;
+        width: 80px;
+        max-width: 250px;
+        //transition: box-shadow 0.1s ease-in-out;
 
         & .legend {
             font-size: 8pt;
+            width: inherit;
+            max-width: inherit;
 
             & .cell {
                 cursor: pointer;
+                max-width: inherit;
 
                 & path {
                     fill: rgba(31, 119, 180, 0.5);
@@ -113,6 +118,15 @@
 
         & text {
             fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+        }
+
+        & .label {
+            width: 60px;
+            max-width: 70px;
+
+            &:hover {
+                fill: rgb(34,160,206);
+            }
         }
 
         & #legend-axis path {
