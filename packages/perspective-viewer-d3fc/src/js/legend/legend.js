@@ -13,7 +13,8 @@ import scrollableLegend from "./scrollableLegend";
 import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
-import {postProcessLegend} from "./postProcessing";
+import {enableDragging} from "./enableDragging";
+import {postProcessLegend, drawBorderBoxOnHover} from "./postProcessing";
 
 const scrollColorLegend = scrollableLegend(
     d3Legend
@@ -76,6 +77,7 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .style("z-index", "2")
                 .call(scrollLegend);
 
+            enableDragging(legendSelection);
             postProcessLegend(legendSelection);
         }
     }

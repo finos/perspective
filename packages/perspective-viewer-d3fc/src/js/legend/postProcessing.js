@@ -10,6 +10,19 @@
 import * as d3 from "d3";
 import {isElementOverflowing} from "../utils/utils";
 
+export function drawBorderBoxOnHover(element) {
+    const node = element.node();
+    node.onmouseover = drawBorderBox;
+    node.onmouseout = hideBorderBox;
+
+    function drawBorderBox() {
+        element.style("box-shadow", "2px 2px 6px #000");
+    }
+    function hideBorderBox() {
+        element.style("box-shadow", "0px 0px 0px #000");
+    }
+}
+
 export function postProcessLegend(legendDiv) {
     const legendCells = legendDiv.select("g.legendCells");
     shiftElementLeft(legendDiv, legendCells);
