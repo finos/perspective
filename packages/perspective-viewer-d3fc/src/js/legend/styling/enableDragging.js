@@ -36,8 +36,8 @@ export function enableDragging(element) {
         xPositionLast = e.clientX;
         yPositionLast = e.clientY;
         // set the node's new position:
-        node.style.top = node.offsetTop - yPositionDiff + "px";
-        node.style.left = node.offsetLeft - xPositionDiff + "px";
+        node.style.top = `${node.offsetTop - yPositionDiff}px`;
+        node.style.left = `${node.offsetLeft - xPositionDiff}px`;
     }
 
     function releaseNode() {

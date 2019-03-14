@@ -14,7 +14,6 @@ import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import {enableDragging} from "./styling/enableDragging";
-import {cropCellContents} from "./styling/cropCellContents";
 
 const scrollColorLegend = scrollableLegend(
     d3Legend
@@ -79,7 +78,6 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .call(scrollLegend);
 
             enableDragging(legendSelection);
-            cropCellContents(legendSelection);
         }
     }
 
@@ -99,7 +97,7 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .style("fill", d => (isHidden(d) ? null : color(d)))
                 .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
 
-            cells.append("title").html(d => `${d}`);
+            cells.append("title").html(d => d);
         }
     });
 

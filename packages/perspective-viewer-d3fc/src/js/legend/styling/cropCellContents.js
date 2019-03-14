@@ -28,7 +28,7 @@ export function cropCellContents(legendDiv) {
     overflowingCells.forEach(cell => {
         const cutoffCharIndex = getCutoffCharacterIndex(cell, svg, legendDivRect);
         const d3Cell = d3.select(cell);
-        d3Cell.text(d3Cell.text().substring(0, cutoffCharIndex - 3) + "...");
+        d3Cell.text(`${d3Cell.text().substring(0, cutoffCharIndex - 3)}...`);
     });
 }
 
