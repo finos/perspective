@@ -97,6 +97,8 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .select("path")
                 .style("fill", d => (isHidden(d) ? null : color(d)))
                 .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
+
+            cells.append("title").html(d => `${d}`);
         }
     });
 
