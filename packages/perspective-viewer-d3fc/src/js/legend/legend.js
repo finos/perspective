@@ -13,8 +13,8 @@ import scrollableLegend from "./scrollableLegend";
 import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
-import {enableDragging} from "./enableDragging";
-import {postProcessLegend, drawBorderBoxOnHover} from "./postProcessing";
+import {enableDragging} from "./styling/enableDragging";
+import {cropCellContents} from "./styling/cropCellContents";
 
 const scrollColorLegend = scrollableLegend(
     d3Legend
@@ -74,12 +74,12 @@ function legendComponent(scrollLegend, scaleModifier) {
             // render the legend
             legendSelection
                 .attr("class", "legend-container")
+                .attr("borderbox-on-hover", true)
                 .style("z-index", "2")
                 .call(scrollLegend);
 
             enableDragging(legendSelection);
-            drawBorderBoxOnHover(legendSelection);
-            postProcessLegend(legendSelection);
+            cropCellContents(legendSelection);
         }
     }
 

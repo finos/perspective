@@ -8,38 +8,10 @@
  */
 
 import * as d3 from "d3";
-import {isElementOverflowing} from "../utils/utils";
+import {isElementOverflowing} from "../../utils/utils";
 
-export function drawBorderBoxOnHover(element) {
-    const node = element.node();
-    node.onmouseover = drawBorderBox;
-    node.onmouseout = hideBorderBox;
-
-    function drawBorderBox() {
-        element.style("box-shadow", "2px 2px 6px #000");
-    }
-    function hideBorderBox() {
-        element.style("box-shadow", "0px 0px 0px #000");
-    }
-}
-
-export function postProcessLegend(legendDiv) {
+export function cropCellContents(legendDiv) {
     const legendCells = legendDiv.select("g.legendCells");
-    //expandElementLeft(legendDiv, legendCells);
-    cropCellContents(legendDiv, legendCells);
-}
-
-function expandElementLeft(legendDiv, legendCells) {
-    const legendDivRect = legendDiv.node().getBoundingClientRect();
-    const legendCellsRect = legendCells.node().getBoundingClientRect();
-
-    if (isElementOverflowing(legendDivRect, legendCellsRect)) {
-        const leftAdjust = legendCellsRect.right - legendDivRect.right;
-        legendDiv.style("width", `${legendDivRect.right - legendDivRect.left + leftAdjust}px`);
-    }
-}
-
-function cropCellContents(legendDiv, legendCells) {
     const legendDivRect = legendDiv.node().getBoundingClientRect();
 
     if (!isElementOverflowing(legendDivRect, legendCells.node().getBoundingClientRect())) {

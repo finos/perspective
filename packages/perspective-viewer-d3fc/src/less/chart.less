@@ -90,6 +90,12 @@
         left: auto;
         max-width: 150px;
 
+        &[borderbox-on-hover="true"] {
+            &:hover {
+                box-shadow: 2px 2px 6px #000;
+            }
+        }
+
         & .legend {
             font-size: 8pt;
             max-width: inherit;
