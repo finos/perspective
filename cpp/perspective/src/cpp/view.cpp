@@ -34,7 +34,6 @@ View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gn
     m_aggregates = m_config.get_aggregates();
     m_filters = m_config.get_fterms();
     m_sorts = m_config.get_sortspecs();
-    m_column_only = m_config.is_column_only();
 }
 
 template <typename CTX_T>
@@ -411,7 +410,7 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 template <typename CTX_T>
 bool
 View<CTX_T>::is_column_only() const {
-    return m_column_only;
+    return m_config.is_column_only();
 }
 
 /******************************************************************************

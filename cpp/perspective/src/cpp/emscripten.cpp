@@ -1663,7 +1663,6 @@ namespace binding {
         auto schema = gnode->get_tblschema();
         t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
 
-        bool column_only = view_config.is_column_only();
         auto aggregates = view_config.get_aggregates();
         auto row_pivots = view_config.get_row_pivots();
         auto filter_op = view_config.get_combiner();
@@ -1676,7 +1675,7 @@ namespace binding {
         }
 
         auto ctx = make_context_one(schema, row_pivots, filter_op, filters, aggregates, sorts,
-            pivot_depth, column_only, pool, gnode, name);
+            pivot_depth, pool, gnode, name);
 
         auto view_ptr
             = std::make_shared<View<t_ctx1>>(pool, ctx, gnode, name, separator, view_config);
@@ -1765,9 +1764,9 @@ namespace binding {
     std::shared_ptr<t_ctx1>
     make_context_one(t_schema schema, std::vector<t_pivot> pivots, t_filter_op combiner,
         std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name) {
-        auto cfg = t_config(pivots, aggregates, combiner, filters, column_only);
+        auto cfg = t_config(pivots, aggregates, combiner, filters);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
@@ -2110,7 +2109,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
         .function<const std::vector<std::string>&>(
             "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
-            
+
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
         .function<const std::vector<std::string>&>(
