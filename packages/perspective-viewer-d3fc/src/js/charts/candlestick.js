@@ -6,14 +6,14 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {seriesSvgOhlc} from "d3fc";
+import {seriesSvgCandlestick} from "d3fc";
 import ohlcCandle from "./ohlcCandle";
 
-const ohlc = ohlcCandle(seriesSvgOhlc);
-ohlc.plugin = {
-    type: "d3_ohlc",
-    name: "[d3fc] OHLC Chart",
+const candlestick = ohlcCandle(seriesSvgCandlestick);
+candlestick.plugin = {
+    type: "d3_candlestick",
+    name: "[d3fc] Candlestick Chart",
     max_size: 25000
 };
 
-export default ohlc;
+export default candlestick;
