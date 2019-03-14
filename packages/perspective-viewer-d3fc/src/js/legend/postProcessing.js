@@ -25,7 +25,7 @@ export function drawBorderBoxOnHover(element) {
 
 export function postProcessLegend(legendDiv) {
     const legendCells = legendDiv.select("g.legendCells");
-    expandElementLeft(legendDiv, legendCells);
+    //expandElementLeft(legendDiv, legendCells);
     cropCellContents(legendDiv, legendCells);
 }
 
