@@ -13,7 +13,11 @@ const ohlc = ohlcCandle(seriesSvgOhlc);
 ohlc.plugin = {
     type: "d3_ohlc",
     name: "[d3fc] OHLC Chart",
-    max_size: 25000
+    max_size: 25000,
+    initial: {
+        type: "number",
+        count: 4
+    }
 };
 
 export default ohlc;

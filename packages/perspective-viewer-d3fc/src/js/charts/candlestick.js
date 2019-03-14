@@ -13,7 +13,11 @@ const candlestick = ohlcCandle(seriesSvgCandlestick);
 candlestick.plugin = {
     type: "d3_candlestick",
     name: "[d3fc] Candlestick Chart",
-    max_size: 25000
+    max_size: 25000,
+    initial: {
+        type: "number",
+        count: 4
+    }
 };
 
 export default candlestick;
