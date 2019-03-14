@@ -2109,16 +2109,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx0>::get_column_names, allow_raw_pointers());
+            "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
+            
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx1>::get_column_names, allow_raw_pointers())
+            "get_column_names", &t_data_slice<t_ctx1>::get_column_names)
         .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
+
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx2>::get_column_names, allow_raw_pointers());
+            "get_column_names", &t_data_slice<t_ctx2>::get_column_names);
+
     /******************************************************************************
      *
      * t_ctx0
