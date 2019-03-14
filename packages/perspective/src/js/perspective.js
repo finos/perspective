@@ -336,15 +336,13 @@ export default function(Module) {
                 for (let cidx = start_col; cidx < end_col; cidx++) {
                     const col_name = col_names[cidx];
                     if (cidx === 0) {
-                        if (!this.column_only) {
-                            let row_path = slice.get_row_path(ridx);
+                        const row_path = slice.get_row_path(ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
-                                const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
+                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
                             formatter.addColumnValue(data, row, col_name, value);
                         }
                         row_path.delete();
-                        }
                     } else {
                         const value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
                         formatter.setColumnValue(data, row, col_name, value);

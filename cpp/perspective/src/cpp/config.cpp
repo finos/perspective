@@ -206,9 +206,8 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
 
 t_config::t_config(const std::vector<t_pivot>& row_pivots,
     const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms, bool column_only)
+    const std::vector<t_fterm>& fterms)
     : m_row_pivots(row_pivots)
-    , m_column_only(column_only)
     , m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)

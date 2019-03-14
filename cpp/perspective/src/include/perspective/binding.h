@@ -347,7 +347,7 @@ namespace binding {
      */
     std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
         t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name);
 
     /**
