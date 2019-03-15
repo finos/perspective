@@ -10,7 +10,6 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
-import {axisOrdinalBottom, axisOrdinalLeft} from "../d3fc/axis/axisOrdinal";
 import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
 
 const AXIS_TYPES = {
@@ -129,7 +128,6 @@ export const axisFactory = settings => {
 
                 const createAxis = scale => {
                     const axis = pickAxis(multiLevel)(scale);
-                    axis.tickLineAlign("right").tickPadding(8);
 
                     if (multiLevel) {
                         axis.groups(levelGroups)
@@ -165,7 +163,7 @@ export const axisFactory = settings => {
         if (multiLevel) {
             return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
         }
-        return orient === "horizontal" ? axisOrdinalBottom : axisOrdinalLeft;
+        return orient === "horizontal" ? fc.axisOrdinalBottom : fc.axisOrdinalLeft;
     };
 
     const axisGroups = domain => {
