@@ -494,9 +494,13 @@ export default function(Module) {
      * Float32Array or Float64Array. If the column cannot be found, or is not of an
      * integer/float type, the Promise returns undefined.
      */
-    view.prototype.col_to_js_typed_array = async function(col_name) {
+    view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
+        const num_rows = await this.num_rows();
         let idx = names.indexOf(col_name);
+
+        const start_row = options.start_row || 0;
+        const end_row = options.end_row || num_rows;
 
         // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
@@ -504,13 +508,13 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false);
+            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false, start_row, end_row);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false);
+            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
             const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
-            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only);
+            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
 
@@ -519,29 +523,43 @@ export default function(Module) {
      *
      * @async
      *
+     * @param {Object} [options] An optional configuration object.
+     * @param {number} options.start_row The starting row index from which
+     * to serialize.
+     * @param {number} options.end_row The ending row index from which
+     * to serialize.
+     * @param {number} options.start_col The starting column index from which
+     * to serialize.
+     * @param {number} options.end_col The ending column index from which
+     * to serialize.
+     *
      * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
      * data from the view.
      */
-    view.prototype.to_arrow = async function() {
+    view.prototype.to_arrow = async function(options = {}) {
         const names = await this._column_names();
         const schema = await this.schema();
 
         const vectors = [];
 
-        for (let name of names) {
+        const start_col = options.start_col || 0;
+        const end_col = options.end_col || names.length;
+
+        for (let i = start_col; i < end_col; i++) {
+            const name = names[i];
             const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
             const type = schema[col_path[col_path.length - 1]];
             if (type === "float") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
                 const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
                 vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
@@ -550,7 +568,7 @@ export default function(Module) {
             }
         }
 
-        return Table.fromVectors(vectors, names).serialize().buffer;
+        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize().buffer;
     };
 
     /**
