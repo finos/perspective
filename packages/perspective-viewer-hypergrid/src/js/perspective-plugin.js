@@ -8,6 +8,7 @@
  */
 
 const rectangular = require("rectangular");
+var superscript = require("superscript-number");
 
 /**
  * @this {Behavior}
@@ -104,9 +105,44 @@ function setColumnPropsByType(column) {
     }
 }
 
+/**
+ * @this {Behavior}
+ */
+function formatColumnHeader(value) {
+    const config = this.dataModel.getConfig();
+    const index = config.sort.findIndex(item => item[0] === value.trim());
+
+    if (index > -1) {
+        const direction = config.sort[index][1];
+
+        if (direction in this.charMap) {
+            value = `${value} ${this.charMap[direction]}${superscript(index + 1)}`;
+        }
+    }
+
+    return value;
+}
+
+function addSortChars(charMap) {
+    Object.assign(charMap, {
+        asc: "\u2191",
+        desc: "\u2193",
+        "asc abs": "\u21E7",
+        "desc abs": "\u21E9",
+        "col asc": "\u2192",
+        "col desc": "\u2190",
+        "col asc abs": "\u21E8",
+        "col desc abs": "\u21E6"
+    });
+}
+
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {
+    addSortChars(grid.behavior.charMap);
+
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
+
+    Object.getPrototypeOf(grid.behavior).formatColumnHeader = formatColumnHeader;
 
     Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
