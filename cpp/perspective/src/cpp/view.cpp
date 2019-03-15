@@ -357,6 +357,7 @@ View<t_ctx2>::get_data(
         slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     }
 
+    column_names.insert(column_names.begin(), "__ROW_PATH__");
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
     auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(
         m_ctx, start_row, end_row, start_col, end_col, slice_ptr, column_names, column_indices);

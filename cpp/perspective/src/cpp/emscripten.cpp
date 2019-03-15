@@ -2150,7 +2150,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx2>::get_column_names);
+            "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
+        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
     /******************************************************************************
      *

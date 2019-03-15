@@ -72,12 +72,22 @@ template <>
 t_tscalar
 t_data_slice<t_ctx2>::get(t_uindex ridx, t_uindex cidx) const {
     t_uindex idx = get_slice_idx(ridx, cidx);
-    t_tscalar rv = m_slice->operator[](idx);
-    /* if (m_column_indices.size() > 0) {
-        t_uindex idx_skip_headers;
-    } else {
+    t_tscalar rv;
 
-    } */
+    if (m_column_indices.size() > 0) {
+        auto skip_cidx = std::find(m_column_indices.begin(), m_column_indices.end(), cidx);
+        if (skip_cidx == m_column_indices.end()) {
+            rv.clear();
+            return rv;
+        }
+    }
+
+    if (idx >= m_slice->size()) {
+        rv.clear();
+    } else {
+        rv = m_slice->at(idx);
+    }
+
     return rv;
 }
 
