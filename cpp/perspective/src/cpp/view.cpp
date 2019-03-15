@@ -143,71 +143,6 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
 }
 
 /**
- * @brief The schema of this View.  A schema is an std::map, the keys of which
- * are the columns of this View, and the values are their string type names.
- * If this View is aggregated, theses will be the aggregated types;
- * otherwise these types will be the same as the columns in the underlying
- * Table.
- *
- * @return std::map<std::string, std::string>
- */
-template <typename CTX_T>
-std::map<std::string, std::string>
-View<CTX_T>::schema() const {
-    auto schema = m_gnode->get_tblschema();
-    auto _types = schema.types();
-    auto names = schema.columns();
-
-    std::map<std::string, t_dtype> types;
-    std::map<std::string, std::string> new_schema;
-
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
-    }
-
-    auto col_names = _column_names(false);
-    for (const std::string& name : col_names) {
-        // Pull out the main aggregate column
-        std::size_t last_delimiter = name.find_last_of(m_separator);
-        std::string agg_name = name.substr(last_delimiter + 1);
-
-        std::string type_string = dtype_to_str(types[agg_name]);
-        new_schema[agg_name] = type_string;
-
-        if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
-        }
-    }
-
-    return new_schema;
-}
-/**
- * @brief The schema of this View. Output and logic is as the above
- * schema(), but this version is specialized for zero-sided
- * contexts.
- *
- * @return std::map<std::string, std::string>
- */
-template <>
-std::map<std::string, std::string>
-View<t_ctx0>::schema() const {
-    t_schema schema = m_gnode->get_tblschema();
-    std::vector<t_dtype> _types = schema.types();
-    std::vector<std::string> names = schema.columns();
-
-    std::map<std::string, std::string> new_schema;
-
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        if (names[i] == "psp_okey") {
-            continue;
-        }
-        new_schema[names[i]] = dtype_to_str(_types[i]);
-    }
-
-    return new_schema;
-}
-
-/**
  * @brief The column names of the View. If the View is aggregated, the
  * individual column names will be joined with a separator character
  * specified by the user, or defaulting to "|".
@@ -284,6 +219,78 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
     }
 
     return names;
+}
+
+/**
+ * @brief The schema of this View.  A schema is an std::map, the keys of which
+ * are the columns of this View, and the values are their string type names.
+ * If this View is aggregated, theses will be the aggregated types;
+ * otherwise these types will be the same as the columns in the underlying
+ * Table.
+ *
+ * @return std::map<std::string, std::string>
+ */
+template <typename CTX_T>
+std::map<std::string, std::string>
+View<CTX_T>::schema() const {
+    auto schema = m_gnode->get_tblschema();
+    auto _types = schema.types();
+    auto names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    auto col_names = _column_names(false);
+    for (const std::string& name : col_names) {
+        // Pull out the main aggregate column
+        std::size_t last_delimiter = name.find_last_of(m_separator);
+        std::string agg_name = name.substr(last_delimiter + 1);
+
+        std::string type_string = dtype_to_str(types[agg_name]);
+        new_schema[agg_name] = type_string;
+
+        if (m_row_pivots.size() > 0 && !is_column_only()) {
+            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
+        }
+    }
+
+    return new_schema;
+}
+/**
+ * @brief The schema of this View. Output and logic is as the above
+ * schema(), but this version is specialized for zero-sided
+ * contexts.
+ *
+ * @return std::map<std::string, std::string>
+ */
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::schema() const {
+    t_schema schema = m_gnode->get_tblschema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    std::vector<std::string> column_names = _column_names(false);
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = column_names.size(); i != max; ++i) {
+        std::string name = column_names[i];
+        if (name == "psp_okey") {
+            continue;
+        }
+        new_schema[name] = dtype_to_str(types[name]);
+    }
+
+    return new_schema;
 }
 
 /**
