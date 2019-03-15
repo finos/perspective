@@ -13,60 +13,48 @@ import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
 export const scale = () => d3.scaleLinear();
 
 export const domain = () => {
-    let lowerValueName = "mainValue";
-    let upperValueName = lowerValueName;
+    let valueNames = ["mainValue"];
 
     const extentLinear = customExtent()
         .pad([0, 0.1])
         .padUnit("percent");
 
     const _domain = function(data) {
-        const extent = getDataExtentFromArray(data, lowerValueName, upperValueName);
+        const extent = getDataExtentFromArray(data, valueNames);
         return extentLinear(extent);
     };
 
     fc.rebindAll(_domain, extentLinear);
 
-    // set both upper and lower values to the supplied value
     _domain.valueName = (...args) => {
         if (!args.length) {
-            return lowerValueName;
+            return valueNames[0];
         }
-        lowerValueName = args[0];
-        upperValueName = lowerValueName;
+        valueNames = [args[0]];
         return _domain;
     };
-
-    _domain.lowerValueName = (...args) => {
+    _domain.valueNames = (...args) => {
         if (!args.length) {
-            return lowerValueName;
+            return valueNames;
         }
-        lowerValueName = args[0];
-        return _domain;
-    };
-
-    _domain.upperValueName = (...args) => {
-        if (!args.length) {
-            return upperValueName;
-        }
-        upperValueName = args[0];
+        valueNames = args[0];
         return _domain;
     };
 
     return _domain;
 };
 
-const getDataExtentFromArray = (array, lowerValueName, upperValueName) => {
-    const dataExtent = array.map(v => getDataExtentFromValue(v, lowerValueName, upperValueName));
+const getDataExtentFromArray = (array, valueNames) => {
+    const dataExtent = array.map(v => getDataExtentFromValue(v, valueNames));
     const extent = flattenExtent(dataExtent);
     return extent;
 };
 
-const getDataExtentFromValue = (value, lowerValueName, upperValueName) => {
+const getDataExtentFromValue = (value, valueNames) => {
     if (Array.isArray(value)) {
-        return getDataExtentFromArray(value, lowerValueName, upperValueName);
+        return getDataExtentFromArray(value, valueNames);
     }
-    return [value[lowerValueName], value[upperValueName]];
+    return [Math.min(...valueNames.map(n => value[n])), Math.max(...valueNames.map(n => value[n]))];
 };
 
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");

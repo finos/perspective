@@ -39,12 +39,6 @@ function ohlcCandle(seriesSvg) {
         const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
         const yScale = mainAxis.scale(settings);
 
-        const yDomain = mainAxis
-            .domain(settings)
-            .lowerValueName("lowValue")
-            .upperValueName("highValue")
-            .paddingStrategy(paddingStrategy)(data);
-
         const chart = fc
             .chartSvgCartesian({
                 xScale,
@@ -55,7 +49,12 @@ function ohlcCandle(seriesSvg) {
             .xLabel(crossAxis.label(settings))
             .xAxisHeight(xAxis.size)
             .xDecorate(xAxis.decorate)
-            .yDomain(yDomain)
+            .yDomain(
+                mainAxis
+                    .domain(settings)
+                    .valueNames(["lowValue", "highValue"])
+                    .paddingStrategy(paddingStrategy)(data)
+            )
             .yLabel(mainAxis.label(settings))
             .yOrient("left")
             .yNice()
