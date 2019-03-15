@@ -13,14 +13,14 @@ import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
 export const scale = () => d3.scaleLinear();
 
 export const domain = () => {
-    let valueName = "mainValue";
+    let valueNames = ["mainValue"];
 
     const extentLinear = customExtent()
         .pad([0, 0.1])
         .padUnit("percent");
 
     const _domain = function(data) {
-        const extent = getDataExtentFromArray(data, valueName);
+        const extent = getDataExtentFromArray(data, valueNames);
         return extentLinear(extent);
     };
 
@@ -28,26 +28,33 @@ export const domain = () => {
 
     _domain.valueName = (...args) => {
         if (!args.length) {
-            return valueName;
+            return valueNames[0];
         }
-        valueName = args[0];
+        valueNames = [args[0]];
+        return _domain;
+    };
+    _domain.valueNames = (...args) => {
+        if (!args.length) {
+            return valueNames;
+        }
+        valueNames = args[0];
         return _domain;
     };
 
     return _domain;
 };
 
-const getDataExtentFromArray = (array, valueName) => {
-    const dataExtent = array.map(v => getDataExtentFromValue(v, valueName));
+const getDataExtentFromArray = (array, valueNames) => {
+    const dataExtent = array.map(v => getDataExtentFromValue(v, valueNames));
     const extent = flattenExtent(dataExtent);
     return extent;
 };
 
-const getDataExtentFromValue = (value, valueName) => {
+const getDataExtentFromValue = (value, valueNames) => {
     if (Array.isArray(value)) {
-        return getDataExtentFromArray(value, valueName);
+        return getDataExtentFromArray(value, valueNames);
     }
-    return [value[valueName], value[valueName]];
+    return [Math.min(...valueNames.map(n => value[n])), Math.max(...valueNames.map(n => value[n]))];
 };
 
 export const label = settings => settings.mainValues.map(v => v.name).join(", ");
