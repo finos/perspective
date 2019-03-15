@@ -9,16 +9,8 @@
 import {labelFunction} from "../axis/crossAxis";
 import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
 
-const flattenArray = array => {
-    if (Array.isArray(array)) {
-        return [].concat(...array.map(flattenArray));
-    } else {
-        return [array];
-    }
-};
-
 export function ohlcData(settings, data) {
-    return flattenArray(splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(data => seriesToOHLC(settings, data)));
+    return splitIntoMultiSeries(settings, data, {excludeEmpty: true}).map(data => seriesToOHLC(settings, data));
 }
 
 function seriesToOHLC(settings, data) {

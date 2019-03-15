@@ -16,7 +16,6 @@ import {withGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
 
 function ohlcCandle(seriesSvg) {
     return function(container, settings) {
@@ -29,6 +28,8 @@ function ohlcCandle(seriesSvg) {
             .lowValue(d => d.lowValue)
             .closeValue(d => d.closeValue);
 
+        const multi = fc.seriesSvgRepeat().series(series);
+
         const paddingStrategy = hardLimitZeroPadding()
             .pad([0.1, 0.1])
             .padUnit("percent");
@@ -38,8 +39,10 @@ function ohlcCandle(seriesSvg) {
         const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
         const yScale = mainAxis.scale(settings);
 
-        const yDomain = customExtent()
-            .accessors([d => d.lowValue, d => d.highValue])
+        const yDomain = mainAxis
+            .domain(settings)
+            .lowerValueName("lowValue")
+            .upperValueName("highValue")
             .paddingStrategy(paddingStrategy)(data);
 
         const chart = fc
@@ -56,7 +59,7 @@ function ohlcCandle(seriesSvg) {
             .yLabel(mainAxis.label(settings))
             .yOrient("left")
             .yNice()
-            .plotArea(withGridLines(series).orient("vertical"));
+            .plotArea(withGridLines(multi).orient("vertical"));
 
         chart.xPaddingInner && chart.xPaddingInner(1);
         chart.xPaddingOuter && chart.xPaddingOuter(0.5);
