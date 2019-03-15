@@ -202,6 +202,26 @@ module.exports = perspective => {
         });
     });
 
+    describe("Schema", function() {
+        it("0-sided view", async function() {
+            const table = perspective.table(int_float_string_data);
+            const view = table.view();
+            const schema = await view.schema();
+            expect(schema).toEqual({int: "integer", float: "float", string: "string"});
+            view.delete();
+            table.delete();
+        });
+
+        it("0-sided view with aggregate selection", async function() {
+            const table = perspective.table(int_float_string_data);
+            const view = table.view({aggregate: [{column: "float", op: "sum"}, {column: "string", op: "sum"}]});
+            const schema = await view.schema();
+            expect(schema).toEqual({float: "float", string: "string"});
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Typed Arrays", function() {
         it("Int, 0-sided view", async function() {
             var table = perspective.table(int_float_data);
