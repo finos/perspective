@@ -643,9 +643,10 @@ namespace binding {
     // Given a column index, serialize data to TypedArray
     template <typename T>
     val
-    col_to_js_typed_array(std::shared_ptr<View<T>> view, t_index idx, bool column_pivot_only) {
+    col_to_js_typed_array(std::shared_ptr<View<T>> view, t_index idx, bool column_pivot_only,
+        t_uindex start_row, t_uindex end_row) {
         std::shared_ptr<T> ctx = view->get_context();
-        std::vector<t_tscalar> data = ctx->get_data(0, ctx->get_row_count(), idx, idx + 1);
+        std::vector<t_tscalar> data = ctx->get_data(start_row, end_row, idx, idx + 1);
         auto dtype = ctx->get_column_dtype(idx);
 
         switch (dtype) {
