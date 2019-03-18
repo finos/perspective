@@ -7,11 +7,10 @@
  *
  */
 import * as fc from "d3fc";
-import {tooltip} from "../tooltip/tooltip";
-import {withOpacity, withoutOpacity} from "./seriesColours";
+import {withOpacity, withoutOpacity} from "./seriesColors";
 import {fromDomain} from "./seriesSymbols";
 
-export function categoryPointSeries(settings, seriesKey, colour, symbols) {
+export function categoryPointSeries(settings, seriesKey, color, symbols) {
     let series = fc.seriesSvgPoint().size(100);
 
     if (symbols) {
@@ -19,9 +18,8 @@ export function categoryPointSeries(settings, seriesKey, colour, symbols) {
     }
 
     series.decorate(selection => {
-        tooltip()(selection, settings);
-        if (colour) {
-            selection.style("stroke", d => withoutOpacity(colour(d.colorValue || seriesKey))).style("fill", d => withOpacity(colour(d.colorValue || seriesKey)));
+        if (color) {
+            selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey)));
         }
     });
 

@@ -2,36 +2,54 @@ import {select} from "d3";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
-import {generateHtmlDefault} from "./generateHTML";
+import {generateHtml} from "./generateHTML";
 
 export const tooltip = () => {
-    let generateHtml = generateHtmlDefault;
+    let alwaysShow = false;
+    let tooltipDiv = null;
+    let settings = null;
 
-    const _tooltip = (selection, settings) => {
+    const _tooltip = selection => {
         const node = selection.node();
 
-        if (!node || !node.isConnected) return;
+        if (!node || !node.isConnected) {
+            hideTooltip(tooltipDiv);
+            return;
+        }
 
         const container = select(getChartElement(node).getContainer());
-        const tooltipDiv = getTooltipDiv(container);
-        selection
-            //        .filter(d => d.baseValue !== d.mainValue)
-            .on("mouseover", function(data) {
-                generateHtml(tooltipDiv, data, settings);
-                showTooltip(container.node(), this, tooltipDiv);
-                select(this).style("opacity", "0.7");
-            })
-            .on("mouseout", function() {
-                hideTooltip(tooltipDiv);
-                select(this).style("opacity", "1");
-            });
+        tooltipDiv = getTooltipDiv(container);
+
+        const showTip = (data, i, nodes) => {
+            generateHtml(tooltipDiv, data, settings);
+            showTooltip(container.node(), nodes[i], tooltipDiv);
+            select(nodes[i]).style("opacity", "0.7");
+        };
+        const hideTip = (data, i, nodes) => {
+            hideTooltip(tooltipDiv);
+            if (nodes) select(nodes[i]).style("opacity", "1");
+        };
+
+        if (alwaysShow) {
+            selection.each(showTip);
+        } else {
+            selection.on("mouseover", showTip).on("mouseout", hideTip);
+        }
     };
 
-    _tooltip.generateHtml = (...args) => {
+    _tooltip.alwaysShow = (...args) => {
         if (!args.length) {
-            return generateHtml;
+            return alwaysShow;
         }
-        generateHtml = args[0];
+        alwaysShow = args[0];
+        return _tooltip;
+    };
+
+    _tooltip.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
         return _tooltip;
     };
 
@@ -81,8 +99,10 @@ function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
 }
 
 function hideTooltip(tooltipDiv) {
-    tooltipDiv
-        .transition()
-        .duration(500)
-        .style("opacity", 0);
+    if (tooltipDiv) {
+        tooltipDiv
+            .transition()
+            .duration(500)
+            .style("opacity", 0);
+    }
 }

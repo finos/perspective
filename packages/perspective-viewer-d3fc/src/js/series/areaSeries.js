@@ -8,12 +8,12 @@
  */
 import * as fc from "d3fc";
 
-export function areaSeries(settings, colour) {
+export function areaSeries(settings, color) {
     let series = fc.seriesSvgArea();
 
     series = series.decorate(selection => {
-        if (colour) {
-            selection.style("fill", d => colour(d[0].key));
+        if (color) {
+            selection.style("fill", d => color(d[0].key));
         }
     });
 
