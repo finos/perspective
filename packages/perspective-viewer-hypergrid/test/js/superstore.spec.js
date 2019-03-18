@@ -74,6 +74,28 @@ utils.with_server({}, () => {
                 });
             });
 
+            describe("sort indicators", () => {
+                test.capture("shows a sort indicator", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("sort", '[["Row ID", "asc"]]'), viewer);
+                });
+
+                test.capture("shows multiple sort indicators", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("sort", '[["Row ID","asc"],["Order ID","desc"]]'), viewer);
+                });
+
+                test.capture("shows a sort indicator on column split", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                    await page.evaluate(element => element.setAttribute("sort", '[["Sales", "desc"]]'), viewer);
+                });
+            });
+
             describe("lazy render mode", () => {
                 test.capture("resets viewable area when the logical size expands.", async page => {
                     await set_lazy(page);
