@@ -1,33 +1,51 @@
-:host([view=d3_xy_scatter]) #app {
-  &.columns_horizontal #side_panel #inactive_columns {
-    padding-top:28px
-  }
+:host([view=d3_xy_scatter]), :host([view=d3_candlestick]), :host([view=d3_ohlc]) {
+ & #app {
+   &.columns_horizontal #side_panel #inactive_columns {
+     padding-top:28px
+   }
 
-  & #side_panel #active_columns perspective-row:nth-child(1) {
-    margin-top:23px;
-    &:before {
-      content:"X Axis"
-    }
-  }
+   & #side_panel #active_columns perspective-row {
+     &:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4) {
+       margin-top:23px;
+     }
+   }
+ }
+}
 
-  & #side_panel #active_columns perspective-row:nth-child(2) {
-    margin-top:23px;
-    &:before {
-      content:"Y Axis"
-    }
-  }
+:host([view=d3_xy_scatter]) #app #side_panel #active_columns perspective-row {
+ &:nth-child(1):before {
+   content:"X Axis"
+ }
 
-  & #side_panel #active_columns perspective-row:nth-child(3) {
-    margin-top:23px;
-    &:before {
-      content:"Color"
-    }
-  }
+ &:nth-child(2):before {
+   content:"Y Axis"
+ }
 
-  & #side_panel #active_columns perspective-row:nth-child(4) {
-    margin-top:23px;
-    &:before {
-      content:"Size"
-    }
-  }
+ &:nth-child(3):before {
+   content:"Color"
+ }
+
+ &:nth-child(4):before {
+   content:"Size"
+ }
+}
+
+:host([view=d3_candlestick]), :host([view=d3_ohlc]) {
+ & #app #side_panel #active_columns perspective-row {
+   &:nth-child(1):before {
+     content:"Open"
+   }
+
+   &:nth-child(2):before {
+     content:"Close"
+   }
+
+   &:nth-child(3):before {
+     content:"High"
+   }
+
+   &:nth-child(4):before {
+     content:"Low"
+   }
+ }
 }
