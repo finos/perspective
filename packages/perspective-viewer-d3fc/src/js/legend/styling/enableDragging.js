@@ -40,29 +40,15 @@ function enforceContainerBoundaries(legendNode, offsetX, offsetY) {
         left: legendNodeRect.left + offsetX - margin
     };
 
-    let adjustedOffsetX = offsetX;
+    const adjustedOffsets = {x: offsetX, y: offsetY};
+    const boundaries = [{edge: "right", dimension: "x"}, {edge: "left", dimension: "x"}, {edge: "top", dimension: "y"}, {edge: "bottom", dimension: "y"}];
 
-    if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, "left")) {
-        const leftAdjust = draggedLegendNodeRect.left - chartNodeRect.left;
-        adjustedOffsetX = offsetX - leftAdjust;
-    }
+    boundaries.forEach(bound => {
+        if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, bound.edge)) {
+            const adjustment = draggedLegendNodeRect[bound.edge] - chartNodeRect[bound.edge];
+            adjustedOffsets[bound.dimension] = adjustedOffsets[bound.dimension] - adjustment;
+        }
+    });
 
-    if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, "right")) {
-        const rightAdjust = draggedLegendNodeRect.right - chartNodeRect.right;
-        adjustedOffsetX = offsetX - rightAdjust;
-    }
-
-    let adjustedOffsetY = offsetY;
-
-    if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, "top")) {
-        const topAdjust = draggedLegendNodeRect.top - chartNodeRect.top;
-        adjustedOffsetY = offsetY - topAdjust;
-    }
-
-    if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, "bottom")) {
-        const bottomAdjust = draggedLegendNodeRect.bottom - chartNodeRect.bottom;
-        adjustedOffsetY = offsetY - bottomAdjust;
-    }
-
-    return [adjustedOffsetX, adjustedOffsetY];
+    return [adjustedOffsets.x, adjustedOffsets.y];
 }
