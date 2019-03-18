@@ -23,7 +23,7 @@ function getGroupValues(data, settings) {
 
 function getSplitValues(data, settings) {
     if (settings.splitValues.length === 0) return [];
-    const splitValues = data.key ? data.key.split("|").slice(0, -1) : data.mainValue.split("|");
+    const splitValues = data.key ? data.key.split("|") : data.mainValue.split("|");
     return settings.splitValues.map((split, i) => ({name: split.name, value: splitValues[i]}));
 }
 
