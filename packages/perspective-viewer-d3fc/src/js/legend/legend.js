@@ -90,14 +90,13 @@ function legendComponent(scrollLegend, scaleModifier) {
             .selectAll("g.cell");
 
         cells.classed("hidden", isHidden);
+        cells.append("title").html(d => d);
 
         if (color) {
             cells
                 .select("path")
                 .style("fill", d => (isHidden(d) ? null : color(d)))
                 .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
-
-            cells.append("title").html(d => d);
         }
     });
 
