@@ -45,3 +45,21 @@ export function withOpacity(color) {
     const toInt = offset => parseInt(color.substring(offset, offset + 2), 16);
     return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
 }
+
+export function seriesUpColors(domain) {
+    const range = domain.length <= 2 ? ["lightgreen", "green"] : d3.schemeGreens[domain.length];
+
+    return d3
+        .scaleOrdinal()
+        .range(range)
+        .domain(domain);
+}
+
+export function seriesDownColors(domain) {
+    const range = domain.length <= 2 ? ["lightred", "red"] : d3.schemeReds[domain.length];
+
+    return d3
+        .scaleOrdinal()
+        .range(range)
+        .domain(domain);
+}

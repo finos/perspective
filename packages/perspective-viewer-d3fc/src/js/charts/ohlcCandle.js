@@ -16,17 +16,28 @@ import {withGridLines} from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
+import {seriesUpColors, seriesDownColors} from "../series/seriesColors";
+
+const isUp = d => d.closeValue >= d.openValue;
 
 function ohlcCandle(seriesSvg) {
     return function(container, settings) {
         const data = ohlcData(settings, filterData(settings));
+
+        const keys = data.map(k => k.key);
+        const upColor = seriesUpColors(keys);
+        const downColor = seriesDownColors(keys);
 
         const series = seriesSvg()
             .crossValue(d => d.crossValue)
             .openValue(d => d.openValue)
             .highValue(d => d.highValue)
             .lowValue(d => d.lowValue)
-            .closeValue(d => d.closeValue);
+            .closeValue(d => d.closeValue)
+            .decorate(selection => {
+                selection.style("fill", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
+                selection.style("stroke", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
+            });
 
         const multi = fc.seriesSvgRepeat().series(series);
 
