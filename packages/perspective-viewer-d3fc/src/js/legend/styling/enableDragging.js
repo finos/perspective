@@ -16,12 +16,23 @@ export function enableDragging(element) {
     node.style.cursor = "move";
 
     const drag = d3.drag().on("drag", function() {
+        overrideDefaultResizingBehaviour(node);
         const [offsetX, offsetY] = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
         this.style.left = `${this.offsetLeft + offsetX}px`;
         this.style.top = `${this.offsetTop + offsetY}px`;
     });
 
     element.call(drag);
+}
+
+// Default behaviour for the legend is to remain pinned to the top right hand corner with a specific margin.
+// Once the legend has moved we cannot continue to use that css based approach.
+function overrideDefaultResizingBehaviour(node) {
+    d3.select(window).on("resize", function() {
+        const [offsetX, offsetY] = enforceContainerBoundaries(node, 0, 0);
+        node.style.left = `${node.offsetLeft + offsetX}px`;
+        node.style.top = `${node.offsetTop + offsetY}px`;
+    });
 }
 
 function enforceContainerBoundaries(legendNode, offsetX, offsetY) {
