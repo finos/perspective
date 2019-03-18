@@ -7,7 +7,6 @@
  *
  */
 
-import * as d3 from "d3";
 import {isElementOverflowing} from "../../utils/utils";
 
 export function cropCellContents(legendDiv) {
@@ -18,17 +17,16 @@ export function cropCellContents(legendDiv) {
         return;
     }
 
-    const overflowingCells = legendCells
-        .selectAll(".label")
-        .nodes()
-        .filter(cell => isElementOverflowing(legendDivRect, cell.getBoundingClientRect()));
-
     const svg = legendDiv.select(".legend");
 
-    overflowingCells.forEach(cell => {
-        const cutoffCharIndex = getCutoffCharacterIndex(cell, svg, legendDivRect);
-        const d3Cell = d3.select(cell);
-        d3Cell.text(`${d3Cell.text().substring(0, cutoffCharIndex - 3)}...`);
+    legendCells.selectAll(".label").text((d, i, nodes) => {
+        const cell = nodes[i];
+        if (isElementOverflowing(legendDivRect, cell.getBoundingClientRect())) {
+            const cutoffCharIndex = getCutoffCharacterIndex(cell, svg, legendDivRect);
+            return `${d.substring(0, cutoffCharIndex - 3)}...`;
+        } else {
+            return d;
+        }
     });
 }
 
