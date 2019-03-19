@@ -25,8 +25,6 @@ function ohlcCandle(seriesSvg) {
     return function(container, settings) {
         const data = ohlcData(settings, filterData(settings));
 
-        console.log("data", data);
-
         const keys = data.map(k => k.key);
         const upColor = seriesUpColors(keys);
         const downColor = seriesDownColors(keys);
@@ -46,7 +44,10 @@ function ohlcCandle(seriesSvg) {
                 selection.style("stroke", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
             });
 
-        const multi = fc.seriesSvgRepeat().series(series);
+        const multi = fc
+            .seriesSvgMulti()
+            .mapping((data, index) => data[index])
+            .series(data.map(() => series));
 
         const paddingStrategy = hardLimitZeroPadding()
             .pad([0.1, 0.1])
