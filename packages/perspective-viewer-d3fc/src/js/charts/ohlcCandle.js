@@ -17,6 +17,7 @@ import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 import {seriesUpColors, seriesDownColors} from "../series/seriesColors";
+import {colorLegend} from "../legend/legend";
 
 const isUp = d => d.closeValue >= d.openValue;
 
@@ -24,9 +25,15 @@ function ohlcCandle(seriesSvg) {
     return function(container, settings) {
         const data = ohlcData(settings, filterData(settings));
 
+        console.log("data", data);
+
         const keys = data.map(k => k.key);
         const upColor = seriesUpColors(keys);
         const downColor = seriesDownColors(keys);
+
+        const legend = colorLegend()
+            .settings(settings)
+            .scale(upColor);
 
         const series = seriesSvg()
             .crossValue(d => d.crossValue)
@@ -90,6 +97,7 @@ function ohlcCandle(seriesSvg) {
         // render
         container.datum(data).call(zoomChart);
         container.call(toolTip);
+        container.call(legend);
     };
 }
 
