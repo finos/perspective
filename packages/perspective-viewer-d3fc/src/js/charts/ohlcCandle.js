@@ -10,7 +10,7 @@ import * as fc from "d3fc";
 import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {ohlcData} from "../data/ohlcData";
-import {filterData} from "../legend/filter";
+import {filterDataByGroup} from "../legend/filter";
 import {withGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
@@ -23,15 +23,19 @@ const isUp = d => d.closeValue >= d.openValue;
 
 function ohlcCandle(seriesSvg) {
     return function(container, settings) {
-        const data = ohlcData(settings, filterData(settings));
+        const data = ohlcData(settings, filterDataByGroup(settings));
 
-        const keys = data.map(k => k.key);
+        const keys = data
+            .map(k => k.key)
+            .concat(settings.hideKeys ? settings.hideKeys : [])
+            .sort();
+
         const upColor = seriesUpColors(keys);
         const downColor = seriesDownColors(keys);
 
         const legend = colorLegend()
             .settings(settings)
-            .scale(upColor);
+            .scale(keys.length > 1 ? upColor : null);
 
         const series = seriesSvg()
             .crossValue(d => d.crossValue)
