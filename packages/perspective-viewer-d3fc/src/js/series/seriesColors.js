@@ -47,7 +47,7 @@ export function withOpacity(color) {
 }
 
 export function seriesUpColors(domain) {
-    const range = domain.length <= 2 ? ["lightgreen", "green"] : d3.schemeGreens[domain.length];
+    const range = domain.length > 1 ? d3.schemeCategory10.map(withoutOpacity) : ["#6c0"];
 
     return d3
         .scaleOrdinal()
@@ -56,7 +56,7 @@ export function seriesUpColors(domain) {
 }
 
 export function seriesDownColors(domain) {
-    const range = domain.length <= 2 ? ["lightred", "red"] : d3.schemeReds[domain.length];
+    const range = domain.length > 1 ? d3.schemeCategory10.map(withOpacity) : ["#c60"];
 
     return d3
         .scaleOrdinal()
