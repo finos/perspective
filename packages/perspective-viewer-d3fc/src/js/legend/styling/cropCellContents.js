@@ -33,7 +33,9 @@ export function cropCellContents(legendDiv) {
 function getCutoffCharacterIndex(cell, svg, legendDivRect) {
     const cellRect = cell.getBoundingClientRect();
     const cutoffCoord = svg.node().createSVGPoint();
-    cutoffCoord.x = legendDivRect.right - cellRect.left;
+    // Sometimes the svg point can _just_ miss a character, so we fuzz it.
+    const fuzzyFactor = 3;
+    cutoffCoord.x = legendDivRect.right - cellRect.left - fuzzyFactor;
     cutoffCoord.y = 0;
     return cell.getCharNumAtPosition(cutoffCoord);
 }
