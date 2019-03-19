@@ -7,7 +7,6 @@
  *
  */
 import * as fc from "d3fc";
-import seriesCanvasMulti from "../d3fc/series/canvas/multi";
 import annotationCanvasGridline from "../d3fc/annotation/canvas/gridline";
 
 const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
@@ -54,7 +53,7 @@ export const withGridLines = series => {
 export const withCanvasGridLines = series => {
     let orient = "both";
 
-    const canvasMulti = seriesCanvasMulti();
+    const canvasMulti = fc.seriesCanvasMulti();
 
     const _withGridLines = function(...args) {
         const xStyle = orient === "vertical" ? crossGridCanvas : mainGridCanvas;
