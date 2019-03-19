@@ -13,7 +13,7 @@ import scrollableLegend from "./scrollableLegend";
 import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
-import {enableDragging} from "./styling/enableDragging";
+import {draggableComponent} from "./styling/draggableComponent";
 
 const scrollColorLegend = scrollableLegend(
     d3Legend
@@ -46,6 +46,7 @@ function legendComponent(scrollLegend, scaleModifier) {
     let settings = {};
     let scale = null;
     let color = null;
+    let draggable = draggableComponent();
 
     function legend(container) {
         if (scale) {
@@ -77,7 +78,7 @@ function legendComponent(scrollLegend, scaleModifier) {
                 .style("z-index", "2")
                 .call(scrollLegend);
 
-            enableDragging(legendSelection);
+            draggable(legendSelection);
         }
     }
 

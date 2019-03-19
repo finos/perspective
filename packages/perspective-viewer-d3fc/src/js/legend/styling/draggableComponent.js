@@ -12,34 +12,37 @@ import {isElementOverflowing} from "../../utils/utils";
 import {getChartElement} from "../../plugin/root";
 
 const margin = 10;
-const pinned = "pinned";
 const resizeForDraggingEvent = "resize.for-dragging";
 
-export function enableDragging(element) {
-    const node = element.node();
-    node.style.cursor = "move";
+export function draggableComponent() {
+    let pinned = true;
 
-    const drag = d3.drag().on("drag", function() {
-        const [offsetX, offsetY] = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
-        this.style.left = `${this.offsetLeft + offsetX}px`;
-        this.style.top = `${this.offsetTop + offsetY}px`;
+    const draggable = element => {
+        const node = element.node();
+        node.style.cursor = "move";
 
-        const element = d3.select(this);
-        if (isNodeInTopRight(node)) {
-            pinNodeToTopRight(node, element);
-            return;
-        }
+        const drag = d3.drag().on("drag", function() {
+            const [offsetX, offsetY] = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
+            this.style.left = `${this.offsetLeft + offsetX}px`;
+            this.style.top = `${this.offsetTop + offsetY}px`;
 
-        unpinNodeFromTopRight(node, element);
-    });
+            const element = d3.select(this);
+            if (isNodeInTopRight(node)) {
+                pinned = pinNodeToTopRight(node);
+                return;
+            }
 
-    element.call(drag);
+            pinned = unpinNodeFromTopRight(node, element, pinned);
+        });
+
+        element.call(drag);
+    };
+
+    return draggable;
 }
 
-function unpinNodeFromTopRight(node, element) {
-    if (element.attr(pinned) !== false) {
-        element.attr(pinned, false);
-
+function unpinNodeFromTopRight(node, element, pinned) {
+    if (pinned !== false) {
         // Default behaviour for the legend is to remain pinned to the top right hand corner with a specific margin.
         // Once the legend has moved we cannot continue to use that css based approach.
         d3.select(window).on(resizeForDraggingEvent, function() {
@@ -48,12 +51,13 @@ function unpinNodeFromTopRight(node, element) {
             node.style.top = `${node.offsetTop + offsetY}px`;
         });
     }
+    return false;
 }
 
-function pinNodeToTopRight(node, element) {
-    element.attr(pinned, true);
+function pinNodeToTopRight(node) {
     d3.select(window).on(resizeForDraggingEvent, null);
     node.style.left = "auto";
+    return true;
 }
 
 function isNodeInTopRight(node) {
@@ -68,13 +72,13 @@ function isNodeInTopRight(node) {
     return nodeRect.right + margin + fuzz >= containerRect.right && nodeRect.top - margin - fuzz <= containerRect.top;
 }
 
-function enforceContainerBoundaries(legendNode, offsetX, offsetY) {
+function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
     const chartNodeRect = d3
-        .select(getChartElement(legendNode).getContainer())
+        .select(getChartElement(innerNode).getContainer())
         .node()
         .getBoundingClientRect();
 
-    const legendNodeRect = legendNode.getBoundingClientRect();
+    const legendNodeRect = innerNode.getBoundingClientRect();
 
     const draggedLegendNodeRect = {
         top: legendNodeRect.top + offsetY - margin,
