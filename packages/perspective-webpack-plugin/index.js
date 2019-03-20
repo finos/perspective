@@ -16,7 +16,7 @@ class PerspectiveWebpackPlugin {
         this.options = Object.assign(
             {},
             {
-                load_path: [/@jpmorganchase\/perspective/],
+                load_path: [/@jpmorganchase[\\/]perspective/, __dirname.replace("-webpack-plugin", "")],
                 workerLoaderOptions: {
                     name: "[name].worker.js"
                 },
