@@ -14,7 +14,7 @@ import {categoryPointSeries, symbolType} from "../series/categoryPointSeries";
 import {groupData} from "../data/groupData";
 import {symbolLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withSvgGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
@@ -57,7 +57,7 @@ function yScatter(container, settings) {
         .yLabel(mainAxis.label(settings))
         .yOrient("left")
         .yNice()
-        .plotArea(withSvgGridLines(series).orient("vertical"));
+        .plotArea(withGridLines(series).orient("vertical"));
 
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);

@@ -20,23 +20,47 @@ const crossGridCanvas = c => {
     c.globalAlpha = 0;
 };
 
-const withGridLines = (seriesMulti, annotationGridline, mainGrid, crossGrid) => series => {
+export default series => {
     let orient = "both";
-
-    const multi = seriesMulti();
+    let mode = "svg";
+    let xScale = null;
+    let yScale = null;
+    let context = null;
 
     const _withGridLines = function(...args) {
+        let seriesMulti;
+        let annotationGridline;
+        let mainGrid;
+        let crossGrid;
+        switch (mode) {
+            case "svg": {
+                seriesMulti = fc.seriesSvgMulti();
+                annotationGridline = fc.annotationSvgGridline();
+                mainGrid = mainGridSvg;
+                crossGrid = crossGridSvg;
+                break;
+            }
+            case "canvas": {
+                seriesMulti = fc.seriesCanvasMulti().context(context);
+                annotationGridline = annotationCanvasGridline();
+                mainGrid = mainGridCanvas;
+                crossGrid = crossGridCanvas;
+                break;
+            }
+            default: {
+                throw new Error(`Unknown mode: ${mode}`);
+            }
+        }
+
+        const multi = seriesMulti.xScale(xScale).yScale(yScale);
+
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
         const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
-        const gridlines = annotationGridline()
-            .xDecorate(xStyle)
-            .yDecorate(yStyle);
+        const gridlines = annotationGridline.xDecorate(xStyle).yDecorate(yStyle);
 
         return multi.series([gridlines, series])(...args);
     };
-
-    fc.rebindAll(_withGridLines, multi);
 
     _withGridLines.orient = (...args) => {
         if (!args.length) {
@@ -46,9 +70,37 @@ const withGridLines = (seriesMulti, annotationGridline, mainGrid, crossGrid) => 
         return _withGridLines;
     };
 
+    _withGridLines.mode = (...args) => {
+        if (!args.length) {
+            return mode;
+        }
+        mode = args[0];
+        return _withGridLines;
+    };
+
+    _withGridLines.xScale = (...args) => {
+        if (!args.length) {
+            return xScale;
+        }
+        xScale = args[0];
+        return _withGridLines;
+    };
+
+    _withGridLines.yScale = (...args) => {
+        if (!args.length) {
+            return yScale;
+        }
+        yScale = args[0];
+        return _withGridLines;
+    };
+
+    _withGridLines.context = (...args) => {
+        if (!args.length) {
+            return context;
+        }
+        context = args[0];
+        return _withGridLines;
+    };
+
     return _withGridLines;
 };
-
-export const withSvgGridLines = withGridLines(fc.seriesSvgMulti, fc.annotationSvgGridline, mainGridSvg, crossGridSvg);
-
-export const withCanvasGridLines = withGridLines(fc.seriesCanvasMulti, annotationCanvasGridline, mainGridCanvas, crossGridCanvas);

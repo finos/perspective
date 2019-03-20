@@ -14,7 +14,7 @@ import {seriesColors} from "../series/seriesColors";
 import {groupAndStackData} from "../data/groupData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withSvgGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -60,7 +60,7 @@ function columnChart(container, settings) {
         .yLabel(mainAxis.label(settings))
         .yOrient("left")
         .yNice()
-        .plotArea(withSvgGridLines(series).orient("vertical"));
+        .plotArea(withGridLines(series).orient("vertical"));
 
     chart.xPaddingInner && chart.xPaddingInner(0.5);
     chart.xPaddingOuter && chart.xPaddingOuter(0.25);
