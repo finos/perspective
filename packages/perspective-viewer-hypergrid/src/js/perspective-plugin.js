@@ -136,6 +136,57 @@ function addSortChars(charMap) {
     });
 }
 
+function sortColumn(event) {
+    event.preventDefault();
+    event.handled = true;
+    const config = this.behavior.dataModel.getConfig();
+    const column = this.behavior.getColumn(event.detail.column);
+    let column_sorting, column_name;
+
+    if (config.column_pivot.length > 0) {
+        column_sorting = true;
+        column_name = column.header.split("|")[config.column_pivot.length]; // index of last column is always the length of the column pivots
+    } else {
+        column_sorting = false;
+        column_name = column.header;
+    }
+
+    const viewer = this.behavior.dataModel._viewer;
+
+    const item_index = config.sort.findIndex(item => item[0] === column_name.trim());
+    const already_sorted = item_index > -1;
+
+    // shift key to enable abs sorting
+    // alt key to not remove already sorted columns
+    const abs_sorting = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("ALT") > -1) && column.type !== "string";
+    const shift_pressed = event.detail.keys && (event.detail.keys.indexOf("ALTSHIFT") > -1 || event.detail.keys.indexOf("SHIFT") > -1);
+    let new_sort_direction;
+
+    // if the column is already sorted we increment the sort
+    if (already_sorted) {
+        const item = config.sort[item_index];
+        const direction = item[1];
+        new_sort_direction = viewer._increment_sort(direction, column_sorting, abs_sorting);
+        item[1] = new_sort_direction;
+    } else {
+        new_sort_direction = viewer._increment_sort("none", column_sorting, abs_sorting);
+    }
+
+    //if alt pressed and column is already sorted, we change the sort for the column and leave the rest as is
+    if (shift_pressed && already_sorted) {
+        if (new_sort_direction === "none") {
+            config.sort.splice(item_index, 1);
+        }
+        viewer.sort = JSON.stringify(config.sort);
+    } else if (shift_pressed) {
+        // if alt key is pressed and column is NOT already selected, append the new sort column
+        config.sort.push([column_name, new_sort_direction]);
+        viewer.sort = JSON.stringify(config.sort);
+    } else {
+        viewer.sort = JSON.stringify([[column_name, new_sort_direction]]);
+    }
+}
+
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {
     addSortChars(grid.behavior.charMap);
@@ -144,6 +195,7 @@ exports.install = function(grid) {
 
     Object.getPrototypeOf(grid.behavior).formatColumnHeader = formatColumnHeader;
 
+    grid.addEventListener("fin-column-sort", sortColumn.bind(grid));
     Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
         event.handled = true;

@@ -77,6 +77,7 @@ const base_grid_properties = {
     showTreeColumn: false,
     singleRowSelectionMode: false,
     sortColumns: [],
+    sortOnDoubleClick: true,
     treeRenderer: "TreeCell",
     treeHeaderFont: "12px Arial, Helvetica, sans-serif",
     treeHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
@@ -370,6 +371,7 @@ async function grid_create(div, view, task) {
     dataModel.setDirty(nrows);
     dataModel._view = view;
     dataModel._config = config;
+    dataModel._viewer = this;
 
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
@@ -383,7 +385,6 @@ async function grid_create(div, view, task) {
     };
 
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
-    this.hypergrid.canvas.paintNow();
     let running = true;
     while (nrows > 0 && running) {
         running = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
