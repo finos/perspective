@@ -103,7 +103,8 @@ function ohlcCandle(seriesCanvas) {
             .xScale(xScale)
             .yScale(yScale)
             .yValueName("closeValue")
-            .data(data);
+            .data(data)
+            .canvas(true);
 
         // render
         container.datum(data).call(zoomChart);
