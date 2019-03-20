@@ -30,7 +30,9 @@
         & d3fc-canvas.plot-area {
             display: none;
         }
-        &.d3_xy_scatter {
+        &.d3_xy_scatter,
+        &.d3_ohlc,
+        &.d3_candlestick {
             & d3fc-canvas.plot-area {
                 display: block;
             }
@@ -123,7 +125,7 @@
 
         & .label {
             &:hover {
-                fill: rgb(34,160,206);
+                fill: rgb(34, 160, 206);
             }
         }
 

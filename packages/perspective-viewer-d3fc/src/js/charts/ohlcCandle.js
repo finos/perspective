@@ -21,7 +21,7 @@ import {colorLegend} from "../legend/legend";
 
 const isUp = d => d.closeValue >= d.openValue;
 
-function ohlcCandle(seriesSvg) {
+function ohlcCandle(seriesCanvas) {
     return function(container, settings) {
         const data = ohlcData(settings, filterDataByGroup(settings));
 
@@ -37,19 +37,20 @@ function ohlcCandle(seriesSvg) {
             .settings(settings)
             .scale(keys.length > 1 ? upColor : null);
 
-        const series = seriesSvg()
+        const series = seriesCanvas()
             .crossValue(d => d.crossValue)
             .openValue(d => d.openValue)
             .highValue(d => d.highValue)
             .lowValue(d => d.lowValue)
             .closeValue(d => d.closeValue)
-            .decorate(selection => {
-                selection.style("fill", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
-                selection.style("stroke", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
+            .decorate((context, d) => {
+                const color = isUp(d) ? upColor(d.key) : downColor(d.key);
+                context.fillStyle = color;
+                context.strokeStyle = color;
             });
 
         const multi = fc
-            .seriesSvgMulti()
+            .seriesCanvasMulti()
             .mapping((data, index) => data[index])
             .series(data.map(() => series));
 
@@ -63,7 +64,7 @@ function ohlcCandle(seriesSvg) {
         const yScale = mainAxis.scale(settings);
 
         const chart = fc
-            .chartSvgCartesian({
+            .chartCanvasCartesian({
                 xScale,
                 yScale,
                 xAxis
@@ -81,7 +82,11 @@ function ohlcCandle(seriesSvg) {
             .yLabel(mainAxis.label(settings))
             .yOrient("left")
             .yNice()
-            .plotArea(withGridLines(multi).orient("vertical"));
+            .plotArea(
+                withGridLines(multi)
+                    .orient("vertical")
+                    .canvas(true)
+            );
 
         chart.xPaddingInner && chart.xPaddingInner(1);
         chart.xPaddingOuter && chart.xPaddingOuter(0.5);
@@ -90,14 +95,16 @@ function ohlcCandle(seriesSvg) {
             .chart(chart)
             .settings(settings)
             .xScale(xScale)
-            .yScale(yScale);
+            .yScale(yScale)
+            .canvas(true);
 
         const toolTip = nearbyTip()
             .settings(settings)
             .xScale(xScale)
             .yScale(yScale)
             .yValueName("closeValue")
-            .data(data);
+            .data(data)
+            .canvas(true);
 
         // render
         container.datum(data).call(zoomChart);
