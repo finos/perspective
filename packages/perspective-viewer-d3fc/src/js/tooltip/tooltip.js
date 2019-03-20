@@ -1,6 +1,6 @@
 import {select} from "d3";
 import {getChartElement} from "../plugin/root";
-import {getOrCreateElement} from "../utils/utils";
+import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import {generateHtml} from "./generateHTML";
 
@@ -87,12 +87,12 @@ function showTooltip(containerNode, barNode, tooltipDiv) {
 function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
     const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
 
-    if (containerRect.right < tooltipDivRect.right) {
+    if (isElementOverflowing(containerRect, tooltipDivRect)) {
         const leftAdjust = tooltipDivRect.right - containerRect.right;
         tooltipDiv.style("left", `${left - leftAdjust}px`);
     }
 
-    if (containerRect.bottom < tooltipDivRect.bottom) {
+    if (isElementOverflowing(containerRect, tooltipDivRect, "bottom")) {
         const topAdjust = tooltipDivRect.bottom - containerRect.bottom;
         tooltipDiv.style("top", `${top - topAdjust}px`);
     }
