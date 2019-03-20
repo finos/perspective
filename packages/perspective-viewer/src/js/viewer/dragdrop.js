@@ -59,7 +59,9 @@ export function drop(ev) {
     if (data_index !== -1) {
         columns.splice(data_index, 1);
     }
-    if (name.indexOf("filter") > -1) {
+
+    const filtering = name.indexOf("filter") > -1;
+    if (filtering) {
         this.setAttribute(name, JSON.stringify(columns.concat([data])));
     } else if (name.indexOf("sort") > -1) {
         this.setAttribute(name, JSON.stringify(columns.concat([[data[0]]])));
@@ -68,7 +70,7 @@ export function drop(ev) {
     }
 
     // Deselect the dropped column
-    if (this._plugin.deselectMode === "pivots" && this._get_visible_column_count() > 1 && name !== "sort" && name !== "filter") {
+    if (this._plugin.deselectMode === "pivots" && this._get_visible_column_count() > 1 && name !== "sort" && !filtering) {
         for (let x of this.shadowRoot.querySelectorAll("#active_columns perspective-row")) {
             if (x.getAttribute("name") === data[0]) {
                 this._active_columns.removeChild(x);
