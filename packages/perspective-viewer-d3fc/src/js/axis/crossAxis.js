@@ -46,7 +46,11 @@ export const domain = settings => {
     let valueName = "crossValue";
     let settingName = "crossValues";
 
-    const extentTime = fc.extentTime().accessors([d => new Date(d[valueName])]);
+    const extentTime = fc
+        .extentTime()
+        .accessors([d => new Date(d[valueName])])
+        .pad([0, 0.1])
+        .padUnit("percent");
 
     const _domain = function(data) {
         const flattenedData = flattenArray(data);
