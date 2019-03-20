@@ -12,7 +12,7 @@ import {heatmapSeries} from "../series/heatmapSeries";
 import {seriesColorRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 
