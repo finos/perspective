@@ -14,7 +14,7 @@ import {seriesColors} from "../series/seriesColors";
 import {splitAndBaseData} from "../data/splitAndBaseData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withSvgGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -55,7 +55,7 @@ function areaChart(container, settings) {
         .yOrient("left")
         .yLabel(mainAxis.label(settings))
         .yNice()
-        .plotArea(withGridLines(series).orient("vertical"));
+        .plotArea(withSvgGridLines(series).orient("vertical"));
 
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);

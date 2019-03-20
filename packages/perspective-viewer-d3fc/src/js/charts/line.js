@@ -14,7 +14,7 @@ import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withSvgGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -53,7 +53,7 @@ function lineChart(container, settings) {
         .yLabel(mainAxis.label(settings))
         .yOrient("left")
         .yNice()
-        .plotArea(withGridLines(series).orient("vertical"));
+        .plotArea(withSvgGridLines(series).orient("vertical"));
 
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);

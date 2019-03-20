@@ -14,7 +14,7 @@ import {seriesColors} from "../series/seriesColors";
 import {groupAndStackData} from "../data/groupData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withSvgGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -66,7 +66,7 @@ function barChart(container, settings) {
         .yDecorate(yAxis.decorate)
         .yOrient("left")
         .xNice()
-        .plotArea(withGridLines(series).orient("horizontal"));
+        .plotArea(withSvgGridLines(series).orient("horizontal"));
 
     chart.yPaddingInner && chart.yPaddingInner(0.5);
     chart.yPaddingOuter && chart.yPaddingOuter(0.25);

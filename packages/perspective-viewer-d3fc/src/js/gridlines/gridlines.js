@@ -9,35 +9,34 @@
 import * as fc from "d3fc";
 import annotationCanvasGridline from "../d3fc/annotation/canvas/gridline";
 
-const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
+const mainGridSvg = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
 const mainGridCanvas = c => {
     c.globalAlpha = 0.3;
     c.lineWidth = 1.0;
 };
 
-const crossGrid = x => x.style("display", "none");
+const crossGridSvg = x => x.style("display", "none");
 const crossGridCanvas = c => {
     c.globalAlpha = 0;
 };
 
-export const withGridLines = series => {
+const withGridLines = (seriesMulti, annotationGridline, mainGrid, crossGrid) => series => {
     let orient = "both";
 
-    const svgMulti = fc.seriesSvgMulti();
+    const multi = seriesMulti();
 
     const _withGridLines = function(...args) {
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
         const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
-        const gridlines = fc
-            .annotationSvgGridline()
+        const gridlines = annotationGridline()
             .xDecorate(xStyle)
             .yDecorate(yStyle);
 
-        return svgMulti.series([gridlines, series])(...args);
+        return multi.series([gridlines, series])(...args);
     };
 
-    fc.rebindAll(_withGridLines, svgMulti);
+    fc.rebindAll(_withGridLines, multi);
 
     _withGridLines.orient = (...args) => {
         if (!args.length) {
@@ -50,31 +49,6 @@ export const withGridLines = series => {
     return _withGridLines;
 };
 
-export const withCanvasGridLines = series => {
-    let orient = "both";
+export const withSvgGridLines = withGridLines(fc.seriesSvgMulti, fc.annotationSvgGridline, mainGridSvg, crossGridSvg);
 
-    const canvasMulti = fc.seriesCanvasMulti();
-
-    const _withGridLines = function(...args) {
-        const xStyle = orient === "vertical" ? crossGridCanvas : mainGridCanvas;
-        const yStyle = orient === "horizontal" ? crossGridCanvas : mainGridCanvas;
-
-        const gridlines = annotationCanvasGridline()
-            .xDecorate(xStyle)
-            .yDecorate(yStyle);
-
-        return canvasMulti.series([gridlines, series])(...args);
-    };
-
-    fc.rebindAll(_withGridLines, canvasMulti);
-
-    _withGridLines.orient = (...args) => {
-        if (!args.length) {
-            return orient;
-        }
-        orient = args[0];
-        return _withGridLines;
-    };
-
-    return _withGridLines;
-};
+export const withCanvasGridLines = withGridLines(fc.seriesCanvasMulti, annotationCanvasGridline, mainGridCanvas, crossGridCanvas);

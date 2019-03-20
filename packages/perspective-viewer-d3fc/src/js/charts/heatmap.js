@@ -12,7 +12,7 @@ import {heatmapSeries} from "../series/heatmapSeries";
 import {seriesColorRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withSvgGridLines} from "../gridlines/gridlines";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -56,7 +56,7 @@ function heatmapChart(container, settings) {
         .yAxisWidth(yAxis.size)
         .yDecorate(yAxis.decorate)
         .yOrient("left")
-        .plotArea(withGridLines(series));
+        .plotArea(withSvgGridLines(series));
 
     chart.xPaddingInner && chart.xPaddingInner(0);
     chart.xPaddingOuter && chart.xPaddingOuter(0);

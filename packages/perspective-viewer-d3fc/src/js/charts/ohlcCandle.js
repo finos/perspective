@@ -11,7 +11,7 @@ import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {ohlcData} from "../data/ohlcData";
 import {filterDataByGroup} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import {withSvgGridLines} from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -81,7 +81,7 @@ function ohlcCandle(seriesSvg) {
             .yLabel(mainAxis.label(settings))
             .yOrient("left")
             .yNice()
-            .plotArea(withGridLines(multi).orient("vertical"));
+            .plotArea(withSvgGridLines(multi).orient("vertical"));
 
         chart.xPaddingInner && chart.xPaddingInner(1);
         chart.xPaddingOuter && chart.xPaddingOuter(0.5);
