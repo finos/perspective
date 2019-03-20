@@ -22,7 +22,7 @@ export default () => {
             context.strokeStyle = "#bbb";
             context.fillStyle = "transparent";
 
-            yDecorate(context);
+            xDecorate(context);
             lineData.context(context)(yScale.domain().map(d => [xScale(xTick), yScale(d)]));
 
             context.fill();
@@ -37,7 +37,7 @@ export default () => {
             context.strokeStyle = "#bbb";
             context.fillStyle = "transparent";
 
-            xDecorate(context);
+            yDecorate(context);
             lineData.context(context)(xScale.domain().map(d => [xScale(d), yScale(yTick)]));
 
             context.fill();
