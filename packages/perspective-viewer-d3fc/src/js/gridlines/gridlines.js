@@ -22,34 +22,22 @@ const crossGridCanvas = c => {
 
 export default series => {
     let orient = "both";
-    let mode = "svg";
+    let canvas = false;
     let xScale = null;
     let yScale = null;
     let context = null;
 
+    let seriesMulti = fc.seriesSvgMulti();
+    let annotationGridline = fc.annotationSvgGridline();
+    let mainGrid = mainGridSvg;
+    let crossGrid = crossGridSvg;
+
     const _withGridLines = function(...args) {
-        let seriesMulti;
-        let annotationGridline;
-        let mainGrid;
-        let crossGrid;
-        switch (mode) {
-            case "svg": {
-                seriesMulti = fc.seriesSvgMulti();
-                annotationGridline = fc.annotationSvgGridline();
-                mainGrid = mainGridSvg;
-                crossGrid = crossGridSvg;
-                break;
-            }
-            case "canvas": {
-                seriesMulti = fc.seriesCanvasMulti().context(context);
-                annotationGridline = annotationCanvasGridline();
-                mainGrid = mainGridCanvas;
-                crossGrid = crossGridCanvas;
-                break;
-            }
-            default: {
-                throw new Error(`Unknown mode: ${mode}`);
-            }
+        if (canvas) {
+            seriesMulti = fc.seriesCanvasMulti().context(context);
+            annotationGridline = annotationCanvasGridline();
+            mainGrid = mainGridCanvas;
+            crossGrid = crossGridCanvas;
         }
 
         const multi = seriesMulti.xScale(xScale).yScale(yScale);
@@ -70,11 +58,11 @@ export default series => {
         return _withGridLines;
     };
 
-    _withGridLines.mode = (...args) => {
+    _withGridLines.canvas = (...args) => {
         if (!args.length) {
-            return mode;
+            return canvas;
         }
-        mode = args[0];
+        canvas = args[0];
         return _withGridLines;
     };
 

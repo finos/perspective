@@ -60,7 +60,7 @@ function xyScatter(container, settings) {
         .yOrient("left")
         .yNice()
         .xNice()
-        .plotArea(withGridLines(series).mode("canvas"));
+        .plotArea(withGridLines(series).canvas(true));
 
     const zoomChart = zoomableChart()
         .chart(chart)
