@@ -8,7 +8,7 @@
  */
 
 const rectangular = require("rectangular");
-var superscript = require("superscript-number");
+const superscript = require("superscript-number");
 
 /**
  * @this {Behavior}
@@ -116,7 +116,7 @@ function formatColumnHeader(value) {
         const direction = config.sort[index][1];
 
         if (direction in this.charMap) {
-            value = `${value} ${this.charMap[direction]}${superscript(index + 1)}`;
+            value = `${value} ${this.charMap[direction]}${config.sort.length > 1 ? superscript(index + 1) : ""}`;
         }
     }
 
