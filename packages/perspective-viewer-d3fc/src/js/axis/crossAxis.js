@@ -56,7 +56,8 @@ export const domain = settings => {
         switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
                 const dataStart = flattenedData[0][valueName];
-                const dataWidth = flattenedData.find(d => d[valueName] !== dataStart)[valueName] - dataStart;
+                const dataNext = flattenedData.find(d => d[valueName] !== dataStart);
+                const dataWidth = dataNext ? dataNext[valueName] - dataStart : 0;
                 return extentTime.pad([dataWidth / 2, dataWidth / 2])(flattenedData);
             default:
                 return [...new Set(flattenedData.map(d => d[valueName]))];
