@@ -27,16 +27,11 @@ function barChart(container, settings) {
         .settings(settings)
         .scale(color);
 
+    const bars = barSeries(settings, color).orient("horizontal");
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, color)
-                    .align("left")
-                    .orient("horizontal")
-            )
-        );
+        .series(data.map(() => bars));
 
     const yDomain = crossAxis
         .domain(settings)(data)
@@ -68,8 +63,11 @@ function barChart(container, settings) {
         .xNice()
         .plotArea(withGridLines(series).orient("horizontal"));
 
-    chart.yPaddingInner && chart.yPaddingInner(0.5);
-    chart.yPaddingOuter && chart.yPaddingOuter(0.25);
+    if (chart.yPaddingInner) {
+        chart.yPaddingInner(0.5);
+        chart.yPaddingOuter(0.25);
+        bars.align("left");
+    }
 
     const zoomChart = zoomableChart()
         .chart(chart)

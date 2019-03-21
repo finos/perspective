@@ -26,16 +26,11 @@ function columnChart(container, settings) {
         .settings(settings)
         .scale(color);
 
+    const bars = barSeries(settings, color).orient("vertical");
     const series = fc
         .seriesSvgMulti()
         .mapping((data, index) => data[index])
-        .series(
-            data.map(() =>
-                barSeries(settings, color)
-                    .align("left")
-                    .orient("vertical")
-            )
-        );
+        .series(data.map(() => bars));
 
     const xDomain = crossAxis.domain(settings)(data);
     const xScale = crossAxis.scale(settings);
@@ -62,8 +57,11 @@ function columnChart(container, settings) {
         .yNice()
         .plotArea(withGridLines(series).orient("vertical"));
 
-    chart.xPaddingInner && chart.xPaddingInner(0.5);
-    chart.xPaddingOuter && chart.xPaddingOuter(0.25);
+    if (chart.xPaddingInner) {
+        chart.xPaddingInner(0.5);
+        chart.xPaddingOuter(0.25);
+        bars.align("left");
+    }
 
     const zoomChart = zoomableChart()
         .chart(chart)
