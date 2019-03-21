@@ -49,14 +49,15 @@ export const domain = settings => {
     const extentTime = fc
         .extentTime()
         .accessors([d => new Date(d[valueName])])
-        .pad([0, 0.1])
-        .padUnit("percent");
+        .padUnit("domain");
 
     const _domain = function(data) {
         const flattenedData = flattenArray(data);
         switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
-                return extentTime(flattenedData);
+                const dataStart = flattenedData[0][valueName];
+                const dataWidth = flattenedData.find(d => d[valueName] !== dataStart)[valueName] - dataStart;
+                return extentTime.pad([0, dataWidth])(flattenedData);
             default:
                 return [...new Set(flattenedData.map(d => d[valueName]))];
         }
