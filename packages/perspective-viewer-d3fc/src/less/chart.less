@@ -140,6 +140,17 @@
         }
     }
 
+    #dragHandles {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        left: auto;
+        pointer-events: none;
+        & rect {
+            pointer-events: all;
+        }
+    }
+
     .label rect {
         fill: none;
     }

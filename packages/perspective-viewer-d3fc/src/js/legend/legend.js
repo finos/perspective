@@ -14,6 +14,7 @@ import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import {draggableComponent} from "./styling/draggableComponent";
+import {resizableComponent} from "./styling/resizableComponent";
 
 const scrollColorLegend = settings =>
     scrollableLegend(
@@ -51,6 +52,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
     let scale = null;
     let color = null;
     let draggable = draggableComponent();
+    let resizable = resizableComponent();
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
@@ -103,6 +105,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .call(scrollLegend);
 
             draggable(legendSelection);
+            resizable(legendSelection);
         }
     }
 
