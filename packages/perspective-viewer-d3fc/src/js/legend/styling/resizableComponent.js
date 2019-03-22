@@ -8,18 +8,24 @@
  */
 
 import * as d3 from "d3";
-import {isElementOverflowing} from "../../utils/utils";
-import {getChartElement} from "../../plugin/root";
 
 const horizontalDragHandleClass = "horizontal-drag-handle";
 const verticalDragHandleClass = "vertical-drag-handle";
 
 export function resizableComponent() {
     const resizable = element => {
-        const dragLeft = dragLeftFunc(element);
-        const dragTop = dragTopFunc(element);
-        const dragRight = dragRightFunc(element);
-        const dragBottom = dragBottomFunc(element);
+        const dragLeft = d3.drag().on("drag", function() {
+            dragLeftFunc(this, d3.event, element);
+        });
+        const dragTop = d3.drag().on("drag", function() {
+            dragTopFunc(this, d3.event, element);
+        });
+        const dragRight = d3.drag().on("drag", function() {
+            dragRightFunc(this, d3.event, element);
+        });
+        const dragBottom = d3.drag().on("drag", function() {
+            dragBottomFunc(this, d3.event, element);
+        });
 
         const node = element.node();
         const nodeRect = node.getBoundingClientRect();
@@ -93,82 +99,66 @@ export function resizableComponent() {
     return resizable;
 }
 
-function dragLeftFunc(element) {
-    const drag = d3.drag().on("drag", function() {
-        const node = element.node();
-        const handles = element.select("#dragHandles");
-        const offsetLeft = d3.event.x;
+function dragLeftFunc(handle, event, element) {
+    const node = element.node();
+    const handles = element.select("#dragHandles");
+    const offsetLeft = event.x;
 
-        // adjust values for resizable element.
-        node.style.left = `${node.offsetLeft + offsetLeft}px`;
-        node.style.width = `${node.offsetWidth - offsetLeft}px`;
+    // adjust values for resizable element.
+    node.style.left = `${node.offsetLeft + offsetLeft}px`;
+    node.style.width = `${node.offsetWidth - offsetLeft}px`;
 
-        // adjust handles container
-        handles.attr("width", handles.node().getBoundingClientRect().width - offsetLeft);
+    // adjust handles container
+    handles.attr("width", handles.node().getBoundingClientRect().width - offsetLeft);
 
-        pinParallelHandleToEdge(handles, this.id, offsetLeft, "x", horizontalDragHandleClass);
-        extendPerpendicularHandles(handles, offsetLeft, "width", verticalDragHandleClass);
-    });
-
-    return drag;
+    pinParallelHandleToEdge(handles, handle.id, offsetLeft, "x", horizontalDragHandleClass);
+    extendPerpendicularHandles(handles, offsetLeft, "width", verticalDragHandleClass);
 }
 
-function dragTopFunc(element) {
-    const drag = d3.drag().on("drag", function() {
-        const node = element.node();
-        const handles = element.select("#dragHandles");
-        const offsetTop = d3.event.y;
+function dragTopFunc(handle, event, element) {
+    const node = element.node();
+    const handles = element.select("#dragHandles");
+    const offsetTop = event.y;
 
-        // adjust values for resizable element.
-        node.style.top = `${node.offsetTop + offsetTop}px`;
-        node.style.height = `${node.offsetHeight - offsetTop}px`;
+    // adjust values for resizable element.
+    node.style.top = `${node.offsetTop + offsetTop}px`;
+    node.style.height = `${node.offsetHeight - offsetTop}px`;
 
-        // adjust handles container
-        handles.attr("height", handles.node().getBoundingClientRect().height - offsetTop);
+    // adjust handles container
+    handles.attr("height", handles.node().getBoundingClientRect().height - offsetTop);
 
-        pinParallelHandleToEdge(handles, this.id, offsetTop, "y", verticalDragHandleClass);
-        extendPerpendicularHandles(handles, offsetTop, "height", horizontalDragHandleClass);
-    });
-
-    return drag;
+    pinParallelHandleToEdge(handles, handle.id, offsetTop, "y", verticalDragHandleClass);
+    extendPerpendicularHandles(handles, offsetTop, "height", horizontalDragHandleClass);
 }
 
-function dragRightFunc(element) {
-    const drag = d3.drag().on("drag", function() {
-        const node = element.node();
-        const handles = element.select("#dragHandles");
-        const offsetRight = -d3.event.dx;
+function dragRightFunc(handle, event, element) {
+    const node = element.node();
+    const handles = element.select("#dragHandles");
+    const offsetRight = -d3.event.dx;
 
-        // adjust values for resizable element.
-        node.style.width = `${node.offsetWidth - offsetRight}px`;
+    // adjust values for resizable element.
+    node.style.width = `${node.offsetWidth - offsetRight}px`;
 
-        // adjust handles container
-        handles.attr("width", handles.node().getBoundingClientRect().width - offsetRight);
+    // adjust handles container
+    handles.attr("width", handles.node().getBoundingClientRect().width - offsetRight);
 
-        pinThisHandleToEdge(handles, this.id, offsetRight, "x", horizontalDragHandleClass);
-        extendPerpendicularHandles(handles, offsetRight, "width", verticalDragHandleClass);
-    });
-
-    return drag;
+    pinThisHandleToEdge(handles, handle.id, offsetRight, "x", horizontalDragHandleClass);
+    extendPerpendicularHandles(handles, offsetRight, "width", verticalDragHandleClass);
 }
 
-function dragBottomFunc(element) {
-    const drag = d3.drag().on("drag", function() {
-        const node = element.node();
-        const handles = element.select("#dragHandles");
-        const offsetBottom = -d3.event.dy;
+function dragBottomFunc(handle, event, element) {
+    const node = element.node();
+    const handles = element.select("#dragHandles");
+    const offsetBottom = -event.dy;
 
-        // adjust values for resizable element.
-        node.style.height = `${node.offsetHeight - offsetBottom}px`;
+    // adjust values for resizable element.
+    node.style.height = `${node.offsetHeight - offsetBottom}px`;
 
-        // adjust handles container
-        handles.attr("height", handles.node().getBoundingClientRect().height - offsetBottom);
+    // adjust handles container
+    handles.attr("height", handles.node().getBoundingClientRect().height - offsetBottom);
 
-        pinThisHandleToEdge(handles, this.id, offsetBottom, "y", verticalDragHandleClass);
-        extendPerpendicularHandles(handles, offsetBottom, "height", horizontalDragHandleClass);
-    });
-
-    return drag;
+    pinThisHandleToEdge(handles, handle.id, offsetBottom, "y", verticalDragHandleClass);
+    extendPerpendicularHandles(handles, offsetBottom, "height", horizontalDragHandleClass);
 }
 
 // dimension as in width or height
