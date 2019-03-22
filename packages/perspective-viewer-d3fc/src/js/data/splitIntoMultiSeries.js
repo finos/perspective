@@ -53,6 +53,7 @@ function splitByValuesIntoMultiSeries(settings, data, {stack = false, excludeEmp
                 } else {
                     splitValues[label] = value;
                 }
+                splitValues.row = col;
             });
 
         // Push each object onto the correct series

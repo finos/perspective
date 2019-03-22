@@ -1,8 +1,18 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import {select} from "d3";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import {generateHtml} from "./generateHTML";
+import {selectionEvent} from "./selectionEvent";
 
 export const tooltip = () => {
     let alwaysShow = false;
@@ -34,6 +44,7 @@ export const tooltip = () => {
             selection.each(showTip);
         } else {
             selection.on("mouseover", showTip).on("mouseout", hideTip);
+            selectionEvent().settings(settings)(selection);
         }
     };
 

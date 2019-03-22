@@ -37,6 +37,7 @@ function drawChart(chart) {
         const col_pivots = this._get_view_column_pivots();
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
+        const filter = this._view._config.filter;
 
         const [tschema, json] = await Promise.all([this._table.schema(), view.to_json()]);
         if (task.cancelled) {
@@ -50,6 +51,7 @@ function drawChart(chart) {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: aggregates.map(a => ({name: a.column, type: tschema[a.column]})),
             splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
+            filter,
             data: filtered.map(dataMap)
         };
 
