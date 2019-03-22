@@ -321,7 +321,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("pivots multiple null values in updates", async function() {
+        it.skip("pivots multiple null values in updates", async function() {
             const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
             const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
 
