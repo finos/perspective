@@ -14,6 +14,10 @@ const horizontalDragHandleClass = "horizontal-drag-handle";
 const verticalDragHandleClass = "vertical-drag-handle";
 const cornerDragHandleClass = "corner-drag-handle";
 
+const dragbarWidth = 7;
+const minLegendHeight = 100;
+const minLegendWidth = 100;
+
 export function resizableComponent() {
     const resizable = element => {
         const dragLeft = d3.drag().on("drag", function() {
@@ -29,14 +33,13 @@ export function resizableComponent() {
             dragBottomFunc(this, d3.event, element);
         });
 
-        const dragLeftTop = d3.drag().on("drag", function() {
+        const dragTopLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
             dragTopFunc(this, d3.event, element);
         });
 
         const node = element.node();
         const nodeRect = node.getBoundingClientRect();
-        const dragbarWidth = 7;
 
         if (dragHandlesContainerExists(element)) {
             return;
@@ -108,7 +111,7 @@ export function resizableComponent() {
 
         dragHandlesGroup
             .append("rect")
-            .attr("id", "draglefttop")
+            .attr("id", "dragtopleft")
             .attr("class", cornerDragHandleClass)
             .attr("y", () => 0)
             .attr("x", () => 0)
@@ -118,7 +121,7 @@ export function resizableComponent() {
             .attr("fill-opacity", 0.5)
             .style("z-index", 3)
             .attr("cursor", "nwse-resize")
-            .call(dragLeftTop);
+            .call(dragTopLeft);
     };
 
     return resizable;
@@ -132,7 +135,7 @@ function dragHandlesContainerExists(container) {
 function dragLeftFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetLeft = enforceContainerBoundaryOnX(handle, event.x);
+    const offsetLeft = enforceBoundariesOnX(handle, event.x, handles);
 
     // adjust values for resizable element.
     node.style.left = `${node.offsetLeft + offsetLeft}px`;
@@ -141,14 +144,30 @@ function dragLeftFunc(handle, event, element) {
     // adjust handles container
     handles.attr("width", handles.node().getBoundingClientRect().width - offsetLeft);
 
-    pinParallelHandleToEdge(handles, handle.id, offsetLeft, "x", horizontalDragHandleClass);
+    const parallelHandle = getParallelHandle(handles, handle.id, horizontalDragHandleClass);
+    pinHandleToEdge(parallelHandle, "x", offsetLeft);
     extendPerpendicularHandles(handles, offsetLeft, "width", verticalDragHandleClass);
+}
+
+function dragRightFunc(handle, event, element) {
+    const node = element.node();
+    const handles = element.select("#dragHandles");
+    const offsetRight = -enforceBoundariesOnX(handle, event.dx, handles, false);
+
+    // adjust values for resizable element.
+    node.style.width = `${node.offsetWidth - offsetRight}px`;
+
+    // adjust handles container
+    handles.attr("width", handles.node().getBoundingClientRect().width - offsetRight);
+
+    pinHandleToEdge(handle, "x", offsetRight);
+    extendPerpendicularHandles(handles, offsetRight, "width", verticalDragHandleClass);
 }
 
 function dragTopFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetTop = enforceContainerBoundaryOnY(handle, event.y);
+    const offsetTop = enforceBoundariesOnY(handle, event.y, handles);
 
     // adjust values for resizable element.
     node.style.top = `${node.offsetTop + offsetTop}px`;
@@ -157,29 +176,15 @@ function dragTopFunc(handle, event, element) {
     // adjust handles container
     handles.attr("height", handles.node().getBoundingClientRect().height - offsetTop);
 
-    pinParallelHandleToEdge(handles, handle.id, offsetTop, "y", verticalDragHandleClass);
+    const parallelHandle = getParallelHandle(handles, handle.id, verticalDragHandleClass);
+    pinHandleToEdge(parallelHandle, "y", offsetTop);
     extendPerpendicularHandles(handles, offsetTop, "height", horizontalDragHandleClass);
-}
-
-function dragRightFunc(handle, event, element) {
-    const node = element.node();
-    const handles = element.select("#dragHandles");
-    const offsetRight = -enforceContainerBoundaryOnX(handle, event.dx);
-
-    // adjust values for resizable element.
-    node.style.width = `${node.offsetWidth - offsetRight}px`;
-
-    // adjust handles container
-    handles.attr("width", handles.node().getBoundingClientRect().width - offsetRight);
-
-    pinThisHandleToEdge(handles, handle.id, offsetRight, "x", horizontalDragHandleClass);
-    extendPerpendicularHandles(handles, offsetRight, "width", verticalDragHandleClass);
 }
 
 function dragBottomFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetBottom = -enforceContainerBoundaryOnY(handle, event.dy);
+    const offsetBottom = -enforceBoundariesOnY(handle, event.dy, handles, false);
 
     // adjust values for resizable element.
     node.style.height = `${node.offsetHeight - offsetBottom}px`;
@@ -187,8 +192,21 @@ function dragBottomFunc(handle, event, element) {
     // adjust handles container
     handles.attr("height", handles.node().getBoundingClientRect().height - offsetBottom);
 
-    pinThisHandleToEdge(handles, handle.id, offsetBottom, "y", verticalDragHandleClass);
+    pinHandleToEdge(handle, "y", offsetBottom);
     extendPerpendicularHandles(handles, offsetBottom, "height", horizontalDragHandleClass);
+}
+
+function getParallelHandle(handles, thisNodeId, orientationClass) {
+    const parallelHandles = handles.selectAll(`.${orientationClass}`);
+    let parallelHandle;
+    parallelHandles.each((_, i, nodes) => {
+        const handleNode = nodes[i];
+        if (handleNode.id === thisNodeId) {
+            return;
+        }
+        parallelHandle = handleNode;
+    });
+    return parallelHandle;
 }
 
 // dimension as in width or height
@@ -201,39 +219,59 @@ function extendPerpendicularHandles(handles, offset, dimension, orientationClass
     });
 }
 
-function pinThisHandleToEdge(handles, thisNodeId, offset, axis, orientationClass) {
-    const parallelHandles = handles.selectAll(`.${orientationClass}`);
-    parallelHandles.each((_, i, nodes) => {
-        const handleNode = nodes[i];
-        if (handleNode.id !== thisNodeId) {
-            return;
-        }
-        updateHandleLocationOnAxis(handleNode, axis, offset);
-    });
-}
-
-function pinParallelHandleToEdge(handles, thisNodeId, offset, axis, orientationClass) {
-    const parallelHandles = handles.selectAll(`.${orientationClass}`);
-    parallelHandles.each((_, i, nodes) => {
-        const handleNode = nodes[i];
-        if (handleNode.id === thisNodeId) {
-            return;
-        }
-        updateHandleLocationOnAxis(handleNode, axis, offset);
-    });
-}
-
-function updateHandleLocationOnAxis(handleNode, axis, offset) {
-    const handleElement = d3.select(handleNode);
+function pinHandleToEdge(handle, axis, offset) {
+    const handleElement = d3.select(handle);
     handleElement.attr(axis, Number(handleElement.attr(axis)) - offset);
 }
 
-function enforceContainerBoundaryOnX(innerNode, offsetX) {
-    const [adjustedOffsetX, _] = enforceContainerBoundaries(innerNode, offsetX, 0);
-    return adjustedOffsetX;
+function enforceBoundariesOnX(handle, offsetX, handles, left = true) {
+    const [adjustedOffsetX, _] = enforceContainerBoundaries(handle, offsetX, 0);
+    const offset = left ? enforceInternalHorizontalBoundariesLeft(adjustedOffsetX, handles) : enforceInternalHorizontalBoundariesRight(adjustedOffsetX, handles);
+    return offset;
 }
 
-function enforceContainerBoundaryOnY(innerNode, offsetY) {
-    const [_, adjustedOffsetY] = enforceContainerBoundaries(innerNode, 0, offsetY);
-    return adjustedOffsetY;
+function enforceBoundariesOnY(handle, offsetY, handles, top = true) {
+    const [_, adjustedOffsetY] = enforceContainerBoundaries(handle, 0, offsetY);
+    const offset = top ? enforceInternalVerticalBoundariesTop(adjustedOffsetY, handles) : enforceInternalVerticalBoundariesBottom(adjustedOffsetY, handles);
+    return offset;
+}
+
+function enforceInternalVerticalBoundariesTop(offset, dragHandleContainer) {
+    const anticipatedHeight = Number(dragHandleContainer.attr("height")) - offset;
+    if (anticipatedHeight < minLegendHeight) {
+        const difference = minLegendHeight - anticipatedHeight;
+        const reducedOffset = offset - difference;
+        return reducedOffset;
+    }
+    return offset;
+}
+
+function enforceInternalVerticalBoundariesBottom(offset, dragHandleContainer) {
+    const anticipatedHeight = Number(dragHandleContainer.attr("height")) + offset;
+    if (anticipatedHeight < minLegendHeight) {
+        const difference = minLegendHeight - anticipatedHeight;
+        const reducedOffset = offset + difference;
+        return reducedOffset;
+    }
+    return offset;
+}
+
+function enforceInternalHorizontalBoundariesLeft(offset, dragHandleContainer) {
+    const anticipatedWidth = Number(dragHandleContainer.attr("width")) - offset;
+    if (anticipatedWidth < minLegendWidth) {
+        const difference = minLegendWidth - anticipatedWidth;
+        const reducedOffset = offset - difference;
+        return reducedOffset;
+    }
+    return offset;
+}
+
+function enforceInternalHorizontalBoundariesRight(offset, dragHandleContainer) {
+    const anticipatedWidth = Number(dragHandleContainer.attr("width")) + offset;
+    if (anticipatedWidth < minLegendWidth) {
+        const difference = minLegendWidth - anticipatedWidth;
+        const reducedOffset = offset + difference;
+        return reducedOffset;
+    }
+    return offset;
 }
