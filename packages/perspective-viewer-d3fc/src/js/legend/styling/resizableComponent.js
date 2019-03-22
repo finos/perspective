@@ -8,6 +8,7 @@
  */
 
 import * as d3 from "d3";
+import {enforceContainerBoundaries} from "./enforceContainerBoundaries";
 
 const horizontalDragHandleClass = "horizontal-drag-handle";
 const verticalDragHandleClass = "vertical-drag-handle";
@@ -131,7 +132,7 @@ function dragHandlesContainerExists(container) {
 function dragLeftFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetLeft = event.x;
+    const offsetLeft = enforceContainerBoundaryOnX(handle, event.x);
 
     // adjust values for resizable element.
     node.style.left = `${node.offsetLeft + offsetLeft}px`;
@@ -147,7 +148,7 @@ function dragLeftFunc(handle, event, element) {
 function dragTopFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetTop = event.y;
+    const offsetTop = enforceContainerBoundaryOnY(handle, event.y);
 
     // adjust values for resizable element.
     node.style.top = `${node.offsetTop + offsetTop}px`;
@@ -163,7 +164,7 @@ function dragTopFunc(handle, event, element) {
 function dragRightFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetRight = -d3.event.dx;
+    const offsetRight = -enforceContainerBoundaryOnX(handle, event.dx);
 
     // adjust values for resizable element.
     node.style.width = `${node.offsetWidth - offsetRight}px`;
@@ -178,7 +179,7 @@ function dragRightFunc(handle, event, element) {
 function dragBottomFunc(handle, event, element) {
     const node = element.node();
     const handles = element.select("#dragHandles");
-    const offsetBottom = -event.dy;
+    const offsetBottom = -enforceContainerBoundaryOnY(handle, event.dy);
 
     // adjust values for resizable element.
     node.style.height = `${node.offsetHeight - offsetBottom}px`;
@@ -225,4 +226,14 @@ function pinParallelHandleToEdge(handles, thisNodeId, offset, axis, orientationC
 function updateHandleLocationOnAxis(handleNode, axis, offset) {
     const handleElement = d3.select(handleNode);
     handleElement.attr(axis, Number(handleElement.attr(axis)) - offset);
+}
+
+function enforceContainerBoundaryOnX(innerNode, offsetX) {
+    const [adjustedOffsetX, _] = enforceContainerBoundaries(innerNode, offsetX, 0);
+    return adjustedOffsetX;
+}
+
+function enforceContainerBoundaryOnY(innerNode, offsetY) {
+    const [_, adjustedOffsetY] = enforceContainerBoundaries(innerNode, 0, offsetY);
+    return adjustedOffsetY;
 }

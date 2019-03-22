@@ -8,10 +8,9 @@
  */
 
 import * as d3 from "d3";
-import {isElementOverflowing} from "../../utils/utils";
 import {getChartContainer} from "../../plugin/root";
+import {enforceContainerBoundaries, margin} from "./enforceContainerBoundaries";
 
-const margin = 10;
 const resizeForDraggingEvent = "resize.for-dragging";
 
 export function draggableComponent() {
@@ -70,32 +69,4 @@ function isNodeInTopRight(node) {
     const fuzz = 5;
 
     return nodeRect.right + margin + fuzz >= containerRect.right && nodeRect.top - margin - fuzz <= containerRect.top;
-}
-
-function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
-    const chartNodeRect = d3
-        .select(getChartContainer(innerNode))
-        .node()
-        .getBoundingClientRect();
-
-    const legendNodeRect = innerNode.getBoundingClientRect();
-
-    const draggedLegendNodeRect = {
-        top: legendNodeRect.top + offsetY - margin,
-        right: legendNodeRect.right + offsetX + margin,
-        bottom: legendNodeRect.bottom + offsetY + margin,
-        left: legendNodeRect.left + offsetX - margin
-    };
-
-    const adjustedOffsets = {x: offsetX, y: offsetY};
-    const boundaries = [{edge: "right", dimension: "x"}, {edge: "left", dimension: "x"}, {edge: "top", dimension: "y"}, {edge: "bottom", dimension: "y"}];
-
-    boundaries.forEach(bound => {
-        if (isElementOverflowing(chartNodeRect, draggedLegendNodeRect, bound.edge)) {
-            const adjustment = draggedLegendNodeRect[bound.edge] - chartNodeRect[bound.edge];
-            adjustedOffsets[bound.dimension] = adjustedOffsets[bound.dimension] - adjustment;
-        }
-    });
-
-    return [adjustedOffsets.x, adjustedOffsets.y];
 }
