@@ -27,7 +27,8 @@ function seriesToOHLC(settings, data) {
             closeValue: closeValue,
             highValue: settings.mainValues.length >= 3 ? col[settings.mainValues[2].name] : Math.max(openValue, closeValue),
             lowValue: settings.mainValues.length >= 4 ? col[settings.mainValues[3].name] : Math.min(openValue, closeValue),
-            key: data.key
+            key: data.key,
+            row: col
         };
     });
 

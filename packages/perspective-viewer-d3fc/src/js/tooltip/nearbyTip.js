@@ -11,6 +11,7 @@ import * as fc from "d3fc";
 import {tooltip} from "./tooltip";
 import {withOpacity} from "../series/seriesColors.js";
 import {findBestFromData} from "../data/findBest";
+import {raiseEvent} from "./selectionEvent";
 
 export default () => {
     const base = tooltip().alwaysShow(true);
@@ -27,8 +28,9 @@ export default () => {
     function nearbyTip(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
         if (xScale || yScale) {
+            let tooltipData = null;
             const pointer = fc.pointer().on("point", event => {
-                const tooltipData = event.length ? [getClosestDataPoint(event[0])] : [];
+                tooltipData = event.length ? [getClosestDataPoint(event[0])] : [];
 
                 renderTip(selection, tooltipData);
             });
@@ -36,6 +38,11 @@ export default () => {
             selection
                 .select(chartPlotArea)
                 .on("measure.nearbyTip", () => renderTip(selection, []))
+                .on("click", () => {
+                    if (tooltipData.length) {
+                        raiseEvent(selection.node(), tooltipData[0], base.settings());
+                    }
+                })
                 .call(pointer);
         }
     }
