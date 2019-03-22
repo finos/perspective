@@ -11,6 +11,7 @@ import * as d3 from "d3";
 
 const horizontalDragHandleClass = "horizontal-drag-handle";
 const verticalDragHandleClass = "vertical-drag-handle";
+const cornerDragHandleClass = "corner-drag-handle";
 
 export function resizableComponent() {
     const resizable = element => {
@@ -25,6 +26,11 @@ export function resizableComponent() {
         });
         const dragBottom = d3.drag().on("drag", function() {
             dragBottomFunc(this, d3.event, element);
+        });
+
+        const dragLeftTop = d3.drag().on("drag", function() {
+            dragLeftFunc(this, d3.event, element);
+            dragTopFunc(this, d3.event, element);
         });
 
         const node = element.node();
@@ -98,6 +104,20 @@ export function resizableComponent() {
             .style("z-index", 3)
             .attr("cursor", "ns-resize")
             .call(dragBottom);
+
+        dragHandlesGroup
+            .append("rect")
+            .attr("id", "draglefttop")
+            .attr("class", cornerDragHandleClass)
+            .attr("y", () => 0)
+            .attr("x", () => 0)
+            .attr("height", dragbarWidth)
+            .attr("width", dragbarWidth)
+            .attr("fill", "red")
+            .attr("fill-opacity", 0.5)
+            .style("z-index", 3)
+            .attr("cursor", "nwse-resize")
+            .call(dragLeftTop);
     };
 
     return resizable;
