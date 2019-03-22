@@ -242,6 +242,21 @@ module.exports = perspective => {
         });
     });
 
+    describe("Aggregates with negatives", function() {
+        it("sum abs", async function() {
+            var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: 1, y: 1}, {x: -1, y: 1}, {x: -2, y: 2}, {x: -3, y: 2}]);
+            var view = table.view({
+                row_pivot: ["y"],
+                aggregate: [{op: "sum abs", column: "x"}]
+            });
+            var answer = [{__ROW_PATH__: [], x: 12}, {__ROW_PATH__: [1], x: 7}, {__ROW_PATH__: [2], x: 5}];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Row pivot", function() {
         it("['x']", async function() {
             var table = perspective.table(data);
