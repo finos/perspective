@@ -66,7 +66,7 @@ function legendComponent(scrollLegend, scaleModifier) {
 
             scrollLegend.labels(options => {
                 const parts = options.domain[options.i].split("|");
-                return settings.mainValues.length <= 1 ? parts.slice(0, parts.length - 1).join("|") : options.domain[options.i];
+                return settings.mainValues.length <= 1 && parts.length > 1 ? parts.slice(0, parts.length - 1).join("|") : options.domain[options.i];
             });
 
             const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));

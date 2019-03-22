@@ -16,9 +16,10 @@ export function ohlcData(settings, data) {
 function seriesToOHLC(settings, data) {
     const labelfn = labelFunction(settings);
 
+    const getNextOpen = i => data[i < data.length - 1 ? i + 1 : i][settings.mainValues[0].name];
     const mappedSeries = data.map((col, i) => {
-        const openValue = settings.mainValues.length >= 2 ? col[settings.mainValues[0].name] : undefined;
-        const closeValue = settings.mainValues.length >= 2 ? col[settings.mainValues[1].name] : undefined;
+        const openValue = settings.mainValues.length >= 1 ? col[settings.mainValues[0].name] : undefined;
+        const closeValue = settings.mainValues.length >= 2 ? col[settings.mainValues[1].name] : getNextOpen(i);
         return {
             crossValue: labelfn(col, i),
             mainValues: settings.mainValues.map(v => col[v.name]),

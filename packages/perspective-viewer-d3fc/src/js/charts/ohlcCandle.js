@@ -16,38 +16,35 @@ import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import {seriesUpColors, seriesDownColors} from "../series/seriesColors";
+import {ohlcCandleSeries} from "../series/ohlcCandleSeries";
+import {colorScale, setOpacity} from "../series/seriesColors";
 import {colorLegend} from "../legend/legend";
-
-const isUp = d => d.closeValue >= d.openValue;
 
 function ohlcCandle(seriesCanvas) {
     return function(container, settings) {
-        const data = ohlcData(settings, filterDataByGroup(settings));
+        const srcData = ohlcData(settings, filterDataByGroup(settings));
 
-        const keys = data
+        const bollinger = fc.indicatorBollingerBands().value(d => d.openValue);
+        const data = srcData.map(seriesData => {
+            const bollingerData = bollinger(seriesData);
+            return seriesData.map((d, i) => Object.assign({bollinger: bollingerData[i]}, d));
+        });
+
+        const keys = srcData
             .map(k => k.key)
             .concat(settings.hideKeys ? settings.hideKeys : [])
             .sort();
 
-        const upColor = seriesUpColors(keys);
-        const downColor = seriesDownColors(keys);
+        const upColor = colorScale()
+            .domain(keys)
+            .defaultColors(["rgba(31, 119, 180)"])
+            .mapFunction(setOpacity(1))();
 
         const legend = colorLegend()
             .settings(settings)
             .scale(keys.length > 1 ? upColor : null);
 
-        const series = seriesCanvas()
-            .crossValue(d => d.crossValue)
-            .openValue(d => d.openValue)
-            .highValue(d => d.highValue)
-            .lowValue(d => d.lowValue)
-            .closeValue(d => d.closeValue)
-            .decorate((context, d) => {
-                const color = isUp(d) ? upColor(d.key) : downColor(d.key);
-                context.fillStyle = color;
-                context.strokeStyle = color;
-            });
+        const series = ohlcCandleSeries(settings, seriesCanvas, upColor);
 
         const multi = fc
             .seriesCanvasMulti()
