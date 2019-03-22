@@ -31,6 +31,10 @@ export function resizableComponent() {
         const nodeRect = node.getBoundingClientRect();
         const dragbarWidth = 7;
 
+        if (dragHandlesContainerExists(element)) {
+            return;
+        }
+
         const dragHandlesSvg = element
             .append("svg")
             .attr("id", "dragHandles")
@@ -97,6 +101,11 @@ export function resizableComponent() {
     };
 
     return resizable;
+}
+
+function dragHandlesContainerExists(container) {
+    let dragHandlesContainer = container.select("svg#dragHandles");
+    return dragHandlesContainer.size() > 0;
 }
 
 function dragLeftFunc(handle, event, element) {
