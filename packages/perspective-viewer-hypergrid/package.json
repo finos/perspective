@@ -49,7 +49,8 @@
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
         "lodash": "^4.17.4",
-        "rectangular": "1.0.1"
+        "rectangular": "1.0.1",
+        "superscript-number": "^1.0.0"
     },
     "devDependencies": {
         "@jpmorganchase/perspective-webpack-plugin": "^0.2.20"

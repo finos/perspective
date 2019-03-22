@@ -347,7 +347,7 @@ namespace binding {
      */
     std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
         t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, bool column_only, t_pool* pool,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, t_pool* pool,
         std::shared_ptr<t_gnode> gnode, std::string name);
 
     /**
@@ -392,6 +392,36 @@ namespace binding {
     T get_data_two_skip_headers(std::shared_ptr<View<t_ctx2>> view, std::uint32_t depth,
         std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
         std::uint32_t end_col);
+
+    /**
+     * @brief Get the t_data_slice object, which contains an underlying slice of data and
+     * metadata required to interact with it.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     */
+    template <typename CTX_T>
+    std::shared_ptr<t_data_slice<CTX_T>> get_data_slice(std::shared_ptr<View<CTX_T>> view,
+        std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
+        std::uint32_t end_col);
+
+    /**
+     * @brief Retrieve a single value from the data slice and serialize it to an output
+     * type that interfaces with the binding language.
+     *
+     * @param view
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return val
+     */
+    template <typename CTX_T, typename T>
+    T get_from_data_slice(
+        std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx);
 
 } // end namespace binding
 } // end namespace perspective

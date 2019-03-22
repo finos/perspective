@@ -222,6 +222,10 @@ bindTemplate(TEMPLATE, style)(
 
                 this.grid.addProperties(grid_properties);
 
+                this.grid.localization.header = {
+                    format: value => this.grid.behavior.formatColumnHeader(value)
+                };
+
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
 
