@@ -7,16 +7,28 @@
  *
  */
 
+function toValue(type, value) {
+    switch (type) {
+        case "datetime":
+            return value instanceof Date ? value : new Date(parseInt(value));
+        case "integer":
+            return parseInt(value, 10);
+        case "float":
+            return parseFloat(value);
+    }
+    return value;
+}
+
 export function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
     const groupValues = (data.crossValue.split ? data.crossValue.split("|") : [data.crossValue]) || [data.key];
-    return settings.crossValues.map((cross, i) => ({name: cross.name, value: groupValues[i]}));
+    return settings.crossValues.map((cross, i) => ({name: cross.name, value: toValue(cross.type, groupValues[i])}));
 }
 
 export function getSplitValues(data, settings) {
     if (settings.splitValues.length === 0) return [];
     const splitValues = data.key ? data.key.split("|") : data.mainValue.split("|");
-    return settings.splitValues.map((split, i) => ({name: split.name, value: splitValues[i]}));
+    return settings.splitValues.map((split, i) => ({name: split.name, value: toValue(split.type, splitValues[i])}));
 }
 
 export function getDataValues(data, settings) {
@@ -29,7 +41,7 @@ export function getDataValues(data, settings) {
                 }
             ];
         }
-        return settings.mainValues.map((main, i) => ({name: main.name, value: data.mainValues[i]}));
+        return settings.mainValues.map((main, i) => ({name: main.name, value: toValue(main.type, data.mainValues[i])}));
     }
     return [
         {
