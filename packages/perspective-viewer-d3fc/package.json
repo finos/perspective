@@ -30,6 +30,9 @@
         "verbose": true,
         "testURL": "http://localhost/",
         "automock": false,
+        "transform": {
+            ".js$": "./test/js/transform.js"
+        },
         "setupFiles": [
             "./test/js/beforeEachSpec.js"
         ]
