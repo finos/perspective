@@ -102,5 +102,9 @@
     "heatmap.html/filters by a datetime column.": "2abcbde52f7798149c167e43471b2a24",
     "heatmap.html/highlights invalid filter.": "d01bd4fb9e9e4005a946c90aaaddb57e",
     "heatmap.html/sorts by an alpha column.": "9edf7f90f0b5cb72edb395f3c3420db9",
-    "heatmap.html/displays visible columns.": "76526dd190fae821de1bc873fccbb8fc"
+    "heatmap.html/displays visible columns.": "76526dd190fae821de1bc873fccbb8fc",
+    "candlestick.html/filter to date range.": "f6133dbe371bc49945608afff45d5596",
+    "candlestick.html/filter by a single instrument.": "9a02826762433f80500cbb079f3fb9bc",
+    "ohlc.html/filter by a single instrument.": "2c23d267ab67d7c4d25bf04231537275",
+    "ohlc.html/filter to date range.": "31b348678e56ef571f10f0b7697f2767"
 }
