@@ -15,6 +15,7 @@ import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import {draggableComponent} from "./styling/draggableComponent";
 import {resizableComponent} from "./styling/resizableComponent";
+import {cropCellContents} from "./styling/cropCellContents";
 
 const scrollColorLegend = settings =>
     scrollableLegend(
@@ -52,7 +53,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
     let scale = null;
     let color = null;
     let draggable = draggableComponent();
-    let resizable = resizableComponent();
+    let resizable;
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
@@ -103,6 +104,8 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .attr("borderbox-on-hover", true)
                 .style("z-index", "2")
                 .call(scrollLegend);
+
+            resizable = resizableComponent(scrollLegend, legendSelection);
 
             draggable(legendSelection);
             resizable(legendSelection);

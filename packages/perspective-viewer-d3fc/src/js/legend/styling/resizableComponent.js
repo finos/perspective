@@ -18,36 +18,47 @@ const dragbarWidth = 7;
 const minLegendHeight = 100;
 const minLegendWidth = 100;
 
-export function resizableComponent() {
+export function resizableComponent(onResizeFunction, onResizeParameter) {
+    const functionCallOnResize = onResizeFunction;
+    const parameterCallOnResize = onResizeParameter;
+
     const resizable = element => {
         const dragLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragTop = d3.drag().on("drag", function() {
             dragTopFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragBottom = d3.drag().on("drag", function() {
             dragBottomFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
 
         const dragTopLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
             dragTopFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragTopRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
             dragTopFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragBottomRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
             dragBottomFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
         const dragBottomLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
             dragBottomFunc(this, d3.event, element);
+            functionCallOnResize(parameterCallOnResize);
         });
 
         const node = element.node();
