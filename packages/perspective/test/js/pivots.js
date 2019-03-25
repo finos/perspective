@@ -242,6 +242,21 @@ module.exports = perspective => {
         });
     });
 
+    describe("Aggregates with negatives", function() {
+        it("sum abs", async function() {
+            var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: 1, y: 1}, {x: -1, y: 1}, {x: -2, y: 2}, {x: -3, y: 2}]);
+            var view = table.view({
+                row_pivot: ["y"],
+                aggregate: [{op: "sum abs", column: "x"}]
+            });
+            var answer = [{__ROW_PATH__: [], x: 12}, {__ROW_PATH__: [1], x: 7}, {__ROW_PATH__: [2], x: 5}];
+            let result = await view.to_json();
+            expect(answer).toEqual(result);
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Row pivot", function() {
         it("['x']", async function() {
             var table = perspective.table(data);
@@ -280,6 +295,53 @@ module.exports = perspective => {
             let result2 = await view.to_json();
             var answer = [{__ROW_PATH__: [], pos: 600}, {__ROW_PATH__: [1], pos: 100}, {__ROW_PATH__: [2], pos: 200}, {__ROW_PATH__: [3], pos: 300}];
             expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("pivots multiple null values on initial load", async function() {
+            const dataWithNulls = [{name: "Homer", value: 1}, {name: null, value: 1}, {name: null, value: 1}, {name: "Krusty", value: 1}];
+
+            var table = perspective.table(dataWithNulls);
+
+            var view = table.view({
+                row_pivot: ["name"]
+            });
+
+            const answer = [
+                {__ROW_PATH__: [], name: 3, value: 4},
+                {__ROW_PATH__: ["Homer"], name: 1, value: 1},
+                {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
+                {__ROW_PATH__: [null], name: 1, value: 2}
+            ];
+
+            let results = await view.to_json();
+            expect(results).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("pivots multiple null values in updates", async function() {
+            const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
+            const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
+
+            var table = perspective.table(dataWithNull1);
+            table.update(dataWithNull2);
+
+            var view = table.view({
+                row_pivot: ["name"]
+            });
+
+            const wrong_answer = [
+                {__ROW_PATH__: [], name: 4, value: 4},
+                {__ROW_PATH__: [null], name: 1, value: 1},
+                {__ROW_PATH__: ["Homer"], name: 1, value: 1},
+                {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
+                {__ROW_PATH__: [null], name: 1, value: 1}
+            ];
+
+            let results = await view.to_json();
+            expect(results).not.toEqual(wrong_answer);
             view.delete();
             table.delete();
         });
