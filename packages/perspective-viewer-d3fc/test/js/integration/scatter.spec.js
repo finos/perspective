@@ -14,10 +14,10 @@ const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_t
 
 utils.with_server({}, () => {
     describe.page(
-        "line.html",
+        "scatter.html",
         () => {
             simple_tests.default();
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..")}
+        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );
 });

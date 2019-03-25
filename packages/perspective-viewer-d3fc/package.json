@@ -29,8 +29,10 @@
         ],
         "verbose": true,
         "testURL": "http://localhost/",
-        "transform": {},
-        "automock": false
+        "automock": false,
+        "setupFiles": [
+            "./test/js/beforeEachSpec.js"
+        ]
     },
     "publishConfig": {
         "access": "public"
