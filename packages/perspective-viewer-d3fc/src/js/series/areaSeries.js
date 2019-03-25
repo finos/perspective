@@ -12,9 +12,7 @@ export function areaSeries(settings, color) {
     let series = fc.seriesSvgArea();
 
     series = series.decorate(selection => {
-        if (color) {
-            selection.style("fill", d => color(d[0].key));
-        }
+        selection.style("fill", d => color(d[0].key));
     });
 
     return series

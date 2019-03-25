@@ -63,21 +63,52 @@
         }
 
         & .bar {
-            fill: rgba(31, 119, 180, 0.5);
+            fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
         }
         & .line {
-            stroke: rgba(31, 119, 180, 0.5);
+            stroke: var(--d3fc-series, rgb(31, 119, 180));
         }
-        & .point {
-            fill: rgba(31, 119, 180, 0.5);
-            stroke: rgb(31, 119, 180);
+        & .point, & .series {
+            fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
+            stroke: var(--d3fc-series, rgb(31, 119, 180));
         }
         & .area {
-            fill: rgba(31, 119, 180, 0.5);
+            fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
         }
 
         & .nearbyTip {
-            fill: rgba(31, 119, 180, 0.5);
+            fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
+        }
+
+        & .series-1 {
+            fill: var(--d3fc-series-1, #0366d6);
+        }
+        & .series-2 {
+            fill: var(--d3fc-series-2, #ff7f0e);
+        }
+        & .series-3 {
+            fill: var(--d3fc-series-3, #2ca02c);
+        }
+        & .series-4 {
+            fill: var(--d3fc-series-4, #d62728);
+        }
+        & .series-5 {
+            fill: var(--d3fc-series-5, #9467bd);
+        }
+        & .series-6 {
+            fill: var(--d3fc-series-6, #8c564b);
+        }
+        & .series-7 {
+            fill: var(--d3fc-series-7, #e377c2);
+        }
+        & .series-8 {
+            fill: var(--d3fc-series-8, #7f7f7f);
+        }
+        & .series-9 {
+            fill: var(--d3fc-series-9, #bcbd22);
+        }
+        & .series-10 {
+            fill: var(--d3fc-series-10, #17becf);
         }
     }
 
@@ -105,8 +136,8 @@
                 cursor: pointer;
 
                 & path {
-                    fill: rgba(31, 119, 180, 0.5);
-                    stroke: rgb(31, 119, 180);
+                    fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
+                    stroke: var(--d3fc-series, rgb(31, 119, 180));
                 }
                 &.hidden path {
                     fill: rgba(204, 204, 204, 0.5);

@@ -37,7 +37,6 @@ function ohlcCandle(seriesCanvas) {
 
         const upColor = colorScale()
             .domain(keys)
-            .defaultColors(["rgba(31, 119, 180)"])
             .mapFunction(setOpacity(1))();
 
         const legend = colorLegend()
@@ -100,6 +99,7 @@ function ohlcCandle(seriesCanvas) {
             .xScale(xScale)
             .yScale(yScale)
             .yValueName("closeValue")
+            .color(upColor)
             .data(data)
             .canvas(true);
 

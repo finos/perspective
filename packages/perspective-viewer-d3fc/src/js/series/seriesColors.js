@@ -8,6 +8,7 @@
  */
 import * as d3 from "d3";
 import {groupFromKey} from "./seriesKey";
+import {colorStyles} from "./colorStyles";
 
 export function seriesColors(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
@@ -31,13 +32,13 @@ export function seriesColorsFromGroups(settings) {
 
 export function colorScale() {
     let domain = null;
-    let defaultColors = null;
+    let defaultColors = [colorStyles.series];
     let mapFunction = withOpacity;
 
     const colors = () => {
         if (defaultColors || domain.length > 1) {
-            const range = domain.length > 1 ? d3.schemeCategory10.map(mapFunction) : defaultColors;
-            return d3.scaleOrdinal(range).domain(domain);
+            const range = domain.length > 1 ? colorStyles.scheme : defaultColors;
+            return d3.scaleOrdinal(range.map(mapFunction)).domain(domain);
         }
         return null;
     };
@@ -74,7 +75,7 @@ export function withoutOpacity(color) {
 }
 
 export function withOpacity(color) {
-    return setOpacity(0.5)(color);
+    return setOpacity(colorStyles.opacity)(color);
 }
 
 export function setOpacity(opacity) {
