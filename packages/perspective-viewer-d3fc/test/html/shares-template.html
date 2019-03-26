@@ -9,32 +9,35 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
-        <script src="perspective.view.js"></script>
-        <script src="d3fc.plugin.js"></script>
+<head>
 
-        <link rel='stylesheet' href="demo.css">
-    </head>
-    <body>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+    <script src="perspective.view.js"></script>
+    <script src="d3fc.plugin.js"></script>
 
-        <perspective-viewer view="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]'
-            sort='[]' columns='["Open","Price","High","Low"]'
-            aggregates='{"Date":"distinct count","Change%":"sum","High":"sum","Low":"sum","Open":"sum","Price":"sum","Vol.":"sum"}'>
+    <link rel='stylesheet' href="demo.css">
+</head>
 
-        </perspective-viewer>
+<body>
 
-        <script>
+    <perspective-viewer view="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
+        columns='["Open","Close","High","Low"]'
+        aggregates='{"Date":"distinct count","Change%":"sum","High":"sum","Low":"sum","Open":"sum","Close":"sum","Vol.":"sum"}'>
 
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'shares.csv', true);
-            xhr.onload = function () { 
-                document.getElementsByTagName('perspective-viewer')[0].load(xhr.response); 
-            }
-            xhr.send(null);
+    </perspective-viewer>
 
-        </script>
+    <script>
 
-    </body>
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'shares.csv', true);
+        xhr.onload = function () {
+            document.getElementsByTagName('perspective-viewer')[0].load(xhr.response);
+        }
+        xhr.send(null);
+
+    </script>
+
+</body>
+
 </html>
