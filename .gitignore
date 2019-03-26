@@ -133,6 +133,5 @@ docs/_build
 docs/modules.rst
 docs/perspective.*.rst
 docs/python
-results.local.json
 package.json.bak
 yarn.lock.bak

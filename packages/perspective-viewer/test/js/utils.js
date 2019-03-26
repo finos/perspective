@@ -11,6 +11,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const puppeteer = require("puppeteer");
 const path = require("path");
+const execSync = require("child_process").execSync;
 
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
@@ -19,7 +20,8 @@ const cp = require("child_process");
 const {WebSocketHost} = require("@jpmorganchase/perspective");
 
 const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
-const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? "results.local.json" : "results.json";
+const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;
+const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? LOCAL_RESULTS_FILENAME : "results.json";
 
 let __PORT__;
 
@@ -113,6 +115,18 @@ beforeAll(async () => {
             return {};
         }
     })();
+
+    if (results.__GIT_COMMIT__) {
+        const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
+        console.log(
+            `${RESULTS_FILENAME} was last updated ${
+                diff
+                    .toString()
+                    .trim()
+                    .split("\n").length
+            } commits ago ${results.__GIT_COMMIT__}`
+        );
+    }
 });
 
 afterAll(() => {
@@ -129,6 +143,9 @@ afterAll(() => {
         for (let key of Object.keys(new_results)) {
             results2[key] = new_results[key];
         }
+        results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
+            .toString()
+            .trim();
         fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
     }
 });
@@ -164,7 +181,7 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         return result;
     });
 
-    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", "results.local.json")) && !process.env.WRITE_TESTS) {
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", LOCAL_RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
         throw new Error(`
         
 ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
