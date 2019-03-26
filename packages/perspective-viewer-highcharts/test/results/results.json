@@ -99,5 +99,6 @@
     "bar.html/perspective dispatches perspective-click event with NO filters.": "bec1634c0b71ce6646b56ddd566bd602",
     "bar.html/perspective dispatches perspective-click event with one filter.": "fa2075a72ffbbd0a005c3d8f82c65486",
     "bar.html/perspective dispatches perspective-click event with filters.": "04b918cdfdf26d0869182163b9bd0d06",
-    "bar.html/dates on the x-axis display correctly.": "2e921b758962fa28bf7fd5673c3c3c8e"
+    "bar.html/dates on the x-axis display correctly.": "2e921b758962fa28bf7fd5673c3c3c8e",
+    "__GIT_COMMIT__": "e44d06594293371bcfef6592e6e7de30b1e562fc"
 }

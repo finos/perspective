@@ -33,5 +33,6 @@
     "superstore.html/saving without parameters should fail as button is disabled.": "a26ce038cea02a8e3e53b7e0b74a204d",
     "superstore.html/saving a duplicate column should fail with error message.": "9d74a59806ad8ec4ab1bcef7c3c94b68",
     "superstore.html/highlights invalid filter.": "3eadf1175e231c1fbcc2bb9ef10ca6ef",
-    "superstore.html/replaces all rows.": "457b6da4914c99a18f768b27847fc76e"
+    "superstore.html/replaces all rows.": "457b6da4914c99a18f768b27847fc76e",
+    "__GIT_COMMIT__": "e44d06594293371bcfef6592e6e7de30b1e562fc"
 }
