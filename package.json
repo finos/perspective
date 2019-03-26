@@ -71,7 +71,8 @@
         "fix:less": "prettier --tab-width 4 --write packages/**/src/less/*.less",
         "fix:html": "html-beautify packages/**/src/html/*.html -r",
         "fix:json": "prettier --tab-width 4 --write **/package.json",
-        "fix": "npm-run-all --silent fix:*"
+        "fix": "npm-run-all --silent fix:*",
+        "toggle_puppeteer": "node scripts/toggle_puppeteer.js"
     },
     "jest": {
         "roots": [
