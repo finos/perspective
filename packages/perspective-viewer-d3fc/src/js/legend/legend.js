@@ -53,7 +53,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
     let scale = null;
     let color = null;
     let draggable = draggableComponent();
-    let resizable;
+    let resizable = resizableComponent();
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
@@ -105,7 +105,9 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .style("z-index", "2")
                 .call(scrollLegend);
 
-            resizable = resizableComponent(scrollLegend.useDynamicPageSize, legendSelection);
+            resizable.addCallbackToResize(function(direction) {
+                return scrollLegend.useDynamicPageSize(legendSelection, direction);
+            });
 
             draggable(legendSelection);
             resizable(legendSelection);
