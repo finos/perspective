@@ -37,5 +37,6 @@
     "scatter.html/filters by a numeric column.": "5c6462e37a886f8ca145682d20918b06",
     "scatter.html/filters by a datetime column.": "ac0a52991f98a9f922f0df6fa6976f3a",
     "scatter.html/highlights invalid filter.": "db0b88d84e559975a100179ad1b313df",
-    "scatter.html/sorts by an alpha column.": "d29c7922fe86891f65d491fc4c625d5d"
+    "scatter.html/sorts by an alpha column.": "d29c7922fe86891f65d491fc4c625d5d",
+    "__GIT_COMMIT__": "e44d06594293371bcfef6592e6e7de30b1e562fc"
 }
