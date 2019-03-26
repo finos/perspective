@@ -107,4 +107,5 @@
     "candlestick.html/filter by a single instrument.": "36d43f5905d6e74cc622ee6d7be44894",
     "ohlc.html/filter by a single instrument.": "94d24188a2839ce1bd0b1dec71d20f33",
     "ohlc.html/filter to date range.": "3313f803361d232b1180e32b9a5d8c17"
+    "__GIT_COMMIT__": "e44d06594293371bcfef6592e6e7de30b1e562fc"
 }
