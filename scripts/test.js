@@ -8,6 +8,7 @@
  */
 
 const execSync = require("child_process").execSync;
+const fs = require("fs");
 
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
@@ -17,9 +18,10 @@ const IS_PUPPETEER = args.indexOf("--private-puppeteer") !== -1;
 const IS_EMSDK = args.indexOf("--private-emsdk") !== -1;
 const IS_WRITE = args.indexOf("--write") !== -1 || process.env.WRITE_TESTS;
 const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
+const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 function jest() {
-    let cmd = "node_modules/.bin/jest --color";
+    let cmd = "TZ=UTC node_modules/.bin/jest --color";
 
     if (args.indexOf("--saturate") > -1) {
         console.log("-- Running the test suite in saturate mode");
@@ -42,11 +44,11 @@ function jest() {
         cmd += ` -t '${regex}'`;
     }
 
-    return cmd;
+    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd;
 }
 
 function slow_jest() {
-    return 'node_modules/.bin/lerna exec --scope="@jpmorganchase/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@jpmorganchase/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
 }
 
 function docker() {
@@ -79,7 +81,7 @@ function emsdk() {
 }
 
 try {
-    if (!IS_PUPPETEER) {
+    if (!IS_PUPPETEER && !IS_LOCAL_PUPPETEER) {
         if (IS_DOCKER && !IS_EMSDK) {
             execute(emsdk());
         } else {
@@ -101,12 +103,12 @@ try {
             execSync(`output=$(${slow_jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});
         } else if (process.env.PACKAGE) {
             console.log("-- Running test suite in individual mode");
-            let cmd = "node_modules/.bin/lerna exec --concurrency 1 --no-bail";
+            let cmd = "TZ=UTC node_modules/.bin/lerna exec --concurrency 1 --no-bail";
             if (process.env.PACKAGE) {
                 cmd += " --scope=@jpmorganchase/${PACKAGE}";
             }
             cmd += " -- yarn --silent test:run";
-            execute(cmd);
+            execute((IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd);
             execute(slow_jest());
         } else {
             console.log("-- Running test suite in fast mode");

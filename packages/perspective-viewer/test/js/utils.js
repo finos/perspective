@@ -11,12 +11,17 @@ const fs = require("fs");
 const crypto = require("crypto");
 const puppeteer = require("puppeteer");
 const path = require("path");
+const execSync = require("child_process").execSync;
 
 const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
 
 const {WebSocketHost} = require("@jpmorganchase/perspective");
+
+const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
+const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;
+const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? LOCAL_RESULTS_FILENAME : "results.json";
 
 let __PORT__;
 
@@ -53,7 +58,9 @@ let browser,
     __name = "";
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]});
+    browser = await puppeteer.launch({
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
+    });
     page = await browser.newPage();
 
     page.shadow_click = async function(...path) {
@@ -100,7 +107,7 @@ beforeAll(async () => {
     });
 
     results = (() => {
-        const dir_name = path.join(test_root, "test", "results", "results.json");
+        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
         if (fs.existsSync(dir_name)) {
             return JSON.parse(fs.readFileSync(dir_name));
         } else if (fs.existsSync(dir_name)) {
@@ -108,12 +115,24 @@ beforeAll(async () => {
             return {};
         }
     })();
+
+    if (results.__GIT_COMMIT__) {
+        const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
+        console.log(
+            `${RESULTS_FILENAME} was last updated ${
+                diff
+                    .toString()
+                    .trim()
+                    .split("\n").length
+            } commits ago ${results.__GIT_COMMIT__}`
+        );
+    }
 });
 
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
-        const dir_name = path.join(test_root, "test", "results", "results.json");
+        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
         const results2 = (() => {
             if (fs.existsSync(dir_name)) {
                 return JSON.parse(fs.readFileSync(dir_name));
@@ -124,6 +143,9 @@ afterAll(() => {
         for (let key of Object.keys(new_results)) {
             results2[key] = new_results[key];
         }
+        results2.__GIT_COMMIT__ = execSync("git rev-parse HEAD")
+            .toString()
+            .trim();
         fs.writeFileSync(dir_name, JSON.stringify(results2, null, 4));
     }
 });
@@ -158,6 +180,17 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         page_reload = old_reload;
         return result;
     });
+
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", LOCAL_RESULTS_FILENAME)) && !process.env.WRITE_TESTS) {
+        throw new Error(`
+        
+ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
+
+Please re-run with "yarn test --write" to generate initial screenshot diffs
+for your local OS.
+
+`);
+    }
 };
 
 test.run = function run(name, body, viewport = null) {
