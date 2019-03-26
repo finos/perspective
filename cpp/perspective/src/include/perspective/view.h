@@ -47,8 +47,8 @@ public:
     void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
     // Data serialization
-    t_data_slice<CTX_T> get_data(std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col);
+    std::shared_ptr<t_data_slice<CTX_T>> get_data(
+        t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;

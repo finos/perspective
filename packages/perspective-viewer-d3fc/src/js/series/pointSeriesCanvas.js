@@ -24,15 +24,10 @@ export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
     }
 
     series.decorate((context, d) => {
-        if (color) {
-            const colorValue = color(d.colorValue !== undefined ? d.colorValue : seriesKey);
+        const colorValue = color(d.colorValue !== undefined ? d.colorValue : seriesKey);
 
-            context.strokeStyle = withoutOpacity(colorValue);
-            context.fillStyle = withOpacity(colorValue);
-        } else {
-            context.strokeStyle = "rgb(31, 119, 180)";
-            context.fillStyle = "rgba(31, 119, 180, 0.5)";
-        }
+        context.strokeStyle = withoutOpacity(colorValue);
+        context.fillStyle = withOpacity(colorValue);
     });
 
     return series;

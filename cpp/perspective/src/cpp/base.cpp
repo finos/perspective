@@ -418,7 +418,7 @@ str_to_aggtype(std::string str) {
         return t_aggtype::AGGTYPE_HIGH_WATER_MARK;
     } else if (str == "low" || str == "low_water_mark") {
         return t_aggtype::AGGTYPE_LOW_WATER_MARK;
-    } else if (str == "sub abs") {
+    } else if (str == "sum abs") {
         return t_aggtype::AGGTYPE_SUM_ABS;
     } else if (str == "sum not null" || str == "sum_not_null") {
         return t_aggtype::AGGTYPE_SUM_NOT_NULL;

@@ -7,38 +7,48 @@
  *
  */
 import * as fc from "d3fc";
-import seriesCanvasMulti from "../d3fc/series/canvas/multi";
 import annotationCanvasGridline from "../d3fc/annotation/canvas/gridline";
 
-const mainGrid = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
+const mainGridSvg = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
 const mainGridCanvas = c => {
     c.globalAlpha = 0.3;
     c.lineWidth = 1.0;
 };
 
-const crossGrid = x => x.style("display", "none");
+const crossGridSvg = x => x.style("display", "none");
 const crossGridCanvas = c => {
     c.globalAlpha = 0;
 };
 
-export const withGridLines = series => {
+export default series => {
     let orient = "both";
+    let canvas = false;
+    let xScale = null;
+    let yScale = null;
+    let context = null;
 
-    const svgMulti = fc.seriesSvgMulti();
+    let seriesMulti = fc.seriesSvgMulti();
+    let annotationGridline = fc.annotationSvgGridline();
+    let mainGrid = mainGridSvg;
+    let crossGrid = crossGridSvg;
 
     const _withGridLines = function(...args) {
+        if (canvas) {
+            seriesMulti = fc.seriesCanvasMulti().context(context);
+            annotationGridline = annotationCanvasGridline();
+            mainGrid = mainGridCanvas;
+            crossGrid = crossGridCanvas;
+        }
+
+        const multi = seriesMulti.xScale(xScale).yScale(yScale);
+
         const xStyle = orient === "vertical" ? crossGrid : mainGrid;
         const yStyle = orient === "horizontal" ? crossGrid : mainGrid;
 
-        const gridlines = fc
-            .annotationSvgGridline()
-            .xDecorate(xStyle)
-            .yDecorate(yStyle);
+        const gridlines = annotationGridline.xDecorate(xStyle).yDecorate(yStyle);
 
-        return svgMulti.series([gridlines, series])(...args);
+        return multi.series([gridlines, series])(...args);
     };
-
-    fc.rebindAll(_withGridLines, svgMulti);
 
     _withGridLines.orient = (...args) => {
         if (!args.length) {
@@ -48,32 +58,35 @@ export const withGridLines = series => {
         return _withGridLines;
     };
 
-    return _withGridLines;
-};
-
-export const withCanvasGridLines = series => {
-    let orient = "both";
-
-    const canvasMulti = seriesCanvasMulti();
-
-    const _withGridLines = function(...args) {
-        const xStyle = orient === "vertical" ? crossGridCanvas : mainGridCanvas;
-        const yStyle = orient === "horizontal" ? crossGridCanvas : mainGridCanvas;
-
-        const gridlines = annotationCanvasGridline()
-            .xDecorate(xStyle)
-            .yDecorate(yStyle);
-
-        return canvasMulti.series([gridlines, series])(...args);
+    _withGridLines.canvas = (...args) => {
+        if (!args.length) {
+            return canvas;
+        }
+        canvas = args[0];
+        return _withGridLines;
     };
 
-    fc.rebindAll(_withGridLines, canvasMulti);
-
-    _withGridLines.orient = (...args) => {
+    _withGridLines.xScale = (...args) => {
         if (!args.length) {
-            return orient;
+            return xScale;
         }
-        orient = args[0];
+        xScale = args[0];
+        return _withGridLines;
+    };
+
+    _withGridLines.yScale = (...args) => {
+        if (!args.length) {
+            return yScale;
+        }
+        yScale = args[0];
+        return _withGridLines;
+    };
+
+    _withGridLines.context = (...args) => {
+        if (!args.length) {
+            return context;
+        }
+        context = args[0];
         return _withGridLines;
     };
 

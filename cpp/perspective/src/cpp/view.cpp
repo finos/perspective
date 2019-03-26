@@ -34,7 +34,6 @@ View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gn
     m_aggregates = m_config.get_aggregates();
     m_filters = m_config.get_fterms();
     m_sorts = m_config.get_sortspecs();
-    m_column_only = m_config.is_column_only();
 }
 
 template <typename CTX_T>
@@ -144,71 +143,6 @@ View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
 }
 
 /**
- * @brief The schema of this View.  A schema is an std::map, the keys of which
- * are the columns of this View, and the values are their string type names.
- * If this View is aggregated, theses will be the aggregated types;
- * otherwise these types will be the same as the columns in the underlying
- * Table.
- *
- * @return std::map<std::string, std::string>
- */
-template <typename CTX_T>
-std::map<std::string, std::string>
-View<CTX_T>::schema() const {
-    auto schema = m_gnode->get_tblschema();
-    auto _types = schema.types();
-    auto names = schema.columns();
-
-    std::map<std::string, t_dtype> types;
-    std::map<std::string, std::string> new_schema;
-
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        types[names[i]] = _types[i];
-    }
-
-    auto col_names = _column_names(false);
-    for (const std::string& name : col_names) {
-        // Pull out the main aggregate column
-        std::size_t last_delimiter = name.find_last_of(m_separator);
-        std::string agg_name = name.substr(last_delimiter + 1);
-
-        std::string type_string = dtype_to_str(types[agg_name]);
-        new_schema[agg_name] = type_string;
-
-        if (m_row_pivots.size() > 0 && !is_column_only()) {
-            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
-        }
-    }
-
-    return new_schema;
-}
-/**
- * @brief The schema of this View. Output and logic is as the above
- * schema(), but this version is specialized for zero-sided
- * contexts.
- *
- * @return std::map<std::string, std::string>
- */
-template <>
-std::map<std::string, std::string>
-View<t_ctx0>::schema() const {
-    t_schema schema = m_gnode->get_tblschema();
-    std::vector<t_dtype> _types = schema.types();
-    std::vector<std::string> names = schema.columns();
-
-    std::map<std::string, std::string> new_schema;
-
-    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
-        if (names[i] == "psp_okey") {
-            continue;
-        }
-        new_schema[names[i]] = dtype_to_str(_types[i]);
-    }
-
-    return new_schema;
-}
-
-/**
  * @brief The column names of the View. If the View is aggregated, the
  * individual column names will be joined with a separator character
  * specified by the user, or defaulting to "|".
@@ -288,26 +222,111 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
 }
 
 /**
+ * @brief The schema of this View.  A schema is an std::map, the keys of which
+ * are the columns of this View, and the values are their string type names.
+ * If this View is aggregated, theses will be the aggregated types;
+ * otherwise these types will be the same as the columns in the underlying
+ * Table.
+ *
+ * @return std::map<std::string, std::string>
+ */
+template <typename CTX_T>
+std::map<std::string, std::string>
+View<CTX_T>::schema() const {
+    auto schema = m_gnode->get_tblschema();
+    auto _types = schema.types();
+    auto names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    auto col_names = _column_names(false);
+    for (const std::string& name : col_names) {
+        // Pull out the main aggregate column
+        std::size_t last_delimiter = name.find_last_of(m_separator);
+        std::string agg_name = name.substr(last_delimiter + 1);
+
+        std::string type_string = dtype_to_str(types[agg_name]);
+        new_schema[agg_name] = type_string;
+
+        if (m_row_pivots.size() > 0 && !is_column_only()) {
+            new_schema[agg_name] = _map_aggregate_types(agg_name, new_schema[agg_name]);
+        }
+    }
+
+    return new_schema;
+}
+/**
+ * @brief The schema of this View. Output and logic is as the above
+ * schema(), but this version is specialized for zero-sided
+ * contexts.
+ *
+ * @return std::map<std::string, std::string>
+ */
+template <>
+std::map<std::string, std::string>
+View<t_ctx0>::schema() const {
+    t_schema schema = m_gnode->get_tblschema();
+    std::vector<t_dtype> _types = schema.types();
+    std::vector<std::string> names = schema.columns();
+
+    std::map<std::string, t_dtype> types;
+    for (std::size_t i = 0, max = names.size(); i != max; ++i) {
+        types[names[i]] = _types[i];
+    }
+
+    std::vector<std::string> column_names = _column_names(false);
+    std::map<std::string, std::string> new_schema;
+
+    for (std::size_t i = 0, max = column_names.size(); i != max; ++i) {
+        std::string name = column_names[i];
+        if (name == "psp_okey") {
+            continue;
+        }
+        new_schema[name] = dtype_to_str(types[name]);
+    }
+
+    return new_schema;
+}
+
+/**
  * @brief Returns a slice of the underlying data of the view.
  *
  * @return std::vector<t_tscalar>
  */
-template <typename CTX_T>
-t_data_slice<CTX_T>
-View<CTX_T>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-    std::uint32_t end_col) {
+template <>
+std::shared_ptr<t_data_slice<t_ctx0>>
+View<t_ctx0>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
         m_ctx->get_data(start_row, end_row, start_col, end_col));
-    auto names_ptr = std::make_shared<std::vector<std::string>>(_column_names());
-    auto data_slice = t_data_slice<CTX_T>(
-        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, names_ptr);
-    return data_slice;
+    auto col_names = _column_names();
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(
+        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, col_names);
+    return data_slice_ptr;
 }
 
 template <>
-t_data_slice<t_ctx2>
-View<t_ctx2>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-    std::uint32_t end_col) {
+std::shared_ptr<t_data_slice<t_ctx1>>
+View<t_ctx1>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
+    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
+        m_ctx->get_data(start_row, end_row, start_col, end_col));
+    auto col_names = _column_names();
+    col_names.insert(col_names.begin(), "__ROW_PATH__");
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(
+        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, col_names);
+    return data_slice_ptr;
+}
+
+template <>
+std::shared_ptr<t_data_slice<t_ctx2>>
+View<t_ctx2>::get_data(
+    t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
     std::vector<t_tscalar> slice;
     std::vector<t_uindex> column_indices;
     std::vector<std::string> column_names;
@@ -325,7 +344,7 @@ View<t_ctx2>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint
 
         column_names = _column_names(true, depth);
         column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
-            column_indices.begin() + std::min(end_col, (std::uint32_t)column_indices.size()));
+            column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
 
         slice = m_ctx->get_data(
             start_row, end_row, column_indices.front(), column_indices.back() + 1);
@@ -335,11 +354,9 @@ View<t_ctx2>::get_data(std::uint32_t start_row, std::uint32_t end_row, std::uint
     }
 
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
-    auto names_ptr = std::make_shared<std::vector<std::string>>(column_names);
-    auto indices_ptr = std::make_shared<std::vector<t_uindex>>(column_indices);
-    auto data_slice = t_data_slice<t_ctx2>(
-        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, names_ptr, indices_ptr);
-    return data_slice;
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(
+        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, column_names, column_indices);
+    return data_slice_ptr;
 }
 
 // Getters
@@ -400,7 +417,7 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 template <typename CTX_T>
 bool
 View<CTX_T>::is_column_only() const {
-    return m_column_only;
+    return m_config.is_column_only();
 }
 
 /******************************************************************************

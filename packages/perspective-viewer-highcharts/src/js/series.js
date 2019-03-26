@@ -637,7 +637,7 @@ export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
     let series = [];
 
     for (let row of rows2) {
-        let rp = row["__ROW_PATH__"];
+        let rp = row["__ROW_PATH__"].map(x => (x === null ? "-" : x));
         let id = rp.join(", ");
         let name = rp.slice(-1)[0];
         let parent = rp.slice(0, -1).join(", ");

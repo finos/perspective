@@ -8,7 +8,7 @@
  */
 
 import * as defaults from "./defaults.js";
-import {DataAccessor, clean_data} from "./DataAccessor/DataAccessor.js";
+import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
@@ -309,75 +309,88 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            slice = __MODULE__.get_data_zero(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
         } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_one(this._View, start_row, end_row, start_col, end_col);
+            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
         } else {
             slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
         }
 
         let data = formatter.initDataValue();
 
-        // determine which level we stop pulling column names
-        let skip = false,
-            depth = 0;
-        if (this.sides() == 2 && sorted) {
-            skip = true;
-            depth = this.config.column_pivot.length;
-        }
-
-        /*
-        let num_rows = this.num_rows();
-        let num_cols = this.num_cols();
-        let column_names = extract_vector(data_slice.get_column_names());
-        for (let ridx = 0; ridx < num_rows; ridx++) {
-            row = {}; // or array for col, etc;
-            for (let cidx = 0; cidx < num_cols; cidx++) {
-                row[column_names[cidx]] = data_slice.get(ridx, cidx);
-            }
-            data.push(row);
-        }
-        */
-
-        let col_names = [[]].concat(this._column_names(skip, depth));
-        let row;
-        let ridx = -1;
-        for (let idx = 0; idx < slice.length; idx++) {
-            let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
-            if (cidx === 0) {
-                if (row) {
-                    formatter.addRow(data, row);
+        if (this.sides() === 0) {
+            const col_names = extract_vector(slice.get_column_names());
+            for (let ridx = start_row; ridx < end_row; ridx++) {
+                const row = formatter.initRowValue();
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    const col_name = col_names[cidx];
+                    const value = __MODULE__.get_from_data_slice_zero(slice, ridx, cidx);
+                    formatter.setColumnValue(data, row, col_name, value);
                 }
-                row = formatter.initRowValue();
-                ridx++;
+                formatter.addRow(data, row);
             }
-            if (this.sides() === 0) {
-                let col_name = col_names[start_col + cidx + 1];
-                formatter.setColumnValue(data, row, col_name, slice[idx]);
-            } else {
+        } else if (this.sides() === 1) {
+            const col_names = extract_vector(slice.get_column_names());
+            for (let ridx = start_row; ridx < end_row; ridx++) {
+                const row = formatter.initRowValue();
+                for (let cidx = start_col; cidx < end_col; cidx++) {
+                    const col_name = col_names[cidx];
+                    if (cidx === 0) {
+                        const row_path = slice.get_row_path(ridx);
+                        formatter.initColumnValue(data, row, col_name);
+                        for (let i = 0; i < row_path.size(); i++) {
+                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
+                            formatter.addColumnValue(data, row, col_name, value);
+                        }
+                        row_path.delete();
+                    } else {
+                        const value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
+                        formatter.setColumnValue(data, row, col_name, value);
+                    }
+                }
+                formatter.addRow(data, row);
+            }
+        } else {
+            // determine which level we stop pulling column names
+            let skip = false,
+                depth = 0;
+            if (sorted) {
+                skip = true;
+                depth = this.config.column_pivot.length;
+            }
+            let col_names = [[]].concat(this._column_names(skip, depth));
+            let row;
+            let ridx = -1;
+            for (let idx = 0; idx < slice.length; idx++) {
+                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
                 if (cidx === 0) {
+                    if (row) {
+                        formatter.addRow(data, row);
+                    }
+                    row = formatter.initRowValue();
+                    ridx++;
                     if (!this.column_only) {
                         let col_name = "__ROW_PATH__";
                         let row_path = this._View.get_row_path(start_row + ridx);
                         formatter.initColumnValue(data, row, col_name);
                         for (let i = 0; i < row_path.size(); i++) {
-                            const value = clean_data(__MODULE__.scalar_vec_to_val(row_path, i));
+                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
                             formatter.addColumnValue(data, row, col_name, value);
                         }
                         row_path.delete();
                     }
                 } else {
                     let col_name = col_names[start_col + cidx];
-                    formatter.setColumnValue(data, row, col_name, clean_data(slice[idx]));
+                    formatter.setColumnValue(data, row, col_name, slice[idx]);
                 }
             }
-        }
 
-        if (row) {
-            formatter.addRow(data, row);
-        }
-        if (this.column_only) {
-            data = formatter.slice(data, this.config.column_pivot.length);
+            if (row) {
+                formatter.addRow(data, row);
+            }
+            if (this.column_only) {
+                data = formatter.slice(data, this.config.column_pivot.length);
+            }
         }
 
         return formatter.formatData(data, options.config);
@@ -481,9 +494,13 @@ export default function(Module) {
      * Float32Array or Float64Array. If the column cannot be found, or is not of an
      * integer/float type, the Promise returns undefined.
      */
-    view.prototype.col_to_js_typed_array = async function(col_name) {
+    view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
+        const num_rows = await this.num_rows();
         let idx = names.indexOf(col_name);
+
+        const start_row = options.start_row || 0;
+        const end_row = options.end_row || num_rows;
 
         // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
@@ -491,13 +508,13 @@ export default function(Module) {
         }
 
         if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false);
+            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false, start_row, end_row);
         } else if (this.sides() === 1) {
             // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false);
+            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
             const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
-            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only);
+            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
 
@@ -506,29 +523,43 @@ export default function(Module) {
      *
      * @async
      *
+     * @param {Object} [options] An optional configuration object.
+     * @param {number} options.start_row The starting row index from which
+     * to serialize.
+     * @param {number} options.end_row The ending row index from which
+     * to serialize.
+     * @param {number} options.start_col The starting column index from which
+     * to serialize.
+     * @param {number} options.end_col The ending column index from which
+     * to serialize.
+     *
      * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
      * data from the view.
      */
-    view.prototype.to_arrow = async function() {
+    view.prototype.to_arrow = async function(options = {}) {
         const names = await this._column_names();
         const schema = await this.schema();
 
         const vectors = [];
 
-        for (let name of names) {
+        const start_col = options.start_col || 0;
+        const end_col = options.end_col || names.length;
+
+        for (let i = start_col; i < end_col; i++) {
+            const name = names[i];
             const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
             const type = schema[col_path[col_path.length - 1]];
             if (type === "float") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name);
+                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
                 const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
                 vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
@@ -537,7 +568,7 @@ export default function(Module) {
             }
         }
 
-        return Table.fromVectors(vectors, names).serialize().buffer;
+        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize().buffer;
     };
 
     /**
@@ -607,39 +638,51 @@ export default function(Module) {
         return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
+    view.prototype._get_step_delta = async function() {
+        let delta = this._View.get_step_delta(0, 2147483647);
+        let data;
+        if (delta.cells.size() === 0) {
+            // FIXME This is currently not implemented for 1+ sided contexts.
+            data = await this.to_json();
+        } else {
+            let rows = {};
+            for (let x = 0; x < delta.cells.size(); x++) {
+                rows[delta.cells.get(x).row] = true;
+            }
+            rows = Object.keys(rows);
+            const results = await Promise.all(
+                rows.map(row =>
+                    this.to_json({
+                        start_row: Number.parseInt(row),
+                        end_row: Number.parseInt(row) + 1
+                    })
+                )
+            );
+            data = [].concat.apply([], results);
+        }
+        delta.cells.delete();
+        return data;
+    };
+
     /**
      * Register a callback with this {@link view}.  Whenever the {@link view}'s
      * underlying table emits an update, this callback will be invoked with the
      * aggregated row deltas.
      *
      * @param {function} callback A callback function invoked on update.  The
-     * parameter to this callback shares a structure with the return type of
-     * {@link view#to_json}.
+     * parameter to this callback is dependent on the `mode` parameter:
+     *     - "none" (default): The callback is invoked without an argument.
+     *     - "rows": The callback is invoked with the changed rows.
      */
-    view.prototype.on_update = function(callback) {
+    view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+        if (["none", "rows"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "rows"`);
+        }
         this.callbacks.push({
             view: this,
-            callback: () => {
-                if (this._View.get_step_delta) {
-                    let delta = this._View.get_step_delta(0, 2147483647);
-                    if (delta.cells.size() === 0) {
-                        this.to_json().then(callback);
-                    } else {
-                        let rows = {};
-                        for (let x = 0; x < delta.cells.size(); x++) {
-                            rows[delta.cells.get(x).row] = true;
-                        }
-                        rows = Object.keys(rows);
-                        Promise.all(
-                            rows.map(row =>
-                                this.to_json({
-                                    start_row: Number.parseInt(row),
-                                    end_row: Number.parseInt(row) + 1
-                                })
-                            )
-                        ).then(results => callback([].concat.apply([], results)));
-                    }
-                    delta.cells.delete();
+            callback: async () => {
+                if (mode === "rows") {
+                    callback(await this._get_step_delta());
                 } else {
                     callback();
                 }

@@ -12,7 +12,7 @@ import {heatmapSeries} from "../series/heatmapSeries";
 import {seriesColorRange} from "../series/seriesRange";
 import {heatmapData} from "../data/heatmapData";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import zoomableChart from "../zoom/zoomableChart";
 
@@ -58,10 +58,16 @@ function heatmapChart(container, settings) {
         .yOrient("left")
         .plotArea(withGridLines(series));
 
-    chart.xPaddingInner && chart.xPaddingInner(0);
-    chart.xPaddingOuter && chart.xPaddingOuter(0);
-    chart.yPaddingInner && chart.yPaddingInner(0);
-    chart.yPaddingOuter && chart.yPaddingOuter(0);
+    if (chart.xPaddingInner) {
+        chart.xPaddingInner(0);
+        chart.xPaddingOuter(0);
+        series.xAlign("right");
+    }
+    if (chart.yPaddingInner) {
+        chart.yPaddingInner(0);
+        chart.yPaddingOuter(0);
+        series.yAlign("top");
+    }
 
     const zoomChart = zoomableChart()
         .chart(chart)

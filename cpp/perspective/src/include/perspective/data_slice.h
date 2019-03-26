@@ -36,13 +36,14 @@ template <typename CTX_T>
 class PERSPECTIVE_EXPORT t_data_slice {
 public:
     t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col, std::shared_ptr<std::vector<t_tscalar>> slice,
-        std::shared_ptr<std::vector<std::string>> column_names);
+        t_uindex start_col, t_uindex end_col,
+        const std::shared_ptr<std::vector<t_tscalar>>& slice,
+        std::vector<std::string> column_names);
 
     t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col, std::shared_ptr<std::vector<t_tscalar>> slice,
-        std::shared_ptr<std::vector<std::string>> column_names,
-        std::shared_ptr<std::vector<t_uindex>> column_indices);
+        t_uindex start_col, t_uindex end_col,
+        const std::shared_ptr<std::vector<t_tscalar>>& slice,
+        std::vector<std::string> column_names, std::vector<t_uindex> column_indices);
 
     ~t_data_slice();
 
@@ -59,12 +60,14 @@ public:
     t_tscalar get(t_uindex ridx, t_uindex cidx) const;
 
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
+    t_uindex get_slice_idx(t_uindex ridx, t_uindex cidx) const;
 
     std::shared_ptr<CTX_T> get_context() const;
     std::shared_ptr<std::vector<t_tscalar>> get_slice() const;
-    std::shared_ptr<std::vector<std::string>> get_column_names() const;
-    std::shared_ptr<std::vector<t_uindex>> get_column_indices() const;
+    const std::vector<std::string>& get_column_names() const;
+    const std::vector<t_uindex>& get_column_indices() const;
     t_get_data_extents get_data_extents() const;
+    t_uindex get_stride() const;
     bool is_column_only() const;
 
 private:
@@ -73,8 +76,9 @@ private:
     t_uindex m_end_row;
     t_uindex m_start_col;
     t_uindex m_end_col;
+    t_uindex m_stride;
     std::shared_ptr<std::vector<t_tscalar>> m_slice;
-    std::shared_ptr<std::vector<std::string>> m_column_names;
-    std::shared_ptr<std::vector<t_uindex>> m_column_indices;
+    std::vector<std::string> m_column_names;
+    std::vector<t_uindex> m_column_indices;
 };
 } // end namespace perspective

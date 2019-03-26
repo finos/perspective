@@ -15,3 +15,15 @@ export function getOrCreateElement(container, selector, createCallback) {
     let element = container.select(selector);
     return element.size() > 0 ? element : createCallback();
 }
+
+export function isElementOverflowing(containerRect, innerElementRect, direction = "right") {
+    if (direction === "right" || direction === "bottom") {
+        return containerRect[direction] < innerElementRect[direction] ? true : false;
+    }
+
+    if (direction === "left" || direction === "top") {
+        return containerRect[direction] > innerElementRect[direction] ? true : false;
+    }
+
+    throw `Direction being checked for overflow is invalid: ${direction}`;
+}

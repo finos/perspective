@@ -8,11 +8,12 @@
  */
 import * as d3 from "d3";
 import {groupFromKey} from "./seriesKey";
+import {colorStyles} from "./colorStyles";
 
 export function seriesColors(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
-    return fromDomain(domain);
+    return colorScale().domain(domain)();
 }
 
 export function seriesColorsFromGroups(settings) {
@@ -26,40 +27,69 @@ export function seriesColorsFromGroups(settings) {
             }
         }
     });
-    return fromDomain(domain);
+    return colorScale().domain(domain)();
 }
 
-function fromDomain(domain) {
-    return domain.length > 1 ? d3.scaleOrdinal(d3.schemeCategory10.map(withOpacity)).domain(domain) : null;
+export function colorScale() {
+    let domain = null;
+    let defaultColors = [colorStyles.series];
+    let mapFunction = withOpacity;
+
+    const colors = () => {
+        if (defaultColors || domain.length > 1) {
+            const range = domain.length > 1 ? colorStyles.scheme : defaultColors;
+            return d3.scaleOrdinal(range.map(mapFunction)).domain(domain);
+        }
+        return null;
+    };
+
+    colors.domain = (...args) => {
+        if (!args.length) {
+            return domain;
+        }
+        domain = args[0];
+        return colors;
+    };
+
+    colors.defaultColors = (...args) => {
+        if (!args.length) {
+            return defaultColors;
+        }
+        defaultColors = args[0];
+        return colors;
+    };
+
+    colors.mapFunction = (...args) => {
+        if (!args.length) {
+            return mapFunction;
+        }
+        mapFunction = args[0];
+        return colors;
+    };
+
+    return colors;
 }
 
 export function withoutOpacity(color) {
-    const lastComma = color.lastIndexOf(",");
-    const valueIndex = color.indexOf("(");
-    return valueIndex !== -1 && lastComma !== -1 ? `rgb(${color.substring(valueIndex + 1, lastComma)})` : color;
+    return setOpacity(1)(color);
 }
 
 export function withOpacity(color) {
-    if (color.includes("rgb")) return color;
-
-    const toInt = offset => parseInt(color.substring(offset, offset + 2), 16);
-    return `rgba(${toInt(1)},${toInt(3)},${toInt(5)},0.5)`;
+    return setOpacity(colorStyles.opacity)(color);
 }
 
-export function seriesUpColors(domain) {
-    const range = domain.length > 1 ? d3.schemeCategory10.map(withoutOpacity) : ["#6c0"];
+export function setOpacity(opacity) {
+    return color => {
+        const toInt = (c, offset, length) => parseInt(c.substring(offset, offset + length) + (length === 1 ? "0" : ""), 16);
+        const colorsFromRGB = c =>
+            c
+                .substring(c.indexOf("(") + 1)
+                .split(",")
+                .map(d => parseInt(d))
+                .slice(0, 3);
+        const colorsFromHex = c => (c.length === 4 ? [toInt(c, 1, 1), toInt(c, 2, 1), toInt(c, 3, 1)] : [toInt(c, 1, 2), toInt(c, 3, 2), toInt(c, 5, 2)]);
 
-    return d3
-        .scaleOrdinal()
-        .range(range)
-        .domain(domain);
-}
-
-export function seriesDownColors(domain) {
-    const range = domain.length > 1 ? d3.schemeCategory10.map(withOpacity) : ["#c60"];
-
-    return d3
-        .scaleOrdinal()
-        .range(range)
-        .domain(domain);
+        const colors = color.includes("rgb") ? colorsFromRGB(color) : colorsFromHex(color);
+        return opacity === 1 ? `rgb(${colors.join(",")})` : `rgba(${colors.join(",")},${opacity})`;
+    };
 }

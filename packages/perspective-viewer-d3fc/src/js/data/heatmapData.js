@@ -21,7 +21,8 @@ export function heatmapData(settings, data) {
                 heatmapData.push({
                     crossValue: crossValue,
                     mainValue: getMainValues(key),
-                    colorValue: col[key]
+                    colorValue: col[key],
+                    row: col
                 });
             });
     });

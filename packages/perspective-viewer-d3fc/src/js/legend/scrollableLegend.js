@@ -10,6 +10,7 @@ import * as d3Legend from "d3-svg-legend";
 import {rebindAll} from "d3fc";
 import {areArraysEqualSimple, getOrCreateElement} from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
+import {cropCellContents} from "./styling/cropCellContents";
 
 export default fromLegend => {
     const legend = fromLegend || d3Legend.legendColor();
@@ -33,6 +34,7 @@ export default fromLegend => {
     const render = selection => {
         renderControls(selection);
         renderLegend(selection);
+        cropCellContents(selection);
     };
 
     const renderControls = selection => {

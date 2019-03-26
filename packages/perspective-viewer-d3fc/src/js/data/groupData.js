@@ -35,7 +35,8 @@ function seriesDataFn(settings, data, {stack = false}) {
             crossValue: labelfn(col, i),
             mainValue: !!col[mainValue.name] ? col[mainValue.name] : null,
             baseValue: baseValue(col),
-            key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name
+            key: col.__KEY__ ? `${col.__KEY__}|${mainValue.name}` : mainValue.name,
+            row: col.row || col
         }));
         series.key = series[0].key;
         return series;

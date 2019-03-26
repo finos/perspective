@@ -18,9 +18,7 @@ export function categoryPointSeries(settings, seriesKey, color, symbols) {
     }
 
     series.decorate(selection => {
-        if (color) {
-            selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey)));
-        }
+        selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey)));
     });
 
     return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);

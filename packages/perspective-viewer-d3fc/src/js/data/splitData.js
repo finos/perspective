@@ -17,7 +17,8 @@ export function splitData(settings, data) {
             .map(key => ({
                 key,
                 crossValue: labelfn(col, i),
-                mainValue: col[key]
+                mainValue: col[key],
+                row: col
             }));
     });
 }

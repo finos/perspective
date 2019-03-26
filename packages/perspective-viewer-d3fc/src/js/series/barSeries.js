@@ -14,9 +14,7 @@ export function barSeries(settings, color) {
 
     series = series.decorate(selection => {
         tooltip().settings(settings)(selection);
-        if (color) {
-            selection.style("fill", d => color(d.key));
-        }
+        selection.style("fill", d => color(d.key));
     });
 
     return fc
