@@ -14,7 +14,7 @@ const horizontalDragHandleClass = "horizontal-drag-handle";
 const verticalDragHandleClass = "vertical-drag-handle";
 const cornerDragHandleClass = "corner-drag-handle";
 
-const dragbarWidth = 7;
+const dragbarWidth = 9;
 const minLegendHeight = 100;
 const minLegendWidth = 100;
 
@@ -25,40 +25,40 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
     const resizable = element => {
         const dragLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "horizontal");
         });
         const dragTop = d3.drag().on("drag", function() {
             dragTopFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "vertical");
         });
         const dragRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "horizontal");
         });
         const dragBottom = d3.drag().on("drag", function() {
             dragBottomFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "vertical");
         });
 
         const dragTopLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
             dragTopFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "diagonal");
         });
         const dragTopRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
             dragTopFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "diagonal");
         });
         const dragBottomRight = d3.drag().on("drag", function() {
             dragRightFunc(this, d3.event, element);
             dragBottomFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "diagonal");
         });
         const dragBottomLeft = d3.drag().on("drag", function() {
             dragLeftFunc(this, d3.event, element);
             dragBottomFunc(this, d3.event, element);
-            functionCallOnResize(parameterCallOnResize);
+            functionCallOnResize(parameterCallOnResize, "diagonal");
         });
 
         const node = element.node();
@@ -85,7 +85,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", nodeRect.height - dragbarWidth * 2)
             .attr("width", dragbarWidth)
             .attr("fill", "lightblue")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "ew-resize")
             .call(dragLeft);
@@ -99,7 +99,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", nodeRect.width - dragbarWidth * 2)
             .attr("fill", "lightgreen")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "ns-resize")
             .call(dragTop);
@@ -113,7 +113,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", nodeRect.height - dragbarWidth * 2)
             .attr("width", dragbarWidth)
             .attr("fill", "lightblue")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "ew-resize")
             .call(dragRight);
@@ -127,7 +127,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", nodeRect.width - dragbarWidth * 2)
             .attr("fill", "lightgreen")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "ns-resize")
             .call(dragBottom);
@@ -141,7 +141,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", dragbarWidth)
             .attr("fill", "red")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "nwse-resize")
             .call(dragTopLeft);
@@ -155,7 +155,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", dragbarWidth)
             .attr("fill", "red")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "nesw-resize")
             .call(dragTopRight);
@@ -169,7 +169,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", dragbarWidth)
             .attr("fill", "red")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "nwse-resize")
             .call(dragBottomRight);
@@ -183,7 +183,7 @@ export function resizableComponent(onResizeFunction, onResizeParameter) {
             .attr("height", dragbarWidth)
             .attr("width", dragbarWidth)
             .attr("fill", "red")
-            .attr("fill-opacity", 0.5)
+            .attr("fill-opacity", 0.0)
             .style("z-index", 3)
             .attr("cursor", "nesw-resize")
             .call(dragBottomLeft);

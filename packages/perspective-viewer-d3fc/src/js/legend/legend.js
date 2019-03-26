@@ -15,7 +15,6 @@ import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import {draggableComponent} from "./styling/draggableComponent";
 import {resizableComponent} from "./styling/resizableComponent";
-import {cropCellContents} from "./styling/cropCellContents";
 
 const scrollColorLegend = settings =>
     scrollableLegend(
@@ -42,6 +41,7 @@ function symbolScale(fromScale) {
 
     const domain = fromScale.domain();
     const range = fromScale.range().map(r => d3.symbol().type(r)());
+
     return d3
         .scaleOrdinal()
         .domain(domain)
@@ -105,7 +105,7 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .style("z-index", "2")
                 .call(scrollLegend);
 
-            resizable = resizableComponent(scrollLegend, legendSelection);
+            resizable = resizableComponent(scrollLegend.useDynamicPageSize, legendSelection);
 
             draggable(legendSelection);
             resizable(legendSelection);

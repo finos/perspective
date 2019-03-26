@@ -14,14 +14,18 @@ import {cropCellContents} from "./styling/cropCellContents";
 
 export default (fromLegend, settings) => {
     const legend = fromLegend || d3Legend.legendColor();
+
+    const defaultPageSize = 15;
+
+    let domain = [];
     let pageCount = 1;
-    let pageSize = 15;
+    let pageSize = defaultPageSize;
     let pageIndex = settings.legend ? settings.legend.pageIndex : 0;
     let decorate = () => {};
 
     const scrollableLegend = selection => {
-        const domain = legend.scale().domain();
-        pageCount = Math.ceil(domain.length / pageSize);
+        domain = legend.scale().domain();
+        pageCount = calculatePageCount();
 
         render(selection);
     };
@@ -66,11 +70,11 @@ export default (fromLegend, settings) => {
         const legendElement = getLegendElement(selection);
         legendElement.call(legend);
 
-        const cellSize = selection
+        const cellContainerSize = selection
             .select("g.legendCells")
             .node()
             .getBBox();
-        legendElement.attr("height", cellSize.height + 20);
+        legendElement.attr("height", cellContainerSize.height + 20);
 
         decorate(selection);
     };
@@ -80,8 +84,32 @@ export default (fromLegend, settings) => {
         settings.legend = {pageIndex};
     };
 
-    const cellFilter = () => {
-        return (_, i) => i >= pageSize * pageIndex && i < pageSize * pageIndex + pageSize;
+    const cellFilter = () => (_, i) => i >= pageSize * pageIndex && i < pageSize * pageIndex + pageSize;
+
+    const calculatePageSize = selection => {
+        const legendContainerRect = selection.node().getBoundingClientRect();
+        const averageCellHeight = 16;
+        let proposedPageSize = Math.floor(legendContainerRect.height / averageCellHeight) - 1;
+
+        pageCount = calculatePageCount(proposedPageSize);
+
+        //if page size is less than all items, leave space for the legend controls
+        if (proposedPageSize < domain.length) {
+            pageSize = proposedPageSize - 1;
+        } else {
+            pageSize = proposedPageSize;
+        }
+
+        if (pageIndex > pageCount - 1) {
+            pageIndex = pageCount - 1;
+        }
+    };
+
+    const calculatePageCount = proposedPageSize => {
+        if (!!proposedPageSize) {
+            return Math.ceil(domain.length / proposedPageSize);
+        }
+        return Math.ceil(domain.length / pageSize);
     };
 
     const getLegendControls = container =>
@@ -100,6 +128,13 @@ export default (fromLegend, settings) => {
         }
         decorate = args[0];
         return scrollableLegend;
+    };
+
+    scrollableLegend.useDynamicPageSize = (selection, resizeDirection) => {
+        if (resizeDirection === "vertical" || resizeDirection === "diagonal") {
+            calculatePageSize(selection);
+        }
+        render(selection);
     };
 
     rebindAll(scrollableLegend, legend);
