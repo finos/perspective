@@ -243,12 +243,15 @@ module.exports = perspective => {
         it("`on_update()`", function(done) {
             var table = perspective.table(meta);
             var view = table.view();
-            view.on_update(function(new_data) {
-                expect(new_data).toEqual(data);
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                function(new_data) {
+                    expect(new_data).toEqual(data);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(data);
         });
 
@@ -257,15 +260,18 @@ module.exports = perspective => {
             var view = table.view();
             table.update(data);
             var ran = false;
-            view.on_update(function(new_data) {
-                if (!ran) {
-                    expect(new_data).toEqual(data);
-                    ran = true;
-                    view.delete();
-                    table.delete();
-                    done();
-                }
-            });
+            view.on_update(
+                function(new_data) {
+                    if (!ran) {
+                        expect(new_data).toEqual(data);
+                        ran = true;
+                        view.delete();
+                        table.delete();
+                        done();
+                    }
+                },
+                {mode: "rows"}
+            );
             table.update(data);
         });
 
@@ -274,16 +280,19 @@ module.exports = perspective => {
             var table2 = perspective.table(meta);
             var view1 = table1.view();
             var view2 = table2.view();
-            view1.on_update(async function(x) {
-                table2.update(x);
-                let result = await view2.to_json();
-                expect(result).toEqual(data);
-                view1.delete();
-                view2.delete();
-                table1.delete();
-                table2.delete();
-                done();
-            });
+            view1.on_update(
+                async function(x) {
+                    table2.update(x);
+                    let result = await view2.to_json();
+                    expect(result).toEqual(data);
+                    view1.delete();
+                    view2.delete();
+                    table1.delete();
+                    table2.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table1.update(data);
         });
 
@@ -295,16 +304,19 @@ module.exports = perspective => {
 
             table1.update(data);
             table2.update(data);
-            view1.on_update(async function(x) {
-                table2.update(x);
-                let result = await view2.to_json();
-                expect(result).toEqual(data.concat(data));
-                view1.delete();
-                view2.delete();
-                table1.delete();
-                table2.delete();
-                done();
-            });
+            view1.on_update(
+                async function(x) {
+                    table2.update(x);
+                    let result = await view2.to_json();
+                    expect(result).toEqual(data.concat(data));
+                    view1.delete();
+                    view2.delete();
+                    table1.delete();
+                    table2.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table1.update(data);
         });
     });
@@ -410,14 +422,17 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "x"});
             var view = table.view();
             table.update(data);
-            view.on_update(async function(new_data) {
-                expect(data_2).toEqual(new_data);
-                let json = await view.to_json();
-                expect(json).toEqual(data.slice(0, 2).concat(data_2));
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                async function(new_data) {
+                    expect(data_2).toEqual(new_data);
+                    let json = await view.to_json();
+                    expect(json).toEqual(data.slice(0, 2).concat(data_2));
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(data_2);
         });
 
@@ -425,14 +440,17 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(data);
-            view.on_update(async function(new_data) {
-                expect(data_2).toEqual(new_data);
-                let json = await view.to_json();
-                expect(json).toEqual(data.slice(0, 2).concat(data_2));
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                async function(new_data) {
+                    expect(data_2).toEqual(new_data);
+                    let json = await view.to_json();
+                    expect(json).toEqual(data.slice(0, 2).concat(data_2));
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(data_2);
         });
 
@@ -466,14 +484,17 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(data);
-            view.on_update(async function(new_data) {
-                expect(new_data).toEqual(expected.slice(0, 2));
-                let json = await view.to_json();
-                expect(json).toEqual(expected);
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                async function(new_data) {
+                    expect(new_data).toEqual(expected.slice(0, 2));
+                    let json = await view.to_json();
+                    expect(json).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(partial);
         });
 
@@ -488,14 +509,17 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(col_data);
-            view.on_update(async function(new_data) {
-                expect(new_data).toEqual(expected.slice(0, 2));
-                let json = await view.to_json();
-                expect(json).toEqual(expected);
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                async function(new_data) {
+                    expect(new_data).toEqual(expected.slice(0, 2));
+                    let json = await view.to_json();
+                    expect(json).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(partial);
         });
 
@@ -509,14 +533,17 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view();
             table.update(col_data);
-            view.on_update(async function(new_data) {
-                expect(new_data).toEqual(expected.slice(0, 2));
-                let json = await view.to_json();
-                expect(json).toEqual(expected);
-                view.delete();
-                table.delete();
-                done();
-            });
+            view.on_update(
+                async function(new_data) {
+                    expect(new_data).toEqual(expected.slice(0, 2));
+                    let json = await view.to_json();
+                    expect(json).toEqual(expected);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "rows"}
+            );
             table.update(partial);
         });
     });
