@@ -49,7 +49,7 @@ function legendComponent(scrollLegend, scaleModifier) {
     let draggable = draggableComponent();
 
     function legend(container) {
-        if (scale) {
+        if (scale && scale.range().length > 1) {
             scrollLegend
                 .scale(scale)
                 .orient("vertical")
