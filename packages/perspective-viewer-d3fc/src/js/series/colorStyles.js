@@ -10,12 +10,10 @@
 import * as d3 from "d3";
 
 let initialised = false;
-export const colorStyles = {
-    scheme: []
-};
+export const colorStyles = {};
 
-export const initialiseStyles = container => {
-    if (!initialised) {
+export const initialiseStyles = (container, settings) => {
+    if (!initialised || !settings.colorStyles) {
         const selection = d3.select(container);
         const chart = selection.append("svg").attr("class", "chart");
 
@@ -31,19 +29,30 @@ export const initialiseStyles = container => {
             .append("circle")
             .attr("class", d => d);
 
+        const styles = {
+            scheme: []
+        };
+
         testElements.each((d, i, nodes) => {
             const style = getComputedStyle(nodes[i]);
-            colorStyles[d] = style.getPropertyValue("fill");
+            styles[d] = style.getPropertyValue("fill");
 
             if (i > 0) {
-                colorStyles.scheme.push(colorStyles[d]);
+                styles.scheme.push(styles[d]);
             }
         });
 
-        colorStyles.opacity = getOpacityFromColor(colorStyles.series);
+        styles.opacity = getOpacityFromColor(styles.series);
 
         chart.remove();
-        initialised = true;
+
+        if (!initialised) {
+            Object.keys(styles).forEach(p => {
+                colorStyles[p] = styles[p];
+            });
+            initialised = true;
+        }
+        settings.colorStyles = styles;
     }
 };
 
