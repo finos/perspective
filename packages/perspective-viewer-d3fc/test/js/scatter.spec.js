@@ -12,6 +12,9 @@ const path = require("path");
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
+const {withTemplate} = require("./simple-template");
+withTemplate("scatter", "d3_xy_scatter", {columns: ["Sales", "Quantity"]});
+
 utils.with_server({}, () => {
     describe.page(
         "scatter.html",

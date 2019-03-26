@@ -12,9 +12,31 @@ const path = require("path");
 const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
+const {withTemplate} = require("./simple-template");
+
+withTemplate("bar", "d3_y_bar");
+withTemplate("bar-x", "d3_x_bar");
+withTemplate("bar-themed", "d3_y_bar", {template: "themed-template"});
+
 utils.with_server({}, () => {
     describe.page(
         "bar.html",
+        () => {
+            simple_tests.default();
+        },
+        {root: path.join(__dirname, "..", "..")}
+    );
+
+    describe.page(
+        "bar-x.html",
+        () => {
+            simple_tests.default();
+        },
+        {root: path.join(__dirname, "..", "..")}
+    );
+
+    describe.page(
+        "bar-themed.html",
         () => {
             simple_tests.default();
         },
