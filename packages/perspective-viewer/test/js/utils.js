@@ -18,6 +18,9 @@ const cp = require("child_process");
 
 const {WebSocketHost} = require("@jpmorganchase/perspective");
 
+const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
+const RESULTS_FILENAME = IS_LOCAL_PUPPETEER ? "results.local.json" : "results.json";
+
 let __PORT__;
 
 exports.with_server = function with_server({paths}, body) {
@@ -53,7 +56,9 @@ let browser,
     __name = "";
 
 beforeAll(async () => {
-    browser = await puppeteer.launch({args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]});
+    browser = await puppeteer.launch({
+        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
+    });
     page = await browser.newPage();
 
     page.shadow_click = async function(...path) {
@@ -100,7 +105,7 @@ beforeAll(async () => {
     });
 
     results = (() => {
-        const dir_name = path.join(test_root, "test", "results", "results.json");
+        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
         if (fs.existsSync(dir_name)) {
             return JSON.parse(fs.readFileSync(dir_name));
         } else if (fs.existsSync(dir_name)) {
@@ -113,7 +118,7 @@ beforeAll(async () => {
 afterAll(() => {
     browser.close();
     if (process.env.WRITE_TESTS) {
-        const dir_name = path.join(test_root, "test", "results", "results.json");
+        const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
         const results2 = (() => {
             if (fs.existsSync(dir_name)) {
                 return JSON.parse(fs.readFileSync(dir_name));
@@ -158,6 +163,17 @@ describe.page = (url, body, {reload_page = true, name, root} = {}) => {
         page_reload = old_reload;
         return result;
     });
+
+    if (IS_LOCAL_PUPPETEER && !fs.existsSync(path.join(test_root, "test", "results", "results.local.json")) && !process.env.WRITE_TESTS) {
+        throw new Error(`
+        
+ERROR: Running in puppeteer tests without "${RESULTS_FILENAME}"
+
+Please re-run with "yarn test --write" to generate initial screenshot diffs
+for your local OS.
+
+`);
+    }
 };
 
 test.run = function run(name, body, viewport = null) {
