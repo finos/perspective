@@ -638,39 +638,51 @@ export default function(Module) {
         return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
+    view.prototype._get_step_delta = async function() {
+        let delta = this._View.get_step_delta(0, 2147483647);
+        let data;
+        if (delta.cells.size() === 0) {
+            // FIXME This is currently not implemented for 1+ sided contexts.
+            data = await this.to_json();
+        } else {
+            let rows = {};
+            for (let x = 0; x < delta.cells.size(); x++) {
+                rows[delta.cells.get(x).row] = true;
+            }
+            rows = Object.keys(rows);
+            const results = await Promise.all(
+                rows.map(row =>
+                    this.to_json({
+                        start_row: Number.parseInt(row),
+                        end_row: Number.parseInt(row) + 1
+                    })
+                )
+            );
+            data = [].concat.apply([], results);
+        }
+        delta.cells.delete();
+        return data;
+    };
+
     /**
      * Register a callback with this {@link view}.  Whenever the {@link view}'s
      * underlying table emits an update, this callback will be invoked with the
      * aggregated row deltas.
      *
      * @param {function} callback A callback function invoked on update.  The
-     * parameter to this callback shares a structure with the return type of
-     * {@link view#to_json}.
+     * parameter to this callback is dependent on the `mode` parameter:
+     *     - "none" (default): The callback is invoked without an argument.
+     *     - "rows": The callback is invoked with the changed rows.
      */
-    view.prototype.on_update = function(callback) {
+    view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+        if (["none", "rows"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "rows"`);
+        }
         this.callbacks.push({
             view: this,
-            callback: () => {
-                if (this._View.get_step_delta) {
-                    let delta = this._View.get_step_delta(0, 2147483647);
-                    if (delta.cells.size() === 0) {
-                        this.to_json().then(callback);
-                    } else {
-                        let rows = {};
-                        for (let x = 0; x < delta.cells.size(); x++) {
-                            rows[delta.cells.get(x).row] = true;
-                        }
-                        rows = Object.keys(rows);
-                        Promise.all(
-                            rows.map(row =>
-                                this.to_json({
-                                    start_row: Number.parseInt(row),
-                                    end_row: Number.parseInt(row) + 1
-                                })
-                            )
-                        ).then(results => callback([].concat.apply([], results)));
-                    }
-                    delta.cells.delete();
+            callback: async () => {
+                if (mode === "rows") {
+                    callback(await this._get_step_delta());
                 } else {
                     callback();
                 }
