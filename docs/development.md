@@ -133,12 +133,29 @@ and `file.diff.png` are also generated, showing the divergent screenshot and a
 contrast diff respectively, so you can verify that the changed behavior
 either does or does not reflect your patch.  If you're confident that the
 screenshots reflect your change, you can update the new hashes manually in the
-`test/results/results.json` file, or update all hashes with the `WRITE_TESTS`
-environment variable:
+`test/results/results.json` file, or update all hashes with the `--wrte`
+flag:
 
 ```bash
 yarn test --write
 ```
+
+For quick local iteration and debugging failing tests, the puppeteer tests can
+use a local copy of Puppeteer, rather than relying on the supplied Docker image.
+These will run much quicker, and can be optionally run without `--headless`
+mode for debugging test failures quickly.  However, due to rendering
+inconsistencies between platforms, the resulting test hashes will not match the
+ones saved in `results.json`, so you will need to re-run the suite with the 
+`--write` flag to generate a `results.local.json` file specific to your OS.
+
+To toggle between Local and Docker Puppeteer, run
+
+```bash
+yarn toggle_puppeteer
+```
+
+This will install a local copy of puppeteer via `yarn` the first time it is run, 
+if a local puppeteer is not found.
 
 ## Benchmarking
 
