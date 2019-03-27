@@ -1928,6 +1928,8 @@ namespace binding {
         auto column_indices = data_slice->get_column_indices();
 
         if (column_indices.size() > 0) {
+            // for every column, go through the slice and pick out exactly what pieces of data
+            // belong to that column. Set them sequentially in the new array.
             t_uindex i = 0;
             auto iter = slice->begin();
             while (iter != slice->end()) {

@@ -75,6 +75,22 @@ View<CTX_T>::num_columns() const {
     return m_ctx->unity_get_column_count();
 }
 
+/**
+ * @brief Return correct number of columns when headers need to be skipped.
+ *
+ * @tparam
+ * @return std::int32_t
+ */
+template <>
+std::int32_t
+View<t_ctx2>::num_columns() const {
+    if (m_sorts.size() > 0) {
+        return m_ctx->unity_get_column_count() - m_aggregates.size();
+    } else {
+        return m_ctx->unity_get_column_count();
+    }
+}
+
 // Pivot table operations
 template <typename CTX_T>
 std::int32_t
@@ -350,8 +366,21 @@ View<t_ctx2>::get_data(
         column_indices = std::vector<t_uindex>(column_indices.begin() + start_col,
             column_indices.begin() + std::min(end_col, (t_uindex)column_indices.size()));
 
-        slice = m_ctx->get_data(
+        std::vector<t_tscalar> slice_with_headers = m_ctx->get_data(
             start_row, end_row, column_indices.front(), column_indices.back() + 1);
+
+        auto iter = slice_with_headers.begin();
+        while (iter != slice_with_headers.end()) {
+            t_uindex prev = column_indices.front();
+            for (auto idx = column_indices.begin(); idx != column_indices.end(); idx++) {
+                t_uindex col_num = *idx;
+                iter += col_num - prev;
+                prev = col_num;
+                slice.push_back(*iter);
+            }
+            if (iter != slice_with_headers.end())
+                iter++;
+        }
     } else {
         column_names = _column_names();
         slice = m_ctx->get_data(start_row, end_row, start_col, end_col);

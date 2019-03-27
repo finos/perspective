@@ -574,8 +574,8 @@ export default function(Module) {
     };
 
     /**
-     * The number of aggregated columns in this {@link module:perspective~view}.  This is affected by
-     * the "column_pivots" configuration parameter supplied to this {@link module:perspective~view}'s
+     * The number of aggregated columns in this {@link view}.  This is affected by
+     * the "column_pivot" configuration parameter supplied to this {@link view}'s
      * contructor.
      *
      * @async

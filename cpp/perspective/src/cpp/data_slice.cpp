@@ -46,8 +46,8 @@ template <typename CTX_T>
 t_data_slice<CTX_T>::~t_data_slice() {}
 
 /**
- * @brief Returns the t_tscalar at the declared indices in the data slice,
- * or an invalid t_tscalar if the indices should be skipped.
+ * @brief Returns the t_tscalar for the row/column in the data slice.
+ * If the row/column index is invalid, return a null-initialized t_tscalar.
  *
  * @param ridx row index into the slice
  * @param cidx column index into the slice
@@ -65,29 +65,6 @@ t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
     } else {
         rv = m_slice->at(idx);
     }
-    return rv;
-}
-
-template <>
-t_tscalar
-t_data_slice<t_ctx2>::get(t_uindex ridx, t_uindex cidx) const {
-    t_uindex idx = get_slice_idx(ridx, cidx);
-    t_tscalar rv;
-
-    if (m_column_indices.size() > 0) {
-        auto skip_cidx = std::find(m_column_indices.begin(), m_column_indices.end(), cidx);
-        if (skip_cidx == m_column_indices.end()) {
-            rv.clear();
-            return rv;
-        }
-    }
-
-    if (idx >= m_slice->size()) {
-        rv.clear();
-    } else {
-        rv = m_slice->at(idx);
-    }
-
     return rv;
 }
 

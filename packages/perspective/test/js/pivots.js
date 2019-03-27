@@ -491,7 +491,7 @@ module.exports = perspective => {
     });
 
     describe("Column pivot", function() {
-        it("['x'] only, schema", async function() {
+        it("['y'] only, schema", async function() {
             var table = perspective.table(data);
             var view = table.view({
                 column_pivot: ["y"]
@@ -518,7 +518,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("['x'] only, column-oriented output", async function() {
+        it("['z'] only, column-oriented output", async function() {
             var table = perspective.table(data_7);
             var view = table.view({
                 column_pivot: ["z"]
@@ -538,7 +538,25 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("['x'] only", async function() {
+        it("['y'] only sorted by ['x'] desc", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ["y"],
+                sort: [["x", "desc"]]
+            });
+            var answer = [
+                {"a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 4, "d|y": "d", "d|z": false},
+                {"a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 3, "c|y": "c", "c|z": true, "d|x": null, "d|y": null, "d|z": null},
+                {"a|x": null, "a|y": null, "a|z": null, "b|x": 2, "b|y": "b", "b|z": false, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
+                {"a|x": 1, "a|y": "a", "a|z": true, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null}
+            ];
+            let result2 = await view.to_json();
+            expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
+        it("['y'] only", async function() {
             var table = perspective.table(data);
             var view = table.view({
                 column_pivot: ["y"]
@@ -671,6 +689,19 @@ module.exports = perspective => {
 
             let result2 = await view.to_columns();
             expect(Object.keys(result2)).toEqual(["__ROW_PATH__", "C|x", "C|y", "B|x", "B|y", "A|x", "A|y"]);
+            view.delete();
+            table.delete();
+        });
+
+        it("['y'] by ['x'] sorted by ['x'] desc has the correct # of columns", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ["y"],
+                row_pivot: ["x"],
+                sort: [["x", "desc"]]
+            });
+            let num_cols = await view.num_columns();
+            expect(num_cols).toEqual(12);
             view.delete();
             table.delete();
         });
