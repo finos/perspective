@@ -135,8 +135,8 @@ export function default_config(aggregates, mode) {
     //
 
     // read this + define chart schema using _view()
-    const that = this,
-        config = that._view._config;
+    const that = this;
+    const config = this._config;
 
     const axis_titles = get_axis_titles(config.aggregate);
     const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
