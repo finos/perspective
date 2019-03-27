@@ -8,11 +8,10 @@
  */
 
 import * as d3 from "d3";
-import {extentLinear} from "d3fc";
 
 export function treeData(settings) {
     const sets = {};
-    settings.data.slice(1).forEach(d => {
+    settings.data.forEach(d => {
         const groups = d.__ROW_PATH__;
         const splits = getSplitNames(d);
         splits.forEach(split => {
@@ -45,7 +44,7 @@ export function treeData(settings) {
     const data = Object.entries(sets).map(set => {
         const tree = {name: "root", children: set[1]};
         const root = d3.hierarchy(tree).sum(d => d.size);
-        const color = treeColor(settings, set[0]);
+        const color = treeColor(settings, set);
         return {split: set[0], data: d3.partition().size([2 * Math.PI, root.height + 1])(root), color};
     });
 
@@ -70,10 +69,11 @@ function getSplitNames(d) {
     return splits;
 }
 
-function treeColor(settings, split) {
+function treeColor(settings, [split, data]) {
     if (settings.mainValues.length > 1) {
-        const colorDomain = extentLinear().accessors([d => getDataValue(d, settings.mainValues[1], split)])(settings.data);
-        return d3.scaleSequential(d3.interpolateRainbow).domain(colorDomain);
+        const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
+        const max = Math.max(...data.map(d => d.color));
+        return d3.scaleSequential(d3.interpolateRainbow).domain([min, max]);
     }
     return () => "rgb(31, 119, 180)";
 }
