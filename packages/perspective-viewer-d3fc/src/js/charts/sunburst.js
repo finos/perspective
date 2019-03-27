@@ -7,7 +7,6 @@
  *
  */
 
-import {select} from "d3";
 import {treeData} from "../data/treeData";
 import {clickHandler} from "../interaction/clickHandler";
 import {arc, arcVisible} from "../series/arcSeries";
