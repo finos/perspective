@@ -8,7 +8,6 @@
  */
 import * as fc from "d3fc";
 import {colorScale, setOpacity} from "../series/seriesColors";
-import {colorStyles} from "./colorStyles";
 
 const isUp = d => d.closeValue >= d.openValue;
 
@@ -16,9 +15,12 @@ export function ohlcCandleSeries(settings, seriesCanvas, upColor) {
     const domain = upColor.domain();
     const downColor = colorScale()
         .domain(domain)
-        .defaultColors([colorStyles["series-2"]])
+        .settings(settings)
+        .defaultColors([settings.colorStyles["series-2"]])
         .mapFunction(setOpacity(0.5))();
-    const avgColor = colorScale().domain(domain)();
+    const avgColor = colorScale()
+        .settings(settings)
+        .domain(domain)();
 
     const series = seriesCanvas()
         .crossValue(d => d.crossValue)

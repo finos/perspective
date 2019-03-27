@@ -7,43 +7,38 @@
  *
  */
 
-import * as d3 from "d3";
-
 let initialised = false;
-export const colorStyles = {
-    scheme: []
-};
+export const colorStyles = {};
 
-export const initialiseStyles = container => {
-    if (!initialised) {
-        const selection = d3.select(container);
-        const chart = selection.append("svg").attr("class", "chart");
-
+export const initialiseStyles = (container, settings) => {
+    if (!initialised || !settings.colorStyles) {
         const data = ["series"];
         for (let n = 1; n <= 10; n++) {
             data.push(`series-${n}`);
         }
 
-        const testElements = chart
-            .selectAll("circle")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("class", d => d);
+        const styles = {
+            scheme: []
+        };
 
-        testElements.each((d, i, nodes) => {
-            const style = getComputedStyle(nodes[i]);
-            colorStyles[d] = style.getPropertyValue("fill");
+        const computed = computedStyle(container);
+        data.forEach((d, i) => {
+            styles[d] = computed(`--d3fc-${d}`);
 
             if (i > 0) {
-                colorStyles.scheme.push(colorStyles[d]);
+                styles.scheme.push(styles[d]);
             }
         });
 
-        colorStyles.opacity = getOpacityFromColor(colorStyles.series);
+        styles.opacity = getOpacityFromColor(styles.series);
 
-        chart.remove();
-        initialised = true;
+        if (!initialised) {
+            Object.keys(styles).forEach(p => {
+                colorStyles[p] = styles[p];
+            });
+            initialised = true;
+        }
+        settings.colorStyles = styles;
     }
 };
 
@@ -53,4 +48,13 @@ const getOpacityFromColor = color => {
         return parseFloat(rgbColors[3]);
     }
     return 1;
+};
+
+const computedStyle = container => {
+    if (window.ShadyCSS) {
+        return d => window.ShadyCSS.getComputedStyleValue(container, d);
+    } else {
+        const containerStyles = getComputedStyle(container);
+        return d => containerStyles.getPropertyValue(d);
+    }
 };
