@@ -14,7 +14,7 @@
         "@babel/polyfill": "^7.0.0",
         "@babel/preset-env": "^7.1.5",
         "babel-eslint": "^8.2.3",
-        "babel-jest": "^23.6.0",
+        "babel-jest": "^24.5.0",
         "babel-plugin-transform-custom-element-classes": "^0.1.0",
         "babel-polyfill": "^6.26.0",
         "chart.js": "^2.7.1",
@@ -25,7 +25,7 @@
         "eslint": "^4.19.1",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
-        "jest": "^23.6.0",
+        "jest": "^24.5.0",
         "js-beautify": "^1.8.6",
         "jsdoc": "^3.5.5",
         "jsdoc-babel": "^0.5.0",
@@ -75,20 +75,12 @@
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js"
     },
     "jest": {
-        "roots": [
-            "packages/perspective/test/js",
-            "packages/perspective-viewer/test/js",
-            "packages/perspective-viewer-hypergrid/test/js",
-            "packages/perspective-viewer-highcharts/test/js",
-            "packages/perspective-viewer-d3fc/test/js"
-        ],
-        "verbose": true,
-        "testURL": "http://localhost/",
-        "transform": {},
-        "transformIgnorePatterns": [
-            "/node_modules/(?!@apache)",
-            "/build/"
-        ],
-        "automock": false
+        "projects": [
+            "packages/perspective",
+            "packages/perspective-viewer",
+            "packages/perspective-viewer-hypergrid",
+            "packages/perspective-viewer-highcharts",
+            "packages/perspective-viewer-d3fc"
+        ]
     }
 }

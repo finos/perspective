@@ -24,7 +24,7 @@ utils.with_server({}, () => {
         () => {
             simple_tests.default();
         },
-        {root: path.join(__dirname, "..", "..")}
+        {root: path.join(__dirname, "..", "..", "..")}
     );
 
     describe.page(
