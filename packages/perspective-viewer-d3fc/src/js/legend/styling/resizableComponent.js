@@ -220,6 +220,7 @@ export function resizableComponent() {
 
         function dragRightFunc(event) {
             const offset = -enforceMinDistToLeftBar(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles);
+            if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
 
             extendHandlesBox(handles, "width", offset);
@@ -241,6 +242,7 @@ export function resizableComponent() {
 
         function dragBottomFunc(event) {
             const offset = -enforceMinDistToTopBar(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles);
+            if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
 
             extendHandlesBox(handles, "height", offset);
@@ -315,6 +317,10 @@ export function resizableComponent() {
             return offset + difference;
         }
         return offset;
+    }
+
+    function pointerFallenBehindAbsoluteCoordinates(offset, axis, handle, event) {
+        return offset < 0 && event[axis] < Number(handle.attr(axis));
     }
 
     return resizable;
