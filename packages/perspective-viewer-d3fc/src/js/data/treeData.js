@@ -73,7 +73,7 @@ function treeColor(settings, [split, data]) {
     if (settings.mainValues.length > 1) {
         const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
         const max = Math.max(...data.map(d => d.color));
-        return d3.scaleSequential(d3.interpolateRainbow).domain([min, max]);
+        return d3.scaleSequential(d3.interpolateViridis).domain([min, max]);
     }
     return () => "rgb(31, 119, 180)";
 }
