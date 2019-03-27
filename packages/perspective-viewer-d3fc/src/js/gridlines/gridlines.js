@@ -7,7 +7,6 @@
  *
  */
 import * as fc from "d3fc";
-import annotationCanvasGridline from "../d3fc/annotation/canvas/gridline";
 
 const mainGridSvg = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
 const mainGridCanvas = c => {
@@ -35,7 +34,7 @@ export default series => {
     const _withGridLines = function(...args) {
         if (canvas) {
             seriesMulti = fc.seriesCanvasMulti().context(context);
-            annotationGridline = annotationCanvasGridline();
+            annotationGridline = fc.annotationCanvasGridline();
             mainGrid = mainGridCanvas;
             crossGrid = crossGridCanvas;
         }
