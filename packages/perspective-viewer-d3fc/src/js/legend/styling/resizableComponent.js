@@ -16,16 +16,6 @@ const cornerHandleClass = "corner-drag-handle";
 
 const handlesContainerId = "dragHandles";
 
-const leftHandleId = "dragleft";
-const topHandleId = "dragtop";
-const rightHandleId = "dragright";
-const bottomHandleId = "dragbottom";
-
-const topLeftHandleId = "dragtopleft";
-const topRightHandleId = "dragtopright";
-const bottomRightHandleId = "dragbottomright";
-const bottomLeftHandleId = "dragbottomleft";
-
 const fillOpacity = 0.0;
 
 export function resizableComponent() {
@@ -42,219 +32,125 @@ export function resizableComponent() {
     };
 
     const resizable = container => {
-        const dragLeft = d3.drag().on("drag", function() {
-            dragLeftFunc(d3.event);
-            executeCallbacks("horizontal");
-        });
-        const dragTop = d3.drag().on("drag", function() {
-            dragTopFunc(d3.event);
-            executeCallbacks("vertical");
-        });
-        const dragRight = d3.drag().on("drag", function() {
-            dragRightFunc(d3.event);
-            executeCallbacks("horizontal");
-        });
-        const dragBottom = d3.drag().on("drag", function() {
-            dragBottomFunc(d3.event);
-            executeCallbacks("vertical");
-        });
-
-        const dragTopLeft = d3.drag().on("drag", function() {
-            dragLeftFunc(d3.event);
-            dragTopFunc(d3.event);
-            executeCallbacks("diagonal");
-        });
-        const dragTopRight = d3.drag().on("drag", function() {
-            dragRightFunc(d3.event);
-            dragTopFunc(d3.event);
-            executeCallbacks("diagonal");
-        });
-        const dragBottomRight = d3.drag().on("drag", function() {
-            dragRightFunc(d3.event);
-            dragBottomFunc(d3.event);
-            executeCallbacks("diagonal");
-        });
-        const dragBottomLeft = d3.drag().on("drag", function() {
-            dragLeftFunc(d3.event);
-            dragBottomFunc(d3.event);
-            executeCallbacks("diagonal");
-        });
-
         if (handlesContainerExists(container)) {
             return;
         }
 
+        const dragHelper = {
+            left: () => executeCallbacks({horizontal: dragLeft(d3.event), vertical: false}),
+            top: () => executeCallbacks({horizontal: false, vertical: dragTop(d3.event)}),
+            right: () => executeCallbacks({horizontal: dragRight(d3.event), vertical: false}),
+            bottom: () => executeCallbacks({horizontal: false, vertical: dragBottom(d3.event)}),
+
+            topleft: () => executeCallbacks({horizontal: dragLeft(d3.event), vertical: dragTop(d3.event)}),
+            topright: () => executeCallbacks({horizontal: dragRight(d3.event), vertical: dragTop(d3.event)}),
+            bottomright: () => executeCallbacks({horizontal: dragRight(d3.event), vertical: dragBottom(d3.event)}),
+            bottomleft: () => executeCallbacks({horizontal: dragLeft(d3.event), vertical: dragBottom(d3.event)})
+        };
+
         const containerNode = container.node();
         const containerRect = containerNode.getBoundingClientRect();
-
         const handles = container
             .append("svg")
             .attr("id", handlesContainerId)
             .attr("width", containerRect.width)
             .attr("height", containerRect.height);
-
         const handlesGroup = handles.append("g");
 
-        const leftHandle = handlesGroup
-            .append("rect")
-            .attr("id", leftHandleId)
-            .attr("class", horizontalHandleClass)
-            .attr("y", () => handleWidth)
-            .attr("x", () => 0)
-            .attr("height", containerRect.height - handleWidth * 2)
-            .attr("width", handleWidth)
-            .attr("fill", "lightblue")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "ew-resize")
-            .call(dragLeft);
+        const isVertical = d => {
+            return d === "left" || d === "right";
+        };
+        const xCoordHelper = {left: 0, top: handleWidth, right: containerRect.width - handleWidth, bottom: handleWidth};
+        const yCoordHelper = {left: handleWidth, top: 0, right: handleWidth, bottom: containerRect.height - handleWidth};
+        const edgeHandles = ["left", "top", "right", "bottom"];
+        const [leftHandle, topHandle, rightHandle, bottomHandle] = edgeHandles.map(edge =>
+            handlesGroup
+                .append("rect")
+                .attr("id", `drag${edge}`)
+                .attr("class", isVertical(edge) ? verticalHandleClass : horizontalHandleClass)
+                .attr("y", yCoordHelper[edge])
+                .attr("x", xCoordHelper[edge])
+                .attr("height", isVertical(edge) ? containerRect.height - handleWidth * 2 : handleWidth)
+                .attr("width", isVertical(edge) ? handleWidth : containerRect.width - handleWidth * 2)
+                .attr("fill", isVertical(edge) ? "lightgreen" : "lightblue")
+                .attr("fill-opacity", fillOpacity)
+                .style("z-index", zIndex)
+                .attr("cursor", isVertical(edge) ? "ew-resize" : "ns-resize")
+                .call(d3.drag().on("drag", dragHelper[edge]))
+        );
 
-        const topHandle = handlesGroup
-            .append("rect")
-            .attr("id", topHandleId)
-            .attr("class", verticalHandleClass)
-            .attr("y", () => 0)
-            .attr("x", () => handleWidth)
-            .attr("height", handleWidth)
-            .attr("width", containerRect.width - handleWidth * 2)
-            .attr("fill", "lightgreen")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "ns-resize")
-            .call(dragTop);
+        const concatCornerEdges = corner => `${corner[0]}${corner[1]}`;
+        const cornerCursorHelper = {topleft: "nwse", topright: "nesw", bottomright: "nwse", bottomleft: "nesw"};
+        const cornerHandles = [["top", "left"], ["top", "right"], ["bottom", "right"], ["bottom", "left"]];
+        const [topLeftHandle, topRightHandle, bottomRightHandle, bottomLeftHandle] = cornerHandles.map(corner =>
+            handlesGroup
+                .append("rect")
+                .attr("id", `drag${concatCornerEdges(corner)}`)
+                .attr("class", `${cornerHandleClass} ${corner[0]} ${corner[1]}`)
+                .attr("height", handleWidth)
+                .attr("width", handleWidth)
+                .attr("fill", "red")
+                .attr("fill-opacity", fillOpacity)
+                .style("z-index", zIndex)
+                .attr("cursor", `${cornerCursorHelper[concatCornerEdges(corner)]}-resize`)
+                .call(d3.drag().on("drag", dragHelper[concatCornerEdges(corner)]))
+        );
 
-        const rightHandle = handlesGroup
-            .append("rect")
-            .attr("id", rightHandleId)
-            .attr("class", horizontalHandleClass)
-            .attr("y", () => handleWidth)
-            .attr("x", () => containerRect.width - handleWidth)
-            .attr("height", containerRect.height - handleWidth * 2)
-            .attr("width", handleWidth)
-            .attr("fill", "lightblue")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "ew-resize")
-            .call(dragRight);
+        pinCorners(handles);
 
-        const bottomHandle = handlesGroup
-            .append("rect")
-            .attr("id", bottomHandleId)
-            .attr("class", verticalHandleClass)
-            .attr("y", () => containerRect.height - handleWidth)
-            .attr("x", () => handleWidth)
-            .attr("height", handleWidth)
-            .attr("width", containerRect.width - handleWidth * 2)
-            .attr("fill", "lightgreen")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "ns-resize")
-            .call(dragBottom);
-
-        handlesGroup
-            .append("rect")
-            .attr("id", topLeftHandleId)
-            .attr("class", `${cornerHandleClass} top left`)
-            .attr("y", () => 0)
-            .attr("x", () => 0)
-            .attr("height", handleWidth)
-            .attr("width", handleWidth)
-            .attr("fill", "red")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "nwse-resize")
-            .call(dragTopLeft);
-
-        const topRightHandle = handlesGroup
-            .append("rect")
-            .attr("id", topRightHandleId)
-            .attr("class", `${cornerHandleClass} top right`)
-            .attr("y", () => 0)
-            .attr("x", () => containerRect.width - handleWidth)
-            .attr("height", handleWidth)
-            .attr("width", handleWidth)
-            .attr("fill", "red")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "nesw-resize")
-            .call(dragTopRight);
-
-        const bottomRightHandle = handlesGroup
-            .append("rect")
-            .attr("id", bottomRightHandleId)
-            .attr("class", `${cornerHandleClass} bottom right`)
-            .attr("y", () => containerRect.height - handleWidth)
-            .attr("x", () => containerRect.width - handleWidth)
-            .attr("height", handleWidth)
-            .attr("width", handleWidth)
-            .attr("fill", "red")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "nwse-resize")
-            .call(dragBottomRight);
-
-        const bottomLeftHandle = handlesGroup
-            .append("rect")
-            .attr("id", bottomLeftHandleId)
-            .attr("class", `${cornerHandleClass} bottom left`)
-            .attr("y", () => containerRect.height - handleWidth)
-            .attr("x", () => 0)
-            .attr("height", handleWidth)
-            .attr("width", handleWidth)
-            .attr("fill", "red")
-            .attr("fill-opacity", fillOpacity)
-            .style("z-index", zIndex)
-            .attr("cursor", "nesw-resize")
-            .call(dragBottomLeft);
-
-        function dragLeftFunc(event) {
+        function dragLeft(event) {
             const offset = enforceMinDistToRightBar(enforceContainerBoundaries(leftHandle.node(), event.x, 0).x, handles);
             containerNode.style.left = `${containerNode.offsetLeft + offset}px`;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
 
             extendHandlesBox(handles, "width", offset);
             pinHandleToHandleBoxEdge(rightHandle, "x", offset);
-            extendPerpendicularHandles(handles, offset, "width", verticalHandleClass);
+            extendPerpendicularHandles(handles, offset, "width", horizontalHandleClass);
             pinCorners(handles);
+            return offset != 0;
         }
 
-        function dragRightFunc(event) {
+        function dragRight(event) {
             const offset = -enforceMinDistToLeftBar(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles);
-            if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return;
+            if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return false;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
 
             extendHandlesBox(handles, "width", offset);
             pinHandleToHandleBoxEdge(rightHandle, "x", offset);
-            extendPerpendicularHandles(handles, offset, "width", verticalHandleClass);
+            extendPerpendicularHandles(handles, offset, "width", horizontalHandleClass);
             pinCorners(handles);
+            return offset != 0;
         }
 
-        function dragTopFunc(event) {
+        function dragTop(event) {
             const offset = enforceMinDistToBottomBar(enforceContainerBoundaries(topHandle.node(), 0, event.y).y, handles);
             containerNode.style.top = `${containerNode.offsetTop + offset}px`;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
 
             extendHandlesBox(handles, "height", offset);
             pinHandleToHandleBoxEdge(bottomHandle, "y", offset);
-            extendPerpendicularHandles(handles, offset, "height", horizontalHandleClass);
+            extendPerpendicularHandles(handles, offset, "height", verticalHandleClass);
             pinCorners(handles);
+            return offset != 0;
         }
 
-        function dragBottomFunc(event) {
+        function dragBottom(event) {
             const offset = -enforceMinDistToTopBar(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles);
-            if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return;
+            if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return false;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
 
             extendHandlesBox(handles, "height", offset);
             pinHandleToHandleBoxEdge(bottomHandle, "y", offset);
-            extendPerpendicularHandles(handles, offset, "height", horizontalHandleClass);
+            extendPerpendicularHandles(handles, offset, "height", verticalHandleClass);
             pinCorners(handles);
+            return offset != 0;
         }
 
         function pinCorners(handles) {
-            topRightHandle.attr("y", () => 0).attr("x", () => handles.attr("width") - handleWidth);
-            bottomRightHandle.attr("y", () => handles.attr("height") - handleWidth).attr("x", () => handles.attr("width") - handleWidth);
-            bottomLeftHandle.attr("y", () => handles.attr("height") - handleWidth).attr("x", () => 0);
+            topLeftHandle.attr("y", 0, "x", 0);
+            topRightHandle.attr("y", 0).attr("x", handles.attr("width") - handleWidth);
+            bottomRightHandle.attr("y", handles.attr("height") - handleWidth).attr("x", handles.attr("width") - handleWidth);
+            bottomLeftHandle.attr("y", handles.attr("height") - handleWidth).attr("x", 0);
         }
     };
 

@@ -126,8 +126,8 @@ export default (fromLegend, settings) => {
         return scrollableLegend;
     };
 
-    scrollableLegend.useDynamicPageSize = (selection, resizeDirection) => {
-        if (resizeDirection === "vertical" || resizeDirection === "diagonal") {
+    scrollableLegend.useDynamicPageSize = (selection, resizedOnAxes) => {
+        if (resizedOnAxes.vertical === true) {
             calculatePageSize(selection);
         }
         render(selection);
