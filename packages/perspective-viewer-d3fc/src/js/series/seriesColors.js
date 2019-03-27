@@ -95,16 +95,8 @@ export function withOpacity(color) {
 
 export function setOpacity(opacity) {
     return color => {
-        const toInt = (c, offset, length) => parseInt(c.substring(offset, offset + length) + (length === 1 ? "0" : ""), 16);
-        const colorsFromRGB = c =>
-            c
-                .substring(c.indexOf("(") + 1)
-                .split(",")
-                .map(d => parseInt(d))
-                .slice(0, 3);
-        const colorsFromHex = c => (c.length === 4 ? [toInt(c, 1, 1), toInt(c, 2, 1), toInt(c, 3, 1)] : [toInt(c, 1, 2), toInt(c, 3, 2), toInt(c, 5, 2)]);
-
-        const colors = color.includes("rgb") ? colorsFromRGB(color) : colorsFromHex(color);
-        return opacity === 1 ? `rgb(${colors.join(",")})` : `rgba(${colors.join(",")},${opacity})`;
+        const decoded = d3.color(color);
+        decoded.opacity = opacity;
+        return decoded + "";
     };
 }

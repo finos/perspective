@@ -10,6 +10,25 @@
   --d3fc-series-8: #7f7f7f;
   --d3fc-series-9: #bcbd22;
   --d3fc-series-10: #17becf;
+  --d3fc-gradient-full: linear-gradient(
+        #4d342f 0%,
+        #e4521b 22.5%,
+        #feeb65 42.5%,
+        #f0f0f0 50%,
+        #dcedc8 57.5%,
+        #42b3d5 67.5%,
+        #1a237e 100%
+    );
+  --d3fc-gradient-positive: linear-gradient(
+    #dcedc8 0%,
+    #42b3d5 35%,
+    #1a237e 100%
+  );
+  --d3fc-gradient-negative: linear-gradient(
+    #feeb65 100%,
+    #e4521b 70%,
+    #4d342f 0%
+  );
 }
 
 :host([view=d3_xy_scatter]), :host([view=d3_candlestick]), :host([view=d3_ohlc]) {
