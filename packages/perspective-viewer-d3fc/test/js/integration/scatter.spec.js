@@ -13,33 +13,14 @@ const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-
-withTemplate("bar", "d3_y_bar");
-withTemplate("bar-x", "d3_x_bar");
-withTemplate("bar-themed", "d3_y_bar", {template: "themed-template"});
+withTemplate("scatter", "d3_xy_scatter", {columns: ["Sales", "Quantity"]});
 
 utils.with_server({}, () => {
     describe.page(
-        "bar.html",
+        "scatter.html",
         () => {
             simple_tests.default();
         },
-        {root: path.join(__dirname, "..", "..")}
-    );
-
-    describe.page(
-        "bar-x.html",
-        () => {
-            simple_tests.default();
-        },
-        {root: path.join(__dirname, "..", "..")}
-    );
-
-    describe.page(
-        "bar-themed.html",
-        () => {
-            simple_tests.default();
-        },
-        {root: path.join(__dirname, "..", "..")}
+        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );
 });

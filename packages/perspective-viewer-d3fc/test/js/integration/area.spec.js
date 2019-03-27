@@ -13,14 +13,14 @@ const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
 const simple_tests = require("@jpmorganchase/perspective-viewer/test/js/simple_tests.js");
 
 const {withTemplate} = require("./simple-template");
-withTemplate("scatter", "d3_xy_scatter", {columns: ["Sales", "Quantity"]});
+withTemplate("area", "d3_y_area");
 
 utils.with_server({}, () => {
     describe.page(
-        "scatter.html",
+        "area.html",
         () => {
             simple_tests.default();
         },
-        {reload_page: false, root: path.join(__dirname, "..", "..")}
+        {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );
 });
