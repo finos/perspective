@@ -21,17 +21,16 @@ export function draggableComponent() {
         node.style.cursor = "move";
 
         const drag = d3.drag().on("drag", function() {
-            const [offsetX, offsetY] = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
-            this.style.left = `${this.offsetLeft + offsetX}px`;
-            this.style.top = `${this.offsetTop + offsetY}px`;
+            const offsets = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
+            this.style.left = `${this.offsetLeft + offsets.x}px`;
+            this.style.top = `${this.offsetTop + offsets.y}px`;
 
-            const element = d3.select(this);
             if (isNodeInTopRight(node)) {
                 pinned = pinNodeToTopRight(node);
                 return;
             }
 
-            pinned = unpinNodeFromTopRight(node, element, pinned);
+            pinned = unpinNodeFromTopRight(node, pinned);
         });
 
         element.call(drag);
@@ -40,14 +39,14 @@ export function draggableComponent() {
     return draggable;
 }
 
-function unpinNodeFromTopRight(node, element, pinned) {
+function unpinNodeFromTopRight(node, pinned) {
     if (pinned !== false) {
         // Default behaviour for the legend is to remain pinned to the top right hand corner with a specific margin.
         // Once the legend has moved we cannot continue to use that css based approach.
         d3.select(window).on(resizeForDraggingEvent, function() {
-            const [offsetX, offsetY] = enforceContainerBoundaries(node, 0, 0);
-            node.style.left = `${node.offsetLeft + offsetX}px`;
-            node.style.top = `${node.offsetTop + offsetY}px`;
+            const offsets = enforceContainerBoundaries(node, 0, 0);
+            node.style.left = `${node.offsetLeft + offsets.x}px`;
+            node.style.top = `${node.offsetTop + offsets.y}px`;
         });
     }
     return false;

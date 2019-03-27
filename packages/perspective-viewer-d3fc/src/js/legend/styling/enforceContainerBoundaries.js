@@ -38,5 +38,5 @@ export function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
         }
     });
 
-    return [adjustedOffsets.x, adjustedOffsets.y];
+    return adjustedOffsets;
 }

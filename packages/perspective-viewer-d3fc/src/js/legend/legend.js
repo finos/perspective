@@ -53,7 +53,11 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
     let scale = null;
     let color = null;
     let draggable = draggableComponent();
-    let resizable = resizableComponent();
+    let resizable = resizableComponent()
+        .zIndex(3)
+        .minHeight(100)
+        .minWidth(100)
+        .handleWidth(9);
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
