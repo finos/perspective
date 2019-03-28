@@ -18,9 +18,19 @@ export function seriesLinearRange(settings, data, valueName) {
 }
 
 export function seriesColorRange(settings, data, valueName) {
-    return d3.scaleSequential(d3.interpolateViridis).domain(
-        domain()
-            .valueName(valueName)
-            .pad([0, 0])(data)
-    );
+    let extent = domain()
+        .valueName(valueName)
+        .pad([0, 0])(data);
+    let interpolator = settings.colorStyles.interpolator.full;
+
+    if (extent[0] >= 0) {
+        interpolator = settings.colorStyles.interpolator.positive;
+    } else if (extent[1] <= 0) {
+        interpolator = settings.colorStyles.interpolator.negative;
+    } else {
+        const maxVal = Math.max(-extent[0], extent[1]);
+        extent = [-maxVal, maxVal];
+    }
+
+    return d3.scaleSequential(interpolator).domain(extent);
 }
