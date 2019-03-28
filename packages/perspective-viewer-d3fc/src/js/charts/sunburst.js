@@ -18,44 +18,58 @@ function sunburst(container, settings) {
     const padding = 30;
     const radius = (Math.min(containerWidth, containerHeight) - padding) / 6;
 
-    const sunburstContainer = container.selectAll("svg").data(treeData(settings));
-    sunburstContainer.exit().remove();
-    sunburstContainer
-        .enter()
-        .append("svg")
-        .style("width", "100%")
-        .style("height", containerHeight - padding / 2)
-        .append("g")
+    const sunburstSvg = container.selectAll("svg").data(treeData(settings), d => d.split);
+    sunburstSvg.exit().remove();
+
+    const sunburstEnter = sunburstSvg.enter().append("svg");
+    const sunburstContainer = sunburstEnter.append("g").attr("class", "sunburst");
+    sunburstContainer.append("circle");
+    sunburstContainer.append("text");
+    sunburstEnter
+        .merge(sunburstSvg)
+        .style("width", containerWidth)
+        .style("height", containerHeight)
+        .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2}, ${containerHeight / 2})`)
         .each(function({data, color}) {
             const sunburstElement = select(this);
             data.each(d => (d.current = d));
 
-            const path = sunburstElement
+            const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
+            const segmentEnter = segment
+                .enter()
                 .append("g")
-                .selectAll("path")
-                .data(data.descendants().slice(1))
-                .join("path")
+                .attr("class", "segment")
+                .attr("text-anchor", "middle");
+            segmentEnter.append("path");
+            segmentEnter.append("text");
+
+            const segmentMerge = segmentEnter.merge(segment);
+
+            const path = segmentMerge
+                .select("path")
                 .attr("fill", d => color(d.data.color))
                 .attr("fill-opacity", d => (arcVisible(d.current) ? 0.8 : 0))
+                .attr("user-select", d => (arcVisible(d.current) ? "initial" : "none"))
+                .attr("pointer-events", d => (arcVisible(d.current) ? "initial" : "none"))
                 .attr("d", d => drawArc(radius)(d.current));
 
-            const label = sunburstElement
-                .append("g")
-                .attr("pointer-events", "none")
-                .attr("text-anchor", "middle")
-                .style("user-select", "none")
-                .selectAll("text")
-                .data(data.descendants().slice(1))
-                .join("text")
+            const label = segmentMerge
+                .select("text")
                 .attr("dy", "0.35em")
+                .attr("user-select", "none")
+                .attr("pointer-events", "none")
                 .attr("fill-opacity", d => +labelVisible(d.current))
                 .attr("transform", d => labelTransform(d.current, radius))
                 .text(d => d.data.name);
 
-            const parentTitle = sunburstElement.append("text").attr("text-anchor", "middle");
+            const parentTitle = sunburstElement
+                .select("text")
+                .attr("text-anchor", "middle")
+                .attr("user-select", "none")
+                .attr("pointer-events", "none");
             const parent = sunburstElement
-                .append("circle")
+                .select("circle")
                 .attr("r", radius)
                 .attr("fill", "none")
                 .attr("pointer-events", "all")
