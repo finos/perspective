@@ -10,3 +10,7 @@
 export function getChartElement(element) {
     return element.getRootNode().host;
 }
+
+export function getChartContainer(element) {
+    return getChartElement(element).getContainer();
+}

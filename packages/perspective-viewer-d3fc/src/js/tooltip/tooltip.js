@@ -8,7 +8,7 @@
  */
 
 import {select} from "d3";
-import {getChartElement} from "../plugin/root";
+import {getChartContainer} from "../plugin/root";
 import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import {generateHtml} from "./generateHTML";
@@ -27,7 +27,7 @@ export const tooltip = () => {
             return;
         }
 
-        const container = select(getChartElement(node).getContainer());
+        const container = select(getChartContainer(node));
         tooltipDiv = getTooltipDiv(container);
 
         const showTip = (data, i, nodes) => {

@@ -11,6 +11,7 @@ import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import withoutTicks from "./withoutTicks";
 import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
+import {getChartContainer} from "../plugin/root";
 
 const AXIS_TYPES = {
     none: "none",
@@ -145,13 +146,14 @@ export const axisFactory = settings => {
                             .tickSizeInner(tickSizeInner)
                             .tickSizeOuter(tickSizeOuter);
                     }
+                    if (orient !== "horizontal") axis.tickPadding(10);
                     return axis;
                 };
 
                 const decorate = (s, data, index) => {
-                    const rotated = groupTickLayout[index].rotate;
-                    hideOverlappingLabels(s, rotated);
-                    if (orient === "horizontal") applyLabelRotation(s, rotated);
+                    const rotation = groupTickLayout[index].rotation;
+                    if (orient === "horizontal") applyLabelRotation(s, rotation);
+                    hideOverlappingLabels(s, rotation);
                 };
 
                 return {
@@ -201,21 +203,26 @@ export const axisFactory = settings => {
 
         if (orient === "horizontal") {
             // x-axis may rotate labels and expand the available height
-            if (group.length * (maxLength * 6 + 10) > width - 100) {
+            if (group.length * 16 > width - 100) {
+                return {
+                    size: maxLength * 5 + 10,
+                    rotation: 90
+                };
+            } else if (group.length * (maxLength * 6 + 10) > width - 100) {
                 return {
                     size: maxLength * 3 + 20,
-                    rotate: true
+                    rotation: 45
                 };
             }
             return {
                 size: 25,
-                rotate: false
+                rotation: 0
             };
         } else {
             // y-axis size always based on label size
             return {
                 size: maxLength * 5 + 10,
-                rotate: false
+                rotation: 0
             };
         }
     };
@@ -228,39 +235,70 @@ export const axisFactory = settings => {
                 .map(c => parseInt(c));
 
         const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
-        const rotatedLabelsOverlap = (r1, r2) => r1.x + 14 > r2.x;
+        const rotatedLabelsOverlap = (r1, r2) => r1.x + r1.width + 14 > r2.x + r2.width;
+        const isOverlap = rotated ? rotatedLabelsOverlap : rectanglesOverlap;
+
+        const rectangleContained = (r1, r2) => r1.x >= r2.x && r1.x + r1.width <= r2.x + r2.width && r1.y >= r2.y && r1.y + r1.height <= r2.y + r2.height;
+        // The bounds rect is the available screen space a label can fit into
+        const boundsRect = orient == "horizontal" ? getXAxisBoundsRect(s) : null;
 
         const previousRectangles = [];
         s.each((d, i, nodes) => {
             const tick = d3.select(nodes[i]);
-            const text = tick.select("text");
 
+            // How the "tick" element is transformed (x/y)
             const transformCoords = getTransformCoords(tick.attr("transform"));
 
-            let rect = {};
-            let overlap = false;
-            if (rotated) {
-                rect = {x: transformCoords[0], y: transformCoords[1]};
-                overlap = previousRectangles.some(r => rotatedLabelsOverlap(r, rect));
-            } else {
-                const textRect = text.node().getBBox();
-                rect = {x: textRect.x + transformCoords[0], y: textRect.y + transformCoords[1], width: textRect.width, height: textRect.height};
-                overlap = previousRectangles.some(r => rectanglesOverlap(r, rect));
-            }
+            // Work out the actual rectanble the label occupies
+            const tickRect = tick.node().getBBox();
+            const rect = {x: tickRect.x + transformCoords[0], y: tickRect.y + transformCoords[1], width: tickRect.width, height: tickRect.height};
 
-            text.attr("visibility", overlap ? "hidden" : "");
-            if (!overlap) {
+            const overlap = previousRectangles.some(r => isOverlap(r, rect));
+
+            // Test that it also fits into the screen space
+            const hidden = overlap || (boundsRect && !rectangleContained(rect, boundsRect));
+
+            tick.attr("visibility", hidden ? "hidden" : "");
+            if (!hidden) {
                 previousRectangles.push(rect);
             }
         });
     };
 
-    const applyLabelRotation = (s, rotate) => {
+    const getXAxisBoundsRect = s => {
+        const chart = getChartContainer(s.node())
+            .getRootNode()
+            .querySelector(".cartesian-chart");
+        const axis = chart.querySelector(".x-axis");
+
+        const chartRect = chart.getBoundingClientRect();
+        const axisRect = axis.getBoundingClientRect();
+        return {
+            x: chartRect.x - axisRect.x,
+            width: chartRect.width,
+            y: chartRect.y - axisRect.y,
+            height: chartRect.height
+        };
+    };
+
+    const getLabelTransform = rotation => {
+        if (!rotation) {
+            return "translate(0, 8)";
+        }
+        if (rotation < 60) {
+            return `rotate(-${rotation} 5 5)`;
+        }
+        return `rotate(-${rotation} 3 7)`;
+    };
+
+    const applyLabelRotation = (s, rotation) => {
+        const transform = getLabelTransform(rotation);
+        const anchor = rotation ? "end" : "";
         s.each((d, i, nodes) => {
             const tick = d3.select(nodes[i]);
             const text = tick.select("text");
 
-            text.attr("transform", rotate ? "rotate(-45 5 5)" : "translate(0, 8)").style("text-anchor", rotate ? "end" : "");
+            text.attr("transform", transform).style("text-anchor", anchor);
         });
     };
 

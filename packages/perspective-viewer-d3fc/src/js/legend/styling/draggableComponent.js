@@ -9,7 +9,7 @@
 
 import * as d3 from "d3";
 import {isElementOverflowing} from "../../utils/utils";
-import {getChartElement} from "../../plugin/root";
+import {getChartContainer} from "../../plugin/root";
 
 const margin = 10;
 const resizeForDraggingEvent = "resize.for-dragging";
@@ -63,7 +63,7 @@ function pinNodeToTopRight(node) {
 function isNodeInTopRight(node) {
     const nodeRect = node.getBoundingClientRect();
     const containerRect = d3
-        .select(getChartElement(node).getContainer())
+        .select(getChartContainer(node))
         .node()
         .getBoundingClientRect();
 
@@ -74,7 +74,7 @@ function isNodeInTopRight(node) {
 
 function enforceContainerBoundaries(innerNode, offsetX, offsetY) {
     const chartNodeRect = d3
-        .select(getChartElement(innerNode).getContainer())
+        .select(getChartContainer(innerNode))
         .node()
         .getBoundingClientRect();
 
