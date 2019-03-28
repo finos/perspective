@@ -606,6 +606,13 @@ t_ctx2::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return rval;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
 
@@ -677,6 +684,11 @@ t_ctx2::reset() {
 
     m_rtraversal = std::make_shared<t_traversal>(rtree(), m_config.handle_nan_sort());
     m_ctraversal = std::make_shared<t_traversal>(ctree(), m_config.handle_nan_sort());
+}
+
+bool
+t_ctx2::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
 }
 
 void

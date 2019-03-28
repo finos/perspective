@@ -36,6 +36,8 @@ void reset();
 
 t_index sidedness() const;
 
+bool get_deltas_enabled() const;
+
 void set_alerts_enabled(bool enabled_state);
 
 void set_deltas_enabled(bool enabled_state);

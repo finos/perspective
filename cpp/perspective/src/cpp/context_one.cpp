@@ -301,6 +301,11 @@ t_ctx1::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return rval;
 }
 
+bool
+t_ctx1::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
+}
+
 void
 t_ctx1::set_feature_state(t_ctx_feature feature, bool state) {
     m_features[feature] = state;
@@ -331,6 +336,13 @@ t_ctx1::get_min_max() const {
     return m_minmax;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     PSP_TRACE_SENTINEL();

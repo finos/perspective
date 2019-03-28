@@ -50,6 +50,10 @@ public:
     std::shared_ptr<t_data_slice<CTX_T>> get_data(
         t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
 
+    // Delta calculation
+    bool _get_deltas_enabled() const;
+    void _set_deltas_enabled(bool enabled_state);
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;

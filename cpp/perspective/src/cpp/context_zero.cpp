@@ -209,6 +209,13 @@ t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return out_data;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return std::vector<t_cellupd>
+ */
 std::vector<t_cellupd>
 t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
     std::unordered_set<t_tscalar> pkeys;
@@ -268,6 +275,13 @@ t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
     return rval;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, m_traversal->size());
@@ -449,6 +463,16 @@ t_ctx0::disable() {
 void
 t_ctx0::enable() {
     m_features[CTX_FEAT_ENABLED] = true;
+}
+
+bool
+t_ctx0::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
+}
+
+void
+t_ctx0::set_deltas_enabled(bool enabled_state) {
+    m_features[CTX_FEAT_DELTA] = enabled_state;
 }
 
 std::vector<t_stree*>

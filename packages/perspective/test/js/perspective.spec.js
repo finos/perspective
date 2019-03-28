@@ -21,6 +21,7 @@ if (!process.env.PSP_DEBUG) {
 const clear_tests = require("./clear.js");
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
+const delta_tests = require("./delta.js");
 const update_tests = require("./updates.js");
 const filter_tests = require("./filters.js");
 const internal_tests = require("./internal.js");
@@ -32,6 +33,7 @@ describe("perspective.js", function() {
             clear_tests(RUNTIMES[mode]);
             constructor_tests(RUNTIMES[mode]);
             pivot_tests(RUNTIMES[mode]);
+            delta_tests(RUNTIMES[mode]);
             update_tests(RUNTIMES[mode]);
             filter_tests(RUNTIMES[mode]);
             toformat_tests(RUNTIMES[mode]);
