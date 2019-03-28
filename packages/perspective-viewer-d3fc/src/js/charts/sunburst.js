@@ -23,8 +23,17 @@ function sunburst(container, settings) {
 
     const sunburstEnter = sunburstSvg.enter().append("svg");
     const sunburstContainer = sunburstEnter.append("g").attr("class", "sunburst");
-    sunburstContainer.append("circle");
-    sunburstContainer.append("text");
+    sunburstContainer
+        .append("circle")
+        .attr("fill", "none")
+        .attr("pointer-events", "all");
+
+    sunburstContainer
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("user-select", "none")
+        .attr("pointer-events", "none");
+
     sunburstEnter
         .merge(sunburstSvg)
         .style("width", containerWidth)
@@ -41,8 +50,13 @@ function sunburst(container, settings) {
                 .append("g")
                 .attr("class", "segment")
                 .attr("text-anchor", "middle");
+
             segmentEnter.append("path");
-            segmentEnter.append("text");
+            segmentEnter
+                .append("text")
+                .attr("dy", "0.35em")
+                .attr("user-select", "none")
+                .attr("pointer-events", "none");
 
             const segmentMerge = segmentEnter.merge(segment);
 
@@ -56,23 +70,14 @@ function sunburst(container, settings) {
 
             const label = segmentMerge
                 .select("text")
-                .attr("dy", "0.35em")
-                .attr("user-select", "none")
-                .attr("pointer-events", "none")
                 .attr("fill-opacity", d => +labelVisible(d.current))
                 .attr("transform", d => labelTransform(d.current, radius))
                 .text(d => d.data.name);
 
-            const parentTitle = sunburstElement
-                .select("text")
-                .attr("text-anchor", "middle")
-                .attr("user-select", "none")
-                .attr("pointer-events", "none");
+            const parentTitle = sunburstElement.select("text");
             const parent = sunburstElement
                 .select("circle")
                 .attr("r", radius)
-                .attr("fill", "none")
-                .attr("pointer-events", "all")
                 .datum(data);
 
             const onClick = clickHandler(data, sunburstElement, parent, parentTitle, path, label, radius);
