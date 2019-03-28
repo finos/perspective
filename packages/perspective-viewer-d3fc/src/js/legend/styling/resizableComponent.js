@@ -19,7 +19,7 @@ const handlesContainerId = "dragHandles";
 const fillOpacity = 0.0;
 
 export function resizableComponent() {
-    let handleWidth = 9;
+    let handleWidthPx = 9;
     let zIndex = 3;
     const minDimensionsPx = {height: 100, width: 100};
 
@@ -59,8 +59,8 @@ export function resizableComponent() {
         const isVertical = d => {
             return d === "left" || d === "right";
         };
-        const xCoordHelper = {left: 0, top: handleWidth, right: containerRect.width - handleWidth, bottom: handleWidth};
-        const yCoordHelper = {left: handleWidth, top: 0, right: handleWidth, bottom: containerRect.height - handleWidth};
+        const xCoordHelper = {left: 0, top: handleWidthPx, right: containerRect.width - handleWidthPx, bottom: handleWidthPx};
+        const yCoordHelper = {left: handleWidthPx, top: 0, right: handleWidthPx, bottom: containerRect.height - handleWidthPx};
         const edgeHandles = ["left", "top", "right", "bottom"];
         const [leftHandle, topHandle, rightHandle, bottomHandle] = edgeHandles.map(edge =>
             handlesGroup
@@ -69,8 +69,8 @@ export function resizableComponent() {
                 .attr("class", isVertical(edge) ? verticalHandleClass : horizontalHandleClass)
                 .attr("y", yCoordHelper[edge])
                 .attr("x", xCoordHelper[edge])
-                .attr("height", isVertical(edge) ? containerRect.height - handleWidth * 2 : handleWidth)
-                .attr("width", isVertical(edge) ? handleWidth : containerRect.width - handleWidth * 2)
+                .attr("height", isVertical(edge) ? containerRect.height - handleWidthPx * 2 : handleWidthPx)
+                .attr("width", isVertical(edge) ? handleWidthPx : containerRect.width - handleWidthPx * 2)
                 .attr("fill", isVertical(edge) ? "lightgreen" : "lightblue")
                 .attr("fill-opacity", fillOpacity)
                 .style("z-index", zIndex)
@@ -86,8 +86,8 @@ export function resizableComponent() {
                 .append("rect")
                 .attr("id", `drag${concatCornerEdges(corner)}`)
                 .attr("class", `${cornerHandleClass} ${corner[0]} ${corner[1]}`)
-                .attr("height", handleWidth)
-                .attr("width", handleWidth)
+                .attr("height", handleWidthPx)
+                .attr("width", handleWidthPx)
                 .attr("fill", "red")
                 .attr("fill-opacity", fillOpacity)
                 .style("z-index", zIndex)
@@ -135,9 +135,9 @@ export function resizableComponent() {
 
         function pinCorners(handles) {
             topLeftHandle.attr("y", 0, "x", 0);
-            topRightHandle.attr("y", 0).attr("x", handles.attr("width") - handleWidth);
-            bottomRightHandle.attr("y", handles.attr("height") - handleWidth).attr("x", handles.attr("width") - handleWidth);
-            bottomLeftHandle.attr("y", handles.attr("height") - handleWidth).attr("x", 0);
+            topRightHandle.attr("y", 0).attr("x", handles.attr("width") - handleWidthPx);
+            bottomRightHandle.attr("y", handles.attr("height") - handleWidthPx).attr("x", handles.attr("width") - handleWidthPx);
+            bottomLeftHandle.attr("y", handles.attr("height") - handleWidthPx).attr("x", 0);
         }
     };
 
@@ -162,12 +162,14 @@ export function resizableComponent() {
     };
 
     resizable.handleWidth = input => {
-        handleWidth = input;
+        handleWidthPx = input;
         return resizable;
     };
 
     function pointerFallenBehindAbsoluteCoordinates(offset, axis, handle, event) {
-        return offset < 0 && event[axis] < Number(handle.attr(axis));
+        const becauseCrossedMinSize = (offset, axis, handle, event) => offset < 0 && event[axis] < Number(handle.attr(axis));
+        const becauseExitedCoordinateSpace = (offset, axis, handle, event) => offset > 0 && event[axis] > Number(handle.attr(axis));
+        return becauseCrossedMinSize(offset, axis, handle, event) || becauseExitedCoordinateSpace(offset, axis, handle, event);
     }
 
     function enforceMinDistToParallelBar(offset, dragHandleContainer, dimension, operatorFunction) {
