@@ -40,7 +40,7 @@ function sunburst(container, settings) {
         .style("height", containerHeight)
         .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2}, ${containerHeight / 2})`)
-        .each(function({data, color}) {
+        .each(function({split, data, color}) {
             const sunburstElement = select(this);
             data.each(d => (d.current = d));
 
@@ -80,11 +80,17 @@ function sunburst(container, settings) {
                 .attr("r", radius)
                 .datum(data);
 
-            const onClick = clickHandler(data, sunburstElement, parent, parentTitle, path, label, radius);
-            parent.on("click", onClick);
+            const onClick = clickHandler(data, sunburstElement, parent, parentTitle, path, label, radius, split, settings);
+            if (settings.sunburstLevel) {
+                const currentLevel = data.descendants().find(d => d.data.name === settings.sunburstLevel[split]);
+                currentLevel && onClick(currentLevel, true);
+            } else {
+                settings.sunburstLevel = {};
+            }
+            parent.on("click", d => onClick(d, false));
             path.filter(d => d.children)
                 .style("cursor", "pointer")
-                .on("click", onClick);
+                .on("click", d => onClick(d, false));
         });
 }
 sunburst.plugin = {

@@ -2,7 +2,8 @@ import {interpolate} from "d3";
 import {drawArc, arcVisible} from "../series/arcSeries";
 import {labelVisible, labelTransform} from "../axis/sunburstLabel";
 
-export const clickHandler = (data, g, parent, parentTitle, path, label, radius) => p => {
+export const clickHandler = (data, g, parent, parentTitle, path, label, radius, split, settings) => (p, skipTransition) => {
+    settings.sunburstLevel[split] = p.data.name;
     if (p.parent) {
         parent.datum(p.parent);
         parent.style("cursor", "pointer");
@@ -22,7 +23,7 @@ export const clickHandler = (data, g, parent, parentTitle, path, label, radius) 
             })
     );
 
-    const t = g.transition().duration(750);
+    const t = g.transition().duration(skipTransition ? 0 : 750);
     path.transition(t)
         .tween("data", d => {
             const i = interpolate(d.current, d.target);
