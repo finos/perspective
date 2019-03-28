@@ -1,5 +1,5 @@
 import {interpolate} from "d3";
-import {arc, arcVisible} from "../series/arcSeries";
+import {drawArc, arcVisible} from "../series/arcSeries";
 import {labelVisible, labelTransform} from "../axis/sunburstLabel";
 
 export const clickHandler = (data, g, parent, parentTitle, path, label, radius) => p => {
@@ -32,7 +32,7 @@ export const clickHandler = (data, g, parent, parentTitle, path, label, radius) 
             return +this.getAttribute("fill-opacity") || arcVisible(d.target);
         })
         .attr("fill-opacity", d => (arcVisible(d.target) ? 0.8 : 0))
-        .attrTween("d", d => () => arc(radius)(d.current));
+        .attrTween("d", d => () => drawArc(radius)(d.current));
 
     label
         .filter(function(d) {

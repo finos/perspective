@@ -10,7 +10,7 @@
 import {select} from "d3";
 import {treeData} from "../data/treeData";
 import {clickHandler} from "../interaction/clickHandler";
-import {arc, arcVisible} from "../series/arcSeries";
+import {drawArc, arcVisible} from "../series/arcSeries";
 import {labelVisible, labelTransform} from "../axis/sunburstLabel";
 
 function sunburst(container, settings) {
@@ -38,7 +38,7 @@ function sunburst(container, settings) {
                 .join("path")
                 .attr("fill", d => color(d.data.color))
                 .attr("fill-opacity", d => (arcVisible(d.current) ? 0.8 : 0))
-                .attr("d", d => arc(radius)(d.current));
+                .attr("d", d => drawArc(radius)(d.current));
 
             const label = sunburstElement
                 .append("g")

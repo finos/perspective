@@ -1,7 +1,7 @@
-import {arc as d3Arc} from "d3";
+import {arc} from "d3";
 
-export const arc = radius =>
-    d3Arc()
+export const drawArc = radius =>
+    arc()
         .startAngle(d => d.x0)
         .endAngle(d => d.x1)
         .padAngle(d => Math.min((d.x1 - d.x0) / 2, 0.005))
