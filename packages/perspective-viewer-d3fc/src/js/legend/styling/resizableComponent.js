@@ -20,9 +20,8 @@ const fillOpacity = 0.0;
 
 export function resizableComponent() {
     let handleWidth = 9;
-    let minHeight = 100;
-    let minWidth = 100;
     let zIndex = 3;
+    const minDimensionsPx = {height: 100, width: 100};
 
     const callbackFuncs = [];
     const executeCallbacks = direction => {
@@ -99,49 +98,37 @@ export function resizableComponent() {
         pinCorners(handles);
 
         function dragLeft(event) {
-            const offset = enforceMinDistToRightBar(enforceContainerBoundaries(leftHandle.node(), event.x, 0).x, handles);
+            const offset = enforceMinDistToParallelBar(enforceContainerBoundaries(leftHandle.node(), event.x, 0).x, handles, "width", (x, y) => x - y);
             containerNode.style.left = `${containerNode.offsetLeft + offset}px`;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
-
-            extendHandlesBox(handles, "width", offset);
-            pinHandleToHandleBoxEdge(rightHandle, "x", offset);
-            extendPerpendicularHandles(handles, offset, "width", horizontalHandleClass);
-            pinCorners(handles);
-            return offset != 0;
+            return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
         function dragRight(event) {
-            const offset = -enforceMinDistToLeftBar(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles);
+            const offset = -enforceMinDistToParallelBar(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles, "width", (x, y) => x + y);
             if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return false;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
-
-            extendHandlesBox(handles, "width", offset);
-            pinHandleToHandleBoxEdge(rightHandle, "x", offset);
-            extendPerpendicularHandles(handles, offset, "width", horizontalHandleClass);
-            pinCorners(handles);
-            return offset != 0;
+            return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
         function dragTop(event) {
-            const offset = enforceMinDistToBottomBar(enforceContainerBoundaries(topHandle.node(), 0, event.y).y, handles);
+            const offset = enforceMinDistToParallelBar(enforceContainerBoundaries(topHandle.node(), 0, event.y).y, handles, "height", (x, y) => x - y);
             containerNode.style.top = `${containerNode.offsetTop + offset}px`;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
-
-            extendHandlesBox(handles, "height", offset);
-            pinHandleToHandleBoxEdge(bottomHandle, "y", offset);
-            extendPerpendicularHandles(handles, offset, "height", verticalHandleClass);
-            pinCorners(handles);
-            return offset != 0;
+            return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
         }
 
         function dragBottom(event) {
-            const offset = -enforceMinDistToTopBar(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles);
+            const offset = -enforceMinDistToParallelBar(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles, "height", (x, y) => x + y);
             if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return false;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
+            return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
+        }
 
-            extendHandlesBox(handles, "height", offset);
-            pinHandleToHandleBoxEdge(bottomHandle, "y", offset);
-            extendPerpendicularHandles(handles, offset, "height", verticalHandleClass);
+        function resizeAndRelocateHandles(handle, offset, dimension, axis) {
+            extendHandlesBox(handles, dimension, offset);
+            pinHandleToHandleBoxEdge(handle, axis, offset);
+            extendPerpendicularHandles(handles, offset, dimension, dimension === "height" ? verticalHandleClass : horizontalHandleClass);
             pinCorners(handles);
             return offset != 0;
         }
@@ -165,12 +152,12 @@ export function resizableComponent() {
     };
 
     resizable.minWidth = input => {
-        minWidth = input;
+        minDimensionsPx.width = input;
         return resizable;
     };
 
     resizable.minHeight = input => {
-        minHeight = input;
+        minDimensionsPx.height = input;
         return resizable;
     };
 
@@ -179,44 +166,17 @@ export function resizableComponent() {
         return resizable;
     };
 
-    function enforceMinDistToBottomBar(offset, dragHandleContainer) {
-        const anticipatedHeight = Number(dragHandleContainer.attr("height")) - offset;
-        if (anticipatedHeight < minHeight) {
-            const difference = minHeight - anticipatedHeight;
-            return offset - difference;
-        }
-        return offset;
-    }
-
-    function enforceMinDistToTopBar(offset, dragHandleContainer) {
-        const anticipatedHeight = Number(dragHandleContainer.attr("height")) + offset;
-        if (anticipatedHeight < minHeight) {
-            const difference = minHeight - anticipatedHeight;
-            return offset + difference;
-        }
-        return offset;
-    }
-
-    function enforceMinDistToRightBar(offset, dragHandleContainer) {
-        const anticipatedWidth = Number(dragHandleContainer.attr("width")) - offset;
-        if (anticipatedWidth < minWidth) {
-            const difference = minWidth - anticipatedWidth;
-            return offset - difference;
-        }
-        return offset;
-    }
-
-    function enforceMinDistToLeftBar(offset, dragHandleContainer) {
-        const anticipatedWidth = Number(dragHandleContainer.attr("width")) + offset;
-        if (anticipatedWidth < minWidth) {
-            const difference = minWidth - anticipatedWidth;
-            return offset + difference;
-        }
-        return offset;
-    }
-
     function pointerFallenBehindAbsoluteCoordinates(offset, axis, handle, event) {
         return offset < 0 && event[axis] < Number(handle.attr(axis));
+    }
+
+    function enforceMinDistToParallelBar(offset, dragHandleContainer, dimension, operatorFunction) {
+        const anticipatedDimension = operatorFunction(Number(dragHandleContainer.attr(dimension)), offset);
+        if (anticipatedDimension < minDimensionsPx[dimension]) {
+            const difference = minDimensionsPx[dimension] - anticipatedDimension;
+            return operatorFunction(offset, difference);
+        }
+        return offset;
     }
 
     return resizable;

@@ -95,10 +95,7 @@ export default (fromLegend, settings) => {
 
         //if page size is less than all legend items, leave space for the legend controls
         pageSize = proposedPageSize < domain.length ? proposedPageSize - 1 : proposedPageSize;
-
-        if (pageIndex > pageCount - 1) {
-            pageIndex = pageCount - 1;
-        }
+        pageIndex = Math.min(pageIndex, pageCount - 1);
     };
 
     const calculatePageCount = proposedPageSize => {
