@@ -574,6 +574,44 @@ module.exports = perspective => {
         });
     });
 
+    describe("Expand/Collapse", function() {
+        it("Collapse a row in a 2x2 pivot", async function() {
+            var table = perspective.table([
+                {x: 7, y: "A", z: true, a: "AA", b: "BB", c: "CC"},
+                {x: 2, y: "A", z: false, a: "AA", b: "CC", c: "CC"},
+                {x: 5, y: "A", z: true, a: "AA", b: "BB", c: "DD"},
+                {x: 4, y: "A", z: false, a: "AA", b: "CC", c: "DD"},
+                {x: 1, y: "B", z: true, a: "AA", b: "BB", c: "CC"},
+                {x: 8, y: "B", z: false, a: "AA", b: "CC", c: "CC"},
+                {x: 3, y: "B", z: true, a: "BB", b: "BB", c: "DD"},
+                {x: 6, y: "B", z: false, a: "BB", b: "CC", c: "DD"},
+                {x: 9, y: "C", z: true, a: "BB", b: "BB", c: "CC"},
+                {x: 10, y: "C", z: false, a: "BB", b: "CC", c: "CC"},
+                {x: 11, y: "C", z: true, a: "BB", b: "BB", c: "DD"},
+                {x: 12, y: "C", z: false, a: "BB", b: "CC", c: "DD"}
+            ]);
+            var view = table.view({
+                column_pivot: ["z", "b"],
+                row_pivot: ["y", "a"],
+                aggregate: [{column: "x", op: "last"}]
+            });
+
+            let answer = [
+                {__ROW_PATH__: [], "false|CC|x": 12, "true|BB|x": 11},
+                {__ROW_PATH__: ["A"], "false|CC|x": 4, "true|BB|x": 5},
+                {__ROW_PATH__: ["A", "AA"], "false|CC|x": 4, "true|BB|x": 5},
+                {__ROW_PATH__: ["B"], "false|CC|x": 6, "true|BB|x": 3},
+                {__ROW_PATH__: ["C"], "false|CC|x": 12, "true|BB|x": 11},
+                {__ROW_PATH__: ["C", "BB"], "false|CC|x": 12, "true|BB|x": 11}
+            ];
+            view.collapse(3);
+            let result2 = await view.to_json();
+            expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+    });
+
     describe("Column pivot w/sort", function() {
         it("['y'] by ['z'], sorted by 'x'", async function() {
             var table = perspective.table([
