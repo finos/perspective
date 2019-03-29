@@ -8,14 +8,51 @@
  */
 
 import * as d3 from "d3";
-import {treeData, treeColor} from "../data/treeData";
+import {treeData} from "../data/treeData";
 
 const base_font_size = 12;
 
-const addTreemap = (selection, data, settings) => {
+function getColors(nodes, colors) {
+    if (nodes.children && nodes.children.length > 0) {
+        nodes.children.forEach(child => {
+            const childColor = getColors(child, colors);
+            if (Array.isArray(childColor)) {
+                colors.concat(childColor);
+            } else {
+                colors.push(childColor);
+            }
+        });
+
+        return colors;
+    } else {
+        return nodes.data.color;
+    }
+}
+
+function treeColor(settings, data) {
+    if (settings.mainValues.length > 1) {
+        const colors = getColors(data, []);
+        const min = Math.min(...colors);
+        const max = Math.max(...colors);
+        return d3.scaleSequential(d3.interpolateViridis).domain([min, max]);
+    }
+
+    return () => "rgb(31, 119, 180)";
+}
+
+const addTreemap = (selection, data, color, settings) => {
+    console.log("data", data);
+    //console.log("color domain", color.domain());
+
+    const treeColorScale = treeColor(settings, data);
+
+    //console.log("treeColorScale domain", treeColorScale.domain());
+
     const adjustFontSize = d => {
-        return `${base_font_size + 2 * settings.row_pivots.length - 2 * d.depth}px`;
+        return `${base_font_size + 2 * settings.crossValues.length - 2 * d.depth}px`;
     };
+
+    const isTop = d => d.depth === settings.crossValues.length;
 
     const nodes = selection
         .select("svg g")
@@ -35,7 +72,9 @@ const addTreemap = (selection, data, settings) => {
         })
         .attr("height", function(d) {
             return d.y1 - d.y0;
-        });
+        })
+        .attr("fill", d => (isTop(d) ? treeColorScale(d.data.color) : "none"))
+        .attr("fill-opacity", d => (isTop(d) ? 0.8 : 0));
 
     nodes
         .append("text")
@@ -49,40 +88,35 @@ const addTreemap = (selection, data, settings) => {
             return adjustFontSize(d);
         })
         .text(function(d) {
-            return d.depth > 0 ? d.data.name : "";
+            return 0 < d.depth && d.depth <= 2 ? d.data.name + ": " + d.data.color : "";
         });
 };
 
 function treemap(container, settings) {
-    //console.log("settings", settings);
     const padder = d => {
-        return settings.row_pivots.length - d.depth;
+        return settings.crossValues.length - d.depth;
     };
 
-    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
     const padding = 30;
-    const selectedContainer = d3.select(container);
-    const data = treeData(settings)[0].data.data;
+    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
 
-    console.log("data", data);
-    console.log("selectedContainer", selectedContainer);
+    const {data, color} = treeData(settings)[0];
 
-    var treemapLayout = d3
+    const treemapLayout = d3
         .treemap()
         .size([containerWidth - padding, containerHeight - padding])
         .paddingInner(d => padder(d));
-    //.paddingOuter(16);
 
     treemapLayout.tile(d3.treemapBinary);
     treemapLayout(data);
 
-    selectedContainer
+    container
         .append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
         .append("g");
 
-    addTreemap(selectedContainer, data, settings);
+    addTreemap(container, data, color, settings);
 }
 treemap.plugin = {
     type: "d3_treemap",
