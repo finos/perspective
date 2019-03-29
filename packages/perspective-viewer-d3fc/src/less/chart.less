@@ -65,7 +65,7 @@
 
         &.d3_treemap {
             rect {
-                stroke: var(--d3fc-axis--lines, rgb(180, 210, 225));
+                stroke: var(--d3fc-axis--lines, white);
             }
             .top {
                 font-size: 14px;
@@ -259,6 +259,27 @@
         left: 0;
         width: 100%;
         text-align: center;
+
+        & button {
+            -webkit-appearance: none;
+            background: rgb(247, 247, 247);
+            border: 1px solid rgb(204, 204, 204);
+            padding: 10px;
+            opacity: 0.5;
+            cursor: pointer;
+
+            &:hover {
+                background: rgb(230, 230, 230);
+            }
+        }
+    }
+
+    .parent-controls {
+        position: absolute;
+        top: 30px;
+        right: 30px;
+        width: 100%;
+        text-align: right;
 
         & button {
             -webkit-appearance: none;
