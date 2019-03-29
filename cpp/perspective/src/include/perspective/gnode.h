@@ -130,6 +130,8 @@ public:
     bool was_updated() const;
     void clear_updated();
 
+    t_uindex mapping_size() const;
+
     // helper function for tests
     std::shared_ptr<t_table> tstep(std::shared_ptr<const t_table> input_table);
 
