@@ -40,12 +40,18 @@ function sunburst(container, settings) {
         .attr("class", "sunburst");
 
     sunburstContainer
+        .append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle");
+
+    sunburstContainer
         .append("circle")
         .attr("fill", "none")
         .attr("pointer-events", "all");
 
     sunburstContainer
         .append("text")
+        .attr("class", "parent")
         .attr("text-anchor", "middle")
         .attr("user-select", "none")
         .attr("pointer-events", "none");
@@ -53,14 +59,17 @@ function sunburst(container, settings) {
     sunburstEnter
         .merge(sunburstDiv)
         .select("svg")
-        .style("height", "80%")
-        .style("width", "80%")
+        .style("height", "100%")
+        .style("width", "100%")
         .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
         .each(function({split, data, color}) {
             const sunburstElement = select(this);
             const {width, height} = this.parentNode.getBoundingClientRect();
-            const radius = Math.min(width, height) / 6;
+            const title = sunburstElement.select("text.title").text(split);
+            title.attr("transform", `translate(0, -${height / 2 - sunburstElement.node().getBoundingClientRect().height})`);
+
+            const radius = (Math.min(width, height) - 100) / 6;
             data.each(d => (d.current = d));
 
             const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
@@ -93,7 +102,7 @@ function sunburst(container, settings) {
                 .attr("transform", d => labelTransform(d.current, radius))
                 .text(d => d.data.name);
 
-            const parentTitle = sunburstElement.select("text");
+            const parentTitle = sunburstElement.select("text.parent");
             const parent = sunburstElement
                 .select("circle")
                 .attr("r", radius)
