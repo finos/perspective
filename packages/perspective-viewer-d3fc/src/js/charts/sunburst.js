@@ -52,7 +52,7 @@ function sunburst(container, settings) {
             const sunburstElement = select(this);
             const {width, height} = this.parentNode.getBoundingClientRect();
             const title = sunburstElement.select("text.title").text(split);
-            title.attr("transform", `translate(0, -${height / 2 - sunburstElement.node().getBoundingClientRect().height})`);
+            title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 100) / 6;
             data.each(d => (d.current = d));
