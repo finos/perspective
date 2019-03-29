@@ -19,24 +19,26 @@ function sunburst(container, settings) {
     const containerWidth = containerRect.width;
     const containerHeight = containerRect.height;
 
-    const padding = 30;
     const minSize = 400;
     const cols = sunburstData.length === 1 ? 1 : Math.floor(containerWidth / minSize);
-    const rows = sunburstData.length / cols;
-    let scrollMargin = 0;
-    if ((containerHeight / cols) * rows > containerHeight) {
-        scrollMargin = 17;
-        container.style("overflow-y", "auto");
-    } else {
-        container.style("overflow-y", "hidden");
-    }
+    const rows = Math.ceil(sunburstData.length / cols);
+    container.style("grid-template-columns", `repeat(${cols}, ${containerWidth / cols}px)`);
+    container.style("grid-template-rows", `repeat(${rows}, ${containerHeight / cols}px)`);
 
-    const radius = (Math.min(containerWidth, containerHeight) - padding) / 6 / cols - scrollMargin;
-    const sunburstSvg = container.selectAll("svg").data(sunburstData, d => d.split);
-    sunburstSvg.exit().remove();
+    const sunburstDiv = container.selectAll("div").data(treeData(settings), d => d.split);
+    sunburstDiv.exit().remove();
 
-    const sunburstEnter = sunburstSvg.enter().append("svg");
-    const sunburstContainer = sunburstEnter.append("g").attr("class", "sunburst");
+    const sunburstEnter = sunburstDiv
+        .enter()
+        .append("div")
+        .style("overflow", "hidden");
+
+    const sunburstContainer = sunburstEnter
+        .append("svg")
+        .style("overflow", "visible")
+        .append("g")
+        .attr("class", "sunburst");
+
     sunburstContainer
         .append("circle")
         .attr("fill", "none")
@@ -49,13 +51,16 @@ function sunburst(container, settings) {
         .attr("pointer-events", "none");
 
     sunburstEnter
-        .merge(sunburstSvg)
-        .style("width", containerWidth / cols - scrollMargin)
-        .style("height", containerHeight / cols)
+        .merge(sunburstDiv)
+        .select("svg")
+        .style("height", "80%")
+        .style("width", "80%")
         .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
         .each(function({split, data, color}) {
             const sunburstElement = select(this);
+            const {width, height} = this.parentNode.getBoundingClientRect();
+            const radius = Math.min(width, height) / 6;
             data.each(d => (d.current = d));
 
             const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
