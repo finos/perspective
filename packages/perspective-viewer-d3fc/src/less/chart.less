@@ -37,7 +37,9 @@
                 height: 100%;
             }
 
-            & text {
+            & text.title,
+            & text.segment,
+            & text.parent {
                 text-anchor: middle;
                 user-select: none;
                 pointer-events: none;
@@ -45,6 +47,13 @@
                 &.title {
                     dominant-baseline: hanging;
                 }
+            }
+
+            .legend-container {
+                display: inline-flex;
+                top: unset;
+                right: unset;
+                transform: translate(-100px, 5px);
             }
         }
 
