@@ -27,6 +27,21 @@
             display: inline-grid;
             padding: 0;
             overflow-y: auto;
+
+            & div {
+                overflow: hidden;
+            }
+
+            & svg {
+                width: 100%;
+                height: 100%;
+            }
+
+            & text {
+                text-anchor: middle;
+                user-select: none;
+                pointer-events: none;
+            }
         }
 
         & .x-label {

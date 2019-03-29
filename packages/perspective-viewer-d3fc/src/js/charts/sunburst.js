@@ -28,39 +28,24 @@ function sunburst(container, settings) {
     const sunburstDiv = container.selectAll("div").data(treeData(settings), d => d.split);
     sunburstDiv.exit().remove();
 
-    const sunburstEnter = sunburstDiv
-        .enter()
-        .append("div")
-        .style("overflow", "hidden");
+    const sunburstEnter = sunburstDiv.enter().append("div");
 
     const sunburstContainer = sunburstEnter
         .append("svg")
-        .style("overflow", "visible")
         .append("g")
         .attr("class", "sunburst");
 
-    sunburstContainer
-        .append("text")
-        .attr("class", "title")
-        .attr("text-anchor", "middle");
+    sunburstContainer.append("text").attr("class", "title");
 
     sunburstContainer
         .append("circle")
         .attr("fill", "none")
         .attr("pointer-events", "all");
 
-    sunburstContainer
-        .append("text")
-        .attr("class", "parent")
-        .attr("text-anchor", "middle")
-        .attr("user-select", "none")
-        .attr("pointer-events", "none");
-
+    sunburstContainer.append("text").attr("class", "parent");
     sunburstEnter
         .merge(sunburstDiv)
         .select("svg")
-        .style("height", "100%")
-        .style("width", "100%")
         .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
         .each(function({split, data, color}) {
@@ -76,16 +61,10 @@ function sunburst(container, settings) {
             const segmentEnter = segment
                 .enter()
                 .append("g")
-                .attr("class", "segment")
-                .attr("text-anchor", "middle");
+                .attr("class", "segment");
 
             segmentEnter.append("path");
-            segmentEnter
-                .append("text")
-                .attr("dy", "0.35em")
-                .attr("user-select", "none")
-                .attr("pointer-events", "none");
-
+            segmentEnter.append("text").attr("dy", "0.35em");
             const segmentMerge = segmentEnter.merge(segment);
 
             const path = segmentMerge
