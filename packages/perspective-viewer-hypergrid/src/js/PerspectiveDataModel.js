@@ -35,7 +35,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     getConfig: function() {
-        return this._view._config;
+        return this._config;
     },
 
     setRowCount: function(count) {

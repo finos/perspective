@@ -81,6 +81,7 @@
             "packages/perspective-viewer-hypergrid",
             "packages/perspective-viewer-highcharts",
             "packages/perspective-viewer-d3fc"
-        ]
+        ],
+        "verbose": true
     }
 }

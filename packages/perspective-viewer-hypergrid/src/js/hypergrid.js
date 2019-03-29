@@ -334,7 +334,13 @@ async function grid_create(div, view, task) {
     this[PRIVATE] = this[PRIVATE] || {};
 
     const hidden = this._get_view_hidden();
-    const colPivots = JSON.parse(this.getAttribute("column-pivots"));
+    const config = await view.get_config();
+
+    if (task.cancelled) {
+        return;
+    }
+
+    const colPivots = config.column_pivot;
     const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(Range.create(0, colPivots.length + 1)), view.schema(), this._table.schema()]);
 
     if (task.cancelled) {
@@ -348,12 +354,13 @@ async function grid_create(div, view, task) {
     }
 
     const dataModel = this.hypergrid.behavior.dataModel;
-    const rowPivots = JSON.parse(this.getAttribute("row-pivots"));
+    const rowPivots = config.row_pivot;
 
     dataModel.setRowCount(nrows);
     dataModel.setIsTree(!!rowPivots.length);
     dataModel.setDirty(nrows);
     dataModel._view = view;
+    dataModel._config = config;
 
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
