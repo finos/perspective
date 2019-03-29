@@ -14,11 +14,25 @@ import {drawArc, arcVisible} from "../series/arcSeries";
 import {labelVisible, labelTransform} from "../axis/sunburstLabel";
 
 function sunburst(container, settings) {
-    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
-    const padding = 30;
-    const radius = (Math.min(containerWidth, containerHeight) - padding) / 6;
+    const sunburstData = treeData(settings);
+    const containerRect = container.node().getBoundingClientRect();
+    const containerWidth = containerRect.width;
+    const containerHeight = containerRect.height;
 
-    const sunburstSvg = container.selectAll("svg").data(treeData(settings), d => d.split);
+    const padding = 30;
+    const minSize = 400;
+    const cols = sunburstData.length === 1 ? 1 : Math.floor(containerWidth / minSize);
+    const rows = sunburstData.length / cols;
+    let scrollMargin = 0;
+    if ((containerHeight / cols) * rows > containerHeight) {
+        scrollMargin = 17;
+        container.style("overflow-y", "auto");
+    } else {
+        container.style("overflow-y", "hidden");
+    }
+
+    const radius = (Math.min(containerWidth, containerHeight) - padding) / 6 / cols - scrollMargin;
+    const sunburstSvg = container.selectAll("svg").data(sunburstData, d => d.split);
     sunburstSvg.exit().remove();
 
     const sunburstEnter = sunburstSvg.enter().append("svg");
@@ -36,10 +50,10 @@ function sunburst(container, settings) {
 
     sunburstEnter
         .merge(sunburstSvg)
-        .style("width", containerWidth)
-        .style("height", containerHeight)
+        .style("width", containerWidth / cols - scrollMargin)
+        .style("height", containerHeight / cols)
         .select("g.sunburst")
-        .attr("transform", `translate(${containerWidth / 2}, ${containerHeight / 2})`)
+        .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
         .each(function({split, data, color}) {
             const sunburstElement = select(this);
             data.each(d => (d.current = d));
