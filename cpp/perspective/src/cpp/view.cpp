@@ -438,6 +438,18 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 }
 
 template <typename CTX_T>
+t_rowdelta
+View<CTX_T>::get_row_delta(t_index bidx, t_index eidx) const {
+    return t_rowdelta();
+}
+
+template <>
+t_rowdelta
+View<t_ctx1>::get_row_delta(t_index bidx, t_index eidx) const {
+    return m_ctx->get_row_delta(bidx, eidx);
+}
+
+template <typename CTX_T>
 bool
 View<CTX_T>::is_column_only() const {
     return m_config.is_column_only();

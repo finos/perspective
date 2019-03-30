@@ -355,6 +355,34 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     return rval;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx1::get_row_delta(t_index bidx, t_index eidx) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    bidx = std::min(bidx, t_index(m_traversal->size()));
+    eidx = std::min(eidx, t_index(m_traversal->size()));
+    std::vector<std::int32_t> rows;
+
+    const auto& deltas = m_tree->get_deltas();
+    for (t_index idx = bidx; idx < eidx; ++idx) {
+        t_index ptidx = m_traversal->get_tree_index(idx);
+        auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
+        if (iterators.first != iterators.second)
+            rows.push_back(idx);
+    }
+
+    t_rowdelta rval(m_rows_changed, rows);
+    m_tree->clear_deltas();
+    return rval;
+}
+
 std::vector<t_cellupd>
 t_ctx1::get_cell_delta(t_index bidx, t_index eidx) const {
     PSP_TRACE_SENTINEL();

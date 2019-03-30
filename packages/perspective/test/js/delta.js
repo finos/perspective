@@ -8,11 +8,14 @@
  */
 
 let data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
-let partial = [{x: 1, y: "x"}, {x: 2, z: true}];
+//let partial_change_x = [{x: 5, y: "a"}, {x: 6, y: "b"}];
+let partial_change_y = [{x: 1, y: "string1"}, {x: 2, y: "string2"}];
+let partial_change_z = [{x: 1, z: false}, {x: 2, z: true}];
+let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z: true}];
 
 module.exports = perspective => {
     describe("Step delta", function() {
-        it("Should calculate step delta for 0-sided contexts", async function(done) {
+        it.skip("Should calculate step delta for 0-sided contexts", async function(done) {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
@@ -24,12 +27,12 @@ module.exports = perspective => {
                 },
                 {mode: "rows"}
             );
-            table.update(partial);
+            table.update(partial_change_y);
         });
     });
 
     describe("Row delta", function() {
-        it("Should calculate row delta for 0-sided contexts", async function(done) {
+        it.skip("0-sided row delta", async function(done) {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
@@ -41,43 +44,117 @@ module.exports = perspective => {
                 },
                 {mode: "pkey"}
             );
-            table.update(partial);
+            table.update(partial_change_y);
         });
 
-        it("Should calculate row delta for 1 sided contexts", async function(done) {
-            let table = perspective.table(data, {index: "x"});
-            let view = table.view({
-                row_pivot: ["y"]
+        describe("1-sided row delta", function() {
+            it("returns changed rows", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivot: ["y"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([3, 4]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y);
             });
-            view.on_update(
-                async function(delta) {
-                    // FIXME: not fully working as expected, verify
-                    expect(delta).toEqual([4]);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                {mode: "pkey"}
-            );
-            table.update([{x: 1, y: "x"}]);
+
+            it("returns nothing when updated data is not in pivot", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivot: ["y"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_z);
+            });
         });
 
-        it("Should calculate row delta for 2 sided contexts", async function(done) {
-            let table = perspective.table(data, {index: "x"});
-            let view = table.view({
-                row_pivot: ["y"],
-                column_pivot: ["x"]
+        describe("2-sided row delta", function() {
+            it("returns changed rows when updated data in row pivot", async function(done) {
+                let table = perspective.table(data, {index: "y"});
+                let view = table.view({
+                    row_pivot: ["y"],
+                    column_pivot: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 5, 6]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y);
             });
-            view.on_update(
-                async function(delta) {
-                    expect(delta).toEqual([4]);
-                    view.delete();
-                    table.delete();
-                    done();
-                },
-                {mode: "pkey"}
-            );
-            table.update([{x: 1, y: "x"}]);
+
+            it("returns changed rows when updated data in column pivot", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivot: ["y"],
+                    column_pivot: ["z"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 1, 2]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_z);
+            });
+
+            it("returns changed rows when updated data in row and column pivot", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivot: ["y"],
+                    column_pivot: ["z"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 3, 4]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y_z);
+            });
+
+            it("returns nothing when updated data is not in pivot", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivot: ["y"],
+                    column_pivot: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_z);
+            });
         });
     });
 };

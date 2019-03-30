@@ -686,15 +686,26 @@ export default function(Module) {
      * in an update.
      */
     view.prototype._get_row_delta = async function() {
-        let delta = this._View.get_step_delta(0, 2147483647);
+        let d, delta;
+        if (this.sides() === 1) {
+            d = this._View.get_row_delta(0, 2147483647);
+            delta = d.rows;
+        } else {
+            d = this._View.get_step_delta(0, 2147483647);
+            delta = d.cells;
+        }
         let row_delta = new Set();
-        if (delta.cells.size() > 0) {
-            for (let i = 0; i < delta.cells.size(); i++) {
-                let ridx = delta.cells.get(i).row;
-                row_delta.add(Number.parseInt(ridx));
+        if (delta.size() > 0) {
+            for (let i = 0; i < delta.size(); i++) {
+                let cell = delta.get(i);
+                if (this.sides() === 1) {
+                    row_delta.add(Number.parseInt(cell));
+                } else {
+                    row_delta.add(Number.parseInt(cell.row));
+                }
             }
         }
-        delta.cells.delete();
+        delta.delete();
         return [...row_delta];
     };
 
@@ -713,8 +724,7 @@ export default function(Module) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
         }
         if (mode === "rows" || mode === "pkey") {
-            // Disable deltas for 1+ sided contexts temporarily - this block
-            // shouldn't ever be executed until this.sides() === 0 is removed
+            // Enable deltas only if needed by callback
             if (!this._View._get_deltas_enabled()) {
                 this._View._set_deltas_enabled(true);
             }

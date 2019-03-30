@@ -21,7 +21,7 @@ const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 function jest() {
-    let cmd = "TZ=UTC node_modules/.bin/jest --color";
+    let cmd = "TZ=UTC node_modules/.bin/jest --color --verbose";
 
     if (args.indexOf("--saturate") > -1) {
         console.log("-- Running the test suite in saturate mode");

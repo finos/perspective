@@ -2048,6 +2048,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filters", &View<t_ctx0>::get_filters)
         .function("get_sorts", &View<t_ctx0>::get_sorts)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx0>::get_row_delta)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -2072,6 +2073,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filters", &View<t_ctx1>::get_filters)
         .function("get_sorts", &View<t_ctx1>::get_sorts)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx1>::get_row_delta)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -2097,6 +2099,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sorts", &View<t_ctx2>::get_sorts)
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx2>::get_row_delta)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -2212,8 +2215,17 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_rowdelta
+     */
+    value_object<t_rowdelta>("t_rowdelta")
+        .field("rows_changed", &t_rowdelta::rows_changed)
+        .field("rows", &t_rowdelta::rows);
+
+    /******************************************************************************
+     *
      * vector
      */
+    register_vector<std::int32_t>("std::vector<std::int32_t>");
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
