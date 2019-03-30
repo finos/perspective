@@ -15,12 +15,12 @@ let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z
 
 module.exports = perspective => {
     describe("Step delta", function() {
-        it.skip("Should calculate step delta for 0-sided contexts", async function(done) {
+        it("Should calculate step delta for 0-sided contexts", async function(done) {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
                 function(new_data) {
-                    expect(new_data).toEqual([{x: 1, y: "x", z: true}, {x: 2, y: "b", z: true}]);
+                    expect(new_data).toEqual([{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}]);
                     view.delete();
                     table.delete();
                     done();
@@ -32,12 +32,29 @@ module.exports = perspective => {
     });
 
     describe("Row delta", function() {
-        it.skip("0-sided row delta", async function(done) {
+        it("0-sided row delta", async function(done) {
             let table = perspective.table(data, {index: "x"});
             let view = table.view();
             view.on_update(
                 async function(delta) {
                     expect(delta).toEqual([0, 1]);
+                    view.delete();
+                    table.delete();
+                    done();
+                },
+                {mode: "pkey"}
+            );
+            table.update(partial_change_y);
+        });
+
+        it("0-sided row delta in sorted context", async function(done) {
+            let table = perspective.table(data, {index: "x"});
+            let view = table.view({
+                sort: [["x", "desc"]]
+            });
+            view.on_update(
+                async function(delta) {
+                    expect(delta).toEqual([3, 2]);
                     view.delete();
                     table.delete();
                     done();

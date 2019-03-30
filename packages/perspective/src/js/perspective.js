@@ -686,23 +686,13 @@ export default function(Module) {
      * in an update.
      */
     view.prototype._get_row_delta = async function() {
-        let d, delta;
-        if (this.sides() === 1) {
-            d = this._View.get_row_delta(0, 2147483647);
-            delta = d.rows;
-        } else {
-            d = this._View.get_step_delta(0, 2147483647);
-            delta = d.cells;
-        }
+        let d = this._View.get_row_delta(0, 2147483647);
+        let delta = d.rows;
         let row_delta = new Set();
         if (delta.size() > 0) {
             for (let i = 0; i < delta.size(); i++) {
                 let cell = delta.get(i);
-                if (this.sides() === 1) {
-                    row_delta.add(Number.parseInt(cell));
-                } else {
-                    row_delta.add(Number.parseInt(cell.row));
-                }
+                row_delta.add(Number.parseInt(cell));
             }
         }
         delta.delete();

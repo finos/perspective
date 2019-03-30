@@ -293,6 +293,66 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     return rval;
 }
 
+/**
+ * @brief Returns the row indices that have been updated.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
+    bidx = std::min(bidx, m_traversal->size());
+    eidx = std::min(eidx, m_traversal->size());
+    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
+    std::vector<std::int32_t> rows;
+
+    std::unordered_set<t_tscalar> pkeys;
+    t_tscalar prev_pkey;
+    prev_pkey.set(t_none());
+
+    if (m_traversal->empty_sort_by()) {
+        std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
+        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
+            const t_tscalar& pkey = pkey_vec[idx];
+            t_index row = bidx + idx;
+            std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
+                t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
+                iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
+            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
+                 iter != iters.second; ++iter) {
+                rows.push_back(row);
+            }
+        }
+    } else {
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            if (prev_pkey != iter->m_pkey) {
+                pkeys.insert(iter->m_pkey);
+                prev_pkey = iter->m_pkey;
+            }
+        }
+
+        std::unordered_map<t_tscalar, t_index> r_indices;
+        m_traversal->get_row_indices(pkeys, r_indices);
+
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            t_index row = r_indices[iter->m_pkey];
+            if (bidx <= row && row <= eidx) {
+                rows.push_back(row);
+            }
+        }
+    }
+
+    t_rowdelta rval(rows_changed, rows);
+    m_deltas->clear(); // what is the difference between this line and clear_deltas()?
+    clear_deltas();
+    return rval;
+}
+
 std::vector<std::string>
 t_ctx0::get_column_names() const {
     return m_config.get_column_names();
