@@ -29,7 +29,8 @@ export function splitAndBaseData(settings, data) {
                     key,
                     crossValue: labelfn(col, i),
                     mainValue: value,
-                    baseValue: baseValue
+                    baseValue: baseValue,
+                    row: col
                 };
             });
     });

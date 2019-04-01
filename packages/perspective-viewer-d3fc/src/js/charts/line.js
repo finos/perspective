@@ -14,7 +14,7 @@ import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";

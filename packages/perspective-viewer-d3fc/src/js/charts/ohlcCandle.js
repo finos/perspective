@@ -11,45 +11,42 @@ import * as crossAxis from "../axis/crossAxis";
 import * as mainAxis from "../axis/mainAxis";
 import {ohlcData} from "../data/ohlcData";
 import {filterDataByGroup} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import {seriesUpColors, seriesDownColors} from "../series/seriesColors";
+import {ohlcCandleSeries} from "../series/ohlcCandleSeries";
+import {colorScale, setOpacity} from "../series/seriesColors";
 import {colorLegend} from "../legend/legend";
 
-const isUp = d => d.closeValue >= d.openValue;
-
-function ohlcCandle(seriesSvg) {
+function ohlcCandle(seriesCanvas) {
     return function(container, settings) {
-        const data = ohlcData(settings, filterDataByGroup(settings));
+        const srcData = ohlcData(settings, filterDataByGroup(settings));
 
-        const keys = data
+        const bollinger = fc.indicatorBollingerBands().value(d => d.openValue);
+        const data = srcData.map(seriesData => {
+            const bollingerData = bollinger(seriesData);
+            return seriesData.map((d, i) => Object.assign({bollinger: bollingerData[i]}, d));
+        });
+
+        const keys = srcData
             .map(k => k.key)
             .concat(settings.hideKeys ? settings.hideKeys : [])
             .sort();
 
-        const upColor = seriesUpColors(keys);
-        const downColor = seriesDownColors(keys);
+        const upColor = colorScale()
+            .domain(keys)
+            .mapFunction(setOpacity(1))();
 
         const legend = colorLegend()
             .settings(settings)
             .scale(keys.length > 1 ? upColor : null);
 
-        const series = seriesSvg()
-            .crossValue(d => d.crossValue)
-            .openValue(d => d.openValue)
-            .highValue(d => d.highValue)
-            .lowValue(d => d.lowValue)
-            .closeValue(d => d.closeValue)
-            .decorate(selection => {
-                selection.style("fill", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
-                selection.style("stroke", d => (isUp(d) ? upColor(d.key) : downColor(d.key)));
-            });
+        const series = ohlcCandleSeries(settings, seriesCanvas, upColor);
 
         const multi = fc
-            .seriesSvgMulti()
+            .seriesCanvasMulti()
             .mapping((data, index) => data[index])
             .series(data.map(() => series));
 
@@ -63,7 +60,7 @@ function ohlcCandle(seriesSvg) {
         const yScale = mainAxis.scale(settings);
 
         const chart = fc
-            .chartSvgCartesian({
+            .chartCanvasCartesian({
                 xScale,
                 yScale,
                 xAxis
@@ -81,7 +78,11 @@ function ohlcCandle(seriesSvg) {
             .yLabel(mainAxis.label(settings))
             .yOrient("left")
             .yNice()
-            .plotArea(withGridLines(multi).orient("vertical"));
+            .plotArea(
+                withGridLines(multi)
+                    .orient("vertical")
+                    .canvas(true)
+            );
 
         chart.xPaddingInner && chart.xPaddingInner(1);
         chart.xPaddingOuter && chart.xPaddingOuter(0.5);
@@ -90,14 +91,17 @@ function ohlcCandle(seriesSvg) {
             .chart(chart)
             .settings(settings)
             .xScale(xScale)
-            .yScale(yScale);
+            .yScale(yScale)
+            .canvas(true);
 
         const toolTip = nearbyTip()
             .settings(settings)
             .xScale(xScale)
             .yScale(yScale)
             .yValueName("closeValue")
-            .data(data);
+            .color(upColor)
+            .data(data)
+            .canvas(true);
 
         // render
         container.datum(data).call(zoomChart);

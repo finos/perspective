@@ -14,7 +14,7 @@ import {categoryPointSeries, symbolType} from "../series/categoryPointSeries";
 import {groupData} from "../data/groupData";
 import {symbolLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
-import {withGridLines} from "../gridlines/gridlines";
+import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";

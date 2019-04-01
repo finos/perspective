@@ -13,6 +13,7 @@ import scrollableLegend from "./scrollableLegend";
 import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
+import {draggableComponent} from "./styling/draggableComponent";
 
 const scrollColorLegend = scrollableLegend(
     d3Legend
@@ -45,9 +46,10 @@ function legendComponent(scrollLegend, scaleModifier) {
     let settings = {};
     let scale = null;
     let color = null;
+    let draggable = draggableComponent();
 
     function legend(container) {
-        if (scale) {
+        if (scale && scale.range().length > 1) {
             scrollLegend
                 .scale(scale)
                 .orient("vertical")
@@ -64,7 +66,7 @@ function legendComponent(scrollLegend, scaleModifier) {
 
             scrollLegend.labels(options => {
                 const parts = options.domain[options.i].split("|");
-                return settings.mainValues.length <= 1 ? parts.slice(0, parts.length - 1).join("|") : options.domain[options.i];
+                return settings.mainValues.length <= 1 && parts.length > 1 ? parts.slice(0, parts.length - 1).join("|") : options.domain[options.i];
             });
 
             const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
@@ -72,8 +74,11 @@ function legendComponent(scrollLegend, scaleModifier) {
             // render the legend
             legendSelection
                 .attr("class", "legend-container")
+                .attr("borderbox-on-hover", true)
                 .style("z-index", "2")
                 .call(scrollLegend);
+
+            draggable(legendSelection);
         }
     }
 
@@ -86,6 +91,7 @@ function legendComponent(scrollLegend, scaleModifier) {
             .selectAll("g.cell");
 
         cells.classed("hidden", isHidden);
+        cells.append("title").html(d => d);
 
         if (color) {
             cells

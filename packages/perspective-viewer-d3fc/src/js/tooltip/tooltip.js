@@ -1,8 +1,18 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
 import {select} from "d3";
 import {getChartElement} from "../plugin/root";
-import {getOrCreateElement} from "../utils/utils";
+import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import {generateHtml} from "./generateHTML";
+import {selectionEvent} from "./selectionEvent";
 
 export const tooltip = () => {
     let alwaysShow = false;
@@ -34,6 +44,7 @@ export const tooltip = () => {
             selection.each(showTip);
         } else {
             selection.on("mouseover", showTip).on("mouseout", hideTip);
+            selectionEvent().settings(settings)(selection);
         }
     };
 
@@ -87,12 +98,12 @@ function showTooltip(containerNode, barNode, tooltipDiv) {
 function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
     const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
 
-    if (containerRect.right < tooltipDivRect.right) {
+    if (isElementOverflowing(containerRect, tooltipDivRect)) {
         const leftAdjust = tooltipDivRect.right - containerRect.right;
         tooltipDiv.style("left", `${left - leftAdjust}px`);
     }
 
-    if (containerRect.bottom < tooltipDivRect.bottom) {
+    if (isElementOverflowing(containerRect, tooltipDivRect, "bottom")) {
         const topAdjust = tooltipDivRect.bottom - containerRect.bottom;
         tooltipDiv.style("top", `${top - topAdjust}px`);
     }

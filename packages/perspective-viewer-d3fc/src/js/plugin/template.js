@@ -12,6 +12,7 @@ import style from "../../less/chart.less";
 import perspectiveStyle from "../../less/perspective-view.less";
 import template from "../../html/d3fc-chart.html";
 import {areArraysEqualSimple} from "../utils/utils";
+import {initialiseStyles} from "../series/colorStyles";
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils";
 
@@ -29,6 +30,8 @@ class D3FCChartElement extends HTMLElement {
         style.setAttribute("scope", "perspective-viewer");
         style.textContent = perspectiveStyle;
         this.shadowRoot.host.getRootNode().appendChild(style);
+
+        initialiseStyles(this._container);
     }
 
     render(chart, settings) {

@@ -42,17 +42,28 @@ const flattenArray = array => {
     }
 };
 
+const getMinimumGap = (data, dataMap) =>
+    data
+        .map(dataMap)
+        .sort((a, b) => a - b)
+        .filter((d, i, a) => i === 0 || d !== a[i - 1])
+        .reduce((acc, d, i, src) => (i === 0 || acc <= d - src[i - 1] ? acc : d - src[i - 1]));
+
 export const domain = settings => {
     let valueName = "crossValue";
     let settingName = "crossValues";
 
-    const extentTime = fc.extentTime().accessors([d => new Date(d[valueName])]);
+    const extentTime = fc
+        .extentTime()
+        .accessors([d => new Date(d[valueName])])
+        .padUnit("domain");
 
     const _domain = function(data) {
         const flattenedData = flattenArray(data);
         switch (axisType(settings, settingName)) {
             case AXIS_TYPES.time:
-                return extentTime(flattenedData);
+                const dataWidth = getMinimumGap(flattenedData, d => new Date(d[valueName]).getTime());
+                return extentTime.pad([dataWidth / 2, dataWidth / 2])(flattenedData);
             default:
                 return [...new Set(flattenedData.map(d => d[valueName]))];
         }
