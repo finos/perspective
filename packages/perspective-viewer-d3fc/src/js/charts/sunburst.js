@@ -9,7 +9,7 @@
 
 import {select} from "d3";
 import {treeData} from "../data/treeData";
-import {sunburstSeries, treeColor} from "../series/sunburstSeries";
+import {sunburstSeries, treeColor} from "../series/sunburst/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
 
@@ -59,7 +59,12 @@ function sunburst(container, settings) {
 
             const radius = (Math.min(width, height) - 100) / 6;
             const color = treeColor(settings, split, data.data.children);
-            sunburstSeries(sunburstElement, settings, split, data, color, radius);
+            sunburstSeries()
+                .settings(settings)
+                .split(split)
+                .data(data)
+                .color(color)
+                .radius(radius)(sunburstElement);
 
             if (color) {
                 const legend = colorRangeLegend().scale(color);
