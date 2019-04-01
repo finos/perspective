@@ -125,27 +125,27 @@ namespace binding {
 
     template <typename T>
     void _fill_col_numeric(T accessor, t_table& tbl, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
     void _fill_col_int64(T accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
     void _fill_col_time(T accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
     void _fill_col_date(T accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
     void _fill_col_bool(T accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
     void _fill_col_string(T accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow);
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     /**
      * Fills the table with data from language.
@@ -165,7 +165,7 @@ namespace binding {
      */
     template <typename T>
     void _fill_data(t_table& tbl, std::vector<std::string> ocolnames, T accessor,
-        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow);
+        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update);
 
     /******************************************************************************
      *
@@ -223,7 +223,7 @@ namespace binding {
      * -------
      * A gnode.
      */
-    std::shared_ptr<t_gnode> make_gnode(const t_table& table);
+    std::shared_ptr<t_gnode> make_gnode(const t_schema& iscm);
 
     /**
      * Create a populated table.

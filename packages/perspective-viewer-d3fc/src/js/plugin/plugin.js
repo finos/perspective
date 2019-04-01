@@ -33,16 +33,16 @@ charts.forEach(chart => {
 function drawChart(chart) {
     return async function(el, view, task) {
         // FIXME: super tight coupling to private viewer methods
-        const row_pivots = this._get_view_row_pivots();
-        const col_pivots = this._get_view_column_pivots();
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
         const filter = this._view._config.filter;
 
-        const [tschema, json] = await Promise.all([this._table.schema(), view.to_json()]);
+        const [tschema, json, config] = await Promise.all([this._table.schema(), view.to_json(), view.get_config()]);
         if (task.cancelled) {
             return;
         }
+        const row_pivots = config.row_pivot;
+        const col_pivots = config.column_pivot;
 
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = !row_pivots.length ? (col, i) => ({...removeHiddenData(col, hidden), __ROW_PATH__: [i]}) : col => removeHiddenData(col, hidden);

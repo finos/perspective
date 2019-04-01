@@ -215,13 +215,13 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("null_in_pivot_column", async function() {
+        it("null in pivot column", async function() {
             var table = perspective.table([{x: null}, {x: "x"}, {x: "y"}]);
             var view = table.view({
                 row_pivot: ["x"],
                 aggregate: [{op: "distinct count", column: "x"}]
             });
-            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: ["x"], x: 1}, {__ROW_PATH__: ["y"], x: 1}, {__ROW_PATH__: [null], x: 1}];
+            var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [null], x: 1}, {__ROW_PATH__: ["x"], x: 1}, {__ROW_PATH__: ["y"], x: 1}];
             let result = await view.to_json();
             expect(result).toEqual(answer);
             view.delete();
@@ -299,51 +299,52 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("pivots multiple null values on initial load", async function() {
-            const dataWithNulls = [{name: "Homer", value: 1}, {name: null, value: 1}, {name: null, value: 1}, {name: "Krusty", value: 1}];
+        describe("pivoting on column containing null values", function() {
+            it("shows one pivot for the nulls on initial load", async function() {
+                const dataWithNulls = [{name: "Homer", value: 1}, {name: null, value: 1}, {name: null, value: 1}, {name: "Krusty", value: 1}];
 
-            var table = perspective.table(dataWithNulls);
+                var table = perspective.table(dataWithNulls);
 
-            var view = table.view({
-                row_pivot: ["name"]
+                var view = table.view({
+                    row_pivot: ["name"]
+                });
+
+                const answer = [
+                    {__ROW_PATH__: [], name: 3, value: 4},
+                    {__ROW_PATH__: [null], name: 1, value: 2},
+                    {__ROW_PATH__: ["Homer"], name: 1, value: 1},
+                    {__ROW_PATH__: ["Krusty"], name: 1, value: 1}
+                ];
+
+                let results = await view.to_json();
+                expect(results).toEqual(answer);
+                view.delete();
+                table.delete();
             });
 
-            const answer = [
-                {__ROW_PATH__: [], name: 3, value: 4},
-                {__ROW_PATH__: ["Homer"], name: 1, value: 1},
-                {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
-                {__ROW_PATH__: [null], name: 1, value: 2}
-            ];
+            it("shows one pivot for the nulls after updating with a null", async function() {
+                const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
+                const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
 
-            let results = await view.to_json();
-            expect(results).toEqual(answer);
-            view.delete();
-            table.delete();
-        });
+                var table = perspective.table(dataWithNull1);
+                table.update(dataWithNull2);
 
-        it.skip("pivots multiple null values in updates", async function() {
-            const dataWithNull1 = [{name: "Homer", value: 1}, {name: null, value: 1}];
-            const dataWithNull2 = [{name: null, value: 1}, {name: "Krusty", value: 1}];
+                var view = table.view({
+                    row_pivot: ["name"]
+                });
 
-            var table = perspective.table(dataWithNull1);
-            table.update(dataWithNull2);
+                const answer = [
+                    {__ROW_PATH__: [], name: 3, value: 4},
+                    {__ROW_PATH__: [null], name: 1, value: 2},
+                    {__ROW_PATH__: ["Homer"], name: 1, value: 1},
+                    {__ROW_PATH__: ["Krusty"], name: 1, value: 1}
+                ];
 
-            var view = table.view({
-                row_pivot: ["name"]
+                let results = await view.to_json();
+                expect(results).toEqual(answer);
+                view.delete();
+                table.delete();
             });
-
-            const wrong_answer = [
-                {__ROW_PATH__: [], name: 4, value: 4},
-                {__ROW_PATH__: [null], name: 1, value: 1},
-                {__ROW_PATH__: ["Homer"], name: 1, value: 1},
-                {__ROW_PATH__: ["Krusty"], name: 1, value: 1},
-                {__ROW_PATH__: [null], name: 1, value: 1}
-            ];
-
-            let results = await view.to_json();
-            expect(results).not.toEqual(wrong_answer);
-            view.delete();
-            table.delete();
         });
 
         it("['x'] has a schema", async function() {
@@ -567,6 +568,44 @@ module.exports = perspective => {
                 {__ROW_PATH__: [3], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": null, "d|y": null, "d|z": null},
                 {__ROW_PATH__: [4], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 4, "d|y": 1, "d|z": 1}
             ];
+            let result2 = await view.to_json();
+            expect(result2).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+    });
+
+    describe("Expand/Collapse", function() {
+        it("Collapse a row in a 2x2 pivot", async function() {
+            var table = perspective.table([
+                {x: 7, y: "A", z: true, a: "AA", b: "BB", c: "CC"},
+                {x: 2, y: "A", z: false, a: "AA", b: "CC", c: "CC"},
+                {x: 5, y: "A", z: true, a: "AA", b: "BB", c: "DD"},
+                {x: 4, y: "A", z: false, a: "AA", b: "CC", c: "DD"},
+                {x: 1, y: "B", z: true, a: "AA", b: "BB", c: "CC"},
+                {x: 8, y: "B", z: false, a: "AA", b: "CC", c: "CC"},
+                {x: 3, y: "B", z: true, a: "BB", b: "BB", c: "DD"},
+                {x: 6, y: "B", z: false, a: "BB", b: "CC", c: "DD"},
+                {x: 9, y: "C", z: true, a: "BB", b: "BB", c: "CC"},
+                {x: 10, y: "C", z: false, a: "BB", b: "CC", c: "CC"},
+                {x: 11, y: "C", z: true, a: "BB", b: "BB", c: "DD"},
+                {x: 12, y: "C", z: false, a: "BB", b: "CC", c: "DD"}
+            ]);
+            var view = table.view({
+                column_pivot: ["z", "b"],
+                row_pivot: ["y", "a"],
+                aggregate: [{column: "x", op: "last"}]
+            });
+
+            let answer = [
+                {__ROW_PATH__: [], "false|CC|x": 12, "true|BB|x": 11},
+                {__ROW_PATH__: ["A"], "false|CC|x": 4, "true|BB|x": 5},
+                {__ROW_PATH__: ["A", "AA"], "false|CC|x": 4, "true|BB|x": 5},
+                {__ROW_PATH__: ["B"], "false|CC|x": 6, "true|BB|x": 3},
+                {__ROW_PATH__: ["C"], "false|CC|x": 12, "true|BB|x": 11},
+                {__ROW_PATH__: ["C", "BB"], "false|CC|x": 12, "true|BB|x": 11}
+            ];
+            view.collapse(3);
             let result2 = await view.to_json();
             expect(result2).toEqual(answer);
             view.delete();

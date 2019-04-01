@@ -34,7 +34,8 @@ const MAXIMUM_RENDER_SIZE = {
 
 global.registerPlugin("x_bar", {
     name: "X Bar Chart",
-    create: draw("x_bar"),
+    create: draw("x_bar", true),
+    update: draw("x_bar", false),
     resize: resize,
     initial: {
         type: "number",
@@ -47,7 +48,8 @@ global.registerPlugin("x_bar", {
 
 global.registerPlugin("y_bar", {
     name: "Y Bar Chart",
-    create: draw("y_bar"),
+    create: draw("y_bar", true),
+    update: draw("y_bar", false),
     resize: resize,
     initial: {
         type: "number",
@@ -60,7 +62,8 @@ global.registerPlugin("y_bar", {
 
 global.registerPlugin("y_line", {
     name: "Y Line Chart",
-    create: draw("y_line"),
+    create: draw("y_line", true),
+    update: draw("y_line", false),
     resize: resize,
     initial: {
         type: "number",
@@ -73,7 +76,8 @@ global.registerPlugin("y_line", {
 
 global.registerPlugin("y_scatter", {
     name: "Y Scatter Chart",
-    create: draw("y_scatter"),
+    create: draw("y_scatter", true),
+    update: draw("y_scatter", false),
     resize: resize,
     initial: {
         type: "number",
@@ -86,7 +90,8 @@ global.registerPlugin("y_scatter", {
 
 global.registerPlugin("y_area", {
     name: "Y Area Chart",
-    create: draw("y_area"),
+    create: draw("y_area", true),
+    update: draw("y_area", false),
     resize: resize,
     initial: {
         type: "number",
@@ -99,7 +104,8 @@ global.registerPlugin("y_area", {
 
 global.registerPlugin("xy_line", {
     name: "X/Y Line Chart",
-    create: draw("line"),
+    create: draw("line", true),
+    update: draw("line", false),
     resize: resize,
     initial: {
         type: "number",
@@ -112,7 +118,8 @@ global.registerPlugin("xy_line", {
 
 global.registerPlugin("xy_scatter", {
     name: "X/Y Scatter Chart",
-    create: draw("scatter"),
+    create: draw("scatter", true),
+    update: draw("scatter", false),
     resize: resize,
     initial: {
         type: "number",
@@ -125,7 +132,8 @@ global.registerPlugin("xy_scatter", {
 
 global.registerPlugin("treemap", {
     name: "Treemap",
-    create: draw("treemap"),
+    create: draw("treemap", true),
+    update: draw("treemap", false),
     resize: resize,
     initial: {
         type: "number",
@@ -138,7 +146,8 @@ global.registerPlugin("treemap", {
 
 global.registerPlugin("sunburst", {
     name: "Sunburst",
-    create: draw("sunburst"),
+    create: draw("sunburst", true),
+    update: draw("sunburst", false),
     resize: resize,
     initial: {
         type: "number",
@@ -151,7 +160,8 @@ global.registerPlugin("sunburst", {
 
 global.registerPlugin("heatmap", {
     name: "Heatmap",
-    create: draw("heatmap"),
+    create: draw("heatmap", true),
+    update: draw("heatmap", false),
     resize: resize,
     initial: {
         type: "number",

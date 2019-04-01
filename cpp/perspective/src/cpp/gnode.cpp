@@ -692,6 +692,11 @@ t_gnode::_process() {
     psp_log_time(repr() + " _process.noinit_path.exit");
 }
 
+t_uindex
+t_gnode::mapping_size() const {
+    return m_state->mapping_size();
+}
+
 t_table*
 t_gnode::_get_otable(t_uindex portidx) {
     PSP_TRACE_SENTINEL();

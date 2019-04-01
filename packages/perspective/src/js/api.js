@@ -62,7 +62,7 @@ function async_queue(method, cmd) {
 
 function view(worker, table_name, config) {
     this._worker = worker;
-    this._config = config;
+    //this._config = config;
     this._name = Math.random() + "";
     var msg = {
         cmd: "view",
@@ -73,6 +73,8 @@ function view(worker, table_name, config) {
     this._worker.post(msg);
     bindall(this);
 }
+
+view.prototype.get_config = async_queue("get_config");
 
 view.prototype.to_json = async_queue("to_json");
 

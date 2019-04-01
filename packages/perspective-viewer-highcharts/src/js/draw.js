@@ -37,11 +37,19 @@ function get_or_create_element(div) {
     return perspective_highcharts_element;
 }
 
-export const draw = mode =>
+export const draw = (mode, set_config) =>
     async function(el, view, task) {
+        if (set_config) {
+            this._config = await view.get_config();
+            if (task.cancelled) {
+                return;
+            }
+        }
+
+        const row_pivots = this._config.row_pivot;
+        const col_pivots = this._config.column_pivot;
+
         // FIXME: super tight coupling to private viewer methods
-        const row_pivots = this._get_view_row_pivots();
-        const col_pivots = this._get_view_column_pivots();
         const aggregates = this._get_view_aggregates();
         const hidden = this._get_view_hidden(aggregates);
 
