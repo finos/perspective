@@ -60,10 +60,12 @@ function sunburst(container, settings) {
             const radius = (Math.min(width, height) - 100) / 6;
             sunburstSeries(sunburstElement, settings, split, data, color, radius);
 
-            const legend = colorRangeLegend().scale(color);
-            select(svgNode.parentNode)
-                .call(legend)
-                .select("div.legend-container");
+            if (color) {
+                const legend = colorRangeLegend().scale(color);
+                select(svgNode.parentNode)
+                    .call(legend)
+                    .select("div.legend-container");
+            }
 
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });

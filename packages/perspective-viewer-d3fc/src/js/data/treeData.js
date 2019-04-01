@@ -89,5 +89,4 @@ function treeColor(settings, [split, data]) {
         const max = Math.max(...data.map(d => d.color));
         return seriesColorRange(settings, null, null, [min, max]);
     }
-    return () => "rgb(31, 119, 180)";
 }

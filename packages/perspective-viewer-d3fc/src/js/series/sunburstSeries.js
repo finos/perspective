@@ -25,11 +25,11 @@ export function sunburstSeries(sunburstElement, settings, split, data, color, ra
 
     const path = segmentMerge
         .select("path")
-        .attr("fill", d => color(d.data.color))
-        .attr("fill-opacity", d => (arcVisible(d.current) ? 0.8 : 0))
+        .attr("fill-opacity", d => (arcVisible(d.current) ? 1 : 0))
         .attr("user-select", d => (arcVisible(d.current) ? "initial" : "none"))
         .attr("pointer-events", d => (arcVisible(d.current) ? "initial" : "none"))
         .attr("d", d => drawArc(radius)(d.current));
+    color && path.style("fill", d => color(d.data.color));
 
     const label = segmentMerge
         .select("text")
