@@ -43,6 +43,7 @@
                 text-anchor: middle;
                 user-select: none;
                 pointer-events: none;
+                fill: var(--d3fc-sunburst--labels, rgb(51, 51, 51));
 
                 &.title {
                     dominant-baseline: hanging;
@@ -174,7 +175,7 @@
         }
 
         & text {
-            fill: var(--d3fc-legend-text, rgb(51, 51, 51));
+            fill: var(--d3fc-legend--text, rgb(51, 51, 51));
         }
 
         & .label {
@@ -184,7 +185,7 @@
         }
 
         & #legend-axis path {
-            stroke: var(--d3fc-legend-text, rgb(51, 51, 51));
+            stroke: var(--d3fc-legend--text, rgb(51, 51, 51));
         }
 
         & .legend-controls {
