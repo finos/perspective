@@ -17,10 +17,12 @@ export function seriesLinearRange(settings, data, valueName) {
     );
 }
 
-export function seriesColorRange(settings, data, valueName) {
-    let extent = domain()
-        .valueName(valueName)
-        .pad([0, 0])(data);
+export function seriesColorRange(settings, data, valueName, customExtent) {
+    let extent =
+        customExtent ||
+        domain()
+            .valueName(valueName)
+            .pad([0, 0])(data);
     let interpolator = settings.colorStyles.interpolator.full;
 
     if (extent[0] >= 0) {
