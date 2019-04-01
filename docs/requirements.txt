@@ -1,0 +1,4 @@
+breathe>=4.12.0
+sphinx>=1.8.4
+-e git://github.com/timkpaine/sphinx-js.git#egg=sphinx-js
+sphinx_rtd_theme>=0.4.3

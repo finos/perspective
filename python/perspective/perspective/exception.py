@@ -1,0 +1,2 @@
+class PSPException(Exception):
+    pass
