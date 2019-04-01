@@ -8,6 +8,8 @@
  */
 
 import {select, arc, interpolate} from "d3";
+import {getDataValue} from "../data/treeData";
+import {seriesColorRange} from "../series/seriesRange";
 
 export function sunburstSeries(sunburstElement, settings, split, data, color, radius) {
     const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
@@ -57,6 +59,14 @@ export function sunburstSeries(sunburstElement, settings, split, data, color, ra
     path.filter(d => d.children)
         .style("cursor", "pointer")
         .on("click", d => onClick(d, false));
+}
+
+export function treeColor(settings, split, data) {
+    if (settings.mainValues.length > 1) {
+        const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
+        const max = Math.max(...data.map(d => d.color));
+        return seriesColorRange(settings, null, null, [min, max]);
+    }
 }
 
 const drawArc = radius =>

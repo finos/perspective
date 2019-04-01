@@ -9,7 +9,7 @@
 
 import {select} from "d3";
 import {treeData} from "../data/treeData";
-import {sunburstSeries} from "../series/sunburstSeries";
+import {sunburstSeries, treeColor} from "../series/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
 
@@ -49,7 +49,7 @@ function sunburst(container, settings) {
         .select("svg")
         .select("g.sunburst")
         .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
-        .each(function({split, data, color}) {
+        .each(function({split, data}) {
             const sunburstElement = select(this);
             const svgNode = this.parentNode;
             const {width, height} = svgNode.getBoundingClientRect();
@@ -58,6 +58,7 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 100) / 6;
+            const color = treeColor(settings, split, data.data.children);
             sunburstSeries(sunburstElement, settings, split, data, color, radius);
 
             if (color) {
