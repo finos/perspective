@@ -60,17 +60,6 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 100) / 6;
-            data.each(d => {
-                d.current = d;
-                d.mainValues = settings.mainValues.length === 1 ? d.value : [d.value, d.data.color];
-                d.crossValue = d
-                    .ancestors()
-                    .slice(0, -1)
-                    .reverse()
-                    .map(cross => cross.data.name)
-                    .join("|");
-                d.key = split;
-            });
 
             const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
             const segmentEnter = segment

@@ -46,7 +46,20 @@ export function treeData(settings) {
         const tree = {name: "root", children: set[1]};
         const root = d3.hierarchy(tree).sum(d => d.size);
         const color = treeColor(settings, set);
-        return {split: set[0], data: d3.partition().size([2 * Math.PI, root.height + 1])(root), color};
+        const chartData = d3.partition().size([2 * Math.PI, root.height + 1])(root);
+        chartData.each(d => {
+            d.current = d;
+            d.mainValues = settings.mainValues.length === 1 ? d.value : [d.value, d.data.color];
+            d.crossValue = d
+                .ancestors()
+                .slice(0, -1)
+                .reverse()
+                .map(cross => cross.data.name)
+                .join("|");
+            d.key = set[0];
+        });
+
+        return {split: set[0], data: chartData, color};
     });
 
     return data;
