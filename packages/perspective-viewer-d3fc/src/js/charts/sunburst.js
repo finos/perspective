@@ -11,7 +11,7 @@ import {select} from "d3";
 import {treeData} from "../data/treeData";
 import {clickHandler} from "../interaction/clickHandler";
 import {drawArc, arcVisible} from "../series/arcSeries";
-import {labelVisible, labelTransform} from "../axis/sunburstLabel";
+import {labelVisible, labelTransform, cropLabel} from "../axis/sunburstLabel";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 
 function sunburst(container, settings) {
@@ -83,7 +83,10 @@ function sunburst(container, settings) {
                 .select("text")
                 .attr("fill-opacity", d => +labelVisible(d.current))
                 .attr("transform", d => labelTransform(d.current, radius))
-                .text(d => d.data.name);
+                .text(d => d.data.name)
+                .each(function(d) {
+                    cropLabel.call(this, d, radius);
+                });
 
             const parentTitle = sunburstElement.select("text.parent");
             const parent = sunburstElement
