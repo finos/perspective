@@ -13,6 +13,7 @@ import {clickHandler} from "../interaction/clickHandler";
 import {drawArc, arcVisible} from "../series/arcSeries";
 import {labelVisible, labelTransform, cropLabel} from "../axis/sunburstLabel";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
+import {tooltip} from "../tooltip/tooltip";
 
 function sunburst(container, settings) {
     const sunburstData = treeData(settings);
@@ -24,10 +25,13 @@ function sunburst(container, settings) {
     container.style("grid-template-columns", `repeat(${cols}, ${containerWidth / cols}px)`);
     container.style("grid-template-rows", `repeat(${rows}, ${containerHeight / cols}px)`);
 
-    const sunburstDiv = container.selectAll("div").data(treeData(settings), d => d.split);
+    const sunburstDiv = container.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
     sunburstDiv.exit().remove();
 
-    const sunburstEnter = sunburstDiv.enter().append("div");
+    const sunburstEnter = sunburstDiv
+        .enter()
+        .append("div")
+        .attr("class", "sunburst-container");
 
     const sunburstContainer = sunburstEnter
         .append("svg")
@@ -56,7 +60,17 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 100) / 6;
-            data.each(d => (d.current = d));
+            data.each(d => {
+                d.current = d;
+                d.mainValues = settings.mainValues.length === 1 ? d.value : [d.value, d.data.color];
+                d.crossValue = d
+                    .ancestors()
+                    .slice(0, -1)
+                    .reverse()
+                    .map(cross => cross.data.name)
+                    .join("|");
+                d.key = split;
+            });
 
             const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
             const segmentEnter = segment
@@ -110,6 +124,8 @@ function sunburst(container, settings) {
             select(svgNode.parentNode)
                 .call(legend)
                 .select("div.legend-container");
+
+            tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });
 }
 sunburst.plugin = {

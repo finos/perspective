@@ -22,7 +22,7 @@ function toValue(type, value) {
 export function getGroupValues(data, settings) {
     if (settings.crossValues.length === 0) return [];
     const groupValues = (data.crossValue.split ? data.crossValue.split("|") : [data.crossValue]) || [data.key];
-    return settings.crossValues.map((cross, i) => ({name: cross.name, value: toValue(cross.type, groupValues[i])}));
+    return groupValues.map((cross, i) => ({name: settings.crossValues[i].name, value: toValue(settings.crossValues[i].type, cross)}));
 }
 
 export function getSplitValues(data, settings) {
