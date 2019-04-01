@@ -9,9 +9,7 @@
 
 import {select} from "d3";
 import {treeData} from "../data/treeData";
-import {clickHandler} from "../interaction/clickHandler";
-import {drawArc, arcVisible} from "../series/arcSeries";
-import {labelVisible, labelTransform, cropLabel} from "../axis/sunburstLabel";
+import {sunburstSeries} from "../series/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
 
@@ -60,54 +58,7 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 100) / 6;
-
-            const segment = sunburstElement.selectAll("g.segment").data(data.descendants().slice(1));
-            const segmentEnter = segment
-                .enter()
-                .append("g")
-                .attr("class", "segment");
-
-            segmentEnter.append("path");
-            segmentEnter
-                .append("text")
-                .attr("class", "segment")
-                .attr("dy", "0.35em");
-            const segmentMerge = segmentEnter.merge(segment);
-
-            const path = segmentMerge
-                .select("path")
-                .attr("fill", d => color(d.data.color))
-                .attr("fill-opacity", d => (arcVisible(d.current) ? 0.8 : 0))
-                .attr("user-select", d => (arcVisible(d.current) ? "initial" : "none"))
-                .attr("pointer-events", d => (arcVisible(d.current) ? "initial" : "none"))
-                .attr("d", d => drawArc(radius)(d.current));
-
-            const label = segmentMerge
-                .select("text")
-                .attr("fill-opacity", d => +labelVisible(d.current))
-                .attr("transform", d => labelTransform(d.current, radius))
-                .text(d => d.data.name)
-                .each(function(d) {
-                    cropLabel.call(this, d, radius);
-                });
-
-            const parentTitle = sunburstElement.select("text.parent");
-            const parent = sunburstElement
-                .select("circle")
-                .attr("r", radius)
-                .datum(data);
-
-            const onClick = clickHandler(data, sunburstElement, parent, parentTitle, path, label, radius, split, settings);
-            if (settings.sunburstLevel) {
-                const currentLevel = data.descendants().find(d => d.data.name === settings.sunburstLevel[split]);
-                currentLevel && onClick(currentLevel, true);
-            } else {
-                settings.sunburstLevel = {};
-            }
-            parent.on("click", d => onClick(d, false));
-            path.filter(d => d.children)
-                .style("cursor", "pointer")
-                .on("click", d => onClick(d, false));
+            sunburstSeries(sunburstElement, settings, split, data, color, radius);
 
             const legend = colorRangeLegend().scale(color);
             select(svgNode.parentNode)
