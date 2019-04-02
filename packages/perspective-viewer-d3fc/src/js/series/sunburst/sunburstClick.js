@@ -41,7 +41,7 @@ export const clickHandler = (data, g, parent, parentTitle, path, label, radius, 
         .filter(function(d) {
             return +this.getAttribute("fill-opacity") || arcVisible(d.target);
         })
-        .attr("fill-opacity", d => (arcVisible(d.target) ? 0.8 : 0))
+        .attr("fill-opacity", d => (arcVisible(d.target) ? 1 : 0))
         .attr("user-select", d => (arcVisible(d.target) ? "initial" : "none"))
         .attr("pointer-events", d => (arcVisible(d.target) ? "initial" : "none"))
         .attrTween("d", d => () => drawArc(radius)(d.current));
