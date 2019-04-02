@@ -305,11 +305,14 @@ export default function(Module) {
 
     const to_format = async function(options, formatter) {
         options = options || {};
+        const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
+        const max_rows = this._View.num_rows();
         let viewport = this.config.viewport ? this.config.viewport : {};
         let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : this._View.num_rows());
+        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
         let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = options.end_col || (viewport.width ? start_col + viewport.width : this._View.num_columns() + (this.sides() === 0 ? 0 : 1));
+        let end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
+
         let slice;
 
         const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
@@ -372,7 +375,7 @@ export default function(Module) {
             let row;
             let ridx = -1;
             for (let idx = 0; idx < slice.length; idx++) {
-                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col - start_col + 1).length);
+                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col + 1).length);
                 if (cidx === 0) {
                     if (row) {
                         formatter.addRow(data, row);
