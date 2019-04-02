@@ -25,6 +25,12 @@ matrix:
       env: TEST=CPP_OSX
       os: osx
 
+    - python: "3.6"
+      language: python
+      env: TEST=DOCS
+      cache: pip
+      services: docker
+
   allow_failures:
     - language: c++
       env: TEST=CPP_OSX
@@ -49,3 +55,6 @@ script:
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn test_python; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi
+  - if [ "$TEST" = "DOCS" ]; then PSP_DOCKER=1 yarn; fi
+  - if [ "$TEST" = "DOCS" ]; then PSP_DOCKER=1 yarn autodocs; fi
+

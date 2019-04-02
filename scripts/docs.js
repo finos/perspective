@@ -23,7 +23,7 @@ function docker(image = "emsdk") {
 let flags = " -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=1 -DPSP_BUILD_DOCS=1";
 
 try {
-    let cmd = "cd docsbuild && cmake ..  -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=0 -DPSP_BUILD_DOCS=1 && make -j${PSP_CPU_COUNT-8}";
+    let cmd = "cd docsbuild && cmake ../cpp/perspective  -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=0 -DPSP_BUILD_DOCS=1 && make -j${PSP_CPU_COUNT-8}";
     if (process.env.PSP_DOCKER) {
         execute(docker("docs") + " mkdir -p docsbuild");
         execute(cmd);
