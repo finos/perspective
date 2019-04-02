@@ -251,6 +251,7 @@ class PerspectiveViewer extends ActionElement {
      */
     set view(v) {
         this._vis_selector.value = this.getAttribute("view");
+        this._set_row_styles();
         this._set_column_defaults();
         this.dispatchEvent(new Event("perspective-config-update"));
     }

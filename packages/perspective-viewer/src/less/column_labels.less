@@ -7,10 +7,6 @@
  *
  */
 
-.titled {
-    margin-top: 23px;
-}
-
 :host {
     #app #top_panel {
         #row_pivots label:before {
@@ -40,120 +36,6 @@
                 color: #666;
                 position: absolute;
                 margin-top: -15px;
-            }
-        }
-    }
-}
-
-:host([view="xy_line"]) {
-    #app.columns_horizontal #side_panel {
-        #inactive_columns {
-            padding-top: 28px;
-        }
-    }
-
-    #app #side_panel {
-        #active_columns {
-            perspective-row:nth-child(1) {
-                .titled();
-
-                &:before {
-                    content: "X Axis";
-                }
-            }
-
-            perspective-row:nth-child(2) {
-                .titled();
-
-                &:before {
-                    content: "Y Axis";
-                }
-            }
-        }
-    }
-}
-
-:host([view="xy_scatter"]),
-:host([view="xy_line"]) {
-    #app.columns_horizontal #side_panel {
-        #inactive_columns {
-            padding-top: 28px;
-        }
-    }
-
-    #app #side_panel {
-        #active_columns {
-            perspective-row:nth-child(1) {
-                .titled();
-
-                &:before {
-                    content: "X Axis";
-                }
-            }
-
-            perspective-row:nth-child(2) {
-                .titled();
-
-                &:before {
-                    content: "Y Axis";
-                }
-            }
-        }
-    }
-}
-
-:host([view="xy_scatter"]) {
-    #app.columns_horizontal #side_panel {
-        #inactive_columns {
-            padding-top: 28px;
-        }
-    }
-
-    #app #side_panel {
-        #active_columns {
-            perspective-row:nth-child(3) {
-                .titled();
-
-                &:before {
-                    content: "Color";
-                }
-            }
-
-            perspective-row:nth-child(4) {
-                .titled();
-
-                &:before {
-                    content: "Size";
-                }
-            }
-        }
-    }
-}
-
-:host([view="treemap"]),
-:host([view="sunburst"]) {
-    #app.columns_horizontal #side_panel {
-        #inactive_columns {
-            padding-top: 28px;
-        }
-    }
-
-    #app #side_panel {
-        #active_columns {
-            perspective-row:nth-child(1) {
-                .titled();
-
-                &:before {
-                    content: "Size";
-                }
-            }
-
-            perspective-row:nth-child(2) {
-                .titled();
-
-                &:before {
-                    content: "Color";
-                }
             }
         }
     }

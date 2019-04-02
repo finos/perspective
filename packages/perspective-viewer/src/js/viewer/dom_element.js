@@ -7,6 +7,7 @@
  *
  */
 
+import detectIE from "detectie";
 import perspective from "@jpmorganchase/perspective";
 import {undrag} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
@@ -170,6 +171,22 @@ export class DomElement extends PerspectiveElement {
                     }
                 }
             }
+        }
+    }
+
+    _set_row_styles() {
+        let style = "";
+        if (this._plugin.initial && this._plugin.initial.names) {
+            for (const nidx in this._plugin.initial.names) {
+                const name = this._plugin.initial.names[nidx];
+                style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}){margin-top:23px;}`;
+                style += `#active_columns perspective-row:nth-child(${parseInt(nidx) + 1}):before{content:"${name}";}`;
+            }
+        }
+        this.shadowRoot.querySelector("#psp_styles").innerHTML = style;
+
+        if (detectIE()) {
+            window.ShadyCSS.styleDocument();
         }
     }
 
