@@ -14,6 +14,8 @@ import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
 
 function sunburst(container, settings) {
+    if (settings.crossValues.length === 0) return;
+
     const sunburstData = treeData(settings);
     const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
 

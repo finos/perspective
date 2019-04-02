@@ -31,7 +31,7 @@
   );
 }
 
-:host([view=d3_xy_scatter]), :host([view=d3_candlestick]), :host([view=d3_ohlc]) {
+:host([view=d3_xy_scatter]), :host([view=d3_candlestick]), :host([view=d3_ohlc]), :host([view=d3_sunburst]) {
  & #app {
    &.columns_horizontal #side_panel #inactive_columns {
      padding-top:28px
@@ -79,6 +79,18 @@
 
    &:nth-child(4):before {
      content:"Low"
+   }
+ }
+}
+
+:host([view=d3_sunburst]) {
+ & #app #side_panel #active_columns perspective-row {
+   &:nth-child(1):before {
+     content:"Size"
+   }
+
+   &:nth-child(2):before {
+     content:"Color"
    }
  }
 }
