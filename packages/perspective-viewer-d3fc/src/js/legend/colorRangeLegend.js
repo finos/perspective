@@ -11,18 +11,24 @@ import * as fc from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
 
 export function colorRangeLegend() {
-    const width = 90;
-    const height = 200;
     let scale = null;
-
-    const xScale = d3
-        .scaleBand()
-        .domain([0, 1])
-        .range([0, width]);
 
     const formatFunc = d => (Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
 
     function legend(container) {
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
+            container
+                .append("div")
+                .attr("class", "legend-container legend-color")
+                .style("z-index", "2")
+        );
+        const {width, height} = legendSelection.node().getBoundingClientRect();
+
+        const xScale = d3
+            .scaleBand()
+            .domain([0, 1])
+            .range([0, width]);
+
         const domain = scale
             .copy()
             .nice()
@@ -58,13 +64,6 @@ export function colorRangeLegend() {
             .tickValues(tickValues)
             .tickSizeOuter(0)
             .tickFormat(d => formatFunc(d));
-
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
-            container
-                .append("div")
-                .attr("class", "legend-container legend-color")
-                .style("z-index", "2")
-        );
 
         const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)
