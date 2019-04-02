@@ -20,7 +20,7 @@ function sunburst(container, settings) {
     const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
 
     const minSize = 500;
-    const cols = sunburstData.length === 1 ? 1 : Math.floor(containerWidth / minSize);
+    const cols = Math.min(sunburstData.length, Math.floor(containerWidth / minSize));
     const rows = Math.ceil(sunburstData.length / cols);
     const containerSize = {
         width: containerWidth / cols,
