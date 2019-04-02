@@ -254,7 +254,7 @@ exports.install = function(grid) {
     //     return canvas.toDataURL() == blank.toDataURL();
     // }
 
-    grid.canvas.resize = async function() {
+    grid.canvas.resize = async function(force, reset) {
         const width = (this.width = Math.floor(this.div.clientWidth));
         const height = (this.height = Math.floor(this.div.clientHeight));
 
@@ -276,11 +276,11 @@ exports.install = function(grid) {
         this.resizeNotification();
 
         let render = false;
-        if (height * ratio > this.canvas.height) {
+        if (!reset && (height * ratio > this.canvas.height || force)) {
             render = await new Promise(resolve => this.component.grid.behavior.dataModel.fetchData(undefined, resolve));
         }
 
-        if (!render) {
+        if (!render || reset) {
             this.bounds = new rectangular.Rectangle(0, 0, width, height);
             this.component.setBounds(this.bounds);
 

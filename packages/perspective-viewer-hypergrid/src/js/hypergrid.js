@@ -322,10 +322,11 @@ async function getOrCreateHypergrid(div) {
         perspectiveHypergridElement = this[PRIVATE].grid;
     }
 
-    if (!document.body.contains(perspectiveHypergridElement)) {
+    if (!perspectiveHypergridElement.isConnected) {
         div.innerHTML = "";
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
+        perspectiveHypergridElement.grid.canvas.resize(false, true);
     }
     return perspectiveHypergridElement;
 }
@@ -366,8 +367,7 @@ async function grid_create(div, view, task) {
     const dataModel = this.hypergrid.behavior.dataModel;
     const columns = Object.keys(json);
 
-    dataModel.setRowCount(nrows);
-    dataModel.setIsTree(!!rowPivots.length);
+    dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
     dataModel._view = view;
     dataModel._config = config;
@@ -385,14 +385,8 @@ async function grid_create(div, view, task) {
     };
 
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
-    let running = true;
-    while (nrows > 0 && running) {
-        running = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
-        if (running) {
-            await new Promise(resolve => setTimeout(resolve, 10));
-        }
-    }
-    this.hypergrid.canvas.resize();
+    this.hypergrid.renderer.computeCellsBounds(true);
+    await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();
     this.hypergrid.canvas.paintNow();
 }
