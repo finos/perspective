@@ -15,18 +15,22 @@ import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
 import {draggableComponent} from "./styling/draggableComponent";
 
-const scrollColorLegend = scrollableLegend(
-    d3Legend
-        .legendColor()
-        .shape("circle")
-        .shapeRadius(6)
-);
-const scrollSymbolLegend = scrollableLegend(
-    d3Legend
-        .legendSymbol()
-        .shapePadding(1)
-        .labelOffset(3)
-);
+const scrollColorLegend = settings =>
+    scrollableLegend(
+        d3Legend
+            .legendColor()
+            .shape("circle")
+            .shapeRadius(6),
+        settings
+    );
+const scrollSymbolLegend = settings =>
+    scrollableLegend(
+        d3Legend
+            .legendSymbol()
+            .shapePadding(1)
+            .labelOffset(3),
+        settings
+    );
 
 export const colorLegend = () => legendComponent(scrollColorLegend);
 export const symbolLegend = () => legendComponent(scrollSymbolLegend, symbolScale);
@@ -42,7 +46,7 @@ function symbolScale(fromScale) {
         .range(range);
 }
 
-function legendComponent(scrollLegend, scaleModifier) {
+function legendComponent(scrollLegendComponent, scaleModifier) {
     let settings = {};
     let scale = null;
     let color = null;
@@ -50,6 +54,7 @@ function legendComponent(scrollLegend, scaleModifier) {
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
+            const scrollLegend = scrollLegendComponent(settings);
             scrollLegend
                 .scale(scale)
                 .orient("vertical")
@@ -71,6 +76,25 @@ function legendComponent(scrollLegend, scaleModifier) {
 
             const legendSelection = getOrCreateElement(container, "div.legend-container", () => container.append("div"));
 
+            scrollLegend.decorate(selection => {
+                const isHidden = data => settings.hideKeys && settings.hideKeys.includes(data);
+
+                const cells = selection
+                    .select("g.legendCells")
+                    .attr("transform", "translate(20,20)")
+                    .selectAll("g.cell");
+
+                cells.classed("hidden", isHidden);
+                cells.append("title").html(d => d);
+
+                if (color) {
+                    cells
+                        .select("path")
+                        .style("fill", d => (isHidden(d) ? null : color(d)))
+                        .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
+                }
+            });
+
             // render the legend
             legendSelection
                 .attr("class", "legend-container")
@@ -81,25 +105,6 @@ function legendComponent(scrollLegend, scaleModifier) {
             draggable(legendSelection);
         }
     }
-
-    scrollLegend.decorate(selection => {
-        const isHidden = data => settings.hideKeys && settings.hideKeys.includes(data);
-
-        const cells = selection
-            .select("g.legendCells")
-            .attr("transform", "translate(20,20)")
-            .selectAll("g.cell");
-
-        cells.classed("hidden", isHidden);
-        cells.append("title").html(d => d);
-
-        if (color) {
-            cells
-                .select("path")
-                .style("fill", d => (isHidden(d) ? null : color(d)))
-                .style("stroke", d => (isHidden(d) ? null : withoutOpacity(color(d))));
-        }
-    });
 
     legend.settings = (...args) => {
         if (!args.length) {

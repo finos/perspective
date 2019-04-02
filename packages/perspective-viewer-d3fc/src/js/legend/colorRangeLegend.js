@@ -11,8 +11,8 @@ import * as fc from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
 
 export function colorRangeLegend() {
-    const width = 100;
-    const height = 150;
+    const width = 90;
+    const height = 200;
     let scale = null;
 
     const xScale = d3
@@ -23,7 +23,10 @@ export function colorRangeLegend() {
     const formatFunc = d => (Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
 
     function legend(container) {
-        const domain = scale.domain();
+        const domain = scale
+            .copy()
+            .nice()
+            .domain();
         const paddedDomain = fc
             .extentLinear()
             .pad([0.1, 0.1])
@@ -47,16 +50,19 @@ export function colorRangeLegend() {
                 selection.selectAll("path").style("fill", d => scale(d));
             });
 
+        const middle = domain[0] < 0 && domain[1] > 0 ? 0 : Math.round((domain[1] + domain[0]) / 2);
+        const tickValues = [...domain, middle];
+
         const axisLabel = fc
             .axisRight(yScale)
-            .tickValues([...domain, (domain[1] + domain[0]) / 2])
+            .tickValues(tickValues)
             .tickSizeOuter(0)
             .tickFormat(d => formatFunc(d));
 
         const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
             container
                 .append("div")
-                .attr("class", "legend-container")
+                .attr("class", "legend-container legend-color")
                 .style("z-index", "2")
         );
 
