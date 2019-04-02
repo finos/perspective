@@ -83,7 +83,7 @@ function showTooltip(containerNode, barNode, tooltipDiv) {
     const barRect = barNode.getBoundingClientRect();
 
     const left = barRect.left + barRect.width / 2 - containerRect.left;
-    const top = barRect.top - containerRect.top;
+    const top = barRect.top - containerRect.top + containerNode.scrollTop;
 
     tooltipDiv
         .style("left", `${left}px`)
