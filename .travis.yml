@@ -31,6 +31,21 @@ matrix:
       env: TEST=CPP_OSX
       os: osx
 
+    - python: "3.6"
+      language: python
+      env: TEST=DOCS
+      cache: pip
+      services: docker
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+        keep_history: true
+        on:
+          branch:
+            - master
+            - merge_py
+
   allow_failures:
     - language: c++
       env: TEST=CPP_OSX
@@ -58,6 +73,8 @@ script:
   - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn test_python:table; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi
+  - if [ "$TEST" = "DOCS" ]; then yarn; fi
+  - if [ "$TEST" = "DOCS" ]; then yarn autodocs; fi
 
 after_success:
   - if ["$TEST" = "PYTHON" ]; then codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957; fi

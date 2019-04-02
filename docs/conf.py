@@ -33,12 +33,6 @@ version = ''
 # The full version, including alpha/beta/rc tags
 release = '0.2.14'  # FIXME
 
-if os.environ.get('READTHEDOCS', None):
-    print('****\nDetected READTHEDOCS Environment\n****\n')
-    subprocess.call('npm install fast-async @babel/cli @babel/core @babel/plugin-proposal-decorators @babel/plugin-transform-for-of  @babel/preset-env babel-plugin-transform-custom-element-classes jsdoc jsdoc-babel --save-dev', shell=True)
-    subprocess.call('npm install', shell=True)
-    subprocess.call('npm run autodocs', shell=True)
-
 # -- General configuration ---------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
