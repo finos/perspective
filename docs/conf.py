@@ -37,8 +37,8 @@ if os.environ.get('READTHEDOCS', None):
     print('****\nDetected READTHEDOCS Environment\n****\n')
     subprocess.call('npm install yarn --save-dev', shell=True)
     subprocess.call('npm install fast-async @babel/cli @babel/core @babel/plugin-proposal-decorators @babel/plugin-transform-for-of  @babel/preset-env babel-plugin-transform-custom-element-classes jsdoc jsdoc-babel --save-dev', shell=True)
-    subprocess.call('yarn')
-    subprocess.call('yarn autodocs')
+    subprocess.call('node_modules/.bin/yarn')
+    subprocess.call('node_modules/.bin/yarn autodocs')
 
 # -- General configuration ---------------------------------------------------
 
