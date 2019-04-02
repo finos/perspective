@@ -19,6 +19,43 @@ const COLUMN_PIVOT_OPTIONS = [[], ["Sub-Category"]];
 
 const ROW_PIVOT_OPTIONS = [[], ["State"], ["State", "City"]];
 
+const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
+
+const wait_for_perspective = () => new Promise(resolve => window.addEventListener("perspective-ready", resolve));
+
+function to_name({aggregate, row_pivot, column_pivot}) {
+    return {
+        aggregate: COLUMN_TYPES[aggregate[0].column],
+        row_pivot: row_pivot.join("/") || "-",
+        column_pivot: column_pivot.join("/") || "-"
+    };
+}
+
+async function get_data(worker) {
+    const req1 = fetch(CSV);
+    const req2 = fetch(ARROW);
+
+    console.log("Downloading CSV");
+    let content = await req1;
+    const csv = await content.text();
+
+    console.log("Downloading Arrow");
+    content = await req2;
+    const arrow = await content.arrayBuffer();
+
+    console.log("Generating JSON");
+    const tbl = worker.table(arrow.slice());
+    const view = tbl.view();
+    const rows = await view.to_json();
+    const columns = await view.to_columns();
+    view.delete();
+    tbl.delete();
+
+    return {csv, arrow, rows, columns};
+}
+
+// Define benchmark cases
+
 async function* run_table_cases(worker, data, test) {
     console.log(`Benchmarking \`${test}\``);
     try {
@@ -90,45 +127,66 @@ async function* run_to_format_cases(table, config, format) {
     await view.delete();
 }
 
-async function initialize(worker) {
-    const req1 = fetch(CSV);
-    const req2 = fetch(ARROW);
+async function* run_on_update_cases(table, config, mode) {
+    const token = to_name(config);
+    const name = `view(${JSON.stringify(token)})`;
 
-    console.log("Downloading CSV");
-    let content = await req1;
-    const csv = await content.text();
+    const view = table.view(config);
+    // FIXME: on_update function does not work in bench
+    //view.on_update(function() {}, {mode: mode});
+    console.log(`Benchmarking \`${name}.on_update(${mode})()\``);
+    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+        const start = performance.now();
+        for (let i = 0; i < 100; i++) {
+            await table.update([
+                {
+                    Sales: Math.random() * 500
+                }
+            ]);
+        }
+        if (x >= TOSS_ITERATIONS) {
+            yield {
+                time: performance.now() - start,
+                test: `on_update(${mode})(${name})`,
+                method: `on_update(${mode})`,
+                ...token
+            };
+        }
+    }
 
-    console.log("Downloading Arrow");
-    content = await req2;
-    const arrow = await content.arrayBuffer();
-
-    console.log("Generating JSON");
-    const tbl = worker.table(arrow.slice());
-    const view = tbl.view();
-    const rows = await view.to_json();
-    const columns = await view.to_columns();
-    view.delete();
-    tbl.delete();
-
-    return {csv, arrow, rows, columns};
+    await view.delete();
 }
 
-const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"};
+// Run collections of cases
 
-function to_name({aggregate, row_pivot, column_pivot}) {
-    return {
-        aggregate: COLUMN_TYPES[aggregate[0].column],
-        row_pivot: row_pivot.join("/") || "-",
-        column_pivot: column_pivot.join("/") || "-"
-    };
+async function* run_all_delta_cases() {
+    const worker = window.perspective.worker();
+    await wait_for_perspective();
+
+    // eslint-disable-next-line no-unused-vars
+    const {csv, arrow, rows, columns} = await get_data(worker);
+
+    const table = worker.table(rows);
+    await table.schema();
+
+    for (const aggregate of AGG_OPTIONS) {
+        for (const row_pivot of ROW_PIVOT_OPTIONS) {
+            for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
+                const config = {aggregate, row_pivot, column_pivot};
+
+                yield* run_on_update_cases(table, config, "none");
+                // TODO: enable after on_update is fixed
+                //yield* run_on_update_cases(table, config, "rows");
+                //yield* run_on_update_cases(table, config, "pkey");
+            }
+        }
+    }
 }
-
-const wait_for_perspective = () => new Promise(resolve => window.addEventListener("perspective-ready", resolve));
 
 async function* run_all_cases() {
     const worker = window.perspective.worker();
     await wait_for_perspective();
-    const {csv, arrow, rows, columns} = await initialize(worker);
+    const {csv, arrow, rows, columns} = await get_data(worker);
     console.assert(rows.length === columns[Object.keys(columns)[0]].length);
 
     yield* run_table_cases(worker, csv, "table(csv)");
@@ -153,7 +211,27 @@ async function* run_all_cases() {
     }
 }
 
+// Run entire test suite
+
+// eslint-disable-next-line no-unused-vars
+async function run_delta_test() {
+    // eslint-disable-next-line no-undef
+    perspective = perspective.default || perspective;
+    try {
+        let results = [];
+        for await (let c of run_all_delta_cases()) {
+            results.push(c);
+        }
+        return results;
+    } catch (e) {
+        console.error(e.message);
+        return [];
+    }
+}
+
+// eslint-disable-next-line no-unused-vars
 async function run_test() {
+    // eslint-disable-next-line no-undef
     perspective = perspective.default || perspective;
     try {
         let results = [];

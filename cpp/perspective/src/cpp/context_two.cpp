@@ -607,7 +607,7 @@ t_ctx2::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
 }
 
 /**
- * @brief
+ * @brief Returns updated cells.
  *
  * @param bidx
  * @param eidx
@@ -615,7 +615,6 @@ t_ctx2::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
  */
 t_stepdelta
 t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
-
     t_uindex start_row = bidx;
     t_uindex end_row = eidx;
     t_uindex start_col = 1;
@@ -659,8 +658,7 @@ t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
 }
 
 /**
- * @brief Returns the row indices that were updated inside the window defined by
- * bidx and eidx.
+ * @brief Returns the row indices that have been updated with new data.
  *
  * @param bidx
  * @param eidx
@@ -681,6 +679,7 @@ t_ctx2::get_row_delta(t_index bidx, t_index eidx) {
 
     std::vector<std::pair<t_uindex, t_uindex>> cells;
 
+    // get cells and imbue with additional information
     for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
         for (t_uindex cidx = 1; cidx < end_col; ++cidx) {
             cells.push_back(std::pair<t_index, t_index>(ridx, cidx));

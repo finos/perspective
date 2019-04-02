@@ -276,7 +276,7 @@ t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
 }
 
 /**
- * @brief
+ * @brief Returns updated cells.
  *
  * @param bidx
  * @param eidx
@@ -294,7 +294,7 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
 }
 
 /**
- * @brief Returns the row indices that have been updated.
+ * @brief Returns the row indices that have been updated with new data.
  *
  * @param bidx
  * @param eidx
@@ -316,6 +316,7 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
         for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
             const t_tscalar& pkey = pkey_vec[idx];
             t_index row = bidx + idx;
+            // Retrieve a pair of iterators from delta storage - start of cell, end of cell
             std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
                 t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
                 iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
@@ -334,6 +335,7 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
             }
         }
 
+        // get row indices and assign into r_indices
         std::unordered_map<t_tscalar, t_index> r_indices;
         m_traversal->get_row_indices(pkeys, r_indices);
 

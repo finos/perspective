@@ -337,7 +337,7 @@ t_ctx1::get_min_max() const {
 }
 
 /**
- * @brief
+ * @brief Returns updated cells.
  *
  * @param bidx
  * @param eidx
@@ -356,7 +356,7 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
 }
 
 /**
- * @brief
+ * @brief Returns the row indices that have been updated with new data.
  *
  * @param bidx
  * @param eidx
@@ -373,6 +373,7 @@ t_ctx1::get_row_delta(t_index bidx, t_index eidx) {
     const auto& deltas = m_tree->get_deltas();
     for (t_index idx = bidx; idx < eidx; ++idx) {
         t_index ptidx = m_traversal->get_tree_index(idx);
+        // Retrieve delta from storage
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
         if (iterators.first != iterators.second)
             rows.push_back(idx);
