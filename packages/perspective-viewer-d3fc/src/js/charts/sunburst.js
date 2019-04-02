@@ -20,8 +20,16 @@ function sunburst(container, settings) {
     const minSize = 500;
     const cols = sunburstData.length === 1 ? 1 : Math.floor(containerWidth / minSize);
     const rows = Math.ceil(sunburstData.length / cols);
-    container.style("grid-template-columns", `repeat(${cols}, ${containerWidth / cols}px)`);
-    container.style("grid-template-rows", `repeat(${rows}, ${containerHeight / cols}px)`);
+    const containerSize = {
+        width: containerWidth / cols,
+        height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
+    };
+    if (containerHeight / rows > containerSize.height * 0.75) {
+        containerSize.height = containerHeight / rows;
+    }
+
+    container.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
+    container.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
 
     const sunburstDiv = container.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
     sunburstDiv.exit().remove();
@@ -48,7 +56,7 @@ function sunburst(container, settings) {
         .merge(sunburstDiv)
         .select("svg")
         .select("g.sunburst")
-        .attr("transform", `translate(${containerWidth / 2 / cols}, ${containerHeight / 2 / cols})`)
+        .attr("transform", `translate(${containerSize.width / 2}, ${containerSize.height / 2})`)
         .each(function({split, data}) {
             const sunburstElement = select(this);
             const svgNode = this.parentNode;
@@ -57,7 +65,7 @@ function sunburst(container, settings) {
             const title = sunburstElement.select("text.title").text(split);
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
-            const radius = (Math.min(width, height) - 100) / 6;
+            const radius = (Math.min(width, height) - 120) / 6;
             const color = treeColor(settings, split, data.data.children);
             sunburstSeries()
                 .settings(settings)
