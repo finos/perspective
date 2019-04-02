@@ -320,7 +320,7 @@ py::object scalar_to(const t_tscalar& scalar) {
  */
 void
 _fill_data(t_table& tbl, std::vector<std::string> ocolnames, py::object accessor,
-    std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow) {
+    std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update) {
     //TODO
 }
 
@@ -401,9 +401,7 @@ data_types(py::object data, std::int32_t format, std::vector<std::string> names,
  * A gnode.
  */
 std::shared_ptr<t_gnode>
-make_gnode(const t_table& table) {
-    auto iscm = table.get_schema();
-
+make_gnode(const t_schema& iscm) {
     std::vector<std::string> ocolnames(iscm.columns());
     std::vector<t_dtype> odt(iscm.types());
 
@@ -475,7 +473,7 @@ std::shared_ptr<t_gnode>
 clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed) {
     t_table* tbl = gnode->_get_pkeyed_table();
     table_add_computed_column(*tbl, computed);
-    std::shared_ptr<t_gnode> new_gnode = make_gnode(*tbl);
+    std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
     pool->register_gnode(new_gnode.get());
     pool->send(new_gnode->get_id(), 0, *tbl);
     pool->_process();

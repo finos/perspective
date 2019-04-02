@@ -13,7 +13,9 @@ import {colorStyles} from "./colorStyles";
 export function seriesColors(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
     const domain = Object.keys(col).filter(k => k !== "__ROW_PATH__");
-    return colorScale().domain(domain)();
+    return colorScale()
+        .settings(settings)
+        .domain(domain)();
 }
 
 export function seriesColorsFromGroups(settings) {
@@ -27,17 +29,22 @@ export function seriesColorsFromGroups(settings) {
             }
         }
     });
-    return colorScale().domain(domain)();
+    return colorScale()
+        .settings(settings)
+        .domain(domain)();
 }
 
 export function colorScale() {
     let domain = null;
-    let defaultColors = [colorStyles.series];
+    let defaultColors = null;
     let mapFunction = withOpacity;
+    let settings = {colorStyles};
 
     const colors = () => {
-        if (defaultColors || domain.length > 1) {
-            const range = domain.length > 1 ? colorStyles.scheme : defaultColors;
+        const styles = settings.colorStyles;
+        const defaults = defaultColors || [styles.series];
+        if (defaults || domain.length > 1) {
+            const range = domain.length > 1 ? styles.scheme : defaults;
             return d3.scaleOrdinal(range.map(mapFunction)).domain(domain);
         }
         return null;
@@ -67,6 +74,14 @@ export function colorScale() {
         return colors;
     };
 
+    colors.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
+        return colors;
+    };
+
     return colors;
 }
 
@@ -80,16 +95,8 @@ export function withOpacity(color) {
 
 export function setOpacity(opacity) {
     return color => {
-        const toInt = (c, offset, length) => parseInt(c.substring(offset, offset + length) + (length === 1 ? "0" : ""), 16);
-        const colorsFromRGB = c =>
-            c
-                .substring(c.indexOf("(") + 1)
-                .split(",")
-                .map(d => parseInt(d))
-                .slice(0, 3);
-        const colorsFromHex = c => (c.length === 4 ? [toInt(c, 1, 1), toInt(c, 2, 1), toInt(c, 3, 1)] : [toInt(c, 1, 2), toInt(c, 3, 2), toInt(c, 5, 2)]);
-
-        const colors = color.includes("rgb") ? colorsFromRGB(color) : colorsFromHex(color);
-        return opacity === 1 ? `rgb(${colors.join(",")})` : `rgba(${colors.join(",")},${opacity})`;
+        const decoded = d3.color(color);
+        decoded.opacity = opacity;
+        return decoded + "";
     };
 }

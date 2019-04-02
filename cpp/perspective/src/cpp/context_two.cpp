@@ -138,7 +138,7 @@ t_ctx2::close(t_header header, t_index idx) {
             m_row_depth = 0;
             retval = m_rtraversal->collapse_node(idx);
             m_rows_changed = (retval > 0);
-        }
+        } break;
         case HEADER_COLUMN: {
             if (!m_ctraversal->is_valid_idx(idx))
                 return 0;
@@ -146,7 +146,7 @@ t_ctx2::close(t_header header, t_index idx) {
             m_column_depth = 0;
             retval = m_ctraversal->collapse_node(idx);
             m_columns_changed = (retval > 0);
-        }
+        } break;
         default: {
             PSP_COMPLAIN_AND_ABORT("Invalid header type detected.");
             return INVALID_INDEX;

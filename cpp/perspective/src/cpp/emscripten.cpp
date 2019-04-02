@@ -685,7 +685,7 @@ namespace binding {
 
     void
     _fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -700,7 +700,7 @@ namespace binding {
 
     void
     _fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -729,7 +729,11 @@ namespace binding {
                     continue;
 
                 if (item.isNull()) {
-                    col->unset(i);
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
                     continue;
                 }
 
@@ -742,7 +746,7 @@ namespace binding {
 
     void
     _fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -771,7 +775,11 @@ namespace binding {
                     continue;
 
                 if (item.isNull()) {
-                    col->unset(i);
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
                     continue;
                 }
 
@@ -782,7 +790,7 @@ namespace binding {
 
     void
     _fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -801,7 +809,11 @@ namespace binding {
                     continue;
 
                 if (item.isNull()) {
-                    col->unset(i);
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
                     continue;
                 }
 
@@ -813,7 +825,7 @@ namespace binding {
 
     void
     _fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
 
         t_uindex nrows = col->size();
 
@@ -866,7 +878,11 @@ namespace binding {
                     continue;
 
                 if (item.isNull()) {
-                    col->unset(i);
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
                     continue;
                 }
 
@@ -880,7 +896,7 @@ namespace binding {
 
     void
     _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow) {
+        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -913,7 +929,11 @@ namespace binding {
                     continue;
 
                 if (item.isNull()) {
-                    col->unset(i);
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
                     continue;
                 }
 
@@ -939,7 +959,8 @@ namespace binding {
                             std::cout << "Promoting to string" << std::endl;
                             tbl.promote_column(name, DTYPE_STR, i, false);
                             col = tbl.get_column(name);
-                            _fill_col_string(accessor, col, name, cidx, DTYPE_STR, is_arrow);
+                            _fill_col_string(
+                                accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
                             return;
                         } else {
                             col->set_nth(i, static_cast<std::int32_t>(fval));
@@ -976,7 +997,7 @@ namespace binding {
      */
     void
     _fill_data(t_table& tbl, std::vector<std::string> ocolnames, val accessor,
-        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow) {
+        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update) {
 
         for (auto cidx = 0; cidx < ocolnames.size(); ++cidx) {
             auto name = ocolnames[cidx];
@@ -993,25 +1014,26 @@ namespace binding {
 
             switch (col_type) {
                 case DTYPE_INT64: {
-                    _fill_col_int64(dcol, col, name, cidx, col_type, is_arrow);
+                    _fill_col_int64(dcol, col, name, cidx, col_type, is_arrow, is_update);
                 } break;
                 case DTYPE_BOOL: {
-                    _fill_col_bool(dcol, col, name, cidx, col_type, is_arrow);
+                    _fill_col_bool(dcol, col, name, cidx, col_type, is_arrow, is_update);
                 } break;
                 case DTYPE_DATE: {
-                    _fill_col_date(dcol, col, name, cidx, col_type, is_arrow);
+                    _fill_col_date(dcol, col, name, cidx, col_type, is_arrow, is_update);
                 } break;
                 case DTYPE_TIME: {
-                    _fill_col_time(dcol, col, name, cidx, col_type, is_arrow);
+                    _fill_col_time(dcol, col, name, cidx, col_type, is_arrow, is_update);
                 } break;
                 case DTYPE_STR: {
-                    _fill_col_string(dcol, col, name, cidx, col_type, is_arrow);
+                    _fill_col_string(dcol, col, name, cidx, col_type, is_arrow, is_update);
                 } break;
                 case DTYPE_NONE: {
                     break;
                 }
                 default:
-                    _fill_col_numeric(dcol, tbl, col, name, cidx, col_type, is_arrow);
+                    _fill_col_numeric(
+                        dcol, tbl, col, name, cidx, col_type, is_arrow, is_update);
             }
 
             if (is_arrow) {
@@ -1418,9 +1440,7 @@ namespace binding {
      * A gnode.
      */
     std::shared_ptr<t_gnode>
-    make_gnode(const t_table& table) {
-        auto iscm = table.get_schema();
-
+    make_gnode(const t_schema& iscm) {
         std::vector<std::string> ocolnames(iscm.columns());
         std::vector<t_dtype> odt(iscm.types());
 
@@ -1496,7 +1516,14 @@ namespace binding {
         tbl.init();
         tbl.extend(size);
 
-        _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow);
+        bool is_new_gnode = gnode.isUndefined();
+        std::shared_ptr<t_gnode> new_gnode;
+        if (!is_new_gnode) {
+            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
+        }
+
+        _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow,
+            !(is_new_gnode || new_gnode->mapping_size() == 0));
 
         // Set up pkey and op columns
         if (is_delete) {
@@ -1522,17 +1549,13 @@ namespace binding {
             tbl.clone_column(index, "psp_okey");
         }
 
-        std::shared_ptr<t_gnode> new_gnode;
-
-        if (gnode.isUndefined()) {
-            new_gnode = make_gnode(tbl);
-            pool->register_gnode(new_gnode.get());
-        } else {
-            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
-        }
-
         if (!computed.isUndefined()) {
             table_add_computed_column(tbl, computed);
+        }
+
+        if (is_new_gnode) {
+            new_gnode = make_gnode(tbl.get_schema());
+            pool->register_gnode(new_gnode.get());
         }
 
         pool->send(new_gnode->get_id(), 0, tbl);
@@ -1556,7 +1579,7 @@ namespace binding {
     clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, val computed) {
         t_table* tbl = gnode->_get_pkeyed_table();
         table_add_computed_column(*tbl, computed);
-        std::shared_ptr<t_gnode> new_gnode = make_gnode(*tbl);
+        std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
         pool->register_gnode(new_gnode.get());
         pool->send(new_gnode->get_id(), 0, *tbl);
         pool->_process();

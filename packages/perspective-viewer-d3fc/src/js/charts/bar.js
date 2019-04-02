@@ -7,8 +7,9 @@
  *
  */
 import * as fc from "d3fc";
-import * as crossAxis from "../axis/crossAxis";
-import * as mainAxis from "../axis/mainAxis";
+import {axisFactory} from "../axis/axisFactory";
+import {chartSvgFactory} from "../axis/chartFactory";
+import {AXIS_TYPES} from "../axis/axisType";
 import {barSeries} from "../series/barSeries";
 import {seriesColors} from "../series/seriesColors";
 import {groupAndStackData} from "../data/groupData";
@@ -33,46 +34,31 @@ function barChart(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(() => bars));
 
-    const yDomain = crossAxis
-        .domain(settings)(data)
-        .reverse();
-    const yScale = crossAxis.scale(settings);
-    const yAxis = crossAxis
-        .axisFactory(settings)
-        .domain(yDomain)
-        .orient("vertical")();
+    const xAxis = axisFactory(settings)
+        .settingName("mainValues")
+        .valueName("mainValue")
+        .excludeType(AXIS_TYPES.ordinal)
+        .include([0])
+        .paddingStrategy(hardLimitZeroPadding())(data);
+    const yAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("crossValues")
+        .valueName("crossValue")
+        .orient("vertical")(data);
 
-    const chart = fc
-        .chartSvgCartesian({
-            xScale: mainAxis.scale(settings),
-            yScale,
-            yAxis
-        })
-        .xDomain(
-            mainAxis
-                .domain(settings)
-                .include([0])
-                .paddingStrategy(hardLimitZeroPadding())(data)
-        )
-        .xLabel(mainAxis.label(settings))
-        .yDomain(yDomain)
-        .yLabel(crossAxis.label(settings))
-        .yAxisWidth(yAxis.size)
-        .yDecorate(yAxis.decorate)
-        .yOrient("left")
-        .xNice()
-        .plotArea(withGridLines(series).orient("horizontal"));
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("horizontal"));
 
     if (chart.yPaddingInner) {
         chart.yPaddingInner(0.5);
         chart.yPaddingOuter(0.25);
         bars.align("left");
     }
+    chart.xNice && chart.xNice();
 
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
-        .yScale(yScale);
+        .yScale(yAxis.scale);
 
     // render
     container.datum(data).call(zoomChart);

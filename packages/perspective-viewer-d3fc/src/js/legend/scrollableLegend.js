@@ -8,24 +8,19 @@
  */
 import * as d3Legend from "d3-svg-legend";
 import {rebindAll} from "d3fc";
-import {areArraysEqualSimple, getOrCreateElement} from "../utils/utils";
+import {getOrCreateElement} from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
 import {cropCellContents} from "./styling/cropCellContents";
 
-export default fromLegend => {
+export default (fromLegend, settings) => {
     const legend = fromLegend || d3Legend.legendColor();
-    let domain = [];
     let pageCount = 1;
     let pageSize = 15;
-    let pageIndex = 0;
+    let pageIndex = settings.legend ? settings.legend.pageIndex : 0;
     let decorate = () => {};
 
     const scrollableLegend = selection => {
-        const newDomain = legend.scale().domain();
-        if (!areArraysEqualSimple(domain, newDomain)) {
-            pageIndex = 0;
-            domain = newDomain;
-        }
+        const domain = legend.scale().domain();
         pageCount = Math.ceil(domain.length / pageSize);
 
         render(selection);
@@ -48,7 +43,7 @@ export default fromLegend => {
             .attr("class", pageIndex === 0 ? "disabled" : "")
             .on("click", () => {
                 if (pageIndex > 0) {
-                    pageIndex--;
+                    setPage(pageIndex - 1);
                     render(selection);
                 }
             });
@@ -58,7 +53,7 @@ export default fromLegend => {
             .attr("class", pageIndex >= pageCount - 1 ? "disabled" : "")
             .on("click", () => {
                 if (pageIndex < pageCount - 1) {
-                    pageIndex++;
+                    setPage(pageIndex + 1);
                     render(selection);
                 }
             });
@@ -78,6 +73,11 @@ export default fromLegend => {
         legendElement.attr("height", cellSize.height + 20);
 
         decorate(selection);
+    };
+
+    const setPage = index => {
+        pageIndex = index;
+        settings.legend = {pageIndex};
     };
 
     const cellFilter = () => {
@@ -103,5 +103,6 @@ export default fromLegend => {
     };
 
     rebindAll(scrollableLegend, legend);
+
     return scrollableLegend;
 };

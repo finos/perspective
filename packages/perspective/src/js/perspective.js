@@ -240,6 +240,16 @@ export default function(Module) {
     }
 
     /**
+     * A copy of the config object passed to the {@link table.view} method
+     * which created this {@link view}.
+     *
+     * @returns {object} Shared the same key/values properties as {@link view}
+     */
+    view.prototype.get_config = async function() {
+        return JSON.parse(JSON.stringify(this.config));
+    };
+
+    /**
      * Delete this {@link view} and clean up all resources associated with it.
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
