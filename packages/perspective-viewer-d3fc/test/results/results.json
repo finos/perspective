@@ -107,5 +107,18 @@
     "candlestick.html/filter by a single instrument.": "36d43f5905d6e74cc622ee6d7be44894",
     "ohlc.html/filter by a single instrument.": "94d24188a2839ce1bd0b1dec71d20f33",
     "ohlc.html/filter to date range.": "3313f803361d232b1180e32b9a5d8c17",
-    "__GIT_COMMIT__": "2b976ce8bcbcb938207b4462a2e6d9e47df798cb"
+    "__GIT_COMMIT__": "f1b6fc56a6888ed1cde5049a28c09f5e656108e5",
+    "sunburst.html/shows a grid without any settings applied.": "322cc928bded452cf3e9156eda5b6bc1",
+    "sunburst.html/pivots by a row.": "92855908f1a166c5549d69a2ec61de9d",
+    "sunburst.html/pivots by two rows.": "d37493821e0656e7b669263505067111",
+    "sunburst.html/pivots by a column.": "e646effbf8160539424d969172eaf3ea",
+    "sunburst.html/pivots by a row and a column.": "7b459be8078c7663e9f79c3126137d4f",
+    "sunburst.html/pivots by two rows and two columns.": "6a3c60bca46a30b031fa1b80bebd2c13",
+    "sunburst.html/sorts by a hidden column.": "3d278235f76780a31dc55538171bb291",
+    "sunburst.html/sorts by a numeric column.": "13c691031d82971288944bcfc1e012ef",
+    "sunburst.html/filters by a numeric column.": "c58f9b74ba273715703391b536237675",
+    "sunburst.html/filters by a datetime column.": "2652910970a04728abaa73771e6fba69",
+    "sunburst.html/highlights invalid filter.": "afe668c4bc37b683c75cd2c74fc30b4a",
+    "sunburst.html/sorts by an alpha column.": "3c7c8151509c47d68d073cc6e228848a",
+    "sunburst.html/displays visible columns.": "be0b92259f73cc5ed768dde48ba061f1"
 }
