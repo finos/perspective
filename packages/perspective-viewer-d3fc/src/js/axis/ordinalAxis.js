@@ -9,166 +9,89 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
-import withoutTicks from "./withoutTicks";
+import {flattenArray} from "./flatten";
 import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
 import {getChartContainer} from "../plugin/root";
 
-const AXIS_TYPES = {
-    none: "none",
-    ordinal: "ordinal",
-    time: "time",
-    linear: "linear"
-};
+export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
 
-export const scale = (settings, settingName = "crossValues") => {
-    switch (axisType(settings, settingName)) {
-        case AXIS_TYPES.none:
-            return withoutTicks(defaultScaleBand());
-        case AXIS_TYPES.time:
-            return d3.scaleTime();
-        case AXIS_TYPES.linear:
-            return d3.scaleLinear();
-        default:
-            return defaultScaleBand();
-    }
-};
+export const domain = () => {
+    let valueNames = ["crossValue"];
+    let orient = "horizontal";
 
-const defaultScaleBand = () => minBandwidth(d3.scaleBand());
-
-const flattenArray = array => {
-    if (Array.isArray(array)) {
-        return [].concat(...array.map(flattenArray));
-    } else {
-        return [array];
-    }
-};
-
-const getMinimumGap = (data, dataMap) =>
-    data
-        .map(dataMap)
-        .sort((a, b) => a - b)
-        .filter((d, i, a) => i === 0 || d !== a[i - 1])
-        .reduce((acc, d, i, src) => (i === 0 || acc <= d - src[i - 1] ? acc : d - src[i - 1]));
-
-export const domain = settings => {
-    let valueName = "crossValue";
-    let settingName = "crossValues";
-
-    const extentTime = fc
-        .extentTime()
-        .accessors([d => new Date(d[valueName])])
-        .padUnit("domain");
-
-    const _domain = function(data) {
+    const _domain = data => {
         const flattenedData = flattenArray(data);
-        switch (axisType(settings, settingName)) {
-            case AXIS_TYPES.time:
-                const dataWidth = getMinimumGap(flattenedData, d => new Date(d[valueName]).getTime());
-                return extentTime.pad([dataWidth / 2, dataWidth / 2])(flattenedData);
-            default:
-                return [...new Set(flattenedData.map(d => d[valueName]))];
-        }
+        return transformDomain([...new Set(flattenedData.map(d => d[valueNames[0]]))]);
     };
 
-    switch (axisType(settings)) {
-        case AXIS_TYPES.time:
-            fc.rebindAll(_domain, extentTime);
-            break;
-    }
+    const transformDomain = d => (orient == "vertical" ? d.reverse() : d);
 
     _domain.valueName = (...args) => {
         if (!args.length) {
-            return valueName;
+            return valueNames[0];
         }
-        valueName = args[0];
+        valueNames = [args[0]];
+        return _domain;
+    };
+    _domain.valueNames = (...args) => {
+        if (!args.length) {
+            return valueNames;
+        }
+        valueNames = args[0];
         return _domain;
     };
 
-    _domain.settingName = (...args) => {
+    _domain.orient = (...args) => {
         if (!args.length) {
-            return settingName;
+            return orient;
         }
-        settingName = args[0];
+        orient = args[0];
         return _domain;
     };
 
     return _domain;
 };
 
-export const labelFunction = (settings, valueName = "__ROW_PATH__", settingName = "crossValues") => {
-    switch (axisType(settings, settingName)) {
-        case AXIS_TYPES.none:
-            return d => d[valueName][0];
-        case AXIS_TYPES.time:
-            return d => new Date(d[valueName][0]);
-        case AXIS_TYPES.linear:
-            return d => d[valueName][0];
-        default:
-            return d => d[valueName].join("|");
-    }
-};
+export const labelFunction = valueName => d => d[valueName].join("|");
 
-export const label = (settings, settingName = "crossValues") => settings[settingName].map(v => v.name).join(", ");
-
-const axisType = (settings, settingName = "crossValues") => {
-    if (settings[settingName].length === 0) {
-        return AXIS_TYPES.none;
-    } else if (settings[settingName].length === 1) {
-        if (settings[settingName][0].type === "datetime") {
-            return AXIS_TYPES.time;
-        }
-    }
-    return AXIS_TYPES.ordinal;
-};
-
-export const axisFactory = settings => {
+export const component = settings => {
     let orient = "horizontal";
     let settingName = "crossValues";
     let domain = null;
 
-    const factory = () => {
-        switch (axisType(settings, settingName)) {
-            case AXIS_TYPES.ordinal:
-                const multiLevel = settings[settingName].length > 1 && settings[settingName].every(v => v.type !== "datetime");
+    const getComponent = () => {
+        const multiLevel = settings[settingName].length > 1;
 
-                // Calculate the label groups and corresponding group sizes
-                const levelGroups = axisGroups(domain);
-                const groupTickLayout = levelGroups.map(getGroupTickLayout);
+        // Calculate the label groups and corresponding group sizes
+        const levelGroups = axisGroups(domain);
+        const groupTickLayout = levelGroups.map(getGroupTickLayout);
 
-                const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
-                const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
+        const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
+        const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
 
-                const createAxis = scale => {
-                    const axis = pickAxis(multiLevel)(scale);
+        const createAxis = scale => {
+            const axis = pickAxis(multiLevel)(scale);
 
-                    if (multiLevel) {
-                        axis.groups(levelGroups)
-                            .tickSizeInner(tickSizeInner)
-                            .tickSizeOuter(tickSizeOuter);
-                    }
-                    if (orient !== "horizontal") axis.tickPadding(10);
-                    return axis;
-                };
+            if (multiLevel) {
+                axis.groups(levelGroups)
+                    .tickSizeInner(tickSizeInner)
+                    .tickSizeOuter(tickSizeOuter);
+            }
+            if (orient !== "horizontal") axis.tickPadding(10);
+            return axis;
+        };
 
-                const decorate = (s, data, index) => {
-                    const rotation = groupTickLayout[index].rotation;
-                    if (orient === "horizontal") applyLabelRotation(s, rotation);
-                    hideOverlappingLabels(s, rotation);
-                };
+        const decorate = (s, data, index) => {
+            const rotation = groupTickLayout[index].rotation;
+            if (orient === "horizontal") applyLabelRotation(s, rotation);
+            hideOverlappingLabels(s, rotation);
+        };
 
-                return {
-                    bottom: createAxis,
-                    left: createAxis,
-                    size: `${tickSizeOuter + 10}px`,
-                    decorate
-                };
-        }
-
-        // Default axis
         return {
-            bottom: fc.axisBottom,
-            left: fc.axisLeft,
-            decorate: () => {}
+            bottom: createAxis,
+            left: createAxis,
+            size: `${tickSizeOuter + 10}px`,
+            decorate
         };
     };
 
@@ -182,7 +105,7 @@ export const axisFactory = settings => {
     const axisGroups = domain => {
         const groups = [];
         domain.forEach(tick => {
-            const split = tick.split("|");
+            const split = tick.split ? tick.split("|") : [tick];
             split.forEach((s, i) => {
                 while (groups.length <= i) groups.push([]);
 
@@ -302,29 +225,29 @@ export const axisFactory = settings => {
         });
     };
 
-    factory.orient = (...args) => {
+    getComponent.orient = (...args) => {
         if (!args.length) {
             return orient;
         }
         orient = args[0];
-        return factory;
+        return getComponent;
     };
 
-    factory.settingName = (...args) => {
+    getComponent.settingName = (...args) => {
         if (!args.length) {
             return settingName;
         }
         settingName = args[0];
-        return factory;
+        return getComponent;
     };
 
-    factory.domain = (...args) => {
+    getComponent.domain = (...args) => {
         if (!args.length) {
             return domain;
         }
         domain = args[0];
-        return factory;
+        return getComponent;
     };
 
-    return factory;
+    return getComponent;
 };

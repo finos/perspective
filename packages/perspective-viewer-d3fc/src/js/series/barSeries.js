@@ -18,8 +18,26 @@ export function barSeries(settings, color) {
     });
 
     return fc
-        .autoBandwidth(series)
+        .autoBandwidth(minBandwidth(series))
         .crossValue(d => d.crossValue)
         .mainValue(d => d.mainValue)
         .baseValue(d => d.baseValue);
 }
+
+const minBandwidth = adaptee => {
+    const min = arg => {
+        return adaptee(arg);
+    };
+
+    fc.rebindAll(min, adaptee);
+
+    min.bandwidth = (...args) => {
+        if (!args.length) {
+            return adaptee.bandwidth();
+        }
+        adaptee.bandwidth(Math.max(args[0], 1));
+        return min;
+    };
+
+    return min;
+};

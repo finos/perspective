@@ -7,8 +7,8 @@
  *
  */
 import * as fc from "d3fc";
-import * as crossAxis from "../axis/crossAxis";
-import * as mainAxis from "../axis/mainAxis";
+import {axisFactory} from "../axis/axisFactory";
+import {chartCanvasFactory} from "../axis/chartFactory";
 import {ohlcData} from "../data/ohlcData";
 import {filterDataByGroup} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
@@ -55,50 +55,34 @@ function ohlcCandle(seriesCanvas) {
             .pad([0.1, 0.1])
             .padUnit("percent");
 
-        const xDomain = crossAxis.domain(settings)(data);
-        const xScale = crossAxis.scale(settings);
-        const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
-        const yScale = mainAxis.scale(settings);
+        const xAxis = axisFactory(settings)
+            .settingName("crossValues")
+            .valueName("crossValue")(data);
+        const yAxis = axisFactory(settings)
+            .settingName("mainValues")
+            .valueNames(["lowValue", "highValue"])
+            .orient("vertical")
+            .paddingStrategy(paddingStrategy)(data);
 
-        const chart = fc
-            .chartCanvasCartesian({
-                xScale,
-                yScale,
-                xAxis
-            })
-            .xDomain(xDomain)
-            .xLabel(crossAxis.label(settings))
-            .xAxisHeight(xAxis.size)
-            .xDecorate(xAxis.decorate)
-            .yDomain(
-                mainAxis
-                    .domain(settings)
-                    .valueNames(["lowValue", "highValue"])
-                    .paddingStrategy(paddingStrategy)(data)
-            )
-            .yLabel(mainAxis.label(settings))
-            .yOrient("left")
-            .yNice()
-            .plotArea(
-                withGridLines(multi)
-                    .orient("vertical")
-                    .canvas(true)
-            );
+        const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
+            withGridLines(multi)
+                .orient("vertical")
+                .canvas(true)
+        );
 
-        chart.xPaddingInner && chart.xPaddingInner(1);
-        chart.xPaddingOuter && chart.xPaddingOuter(0.5);
+        chart.yNice && chart.yNice();
 
         const zoomChart = zoomableChart()
             .chart(chart)
             .settings(settings)
-            .xScale(xScale)
-            .yScale(yScale)
+            .xScale(xAxis.scale)
+            .yScale(yAxis.scale)
             .canvas(true);
 
         const toolTip = nearbyTip()
             .settings(settings)
-            .xScale(xScale)
-            .yScale(yScale)
+            .xScale(xAxis.scale)
+            .yScale(yAxis.scale)
             .yValueName("closeValue")
             .color(upColor)
             .data(data)
