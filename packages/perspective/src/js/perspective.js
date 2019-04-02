@@ -581,7 +581,7 @@ export default function(Module) {
             }
         }
 
-        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize().buffer;
+        return Table.fromVectors(vectors, names.slice(start_col, end_col)).serialize("binary", false).buffer;
     };
 
     /**
