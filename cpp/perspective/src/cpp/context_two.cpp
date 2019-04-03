@@ -693,10 +693,13 @@ t_ctx2::get_row_delta(t_index bidx, t_index eidx) {
             continue;
         const auto& deltas = m_trees[c.m_treenum]->get_deltas();
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(c.m_idx);
-        if (iterators.first != iterators.second)
-            rows.push_back(c.m_ridx);
+        auto ridx = c.m_ridx;
+        bool unique_ridx = std::find(rows.begin(), rows.end(), ridx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
+            rows.push_back(ridx);
     }
 
+    std::sort(rows.begin(), rows.end());
     t_rowdelta rval(true, rows);
     clear_deltas();
     return rval;

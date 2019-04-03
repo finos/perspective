@@ -71,7 +71,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([3, 2]);
+                        expect(delta).toEqual([2, 3]);
                         view.delete();
                         table.delete();
                         done();
@@ -86,7 +86,7 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([3, 2]);
+                        expect(delta).toEqual([2, 3]);
                         view.delete();
                         table.delete();
                         done();

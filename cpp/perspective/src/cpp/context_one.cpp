@@ -375,10 +375,12 @@ t_ctx1::get_row_delta(t_index bidx, t_index eidx) {
         t_index ptidx = m_traversal->get_tree_index(idx);
         // Retrieve delta from storage
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
-        if (iterators.first != iterators.second)
+        bool unique_ridx = std::find(rows.begin(), rows.end(), idx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
             rows.push_back(idx);
     }
 
+    std::sort(rows.begin(), rows.end());
     t_rowdelta rval(m_rows_changed, rows);
     m_tree->clear_deltas();
     return rval;

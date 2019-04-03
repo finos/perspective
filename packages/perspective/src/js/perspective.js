@@ -687,16 +687,7 @@ export default function(Module) {
      */
     view.prototype._get_row_delta = async function() {
         let d = this._View.get_row_delta(0, 2147483647);
-        let delta = d.rows;
-        let row_delta = new Set();
-        if (delta.size() > 0) {
-            for (let i = 0; i < delta.size(); i++) {
-                let cell = delta.get(i);
-                row_delta.add(Number.parseInt(cell));
-            }
-        }
-        delta.delete();
-        return [...row_delta];
+        return extract_vector(d.rows);
     };
 
     /**

@@ -322,7 +322,8 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
                 iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
             for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
                  iter != iters.second; ++iter) {
-                rows.push_back(row);
+                if (std::find(rows.begin(), rows.end(), row) == rows.end())
+                    rows.push_back(row);
             }
         }
     } else {
@@ -343,12 +344,15 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
              = m_deltas->get<by_zc_pkey_colidx>().begin();
              iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
             t_index row = r_indices[iter->m_pkey];
-            if (bidx <= row && row <= eidx) {
+            bool valid_ridx = bidx <= row && row <= eidx;
+            bool unique_ridx = std::find(rows.begin(), rows.end(), row) == rows.end();
+            if (valid_ridx && unique_ridx) {
                 rows.push_back(row);
             }
         }
     }
 
+    std::sort(rows.begin(), rows.end());
     t_rowdelta rval(rows_changed, rows);
     m_deltas->clear(); // what is the difference between this line and clear_deltas()?
     clear_deltas();
