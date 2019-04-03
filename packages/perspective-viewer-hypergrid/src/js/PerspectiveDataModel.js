@@ -7,8 +7,6 @@
  *
  */
 
-const Range = require("./Range");
-
 const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
 
 function getSubrects(nrows) {
@@ -97,6 +95,11 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     fetchData: async function(rectangles, resolve) {
         rectangles = getSubrects.call(this.grid.renderer);
 
+        if (this._view === undefined) {
+            resolve(true);
+            return;
+        }
+
         if (!this._dirty && !rectangles.find(uncachedRow, this)) {
             resolve(false);
             return;
@@ -110,13 +113,20 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         this._dirty = false;
         this._outstanding_requested_rects = rectangles;
 
-        const promises = rectangles.map(rect => this.pspFetch(Range.create(rect.origin.y, rect.corner.y)));
+        const promises = rectangles.map(rect =>
+            this.pspFetch({
+                start_row: rect.origin.y,
+                end_row: rect.corner.y,
+                start_col: rect.origin.x,
+                end_col: rect.corner.x + 1
+            })
+        );
 
         try {
             await Promise.all(promises);
             resolve(false);
         } catch (e) {
-            resolve(e);
+            resolve(true);
         } finally {
             this._outstanding_requested_rects = undefined;
         }
@@ -140,7 +150,9 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
 });
 
 function uncachedRow(rect) {
-    return !(this.data[rect.origin.y] && this.data[Math.min(rect.corner.y, this.getRowCount() - 1)]);
+    let start_row = this.data[rect.origin.y];
+    let end_row = this.data[Math.min(rect.corner.y, this.getRowCount() - 1)];
+    return !(start_row && start_row[rect.origin.x] !== undefined && end_row && end_row[rect.corner.x] !== undefined);
 }
 
 function cellStyle(gridCellConfig) {

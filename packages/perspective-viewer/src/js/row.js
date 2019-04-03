@@ -173,20 +173,6 @@ class Row extends HTMLElement {
         this.dispatchEvent(new CustomEvent("filter-selected", {detail: event}));
     }
 
-    _increment_sort_order(column_sorting, abs_sorting) {
-        const current = this.getAttribute("sort-order");
-        let sort_orders = ["asc", "desc"];
-        if (column_sorting) {
-            sort_orders.push("col asc", "col desc");
-        }
-        if (abs_sorting && this.getAttribute("type") !== "string") {
-            sort_orders = sort_orders.map(x => `${x} abs`);
-        }
-        sort_orders.unshift("none");
-        const order = (sort_orders.indexOf(current) + 1) % sort_orders.length;
-        this.setAttribute("sort-order", sort_orders[order]);
-    }
-
     _set_data_transfer(event) {
         if (this.hasAttribute("filter")) {
             let {operator, operand} = JSON.parse(this.getAttribute("filter"));

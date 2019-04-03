@@ -235,7 +235,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("/usr/local/include/python3.7m")  # FIXME
-		include_directories("${CMAKE_SOURCE_DIR}/../../python/perspective/include")
+		include_directories("${CMAKE_SOURCE_DIR}/../../python/table/perspective/include")
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
@@ -382,14 +382,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
-		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/../../python/perspective/src/numpy.cpp ${HEADER_FILES})
+		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/numpy.cpp ${HEADER_FILES})
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(psp ${BOOST_PYTHON})
 		target_link_libraries(psp ${BOOST_NUMPY})
 		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
-		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/../../python/perspective/src/python.cpp)
+		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/python.cpp)
 		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)

@@ -55,6 +55,7 @@ export function registerElement(templateString, styleString, proto) {
         template.innerHTML = `<style>${styleString.toString()}</style>` + template.innerHTML;
     }
     window.ShadyCSS && window.ShadyCSS.prepareTemplate(template, template.getAttribute("id"));
+    template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
 
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {

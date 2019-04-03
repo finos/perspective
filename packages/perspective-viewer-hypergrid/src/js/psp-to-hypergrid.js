@@ -21,10 +21,10 @@ function filter_hidden(hidden, json) {
     return json;
 }
 
-function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
+function psp2hypergrid(data, hidden, schema, tschema, row_pivots, columns) {
     data = filter_hidden(hidden, data);
-    const colnames = Object.keys(data);
-    const firstcol = colnames.length > 0 ? colnames[0] : undefined;
+    const colnames = columns || Object.keys(data);
+    const firstcol = Object.keys(data).length > 0 ? Object.keys(data)[0] : undefined;
     if (colnames.length === 0 || data[firstcol].length === 0) {
         let columns = Object.keys(schema);
         return {
@@ -38,14 +38,16 @@ function psp2hypergrid(data, hidden, schema, tschema, row_pivots) {
 
     var is_tree = !!row_pivots.length;
 
-    var flat_columns = Object.keys(data).filter(row => row !== "__ROW_PATH__");
+    var flat_columns = colnames.filter(row => row !== "__ROW_PATH__");
     var columnPaths = flat_columns.map(row => row.split(COLUMN_SEPARATOR_STRING));
 
     let rows = [];
 
     for (let idx = 0; idx < data[firstcol].length; idx++) {
         let dataRow = flat_columns.reduce(function(dataRow, columnName, index) {
-            dataRow[index] = data[columnName][idx];
+            if (data[columnName]) {
+                dataRow[index] = data[columnName][idx];
+            }
             return dataRow;
         }, {});
         rows.push(dataRow);

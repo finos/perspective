@@ -92,7 +92,8 @@ sunburst.plugin = {
     max_size: 25000,
     initial: {
         type: "number",
-        count: 2
+        count: 2,
+        names: ["Size", "Color"]
     }
 };
 
