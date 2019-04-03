@@ -11,26 +11,39 @@ import {rebindAll} from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
 import legendControlsTemplate from "../../html/legend-controls.html";
 import {cropCellContents} from "./styling/cropCellContents";
+import {draggableComponent} from "./styling/draggableComponent";
+import {resizableComponent} from "./styling/resizableComponent";
+
+const averageCellHeightPx = 16;
+const controlsHeightPx = 20;
 
 export default (fromLegend, settings) => {
     const legend = fromLegend || d3Legend.legendColor();
 
-    const defaultPageSize = 15;
-
     let domain = [];
     let pageCount = 1;
-    let pageSize = defaultPageSize;
+    let pageSize;
     let pageIndex = settings.legend ? settings.legend.pageIndex : 0;
     let decorate = () => {};
+    let draggable = draggableComponent();
+    let resizable;
 
     const scrollableLegend = selection => {
         domain = legend.scale().domain();
         pageCount = calculatePageCount();
 
         render(selection);
+
+        resizable = resizableComponent()
+            .maxHeight(domain.length * averageCellHeightPx + controlsHeightPx)
+            .on("resize", () => render(selection));
+
+        resizable(selection);
+        draggable(selection);
     };
 
     const render = selection => {
+        calculatePageSize(selection);
         renderControls(selection);
         renderLegend(selection);
         cropCellContents(selection);
@@ -74,7 +87,7 @@ export default (fromLegend, settings) => {
             .select("g.legendCells")
             .node()
             .getBBox();
-        legendElement.attr("height", cellContainerSize.height + 20);
+        legendElement.attr("height", cellContainerSize.height + controlsHeightPx);
 
         decorate(selection);
     };
@@ -88,22 +101,15 @@ export default (fromLegend, settings) => {
 
     const calculatePageSize = selection => {
         const legendContainerRect = selection.node().getBoundingClientRect();
-        const averageCellHeight = 16;
-        let proposedPageSize = Math.floor(legendContainerRect.height / averageCellHeight) - 1;
-
-        pageCount = calculatePageCount(proposedPageSize);
+        let proposedPageSize = Math.floor(legendContainerRect.height / averageCellHeightPx) - 1;
 
         //if page size is less than all legend items, leave space for the legend controls
         pageSize = proposedPageSize < domain.length ? proposedPageSize - 1 : proposedPageSize;
+        pageCount = calculatePageCount(proposedPageSize);
         pageIndex = Math.min(pageIndex, pageCount - 1);
     };
 
-    const calculatePageCount = proposedPageSize => {
-        if (!!proposedPageSize) {
-            return Math.ceil(domain.length / proposedPageSize);
-        }
-        return Math.ceil(domain.length / pageSize);
-    };
+    const calculatePageCount = pageSize => Math.ceil(domain.length / pageSize);
 
     const getLegendControls = container =>
         getOrCreateElement(container, ".legend-controls", () =>
@@ -121,13 +127,6 @@ export default (fromLegend, settings) => {
         }
         decorate = args[0];
         return scrollableLegend;
-    };
-
-    scrollableLegend.useDynamicPageSize = (selection, resizedOnAxes) => {
-        if (resizedOnAxes.vertical === true) {
-            calculatePageSize(selection);
-        }
-        render(selection);
     };
 
     rebindAll(scrollableLegend, legend);
