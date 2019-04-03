@@ -8,6 +8,7 @@
  */
 
 import charts from "../charts/charts";
+import "./polyfills/index";
 import "./template";
 
 export const PRIVATE = Symbol("D3FC chart");
@@ -116,4 +117,8 @@ function deleteChart() {
         const perspective_d3fc_element = this[PRIVATE].chart;
         perspective_d3fc_element.delete();
     }
+}
+
+if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector;
 }

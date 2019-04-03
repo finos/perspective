@@ -193,6 +193,7 @@ class WebSocketHost extends module.exports.Host {
 
     open(name, table) {
         this._tables[name] = table;
+        table.view({aggregate: []});
     }
 
     close() {

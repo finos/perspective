@@ -162,8 +162,24 @@ export class ActionElement extends DomElement {
         this._debounce_update();
     }
 
+    _increment_sort(sort, column_sorting, abs_sorting) {
+        let sort_orders = ["asc", "desc"];
+        if (column_sorting) {
+            sort_orders.push("col asc", "col desc");
+        }
+        if (abs_sorting) {
+            sort_orders = sort_orders.map(x => `${x} abs`);
+        }
+        sort_orders.push("none");
+        return sort_orders[(sort_orders.indexOf(sort) + 1) % sort_orders.length];
+    }
+
     _sort_order_clicked(event) {
-        event.target._increment_sort_order(this._get_view_column_pivots().length > 0, event.detail.shiftKey);
+        const row = event.target;
+        const abs_sorting = event.detail.shiftKey && row.getAttribute("type") !== "string";
+        const new_sort_order = this._increment_sort(row.getAttribute("sort-order"), this._get_view_column_pivots().length > 0, abs_sorting);
+        row.setAttribute("sort-order", new_sort_order);
+
         let sort = JSON.parse(this.getAttribute("sort"));
         let new_sort = this._get_view_sorts();
         for (let s of sort) {

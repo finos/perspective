@@ -1,0 +1,36 @@
+{
+    "name": "@jpmorganchase/perspective-cli",
+    "version": "0.2.21",
+    "description": "Perspective.js CLI",
+    "main": "build/index.js",
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "build/**/*",
+        "perspective",
+        "babel.config.js"
+    ],
+    "typings": "index.d.ts",
+    "scripts": {
+        "prebuild": "mkdirp build",
+        "build": "babel src/js --source-maps --out-dir build && cpx \"src/html/*\" build/html",
+        "clean": "rimraf build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/jpmorganchase/perspective"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "bin": {
+        "perspective": "perspective"
+    },
+    "dependencies": {
+        "@jpmorganchase/perspective": "^0.2.21",
+        "@jpmorganchase/perspective-viewer": "^0.2.21",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.21",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.21",
+        "commander": "^2.19.0"
+    }
+}

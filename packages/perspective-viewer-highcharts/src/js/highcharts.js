@@ -109,7 +109,8 @@ global.registerPlugin("xy_line", {
     resize: resize,
     initial: {
         type: "number",
-        count: 2
+        count: 2,
+        names: ["X Axis", "Y Axis"]
     },
     selectMode: "toggle",
     delete: delete_chart,
@@ -123,7 +124,8 @@ global.registerPlugin("xy_scatter", {
     resize: resize,
     initial: {
         type: "number",
-        count: 2
+        count: 2,
+        names: ["X Axis", "Y Axis", "Color", "Size"]
     },
     selectMode: "toggle",
     delete: delete_chart,
@@ -137,7 +139,8 @@ global.registerPlugin("treemap", {
     resize: resize,
     initial: {
         type: "number",
-        count: 2
+        count: 2,
+        names: ["Size", "Color"]
     },
     selectMode: "toggle",
     delete: function() {},
@@ -151,7 +154,8 @@ global.registerPlugin("sunburst", {
     resize: resize,
     initial: {
         type: "number",
-        count: 2
+        count: 2,
+        names: ["Size", "Color"]
     },
     selectMode: "toggle",
     delete: function() {},

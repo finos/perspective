@@ -11,7 +11,6 @@ const Hypergrid = require("fin-hypergrid");
 const Base = require("fin-hypergrid/src/Base");
 const groupedHeaderPlugin = require("fin-hypergrid-grouped-header-plugin");
 
-const Range = require("./Range");
 const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLineRendererPaint;
@@ -23,7 +22,7 @@ const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
 
-const COLUMN_HEADER_FONT = "12px amplitude-regular, Helvetica, sans-serif";
+const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
 
 const base_grid_properties = {
@@ -78,6 +77,7 @@ const base_grid_properties = {
     showTreeColumn: false,
     singleRowSelectionMode: false,
     sortColumns: [],
+    sortOnDoubleClick: true,
     treeRenderer: "TreeCell",
     treeHeaderFont: "12px Arial, Helvetica, sans-serif",
     treeHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
@@ -322,16 +322,21 @@ async function getOrCreateHypergrid(div) {
         perspectiveHypergridElement = this[PRIVATE].grid;
     }
 
-    if (!document.body.contains(perspectiveHypergridElement)) {
+    if (!perspectiveHypergridElement.isConnected) {
         div.innerHTML = "";
         div.appendChild(perspectiveHypergridElement);
         await new Promise(resolve => setTimeout(resolve));
+        perspectiveHypergridElement.grid.canvas.resize(false, true);
     }
     return perspectiveHypergridElement;
 }
 
 async function grid_create(div, view, task) {
     this[PRIVATE] = this[PRIVATE] || {};
+    const hypergrid = this.hypergrid;
+    if (hypergrid) {
+        hypergrid.behavior.dataModel._view = undefined;
+    }
 
     const hidden = this._get_view_hidden();
     const config = await view.get_config();
@@ -341,7 +346,13 @@ async function grid_create(div, view, task) {
     }
 
     const colPivots = config.column_pivot;
-    const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(Range.create(0, colPivots.length + 1)), view.schema(), this._table.schema()]);
+    const rowPivots = config.row_pivot;
+    const window = {
+        start_row: 0,
+        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1)
+    };
+
+    const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(window), view.schema(), this._table.schema()]);
 
     if (task.cancelled) {
         return;
@@ -354,34 +365,32 @@ async function grid_create(div, view, task) {
     }
 
     const dataModel = this.hypergrid.behavior.dataModel;
-    const rowPivots = config.row_pivot;
+    const columns = Object.keys(json);
 
-    dataModel.setRowCount(nrows);
-    dataModel.setIsTree(!!rowPivots.length);
+    dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
     dataModel._view = view;
     dataModel._config = config;
+    dataModel._viewer = this;
 
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
+        range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
-        const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots).rows;
+        const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots, columns).rows;
         const data = dataModel.data;
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
+    this.hypergrid.sbVScroller.index = 0;
+    this.hypergrid.sbHScroller.index = 0;
 
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
+    this.hypergrid.renderer.computeCellsBounds(true);
+    await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();
-    let running = true;
-    while (nrows > 0 && running) {
-        running = await new Promise(resolve => dataModel.fetchData(undefined, resolve));
-        if (running) {
-            await new Promise(resolve => setTimeout(resolve, 10));
-        }
-    }
-    this.hypergrid.canvas.resize();
+    this.hypergrid.canvas.paintNow();
 }
 
 global.registerPlugin("hypergrid", {

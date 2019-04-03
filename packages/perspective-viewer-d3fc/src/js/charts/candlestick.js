@@ -16,7 +16,8 @@ candlestick.plugin = {
     max_size: 25000,
     initial: {
         type: "number",
-        count: 4
+        count: 4,
+        names: ["Open", "Close", "High", "Low"]
     }
 };
 
