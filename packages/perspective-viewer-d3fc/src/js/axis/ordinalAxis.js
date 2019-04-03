@@ -151,11 +151,15 @@ export const component = settings => {
     };
 
     const hideOverlappingLabels = (s, rotated) => {
-        const getTransformCoords = transform =>
-            transform
+        const getTransformCoords = transform => {
+            const splitOn = transform.indexOf(",") !== -1 ? "," : " ";
+            const coords = transform
                 .substring(transform.indexOf("(") + 1, transform.indexOf(")"))
-                .split(",")
+                .split(splitOn)
                 .map(c => parseInt(c));
+            while (coords.length < 2) coords.push(0);
+            return coords;
+        };
 
         const rectanglesOverlap = (r1, r2) => r1.x <= r2.x + r2.width && r2.x <= r1.x + r1.width && r1.y <= r2.y + r2.height && r2.y <= r1.y + r1.height;
         const rotatedLabelsOverlap = (r1, r2) => r1.x + r1.width + 14 > r2.x + r2.width;
@@ -189,17 +193,15 @@ export const component = settings => {
     };
 
     const getXAxisBoundsRect = s => {
-        const chart = getChartContainer(s.node())
-            .getRootNode()
-            .querySelector(".cartesian-chart");
+        const chart = s.node().closest(".cartesian-chart");
         const axis = chart.querySelector(".x-axis");
 
         const chartRect = chart.getBoundingClientRect();
         const axisRect = axis.getBoundingClientRect();
         return {
-            x: chartRect.x - axisRect.x,
+            x: chartRect.left - axisRect.left,
             width: chartRect.width,
-            y: chartRect.y - axisRect.y,
+            y: chartRect.top - axisRect.top,
             height: chartRect.height
         };
     };
