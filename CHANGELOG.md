@@ -1,5 +1,31 @@
 # Changelog
 
+# [0.2.21] - 2019-04-03
+### Added
+* [#488](https://github.com/jpmorganchase/perspective/pull/488) Candlestick and OHLC charts for `perspective-viewer-d3fc`.
+* [#479](https://github.com/jpmorganchase/perspective/pull/479) Added zooming, label rotation and new scatter types to `perspective-viewer-d3fc`.
+* [#498](https://github.com/jpmorganchase/perspective/pull/498) Bollinger bands, moving averages, draggable legends for `perspective-viewer-d3fc`.
+* [#489](https://github.com/jpmorganchase/perspective/pull/489) Header sort indicator for `perspective-viewer-hypergrid`.
+* [#506](https://github.com/jpmorganchase/perspective/pull/506) Header click-to-sort for `perspective-viewer-hypergrid`, improved scroll performance.
+* [#516](https://github.com/jpmorganchase/perspective/pull/516) New `perspective-cli` package for convenient Perspective operations from the command line.
+* [#483](https://github.com/jpmorganchase/perspective/pull/483) Performance improvement for `perspective.to_*` methods.
+* [#485](https://github.com/jpmorganchase/perspective/pull/485) Added window support to `to_arrow()` method.
+* [#486](https://github.com/jpmorganchase/perspective/pull/486) Disabled delta calculation for `on_update` method by default, improving update performance.
+* [#503](https://github.com/jpmorganchase/perspective/pull/503) Added `get_config()` API to `perspective.table`.
+* [#512](https://github.com/jpmorganchase/perspective/pull/512) Column context labels are now configurable via the plugin API.
+
+### Fixes
+* [#478](https://github.com/jpmorganchase/perspective/pull/478) Fixed broken filtering on `date` type columns.
+* [#486](https://github.com/jpmorganchase/perspective/pull/486) Fixed un-pivoted `view.to_schema()` method to only show visible columns.
+* [#490](https://github.com/jpmorganchase/perspective/pull/490) Fixed bug which removed filter columns when dragged from active columns list.
+* [#491](https://github.com/jpmorganchase/perspective/pull/491) Fixed `perspective-webpack-plugin` load_path issue when `perspective-*` modules are not at the top-level of `node_modules`.
+* [#493](https://github.com/jpmorganchase/perspective/pull/493) Fixed `sum abs` aggregate type.
+* [#501](https://github.com/jpmorganchase/perspective/pull/501) Fixed pivot on categories containing nulls bug.
+* [#502](https://github.com/jpmorganchase/perspective/pull/502) Fixed expand/collapse on 2-sided contexts bug.
+
+### Internal
+* [#497](https://github.com/jpmorganchase/perspective/pull/497) Added local puppeteer mode for testing.
+  
 ## [0.2.20] - 2019-03-07
 ### Added
 * [#463](https://github.com/jpmorganchase/perspective/pull/463) D3FC plugin features Area and Heatmap charts, hierarchial axes have been added to all chart types, as well as a host of additioanl improvements.
@@ -7,7 +33,7 @@
 * [#469](https://github.com/jpmorganchase/perspective/pull/469) `open()` in the node.js API now takes a `table()` argument so it may be retained in the invoking code.
 * [#475](https://github.com/jpmorganchase/perspective/pull/475) Added `not in` filter type to `<perspective-viewer>`.
   
-### Fixed
+### Fixes
 * [#470](https://github.com/jpmorganchase/perspective/pull/470) Fixed Jupyterlab extension dist
 * [#471](https://github.com/jpmorganchase/perspective/pull/471) Fixed CSV parse issue when converting `integer` to `string` via schema.
 

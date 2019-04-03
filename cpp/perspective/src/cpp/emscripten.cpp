@@ -1999,8 +1999,6 @@ using namespace perspective::binding;
  */
 int
 main(int argc, char** argv) {
-    std::cout << "Perspective initialized successfully" << std::endl;
-
     // clang-format off
 EM_ASM({
 

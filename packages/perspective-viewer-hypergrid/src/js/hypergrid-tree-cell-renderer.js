@@ -13,6 +13,7 @@ export function treeLineRendererPaint(gc, config) {
     var width = config.bounds.width;
     var height = config.bounds.height;
 
+    config.minWidth = 1;
     if (config.value === null) {
         return;
     }

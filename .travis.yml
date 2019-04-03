@@ -17,7 +17,7 @@ matrix:
 
     - python: "3.6"
       language: python
-      env: TEST=PYTHON
+      env: TEST=PYTHON_TABLE
       cache: pip
       services: docker
 
@@ -44,8 +44,8 @@ script:
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn test --quiet; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
-  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn build_python; fi
-  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn lint_python; fi
-  - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn test_python; fi
+  - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn build_python:table; fi
+  - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn lint_python:table; fi
+  - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn test_python:table; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi
