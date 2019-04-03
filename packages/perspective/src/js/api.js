@@ -11,9 +11,14 @@ import {bindall} from "./utils.js";
 
 function unsubscribe(method, cmd) {
     return function() {
-        let resolve = arguments[arguments.length - 1];
+        let resolve;
         let reject = () => {};
-        let args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
+        let args = Array.prototype.slice.call(arguments, 0, arguments.length);
+        for (let i = args.length - 1; i >= 0; i--) {
+            if (typeof args[i] === "function") {
+                resolve = args.splice(i, 1)[0];
+            }
+        }
         let msg = {
             cmd: cmd || "view_method",
             name: this._name,
@@ -28,9 +33,14 @@ function unsubscribe(method, cmd) {
 
 function subscribe(method, cmd) {
     return function() {
-        let resolve = arguments[arguments.length - 1];
+        let resolve;
         let reject = () => {};
-        let args = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
+        let args = Array.prototype.slice.call(arguments, 0, arguments.length);
+        for (let i = args.length - 1; i >= 0; i--) {
+            if (typeof args[i] === "function") {
+                resolve = args.splice(i, 1)[0];
+            }
+        }
         let msg = {
             cmd: cmd || "view_method",
             name: this._name,
