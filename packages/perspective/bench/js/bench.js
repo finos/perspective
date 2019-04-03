@@ -58,6 +58,7 @@ async function run() {
     // Allow users to set a limit on version lookbacks
     let psp_urls = URLS;
     let is_delta = false;
+    let benchmark_name = "benchmark";
     if (LIMIT !== -1) {
         let limit_num = Number(args[LIMIT + 1]);
         if (!isNaN(limit_num) && limit_num > 0 && limit_num <= psp_urls.length) {
@@ -69,6 +70,7 @@ async function run() {
     if (IS_DELTA !== -1) {
         // Only run delta tests for master
         psp_urls = [URLS[0]];
+        benchmark_name = "delta_benchmark";
         is_delta = true;
     }
 
@@ -84,11 +86,13 @@ async function run() {
         bins = bins.map(result => ({...result, version, version_index}));
         version_index++;
         data = data.concat(bins);
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", "benchmark.json"), JSON.stringify(transpose(data)));
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", "benchmark.html"), fs.readFileSync(path.join(__dirname, "..", "html", "benchmark.html")).toString());
+        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.json`), JSON.stringify(transpose(data)));
+        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}s.html`)).toString());
 
         await browser.close();
     }
+
+    console.log(`Benchmark suite has finished running - results are in ${benchmark_name}.html.`);
 }
 
 run();

@@ -132,8 +132,7 @@ async function* run_on_update_cases(table, config, mode) {
     const name = `view(${JSON.stringify(token)})`;
 
     const view = table.view(config);
-    // FIXME: on_update function does not work in bench
-    //view.on_update(function() {}, {mode: mode});
+    view.on_update(function() {}, {mode: mode});
     console.log(`Benchmarking \`${name}.on_update(${mode})()\``);
     for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
         const start = performance.now();
@@ -169,16 +168,14 @@ async function* run_all_delta_cases() {
     const table = worker.table(rows);
     await table.schema();
 
-    for (const aggregate of AGG_OPTIONS) {
-        for (const row_pivot of ROW_PIVOT_OPTIONS) {
-            for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
-                const config = {aggregate, row_pivot, column_pivot};
+    const aggregate = AGG_OPTIONS[0];
+    for (const row_pivot of ROW_PIVOT_OPTIONS) {
+        for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
+            const config = {aggregate, row_pivot, column_pivot};
 
-                yield* run_on_update_cases(table, config, "none");
-                // TODO: enable after on_update is fixed
-                //yield* run_on_update_cases(table, config, "rows");
-                //yield* run_on_update_cases(table, config, "pkey");
-            }
+            yield* run_on_update_cases(table, config, "none");
+            yield* run_on_update_cases(table, config, "rows");
+            yield* run_on_update_cases(table, config, "pkey");
         }
     }
 }
