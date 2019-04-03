@@ -23,8 +23,6 @@ class D3FCChartElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
-
-        initialiseStyles(this._container);
     }
 
     render(chart, settings) {
