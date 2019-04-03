@@ -26,7 +26,7 @@
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf build && rimraf cjs",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
-        "docs": "documentation build src/js/viewer.js -f md --shallow > README.md && cp README.md ../../docs/perspective-viewer.md"
+        "docs": "jsdoc2md src/js/viewer.js -p list --separators --no-gfm | tee README.md ../../docs/obj/perspective-viewer.md > /dev/null"
     },
     "publishConfig": {
         "access": "public"

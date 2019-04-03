@@ -28,10 +28,36 @@ import {ActionElement} from "./viewer/action_element.js";
 polyfill({});
 
 /**
- * HTMLElement class for `<perspective-viewer` custom element.
+ * Module for `<perspective-viewer` custom element.  There are no exports from
+ * this module, however importing it has a side effect:  the
+ * {@link module:perspective_viewer~PerspectiveViewer} class is registered as a
+ * custom element, after which it can be used as a standard DOM element.  The
+ * documentation in this module defines the instance structure of a
+ * `<perspective-viewer>` DOM object instantiated typically, through HTML or any
+ * relevent DOM method e.g. `document.createElement("perspective-viewer")` or
+ * `document.getElementsByTagName("perspective-viewer")`.
+ *
+ * @module perspective-viewer
+ */
+
+/**
+ * HTMLElement class for `<perspective-viewer>` custom element.  This class is
+ * not exported, so this constructor cannot be invoked in the typical manner;
+ * instead, instances of the class are created through the Custom Elements DOM
+ * API.
+ *
+ * Properties of an instance of this class, such as {@link module:perspective_viewer~PerspectiveViewer#columns},
+ * are reflected on the DOM element as Attributes, and should be accessed as
+ * such - e.g. `instance.setAttribute("columns", JSON.stringify(["a", "b"]))`.
  *
  * @class PerspectiveViewer
- * @extends {ActionElement}
+ * @extends {HTMLElement}
+ * @example
+ * // Create a new `<perspective-viewer>`
+ * const elem = document.createElement("perspective-viewer");
+ * elem.setAttribute("columns", JSON.stringify(["a", "b"]));
+ * document.body.appendChild(elem);
+ *
  */
 @bindTemplate(template, view_style, default_style) // eslint-disable-next-line no-unused-vars
 class PerspectiveViewer extends ActionElement {
@@ -70,8 +96,7 @@ class PerspectiveViewer extends ActionElement {
      * Sets this `perspective.table.view`'s `sort` property, an array of column
      * names.
      *
-     * @name sort
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @type {array<string>} Array of arrays tuples of column name and
      * direction, where the possible values are "asc", "desc", "asc abs",
      * "desc abs" and "none".
@@ -83,7 +108,7 @@ class PerspectiveViewer extends ActionElement {
      * <perspective-viewer sort='[["x","desc"]]'></perspective-viewer>
      */
     @array_attribute
-    set sort(sort) {
+    sort(sort) {
         var inner = this._sort.querySelector("ul");
         this._update_column_list(
             sort,
@@ -110,8 +135,7 @@ class PerspectiveViewer extends ActionElement {
     /**
      * The set of visible columns.
      *
-     * @name columns
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @param {array} columns An array of strings, the names of visible columns.
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
@@ -121,7 +145,7 @@ class PerspectiveViewer extends ActionElement {
      * <perspective-viewer columns='["x", "y"]'></perspective-viewer>
      */
     @array_attribute
-    set columns(show) {
+    columns(show) {
         this._update_column_view(show, true);
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
@@ -130,8 +154,7 @@ class PerspectiveViewer extends ActionElement {
     /**
      * The set of visible columns.
      *
-     * @name computed-columns
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @param {array} computed-columns An array of computed column objects
      * @fires PerspectiveViewer#perspective-config-update
      * @example <caption>via Javascript DOM</caption>
@@ -141,7 +164,7 @@ class PerspectiveViewer extends ActionElement {
      * <perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""></perspective-viewer>
      */
     @array_attribute
-    set "computed-columns"(computed_columns) {
+    "computed-columns"(computed_columns) {
         const resolve = this._set_updating();
         this._computed_column._close_computed_column();
         (async () => {
@@ -166,8 +189,7 @@ class PerspectiveViewer extends ActionElement {
     /**
      * The set of column aggregate configurations.
      *
-     * @name aggregates
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @param {object} aggregates A dictionary whose keys are column names, and
      * values are valid aggregations.  The `aggergates` attribute works as an
      * override;  in lieu of a key for a column supplied by the developers, a
@@ -181,7 +203,7 @@ class PerspectiveViewer extends ActionElement {
      * <perspective-viewer aggregates='{"x": "distinct count"}'></perspective-viewer>
      */
     @json_attribute
-    set aggregates(show) {
+    aggregates(show) {
         let lis = this._get_view_dom_columns();
         lis.map(x => {
             let agg = show[x.getAttribute("name")];
@@ -196,8 +218,7 @@ class PerspectiveViewer extends ActionElement {
     /**
      * The set of column filter configurations.
      *
-     * @name filters
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @type {array} filters An arry of filter config objects.  A filter
      * config object is an array of three elements:
      *     * The column name.
@@ -217,7 +238,7 @@ class PerspectiveViewer extends ActionElement {
      * <perspective-viewer filters='[["x", "<", 3], ["y", "contains", "abc"]]'></perspective-viewer>
      */
     @array_attribute
-    set filters(filters) {
+    filters(filters) {
         if (!this._updating_filter && typeof this._table !== "undefined") {
             var inner = this._filters.querySelector("ul");
             this._update_column_list(
@@ -259,13 +280,12 @@ class PerspectiveViewer extends ActionElement {
     /**
      * Sets this `perspective.table.view`'s `column_pivots` property.
      *
-     * @name column-pivots
-     * @memberof PerspectiveViewer.prototype
-     * @type {array<string>} Array of column names
+     * @kind member
+     * @type {Array<String>} Array of column names
      * @fires PerspectiveViewer#perspective-config-update
      */
     @array_attribute
-    set "column-pivots"(pivots) {
+    "column-pivots"(pivots) {
         var inner = this._column_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
@@ -275,13 +295,12 @@ class PerspectiveViewer extends ActionElement {
     /**
      * Sets this `perspective.table.view`'s `row_pivots` property.
      *
-     * @name row-pivots
-     * @memberof PerspectiveViewer.prototype
+     * @kind member
      * @type {array<string>} Array of column names
      * @fires PerspectiveViewer#perspective-config-update
      */
     @array_attribute
-    set "row-pivots"(pivots) {
+    "row-pivots"(pivots) {
         var inner = this._row_pivots.querySelector("ul");
         this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
@@ -298,7 +317,7 @@ class PerspectiveViewer extends ActionElement {
      * let elem = document.getElementById('my_viewer');
      * elem.setAttribute('message', '<h1>Loading</h1>');
      */
-    set message(msg) {
+    message(msg) {
         if (this.getAttribute("message") !== msg) {
             this.setAttribute("message", msg);
             return;
@@ -345,7 +364,7 @@ class PerspectiveViewer extends ActionElement {
      * supported by `perspective.table`.
      * @returns {Promise<void>} A promise which resolves once the data is
      * loaded and a `perspective.view` has been created.
-     * @fires PerspectiveViewer#perspective-view-update
+     * @fires module:perspective_viewer~PerspectiveViewer#perspective-click PerspectiveViewer#perspective-view-update
      * @example <caption>Load JSON</caption>
      * const my_viewer = document.getElementById('#my_viewer');
      * my_viewer.load([
@@ -607,7 +626,7 @@ class PerspectiveViewer extends ActionElement {
  * clicked providing a detail that includes a `config`, `column_names` and
  * `row`.
  *
- * @event PerspectiveViewer#perspective-click
+ * @event module:perspective_viewer~PerspectiveViewer#perspective-click
  * @type {object}
  * @property {array} column_names - Includes a list of column names.
  * @property {object} config - Contains a property `filters` that can be applied
@@ -620,7 +639,7 @@ class PerspectiveViewer extends ActionElement {
  * `perspective-config-update` is fired whenever an configuration attribute has
  * been modified, by the user or otherwise.
  *
- * @event PerspectiveViewer#perspective-config-update
+ * @event module:perspective_viewer~PerspectiveViewer#perspective-config-update
  * @type {string}
  */
 
@@ -628,6 +647,6 @@ class PerspectiveViewer extends ActionElement {
  * `perspective-view-update` is fired whenever underlying `view`'s data has
  * updated, including every invocation of `load` and `update`.
  *
- * @event PerspectiveViewer#perspective-view-update
+ * @event module:perspective_viewer~PerspectiveViewer#perspective-view-update
  * @type {string}
  */

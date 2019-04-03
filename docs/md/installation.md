@@ -1,9 +1,4 @@
----
-id: installation
-hide_title: true
----
-
-# Installation <!-- omit in toc -->
+# Installation
 
 ## (!) An important note about Hosting
 

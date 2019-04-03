@@ -97,6 +97,9 @@ try {
             execute(docker() + " " + args.join(" "));
         }
     } else {
+        if (IS_LOCAL_PUPPETEER) {
+            execute(`yarn --silent clean --screenshots`);
+        }
         if (args.indexOf("--quiet") > -1) {
             console.log("-- Running test suite in quiet mode");
             execSync(`output=$(${jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});

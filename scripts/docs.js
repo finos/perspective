@@ -16,20 +16,17 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/usr/src/app -w /usr/src/app/ perspective/${image}`;
+    cmd += ` -v $(pwd):/usr/src/app -w /usr/src/app/ perspective/${image}:latest`;
     return cmd;
 }
 
-let flags = " -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=1 -DPSP_BUILD_DOCS=1";
-
 try {
-    let cmd = "cd docsbuild && cmake ..  -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=0 -DPSP_BUILD_DOCS=1 && make -j${PSP_CPU_COUNT-8}";
+    let cmd = ' bash -c "cd docs/build && cmake ../../cpp/perspective  -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=0 -DPSP_BUILD_DOCS=1 && make -j${PSP_CPU_COUNT-8}"';
+    execute("mkdirp docs/build");
+    execute("lerna run docs --silent --stream");
     if (process.env.PSP_DOCKER) {
-        execute(docker("docs") + " mkdir -p docsbuild");
-        execute(cmd);
-
+        execute(docker("docs") + cmd);
     } else {
-        execute("mkdir -p docsbuild");
         execute(cmd);
     }
 } catch (e) {
