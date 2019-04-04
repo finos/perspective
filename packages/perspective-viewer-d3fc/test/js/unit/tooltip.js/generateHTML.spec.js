@@ -56,11 +56,12 @@ describe("tooltip should", () => {
 
     test("format mainValue as date", () => {
         settings.mainValues[0].type = "datetime";
+        const testDate = new Date("2019-04-03T15:15Z");
         const data = {
-            mainValue: new Date("2019-04-03T15:15Z").getTime()
+            mainValue: testDate.getTime()
         };
         generateHtml(tooltip, data, settings);
-        expect(getContent()).toEqual(["main-1: Wed Apr 03 2019 16:15:00 GMT+0100 (GMT Summer Time)"]);
+        expect(getContent()).toEqual([`main-1: ${testDate.toLocaleString()}`]);
     });
 
     test("format mainValue as integer", () => {
