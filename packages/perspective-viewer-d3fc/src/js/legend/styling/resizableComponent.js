@@ -157,13 +157,13 @@ export function resizableComponent() {
 
     resizable.minWidth = input => {
         minDimensionsPx.width = input;
-        if (!!maxDimensionsPx.width && maxDimensionsPx.width < minDimensionsPx.width) maxDimensionsPx.width = minDimensionsPx.width;
+        if (!!maxDimensionsPx.width) maxDimensionsPx.width = Math.max(minDimensionsPx.width, maxDimensionsPx.width);
         return resizable;
     };
 
     resizable.minHeight = input => {
         minDimensionsPx.height = input;
-        if (!!maxDimensionsPx.height && maxDimensionsPx.height < minDimensionsPx.height) maxDimensionsPx.height = minDimensionsPx.height;
+        if (!!maxDimensionsPx.height) maxDimensionsPx.height = Math.max(minDimensionsPx.height, maxDimensionsPx.height);
         return resizable;
     };
 
@@ -174,13 +174,13 @@ export function resizableComponent() {
 
     resizable.maxWidth = input => {
         maxDimensionsPx.width = input;
-        if (minDimensionsPx.width > maxDimensionsPx.width) minDimensionsPx.width = maxDimensionsPx.width;
+        minDimensionsPx.width = Math.min(minDimensionsPx.width, maxDimensionsPx.width);
         return resizable;
     };
 
     resizable.maxHeight = input => {
         maxDimensionsPx.height = input;
-        if (minDimensionsPx.height > maxDimensionsPx.height) minDimensionsPx.height = maxDimensionsPx.height;
+        minDimensionsPx.height = Math.min(minDimensionsPx.height, maxDimensionsPx.height);
         return resizable;
     };
 
