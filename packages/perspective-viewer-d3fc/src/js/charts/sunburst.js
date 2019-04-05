@@ -18,6 +18,7 @@ function sunburst(container, settings) {
 
     const sunburstData = treeData(settings);
     const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
+    const color = treeColor(settings, sunburstData.map(d => d.extents));
 
     const minSize = 500;
     const cols = Math.min(sunburstData.length, Math.floor(containerWidth / minSize));
@@ -68,7 +69,6 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 120) / 6;
-            const color = treeColor(settings, split, data.data.children);
             sunburstSeries()
                 .settings(settings)
                 .split(split)
