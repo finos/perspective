@@ -78,9 +78,7 @@ function sunburst(container, settings) {
 
             if (color) {
                 const legend = colorRangeLegend().scale(color);
-                select(svgNode.parentNode)
-                    .call(legend)
-                    .select("div.legend-container");
+                select(svgNode.parentNode).call(legend);
             }
 
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
