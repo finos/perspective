@@ -644,13 +644,17 @@ export default function(Module) {
     };
 
     /**
-     * Set expansion `depth` pf the pivot tree.
+     * Set expansion `depth` of the pivot tree.
      *
      */
     view.prototype.set_depth = async function(depth) {
         return this._View.set_depth(depth, this.config.row_pivot.length);
     };
 
+    /**
+     * Returns the data of all changed rows in JSON format, or for 1+ sided contexts
+     * an empty array as the feature has not been enabled due to performance concerns.
+     */
     view.prototype._get_step_delta = async function() {
         let delta = this._View.get_step_delta(0, 2147483647);
         let data;
@@ -678,6 +682,15 @@ export default function(Module) {
     };
 
     /**
+     * Returns an array of row indices indicating which rows have been changed
+     * in an update.
+     */
+    view.prototype._get_row_delta = async function() {
+        let d = this._View.get_row_delta(0, 2147483647);
+        return extract_vector(d.rows);
+    };
+
+    /**
      * Register a callback with this {@link view}.  Whenever the {@link view}'s
      * underlying table emits an update, this callback will be invoked with the
      * aggregated row deltas.
@@ -688,16 +701,32 @@ export default function(Module) {
      *     - "rows": The callback is invoked with the changed rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        if (["none", "rows"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "rows"`);
+        if (["none", "rows", "pkey"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
+        }
+        if (mode === "rows" || mode === "pkey") {
+            // Enable deltas only if needed by callback
+            if (!this._View._get_deltas_enabled()) {
+                this._View._set_deltas_enabled(true);
+            }
         }
         this.callbacks.push({
             view: this,
             callback: async () => {
-                if (mode === "rows") {
-                    callback(await this._get_step_delta());
-                } else {
-                    callback();
+                switch (mode) {
+                    case "rows":
+                        {
+                            callback(await this._get_step_delta());
+                        }
+                        break;
+                    case "pkey":
+                        {
+                            callback(await this._get_row_delta());
+                        }
+                        break;
+                    default: {
+                        callback();
+                    }
                 }
             }
         });

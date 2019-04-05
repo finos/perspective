@@ -50,6 +50,10 @@ public:
     std::shared_ptr<t_data_slice<CTX_T>> get_data(
         t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
 
+    // Delta calculation
+    bool _get_deltas_enabled() const;
+    void _set_deltas_enabled(bool enabled_state);
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::vector<std::string> get_row_pivots() const;
@@ -59,6 +63,7 @@ public:
     std::vector<t_sortspec> get_sorts() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
+    t_rowdelta get_row_delta(t_index bidx, t_index eidx) const;
     bool is_column_only() const;
 
 private:

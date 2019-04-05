@@ -363,6 +363,29 @@ View<t_ctx2>::get_data(
     return data_slice_ptr;
 }
 
+// Delta calculation
+template <typename CTX_T>
+bool
+View<CTX_T>::_get_deltas_enabled() const {
+    return m_ctx->get_deltas_enabled();
+}
+
+template <>
+bool
+View<t_ctx0>::_get_deltas_enabled() const {
+    return true;
+}
+
+template <typename CTX_T>
+void
+View<CTX_T>::_set_deltas_enabled(bool enabled_state) {
+    m_ctx->set_deltas_enabled(enabled_state);
+}
+
+template <>
+void
+View<t_ctx0>::_set_deltas_enabled(bool enabled_state) {}
+
 // Getters
 template <typename CTX_T>
 std::shared_ptr<CTX_T>
@@ -416,6 +439,12 @@ template <typename CTX_T>
 t_stepdelta
 View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
     return m_ctx->get_step_delta(bidx, eidx);
+}
+
+template <typename CTX_T>
+t_rowdelta
+View<CTX_T>::get_row_delta(t_index bidx, t_index eidx) const {
+    return m_ctx->get_row_delta(bidx, eidx);
 }
 
 template <typename CTX_T>
