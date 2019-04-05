@@ -12,13 +12,22 @@ import {treeData} from "../data/treeData";
 import {sunburstSeries, treeColor} from "../series/sunburst/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
+import {getOrCreateElement} from "../utils/utils";
 
 function sunburst(container, settings) {
     if (settings.crossValues.length === 0) return;
 
     const sunburstData = treeData(settings);
-    const {width: containerWidth, height: containerHeight, top: containerTop} = container.node().getBoundingClientRect();
+    const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
     const color = treeColor(settings, sunburstData.map(d => d.extents));
+
+    const innerRect = innerContainer.node().getBoundingClientRect();
+    const containerHeight = innerRect.height;
+    const containerWidth = innerRect.width - (color ? 70 : 0);
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container.call(legend);
+    }
 
     const minSize = 500;
     const cols = Math.min(sunburstData.length, Math.floor(containerWidth / minSize));
@@ -31,11 +40,10 @@ function sunburst(container, settings) {
         containerSize.height = containerHeight / rows;
     }
 
-    const marginRight = color && cols > 1 ? 90 / cols : 0;
-    container.style("grid-template-columns", `repeat(${cols}, ${containerSize.width - marginRight}px)`);
-    container.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
+    innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
+    innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
 
-    const sunburstDiv = container.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
+    const sunburstDiv = innerContainer.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
     sunburstDiv.exit().remove();
 
     const sunburstEnter = sunburstDiv
@@ -69,7 +77,7 @@ function sunburst(container, settings) {
             const title = sunburstElement.select("text.title").text(split);
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
-            const radius = (Math.min(width, height) - 130 + marginRight) / 6;
+            const radius = (Math.min(width, height) - 120) / 6;
             sunburstSeries()
                 .settings(settings)
                 .split(split)
@@ -79,14 +87,6 @@ function sunburst(container, settings) {
 
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });
-
-    if (color) {
-        const legend = colorRangeLegend().scale(color);
-        container
-            .call(legend)
-            .select("div.legend-container")
-            .style("transform", `translateY(${containerTop}px)`);
-    }
 }
 sunburst.plugin = {
     type: "d3_sunburst",
