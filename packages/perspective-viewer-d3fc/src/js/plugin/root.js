@@ -12,5 +12,5 @@ export function getChartElement(element) {
 }
 
 export function getChartContainer(element) {
-    return getChartElement(element).getContainer();
+    return element.closest("#container.chart");
 }
