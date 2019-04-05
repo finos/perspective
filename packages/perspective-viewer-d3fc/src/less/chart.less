@@ -140,6 +140,17 @@
         }
     }
 
+    #dragHandles {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        left: auto;
+        pointer-events: none;
+        & rect {
+            pointer-events: all;
+        }
+    }
+
     .label rect {
         fill: none;
     }
@@ -150,6 +161,7 @@
         right: 15px;
         left: auto;
         width: 150px;
+        height: 280px;
 
         &.legend-color {
             width: 90px;
@@ -157,13 +169,16 @@
         }
 
         &[borderbox-on-hover="true"] {
+            transition: box-shadow 1s;
             &:hover {
                 box-shadow: 2px 2px 6px #000;
+                transition: box-shadow 0.2s;
             }
         }
 
         & .legend {
             font-size: 8pt;
+            width: 100%;
 
             & .cell {
                 cursor: pointer;

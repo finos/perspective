@@ -13,7 +13,6 @@ import scrollableLegend from "./scrollableLegend";
 import {withoutOpacity} from "../series/seriesColors";
 import {getChartElement} from "../plugin/root";
 import {getOrCreateElement} from "../utils/utils";
-import {draggableComponent} from "./styling/draggableComponent";
 
 const scrollColorLegend = settings =>
     scrollableLegend(
@@ -40,6 +39,7 @@ function symbolScale(fromScale) {
 
     const domain = fromScale.domain();
     const range = fromScale.range().map(r => d3.symbol().type(r)());
+
     return d3
         .scaleOrdinal()
         .domain(domain)
@@ -50,7 +50,6 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
     let settings = {};
     let scale = null;
     let color = null;
-    let draggable = draggableComponent();
 
     function legend(container) {
         if (scale && scale.range().length > 1) {
@@ -101,8 +100,6 @@ function legendComponent(scrollLegendComponent, scaleModifier) {
                 .attr("borderbox-on-hover", true)
                 .style("z-index", "2")
                 .call(scrollLegend);
-
-            draggable(legendSelection);
         }
     }
 
