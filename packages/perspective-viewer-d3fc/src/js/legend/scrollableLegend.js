@@ -30,8 +30,6 @@ export default (fromLegend, settings) => {
 
     const scrollableLegend = selection => {
         domain = legend.scale().domain();
-        pageCount = calculatePageCount();
-
         render(selection);
 
         resizable = resizableComponent()
