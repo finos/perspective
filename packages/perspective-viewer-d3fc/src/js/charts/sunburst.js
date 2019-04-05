@@ -69,7 +69,7 @@ function sunburst(container, settings) {
             const title = sunburstElement.select("text.title").text(split);
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
-            const radius = (Math.min(width, height) - 120) / 6;
+            const radius = (Math.min(width, height) - 130 + marginRight) / 6;
             sunburstSeries()
                 .settings(settings)
                 .split(split)
