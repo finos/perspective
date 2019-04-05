@@ -17,7 +17,7 @@ function sunburst(container, settings) {
     if (settings.crossValues.length === 0) return;
 
     const sunburstData = treeData(settings);
-    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
+    const {width: containerWidth, height: containerHeight, top: containerTop} = container.node().getBoundingClientRect();
     const color = treeColor(settings, sunburstData.map(d => d.extents));
 
     const minSize = 500;
@@ -31,7 +31,8 @@ function sunburst(container, settings) {
         containerSize.height = containerHeight / rows;
     }
 
-    container.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
+    const marginRight = color && cols > 1 ? 90 / cols : 0;
+    container.style("grid-template-columns", `repeat(${cols}, ${containerSize.width - marginRight}px)`);
     container.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
 
     const sunburstDiv = container.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
@@ -76,13 +77,16 @@ function sunburst(container, settings) {
                 .color(color)
                 .radius(radius)(sunburstElement);
 
-            if (color) {
-                const legend = colorRangeLegend().scale(color);
-                select(svgNode.parentNode).call(legend);
-            }
-
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });
+
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container
+            .call(legend)
+            .select("div.legend-container")
+            .style("transform", `translateY(${containerTop}px)`);
+    }
 }
 sunburst.plugin = {
     type: "d3_sunburst",
