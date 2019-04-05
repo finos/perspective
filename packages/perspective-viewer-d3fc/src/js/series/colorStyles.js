@@ -10,11 +10,8 @@
 import * as d3 from "d3";
 import * as gparser from "gradient-parser";
 
-let initialised = false;
-export const colorStyles = {};
-
 export const initialiseStyles = (container, settings) => {
-    if (!initialised || !settings.colorStyles) {
+    if (!settings.colorStyles) {
         const data = ["series"];
         for (let n = 1; n <= 10; n++) {
             data.push(`series-${n}`);
@@ -41,15 +38,8 @@ export const initialiseStyles = (container, settings) => {
         gradients.forEach(g => {
             const gradient = computed(`--d3fc-gradient-${g}`);
             styles.gradient[g] = parseGradient(gradient, styles.opacity);
-            styles.interpolator[g] = multiInterpolator(styles.gradient[g]);
         });
 
-        if (!initialised) {
-            Object.keys(styles).forEach(p => {
-                colorStyles[p] = styles[p];
-            });
-            initialised = true;
-        }
         settings.colorStyles = styles;
     }
 };
@@ -78,24 +68,3 @@ const parseGradient = (gradient, opacity) =>
         .parse(gradient)[0]
         .colorStops.map(g => [g.length.value / 100, stepAsColor(g.value, opacity)])
         .sort((a, b) => a[0] - b[0]);
-
-const multiInterpolator = gradientPairs => {
-    // A new interpolator that calls through to a set of
-    // interpolators between each value/color pair
-    const interpolators = gradientPairs.slice(1).map((p, i) => d3.interpolate(gradientPairs[i][1], p[1]));
-    return value => {
-        const index = gradientPairs.findIndex((p, i) => i < gradientPairs.length - 1 && value <= gradientPairs[i + 1][0] && value > p[0]);
-        if (index === -1) {
-            if (value <= gradientPairs[0][0]) {
-                return gradientPairs[0][1];
-            }
-            return gradientPairs[gradientPairs.length - 1][1];
-        }
-
-        const interpolator = interpolators[index];
-        const [value1] = gradientPairs[index];
-        const [value2] = gradientPairs[index + 1];
-
-        return interpolator((value - value1) / (value2 - value1));
-    };
-};
