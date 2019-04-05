@@ -1,5 +1,6 @@
 {
     "empty.html/empty grids do not explode": "423ca653bbcbc21a28029c149a37b8ec",
+    "regressions.html/should not render an extra row for column_only views": "0656c682240c18c13c1d5892bf790d8a",
     "regressions.html/regular updates": "14abd51c3cae1919119d9f88bfbc5cd3",
     "regressions.html/saving a computed column does not interrupt update rendering": "da13afb4284b9c3da21ed57c6ba69301",
     "superstore.html/shows a grid without any settings applied.": "59ecbb591317976232b7dc078b79e164",

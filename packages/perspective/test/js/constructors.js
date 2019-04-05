@@ -320,7 +320,7 @@ module.exports = perspective => {
             var view = table.view({column_pivot: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|int");
             // bytelength should not include the aggregate row
-            expect(result[0].byteLength).toEqual(16);
+            expect(result[0].byteLength).toEqual(12);
             view.delete();
             table.delete();
         });
@@ -329,7 +329,7 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view({column_pivot: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|float");
-            expect(result[0].byteLength).toEqual(32);
+            expect(result[0].byteLength).toEqual(24);
             view.delete();
             table.delete();
         });
@@ -520,6 +520,20 @@ module.exports = perspective => {
             let result = await view.schema();
             expect(result).toEqual({x: "string", y: "integer"});
             view.delete();
+            table.delete();
+        });
+
+        it("Returns the correct number of rows for column-only views", async function() {
+            var table = perspective.table(data);
+            var view = table.view();
+            var num_rows = await view.num_rows();
+            var view2 = table.view({
+                column_pivot: ["x"]
+            });
+            var num_rows_col_only = await view2.num_rows();
+            expect(num_rows_col_only).toEqual(num_rows);
+            view.delete();
+            view2.delete();
             table.delete();
         });
 

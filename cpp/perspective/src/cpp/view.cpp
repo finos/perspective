@@ -62,7 +62,11 @@ View<t_ctx2>::sides() const {
 template <typename CTX_T>
 std::int32_t
 View<CTX_T>::num_rows() const {
-    return m_ctx->get_row_count();
+    if (is_column_only()) {
+        return m_ctx->get_row_count() - 1;
+    } else {
+        return m_ctx->get_row_count();
+    }
 }
 
 template <typename CTX_T>
