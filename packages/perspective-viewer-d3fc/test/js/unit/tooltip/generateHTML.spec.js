@@ -9,7 +9,7 @@
 import {select} from "d3";
 import {generateHtml} from "../../../../src/js/tooltip/generateHTML";
 
-describe("tooltip should", () => {
+describe("tooltip generateHTML should", () => {
     let tooltip = null;
     let settings = null;
 

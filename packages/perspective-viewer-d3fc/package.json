@@ -32,7 +32,8 @@
         "testURL": "http://localhost/",
         "automock": false,
         "transform": {
-            ".js$": "./test/js/transform.js"
+            ".js$": "./test/js/transform.js",
+            ".html$": "html-loader-jest"
         },
         "setupFiles": [
             "./test/js/beforeEachSpec.js"
@@ -59,6 +60,7 @@
     },
     "devDependencies": {
         "babel-loader": "^8.0.5",
+        "html-loader-jest": "^0.2.1",
         "webpack": "^3.5.6"
     }
 }

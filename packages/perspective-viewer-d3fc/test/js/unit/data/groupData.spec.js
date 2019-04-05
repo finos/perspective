@@ -7,7 +7,7 @@
  *
  */
 
-import {groupAndStackData} from "../../../src/js/data/groupData";
+import {groupAndStackData} from "../../../../src/js/data/groupData";
 
 describe("groupAndStackData should", () => {
     test("include globals", () => {
@@ -16,7 +16,7 @@ describe("groupAndStackData should", () => {
         expect(typeof customElements.define).toBe("function");
     });
 
-    test("groupAndStackData should use settings data if no specific data is supplied", () => {
+    test("use settings data if no specific data is supplied", () => {
         const settings = {
             crossValues: [{name: "cross1", type: "string"}],
             data: [{value1: 10, __ROW_PATH__: ["CROSS1.1"]}, {value1: 20, __ROW_PATH__: ["CROSS1.2"]}, {value1: 30, __ROW_PATH__: ["CROSS1.1"]}],
@@ -28,7 +28,7 @@ describe("groupAndStackData should", () => {
         expect(groupedResult[0].length).toEqual(3);
     });
 
-    test("groupAndStackData should use specific data if supplied", () => {
+    test("use specific data if supplied", () => {
         const suppliedData = [{value1: 10, __ROW_PATH__: ["CROSS1.1"]}, {value1: 20, __ROW_PATH__: ["CROSS1.2"]}, {value1: 30, __ROW_PATH__: ["CROSS1.1"]}];
         const settings = {
             crossValues: [{name: "cross1", type: "string"}],

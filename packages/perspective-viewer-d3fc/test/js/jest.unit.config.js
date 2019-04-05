@@ -13,7 +13,8 @@ module.exports = {
     testURL: "http://localhost/",
     automock: false,
     transform: {
-        ".js$": "./transform.js"
+        ".js$": "./transform.js",
+        ".html$": "html-loader-jest"
     },
     setupFiles: ["./beforeEachSpec.js"]
 };
