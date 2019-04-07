@@ -172,7 +172,6 @@ function _attribute(_default) {
         };
         delete desc["value"];
         delete desc["writable"];
-        console.log(desc);
         return desc;
     };
 }

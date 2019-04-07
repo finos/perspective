@@ -340,7 +340,7 @@ export default function(Module) {
             let row = formatter.initRowValue();
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
-                if (cidx === 0 && num_sides !== 0) {
+                if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         const row_path = slice.get_row_path(ridx);
                         formatter.initColumnValue(data, row, "__ROW_PATH__");

@@ -46,16 +46,6 @@ exports.default = function() {
         await page.evaluate(element => element.setAttribute("column-pivots", '["Category","Sub-Category"]'), viewer);
     });
 
-    test.skip("pivots by two rows and two columns, sorted by a numeric column.", async page => {
-        const viewer = await page.$("perspective-viewer");
-        await page.shadow_click("perspective-viewer", "#config_button");
-        await page.evaluate(element => element.setAttribute("row-pivots", '["Region","State"]'), viewer);
-        await page.waitForSelector("perspective-viewer:not([updating])");
-        await page.evaluate(element => element.setAttribute("column-pivots", '["Category","Sub-Category"]'), viewer);
-        await page.waitForSelector("perspective-viewer:not([updating])");
-        await page.evaluate(element => element.setAttribute("sort", '[["Sales", "desc"]]'), viewer);
-    });
-
     test.capture("sorts by a hidden column.", async page => {
         const viewer = await page.$("perspective-viewer");
         await page.shadow_click("perspective-viewer", "#config_button");
