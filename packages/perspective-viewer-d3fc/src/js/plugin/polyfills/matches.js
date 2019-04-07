@@ -6,11 +6,6 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
-export function getChartElement(element) {
-    return element.getRootNode().host;
-}
-
-export function getChartContainer(element) {
-    return getChartElement(element).getContainer();
+if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector || Element.prototype.webkitMatchesSelector;
 }

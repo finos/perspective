@@ -11,19 +11,28 @@ import * as fc from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
 
 export function colorRangeLegend() {
-    const width = 100;
-    const height = 150;
     let scale = null;
-
-    const xScale = d3
-        .scaleBand()
-        .domain([0, 1])
-        .range([0, width]);
 
     const formatFunc = d => (Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
 
     function legend(container) {
-        const domain = scale.domain();
+        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
+            container
+                .append("div")
+                .attr("class", "legend-container legend-color")
+                .style("z-index", "2")
+        );
+        const {width, height} = legendSelection.node().getBoundingClientRect();
+
+        const xScale = d3
+            .scaleBand()
+            .domain([0, 1])
+            .range([0, width]);
+
+        const domain = scale
+            .copy()
+            .nice()
+            .domain();
         const paddedDomain = fc
             .extentLinear()
             .pad([0.1, 0.1])
@@ -47,18 +56,14 @@ export function colorRangeLegend() {
                 selection.selectAll("path").style("fill", d => scale(d));
             });
 
+        const middle = domain[0] < 0 && domain[1] > 0 ? 0 : Math.round((domain[1] + domain[0]) / 2);
+        const tickValues = [...domain, middle];
+
         const axisLabel = fc
             .axisRight(yScale)
-            .tickValues([...domain, (domain[1] + domain[0]) / 2])
+            .tickValues(tickValues)
             .tickSizeOuter(0)
             .tickFormat(d => formatFunc(d));
-
-        const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
-            container
-                .append("div")
-                .attr("class", "legend-container")
-                .style("z-index", "2")
-        );
 
         const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)

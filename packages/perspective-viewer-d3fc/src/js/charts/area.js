@@ -7,8 +7,9 @@
  *
  */
 import * as fc from "d3fc";
-import * as crossAxis from "../axis/crossAxis";
-import * as mainAxis from "../axis/mainAxis";
+import {axisFactory} from "../axis/axisFactory";
+import {chartSvgFactory} from "../axis/chartFactory";
+import {AXIS_TYPES} from "../axis/axisType";
 import {areaSeries} from "../series/areaSeries";
 import {seriesColors} from "../series/seriesColors";
 import {splitAndBaseData} from "../data/splitAndBaseData";
@@ -30,45 +31,31 @@ function areaChart(container, settings) {
 
     const series = fc.seriesSvgRepeat().series(areaSeries(settings, color).orient("vertical"));
 
-    const xDomain = crossAxis.domain(settings)(data);
-    const xScale = crossAxis.scale(settings);
-    const yScale = mainAxis.scale(settings);
-    const xAxis = crossAxis.axisFactory(settings).domain(xDomain)();
+    const xAxis = axisFactory(settings)
+        .excludeType(AXIS_TYPES.linear)
+        .settingName("crossValues")
+        .valueName("crossValue")(data);
+    const yAxis = axisFactory(settings)
+        .settingName("mainValues")
+        .valueName("mainValue")
+        .excludeType(AXIS_TYPES.ordinal)
+        .orient("vertical")
+        .include([0])
+        .paddingStrategy(hardLimitZeroPadding())(data);
 
-    const chart = fc
-        .chartSvgCartesian({
-            xScale,
-            yScale,
-            xAxis
-        })
-        .xDomain(xDomain)
-        .xLabel(crossAxis.label(settings))
-        .xAxisHeight(xAxis.size)
-        .xDecorate(xAxis.decorate)
-        .yDomain(
-            mainAxis
-                .domain(settings)
-                .include([0])
-                .paddingStrategy(hardLimitZeroPadding())(data)
-        )
-        .yLabel(crossAxis.label(settings))
-        .yOrient("left")
-        .yLabel(mainAxis.label(settings))
-        .yNice()
-        .plotArea(withGridLines(series).orient("vertical"));
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
 
-    chart.xPaddingInner && chart.xPaddingInner(1);
-    chart.xPaddingOuter && chart.xPaddingOuter(0.5);
+    chart.yNice && chart.yNice();
 
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
-        .xScale(xScale);
+        .xScale(xAxis.scale);
 
     const toolTip = nearbyTip()
         .settings(settings)
-        .xScale(xScale)
-        .yScale(yScale)
+        .xScale(xAxis.scale)
+        .yScale(yAxis.scale)
         .color(color)
         .data(data);
 

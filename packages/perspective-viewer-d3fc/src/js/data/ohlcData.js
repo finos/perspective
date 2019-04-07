@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import {labelFunction} from "../axis/crossAxis";
+import {labelFunction} from "../axis/axisLabel";
 import {splitIntoMultiSeries} from "./splitIntoMultiSeries";
 
 export function ohlcData(settings, data) {

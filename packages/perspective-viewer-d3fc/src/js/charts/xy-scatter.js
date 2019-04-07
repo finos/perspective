@@ -7,7 +7,8 @@
  *
  */
 import * as fc from "d3fc";
-import * as mainAxis from "../axis/mainAxis";
+import {axisFactory} from "../axis/axisFactory";
+import {chartCanvasFactory} from "../axis/chartFactory";
 import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
 import {pointData} from "../data/pointData";
 import {seriesColorsFromGroups} from "../series/seriesColors";
@@ -46,36 +47,42 @@ function xyScatter(container, settings) {
         .mapping((data, index) => data[index])
         .series(data.map(series => pointSeriesCanvas(settings, series.key, size, color, symbols)));
 
-    const domainDefault = () => mainAxis.domain(settings).paddingStrategy(hardLimitZeroPadding().pad([0.1, 0.1]));
+    const axisDefault = () =>
+        axisFactory(settings)
+            .settingName("mainValues")
+            .paddingStrategy(hardLimitZeroPadding())
+            .pad([0.1, 0.1]);
 
-    const xScale = mainAxis.scale(settings);
-    const yScale = mainAxis.scale(settings);
+    const xAxis = axisDefault()
+        .settingValue(settings.mainValues[0].name)
+        .valueName("x")(data);
+    const yAxis = axisDefault()
+        .orient("vertical")
+        .settingValue(settings.mainValues[1].name)
+        .valueName("y")(data);
 
-    const chart = fc
-        .chartCanvasCartesian(xScale, yScale)
-        .xDomain(domainDefault().valueName("x")(data))
+    const chart = chartCanvasFactory(xAxis, yAxis)
         .xLabel(settings.mainValues[0].name)
-        .yDomain(domainDefault().valueName("y")(data))
         .yLabel(settings.mainValues[1].name)
-        .yOrient("left")
-        .yNice()
-        .xNice()
         .plotArea(withGridLines(series).canvas(true));
+
+    chart.xNice && chart.xNice();
+    chart.yNice && chart.yNice();
 
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
-        .xScale(xScale)
-        .yScale(yScale)
+        .xScale(xAxis.scale)
+        .yScale(yAxis.scale)
         .canvas(true);
 
     const toolTip = nearbyTip()
         .settings(settings)
         .canvas(true)
-        .xScale(xScale)
+        .xScale(xAxis.scale)
         .xValueName("x")
         .yValueName("y")
-        .yScale(yScale)
+        .yScale(yAxis.scale)
         .color(useGroupColors && color)
         .size(size)
         .data(data);

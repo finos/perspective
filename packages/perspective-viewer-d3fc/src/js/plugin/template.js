@@ -23,8 +23,6 @@ class D3FCChartElement extends HTMLElement {
         this._container = this.shadowRoot.querySelector(".chart");
         this._chart = null;
         this._settings = null;
-
-        initialiseStyles(this._container);
     }
 
     render(chart, settings) {
@@ -32,6 +30,7 @@ class D3FCChartElement extends HTMLElement {
 
         this._chart = chart;
         this._settings = this._configureSettings(this._settings, settings);
+        initialiseStyles(this._container, this._settings);
         this.draw();
 
         if (window.navigator.userAgent.indexOf("Edge") > -1) {
@@ -71,7 +70,8 @@ class D3FCChartElement extends HTMLElement {
             if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data};
         }
         this.remove();
-        return newSettings;
+        const {colorStyles} = oldSettings || {};
+        return {...newSettings, colorStyles};
     }
 }
 

@@ -8,7 +8,7 @@
  */
 
 import {select} from "d3";
-import {getChartElement} from "../plugin/root";
+import {getChartContainer} from "../plugin/root";
 import {getOrCreateElement, isElementOverflowing} from "../utils/utils";
 import tooltipTemplate from "../../html/tooltip.html";
 import {generateHtml} from "./generateHTML";
@@ -27,7 +27,7 @@ export const tooltip = () => {
             return;
         }
 
-        const container = select(getChartElement(node).getContainer());
+        const container = select(getChartContainer(node));
         tooltipDiv = getTooltipDiv(container);
 
         const showTip = (data, i, nodes) => {
@@ -83,7 +83,7 @@ function showTooltip(containerNode, barNode, tooltipDiv) {
     const barRect = barNode.getBoundingClientRect();
 
     const left = barRect.left + barRect.width / 2 - containerRect.left;
-    const top = barRect.top - containerRect.top;
+    const top = barRect.top - containerRect.top + containerNode.scrollTop;
 
     tooltipDiv
         .style("left", `${left}px`)

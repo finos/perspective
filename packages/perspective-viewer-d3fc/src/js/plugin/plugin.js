@@ -8,6 +8,7 @@
  */
 
 import charts from "../charts/charts";
+import "./polyfills/index";
 import "./template";
 
 export const PRIVATE = Symbol("D3FC chart");
@@ -47,9 +48,11 @@ function drawChart(chart) {
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = !row_pivots.length ? (col, i) => ({...removeHiddenData(col, hidden), __ROW_PATH__: [i]}) : col => removeHiddenData(col, hidden);
 
+        const aggregateType = agg => getOpType(row_pivots, agg.op, tschema[agg.column]);
+
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
-            mainValues: aggregates.map(a => ({name: a.column, type: tschema[a.column]})),
+            mainValues: aggregates.map(a => ({name: a.column, type: aggregateType(a)})),
             splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
             data: filtered.map(dataMap)
@@ -57,6 +60,20 @@ function drawChart(chart) {
 
         createOrUpdateChart.call(this, el, chart, settings);
     };
+}
+
+function getOpType(groupBy, op, varType) {
+    if (groupBy.length === 0) return varType;
+
+    switch (op) {
+        case "count":
+        case "distinct count":
+            return "integer";
+        case "mean":
+        case "mean by count":
+            return "float";
+    }
+    return varType;
 }
 
 function removeHiddenData(col, hidden) {
@@ -100,4 +117,8 @@ function deleteChart() {
         const perspective_d3fc_element = this[PRIVATE].chart;
         perspective_d3fc_element.delete();
     }
+}
+
+if (!Element.prototype.matches) {
+    Element.prototype.matches = Element.prototype.msMatchesSelector;
 }
