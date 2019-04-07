@@ -2,7 +2,8 @@
     "private": true,
     "workspaces": [
         "packages/*",
-        "examples/*"
+        "examples/*",
+        "docs"
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.4.0",
@@ -21,7 +22,6 @@
         "codemirror": "^5.30.0",
         "codemirror-javascript": "^0.2.0",
         "cpx": "^1.5.0",
-        "documentation": "^5.3.3",
         "eslint": "^4.19.1",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
@@ -29,6 +29,7 @@
         "js-beautify": "^1.8.6",
         "jsdoc": "^3.5.5",
         "jsdoc-babel": "^0.5.0",
+        "jsdoc-to-markdown": "^4.0.1",
         "lerna": "^2.11.0",
         "minimist": "^1.2.0",
         "mkdirp": "^0.5.1",
@@ -55,8 +56,7 @@
         "install_python": "cd python/table && python3 setup.py install",
         "install_python:table": "cd python/perspective && python3 setup.py install",
         "bench": "node scripts/bench.js",
-        "docs": "lerna run docs --silent --stream",
-        "autodocs": "node scripts/docs.js",
+        "docs": "node scripts/docs.js",
         "test": "node scripts/test.js",
         "test_cpp": "node scripts/test_cpp.js",
         "test_python": "node scripts/test_python.js",

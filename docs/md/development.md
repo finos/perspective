@@ -1,9 +1,7 @@
 ---
 id: development
-hide_title: true
+title: Developer Guide
 ---
-
-# Development <!-- omit in toc -->
 
 Thank you for your interest in contributing to Perspective!  This guide will
 teach you everything you need to know to get started hacking on the Perspective

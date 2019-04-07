@@ -1,0 +1,25 @@
+{
+    "name": "@jpmorganchase/docs",
+    "private": true,
+    "version": "0.2.21",
+    "scripts": {
+        "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
+        "examples": "docusaurus-examples",
+        "start": "npm run theme && docusaurus-start",
+        "docs": "npm run theme && docusaurus-build",
+        "publish-gh-pages": "npm run theme && docusaurus-publish",
+        "write-translations": "docusaurus-write-translations",
+        "version": "docusaurus-version",
+        "rename-version": "docusaurus-rename-version"
+    },
+    "devDependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.4.0",
+        "@jpmorganchase/perspective": "^0.2.21",
+        "@jpmorganchase/perspective-viewer": "^0.2.21",
+        "docusaurus": "^1.8.0",
+        "less": "^3.9.0"
+    },
+    "dependencies": {
+        "@babel/preset-react": "^7.0.0"
+    }
+}

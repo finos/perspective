@@ -17,15 +17,16 @@ const args = process.argv.slice(2);
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
+function rimraf_err(e) {
+    if (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
+}
 
 function clean(dir) {
     if (fs.existsSync(dir)) {
-        rimraf(dir, e => {
-            if (e) {
-                console.error(e.message);
-                process.exit(1);
-            }
-        });
+        rimraf(dir, rimraf_err);
     }
 }
 
@@ -41,6 +42,9 @@ try {
     }
     if (!IS_SCREENSHOTS) {
         execute("lerna run clean");
+        rimraf("docs/build", rimraf_err);
+        rimraf("docs/python", rimraf_err);
+        rimraf("docs/obj", rimraf_err);
     }
     clean_screenshots();
 } catch (e) {

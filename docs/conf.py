@@ -29,9 +29,9 @@ copyright = '2019, Perspective Authors'
 author = 'Perspective Authors'
 
 # The short X.Y version
-version = ''
+version = '0.2.21'
 # The full version, including alpha/beta/rc tags
-release = '0.2.14'
+release = '0.2.21'
 
 
 # -- General configuration ---------------------------------------------------
@@ -47,24 +47,12 @@ extensions = [
     'sphinx.ext.autodoc',  # autodocument python
     'breathe',  # integrate with doxygen
     'sphinx.ext.napoleon',  # google style docstrings
-    'sphinx_js',  # jsdoc
+    'recommonmark',
+    'sphinx_markdown_builder',
 ]
 
-breathe_projects = {"perspective": os.path.abspath(os.path.join(os.path.dirname(__file__), '_build', 'xml'))}
+breathe_projects = {"perspective": os.path.abspath(os.path.join(os.path.dirname(__file__), 'build', 'xml'))}
 breathe_default_project = "perspective"
-
-js_source_path = [
-  # '../packages/perspective/src/js',
-  # '../packages/perspective/src/js/DataAccessor',
-  '../packages/perspective-viewer/src/js',
-  '../packages/perspective-viewer/src/js/computed_column',
-  '../packages/perspective-viewer/src/js/viewer',
-  # '../packages/perspective-viewer-highcharts/src/js',
-  # '../packages/perspective-viewer-hypergrid/src/js',
-  # '../packages/perspective-webpack-plugin/src/js',
-]
-root_for_relative_js_paths = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-jsdoc_config_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'jsdoc.conf'))
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -73,7 +61,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst']
 
 # The master toctree document.
 master_doc = 'index'
@@ -88,7 +76,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
@@ -113,7 +101,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -205,18 +193,24 @@ epub_exclude_files = ['search.html']
 
 def run_apidoc(_):
     o_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'python'))
-    psp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python', 'perspective'))
+    psp_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python', 'table', 'perspective'))
+    exclude_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'python', 'table', 'perspective', 'tests'))
     cmd_path = 'sphinx-apidoc'
-    if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
-        # If we are, assemble the path manually
+
+    # Check to see if we are in a virtualenv, if we are, assemble the path manually
+    if hasattr(sys, 'real_prefix'):  
         cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
-    subprocess.check_call([cmd_path,
-                           '-E',
-                           '-M',
-                           '-o',
-                           o_dir,
-                           psp_dir,
-                           '--force'])
+
+    subprocess.check_call([
+        cmd_path,
+        '-E',
+        '-M',
+        '-o',
+        o_dir,
+        psp_dir,
+        exclude_dir,
+        '--force'
+    ])
 
 
 def setup(app):
