@@ -50,6 +50,17 @@ module.exports = perspective => {
             }
         });
 
+        it("one-sided views with start_col > 0 should have row paths", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivot: ["int"]
+            });
+            let json = await view.to_json({start_col: 1});
+            for (let d of json) {
+                expect(d.__ROW_PATH__).toBeDefined();
+            }
+        });
+
         it("one-sided column-only views should not have row paths", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view({

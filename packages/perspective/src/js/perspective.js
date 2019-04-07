@@ -343,17 +343,18 @@ export default function(Module) {
                 formatter.addRow(data, row);
             }
         } else if (this.sides() === 1) {
+            // TODO slice.column_names should return the column names in the slice, respecting start_col and end_col
             const col_names = extract_vector(slice.get_column_names());
             for (let ridx = start_row; ridx < end_row; ridx++) {
                 const row = formatter.initRowValue();
                 for (let cidx = start_col; cidx < end_col; cidx++) {
                     const col_name = col_names[cidx];
-                    if (cidx === 0) {
+                    if (cidx === start_col) {
                         const row_path = slice.get_row_path(ridx);
-                        formatter.initColumnValue(data, row, col_name);
+                        formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                            formatter.addColumnValue(data, row, col_name, value);
+                            formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                         }
                         row_path.delete();
                     } else {
