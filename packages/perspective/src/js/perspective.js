@@ -312,49 +312,27 @@ export default function(Module) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
-        let viewport = this.config.viewport ? this.config.viewport : {};
-        let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
-        let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
 
-        let slice;
+        const viewport = this.config.viewport ? this.config.viewport : {};
+        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
+        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
 
-        const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
+        const num_sides = this.sides();
+        const nidx = ["zero", "one", "two"][num_sides];
 
-        if (this.column_only) {
-            end_row += this.config.column_pivot.length;
-        }
-
-        if (this.sides() === 0) {
-            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
-        } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
-        } else {
-            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
-        }
+        const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
 
         let data = formatter.initDataValue();
 
-        if (this.sides() === 0) {
-            const col_names = extract_vector(slice.get_column_names());
-            for (let ridx = start_row; ridx < end_row; ridx++) {
-                const row = formatter.initRowValue();
-                for (let cidx = start_col; cidx < end_col; cidx++) {
-                    const col_name = col_names[cidx];
-                    const value = __MODULE__.get_from_data_slice_zero(slice, ridx, cidx);
-                    formatter.setColumnValue(data, row, col_name, value);
-                }
-                formatter.addRow(data, row);
-            }
-        } else if (this.sides() === 1) {
-            // TODO slice.column_names should return the column names in the slice, respecting start_col and end_col
-            const col_names = extract_vector(slice.get_column_names());
-            for (let ridx = start_row; ridx < end_row; ridx++) {
-                const row = formatter.initRowValue();
-                for (let cidx = start_col; cidx < end_col; cidx++) {
-                    const col_name = col_names[cidx];
-                    if (cidx === start_col) {
+        const col_names = extract_vector(slice.get_column_names());
+        for (let ridx = start_row; ridx < end_row; ridx++) {
+            let row = formatter.initRowValue();
+            for (let cidx = start_col; cidx < end_col; cidx++) {
+                const col_name = col_names[cidx];
+                if (cidx === start_col && num_sides !== 0) {
+                    if (!this.column_only) {
                         const row_path = slice.get_row_path(ridx);
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
@@ -362,54 +340,17 @@ export default function(Module) {
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                         }
                         row_path.delete();
-                    } else {
-                        const value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
-                        formatter.setColumnValue(data, row, col_name, value);
-                    }
-                }
-                formatter.addRow(data, row);
-            }
-        } else {
-            // determine which level we stop pulling column names
-            let skip = false,
-                depth = 0;
-            if (sorted) {
-                skip = true;
-                depth = this.config.column_pivot.length;
-            }
-            let col_names = [[]].concat(this._column_names(skip, depth));
-            let row;
-            let ridx = -1;
-            for (let idx = 0; idx < slice.length; idx++) {
-                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col + 1).length);
-                if (cidx === 0) {
-                    if (row) {
-                        formatter.addRow(data, row);
-                    }
-                    row = formatter.initRowValue();
-                    ridx++;
-                    if (!this.column_only) {
-                        let col_name = "__ROW_PATH__";
-                        let row_path = this._View.get_row_path(start_row + ridx);
-                        formatter.initColumnValue(data, row, col_name);
-                        for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                            formatter.addColumnValue(data, row, col_name, value);
-                        }
-                        row_path.delete();
                     }
                 } else {
-                    let col_name = col_names[start_col + cidx];
-                    formatter.setColumnValue(data, row, col_name, slice[idx]);
+                    const value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+                    formatter.setColumnValue(data, row, col_name, value);
                 }
             }
+            formatter.addRow(data, row);
+        }
 
-            if (row) {
-                formatter.addRow(data, row);
-            }
-            if (this.column_only) {
-                data = formatter.slice(data, this.config.column_pivot.length);
-            }
+        if (this.column_only) {
+            data = formatter.slice(data, 1);
         }
 
         return formatter.formatData(data, options.config);
@@ -604,8 +545,8 @@ export default function(Module) {
     };
 
     /**
-     * The number of aggregated columns in this {@link module:perspective~view}.  This is affected by
-     * the "column_pivots" configuration parameter supplied to this {@link module:perspective~view}'s
+     * The number of aggregated columns in this {@link view}.  This is affected by
+     * the "column_pivot" configuration parameter supplied to this {@link view}'s
      * contructor.
      *
      * @async
@@ -659,7 +600,7 @@ export default function(Module) {
 
     /**
      * Returns the data of all changed rows in JSON format, or for 1+ sided contexts
-     * an empty array as the feature has not been enabled due to performance concerns.
+     * the entire dataset of the view.
      * @private
      */
     view.prototype._get_step_delta = async function() {

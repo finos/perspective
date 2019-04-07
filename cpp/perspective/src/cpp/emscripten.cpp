@@ -1882,76 +1882,6 @@ namespace binding {
     }
 
     /**
-     * @brief Get a slice of data foe each column from the underlying view,
-     * serialized to val.
-     *
-     * @tparam CTX_T
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
-    template <typename CTX_T>
-    val
-    get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col) {
-        val arr = val::array();
-        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice->get_slice();
-        for (auto idx = 0; idx < slice->size(); ++idx) {
-            arr.set(idx, scalar_to_val(slice->at(idx)));
-        }
-        return arr;
-    }
-
-    /**
-     * @brief Get a slice of data from the underlying view, serlializing to val
-     * and, for sorted views, ignoring the sort headers which aren't part of the
-     * underlying data.
-     *
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
-    template <>
-    val
-    get_data(std::shared_ptr<View<t_ctx2>> view, std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col) {
-        val arr = val::array();
-        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice->get_slice();
-        auto column_indices = data_slice->get_column_indices();
-
-        if (column_indices.size() > 0) {
-            t_uindex i = 0;
-            auto iter = slice->begin();
-            while (iter != slice->end()) {
-                t_uindex prev = column_indices.front();
-                for (auto idx = column_indices.begin(); idx != column_indices.end();
-                     idx++, i++) {
-                    t_uindex col_num = *idx;
-                    iter += col_num - prev;
-                    prev = col_num;
-                    arr.set(i, scalar_to_val(*iter));
-                }
-                if (iter != slice->end())
-                    iter++;
-            }
-        } else {
-            for (auto idx = 0; idx < slice->size(); ++idx) {
-                arr.set(idx, scalar_to_val(slice->at(idx)));
-            }
-        }
-
-        return arr;
-    }
-
-    /**
      * @brief Get the t_data_slice object, which contains an underlying slice of data and
      * metadata required to interact with it.
      *
@@ -2150,7 +2080,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx2>::get_column_names);
+            "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
+        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
     /******************************************************************************
      *
@@ -2276,9 +2207,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("get_data_zero", &get_data<t_ctx0>);
-    function("get_data_one", &get_data<t_ctx1>);
-    function("get_data_two", &get_data<t_ctx2>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);
