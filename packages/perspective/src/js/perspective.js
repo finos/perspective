@@ -312,27 +312,18 @@ export default function(Module) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
-        let viewport = this.config.viewport ? this.config.viewport : {};
-        let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
-        let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
 
-        let slice;
+        const viewport = this.config.viewport ? this.config.viewport : {};
+        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? this.config.column_pivot.length : 0);
+        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
 
-        if (this.column_only) {
-            end_row += this.config.column_pivot.length;
-        }
+        const num_sides = this.sides();
+        const nidx = ["zero", "one", "two"][num_sides];
 
-        if (this.sides() === 0) {
-            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
-        } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
-        } else {
-            slice = __MODULE__.get_data_slice_two(this._View, start_row, end_row, start_col, end_col);
-        }
+        const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
 
-        let num_sides = this.sides();
         let data = formatter.initDataValue();
 
         const col_names = extract_vector(slice.get_column_names());
@@ -351,27 +342,7 @@ export default function(Module) {
                         row_path.delete();
                     }
                 } else {
-                    let value;
-                    switch (num_sides) {
-                        case 0:
-                            {
-                                value = __MODULE__.get_from_data_slice_zero(slice, ridx, cidx);
-                            }
-                            break;
-                        case 1:
-                            {
-                                value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
-                            }
-                            break;
-                        case 2:
-                            {
-                                value = __MODULE__.get_from_data_slice_two(slice, ridx, cidx);
-                            }
-                            break;
-                        default: {
-                            throw new Error("Cannot get data - view has invalid number of sides.");
-                        }
-                    }
+                    const value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
                     formatter.setColumnValue(data, row, col_name, value);
                 }
             }
