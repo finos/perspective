@@ -376,6 +376,7 @@ async function grid_create(div, view, task) {
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
+        range.end_col *= hidden.length + 1;
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
         const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots, columns).rows;
