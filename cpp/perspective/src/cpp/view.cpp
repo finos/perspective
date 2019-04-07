@@ -85,7 +85,15 @@ template <>
 std::int32_t
 View<t_ctx2>::num_columns() const {
     if (m_sorts.size() > 0) {
-        return m_ctx->unity_get_column_count() - m_aggregates.size();
+        auto depth = m_column_pivots.size();
+        auto col_length = m_ctx->unity_get_column_count();
+        auto count = 0;
+        for (t_uindex i = 0; i < col_length; ++i) {
+            if (m_ctx->unity_get_column_path(i + 1).size() == depth) {
+                count++;
+            }
+        }
+        return count;
     } else {
         return m_ctx->unity_get_column_count();
     }
