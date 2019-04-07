@@ -591,6 +591,23 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("['x', 'z']", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                column_pivot: ["x", "z"],
+                aggregate: [{column: "y", op: "sum"}]
+            });
+            let result2 = await view.to_json();
+            expect(result2).toEqual([
+                {"1|true|y": "a", "2|false|y": null, "3|true|y": null, "4|false|y": null},
+                {"1|true|y": null, "2|false|y": "b", "3|true|y": null, "4|false|y": null},
+                {"1|true|y": null, "2|false|y": null, "3|true|y": "c", "4|false|y": null},
+                {"1|true|y": null, "2|false|y": null, "3|true|y": null, "4|false|y": "d"}
+            ]);
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Expand/Collapse", function() {

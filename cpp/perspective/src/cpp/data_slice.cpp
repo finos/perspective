@@ -54,7 +54,7 @@ t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
     if (idx >= m_slice->size()) {
         rv.clear();
     } else {
-        rv = m_slice->at(idx);
+        rv = m_slice->operator[](idx);
     }
     return rv;
 }

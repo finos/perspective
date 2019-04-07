@@ -315,7 +315,7 @@ export default function(Module) {
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? this.config.column_pivot.length : 0);
+        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
 
@@ -350,7 +350,7 @@ export default function(Module) {
         }
 
         if (this.column_only) {
-            data = formatter.slice(data, this.config.column_pivot.length);
+            data = formatter.slice(data, 1);
         }
 
         return formatter.formatData(data, options.config);
