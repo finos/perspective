@@ -1,4 +1,7 @@
-# Installation
+---
+id: installation
+title: Installation
+---
 
 ## (!) An important note about Hosting
 

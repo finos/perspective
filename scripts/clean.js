@@ -44,6 +44,7 @@ try {
         execute("lerna run clean");
         rimraf("docs/build", rimraf_err);
         rimraf("docs/python", rimraf_err);
+        rimraf("docs/obj", rimraf_err);
     }
     clean_screenshots();
 } catch (e) {

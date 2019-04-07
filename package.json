@@ -2,7 +2,8 @@
     "private": true,
     "workspaces": [
         "packages/*",
-        "examples/*"
+        "examples/*",
+        "docs"
     ],
     "devDependencies": {
         "@apache-arrow/es5-esm": "^0.4.0",

@@ -1,4 +1,7 @@
-# User Guide
+---
+id: usage
+title: User Guide
+---
 
 ## Overview
 
@@ -18,7 +21,7 @@ though you can instantiate this separately if you wish - this is helpful for
 e.g. [sharing a table](<(#sharing-a-table-between-multiple-perspective-viewers)>)
 between multiple `<perspective-viewer>`s
 
-<img src="../_static/img/architecture.svg">
+<img src="https://jpmorganchase.github.io/perspective/svg/architecture.svg">
 
 Perspective is designed for flexibility, allowing developers to pick and choose
 which modules they need for their specific use case. The main modules are:

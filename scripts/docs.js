@@ -22,7 +22,7 @@ function docker(image = "emsdk") {
 
 try {
     let cmd = ' bash -c "cd docs/build && cmake ../../cpp/perspective  -DPSP_WASM_BUILD=0 -DPSP_CPP_BUILD=0 -DPSP_PYTHON_BUILD=0 -DPSP_BUILD_DOCS=1 && make -j${PSP_CPU_COUNT-8}"';
-    execute("mkdirp docs/build");
+    execute("mkdirp docs/build docs/obj");
     execute("lerna run docs --silent --stream");
     if (process.env.PSP_DOCKER) {
         execute(docker("docs") + cmd);

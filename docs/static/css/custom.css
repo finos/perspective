@@ -1,0 +1,83 @@
+/* your custom css */
+
+@media only screen and (min-device-width: 360px) and (max-device-width: 736px) {
+}
+
+@media only screen and (min-width: 1024px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (min-width: 1400px) {
+}
+
+@media only screen and (min-width: 1500px) {
+}
+
+.titleViewer {
+    margin-top:24px;
+    margin-bottom:48px;
+    position:relative;
+    display:inline-block;
+    width:100%;
+    height:600px;
+    text-align: initial;
+    vertical-align: center;
+    box-shadow: 0px 5px 5px rgba(0,0,0,0.2);
+    max-width: 1000px;
+    border: none;
+}
+
+.titleViewer ul {
+    background: none !important;
+}
+
+.titleViewer {
+    font: initial;
+    font-family:Arial;
+}
+
+.post h1, .post h2, .post h3, .post h4, .post h5, .post h6 {
+    color: #1A7DA1 !important;
+}
+
+h2.headerTitleWithLogo {
+    font-family: "Montserrat";
+    color: #f9f9f9 !important;
+}
+
+.mainContainer .blockImage img {
+    width: 100px;
+}
+
+perspective-viewer #config_button:before {
+    font-family: "Material Icons";
+    content: "more_vert" !important;
+}
+
+.homeContainer {
+    background-color: #242526;
+}
+
+.homeContainer .projectTitle {
+    color: #f9f9f9;
+    font-family: "Montserrat";
+}
+
+.homeContainer .projectTitle i {
+    font-size: 18px;
+}
+
+.homeContainer .buttonWrapper a {
+    border: 1px solid #f9f9f9;
+    color: #f9f9f9 !important;
+}
+
+.nav-footer a {
+    color: #f9f9f9 !important;
+}
+
+.nav-footer a:hover {
+    color: #1A7DA1 !important;
+}
