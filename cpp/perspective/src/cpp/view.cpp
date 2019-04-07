@@ -91,84 +91,7 @@ View<t_ctx2>::num_columns() const {
     }
 }
 
-// Pivot table operations
-template <typename CTX_T>
-std::int32_t
-View<CTX_T>::get_row_expanded(std::int32_t idx) const {
-    return m_ctx->unity_get_row_expanded(idx);
-}
-
-template <>
-t_index
-View<t_ctx0>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
-    return idx;
-}
-
-template <>
-t_index
-View<t_ctx1>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
-    return m_ctx->open(idx);
-}
-
-template <>
-t_index
-View<t_ctx2>::expand(std::int32_t idx, std::int32_t row_pivot_length) {
-    if (m_ctx->unity_get_row_depth(idx) < t_uindex(row_pivot_length)) {
-        return m_ctx->open(t_header::HEADER_ROW, idx);
-    } else {
-        return idx;
-    }
-}
-
-template <>
-t_index
-View<t_ctx0>::collapse(std::int32_t idx) {
-    return idx;
-}
-
-template <>
-t_index
-View<t_ctx1>::collapse(std::int32_t idx) {
-    return m_ctx->close(idx);
-}
-
-template <>
-t_index
-View<t_ctx2>::collapse(std::int32_t idx) {
-    return m_ctx->close(t_header::HEADER_ROW, idx);
-}
-
-template <>
-void
-View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
-
-template <>
-void
-View<t_ctx1>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
-    if (row_pivot_length >= depth) {
-        m_ctx->set_depth(depth);
-    } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
-    }
-}
-
-template <>
-void
-View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
-    if (row_pivot_length >= depth) {
-        m_ctx->set_depth(t_header::HEADER_ROW, depth);
-    } else {
-        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
-    }
-}
-
-/**
- * @brief The column names of the View. If the View is aggregated, the
- * individual column names will be joined with a separator character
- * specified by the user, or defaulting to "|".
- *
- * @return std::vector<std::string>
- */
+// Metadata construction
 template <typename CTX_T>
 std::vector<std::string>
 View<CTX_T>::_column_names(bool skip, std::int32_t depth) const {
@@ -215,12 +138,6 @@ View<CTX_T>::_column_names(bool skip, std::int32_t depth) const {
     return names;
 }
 
-/**
- * @brief The column names of the View. Same as above but
- * specialized for zero-sided contexts.
- *
- * @return std::vector<std::string> containing all column names
- */
 template <>
 std::vector<std::string>
 View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
@@ -241,15 +158,6 @@ View<t_ctx0>::_column_names(bool skip, std::int32_t depth) const {
     return names;
 }
 
-/**
- * @brief The schema of this View.  A schema is an std::map, the keys of which
- * are the columns of this View, and the values are their string type names.
- * If this View is aggregated, theses will be the aggregated types;
- * otherwise these types will be the same as the columns in the underlying
- * Table.
- *
- * @return std::map<std::string, std::string>
- */
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
@@ -280,13 +188,7 @@ View<CTX_T>::schema() const {
 
     return new_schema;
 }
-/**
- * @brief The schema of this View. Output and logic is as the above
- * schema(), but this version is specialized for zero-sided
- * contexts.
- *
- * @return std::map<std::string, std::string>
- */
+
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() const {
@@ -313,11 +215,6 @@ View<t_ctx0>::schema() const {
     return new_schema;
 }
 
-/**
- * @brief Returns a slice of the underlying data of the view.
- *
- * @return std::vector<t_tscalar>
- */
 template <>
 std::shared_ptr<t_data_slice<t_ctx0>>
 View<t_ctx0>::get_data(
@@ -353,6 +250,10 @@ View<t_ctx2>::get_data(
     bool is_sorted = m_sorts.size() > 0;
 
     if (is_sorted) {
+        /**
+         * Perspective generates headers for sorted columns, so we have to
+         * skip them in the underlying slice.
+         */
         auto depth = m_column_pivots.size();
         auto col_length = m_ctx->unity_get_column_count();
         column_indices.push_back(0);
@@ -415,6 +316,77 @@ View<CTX_T>::_set_deltas_enabled(bool enabled_state) {
 template <>
 void
 View<t_ctx0>::_set_deltas_enabled(bool enabled_state) {}
+
+// Pivot table operations
+template <typename CTX_T>
+std::int32_t
+View<CTX_T>::get_row_expanded(std::int32_t ridx) const {
+    return m_ctx->unity_get_row_expanded(ridx);
+}
+
+template <>
+t_index
+View<t_ctx0>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
+    return ridx;
+}
+
+template <>
+t_index
+View<t_ctx1>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
+    return m_ctx->open(ridx);
+}
+
+template <>
+t_index
+View<t_ctx2>::expand(std::int32_t ridx, std::int32_t row_pivot_length) {
+    if (m_ctx->unity_get_row_depth(ridx) < t_uindex(row_pivot_length)) {
+        return m_ctx->open(t_header::HEADER_ROW, ridx);
+    } else {
+        return ridx;
+    }
+}
+
+template <>
+t_index
+View<t_ctx0>::collapse(std::int32_t ridx) {
+    return ridx;
+}
+
+template <>
+t_index
+View<t_ctx1>::collapse(std::int32_t ridx) {
+    return m_ctx->close(ridx);
+}
+
+template <>
+t_index
+View<t_ctx2>::collapse(std::int32_t ridx) {
+    return m_ctx->close(t_header::HEADER_ROW, ridx);
+}
+
+template <>
+void
+View<t_ctx0>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {}
+
+template <>
+void
+View<t_ctx1>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
+    if (row_pivot_length >= depth) {
+        m_ctx->set_depth(depth);
+    } else {
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+    }
+}
+
+template <>
+void
+View<t_ctx2>::set_depth(std::int32_t depth, std::int32_t row_pivot_length) {
+    if (row_pivot_length >= depth) {
+        m_ctx->set_depth(t_header::HEADER_ROW, depth);
+    } else {
+        std::cout << "Cannot expand past " << std::to_string(row_pivot_length) << std::endl;
+    }
+}
 
 // Getters
 template <typename CTX_T>

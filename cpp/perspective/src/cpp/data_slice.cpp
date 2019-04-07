@@ -45,16 +45,7 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
 template <typename CTX_T>
 t_data_slice<CTX_T>::~t_data_slice() {}
 
-/**
- * @brief Returns the t_tscalar for the row/column in the data slice.
- * If the row/column index is invalid, return a null-initialized t_tscalar.
- *
- * @param ridx row index into the slice
- * @param cidx column index into the slice
- *
- * @return t_tscalar a valid scalar containing the underlying data, or a new
- * t_tscalar initialized with an invalid flag.
- */
+// Public API
 template <typename CTX_T>
 t_tscalar
 t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
@@ -70,15 +61,8 @@ t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
 
 template <typename CTX_T>
 std::vector<t_tscalar>
-t_data_slice<CTX_T>::get_row_path(t_uindex idx) const {
-    return m_ctx->unity_get_row_path(idx);
-}
-
-template <typename CTX_T>
-t_uindex
-t_data_slice<CTX_T>::get_slice_idx(t_uindex ridx, t_uindex cidx) const {
-    t_uindex idx = (ridx - m_start_row) * m_stride + (cidx - m_start_col);
-    return idx;
+t_data_slice<CTX_T>::get_row_path(t_uindex ridx) const {
+    return m_ctx->unity_get_row_path(ridx);
 }
 
 // Getters
@@ -133,6 +117,14 @@ t_data_slice<CTX_T>::get_data_extents() const {
     t_get_data_extents ext = sanitize_get_data_extents(
         nrows, ncols, m_start_row, m_end_row, m_start_col, m_end_col);
     return ext;
+}
+
+// Private
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::get_slice_idx(t_uindex ridx, t_uindex cidx) const {
+    t_uindex idx = (ridx - m_start_row) * m_stride + (cidx - m_start_col);
+    return idx;
 }
 
 // Explicitly instantiate data slice for each context

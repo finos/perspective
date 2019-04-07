@@ -629,7 +629,7 @@ export default function(Module) {
 
     /**
      * Returns the data of all changed rows in JSON format, or for 1+ sided contexts
-     * an empty array as the feature has not been enabled due to performance concerns.
+     * the entire dataset of the view.
      * @private
      */
     view.prototype._get_step_delta = async function() {
