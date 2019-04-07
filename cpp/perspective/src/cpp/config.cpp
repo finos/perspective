@@ -86,11 +86,12 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
 // view config
 t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const std::vector<t_sortspec>& sortspecs, t_filter_op combiner,
+    const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs, t_filter_op combiner,
     const std::vector<t_fterm>& fterms, const std::vector<std::string>& col_names,
     bool column_only)
     : m_column_only(column_only)
     , m_sortspecs(sortspecs)
+    , m_col_sortspecs(col_sortspecs)
     , m_aggregates(aggregates)
     , m_detail_columns(col_names)
     , m_combiner(combiner)
@@ -428,6 +429,11 @@ t_config::get_sortby_pairs() const {
 const std::vector<t_sortspec>&
 t_config::get_sortspecs() const {
     return m_sortspecs;
+}
+
+const std::vector<t_sortspec>&
+t_config::get_col_sortspecs() const {
+    return m_col_sortspecs;
 }
 
 const std::vector<t_aggspec>&
