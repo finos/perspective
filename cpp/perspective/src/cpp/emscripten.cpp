@@ -79,7 +79,7 @@ namespace binding {
              */
             std::string op = sort_item[1].as<std::string>();
             bool is_col_sortop = op.find("col") != std::string::npos;
-            return (is_column_sort && is_col_sortop) || !is_col_sortop;
+            return (is_column_sort && is_col_sortop) || (!is_col_sortop && !is_column_sort);
         };
 
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
