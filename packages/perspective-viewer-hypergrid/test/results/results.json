@@ -27,6 +27,6 @@
     "superstore.html/should not be able to expand past number of row pivots": "2db398671e7d98f2fa3c7ebabf4a3176",
     "superstore.html/shows a sort indicator": "ad6bb4a58d3c630f45a2ea3e21ee74e1",
     "superstore.html/shows multiple sort indicators": "919e5b8734d8ab684b11649c4b9d6eb4",
-    "superstore.html/shows a sort indicator on column split": "79c4434bf30a3517e4537bea8c1ad9bb",
-    "__GIT_COMMIT__": "38cf3d646a169637b086c6d2cdd850afb7faf4e0"
+    "superstore.html/shows a sort indicator on column split": "bd11ff17bd50fd575744161884b0304c",
+    "__GIT_COMMIT__": "8319755ed97ce2ccf478a00bf8b8209254a95890"
 }
