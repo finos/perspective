@@ -219,7 +219,7 @@ export class PerspectiveElement extends StateElement {
             const exclamation = node.shadowRoot.getElementById("row_exclamation");
             const {operator, operand} = JSON.parse(node.getAttribute("filter"));
             const filter = [node.getAttribute("name"), operator, operand];
-            if ((await this._table.is_valid_filter(filter)) && operand !== "") {
+            if ((await this._table.is_valid_philter(filter)) && operand !== "") {
                 filters.push(filter);
                 node.title = "";
                 operandNode.style.borderColor = "";
@@ -261,8 +261,8 @@ export class PerspectiveElement extends StateElement {
         }
         this._view = this._table.view({
             filter: filters,
-            row_pivot: row_pivots,
-            column_pivot: column_pivots,
+            row_pivots: row_pivots,
+            column_pivots: column_pivots,
             aggregate: aggregates,
             sort: sort
         });

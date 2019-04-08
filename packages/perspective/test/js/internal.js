@@ -25,7 +25,7 @@ module.exports = (perspective, mode) => {
             var table = perspective.table(arrow.slice());
             let anon = function() {
                 table.view({
-                    row_pivot: ["char"],
+                    row_pivots: ["char"],
                     aggregate: [{op: "sum", column: ["f16", "f32"]}]
                 });
             };

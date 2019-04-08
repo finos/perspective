@@ -457,7 +457,7 @@ module.exports = perspective => {
         it("update with depth expansion", async function() {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view({
-                row_pivot: ["z", "y"],
+                row_pivots: ["z", "y"],
                 aggregate: []
             });
             table.update(data);
@@ -553,7 +553,7 @@ module.exports = perspective => {
             var table = perspective.table([{x: 1, y: 1}, {x: 2, y: 1}], {index: "x"});
             table.update([{x: 2, y: null}]);
             var view = table.view({
-                row_pivot: ["x"],
+                row_pivots: ["x"],
                 aggregate: [{op: "sum", column: "y"}]
             });
             let json = await view.to_json();

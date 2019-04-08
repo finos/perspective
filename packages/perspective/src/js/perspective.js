@@ -473,7 +473,7 @@ export default function(Module) {
             // columns start at 1 for > 0-sided views
             return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
-            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
+            const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
             return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
@@ -546,7 +546,7 @@ export default function(Module) {
 
     /**
      * The number of aggregated columns in this {@link view}.  This is affected by
-     * the "column_pivot" configuration parameter supplied to this {@link view}'s
+     * the "column_pivots" configuration parameter supplied to this {@link view}'s
      * contructor.
      *
      * @async
@@ -576,7 +576,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        return this._View.expand(idx, this.config.row_pivot.length);
+        return this._View.expand(idx, this.config.row_pivots.length);
     };
 
     /**
@@ -595,7 +595,7 @@ export default function(Module) {
      *
      */
     view.prototype.set_depth = async function(depth) {
-        return this._View.set_depth(depth, this.config.row_pivot.length);
+        return this._View.set_depth(depth, this.config.row_pivots.length);
     };
 
     /**
@@ -869,7 +869,7 @@ export default function(Module) {
         return key => schema[key] === "datetime" || schema[key] === "date";
     };
 
-    table.prototype._is_valid_filter = function(filter) {
+    table.prototype._is_valid_philter = function(filter) {
         const schema = this._schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
@@ -883,8 +883,8 @@ export default function(Module) {
      *
      * @returns {boolean} Whether the filter is valid
      */
-    table.prototype.is_valid_filter = function(filter) {
-        return this._is_valid_filter(filter);
+    table.prototype.is_valid_philter = function(filter) {
+        return this._is_valid_philter(filter);
     };
 
     /**
@@ -892,9 +892,9 @@ export default function(Module) {
      * configuration.
      *
      * @param {Object} [config] The configuration object for this {@link module:perspective~view}.
-     * @param {Array<string>} [config.row_pivot] An array of column names
+     * @param {Array<string>} [config.row_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
-     * @param {Array<string>} [config.column_pivot] An array of column names
+     * @param {Array<string>} [config.column_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
      * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
      * each of which should provide a "column" and "op" property, representing the string
@@ -909,7 +909,7 @@ export default function(Module) {
      *
      * @example
      * var view = table.view({
-     *      row_pivot: ['region'],
+     *      row_pivots: ['region'],
      *      aggregate: [{op: 'dominant', column:'region'}],
      *      filter: [['client', 'contains', 'fred']],
      *      sort: [['value', 'asc']]
@@ -923,14 +923,14 @@ export default function(Module) {
 
         let name = Math.random() + "";
 
-        config.row_pivot = config.row_pivot || [];
-        config.column_pivot = config.column_pivot || [];
+        config.row_pivots = config.row_pivots || [];
+        config.column_pivots = config.column_pivots || [];
         config.filter = config.filter || [];
 
         let sides;
 
-        if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
-            if (config.column_pivot && config.column_pivot.length > 0) {
+        if (config.row_pivots.length > 0 || config.column_pivots.length > 0) {
+            if (config.column_pivots && config.column_pivots.length > 0) {
                 sides = 2;
             } else {
                 sides = 1;

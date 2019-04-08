@@ -1590,8 +1590,8 @@ namespace binding {
     t_config
     make_view_config(
         const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivot = config["row_pivot"];
-        val j_column_pivot = config["column_pivot"];
+        val j_row_pivot = config["row_pivots"];
+        val j_column_pivot = config["column_pivots"];
         val j_aggregate = config["aggregate"];
         val j_filter = config["filter"];
         val j_sort = config["sort"];

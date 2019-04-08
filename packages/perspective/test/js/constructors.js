@@ -255,7 +255,7 @@ module.exports = perspective => {
         it("Int, 1-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
-                row_pivot: ["int"],
+                row_pivots: ["int"],
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("int");
@@ -268,7 +268,7 @@ module.exports = perspective => {
         it("Float, 1-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
-                row_pivot: ["int"],
+                row_pivots: ["int"],
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("float");
@@ -280,7 +280,7 @@ module.exports = perspective => {
         it("Datetime, 1-sided view", async function() {
             var table = perspective.table(datetime_data);
             var view = table.view({
-                row_pivot: ["int"],
+                row_pivots: ["int"],
                 aggregate: [{op: "high", column: "datetime"}]
             });
             const result = await view.col_to_js_typed_array("datetime");
@@ -292,8 +292,8 @@ module.exports = perspective => {
         it("Int, 2-sided view with row pivot", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
-                column_pivot: ["float"],
-                row_pivot: ["int"],
+                column_pivots: ["float"],
+                row_pivots: ["int"],
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("3.5|int");
@@ -305,8 +305,8 @@ module.exports = perspective => {
         it("Float, 2-sided view with row pivot", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view({
-                column_pivot: ["float"],
-                row_pivot: ["int"],
+                column_pivots: ["float"],
+                row_pivots: ["int"],
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             const result = await view.col_to_js_typed_array("3.5|float");
@@ -317,7 +317,7 @@ module.exports = perspective => {
 
         it("Int, 2-sided view, no row pivot", async function() {
             var table = perspective.table(int_float_data);
-            var view = table.view({column_pivot: ["float"]});
+            var view = table.view({column_pivots: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|int");
             // bytelength should not include the aggregate row
             expect(result[0].byteLength).toEqual(12);
@@ -327,7 +327,7 @@ module.exports = perspective => {
 
         it("Float, 2-sided view, no row pivot", async function() {
             var table = perspective.table(int_float_data);
-            var view = table.view({column_pivot: ["float"]});
+            var view = table.view({column_pivots: ["float"]});
             const result = await view.col_to_js_typed_array("3.5|float");
             expect(result[0].byteLength).toEqual(24);
             view.delete();
@@ -354,7 +354,7 @@ module.exports = perspective => {
         it("Symmetric output with to_columns, 1-sided", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view({
-                row_pivot: ["int"],
+                row_pivots: ["int"],
                 aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
             });
             let cols = await view.to_columns();
@@ -386,7 +386,7 @@ module.exports = perspective => {
         it("Serializes 1 sided view to CSV", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                row_pivot: ["z"],
+                row_pivots: ["z"],
                 aggregate: [{op: "sum", column: "x"}]
             });
             var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
@@ -399,8 +399,8 @@ module.exports = perspective => {
         it("Serializes a 2 sided view to CSV", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                row_pivot: ["z"],
-                column_pivot: ["y"],
+                row_pivots: ["z"],
+                column_pivots: ["y"],
                 aggregate: [{op: "sum", column: "x"}]
             });
             var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
@@ -528,7 +528,7 @@ module.exports = perspective => {
             var view = table.view();
             var num_rows = await view.num_rows();
             var view2 = table.view({
-                column_pivot: ["x"]
+                column_pivots: ["x"]
             });
             var num_rows_col_only = await view2.num_rows();
             expect(num_rows_col_only).toEqual(num_rows);

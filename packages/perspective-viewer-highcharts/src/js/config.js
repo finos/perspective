@@ -139,7 +139,7 @@ export function default_config(aggregates, mode) {
     const config = this._config;
 
     const axis_titles = get_axis_titles(config.aggregate);
-    const pivot_titles = get_pivot_titles(config.row_pivot, config.column_pivot);
+    const pivot_titles = get_pivot_titles(config.row_pivots, config.column_pivots);
 
     const is_empty = str => str.replace(/\s/g, "") == "";
 
@@ -221,21 +221,21 @@ export function default_config(aggregates, mode) {
                 point: {
                     events: {
                         click: async function() {
-                            let row_pivot_values = [];
+                            let row_pivots_values = [];
                             let column_pivot_values = [];
                             if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivot_values = this.name.split(", ");
+                                row_pivots_values = this.name.split(", ");
                             } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivot_values = tooltip.get_pivot_values(this.category);
+                                row_pivots_values = tooltip.get_pivot_values(this.category);
                             } else {
                                 console.log(`Click dispatch for ${mode} ${type} not supported.`);
                                 return;
                             }
 
-                            const row_filters = config.row_pivot.map((c, index) => [c, "==", row_pivot_values[index]]);
-                            const column_filters = config.column_pivot.map((c, index) => [c, "==", column_pivot_values[index]]);
+                            const row_filters = config.row_pivots.map((c, index) => [c, "==", row_pivots_values[index]]);
+                            const column_filters = config.column_pivots.map((c, index) => [c, "==", column_pivot_values[index]]);
                             const filters = config.filter
                                 .concat(row_filters)
                                 .concat(column_filters)

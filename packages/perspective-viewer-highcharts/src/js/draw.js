@@ -46,8 +46,8 @@ export const draw = (mode, set_config) =>
             }
         }
 
-        const row_pivots = this._config.row_pivot;
-        const col_pivots = this._config.column_pivot;
+        const row_pivots = this._config.row_pivots;
+        const col_pivots = this._config.column_pivots;
 
         // FIXME: super tight coupling to private viewer methods
         const aggregates = this._get_view_aggregates();

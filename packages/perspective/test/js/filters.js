@@ -356,28 +356,28 @@ module.exports = perspective => {
             });
         });
 
-        describe("is_valid_filter", function() {
+        describe("is_valid_philter", function() {
             it("x == 2", async function() {
                 var table = perspective.table(data);
-                let isValid = await table.is_valid_filter(["x", "==", 2]);
+                let isValid = await table.is_valid_philter(["x", "==", 2]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
             it("x < null", async function() {
                 var table = perspective.table(data);
-                let isValid = await table.is_valid_filter(["x", "<", null]);
+                let isValid = await table.is_valid_philter(["x", "<", null]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
             it("x > undefined", async function() {
                 var table = perspective.table(data);
-                let isValid = await table.is_valid_filter(["x", ">", undefined]);
+                let isValid = await table.is_valid_philter(["x", ">", undefined]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
             it('x == ""', async function() {
                 var table = perspective.table(data);
-                let isValid = await table.is_valid_filter(["x", "==", ""]);
+                let isValid = await table.is_valid_philter(["x", "==", ""]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -387,7 +387,7 @@ module.exports = perspective => {
                     y: "date"
                 };
                 var table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
+                let isValid = await table.is_valid_philter(["y", "==", "01-01-1970"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -397,7 +397,7 @@ module.exports = perspective => {
                     y: "date"
                 };
                 var table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "<", "1234"]);
+                let isValid = await table.is_valid_philter(["y", "<", "1234"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
@@ -407,7 +407,7 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 var table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
+                let isValid = await table.is_valid_philter(["y", "==", "11:11:11.111"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
@@ -417,7 +417,7 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 var table = perspective.table(schema);
-                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
+                let isValid = await table.is_valid_philter(["y", ">", "11:11:11:111"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
