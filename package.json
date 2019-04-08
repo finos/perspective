@@ -6,7 +6,7 @@
         "docs"
     ],
     "devDependencies": {
-        "@apache-arrow/es5-esm": "^0.4.0",
+        "@apache-arrow/es5-esm": "0.4.0",
         "@babel/cli": "^7.2.3",
         "@babel/core": "^7.1.0",
         "@babel/plugin-proposal-decorators": "^7.1.2",
