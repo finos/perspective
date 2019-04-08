@@ -9,6 +9,7 @@
 
 const rectangular = require("rectangular");
 const superscript = require("superscript-number");
+const lodash = require("lodash");
 
 /**
  * @this {Behavior}
@@ -34,23 +35,30 @@ function setPSP(payload) {
         if (payload.isTree && columnIndex === 0) {
             new_schema[-1] = {name, header, type};
         } else {
-            new_schema.push({name, header, type});
+            new_schema.push({name, header, type, index: columnIndex - (payload.isTree ? 1 : 0)});
         }
     });
 
     this.grid.properties.showTreeColumn = payload.isTree;
-
-    console.log("Setting up initial schema and data load into HyperGrid");
 
     // Following call to setData signals the grid to call createColumns and dispatch the
     // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    this.grid.setData({
-        data: payload.rows,
-        schema: new_schema
-    });
+    if (this._memoized_schema && lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length))) {
+        this.grid.sbVScroller.index = 0;
+        this.grid.behavior.dataModel.data = payload.rows;
+    } else {
+        this.grid.sbVScroller.index = 0;
+        this.grid.sbHScroller.index = 0;
+
+        this.grid.setData({
+            data: payload.rows,
+            schema: new_schema
+        });
+    }
+    this._memoized_schema = new_schema;
 }
 
 /**

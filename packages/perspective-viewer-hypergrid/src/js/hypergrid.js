@@ -384,8 +384,6 @@ async function grid_create(div, view, task) {
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
-    this.hypergrid.sbVScroller.index = 0;
-    this.hypergrid.sbHScroller.index = 0;
 
     perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
     this.hypergrid.renderer.computeCellsBounds(true);
