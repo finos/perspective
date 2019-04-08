@@ -30,7 +30,7 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "sum", column: "x"}]
+                columns: ["x"]
             });
             var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
@@ -43,7 +43,7 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "sum", column: ["x"]}]
+                columns: ["x"]
             });
             var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
             let result = await view.to_json();
@@ -69,7 +69,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [false], x: 3}, {__ROW_PATH__: [true], x: 2}];
             let result = await view.to_json();
@@ -82,7 +83,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "first by index", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "first by index"}
             });
             var answer = [{__ROW_PATH__: [], x: 1}, {__ROW_PATH__: [false], x: 2}, {__ROW_PATH__: [true], x: 1}];
             let result = await view.to_json();
@@ -95,7 +97,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "last by index", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "last by index"}
             });
             var answer = [{__ROW_PATH__: [], x: 4}, {__ROW_PATH__: [false], x: 4}, {__ROW_PATH__: [true], x: 3}];
             let result = await view.to_json();
@@ -108,7 +111,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "last", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "last"}
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [false], x: 4}, {__ROW_PATH__: [true], x: 3}];
             let result = await view.to_json();
@@ -128,7 +132,8 @@ module.exports = perspective => {
             var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
@@ -141,7 +146,8 @@ module.exports = perspective => {
             var table = perspective.table([{x: 3, y: 1}, {x: 3, y: 1}, {x: 0, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
@@ -155,7 +161,8 @@ module.exports = perspective => {
             table.update([{x: 3, y: 1}, {x: 3, y: 1}, {x: 0, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
@@ -168,7 +175,7 @@ module.exports = perspective => {
             var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: null, y: 1}, {x: null, y: 1}, {x: 4, y: 2}, {x: null, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "sum", column: "x"}]
+                columns: ["x"]
             });
             var answer = [{__ROW_PATH__: [], x: 9}, {__ROW_PATH__: [1], x: 5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
@@ -182,7 +189,8 @@ module.exports = perspective => {
             table.update([{x: 2, y: 1}, {x: null, y: 1}, {x: 4, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
@@ -197,7 +205,8 @@ module.exports = perspective => {
             table.update([{x: 2, y: 2, z: "c"}, {x: 3, y: 2, z: "c"}, {x: null, y: 2, z: "c"}, {x: 7, y: 2, z: "c"}]);
             var view = table.view({
                 row_pivots: ["y", "z"],
-                aggregate: [{op: "mean", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "mean"}
             });
             var answer = [
                 {__ROW_PATH__: [], x: 3.142857142857143},
@@ -219,7 +228,8 @@ module.exports = perspective => {
             var table = perspective.table([{x: null}, {x: "x"}, {x: "y"}]);
             var view = table.view({
                 row_pivots: ["x"],
-                aggregate: [{op: "distinct count", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "distinct count"}
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [null], x: 1}, {__ROW_PATH__: ["x"], x: 1}, {__ROW_PATH__: ["y"], x: 1}];
             let result = await view.to_json();
@@ -247,7 +257,8 @@ module.exports = perspective => {
             var table = perspective.table([{x: 3, y: 1}, {x: 2, y: 1}, {x: 1, y: 1}, {x: -1, y: 1}, {x: -2, y: 2}, {x: -3, y: 2}]);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{op: "sum abs", column: "x"}]
+                columns: ["x"],
+                aggregates: {x: "sum abs"}
             });
             var answer = [{__ROW_PATH__: [], x: 12}, {__ROW_PATH__: [1], x: 7}, {__ROW_PATH__: [2], x: 5}];
             let result = await view.to_json();
@@ -288,7 +299,7 @@ module.exports = perspective => {
             table.update(rec1);
             let view = table.view({
                 row_pivots: ["id"],
-                aggregate: [{op: "sum", column: "pos"}]
+                columns: ["pos"]
             });
             let rec2 = [{id: 1, chg: 3}];
             table.update(rec2);
@@ -362,7 +373,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["x"],
-                aggregate: [{column: "y", op: "distinct count"}]
+                columns: ["y"],
+                aggregates: {y: "distinct count"}
             });
             let result2 = await view.schema();
             expect(result2).toEqual({y: "integer"});
@@ -374,7 +386,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["y"],
-                aggregate: [{column: "x", op: "avg"}]
+                columns: ["x"],
+                aggregates: {x: "avg"}
             });
             let result2 = await view.schema();
             expect(result2).toEqual({x: "float"});
@@ -386,7 +399,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 column_pivots: ["y"],
-                aggregate: [{column: "x", op: "avg"}]
+                columns: ["x"],
+                aggregates: {x: "avg"}
             });
             let result2 = await view.schema();
             expect(result2).toEqual({x: "integer"});
@@ -596,7 +610,7 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 column_pivots: ["x", "z"],
-                aggregate: [{column: "y", op: "sum"}]
+                columns: ["y"]
             });
             let result2 = await view.to_json();
             expect(result2).toEqual([
@@ -629,7 +643,8 @@ module.exports = perspective => {
             var view = table.view({
                 column_pivots: ["z", "b"],
                 row_pivots: ["y", "a"],
-                aggregate: [{column: "x", op: "last"}]
+                columns: ["x"],
+                aggregates: {x: "last"}
             });
 
             let answer = [
@@ -701,7 +716,8 @@ module.exports = perspective => {
                 column_pivots: ["y"],
                 row_pivots: ["z"],
                 sort: [["y", "col desc"]],
-                aggregate: [{column: "x", op: "sum"}, {column: "y", op: "any"}]
+                columns: ["x", "y"],
+                aggregates: {x: "sum", y: "any"}
             });
 
             let result2 = await view.to_columns();

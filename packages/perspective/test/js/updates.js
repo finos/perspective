@@ -229,7 +229,7 @@ module.exports = perspective => {
                 }
             ]);
             table2.update(data);
-            let view2 = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
+            let view2 = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
             let result = await view2.to_json();
             let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
             expect(result).toEqual(expected);
@@ -458,7 +458,7 @@ module.exports = perspective => {
             var table = perspective.table(meta, {index: "y"});
             var view = table.view({
                 row_pivots: ["z", "y"],
-                aggregate: []
+                columns: []
             });
             table.update(data);
 
@@ -554,7 +554,7 @@ module.exports = perspective => {
             table.update([{x: 2, y: null}]);
             var view = table.view({
                 row_pivots: ["x"],
-                aggregate: [{op: "sum", column: "y"}]
+                columns: ["y"]
             });
             let json = await view.to_json();
             expect(json).toEqual([{__ROW_PATH__: [], y: 1}, {__ROW_PATH__: [1], y: 1}, {__ROW_PATH__: [2], y: 0}]);

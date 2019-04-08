@@ -256,7 +256,8 @@ configuration properties for `view()`, see the
 const table = worker.table(data);
 
 const view = table.view({
-    aggregate: [{ column: "Sales", op: "sum" }],
+    columns: ["Sales"],
+    aggregates: {"Sales": "sum"},
     row_pivot: ["Region", "Country"],
     filter: [["Category", "in", ["Furniture", "Technology"]]]
 });

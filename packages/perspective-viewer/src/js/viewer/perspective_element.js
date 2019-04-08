@@ -240,18 +240,23 @@ export class PerspectiveElement extends StateElement {
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
         const filters = await this._validate_filters();
-        const aggregates = this._get_view_aggregates();
-        if (aggregates.length === 0) return;
+        const view_aggregates = this._get_view_aggregates();
+        if (view_aggregates.length === 0) return;
         const sort = this._get_view_sorts();
-        const hidden = this._get_view_hidden(aggregates, sort);
+        const hidden = this._get_view_hidden(view_aggregates, sort);
         for (const s of hidden) {
             const all = this.get_aggregate_attribute();
             if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
-                aggregates.push({column: s, op: "unique"});
+                view_aggregates.push({column: s, op: "unique"});
             } else {
-                aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+                view_aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
             }
         }
+        let columns = view_aggregates.map(x => x.column);
+        let aggregates = view_aggregates.reduce((aggs, a) => {
+            aggs[a.column] = a.op;
+            return aggs;
+        }, {});
 
         if (this._view) {
             this._view.delete();
@@ -263,7 +268,8 @@ export class PerspectiveElement extends StateElement {
             filter: filters,
             row_pivots: row_pivots,
             column_pivots: column_pivots,
-            aggregate: aggregates,
+            aggregates: aggregates,
+            columns: columns,
             sort: sort
         });
 

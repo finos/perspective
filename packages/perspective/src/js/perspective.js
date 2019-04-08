@@ -897,10 +897,13 @@ export default function(Module) {
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
      * @param {Array<string>} [config.column_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
-     * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
-     * each of which should provide a "column" and "op" property, representing the string
-     * aggregation type and associated column name, respectively.  Aggregates not provided
-     * will use their type defaults
+     * @param {Array<Object>} [config.columns] An array of column names for the
+     * output columns.  If none are provided, all columns are output.
+     * @param {Object} [config.aggregates] An object, the keys of which are column
+     * names, and their respective values ar ethe aggregates calculations to use
+     * when this view has `row_pivots`.  A column provided to `config.columns`
+     * without an aggregate in this object, will use the default aggregate
+     * calculation for its type.
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
      * apply.  A filter configuration is an array of 3 elements:  A column name,
      * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
@@ -911,7 +914,8 @@ export default function(Module) {
      * @example
      * var view = table.view({
      *      row_pivots: ['region'],
-     *      aggregate: [{op: 'dominant', column:'region'}],
+     *      columns: ["region"],
+     *      aggregates: {"region": "dominant"},
      *      filter: [['client', 'contains', 'fred']],
      *      sort: [['value', 'asc']]
      * });
@@ -929,10 +933,25 @@ export default function(Module) {
                 } else {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
+            } else if (key === "aggregate") {
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" amd "columns"`);
+                config[key] = _config[key];
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
             } else {
                 throw new Error(`Unrecognized config parameter "${key}"`);
+            }
+        }
+
+        if (config.columns) {
+            if (config.aggregate) {
+                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
+            }
+            config.aggregate = [];
+            const aggregates = config.aggregates || {};
+            const schema = this._schema(true);
+            for (const col of config.columns) {
+                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
             }
         }
 
@@ -941,6 +960,7 @@ export default function(Module) {
         config.row_pivots = config.row_pivots || [];
         config.column_pivots = config.column_pivots || [];
         config.filter = config.filter || [];
+        config.sort = config.sort || [];
 
         let sides;
 

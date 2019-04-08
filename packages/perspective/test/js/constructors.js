@@ -212,9 +212,9 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("0-sided view with aggregate selection", async function() {
+        it("0-sided view with columns selection", async function() {
             const table = perspective.table(int_float_string_data);
-            const view = table.view({aggregate: [{column: "float", op: "sum"}, {column: "string", op: "sum"}]});
+            const view = table.view({columns: ["float", "string"]});
             const schema = await view.schema();
             expect(schema).toEqual({float: "float", string: "string"});
             view.delete();
@@ -256,7 +256,7 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view({
                 row_pivots: ["int"],
-                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+                columns: ["int", "float"]
             });
             const result = await view.col_to_js_typed_array("int");
             // should include aggregate row
@@ -269,7 +269,7 @@ module.exports = perspective => {
             var table = perspective.table(int_float_data);
             var view = table.view({
                 row_pivots: ["int"],
-                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+                columns: ["int", "float"]
             });
             const result = await view.col_to_js_typed_array("float");
             expect(result[0].byteLength).toEqual(40);
@@ -281,7 +281,8 @@ module.exports = perspective => {
             var table = perspective.table(datetime_data);
             var view = table.view({
                 row_pivots: ["int"],
-                aggregate: [{op: "high", column: "datetime"}]
+                columns: ["datetime"],
+                aggregates: {datetime: "high"}
             });
             const result = await view.col_to_js_typed_array("datetime");
             expect(result[0].byteLength).toEqual(24);
@@ -294,7 +295,7 @@ module.exports = perspective => {
             var view = table.view({
                 column_pivots: ["float"],
                 row_pivots: ["int"],
-                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+                columns: ["int", "float"]
             });
             const result = await view.col_to_js_typed_array("3.5|int");
             expect(result[0].byteLength).toEqual(20);
@@ -307,7 +308,7 @@ module.exports = perspective => {
             var view = table.view({
                 column_pivots: ["float"],
                 row_pivots: ["int"],
-                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+                columns: ["int", "float"]
             });
             const result = await view.col_to_js_typed_array("3.5|float");
             expect(result[0].byteLength).toEqual(40);
@@ -355,7 +356,7 @@ module.exports = perspective => {
             let table = perspective.table(int_float_string_data);
             let view = table.view({
                 row_pivots: ["int"],
-                aggregate: [{op: "sum", column: "int"}, {op: "sum", column: "float"}]
+                columns: ["int", "float"]
             });
             let cols = await view.to_columns();
 
@@ -387,7 +388,7 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["z"],
-                aggregate: [{op: "sum", column: "x"}]
+                columns: ["x"]
             });
             var answer = `__ROW_PATH__,x\r\n,10\r\nfalse,6\r\ntrue,4`;
             let result = await view.to_csv();
@@ -401,7 +402,7 @@ module.exports = perspective => {
             var view = table.view({
                 row_pivots: ["z"],
                 column_pivots: ["y"],
-                aggregate: [{op: "sum", column: "x"}]
+                columns: ["x"]
             });
             var answer = `__ROW_PATH__,\"a,x\",\"b,x\",\"c,x\",\"d,x\"\r\n,1,2,3,4\r\nfalse,,2,,4\r\ntrue,1,,3,`;
             let result = await view.to_csv();
@@ -804,7 +805,7 @@ module.exports = perspective => {
                         inputs: []
                     }
                 ]);
-                let view = table2.view({aggregate: [{op: "count", column: "const"}]});
+                let view = table2.view({columns: ["const"], aggregates: {const: "count"}});
                 let result = await view.to_json();
                 expect(result).toEqual([{const: 1}, {const: 1}, {const: 1}, {const: 1}]);
                 view.delete();
@@ -823,7 +824,7 @@ module.exports = perspective => {
                         inputs: ["w", "x"]
                     }
                 ]);
-                let view = table2.view({aggregate: [{op: "count", column: "ratio"}]});
+                let view = table2.view({columns: ["ratio"], aggregates: {ratio: "count"}});
                 let result = await view.to_json();
                 expect(result).toEqual([{ratio: 1.5}, {ratio: 1.25}, {ratio: 1.1666666666666667}, {ratio: 1.125}]);
                 view.delete();
@@ -852,7 +853,7 @@ module.exports = perspective => {
 
                 let delta_upd = [{y: "a", z: false}, {y: "b", z: true}, {y: "c", z: false}, {y: "d", z: true}];
                 table2.update(delta_upd);
-                let view = table2.view({aggregate: [{op: "count", column: "y"}, {op: "count", column: "ratio"}]});
+                let view = table2.view({columns: ["y", "ratio"], aggregates: {y: "count", ratio: "count"}});
                 let result = await view.to_json();
                 let expected = [{y: "a", ratio: 1.5}, {y: "b", ratio: 1.25}, {y: "c", ratio: 1.1666666666666667}, {y: "d", ratio: 1.125}];
                 expect(result).toEqual(expected);
@@ -872,7 +873,7 @@ module.exports = perspective => {
                         inputs: ["z"]
                     }
                 ]);
-                let view = table2.view({aggregate: [{op: "count", column: "yes/no"}]});
+                let view = table2.view({columns: ["yes/no"], aggregates: {"yes/no": "count"}});
                 let result = await view.to_json();
                 let expected = [{"yes/no": "yes"}, {"yes/no": "no"}, {"yes/no": "yes"}, {"yes/no": "no"}];
                 expect(result).toEqual(expected);

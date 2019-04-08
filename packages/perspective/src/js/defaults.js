@@ -17,11 +17,10 @@ export const CONFIG_ALIASES = {
     "column-pivot": "column_pivots",
     "column-pivots": "column_pivots",
     filters: "filter",
-    sorts: "sort",
-    aggregates: "aggregate"
+    sorts: "sort"
 };
 
-export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregate", "filter", "sort", "row_pivot_depth", "filter_op"];
+export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregates", "columns", "filter", "sort", "row_pivot_depth", "filter_op"];
 
 const NUMBER_AGGREGATES = [
     "any",
