@@ -7,6 +7,22 @@
  *
  */
 
+export const CONFIG_ALIASES = {
+    row_pivot: "row_pivots",
+    "row-pivot": "row_pivots",
+    "row-pivots": "row_pivots",
+    col_pivot: "column_pivots",
+    col_pivots: "column_pivots",
+    column_pivot: "column_pivots",
+    "column-pivot": "column_pivots",
+    "column-pivots": "column_pivots",
+    filters: "filter",
+    sorts: "sort",
+    aggregates: "aggregate"
+};
+
+export const CONFIG_VALID_KEYS = ["viewport", "row_pivots", "column_pivots", "aggregate", "filter", "sort", "row_pivot_depth", "filter_op"];
+
 const NUMBER_AGGREGATES = [
     "any",
     "avg",
