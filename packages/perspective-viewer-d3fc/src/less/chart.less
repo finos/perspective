@@ -54,7 +54,7 @@
                     text-anchor: middle;
                     user-select: none;
                     pointer-events: none;
-                    fill: var(--d3fc-sunburst--labels, rgb(51, 51, 51));
+                    fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
 
                     &.title {
                         dominant-baseline: hanging;
@@ -64,21 +64,56 @@
         }
 
         &.d3_treemap {
-            padding-right: 125px;
-            rect {
-                stroke: var(--d3fc-axis--lines, white);
+            padding: 0;
+            
+            & .treemap-container {
+                position: relative;
             }
-            .top {
-                font-size: 15px;
-                font-weight:bold;
-            }
-            .lower {
-                font-size: 10px;
-                font-weight:bold;
-                opacity: 0.7;
-            }
-            & text {
-                fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
+
+            & .inner-container {
+                width: 100%;
+                height: 100%;
+                display: inline-grid;
+                padding: 0;
+                margin: 0;
+                overflow-y: auto;
+                overflow-x: hidden;
+
+                & div {
+                    overflow: hidden;
+                }
+
+                & svg {
+                    width: 100%;
+                    height: 100%;
+                }
+
+                & rect {
+                    stroke: var(--d3fc-axis--lines, white);
+                }
+                & .top {
+                    font-size: 15px;
+                    font-weight:bold;
+                }
+                & .lower {
+                    font-size: 10px;
+                    font-weight:bold;
+                    opacity: 0.7;
+                }
+                & text {
+                    fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
+                }
+
+                & .parent-controls {
+                    position: absolute;
+                    top: 15px;
+                    right: 70px;
+                    z-index: 10;
+                }
+
+                & #goto-parent {
+                    z-index: 10;
+                }
             }
         }
 

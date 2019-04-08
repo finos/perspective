@@ -9,7 +9,8 @@
 
 import {select} from "d3";
 import {treeData} from "../data/treeData";
-import {sunburstSeries, treeColor} from "../series/sunburst/sunburstSeries";
+import {treeColor} from "../series/sunburst/sunburstColor";
+import {sunburstSeries} from "../series/sunburst/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
 import {getOrCreateElement} from "../utils/utils";

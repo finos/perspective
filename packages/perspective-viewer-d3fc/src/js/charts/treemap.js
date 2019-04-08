@@ -9,145 +9,80 @@
 
 import * as d3 from "d3";
 import {treeData} from "../data/treeData";
-import {getOrCreateElement, isElementOverlapping} from "../utils/utils";
+import {treeColor} from "../series/treemap/treemapColor";
 import treemapLayout from "../layout/treemapLayout";
-import template from "../../html/parent-controls.html";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
-import {seriesColorRange} from "../series/seriesRange";
+import {treemapSeries} from "../series/treemap/treemapSeries";
+import {tooltip} from "../tooltip/tooltip";
+import {getOrCreateElement} from "../utils/utils";
 
 function treemap(container, settings) {
-    const {data} = treeData(settings)[0];
-    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
+    //if (settings.crossValues.length === 0) return;
 
-    treemapLayout(containerWidth, containerHeight)(data);
+    const treemapData = treeData(settings);
+    const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
+    const color = treeColor(treemapData.map(d => d.data), settings);
 
-    container
-        .append("svg")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .append("g");
-
-    const color = treeColor(data, settings);
-
-    addTreemap(container, data, settings, color);
-
-    const legend = colorRangeLegend().scale(color);
-    container.call(legend);
-}
-
-const addTreemap = (selection, data, settings, color) => {
-    const maxDepth = data.height;
-    let parent = null;
-
-    const isDeepest = d => d.depth === maxDepth;
-    const isTop = d => d.depth === 1;
-    const showName = d => maxDepth === 0 || (0 < d.depth && d.depth <= 2);
-    const centreText = node => d3.select(node).attr("dx", d3.select(node).attr("dx") - node.getBoundingClientRect().width / 2);
-
-    const nodes = selection
-        .select("svg g")
-        .selectAll("g")
-        .data(data.descendants())
-        .enter()
-        .append("g")
-        .attr("transform", d => `translate(${[d.x0, d.y0]})`);
-
-    // draw child nodes first
-    nodes.sort((a, b) => (b.depth === 0 ? 0 : b.depth - a.depth));
-
-    nodes
-        .append("rect")
-        .attr("class", "treerect")
-        .attr("width", d => d.x1 - d.x0)
-        .attr("height", d => d.y1 - d.y0)
-        .attr("fill", d => color(d.data.color))
-        .attr("fill-opacity", d => (isDeepest(d) ? 0.8 : 0))
-        .on("click", d => transition(d));
-
-    nodes
-        .append("text")
-        .attr("class", d => (isTop(d) ? "top" : "lower"))
-        .attr("dx", d => (d.x1 - d.x0) / 2)
-        .attr("dy", d => (d.y1 - d.y0) / 2)
-        .text(d => (showName(d) ? d.data.name : ""));
-
-    nodes.selectAll("text").each((_, i, nodes) => centreText(nodes[i]));
-
-    preventTextCollisions(nodes);
-
-    const transition = d => {
-        if (!d || d.height === 0) return;
-
-        selection
-            .select("svg g")
-            .selectAll("g")
-            .remove();
-
-        let newData = d3.hierarchy(d.data).sum(d => d.size);
-
-        parent = d.parent;
-
-        const {width: containerWidth, height: containerHeight} = selection.node().getBoundingClientRect();
-
-        treemapLayout(containerWidth, containerHeight)(newData);
-        newData.parent = d.parent;
-
-        addTreemap(selection, newData, settings, color);
-
-        getGoToParentControls(selection)
-            .style("display", parent ? "" : "none")
-            .select("#goto-parent")
-            .html(newData ? newData.data.name : "")
-            .on("click", () => {
-                transition(parent);
-            });
-    };
-};
-
-const preventTextCollisions = nodes => {
-    const textCollisionFuzzFactor = 16;
-    const rect = element => element.getBoundingClientRect();
-
-    const topNodes = [];
-    nodes
-        .selectAll("text")
-        .filter((_, i, nodes) => d3.select(nodes[i]).attr("class") === "top")
-        .each((_, i, nodes) => topNodes.push(nodes[i]));
-
-    nodes
-        .selectAll("text")
-        .filter((_, i, nodes) => d3.select(nodes[i]).attr("class") === "lower" && d3.select(nodes[i]).text() !== "")
-        .each((_, i, nodes) => {
-            const lowerNode = nodes[i];
-            topNodes
-                .filter(topNode => isElementOverlapping("x", rect(topNode), rect(lowerNode)) && isElementOverlapping("y", rect(topNode), rect(lowerNode), textCollisionFuzzFactor))
-                .forEach(() => d3.select(lowerNode).attr("dy", Number(d3.select(lowerNode).attr("dy")) + textCollisionFuzzFactor));
-        });
-};
-
-function treeColor(data, settings) {
-    if (data.height > 0) {
-        const colors = getColors(data);
-        let min = Math.min(...colors);
-        let max = Math.max(...colors);
-        return seriesColorRange(settings, null, null, [min, max]);
+    const innerRect = innerContainer.node().getBoundingClientRect();
+    const containerHeight = innerRect.height;
+    const containerWidth = innerRect.width - (color ? 70 : 0);
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container.call(legend);
     }
-}
 
-// only get the colors from the bottom level (e.g. nodes with no children)
-function getColors(nodes, colors = []) {
-    nodes.children && nodes.children.length > 0 ? nodes.children.forEach(child => colors.concat(getColors(child, colors))) : colors.push(nodes.data.color);
-    return colors;
-}
+    const minSize = 500;
+    const cols = Math.min(treemapData.length, Math.floor(containerWidth / minSize));
+    const rows = Math.ceil(treemapData.length / cols);
+    const containerSize = {
+        width: containerWidth / cols,
+        height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
+    };
+    if (containerHeight / rows > containerSize.height * 0.75) {
+        containerSize.height = containerHeight / rows;
+    }
 
-const getGoToParentControls = container =>
-    getOrCreateElement(container, ".parent-controls", () =>
-        container
-            .append("div")
-            .attr("class", "parent-controls")
-            .style("display", "none")
-            .html(template)
-    );
+    innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
+    innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
+
+    const treemapDiv = innerContainer.selectAll("div.treemap-container").data(treeData(settings), d => d.split);
+    treemapDiv.exit().remove();
+
+    const treemapEnter = treemapDiv
+        .enter()
+        .append("div")
+        .attr("class", "treemap-container");
+
+    const treemapContainer = treemapEnter
+        .append("svg")
+        .append("g")
+        .attr("class", "treemap");
+
+    treemapContainer.append("text").attr("class", "title");
+
+    treemapContainer.append("text").attr("class", "parent");
+    treemapEnter
+        .merge(treemapDiv)
+        .select("svg")
+        .select("g.treemap")
+        .each(function({split, data}) {
+            const treemapElement = d3.select(this);
+            const svgNode = this.parentNode;
+            const {width, height} = svgNode.getBoundingClientRect();
+
+            treemapLayout(width, height)(data);
+
+            const title = treemapElement.select("text.title").text(split);
+            title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
+
+            treemapSeries()
+                .data(data)
+                .container(d3.select(d3.select(this.parentNode).node().parentNode))
+                .color(color)(treemapElement);
+
+            tooltip().settings(settings)(treemapElement.selectAll("g"));
+        });
+}
 
 treemap.plugin = {
     type: "d3_treemap",

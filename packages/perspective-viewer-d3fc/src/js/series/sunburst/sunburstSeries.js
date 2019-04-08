@@ -7,8 +7,6 @@
  *
  */
 
-import {flattenExtent} from "../../axis/flatten";
-import {seriesColorRange} from "../../series/seriesRange";
 import {drawArc, arcVisible} from "./sunburstArc";
 import {labelVisible, labelTransform, cropLabel} from "./sunburstLabel";
 import {clickHandler} from "./sunburstClick";
@@ -111,10 +109,4 @@ export function sunburstSeries() {
     };
 
     return _sunburstSeries;
-}
-
-export function treeColor(settings, extents) {
-    if (settings.mainValues.length > 1) {
-        return seriesColorRange(settings, null, null, flattenExtent(extents));
-    }
 }
