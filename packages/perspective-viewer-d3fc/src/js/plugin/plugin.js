@@ -41,8 +41,8 @@ function drawChart(chart) {
         if (task.cancelled) {
             return;
         }
-        const row_pivots = config.row_pivot;
-        const col_pivots = config.column_pivot;
+        const row_pivots = config.row_pivots;
+        const col_pivots = config.column_pivots;
         const filter = config.filter;
 
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;

@@ -67,7 +67,7 @@ export class DomElement extends PerspectiveElement {
         if (filter) {
             row.setAttribute("filter", filter);
             if (type === "string") {
-                const v = this._table.view({row_pivot: [name], aggregate: []});
+                const v = this._table.view({row_pivots: [name], aggregate: []});
                 v.to_json().then(json => {
                     row.choices(json.slice(1, json.length).map(x => x.__ROW_PATH__));
                     v.delete();

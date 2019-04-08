@@ -32,7 +32,7 @@ The main API module for Perspective.
         * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
+        * [.is_valid_philter([filter])](#module_perspective..table+is_valid_philter) ⇒ <code>boolean</code>
         * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
@@ -365,7 +365,7 @@ is deleted, this callback will be invoked.
     * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
+    * [.is_valid_philter([filter])](#module_perspective..table+is_valid_philter) ⇒ <code>boolean</code>
     * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
@@ -476,7 +476,7 @@ Object containing the associated column_name, column_type, and computation.
 
 * * *
 
-<a name="module_perspective..table+is_valid_filter"></a>
+<a name="module_perspective..table+is_valid_philter"></a>
 
 #### table.is\_valid\_filter([filter]) ⇒ <code>boolean</code>
 Determines whether a given filter is valid.
@@ -502,9 +502,9 @@ bound to this table
 **Params**
 
 - [config] <code>Object</code> - The configuration object for this [view](#module_perspective..view).
-    - [.row_pivot] <code>Array.&lt;string&gt;</code> - An array of column names
+    - [.row_pivots] <code>Array.&lt;string&gt;</code> - An array of column names
 to use as [Row Pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
-    - [.column_pivot] <code>Array.&lt;string&gt;</code> - An array of column names
+    - [.column_pivots] <code>Array.&lt;string&gt;</code> - An array of column names
 to use as [Column Pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
     - [.aggregate] <code>Array.&lt;Object&gt;</code> - An Array of Aggregate configuration objects,
 each of which should provide a "column" and "op" property, representing the string
@@ -520,7 +520,7 @@ which are: "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", 
 **Example**  
 ```js
 var view = table.view({
-     row_pivot: ['region'],
+     row_pivots: ['region'],
      aggregate: [{op: 'dominant', column:'region'}],
      filter: [['client', 'contains', 'fred']],
      sort: [['value', 'asc']]

@@ -457,10 +457,12 @@ export default function(Module) {
     view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
         const num_rows = await this.num_rows();
+        const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
+
         let idx = names.indexOf(col_name);
 
         const start_row = options.start_row || 0;
-        const end_row = options.end_row || num_rows;
+        const end_row = (options.end_row || num_rows) + (column_pivot_only ? 1 : 0);
 
         // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
@@ -473,7 +475,6 @@ export default function(Module) {
             // columns start at 1 for > 0-sided views
             return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
-            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
             return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
@@ -546,7 +547,7 @@ export default function(Module) {
 
     /**
      * The number of aggregated columns in this {@link view}.  This is affected by
-     * the "column_pivot" configuration parameter supplied to this {@link view}'s
+     * the "column_pivots" configuration parameter supplied to this {@link view}'s
      * contructor.
      *
      * @async
@@ -576,7 +577,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        return this._View.expand(idx, this.config.row_pivot.length);
+        return this._View.expand(idx, this.config.row_pivots.length);
     };
 
     /**
@@ -595,7 +596,7 @@ export default function(Module) {
      *
      */
     view.prototype.set_depth = async function(depth) {
-        return this._View.set_depth(depth, this.config.row_pivot.length);
+        return this._View.set_depth(depth, this.config.row_pivots.length);
     };
 
     /**
@@ -869,7 +870,7 @@ export default function(Module) {
         return key => schema[key] === "datetime" || schema[key] === "date";
     };
 
-    table.prototype._is_valid_filter = function(filter) {
+    table.prototype._is_valid_philter = function(filter) {
         const schema = this._schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
@@ -883,8 +884,8 @@ export default function(Module) {
      *
      * @returns {boolean} Whether the filter is valid
      */
-    table.prototype.is_valid_filter = function(filter) {
-        return this._is_valid_filter(filter);
+    table.prototype.is_valid_philter = function(filter) {
+        return this._is_valid_philter(filter);
     };
 
     /**
@@ -892,14 +893,17 @@ export default function(Module) {
      * configuration.
      *
      * @param {Object} [config] The configuration object for this {@link module:perspective~view}.
-     * @param {Array<string>} [config.row_pivot] An array of column names
+     * @param {Array<string>} [config.row_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
-     * @param {Array<string>} [config.column_pivot] An array of column names
+     * @param {Array<string>} [config.column_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
-     * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
-     * each of which should provide a "column" and "op" property, representing the string
-     * aggregation type and associated column name, respectively.  Aggregates not provided
-     * will use their type defaults
+     * @param {Array<Object>} [config.columns] An array of column names for the
+     * output columns.  If none are provided, all columns are output.
+     * @param {Object} [config.aggregates] An object, the keys of which are column
+     * names, and their respective values ar ethe aggregates calculations to use
+     * when this view has `row_pivots`.  A column provided to `config.columns`
+     * without an aggregate in this object, will use the default aggregate
+     * calculation for its type.
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
      * apply.  A filter configuration is an array of 3 elements:  A column name,
      * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
@@ -909,8 +913,9 @@ export default function(Module) {
      *
      * @example
      * var view = table.view({
-     *      row_pivot: ['region'],
-     *      aggregate: [{op: 'dominant', column:'region'}],
+     *      row_pivots: ['region'],
+     *      columns: ["region"],
+     *      aggregates: {"region": "dominant"},
      *      filter: [['client', 'contains', 'fred']],
      *      sort: [['value', 'asc']]
      * });
@@ -918,19 +923,49 @@ export default function(Module) {
      * @returns {view} A new {@link module:perspective~view} object for the supplied configuration,
      * bound to this table
      */
-    table.prototype.view = function(config) {
-        config = {...config};
+    table.prototype.view = function(_config = {}) {
+        let config = {};
+        for (const key of Object.keys(_config)) {
+            if (defaults.CONFIG_ALIASES[key]) {
+                if (!config[defaults.CONFIG_ALIASES[key]]) {
+                    console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                    config[defaults.CONFIG_ALIASES[key]] = _config[key];
+                } else {
+                    throw new Error(`Duplicate configuration parameter "${key}"`);
+                }
+            } else if (key === "aggregate") {
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" amd "columns"`);
+                config[key] = _config[key];
+            } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
+                config[key] = _config[key];
+            } else {
+                throw new Error(`Unrecognized config parameter "${key}"`);
+            }
+        }
+
+        if (config.columns) {
+            if (config.aggregate) {
+                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
+            }
+            config.aggregate = [];
+            const aggregates = config.aggregates || {};
+            const schema = this._schema(true);
+            for (const col of config.columns) {
+                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
+            }
+        }
 
         let name = Math.random() + "";
 
-        config.row_pivot = config.row_pivot || [];
-        config.column_pivot = config.column_pivot || [];
+        config.row_pivots = config.row_pivots || [];
+        config.column_pivots = config.column_pivots || [];
         config.filter = config.filter || [];
+        config.sort = config.sort || [];
 
         let sides;
 
-        if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
-            if (config.column_pivot && config.column_pivot.length > 0) {
+        if (config.row_pivots.length > 0 || config.column_pivots.length > 0) {
+            if (config.column_pivots && config.column_pivots.length > 0) {
                 sides = 2;
             } else {
                 sides = 1;

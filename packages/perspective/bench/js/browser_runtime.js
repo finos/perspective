@@ -23,11 +23,11 @@ const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"
 
 const wait_for_perspective = () => new Promise(resolve => window.addEventListener("perspective-ready", resolve));
 
-function to_name({aggregate, row_pivot, column_pivot}) {
+function to_name({aggregate, row_pivots, column_pivots}) {
     return {
         aggregate: COLUMN_TYPES[aggregate[0].column],
-        row_pivot: row_pivot.join("/") || "-",
-        column_pivot: column_pivot.join("/") || "-"
+        row_pivots: row_pivots.join("/") || "-",
+        column_pivots: column_pivots.join("/") || "-"
     };
 }
 
@@ -68,8 +68,8 @@ async function* run_table_cases(worker, data, test) {
                     test,
                     time: performance.now() - start,
                     method: test,
-                    row_pivot: "n/a",
-                    column_pivot: "n/a",
+                    row_pivots: "n/a",
+                    column_pivots: "n/a",
                     aggregate: "n/a"
                 };
             }
@@ -169,9 +169,9 @@ async function* run_all_delta_cases() {
     await table.schema();
 
     const aggregate = AGG_OPTIONS[0];
-    for (const row_pivot of ROW_PIVOT_OPTIONS) {
-        for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
-            const config = {aggregate, row_pivot, column_pivot};
+    for (const row_pivots of ROW_PIVOT_OPTIONS) {
+        for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
+            const config = {aggregate, row_pivots, column_pivots};
 
             yield* run_on_update_cases(table, config, "none");
             yield* run_on_update_cases(table, config, "rows");
@@ -195,9 +195,9 @@ async function* run_all_cases() {
     await table.schema();
 
     for (const aggregate of AGG_OPTIONS) {
-        for (const row_pivot of ROW_PIVOT_OPTIONS) {
-            for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
-                const config = {aggregate, row_pivot, column_pivot};
+        for (const row_pivots of ROW_PIVOT_OPTIONS) {
+            for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
+                const config = {aggregate, row_pivots, column_pivots};
 
                 yield* run_view_cases(table, config);
                 yield* run_to_format_cases(table, config, "to_json");

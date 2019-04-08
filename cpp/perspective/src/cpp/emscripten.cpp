@@ -1590,8 +1590,8 @@ namespace binding {
     t_config
     make_view_config(
         const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivot = config["row_pivot"];
-        val j_column_pivot = config["column_pivot"];
+        val j_row_pivot = config["row_pivots"];
+        val j_column_pivot = config["column_pivots"];
         val j_aggregate = config["aggregate"];
         val j_filter = config["filter"];
         val j_sort = config["sort"];
@@ -1601,6 +1601,7 @@ namespace binding {
         std::vector<t_aggspec> aggregates;
         std::vector<t_fterm> filters;
         std::vector<t_sortspec> sorts;
+        std::vector<t_sortspec> col_sorts;
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
@@ -1641,10 +1642,11 @@ namespace binding {
 
         if (hasValue(j_sort)) {
             sorts = _get_sort(col_names, false, j_sort);
+            col_sorts = _get_sort(col_names, true, j_sort);
         }
 
-        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, filter_op,
-            filters, col_names, column_only);
+        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
+            filter_op, filters, col_names, column_only);
 
         return view_config;
     }
@@ -1722,6 +1724,7 @@ namespace binding {
         auto filter_op = view_config.get_combiner();
         auto filters = view_config.get_fterms();
         auto sorts = view_config.get_sortspecs();
+        auto col_sorts = view_config.get_col_sortspecs();
 
         std::int32_t rpivot_depth = -1;
         std::int32_t cpivot_depth = -1;
@@ -1732,12 +1735,6 @@ namespace binding {
 
         if (hasValue(config["column_pivot_depth"])) {
             cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
-        }
-
-        val j_sort = config["sort"];
-        std::vector<t_sortspec> col_sorts;
-        if (hasValue(j_sort)) {
-            col_sorts = _get_sort(column_names, true, j_sort);
         }
 
         auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,

@@ -101,7 +101,7 @@ module.exports = perspective => {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivot: ["y"]
+                    row_pivots: ["y"]
                 });
                 view.on_update(
                     async function(delta) {
@@ -118,7 +118,7 @@ module.exports = perspective => {
             it("returns nothing when updated data is not in pivot", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivot: ["y"]
+                    row_pivots: ["y"]
                 });
                 view.on_update(
                     async function(delta) {
@@ -137,8 +137,8 @@ module.exports = perspective => {
             it("returns changed rows when updated data in row pivot", async function(done) {
                 let table = perspective.table(data, {index: "y"});
                 let view = table.view({
-                    row_pivot: ["y"],
-                    column_pivot: ["x"]
+                    row_pivots: ["y"],
+                    column_pivots: ["x"]
                 });
                 view.on_update(
                     async function(delta) {
@@ -155,8 +155,8 @@ module.exports = perspective => {
             it("returns changed rows when updated data in column pivot", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivot: ["y"],
-                    column_pivot: ["z"]
+                    row_pivots: ["y"],
+                    column_pivots: ["z"]
                 });
                 view.on_update(
                     async function(delta) {
@@ -173,8 +173,8 @@ module.exports = perspective => {
             it("returns changed rows when updated data in row and column pivot", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivot: ["y"],
-                    column_pivot: ["z"]
+                    row_pivots: ["y"],
+                    column_pivots: ["z"]
                 });
                 view.on_update(
                     async function(delta) {
@@ -191,8 +191,8 @@ module.exports = perspective => {
             it("returns nothing when updated data is not in pivot", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivot: ["y"],
-                    column_pivot: ["x"]
+                    row_pivots: ["y"],
+                    column_pivots: ["x"]
                 });
                 view.on_update(
                     async function(delta) {

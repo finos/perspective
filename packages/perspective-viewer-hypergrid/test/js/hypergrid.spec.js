@@ -21,7 +21,7 @@ const click_details = async page => {
         });
     }, viewer);
 
-    await page.mouse.click(300, 300);
+    await page.mouse.click(310, 300);
     return await click_event;
 };
 
@@ -55,7 +55,7 @@ utils.with_server({}, () => {
                             State: "California",
                             "Sub-Category": "Phones"
                         });
-                        expect(detail.column_names).toEqual(["Order Date"]);
+                        expect(detail.column_names).toEqual(["Ship Date"]);
                         expect(detail.config).toEqual({filters: []});
                     });
                 });
