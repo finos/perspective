@@ -207,7 +207,7 @@ module.exports = perspective => {
 
         it("Transitive arrow output 2-sided", async function() {
             let table = perspective.table(int_float_string_data);
-            let view = table.view({row_pivots: ["string"], col_pivot: ["int"]});
+            let view = table.view({row_pivots: ["string"], column_pivots: ["int"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
             let table2 = perspective.table(arrow);
@@ -229,7 +229,7 @@ module.exports = perspective => {
 
         it("Transitive arrow output 2-sided column only", async function() {
             let table = perspective.table(int_float_string_data);
-            let view = table.view({col_pivot: ["string"]});
+            let view = table.view({column_pivots: ["string"]});
             let json = await view.to_json();
             let arrow = await view.to_arrow();
             let table2 = perspective.table(arrow);

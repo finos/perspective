@@ -457,10 +457,12 @@ export default function(Module) {
     view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
         const num_rows = await this.num_rows();
+        const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
+
         let idx = names.indexOf(col_name);
 
         const start_row = options.start_row || 0;
-        const end_row = options.end_row || num_rows;
+        const end_row = (options.end_row || num_rows) + (column_pivot_only ? 1 : 0);
 
         // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
@@ -473,7 +475,6 @@ export default function(Module) {
             // columns start at 1 for > 0-sided views
             return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
-            const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
             return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
