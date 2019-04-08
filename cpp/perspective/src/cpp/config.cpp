@@ -86,9 +86,9 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
 // view config
 t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms, const std::vector<std::string>& col_names,
-    bool column_only)
+    const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
+    t_filter_op combiner, const std::vector<t_fterm>& fterms,
+    const std::vector<std::string>& col_names, bool column_only)
     : m_column_only(column_only)
     , m_sortspecs(sortspecs)
     , m_col_sortspecs(col_sortspecs)

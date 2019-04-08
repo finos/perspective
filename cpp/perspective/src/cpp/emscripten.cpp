@@ -1645,8 +1645,8 @@ namespace binding {
             col_sorts = _get_sort(col_names, true, j_sort);
         }
 
-        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts, filter_op,
-            filters, col_names, column_only);
+        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
+            filter_op, filters, col_names, column_only);
 
         return view_config;
     }

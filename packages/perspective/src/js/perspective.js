@@ -922,14 +922,14 @@ export default function(Module) {
     table.prototype.view = function(_config = {}) {
         let config = {};
         for (const key of Object.keys(_config)) {
-            if (CONFIG_ALIASES[key]) {
-                if (!config[CONFIG_ALIASES[key]]) {
-                    console.warn(`Deprecated: "${key}" config parameter, please use "${CONFIG_ALIASES[key]}" instead`);
-                    config[CONFIG_ALIASES[key]] = _config[key];
+            if (defaults.CONFIG_ALIASES[key]) {
+                if (!config[defaults.CONFIG_ALIASES[key]]) {
+                    console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                    config[defaults.CONFIG_ALIASES[key]] = _config[key];
                 } else {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
-            } else if (CONFIG_VALID_KEYS.indexOf(key) > -1) {
+            } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
             } else {
                 throw new Error(`Unrecognized config parameter "${key}"`);
