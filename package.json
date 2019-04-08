@@ -25,6 +25,7 @@
         "eslint": "^4.19.1",
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
+        "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
         "jest": "^24.5.0",
         "js-beautify": "^1.8.6",
         "jsdoc": "^3.5.5",
