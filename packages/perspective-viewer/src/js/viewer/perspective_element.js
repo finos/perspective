@@ -243,20 +243,21 @@ export class PerspectiveElement extends StateElement {
         const view_aggregates = this._get_view_aggregates();
         if (view_aggregates.length === 0) return;
         const sort = this._get_view_sorts();
-        const hidden = this._get_view_hidden(view_aggregates, sort);
-        for (const s of hidden) {
-            const all = this.get_aggregate_attribute();
-            if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
-                view_aggregates.push({column: s, op: "unique"});
-            } else {
-                view_aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+
+        let columns = view_aggregates.map(x => x.column);
+        let aggregates = {};
+        for (const a of view_aggregates) {
+            aggregates[a.column] = a.op;
+        }
+
+        for (const s of sort) {
+            const name = s[0];
+            if (columns.indexOf(name) === -1 && !(column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1)) {
+                const all = this.get_aggregate_attribute();
+                const {column, op} = all.reduce((obj, y) => (y.column === s ? y : obj));
+                aggregates[column] = op;
             }
         }
-        let columns = view_aggregates.map(x => x.column);
-        let aggregates = view_aggregates.reduce((aggs, a) => {
-            aggs[a.column] = a.op;
-            return aggs;
-        }, {});
 
         if (this._view) {
             this._view.delete();
