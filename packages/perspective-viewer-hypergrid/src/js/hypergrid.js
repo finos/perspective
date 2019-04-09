@@ -338,7 +338,6 @@ async function grid_create(div, view, task) {
         hypergrid.behavior.dataModel._view = undefined;
     }
 
-    const hidden = this._get_view_hidden();
     const config = await view.get_config();
 
     if (task.cancelled) {
@@ -376,16 +375,15 @@ async function grid_create(div, view, task) {
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
-        range.end_col *= hidden.length + 1;
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
-        const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots, columns).rows;
+        const rows = psp2hypergrid(next_page, schema, tschema, rowPivots, columns).rows;
         const data = dataModel.data;
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
 
-    perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
+    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots);
     this.hypergrid.renderer.computeCellsBounds(true);
     await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();

@@ -11,31 +11,8 @@ const COLUMN_SEPARATOR_STRING = "|";
 
 const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
 
-function filter_hidden(hidden, json) {
-    let keys;
-    const is_object = !Array.isArray(json);
-    if (is_object) {
-        keys = Object.keys(json);
-    } else {
-        keys = json.map(x => x);
-    }
-    for (let idx in keys) {
-        const key = keys[idx];
-        const split_key = key.split(COLUMN_SEPARATOR_STRING);
-        if (hidden.indexOf(split_key[split_key.length - 1].trim()) >= 0) {
-            if (is_object) {
-                delete json[key];
-            } else {
-                delete json[idx];
-            }
-        }
-    }
-    return json;
-}
-
-function psp2hypergrid(data, hidden, schema, tschema, row_pivots, columns) {
-    data = filter_hidden(hidden, data);
-    const colnames = filter_hidden(hidden, columns || Object.keys(data));
+function psp2hypergrid(data, schema, tschema, row_pivots, columns) {
+    const colnames = columns || Object.keys(data);
     const firstcol = Object.keys(data).length > 0 ? Object.keys(data)[0] : undefined;
     if (colnames.length === 0 || data[firstcol].length === 0) {
         let columns = Object.keys(schema);
