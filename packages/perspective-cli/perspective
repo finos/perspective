@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --max-old-space-size=8192
 /* eslint no-var: 0 */
 
 require("@jpmorganchase/perspective-cli");
