@@ -33,22 +33,106 @@ public:
 
     ~View();
 
+    /**
+     * @brief The number of pivoted sides of this View.
+     *
+     * @return std::int32_t
+     */
     std::int32_t sides() const;
+
+    /**
+     * @brief The number of aggregated rows in this View. This is affected by
+     * the "row_pivot" configuration parameter supplied to this View's
+     * contructor.
+     *
+     *
+     * @return std::int32_t the number of aggregated rows
+     */
     std::int32_t num_rows() const;
+
+    /**
+     * @brief The number of aggregated columns in this View. This is affected by
+     * the "column_pivot" configuration parameter supplied to this View's
+     * contructor.
+     *
+     *
+     * @return std::int32_t the number of aggregated columns
+     */
     std::int32_t num_columns() const;
 
+    /**
+     * @brief The schema of this View.  A schema is an std::map, the keys of which
+     * are the columns of this View, and the values are their string type names.
+     * If this View is aggregated, theses will be the aggregated types;
+     * otherwise these types will be the same as the columns in the underlying
+     * Table.
+     *
+     * @return std::map<std::string, std::string>
+     */
     std::map<std::string, std::string> schema() const;
+
+    /**
+     * @brief The column names of this View. If the View is aggregated, the
+     * individual column names will be joined with a separator character
+     * specified by the user, or defaulting to "|".
+     *
+     * @return std::vector<std::string>
+     */
     std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0) const;
 
-    // Pivot table operations
-    std::int32_t get_row_expanded(std::int32_t idx) const;
-    t_index expand(std::int32_t idx, std::int32_t row_pivot_length);
-    t_index collapse(std::int32_t idx);
-    void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
-
-    // Data serialization
+    /**
+     * @brief Returns shared pointer to a t_data_slice object, which contains the
+     * underlying slice of data as well as the metadata required to interface
+     * with it.
+     *
+     * @tparam
+     * @param start_row
+     * @param end_row
+     * @param start_col
+     * @param end_col
+     * @return std::shared_ptr<t_data_slice<t_ctx0>>
+     */
     std::shared_ptr<t_data_slice<CTX_T>> get_data(
         t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col);
+
+    // Delta calculation
+    bool _get_deltas_enabled() const;
+    void _set_deltas_enabled(bool enabled_state);
+
+    // Pivot table operations
+
+    /**
+     * @brief Whether the row at "ridx" is expanded or collapsed.
+     *
+     * @param ridx
+     * @return std::int32_t
+     */
+    std::int32_t get_row_expanded(std::int32_t ridx) const;
+
+    /**
+     * @brief Expands the row at "ridx".
+     *
+     * @param ridx
+     * @param row_pivot_length
+     * @return t_index
+     */
+    t_index expand(std::int32_t ridx, std::int32_t row_pivot_length);
+
+    /**
+     * @brief Collapses the row at "ridx".
+     *
+     * @param ridx
+     * @return t_index
+     */
+    t_index collapse(std::int32_t ridx);
+
+    /**
+     * @brief Set the expansion "depth" of the pivot tree.
+     *
+     * @param depth
+     * @param row_pivot_length
+     */
+    void set_depth(std::int32_t depth, std::int32_t row_pivot_length);
 
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
@@ -59,6 +143,7 @@ public:
     std::vector<t_sortspec> get_sorts() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
+    t_rowdelta get_row_delta(t_index bidx, t_index eidx) const;
     bool is_column_only() const;
 
 private:

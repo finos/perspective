@@ -301,6 +301,11 @@ t_ctx1::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return rval;
 }
 
+bool
+t_ctx1::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
+}
+
 void
 t_ctx1::set_feature_state(t_ctx_feature feature, bool state) {
     m_features[feature] = state;
@@ -331,6 +336,13 @@ t_ctx1::get_min_max() const {
     return m_minmax;
 }
 
+/**
+ * @brief Returns updated cells.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     PSP_TRACE_SENTINEL();
@@ -339,6 +351,37 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     eidx = std::min(eidx, t_index(m_traversal->size()));
 
     t_stepdelta rval(m_rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
+    m_tree->clear_deltas();
+    return rval;
+}
+
+/**
+ * @brief Returns the row indices that have been updated with new data.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx1::get_row_delta(t_index bidx, t_index eidx) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    bidx = std::min(bidx, t_index(m_traversal->size()));
+    eidx = std::min(eidx, t_index(m_traversal->size()));
+    std::vector<std::int32_t> rows;
+
+    const auto& deltas = m_tree->get_deltas();
+    for (t_index idx = bidx; idx < eidx; ++idx) {
+        t_index ptidx = m_traversal->get_tree_index(idx);
+        // Retrieve delta from storage
+        auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
+        bool unique_ridx = std::find(rows.begin(), rows.end(), idx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
+            rows.push_back(idx);
+    }
+
+    std::sort(rows.begin(), rows.end());
+    t_rowdelta rval(m_rows_changed, rows);
     m_tree->clear_deltas();
     return rval;
 }

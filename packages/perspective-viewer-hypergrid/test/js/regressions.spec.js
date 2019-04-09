@@ -44,6 +44,11 @@ utils.with_server({}, () => {
         "regressions.html",
         () => {
             describe("Updates", () => {
+                test.capture("should not render an extra row for column_only views", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["y"]'), viewer);
+                });
                 test.capture("regular updates", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");

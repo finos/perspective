@@ -209,6 +209,13 @@ t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return out_data;
 }
 
+/**
+ * @brief
+ *
+ * @param bidx
+ * @param eidx
+ * @return std::vector<t_cellupd>
+ */
 std::vector<t_cellupd>
 t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
     std::unordered_set<t_tscalar> pkeys;
@@ -268,6 +275,13 @@ t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
     return rval;
 }
 
+/**
+ * @brief Returns updated cells.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     bidx = std::min(bidx, m_traversal->size());
@@ -275,6 +289,72 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
     t_stepdelta rval(rows_changed, m_columns_changed, get_cell_delta(bidx, eidx));
     m_deltas->clear();
+    clear_deltas();
+    return rval;
+}
+
+/**
+ * @brief Returns the row indices that have been updated with new data.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
+    bidx = std::min(bidx, m_traversal->size());
+    eidx = std::min(eidx, m_traversal->size());
+    bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
+    std::vector<std::int32_t> rows;
+
+    std::unordered_set<t_tscalar> pkeys;
+    t_tscalar prev_pkey;
+    prev_pkey.set(t_none());
+
+    if (m_traversal->empty_sort_by()) {
+        std::vector<t_tscalar> pkey_vec = m_traversal->get_pkeys(bidx, eidx);
+        for (t_index idx = 0, loop_end = pkey_vec.size(); idx < loop_end; ++idx) {
+            const t_tscalar& pkey = pkey_vec[idx];
+            t_index row = bidx + idx;
+            // Retrieve a pair of iterators from delta storage - start of cell, end of cell
+            std::pair<t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator,
+                t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator>
+                iters = m_deltas->get<by_zc_pkey_colidx>().equal_range(pkey);
+            for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter = iters.first;
+                 iter != iters.second; ++iter) {
+                if (std::find(rows.begin(), rows.end(), row) == rows.end())
+                    rows.push_back(row);
+            }
+        }
+    } else {
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            if (prev_pkey != iter->m_pkey) {
+                pkeys.insert(iter->m_pkey);
+                prev_pkey = iter->m_pkey;
+            }
+        }
+
+        // get row indices and assign into r_indices
+        std::unordered_map<t_tscalar, t_index> r_indices;
+        m_traversal->get_row_indices(pkeys, r_indices);
+
+        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
+             = m_deltas->get<by_zc_pkey_colidx>().begin();
+             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
+            t_index row = r_indices[iter->m_pkey];
+            bool valid_ridx = bidx <= row && row <= eidx;
+            bool unique_ridx = std::find(rows.begin(), rows.end(), row) == rows.end();
+            if (valid_ridx && unique_ridx) {
+                rows.push_back(row);
+            }
+        }
+    }
+
+    std::sort(rows.begin(), rows.end());
+    t_rowdelta rval(rows_changed, rows);
+    m_deltas->clear(); // what is the difference between this line and clear_deltas()?
     clear_deltas();
     return rval;
 }
@@ -449,6 +529,16 @@ t_ctx0::disable() {
 void
 t_ctx0::enable() {
     m_features[CTX_FEAT_ENABLED] = true;
+}
+
+bool
+t_ctx0::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
+}
+
+void
+t_ctx0::set_deltas_enabled(bool enabled_state) {
+    m_features[CTX_FEAT_DELTA] = enabled_state;
 }
 
 std::vector<t_stree*>

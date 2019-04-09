@@ -143,7 +143,7 @@ export function bindTemplate(template, ...styleStrings) {
  */
 function _attribute(_default) {
     return function(cls, name, desc) {
-        const old_set = desc.set;
+        const old_set = desc.value;
         desc.set = function(x) {
             let attr = this.getAttribute(name);
             try {
@@ -170,6 +170,8 @@ function _attribute(_default) {
                 return JSON.parse(this.getAttribute(name));
             }
         };
+        delete desc["value"];
+        delete desc["writable"];
         return desc;
     };
 }

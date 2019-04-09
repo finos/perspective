@@ -13,9 +13,13 @@ Perspective
    :maxdepth: 2
    :caption: Contents:
 
-   python
-   cpp
-   js
+   md/installation
+   md/usage
+   md/development
+   rst/js
+   
+.. rst/python
+.. rst/cpp
 
 .. |build-status| image:: https://travis-ci.org/jpmorganchase/perspective.svg?branch=master
     :alt: Build Status

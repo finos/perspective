@@ -46,12 +46,11 @@ export const draw = (mode, set_config) =>
             }
         }
 
-        const row_pivots = this._config.row_pivot;
-        const col_pivots = this._config.column_pivot;
+        const config = await view.get_config();
 
-        // FIXME: super tight coupling to private viewer methods
-        const aggregates = this._get_view_aggregates();
-        const hidden = this._get_view_hidden(aggregates);
+        const row_pivots = config.row_pivots;
+        const col_pivots = config.column_pivots;
+        const columns = config.columns;
 
         const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
         let js, element;
@@ -61,28 +60,28 @@ export const draw = (mode, set_config) =>
         }
 
         let configs = [],
-            xaxis_name = aggregates.length > 0 ? aggregates[0].column : undefined,
+            xaxis_name = columns.length > 0 ? columns[0] : undefined,
             xaxis_type = schema[xaxis_name],
-            yaxis_name = aggregates.length > 1 ? aggregates[1].column : undefined,
+            yaxis_name = columns.length > 1 ? columns[1] : undefined,
             yaxis_type = schema[yaxis_name],
             xtree_name = row_pivots.length > 0 ? row_pivots[row_pivots.length - 1] : undefined,
             xtree_type = tschema[xtree_name],
             ytree_name = col_pivots.length > 0 ? col_pivots[col_pivots.length - 1] : undefined,
             ytree_type = tschema[ytree_name],
-            num_aggregates = aggregates.length - hidden.length;
+            num_aggregates = columns.length;
 
         try {
             if (mode === "scatter") {
                 const cols = await view.to_columns();
-                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
-                const config = (configs[0] = default_config.call(this, aggregates, mode));
+                const config = (configs[0] = default_config.call(this, columns, mode));
+                const [series, xtop, colorRange, ytop] = make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
 
                 config.legend.floating = series.length <= 20;
                 config.legend.enabled = col_pivots.length > 0;
                 config.series = series;
                 config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
                 if (colorRange[0] !== Infinity) {
-                    if (aggregates.length <= 3) {
+                    if (columns.length <= 3) {
                         config.chart.type = "coloredScatter";
                     } else {
                         config.chart.type = "coloredBubble";
@@ -97,8 +96,8 @@ export const draw = (mode, set_config) =>
                 set_tick_size.call(this, config);
             } else if (mode === "heatmap") {
                 js = await view.to_json();
-                let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
-                let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, hidden, ytree_type);
+                let config = (configs[0] = default_config.call(this, columns, mode));
+                let [series, top, ytop, colorRange] = make_xyz_data(js, row_pivots, ytree_type);
                 config.series = [
                     {
                         name: null,
@@ -115,9 +114,9 @@ export const draw = (mode, set_config) =>
                 set_category_axis(config, "yAxis", ytree_type, ytop);
             } else if (mode === "treemap" || mode === "sunburst") {
                 js = await view.to_json();
-                let [charts, , colorRange] = make_tree_data(js, row_pivots, hidden, aggregates, mode === "treemap");
+                let [charts, , colorRange] = make_tree_data(js, row_pivots, columns, mode === "treemap");
                 for (let series of charts) {
-                    let config = default_config.call(this, aggregates, mode, js, col_pivots);
+                    let config = default_config.call(this, columns, mode);
                     config.series = [series];
                     if (charts.length > 1) {
                         config.title.text = series.title;
@@ -131,14 +130,14 @@ export const draw = (mode, set_config) =>
                 }
             } else if (mode === "line") {
                 let s;
-                let config = (configs[0] = default_config.call(this, aggregates, mode, js, col_pivots));
+                let config = (configs[0] = default_config.call(this, columns, mode));
 
                 if (col_pivots.length === 0) {
                     const cols = await view.to_columns();
-                    s = await make_xy_column_data(cols, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+                    s = await make_xy_column_data(cols, schema, columns, row_pivots, col_pivots);
                 } else {
                     js = await view.to_json();
-                    s = await make_xy_data(js, schema, aggregates.map(x => x.column), row_pivots, col_pivots, hidden);
+                    s = await make_xy_data(js, schema, columns, row_pivots, col_pivots);
                 }
 
                 const series = s[0];
@@ -157,9 +156,9 @@ export const draw = (mode, set_config) =>
                 set_both_axis(config, "xAxis", xaxis_name, xaxis_type, xaxis_type, xtop);
                 set_both_axis(config, "yAxis", yaxis_name, yaxis_type, yaxis_type, ytop);
             } else {
-                let config = (configs[0] = default_config.call(this, aggregates, mode));
+                let config = (configs[0] = default_config.call(this, columns, mode));
                 let cols = await view.to_columns();
-                let [series, top] = make_y_data(cols, row_pivots, hidden);
+                let [series, top] = make_y_data(cols, row_pivots);
                 config.series = series;
                 config.colors = series.length <= 10 ? COLORS_10 : COLORS_20;
                 config.legend.enabled = col_pivots.length > 0 || series.length > 1;
@@ -177,7 +176,7 @@ export const draw = (mode, set_config) =>
                         startOnTick: false,
                         endOnTick: false,
                         title: {
-                            text: aggregates.map(x => x.column).join(",  "),
+                            text: columns.join(",  "),
                             style: {color: "#666666", fontSize: "14px"}
                         },
                         labels: {overflow: "justify"}

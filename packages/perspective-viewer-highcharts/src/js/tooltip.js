@@ -8,23 +8,23 @@
  */
 
 export function format_tooltip(context, type, schema, axis_titles, pivot_titles) {
-    const row_pivot_titles = pivot_titles.row,
+    const row_pivots_titles = pivot_titles.row,
         column_pivot_titles = pivot_titles.column;
 
-    const has_row_pivot = row_pivot_titles.length > 0,
-        has_column_pivot = column_pivot_titles.length > 0;
+    const has_row_pivots = row_pivots_titles.length > 0,
+        has_column_pivots = column_pivot_titles.length > 0;
 
     if (type === "y") {
         // pivots cannot be type-mapped
-        let row_pivot_text = "",
+        let row_pivots_text = "",
             column_pivot_text = "";
 
-        if (has_row_pivot) {
-            let row_pivot_values = get_pivot_values(context.key);
-            row_pivot_text = collate_multiple_values(row_pivot_titles, row_pivot_values);
+        if (has_row_pivots) {
+            let row_pivots_values = get_pivot_values(context.key);
+            row_pivots_text = collate_multiple_values(row_pivots_titles, row_pivots_values);
         }
 
-        if (has_column_pivot) {
+        if (has_column_pivots) {
             let column_pivot_values = context.series.userOptions.name.split(", ");
             column_pivot_text = collate_multiple_values(column_pivot_titles, column_pivot_values);
         }
@@ -32,7 +32,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
         const axis_title = context.series.userOptions.stack;
         const axis_type = get_axis_type(axis_title, schema);
 
-        return `${row_pivot_text}
+        return `${row_pivots_text}
                 ${column_pivot_text}
                 <span>${axis_title}: </span><b>${format_value(context.y, axis_type)}</b>`;
     } else if (type === "xy") {
@@ -41,7 +41,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
             has_z_values = value_exists(axis_titles[2]),
             has_w_values = value_exists(axis_titles[3]);
 
-        let row_pivot_text = "",
+        let row_pivots_text = "",
             column_pivot_text = "",
             x_text = "",
             y_text = "",
@@ -49,12 +49,12 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
             w_text = "";
 
         // render tooltip based on axis + pivots
-        if (has_row_pivot) {
-            let row_pivot_values = context.key.split(",");
-            row_pivot_text = collate_multiple_values(row_pivot_titles, row_pivot_values);
+        if (has_row_pivots) {
+            let row_pivots_values = context.key.split(",");
+            row_pivots_text = collate_multiple_values(row_pivots_titles, row_pivots_values);
         }
 
-        if (has_column_pivot) {
+        if (has_column_pivots) {
             let column_pivot_values = context.point.series.name.split(",");
             column_pivot_text = collate_multiple_values(column_pivot_titles, column_pivot_values);
         }
@@ -84,7 +84,7 @@ export function format_tooltip(context, type, schema, axis_titles, pivot_titles)
             w_text = collate_single_value(w_axis_title, raw_w_axis_value, schema);
         }
 
-        const tooltip_text = [row_pivot_text, column_pivot_text, x_text, y_text, z_text, w_text];
+        const tooltip_text = [row_pivots_text, column_pivot_text, x_text, y_text, z_text, w_text];
         return tooltip_text.join("");
     } else if (type === "xyz") {
         return `<span>${format_value(context.point.value)}</span>`;

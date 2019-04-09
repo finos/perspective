@@ -26,6 +26,7 @@ struct PERSPECTIVE_EXPORT t_config_recipe {
     std::vector<t_pivot_recipe> m_row_pivots;
     std::vector<t_pivot_recipe> m_col_pivots;
     std::vector<std::pair<std::string, std::string>> m_sortby;
+    std::vector<std::pair<std::string, std::string>> m_col_sortby;
     std::vector<t_aggspec_recipe> m_aggregates;
     std::vector<std::string> m_detail_columns;
     t_totals m_totals;
@@ -57,9 +58,9 @@ public:
     // view config
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots, const std::vector<t_aggspec>& aggregates,
-        const std::vector<t_sortspec>& sortspecs, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, const std::vector<std::string>& col_names,
-        bool column_only);
+        const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
+        t_filter_op combiner, const std::vector<t_fterm>& fterms,
+        const std::vector<std::string>& col_names, bool column_only);
 
     // grouped_pkeys
     t_config(const std::vector<std::string>& row_pivots,
@@ -131,6 +132,7 @@ public:
 
     std::vector<std::pair<std::string, std::string>> get_sortby_pairs() const;
     const std::vector<t_sortspec>& get_sortspecs() const;
+    const std::vector<t_sortspec>& get_col_sortspecs() const;
 
     bool has_filters() const;
 
@@ -168,6 +170,7 @@ private:
     bool m_column_only;
     std::map<std::string, std::string> m_sortby;
     std::vector<t_sortspec> m_sortspecs;
+    std::vector<t_sortspec> m_col_sortspecs;
     std::vector<t_aggspec> m_aggregates;
     std::vector<std::string> m_detail_columns;
     t_totals m_totals;

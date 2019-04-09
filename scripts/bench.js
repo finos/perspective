@@ -13,6 +13,7 @@ const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const args = process.argv.slice(2);
 const LIMIT = args.indexOf("--limit");
+const IS_DELTA = args.indexOf("--delta");
 
 function docker() {
     console.log("Creating puppeteer docker image");
@@ -21,9 +22,15 @@ function docker() {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
     cmd += " perspective/puppeteer nice -n -20 node packages/perspective/bench/js/bench.js";
+
     if (LIMIT !== -1) {
         let limit = args[LIMIT + 1];
         cmd += ` --limit ${limit}`;
+    }
+
+    if (IS_DELTA !== -1) {
+        console.log("Running benchmarking suite for delta - only comparing results within master.");
+        cmd += " --delta";
     }
     return cmd;
 }

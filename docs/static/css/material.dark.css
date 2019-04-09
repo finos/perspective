@@ -1,0 +1,149 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+@import url("https://fonts.googleapis.com/css?family=Material+Icons");
+@import url("https://fonts.googleapis.com/css?family=Open+Sans");
+@import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+perspective-viewer {
+  --interface--font-family: "Open Sans";
+  --interface-monospace--font-family: "Roboto Mono";
+  --inactive-column-selector--content: "\E835";
+  --active-column-selector--content: "\E834";
+  --active-column-selector--color: #1a7da1;
+  --active-column--background: none;
+  --column--height: 21px;
+  --active-column--height: 51px;
+  --inactive-column--height: 24px;
+  --active-columns--justify-content: space-evenly;
+  --inactive-column--opacity: 0.3;
+  --column_type-float--color: #1a7da1;
+  --column_type-string--color: #ff8888;
+  --config_button--before: "more_vert";
+  --button--font-family: "Material Icons";
+  --copy_button--before: "file_copy";
+  --download_button--before: "save_alt";
+  --reset_button--before: "refresh";
+  --row_draggable-border-last-child-width: 0;
+  --row_pivots--before: "Group By";
+  --column_pivots--before: "Split By";
+  --sort-order-asc--before: "arrow_upward";
+  --sort-order-desc--before: "arrow_downward";
+  --sort-order-none--before: "-";
+  --sort-order-col-asc--before: "arrow_back";
+  --sort-order-col-desc--before: "arrow_forward";
+  --sort_order-padding: 0 0 0 0px;
+  --select--background-color: none;
+  --select--padding: 0px;
+  --column-drop-container--background: none;
+  --column-drop-container--padding: 0px;
+  --column-drop-container--margin: 24px 24px 0px 0px;
+  --column-drop-label--margin: -12px 0px 0px 0px;
+  --column-drop-label--font-size: 10px;
+  --column-drop-label--display: inline-block;
+  --column-container--margin: 24px 0px 0px 0px;
+  --column-add--font-family: "Material Icons";
+  --column-add--before: "add";
+  --column_type--padding: 0px 0px 0px 0px;
+  --column_type--width: 25px;
+  --column-selector--font-family: "Material Icons";
+  --active-column-selector--height: 45px;
+  --column_selector--width: 31px;
+  --column_selector--font-size: 16px;
+  --hypergrid--padding: 24px;
+  --side_panel--padding: 24px 24px 24px 17px;
+  --button--padding: 24px 17px 0px 17px;
+  --button--font-size: 16px;
+  --button-hover--color: #1a7da1;
+  --top_panel--padding: 0px 0px 24px 0px;
+  --hypergrid-scrollbar--width: 8px;
+  --hypergrid-scrollbar--border-radius: 5px;
+  --hypergrid-positive--color: #1078d1;
+  --hypergrid-negative--color: #de3838;
+  --hypergrid--font-size: 12px;
+  --hypergrid-header--font-size: 12px;
+  --hypergrid--font-family: "Open Sans";
+  --hypergrid-header--font-family: "Open Sans";
+}
+.homeContainer {
+  /******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+  @import url("https://fonts.googleapis.com/css?family=Open+Sans");
+  @import url("https://fonts.googleapis.com/css?family=Material+Icons");
+  @import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
+}
+.homeContainer perspective-viewer {
+  background-color: #2a2c2f;
+  color: #cfd8dc;
+  --plugin--background: #2f3136;
+  --column-drop-label--color: #666;
+  --column--border-color: #3b3f46;
+  --column-drop-target--background: #135d78;
+  --active-column-selector--color: #22a0ce;
+  --column_type-float--color: #22a0ce;
+  --column_type-string--color: #ff8888;
+  --psp-text-field--border-color: #22a0ce;
+  --button-hover--color: #22a0ce;
+  --hypergrid-tree-header--background: #2f3136;
+  --hypergrid-tree-header--color: #eee;
+  --hypergrid-header--background: #2f3136;
+  --hypergrid-separator--color: #eee;
+  --hypergrid-header--color: #eee;
+  --hypergrid-positive--color: #22a0ce;
+  --hypergrid-negative--color: #ff8888;
+  --hypergrid-positive--background: #2f3136;
+  --hypergrid-negative--background: #2f3136;
+  --hypergrid--font-size: 12px;
+  --hypergrid-header--font-size: 12px;
+  --hypergrid--font-family: "Open Sans";
+  --hypergrid-header--font-family: "Open Sans";
+  --hypergrid-row-hover--background: #555;
+  --hypergrid-row-hover--color: #eee;
+  --hypergrid-cell-hover--background: #444;
+  --hypergrid-cell-hover--color: #eee;
+  --highcharts-label--fill: #cfd8dc;
+  --highcharts-rect--opacity: 0.85;
+  --highcharts-grid-line--stroke: #3b3f46;
+  --highcharts-tooltip--background: #2a2c2f;
+  --d3fc-legend-text: #bbbbbb;
+  --d3fc-axis--ticks: #bbbbbb;
+  --d3fc-axis--lines: #555555;
+  --d3fc-tooltip--background: #333333;
+  --d3fc-tooltip--color: #cfd8dc;
+  --d3fc-series: #1f77b4;
+  --d3fc-series-1: #0366d6;
+  --d3fc-series-2: #ff7f0e;
+  --d3fc-series-3: #2ca02c;
+  --d3fc-series-4: #d62728;
+  --d3fc-series-5: #9467bd;
+  --d3fc-series-6: #8c564b;
+  --d3fc-series-7: #e377c2;
+  --d3fc-series-8: #7f7f7f;
+  --d3fc-series-9: #bcbd22;
+  --d3fc-series-10: #17becf;
+  --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
+  --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+  --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
+  --warning--color: #333;
+}
+.homeContainer #app {
+  background-color: #2A2C2F !important;
+}

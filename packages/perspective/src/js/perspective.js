@@ -33,6 +33,10 @@ if (typeof self !== "undefined" && self.performance === undefined) {
     self.performance = {now: Date.now};
 }
 
+/**
+ * The main API module for Perspective.
+ * @module perspective
+ */
 export default function(Module) {
     let __MODULE__ = Module;
     let accessor = new DataAccessor();
@@ -69,7 +73,8 @@ export default function(Module) {
      * @param {*} limit
      * @param {*} limit_index
      * @param {*} is_delete
-     * @returns
+     * @private
+     * @returns {Table}
      */
     function make_table(accessor, pool, gnode, computed, index, limit, limit_index, is_update, is_delete, is_arrow) {
         if (is_arrow) {
@@ -202,14 +207,14 @@ export default function(Module) {
 
     /**
      * A View object represents a specific transform (configuration or pivot,
-     * filter, sort, etc) configuration on an underlying {@link table}. A View
-     * receives all updates from the {@link table} from which it is derived, and
+     * filter, sort, etc) configuration on an underlying {@link module:perspective~table}. A View
+     * receives all updates from the {@link module:perspective~table} from which it is derived, and
      * can be serialized to JSON or trigger a callback when it is updated.  View
      * objects are immutable, and will remain in memory and actively process
-     * updates until its {@link view#delete} method is called.
+     * updates until its {@link module:perspective~view#delete} method is called.
      *
      * <strong>Note</strong> This constructor is not public - Views are created
-     * by invoking the {@link table#view} method.
+     * by invoking the {@link module:perspective~table#view} method.
      *
      * @example
      * // Returns a new View, pivoted in the row space by the "name" column.
@@ -240,17 +245,17 @@ export default function(Module) {
     }
 
     /**
-     * A copy of the config object passed to the {@link table.view} method
-     * which created this {@link view}.
+     * A copy of the config object passed to the {@link table#view} method
+     * which created this {@link module:perspective~view}.
      *
-     * @returns {object} Shared the same key/values properties as {@link view}
+     * @returns {object} Shared the same key/values properties as {@link module:perspective~view}
      */
     view.prototype.get_config = async function() {
         return JSON.parse(JSON.stringify(this.config));
     };
 
     /**
-     * Delete this {@link view} and clean up all resources associated with it.
+     * Delete this {@link module:perspective~view} and clean up all resources associated with it.
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
@@ -284,16 +289,27 @@ export default function(Module) {
         return this._View.sides();
     };
 
+    view.prototype._num_hidden = function() {
+        // Count hidden columns.
+        let hidden = 0;
+        for (const sort of this.config.sort) {
+            if (this.config.columns.indexOf(sort[0]) === -1) {
+                hidden++;
+            }
+        }
+        return hidden;
+    };
+
     /**
-     * The schema of this {@link view}. A schema is an Object, the keys of which
-     * are the columns of this {@link view}, and the values are their string type names.
-     * If this {@link view} is aggregated, theses will be the aggregated types;
+     * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
+     * are the columns of this {@link module:perspective~view}, and the values are their string type names.
+     * If this {@link module:perspective~view} is aggregated, theses will be the aggregated types;
      * otherwise these types will be the same as the columns in the underlying
-     * {@link table}
+     * {@link module:perspective~table}
      *
      * @async
      *
-     * @returns {Promise<Object>} A Promise of this {@link view}'s schema.
+     * @returns {Promise<Object>} A Promise of this {@link module:perspective~view}'s schema.
      */
     view.prototype.schema = async function() {
         return extract_map(this._View.schema());
@@ -307,103 +323,48 @@ export default function(Module) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
-        let viewport = this.config.viewport ? this.config.viewport : {};
-        let start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        let end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
-        let start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        let end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
+        const hidden = this._num_hidden();
 
-        let slice;
+        const viewport = this.config.viewport ? this.config.viewport : {};
+        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
+        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
-        const sorted = typeof this.config.sort !== "undefined" && this.config.sort.length > 0;
+        const num_sides = this.sides();
+        const nidx = ["zero", "one", "two"][num_sides];
 
-        if (this.column_only) {
-            end_row += this.config.column_pivot.length;
-        }
-
-        if (this.sides() === 0) {
-            slice = __MODULE__.get_data_slice_zero(this._View, start_row, end_row, start_col, end_col);
-        } else if (this.sides() === 1) {
-            slice = __MODULE__.get_data_slice_one(this._View, start_row, end_row, start_col, end_col);
-        } else {
-            slice = __MODULE__.get_data_two(this._View, start_row, end_row, start_col, end_col);
-        }
+        const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        const col_names = extract_vector(slice.get_column_names());
 
         let data = formatter.initDataValue();
-
-        if (this.sides() === 0) {
-            const col_names = extract_vector(slice.get_column_names());
-            for (let ridx = start_row; ridx < end_row; ridx++) {
-                const row = formatter.initRowValue();
-                for (let cidx = start_col; cidx < end_col; cidx++) {
-                    const col_name = col_names[cidx];
-                    const value = __MODULE__.get_from_data_slice_zero(slice, ridx, cidx);
-                    formatter.setColumnValue(data, row, col_name, value);
-                }
-                formatter.addRow(data, row);
-            }
-        } else if (this.sides() === 1) {
-            const col_names = extract_vector(slice.get_column_names());
-            for (let ridx = start_row; ridx < end_row; ridx++) {
-                const row = formatter.initRowValue();
-                for (let cidx = start_col; cidx < end_col; cidx++) {
-                    const col_name = col_names[cidx];
-                    if (cidx === 0) {
-                        const row_path = slice.get_row_path(ridx);
-                        formatter.initColumnValue(data, row, col_name);
-                        for (let i = 0; i < row_path.size(); i++) {
-                            const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                            formatter.addColumnValue(data, row, col_name, value);
-                        }
-                        row_path.delete();
-                    } else {
-                        const value = __MODULE__.get_from_data_slice_one(slice, ridx, cidx);
-                        formatter.setColumnValue(data, row, col_name, value);
-                    }
-                }
-                formatter.addRow(data, row);
-            }
-        } else {
-            // determine which level we stop pulling column names
-            let skip = false,
-                depth = 0;
-            if (sorted) {
-                skip = true;
-                depth = this.config.column_pivot.length;
-            }
-            let col_names = [[]].concat(this._column_names(skip, depth));
-            let row;
-            let ridx = -1;
-            for (let idx = 0; idx < slice.length; idx++) {
-                let cidx = idx % Math.min(end_col - start_col, col_names.slice(start_col, end_col + 1).length);
-                if (cidx === 0) {
-                    if (row) {
-                        formatter.addRow(data, row);
-                    }
-                    row = formatter.initRowValue();
-                    ridx++;
+        for (let ridx = start_row; ridx < end_row; ridx++) {
+            let row = formatter.initRowValue();
+            for (let cidx = start_col; cidx < end_col; cidx++) {
+                const col_name = col_names[cidx];
+                if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
+                    // Hidden columns are always at the end, so don't emit these.
+                    continue;
+                } else if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
-                        let col_name = "__ROW_PATH__";
-                        let row_path = this._View.get_row_path(start_row + ridx);
-                        formatter.initColumnValue(data, row, col_name);
+                        const row_path = slice.get_row_path(ridx);
+                        formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = __MODULE__.scalar_vec_to_val(row_path, i);
-                            formatter.addColumnValue(data, row, col_name, value);
+                            formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                         }
                         row_path.delete();
                     }
                 } else {
-                    let col_name = col_names[start_col + cidx];
-                    formatter.setColumnValue(data, row, col_name, slice[idx]);
+                    const value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+                    formatter.setColumnValue(data, row, col_name, value);
                 }
             }
+            formatter.addRow(data, row);
+        }
 
-            if (row) {
-                formatter.addRow(data, row);
-            }
-            if (this.column_only) {
-                data = formatter.slice(data, this.config.column_pivot.length);
-            }
+        if (this.column_only) {
+            data = formatter.slice(data, 1);
         }
 
         return formatter.formatData(data, options.config);
@@ -425,10 +386,10 @@ export default function(Module) {
      * to serialize.
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
-     * representing the rows of this {@link view}.  If this {@link view} had a
+     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
      * "row_pivots" config parameter supplied when constructed, each row Object
      * will have a "__ROW_PATH__" key, whose value specifies this row's
-     * aggregated path.  If this {@link view} had a "column_pivots" config
+     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
@@ -452,10 +413,10 @@ export default function(Module) {
      * to serialize.
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
-     * representing the rows of this {@link view}.  If this {@link view} had a
+     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
      * "row_pivots" config parameter supplied when constructed, each row Object
      * will have a "__ROW_PATH__" key, whose value specifies this row's
-     * aggregated path.  If this {@link view} had a "column_pivots" config
+     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
@@ -481,10 +442,10 @@ export default function(Module) {
      * config object.
      *
      * @returns {Promise<string>} A Promise resolving to a string in CSV format
-     * representing the rows of this {@link view}.  If this {@link view} had a
+     * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
      * "row_pivots" config parameter supplied when constructed, each row
      * will have prepended those values specified by this row's
-     * aggregated path.  If this {@link view} had a "column_pivots" config
+     * aggregated path.  If this {@link module:perspective~view} had a "column_pivots" config
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
@@ -500,7 +461,7 @@ export default function(Module) {
      * @param {string} column_name The name of the column to serialize.
      *
      * @returns {Promise<TypedArray>} A promise resolving to a TypedArray
-     * representing the data of the column as retrieved from the {@link view} - all
+     * representing the data of the column as retrieved from the {@link module:perspective~view} - all
      * pivots, aggregates, sorts, and filters have been applied onto the values
      * inside the TypedArray. The TypedArray will be constructed based on data type -
      * integers will resolve to Int8Array, Int16Array, or Int32Array. Floats resolve to
@@ -510,10 +471,12 @@ export default function(Module) {
     view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
         const num_rows = await this.num_rows();
+        const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
+
         let idx = names.indexOf(col_name);
 
         const start_row = options.start_row || 0;
-        const end_row = options.end_row || num_rows;
+        const end_row = (options.end_row || num_rows) + (column_pivot_only ? 1 : 0);
 
         // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
@@ -526,7 +489,6 @@ export default function(Module) {
             // columns start at 1 for > 0-sided views
             return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
         } else {
-            const column_pivot_only = this.config.row_pivot[0] === "psp_okey" || this.column_only === true;
             return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
         }
     };
@@ -585,8 +547,8 @@ export default function(Module) {
     };
 
     /**
-     * The number of aggregated rows in this {@link view}.  This is affected by
-     * the "row_pivots" configuration parameter supplied to this {@link view}'s
+     * The number of aggregated rows in this {@link module:perspective~view}.  This is affected by
+     * the "row_pivots" configuration parameter supplied to this {@link module:perspective~view}'s
      * contructor.
      *
      * @async
@@ -607,7 +569,9 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated columns.
      */
     view.prototype.num_columns = async function() {
-        return this._View.num_columns();
+        const ncols = this._View.num_columns();
+        const nhidden = this._num_hidden();
+        return ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden;
     };
 
     /**
@@ -629,7 +593,7 @@ export default function(Module) {
      * @returns {Promise<void>}
      */
     view.prototype.expand = async function(idx) {
-        return this._View.expand(idx, this.config.row_pivot.length);
+        return this._View.expand(idx, this.config.row_pivots.length);
     };
 
     /**
@@ -644,13 +608,18 @@ export default function(Module) {
     };
 
     /**
-     * Set expansion `depth` pf the pivot tree.
+     * Set expansion `depth` of the pivot tree.
      *
      */
     view.prototype.set_depth = async function(depth) {
-        return this._View.set_depth(depth, this.config.row_pivot.length);
+        return this._View.set_depth(depth, this.config.row_pivots.length);
     };
 
+    /**
+     * Returns the data of all changed rows in JSON format, or for 1+ sided contexts
+     * the entire dataset of the view.
+     * @private
+     */
     view.prototype._get_step_delta = async function() {
         let delta = this._View.get_step_delta(0, 2147483647);
         let data;
@@ -678,7 +647,17 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link view}.  Whenever the {@link view}'s
+     * Returns an array of row indices indicating which rows have been changed
+     * in an update.
+     * @private
+     */
+    view.prototype._get_row_delta = async function() {
+        let d = this._View.get_row_delta(0, 2147483647);
+        return extract_vector(d.rows);
+    };
+
+    /**
+     * Register a callback with this {@link module:perspective~view}.  Whenever the {@link module:perspective~view}'s
      * underlying table emits an update, this callback will be invoked with the
      * aggregated row deltas.
      *
@@ -688,16 +667,32 @@ export default function(Module) {
      *     - "rows": The callback is invoked with the changed rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        if (["none", "rows"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none" and "rows"`);
+        if (["none", "rows", "pkey"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
+        }
+        if (mode === "rows" || mode === "pkey") {
+            // Enable deltas only if needed by callback
+            if (!this._View._get_deltas_enabled()) {
+                this._View._set_deltas_enabled(true);
+            }
         }
         this.callbacks.push({
             view: this,
             callback: async () => {
-                if (mode === "rows") {
-                    callback(await this._get_step_delta());
-                } else {
-                    callback();
+                switch (mode) {
+                    case "rows":
+                        {
+                            callback(await this._get_step_delta());
+                        }
+                        break;
+                    case "pkey":
+                        {
+                            callback(await this._get_row_delta());
+                        }
+                        break;
+                    default: {
+                        callback();
+                    }
                 }
             }
         });
@@ -708,12 +703,12 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link view}.  Whenever the {@link view}
+     * Register a callback with this {@link module:perspective~view}.  Whenever the {@link module:perspective~view}
      * is deleted, this callback will be invoked.
      *
      * @param {function} callback A callback function invoked on update.  The
      *     parameter to this callback shares a structure with the return type of
-     *     {@link view#to_json}.
+     *     {@link module:perspective~view#to_json}.
      */
     view.prototype.on_delete = function(callback) {
         this._delete_callback = callback;
@@ -735,8 +730,8 @@ export default function(Module) {
      * each.
      *
      * <strong>Note</strong> This constructor is not public - Tables are created
-     * by invoking the {@link table} factory method, either on the perspective
-     * module object, or an a {@link worker} instance.
+     * by invoking the {@link module:perspective~table} factory method, either on the perspective
+     * module object, or an a {@link module:perspective~worker} instance.
      *
      * @class
      * @hideconstructor
@@ -763,7 +758,7 @@ export default function(Module) {
     };
 
     /**
-     * Remove all rows in this {@link table} while preserving the schema and
+     * Remove all rows in this {@link module:perspective~table} while preserving the schema and
      * construction options.
      */
     table.prototype.clear = function() {
@@ -771,7 +766,7 @@ export default function(Module) {
     };
 
     /**
-     * Replace all rows in this {@link table} the input data.
+     * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
         this.gnode.reset();
@@ -779,7 +774,7 @@ export default function(Module) {
     };
 
     /**
-     * Delete this {@link table} and clean up all resources associated with it.
+     * Delete this {@link module:perspective~table} and clean up all resources associated with it.
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
@@ -796,20 +791,20 @@ export default function(Module) {
     };
 
     /**
-     * Register a callback with this {@link table}.  Whenever the {@link view}
+     * Register a callback with this {@link module:perspective~table}.  Whenever the {@link module:perspective~view}
      * is deleted, this callback will be invoked.
      *
      * @param {function} callback A callback function invoked on update.  The
      *     parameter to this callback shares a structure with the return type of
-     *     {@link table#to_json}.
+     *     {@link module:perspective~table#to_json}.
      */
     table.prototype.on_delete = function(callback) {
         this._delete_callback = callback;
     };
 
     /**
-     * The number of accumulated rows in this {@link table}.  This is affected by
-     * the "index" configuration parameter supplied to this {@link view}'s
+     * The number of accumulated rows in this {@link module:perspective~table}.  This is affected by
+     * the "index" configuration parameter supplied to this {@link module:perspective~view}'s
      * contructor - as rows will be overwritten when they share an idnex column.
      *
      * @async
@@ -840,13 +835,13 @@ export default function(Module) {
     };
 
     /**
-     * The schema of this {@link table}.  A schema is an Object whose keys are the
-     * columns of this {@link table}, and whose values are their string type names.
+     * The schema of this {@link module:perspective~table}.  A schema is an Object whose keys are the
+     * columns of this {@link module:perspective~table}, and whose values are their string type names.
      *
      * @async
      * @param {boolean} computed Should computed columns be included?
      * (default false)
-     * @returns {Promise<Object>} A Promise of this {@link table}'s schema.
+     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
      */
     table.prototype.schema = async function(computed = false) {
         return this._schema(computed);
@@ -875,13 +870,13 @@ export default function(Module) {
     };
 
     /**
-     * The computed schema of this {@link table}. Returns a schema of only computed
+     * The computed schema of this {@link module:perspective~table}. Returns a schema of only computed
      * columns added by the user, the keys of which are computed columns and the values an
      * Object containing the associated column_name, column_type, and computation.
      *
      * @async
      *
-     * @returns {Promise<Object>} A Promise of this {@link table}'s computed schema.
+     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s computed schema.
      */
     table.prototype.computed_schema = async function() {
         return this._computed_schema();
@@ -910,18 +905,21 @@ export default function(Module) {
     };
 
     /**
-     * Create a new {@link view} from this table with a specified
+     * Create a new {@link module:perspective~view} from this table with a specified
      * configuration.
      *
-     * @param {Object} [config] The configuration object for this {@link view}.
-     * @param {Array<string>} [config.row_pivot] An array of column names
+     * @param {Object} [config] The configuration object for this {@link module:perspective~view}.
+     * @param {Array<string>} [config.row_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Row_labels Row Pivots}.
-     * @param {Array<string>} [config.column_pivot] An array of column names
+     * @param {Array<string>} [config.column_pivots] An array of column names
      * to use as {@link https://en.wikipedia.org/wiki/Pivot_table#Column_labels Column Pivots}.
-     * @param {Array<Object>} [config.aggregate] An Array of Aggregate configuration objects,
-     * each of which should provide a "column" and "op" property, representing the string
-     * aggregation type and associated column name, respectively.  Aggregates not provided
-     * will use their type defaults
+     * @param {Array<Object>} [config.columns] An array of column names for the
+     * output columns.  If none are provided, all columns are output.
+     * @param {Object} [config.aggregates] An object, the keys of which are column
+     * names, and their respective values ar ethe aggregates calculations to use
+     * when this view has `row_pivots`.  A column provided to `config.columns`
+     * without an aggregate in this object, will use the default aggregate
+     * calculation for its type.
      * @param {Array<Array<string>>} [config.filter] An Array of Filter configurations to
      * apply.  A filter configuration is an array of 3 elements:  A column name,
      * a supported filter comparison string (e.g. '===', '>'), and a value to compare.
@@ -931,28 +929,78 @@ export default function(Module) {
      *
      * @example
      * var view = table.view({
-     *      row_pivot: ['region'],
-     *      aggregate: [{op: 'dominant', column:'region'}],
+     *      row_pivots: ['region'],
+     *      columns: ["region"],
+     *      aggregates: {"region": "dominant"},
      *      filter: [['client', 'contains', 'fred']],
      *      sort: [['value', 'asc']]
      * });
      *
-     * @returns {view} A new {@link view} object for the supplied configuration,
+     * @returns {view} A new {@link module:perspective~view} object for the supplied configuration,
      * bound to this table
      */
-    table.prototype.view = function(config) {
-        config = {...config};
+    table.prototype.view = function(_config = {}) {
+        let config = {};
+        for (const key of Object.keys(_config)) {
+            if (defaults.CONFIG_ALIASES[key]) {
+                if (!config[defaults.CONFIG_ALIASES[key]]) {
+                    console.warn(`Deprecated: "${key}" config parameter, please use "${defaults.CONFIG_ALIASES[key]}" instead`);
+                    config[defaults.CONFIG_ALIASES[key]] = _config[key];
+                } else {
+                    throw new Error(`Duplicate configuration parameter "${key}"`);
+                }
+            } else if (key === "aggregate") {
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" amd "columns"`);
+                config[key] = _config[key];
+            } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
+                config[key] = _config[key];
+            } else {
+                throw new Error(`Unrecognized config parameter "${key}"`);
+            }
+        }
+
+        config.row_pivots = config.row_pivots || [];
+        config.column_pivots = config.column_pivots || [];
+        config.filter = config.filter || [];
+        config.sort = config.sort || [];
+
+        const aggregates = config.aggregates || {};
+        const schema = this._schema(true);
+
+        if (config.columns === undefined && config.aggregate === undefined) {
+            config.columns = this._columns(true);
+        }
+
+        if (config.columns) {
+            if (config.aggregate) {
+                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
+            }
+            config.aggregate = [];
+            for (const col of config.columns) {
+                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
+            }
+        } else {
+            config.columns = config.aggregate.map(x => (Array.isArray(x.column) ? x.column[0] : x.column));
+        }
+
+        if (config.sort) {
+            for (const sort of config.sort) {
+                const name = sort[0];
+                if (config.columns.indexOf(name) === -1) {
+                    if (config.column_pivots.indexOf(name) > -1 || config.row_pivots.indexOf(name) > -1) {
+                        config.aggregate.push({column: name, op: "unique"});
+                    } else {
+                        config.aggregate.push({column: name, op: aggregates[name] || defaults.AGGREGATE_DEFAULTS[schema[name]]});
+                    }
+                }
+            }
+        }
 
         let name = Math.random() + "";
-
-        config.row_pivot = config.row_pivot || [];
-        config.column_pivot = config.column_pivot || [];
-        config.filter = config.filter || [];
-
         let sides;
 
-        if (config.row_pivot.length > 0 || config.column_pivot.length > 0) {
-            if (config.column_pivot && config.column_pivot.length > 0) {
+        if (config.row_pivots.length > 0 || config.column_pivots.length > 0) {
+            if (config.column_pivots && config.column_pivots.length > 0) {
                 sides = 2;
             } else {
                 sides = 1;
@@ -967,15 +1015,15 @@ export default function(Module) {
     };
 
     /**
-     * Updates the rows of a {@link table}. Updated rows are pushed down to any
-     * derived {@link view} objects.
+     * Updates the rows of a {@link module:perspective~table}. Updated rows are pushed down to any
+     * derived {@link module:perspective~view} objects.
      *
      * @param {Object<string, Array>|Array<Object>|string} data The input data
      * for this table.  The supported input types mirror the constructor options, minus
      * the ability to pass a schema (Object<string, string>) as this table has
      * already been constructed, thus its types are set in stone.
      *
-     * @see {@link table}
+     * @see {@link module:perspective~table}
      */
     table.prototype.update = function(data) {
         let pdata;
@@ -1022,12 +1070,12 @@ export default function(Module) {
     };
 
     /**
-     * Removes the rows of a {@link table}. Removed rows are pushed down to any
-     * derived {@link view} objects.
+     * Removes the rows of a {@link module:perspective~table}. Removed rows are pushed down to any
+     * derived {@link module:perspective~view} objects.
      *
      * @param {Array<Object>} data An array of primary keys to remove.
      *
-     * @see {@link table}
+     * @see {@link module:perspective~table}
      */
     table.prototype.remove = function(data) {
         let pdata;
@@ -1405,7 +1453,7 @@ export default function(Module) {
         worker: function() {},
 
         /**
-         * A factory method for constructing {@link table}s.
+         * A factory method for constructing {@link module:perspective~table}s.
          *
          * @example
          * // Creating a table directly from node
@@ -1432,7 +1480,7 @@ export default function(Module) {
          *     the order they were inserted.  `limit` is mutually exclusive to
          *     `index`.
          *
-         * @returns {table} A new {@link table} object.
+         * @returns {table} A new {@link module:perspective~table} object.
          */
         table: function(data, options) {
             options = options || {};

@@ -9,6 +9,7 @@
 
 const rectangular = require("rectangular");
 const superscript = require("superscript-number");
+const lodash = require("lodash");
 
 /**
  * @this {Behavior}
@@ -34,23 +35,30 @@ function setPSP(payload) {
         if (payload.isTree && columnIndex === 0) {
             new_schema[-1] = {name, header, type};
         } else {
-            new_schema.push({name, header, type});
+            new_schema.push({name, header, type, index: columnIndex - (payload.isTree ? 1 : 0)});
         }
     });
 
     this.grid.properties.showTreeColumn = payload.isTree;
-
-    console.log("Setting up initial schema and data load into HyperGrid");
 
     // Following call to setData signals the grid to call createColumns and dispatch the
     // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    this.grid.setData({
-        data: payload.rows,
-        schema: new_schema
-    });
+    if (this._memoized_schema && lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length))) {
+        this.grid.sbVScroller.index = 0;
+        this.grid.behavior.dataModel.data = payload.rows;
+    } else {
+        this.grid.sbVScroller.index = 0;
+        this.grid.sbHScroller.index = 0;
+
+        this.grid.setData({
+            data: payload.rows,
+            schema: new_schema
+        });
+    }
+    this._memoized_schema = new_schema;
 }
 
 /**
@@ -143,9 +151,9 @@ function sortColumn(event) {
     const column = this.behavior.getColumn(event.detail.column);
     let column_sorting, column_name;
 
-    if (config.column_pivot.length > 0) {
+    if (config.column_pivots.length > 0) {
         column_sorting = true;
-        column_name = column.header.split("|")[config.column_pivot.length]; // index of last column is always the length of the column pivots
+        column_name = column.header.split("|")[config.column_pivots.length]; // index of last column is always the length of the column pivots
     } else {
         column_sorting = false;
         column_name = column.header;
@@ -201,16 +209,16 @@ exports.install = function(grid) {
         event.handled = true;
         const {x, y} = event.dataCell;
         const config = this.dataModel.getConfig();
-        const row_pivots = config.row_pivot;
-        const column_pivots = config.column_pivot;
+        const row_pivots = config.row_pivots;
+        const column_pivots = config.column_pivots;
         const start_row = y >= 0 ? y : 0;
         const end_row = start_row + 1;
         const r = await this.dataModel._view.to_json({start_row, end_row});
         const row_paths = r.map(x => x.__ROW_PATH__);
-        const row_pivot_values = row_paths[0] || [];
+        const row_pivots_values = row_paths[0] || [];
         const row_filters = row_pivots
             .map((pivot, index) => {
-                const pivot_value = row_pivot_values[index];
+                const pivot_value = row_pivots_values[index];
                 return pivot_value ? [pivot, "==", pivot_value] : undefined;
             })
             .filter(x => x);
