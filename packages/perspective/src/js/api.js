@@ -179,7 +179,7 @@ table.prototype.column_metadata = async_queue("column_metadata", "table_method")
 
 table.prototype.computed_schema = async_queue("computed_schema", "table_method");
 
-table.prototype.is_valid_philter = async_queue("is_valid_philter", "table_method");
+table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
 
 table.prototype.size = async_queue("size", "table_method");
 

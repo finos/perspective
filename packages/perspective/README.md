@@ -32,7 +32,7 @@ The main API module for Perspective.
         * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.is_valid_philter([filter])](#module_perspective..table+is_valid_philter) ⇒ <code>boolean</code>
+        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
         * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
@@ -365,7 +365,7 @@ is deleted, this callback will be invoked.
     * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.is_valid_philter([filter])](#module_perspective..table+is_valid_philter) ⇒ <code>boolean</code>
+    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
     * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
@@ -476,7 +476,7 @@ Object containing the associated column_name, column_type, and computation.
 
 * * *
 
-<a name="module_perspective..table+is_valid_philter"></a>
+<a name="module_perspective..table+is_valid_filter"></a>
 
 #### table.is\_valid\_filter([filter]) ⇒ <code>boolean</code>
 Determines whether a given filter is valid.

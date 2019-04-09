@@ -289,6 +289,17 @@ export default function(Module) {
         return this._View.sides();
     };
 
+    view.prototype._num_hidden = function() {
+        // Count hidden columns.
+        let hidden = 0;
+        for (const sort of this.config.sort) {
+            if (this.config.columns.indexOf(sort[0]) === -1) {
+                hidden++;
+            }
+        }
+        return hidden;
+    };
+
     /**
      * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
      * are the columns of this {@link module:perspective~view}, and the values are their string type names.
@@ -312,26 +323,29 @@ export default function(Module) {
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
+        const hidden = this._num_hidden();
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
         const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
-        const end_col = Math.min(max_cols, options.end_col || (viewport.width ? start_col + viewport.width : max_cols));
+        const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
 
         const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        const col_names = extract_vector(slice.get_column_names());
 
         let data = formatter.initDataValue();
-
-        const col_names = extract_vector(slice.get_column_names());
         for (let ridx = start_row; ridx < end_row; ridx++) {
             let row = formatter.initRowValue();
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
-                if (cidx === start_col && num_sides !== 0) {
+                if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
+                    // Hidden columns are always at the end, so don't emit these.
+                    continue;
+                } else if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
                         const row_path = slice.get_row_path(ridx);
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
@@ -555,7 +569,9 @@ export default function(Module) {
      * @returns {Promise<number>} The number of aggregated columns.
      */
     view.prototype.num_columns = async function() {
-        return this._View.num_columns();
+        const ncols = this._View.num_columns();
+        const nhidden = this._num_hidden();
+        return ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden;
     };
 
     /**
@@ -870,7 +886,7 @@ export default function(Module) {
         return key => schema[key] === "datetime" || schema[key] === "date";
     };
 
-    table.prototype._is_valid_philter = function(filter) {
+    table.prototype._is_valid_filter = function(filter) {
         const schema = this._schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
@@ -884,8 +900,8 @@ export default function(Module) {
      *
      * @returns {boolean} Whether the filter is valid
      */
-    table.prototype.is_valid_philter = function(filter) {
-        return this._is_valid_philter(filter);
+    table.prototype.is_valid_filter = function(filter) {
+        return this._is_valid_filter(filter);
     };
 
     /**
@@ -943,25 +959,44 @@ export default function(Module) {
             }
         }
 
-        if (config.columns) {
-            if (config.aggregate) {
-                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
-            }
-            config.aggregate = [];
-            const aggregates = config.aggregates || {};
-            const schema = this._schema(true);
-            for (const col of config.columns) {
-                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
-            }
-        }
-
-        let name = Math.random() + "";
-
         config.row_pivots = config.row_pivots || [];
         config.column_pivots = config.column_pivots || [];
         config.filter = config.filter || [];
         config.sort = config.sort || [];
 
+        const aggregates = config.aggregates || {};
+        const schema = this._schema(true);
+
+        if (config.columns === undefined && config.aggregate === undefined) {
+            config.columns = this._columns(true);
+        }
+
+        if (config.columns) {
+            if (config.aggregate) {
+                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
+            }
+            config.aggregate = [];
+            for (const col of config.columns) {
+                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
+            }
+        } else {
+            config.columns = config.aggregate.map(x => (Array.isArray(x.column) ? x.column[0] : x.column));
+        }
+
+        if (config.sort) {
+            for (const sort of config.sort) {
+                const name = sort[0];
+                if (config.columns.indexOf(name) === -1) {
+                    if (config.column_pivots.indexOf(name) > -1 || config.row_pivots.indexOf(name) > -1) {
+                        config.aggregate.push({column: name, op: "unique"});
+                    } else {
+                        config.aggregate.push({column: name, op: aggregates[name] || defaults.AGGREGATE_DEFAULTS[schema[name]]});
+                    }
+                }
+            }
+        }
+
+        let name = Math.random() + "";
         let sides;
 
         if (config.row_pivots.length > 0 || config.column_pivots.length > 0) {
