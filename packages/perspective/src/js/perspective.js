@@ -870,7 +870,7 @@ export default function(Module) {
         return key => schema[key] === "datetime" || schema[key] === "date";
     };
 
-    table.prototype._is_valid_philter = function(filter) {
+    table.prototype._is_valid_filter = function(filter) {
         const schema = this._schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
@@ -884,8 +884,8 @@ export default function(Module) {
      *
      * @returns {boolean} Whether the filter is valid
      */
-    table.prototype.is_valid_philter = function(filter) {
-        return this._is_valid_philter(filter);
+    table.prototype.is_valid_filter = function(filter) {
+        return this._is_valid_filter(filter);
     };
 
     /**
