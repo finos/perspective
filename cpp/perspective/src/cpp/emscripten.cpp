@@ -230,20 +230,15 @@ namespace binding {
                             + std::to_string(deps.size()) + ") for column dependencies.");
                     }
 
-                    std::ostringstream oss;
-
                     for (auto didx = 0; didx < deps.size(); ++didx) {
                         if (!hasValue(deps[didx])) {
                             continue;
                         }
                         std::string dep = deps[didx].as<std::string>();
                         dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
-                        oss << dep;
-                        oss << separator;
                     }
 
-                    col_name = oss.str();
-                    col_name.pop_back();
+                    col_name = deps[0].as<std::string>();
 
                     if (hasValue(agg["name"])) {
                         col_name = agg["name"].as<std::string>();
