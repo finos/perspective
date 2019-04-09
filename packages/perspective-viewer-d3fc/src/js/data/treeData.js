@@ -57,13 +57,21 @@ export function treeData(settings) {
             d.key = set[0];
         });
 
-        return {split: set[0], data: chartData};
+        return {split: set[0], data: chartData, extents: getExtents(settings, set)};
     });
 
     return data;
 }
 
 export const getDataValue = (d, aggregate, split) => (split.length ? d[`${split}|${aggregate.name}`] : d[aggregate.name]);
+
+function getExtents(settings, [split, data]) {
+    if (settings.mainValues.length > 1) {
+        const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
+        const max = Math.max(...data.map(d => d.color));
+        return [min, max];
+    }
+}
 
 function getSplitNames(d) {
     const splits = [];

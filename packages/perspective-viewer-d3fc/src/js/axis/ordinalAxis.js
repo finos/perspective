@@ -193,7 +193,7 @@ export const component = settings => {
     };
 
     const getXAxisBoundsRect = s => {
-        const chart = s.node().closest(".cartesian-chart");
+        const chart = getChartContainer(s.node()).querySelector(".cartesian-chart");
         const axis = chart.querySelector(".x-axis");
 
         const chartRect = chart.getBoundingClientRect();

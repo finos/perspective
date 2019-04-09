@@ -12,13 +12,14 @@ import {fromDomain} from "./seriesSymbols";
 
 export function categoryPointSeries(settings, seriesKey, color, symbols) {
     let series = fc.seriesSvgPoint().size(100);
+    const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
     if (symbols) {
         series.type(symbols(seriesKey));
     }
 
     series.decorate(selection => {
-        selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey)));
+        selection.style("stroke", d => withoutOpacity(color(d.colorValue || seriesKey))).style("fill", d => withOpacity(color(d.colorValue || seriesKey), opacity));
     });
 
     return series.crossValue(d => d.crossValue).mainValue(d => d.mainValue);

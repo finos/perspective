@@ -79,7 +79,7 @@ namespace binding {
              */
             std::string op = sort_item[1].as<std::string>();
             bool is_col_sortop = op.find("col") != std::string::npos;
-            return (is_column_sort && is_col_sortop) || !is_col_sortop;
+            return (is_column_sort && is_col_sortop) || (!is_col_sortop && !is_column_sort);
         };
 
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
@@ -230,20 +230,15 @@ namespace binding {
                             + std::to_string(deps.size()) + ") for column dependencies.");
                     }
 
-                    std::ostringstream oss;
-
                     for (auto didx = 0; didx < deps.size(); ++didx) {
                         if (!hasValue(deps[didx])) {
                             continue;
                         }
                         std::string dep = deps[didx].as<std::string>();
                         dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
-                        oss << dep;
-                        oss << separator;
                     }
 
-                    col_name = oss.str();
-                    col_name.pop_back();
+                    col_name = deps[0].as<std::string>();
 
                     if (hasValue(agg["name"])) {
                         col_name = agg["name"].as<std::string>();
@@ -1590,8 +1585,8 @@ namespace binding {
     t_config
     make_view_config(
         const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivot = config["row_pivot"];
-        val j_column_pivot = config["column_pivot"];
+        val j_row_pivot = config["row_pivots"];
+        val j_column_pivot = config["column_pivots"];
         val j_aggregate = config["aggregate"];
         val j_filter = config["filter"];
         val j_sort = config["sort"];
@@ -1601,6 +1596,7 @@ namespace binding {
         std::vector<t_aggspec> aggregates;
         std::vector<t_fterm> filters;
         std::vector<t_sortspec> sorts;
+        std::vector<t_sortspec> col_sorts;
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
@@ -1641,10 +1637,11 @@ namespace binding {
 
         if (hasValue(j_sort)) {
             sorts = _get_sort(col_names, false, j_sort);
+            col_sorts = _get_sort(col_names, true, j_sort);
         }
 
-        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, filter_op,
-            filters, col_names, column_only);
+        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
+            filter_op, filters, col_names, column_only);
 
         return view_config;
     }
@@ -1722,6 +1719,7 @@ namespace binding {
         auto filter_op = view_config.get_combiner();
         auto filters = view_config.get_fterms();
         auto sorts = view_config.get_sortspecs();
+        auto col_sorts = view_config.get_col_sortspecs();
 
         std::int32_t rpivot_depth = -1;
         std::int32_t cpivot_depth = -1;
@@ -1732,12 +1730,6 @@ namespace binding {
 
         if (hasValue(config["column_pivot_depth"])) {
             cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
-        }
-
-        val j_sort = config["sort"];
-        std::vector<t_sortspec> col_sorts;
-        if (hasValue(j_sort)) {
-            col_sorts = _get_sort(column_names, true, j_sort);
         }
 
         auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
@@ -1882,76 +1874,6 @@ namespace binding {
     }
 
     /**
-     * @brief Get a slice of data foe each column from the underlying view,
-     * serialized to val.
-     *
-     * @tparam CTX_T
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
-    template <typename CTX_T>
-    val
-    get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col) {
-        val arr = val::array();
-        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice->get_slice();
-        for (auto idx = 0; idx < slice->size(); ++idx) {
-            arr.set(idx, scalar_to_val(slice->at(idx)));
-        }
-        return arr;
-    }
-
-    /**
-     * @brief Get a slice of data from the underlying view, serlializing to val
-     * and, for sorted views, ignoring the sort headers which aren't part of the
-     * underlying data.
-     *
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
-    template <>
-    val
-    get_data(std::shared_ptr<View<t_ctx2>> view, std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col) {
-        val arr = val::array();
-        auto data_slice = view->get_data(start_row, end_row, start_col, end_col);
-        auto slice = data_slice->get_slice();
-        auto column_indices = data_slice->get_column_indices();
-
-        if (column_indices.size() > 0) {
-            t_uindex i = 0;
-            auto iter = slice->begin();
-            while (iter != slice->end()) {
-                t_uindex prev = column_indices.front();
-                for (auto idx = column_indices.begin(); idx != column_indices.end();
-                     idx++, i++) {
-                    t_uindex col_num = *idx;
-                    iter += col_num - prev;
-                    prev = col_num;
-                    arr.set(i, scalar_to_val(*iter));
-                }
-                if (iter != slice->end())
-                    iter++;
-            }
-        } else {
-            for (auto idx = 0; idx < slice->size(); ++idx) {
-                arr.set(idx, scalar_to_val(slice->at(idx)));
-            }
-        }
-
-        return arr;
-    }
-
-    /**
      * @brief Get the t_data_slice object, which contains an underlying slice of data and
      * metadata required to interact with it.
      *
@@ -2039,6 +1961,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .function("schema", &View<t_ctx0>::schema)
         .function("_column_names", &View<t_ctx0>::_column_names)
+        .function("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
+        .function("_set_deltas_enabled", &View<t_ctx0>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx0>::get_context, allow_raw_pointers())
         .function("get_row_pivots", &View<t_ctx0>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx0>::get_column_pivots)
@@ -2046,6 +1970,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filters", &View<t_ctx0>::get_filters)
         .function("get_sorts", &View<t_ctx0>::get_sorts)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx0>::get_row_delta)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -2061,6 +1986,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx1>::set_depth)
         .function("schema", &View<t_ctx1>::schema)
         .function("_column_names", &View<t_ctx1>::_column_names)
+        .function("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
+        .function("_set_deltas_enabled", &View<t_ctx1>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx1>::get_context, allow_raw_pointers())
         .function("get_row_pivots", &View<t_ctx1>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx1>::get_column_pivots)
@@ -2068,6 +1995,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_filters", &View<t_ctx1>::get_filters)
         .function("get_sorts", &View<t_ctx1>::get_sorts)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx1>::get_row_delta)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -2083,6 +2011,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("set_depth", &View<t_ctx2>::set_depth)
         .function("schema", &View<t_ctx2>::schema)
         .function("_column_names", &View<t_ctx2>::_column_names)
+        .function("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
+        .function("_set_deltas_enabled", &View<t_ctx2>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx2>::get_context, allow_raw_pointers())
         .function("get_row_pivots", &View<t_ctx2>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx2>::get_column_pivots)
@@ -2091,6 +2021,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sorts", &View<t_ctx2>::get_sorts)
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
+        .function("get_row_delta", &View<t_ctx2>::get_row_delta)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -2141,7 +2072,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
         .function<const std::vector<std::string>&>(
-            "get_column_names", &t_data_slice<t_ctx2>::get_column_names);
+            "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
+        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
     /******************************************************************************
      *
@@ -2206,8 +2138,17 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_rowdelta
+     */
+    value_object<t_rowdelta>("t_rowdelta")
+        .field("rows_changed", &t_rowdelta::rows_changed)
+        .field("rows", &t_rowdelta::rows);
+
+    /******************************************************************************
+     *
      * vector
      */
+    register_vector<std::int32_t>("std::vector<std::int32_t>");
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
@@ -2258,9 +2199,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("get_data_zero", &get_data<t_ctx0>);
-    function("get_data_one", &get_data<t_ctx1>);
-    function("get_data_two", &get_data<t_ctx2>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
     function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);

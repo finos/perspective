@@ -8,7 +8,6 @@
  */
 import * as d3 from "d3";
 import {groupFromKey} from "./seriesKey";
-import {colorStyles} from "./colorStyles";
 
 export function seriesColors(settings) {
     const col = settings.data && settings.data.length > 0 ? settings.data[0] : {};
@@ -37,8 +36,8 @@ export function seriesColorsFromGroups(settings) {
 export function colorScale() {
     let domain = null;
     let defaultColors = null;
-    let mapFunction = withOpacity;
-    let settings = {colorStyles};
+    let settings = {};
+    let mapFunction = d => withOpacity(d, settings.colorStyles && settings.colorStyles.opacity);
 
     const colors = () => {
         const styles = settings.colorStyles;
@@ -89,8 +88,8 @@ export function withoutOpacity(color) {
     return setOpacity(1)(color);
 }
 
-export function withOpacity(color) {
-    return setOpacity(colorStyles.opacity)(color);
+export function withOpacity(color, opacity = 0.5) {
+    return setOpacity(opacity)(color);
 }
 
 export function setOpacity(opacity) {

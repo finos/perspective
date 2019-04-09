@@ -606,9 +606,15 @@ t_ctx2::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
     return rval;
 }
 
+/**
+ * @brief Returns updated cells.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_stepdelta
+ */
 t_stepdelta
 t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
-
     t_uindex start_row = bidx;
     t_uindex end_row = eidx;
     t_uindex start_col = 1;
@@ -651,6 +657,54 @@ t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
     return rval;
 }
 
+/**
+ * @brief Returns the row indices that have been updated with new data.
+ *
+ * @param bidx
+ * @param eidx
+ * @return t_rowdelta
+ */
+t_rowdelta
+t_ctx2::get_row_delta(t_index bidx, t_index eidx) {
+    t_uindex start_row = bidx;
+    t_uindex end_row = eidx;
+    t_uindex start_col = 1;
+    t_uindex end_col = get_num_view_columns();
+    std::vector<std::int32_t> rows;
+
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, start_row, end_row, start_col, end_col);
+
+    std::vector<std::pair<t_uindex, t_uindex>> cells;
+
+    // get cells and imbue with additional information
+    for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
+        for (t_uindex cidx = 1; cidx < end_col; ++cidx) {
+            cells.push_back(std::pair<t_index, t_index>(ridx, cidx));
+        }
+    }
+
+    auto cells_info = resolve_cells(cells);
+
+    for (const auto& c : cells_info) {
+        if (c.m_idx < 0)
+            continue;
+        const auto& deltas = m_trees[c.m_treenum]->get_deltas();
+        auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(c.m_idx);
+        auto ridx = c.m_ridx;
+        bool unique_ridx = std::find(rows.begin(), rows.end(), ridx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
+            rows.push_back(ridx);
+    }
+
+    std::sort(rows.begin(), rows.end());
+    t_rowdelta rval(true, rows);
+    clear_deltas();
+    return rval;
+}
+
 std::vector<t_minmax>
 t_ctx2::get_min_max() const {
     return m_minmax;
@@ -677,6 +731,11 @@ t_ctx2::reset() {
 
     m_rtraversal = std::make_shared<t_traversal>(rtree(), m_config.handle_nan_sort());
     m_ctraversal = std::make_shared<t_traversal>(ctree(), m_config.handle_nan_sort());
+}
+
+bool
+t_ctx2::get_deltas_enabled() const {
+    return m_features[CTX_FEAT_DELTA];
 }
 
 void

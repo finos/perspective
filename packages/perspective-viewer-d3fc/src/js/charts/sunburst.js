@@ -12,12 +12,22 @@ import {treeData} from "../data/treeData";
 import {sunburstSeries, treeColor} from "../series/sunburst/sunburstSeries";
 import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {tooltip} from "../tooltip/tooltip";
+import {getOrCreateElement} from "../utils/utils";
 
 function sunburst(container, settings) {
     if (settings.crossValues.length === 0) return;
 
     const sunburstData = treeData(settings);
-    const {width: containerWidth, height: containerHeight} = container.node().getBoundingClientRect();
+    const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
+    const color = treeColor(settings, sunburstData.map(d => d.extents));
+
+    const innerRect = innerContainer.node().getBoundingClientRect();
+    const containerHeight = innerRect.height;
+    const containerWidth = innerRect.width - (color ? 70 : 0);
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container.call(legend);
+    }
 
     const minSize = 500;
     const cols = Math.min(sunburstData.length, Math.floor(containerWidth / minSize));
@@ -30,10 +40,10 @@ function sunburst(container, settings) {
         containerSize.height = containerHeight / rows;
     }
 
-    container.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
-    container.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
+    innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
+    innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
 
-    const sunburstDiv = container.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
+    const sunburstDiv = innerContainer.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
     sunburstDiv.exit().remove();
 
     const sunburstEnter = sunburstDiv
@@ -68,20 +78,12 @@ function sunburst(container, settings) {
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             const radius = (Math.min(width, height) - 120) / 6;
-            const color = treeColor(settings, split, data.data.children);
             sunburstSeries()
                 .settings(settings)
                 .split(split)
                 .data(data)
                 .color(color)
                 .radius(radius)(sunburstElement);
-
-            if (color) {
-                const legend = colorRangeLegend().scale(color);
-                select(svgNode.parentNode)
-                    .call(legend)
-                    .select("div.legend-container");
-            }
 
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });

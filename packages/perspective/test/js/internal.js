@@ -20,19 +20,6 @@ module.exports = (perspective, mode) => {
             expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : "native-wasm");
         });
 
-        // FIXME: throw no longer occurs in agg construction
-        it.skip("['z'], sum with new column syntax with wrong column arity errors", async function() {
-            var table = perspective.table(arrow.slice());
-            let anon = function() {
-                table.view({
-                    row_pivot: ["char"],
-                    aggregate: [{op: "sum", column: ["f16", "f32"]}]
-                });
-            };
-            expect(anon).toThrow();
-            table.delete();
-        });
-
         it("Arrow schema types are mapped correctly", async function() {
             // This only works for non parallel
             var table = perspective.table(arrow.slice());

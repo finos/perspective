@@ -1,9 +1,7 @@
 ---
 id: usage
-hide_title: true
+title: User Guide
 ---
-
-# Perspective User Guide <!-- omit in toc -->
 
 ## Overview
 
@@ -23,7 +21,7 @@ though you can instantiate this separately if you wish - this is helpful for
 e.g. [sharing a table](<(#sharing-a-table-between-multiple-perspective-viewers)>)
 between multiple `<perspective-viewer>`s
 
-<img src="./architecture.svg">
+<img src="https://jpmorganchase.github.io/perspective/svg/architecture.svg">
 
 Perspective is designed for flexibility, allowing developers to pick and choose
 which modules they need for their specific use case. The main modules are:
@@ -258,7 +256,8 @@ configuration properties for `view()`, see the
 const table = worker.table(data);
 
 const view = table.view({
-    aggregate: [{ column: "Sales", op: "sum" }],
+    columns: ["Sales"],
+    aggregates: {"Sales": "sum"},
     row_pivot: ["Region", "Country"],
     filter: [["Category", "in", ["Furniture", "Technology"]]]
 });

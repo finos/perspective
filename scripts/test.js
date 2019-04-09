@@ -21,7 +21,7 @@ const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 function jest() {
-    let cmd = "TZ=UTC node_modules/.bin/jest --color";
+    let cmd = "TZ=UTC node_modules/.bin/jest --color --verbose";
 
     if (args.indexOf("--saturate") > -1) {
         console.log("-- Running the test suite in saturate mode");
@@ -97,6 +97,9 @@ try {
             execute(docker() + " " + args.join(" "));
         }
     } else {
+        if (IS_LOCAL_PUPPETEER) {
+            execute(`yarn --silent clean --screenshots`);
+        }
         if (args.indexOf("--quiet") > -1) {
             console.log("-- Running test suite in quiet mode");
             execSync(`output=$(${jest()}); ret=$?; echo "\${output}"; exit $ret`, {stdio: "inherit"});

@@ -30,4 +30,4 @@ function addDataValues(tooltipDiv, values) {
         });
 }
 
-const formatNumber = value => (typeof value === "number" ? value.toLocaleString(undefined, {style: "decimal"}) : value);
+const formatNumber = value => value.toLocaleString(undefined, {style: "decimal"});

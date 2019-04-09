@@ -148,19 +148,14 @@ class ChartAxis {
 }
 
 class RowIterator {
-    constructor(rows, hidden) {
+    constructor(rows) {
         this.rows = rows;
-        this.hidden = hidden;
     }
 
     *[Symbol.iterator]() {
         for (let row of this.rows) {
             if (this.columns === undefined) {
-                this.columns = Object.keys(row).filter(prop => {
-                    let cname = prop.split(COLUMN_SEPARATOR_STRING);
-                    cname = cname[cname.length - 1];
-                    return prop !== "__ROW_PATH__" && this.hidden.indexOf(cname) === -1;
-                });
+                this.columns = Object.keys(row).filter(prop => prop !== "__ROW_PATH__");
                 this.is_stacked =
                     this.columns.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
             }
@@ -170,14 +165,9 @@ class RowIterator {
 }
 
 class ColumnIterator {
-    constructor(columns, hidden, pivot_length) {
+    constructor(columns, pivot_length) {
         this.columns = columns;
-        this.hidden = [...hidden, "hidden", "column_names"];
-        this.column_names = Object.keys(this.columns).filter(prop => {
-            let cname = prop.split(COLUMN_SEPARATOR_STRING);
-            cname = cname[cname.length - 1];
-            return prop !== "__ROW_PATH__" && !this.hidden.includes(cname);
-        });
+        this.column_names = Object.keys(this.columns).filter(prop => prop !== "__ROW_PATH__");
         this.is_stacked =
             this.column_names.map(value => value.substr(value.lastIndexOf(COLUMN_SEPARATOR_STRING) + 1, value.length)).filter((value, index, self) => self.indexOf(value) === index).length > 1;
         this.pivot_length = pivot_length;
@@ -200,10 +190,10 @@ class ColumnIterator {
     }
 }
 
-export function make_y_data(cols, pivots, hidden) {
+export function make_y_data(cols, pivots) {
     let series = [];
     let axis = new ChartAxis(cols, pivots.length);
-    let columns = new ColumnIterator(cols, hidden, pivots.length);
+    let columns = new ColumnIterator(cols, pivots.length);
     for (let col of columns) {
         let sname = col.name.split(COLUMN_SEPARATOR_STRING);
         let gname = sname[sname.length - 1];
@@ -220,9 +210,9 @@ export function make_y_data(cols, pivots, hidden) {
 }
 
 // Preserve old behavior for heatmaps
-export function make_y_heatmap_data(js, pivots, hidden) {
+export function make_y_heatmap_data(js, pivots) {
     let rows = new TreeAxisIterator(pivots.length, js);
-    let rows2 = new RowIterator(rows, hidden);
+    let rows2 = new RowIterator(rows);
     var series = [];
 
     for (let row of rows2) {
@@ -389,8 +379,8 @@ class MakeTick {
     }
 }
 
-export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidden) {
-    const columns = new ColumnIterator(cols, hidden, pivots.length);
+export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots) {
+    const columns = new ColumnIterator(cols, pivots.length);
     let series = [];
     let color_range = [Infinity, -Infinity];
     let make_tick = new MakeTick(schema, columns.column_names);
@@ -441,9 +431,9 @@ export function make_xy_column_data(cols, schema, aggs, pivots, col_pivots, hidd
     return [series, {categories: make_tick.xaxis_clean.names}, color_range, {categories: make_tick.yaxis_clean.names}];
 }
 
-export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
+export function make_xy_data(js, schema, columns, pivots, col_pivots) {
     let rows = new TreeAxisIterator(pivots.length, js);
-    let rows2 = new RowIterator(rows, hidden);
+    let rows2 = new RowIterator(rows);
     let series = [];
     let colorRange = [Infinity, -Infinity];
     let make_tick = new MakeTick(schema, columns);
@@ -460,11 +450,7 @@ export function make_xy_data(js, schema, columns, pivots, col_pivots, hidden) {
         let prev,
             group = [],
             s;
-        let cols = Object.keys(js[0]).filter(prop => {
-            let cname = prop.split(COLUMN_SEPARATOR_STRING);
-            cname = cname[cname.length - 1];
-            return prop !== "__ROW_PATH__" && hidden.indexOf(cname) === -1;
-        });
+        let cols = Object.keys(js[0]).filter(prop => prop !== "__ROW_PATH__");
         for (let prop of cols) {
             let column_levels = prop.split(COLUMN_SEPARATOR_STRING);
             let group_name = column_levels.slice(0, column_levels.length - 1).join(", ") || " ";
@@ -529,8 +515,8 @@ function make_tree_axis(series) {
     return ytop;
 }
 
-export function make_xyz_data(js, pivots, hidden, ytree_type) {
-    let [series, top] = make_y_heatmap_data(js, pivots, hidden);
+export function make_xyz_data(js, pivots, ytree_type) {
+    let [series, top] = make_y_heatmap_data(js, pivots);
     if (ytree_type !== "string" && ytree_type !== undefined) {
         series = series.reverse();
     }
@@ -631,9 +617,9 @@ function make_configs(series, levels) {
     return configs;
 }
 
-export function make_tree_data(js, row_pivots, hidden, aggregates, leaf_only) {
+export function make_tree_data(js, row_pivots, aggregates, leaf_only) {
     let rows = new TreeIterator(row_pivots.length, js);
-    let rows2 = new RowIterator(rows, hidden);
+    let rows2 = new RowIterator(rows);
     let series = [];
 
     for (let row of rows2) {

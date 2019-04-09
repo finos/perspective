@@ -59,7 +59,7 @@ let browser,
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
-        args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
+        args: ["--disable-accelerated-2d-canvas", "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
     });
     page = await browser.newPage();
 

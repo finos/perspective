@@ -81,18 +81,6 @@ export class StateElement extends HTMLElement {
         });
     }
 
-    _get_view_hidden(aggregates, sort) {
-        aggregates = aggregates || this._get_view_aggregates();
-        let hidden = [];
-        sort = sort || this._get_view_sorts();
-        for (let s of sort) {
-            if (aggregates.map(agg => agg.column).indexOf(s[0]) === -1) {
-                hidden.push(s[0]);
-            }
-        }
-        return hidden;
-    }
-
     _get_visible_column_count() {
         return this._get_view_dom_columns().length;
     }
