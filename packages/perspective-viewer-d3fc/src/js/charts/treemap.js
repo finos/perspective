@@ -8,57 +8,26 @@
  */
 
 import * as d3 from "d3";
-import {treeData} from "../data/treeData";
 import {treeColor} from "../series/treemap/treemapColor";
 import treemapLayout from "../layout/treemapLayout";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
 import {treemapSeries} from "../series/treemap/treemapSeries";
 import {tooltip} from "../tooltip/tooltip";
-import {getOrCreateElement} from "../utils/utils";
+import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
 
 function treemap(container, settings) {
-    //if (settings.crossValues.length === 0) return;
+    const treemapGrid = gridLayoutMultiChart()
+        .elementsPrefix("treemap")
+        .treeColor(treeColor)
+        .treeColorDataMap(d => d.data);
 
-    const treemapData = treeData(settings);
-    const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
-    const color = treeColor(treemapData.map(d => d.data), settings);
+    treemapGrid(settings, container);
 
-    const innerRect = innerContainer.node().getBoundingClientRect();
-    const containerHeight = innerRect.height;
-    const containerWidth = innerRect.width - (color ? 70 : 0);
-    if (color) {
-        const legend = colorRangeLegend().scale(color);
-        container.call(legend);
-    }
+    if (!treemapGrid.contentToRender()) return;
 
-    const minSize = 500;
-    const cols = Math.min(treemapData.length, Math.floor(containerWidth / minSize));
-    const rows = Math.ceil(treemapData.length / cols);
-    const containerSize = {
-        width: containerWidth / cols,
-        height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
-    };
-    if (containerHeight / rows > containerSize.height * 0.75) {
-        containerSize.height = containerHeight / rows;
-    }
-
-    innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
-    innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
-
-    const treemapDiv = innerContainer.selectAll("div.treemap-container").data(treeData(settings), d => d.split);
-    treemapDiv.exit().remove();
-
-    const treemapEnter = treemapDiv
-        .enter()
-        .append("div")
-        .attr("class", "treemap-container");
-
-    const treemapContainer = treemapEnter
-        .append("svg")
-        .append("g")
-        .attr("class", "treemap");
-
-    treemapContainer.append("text").attr("class", "title");
+    const treemapContainer = treemapGrid.chartContainer();
+    const treemapEnter = treemapGrid.chartEnter();
+    const treemapDiv = treemapGrid.chartDiv();
+    const color = treemapGrid.color();
 
     treemapContainer.append("text").attr("class", "parent");
     treemapEnter
