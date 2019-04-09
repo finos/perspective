@@ -25,9 +25,10 @@ export function pointSeriesCanvas(settings, seriesKey, size, color, symbols) {
 
     series.decorate((context, d) => {
         const colorValue = color(d.colorValue !== undefined ? d.colorValue : seriesKey);
+        const opacity = settings.colorStyles && settings.colorStyles.opacity;
 
         context.strokeStyle = withoutOpacity(colorValue);
-        context.fillStyle = withOpacity(colorValue);
+        context.fillStyle = withOpacity(colorValue, opacity);
     });
 
     return series;

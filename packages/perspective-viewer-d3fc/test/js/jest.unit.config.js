@@ -7,10 +7,14 @@
  *
  */
 
-export function getChartElement(element) {
-    return element.getRootNode().host;
-}
-
-export function getChartContainer(element) {
-    return element.closest("#container.chart");
-}
+module.exports = {
+    roots: ["unit"],
+    verbose: true,
+    testURL: "http://localhost/",
+    automock: false,
+    transform: {
+        ".js$": "./transform.js",
+        ".html$": "html-loader-jest"
+    },
+    setupFiles: ["./beforeEachSpec.js"]
+};

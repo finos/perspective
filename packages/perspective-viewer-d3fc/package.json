@@ -19,6 +19,7 @@
         "test:build": "cpx \"test/html/*\" build",
         "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
         "test:run": "jest --silent --color 2>&1",
+        "test:unit": "jest --config=test/js/jest.unit.config.js --color --watch",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf build && rimraf cjs",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
@@ -31,7 +32,8 @@
         "testURL": "http://localhost/",
         "automock": false,
         "transform": {
-            ".js$": "./test/js/transform.js"
+            ".js$": "./test/js/transform.js",
+            ".html$": "html-loader-jest"
         },
         "setupFiles": [
             "./test/js/beforeEachSpec.js"
@@ -58,6 +60,7 @@
     },
     "devDependencies": {
         "babel-loader": "^8.0.5",
+        "html-loader-jest": "^0.2.1",
         "webpack": "^3.5.6"
     }
 }

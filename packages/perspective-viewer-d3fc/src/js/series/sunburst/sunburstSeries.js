@@ -7,7 +7,7 @@
  *
  */
 
-import {getDataValue} from "../../data/treeData";
+import {flattenExtent} from "../../axis/flatten";
 import {seriesColorRange} from "../../series/seriesRange";
 import {drawArc, arcVisible} from "./sunburstArc";
 import {labelVisible, labelTransform, cropLabel} from "./sunburstLabel";
@@ -113,10 +113,8 @@ export function sunburstSeries() {
     return _sunburstSeries;
 }
 
-export function treeColor(settings, split, data) {
+export function treeColor(settings, extents) {
     if (settings.mainValues.length > 1) {
-        const min = Math.min(...settings.data.map(d => getDataValue(d, settings.mainValues[1], split)));
-        const max = Math.max(...data.map(d => d.color));
-        return seriesColorRange(settings, null, null, [min, max]);
+        return seriesColorRange(settings, null, null, flattenExtent(extents));
     }
 }
