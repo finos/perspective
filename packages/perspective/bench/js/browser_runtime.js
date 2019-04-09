@@ -156,30 +156,6 @@ async function* run_on_update_cases(table, config, mode) {
     await view.delete();
 }
 
-// Run collections of cases
-
-async function* run_all_delta_cases() {
-    const worker = window.perspective.worker();
-    await wait_for_perspective();
-
-    // eslint-disable-next-line no-unused-vars
-    const {csv, arrow, rows, columns} = await get_data(worker);
-
-    const table = worker.table(rows);
-    await table.schema();
-
-    const aggregate = AGG_OPTIONS[0];
-    for (const row_pivots of ROW_PIVOT_OPTIONS) {
-        for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
-            const config = {aggregate, row_pivots, column_pivots};
-
-            yield* run_on_update_cases(table, config, "none");
-            yield* run_on_update_cases(table, config, "rows");
-            yield* run_on_update_cases(table, config, "pkey");
-        }
-    }
-}
-
 async function* run_all_cases() {
     const worker = window.perspective.worker();
     await wait_for_perspective();
@@ -206,38 +182,32 @@ async function* run_all_cases() {
             }
         }
     }
+
+    const aggregate = AGG_OPTIONS[0];
+    for (const row_pivots of ROW_PIVOT_OPTIONS) {
+        for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
+            const config = {aggregate, row_pivots, column_pivots};
+
+            yield* run_on_update_cases(table, config, "none");
+            yield* run_on_update_cases(table, config, "rows");
+            yield* run_on_update_cases(table, config, "pkey");
+        }
+    }
 }
 
 // Run entire test suite
 
 // eslint-disable-next-line no-unused-vars
-async function run_delta_test() {
-    // eslint-disable-next-line no-undef
-    perspective = perspective.default || perspective;
-    try {
-        let results = [];
-        for await (let c of run_all_delta_cases()) {
-            results.push(c);
-        }
-        return results;
-    } catch (e) {
-        console.error(e.message);
-        return [];
-    }
-}
-
-// eslint-disable-next-line no-unused-vars
 async function run_test() {
     // eslint-disable-next-line no-undef
     perspective = perspective.default || perspective;
+    let results = [];
     try {
-        let results = [];
         for await (let c of run_all_cases()) {
             results.push(c);
         }
-        return results;
     } catch (e) {
         console.error(e.message);
-        return [];
     }
+    return results;
 }
