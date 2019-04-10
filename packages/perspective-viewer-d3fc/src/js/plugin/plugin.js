@@ -37,18 +37,15 @@ function drawChart(chart) {
         if (task.cancelled) {
             return;
         }
-        const aggregates = config.columns;
-        const row_pivots = config.row_pivots;
-        const col_pivots = config.column_pivots;
-        const filter = config.filter;
+        const {columns, row_pivots, column_pivots, filter} = config;
 
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
-            mainValues: aggregates.map(a => ({name: a, type: schema[a]})),
-            splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
+            mainValues: columns.map(a => ({name: a, type: schema[a]})),
+            splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
             data: filtered.map(dataMap)
         };
