@@ -9,20 +9,12 @@
 import * as d3 from "d3";
 import {domain} from "../axis/linearAxis";
 
-export function seriesLinearRange(settings, data, valueName) {
-    return d3.scaleLinear().domain(
-        domain()
-            .valueName(valueName)
-            .pad([0, 0])(data)
-    );
+export function seriesLinearRange(settings, data, valueName, customExtent) {
+    return d3.scaleLinear().domain(getExtent(data, valueName, customExtent));
 }
 
 export function seriesColorRange(settings, data, valueName, customExtent) {
-    let extent =
-        customExtent ||
-        domain()
-            .valueName(valueName)
-            .pad([0, 0])(data);
+    let extent = getExtent(data, valueName, customExtent);
     let gradient = settings.colorStyles.gradient.full;
 
     if (extent[0] >= 0) {
@@ -37,6 +29,15 @@ export function seriesColorRange(settings, data, valueName, customExtent) {
     const interpolator = multiInterpolator(gradient);
     return d3.scaleSequential(interpolator).domain(extent);
 }
+
+const getExtent = (data, valueName, customExtent) => {
+    return (
+        customExtent ||
+        domain()
+            .valueName(valueName)
+            .pad([0, 0])(data)
+    );
+};
 
 const multiInterpolator = gradientPairs => {
     // A new interpolator that calls through to a set of
