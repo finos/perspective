@@ -12,17 +12,39 @@ import {preventTextCollisions, centreText} from "./treemapLabel";
 import {getGoToParentControls} from "./treemapControls";
 import treemapLayout from "../../layout/treemapLayout";
 
+export const textLevel = {
+    top: "top",
+    mid: "mid",
+    lower: "lower"
+};
+
+const nodeLevel = {
+    leaf: "leafnode",
+    branch: "branchnode",
+    root: "rootNode"
+};
+
 export function treemapSeries() {
     let data = null;
     let color = null;
     let treemapDiv = null;
+    let settings = null;
 
     const _treemapSeries = treemapSvg => {
         const maxDepth = data.height;
         let parent = null;
 
         const isDeepest = d => d.depth === maxDepth;
-        const isTop = d => d.depth === 1;
+        const levelHelper = d => {
+            switch (d.depth) {
+                case 1:
+                    return textLevel.top;
+                case 2:
+                    return textLevel.mid;
+                default:
+                    return textLevel.lower;
+            }
+        };
         const showName = d => maxDepth === 0 || (0 < d.depth && d.depth <= 2);
 
         const nodes = treemapSvg
@@ -37,16 +59,15 @@ export function treemapSeries() {
 
         nodes
             .append("rect")
-            .attr("class", "treerect")
+            .attr("class", d => `treerect${isDeepest(d) ? ` ${nodeLevel.leaf}` : ` ${nodeLevel.branch}`}`)
             .attr("width", d => d.x1 - d.x0)
             .attr("height", d => d.y1 - d.y0)
             .attr("fill", d => color(d.data.color))
-            .attr("fill-opacity", d => (isDeepest(d) ? 0.8 : 0))
             .on("click", d => transition(d));
 
         nodes
             .append("text")
-            .attr("class", d => (isTop(d) ? "top" : "lower"))
+            .attr("class", d => levelHelper(d))
             .attr("dx", d => (d.x1 - d.x0) / 2)
             .attr("dy", d => (d.y1 - d.y0) / 2)
             .text(d => (showName(d) ? d.data.name : ""));
@@ -69,6 +90,7 @@ export function treemapSeries() {
 
             treemapSeries()
                 .data(newData)
+                .settings(settings)
                 .container(treemapDiv)
                 .color(color)(treemapSvg);
 
@@ -103,6 +125,14 @@ export function treemapSeries() {
             return treemapDiv;
         }
         treemapDiv = args[0];
+        return _treemapSeries;
+    };
+
+    _treemapSeries.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
         return _treemapSeries;
     };
 

@@ -88,17 +88,39 @@
                     height: 100%;
                 }
 
-                & rect {
+                & .treerect {
                     stroke: var(--d3fc-axis--lines, white);
+                    &:hover {
+                        cursor: pointer;
+                        stroke: var(--d3fc-treedata--hover-highlight, black);
+                        stroke-opacity: 1;
+                    }
                 }
+                & .branchnode {
+                    fill-opacity: 0;
+                    &:hover {
+                        fill-opacity: 0.1;
+                        fill: var(--d3fc-treedata--hover-highlight, black);
+                    }
+                }
+                & .leafnode {
+                    fill-opacity: 0.8;
+                    &:hover {
+                        fill-opacity: 0.5;
+                    }
+                }
+
                 & .top {
                     font-size: 15px;
                     font-weight:bold;
+                    z-index: 5;
+                    pointer-events: none;
                 }
-                & .lower {
+                & .lower, .mid {
                     font-size: 10px;
                     font-weight:bold;
                     opacity: 0.7;
+                    z-index: 4;
                 }
                 & text {
                     fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
@@ -108,11 +130,11 @@
                     position: absolute;
                     top: 15px;
                     right: 70px;
-                    z-index: 10;
+                    z-index: 4;
                 }
 
                 & #goto-parent {
-                    z-index: 10;
+                    z-index: 4;
                 }
             }
         }

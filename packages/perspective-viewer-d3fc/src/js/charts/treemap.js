@@ -46,6 +46,7 @@ function treemap(container, settings) {
 
             treemapSeries()
                 .data(data)
+                .settings(settings)
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
                 .color(color)(treemapElement);
 

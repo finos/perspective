@@ -9,6 +9,7 @@
 
 import {select} from "d3";
 import {isElementOverlapping} from "../../utils/utils";
+import {textLevel} from "./treemapSeries";
 
 export const centreText = node => select(node).attr("dx", select(node).attr("dx") - node.getBoundingClientRect().width / 2);
 
@@ -20,12 +21,12 @@ export const preventTextCollisions = nodes => {
     const topNodes = [];
     nodes
         .selectAll("text")
-        .filter((_, i, nodes) => select(nodes[i]).attr("class") === "top")
+        .filter((_, i, nodes) => select(nodes[i]).attr("class") === textLevel.top)
         .each((_, i, nodes) => topNodes.push(nodes[i]));
 
     nodes
         .selectAll("text")
-        .filter((_, i, nodes) => select(nodes[i]).attr("class") === "lower" && select(nodes[i]).text() !== "")
+        .filter((_, i, nodes) => select(nodes[i]).attr("class") === textLevel.mid)
         .each((_, i, nodes) => {
             const lowerNode = nodes[i];
             topNodes
