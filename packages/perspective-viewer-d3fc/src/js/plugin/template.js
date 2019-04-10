@@ -26,11 +26,13 @@ class D3FCChartElement extends HTMLElement {
     }
 
     render(chart, settings) {
-        this.remove();
-
         this._chart = chart;
         this._settings = this._configureSettings(this._settings, settings);
         initialiseStyles(this._container, this._settings);
+
+        if ((this._settings.data && this._settings.data.length > 0) || chart.plugin.type !== this._chart.plugin.type) {
+            this.remove();
+        }
         this.draw();
 
         if (window.navigator.userAgent.indexOf("Edge") > -1) {
@@ -42,8 +44,15 @@ class D3FCChartElement extends HTMLElement {
 
     draw() {
         if (this._settings.data) {
+            const containerDiv = d3.select(this._container);
+            const chartClass = `chart ${this._chart.plugin.type}`;
             this._settings.size = this._container.getBoundingClientRect();
-            this._chart(d3.select(this._container).attr("class", `chart ${this._chart.plugin.type}`), this._settings);
+
+            if (this._settings.data.length > 0) {
+                this._chart(containerDiv.attr("class", chartClass), this._settings);
+            } else {
+                containerDiv.attr("class", `${chartClass} disabled`);
+            }
         }
     }
 

@@ -10,8 +10,8 @@ declare module '@jpmorganchase/perspective-viewer' {
         notifyResize(): void;
 
         schema?: Schema;
-        row_pivot?: Array<string>;
-        column_pivot?: Array<string>;
+        row_pivots?: Array<string>;
+        column_pivots?: Array<string>;
         sort?: Array<string>;
         filter?: Array<Array<string>>;
         aggregate: Array<AggregateConfig>;

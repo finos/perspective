@@ -338,15 +338,14 @@ async function grid_create(div, view, task) {
         hypergrid.behavior.dataModel._view = undefined;
     }
 
-    const hidden = this._get_view_hidden();
     const config = await view.get_config();
 
     if (task.cancelled) {
         return;
     }
 
-    const colPivots = config.column_pivot;
-    const rowPivots = config.row_pivot;
+    const colPivots = config.column_pivots;
+    const rowPivots = config.row_pivots;
     const window = {
         start_row: 0,
         end_row: Math.max(colPivots.length + 1, rowPivots.length + 1)
@@ -378,15 +377,13 @@ async function grid_create(div, view, task) {
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
-        const rows = psp2hypergrid(next_page, hidden, schema, tschema, rowPivots, columns).rows;
+        const rows = psp2hypergrid(next_page, schema, tschema, rowPivots, columns).rows;
         const data = dataModel.data;
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
-    this.hypergrid.sbVScroller.index = 0;
-    this.hypergrid.sbHScroller.index = 0;
 
-    perspectiveHypergridElement.set_data(json, hidden, schema, tschema, rowPivots);
+    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots);
     this.hypergrid.renderer.computeCellsBounds(true);
     await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();

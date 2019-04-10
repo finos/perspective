@@ -240,16 +240,22 @@ export class PerspectiveElement extends StateElement {
         const row_pivots = this._get_view_row_pivots();
         const column_pivots = this._get_view_column_pivots();
         const filters = await this._validate_filters();
-        const aggregates = this._get_view_aggregates();
-        if (aggregates.length === 0) return;
+        const view_aggregates = this._get_view_aggregates();
+        if (view_aggregates.length === 0) return;
         const sort = this._get_view_sorts();
-        const hidden = this._get_view_hidden(aggregates, sort);
-        for (const s of hidden) {
-            const all = this.get_aggregate_attribute();
-            if (column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1) {
-                aggregates.push({column: s, op: "unique"});
-            } else {
-                aggregates.push(all.reduce((obj, y) => (y.column === s ? y : obj)));
+
+        let columns = view_aggregates.map(x => x.column);
+        let aggregates = {};
+        for (const a of view_aggregates) {
+            aggregates[a.column] = a.op;
+        }
+
+        for (const s of sort) {
+            const name = s[0];
+            if (columns.indexOf(name) === -1 && !(column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1)) {
+                const all = this.get_aggregate_attribute();
+                const {column, op} = all.reduce((obj, y) => (y.column === s ? y : obj));
+                aggregates[column] = op;
             }
         }
 
@@ -261,9 +267,10 @@ export class PerspectiveElement extends StateElement {
         }
         this._view = this._table.view({
             filter: filters,
-            row_pivot: row_pivots,
-            column_pivot: column_pivots,
-            aggregate: aggregates,
+            row_pivots: row_pivots,
+            column_pivots: column_pivots,
+            aggregates: aggregates,
+            columns: columns,
             sort: sort
         });
 

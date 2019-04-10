@@ -83,6 +83,15 @@ struct PERSPECTIVE_EXPORT t_stepdelta {
     std::vector<t_cellupd> cells;
 };
 
+struct PERSPECTIVE_EXPORT t_rowdelta {
+    t_rowdelta();
+
+    t_rowdelta(bool rows_changed, const std::vector<std::int32_t>& rows);
+
+    bool rows_changed;
+    std::vector<std::int32_t> rows;
+};
+
 } // end namespace perspective
 
 namespace std {

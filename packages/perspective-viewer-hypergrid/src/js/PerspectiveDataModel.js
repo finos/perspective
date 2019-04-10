@@ -124,7 +124,8 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
 
         try {
             await Promise.all(promises);
-            resolve(false);
+            const rects = getSubrects.call(this.grid.renderer);
+            resolve(!!rects.find(uncachedRow, this));
         } catch (e) {
             resolve(true);
         } finally {
@@ -152,7 +153,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
 function uncachedRow(rect) {
     let start_row = this.data[rect.origin.y];
     let end_row = this.data[Math.min(rect.corner.y, this.getRowCount() - 1)];
-    return !(start_row && start_row[rect.origin.x] !== undefined && end_row && end_row[rect.corner.x] !== undefined);
+    return !(start_row && start_row[rect.origin.x] !== undefined && end_row && end_row[rect.corner.x - 1] !== undefined);
 }
 
 function cellStyle(gridCellConfig) {

@@ -1,5 +1,6 @@
 {
     "empty.html/empty grids do not explode": "423ca653bbcbc21a28029c149a37b8ec",
+    "regressions.html/should not render an extra row for column_only views": "0656c682240c18c13c1d5892bf790d8a",
     "regressions.html/regular updates": "14abd51c3cae1919119d9f88bfbc5cd3",
     "regressions.html/saving a computed column does not interrupt update rendering": "da13afb4284b9c3da21ed57c6ba69301",
     "superstore.html/shows a grid without any settings applied.": "59ecbb591317976232b7dc078b79e164",
@@ -19,13 +20,13 @@
     "superstore.html/resets viewable area when the logical size expands.": "a5d1bad309edf83ceef190dd19d867ec",
     "superstore.html/resets viewable area when the physical size expands.": "59ecbb591317976232b7dc078b79e164",
     "superstore.html/replaces all rows.": "2c41d623f03b2417da7b5dcf7f31e364",
-    "hypergrid.html/perspective dispatches perspective-click event with correct properties.": "f5d6bf82299b2e5f403cdb69b67645fe",
-    "hypergrid.html/perspective dispatches perspective-click event with one filter.": "b7a10ece1d5084742f9a2d88bb68984d",
+    "hypergrid.html/perspective dispatches perspective-click event with correct properties.": "8828c6f1cfd5446a7f4c6c885e4f5fc4",
+    "hypergrid.html/perspective dispatches perspective-click event with one filter.": "5b5f7a0819a72c5dc0b5ac9726ee6221",
     "hypergrid.html/perspective dispatches perspective-click event with filters.": "3025f83c828d468207b04d8454e94fda",
     "superstore.html/handles flush": "a5d1bad309edf83ceef190dd19d867ec",
     "superstore.html/should not be able to expand past number of row pivots": "2db398671e7d98f2fa3c7ebabf4a3176",
     "superstore.html/shows a sort indicator": "ad6bb4a58d3c630f45a2ea3e21ee74e1",
     "superstore.html/shows multiple sort indicators": "919e5b8734d8ab684b11649c4b9d6eb4",
-    "superstore.html/shows a sort indicator on column split": "79c4434bf30a3517e4537bea8c1ad9bb",
-    "__GIT_COMMIT__": "e44d06594293371bcfef6592e6e7de30b1e562fc"
+    "superstore.html/shows a sort indicator on column split": "bd11ff17bd50fd575744161884b0304c",
+    "__GIT_COMMIT__": "8319755ed97ce2ccf478a00bf8b8209254a95890"
 }

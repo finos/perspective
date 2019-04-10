@@ -13,6 +13,7 @@ const path = require("path");
 
 const args = process.argv.slice(2);
 const LIMIT = args.indexOf("--limit");
+const IS_DELTA = args.indexOf("--delta");
 
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
@@ -26,7 +27,7 @@ const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective
 
 const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 
-async function run_version(browser, url) {
+async function run_version(browser, url, is_delta = false) {
     let page = await browser.newPage();
     page.on("console", msg => console.log(` ${msg.type() === "error" ? " !" : "->"} ${msg.text()}`));
     page.on("pageerror", msg => console.log(` -> ${msg.message}`));
@@ -34,7 +35,12 @@ async function run_version(browser, url) {
     await page.setContent(`<html><head><script src="${url}" async></script><script>${RUN_TEST}</script></head><body></body></html>`);
     await page.waitFor(() => window.hasOwnProperty("perspective"));
 
-    let results = await page.evaluate(async () => await window.run_test());
+    let results;
+    if (is_delta) {
+        results = await page.evaluate(async () => await window.run_delta_test());
+    } else {
+        results = await page.evaluate(async () => await window.run_test());
+    }
     await page.close();
 
     return results;
@@ -51,12 +57,21 @@ function transpose(json) {
 async function run() {
     // Allow users to set a limit on version lookbacks
     let psp_urls = URLS;
+    let is_delta = false;
+    let benchmark_name = "benchmark";
     if (LIMIT !== -1) {
         let limit_num = Number(args[LIMIT + 1]);
         if (!isNaN(limit_num) && limit_num > 0 && limit_num <= psp_urls.length) {
             console.log(`Benchmarking the last ${limit_num} versions`);
             psp_urls = URLS.slice(0, limit_num);
         }
+    }
+
+    if (IS_DELTA !== -1) {
+        // Only run delta tests for master
+        psp_urls = [URLS[0]];
+        benchmark_name = "delta_benchmark";
+        is_delta = true;
     }
 
     let data = [],
@@ -67,15 +82,17 @@ async function run() {
             args: ["--auto-open-devtools-for-tabs", "--no-sandbox"]
         });
         console.log(`Running v${version}   (${url})`);
-        let bins = await run_version(browser, url);
+        let bins = await run_version(browser, url, is_delta);
         bins = bins.map(result => ({...result, version, version_index}));
         version_index++;
         data = data.concat(bins);
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", "benchmark.json"), JSON.stringify(transpose(data)));
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", "benchmark.html"), fs.readFileSync(path.join(__dirname, "..", "html", "benchmark.html")).toString());
+        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.json`), JSON.stringify(transpose(data)));
+        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}s.html`)).toString());
 
         await browser.close();
     }
+
+    console.log(`Benchmark suite has finished running - results are in ${benchmark_name}.html.`);
 }
 
 run();
