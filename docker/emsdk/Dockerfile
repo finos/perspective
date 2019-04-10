@@ -52,6 +52,8 @@ RUN node test.js
 RUN em++ test.cpp -o test.js --closure 1
 RUN node test.js
 
+RUN embuilder.py build libc-extras
+
 RUN cd /
 RUN rm -fr /tmp/emscripten_test
 

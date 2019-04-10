@@ -14,7 +14,7 @@ const groupedHeaderPlugin = require("fin-hypergrid-grouped-header-plugin");
 const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLineRendererPaint;
-const {psp2hypergrid} = require("./psp-to-hypergrid");
+const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils.js";
 
@@ -141,8 +141,8 @@ function null_formatter(formatter, null_value = "") {
 
 bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
-        set_data(data, hidden, schema, tschema, row_pivots) {
-            const hg_data = psp2hypergrid(data, hidden, schema, tschema, row_pivots);
+        set_data(data, schema, tschema, row_pivots, columns) {
+            const hg_data = psp2hypergrid(data, schema, tschema, row_pivots, columns);
             if (this.grid) {
                 this.grid.behavior.setPSP(hg_data);
             } else {
@@ -377,13 +377,13 @@ async function grid_create(div, view, task) {
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
         let next_page = await dataModel._view.to_columns(range);
         dataModel.data = [];
-        const rows = psp2hypergrid(next_page, schema, tschema, rowPivots, columns).rows;
+        const rows = page2hypergrid(next_page, rowPivots, columns);
         const data = dataModel.data;
         const base = range.start_row;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
 
-    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots);
+    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns);
     this.hypergrid.renderer.computeCellsBounds(true);
     await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();
