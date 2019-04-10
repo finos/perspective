@@ -66,8 +66,7 @@ async function convert(filename, options) {
  * @param {*} options
  */
 async function host(filename, options) {
-    const files = path.join(require.resolve("@jpmorganchase/perspective-cli"), "html");
-    console.log(files);
+    const files = path.join(__dirname, "html");
     const server = new WebSocketHost({assets: [files], port: options.port});
     let file;
     if (filename) {
