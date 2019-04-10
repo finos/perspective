@@ -1,6 +1,6 @@
 # Liberally copied from trzeci/emscripten
 
-FROM trzeci/emscripten-slim:sdk-tag-1.38.20-64bit
+FROM trzeci/emscripten-slim:sdk-tag-1.38.29-64bit
 
 RUN apt-get -qq -y update 
 RUN apt-get -qq install -y --no-install-recommends \
@@ -18,8 +18,7 @@ ant \
 libidn11 
 
 
-RUN echo "deb http://http.debian.net/debian jessie-backports main" >> /etc/apt/sources.list
-RUN apt-get -qq -y update && apt-get -qq install -y --no-install-recommends -t jessie-backports openjdk-8-jre-headless
+RUN apt-get -qq -y update && apt-get -qq install -y --no-install-recommends openjdk-8-jre-headless
 
 RUN wget https://cmake.org/files/v3.7/cmake-3.7.2-Linux-x86_64.sh -q
 RUN mkdir /opt/cmake
