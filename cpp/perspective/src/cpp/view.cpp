@@ -20,6 +20,7 @@ View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gn
     , m_gnode(gnode)
     , m_name(name)
     , m_separator(separator)
+    , m_col_offset(0)
     , m_config(config) {
 
     // We should deprecate t_pivot and just use string column names throughout
@@ -34,6 +35,9 @@ View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gn
     m_aggregates = m_config.get_aggregates();
     m_filters = m_config.get_fterms();
     m_sorts = m_config.get_sortspecs();
+
+    // configure data window for column-only rows
+    is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
 }
 
 template <typename CTX_T>
@@ -230,8 +234,8 @@ View<t_ctx0>::get_data(
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
         m_ctx->get_data(start_row, end_row, start_col, end_col));
     auto col_names = _column_names();
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(
-        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, col_names);
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
+        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, col_names);
     return data_slice_ptr;
 }
 
@@ -243,8 +247,8 @@ View<t_ctx1>::get_data(
         m_ctx->get_data(start_row, end_row, start_col, end_col));
     auto col_names = _column_names();
     col_names.insert(col_names.begin(), "__ROW_PATH__");
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(
-        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, col_names);
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
+        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, col_names);
     return data_slice_ptr;
 }
 
@@ -256,6 +260,11 @@ View<t_ctx2>::get_data(
     std::vector<t_uindex> column_indices;
     std::vector<std::string> column_names;
     bool is_sorted = m_sorts.size() > 0;
+
+    if (is_column_only()) {
+        start_row += m_row_offset;
+        end_row += m_row_offset;
+    }
 
     if (is_sorted) {
         /**
@@ -297,8 +306,9 @@ View<t_ctx2>::get_data(
 
     column_names.insert(column_names.begin(), "__ROW_PATH__");
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
-    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(
-        m_ctx, start_row, end_row, start_col, end_col, slice_ptr, column_names, column_indices);
+    auto data_slice_ptr
+        = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row, start_col, end_col,
+            m_row_offset, m_col_offset, slice_ptr, column_names, column_indices);
     return data_slice_ptr;
 }
 

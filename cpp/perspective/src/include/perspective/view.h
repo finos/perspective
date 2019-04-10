@@ -162,6 +162,8 @@ private:
     std::vector<t_fterm> m_filters;
     std::vector<t_sortspec> m_sorts;
     bool m_column_only;
+    t_uindex m_row_offset;
+    t_uindex m_col_offset;
 
     t_config m_config;
 };

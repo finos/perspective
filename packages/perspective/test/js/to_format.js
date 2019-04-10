@@ -16,7 +16,25 @@ var int_float_string_data = [
 
 module.exports = perspective => {
     describe("data slice", function() {
-        it("data slice should respect start/end rows", async function() {
+        it("should filter out invalid start rows", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 5
+            });
+            expect(json).toEqual([]);
+        });
+
+        it("should filter out invalid start columns", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_col: 5
+            });
+            expect(json).toEqual([{}, {}, {}, {}]);
+        });
+
+        it("should respect start/end rows", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
             let json = await view.to_json({
@@ -28,7 +46,7 @@ module.exports = perspective => {
             expect(json[0]).toEqual(comparator);
         });
 
-        it("data slice should respect start/end columns", async function() {
+        it("should respect start/end columns", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
             let json = await view.to_columns({
@@ -70,6 +88,26 @@ module.exports = perspective => {
             for (let d of json) {
                 expect(d.__ROW_PATH__).toBeUndefined();
             }
+        });
+
+        it("column-only views should not have header rows", async function() {
+            let table = perspective.table([{x: 1, y: "a"}, {x: 2, y: "b"}]);
+            let view = table.view({
+                column_pivots: ["x"]
+            });
+            let json = await view.to_json();
+            expect(json).toEqual([{"1|x": 1, "1|y": "a", "2|x": null, "2|y": null}, {"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}]);
+        });
+
+        it("column-only views should return correct windows of data", async function() {
+            let table = perspective.table([{x: 1, y: "a"}, {x: 2, y: "b"}]);
+            let view = table.view({
+                column_pivots: ["x"]
+            });
+            let json = await view.to_json({
+                start_row: 1
+            });
+            expect(json).toEqual([{"1|x": null, "1|y": null, "2|x": 2, "2|y": "b"}]);
         });
 
         it("two-sided views should have row paths", async function() {
