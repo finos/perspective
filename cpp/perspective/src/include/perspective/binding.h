@@ -78,8 +78,7 @@ namespace binding {
      *
      */
     template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(
-        t_schema schema, std::string separator, bool column_only, T j_aggs);
+    std::vector<t_aggspec> _get_aggspecs(t_schema schema, bool column_only, T j_aggs);
 
     /**
      * Converts a scalar value to its language-specific representation.
