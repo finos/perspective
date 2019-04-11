@@ -88,7 +88,7 @@ View<CTX_T>::num_columns() const {
 template <>
 std::int32_t
 View<t_ctx2>::num_columns() const {
-    if (m_sorts.size() > 0) {
+    if (m_sort.size() > 0) {
         auto depth = m_column_pivots.size();
         auto col_length = m_ctx->unity_get_column_count();
         auto count = 0;
@@ -419,14 +419,14 @@ View<CTX_T>::get_aggregates() const {
 
 template <typename CTX_T>
 std::vector<t_fterm>
-View<CTX_T>::get_filters() const {
-    return m_filters;
+View<CTX_T>::get_filter() const {
+    return m_filter;
 }
 
 template <typename CTX_T>
 std::vector<t_sortspec>
-View<CTX_T>::get_sorts() const {
-    return m_sorts;
+View<CTX_T>::get_sort() const {
+    return m_sort;
 }
 
 template <>
@@ -464,12 +464,6 @@ View<CTX_T>::is_column_only() const {
  * Private
  */
 
-/**
- * @brief Gets the correct type for the specified aggregate, thus remapping columns
- * when they are pivoted. This ensures that we display aggregates with the correct type.
- *
- * @return std::string
- */
 template <typename CTX_T>
 std::string
 View<CTX_T>::_map_aggregate_types(

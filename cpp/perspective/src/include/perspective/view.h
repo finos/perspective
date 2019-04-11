@@ -140,14 +140,20 @@ public:
     std::vector<std::string> get_row_pivots() const;
     std::vector<std::string> get_column_pivots() const;
     std::vector<t_aggspec> get_aggregates() const;
-    std::vector<t_fterm> get_filters() const;
-    std::vector<t_sortspec> get_sorts() const;
+    std::vector<t_fterm> get_filter() const;
+    std::vector<t_sortspec> get_sort() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
     t_rowdelta get_row_delta(t_index bidx, t_index eidx) const;
     bool is_column_only() const;
 
 private:
+    /**
+     * @brief Gets the correct type for the specified aggregate, thus remapping columns
+     * when they are pivoted. This ensures that we display aggregates with the correct type.
+     *
+     * @return std::string
+     */
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
@@ -160,8 +166,8 @@ private:
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     std::vector<t_aggspec> m_aggregates;
-    std::vector<t_fterm> m_filters;
-    std::vector<t_sortspec> m_sorts;
+    std::vector<t_fterm> m_filter;
+    std::vector<t_sortspec> m_sort;
     bool m_column_only;
     t_uindex m_row_offset;
     t_uindex m_col_offset;
