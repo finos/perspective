@@ -937,7 +937,7 @@ export default function(Module) {
      * @param {Array<Object>} [config.columns] An array of column names for the
      * output columns.  If none are provided, all columns are output.
      * @param {Object} [config.aggregates] An object, the keys of which are column
-     * names, and their respective values ar ethe aggregates calculations to use
+     * names, and their respective values are the aggregates calculations to use
      * when this view has `row_pivots`.  A column provided to `config.columns`
      * without an aggregate in this object, will use the default aggregate
      * calculation for its type.
@@ -971,8 +971,7 @@ export default function(Module) {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
             } else if (key === "aggregate") {
-                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
-                config[key] = _config[key];
+                throw new Error(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
             } else {
@@ -1016,6 +1015,9 @@ export default function(Module) {
                 }
             }
         }
+
+        config.aggregates = config.aggregate;
+        config.aggregate = undefined;
 
         let name = Math.random() + "";
         let sides;
