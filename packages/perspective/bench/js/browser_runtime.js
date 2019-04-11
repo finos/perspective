@@ -25,6 +25,7 @@ const wait_for_perspective = () => new Promise(resolve => window.addEventListene
 
 function to_name({aggregate, row_pivot, column_pivot}) {
     return {
+        // FIXME: remove "aggregate" and replace with new syntax
         aggregate: COLUMN_TYPES[aggregate[0].column],
         row_pivots: row_pivot.join("/") || "-",
         column_pivots: column_pivot.join("/") || "-"

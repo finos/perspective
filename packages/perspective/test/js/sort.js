@@ -17,7 +17,7 @@ const data = {
 module.exports = perspective => {
     describe("Sorts", function() {
         describe("On hidden columns", function() {
-            it("unpivotted", async function() {
+            it("unpivoted", async function() {
                 var table = perspective.table(data);
                 var view = table.view({
                     columns: ["w", "y"],

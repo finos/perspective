@@ -148,6 +148,11 @@ public:
     bool is_column_only() const;
 
 private:
+    /**
+     * @brief Gets the number of hidden columns - columns used in sort but not shown.
+     *
+     * @return std::int32_t
+     */
     std::int32_t _num_hidden_cols();
 
     /**
