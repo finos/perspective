@@ -1602,27 +1602,29 @@ namespace binding {
     t_config
     make_view_config(
         const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivot = config["row_pivots"];
-        val j_column_pivot = config["column_pivots"];
-        val j_aggregate = config["aggregate"];
+        val j_row_pivots = config["row_pivots"];
+        val j_column_pivots = config["column_pivots"];
+        val j_aggregates = config["aggregates"];
+        val j_columns = config["columns"];
         val j_filter = config["filter"];
         val j_sort = config["sort"];
 
         std::vector<std::string> row_pivots;
         std::vector<std::string> column_pivots;
         std::vector<t_aggspec> aggregates;
+        std::vector<std::string> columns;
         std::vector<t_fterm> filters;
         std::vector<t_sortspec> sorts;
         std::vector<t_sortspec> col_sorts;
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
-        if (hasValue(j_row_pivot)) {
-            row_pivots = vecFromArray<val, std::string>(j_row_pivot);
+        if (hasValue(j_row_pivots)) {
+            row_pivots = vecFromArray<val, std::string>(j_row_pivots);
         }
 
-        if (hasValue(j_column_pivot)) {
-            column_pivots = vecFromArray<val, std::string>(j_column_pivot);
+        if (hasValue(j_column_pivots)) {
+            column_pivots = vecFromArray<val, std::string>(j_column_pivots);
         }
 
         bool column_only = false;
@@ -1632,17 +1634,12 @@ namespace binding {
             column_only = true;
         }
 
-        aggregates = _get_aggspecs(schema, separator, column_only, j_aggregate);
+        aggregates = _get_aggspecs(schema, separator, column_only, j_aggregates);
 
-        std::vector<std::string> col_names;
         if (aggregates.size() > 0) {
-            col_names = _get_aggregate_names(aggregates);
+            columns = _get_aggregate_names(aggregates);
         } else {
-            auto t_aggs = schema.columns();
-            auto okey_itr = std::find(t_aggs.begin(), t_aggs.end(), "psp_okey");
-            if (okey_itr != t_aggs.end())
-                t_aggs.erase(okey_itr);
-            col_names = t_aggs;
+            columns = vecFromArray<val, std::string>(j_columns);
         }
 
         if (hasValue(j_filter)) {
@@ -1653,12 +1650,12 @@ namespace binding {
         }
 
         if (hasValue(j_sort)) {
-            sorts = _get_sort(col_names, false, j_sort);
-            col_sorts = _get_sort(col_names, true, j_sort);
+            sorts = _get_sort(columns, false, j_sort);
+            col_sorts = _get_sort(columns, true, j_sort);
         }
 
         auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
-            filter_op, filters, col_names, column_only);
+            filter_op, filters, columns, column_only);
 
         return view_config;
     }

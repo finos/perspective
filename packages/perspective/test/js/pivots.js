@@ -46,20 +46,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("['z'], sum with new column syntax", async function() {
-            var table = perspective.table(data);
-            var view = table.view({
-                row_pivots: ["z"],
-                columns: ["x"]
-            });
-            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
-            let result = await view.to_json();
-            expect(result).toEqual(answer);
-            view.delete();
-            table.delete();
-        });
-
-        it("['z'], weighted_mean", async function() {
+        it.skip("['z'], weighted_mean", async function() {
             var table = perspective.table(data2);
             var view = table.view({
                 row_pivots: ["z"],
@@ -245,7 +232,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("weighted mean", async function() {
+        it.skip("weighted mean", async function() {
             var table = perspective.table([{a: "a", x: 1, y: 200}, {a: "a", x: 2, y: 100}, {a: "a", x: 3, y: null}]);
             var view = table.view({
                 row_pivots: ["a"],

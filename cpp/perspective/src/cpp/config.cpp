@@ -93,7 +93,7 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_sortspecs(sortspecs)
     , m_col_sortspecs(col_sortspecs)
     , m_aggregates(aggregates)
-    , m_detail_columns(col_names)
+    , m_detail_columns(col_names) // this should be the columns property
     , m_combiner(combiner)
     , m_fterms(fterms) {
     for (const auto& p : row_pivots) {

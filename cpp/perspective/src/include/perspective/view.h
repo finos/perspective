@@ -148,6 +148,8 @@ public:
     bool is_column_only() const;
 
 private:
+    std::int32_t _num_hidden_cols();
+
     /**
      * @brief Gets the correct type for the specified aggregate, thus remapping columns
      * when they are pivoted. This ensures that we display aggregates with the correct type.
@@ -166,6 +168,7 @@ private:
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     std::vector<t_aggspec> m_aggregates;
+    std::vector<std::string> m_columns;
     std::vector<t_fterm> m_filter;
     std::vector<t_sortspec> m_sort;
     bool m_column_only;
