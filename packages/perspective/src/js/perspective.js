@@ -327,7 +327,7 @@ export default function(Module) {
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
+        const end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
@@ -363,9 +363,9 @@ export default function(Module) {
             formatter.addRow(data, row);
         }
 
-        if (this.column_only) {
+        /*         if (this.column_only) {
             data = formatter.slice(data, 1);
-        }
+        } */
 
         return formatter.formatData(data, options.config);
     };
@@ -950,7 +950,7 @@ export default function(Module) {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
             } else if (key === "aggregate") {
-                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" amd "columns"`);
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
                 config[key] = _config[key];
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];

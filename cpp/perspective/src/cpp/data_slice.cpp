@@ -14,13 +14,16 @@ namespace perspective {
 
 template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names)
+    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
+    t_uindex col_offset, const std::shared_ptr<std::vector<t_tscalar>>& slice,
+    std::vector<std::string> column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
     , m_start_col(start_col)
     , m_end_col(end_col)
+    , m_row_offset(row_offset)
+    , m_col_offset(col_offset)
     , m_slice(slice)
     , m_column_names(column_names) {
     m_stride = m_end_col - m_start_col;
@@ -28,14 +31,16 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
 
 template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
-    t_uindex end_row, t_uindex start_col, t_uindex end_col,
-    const std::shared_ptr<std::vector<t_tscalar>>& slice, std::vector<std::string> column_names,
-    std::vector<t_uindex> column_indices)
+    t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
+    t_uindex col_offset, const std::shared_ptr<std::vector<t_tscalar>>& slice,
+    std::vector<std::string> column_names, std::vector<t_uindex> column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
     , m_start_col(start_col)
     , m_end_col(end_col)
+    , m_row_offset(row_offset)
+    , m_col_offset(col_offset)
     , m_slice(slice)
     , m_column_names(column_names)
     , m_column_indices(column_indices) {
@@ -49,6 +54,7 @@ t_data_slice<CTX_T>::~t_data_slice() {}
 template <typename CTX_T>
 t_tscalar
 t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
+    ridx += m_row_offset;
     t_uindex idx = get_slice_idx(ridx, cidx);
     t_tscalar rv;
     if (idx >= m_slice->size()) {
