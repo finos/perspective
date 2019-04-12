@@ -52,7 +52,8 @@ function heatmapChart(container, settings) {
         .chart(chart)
         .settings(settings)
         .xScale(xAxis.scale)
-        .yScale(yAxis.scale);
+        .yScale(yAxis.scale)
+        .dateAxis(xAxis.type === AXIS_TYPES.time);
 
     // render
     container.datum(data).call(zoomChart);

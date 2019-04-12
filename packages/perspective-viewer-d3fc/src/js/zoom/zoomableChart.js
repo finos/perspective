@@ -19,6 +19,7 @@ export default () => {
     let yScale = null;
     let yCopy = null;
     let bound = false;
+    let dateAxis = false;
     let canvas = false;
 
     function zoomableChart(selection) {
@@ -37,12 +38,27 @@ export default () => {
 
                 const noZoom = transform.k === 1 && transform.x === 0 && transform.y === 0;
 
-                getZoomControls(selection)
-                    .style("display", noZoom ? "none" : "")
-                    .select("#zoom-reset")
-                    .on("click", () => {
-                        selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity);
+                const zoomControls = getZoomControls(selection).style("display", noZoom ? "none" : "");
+                zoomControls.select("#zoom-reset").on("click", () => selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity));
+
+                const oneYear = zoomControls.select("#one-year").style("display", dateAxis ? "" : "none");
+                if (dateAxis) {
+                    const xRange = xCopy.range();
+                    oneYear.on("click", () => {
+                        const start = new Date(xScale.domain()[0]);
+                        const end = new Date(start);
+                        end.setYear(start.getFullYear() + 1);
+
+                        const k = (xRange[1] - xRange[0]) / (xCopy(end) - xCopy(start));
+                        const x = -xCopy(start) * k;
+                        let y = 0;
+                        if (yScale) {
+                            const yMiddle = yScale.domain().reduce((a, b) => a + b) / 2;
+                            y = -yCopy(yMiddle) * k + yScale(yMiddle);
+                        }
+                        selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(k));
                     });
+                }
             });
 
             chart.decorate(sel => {
@@ -104,6 +120,14 @@ export default () => {
             const yDomain = yCopy.domain();
             yCopy.domain([yDomain[1], yDomain[0]]);
         }
+        return zoomableChart;
+    };
+
+    zoomableChart.dateAxis = (...args) => {
+        if (!args.length) {
+            return dateAxis;
+        }
+        dateAxis = args[0];
         return zoomableChart;
     };
 

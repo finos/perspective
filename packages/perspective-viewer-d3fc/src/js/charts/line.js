@@ -53,7 +53,8 @@ function lineChart(container, settings) {
     const zoomChart = zoomableChart()
         .chart(chart)
         .settings(settings)
-        .xScale(xAxis.scale);
+        .xScale(xAxis.scale)
+        .dateAxis(xAxis.type === AXIS_TYPES.time);
 
     const toolTip = nearbyTip()
         .settings(settings)
