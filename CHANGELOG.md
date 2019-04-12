@@ -1,5 +1,25 @@
 # Changelog
 
+# [0.2.22] - 2019-04-10
+### Added
+* [#511](https://github.com/jpmorganchase/perspective/pull/511) Sunburst charts for `perspective-viewer-d3fc`, as well as support for perspective themes.
+* [#517](https://github.com/jpmorganchase/perspective/pull/517) Added `options` parameter to `view.on_update` method, and new `rows`, `none` and `pkey` update modes.
+* [#527](https://github.com/jpmorganchase/perspective/pull/527) Split `aggregate` view config option into `columns` and `aggregates` ala `<perspective-viewer>`, and named other properties like `row_pivots` consistently as well.  Old properties emit warnings.
+* [#531](https://github.com/jpmorganchase/perspective/pull/531) `perspective.table` can now be sorted by columns not in the `columns` list.
+* [#532](https://github.com/jpmorganchase/perspective/pull/532) Added `save()` and `restore()` methods to the `<perspective-viewer>` plugin API.
+* [#534](https://github.com/jpmorganchase/perspective/pull/534) Resizable Legends for `perspective-viewer-d3fc`, plus multiple bug fixes.
+
+### Fixes
+* [#521](https://github.com/jpmorganchase/perspective/pull/521) Fixed Hypergrid scroll stuttering on wide tables.
+* [#523](https://github.com/jpmorganchase/perspective/pull/523) Fixed row count on column-only pivots.
+* [#529](https://github.com/jpmorganchase/perspective/pull/529) Fixed column sorting regression.
+* [#538](https://github.com/jpmorganchase/perspective/pull/538) Fixed issue which caused Hypergrid to freeze when the column set changed during `update()`
+
+### Internal
+* [#537](https://github.com/jpmorganchase/perspective/pull/537) Upgraded Emscripten to 1.38.29 `perspective/emsdk:latest`.
+* [#539](https://github.com/jpmorganchase/perspective/pull/539) Upgraded Puppeteer `perspective/puppeteer:latest`.
+* [#520](https://github.com/jpmorganchase/perspective/pull/520) Updated `docs/` build and integrated into `master` branch.
+
 # [0.2.21] - 2019-04-03
 ### Added
 * [#488](https://github.com/jpmorganchase/perspective/pull/488) Candlestick and OHLC charts for `perspective-viewer-d3fc`.

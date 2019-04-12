@@ -254,7 +254,7 @@ export class PerspectiveElement extends StateElement {
             const name = s[0];
             if (columns.indexOf(name) === -1 && !(column_pivots.indexOf(s) > -1 || row_pivots.indexOf(s) > -1)) {
                 const all = this.get_aggregate_attribute();
-                const {column, op} = all.reduce((obj, y) => (y.column === s ? y : obj));
+                const {column, op} = all.reduce((obj, y) => (y.column === name ? y : obj));
                 aggregates[column] = op;
             }
         }

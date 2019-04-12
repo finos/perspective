@@ -91,8 +91,8 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => element.setAttribute("columns", '["Sales", "Profit"]'), viewer);
-                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
                     await page.evaluate(element => element.setAttribute("sort", '[["Sales", "desc"]]'), viewer);
+                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
                 });
             });
 

@@ -23,11 +23,11 @@ const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"
 
 const wait_for_perspective = () => new Promise(resolve => window.addEventListener("perspective-ready", resolve));
 
-function to_name({aggregate, row_pivots, column_pivots}) {
+function to_name({aggregate, row_pivot, column_pivot}) {
     return {
         aggregate: COLUMN_TYPES[aggregate[0].column],
-        row_pivots: row_pivots.join("/") || "-",
-        column_pivots: column_pivots.join("/") || "-"
+        row_pivots: row_pivot.join("/") || "-",
+        column_pivots: column_pivot.join("/") || "-"
     };
 }
 
@@ -134,6 +134,7 @@ async function* run_on_update_cases(table, config, mode) {
     const view = table.view(config);
     view.on_update(function() {}, {mode: mode});
     console.log(`Benchmarking \`${name}.on_update(${mode})()\``);
+
     for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
         const start = performance.now();
         for (let i = 0; i < 100; i++) {
@@ -156,30 +157,6 @@ async function* run_on_update_cases(table, config, mode) {
     await view.delete();
 }
 
-// Run collections of cases
-
-async function* run_all_delta_cases() {
-    const worker = window.perspective.worker();
-    await wait_for_perspective();
-
-    // eslint-disable-next-line no-unused-vars
-    const {csv, arrow, rows, columns} = await get_data(worker);
-
-    const table = worker.table(rows);
-    await table.schema();
-
-    const aggregate = AGG_OPTIONS[0];
-    for (const row_pivots of ROW_PIVOT_OPTIONS) {
-        for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
-            const config = {aggregate, row_pivots, column_pivots};
-
-            yield* run_on_update_cases(table, config, "none");
-            yield* run_on_update_cases(table, config, "rows");
-            yield* run_on_update_cases(table, config, "pkey");
-        }
-    }
-}
-
 async function* run_all_cases() {
     const worker = window.perspective.worker();
     await wait_for_perspective();
@@ -195,9 +172,9 @@ async function* run_all_cases() {
     await table.schema();
 
     for (const aggregate of AGG_OPTIONS) {
-        for (const row_pivots of ROW_PIVOT_OPTIONS) {
-            for (const column_pivots of COLUMN_PIVOT_OPTIONS) {
-                const config = {aggregate, row_pivots, column_pivots};
+        for (const row_pivot of ROW_PIVOT_OPTIONS) {
+            for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
+                const config = {aggregate, row_pivot, column_pivot};
 
                 yield* run_view_cases(table, config);
                 yield* run_to_format_cases(table, config, "to_json");
@@ -206,38 +183,32 @@ async function* run_all_cases() {
             }
         }
     }
+
+    const aggregate = AGG_OPTIONS[0];
+    for (const row_pivot of ROW_PIVOT_OPTIONS) {
+        for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
+            const config = {aggregate, row_pivot, column_pivot};
+
+            yield* run_on_update_cases(table, config, "none");
+            yield* run_on_update_cases(table, config, "rows");
+            yield* run_on_update_cases(table, config, "pkey");
+        }
+    }
 }
 
 // Run entire test suite
 
 // eslint-disable-next-line no-unused-vars
-async function run_delta_test() {
-    // eslint-disable-next-line no-undef
-    perspective = perspective.default || perspective;
-    try {
-        let results = [];
-        for await (let c of run_all_delta_cases()) {
-            results.push(c);
-        }
-        return results;
-    } catch (e) {
-        console.error(e.message);
-        return [];
-    }
-}
-
-// eslint-disable-next-line no-unused-vars
 async function run_test() {
     // eslint-disable-next-line no-undef
     perspective = perspective.default || perspective;
+    let results = [];
     try {
-        let results = [];
         for await (let c of run_all_cases()) {
             results.push(c);
         }
-        return results;
     } catch (e) {
         console.error(e.message);
-        return [];
     }
+    return results;
 }

@@ -13,11 +13,10 @@ const path = require("path");
 
 const args = process.argv.slice(2);
 const LIMIT = args.indexOf("--limit");
-const IS_DELTA = args.indexOf("--delta");
 
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
-const UNPKG_VERSIONS = ["0.2.18", "0.2.16", "0.2.15", "0.2.12", "0.2.11", "0.2.10", "0.2.9", "0.2.8", "0.2.7", "0.2.6", "0.2.5", "0.2.4", "0.2.3", "0.2.2", "0.2.1", "0.2.0"];
+const UNPKG_VERSIONS = ["0.2.21", "0.2.20", "0.2.18", "0.2.16", "0.2.15", "0.2.12", "0.2.11", "0.2.10", "0.2.9", "0.2.8", "0.2.7", "0.2.6", "0.2.5", "0.2.4", "0.2.3", "0.2.2", "0.2.1", "0.2.0"];
 const UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${UNPKG_VERSIONS}/build/perspective.js`;
 
 const OLD_FORMAT_UNPKG_VERSIONS = ["0.2.0-beta.3"];
@@ -29,7 +28,11 @@ const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toS
 
 async function run_version(browser, url, is_delta = false) {
     let page = await browser.newPage();
-    page.on("console", msg => console.log(` ${msg.type() === "error" ? " !" : "->"} ${msg.text()}`));
+    page.on("console", msg => {
+        if (msg.type() !== "warning") {
+            console.log(` ${msg.type() === "error" ? " !" : "->"} ${msg.text()}`);
+        }
+    });
     page.on("pageerror", msg => console.log(` -> ${msg.message}`));
 
     await page.setContent(`<html><head><script src="${url}" async></script><script>${RUN_TEST}</script></head><body></body></html>`);
@@ -67,13 +70,6 @@ async function run() {
         }
     }
 
-    if (IS_DELTA !== -1) {
-        // Only run delta tests for master
-        psp_urls = [URLS[0]];
-        benchmark_name = "delta_benchmark";
-        is_delta = true;
-    }
-
     let data = [],
         version_index = 1;
     for (let [version, url] of psp_urls) {
@@ -87,7 +83,7 @@ async function run() {
         version_index++;
         data = data.concat(bins);
         fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.json`), JSON.stringify(transpose(data)));
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}s.html`)).toString());
+        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}.html`)).toString());
 
         await browser.close();
     }

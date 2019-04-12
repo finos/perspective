@@ -483,6 +483,9 @@ class PerspectiveViewer extends ActionElement {
                 obj[attr.name] = attr.value;
             }
         }
+        if (this._plugin.save) {
+            obj.plugin_config = this._plugin.save();
+        }
         return obj;
     }
 
@@ -501,6 +504,9 @@ class PerspectiveViewer extends ActionElement {
                 val = JSON.stringify(val);
             }
             this.setAttribute(key, val);
+        }
+        if (this._plugin.restore && x.plugin_config) {
+            this._plugin.restore(x.plugin_config);
         }
         await this._debounce_update();
     }
