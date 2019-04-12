@@ -27,7 +27,9 @@ charts.forEach(chart => {
         ...chart.plugin,
         create: drawChart(chart),
         resize: resizeChart,
-        delete: deleteChart
+        delete: deleteChart,
+        save: save,
+        restore: restore
     });
 });
 
@@ -82,6 +84,20 @@ function deleteChart() {
     if (this[PRIVATE] && this[PRIVATE].chart) {
         const perspective_d3fc_element = this[PRIVATE].chart;
         perspective_d3fc_element.delete();
+    }
+}
+
+function save() {
+    if (this[PRIVATE] && this[PRIVATE].chart) {
+        const perspective_d3fc_element = this[PRIVATE].chart;
+        return perspective_d3fc_element.getSettings();
+    }
+}
+
+function restore(config) {
+    if (this[PRIVATE] && this[PRIVATE].chart) {
+        const perspective_d3fc_element = this[PRIVATE].chart;
+        perspective_d3fc_element.setSettings(config);
     }
 }
 
