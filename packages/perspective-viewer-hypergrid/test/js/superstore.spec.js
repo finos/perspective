@@ -96,6 +96,17 @@ utils.with_server({}, () => {
                 });
             });
 
+            describe("memoized column meta", () => {
+                test.capture("should reinterpret metadata when only row pivots are changed", async page => {
+                    const viewer = await page.$("perspective-viewer");
+                    await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Region","OrderDate"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Order Date"]'), viewer);
+                    await page.waitForSelector("perspective-viewer:not([updating])");
+                });
+            });
+
             describe("lazy render mode", () => {
                 test.capture("resets viewable area when the logical size expands.", async page => {
                     await set_lazy(page);
