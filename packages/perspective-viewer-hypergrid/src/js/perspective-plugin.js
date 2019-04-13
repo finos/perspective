@@ -46,7 +46,11 @@ function setPSP(payload) {
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
 
-    if (this._memoized_schema && lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length))) {
+    if (
+        this._memoized_schema &&
+        lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length)) &&
+        lodash.isEqual(payload.rowPivots, this._memoized_pivots)
+    ) {
         this.grid.sbVScroller.index = 0;
         this.grid.behavior.dataModel.data = payload.rows;
     } else {
@@ -59,6 +63,7 @@ function setPSP(payload) {
         });
     }
     this._memoized_schema = new_schema;
+    this._memoized_pivots = payload.rowPivots;
 }
 
 /**
