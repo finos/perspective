@@ -93,6 +93,13 @@ t_aggspec::name() const {
     return m_name;
 }
 
+t_tscalar
+t_aggspec::name_scalar() const {
+    t_tscalar s;
+    s.set(m_name.c_str());
+    return s;
+}
+
 std::string
 t_aggspec::disp_name() const {
     return m_disp_name;

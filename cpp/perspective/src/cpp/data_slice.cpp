@@ -16,7 +16,7 @@ template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
     t_uindex col_offset, const std::shared_ptr<std::vector<t_tscalar>>& slice,
-    std::vector<std::string> column_names)
+    std::vector<std::vector<t_tscalar>> column_names)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -33,7 +33,7 @@ template <typename CTX_T>
 t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row,
     t_uindex end_row, t_uindex start_col, t_uindex end_col, t_uindex row_offset,
     t_uindex col_offset, const std::shared_ptr<std::vector<t_tscalar>>& slice,
-    std::vector<std::string> column_names, std::vector<t_uindex> column_indices)
+    std::vector<std::vector<t_tscalar>> column_names, std::vector<t_uindex> column_indices)
     : m_ctx(ctx)
     , m_start_row(start_row)
     , m_end_row(end_row)
@@ -85,7 +85,7 @@ t_data_slice<CTX_T>::get_slice() const {
 }
 
 template <typename CTX_T>
-const std::vector<std::string>&
+const std::vector<std::vector<t_tscalar>>&
 t_data_slice<CTX_T>::get_column_names() const {
     return m_column_names;
 }

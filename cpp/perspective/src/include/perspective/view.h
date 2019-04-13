@@ -76,9 +76,10 @@ public:
      * individual column names will be joined with a separator character
      * specified by the user, or defaulting to "|".
      *
-     * @return std::vector<std::string>
+     * @return std::vector<std::vector<t_tscalar>>
      */
-    std::vector<std::string> _column_names(bool skip = false, std::int32_t depth = 0) const;
+    std::vector<std::vector<t_tscalar>> column_names(
+        bool skip = false, std::int32_t depth = 0) const;
 
     /**
      * @brief Returns shared pointer to a t_data_slice object, which contains the

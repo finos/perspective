@@ -322,7 +322,7 @@ namespace binding {
      * val
      */
     val
-    scalar_to_val(const t_tscalar& scalar, bool cast_double) {
+    scalar_to_val(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         if (!scalar.is_valid()) {
             return val::null();
         }
@@ -334,7 +334,19 @@ namespace binding {
                     return val(false);
                 }
             }
-            case DTYPE_TIME:
+            case DTYPE_TIME: {
+                if (cast_double) {
+                    auto x = scalar.to_uint64();
+                    double y = *reinterpret_cast<double*>(&x);
+                    return val(y);
+                } else if (cast_string) {
+                    double ms = scalar.to_double();
+                    emscripten::val date = val::global("Date").new_(ms);
+                    return date.call<val>("toLocaleString");
+                } else {
+                    return val(scalar.to_double());
+                }
+            }
             case DTYPE_FLOAT64:
             case DTYPE_FLOAT32: {
                 if (cast_double) {
@@ -375,6 +387,11 @@ namespace binding {
     val
     scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
         return scalar_to_val(scalars[idx]);
+    }
+
+    val
+    scalar_vec_to_string(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
+        return scalar_to_val(scalars[idx], false, true);
     }
 
     template <typename T, typename U>
@@ -1960,7 +1977,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("num_columns", &View<t_ctx0>::num_columns)
         .function("get_row_expanded", &View<t_ctx0>::get_row_expanded)
         .function("schema", &View<t_ctx0>::schema)
-        .function("_column_names", &View<t_ctx0>::_column_names)
+        .function("column_names", &View<t_ctx0>::column_names)
         .function("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx0>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx0>::get_context, allow_raw_pointers())
@@ -1985,7 +2002,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("collapse", &View<t_ctx1>::collapse)
         .function("set_depth", &View<t_ctx1>::set_depth)
         .function("schema", &View<t_ctx1>::schema)
-        .function("_column_names", &View<t_ctx1>::_column_names)
+        .function("column_names", &View<t_ctx1>::column_names)
         .function("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx1>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx1>::get_context, allow_raw_pointers())
@@ -2010,7 +2027,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("collapse", &View<t_ctx2>::collapse)
         .function("set_depth", &View<t_ctx2>::set_depth)
         .function("schema", &View<t_ctx2>::schema)
-        .function("_column_names", &View<t_ctx2>::_column_names)
+        .function("column_names", &View<t_ctx2>::column_names)
         .function("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
         .function("_set_deltas_enabled", &View<t_ctx2>::_set_deltas_enabled)
         .function("get_context", &View<t_ctx2>::get_context, allow_raw_pointers())
@@ -2060,18 +2077,18 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
-        .function<const std::vector<std::string>&>(
+        .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
 
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
-        .function<const std::vector<std::string>&>(
+        .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx1>::get_column_names)
         .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
 
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
-        .function<const std::vector<std::string>&>(
+        .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
         .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
@@ -2152,6 +2169,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
+    register_vector<std::vector<t_tscalar>>("std::vector<std::vector<t_tscalar>>");
     register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
@@ -2198,6 +2216,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_table", &make_table<val>, allow_raw_pointers());
     function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
     function("scalar_vec_to_val", &scalar_vec_to_val);
+    function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<val>);
     function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
     function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);

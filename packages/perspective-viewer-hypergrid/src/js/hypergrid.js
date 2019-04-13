@@ -237,7 +237,7 @@ bindTemplate(TEMPLATE, style)(
                 );
                 this.grid.localization.add("FinanceFloat", float_formatter);
 
-                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter("en-US", {}));
+                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter("en-us", {}));
                 this.grid.localization.add("FinanceInteger", integer_formatter);
 
                 const datetime_formatter = null_formatter(
