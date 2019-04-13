@@ -44,6 +44,7 @@ public:
     std::vector<t_tscalar> get_column_path_userspace(t_index idx) const;
 
     std::vector<t_aggspec> get_aggregates() const;
+    t_tscalar get_aggregate_name(t_uindex idx) const;
 
     void column_sort_by(const std::vector<t_sortspec>& sortby);
 

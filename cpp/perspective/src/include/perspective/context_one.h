@@ -35,6 +35,7 @@ public:
     t_index close(t_index idx);
 
     t_aggspec get_aggregate(t_uindex idx) const;
+    t_tscalar get_aggregate_name(t_uindex idx) const;
     std::vector<t_aggspec> get_aggregates() const;
     std::vector<t_tscalar> get_row_path(t_index idx) const;
     void set_depth(t_depth depth);

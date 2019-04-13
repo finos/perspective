@@ -300,6 +300,26 @@ export default function(Module) {
         return hidden;
     };
 
+    function col_path_vector_to_string(vector) {
+        let extracted = [];
+        for (let i = 0; i < vector.size(); i++) {
+            extracted.push(__MODULE__.scalar_vec_to_string(vector, i));
+        }
+        vector.delete();
+        return extracted;
+    }
+
+    const extract_vector_scalar = function(vector) {
+        // handles deletion already - do not call delete() on the input vector again
+        let extracted = [];
+        for (let i = 0; i < vector.size(); i++) {
+            let item = vector.get(i);
+            extracted.push(col_path_vector_to_string(item));
+        }
+        vector.delete();
+        return extracted;
+    };
+
     /**
      * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
      * are the columns of this {@link module:perspective~view}, and the values are their string type names.
@@ -316,7 +336,7 @@ export default function(Module) {
     };
 
     view.prototype._column_names = function(skip = false, depth = 0) {
-        return extract_vector(this._View._column_names(skip, depth));
+        return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
     const to_format = async function(options, formatter) {
@@ -335,7 +355,8 @@ export default function(Module) {
         const nidx = ["zero", "one", "two"][num_sides];
 
         const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
-        const col_names = extract_vector(slice.get_column_names());
+        const ns = slice.get_column_names();
+        const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
 
         let data = formatter.initDataValue();
         for (let ridx = start_row; ridx < end_row; ridx++) {

@@ -541,6 +541,17 @@ t_ctx2::get_aggregates() const {
     return m_config.get_aggregates();
 }
 
+t_tscalar
+t_ctx2::get_aggregate_name(t_uindex idx) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_tscalar s;
+    if (idx >= m_config.get_num_aggregates())
+        return s;
+    s.set(m_config.get_aggregates()[idx].name_scalar());
+    return s;
+}
+
 void
 t_ctx2::set_depth(t_header header, t_depth depth) {
     t_depth new_depth;
