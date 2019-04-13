@@ -24,6 +24,13 @@ var data_7 = {
     z: [true, false, true, false]
 };
 
+var data_8 = {
+    w: [1.5, 2.5, 3.5, 4.5],
+    x: [1, 2, 3, 4],
+    y: ["a", "b", "c", "d"],
+    z: [new Date(1555126035065), new Date(1555126035065), new Date(1555026035065), new Date(1555026035065)]
+};
+
 module.exports = perspective => {
     describe("Aggregate", function() {
         it("['z'], sum", async function() {
@@ -512,6 +519,23 @@ module.exports = perspective => {
             });
             let result2 = await view.schema();
             expect(result2).toEqual(meta);
+            view.delete();
+            table.delete();
+        });
+
+        it("['z'] only, datetime column", async function() {
+            var table = perspective.table(data_8);
+            var view = table.view({
+                column_pivots: ["z"],
+                columns: ["x", "y"]
+            });
+            let result2 = await view.to_columns();
+            expect(result2).toEqual({
+                "2019-4-11 23:40:35|x": [null, null, 3, 4],
+                "2019-4-11 23:40:35|y": [null, null, "c", "d"],
+                "2019-4-13 03:27:15|x": [1, 2, null, null],
+                "2019-4-13 03:27:15|y": ["a", "b", null, null]
+            });
             view.delete();
             table.delete();
         });

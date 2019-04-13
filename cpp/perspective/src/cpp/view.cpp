@@ -293,9 +293,8 @@ View<t_ctx2>::get_data(
     row_path.set("__ROW_PATH__");
     cols.insert(cols.begin(), std::vector<t_tscalar>{row_path});
     auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
-    auto data_slice_ptr
-        = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row, start_col, end_col,
-            m_row_offset, m_col_offset, slice_ptr, cols, column_indices);
+    auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row,
+        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, cols, column_indices);
     return data_slice_ptr;
 }
 
