@@ -1,4 +1,5 @@
 {
+    "name": "Perspective",
     "private": true,
     "workspaces": [
         "packages/*",
@@ -47,6 +48,7 @@
         "precommit"
     ],
     "scripts": {
+        "check-transitive-licenses": "node-license-validator . --allow-licenses MIT ISC Apache \"Apache 2.0\" BSD BSD-2-Clause BSD-3-Clause BSD-like MIT/X11 Unlicense",
         "build,test": "npm run --silent build && npm run --silent test",
         "build,test,bench": "npm run --silent build && npm run --silent test && npm run --silent bench",
         "build,bench": "npm run --silent build && npm run --silent bench",

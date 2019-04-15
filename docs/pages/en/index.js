@@ -84,9 +84,9 @@ class HomeSplash extends React.Component {
 
           <PromoSection>
             <Button href="https://jsfiddle.net/user/texodus/fiddles/">Examples</Button>
-            <Button href="https://jpmorganchase.github.io/perspective/docs/installation.html">Docs</Button>
-            <Button href="https://www.npmjs.com/package/@jpmorganchase/perspective">NPM</Button>
-            <Button href="https://github.com/jpmorganchase/perspective">Github</Button>
+            <Button href="https://perspective.finos.org/docs/installation.html">Docs</Button>
+            <Button href="https://www.npmjs.com/package/@finos/perspective">NPM</Button>
+            <Button href="https://github.com/finos/perspective">Github</Button>
           </PromoSection>
         </div>
       </SplashContainer>

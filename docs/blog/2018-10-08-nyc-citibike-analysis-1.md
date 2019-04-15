@@ -40,10 +40,10 @@ already be quite familiar with (Yes, perspective-heads is a real term that real
 people other than me use):
 
 ```html
-<script src="https://unpkg.com/@jpmorganchase/perspective/build/perspective.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
+<script src="https://unpkg.com/@finos/perspective/build/perspective.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
 ```
 
 You're also going to need a relatively up-to-date browser, as this example makes use
@@ -238,7 +238,7 @@ parameter to our `table.update()` method.  The <i>index</i> field of the
 <i>options object</i> passed as the second parameter to
 `table()` makes sure that each updated row overwrites existing <i>rows</i> 
 joined by `station_id`, and Perspective's support for 
-[partial updates](https://jpmorganchase.github.io/perspective/docs/usage.html#partial-i-row-i-updates-via-undefined)
+[partial updates](https://perspective.finos.org/docs/usage.html#partial-i-row-i-updates-via-undefined)
 means only the fields actually defined in the `station_status` feed are updated,
 while the `station_information` fields are left alone.  Without this property,
 <i>rows</i> added via the `table.update()` method would simply append, and we'd
@@ -298,7 +298,7 @@ visualizations that may help us understand the answer, including
 an incredibly obvious and easy one - a list of Citibike stations ordered by
 the `"num_bikes_available"`.  We can make this the default view on a
 `<perspective-viewer>` easily in HTML, through its
-[Attribute API](https://jpmorganchase.github.io/perspective/docs/usage.html#setting-reading-viewer-configuration-via-attributes).
+[Attribute API](https://perspective.finos.org/docs/usage.html#setting-reading-viewer-configuration-via-attributes).
 
 In this case, we'll want to set the `columns` attribute to our column set,
 `["num_bikes_available"]`, and the `sort` attribute to a list of sort
@@ -356,5 +356,5 @@ Finally, at long last, we have our live & ticking Citibike Analytics Dashboard:
 ## Appendix - the Entire Application
 
 For your covenience, the entire Javascript application at once is available
-[in the `examples/` directory of the Perspective github repository](https://github.com/jpmorganchase/perspective/blob/master/examples/simple/citibike.html), as well as
+[in the `examples/` directory of the Perspective github repository](https://github.com/finos/perspective/blob/master/examples/simple/citibike.html), as well as
 [in a JSFiddle](https://jsfiddle.net/texodus/m2rwz690)

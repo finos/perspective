@@ -8,17 +8,18 @@
 const siteConfig = {
     title: "Perspective" /* title for your website */,
     tagline: "Streaming Analytics via WebAssembly",
-    url: "https://jpmorganchase.github.io/" /* your website url */,
-    baseUrl: "/perspective/" /* base url for your project */,
+    url: "https://perspective.finos.org/" /* your website url */,
+    cname: "perspective.finos.org",
+    baseUrl: "/" /* base url for your project */,
 
     projectName: "perspective",
-    organizationName: "jpmorganchase",
+    organizationName: "FINOS Data Visualization Program",
 
     headerLinks: [
         {doc: "md/installation", label: "Docs"},
         {doc: "obj/perspective-viewer", label: "API"},
         {blog: true, label: "Blog"},
-        {href: "https://github.com/jpmorganchase/perspective/", label: "GitHub"}
+        {href: "https://github.com/finos/perspective/", label: "GitHub"}
     ],
 
     headerIcon: "img/perspective2.svg",
@@ -38,10 +39,10 @@ const siteConfig = {
 
     scripts: [
         "https://buttons.github.io/buttons.js",
-        "https://unpkg.com/@jpmorganchase/perspective/build/perspective.js",
-        "https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js",
-        "https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js",
-        "https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js",
+        "https://unpkg.com/@finos/perspective/build/perspective.js",
+        "https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js",
+        "https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js",
+        "https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js",
         "js/animation.js"
     ],
 

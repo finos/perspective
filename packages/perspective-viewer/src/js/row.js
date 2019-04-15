@@ -14,7 +14,7 @@ import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
 
 import {bindTemplate} from "./utils.js";
 
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@finos/perspective";
 import template from "../html/row.html";
 
 import style from "../less/row.less";

@@ -8,14 +8,14 @@
  */
 
 const path = require("path");
-const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
     entry: "./src/ts/index.ts",
     resolveLoader: {
         alias: {
-            "file-worker-loader": "@jpmorganchase/perspective-webpack-plugin/src/js/psp-worker-loader.js"
+            "file-worker-loader": "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"
         }
     },
     resolve: {

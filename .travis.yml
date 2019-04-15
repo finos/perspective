@@ -34,6 +34,11 @@ env:
   global:
     - EM_USE_GLOBAL_CACHE=1
 
+# Analyse licenses, only for bundled dependencies
+before_install:
+  - npm install --production
+  - npm run check-transitive-licenses
+
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
   - yarn

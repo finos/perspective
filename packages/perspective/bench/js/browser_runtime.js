@@ -7,8 +7,8 @@
  *
  */
 
-const CSV = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.csv";
-const ARROW = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
+const CSV = "https://unpkg.com/@finos/perspective-examples@0.2.0-beta.2/build/superstore.csv";
+const ARROW = "https://unpkg.com/@finos/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
 
 const ITERATIONS = 50;
 const TOSS_ITERATIONS = 10;

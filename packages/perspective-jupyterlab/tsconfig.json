@@ -14,7 +14,7 @@
       "DOM"
     ],
     "types": [
-      "@jpmorganchase/perspective-phosphor",
+      "@finos/perspective-phosphor",
       "node"
     ]
   },

@@ -21,17 +21,17 @@ though you can instantiate this separately if you wish - this is helpful for
 e.g. [sharing a table](<(#sharing-a-table-between-multiple-perspective-viewers)>)
 between multiple `<perspective-viewer>`s
 
-<img src="https://jpmorganchase.github.io/perspective/svg/architecture.svg">
+<img src="https://perspective.finos.org/svg/architecture.svg">
 
 Perspective is designed for flexibility, allowing developers to pick and choose
 which modules they need for their specific use case. The main modules are:
 
--   `@jpmorganchase/perspective`  
+-   `@finos/perspective`  
     The data engine library, as both a browser ES6 and Node.js module. Provides an
     asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
     runtime.
 
--   `@jpmorganchase/perspective-viewer`  
+-   `@finos/perspective-viewer`  
     A user-configurable visualization widget, bundled as a [Web Component](https://www.webcomponents.org/introduction).
     This module includes the core data engine module as a dependency.
 
@@ -41,14 +41,14 @@ Javascript libraries such as [HighCharts](https://github.com/highcharts/highchar
 are packaged separately and must be imported individually; in this way,
 developers can choose to opt into the features, bundle size inflation and
 licensing for these dependencies as needed. When imported after
-`@jpmorganchase/perspective-viewer`, the plugin modules will register
+`@finos/perspective-viewer`, the plugin modules will register
 themselves automatically, and the renderers they export will be available in the
 `view` dropdown in the `<perspective-viewer>` UI.
 
--   `@jpmorganchase/perspective-viewer-hypergrid`  
+-   `@finos/perspective-viewer-hypergrid`  
     A `<perspective-viewer>` plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
 
--   `@jpmorganchase/perspective-viewer-highcharts`  
+-   `@finos/perspective-viewer-highcharts`  
     A `<perspective-viewer>` plugin for [HighCharts](https://github.com/highcharts/highcharts).
     This plugin has a dependency on Highcharts' [mixed commercial license](https://creativecommons.org/licenses/by-nc/3.0/).
 
@@ -58,15 +58,15 @@ project:
 
 -   If you are only interested in using Perspective as a simple, browser-based
     data visualization widget, you probably only need the
-    `@jpmorganchase/perspective-viewer` module and optionally its plugins
-    `@jpmorganchase/perspective-viewer-hypergrid` and
-    `@jpmorganchase/perspective-viewer-highcharts`. The core data engine
-    `@jpmorganchase/perspective` is a depedency of these packages and does not
+    `@finos/perspective-viewer` module and optionally its plugins
+    `@finos/perspective-viewer-hypergrid` and
+    `@finos/perspective-viewer-highcharts`. The core data engine
+    `@finos/perspective` is a depedency of these packages and does not
     need to be imported on its own for basic usage. Details for these can be found [here](#perspective-viewer-web-component).
 
 -   If you are only interested in the high-performance streaming data engine
     (the WebAssembly part), or your project is purely Node.js based, you need only
-    the `@jpmorganchase/perspective` module, detailed [here](#perspective-library).
+    the `@finos/perspective` module, detailed [here](#perspective-library).
 
 -   For more complex cases, such as
     [sharing tables between viewers](#sharing-a-table-between-multiple-perspective-viewers)
@@ -78,9 +78,9 @@ project:
 The main module exporting `table()` and `view()`, as well as process
 management functions such as `worker()` and `WorkerHost()`. This module is
 not needed if you only intend to use `<perspective-viewer>` to visualize
-simple data, and is a dependency of the `@jpmorganchase/perspective-viewer`
+simple data, and is a dependency of the `@finos/perspective-viewer`
 module. For a complete reference on all exported methods in `perspective`, see the
-[full API Docs](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective);
+[full API Docs](https://github.com/finos/perspective/tree/master/packages/perspective);
 presented here is a basic overview of the module's usage.
 
 As a library, `perspective` provides a suite of streaming pivot, aggregate, filter
@@ -90,7 +90,7 @@ nearly identical API.
 
 ### Importing in the browser
 
-The `main` entry point for `@jpmorganchase/perspective` runs in a Web
+The `main` entry point for `@finos/perspective` runs in a Web
 Worker, such that the CPU workload is segregated from the web application in
 which it is embedded, and so the bulk of engine code can be lazy-loaded only
 after browser feature detection determines whether WebAssembly is supported.
@@ -98,18 +98,18 @@ after browser feature detection determines whether WebAssembly is supported.
 The library can be imported ia ES6 module and/or Babel:
 
 ```javascript
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@finos/perspective";
 ```
 
 or
 
 ```javascript
-const perspective = require("@jpmorganchase/perspective");
+const perspective = require("@finos/perspective");
 ```
 
 Perspective can also be referenced via the global `perspective` module name in vanilla
-Javascript, when e.g. importing `@jpmorganchase/perspective`
-[via a CDN](https://unpkg.com/@jpmorganchase/perspective/build/perspective.js).
+Javascript, when e.g. importing `@finos/perspective`
+[via a CDN](https://unpkg.com/@finos/perspective/build/perspective.js).
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()`
 method. This will create a new WebWorker (browser) or Process (node.js), and
@@ -127,13 +127,13 @@ need them to interact with your data in each instance.
 
 ### Importing in Node.js
 
-The `Node.js` runtime for the `@jpmorganchase/perpsective` module runs
+The `Node.js` runtime for the `@finos/perpsective` module runs
 in-process by default, and does not implement a `child_process` interface.
 Hence, there is no `worker()` method, and the module object itself directly
 exports the full `perspective` API.
 
 ```javascript
-const perspective = require("@jpmorganchase/perspective");
+const perspective = require("@finos/perspective");
 ```
 
 ### Loading data with `table()`
@@ -250,7 +250,7 @@ of transformations for an associated `table()`. A `view()` is created from a
 `table()` via a configuration object, and a `view()` instance can return data
 from queries to its various methods. For a full description of the available
 configuration properties for `view()`, see the
-[full API documentation](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective).
+[full API documentation](https://github.com/finos/perspective/tree/master/packages/perspective).
 
 ```javascript
 const table = worker.table(data);
@@ -312,9 +312,9 @@ application - these modules export nothing, but rather register the components
 for use within your site's regular HTML:
 
 ```javascript
-import "@jpmorganchase/perspective-viewer";
-import "@jpmorganchase/perspective-viewer-hypergrid";
-import "@jpmorganchase/perspective-viewer-highcharts";
+import "@finos/perspective-viewer";
+import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-highcharts";
 ```
 
 You must also import a theme when bundling perspective-viewer. Even though there
@@ -322,7 +322,7 @@ are only 2 of them.
 
 ```javascript
 // A theme based on Google's Material Design Language
-import "@jpmorganchase/perspective-viewer/build/material.css";
+import "@finos/perspective-viewer/build/material.css";
 ```
 
 Alternatively, if you're fine with a default theme and don't want to bundle yourself,
@@ -424,7 +424,7 @@ In Node.js:
 const {
     WebSocketHost,
     table
-} = require("@jpmorganchase/perspective/build/perspective.node.js");
+} = require("@finos/perspective/build/perspective.node.js");
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
@@ -463,7 +463,7 @@ initial state, by reading JSON encoded properties from attributes for each
 `row_pivot` and `filter` configuration to the initial `view()` created when
 data is loaded via the `load()` method, as well as set the UI controls to
 reflect this config. See the
-[full Attribute API documentation](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-viewer)
+[full Attribute API documentation](https://github.com/finos/perspective/tree/master/packages/perspective-viewer)
 for a full description of the available Attributes.
 
 ```html

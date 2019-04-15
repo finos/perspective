@@ -16,7 +16,7 @@ const PerspectiveDataModel = require("./PerspectiveDataModel");
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLineRendererPaint;
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 
-import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils.js";
+import {bindTemplate} from "@finos/perspective-viewer/cjs/js/utils.js";
 
 const TEMPLATE = require("../html/hypergrid.html");
 

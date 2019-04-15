@@ -8,15 +8,15 @@
  */
 /**************************/
 /* perspective components */
-import "@jpmorganchase/perspective-viewer";
-import "@jpmorganchase/perspective-viewer-hypergrid";
-import "@jpmorganchase/perspective-viewer-highcharts";
+import "@finos/perspective-viewer";
+import "@finos/perspective-viewer-hypergrid";
+import "@finos/perspective-viewer-highcharts";
 
 import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import { MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK } from './utils';
-import { Schema, TableOptions } from '@jpmorganchase/perspective';
-import { PerspectiveViewer } from '@jpmorganchase/perspective-viewer';
+import { Schema, TableOptions } from '@finos/perspective';
+import { PerspectiveViewer } from '@finos/perspective-viewer';
 
 let _increment = 0;
 

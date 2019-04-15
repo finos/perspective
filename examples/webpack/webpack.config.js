@@ -7,7 +7,7 @@
  *
  */
 
-const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const path = require("path");
 
 module.exports = {

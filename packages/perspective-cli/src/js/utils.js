@@ -8,7 +8,7 @@
  */
 
 const exec = require("child_process").exec;
-const {table} = require("@jpmorganchase/perspective/build/perspective.node.js");
+const {table} = require("@finos/perspective/build/perspective.node.js");
 
 const OPEN = port => `
 if which xdg-open > /dev/null

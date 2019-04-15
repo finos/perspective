@@ -1,9 +1,9 @@
-# [![Perspective](https://jpmorganchase.github.io/perspective/img/title.png)](https://jpmorganchase.github.io/perspective/)
+# [![Perspective](https://perspective.finos.org/img/title.png)](https://perspective.finos.org/)
 
-[![Build Status](https://travis-ci.org/jpmorganchase/perspective.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
-[![Appveyor](https://ci.appveyor.com/api/projects/status/github/jpmorganchase/perspective?svg=true)](https://ci.appveyor.com/project/neilslinger/perspective)
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jpmorganchase/perspective)
-[![npm](https://img.shields.io/npm/v/@jpmorganchase/perspective.svg?style=flat-square)](https://www.npmjs.com/package/@jpmorganchase/perspective)
+[![Build Status](https://travis-ci.org/finos/perspective.svg?branch=master)](https://travis-ci.org/finos/perspective)
+[![Appveyor](https://ci.appveyor.com/api/projects/status/github/finos/perspective?svg=true)](https://ci.appveyor.com/project/neilslinger/perspective)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/finos/perspective)
+[![npm](https://img.shields.io/npm/v/@finos/perspective.svg?style=flat-square)](https://www.npmjs.com/package/@finos/perspective)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 [![FINOS - Operating](https://cdn.rawgit.com/finos/contrib-toolbox/master/images/badge-operating.svg)](https://finosfoundation.atlassian.net/wiki/display/FINOS/Operating)
 
@@ -11,7 +11,7 @@
 A streaming data visualization engine for Javascript, Perspective makes it
 simple to build real-time & user configurable analytics entirely in the browser.
 
-<img src="https://jpmorganchase.github.io/perspective/img/demo.gif">
+<img src="https://perspective.finos.org/img/demo.gif">
 
 ## Features
 
@@ -27,7 +27,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
   [HighCharts](https://github.com/highcharts/highcharts) and
   [Hypergrid](https://github.com/fin-hypergrid/core).
 
-- Integration with [Jupyterlab](https://github.com/jpmorganchase/perspective/tree/master/packages/perspective-jupyterlab).
+- Integration with [Jupyterlab](https://github.com/finos/perspective/tree/master/packages/perspective-jupyterlab).
 
 - Runtimes for the Browser and Node.js.
 
@@ -45,9 +45,26 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 ## Documentation
 
-* [Project Site](https://jpmorganchase.github.io/perspective/)
-* [Installation](https://jpmorganchase.github.io/perspective/docs/installation.html)
-* [User's Guide](https://jpmorganchase.github.io/perspective/docs/usage.html)
-* [Developer's Guide](https://jpmorganchase.github.io/perspective/docs/development.html)
-* [Perspective API](https://github.com/jpmorganchase/perspective/blob/master/packages/perspective/README.md)
-* [Perspective Viewer API](https://github.com/jpmorganchase/perspective/blob/master/packages/perspective-viewer/README.md)
+* [Project Site](https://perspective.finos.org/)
+* [Installation](https://perspective.finos.org/docs/installation.html)
+* [User's Guide](https://perspective.finos.org/docs/usage.html)
+* [Developer's Guide](https://perspective.finos.org/docs/development.html)
+* [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
+* [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
+
+## Contributing
+
+1. Fork it (<https://github.com/yourname/yourproject/fork>)
+2. Create your feature branch (`git checkout -b feature/fooBar`)
+3. Read our [contribution guidelines](.github/CONTRIBUTING.md) and [Community Code of Conduct](https://www.finos.org/code-of-conduct)
+4. Commit your changes (`git commit -am 'Add some fooBar'`)
+5. Push to the branch (`git push origin feature/fooBar`)
+6. Create a new Pull Request
+
+## License
+
+Copyright 2019 JP Morgan Chase
+
+Distributed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+SPDX-License-Identifier: [Apache-2.0](https://spdx.org/licenses/Apache-2.0)

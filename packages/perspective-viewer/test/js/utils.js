@@ -17,7 +17,7 @@ const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
 
-const {WebSocketHost} = require("@jpmorganchase/perspective");
+const {WebSocketHost} = require("@finos/perspective");
 
 const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
 const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;

@@ -9,7 +9,7 @@
 
 import _ from "lodash";
 
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@finos/perspective";
 import {CancelTask} from "./cancel_task.js";
 import {COMPUTATIONS} from "../computed_column.js";
 
