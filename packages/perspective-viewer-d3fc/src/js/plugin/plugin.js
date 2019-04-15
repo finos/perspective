@@ -28,8 +28,8 @@ charts.forEach(chart => {
         create: drawChart(chart),
         resize: resizeChart,
         delete: deleteChart,
-        save: save,
-        restore: restore
+        save,
+        restore
     });
 });
 
