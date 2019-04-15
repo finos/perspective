@@ -40,14 +40,14 @@ template <typename CTX_T>
 class PERSPECTIVE_EXPORT t_data_slice {
 public:
     t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col,
+        t_uindex start_col, t_uindex end_col, t_uindex row_offset, t_uindex col_offset,
         const std::shared_ptr<std::vector<t_tscalar>>& slice,
-        std::vector<std::string> column_names);
+        std::vector<std::vector<t_tscalar>> column_names);
 
     t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row, t_uindex end_row,
-        t_uindex start_col, t_uindex end_col,
+        t_uindex start_col, t_uindex end_col, t_uindex row_offset, t_uindex col_offset,
         const std::shared_ptr<std::vector<t_tscalar>>& slice,
-        std::vector<std::string> column_names, std::vector<t_uindex> column_indices);
+        std::vector<std::vector<t_tscalar>> column_names, std::vector<t_uindex> column_indices);
 
     ~t_data_slice();
 
@@ -75,7 +75,7 @@ public:
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     std::shared_ptr<std::vector<t_tscalar>> get_slice() const;
-    const std::vector<std::string>& get_column_names() const;
+    const std::vector<std::vector<t_tscalar>>& get_column_names() const;
     const std::vector<t_uindex>& get_column_indices() const;
     t_get_data_extents get_data_extents() const;
     t_uindex get_stride() const;
@@ -97,9 +97,11 @@ private:
     t_uindex m_end_row;
     t_uindex m_start_col;
     t_uindex m_end_col;
+    t_uindex m_row_offset;
+    t_uindex m_col_offset;
     t_uindex m_stride;
     std::shared_ptr<std::vector<t_tscalar>> m_slice;
-    std::vector<std::string> m_column_names;
+    std::vector<std::vector<t_tscalar>> m_column_names;
     std::vector<t_uindex> m_column_indices;
 };
 } // end namespace perspective

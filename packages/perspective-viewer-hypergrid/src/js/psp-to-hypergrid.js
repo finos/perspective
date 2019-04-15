@@ -76,6 +76,7 @@ function psp2hypergrid(data, schema, tschema, row_pivots, columns) {
         rows: rows,
         isTree: is_tree,
         configuration: {},
+        rowPivots: row_pivots,
         columnPaths: (is_tree ? [[" "]] : []).concat(columnPaths),
         columnTypes: (is_tree ? [row_pivots.map(x => tschema[x])] : []).concat(columnPaths.map(col => schema[col[col.length - 1]]))
     };

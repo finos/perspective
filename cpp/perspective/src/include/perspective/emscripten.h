@@ -42,7 +42,8 @@ namespace binding {
      */
     template <>
     emscripten::val scalar_to(const t_tscalar& scalar);
-    emscripten::val scalar_to_val(const t_tscalar& scalar, bool cast_double = false);
+    emscripten::val scalar_to_val(
+        const t_tscalar& scalar, bool cast_double = false, bool cast_string = false);
 
     template <>
     emscripten::val scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);

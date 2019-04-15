@@ -65,6 +65,7 @@ public:
         t_uindex agg_one_idx, t_uindex agg_two_idx, double agg_one_weight,
         double agg_two_weight);
     std::string name() const;
+    t_tscalar name_scalar() const;
     std::string disp_name() const;
     t_aggtype agg() const;
     std::string agg_str() const;

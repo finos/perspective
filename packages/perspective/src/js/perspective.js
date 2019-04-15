@@ -300,6 +300,26 @@ export default function(Module) {
         return hidden;
     };
 
+    function col_path_vector_to_string(vector) {
+        let extracted = [];
+        for (let i = 0; i < vector.size(); i++) {
+            extracted.push(__MODULE__.scalar_vec_to_string(vector, i));
+        }
+        vector.delete();
+        return extracted;
+    }
+
+    const extract_vector_scalar = function(vector) {
+        // handles deletion already - do not call delete() on the input vector again
+        let extracted = [];
+        for (let i = 0; i < vector.size(); i++) {
+            let item = vector.get(i);
+            extracted.push(col_path_vector_to_string(item));
+        }
+        vector.delete();
+        return extracted;
+    };
+
     /**
      * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
      * are the columns of this {@link module:perspective~view}, and the values are their string type names.
@@ -316,7 +336,7 @@ export default function(Module) {
     };
 
     view.prototype._column_names = function(skip = false, depth = 0) {
-        return extract_vector(this._View._column_names(skip, depth));
+        return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
     const to_format = async function(options, formatter) {
@@ -327,7 +347,7 @@ export default function(Module) {
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = (options.end_row || (viewport.height ? start_row + viewport.height : max_rows)) + (this.column_only ? 1 : 0);
+        const end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
@@ -335,7 +355,8 @@ export default function(Module) {
         const nidx = ["zero", "one", "two"][num_sides];
 
         const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
-        const col_names = extract_vector(slice.get_column_names());
+        const ns = slice.get_column_names();
+        const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
 
         let data = formatter.initDataValue();
         for (let ridx = start_row; ridx < end_row; ridx++) {
@@ -363,9 +384,9 @@ export default function(Module) {
             formatter.addRow(data, row);
         }
 
-        if (this.column_only) {
+        /*         if (this.column_only) {
             data = formatter.slice(data, 1);
-        }
+        } */
 
         return formatter.formatData(data, options.config);
     };
@@ -950,7 +971,7 @@ export default function(Module) {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
             } else if (key === "aggregate") {
-                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" amd "columns"`);
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
                 config[key] = _config[key];
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
