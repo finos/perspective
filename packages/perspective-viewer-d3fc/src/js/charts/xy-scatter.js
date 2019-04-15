@@ -7,7 +7,6 @@
  *
  */
 import * as fc from "d3fc";
-import {AXIS_TYPES} from "../axis/axisType";
 import {axisFactory} from "../axis/axisFactory";
 import {chartCanvasFactory} from "../axis/chartFactory";
 import {pointSeriesCanvas, symbolTypeFromGroups} from "../series/pointSeriesCanvas";
@@ -75,7 +74,6 @@ function xyScatter(container, settings) {
         .settings(settings)
         .xScale(xAxis.scale)
         .yScale(yAxis.scale)
-        .dateAxis(xAxis.type === AXIS_TYPES.time)
         .canvas(true);
 
     const toolTip = nearbyTip()

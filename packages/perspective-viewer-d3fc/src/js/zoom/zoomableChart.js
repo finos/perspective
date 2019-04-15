@@ -19,11 +19,12 @@ export default () => {
     let yScale = null;
     let yCopy = null;
     let bound = false;
-    let dateAxis = false;
     let canvas = false;
 
     function zoomableChart(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
+        const dateAxis = xCopy.domain()[0] instanceof Date;
+        const xRange = xCopy.range();
         if (xScale || yScale) {
             const zoom = d3.zoom().on("zoom", () => {
                 const {transform} = d3.event;
@@ -43,7 +44,6 @@ export default () => {
 
                 const oneYear = zoomControls.select("#one-year").style("display", dateAxis ? "" : "none");
                 if (dateAxis) {
-                    const xRange = xCopy.range();
                     oneYear.on("click", () => {
                         const start = new Date(xScale.domain()[0]);
                         const end = new Date(start);
@@ -120,14 +120,6 @@ export default () => {
             const yDomain = yCopy.domain();
             yCopy.domain([yDomain[1], yDomain[0]]);
         }
-        return zoomableChart;
-    };
-
-    zoomableChart.dateAxis = (...args) => {
-        if (!args.length) {
-            return dateAxis;
-        }
-        dateAxis = args[0];
         return zoomableChart;
     };
 

@@ -57,8 +57,7 @@ export const axisFactory = settings => {
             },
             size: component.size,
             decorate: component.decorate,
-            label: settings[settingName].map(v => v.name).join(", "),
-            type: useType
+            label: settings[settingName].map(v => v.name).join(", ")
         };
     };
 
