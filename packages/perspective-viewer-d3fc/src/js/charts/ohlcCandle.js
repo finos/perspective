@@ -76,7 +76,10 @@ function ohlcCandle(seriesCanvas) {
             .chart(chart)
             .settings(settings)
             .xScale(xAxis.scale)
-            .yScale(yAxis.scale)
+            .onChange(zoom => {
+                const zoomedData = data.map(series => series.filter(d => d.crossValue >= zoom.xDomain[0] && d.crossValue <= zoom.xDomain[1]));
+                chart.yDomain(yAxis.domainFunction(zoomedData));
+            })
             .canvas(true);
 
         const toolTip = nearbyTip()
