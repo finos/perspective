@@ -42,11 +42,13 @@ export default () => {
                 zoomControls.select("#zoom-reset").on("click", () => selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity));
 
                 const oneYear = zoomControls.select("#one-year").style("display", dateAxis ? "" : "none");
+                const sixMonths = zoomControls.select("#six-months").style("display", dateAxis ? "" : "none");
+                const oneMonth = zoomControls.select("#one-month").style("display", dateAxis ? "" : "none");
                 if (dateAxis) {
-                    oneYear.on("click", () => {
+                    const dateClick = endCalculation => () => {
                         const start = new Date(xScale.domain()[0]);
                         const end = new Date(start);
-                        end.setYear(start.getFullYear() + 1);
+                        endCalculation(start, end);
 
                         const xRange = xCopy.range();
                         const k = (xRange[1] - xRange[0]) / (xCopy(end) - xCopy(start));
@@ -57,7 +59,11 @@ export default () => {
                             y = -yCopy(yMiddle) * k + yScale(yMiddle);
                         }
                         selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(k));
-                    });
+                    };
+
+                    oneYear.on("click", dateClick((start, end) => end.setYear(start.getFullYear() + 1)));
+                    sixMonths.on("click", dateClick((start, end) => end.setMonth(start.getMonth() + 6)));
+                    oneMonth.on("click", dateClick((start, end) => end.setMonth(start.getMonth() + 1)));
                 }
             });
 
