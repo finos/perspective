@@ -56,7 +56,7 @@ function drawChart(chart) {
     };
 }
 
-function createOrUpdateChart(div, chart, settings) {
+function getOrCreatePluginElement() {
     let perspective_d3fc_element;
     this[PRIVATE] = this[PRIVATE] || {};
     if (!this[PRIVATE].chart) {
@@ -64,6 +64,11 @@ function createOrUpdateChart(div, chart, settings) {
     } else {
         perspective_d3fc_element = this[PRIVATE].chart;
     }
+    return perspective_d3fc_element;
+}
+
+function createOrUpdateChart(div, chart, settings) {
+    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
 
     if (!document.body.contains(perspective_d3fc_element)) {
         div.innerHTML = "";
@@ -95,10 +100,8 @@ function save() {
 }
 
 function restore(config) {
-    if (this[PRIVATE] && this[PRIVATE].chart) {
-        const perspective_d3fc_element = this[PRIVATE].chart;
-        perspective_d3fc_element.setSettings(config);
-    }
+    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
+    perspective_d3fc_element.setSettings(config);
 }
 
 if (!Element.prototype.matches) {
