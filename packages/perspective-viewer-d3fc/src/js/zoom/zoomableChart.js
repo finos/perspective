@@ -20,6 +20,7 @@ export default () => {
     let yCopy = null;
     let bound = false;
     let canvas = false;
+    let onChange = () => {};
 
     function zoomableChart(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
@@ -34,6 +35,7 @@ export default () => {
                 };
 
                 applyTransform(transform);
+
                 selection.call(chart);
 
                 const noZoom = transform.k === 1 && transform.x === 0 && transform.y === 0;
@@ -137,15 +139,28 @@ export default () => {
         return zoomableChart;
     };
 
+    zoomableChart.onChange = (...args) => {
+        if (!args.length) {
+            return onChange;
+        }
+        onChange = args[0];
+        return zoomableChart;
+    };
+
     const applyTransform = transform => {
+        const changeArgs = {...transform};
         if (xScale) {
             xScale.domain(transform.rescaleX(xCopy).domain());
+            changeArgs.xDomain = xScale.domain();
         }
 
         if (yScale) {
             const yZoomDomain = transform.rescaleY(yCopy).domain();
             yScale.domain([yZoomDomain[1], yZoomDomain[0]]);
+            changeArgs.yDomain = yScale.domain();
         }
+
+        onChange(changeArgs);
     };
 
     const getZoomControls = container =>
