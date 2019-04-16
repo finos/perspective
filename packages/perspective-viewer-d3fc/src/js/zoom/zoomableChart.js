@@ -23,8 +23,8 @@ export default () => {
 
     function zoomableChart(selection) {
         const chartPlotArea = `d3fc-${canvas ? "canvas" : "svg"}.plot-area`;
-        const dateAxis = xCopy.domain()[0] instanceof Date;
         if (xScale || yScale) {
+            const dateAxis = xCopy && xCopy.domain()[0] instanceof Date;
             const zoom = d3.zoom().on("zoom", () => {
                 const {transform} = d3.event;
                 settings.zoom = {
@@ -41,7 +41,6 @@ export default () => {
                 const zoomControls = getZoomControls(selection).style("display", noZoom ? "none" : "");
                 zoomControls.select("#zoom-reset").on("click", () => selection.select(chartPlotArea).call(zoom.transform, d3.zoomIdentity));
 
-                const xRange = xCopy.range();
                 const oneYear = zoomControls.select("#one-year").style("display", dateAxis ? "" : "none");
                 if (dateAxis) {
                     oneYear.on("click", () => {
@@ -49,6 +48,7 @@ export default () => {
                         const end = new Date(start);
                         end.setYear(start.getFullYear() + 1);
 
+                        const xRange = xCopy.range();
                         const k = (xRange[1] - xRange[0]) / (xCopy(end) - xCopy(start));
                         const x = -xCopy(start) * k;
                         let y = 0;
