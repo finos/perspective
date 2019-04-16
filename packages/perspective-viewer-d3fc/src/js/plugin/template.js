@@ -72,6 +72,20 @@ class D3FCChartElement extends HTMLElement {
         return this._container;
     }
 
+    getSettings() {
+        const excludeSettings = ["crossValues", "mainValues", "splitValues", "filter", "data", "size", "colorStyles"];
+        const settings = {...this._settings};
+        excludeSettings.forEach(s => {
+            delete settings[s];
+        });
+        return settings;
+    }
+
+    setSettings(settings) {
+        this._settings = {...this._settings, ...settings};
+        this.draw();
+    }
+
     _configureSettings(oldSettings, newSettings) {
         if (oldSettings) {
             const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];
