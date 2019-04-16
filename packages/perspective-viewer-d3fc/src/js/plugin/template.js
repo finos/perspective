@@ -92,11 +92,12 @@ class D3FCChartElement extends HTMLElement {
     }
 
     _configureSettings(oldSettings, newSettings) {
-        if (oldSettings && !oldSettings.data) {
-            // Combine with the restored settings
-            return {...oldSettings, ...newSettings};
-        }
         if (oldSettings) {
+            if (!oldSettings.data) {
+                // Combine with the restored settings
+                return {...oldSettings, ...newSettings};
+            }
+
             const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];
             const newValues = [newSettings.crossValues, newSettings.mainValues, newSettings.splitValues];
             if (areArraysEqualSimple(oldValues, newValues)) return {...oldSettings, data: newSettings.data, colorStyles: null};
