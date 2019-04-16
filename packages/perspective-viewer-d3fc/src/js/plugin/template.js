@@ -19,10 +19,15 @@ const styleWithD3FC = `${style}${getD3FCStyles()}`;
 
 @bindTemplate(template, styleWithD3FC) // eslint-disable-next-line no-unused-vars
 class D3FCChartElement extends HTMLElement {
-    connectedCallback() {
-        this._container = this.shadowRoot.querySelector(".chart");
+    constructor() {
+        super();
         this._chart = null;
         this._settings = null;
+    }
+
+    connectedCallback() {
+        console.log("connected callback");
+        this._container = this.shadowRoot.querySelector(".chart");
     }
 
     render(chart, settings) {
@@ -87,6 +92,10 @@ class D3FCChartElement extends HTMLElement {
     }
 
     _configureSettings(oldSettings, newSettings) {
+        if (oldSettings && !oldSettings.data) {
+            // Combine with the restored settings
+            return {...oldSettings, ...newSettings};
+        }
         if (oldSettings) {
             const oldValues = [oldSettings.crossValues, oldSettings.mainValues, oldSettings.splitValues];
             const newValues = [newSettings.crossValues, newSettings.mainValues, newSettings.splitValues];
