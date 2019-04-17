@@ -49,7 +49,6 @@ export function resizableComponent() {
         if (settings.legend) {
             containerNode.style.height = settings.legend.height;
             containerNode.style.width = settings.legend.width;
-            executeCallbacks(resizeEvent);
         }
 
         const containerRect = containerNode.getBoundingClientRect();
