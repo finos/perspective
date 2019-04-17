@@ -33,6 +33,7 @@ export default (fromLegend, settings) => {
         render(selection);
 
         resizable = resizableComponent()
+            .settings(settings)
             .maxHeight(domain.length * averageCellHeightPx + controlsHeightPx)
             .on("resize", () => render(selection));
 
