@@ -20,19 +20,20 @@ export function draggableComponent() {
     const draggable = element => {
         const node = element.node();
         node.style.cursor = "move";
-        if (settings.legendPosition) {
-            node.style.left = settings.legendPosition.left;
-            node.style.top = settings.legendPosition.top;
+        if (settings.legend) {
+            node.style.left = settings.legend.left;
+            node.style.top = settings.legend.top;
         }
 
         const drag = d3.drag().on("drag", function() {
             const offsets = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;
-            settings.legendPosition = {
+            const position = {
                 left: this.style.left,
                 top: this.style.top
             };
+            settings.legend = {...settings.legend, ...position};
 
             if (isNodeInTopRight(node)) {
                 pinned = pinNodeToTopRight(node);

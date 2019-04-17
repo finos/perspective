@@ -46,9 +46,9 @@ export function resizableComponent() {
         };
 
         const containerNode = container.node();
-        if (settings.legendPosition) {
-            containerNode.style.height = settings.legendPosition.height;
-            containerNode.style.width = settings.legendPosition.width;
+        if (settings.legend) {
+            containerNode.style.height = settings.legend.height;
+            containerNode.style.width = settings.legend.width;
             executeCallbacks(resizeEvent);
         }
 
@@ -134,12 +134,13 @@ export function resizableComponent() {
         }
 
         function updateSettings() {
-            settings.legendPosition = {
+            const dimensions = {
                 top: containerNode.style.top,
                 left: containerNode.style.left,
                 height: containerNode.style.height,
                 width: containerNode.style.width
             };
+            settings.legend = {...settings.legend, ...dimensions};
         }
 
         function resizeAndRelocateHandles(handle, offset, dimension, axis) {
