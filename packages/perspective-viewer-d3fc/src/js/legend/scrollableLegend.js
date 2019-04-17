@@ -25,7 +25,7 @@ export default (fromLegend, settings) => {
     let pageSize;
     let pageIndex = settings.legend ? settings.legend.pageIndex : 0;
     let decorate = () => {};
-    let draggable = draggableComponent();
+    let draggable = draggableComponent().settings(settings);
     let resizable;
 
     const scrollableLegend = selection => {
