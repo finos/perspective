@@ -33,7 +33,8 @@ export function treeData(settings) {
                 if (i === groups.length - 1) {
                     element.name = groups.slice(-1)[0];
                     if (groups.length === settings.crossValues.length) {
-                        element.size = getDataValue(d, settings.mainValues[0], split);
+                        const size = getDataValue(d, settings.mainValues[0], split);
+                        element.size = size > 0 ? size : 0;
                     }
                 }
                 currentLevel = element.children;
