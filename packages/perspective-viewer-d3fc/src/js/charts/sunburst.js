@@ -35,7 +35,10 @@ function sunburst(container, settings) {
     const sunburstContainer = sunburstGrid.chartContainer();
     const sunburstEnter = sunburstGrid.chartEnter();
     const sunburstDiv = sunburstGrid.chartDiv();
+    const sunburstTitle = sunburstGrid.chartTitle();
     const containerSize = sunburstGrid.containerSize();
+
+    sunburstTitle.each((d, i, nodes) => select(nodes[i]).text(d.split));
 
     sunburstContainer
         .append("circle")
@@ -53,10 +56,7 @@ function sunburst(container, settings) {
             const svgNode = this.parentNode;
             const {width, height} = svgNode.getBoundingClientRect();
 
-            const title = sunburstElement.select("text.title").text(split);
-            title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
-
-            const radius = (Math.min(width, height) - 120) / 6;
+            const radius = (Math.min(width, height) - 40) / 6;
             sunburstSeries()
                 .settings(settings)
                 .split(split)

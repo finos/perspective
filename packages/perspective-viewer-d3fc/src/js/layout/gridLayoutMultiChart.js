@@ -15,6 +15,7 @@ export function gridLayoutMultiChart() {
     let chartContainer = null;
     let chartEnter = null;
     let chartDiv = null;
+    let chartTitle = null;
     let color = null;
     let containerSize = null;
 
@@ -48,12 +49,19 @@ export function gridLayoutMultiChart() {
             .append("div")
             .attr("class", `${elementsPrefix}-container`);
 
+        chartTitle = chartEnter
+            .append("div")
+            .attr("class", "title-container")
+            .style("text-align", "center")
+            .attr("display", "inline-block")
+            .append("text")
+            .attr("class", "title")
+            .style("text-align", "left");
+
         chartContainer = chartEnter
             .append("svg")
             .append("g")
             .attr("class", elementsPrefix);
-
-        chartContainer.append("text").attr("class", "title");
     };
 
     _gridLayoutMultiChart.elementsPrefix = (...args) => {
@@ -69,6 +77,8 @@ export function gridLayoutMultiChart() {
     _gridLayoutMultiChart.chartEnter = () => chartEnter;
 
     _gridLayoutMultiChart.chartDiv = () => chartDiv;
+
+    _gridLayoutMultiChart.chartTitle = () => chartTitle;
 
     _gridLayoutMultiChart.containerSize = () => containerSize;
 

@@ -48,17 +48,12 @@
                     fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
                 }
 
-                & text.title,
                 & text.segment,
                 & text.parent {
                     text-anchor: middle;
                     user-select: none;
                     pointer-events: none;
                     fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
-
-                    &.title {
-                        dominant-baseline: hanging;
-                    }
                 }
             }
         }
@@ -76,8 +71,8 @@
                 display: inline-grid;
                 padding: 0;
                 margin: 0;
-                overflow-y: auto;
                 overflow-x: hidden;
+                overflow-y: auto;
 
                 & div {
                     overflow: hidden;
@@ -142,6 +137,9 @@
                 }
                 & text {
                     fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
+                    &.title {
+                        dominant-baseline: hanging;
+                    }
                 }
 
                 & .parent-controls {
