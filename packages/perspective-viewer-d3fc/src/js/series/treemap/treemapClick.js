@@ -18,7 +18,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
     settings.treemapLevel = d.depth;
     const crossValues = d.crossValue.split("|");
 
-    if (!d[settings.treemapLevel] || !d[settings.treemapLevel].visible) {
+    if (!d.mapLevel[settings.treemapLevel] || !d.mapLevel[settings.treemapLevel].visible) {
         calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode);
     }
 
@@ -29,7 +29,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
         .duration(350)
         .ease(d3.easeCubicOut);
 
-    nodesMerge.each(d => (d.target = d[settings.treemapLevel]));
+    nodesMerge.each(d => (d.target = d.mapLevel[settings.treemapLevel]));
 
     rects
         .transition(t)
@@ -85,7 +85,7 @@ function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode) {
         const width = calcWidth(d) * dimensionMultiplier.width;
         const height = calcHeight(d) * dimensionMultiplier.height;
         const visible = includesAllCrossValues(d, crossValues) && d.data.name != crossValues[settings.treemapLevel - 1];
-        d[settings.treemapLevel] = {
+        d.mapLevel[settings.treemapLevel] = {
             x0,
             x1: width + x0,
             y0,

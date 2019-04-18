@@ -61,7 +61,8 @@ export function treemapSeries() {
         drawLabels(nodesMerge, settings.treemapLevel, []);
 
         nodesMerge.each(d => {
-            d[settings.treemapLevel] = {
+            d.mapLevel = [];
+            d.mapLevel[settings.treemapLevel] = {
                 x0: d.x0,
                 x1: calcWidth(d) + d.x0,
                 y0: d.y0,
