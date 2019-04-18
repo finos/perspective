@@ -9,7 +9,6 @@
 
 import * as d3 from "d3";
 import {treeColor} from "../series/treemap/treemapColor";
-import treemapLayout from "../layout/treemapLayout";
 import {treemapSeries} from "../series/treemap/treemapSeries";
 import {tooltip} from "../tooltip/tooltip";
 import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
@@ -35,22 +34,21 @@ function treemap(container, settings) {
         .select("svg")
         .select("g.treemap")
         .each(function({split, data}) {
-            const treemapElement = d3.select(this);
+            const treemapSvg = d3.select(this);
             const svgNode = this.parentNode;
-            const {width, height} = svgNode.getBoundingClientRect();
+            const {height} = svgNode.getBoundingClientRect();
 
-            treemapLayout(width, height)(data);
-
-            const title = treemapElement.select("text.title").text(split);
+            const title = treemapSvg.select("text.title").text(split);
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             treemapSeries()
-                .data(data)
                 .settings(settings)
+                .split(split)
+                .data(data)
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
-                .color(color)(treemapElement);
+                .color(color)(treemapSvg);
 
-            tooltip().settings(settings)(treemapElement.selectAll("g"));
+            tooltip().settings(settings)(treemapSvg.selectAll("g"));
         });
 }
 

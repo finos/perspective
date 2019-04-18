@@ -96,6 +96,11 @@
                         stroke-opacity: 1;
                     }
                 }
+                & .rootnode {
+                    opacity: 0;
+                    pointer-events: none;
+                    z-index: 0;
+                }
                 & .branchnode {
                     fill-opacity: 0;
                     &:hover {
@@ -109,6 +114,11 @@
                         fill-opacity: 0.5;
                     }
                 }
+                & #hidden {
+                    opacity: 0;
+                    pointer-events: none;
+                    z-index: 0;
+                }
 
                 & .top {
                     font-size: 15px;
@@ -116,10 +126,16 @@
                     z-index: 5;
                     pointer-events: none;
                 }
-                & .lower, .mid {
+                & .mid {
                     font-size: 10px;
                     font-weight:bold;
                     opacity: 0.7;
+                    z-index: 4;
+                }
+                & .lower {
+                    font-size: 10px;
+                    font-weight:bold;
+                    opacity: 0;
                     z-index: 4;
                 }
                 & text {
@@ -130,7 +146,14 @@
                     position: absolute;
                     top: 15px;
                     right: 70px;
+                    left: auto;
+                    width: auto;
                     z-index: 4;
+                    transition: box-shadow 1s;
+                    &:hover {
+                        box-shadow: 2px 2px 6px #000;
+                        transition: box-shadow 0.2s;
+                    }
                 }
 
                 & #goto-parent {

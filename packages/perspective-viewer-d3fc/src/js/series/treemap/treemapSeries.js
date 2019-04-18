@@ -7,101 +7,88 @@
  *
  */
 
-import * as d3 from "d3";
-import {preventTextCollisions, centreText} from "./treemapLabel";
-import {getGoToParentControls} from "./treemapControls";
+import {drawLabels} from "./treemapLabel";
 import treemapLayout from "../../layout/treemapLayout";
+import {changeLevel} from "./treemapClick";
 
-export const textLevel = {
-    top: "top",
-    mid: "mid",
-    lower: "lower"
-};
-
-const nodeLevel = {
-    leaf: "leafnode",
-    branch: "branchnode",
-    root: "rootNode"
-};
+export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
+export const calcWidth = d => d.x1 - d.x0;
+export const calcHeight = d => d.y1 - d.y0;
+const isLeafNode = (maxDepth, d) => d.depth === maxDepth;
+const nodeLevelHelper = (maxDepth, d) => (d.depth === 0 ? nodeLevel.root : isLeafNode(maxDepth, d) ? nodeLevel.leaf : nodeLevel.branch);
 
 export function treemapSeries() {
+    let settings = null;
+    let split = null;
     let data = null;
     let color = null;
     let treemapDiv = null;
-    let settings = null;
 
     const _treemapSeries = treemapSvg => {
         const maxDepth = data.height;
-        let parent = null;
+        settings.treemapLevel = 0;
+        const treemap = treemapLayout(treemapDiv.node().getBoundingClientRect().width, treemapDiv.node().getBoundingClientRect().height);
+        treemap(data);
 
-        const isDeepest = d => d.depth === maxDepth;
-        const levelHelper = d => {
-            switch (d.depth) {
-                case 1:
-                    return textLevel.top;
-                case 2:
-                    return textLevel.mid;
-                default:
-                    return textLevel.lower;
-            }
-        };
-        const showName = d => maxDepth === 0 || (0 < d.depth && d.depth <= 2);
-
+        // Draw child nodes first
         const nodes = treemapSvg
             .selectAll("g")
             .data(data.descendants())
             .enter()
             .append("g")
-            .attr("transform", d => `translate(${[d.x0, d.y0]})`);
+            .sort((a, b) => b.depth - a.depth);
 
-        // draw child nodes first
-        nodes.sort((a, b) => (b.depth === 0 ? 0 : b.depth - a.depth));
+        nodes.append("rect");
+        nodes.append("text");
 
-        nodes
-            .append("rect")
-            .attr("class", d => `treerect${isDeepest(d) ? ` ${nodeLevel.leaf}` : ` ${nodeLevel.branch}`}`)
-            .attr("width", d => d.x1 - d.x0)
-            .attr("height", d => d.y1 - d.y0)
-            .attr("fill", d => color(d.data.color))
-            .on("click", d => transition(d));
+        const nodesMerge = nodes.merge(nodes);
 
-        nodes
-            .append("text")
-            .attr("class", d => levelHelper(d))
-            .attr("dx", d => (d.x1 - d.x0) / 2)
-            .attr("dy", d => (d.y1 - d.y0) / 2)
-            .text(d => (showName(d) ? d.data.name : ""));
+        const rects = nodesMerge
+            .select("rect")
+            .attr("class", d => `treerect ${nodeLevelHelper(maxDepth, d)}`)
+            .style("x", d => d.x0)
+            .style("y", d => d.y0)
+            .style("width", d => calcWidth(d))
+            .style("height", d => calcHeight(d))
+            .style("fill", d => color(d.data.color));
 
-        nodes.selectAll("text").each((_, i, nodes) => centreText(nodes[i]));
+        const labels = nodesMerge
+            .select("text")
+            .attr("x", d => d.x0 + calcWidth(d) / 2)
+            .attr("y", d => d.y0 + calcHeight(d) / 2)
+            .text(d => d.data.name);
 
-        preventTextCollisions(nodes);
+        drawLabels(nodesMerge, settings.treemapLevel, []);
 
-        const transition = d => {
-            if (!d || d.height === 0) return;
+        nodesMerge.each(d => {
+            d[settings.treemapLevel] = {
+                x0: d.x0,
+                x1: calcWidth(d) + d.x0,
+                y0: d.y0,
+                y1: calcHeight(d) + d.y0,
+                visible: true,
+                opacity: 1
+            };
+        });
 
-            const {width: containerWidth, height: containerHeight} = treemapDiv.node().getBoundingClientRect();
+        const rootNode = rects.filter(d => d.crossValue === "").datum();
+        rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode));
+    };
 
-            treemapSvg.selectAll("g").remove();
+    _treemapSeries.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
+        return _treemapSeries;
+    };
 
-            let newData = d3.hierarchy(d.data).sum(d => d.size);
-            parent = d.parent;
-            treemapLayout(containerWidth, containerHeight)(newData);
-            newData.parent = d.parent;
-
-            treemapSeries()
-                .data(newData)
-                .settings(settings)
-                .container(treemapDiv)
-                .color(color)(treemapSvg);
-
-            getGoToParentControls(treemapDiv)
-                .style("display", parent ? "" : "none")
-                .select("#goto-parent")
-                .html(newData ? newData.data.name : "")
-                .on("click", () => {
-                    transition(parent);
-                });
-        };
+    _treemapSeries.split = (...args) => {
+        if (!args.length) {
+            return split;
+        }
+        split = args[0];
+        return _treemapSeries;
     };
 
     _treemapSeries.data = (...args) => {
@@ -125,14 +112,6 @@ export function treemapSeries() {
             return treemapDiv;
         }
         treemapDiv = args[0];
-        return _treemapSeries;
-    };
-
-    _treemapSeries.settings = (...args) => {
-        if (!args.length) {
-            return settings;
-        }
-        settings = args[0];
         return _treemapSeries;
     };
 
