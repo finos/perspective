@@ -8,7 +8,7 @@
  */
 
 import {drawLabels} from "./treemapLabel";
-import treemapLayout from "../../layout/treemapLayout";
+import treemapLayout from "./treemapLayout";
 import {changeLevel} from "./treemapClick";
 
 export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
