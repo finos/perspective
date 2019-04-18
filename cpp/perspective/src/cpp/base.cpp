@@ -443,6 +443,48 @@ str_to_aggtype(std::string str) {
     }
 }
 
+t_aggtype
+_get_default_aggregate(t_dtype dtype) {
+    t_aggtype agg_op;
+    switch (dtype) {
+        case DTYPE_FLOAT64:
+        case DTYPE_FLOAT32:
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_UINT32:
+        case DTYPE_UINT64:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            agg_op = t_aggtype::AGGTYPE_SUM;
+        } break;
+        default: { agg_op = t_aggtype::AGGTYPE_DISTINCT_COUNT; }
+    }
+    return agg_op;
+}
+
+std::string
+_get_default_aggregate_string(t_dtype dtype) {
+    std::string agg_op_str;
+    switch (dtype) {
+        case DTYPE_FLOAT64:
+        case DTYPE_FLOAT32:
+        case DTYPE_UINT8:
+        case DTYPE_UINT16:
+        case DTYPE_UINT32:
+        case DTYPE_UINT64:
+        case DTYPE_INT8:
+        case DTYPE_INT16:
+        case DTYPE_INT32:
+        case DTYPE_INT64: {
+            agg_op_str = "sum";
+        } break;
+        default: { agg_op_str = "distinct count"; }
+    }
+    return agg_op_str;
+}
+
 std::string
 get_status_descr(t_status status) {
     switch (status) {
