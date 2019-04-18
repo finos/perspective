@@ -201,7 +201,7 @@ std::vector<U> vecFromArray(T& arr){
  */
 template <>
 std::vector<t_sortspec> _get_sort(
-        std::vector<std::string>& col_names, bool is_column_sort, py::object j_sortby) {
+        const std::vector<std::string>& columns, bool is_column_sort, py::object j_sortby) {
     // TODO
     std::vector<t_sortspec> svec{};
     return svec;
@@ -220,7 +220,7 @@ std::vector<t_sortspec> _get_sort(
  */
 template <> 
 std::vector<t_fterm>
-_get_fterms(t_schema schema, py::object j_date_parser, py::object j_filters) {
+_get_fterms(const t_schema schema, py::object j_date_parser, py::object j_filters) {
     // TODO
     std::vector<t_fterm> fvec{};
     return fvec;

@@ -240,6 +240,8 @@ enum t_aggtype {
 };
 
 PERSPECTIVE_EXPORT t_aggtype str_to_aggtype(std::string str);
+PERSPECTIVE_EXPORT t_aggtype _get_default_aggregate(t_dtype dtype);
+PERSPECTIVE_EXPORT std::string _get_default_aggregate_string(t_dtype dtype);
 
 enum t_totals { TOTALS_BEFORE, TOTALS_HIDDEN, TOTALS_AFTER };
 

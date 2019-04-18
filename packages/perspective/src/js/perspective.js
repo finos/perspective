@@ -985,26 +985,9 @@ export default function(Module) {
         config.filter = config.filter || [];
         config.sort = config.sort || [];
 
-        const schema = this._schema(true);
-
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
             config.columns = this._columns(true);
-        }
-
-        // TODO: move into c++
-        if (config.sort) {
-            for (const sort of config.sort) {
-                const name = sort[0];
-                if (config.columns.indexOf(name) === -1) {
-                    // If sorting by hidden column, include it in aggregates
-                    if (config.column_pivots.indexOf(name) > -1 || config.row_pivots.indexOf(name) > -1) {
-                        config.aggregates[name] = "unique";
-                    } else {
-                        config.aggregates[name] = config.aggregates[name] || defaults.AGGREGATE_DEFAULTS[schema[name]];
-                    }
-                }
-            }
         }
 
         let name = Math.random() + "";
