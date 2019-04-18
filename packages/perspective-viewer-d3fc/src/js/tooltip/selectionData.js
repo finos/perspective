@@ -46,7 +46,7 @@ export function getDataValues(data, settings) {
     return [
         {
             name: settings.mainValues[0].name,
-            value: toValue(settings.mainValues[0].type, data.colorValue || data.mainValue - data.baseValue || data.mainValue)
+            value: toValue(settings.mainValues[0].type, data.colorValue || data.mainValue - data.baseValue || data.mainValue || data.mainValues)
         }
     ];
 }
