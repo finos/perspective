@@ -48,9 +48,24 @@ namespace binding {
 
     std::vector<std::string> _get_aggregate_names(const std::vector<t_aggspec>& aggs);
 
+    /**
+     *
+     *
+     * Params
+     * ------
+     *
+     *
+     * Returns
+     * -------
+     *
+     */
+    template <typename T>
+    std::vector<t_aggspec> _get_aggspecs(
+        const t_schema& schema, bool column_only, T j_columns, T j_aggs);
+
     template <typename T>
     std::vector<t_sortspec> _get_sort(
-        std::vector<std::string>& col_names, bool is_column_sort, T j_sortby);
+        const std::vector<std::string>& columns, bool is_column_sort, T j_sortby);
 
     /**
      *
@@ -64,21 +79,7 @@ namespace binding {
      *
      */
     template <typename T>
-    std::vector<t_fterm> _get_fterms(t_schema schema, T j_date_parser, T j_filters);
-
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
-    template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(t_schema schema, bool column_only, T j_aggs);
+    std::vector<t_fterm> _get_fterms(const t_schema& schema, T j_date_parser, T j_filters);
 
     /**
      * Converts a scalar value to its language-specific representation.
