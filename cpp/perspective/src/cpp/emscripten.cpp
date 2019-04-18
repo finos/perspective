@@ -88,10 +88,47 @@ namespace binding {
      * @return std::vector<t_aggspec>
      */
     std::vector<t_aggspec>
-    _get_aggspecs(t_schema schema, bool column_only, val j_aggs) {
+    _get_aggspecs(const t_schema& schema, bool column_only, val j_columns, val j_aggs) {
         std::vector<t_aggspec> aggspecs;
         val agg_columns = val::global("Object").call<val>("keys", j_aggs);
         std::vector<std::string> aggs = vecFromArray<val, std::string>(agg_columns);
+        std::vector<std::string> columns = vecFromArray<val, std::string>(j_columns);
+
+        /**
+         * Provide aggregates for columns that are shown but NOT specified in
+         * the `j_aggs` object.
+         */
+        for (const std::string& column : columns) {
+            if (std::find(aggs.begin(), aggs.end(), column) != aggs.end()) {
+                continue;
+            }
+
+            t_dtype dtype = schema.get_dtype(column);
+            std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
+            t_aggtype agg_op
+                = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
+
+            if (!column_only) {
+                switch (dtype) {
+                    case DTYPE_FLOAT64:
+                    case DTYPE_FLOAT32:
+                    case DTYPE_UINT8:
+                    case DTYPE_UINT16:
+                    case DTYPE_UINT32:
+                    case DTYPE_UINT64:
+                    case DTYPE_INT8:
+                    case DTYPE_INT16:
+                    case DTYPE_INT32:
+                    case DTYPE_INT64: {
+                        agg_op = t_aggtype::AGGTYPE_SUM;
+                    } break;
+                    default: { agg_op = t_aggtype::AGGTYPE_DISTINCT_COUNT; }
+                }
+            }
+
+            aggspecs.push_back(t_aggspec(column, agg_op, dependencies));
+        }
+
         // Construct aggregates from config object
         for (const std::string& agg_column : aggs) {
             std::string agg_op = j_aggs[agg_column].as<std::string>();
@@ -130,7 +167,7 @@ namespace binding {
      */
     template <>
     std::vector<t_sortspec>
-    _get_sort(std::vector<std::string>& col_names, bool is_column_sort, val j_sortby) {
+    _get_sort(const std::vector<std::string>& columns, bool is_column_sort, val j_sortby) {
         std::vector<t_sortspec> svec{};
         std::vector<val> sortbys = vecFromArray<val, val>(j_sortby);
 
@@ -147,7 +184,7 @@ namespace binding {
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
             val sort_item = sortbys[idx];
             t_index agg_index;
-            std::string col_name;
+            std::string column;
             t_sorttype sorttype;
 
             std::string sort_op_str;
@@ -155,11 +192,11 @@ namespace binding {
                 continue;
             }
 
-            col_name = sort_item[0].as<std::string>();
+            column = sort_item[0].as<std::string>();
             sort_op_str = sort_item[1].as<std::string>();
             sorttype = str_to_sorttype(sort_op_str);
 
-            agg_index = _get_aggregate_index(col_names, col_name);
+            agg_index = _get_aggregate_index(columns, column);
 
             svec.push_back(t_sortspec(agg_index, sorttype));
         }
@@ -177,7 +214,7 @@ namespace binding {
      */
     template <>
     std::vector<t_fterm>
-    _get_fterms(t_schema schema, val j_date_parser, val j_filters) {
+    _get_fterms(const t_schema& schema, val j_date_parser, val j_filters) {
         std::vector<t_fterm> fvec{};
         std::vector<val> filters = vecFromArray<val, val>(j_filters);
 
@@ -1598,7 +1635,7 @@ namespace binding {
             column_only = true;
         }
 
-        aggregates = _get_aggspecs(schema, column_only, j_aggregates);
+        aggregates = _get_aggspecs(schema, column_only, j_columns, j_aggregates);
         columns = _get_aggregate_names(aggregates);
 
         if (hasValue(j_filter)) {
