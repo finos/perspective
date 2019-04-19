@@ -15,6 +15,7 @@ const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
 const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLineRendererPaint;
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
+const {cloneDeep} = require("lodash");
 
 import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils.js";
 
@@ -117,7 +118,7 @@ const light_theme_overrides = {
 };
 
 function generateGridProperties(overrides) {
-    return Object.assign({}, base_grid_properties, overrides);
+    return Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(overrides));
 }
 
 function null_formatter(formatter, null_value = "") {
@@ -193,7 +194,7 @@ bindTemplate(TEMPLATE, style)(
                     return _old_paint.call(this, gc, config);
                 };
 
-                const grid_properties = generateGridProperties(Hypergrid._default_properties || light_theme_overrides);
+                const grid_properties = generateGridProperties(light_theme_overrides);
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
                 grid_properties["treeHeaderBackgroundColor"] = grid_properties["backgroundColor"] = this.get_style("--hypergrid-tree-header--background");
