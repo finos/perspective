@@ -116,6 +116,7 @@ class WebSocketWorker extends worker {
             pingTimeout: 15000,
             pingMsg: "heartbeat"
         });
+        this._ws.ws.binaryType = "arraybuffer";
         this._ws.onopen = () => {
             this.send({id: -1, cmd: "init"});
         };
@@ -123,7 +124,18 @@ class WebSocketWorker extends worker {
             if (msg.data === "heartbeat") {
                 return;
             }
-            this._handle({data: JSON.parse(msg.data)});
+            if (this._pending_arrow) {
+                this._handle({data: {id: this._pending_arrow, data: msg.data}});
+                delete this._pending_arrow;
+            } else {
+                msg = JSON.parse(msg.data);
+                if (msg.is_transferable) {
+                    console.warn("Arrow transfer detected!");
+                    this._pending_arrow = msg.id;
+                } else {
+                    this._handle({data: msg});
+                }
+            }
         };
     }
 

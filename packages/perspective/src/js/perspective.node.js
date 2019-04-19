@@ -186,8 +186,14 @@ class WebSocketHost extends module.exports.Host {
         });
     }
 
-    post(msg) {
-        this.REQS[msg.id].send(JSON.stringify(msg));
+    post(msg, transferable) {
+        if (transferable) {
+            msg.is_transferable = true;
+            this.REQS[msg.id].send(JSON.stringify(msg));
+            this.REQS[msg.id].send(transferable[0]);
+        } else {
+            this.REQS[msg.id].send(JSON.stringify(msg));
+        }
         delete this.REQS[msg.id];
     }
 
