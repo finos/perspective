@@ -197,9 +197,13 @@ class WebSocketHost extends module.exports.Host {
         delete this.REQS[msg.id];
     }
 
-    open(name, table) {
+    host_table(name, table) {
         this._tables[name] = table;
-        table.view({aggregate: []});
+        table.view({columns: []});
+    }
+
+    host_view(name, view) {
+        this._views[name] = view;
     }
 
     close() {
