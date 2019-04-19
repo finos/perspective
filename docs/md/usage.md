@@ -432,21 +432,30 @@ const fs = require("fs");
 // module's directory.
 const host = new WebSocketHost({ assets: [__dirname], port: 8080 });
 
-// Read an arrow file from the file system and load it as a named data source.
+// Read an arrow file from the file system and load it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
-host.open("data_source_one", table(arr));
+const tbl = table(arr);
+host.host_table("table_one", tbl);
+
+// Or host a view 
+const view = tbl.view({filter: [["State", "==", "Texas"]]});
+host.host_view("view_one", view);
 ```
 
 In the browser:
 
 ```javascript
-var elem = document.getElementsByTagName("perspective-viewer")[0];
+const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
-var worker = perspective.worker(window.location.origin.replace("http", "ws"));
+const worker = perspective.worker(window.location.origin.replace("http", "ws"));
 
 // Bind the viewer to the preloaded data source.
-elem.load(worker.open("data_source_one"));
+elem.load(worker.open_table("table_one"));
+
+// Or load data from a view
+const arrow = await worker.open_view("view_one").to_arrow();
+elem.load(arrow);
 ```
 
 `<perspective-viewer>` instances bound in this way are otherwise no different
