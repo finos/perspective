@@ -74,7 +74,7 @@ async function host(filename, options) {
     } else {
         file = await read_stdin();
     }
-    server.open("data_source_one", table(file));
+    server.host_table("data_source_one", table(file));
     if (options.open) {
         open_browser(options.port);
     }

@@ -11,46 +11,42 @@
 <html>
 
 <head>
+
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
     <script src="perspective.view.js"></script>
     <script src="hypergrid.plugin.js"></script>
     <script src="highcharts.plugin.js"></script>
+
     <script src="perspective.js"></script>
+
+    <link rel='stylesheet' href="index.css">
     <link rel='stylesheet' href="material.css">
 
-    <style>
-        perspective-viewer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        @media (max-width: 600px) {
-            html {
-                overflow: hidden;
-            }
-
-            body {
-                position: fixed;
-                height: 100%;
-                width: 100%;
-                margin: 0;
-                overflow: hidden;
-                touch-action: none;
-            }
-        }
-    </style>
 </head>
+
 <body>
-    <perspective-viewer  id="view1"></perspective-viewer>
+
+    <perspective-viewer 
+        id="view1"
+        view="y_area" 
+        row-pivots='["week_bucket(Date)"]' 
+        column-pivots='["Email"]'
+        columns='["Hash"]'
+        computed-columns='[{"name":"week_bucket(Date)","inputs":["Date"],"func":"week_bucket"}]'>
+    
+    </perspective-viewer>
+
     <script>
-        window.addEventListener('WebComponentsReady', function() {
+        window.addEventListener('WebComponentsReady', async function() {
             var elem = document.getElementById('view1');
             var worker = perspective.worker(window.location.origin.replace('http', 'ws'));
-            elem.load(worker.open_table('data_source_one'));
+            let view = worker.open_view('data_source_one');
+            let arrow = await view.to_arrow();
+            elem.load(perspective.worker().table(arrow));
         });
     </script>
+
 </body>
+
 </html>

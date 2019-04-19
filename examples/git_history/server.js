@@ -18,5 +18,6 @@ function execute(command, callback) {
 
 execute(`git log --date=iso --pretty=format:'"%h","%an","%aD","%s","%ae"'`, log => {
     const host = new WebSocketHost({assets: [__dirname]});
-    host.open("data_source_one", table("Hash,Name,Date,Message,Email\n" + log));
+    const tbl = table("Hash,Name,Date,Message,Email\n" + log);
+    host.host_view("data_source_one", tbl.view());
 });
