@@ -199,13 +199,13 @@ std::vector<U> vecFromArray(T& arr){
  *
  * Data Loading
  */
-template <>
+/* template <>
 std::vector<t_sortspec> _get_sort(
         const std::vector<std::string>& columns, bool is_column_sort, py::object j_sortby) {
     // TODO
     std::vector<t_sortspec> svec{};
     return svec;
-}
+} */
 
 /**
  *
@@ -218,13 +218,13 @@ std::vector<t_sortspec> _get_sort(
  * -------
  *
  */
-template <> 
+/* template <> 
 std::vector<t_fterm>
 _get_fterms(const t_schema schema, py::object j_date_parser, py::object j_filters) {
     // TODO
     std::vector<t_fterm> fvec{};
     return fvec;
-}
+} */
 
 /**
  *
@@ -237,13 +237,13 @@ _get_fterms(const t_schema schema, py::object j_date_parser, py::object j_filter
  * -------
  *
  */
-std::vector<t_aggspec>
+/* std::vector<t_aggspec>
 _get_aggspecs(py::object j_aggs) {
     // TODO
     std::vector<t_aggspec> aggspecs;
     return aggspecs;
 }
-
+ */
 /**
  * Converts a scalar value to its Python representation.
  *
