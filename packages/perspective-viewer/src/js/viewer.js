@@ -28,7 +28,7 @@ import {ActionElement} from "./viewer/action_element.js";
 polyfill({});
 
 /**
- * Module for `<perspective-viewer` custom element.  There are no exports from
+ * Module for `<perspective-viewer>` custom element.  There are no exports from
  * this module, however importing it has a side effect:  the
  * {@link module:perspective_viewer~PerspectiveViewer} class is registered as a
  * custom element, after which it can be used as a standard DOM element.  The
@@ -344,6 +344,15 @@ class PerspectiveViewer extends ActionElement {
      */
     get worker() {
         return this._get_worker();
+    }
+
+    /**
+     * This element's `perspective.table` instance.
+     *
+     * @readonly
+     */
+    get table() {
+        return this._table;
     }
 
     /**
