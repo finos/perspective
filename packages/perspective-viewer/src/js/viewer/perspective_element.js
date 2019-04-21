@@ -312,7 +312,7 @@ export class PerspectiveElement extends StateElement {
         return () => this.setAttribute("render_time", performance.now() - t);
     }
 
-    _clear_state() {
+    _clear_state(clear_table = true) {
         if (this._task) {
             this._task.cancel();
         }
@@ -324,7 +324,7 @@ export class PerspectiveElement extends StateElement {
             view.remove_update(this._view_updater);
             view.remove_delete();
         }
-        if (this._table) {
+        if (this._table && clear_table) {
             const table = this._table;
             this._table = undefined;
             if (table._owner_viewer && table._owner_viewer === this) {
