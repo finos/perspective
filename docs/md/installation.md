@@ -46,10 +46,11 @@ library can be used directly from
 CDN by simply adding these scripts to your `.html`'s `<head>` section:
 
 ```html
-<script src="https://unpkg.com/@jpmorganchase/perspective/build/perspective.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-d3fc"></script>
+<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts"></script>
 ```
 
 Ultimately, for production you'll want Perspective incorporated directly into your
@@ -62,9 +63,9 @@ For using Perspective from Node.js, or as a depedency in a `package.json` based
 via NPM
 
 ```bash
-yarn @jpmorganchase/perspective-viewer
-yarn @jpmorganchase/perspective-viewer-highcharts
-yarn @jpmorganchase/perspective-viewer-hypergrid
+yarn add @jpmorganchase/perspective-viewer
+yarn add @jpmorganchase/perspective-viewer-d3fc
+yarn add @jpmorganchase/perspective-viewer-hypergrid
 ```
 
 ## From source

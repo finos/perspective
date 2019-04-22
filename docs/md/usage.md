@@ -37,7 +37,7 @@ which modules they need for their specific use case. The main modules are:
 
 `<perspective-viewer>` by itself only implements a trivial debug renderer, which
 prints the currently configured `view()` as a CSV. Plugin modules for popular
-Javascript libraries such as [HighCharts](https://github.com/highcharts/highcharts)
+Javascript libraries such as [d3fc](https://d3fc.io/)
 are packaged separately and must be imported individually; in this way,
 developers can choose to opt into the features, bundle size inflation and
 licensing for these dependencies as needed. When imported after
@@ -47,6 +47,9 @@ themselves automatically, and the renderers they export will be available in the
 
 -   `@jpmorganchase/perspective-viewer-hypergrid`  
     A `<perspective-viewer>` plugin for [Hypergrid](https://github.com/fin-hypergrid/core).
+
+-   `@jpmorganchase/perspective-viewer-d3fc`  
+    A `<perspective-viewer>` plugin for the [d3fc](https://d3fc.io) charting library.
 
 -   `@jpmorganchase/perspective-viewer-highcharts`  
     A `<perspective-viewer>` plugin for [HighCharts](https://github.com/highcharts/highcharts).
@@ -59,10 +62,11 @@ project:
 -   If you are only interested in using Perspective as a simple, browser-based
     data visualization widget, you probably only need the
     `@jpmorganchase/perspective-viewer` module and optionally its plugins
-    `@jpmorganchase/perspective-viewer-hypergrid` and
-    `@jpmorganchase/perspective-viewer-highcharts`. The core data engine
-    `@jpmorganchase/perspective` is a depedency of these packages and does not
-    need to be imported on its own for basic usage. Details for these can be found [here](#perspective-viewer-web-component).
+    `@jpmorganchase/perspective-viewer-hypergrid` for data grids, and
+    `@jpmorganchase/perspective-viewer-d3fc` or `@jpmorganchase/perspective-viewer-highcharts`
+    for charting. The core data engine `@jpmorganchase/perspective` is a 
+    depedency of these packages and does not need to be imported on its own for 
+    basic usage. Details for these can be found [here](#perspective-viewer-web-component).
 
 -   If you are only interested in the high-performance streaming data engine
     (the WebAssembly part), or your project is purely Node.js based, you need only
@@ -314,10 +318,20 @@ for use within your site's regular HTML:
 ```javascript
 import "@jpmorganchase/perspective-viewer";
 import "@jpmorganchase/perspective-viewer-hypergrid";
-import "@jpmorganchase/perspective-viewer-highcharts";
+import "@jpmorganchase/perspective-viewer-d3fc";
 ```
 
-You must also import a theme when bundling perspective-viewer. Even though there
+While each plugin module by default will register all of its visualization types,
+you may choose to import these individually as well:
+
+```javascript
+import "@jpmorganchase/perspective-viewer-d3fc/bar";
+import "@jpmorganchase/perspective-viewer-d3fc/column";
+import "@jpmorganchase/perspective-viewer-d3fc/xy-scatter";
+import "@jpmorganchase/perspective-viewer-highcharts/treemap";
+```
+
+You may also import a theme when bundling perspective-viewer. Even though there
 are only 2 of them.
 
 ```javascript
@@ -326,12 +340,13 @@ import "@jpmorganchase/perspective-viewer/build/material.css";
 ```
 
 Alternatively, if you're fine with a default theme and don't want to bundle yourself,
-you can just import the pre-bundled assets from their respective modules.
+you can just import the pre-bundled assets from their respective modules, which
+export their default visualizations.
 
 ```html
 <script src="perspective.view.js"></script>
 <script src="hypergrid.plugin.js"></script>
-<script src="highcharts.plugin.js"></script>
+<script src="d3fc.plugin.js"></script>
 
 <!-- Theme available separately if you are so inclined -->
 <link rel='stylesheet' href='material.css'>
