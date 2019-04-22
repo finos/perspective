@@ -74,7 +74,7 @@ function yScatter(container, settings) {
 }
 yScatter.plugin = {
     type: "d3_y_scatter",
-    name: "[d3fc] Y Scatter Chart",
+    name: "Y Scatter Chart",
     max_size: 25000
 };
 

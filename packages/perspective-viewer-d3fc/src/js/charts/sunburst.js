@@ -90,7 +90,7 @@ function sunburst(container, settings) {
 }
 sunburst.plugin = {
     type: "d3_sunburst",
-    name: "[D3] Sunburst",
+    name: "Sunburst",
     max_size: 25000,
     initial: {
         type: "number",

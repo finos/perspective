@@ -8,7 +8,7 @@ rules.push({
 });
 
 module.exports = Object.assign({}, pluginConfig, {
-    entry: "./src/js/plugin/plugin.js",
+    entry: "./src/js/index.js",
     module: Object.assign({}, pluginConfig.module, {
         rules
     })
