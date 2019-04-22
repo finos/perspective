@@ -3,6 +3,7 @@
     "version": "0.2.23",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
+    "unpkg": "build/perspective.js",
     "browser": "cjs/js/perspective.parallel.js",
     "module": "cjs/js/perspective.parallel.js",
     "publishConfig": {
