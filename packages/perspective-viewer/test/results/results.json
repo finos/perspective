@@ -34,5 +34,5 @@
     "superstore.html/saving a duplicate column should fail with error message.": "d9618357228698c5fbe9978b3ed1f668",
     "superstore.html/highlights invalid filter.": "b31284a7b2a401d232ed077ec097a653",
     "superstore.html/replaces all rows.": "7a7265b18d5c94f8f90abcad4f3f7781",
-    "__GIT_COMMIT__": "80cf89627003aeff8719dd76e3496d8709164602"
+    "__GIT_COMMIT__": "87772b51fba4802095f9fa3b4b680d4a804be5d5"
 }
