@@ -1,5 +1,15 @@
 # Changelog
 
+# [0.2.23] - 2019-04-22
+### Added
+* [#547](https://github.com/jpmorganchase/perspective/pull/547) Added `to_arrow()` support to remote perspective, as well as ability to host `view()`s in addition to `table()`s.
+* [#549](https://github.com/jpmorganchase/perspective/pull/549) Added table ownership flag to `perspective-viewer` `delete()` method.
+  
+### Fixes
+* [#542](https://github.com/jpmorganchase/perspective/pull/542) Fixed Hypergrid formatting issue when changing row-pivots.
+* [#544](https://github.com/jpmorganchase/perspective/pull/544) Fixed `save()` and `restore()` plugin method APIs.
+* [#546](https://github.com/jpmorganchase/perspective/pull/546) Fixed Hypergrid theme issue when page contains multiple themes.
+
 # [0.2.22] - 2019-04-10
 ### Added
 * [#511](https://github.com/jpmorganchase/perspective/pull/511) Sunburst charts for `perspective-viewer-d3fc`, as well as support for perspective themes.

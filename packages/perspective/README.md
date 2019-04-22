@@ -271,8 +271,8 @@ contructor.
 <a name="module_perspective..view+num_columns"></a>
 
 #### view.num\_columns() ⇒ <code>Promise.&lt;number&gt;</code>
-The number of aggregated columns in this [view](#module_perspective..view).  This is affected by
-the "column_pivots" configuration parameter supplied to this [view](#module_perspective..view)'s
+The number of aggregated columns in this [view](view).  This is affected by
+the "column_pivots" configuration parameter supplied to this [view](view)'s
 contructor.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -506,10 +506,13 @@ bound to this table
 to use as [Row Pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels).
     - [.column_pivots] <code>Array.&lt;string&gt;</code> - An array of column names
 to use as [Column Pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_labels).
-    - [.aggregate] <code>Array.&lt;Object&gt;</code> - An Array of Aggregate configuration objects,
-each of which should provide a "column" and "op" property, representing the string
-aggregation type and associated column name, respectively.  Aggregates not provided
-will use their type defaults
+    - [.columns] <code>Array.&lt;Object&gt;</code> - An array of column names for the
+output columns.  If none are provided, all columns are output.
+    - [.aggregates] <code>Object</code> - An object, the keys of which are column
+names, and their respective values ar ethe aggregates calculations to use
+when this view has `row_pivots`.  A column provided to `config.columns`
+without an aggregate in this object, will use the default aggregate
+calculation for its type.
     - [.filter] <code>Array.&lt;Array.&lt;string&gt;&gt;</code> - An Array of Filter configurations to
 apply.  A filter configuration is an array of 3 elements:  A column name,
 a supported filter comparison string (e.g. '===', '>'), and a value to compare.
@@ -521,7 +524,8 @@ which are: "none", "asc", "desc", "col asc", "col desc", "asc abs", "desc abs", 
 ```js
 var view = table.view({
      row_pivots: ['region'],
-     aggregate: [{op: 'dominant', column:'region'}],
+     columns: ["region"],
+     aggregates: {"region": "dominant"},
      filter: [['client', 'contains', 'fred']],
      sort: [['value', 'asc']]
 });

@@ -1,7 +1,7 @@
 <a name="module_perspective-viewer"></a>
 
 ## perspective-viewer
-Module for `<perspective-viewer` custom element.  There are no exports fromthis module, however importing it has a side effect:  the[module:perspective_viewer~PerspectiveViewer](module:perspective_viewer~PerspectiveViewer) class is registered as acustom element, after which it can be used as a standard DOM element.  Thedocumentation in this module defines the instance structure of a`<perspective-viewer>` DOM object instantiated typically, through HTML or anyrelevent DOM method e.g. `document.createElement("perspective-viewer")` or`document.getElementsByTagName("perspective-viewer")`.
+Module for `<perspective-viewer>` custom element.  There are no exports fromthis module, however importing it has a side effect:  the[module:perspective_viewer~PerspectiveViewer](module:perspective_viewer~PerspectiveViewer) class is registered as acustom element, after which it can be used as a standard DOM element.  Thedocumentation in this module defines the instance structure of a`<perspective-viewer>` DOM object instantiated typically, through HTML or anyrelevent DOM method e.g. `document.createElement("perspective-viewer")` or`document.getElementsByTagName("perspective-viewer")`.
 
 
 * [perspective-viewer](#module_perspective-viewer)
@@ -16,13 +16,13 @@ Module for `<perspective-viewer` custom element.  There are no exports fromthis
         * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
         * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
         * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
+        * [.table](#module_perspective-viewer..PerspectiveViewer+table)
         * [.view](#module_perspective-viewer..PerspectiveViewer+view)
-        * [.message(msg)](#module_perspective-viewer..PerspectiveViewer+message)
         * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>Promise.&lt;void&gt;</code>
         * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
         * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
         * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-        * [.delete()](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+        * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
         * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
         * [.restore(x)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
         * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -52,13 +52,13 @@ Module for `<perspective-viewer` custom element.  There are no exports fromthis
     * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
     * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
     * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
+    * [.table](#module_perspective-viewer..PerspectiveViewer+table)
     * [.view](#module_perspective-viewer..PerspectiveViewer+view)
-    * [.message(msg)](#module_perspective-viewer..PerspectiveViewer+message)
     * [.load(data)](#module_perspective-viewer..PerspectiveViewer+load) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.update(data)](#module_perspective-viewer..PerspectiveViewer+update)
     * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
     * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
-    * [.delete()](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
     * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
     * [.restore(x)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -238,6 +238,16 @@ let elem = document.getElementById('my_viewer');let table = elem.worker.table([
 
 * * *
 
+<a name="module_perspective-viewer..PerspectiveViewer+table"></a>
+
+#### perspectiveViewer.table
+This element's `perspective.table` instance.
+
+**Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
+**Read only**: true  
+
+* * *
+
 <a name="module_perspective-viewer..PerspectiveViewer+view"></a>
 
 #### perspectiveViewer.view
@@ -245,23 +255,6 @@ This element's `perspective.table.view` instance.  The instance itselfwill chan
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Read only**: true  
-
-* * *
-
-<a name="module_perspective-viewer..PerspectiveViewer+message"></a>
-
-#### perspectiveViewer.message(msg)
-When set, hide the data visualization and display the message.  Setting`message` does not clear the internal `perspective.table`, but it doesrender it hidden until the message is removed.
-
-**Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
-**Params**
-
-- msg <code>string</code> - The message. This can be HTML - it is not sanitized.
-
-**Example**  
-```js
-let elem = document.getElementById('my_viewer');elem.setAttribute('message', '<h1>Loading</h1>');
-```
 
 * * *
 
@@ -341,11 +334,15 @@ Duplicate an existing `<perspective-element>`, including data and viewsettings.
 
 <a name="module_perspective-viewer..PerspectiveViewer+delete"></a>
 
-#### perspectiveViewer.delete() ⇒ <code>Promise.&lt;boolean&gt;</code>
+#### perspectiveViewer.delete(delete_table) ⇒ <code>Promise.&lt;boolean&gt;</code>
 Deletes this element's data and clears it's internal state (but not itsuser state).  This (or the underlying `perspective.table`'s equivalentmethod) must be called in order for its memory to be reclaimed.
 
 **Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 **Returns**: <code>Promise.&lt;boolean&gt;</code> - Whether or not this call resulted in theunderlying `perspective.table` actually being deleted.  
+**Params**
+
+- delete_table <code>boolean</code> <code> = true</code> - Should a delete call also be made to theunderlying `table()`.
+
 
 * * *
 

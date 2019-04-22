@@ -1,6 +1,6 @@
 {
     "name": "@jpmorganchase/perspective-cli",
-    "version": "0.2.22",
+    "version": "0.2.23",
     "description": "Perspective.js CLI",
     "main": "build/index.js",
     "publishConfig": {
@@ -27,10 +27,10 @@
         "perspective": "perspective"
     },
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.22",
-        "@jpmorganchase/perspective-viewer": "^0.2.22",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.22",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.22",
+        "@jpmorganchase/perspective": "^0.2.23",
+        "@jpmorganchase/perspective-viewer": "^0.2.23",
+        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.23",
+        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.23",
         "commander": "^2.19.0"
     }
 }
