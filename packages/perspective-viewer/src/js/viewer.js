@@ -457,11 +457,13 @@ class PerspectiveViewer extends ActionElement {
      * user state).  This (or the underlying `perspective.table`'s equivalent
      * method) must be called in order for its memory to be reclaimed.
      *
+     * @param {boolean} delete_table Should a delete call also be made to the
+     * underlying `table()`.
      * @returns {Promise<boolean>} Whether or not this call resulted in the
      * underlying `perspective.table` actually being deleted.
      */
-    delete() {
-        let x = this._clear_state();
+    delete(delete_table = true) {
+        let x = this._clear_state(delete_table);
         if (this._plugin.delete) {
             this._plugin.delete.call(this);
         }
