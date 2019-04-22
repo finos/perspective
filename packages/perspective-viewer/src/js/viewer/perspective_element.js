@@ -303,6 +303,7 @@ export class PerspectiveElement extends StateElement {
             task.cancel();
             if (this._render_count === 0) {
                 this.removeAttribute("updating");
+                this.dispatchEvent(new Event("perspective-update-complete"));
             }
         }
     }

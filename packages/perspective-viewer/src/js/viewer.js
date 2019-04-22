@@ -28,7 +28,7 @@ import {ActionElement} from "./viewer/action_element.js";
 polyfill({});
 
 /**
- * Module for `<perspective-viewer` custom element.  There are no exports from
+ * Module for `<perspective-viewer>` custom element.  There are no exports from
  * this module, however importing it has a side effect:  the
  * {@link module:perspective_viewer~PerspectiveViewer} class is registered as a
  * custom element, after which it can be used as a standard DOM element.  The
@@ -64,7 +64,6 @@ class PerspectiveViewer extends ActionElement {
     constructor() {
         super();
         this._register_debounce_instance();
-        this._slaves = [];
         this._show_config = true;
         this._show_warnings = true;
         this._resize_handler = _.debounce(this.notifyResize, 250).bind(this);
@@ -308,29 +307,6 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
-     * When set, hide the data visualization and display the message.  Setting
-     * `message` does not clear the internal `perspective.table`, but it does
-     * render it hidden until the message is removed.
-     *
-     * @param {string} msg The message. This can be HTML - it is not sanitized.
-     * @example
-     * let elem = document.getElementById('my_viewer');
-     * elem.setAttribute('message', '<h1>Loading</h1>');
-     */
-    message(msg) {
-        if (this.getAttribute("message") !== msg) {
-            this.setAttribute("message", msg);
-            return;
-        }
-        if (!this._inner_drop_target) return;
-        this.shadowRoot.querySelector("#app").classList.remove("hide_message");
-        this._inner_drop_target.innerHTML = msg;
-        for (let slave of this._slaves) {
-            slave.setAttribute("message", msg);
-        }
-    }
-
-    /**
      * This element's `perspective` worker instance.  This property is not
      * reflected as an HTML attribute, and is readonly;  it can be effectively
      * set however by calling the `load() method with a `perspective.table`
@@ -344,6 +320,15 @@ class PerspectiveViewer extends ActionElement {
      */
     get worker() {
         return this._get_worker();
+    }
+
+    /**
+     * This element's `perspective.table` instance.
+     *
+     * @readonly
+     */
+    get table() {
+        return this._table;
     }
 
     /**
@@ -390,12 +375,7 @@ class PerspectiveViewer extends ActionElement {
             table = this.worker.table(data, options);
             table._owner_viewer = this;
         }
-        let _promises = [this._load_table(table)];
-        for (let slave of this._slaves) {
-            _promises.push(this._load_table.call(slave, table));
-        }
-        this._slaves = [];
-        return Promise.all(_promises);
+        return this._load_table(table);
     }
 
     /**
@@ -445,11 +425,8 @@ class PerspectiveViewer extends ActionElement {
             this._inner_drop_target.innerHTML = widget._inner_drop_target.innerHTML;
         }
 
-        if (widget._table) {
-            this._load_table(widget._table);
-        } else {
-            widget._slaves.push(this);
-        }
+        this._load_table(widget.table);
+        this.restore(widget.save());
     }
 
     /**
