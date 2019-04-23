@@ -15,15 +15,25 @@ const resizeForDraggingEvent = "resize.for-dragging";
 
 export function draggableComponent() {
     let pinned = true;
+    let settings = null;
 
     const draggable = element => {
         const node = element.node();
         node.style.cursor = "move";
+        if (settings.legend) {
+            node.style.left = settings.legend.left;
+            node.style.top = settings.legend.top;
+        }
 
         const drag = d3.drag().on("drag", function() {
             const offsets = enforceContainerBoundaries(this, d3.event.dx, d3.event.dy);
             this.style.left = `${this.offsetLeft + offsets.x}px`;
             this.style.top = `${this.offsetTop + offsets.y}px`;
+            const position = {
+                left: this.style.left,
+                top: this.style.top
+            };
+            settings.legend = {...settings.legend, ...position};
 
             if (isNodeInTopRight(node)) {
                 pinned = pinNodeToTopRight(node);
@@ -34,6 +44,14 @@ export function draggableComponent() {
         });
 
         element.call(drag);
+    };
+
+    draggable.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
+        return draggable;
     };
 
     return draggable;
