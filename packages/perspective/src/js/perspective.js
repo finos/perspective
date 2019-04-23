@@ -384,9 +384,7 @@ export default function(Module) {
             formatter.addRow(data, row);
         }
 
-        /*         if (this.column_only) {
-            data = formatter.slice(data, 1);
-        } */
+        slice.delete();
 
         return formatter.formatData(data, options.config);
     };
@@ -971,7 +969,14 @@ export default function(Module) {
                     throw new Error(`Duplicate configuration parameter "${key}"`);
                 }
             } else if (key === "aggregate") {
-                throw new Error(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
+                // backwards compatibility: deconstruct `aggregate` into `aggregates` and `columns`
+                config["aggregates"] = {};
+                config["columns"] = [];
+                for (const agg of _config["aggregate"]) {
+                    config["aggregates"][agg["column"]] = agg["op"];
+                    config["columns"].push(agg["column"]);
+                }
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
             } else {

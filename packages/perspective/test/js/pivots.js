@@ -33,6 +33,19 @@ var data_8 = {
 
 module.exports = perspective => {
     describe("Aggregate", function() {
+        it("old `aggregate` syntax is backwards compatible", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                aggregate: [{column: "x", op: "sum"}],
+                row_pivots: ["z"]
+            });
+            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], sum", async function() {
             var table = perspective.table(data);
             var view = table.view({
