@@ -9,24 +9,32 @@
 
 import * as d3 from "d3";
 import {treeColor} from "../series/treemap/treemapColor";
+import {treeData} from "../data/treeData";
 import {treemapSeries} from "../series/treemap/treemapSeries";
 import {tooltip} from "../tooltip/tooltip";
 import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
+import {colorRangeLegend} from "../legend/colorRangeLegend";
 
 function treemap(container, settings) {
-    const treemapGrid = gridLayoutMultiChart()
-        .elementsPrefix("treemap")
-        .treeColor(treeColor)
-        .treeColorDataMap(d => d.data);
+    if (settings.crossValues.length === 0) {
+        console.warn("Unable to render a chart in the absence of any groups.");
+        return;
+    }
 
-    treemapGrid(settings, container);
+    const data = treeData(settings);
+    const color = treeColor(settings, data.map(d => d.data));
+    const treemapGrid = gridLayoutMultiChart().elementsPrefix("treemap");
 
-    if (!treemapGrid.contentToRender()) return;
+    container.datum(data).call(treemapGrid);
+
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container.call(legend);
+    }
 
     const treemapContainer = treemapGrid.chartContainer();
     const treemapEnter = treemapGrid.chartEnter();
     const treemapDiv = treemapGrid.chartDiv();
-    const color = treemapGrid.color();
 
     treemapContainer.append("text").attr("class", "parent");
     treemapEnter

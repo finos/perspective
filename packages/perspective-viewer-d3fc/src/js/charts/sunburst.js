@@ -9,24 +9,32 @@
 
 import {select} from "d3";
 import {treeColor} from "../series/sunburst/sunburstColor";
+import {treeData} from "../data/treeData";
 import {sunburstSeries} from "../series/sunburst/sunburstSeries";
 import {tooltip} from "../tooltip/tooltip";
 import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
+import {colorRangeLegend} from "../legend/colorRangeLegend";
 
 function sunburst(container, settings) {
-    const sunburstGrid = gridLayoutMultiChart()
-        .elementsPrefix("sunburst")
-        .treeColor(treeColor)
-        .treeColorDataMap(d => d.extents);
+    if (settings.crossValues.length === 0) {
+        console.warn("Unable to render a chart in the absence of any groups.");
+        return;
+    }
 
-    sunburstGrid(settings, container);
+    const data = treeData(settings);
+    const color = treeColor(settings, data.map(d => d.extents));
+    const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
 
-    if (!sunburstGrid.contentToRender()) return;
+    container.datum(data).call(sunburstGrid);
+
+    if (color) {
+        const legend = colorRangeLegend().scale(color);
+        container.call(legend);
+    }
 
     const sunburstContainer = sunburstGrid.chartContainer();
     const sunburstEnter = sunburstGrid.chartEnter();
     const sunburstDiv = sunburstGrid.chartDiv();
-    const color = sunburstGrid.color();
     const containerSize = sunburstGrid.containerSize();
 
     sunburstContainer
