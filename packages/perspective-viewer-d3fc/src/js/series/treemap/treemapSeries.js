@@ -36,17 +36,13 @@ export function treemapSeries() {
         treemap(data);
 
         // Draw child nodes first
-        const nodes = treemapSvg
-            .selectAll("g")
-            .data(data.descendants())
-            .enter()
-            .append("g")
-            .sort((a, b) => b.depth - a.depth);
+        const nodes = treemapSvg.selectAll("g").data(data.descendants());
+        const nodesEnter = nodes.enter().append("g");
 
-        nodes.append("rect");
-        nodes.append("text");
+        nodesEnter.append("rect");
+        nodesEnter.append("text");
 
-        const nodesMerge = nodes.merge(nodes);
+        const nodesMerge = nodesEnter.merge(nodes).sort((a, b) => b.depth - a.depth);
 
         const rects = nodesMerge
             .select("rect")
