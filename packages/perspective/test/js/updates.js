@@ -204,16 +204,6 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-
-        it("Arrow `update()`s", async function() {
-            var table = perspective.table(arrow.slice());
-            table.update(arrow.slice());
-            var view = table.view();
-            let result = await view.to_json();
-            expect(result).toEqual(arrow_result.concat(arrow_result));
-            view.delete();
-            table.delete();
-        });
     });
 
     describe("Computed column updates", function() {
@@ -236,6 +226,29 @@ module.exports = perspective => {
             view2.delete();
             table.delete();
             table2.delete();
+        });
+    });
+
+    describe("Arrow Updates", function() {
+        it("arrow contructor then arrow `update()`", async function() {
+            var table = perspective.table(arrow.slice());
+            table.update(arrow.slice());
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(arrow_result.concat(arrow_result));
+            view.delete();
+            table.delete();
+        });
+
+        it("non-arrow constructor then arrow `update()`", async function() {
+            let table = perspective.table(arrow_result);
+            let view = table.view();
+            let generated_arrow = await view.to_arrow();
+            table.update(generated_arrow);
+            let result = await view.to_json();
+            expect(result).toEqual(arrow_result.concat(arrow_result));
+            view.delete();
+            table.delete();
         });
     });
 

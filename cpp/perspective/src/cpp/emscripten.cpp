@@ -557,20 +557,25 @@ namespace binding {
         int data_size = data.size() - start_idx;
         std::vector<T> vals;
         vals.reserve(data.size());
+
+        // Validity map must have a length that is a multiple of 64
         int nullSize = ceil(data_size / 64.0) * 2;
         int nullCount = 0;
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
+
         for (int idx = 0; idx < data.size() - start_idx; idx++) {
             t_tscalar scalar = data[idx + start_idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 vals.push_back(get_scalar<F, T>(scalar));
+                // Mark the slot as non-null (valid)
                 validityMap[idx / 32] |= 1 << (idx % 32);
             } else {
                 vals.push_back({});
                 nullCount++;
             }
         }
+
         val arr = val::global("Array").new_();
         arr.call<void>("push", typed_array<O>.new_(vector_to_typed_array(vals)["buffer"]));
         arr.call<void>("push", nullCount);
@@ -640,7 +645,8 @@ namespace binding {
         auto dtype = ctx->get_column_dtype(idx);
 
         switch (dtype) {
-            case DTYPE_INT8: {
+            case DTYPE_INT8:
+            case DTYPE_BOOL: {
                 return col_to_typed_array<std::int8_t>(data, column_pivot_only);
             } break;
             case DTYPE_INT16: {
@@ -784,13 +790,28 @@ namespace binding {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            // arrow packs bools into a bitmap
+            /**
+             * FIXME:
+             *
+             * Arrow BoolVectors are packed by `to_arrow` correctly, but are parsed incorrectly
+             * in this block.
+             *
+             * Using vecFromTypedArray, they are parsed and set correctly.
+             *
+             * Pre-generated arrows are parsed correctly by this block, but incorrectly by the
+             * vecFromTypedArray logic.
+             *
+             * Unpacking the arrow using ObservableHQ shows that booleans are packed into a
+             * BoolVector.
+             *
+             * Applying this logic to the Observable notebook gives us [21, 0, 0, 0, 0, 0, 0,
+             * 0], which is the same error that happens here when we incorrectly parse.
+             *
+             * Also an arrow of a million rows is barely being handled, but using an external
+             * arrow with booleans shows that this logic IS accessing them correctly, I think.
+             */
             val data = accessor["values"];
-            for (auto i = 0; i < nrows; ++i) {
-                std::uint8_t elem = data[i / 8].as<std::uint8_t>();
-                bool v = elem & (1 << (i % 8));
-                col->set_nth(i, v);
-            }
+            arrow::vecFromTypedArray(data, col->get_nth<bool>(0), nrows * 2);
         } else {
             for (auto i = 0; i < nrows; ++i) {
                 val item = accessor.call<val>("marshal", cidx, i, type);

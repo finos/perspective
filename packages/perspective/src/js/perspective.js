@@ -19,7 +19,7 @@ import {Visitor} from "@apache-arrow/es5-esm/visitor";
 import {Data} from "@apache-arrow/es5-esm/data";
 import {Vector} from "@apache-arrow/es5-esm/vector";
 
-import {Utf8, Uint32, Float64, Int32, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
+import {Utf8, Uint32, Float64, Int32, Bool, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
 
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
@@ -120,6 +120,7 @@ export default function(Module) {
                 cdata: loader.cdata.map(y => y.chunks[x])
             });
         }
+        console.log(chunks);
         return chunks;
     }
 
@@ -549,6 +550,9 @@ export default function(Module) {
             } else if (type === "integer") {
                 const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
+            } else if (type === "boolean") {
+                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "date" || type === "datetime") {
                 const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
