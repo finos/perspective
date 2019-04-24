@@ -51,7 +51,6 @@ function treemap(container, settings) {
 
             treemapSeries()
                 .settings(settings)
-                .split(split)
                 .data(data)
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
                 .color(color)(treemapSvg);

@@ -21,7 +21,6 @@ const nodeLevelHelper = (maxDepth, d) => (d.depth === 0 ? nodeLevel.root : isLea
 
 export function treemapSeries() {
     let settings = null;
-    let split = null;
     let data = null;
     let color = null;
     let treemapDiv = null;
@@ -76,14 +75,6 @@ export function treemapSeries() {
             return settings;
         }
         settings = args[0];
-        return _treemapSeries;
-    };
-
-    _treemapSeries.split = (...args) => {
-        if (!args.length) {
-            return split;
-        }
-        split = args[0];
         return _treemapSeries;
     };
 
