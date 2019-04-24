@@ -10,6 +10,7 @@
 import {seriesColorRange} from "../seriesRange";
 
 export function treeColor(settings, data) {
+    if (settings.mainValues.length <= 1) return;
     const colors = data
         .filter(x => x.height > 0)
         .map(x => getColors(x))
