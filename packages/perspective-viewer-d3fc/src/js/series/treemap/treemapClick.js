@@ -8,13 +8,12 @@
  */
 
 import * as d3 from "d3";
-import {getGoToParentControls} from "./treemapControls";
 import {calcWidth, calcHeight} from "./treemapSeries";
 import {toggleLabels, preventTextCollisions} from "./treemapLabel";
 
 const includesAllCrossValues = (d, crossValues) => crossValues.every(val => d.crossValue.split("|").includes(val));
 
-export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode) {
+export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
     settings.treemapLevel = d.depth;
     const crossValues = d.crossValue.split("|");
 
@@ -67,11 +66,14 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
 
     toggleLabels(nodesMerge, settings.treemapLevel, crossValues);
 
-    getGoToParentControls(treemapDiv)
-        .style("display", parent ? "" : "none")
-        .select("#goto-parent")
-        .html(d.data.name)
-        .on("click", () => changeLevel(parent, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode));
+    if (parent) {
+        parentCtrls
+            .hide(false)
+            .text(d.data.name)
+            .onClick(() => changeLevel(parent, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls))();
+    } else {
+        parentCtrls.hide(true)();
+    }
 }
 
 function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode) {

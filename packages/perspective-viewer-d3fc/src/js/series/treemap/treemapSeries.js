@@ -10,6 +10,7 @@
 import {drawLabels} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
 import {changeLevel} from "./treemapClick";
+import {parentControls} from "./treemapControls";
 
 export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
 export const calcWidth = d => d.x1 - d.x0;
@@ -23,8 +24,12 @@ export function treemapSeries() {
     let data = null;
     let color = null;
     let treemapDiv = null;
+    let parentCtrls = null;
 
     const _treemapSeries = treemapSvg => {
+        parentCtrls = parentControls(treemapDiv);
+        parentCtrls();
+
         const maxDepth = data.height;
         settings.treemapLevel = 0;
         const treemap = treemapLayout(treemapDiv.node().getBoundingClientRect().width, treemapDiv.node().getBoundingClientRect().height);
@@ -73,7 +78,7 @@ export function treemapSeries() {
         });
 
         const rootNode = rects.filter(d => d.crossValue === "").datum();
-        rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode));
+        rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
     };
 
     _treemapSeries.settings = (...args) => {
