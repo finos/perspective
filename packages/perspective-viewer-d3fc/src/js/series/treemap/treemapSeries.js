@@ -11,6 +11,7 @@ import {drawLabels} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
 import {changeLevel} from "./treemapClick";
 import {parentControls} from "./treemapControls";
+import {calculateRootLevelMap} from "./treemapLevelCalculation";
 
 export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
 export const calcWidth = d => d.x1 - d.x0;
@@ -65,18 +66,7 @@ export function treemapSeries() {
 
         drawLabels(nodesMerge, settings.treemapLevel, []);
 
-        nodesMerge.each(d => {
-            d.mapLevel = [];
-            d.mapLevel[settings.treemapLevel] = {
-                x0: d.x0,
-                x1: calcWidth(d) + d.x0,
-                y0: d.y0,
-                y1: calcHeight(d) + d.y0,
-                visible: true,
-                opacity: 1
-            };
-        });
-
+        calculateRootLevelMap(nodesMerge, settings);
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
     };

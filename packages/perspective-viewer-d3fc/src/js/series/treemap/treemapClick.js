@@ -10,8 +10,7 @@
 import * as d3 from "d3";
 import {calcWidth, calcHeight} from "./treemapSeries";
 import {toggleLabels, preventTextCollisions} from "./treemapLabel";
-
-const includesAllCrossValues = (d, crossValues) => crossValues.every(val => d.crossValue.split("|").includes(val));
+import {calculateSubTreeMap} from "./treemapLevelCalculation";
 
 export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
     settings.treemapLevel = d.depth;
@@ -74,26 +73,4 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
     } else {
         parentCtrls.hide(true)();
     }
-}
-
-function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode) {
-    const oldDimensions = {x: d.x0, y: d.y0, width: d.x1 - d.x0, height: d.y1 - d.y0};
-    const newDimensions = {width: rootNode.x1 - rootNode.x0, height: rootNode.y1 - rootNode.y0};
-    const dimensionMultiplier = {width: newDimensions.width / oldDimensions.width, height: newDimensions.height / oldDimensions.height};
-
-    nodesMerge.each(d => {
-        const x0 = (d.x0 - oldDimensions.x) * dimensionMultiplier.width;
-        const y0 = (d.y0 - oldDimensions.y) * dimensionMultiplier.height;
-        const width = calcWidth(d) * dimensionMultiplier.width;
-        const height = calcHeight(d) * dimensionMultiplier.height;
-        const visible = includesAllCrossValues(d, crossValues) && d.data.name != crossValues[settings.treemapLevel - 1];
-        d.mapLevel[settings.treemapLevel] = {
-            x0,
-            x1: width + x0,
-            y0,
-            y1: height + y0,
-            visible,
-            opacity: visible ? 1 : 0
-        };
-    });
 }
