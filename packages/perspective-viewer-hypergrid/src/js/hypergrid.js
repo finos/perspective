@@ -159,6 +159,44 @@ bindTemplate(TEMPLATE, style)(
             }
         }
 
+        apply_styles() {
+            const font = `${this.get_style("--hypergrid--font-size")} ${this.get_style("--hypergrid--font-family")}`;
+            const headerfont = `${this.get_style("--hypergrid-header--font-size")} ${this.get_style("--hypergrid-header--font-family")}`;
+            const hoverRowHighlight = {
+                enabled: true,
+                backgroundColor: this.get_style("--hypergrid-row-hover--background"),
+                color: this.get_style("--hypergrid-row-hover--color")
+            };
+
+            const hoverCellHighlight = {
+                enabled: true,
+                backgroundColor: this.get_style("--hypergrid-cell-hover--background"),
+                color: this.get_style("--hypergrid-cell-hover--color")
+            };
+
+            const grid_properties = {
+                treeHeaderBackgroundColor: this.get_style("--hypergrid-tree-header--background"),
+                backgroundColor: this.get_style("--hypergrid-tree-header--background"),
+                treeHeaderColor: this.get_style("--hypergrid-tree-header--color"),
+                color: this.get_style("--hypergrid-tree-header--color"),
+                columnHeaderBackgroundColor: this.get_style("--hypergrid-header--background"),
+                columnHeaderSeparatorColor: this.get_style("--hypergrid-separator--color"),
+                columnHeaderColor: this.get_style("--hypergrid-header--color"),
+                columnColorNumberPositive: this.get_style("--hypergrid-positive--color"),
+                columnColorNumberNegative: this.get_style("--hypergrid-negative--color"),
+                columnBackgroundColorNumberPositive: this.get_style("--hypergrid-positive--background"),
+                columnBackgroundColorNumberNegative: this.get_style("--hypergrid-negative--background"),
+                columnHeaderFont: headerfont,
+                font,
+                rowHeaderFont: font,
+                treeHeaderFont: font,
+                hoverRowHighlight,
+                hoverCellHighlight
+            };
+
+            this.grid && this.grid.addProperties(grid_properties);
+        }
+
         connectedCallback() {
             if (!this.grid) {
                 const host = this.shadowRoot.querySelector("#mainGrid");
@@ -197,30 +235,7 @@ bindTemplate(TEMPLATE, style)(
                 const grid_properties = generateGridProperties(light_theme_overrides);
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
-                grid_properties["treeHeaderBackgroundColor"] = grid_properties["backgroundColor"] = this.get_style("--hypergrid-tree-header--background");
-                grid_properties["treeHeaderColor"] = grid_properties["color"] = this.get_style("--hypergrid-tree-header--color");
-                grid_properties["columnHeaderBackgroundColor"] = this.get_style("--hypergrid-header--background");
-                grid_properties["columnHeaderSeparatorColor"] = this.get_style("--hypergrid-separator--color");
-                grid_properties["columnHeaderColor"] = this.get_style("--hypergrid-header--color");
-
-                grid_properties["columnColorNumberPositive"] = this.get_style("--hypergrid-positive--color");
-                grid_properties["columnColorNumberNegative"] = this.get_style("--hypergrid-negative--color");
-                grid_properties["columnBackgroundColorNumberPositive"] = this.get_style("--hypergrid-positive--background");
-                grid_properties["columnBackgroundColorNumberNegative"] = this.get_style("--hypergrid-negative--background");
-
-                const font = `${this.get_style("--hypergrid--font-size")} ${this.get_style("--hypergrid--font-family")}`;
-                const headerfont = `${this.get_style("--hypergrid-header--font-size")} ${this.get_style("--hypergrid-header--font-family")}`;
-
-                grid_properties["columnHeaderFont"] = headerfont;
-                grid_properties["font"] = font;
-                grid_properties["rowHeaderFont"] = font;
-                grid_properties["treeHeaderFont"] = font;
-
-                grid_properties["hoverRowHighlight"]["backgroundColor"] = this.get_style("--hypergrid-row-hover--background");
-                grid_properties["hoverRowHighlight"]["color"] = this.get_style("--hypergrid-row-hover--color");
-                grid_properties["hoverCellHighlight"]["backgroundColor"] = this.get_style("--hypergrid-cell-hover--background");
-                grid_properties["hoverCellHighlight"]["color"] = this.get_style("--hypergrid-cell-hover--color");
-
+                this.apply_styles();
                 this.grid.addProperties(grid_properties);
 
                 this.grid.localization.header = {
@@ -306,6 +321,11 @@ async function grid_update(div, view, task) {
     this.hypergrid.canvas.paintNow();
 }
 
+function style_element() {
+    const element = this[PRIVATE].grid;
+    element.apply_styles();
+    element.grid.canvas.paintNow();
+}
 /**
  * Create a new <perspective-hypergrid> web component, and attach it to the DOM.
  *
@@ -397,6 +417,7 @@ global.registerPlugin("hypergrid", {
     selectMode: "toggle",
     update: grid_update,
     deselectMode: "pivots",
+    styleElement: style_element,
     resize: async function() {
         if (this.hypergrid) {
             this.hypergrid.canvas.checksize();

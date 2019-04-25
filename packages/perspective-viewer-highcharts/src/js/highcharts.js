@@ -121,6 +121,7 @@ global.registerPlugin("xy_scatter", {
     name: "X/Y Scatter Chart",
     create: draw("scatter", true),
     update: draw("scatter", false),
+    styleElement: draw("scatter", false, true),
     resize: resize,
     initial: {
         type: "number",
@@ -137,6 +138,7 @@ global.registerPlugin("treemap", {
     create: draw("treemap", true),
     update: draw("treemap", false),
     resize: resize,
+    styleElement: draw("treemap", false, true),
     initial: {
         type: "number",
         count: 2,
@@ -151,6 +153,7 @@ global.registerPlugin("sunburst", {
     name: "Sunburst",
     create: draw("sunburst", true),
     update: draw("sunburst", false),
+    styleElement: draw("sunburst", false, true),
     resize: resize,
     initial: {
         type: "number",
