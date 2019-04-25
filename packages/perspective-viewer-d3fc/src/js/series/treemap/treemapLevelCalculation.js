@@ -11,7 +11,7 @@ import {calcWidth, calcHeight} from "./treemapSeries";
 
 const includesAllCrossValues = (d, crossValues) => crossValues.every(val => d.crossValue.split("|").includes(val));
 
-export function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode) {
+export function calculateSubTreeMap(d, crossValues, nodesMerge, treemapLevel, rootNode) {
     const oldDimensions = {x: d.x0, y: d.y0, width: d.x1 - d.x0, height: d.y1 - d.y0};
     const newDimensions = {width: rootNode.x1 - rootNode.x0, height: rootNode.y1 - rootNode.y0};
     const dimensionMultiplier = {width: newDimensions.width / oldDimensions.width, height: newDimensions.height / oldDimensions.height};
@@ -21,8 +21,8 @@ export function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNo
         const y0 = (d.y0 - oldDimensions.y) * dimensionMultiplier.height;
         const width = calcWidth(d) * dimensionMultiplier.width;
         const height = calcHeight(d) * dimensionMultiplier.height;
-        const visible = includesAllCrossValues(d, crossValues) && d.data.name != crossValues[settings.treemapLevel - 1];
-        d.mapLevel[settings.treemapLevel] = {
+        const visible = includesAllCrossValues(d, crossValues) && d.data.name != crossValues[treemapLevel - 1];
+        d.mapLevel[treemapLevel] = {
             x0,
             x1: width + x0,
             y0,
@@ -31,12 +31,13 @@ export function calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNo
             opacity: visible ? 1 : 0
         };
     });
+    d.mapLevel[treemapLevel].levelRoot = true;
 }
 
-export function calculateRootLevelMap(nodesMerge, settings) {
+export function calculateRootLevelMap(nodesMerge, rootNode) {
     nodesMerge.each(d => {
         d.mapLevel = [];
-        d.mapLevel[settings.treemapLevel] = {
+        d.mapLevel[0] = {
             x0: d.x0,
             x1: calcWidth(d) + d.x0,
             y0: d.y0,
@@ -45,4 +46,5 @@ export function calculateRootLevelMap(nodesMerge, settings) {
             opacity: 1
         };
     });
+    rootNode.mapLevel[0].levelRoot = true;
 }

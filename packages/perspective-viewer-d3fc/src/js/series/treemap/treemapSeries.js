@@ -9,7 +9,7 @@
 
 import {drawLabels} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
-import {changeLevel} from "./treemapClick";
+import {changeLevel, returnToLevel} from "./treemapClick";
 import {parentControls} from "./treemapControls";
 import {calculateRootLevelMap} from "./treemapLevelCalculation";
 
@@ -31,17 +31,18 @@ export function treemapSeries() {
         parentCtrls();
 
         const maxDepth = data.height;
-        settings.treemapLevel = 0;
+        if (!settings.treemapLevel) settings.treemapLevel = 0;
+        if (!settings.treemapRoute) settings.treemapRoute = [];
         const treemap = treemapLayout(treemapDiv.node().getBoundingClientRect().width, treemapDiv.node().getBoundingClientRect().height);
         treemap(data);
 
-        // Draw child nodes first
         const nodes = treemapSvg.selectAll("g").data(data.descendants());
         const nodesEnter = nodes.enter().append("g");
 
         nodesEnter.append("rect");
         nodesEnter.append("text");
 
+        // Draw child nodes first
         const nodesMerge = nodesEnter.merge(nodes).sort((a, b) => b.depth - a.depth);
 
         const rects = nodesMerge
@@ -61,9 +62,12 @@ export function treemapSeries() {
 
         drawLabels(nodesMerge, settings.treemapLevel, []);
 
-        calculateRootLevelMap(nodesMerge, settings);
         const rootNode = rects.filter(d => d.crossValue === "").datum();
+        calculateRootLevelMap(nodesMerge, rootNode);
+        if (settings.treemapRoute.length === 0) settings.treemapRoute.push(rootNode);
         rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
+
+        returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls);
     };
 
     _treemapSeries.settings = (...args) => {
