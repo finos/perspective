@@ -7,7 +7,7 @@
  *
  */
 
-import {drawLabels} from "./treemapLabel";
+import {toggleLabels} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
 import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
@@ -60,7 +60,7 @@ export function treemapSeries() {
             .attr("y", d => d.y0 + calcHeight(d) / 2)
             .text(d => d.data.name);
 
-        drawLabels(nodesMerge, settings.treemapLevel, []);
+        toggleLabels(nodesMerge, settings.treemapLevel, []);
 
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
