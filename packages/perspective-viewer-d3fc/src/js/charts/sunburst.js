@@ -8,55 +8,34 @@
  */
 
 import {select} from "d3";
+import {treeColor} from "../series/sunburst/sunburstColor";
 import {treeData} from "../data/treeData";
-import {sunburstSeries, treeColor} from "../series/sunburst/sunburstSeries";
-import {colorRangeLegend} from "../legend/colorRangeLegend";
+import {sunburstSeries} from "../series/sunburst/sunburstSeries";
 import {tooltip} from "../tooltip/tooltip";
-import {getOrCreateElement} from "../utils/utils";
+import {gridLayoutMultiChart} from "../layout/gridLayoutMultiChart";
+import {colorRangeLegend} from "../legend/colorRangeLegend";
 
 function sunburst(container, settings) {
-    if (settings.crossValues.length === 0) return;
+    if (settings.crossValues.length === 0) {
+        console.warn("Unable to render a chart in the absence of any groups.");
+        return;
+    }
 
-    const sunburstData = treeData(settings);
-    const innerContainer = getOrCreateElement(container, "div.inner-container", () => container.append("div").attr("class", "inner-container"));
-    const color = treeColor(settings, sunburstData.map(d => d.extents));
+    const data = treeData(settings);
+    const color = treeColor(settings, data.map(d => d.extents));
+    const sunburstGrid = gridLayoutMultiChart().elementsPrefix("sunburst");
 
-    const innerRect = innerContainer.node().getBoundingClientRect();
-    const containerHeight = innerRect.height;
-    const containerWidth = innerRect.width - (color ? 70 : 0);
+    container.datum(data).call(sunburstGrid);
+
     if (color) {
         const legend = colorRangeLegend().scale(color);
         container.call(legend);
     }
 
-    const minSize = 500;
-    const cols = Math.min(sunburstData.length, Math.floor(containerWidth / minSize));
-    const rows = Math.ceil(sunburstData.length / cols);
-    const containerSize = {
-        width: containerWidth / cols,
-        height: Math.min(containerHeight, Math.max(containerHeight / rows, containerWidth / cols))
-    };
-    if (containerHeight / rows > containerSize.height * 0.75) {
-        containerSize.height = containerHeight / rows;
-    }
-
-    innerContainer.style("grid-template-columns", `repeat(${cols}, ${containerSize.width}px)`);
-    innerContainer.style("grid-template-rows", `repeat(${rows}, ${containerSize.height}px)`);
-
-    const sunburstDiv = innerContainer.selectAll("div.sunburst-container").data(treeData(settings), d => d.split);
-    sunburstDiv.exit().remove();
-
-    const sunburstEnter = sunburstDiv
-        .enter()
-        .append("div")
-        .attr("class", "sunburst-container");
-
-    const sunburstContainer = sunburstEnter
-        .append("svg")
-        .append("g")
-        .attr("class", "sunburst");
-
-    sunburstContainer.append("text").attr("class", "title");
+    const sunburstContainer = sunburstGrid.chartContainer();
+    const sunburstEnter = sunburstGrid.chartEnter();
+    const sunburstDiv = sunburstGrid.chartDiv();
+    const containerSize = sunburstGrid.containerSize();
 
     sunburstContainer
         .append("circle")
