@@ -9,7 +9,7 @@
 
 import {drawLabels} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
-import {changeLevel, returnToLevel} from "./treemapClick";
+import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
 import {calculateRootLevelMap} from "./treemapLevelCalculation";
 
