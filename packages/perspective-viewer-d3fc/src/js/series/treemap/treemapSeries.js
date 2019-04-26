@@ -64,7 +64,7 @@ export function treemapSeries() {
 
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
-        if (settings.treemapRoute.length === 0) settings.treemapRoute.push(rootNode);
+        if (settings.treemapRoute.length === 0) settings.treemapRoute.push(rootNode.crossValue);
         rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
 
         returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls);

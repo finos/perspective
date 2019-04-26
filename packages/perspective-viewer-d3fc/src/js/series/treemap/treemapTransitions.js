@@ -16,12 +16,19 @@ export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, t
     if (settings.treemapLevel > 0) {
         const crossValues = rootNode.crossValue.split("|");
         executeTransition(rootNode, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, 0, crossValues, parentCtrls, 1);
+
+        settings.treemapRoute.slice(1, settings.treemapRoute.length).forEach(cv => {
+            const d = nodesMerge.filter(d => d.crossValue === cv).datum();
+            const crossValues = d.crossValue.split("|");
+            calculateSubTreeMap(d, crossValues, nodesMerge, d.depth, rootNode);
+            executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, d.depth, crossValues, parentCtrls, 1);
+        });
     }
 }
 
 export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
     if (settings.treemapLevel < d.depth) {
-        settings.treemapRoute.push(d);
+        settings.treemapRoute.push(d.crossValue);
     } else {
         settings.treemapRoute.pop();
     }
