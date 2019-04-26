@@ -37,7 +37,7 @@ function get_or_create_element(div) {
     return perspective_highcharts_element;
 }
 
-export const draw = (mode, set_config) =>
+export const draw = (mode, set_config, restyle) =>
     async function(el, view, task) {
         if (set_config) {
             this._config = await view.get_config();
@@ -86,7 +86,7 @@ export const draw = (mode, set_config) =>
                     } else {
                         config.chart.type = "coloredBubble";
                     }
-                    color_axis.call(this, config, colorRange);
+                    color_axis.call(this, config, colorRange, restyle);
                 }
                 if (num_aggregates < 3) {
                     set_boost(config, xaxis_type, yaxis_type);
@@ -108,7 +108,7 @@ export const draw = (mode, set_config) =>
                 config.legend.enabled = true;
                 config.legend.floating = false;
 
-                color_axis.call(this, config, colorRange);
+                color_axis.call(this, config, colorRange, restyle);
                 set_boost(config, xaxis_type, yaxis_type);
                 set_category_axis(config, "xAxis", xtree_type, top);
                 set_category_axis(config, "yAxis", ytree_type, ytop);
@@ -124,7 +124,7 @@ export const draw = (mode, set_config) =>
                     config.plotOptions.series.borderWidth = 1;
                     config.legend.floating = false;
                     if (colorRange) {
-                        color_axis.call(this, config, colorRange);
+                        color_axis.call(this, config, colorRange, restyle);
                     }
                     configs.push(config);
                 }
@@ -185,7 +185,7 @@ export const draw = (mode, set_config) =>
             }
         } finally {
             element = get_or_create_element.call(this, el);
-            if (this.hasAttribute("updating")) {
+            if (restyle || this.hasAttribute("updating")) {
                 element.delete();
             }
         }

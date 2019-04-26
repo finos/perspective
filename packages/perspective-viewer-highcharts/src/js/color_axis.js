@@ -30,8 +30,8 @@ function _get_gradient(type) {
 
 const _get_gradients = (() => {
     let gradients;
-    return function() {
-        if (gradients === undefined) {
+    return function(restyle) {
+        if (restyle || gradients === undefined) {
             gradients = {};
             for (let type of ["positive", "negative", "full"]) {
                 gradients[type] = _get_gradient.bind(this)(type);
@@ -41,9 +41,9 @@ const _get_gradients = (() => {
     };
 })();
 
-export function color_axis(config, colorRange) {
+export function color_axis(config, colorRange, restyle) {
     let gradient,
-        {positive, negative, full} = _get_gradients.bind(this)();
+        {positive, negative, full} = _get_gradients.bind(this)(restyle);
     if (colorRange[0] >= 0) {
         gradient = positive;
     } else if (colorRange[1] <= 0) {

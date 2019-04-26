@@ -313,6 +313,13 @@ export class PerspectiveElement extends StateElement {
         return () => this.setAttribute("render_time", performance.now() - t);
     }
 
+    _restyle_plugin() {
+        if (this._plugin.styleElement) {
+            const task = (this._task = new CancelTask());
+            this._plugin.styleElement.call(this, this._datavis, this._view, task);
+        }
+    }
+
     _clear_state(clear_table = true) {
         if (this._task) {
             this._task.cancel();

@@ -450,6 +450,13 @@ class PerspectiveViewer extends ActionElement {
     }
 
     /**
+     * Restyles the elements and to pick up any style changes
+     */
+    restyleElement() {
+        this._restyle_plugin();
+    }
+
+    /**
      * Serialize this element's attribute/interaction state.
      *
      * @returns {object} a serialized element.
