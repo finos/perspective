@@ -58,7 +58,9 @@ function treemap(container, settings) {
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
                 .color(color)(treemapSvg);
 
-            tooltip().settings(settings)(treemapSvg.selectAll("g"));
+            tooltip()
+                .settings(settings)
+                .centered(true)(treemapSvg.selectAll("g"));
         });
 }
 
