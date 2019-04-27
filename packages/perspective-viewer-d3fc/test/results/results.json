@@ -36,7 +36,7 @@
     "scatter.html/sorts by a numeric column.": "1298a2236550ab855ee7f065229848bc",
     "scatter.html/filters by a numeric column.": "31a536aa81acc7188b986a17c5a4d5a7",
     "scatter.html/filters by a datetime column.": "642d250fc835b23aaf884cc5aed06ce5",
-    "scatter.html/highlights invalid filter.": "a47e406b13fb5d137158f57ea64e10a4",
+    "scatter.html/highlights invalid filter.": "1c1957bb84053b84bf310eeb1b8a359c",
     "scatter.html/sorts by an alpha column.": "8c85a4fb51d0c969de217f2058432cfe",
     "bar-x.html/shows a grid without any settings applied.": "323dcddc42665e9d08aec22728e3834d",
     "bar-x.html/pivots by a row.": "b41d0250b77fba75841d51693d5f3265",
@@ -48,7 +48,7 @@
     "bar-x.html/sorts by a numeric column.": "fa1fb2f6f021c4c0b5ccb52923a0ca5d",
     "bar-x.html/filters by a numeric column.": "8f5ba98d33ae2bfc6a53230884d9bb18",
     "bar-x.html/filters by a datetime column.": "7f3500f3789d17f77821a95cbdafb458",
-    "bar-x.html/highlights invalid filter.": "65840234aefa8109860c3f0f9c8f4d38",
+    "bar-x.html/highlights invalid filter.": "0ece158a68c96d25cf00fe95b8436c6e",
     "bar-x.html/sorts by an alpha column.": "20757a0b80448a96c9a8abe2d3c761d2",
     "bar-x.html/displays visible columns.": "204c1c5b11184fca81d25e2419056cc7",
     "bar-themed.html/shows a grid without any settings applied.": "4c9570007a5cff45fcc020a83d208c29",
@@ -111,7 +111,7 @@
     "sunburst.html/pivots by a row.": "b3dc7a447640a048162e8ebe560fcd7a",
     "sunburst.html/pivots by two rows.": "18d40f3e5ae31a0a5f8c607bcdff828d",
     "sunburst.html/pivots by a column.": "e0dc986703eddddd1805ef8ebd10a2f0",
-    "sunburst.html/pivots by a row and a column.": "28b2209fea8864e76ed77e3836c82c0e",
+    "sunburst.html/pivots by a row and a column.": "4a85005d20e32accdeb8f80f6f5eb1a9",
     "sunburst.html/pivots by two rows and two columns.": "59b321c46755eb1d5b0115d5c0456c88",
     "sunburst.html/sorts by a hidden column.": "b13aa4137c129a48f117d894980524ad",
     "sunburst.html/sorts by a numeric column.": "0e5db2ff954d643664ef8b738174bb39",
@@ -120,5 +120,5 @@
     "sunburst.html/highlights invalid filter.": "ea2ff4761029cf76f2dd5e3071d523ee",
     "sunburst.html/sorts by an alpha column.": "b5e20ba8444c15967b886d76c143afa9",
     "sunburst.html/displays visible columns.": "ea886e90939eb4455351b4f4e73af15d",
-    "__GIT_COMMIT__": "b00177a18f3a9cb319ec0fef0e1a0a45c2c69ca2"
+    "__GIT_COMMIT__": "80cf89627003aeff8719dd76e3496d8709164602"
 }

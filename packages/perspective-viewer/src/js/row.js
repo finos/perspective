@@ -103,10 +103,13 @@ class Row extends HTMLElement {
                 }
             }
         });
-        this._filter_operand.addEventListener("focus", () => {
-            selector.evaluate();
-        });
+        selector.evaluate();
         filter_operand.focus();
+        this._filter_operand.addEventListener("focus", () => {
+            if (filter_operand.value.trim().length === 0) {
+                selector.evaluate();
+            }
+        });
         filter_operand.addEventListener("awesomplete-selectcomplete", this._callback);
     }
 

@@ -166,7 +166,7 @@ export class PerspectiveElement extends StateElement {
         this._show_column_selectors();
 
         this.filters = this.getAttribute("filters");
-        await this._debounce_update();
+        await this._debounce_update({force_update: true});
         resolve();
     }
 
@@ -245,7 +245,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view(ignore_size_check = false) {
+    async _new_view({ignore_size_check = false, force_update = false} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -279,7 +279,8 @@ export class PerspectiveElement extends StateElement {
             sort: sort
         };
 
-        if (!this._is_config_changed(config)) {
+        if (!this._is_config_changed(config) && !ignore_size_check && !force_update) {
+            this.removeAttribute("updating");
             return;
         }
 
@@ -371,13 +372,13 @@ export class PerspectiveElement extends StateElement {
 
     // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check) => {
-            this._new_view(ignore_size_check).then(resolve);
+        const _update = _.debounce((resolve, ignore_size_check, force_update) => {
+            this._new_view({ignore_size_check, force_update}).then(resolve);
         }, 0);
-        this._debounce_update = async ({ignore_size_check = false} = {}) => {
+        this._debounce_update = async ({ignore_size_check = false, force_update = false} = {}) => {
             if (this._table) {
                 let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check));
+                await new Promise(resolve => _update(resolve, ignore_size_check, force_update));
                 resolve();
             }
         };
