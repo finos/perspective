@@ -384,9 +384,7 @@ export default function(Module) {
             formatter.addRow(data, row);
         }
 
-        /*         if (this.column_only) {
-            data = formatter.slice(data, 1);
-        } */
+        slice.delete();
 
         return formatter.formatData(data, options.config);
     };
@@ -937,7 +935,7 @@ export default function(Module) {
      * @param {Array<Object>} [config.columns] An array of column names for the
      * output columns.  If none are provided, all columns are output.
      * @param {Object} [config.aggregates] An object, the keys of which are column
-     * names, and their respective values ar ethe aggregates calculations to use
+     * names, and their respective values are the aggregates calculations to use
      * when this view has `row_pivots`.  A column provided to `config.columns`
      * without an aggregate in this object, will use the default aggregate
      * calculation for its type.
@@ -972,7 +970,13 @@ export default function(Module) {
                 }
             } else if (key === "aggregate") {
                 console.warn(`Deprecated: "aggregate" config parameter has been replaced by "aggregates" and "columns"`);
-                config[key] = _config[key];
+                // backwards compatibility: deconstruct `aggregate` into `aggregates` and `columns`
+                config["aggregates"] = {};
+                config["columns"] = [];
+                for (const agg of _config["aggregate"]) {
+                    config["aggregates"][agg["column"]] = agg["op"];
+                    config["columns"].push(agg["column"]);
+                }
             } else if (defaults.CONFIG_VALID_KEYS.indexOf(key) > -1) {
                 config[key] = _config[key];
             } else {
@@ -982,39 +986,13 @@ export default function(Module) {
 
         config.row_pivots = config.row_pivots || [];
         config.column_pivots = config.column_pivots || [];
+        config.aggregates = config.aggregates || {};
         config.filter = config.filter || [];
         config.sort = config.sort || [];
 
-        const aggregates = config.aggregates || {};
-        const schema = this._schema(true);
-
-        if (config.columns === undefined && config.aggregate === undefined) {
+        if (config.columns === undefined) {
+            // If columns are not provided, use all columns
             config.columns = this._columns(true);
-        }
-
-        if (config.columns) {
-            if (config.aggregate) {
-                throw new Error(`Duplicate configuration parameter "aggregate" and "columns"`);
-            }
-            config.aggregate = [];
-            for (const col of config.columns) {
-                config.aggregate.push({column: col, op: aggregates[col] || defaults.AGGREGATE_DEFAULTS[schema[col]]});
-            }
-        } else {
-            config.columns = config.aggregate.map(x => (Array.isArray(x.column) ? x.column[0] : x.column));
-        }
-
-        if (config.sort) {
-            for (const sort of config.sort) {
-                const name = sort[0];
-                if (config.columns.indexOf(name) === -1) {
-                    if (config.column_pivots.indexOf(name) > -1 || config.row_pivots.indexOf(name) > -1) {
-                        config.aggregate.push({column: name, op: "unique"});
-                    } else {
-                        config.aggregate.push({column: name, op: aggregates[name] || defaults.AGGREGATE_DEFAULTS[schema[name]]});
-                    }
-                }
-            }
         }
 
         let name = Math.random() + "";
