@@ -117,15 +117,19 @@ beforeAll(async () => {
     })();
 
     if (results.__GIT_COMMIT__) {
-        const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
-        console.log(
-            `${RESULTS_FILENAME} was last updated ${
-                diff
-                    .toString()
-                    .trim()
-                    .split("\n").length
-            } commits ago ${results.__GIT_COMMIT__}`
-        );
+        try {
+            const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
+            console.log(
+                `${RESULTS_FILENAME} was last updated ${
+                    diff
+                        .toString()
+                        .trim()
+                        .split("\n").length
+                } commits ago ${results.__GIT_COMMIT__}`
+            );
+        } catch (e) {
+            console.log(`${RESULTS_FILENAME} was last updated UNKNOWN commits ago (Can't find commit ${results.__GIT_COMMIT__} in history)`);
+        }
     }
 });
 
