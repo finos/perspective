@@ -205,7 +205,7 @@ class HighchartsElement extends HTMLElement {
     }
 
     render(mode, configs, callee) {
-        if (this._charts.length > 0) {
+        if (this._charts.length > 0 && this._charts.length === configs.length) {
             let idx = 0;
             for (let chart of this._charts) {
                 let config = configs[idx++];
