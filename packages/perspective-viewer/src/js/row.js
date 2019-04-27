@@ -83,10 +83,11 @@ class Row extends HTMLElement {
     choices(choices) {
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");
         let filter_operator = this.shadowRoot.querySelector("#filter_operator");
-        new Awesomplete(filter_operand, {
+        const selector = new Awesomplete(filter_operand, {
             label: this.getAttribute("name"),
             list: choices,
             minChars: 0,
+            autoFirst: true,
             filter: function(text, input) {
                 return Awesomplete.FILTER_CONTAINS(text, input.match(/[^,]*$/)[0]);
             },
@@ -102,6 +103,10 @@ class Row extends HTMLElement {
                 }
             }
         });
+        this._filter_operand.addEventListener("focus", () => {
+            selector.evaluate();
+        });
+        filter_operand.focus();
         filter_operand.addEventListener("awesomplete-selectcomplete", this._callback);
     }
 
@@ -214,6 +219,7 @@ class Row extends HTMLElement {
 
         const debounced_filter = _.debounce(event => this._update_filter(event), 50);
         this._filter_operator.addEventListener("change", () => {
+            this._filter_operand.focus();
             this._filter_operator.style.width = get_text_width(this._filter_operator.value);
             const filter_input = this.shadowRoot.querySelector("#filter_operand");
             filter_input.style.width = get_text_width("" + this._filter_operand.value, 30);

@@ -234,6 +234,17 @@ export class PerspectiveElement extends StateElement {
         return filters;
     }
 
+    _is_config_changed(config) {
+        const plugin_name = this.getAttribute("view");
+        if (_.isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
+            return false;
+        } else {
+            this._previous_config = config;
+            this._previous_plugin_name = plugin_name;
+            return true;
+        }
+    }
+
     async _new_view(ignore_size_check = false) {
         if (!this._table) return;
         this._check_responsive_layout();
@@ -259,20 +270,27 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        if (this._view) {
-            this._view.delete();
-            this._view.remove_update(this._view_updater);
-            this._view.remove_delete();
-            this._view = undefined;
-        }
-        this._view = this._table.view({
+        const config = {
             filter: filters,
             row_pivots: row_pivots,
             column_pivots: column_pivots,
             aggregates: aggregates,
             columns: columns,
             sort: sort
-        });
+        };
+
+        if (!this._is_config_changed(config)) {
+            return;
+        }
+
+        if (this._view) {
+            this._view.delete();
+            this._view.remove_update(this._view_updater);
+            this._view.remove_delete();
+            this._view = undefined;
+        }
+
+        this._view = this._table.view(config);
 
         if (!ignore_size_check) {
             if (await this._warn_render_size_exceeded()) {
