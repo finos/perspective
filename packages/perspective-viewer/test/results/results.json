@@ -19,7 +19,7 @@
     "superstore.html/pivots by computed column.": "8e90e169a32b3bdf9dad2d48fda90127",
     "superstore.html/computed column aggregates should persist.": "53e3aef06e71661932e7656525d302f7",
     "superstore.html/sorts by computed column.": "66c64c177f299f304196099c22ef5d1a",
-    "superstore.html/filters by computed column.": "2e9dab90920424525e87e2f84e03335a",
+    "superstore.html/filters by computed column.": "3546966e5bd269094fd50deb4bb59b1c",
     "blank.html/Handles reloading with a schema.": "fbd26775ecee9cfd29f55214242b727f",
     "superstore.html/pivots by a column.": "44d765f0824ce7655900cbdfd3b8ad18",
     "superstore.html/click on add computed column button opens the UI.": "fcbbc8de5940eec90ca23c825ad92dbd",
@@ -34,5 +34,5 @@
     "superstore.html/saving a duplicate column should fail with error message.": "d9618357228698c5fbe9978b3ed1f668",
     "superstore.html/highlights invalid filter.": "b31284a7b2a401d232ed077ec097a653",
     "superstore.html/replaces all rows.": "7a7265b18d5c94f8f90abcad4f3f7781",
-    "__GIT_COMMIT__": "b00177a18f3a9cb319ec0fef0e1a0a45c2c69ca2"
+    "__GIT_COMMIT__": "80cf89627003aeff8719dd76e3496d8709164602"
 }
