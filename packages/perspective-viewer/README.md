@@ -23,6 +23,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
         * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
         * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
         * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+        * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
         * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
         * [.restore(x)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
         * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -59,6 +60,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
     * [.notifyResize()](#module_perspective-viewer..PerspectiveViewer+notifyResize)
     * [.clone(widget)](#module_perspective-viewer..PerspectiveViewer+clone)
     * [.delete(delete_table)](#module_perspective-viewer..PerspectiveViewer+delete) ⇒ <code>Promise.&lt;boolean&gt;</code>
+    * [.restyleElement()](#module_perspective-viewer..PerspectiveViewer+restyleElement)
     * [.save()](#module_perspective-viewer..PerspectiveViewer+save) ⇒ <code>object</code>
     * [.restore(x)](#module_perspective-viewer..PerspectiveViewer+restore) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.flush()](#module_perspective-viewer..PerspectiveViewer+flush) ⇒ <code>Promise.&lt;void&gt;</code>
@@ -343,6 +345,15 @@ Deletes this element's data and clears it's internal state (but not itsuser sta
 
 - delete_table <code>boolean</code> <code> = true</code> - Should a delete call also be made to theunderlying `table()`.
 
+
+* * *
+
+<a name="module_perspective-viewer..PerspectiveViewer+restyleElement"></a>
+
+#### perspectiveViewer.restyleElement()
+Restyles the elements and to pick up any style changes
+
+**Kind**: instance method of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
 
 * * *
 

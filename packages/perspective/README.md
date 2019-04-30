@@ -509,7 +509,7 @@ to use as [Column Pivots](https://en.wikipedia.org/wiki/Pivot_table#Column_label
     - [.columns] <code>Array.&lt;Object&gt;</code> - An array of column names for the
 output columns.  If none are provided, all columns are output.
     - [.aggregates] <code>Object</code> - An object, the keys of which are column
-names, and their respective values ar ethe aggregates calculations to use
+names, and their respective values are the aggregates calculations to use
 when this view has `row_pivots`.  A column provided to `config.columns`
 without an aggregate in this object, will use the default aggregate
 calculation for its type.

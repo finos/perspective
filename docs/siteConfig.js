@@ -13,7 +13,7 @@ const siteConfig = {
     baseUrl: "/" /* base url for your project */,
 
     projectName: "perspective",
-    organizationName: "FINOS Data Visualization Program",
+    organizationName: "finos",
 
     headerLinks: [
         {doc: "md/installation", label: "Docs"},
