@@ -7,5 +7,5 @@
  *
  */
 
-const {WebSocketHost} = require("@jpmorganchase/perspective");
+const {WebSocketHost} = require("@finos/perspective");
 new WebSocketHost({assets: [__dirname]});

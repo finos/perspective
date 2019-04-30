@@ -11,9 +11,9 @@ import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base
 
 import {PERSPECTIVE_VERSION} from './version';
 
-import perspective from "@jpmorganchase/perspective";
-import * as wasm from "arraybuffer-loader!@jpmorganchase/perspective/build/psp.async.wasm";
-import * as worker from "file-worker-loader?inline=true!@jpmorganchase/perspective/build/perspective.wasm.worker.js";
+import perspective from "@finos/perspective";
+import * as wasm from "arraybuffer-loader!@finos/perspective/build/psp.async.wasm";
+import * as worker from "file-worker-loader?inline=true!@finos/perspective/build/perspective.wasm.worker.js";
 
 if (perspective) {
     perspective.override({wasm, worker});
@@ -21,7 +21,7 @@ if (perspective) {
     console.warn('Perspective was undefined - wasm load errors may occur');
 }
 
-import {PerspectiveWidget} from '@jpmorganchase/perspective-phosphor/src/ts/index';
+import {PerspectiveWidget} from '@finos/perspective-phosphor/src/ts/index';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
@@ -60,10 +60,10 @@ class PerspectiveModel extends DOMWidgetModel {
     }
 
     static model_name = 'PerspectiveModel';
-    static model_module = '@jpmorganchase/perspective-jupyterlab';
+    static model_module = '@finos/perspective-jupyterlab';
     static model_module_version = PERSPECTIVE_VERSION;
     static view_name = 'PerspectiveView';
-    static view_module = '@jpmorganchase/perspective-jupyterlab';
+    static view_module = '@finos/perspective-jupyterlab';
     static view_module_version = PERSPECTIVE_VERSION;
 }
 

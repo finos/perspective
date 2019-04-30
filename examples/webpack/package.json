@@ -12,13 +12,13 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.23",
-        "@jpmorganchase/perspective-viewer": "^0.2.23",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.23",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.23"
+        "@finos/perspective": "^0.2.23",
+        "@finos/perspective-viewer": "^0.2.23",
+        "@finos/perspective-viewer-highcharts": "^0.2.23",
+        "@finos/perspective-viewer-hypergrid": "^0.2.23"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.21",
+        "@finos/perspective-webpack-plugin": "^0.2.21",
         "css-loader": "^0.28.7",
         "http-server": "^0.11.1",
         "less-loader": "^4.0.5",

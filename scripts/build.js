@@ -137,7 +137,7 @@ function compileCPP(packageName) {
 function lerna() {
     let cmd = `lerna run build --loglevel silent --stream `;
     if (process.env.PACKAGE) {
-        cmd += `--scope=@jpmorganchase/${process.env.PACKAGE} `;
+        cmd += `--scope=@finos/${process.env.PACKAGE} `;
     }
     execute(cmd);
 }
