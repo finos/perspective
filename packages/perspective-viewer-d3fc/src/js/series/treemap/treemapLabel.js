@@ -9,20 +9,14 @@
 
 import {select} from "d3";
 import {isElementOverlapping} from "../../utils/utils";
-import {calcWidth, calcHeight} from "./treemapSeries";
-
-export const drawLabels = (nodes, treemapLevel, crossValues) => {
-    nodes
-        .selectAll("text")
-        .attr("x", d => d.x0 + calcWidth(d) / 2)
-        .attr("y", d => d.y0 + calcHeight(d) / 2)
-        .attr("class", d => textLevelHelper(d, treemapLevel, crossValues));
-    nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
-    preventTextCollisions(nodes);
-};
 
 export const toggleLabels = (nodes, treemapLevel, crossValues) => {
-    nodes.selectAll("text").attr("class", d => textLevelHelper(d, treemapLevel, crossValues));
+    nodes
+        .selectAll("text")
+        .attr("dx", 0)
+        .attr("dy", 0)
+        .attr("class", d => textLevelHelper(d, treemapLevel, crossValues));
+    nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
     preventTextCollisions(nodes);
 };
 
@@ -48,7 +42,7 @@ export const preventTextCollisions = nodes => {
         });
 };
 
-export const centerText = node => select(node).attr("dx", select(node).attr("dx") - node.getBoundingClientRect().width / 2);
+const centerText = node => select(node).attr("dx", select(node).attr("dx") - node.getBoundingClientRect().width / 2);
 
 const textLevelHelper = (d, treemapLevel, crossValues) => {
     if (!crossValues.filter(x => x !== "").every(x => d.crossValue.split("|").includes(x))) return textVisability.zero;

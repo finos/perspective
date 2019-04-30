@@ -20,6 +20,7 @@ function treemap(container, settings) {
         console.warn("Unable to render a chart in the absence of any groups.");
         return;
     }
+    if (!settings.treemaps) settings.treemaps = {};
 
     const data = treeData(settings);
     const color = treeColor(settings, data.map(d => d.data));
@@ -49,9 +50,10 @@ function treemap(container, settings) {
             const title = treemapSvg.select("text.title").text(split);
             title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
+            if (!settings.treemaps[split]) settings.treemaps[split] = {};
+
             treemapSeries()
-                .settings(settings)
-                .split(split)
+                .settings(settings.treemaps[split])
                 .data(data)
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
                 .color(color)(treemapSvg);

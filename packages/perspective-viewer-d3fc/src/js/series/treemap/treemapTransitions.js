@@ -12,22 +12,47 @@ import {calcWidth, calcHeight} from "./treemapSeries";
 import {toggleLabels, preventTextCollisions} from "./treemapLabel";
 import {calculateSubTreeMap} from "./treemapLevelCalculation";
 
-export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
-    settings.treemapLevel = d.depth;
-    const crossValues = d.crossValue.split("|");
+export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
+    if (settings.treemapLevel > 0) {
+        const crossValues = rootNode.crossValue.split("|");
+        executeTransition(rootNode, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, 0, crossValues, parentCtrls, 1);
 
-    if (!d.mapLevel[settings.treemapLevel] || !d.mapLevel[settings.treemapLevel].visible) {
-        calculateSubTreeMap(d, crossValues, nodesMerge, settings, rootNode);
+        settings.treemapRoute.slice(1, settings.treemapRoute.length).forEach(cv => {
+            const d = nodesMerge.filter(d => d.crossValue === cv).datum();
+            const crossValues = d.crossValue.split("|");
+            calculateSubTreeMap(d, crossValues, nodesMerge, d.depth, rootNode);
+            executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, d.depth, crossValues, parentCtrls, 1);
+        });
+    }
+}
+
+export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
+    if (settings.treemapLevel < d.depth) {
+        settings.treemapRoute.push(d.crossValue);
+    } else {
+        settings.treemapRoute.pop();
     }
 
+    settings.treemapLevel = d.depth;
+
+    const crossValues = d.crossValue.split("|");
+    if (!d.mapLevel[settings.treemapLevel] || !d.mapLevel[settings.treemapLevel].levelRoot) {
+        calculateSubTreeMap(d, crossValues, nodesMerge, settings.treemapLevel, rootNode);
+    }
+
+    executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, settings.treemapLevel, crossValues, parentCtrls);
+}
+
+function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration) {
+    const transitionDuration = !!duration ? duration : 350;
     const parent = d.parent;
 
     const t = treemapSvg
         .transition()
-        .duration(350)
+        .duration(transitionDuration)
         .ease(d3.easeCubicOut);
 
-    nodesMerge.each(d => (d.target = d.mapLevel[settings.treemapLevel]));
+    nodesMerge.each(d => (d.target = d.mapLevel[treemapLevel]));
 
     rects
         .transition(t)
@@ -63,7 +88,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
         .styleTween("opacity", d => () => d.current.opacity)
         .attrTween("pointer-events", d => () => (d.target.visible ? "all" : "none"));
 
-    toggleLabels(nodesMerge, settings.treemapLevel, crossValues);
+    toggleLabels(nodesMerge, treemapLevel, crossValues);
 
     if (parent) {
         parentCtrls
