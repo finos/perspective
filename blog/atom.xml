@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://jpmorganchase.github.io//perspective/blog</id>
+    <id>https://perspective.finos.org//blog</id>
     <title>Perspective Blog</title>
     <updated>2018-10-08T06:00:00Z</updated>
     <generator>Feed for Node.js</generator>
-    <link rel="alternate" href="https://jpmorganchase.github.io//perspective/blog"/>
+    <link rel="alternate" href="https://perspective.finos.org//blog"/>
     <subtitle>The best place to stay up-to-date with the latest Perspective news and events.</subtitle>
-    <logo>https://jpmorganchase.github.io//perspective/img/perspective2.svg</logo>
+    <logo>https://perspective.finos.org//img/perspective2.svg</logo>
     <rights>Copyright © 2019 Perspective Authors</rights>
     <entry>
         <title type="html"><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
-        <id>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</id>
-        <link href="https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html">
+        <id>https://perspective.finos.org//blog/2018/10/08/nyc-citibike-analysis-1.html</id>
+        <link href="https://perspective.finos.org//blog/2018/10/08/nyc-citibike-analysis-1.html">
         </link>
         <updated>2018-10-08T06:00:00Z</updated>
         <summary type="html"><![CDATA[<p>There are many well-known perks to living in New York City - the world class
@@ -29,8 +29,8 @@ seek to answer one burning question: Where are all of New York's
     </entry>
     <entry>
         <title type="html"><![CDATA[0.2.0 Release]]></title>
-        <id>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</id>
-        <link href="https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html">
+        <id>https://perspective.finos.org//blog/2018/10/01/v0.2.0-release.html</id>
+        <link href="https://perspective.finos.org//blog/2018/10/01/v0.2.0-release.html">
         </link>
         <updated>2018-10-01T06:00:00Z</updated>
         <summary type="html"><![CDATA[<p>After nine months of tireless development and over 700 commits from 18

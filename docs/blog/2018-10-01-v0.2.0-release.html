@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>0.2.0 Release · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;After nine months of tireless development and over 700 commits from 18&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="0.2.0 Release · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="&lt;p&gt;After nine months of tireless development and over 700 commits from 18&lt;/p&gt;
+"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai.min.css"/><link rel="alternate" type="application/atom+xml" href="https://perspective.finos.org/blog/atom.xml" title="Perspective Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://perspective.finos.org/blog/feed.xml" title="Perspective Blog RSS Feed"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><link rel="stylesheet" href="css/material.dark.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective/build/perspective.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js"></script><script type="text/javascript" src="js/animation.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><img class="logo" src="/img/perspective2.svg" alt="Perspective"/><h2 class="headerTitleWithLogo">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/md/installation.html" target="_self">Docs</a></li><li class=""><a href="/docs/obj/perspective-viewer.html" target="_self">API</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">0.2.0 Release</h1></header><article><div><span><p>After nine months of tireless development and over 700 commits from 18
+exceptionally talented <a href="https://github.com/jpmorganchase/perspective/graphs/contributors">contributors</a>,
+we are pleased to announce the v0.2.0 release of Perspective!  With this release
+comes a cavalcade of exciting features, performance optimizations, bug fixes,
+and <strike>easter eggs</strike> usability improvements.</p>
+<p>Get started quickly with our <a href="https://jpmorganchase.github.io/perspective/docs/installation.html">new and improved documentation</a>,
+or try out some <a href="https://jsfiddle.net/user/texodus/fiddles/">live examples on JSFiddle</a>!</p>
+<!--truncate-->
+<style>.post img {width:300px;float:left;padding-right: 30px;padding-bottom:20px;display:inline-block}img:</style>
+<h2><a class="anchor" aria-hidden="true" id="user-experience"></a><a href="#user-experience" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>User Experience</h2>
+<p><img src="../../../../img/2018-10-01-v0.2.0-release/jupyter.png"></img></p>
+<p>Perspective now features a first class &amp; completely symmetric
+<a href="https://jupyterlab.readthedocs.io/en/latest/">JupyterLab</a> widget, via the
+<a href="https://github.com/timkpaine/perspective-python">perspective-python</a>
+package, available via pip.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/theme.png"></img></p>
+<p>The new <a href="https://material.io/design/">Material</a> inspired design is clear, functional and
+trendy.  Comes in both <a href="https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0/build/theme-material.html">Day</a>,
+and a <a href="https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0/build/theme-material-dark.html">Night</a>
+flavor for after market hours (be sure to <a href="../../../../img/2018-10-01-v0.2.0-release/sunglasses.png">wear sunglasses!</a>).</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/interface.png"></img></p>
+<p>Perspective's User Interface has seen readability, usability and functionality
+changes, including better control labels, column remove buttons, sort direction
+indicators, filter operator <code>select</code>, auto-complete of filter terms based on data,
+smart parsing filter dates;  just to name a few!</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/computed.png"></img></p>
+<p>Computed Columns allow you to create time-bucketed series, categorize and group
+values by function, combine columns through simple mathematical operations,
+duplicate columns for calculating multiple aggregates, and
+much, much more!</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/remote.png"></img></p>
+<p>Run Perspective without your data ever leaving the server!  With Perspective
+running in Remote mode, the entire User Experience can be virtualized to the
+server, rather than downloading your data to the client, substantially improving
+performance for enormous datasets.  All in just a few lines of code!</p>
+<p><br style="clear:both;" /></p>
+<h3><a class="anchor" aria-hidden="true" id="highcharts-plugin"></a><a href="#highcharts-plugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Highcharts Plugin</h3>
+<p><img src="../../../../img/2018-10-01-v0.2.0-release/hierarchial.png"></img></p>
+<p>Hierarchial chart types: <code>heatmap</code>, <code>treemap</code> and <code>sunburst</code>.  See the
+structure of your pivotted data more clearly than ever before!</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/subchart.png"></img></p>
+<p>Sub-charts are rendered for <code>column-pivot</code> categories on <code>treemap</code> and
+<code>sunburst</code> chart types, allowing you to separately chart any data category.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/boost.png"></img></p>
+<p>Substantial performance improvements for most chart types, which will
+now also take advantage of <a href="">Highcharts boost mode</a> where available, allow
+visualization of substantially larger datasets.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2018-10-01-v0.2.0-release/axis.png"></img></p>
+<p>Category (string) and Date/time Axis types are available on all charts, where
+they will be applied automatically based on your data's <i>schema</i>.</p>
+<p><br style="clear:both;" /></p>
+<h3><a class="anchor" aria-hidden="true" id="hypergrid-plugin"></a><a href="#hypergrid-plugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Hypergrid Plugin</h3>
+<p>In addition to a new <i>lazy mode</i> which only loads data visible in the
+viewport, substantially improving render performance for huge datasets,
+Perspective's Hypergrid plugin received one of the most requested features
+ever:</p>
+<p><img src="../../../../img/2018-10-01-v0.2.0-release/expandcollapse.png"></img></p>
+<p>By popular demand, collapse rows alone or in groups, and even
+<a href="https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0/build/streaming.html">across real-time updates</a>.</p>
+<p><br style="clear:both;" /></p>
+<ul>
+<li><p>(major) Bug fixes</p>
+<ul>
+<li>Better input type inference, better automated output formatting (dates).</li>
+<li>Better support for Apache Arrow, for the ultimate in load-time performance.</li>
+<li>More consistent use of <code>promise</code> for asynchronous APIs.</li>
+</ul></li>
+<li><p>New APIs</p>
+<ul>
+<li>Clipboard, config save/restore, export, reset, row delete <code>&lt;perspective-viewer&gt;</code> APIs.</li>
+<li><code>to_columns()</code>, <code>to_csv()</code> output methods.</li>
+<li>Partial updates and <i>unset</i> cell semantics.</li>
+<li><code>weighted_mean</code> aggregate, 'in' filter operator.</li>
+<li><code>WorkerHost()</code> for powering <code>&lt;perspective-viewer&gt;</code> via a remote Node.js process.</li>
+<li>Lifecycle events.</li>
+</ul></li>
+<li><p>Structural improvements</p>
+<ul>
+<li>Deprecation of the <code>perspective-common</code> and <code>perspective-examples</code> modules.</li>
+<li>A new top-level <code>examples/</code> directory containing full example projects.</li>
+<li>Flattened Web Assembly asset strucutre for a smaller module, simpler
+project integration and easier hosting.</li>
+</ul></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#user-experience">User Experience</a><ul class="toc-headings"><li><a href="#highcharts-plugin">Highcharts Plugin</a></li><li><a href="#hypergrid-plugin">Hypergrid Plugin</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"><img src="/img/perspective2.svg" alt="Perspective" width="66" height="58"/></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>

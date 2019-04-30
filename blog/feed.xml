@@ -2,21 +2,21 @@
 <rss version="2.0">
     <channel>
         <title>Perspective Blog</title>
-        <link>https://jpmorganchase.github.io//perspective/blog</link>
+        <link>https://perspective.finos.org//blog</link>
         <description>The best place to stay up-to-date with the latest Perspective news and events.</description>
         <lastBuildDate>Mon, 08 Oct 2018 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
             <title>Perspective Blog</title>
-            <url>https://jpmorganchase.github.io//perspective/img/perspective2.svg</url>
-            <link>https://jpmorganchase.github.io//perspective/blog</link>
+            <url>https://perspective.finos.org//img/perspective2.svg</url>
+            <link>https://perspective.finos.org//blog</link>
         </image>
         <copyright>Copyright © 2019 Perspective Authors</copyright>
         <item>
             <title><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
-            <link>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</link>
-            <guid>https://jpmorganchase.github.io//perspective/blog/2018/10/08/nyc-citibike-analysis-1.html</guid>
+            <link>https://perspective.finos.org//blog/2018/10/08/nyc-citibike-analysis-1.html</link>
+            <guid>https://perspective.finos.org//blog/2018/10/08/nyc-citibike-analysis-1.html</guid>
             <pubDate>Mon, 08 Oct 2018 06:00:00 GMT</pubDate>
             <description><![CDATA[<p>There are many well-known perks to living in New York City - the world class
 restaurants, museums, two mediocre NFL teams (taken together, that's one pretty
@@ -29,8 +29,8 @@ seek to answer one burning question: Where are all of New York's
         </item>
         <item>
             <title><![CDATA[0.2.0 Release]]></title>
-            <link>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</link>
-            <guid>https://jpmorganchase.github.io//perspective/blog/2018/10/01/v0.2.0-release.html</guid>
+            <link>https://perspective.finos.org//blog/2018/10/01/v0.2.0-release.html</link>
+            <guid>https://perspective.finos.org//blog/2018/10/01/v0.2.0-release.html</guid>
             <pubDate>Mon, 01 Oct 2018 06:00:00 GMT</pubDate>
             <description><![CDATA[<p>After nine months of tireless development and over 700 commits from 18
 exceptionally talented <a href="https://github.com/jpmorganchase/perspective/graphs/contributors">contributors</a>,
