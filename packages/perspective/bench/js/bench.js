@@ -16,7 +16,28 @@ const LIMIT = args.indexOf("--limit");
 
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
-const UNPKG_VERSIONS = ["0.2.21", "0.2.20", "0.2.18", "0.2.16", "0.2.15", "0.2.12", "0.2.11", "0.2.10", "0.2.9", "0.2.8", "0.2.7", "0.2.6", "0.2.5", "0.2.4", "0.2.3", "0.2.2", "0.2.1", "0.2.0"];
+const UNPKG_VERSIONS = [
+    "0.2.22",
+    "0.2.21",
+    "0.2.20",
+    "0.2.18",
+    "0.2.16",
+    "0.2.15",
+    "0.2.12",
+    "0.2.11",
+    "0.2.10",
+    "0.2.9",
+    "0.2.8",
+    "0.2.7",
+    "0.2.6",
+    "0.2.5",
+    "0.2.4",
+    "0.2.3",
+    "0.2.2",
+    "0.2.1",
+    "0.2.0"
+];
+
 const UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${UNPKG_VERSIONS}/build/perspective.js`;
 
 const OLD_FORMAT_UNPKG_VERSIONS = ["0.2.0-beta.3"];

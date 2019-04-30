@@ -17,7 +17,7 @@ const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLine
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 const {cloneDeep} = require("lodash");
 
-import {bindTemplate} from "@jpmorganchase/perspective-viewer/cjs/js/utils.js";
+import {bindTemplate} from "@finos/perspective-viewer/cjs/js/utils.js";
 
 const TEMPLATE = require("../html/hypergrid.html");
 

@@ -1,5 +1,5 @@
 
-declare module '@jpmorganchase/perspective' {
+declare module '@finos/perspective' {
     /**** object types ****/
     export enum TypeNames {
         STRING = 'string',
@@ -155,16 +155,16 @@ declare module '@jpmorganchase/perspective' {
 
 
 
-declare module "@jpmorganchase/perspective/build/psp.async.wasm" {
+declare module "@finos/perspective/build/psp.async.wasm" {
     const impl: ArrayBuffer;
     export default impl;
 }
 
-declare module "@jpmorganchase/perspective/build/psp.sync.wasm" {
+declare module "@finos/perspective/build/psp.sync.wasm" {
     const impl: ArrayBuffer;
     export default impl;
 }
 
-declare module "@jpmorganchase/perspective/build/perspective.wasm.worker.js" {}
-declare module "@jpmorganchase/perspective/build/perspective.asmjs.worker.js" {}
+declare module "@finos/perspective/build/perspective.wasm.worker.js" {}
+declare module "@finos/perspective/build/perspective.asmjs.worker.js" {}
 

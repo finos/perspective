@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost, table} = require("@jpmorganchase/perspective");
+const {WebSocketHost, table} = require("@finos/perspective/build/perspective.node.js");
 const {read_stdin, open_browser} = require("./utils.js");
 const fs = require("fs");
 const path = require("path");

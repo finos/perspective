@@ -13,7 +13,7 @@ possible, but some things might not work the way you're used to!
 
 Perspective is organized as a [monorepo](https://github.com/babel/babel/blob/master/doc/design/monorepo.md),
 and uses [lerna](https://lernajs.io/) to manage dependencies. The
-`@jpmorganchase/perspective` modules has an additional, unmanaged dependency
+`@finos/perspective` modules has an additional, unmanaged dependency
 however; the [Emscripten](https://github.com/kripken/emscripten) compiler, which
 is used to compile the core C++ engine to WebAssembly, and must be installed
 independently.
@@ -97,7 +97,7 @@ Whichever method you choose, the build script respects a few environment flags:
 -   `PSP_DEBUG` will run a debug build of the C++ source.
 -   `PSP_NO_MINIFY` will skip Javascript minification.
 -   `PSP_CPU_COUNT` will set the concurrency limit for the build.
--   `PACKAGE` will restrict the build to only specific `@jpmorganchase/` packages.
+-   `PACKAGE` will restrict the build to only specific `@finos/` packages.
 
 ## Testing
 
@@ -115,7 +115,7 @@ yarn test -t 'button test (A|B)'
 ``` 
 
 The test suite is composed of two sections:  a Node.js test which asserts
-behavior of the `@jpmorganchase/perspective` library, and a suite of 
+behavior of the `@finos/perspective` library, and a suite of 
 [Puppeteer](https://developers.google.com/web/tools/puppeteer/) tests which 
 assert the behavior of the rest of the UI facing packages.  For the latter,
 you'll need Docker installed, as these tests use a Puppeteer and Chrome build

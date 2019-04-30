@@ -7,10 +7,10 @@
  *
  */
 
-const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const utils = require("@finos/perspective-viewer/test/js/utils.js");
 const path = require("path");
 
-const mutation_tests = require("@jpmorganchase/perspective-viewer/test/js/mutation_tests.js");
+const mutation_tests = require("@finos/perspective-viewer/test/js/mutation_tests.js");
 
 utils.with_server({}, () => {
     describe.page(

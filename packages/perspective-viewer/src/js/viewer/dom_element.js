@@ -8,7 +8,7 @@
  */
 
 import detectIE from "detectie";
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@finos/perspective";
 import {undrag} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 
