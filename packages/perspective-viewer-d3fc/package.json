@@ -2,7 +2,21 @@
     "name": "@jpmorganchase/perspective-viewer-d3fc",
     "version": "0.2.23",
     "description": "Perspective.js",
-    "main": "cjs/js/plugin/plugin.js",
+    "main": "./cjs/js/index.js",
+    "module": "./cjs/js/index.js",
+    "browser": {
+        "area": "./cjs/js/index/area.js",
+        "bar": "./cjs/js/index/bar.js",
+        "candlestick": "./cjs/js/index/candlestick.js",
+        "column": "./cjs/js/index/column.js",
+        "heatmap": "./cjs/js/index/heatmap.js",
+        "line": "./cjs/js/index/line.js",
+        "ohlc": "./cjs/js/index/ohlc.js",
+        "sunburst": "./cjs/js/index/sunburst.js",
+        "xy-scatter": "./cjs/js/index/xy-scatter.js",
+        "y-scatter": "./cjs/js/index/y-scatter.js"
+    },
+    "unpkg": "./build/d3fc.plugin.js",
     "files": [
         "build/**/*",
         "cjs/**/*",

@@ -70,7 +70,7 @@ function lineChart(container, settings) {
 
 lineChart.plugin = {
     type: "d3_y_line",
-    name: "[d3fc] Y Line Chart",
+    name: "Y Line Chart",
     max_size: 25000
 };
 

@@ -22,6 +22,17 @@ export const renderers = new class {
      *     mode : The selection mode - may be "toggle" or "select".
      */
     registerPlugin(name, plugin) {
+        if (RENDERERS[name]) {
+            throw new Error(`A perspective-viewer plugin "${name}" has already been registered`);
+        }
+        for (const id in RENDERERS) {
+            const old_plugin = RENDERERS[id];
+            if (old_plugin && old_plugin.name === plugin.name) {
+                console.warn(`Conflicting plugin name "${plugin.name}", qualifying with id`);
+                old_plugin.name = `${old_plugin.name} [${id}]`;
+                plugin.name = `${plugin.name} [${name}]`;
+            }
+        }
         RENDERERS[name] = plugin;
     }
 

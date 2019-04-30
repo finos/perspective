@@ -9,8 +9,8 @@
 
 import Highcharts from "highcharts";
 
-import style from "../less/highcharts.less";
-import template from "../html/highcharts.html";
+import style from "../../less/highcharts.less";
+import template from "../../html/highcharts.html";
 
 import {COLORS_10, COLORS_20} from "./externals.js";
 import {color_axis} from "./color_axis.js";

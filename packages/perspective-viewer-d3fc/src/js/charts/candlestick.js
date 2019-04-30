@@ -12,7 +12,7 @@ import ohlcCandle from "./ohlcCandle";
 const candlestick = ohlcCandle(seriesCanvasCandlestick);
 candlestick.plugin = {
     type: "d3_candlestick",
-    name: "[d3fc] Candlestick Chart",
+    name: "Candlestick Chart",
     max_size: 25000,
     initial: {
         type: "number",

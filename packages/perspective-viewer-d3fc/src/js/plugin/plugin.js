@@ -21,15 +21,20 @@ const DEFAULT_PLUGIN_SETTINGS = {
     selectMode: "select"
 };
 
-charts.forEach(chart => {
-    global.registerPlugin(chart.plugin.type, {
-        ...DEFAULT_PLUGIN_SETTINGS,
-        ...chart.plugin,
-        create: drawChart(chart),
-        resize: resizeChart,
-        delete: deleteChart
+export function register(...plugins) {
+    plugins = new Set(plugins.length > 0 ? plugins : charts.map(chart => chart.plugin.type));
+    charts.forEach(chart => {
+        if (plugins.has(chart.plugin.type)) {
+            global.registerPlugin(chart.plugin.type, {
+                ...DEFAULT_PLUGIN_SETTINGS,
+                ...chart.plugin,
+                create: drawChart(chart),
+                resize: resizeChart,
+                delete: deleteChart
+            });
+        }
     });
-});
+}
 
 function drawChart(chart) {
     return async function(el, view, task) {

@@ -19,7 +19,7 @@ utils.with_server({}, () => {
     describe.page(
         "sunburst.html",
         () => {
-            simple_tests.default();
+            simple_tests.default("skip");
         },
         {reload_page: false, root: path.join(__dirname, "..", "..", "..")}
     );
