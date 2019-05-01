@@ -524,6 +524,11 @@ namespace binding {
         return t.to_double();
     }
     template <>
+    std::uint8_t
+    get_scalar<std::uint8_t>(t_tscalar& t) {
+        return static_cast<std::uint8_t>(t.to_int64());
+    }
+    template <>
     std::int8_t
     get_scalar<std::int8_t>(t_tscalar& t) {
         return static_cast<std::int8_t>(t.to_int64());
@@ -578,6 +583,45 @@ namespace binding {
 
         val arr = val::global("Array").new_();
         arr.call<void>("push", typed_array<O>.new_(vector_to_typed_array(vals)["buffer"]));
+        arr.call<void>("push", nullCount);
+        arr.call<void>("push", vector_to_typed_array(validityMap));
+        return arr;
+    }
+
+    template <>
+    val
+    col_to_typed_array<bool>(std::vector<t_tscalar> data, bool column_pivot_only) {
+        int start_idx = column_pivot_only ? 1 : 0;
+        int data_size = data.size() - start_idx;
+
+        std::vector<std::int8_t> vals;
+        vals.reserve(data.size());
+
+        // Validity map must have a length that is a multiple of 64
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::uint32_t> validityMap;
+        validityMap.resize(nullSize);
+
+        for (int idx = 0; idx < data.size() - start_idx; idx++) {
+            t_tscalar scalar = data[idx + start_idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                // get boolean and write into array
+                std::int8_t val = get_scalar<std::int8_t>(scalar);
+                vals.push_back(val);
+                // bit mask based on value in array
+                vals[idx / 8] |= val << (idx % 8);
+                // Mark the slot as non-null (valid)
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                vals.push_back({});
+                nullCount++;
+            }
+        }
+
+        val arr = val::global("Array").new_();
+        arr.call<void>(
+            "push", typed_array<std::int8_t>.new_(vector_to_typed_array(vals)["buffer"]));
         arr.call<void>("push", nullCount);
         arr.call<void>("push", vector_to_typed_array(validityMap));
         return arr;
@@ -645,8 +689,7 @@ namespace binding {
         auto dtype = ctx->get_column_dtype(idx);
 
         switch (dtype) {
-            case DTYPE_INT8:
-            case DTYPE_BOOL: {
+            case DTYPE_INT8: {
                 return col_to_typed_array<std::int8_t>(data, column_pivot_only);
             } break;
             case DTYPE_INT16: {
@@ -668,6 +711,9 @@ namespace binding {
             } break;
             case DTYPE_FLOAT64: {
                 return col_to_typed_array<double>(data, column_pivot_only);
+            } break;
+            case DTYPE_BOOL: {
+                return col_to_typed_array<bool>(data, column_pivot_only);
             } break;
             case DTYPE_STR: {
                 return col_to_typed_array<std::string>(data, column_pivot_only);
@@ -790,28 +836,13 @@ namespace binding {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            /**
-             * FIXME:
-             *
-             * Arrow BoolVectors are packed by `to_arrow` correctly, but are parsed incorrectly
-             * in this block.
-             *
-             * Using vecFromTypedArray, they are parsed and set correctly.
-             *
-             * Pre-generated arrows are parsed correctly by this block, but incorrectly by the
-             * vecFromTypedArray logic.
-             *
-             * Unpacking the arrow using ObservableHQ shows that booleans are packed into a
-             * BoolVector.
-             *
-             * Applying this logic to the Observable notebook gives us [21, 0, 0, 0, 0, 0, 0,
-             * 0], which is the same error that happens here when we incorrectly parse.
-             *
-             * Also an arrow of a million rows is barely being handled, but using an external
-             * arrow with booleans shows that this logic IS accessing them correctly, I think.
-             */
+            // bools are stored using a bit mask
             val data = accessor["values"];
-            arrow::vecFromTypedArray(data, col->get_nth<bool>(0), nrows * 2);
+            for (auto i = 0; i < nrows; ++i) {
+                std::uint8_t elem = data[i / 8].as<std::uint8_t>();
+                bool v = elem & (1 << (i % 8));
+                col->set_nth(i, v);
+            }
         } else {
             for (auto i = 0; i < nrows; ++i) {
                 val item = accessor.call<val>("marshal", cidx, i, type);

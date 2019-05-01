@@ -120,7 +120,6 @@ export default function(Module) {
                 cdata: loader.cdata.map(y => y.chunks[x])
             });
         }
-        console.log(chunks);
         return chunks;
     }
 
