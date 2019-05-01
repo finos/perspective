@@ -42,6 +42,7 @@
                 & svg {
                     width: 100%;
                     height: 100%;
+                    transform: translate(0, -27px);
                 }
 
                 & path {
@@ -55,12 +56,16 @@
                     pointer-events: none;
                     fill: var(--d3fc-treedata--labels, rgb(51, 51, 51));
                 }
+
+                & div.title-container {
+                    margin-top: 5px;
+                }
             }
         }
 
         &.d3_treemap {
             padding: 0;
-            
+
             & .treemap-container {
                 position: relative;
             }
@@ -101,7 +106,7 @@
                     opacity: 0;
                     &:hover {
                         fill-opacity: 0.1;
-                        opacity: 1.0;
+                        opacity: 1;
                         fill: var(--d3fc-treedata--hover-highlight, black);
                     }
                 }
@@ -119,19 +124,19 @@
 
                 & .top {
                     font-size: 15px;
-                    font-weight:bold;
+                    font-weight: bold;
                     z-index: 5;
                     pointer-events: none;
                 }
                 & .mid {
                     font-size: 10px;
-                    font-weight:bold;
+                    font-weight: bold;
                     opacity: 0.7;
                     z-index: 4;
                 }
                 & .lower {
                     font-size: 10px;
-                    font-weight:bold;
+                    font-weight: bold;
                     opacity: 0;
                     z-index: 4;
                 }
@@ -157,7 +162,6 @@
                 }
             }
         }
-
 
         & .x-label {
             height: 1.2em !important;
@@ -379,7 +383,7 @@
             }
         }
     }
-    
+
     div.tooltip {
         position: absolute;
         text-align: left;

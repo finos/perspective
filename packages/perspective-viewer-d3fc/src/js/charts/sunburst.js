@@ -56,7 +56,7 @@ function sunburst(container, settings) {
             const svgNode = this.parentNode;
             const {width, height} = svgNode.getBoundingClientRect();
 
-            const radius = (Math.min(width, height) - 40) / 6;
+            const radius = (Math.min(width, height) - 120) / 6;
             sunburstSeries()
                 .settings(settings)
                 .split(split)
