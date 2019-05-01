@@ -9,7 +9,7 @@
 
 import * as d3 from "d3";
 import {calcWidth, calcHeight} from "./treemapSeries";
-import {toggleLabels, preventTextCollisions} from "./treemapLabel";
+import {toggleLabels, preventTextCollisions, lockTextOpacity, unlockTextOpacity, textOpacity, selectVisibleNodes, adjustLabelsThatOverflow} from "./treemapLabel";
 import {calculateSubTreeMap} from "./treemapLevelCalculation";
 
 export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
@@ -45,6 +45,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
 
 function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration) {
     const transitionDuration = !!duration ? duration : 350;
+    const textFadeTransitionDuration = 350;
     const parent = d.parent;
 
     const t = treemapSvg
@@ -76,7 +77,9 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         .attrTween("x", d => () => d.current.x0 + calcWidth(d.current) / 2)
         .attrTween("y", d => () => d.current.y0 + calcHeight(d.current) / 2)
         .end()
-        .then(() => preventTextCollisions(nodesMerge));
+        .then(() => preventTextCollisions(visibleLabelNodes))
+        .then(() => adjustLabelsThatOverflow(visibleLabelNodes))
+        .then(() => fadeTextTransition(labels, treemapSvg, textFadeTransitionDuration));
 
     // hide hidden svgs
     nodesMerge
@@ -88,7 +91,9 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         .styleTween("opacity", d => () => d.current.opacity)
         .attrTween("pointer-events", d => () => (d.target.visible ? "all" : "none"));
 
+    labels.each((_, i, labels) => lockTextOpacity(labels[i]));
     toggleLabels(nodesMerge, treemapLevel, crossValues);
+    const visibleLabelNodes = selectVisibleNodes(nodesMerge);
 
     if (parent) {
         parentCtrls
@@ -99,3 +104,27 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         parentCtrls.hide(true)();
     }
 }
+
+function fadeTextTransition(labels, treemapSvg, duration) {
+    const transitionDuration = !!duration ? duration : 350;
+
+    const t = treemapSvg
+        .transition()
+        .duration(transitionDuration)
+        .ease(d3.easeCubicOut);
+
+    labels
+        .transition(t)
+        .filter(d => d.target.visible)
+        .tween("data", (d, i, labels) => {
+            const label = labels[i];
+            const interpolation = d3.interpolate(lockedOpacity(d), targetOpacity(label));
+            return t => (d.current = interpolation(t));
+        })
+        .styleTween("opacity", d => () => d.current)
+        .end()
+        .then(() => labels.each((_, i, labels) => unlockTextOpacity(labels[i])));
+}
+
+const lockedOpacity = d => d.target.textLockedAt.opacity;
+const targetOpacity = d => textOpacity[d3.select(d).attr("class")];

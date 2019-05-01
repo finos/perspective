@@ -8,8 +8,9 @@
  */
 
 import {calcWidth, calcHeight} from "./treemapSeries";
-import {hierarchy} from "d3";
+import {hierarchy, select} from "d3";
 import treemapLayout from "./treemapLayout";
+import {textOpacity} from "./treemapLabel";
 
 const includesAllCrossValues = (d, crossValues) => crossValues.every(val => d.crossValue.split("|").includes(val));
 
@@ -20,6 +21,8 @@ export function calculateSubTreeMap(d, crossValues, nodesMerge, treemapLevel, ro
     d.mapLevel[treemapLevel].levelRoot = true;
     // Use the pre-existing d3 mechanism to calculate the subtree for the viewable area.
     recalculateVisibleSubTreeCoordinates(d, rootNode.x1 - rootNode.x0, rootNode.y1 - rootNode.y0, treemapLevel);
+
+    calculateTextOpacities(nodesMerge, treemapLevel);
 }
 
 export function calculateRootLevelMap(nodesMerge, rootNode) {
@@ -35,6 +38,7 @@ export function calculateRootLevelMap(nodesMerge, rootNode) {
         };
     });
     rootNode.mapLevel[0].levelRoot = true;
+    calculateTextOpacities(nodesMerge, 0);
 }
 
 function approximateAttributesForAllNodes(d, crossValues, nodesMerge, treemapLevel, rootNode) {
@@ -48,6 +52,7 @@ function approximateAttributesForAllNodes(d, crossValues, nodesMerge, treemapLev
         const width = calcWidth(d) * dimensionMultiplier.width;
         const height = calcHeight(d) * dimensionMultiplier.height;
         const visible = includesAllCrossValues(d, crossValues) && d.data.name != crossValues[treemapLevel - 1];
+
         d.mapLevel[treemapLevel] = {
             x0,
             x1: width + x0,
@@ -57,6 +62,7 @@ function approximateAttributesForAllNodes(d, crossValues, nodesMerge, treemapLev
             opacity: visible ? 1 : 0
         };
     });
+    d.mapLevel[treemapLevel].levelRoot = true;
 }
 
 function recalculateVisibleSubTreeCoordinates(subTreeRoot, treeRootWidth, treeRootHeight, treemapLevel) {
@@ -71,5 +77,14 @@ function recalculateVisibleSubTreeCoordinates(subTreeRoot, treeRootWidth, treeRo
         descendants[i].mapLevel[treemapLevel].x1 = dummiedDescendants[i].x1;
         descendants[i].mapLevel[treemapLevel].y0 = dummiedDescendants[i].y0;
         descendants[i].mapLevel[treemapLevel].y1 = dummiedDescendants[i].y1;
+    });
+}
+
+function calculateTextOpacities(nodesMerge, treemapLevel) {
+    nodesMerge.selectAll("text").each((_, i, nodes) => {
+        const text = select(nodes[i]);
+        const d = select(nodes[i]).datum();
+        const textVis = text.attr("class");
+        d.mapLevel[treemapLevel].textLockedAt = {opacity: textOpacity[textVis]};
     });
 }

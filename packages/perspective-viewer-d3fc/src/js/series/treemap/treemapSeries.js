@@ -7,7 +7,7 @@
  *
  */
 
-import {toggleLabels} from "./treemapLabel";
+import {toggleLabels, adjustLabelsThatOverflow, selectVisibleNodes} from "./treemapLabel";
 import treemapLayout from "./treemapLayout";
 import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
@@ -61,6 +61,7 @@ export function treemapSeries() {
             .text(d => d.data.name);
 
         toggleLabels(nodesMerge, settings.treemapLevel, []);
+        adjustLabelsThatOverflow(selectVisibleNodes(nodesMerge));
 
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
