@@ -188,6 +188,38 @@
             stroke: var(--d3fc-axis--lines, rgb(180, 210, 225));
         }
 
+        & .splitter-label {
+            display: inline-block;
+            margin: 0 10px;
+            cursor: pointer;
+
+            &::after {
+                margin-left: 5px;
+                color: var(--d3fc-axis--lines, rgb(180, 210, 225));
+            }
+
+            &:hover {
+                &::after {
+                    color: var(--d3fc-axis--ticks, rgb(80, 80, 80));
+                }
+            }
+
+            &.disabled {
+                &::after {
+                    color: rgba(80, 80, 80, 0.3);
+                }
+                cursor: default;
+            }
+        }
+
+        & .y-label-container .splitter-label::after {
+            content: "\1f847"
+        }
+
+        & .y2-label-container .splitter-label::after {
+            content: "\1f845"
+        }
+
         &.d3_y_bar .y-axis path,
         &.d3_y_line .y-axis path,
         &.d3_y_area .y-axis path,
