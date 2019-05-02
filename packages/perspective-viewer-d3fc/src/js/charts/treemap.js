@@ -33,22 +33,17 @@ function treemap(container, settings) {
         container.call(legend);
     }
 
-    const treemapContainer = treemapGrid.chartContainer();
     const treemapEnter = treemapGrid.chartEnter();
     const treemapDiv = treemapGrid.chartDiv();
+    const treemapTitle = treemapGrid.chartTitle();
 
-    treemapContainer.append("text").attr("class", "parent");
+    treemapTitle.each((d, i, nodes) => d3.select(nodes[i]).text(d.split));
     treemapEnter
         .merge(treemapDiv)
         .select("svg")
         .select("g.treemap")
         .each(function({split, data}) {
             const treemapSvg = d3.select(this);
-            const svgNode = this.parentNode;
-            const {height} = svgNode.getBoundingClientRect();
-
-            const title = treemapSvg.select("text.title").text(split);
-            title.attr("transform", `translate(0, ${-(height / 2 - 5)})`);
 
             if (!settings.treemaps[split]) settings.treemaps[split] = {};
 
