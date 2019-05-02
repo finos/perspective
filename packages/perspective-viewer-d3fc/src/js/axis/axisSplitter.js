@@ -9,15 +9,20 @@
 import {splitterLabels} from "./splitterLabels";
 
 export const axisSplitter = (settings, sourceData) => {
-    // splitMainValues is an array of main-value indexes (numbers) to put into the alt-axis
-    const splitMainValues = settings.splitMainValues || [];
-    const altValue = (value, index) => splitMainValues.includes(index);
+    let color;
 
-    const haveSplit = settings["mainValues"].some(altValue);
+    // splitMainValues is an array of main-value names to put into the alt-axis
+    const splitMainValues = settings.splitMainValues || [];
+    const altValue = name => {
+        const split = name.split("|");
+        return splitMainValues.includes(split[split.length - 1]);
+    };
+
+    const haveSplit = settings["mainValues"].some(m => altValue(m.name));
 
     // Split the data into main and alt displays
-    const data = haveSplit ? sourceData.map(d => d.filter((v, i) => !altValue(v, i))) : sourceData;
-    const altData = haveSplit ? sourceData.map(d => d.filter(altValue)) : null;
+    const data = haveSplit ? sourceData.map(d => d.filter(v => !altValue(v.key))) : sourceData;
+    const altData = haveSplit ? sourceData.map(d => d.filter(v => altValue(v.key))) : null;
 
     // Renderer to show the special controls for moving between axes
     const splitter = selection => {
@@ -27,15 +32,25 @@ export const axisSplitter = (settings, sourceData) => {
             index: i,
             name: v.name
         }));
-        const mainLabels = labelsInfo.filter((v, i) => !altValue(v, i));
-        const altLabels = labelsInfo.filter(altValue);
+        const mainLabels = labelsInfo.filter(v => !altValue(v.name));
+        const altLabels = labelsInfo.filter(v => altValue(v.name));
 
-        selection.select(".y-label-container>.y-label").call(splitterLabels(settings).labels(mainLabels));
+        const labeller = () => splitterLabels(settings).color(color);
+
+        selection.select(".y-label-container>.y-label").call(labeller().labels(mainLabels));
         selection.select(".y2-label-container>.y-label").call(
-            splitterLabels(settings)
+            labeller()
                 .labels(altLabels)
                 .alt(true)
         );
+    };
+
+    splitter.color = (...args) => {
+        if (!args.length) {
+            return color;
+        }
+        color = args[0];
+        return splitter;
     };
 
     splitter.haveSplit = () => haveSplit;

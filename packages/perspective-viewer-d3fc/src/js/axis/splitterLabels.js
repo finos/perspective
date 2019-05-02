@@ -8,27 +8,32 @@
  */
 import * as fc from "d3fc";
 import {getChartElement} from "../plugin/root";
+import {withoutOpacity} from "../series/seriesColors.js";
 
 // Render a set of labels with the little left/right arrows for moving between axes
 export const splitterLabels = settings => {
     let labels = [];
     let alt = false;
+    let color;
 
     const _render = selection => {
         selection.text("");
 
         const labelDataJoin = fc.dataJoin("span", "splitter-label").key(d => d);
+
         const disabled = !alt && labels.length === 1;
+        const coloured = color && settings.splitValues.length === 0;
         labelDataJoin(selection, labels)
             .classed("disabled", disabled)
             .text(d => d.name)
+            .style("color", d => (coloured ? withoutOpacity(color(d.name)) : undefined))
             .on("click", d => {
                 if (disabled) return;
 
                 if (alt) {
-                    settings.splitMainValues = settings.splitMainValues.filter(v => v !== d.index);
+                    settings.splitMainValues = settings.splitMainValues.filter(v => v != d.name);
                 } else {
-                    settings.splitMainValues = [d.index].concat(settings.splitMainValues || []);
+                    settings.splitMainValues = [d.name].concat(settings.splitMainValues || []);
                 }
 
                 redrawChart(selection);
@@ -53,6 +58,14 @@ export const splitterLabels = settings => {
             return alt;
         }
         alt = args[0];
+        return _render;
+    };
+
+    _render.color = (...args) => {
+        if (!args.length) {
+            return color;
+        }
+        color = args[0];
         return _render;
     };
     return _render;

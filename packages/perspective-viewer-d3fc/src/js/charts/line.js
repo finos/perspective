@@ -48,7 +48,7 @@ function lineChart(container, settings) {
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data);
+    const splitter = axisSplitter(settings, data).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
