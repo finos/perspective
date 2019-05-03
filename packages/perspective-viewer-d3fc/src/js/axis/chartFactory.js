@@ -25,12 +25,13 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         .xDomain(xAxis.domain)
         .xLabel(xAxis.label)
         .xAxisHeight(xAxis.size)
-        .xDecorate(xAxis.decorate)
         .yDomain(yAxis.domain)
         .yLabel(yAxis.label)
         .yAxisWidth(yAxis.size)
-        .yDecorate(yAxis.decorate)
         .yOrient("left");
+
+    if (xAxis.decorate) chart.xDecorate(xAxis.decorate);
+    if (yAxis.decorate) chart.yDecorate(yAxis.decorate);
 
     // Padding defaults can be overridden
     chart.xPaddingInner && chart.xPaddingInner(1);
@@ -54,7 +55,9 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         return chart;
     };
 
+    const oldDecorate = chart.decorate();
     chart.decorate((container, data) => {
+        oldDecorate(container, data);
         if (!axisSplitter) return;
 
         if (axisSplitter.haveSplit()) {
