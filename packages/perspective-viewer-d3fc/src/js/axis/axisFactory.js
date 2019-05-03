@@ -50,6 +50,7 @@ export const axisFactory = settings => {
         return {
             scale: axis.scale(),
             domain,
+            domainFunction,
             labelFunction: axis.labelFunction,
             component: {
                 bottom: component.bottom,

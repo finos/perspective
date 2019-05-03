@@ -22,6 +22,7 @@ const resizeEvent = "resize";
 export function resizableComponent() {
     let handleWidthPx = 9;
     let zIndex = 3;
+    let settings = null;
     const minDimensionsPx = {height: 100, width: 100};
     const maxDimensionsPx = {height: null, width: null};
 
@@ -45,6 +46,11 @@ export function resizableComponent() {
         };
 
         const containerNode = container.node();
+        if (settings.legend) {
+            containerNode.style.height = settings.legend.height;
+            containerNode.style.width = settings.legend.width;
+        }
+
         const containerRect = containerNode.getBoundingClientRect();
         const handles = container
             .append("svg")
@@ -98,6 +104,7 @@ export function resizableComponent() {
             const offset = enforceDistToParallelBarConstraints(enforceContainerBoundaries(leftHandle.node(), event.x, 0).x, handles, "width", (x, y) => x - y);
             containerNode.style.left = `${containerNode.offsetLeft + offset}px`;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
+            updateSettings();
             return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
@@ -105,6 +112,7 @@ export function resizableComponent() {
             const offset = -enforceDistToParallelBarConstraints(enforceContainerBoundaries(rightHandle.node(), event.dx, 0).x, handles, "width", (x, y) => x + y);
             if (pointerFallenBehindAbsoluteCoordinates(offset, "x", rightHandle, event)) return false;
             containerNode.style.width = `${containerNode.offsetWidth - offset}px`;
+            updateSettings();
             return resizeAndRelocateHandles(rightHandle, offset, "width", "x");
         }
 
@@ -112,6 +120,7 @@ export function resizableComponent() {
             const offset = enforceDistToParallelBarConstraints(enforceContainerBoundaries(topHandle.node(), 0, event.y).y, handles, "height", (x, y) => x - y);
             containerNode.style.top = `${containerNode.offsetTop + offset}px`;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
+            updateSettings();
             return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
         }
 
@@ -119,7 +128,18 @@ export function resizableComponent() {
             const offset = -enforceDistToParallelBarConstraints(enforceContainerBoundaries(bottomHandle.node(), 0, event.dy).y, handles, "height", (x, y) => x + y);
             if (pointerFallenBehindAbsoluteCoordinates(offset, "y", bottomHandle, event)) return false;
             containerNode.style.height = `${containerNode.offsetHeight - offset}px`;
+            updateSettings();
             return resizeAndRelocateHandles(bottomHandle, offset, "height", "y");
+        }
+
+        function updateSettings() {
+            const dimensions = {
+                top: containerNode.style.top,
+                left: containerNode.style.left,
+                height: containerNode.style.height,
+                width: containerNode.style.width
+            };
+            settings.legend = {...settings.legend, ...dimensions};
         }
 
         function resizeAndRelocateHandles(handle, offset, dimension, axis) {
@@ -152,6 +172,14 @@ export function resizableComponent() {
 
     resizable.zIndex = input => {
         zIndex = input;
+        return resizable;
+    };
+
+    resizable.settings = (...args) => {
+        if (!args.length) {
+            return settings;
+        }
+        settings = args[0];
         return resizable;
     };
 

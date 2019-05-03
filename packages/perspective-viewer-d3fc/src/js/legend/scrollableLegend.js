@@ -23,21 +23,22 @@ export default (fromLegend, settings) => {
     let domain = [];
     let pageCount = 1;
     let pageSize;
-    let pageIndex = settings.legend ? settings.legend.pageIndex : 0;
+    let pageIndex = settings.legend && settings.legend.pageIndex ? settings.legend.pageIndex : 0;
     let decorate = () => {};
-    let draggable = draggableComponent();
+    let draggable = draggableComponent().settings(settings);
     let resizable;
 
     const scrollableLegend = selection => {
         domain = legend.scale().domain();
-        render(selection);
 
         resizable = resizableComponent()
+            .settings(settings)
             .maxHeight(domain.length * averageCellHeightPx + controlsHeightPx)
             .on("resize", () => render(selection));
 
         resizable(selection);
         draggable(selection);
+        render(selection);
     };
 
     const render = selection => {
@@ -92,7 +93,7 @@ export default (fromLegend, settings) => {
 
     const setPage = index => {
         pageIndex = index;
-        settings.legend = {pageIndex};
+        settings.legend = {...settings.legend, pageIndex};
     };
 
     const cellFilter = () => (_, i) => i >= pageSize * pageIndex && i < pageSize * pageIndex + pageSize;

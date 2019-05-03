@@ -42,18 +42,15 @@ function drawChart(chart) {
         if (task.cancelled) {
             return;
         }
-        const aggregates = config.columns;
-        const row_pivots = config.row_pivots;
-        const col_pivots = config.column_pivots;
-        const filter = config.filter;
+        const {columns, row_pivots, column_pivots, filter} = config;
 
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
-            mainValues: aggregates.map(a => ({name: a, type: schema[a]})),
-            splitValues: col_pivots.map(r => ({name: r, type: tschema[r]})),
+            mainValues: columns.map(a => ({name: a, type: schema[a]})),
+            splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
             data: filtered.map(dataMap)
         };
@@ -62,7 +59,7 @@ function drawChart(chart) {
     };
 }
 
-function createOrUpdateChart(div, chart, settings) {
+function getOrCreatePluginElement() {
     let perspective_d3fc_element;
     this[PRIVATE] = this[PRIVATE] || {};
     if (!this[PRIVATE].chart) {
@@ -70,6 +67,11 @@ function createOrUpdateChart(div, chart, settings) {
     } else {
         perspective_d3fc_element = this[PRIVATE].chart;
     }
+    return perspective_d3fc_element;
+}
+
+function createOrUpdateChart(div, chart, settings) {
+    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
 
     if (!document.body.contains(perspective_d3fc_element)) {
         div.innerHTML = "";
@@ -91,6 +93,18 @@ function deleteChart() {
         const perspective_d3fc_element = this[PRIVATE].chart;
         perspective_d3fc_element.delete();
     }
+}
+
+function save() {
+    if (this[PRIVATE] && this[PRIVATE].chart) {
+        const perspective_d3fc_element = this[PRIVATE].chart;
+        return perspective_d3fc_element.getSettings();
+    }
+}
+
+function restore(config) {
+    const perspective_d3fc_element = getOrCreatePluginElement.call(this);
+    perspective_d3fc_element.setSettings(config);
 }
 
 if (!Element.prototype.matches) {
