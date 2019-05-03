@@ -30,7 +30,9 @@ export function register(...plugins) {
                 ...chart.plugin,
                 create: drawChart(chart),
                 resize: resizeChart,
-                delete: deleteChart
+                delete: deleteChart,
+                save,
+                restore
             });
         }
     });
