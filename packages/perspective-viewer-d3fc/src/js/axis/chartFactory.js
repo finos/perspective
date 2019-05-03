@@ -82,7 +82,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 .style("transform", "rotate(-90deg)");
 
             const y2Scale = altAxis.scale.domain(altAxis.domain);
-            const yAxisComponent = d3.axisRight(y2Scale);
+            const yAxisComponent = fc.axisRight(y2Scale);
 
             // Render the axis
             y2AxisDataJoin(container, ["right"])
