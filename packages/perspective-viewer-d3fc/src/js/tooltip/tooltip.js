@@ -103,7 +103,7 @@ function showTooltip(containerNode, node, tooltipDiv, centered) {
         .duration(200)
         .style("opacity", 0.9);
 
-    if (centered) left = centerTip(tooltipDiv, containerRect);
+    if (centered) [left, top] = centerTip(tooltipDiv, containerRect);
 
     shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top);
 }
@@ -115,7 +115,10 @@ function centerTip(tooltipDiv, containerRect) {
     const newLeft = tooltipDivRect.left - leftAdjust - containerRect.left;
     tooltipDiv.style("left", `${newLeft}px`);
 
-    return newLeft;
+    const topAdjust = tooltipDivRect.height / 2;
+    const newTop = tooltipDivRect.top - topAdjust - containerRect.top;
+    tooltipDiv.style("top", `${newTop}px`);
+    return [newLeft, newTop];
 }
 
 function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
