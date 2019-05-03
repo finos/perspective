@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost, table} = require("@jpmorganchase/perspective/build/perspective.node.js");
+const {WebSocketHost, table} = require("@finos/perspective/build/perspective.node.js");
 const {read_stdin, open_browser} = require("./utils.js");
 const fs = require("fs");
 const path = require("path");
@@ -66,15 +66,18 @@ async function convert(filename, options) {
  * @param {*} options
  */
 async function host(filename, options) {
-    const files = path.join(__dirname, "html");
-    const server = new WebSocketHost({assets: [files], port: options.port});
+    let files = [path.join(__dirname, "html")];
+    if (options.assets) {
+        files = [options.assets, ...files];
+    }
+    const server = new WebSocketHost({assets: files, port: options.port});
     let file;
     if (filename) {
         file = fs.readFileSync(filename).toString();
     } else {
         file = await read_stdin();
     }
-    server.open("data_source_one", table(file));
+    server.host_table("data_source_one", table(file));
     if (options.open) {
         open_browser(options.port);
     }
@@ -96,6 +99,7 @@ program
     .command("host [filename]")
     .description("Host a file on a local Websocket/HTTP server using a server-side Perspective.  Reads from STDIN if no filename is provided")
     .option("-p, --port <port>", "Which port to bind to.", x => parseInt(x), 8080)
+    .option("-a, --assets <path>", "Host from a working directory")
     .option("-o, --open", "Open a browser automagically.")
     .action(host);
 

@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const utils = require("@finos/perspective-viewer/test/js/utils.js");
 const path = require("path");
 
 async function capture_update(page, viewer, body) {

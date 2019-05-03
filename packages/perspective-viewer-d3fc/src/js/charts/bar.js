@@ -66,7 +66,7 @@ function barChart(container, settings) {
 }
 barChart.plugin = {
     type: "d3_x_bar",
-    name: "[d3fc] X Bar Chart",
+    name: "X Bar Chart",
     max_size: 25000
 };
 

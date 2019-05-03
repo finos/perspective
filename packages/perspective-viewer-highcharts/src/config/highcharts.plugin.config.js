@@ -1,8 +1,8 @@
 const path = require("path");
-const common = require("@jpmorganchase/perspective/src/config/common.config.js");
+const common = require("@finos/perspective/src/config/common.config.js");
 
 module.exports = Object.assign({}, common(), {
-    entry: "./cjs/js/highcharts.js",
+    entry: "./cjs/js/index.js",
     output: {
         filename: "highcharts.plugin.js",
         library: "perspective-view-highcharts",

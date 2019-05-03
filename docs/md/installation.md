@@ -11,14 +11,14 @@ have access to the `.worker.*.js` and `.wasm` assets in addition to the
 bundled scripts themselves. These are downloaded asynchronously at runtime
 after detecting whether or not WebAssembly is supported by your browser. The
 assets can be found in the `build/` directory of the
-`@jpmorganchase/perspective` and `@jpmorganchase/perspective-viewer` packages.
+`@finos/perspective` and `@finos/perspective-viewer` packages.
 
 When importing from NPM modules, you should use
-`@jpmorganchase/perspective-webpack-plugin` to manage the `.worker.*.js` and 
+`@finos/perspective-webpack-plugin` to manage the `.worker.*.js` and 
 `.wasm` assets for you. A sample config:
 
 ```javascript
-const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
     entry: "./in.js",
@@ -35,21 +35,22 @@ the contents of a package's `build/` in your application's build script, or
 otherwise making sure these directories are visible to your web server, e.g.:
 
 ```javascript
-cp -r node_modules/@jpmorganchase/perspective/build my_build/assets/
+cp -r node_modules/@finos/perspective/build my_build/assets/
 ```
 
 ## From CDN
 
 By far the easiest way to get started with Perspective in the browser, the full
 library can be used directly from
-[unpkg.com](https://unpkg.com/@jpmorganchase/perspective-examples/build/perspective.view.js)
+[unpkg.com](https://unpkg.com/@finos/perspective-examples/build/perspective.view.js)
 CDN by simply adding these scripts to your `.html`'s `<head>` section:
 
 ```html
-<script src="https://unpkg.com/@jpmorganchase/perspective/build/perspective.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer/build/perspective.view.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script>
-<script src="https://unpkg.com/@jpmorganchase/perspective-viewer-highcharts/build/highcharts.plugin.js"></script>
+<script src="https://unpkg.com/@finos/perspective"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-hypergrid"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
+<script src="https://unpkg.com/@finos/perspective-viewer-highcharts"></script>
 ```
 
 Ultimately, for production you'll want Perspective incorporated directly into your
@@ -62,15 +63,15 @@ For using Perspective from Node.js, or as a depedency in a `package.json` based
 via NPM
 
 ```bash
-yarn @jpmorganchase/perspective-viewer
-yarn @jpmorganchase/perspective-viewer-highcharts
-yarn @jpmorganchase/perspective-viewer-hypergrid
+yarn add @finos/perspective-viewer
+yarn add @finos/perspective-viewer-d3fc
+yarn add @finos/perspective-viewer-hypergrid
 ```
 
 ## From source
 
 For hackers, contributors, and masochists, Perspective can be installed directly
-from source available on [Github](https://github.com/jpmorganchase/perspective).
+from source available on [Github](https://github.com/finos/perspective).
 Doing so is quite a bit more complex than a standard pure Javascript NPM
 package, so if you're not looking to hack on Perspective itself, you are likely
 better off choosing the CDN or NPM methods above. See the
@@ -85,7 +86,7 @@ package.  `perspective-python` implements mostly the same API as
 `<perspective-viewer>`, and works with static `pandas.DataFrame` objects as well
 as streaming incremental updates via the `update()` method (as in Javascript).
 
-<img src="https://jpmorganchase.github.io/perspective/img/jupyterlab.png"></img>
+<img src="https://perspective.finos.org/img/jupyterlab.png"></img>
 
 You'll need to install both to utilize Perspective from Python in Jupyterlab.
 Assuming you've already installed the latter 3, you can install the Perspective 
@@ -95,6 +96,6 @@ plugin as below, or follow the install from source instructions from the
 
 ```bash
 pip install perspective-python
-jupyter labextension install @jpmorganchase/perspective-jupyterlab
+jupyter labextension install @finos/perspective-jupyterlab
 ```
 

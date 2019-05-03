@@ -1,11 +1,11 @@
 # Perspective-python
-Python APIs for [perspective](https://github.com/jpmorganchase/perspective) front end
+Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 
 [![PyPI](https://img.shields.io/pypi/v/perspective-python.svg)](https://pypi.python.org/pypi/perspective-python)
 [![PyPI](https://img.shields.io/pypi/l/perspective-python.svg)](https://pypi.python.org/pypi/perspective-python)
 [![Docs](https://img.shields.io/readthedocs/perspective-python.svg)](https://perspective-python.readthedocs.io)
-[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/jpmorganchase/perspective)
+[![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/finos/perspective)
 
 
 Python Build
@@ -14,7 +14,7 @@ Python Build
 
 C++ Build
 
-[![Build Status 2](https://travis-ci.org/timkpaine/perspective-python.svg?branch=master)](https://travis-ci.org/jpmorganchase/perspective)
+[![Build Status 2](https://travis-ci.org/timkpaine/perspective-python.svg?branch=master)](https://travis-ci.org/finos/perspective)
 
 # Package
 This package consists of two mutually-exclusive libraries:
@@ -35,7 +35,7 @@ To install the C++ engine from pip:
 
 To install the JupyterLab extension:
 
-`jupyter labextension install @jpmorganchase/perspective-jupyterlab`
+`jupyter labextension install @finos/perspective-jupyterlab`
 
 
 ## Getting Started

@@ -10,7 +10,7 @@ takes care of:
 Example:
 
 ```javascript
-const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 module.exports = {
     entry: "./in.js",

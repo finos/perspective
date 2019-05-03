@@ -84,6 +84,13 @@ function view(worker, table_name, config) {
     bindall(this);
 }
 
+function proxy_view(worker, name) {
+    this._worker = worker;
+    this._name = name;
+}
+
+proxy_view.prototype = view.prototype;
+
 view.prototype.get_config = async_queue("get_config");
 
 view.prototype.to_json = async_queue("to_json");
@@ -251,8 +258,12 @@ worker.prototype.send = function() {
     throw new Error("post() not implemented");
 };
 
-worker.prototype.open = function(name) {
+worker.prototype.open_table = function(name) {
     return new proxy_table(this, name);
+};
+
+worker.prototype.open_view = function(name) {
+    return new proxy_view(this, name);
 };
 
 let _initialized = false;

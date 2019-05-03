@@ -17,7 +17,7 @@ const cons = require("console");
 const private_console = new cons.Console(process.stdout, process.stderr);
 const cp = require("child_process");
 
-const {WebSocketHost} = require("@jpmorganchase/perspective");
+const {WebSocketHost} = require("@finos/perspective");
 
 const IS_LOCAL_PUPPETEER = fs.existsSync(path.join(__dirname, "..", "..", "..", "..", "node_modules", "puppeteer"));
 const LOCAL_RESULTS_FILENAME = `results.${process.platform}.json`;
@@ -117,15 +117,19 @@ beforeAll(async () => {
     })();
 
     if (results.__GIT_COMMIT__) {
-        const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
-        console.log(
-            `${RESULTS_FILENAME} was last updated ${
-                diff
-                    .toString()
-                    .trim()
-                    .split("\n").length
-            } commits ago ${results.__GIT_COMMIT__}`
-        );
+        try {
+            const diff = execSync(`git rev-list ${results.__GIT_COMMIT__}..HEAD`);
+            console.log(
+                `${RESULTS_FILENAME} was last updated ${
+                    diff
+                        .toString()
+                        .trim()
+                        .split("\n").length
+                } commits ago ${results.__GIT_COMMIT__}`
+            );
+        } catch (e) {
+            console.log(`${RESULTS_FILENAME} was last updated UNKNOWN commits ago (Can't find commit ${results.__GIT_COMMIT__} in history)`);
+        }
     }
 });
 

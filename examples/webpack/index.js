@@ -7,12 +7,12 @@
  *
  */
 
-const perspective = require("@jpmorganchase/perspective").default;
+const perspective = require("@finos/perspective").default;
 require("./index.less");
 
-require("@jpmorganchase/perspective-viewer");
-require("@jpmorganchase/perspective-viewer-hypergrid");
-require("@jpmorganchase/perspective-viewer-highcharts");
+require("@finos/perspective-viewer");
+require("@finos/perspective-viewer-hypergrid");
+require("@finos/perspective-viewer-highcharts");
 
 window.addEventListener("WebComponentsReady", () => {
     const worker = perspective.worker();

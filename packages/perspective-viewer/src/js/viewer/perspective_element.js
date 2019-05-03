@@ -9,7 +9,7 @@
 
 import _ from "lodash";
 
-import perspective from "@jpmorganchase/perspective";
+import perspective from "@finos/perspective";
 import {CancelTask} from "./cancel_task.js";
 import {COMPUTATIONS} from "../computed_column.js";
 
@@ -166,7 +166,7 @@ export class PerspectiveElement extends StateElement {
         this._show_column_selectors();
 
         this.filters = this.getAttribute("filters");
-        await this._debounce_update();
+        await this._debounce_update({force_update: true});
         resolve();
     }
 
@@ -234,7 +234,18 @@ export class PerspectiveElement extends StateElement {
         return filters;
     }
 
-    async _new_view(ignore_size_check = false) {
+    _is_config_changed(config) {
+        const plugin_name = this.getAttribute("view");
+        if (_.isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
+            return false;
+        } else {
+            this._previous_config = config;
+            this._previous_plugin_name = plugin_name;
+            return true;
+        }
+    }
+
+    async _new_view({ignore_size_check = false, force_update = false} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -259,20 +270,28 @@ export class PerspectiveElement extends StateElement {
             }
         }
 
-        if (this._view) {
-            this._view.delete();
-            this._view.remove_update(this._view_updater);
-            this._view.remove_delete();
-            this._view = undefined;
-        }
-        this._view = this._table.view({
+        const config = {
             filter: filters,
             row_pivots: row_pivots,
             column_pivots: column_pivots,
             aggregates: aggregates,
             columns: columns,
             sort: sort
-        });
+        };
+
+        if (!this._is_config_changed(config) && !ignore_size_check && !force_update) {
+            this.removeAttribute("updating");
+            return;
+        }
+
+        if (this._view) {
+            this._view.delete();
+            this._view.remove_update(this._view_updater);
+            this._view.remove_delete();
+            this._view = undefined;
+        }
+
+        this._view = this._table.view(config);
 
         if (!ignore_size_check) {
             if (await this._warn_render_size_exceeded()) {
@@ -303,6 +322,7 @@ export class PerspectiveElement extends StateElement {
             task.cancel();
             if (this._render_count === 0) {
                 this.removeAttribute("updating");
+                this.dispatchEvent(new Event("perspective-update-complete"));
             }
         }
     }
@@ -312,7 +332,14 @@ export class PerspectiveElement extends StateElement {
         return () => this.setAttribute("render_time", performance.now() - t);
     }
 
-    _clear_state() {
+    _restyle_plugin() {
+        if (this._plugin.styleElement) {
+            const task = (this._task = new CancelTask());
+            this._plugin.styleElement.call(this, this._datavis, this._view, task);
+        }
+    }
+
+    _clear_state(clear_table = true) {
         if (this._task) {
             this._task.cancel();
         }
@@ -324,7 +351,7 @@ export class PerspectiveElement extends StateElement {
             view.remove_update(this._view_updater);
             view.remove_delete();
         }
-        if (this._table) {
+        if (this._table && clear_table) {
             const table = this._table;
             this._table = undefined;
             if (table._owner_viewer && table._owner_viewer === this) {
@@ -345,13 +372,13 @@ export class PerspectiveElement extends StateElement {
 
     // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check) => {
-            this._new_view(ignore_size_check).then(resolve);
+        const _update = _.debounce((resolve, ignore_size_check, force_update) => {
+            this._new_view({ignore_size_check, force_update}).then(resolve);
         }, 0);
-        this._debounce_update = async ({ignore_size_check = false} = {}) => {
+        this._debounce_update = async ({ignore_size_check = false, force_update = false} = {}) => {
             if (this._table) {
                 let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check));
+                await new Promise(resolve => _update(resolve, ignore_size_check, force_update));
                 resolve();
             }
         };

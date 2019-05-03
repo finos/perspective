@@ -33,6 +33,19 @@ var data_8 = {
 
 module.exports = perspective => {
     describe("Aggregate", function() {
+        it("old `aggregate` syntax is backwards compatible", async function() {
+            var table = perspective.table(data);
+            var view = table.view({
+                aggregate: [{column: "x", op: "sum"}],
+                row_pivots: ["z"]
+            });
+            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
+            let result = await view.to_json();
+            expect(result).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("['z'], sum", async function() {
             var table = perspective.table(data);
             var view = table.view({
@@ -46,20 +59,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("['z'], sum with new column syntax", async function() {
-            var table = perspective.table(data);
-            var view = table.view({
-                row_pivots: ["z"],
-                columns: ["x"]
-            });
-            var answer = [{__ROW_PATH__: [], x: 10}, {__ROW_PATH__: [false], x: 6}, {__ROW_PATH__: [true], x: 4}];
-            let result = await view.to_json();
-            expect(result).toEqual(answer);
-            view.delete();
-            table.delete();
-        });
-
-        it("['z'], weighted_mean", async function() {
+        it.skip("['z'], weighted_mean", async function() {
             var table = perspective.table(data2);
             var view = table.view({
                 row_pivots: ["z"],
@@ -144,7 +144,7 @@ module.exports = perspective => {
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
-            expect(answer).toEqual(result);
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -158,7 +158,7 @@ module.exports = perspective => {
             });
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
-            expect(answer).toEqual(result);
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -173,7 +173,7 @@ module.exports = perspective => {
             });
             var answer = [{__ROW_PATH__: [], x: 2.5}, {__ROW_PATH__: [1], x: 2}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
-            expect(answer).toEqual(result);
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -186,7 +186,7 @@ module.exports = perspective => {
             });
             var answer = [{__ROW_PATH__: [], x: 9}, {__ROW_PATH__: [1], x: 5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
-            expect(answer).toEqual(result);
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -201,7 +201,7 @@ module.exports = perspective => {
             });
             var answer = [{__ROW_PATH__: [], x: 3}, {__ROW_PATH__: [1], x: 2.5}, {__ROW_PATH__: [2], x: 4}];
             let result = await view.to_json();
-            expect(answer).toEqual(result);
+            expect(result).toEqual(answer);
             view.delete();
             table.delete();
         });
@@ -245,7 +245,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("weighted mean", async function() {
+        it.skip("weighted mean", async function() {
             var table = perspective.table([{a: "a", x: 1, y: 200}, {a: "a", x: 2, y: 100}, {a: "a", x: 3, y: null}]);
             var view = table.view({
                 row_pivots: ["a"],

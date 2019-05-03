@@ -1,6 +1,6 @@
 {
-    "name": "@jpmorganchase/perspective-viewer",
-    "version": "0.2.22",
+    "name": "@finos/perspective-viewer",
+    "version": "0.3.0-rc.1",
     "description": "Perspective.js",
     "main": "cjs/js/viewer.js",
     "browser": "cjs/js/viewer.js",
@@ -44,13 +44,13 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/jpmorganchase/perspective"
+        "url": "https://github.com/finos/perspective"
     },
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@jpmorganchase/perspective": "^0.2.22",
+        "@finos/perspective": "^0.3.0-rc.1",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
@@ -60,6 +60,6 @@
         "mobile-drag-drop": "^2.2.0"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.21"
+        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1"
     }
 }

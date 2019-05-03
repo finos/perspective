@@ -138,7 +138,7 @@ export function default_config(aggregates, mode) {
     const that = this;
     const config = this._config;
 
-    const axis_titles = get_axis_titles(config.aggregate);
+    const axis_titles = get_axis_titles(config.aggregates);
     const pivot_titles = get_pivot_titles(config.row_pivots, config.column_pivots);
 
     const is_empty = str => str.replace(/\s/g, "") == "";
@@ -315,13 +315,7 @@ export function default_config(aggregates, mode) {
 }
 
 function get_axis_titles(aggs) {
-    let titles = [];
-
-    for (let i = 0; i < aggs.length; i++) {
-        let axis_title = aggs[i].column;
-        titles.push(axis_title);
-    }
-    return titles;
+    return Object.keys(aggs);
 }
 
 function get_pivot_titles(row_pivots, column_pivots) {

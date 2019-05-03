@@ -44,42 +44,55 @@ namespace binding {
      *
      * Data Loading
      */
+
+    // Aggregate parsing utilities
+
     t_index _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name);
 
     std::vector<std::string> _get_aggregate_names(const std::vector<t_aggspec>& aggs);
 
-    template <typename T>
-    std::vector<t_sortspec> _get_sort(
-        std::vector<std::string>& col_names, bool is_column_sort, T j_sortby);
-
     /**
+     * @brief Calculate aggregates specified in `j_aggs` and use default aggregates for
+     * columns marked in `columns`.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @tparam
+     * @param schema
+     * @param row_pivots
+     * @param column_pivots
+     * @param sortbys
+     * @param columns
+     * @param j_aggs
      */
     template <typename T>
-    std::vector<t_fterm> _get_fterms(t_schema schema, T j_date_parser, T j_filters);
+    std::vector<t_aggspec> _get_aggspecs(const t_schema& schema,
+        const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& column_pivots, bool column_only,
+        const std::vector<std::string>& columns, const std::vector<T>& sortbys, T j_aggs);
 
     /**
+     * @brief Retrieve and validate how we sort the dataset in the view.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @tparam T
+     * @param columns
+     * @param is_column_sort
+     * @param sortbys
+     * @return std::vector<t_sortspec>
      */
     template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(
-        t_schema schema, std::string separator, bool column_only, T j_aggs);
+    std::vector<t_sortspec> _get_sort(const std::vector<std::string>& columns,
+        bool is_column_sort, const std::vector<T>& sortbys);
+
+    /**
+     * @brief From the binding language, retrieve what we need to filter the dataset by.
+     *
+     * @tparam T
+     * @param schema
+     * @param j_date_parser
+     * @param j_filters
+     * @return std::vector<t_fterm>
+     */
+    template <typename T>
+    std::vector<t_fterm> _get_fterms(const t_schema& schema, T j_date_parser, T j_filters);
 
     /**
      * Converts a scalar value to its language-specific representation.
@@ -260,14 +273,15 @@ namespace binding {
         t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed);
 
     /**
-     * Creates the configuration object for a new View.
+     * @brief Extracts and validates the config from the binding language,
+     * creating a t_config for the new View.
      *
-     * Params
-     * ------
-     *
-     * Returns
-     * -------
-     * A t_config object.
+     * @tparam T
+     * @param schema
+     * @param separator
+     * @param date_parser
+     * @param config
+     * @return t_config
      */
     template <typename T>
     t_config make_view_config(

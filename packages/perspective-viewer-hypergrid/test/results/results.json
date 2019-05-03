@@ -28,6 +28,6 @@
     "superstore.html/shows a sort indicator": "bea0d6800110d9e7289c3d6fa1a42f33",
     "superstore.html/shows multiple sort indicators": "d61716d5e6ee368ed51f6ac1f3759195",
     "superstore.html/shows a sort indicator on column split": "21cc1a4820cccebf53df2dee77e9ab0f",
-    "__GIT_COMMIT__": "cfdd2c25f4b81dbd1c542c11dbd30402c05ba22b",
+    "__GIT_COMMIT__": "87772b51fba4802095f9fa3b4b680d4a804be5d5",
     "superstore.html/should reinterpret metadata when only row pivots are changed": "3fdd007c530e3c33ebb8b84b4c7da40a"
 }

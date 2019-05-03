@@ -33,8 +33,9 @@ View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gn
     }
 
     m_aggregates = m_config.get_aggregates();
-    m_filters = m_config.get_fterms();
-    m_sorts = m_config.get_sortspecs();
+    m_columns = m_config.get_column_names();
+    m_filter = m_config.get_fterms();
+    m_sort = m_config.get_sortspecs();
 
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
@@ -88,7 +89,7 @@ View<CTX_T>::num_columns() const {
 template <>
 std::int32_t
 View<t_ctx2>::num_columns() const {
-    if (m_sorts.size() > 0) {
+    if (m_sort.size() > 0) {
         auto depth = m_column_pivots.size();
         auto col_length = m_ctx->unity_get_column_count();
         auto count = 0;
@@ -245,7 +246,7 @@ View<t_ctx2>::get_data(
     std::vector<t_tscalar> slice;
     std::vector<t_uindex> column_indices;
     std::vector<std::vector<t_tscalar>> cols;
-    bool is_sorted = m_sorts.size() > 0;
+    bool is_sorted = m_sort.size() > 0;
 
     if (is_column_only()) {
         start_row += m_row_offset;
@@ -419,14 +420,14 @@ View<CTX_T>::get_aggregates() const {
 
 template <typename CTX_T>
 std::vector<t_fterm>
-View<CTX_T>::get_filters() const {
-    return m_filters;
+View<CTX_T>::get_filter() const {
+    return m_filter;
 }
 
 template <typename CTX_T>
 std::vector<t_sortspec>
-View<CTX_T>::get_sorts() const {
-    return m_sorts;
+View<CTX_T>::get_sort() const {
+    return m_sort;
 }
 
 template <>
@@ -464,12 +465,15 @@ View<CTX_T>::is_column_only() const {
  * Private
  */
 
-/**
- * @brief Gets the correct type for the specified aggregate, thus remapping columns
- * when they are pivoted. This ensures that we display aggregates with the correct type.
- *
- * @return std::string
- */
+/* template <typename CTX_T>
+std::int32_t
+View<CTX_T>::_num_hidden_cols() {
+    std::int32_t hidden = 0;
+    for (const t_sortspec& sort : m_sort) {
+    }
+    return hidden;
+} */
+
 template <typename CTX_T>
 std::string
 View<CTX_T>::_map_aggregate_types(

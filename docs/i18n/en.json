@@ -25,6 +25,9 @@
       },
       "obj/perspective": {
         "title": "`perspective` API"
+      },
+      "README": {
+        "title": "README"
       }
     },
     "links": {

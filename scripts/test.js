@@ -48,7 +48,7 @@ function jest() {
 }
 
 function slow_jest() {
-    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@jpmorganchase/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
 }
 
 function docker() {
@@ -88,7 +88,7 @@ try {
             execute("node_modules/.bin/lerna exec -- mkdir -p build");
             let cmd = "node_modules/.bin/lerna run test:build --stream";
             if (process.env.PACKAGE) {
-                cmd += " --scope=@jpmorganchase/${PACKAGE}";
+                cmd += " --scope=@finos/${PACKAGE}";
             }
             execute(cmd);
         }
@@ -108,7 +108,7 @@ try {
             console.log("-- Running test suite in individual mode");
             let cmd = "TZ=UTC node_modules/.bin/lerna exec --concurrency 1 --no-bail";
             if (process.env.PACKAGE) {
-                cmd += " --scope=@jpmorganchase/${PACKAGE}";
+                cmd += " --scope=@finos/${PACKAGE}";
             }
             cmd += " -- yarn --silent test:run";
             execute((IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd);

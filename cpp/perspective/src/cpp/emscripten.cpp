@@ -46,6 +46,7 @@ namespace binding {
      *
      * Data Loading
      */
+
     t_index
     _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name) {
         for (std::size_t idx = 0, max = agg_names.size(); idx != max; ++idx) {
@@ -53,7 +54,6 @@ namespace binding {
                 return t_index(idx);
             }
         }
-
         return t_index();
     }
 
@@ -67,10 +67,95 @@ namespace binding {
     }
 
     template <>
+    std::vector<t_aggspec>
+    _get_aggspecs(const t_schema& schema, const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& column_pivots, bool column_only,
+        const std::vector<std::string>& columns, const std::vector<val>& sortbys, val j_aggs) {
+        std::vector<t_aggspec> aggspecs;
+        val agg_columns = val::global("Object").call<val>("keys", j_aggs);
+        std::vector<std::string> aggs = vecFromArray<val, std::string>(agg_columns);
+
+        /**
+         * Provide aggregates for columns that are shown but NOT specified in
+         * the `j_aggs` object.
+         */
+        for (const std::string& column : columns) {
+            if (std::find(aggs.begin(), aggs.end(), column) != aggs.end()) {
+                continue;
+            }
+
+            t_dtype dtype = schema.get_dtype(column);
+            std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
+            t_aggtype agg_op
+                = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
+
+            if (!column_only) {
+                agg_op = _get_default_aggregate(dtype);
+            }
+
+            aggspecs.push_back(t_aggspec(column, agg_op, dependencies));
+        }
+
+        // Construct aggregates from config object
+        for (const std::string& agg_column : aggs) {
+            std::string agg_op = j_aggs[agg_column].as<std::string>();
+            std::vector<t_dep> dependencies;
+
+            if (column_only) {
+                agg_op = "any";
+            }
+
+            dependencies.push_back(t_dep(agg_column, DEPTYPE_COLUMN));
+
+            t_aggtype aggtype = str_to_aggtype(agg_op);
+
+            if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
+                if (dependencies.size() == 1) {
+                    dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
+                }
+                aggspecs.push_back(t_aggspec(
+                    agg_column, agg_column, aggtype, dependencies, SORTTYPE_ASCENDING));
+            } else {
+                aggspecs.push_back(t_aggspec(agg_column, aggtype, dependencies));
+            }
+        }
+
+        // construct aggspecs for hidden sorts
+        for (auto sortby : sortbys) {
+            std::string column = sortby[0].as<std::string>();
+
+            bool is_hidden_column
+                = std::find(columns.begin(), columns.end(), column) == columns.end();
+            bool not_aggregated = std::find(aggs.begin(), aggs.end(), column) == aggs.end();
+
+            if (is_hidden_column && not_aggregated) {
+                bool is_pivot = (std::find(row_pivots.begin(), row_pivots.end(), column)
+                                    != row_pivots.end())
+                    || (std::find(column_pivots.begin(), column_pivots.end(), column)
+                           != column_pivots.end());
+
+                std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
+                t_aggtype agg_op;
+
+                if (is_pivot) {
+                    agg_op = t_aggtype::AGGTYPE_UNIQUE;
+                } else {
+                    t_dtype dtype = schema.get_dtype(column);
+                    agg_op = _get_default_aggregate(dtype);
+                }
+
+                aggspecs.push_back(t_aggspec(column, agg_op, dependencies));
+            }
+        }
+
+        return aggspecs;
+    }
+
+    template <>
     std::vector<t_sortspec>
-    _get_sort(std::vector<std::string>& col_names, bool is_column_sort, val j_sortby) {
+    _get_sort(const std::vector<std::string>& columns, bool is_column_sort,
+        const std::vector<val>& sortbys) {
         std::vector<t_sortspec> svec{};
-        std::vector<val> sortbys = vecFromArray<val, val>(j_sortby);
 
         auto _is_valid_sort = [is_column_sort](val sort_item) {
             /**
@@ -85,7 +170,7 @@ namespace binding {
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
             val sort_item = sortbys[idx];
             t_index agg_index;
-            std::string col_name;
+            std::string column;
             t_sorttype sorttype;
 
             std::string sort_op_str;
@@ -93,30 +178,20 @@ namespace binding {
                 continue;
             }
 
-            col_name = sort_item[0].as<std::string>();
+            column = sort_item[0].as<std::string>();
             sort_op_str = sort_item[1].as<std::string>();
             sorttype = str_to_sorttype(sort_op_str);
 
-            agg_index = _get_aggregate_index(col_names, col_name);
+            agg_index = _get_aggregate_index(columns, column);
+
             svec.push_back(t_sortspec(agg_index, sorttype));
         }
         return svec;
     }
 
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
     template <>
     std::vector<t_fterm>
-    _get_fterms(t_schema schema, val j_date_parser, val j_filters) {
+    _get_fterms(const t_schema& schema, val j_date_parser, val j_filters) {
         std::vector<t_fterm> fvec{};
         std::vector<val> filters = vecFromArray<val, val>(j_filters);
 
@@ -186,103 +261,6 @@ namespace binding {
             }
         }
         return fvec;
-    }
-
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
-    std::vector<t_aggspec>
-    _get_aggspecs(t_schema schema, std::string separator, bool column_only, val j_aggs) {
-        std::vector<t_aggspec> aggspecs;
-
-        if (j_aggs.typeOf().as<std::string>() == "object") {
-            // Construct aggregates from array
-            std::vector<val> aggs = vecFromArray<val, val>(j_aggs);
-
-            for (auto idx = 0; idx < aggs.size(); ++idx) {
-                val agg = aggs[idx];
-                val col = agg["column"];
-                std::string col_name;
-                std::string agg_op = agg["op"].as<std::string>();
-                std::vector<t_dep> dependencies;
-
-                if (column_only) {
-                    agg_op = "any";
-                }
-
-                if (col.typeOf().as<std::string>() == "string") {
-                    col_name = col.as<std::string>();
-                    dependencies.push_back(t_dep(col_name, DEPTYPE_COLUMN));
-                } else {
-                    std::vector<val> deps = vecFromArray<val, val>(col);
-
-                    if ((agg_op != "weighted mean" && deps.size() != 1)
-                        || (agg_op == "weighted mean" && deps.size() != 2)) {
-                        PSP_COMPLAIN_AND_ABORT(agg_op + " has incorrect arity ("
-                            + std::to_string(deps.size()) + ") for column dependencies.");
-                    }
-
-                    for (auto didx = 0; didx < deps.size(); ++didx) {
-                        if (!hasValue(deps[didx])) {
-                            continue;
-                        }
-                        std::string dep = deps[didx].as<std::string>();
-                        dependencies.push_back(t_dep(dep, DEPTYPE_COLUMN));
-                    }
-
-                    col_name = deps[0].as<std::string>();
-
-                    if (hasValue(agg["name"])) {
-                        col_name = agg["name"].as<std::string>();
-                    }
-                }
-
-                t_aggtype aggtype = str_to_aggtype(agg_op);
-
-                if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
-                    if (dependencies.size() == 1) {
-                        dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
-                    }
-                    aggspecs.push_back(t_aggspec(
-                        col_name, col_name, aggtype, dependencies, SORTTYPE_ASCENDING));
-                } else {
-                    aggspecs.push_back(t_aggspec(col_name, aggtype, dependencies));
-                }
-            }
-        } else {
-            // No specified aggregates - set defaults for each column
-            auto col_names = schema.columns();
-            auto col_types = schema.types();
-
-            for (std::size_t aidx = 0, max = col_names.size(); aidx != max; ++aidx) {
-                std::string name = col_names[aidx];
-                std::vector<t_dep> dependencies{t_dep(name, DEPTYPE_COLUMN)};
-                std::string agg_op = "any";
-
-                if (!column_only) {
-                    std::string type_str = dtype_to_str(col_types[aidx]);
-                    if (type_str == "float" || type_str == "integer") {
-                        agg_op = "sum";
-                    } else {
-                        agg_op = "distinct count";
-                    }
-                }
-
-                if (name != "psp_okey") {
-                    aggspecs.push_back(t_aggspec(name, str_to_aggtype(agg_op), dependencies));
-                }
-            }
-        }
-
-        return aggspecs;
     }
 
     /******************************************************************************
@@ -1602,27 +1580,31 @@ namespace binding {
     t_config
     make_view_config(
         const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivot = config["row_pivots"];
-        val j_column_pivot = config["column_pivots"];
-        val j_aggregate = config["aggregate"];
+        val j_row_pivots = config["row_pivots"];
+        val j_column_pivots = config["column_pivots"];
+        val j_aggregates = config["aggregates"];
+        val j_columns = config["columns"];
         val j_filter = config["filter"];
         val j_sort = config["sort"];
 
         std::vector<std::string> row_pivots;
         std::vector<std::string> column_pivots;
         std::vector<t_aggspec> aggregates;
+        std::vector<std::string> aggregate_names;
+        std::vector<std::string> columns;
         std::vector<t_fterm> filters;
+        std::vector<val> sortbys;
         std::vector<t_sortspec> sorts;
         std::vector<t_sortspec> col_sorts;
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
-        if (hasValue(j_row_pivot)) {
-            row_pivots = vecFromArray<val, std::string>(j_row_pivot);
+        if (hasValue(j_row_pivots)) {
+            row_pivots = vecFromArray<val, std::string>(j_row_pivots);
         }
 
-        if (hasValue(j_column_pivot)) {
-            column_pivots = vecFromArray<val, std::string>(j_column_pivot);
+        if (hasValue(j_column_pivots)) {
+            column_pivots = vecFromArray<val, std::string>(j_column_pivots);
         }
 
         bool column_only = false;
@@ -1632,18 +1614,14 @@ namespace binding {
             column_only = true;
         }
 
-        aggregates = _get_aggspecs(schema, separator, column_only, j_aggregate);
-
-        std::vector<std::string> col_names;
-        if (aggregates.size() > 0) {
-            col_names = _get_aggregate_names(aggregates);
-        } else {
-            auto t_aggs = schema.columns();
-            auto okey_itr = std::find(t_aggs.begin(), t_aggs.end(), "psp_okey");
-            if (okey_itr != t_aggs.end())
-                t_aggs.erase(okey_itr);
-            col_names = t_aggs;
+        if (hasValue(j_sort)) {
+            sortbys = vecFromArray<val, val>(j_sort);
         }
+
+        columns = vecFromArray<val, std::string>(j_columns);
+        aggregates = _get_aggspecs(
+            schema, row_pivots, column_pivots, column_only, columns, sortbys, j_aggregates);
+        aggregate_names = _get_aggregate_names(aggregates);
 
         if (hasValue(j_filter)) {
             filters = _get_fterms(schema, date_parser, j_filter);
@@ -1652,13 +1630,13 @@ namespace binding {
             }
         }
 
-        if (hasValue(j_sort)) {
-            sorts = _get_sort(col_names, false, j_sort);
-            col_sorts = _get_sort(col_names, true, j_sort);
+        if (sortbys.size() > 0) {
+            sorts = _get_sort(aggregate_names, false, sortbys);
+            col_sorts = _get_sort(aggregate_names, true, sortbys);
         }
 
         auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
-            filter_op, filters, col_names, column_only);
+            filter_op, filters, aggregate_names, column_only);
 
         return view_config;
     }
@@ -1984,8 +1962,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_pivots", &View<t_ctx0>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx0>::get_column_pivots)
         .function("get_aggregates", &View<t_ctx0>::get_aggregates)
-        .function("get_filters", &View<t_ctx0>::get_filters)
-        .function("get_sorts", &View<t_ctx0>::get_sorts)
+        .function("get_filter", &View<t_ctx0>::get_filter)
+        .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_row_delta", &View<t_ctx0>::get_row_delta)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
@@ -2009,8 +1987,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_pivots", &View<t_ctx1>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx1>::get_column_pivots)
         .function("get_aggregates", &View<t_ctx1>::get_aggregates)
-        .function("get_filters", &View<t_ctx1>::get_filters)
-        .function("get_sorts", &View<t_ctx1>::get_sorts)
+        .function("get_filter", &View<t_ctx1>::get_filter)
+        .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_row_delta", &View<t_ctx1>::get_row_delta)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
@@ -2034,8 +2012,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_pivots", &View<t_ctx2>::get_row_pivots)
         .function("get_column_pivots", &View<t_ctx2>::get_column_pivots)
         .function("get_aggregates", &View<t_ctx2>::get_aggregates)
-        .function("get_filters", &View<t_ctx2>::get_filters)
-        .function("get_sorts", &View<t_ctx2>::get_sorts)
+        .function("get_filter", &View<t_ctx2>::get_filter)
+        .function("get_sort", &View<t_ctx2>::get_sort)
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_row_delta", &View<t_ctx2>::get_row_delta)

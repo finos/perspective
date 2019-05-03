@@ -9,7 +9,7 @@
 
 const path = require("path");
 
-const utils = require("@jpmorganchase/perspective-viewer/test/js/utils.js");
+const utils = require("@finos/perspective-viewer/test/js/utils.js");
 
 const {withTemplate} = require("./simple-template");
 withTemplate("ohlc", "d3_ohlc", {template: "shares-template"});

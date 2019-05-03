@@ -1,6 +1,6 @@
-import {TableData, TableOptions, Schema, View, AggregateConfig} from '@jpmorganchase/perspective';
+import {TableData, TableOptions, Schema, View, AggregateConfig} from '@finos/perspective';
 
-declare module '@jpmorganchase/perspective-viewer' {
+declare module '@finos/perspective-viewer' {
     export type PerspectiveViewer = {
         load(data: TableData): void;
         load(schema: Schema, options: TableOptions): void;

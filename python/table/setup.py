@@ -91,7 +91,7 @@ setup(
     version='0.1.3',
     description='Analytics library',
     long_description=long_description,
-    url='https://github.com/jpmorganchase/perspective',
+    url='https://github.com/finos/perspective',
     author='Tim Paine',
     author_email='timothy.k.paine@gmail.com',
     license='Apache 2.0',

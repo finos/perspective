@@ -30,11 +30,11 @@ import {
 
 export
     const pspPlugin: IPlugin<Application<Widget>, void> = {
-        id: '@jpmorganchase/perspective-jupyterlab',
+        id: '@finos/perspective-jupyterlab',
         requires: [IJupyterWidgetRegistry],
         activate: (app: Application<Widget>, registry: IJupyterWidgetRegistry): void => {
             registry.registerWidget({
-                name: '@jpmorganchase/perspective-jupyterlab',
+                name: '@finos/perspective-jupyterlab',
                 version: PERSPECTIVE_VERSION,
                 exports: {
                     PerspectiveModel: PerspectiveModel,

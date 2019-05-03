@@ -1,13 +1,26 @@
 {
-    "name": "@jpmorganchase/perspective-viewer-highcharts",
-    "version": "0.2.22",
+    "name": "@finos/perspective-viewer-highcharts",
+    "version": "0.3.0-rc.1",
     "description": "Perspective.js",
-    "main": "cjs/js/highcharts.js",
-    "browser": "cjs/js/highcharts.js",
-    "module": "cjs/js/highcharts.js",
+    "main": "./cjs/js/index.js",
+    "unpkg": "./build/highcharts.plugin.js",
+    "browser": {
+        "heatmap": "./cjs/js/heatmap.js",
+        "sunburst": "./cjs/js/sunburst.js",
+        "treemap": "./cjs/js/treemap.js",
+        "x_bar": "./cjs/js/x_bar.js",
+        "xy_line": "./cjs/js/xy_line.js",
+        "xy_scatter": "./cjs/js/xy_scatter.js",
+        "y_area": "./cjs/js/y_area.js",
+        "y_bar": "./cjs/js/y_bar.js",
+        "y_line": "./cjs/js/y_line.js",
+        "y_scatter": "./cjs/js/y_scatter.js"
+    },
+    "module": "./cjs/js/index.js",
     "files": [
         "build/**/*",
-        "cjs/**/*"
+        "cjs/**/*",
+        "babel.config.js"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
@@ -38,14 +51,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/jpmorganchase/perspective"
+        "url": "https://github.com/finos/perspective"
     },
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@jpmorganchase/perspective": "^0.2.22",
-        "@jpmorganchase/perspective-viewer": "^0.2.22",
+        "@finos/perspective": "^0.3.0-rc.1",
+        "@finos/perspective-viewer": "^0.3.0-rc.1",
         "chroma-js": "^1.3.4",
         "detectie": "1.0.0",
         "gradient-parser": "0.1.5",
@@ -54,6 +67,6 @@
         "highcharts-more": "^0.1.2"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.21"
+        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1"
     }
 }

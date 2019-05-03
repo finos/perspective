@@ -41,7 +41,7 @@ perspective-viewer {
   --column_pivots--before: "Split By";
   --sort-order-asc--before: "arrow_upward";
   --sort-order-desc--before: "arrow_downward";
-  --sort-order-none--before: "-";
+  --sort-order-none--before: "remove";
   --sort-order-col-asc--before: "arrow_back";
   --sort-order-col-desc--before: "arrow_forward";
   --sort_order-padding: 0 0 0 0px;
@@ -123,12 +123,13 @@ perspective-viewer {
   --highcharts-rect--opacity: 0.85;
   --highcharts-grid-line--stroke: #3b3f46;
   --highcharts-tooltip--background: #2a2c2f;
-  --d3fc-legend-text: #bbbbbb;
+  --d3fc-legend--text: #bbbbbb;
+  --d3fc-sunburst--labels: #bbbbbb;
   --d3fc-axis--ticks: #bbbbbb;
   --d3fc-axis--lines: #555555;
   --d3fc-tooltip--background: #333333;
   --d3fc-tooltip--color: #cfd8dc;
-  --d3fc-series: #1f77b4;
+  --d3fc-series: rgba(31, 119, 180, 0.8);
   --d3fc-series-1: #0366d6;
   --d3fc-series-2: #ff7f0e;
   --d3fc-series-3: #2ca02c;
@@ -139,6 +140,9 @@ perspective-viewer {
   --d3fc-series-8: #7f7f7f;
   --d3fc-series-9: #bcbd22;
   --d3fc-series-10: #17becf;
+  --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);
+  --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+  --d3fc-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
   --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
   --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
   --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);

@@ -1,8 +1,9 @@
 {
-    "name": "@jpmorganchase/perspective",
-    "version": "0.2.22",
+    "name": "@finos/perspective",
+    "version": "0.3.0-rc.1",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
+    "unpkg": "build/perspective.js",
     "browser": "cjs/js/perspective.parallel.js",
     "module": "cjs/js/perspective.parallel.js",
     "publishConfig": {
@@ -47,7 +48,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/jpmorganchase/perspective"
+        "url": "https://github.com/finos/perspective"
     },
     "author": "",
     "license": "Apache-2.0",
@@ -66,6 +67,6 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@jpmorganchase/perspective-webpack-plugin": "^0.2.21"
+        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1"
     }
 }

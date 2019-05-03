@@ -1,6 +1,6 @@
 {
-    "name": "@jpmorganchase/perspective-cli",
-    "version": "0.2.22",
+    "name": "@finos/perspective-cli",
+    "version": "0.3.0-rc.1",
     "description": "Perspective.js CLI",
     "main": "build/index.js",
     "publishConfig": {
@@ -19,7 +19,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/jpmorganchase/perspective"
+        "url": "https://github.com/finos/perspective"
     },
     "author": "",
     "license": "Apache-2.0",
@@ -27,10 +27,10 @@
         "perspective": "perspective"
     },
     "dependencies": {
-        "@jpmorganchase/perspective": "^0.2.22",
-        "@jpmorganchase/perspective-viewer": "^0.2.22",
-        "@jpmorganchase/perspective-viewer-highcharts": "^0.2.22",
-        "@jpmorganchase/perspective-viewer-hypergrid": "^0.2.22",
+        "@finos/perspective": "^0.3.0-rc.1",
+        "@finos/perspective-viewer": "^0.3.0-rc.1",
+        "@finos/perspective-viewer-highcharts": "^0.3.0-rc.1",
+        "@finos/perspective-viewer-hypergrid": "^0.3.0-rc.1",
         "commander": "^2.19.0"
     }
 }

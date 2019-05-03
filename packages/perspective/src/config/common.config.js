@@ -1,6 +1,6 @@
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin");
 const webpack = require("webpack");
-const PerspectivePlugin = require("@jpmorganchase/perspective-webpack-plugin");
+const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 
 const plugins = [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)];
 

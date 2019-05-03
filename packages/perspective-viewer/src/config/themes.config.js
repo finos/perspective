@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const common = require("@jpmorganchase/perspective/src/config/common.config.js");
+const common = require("@finos/perspective/src/config/common.config.js");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = Object.assign({}, common(), {

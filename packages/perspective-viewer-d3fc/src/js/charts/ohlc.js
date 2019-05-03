@@ -12,7 +12,7 @@ import ohlcCandle from "./ohlcCandle";
 const ohlc = ohlcCandle(seriesCanvasOhlc);
 ohlc.plugin = {
     type: "d3_ohlc",
-    name: "[d3fc] OHLC Chart",
+    name: "OHLC Chart",
     max_size: 25000,
     initial: {
         type: "number",
