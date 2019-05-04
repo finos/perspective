@@ -64,6 +64,9 @@ function read_promise(filePath) {
     });
 }
 
+/**
+ * Host a Perspective server that hosts data, code files, etc.
+ */
 function create_http_server(assets, host_psp) {
     return async function(request, response) {
         response.setHeader("Access-Control-Allow-Origin", "*");
@@ -126,13 +129,20 @@ class WebSocketHost extends module.exports.Host {
         port = typeof port === "undefined" ? 8080 : port;
         assets = assets || ["./"];
 
+        // Serve Perspective files through HTTP
         this._server = http.createServer(create_http_server(assets, host_psp));
 
         this.REQS = {};
+
+        // Serve Worker API through WebSockets
         this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
+
+        // When the server starts, define how to handle messages
         this._wss.on("connection", ws => {
             ws.isAlive = true;
             ws.id = CLIENT_ID_GEN++;
+
+            // Parse incoming messages
             ws.on("message", msg => {
                 ws.isAlive = true;
                 if (msg === "heartbeat") {
@@ -142,6 +152,7 @@ class WebSocketHost extends module.exports.Host {
                 msg = JSON.parse(msg);
                 this.REQS[msg.id] = ws;
                 try {
+                    // Send all messages to the handler defined in Perspective.Host
                     this.process(msg, ws.id);
                 } catch (e) {
                     console.error(e);
@@ -186,6 +197,12 @@ class WebSocketHost extends module.exports.Host {
         });
     }
 
+    /**
+     * Send an asynchronous message to the Perspective web worker.
+     *
+     * @param {*} msg
+     * @param {*} transferable
+     */
     post(msg, transferable) {
         if (transferable) {
             msg.is_transferable = true;
@@ -197,11 +214,23 @@ class WebSocketHost extends module.exports.Host {
         delete this.REQS[msg.id];
     }
 
+    /**
+     * Expose a Perspective table through the WebSocket, allowing it to be accessed by a unique name.
+     *
+     * @param {String} name
+     * @param {Perspective.table} table
+     */
     host_table(name, table) {
         this._tables[name] = table;
         table.view({columns: []});
     }
 
+    /**
+     * Expose a Perspective view through the WebSocket, allowing it to be accessed by a unique name.
+     *
+     * @param {String} name
+     * @param {Perspective.view} view
+     */
     host_view(name, view) {
         this._views[name] = view;
     }

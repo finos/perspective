@@ -9,23 +9,14 @@
 import WebsocketHeartbeatJs from "websocket-heartbeat-js";
 import * as defaults from "./defaults.js";
 
-import {worker} from "./api.js";
+import {worker} from "./API/worker.js";
 
 import asmjs_worker from "./perspective.asmjs.js";
 import wasm_worker from "./perspective.wasm.js";
 
 import wasm from "./psp.async.wasm.js";
 
-/******************************************************************************
- *
- * Utilities
- *
- */
-
-// https://github.com/kripken/emscripten/issues/6042
-function detect_iphone() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
+import {detect_iphone} from "./utils.js";
 
 /**
  * Singleton WASM file download cache.
@@ -60,6 +51,9 @@ const override = new class {
     }
 }();
 
+/**
+ * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
+ */
 class WebWorker extends worker {
     constructor() {
         super();
@@ -108,6 +102,11 @@ class WebWorker extends worker {
     }
 }
 
+/**
+ * Given a WebSocket URL, connect to the socket located at `url`.
+ *
+ * The `onmessage` handler receives incoming messages and sends it to the WebWorker through `this._handle`.
+ */
 class WebSocketWorker extends worker {
     constructor(url) {
         super();
@@ -166,6 +165,10 @@ const WORKER_SINGLETON = (function() {
     };
 })();
 
+/**
+ * If Perspective is loaded with the `preload` attribute, pre-initialize
+ * the worker so it is available at page render.
+ */
 if (document.currentScript && document.currentScript.hasAttribute("preload")) {
     WORKER_SINGLETON.getInstance();
 }
@@ -173,6 +176,12 @@ if (document.currentScript && document.currentScript.hasAttribute("preload")) {
 const mod = {
     override: x => override.set(x),
 
+    /**
+     * Create a new WebWorker instance. If the `url` parameter is provided, load the worker
+     * at `url` using a WebSocket.
+     *s
+     * @param {*} url
+     */
     worker(url) {
         if (url) {
             return new WebSocketWorker(url);

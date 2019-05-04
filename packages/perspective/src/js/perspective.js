@@ -1243,6 +1243,11 @@ export default function(Module) {
         return obj;
     }
 
+    /**
+     * The base class for Perspective's WebWorker architecture.
+     *
+     * Child classes must implement the `post()` interface, which defines how the worker sends messages.
+     */
     class Host {
         constructor() {
             this._tables = {};
@@ -1257,6 +1262,9 @@ export default function(Module) {
             throw new Error("post() not implemented!");
         }
 
+        /**
+         * Garbage collect un-needed views.
+         */
         clear_views(client_id) {
             for (let key of Object.keys(this._views)) {
                 if (this._views[key].client_id === client_id) {
@@ -1271,6 +1279,13 @@ export default function(Module) {
             console.debug(`GC ${Object.keys(this._views).length} views in memory`);
         }
 
+        /**
+         * Given a message, execute its instructions. This method is the dispatcher for all Perspective actions,
+         * including table/view creation, deletion, and all method calls to/from the table and view.
+         *
+         * @param {*} msg an Object containing `cmd` (a String instruction) and associated data for that instruction
+         * @param {*} client_id
+         */
         process(msg, client_id) {
             switch (msg.cmd) {
                 case "init":
@@ -1414,6 +1429,11 @@ export default function(Module) {
         }
     }
 
+    /**
+     * Create a WebWorker API that communicates with Perspective.
+     *
+     * `post()` is implemented through the worker's `postMessage()` method.
+     */
     class WorkerHost extends Host {
         constructor() {
             super();

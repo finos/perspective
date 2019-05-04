@@ -90,6 +90,11 @@ export function detectChrome() {
     }
 }
 
+// https://github.com/kripken/emscripten/issues/6042
+export function detect_iphone() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
 if (!String.prototype.includes) {
     String.prototype.includes = function(search, start) {
         if (typeof start !== "number") {
