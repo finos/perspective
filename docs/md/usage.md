@@ -159,7 +159,7 @@ const table1 = worker.table(data);
 ```
 
 `table()`s are columnar data structures, and each column must have a single
-type - perspective supports `integer`, `float`, `string` and `datetime` types.
+type - perspective supports `integer`, `float`, `string`, `boolean`, and `datetime` types.
 When passing simple data directly to the `table()` constructor, the type of
 each column is inferred automatically; however, in some case, the inferrence
 algorithm may not return exactly what you'd like. For example, a column may
