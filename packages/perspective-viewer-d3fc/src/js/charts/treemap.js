@@ -53,13 +53,15 @@ function treemap(container, settings) {
                 .container(d3.select(d3.select(this.parentNode).node().parentNode))
                 .color(color)(treemapSvg);
 
-            tooltip().settings(settings)(treemapSvg.selectAll("g"));
+            tooltip()
+                .settings(settings)
+                .centered(true)(treemapSvg.selectAll("g"));
         });
 }
 
 treemap.plugin = {
     type: "d3_treemap",
-    name: "[D3] Treemap",
+    name: "Treemap",
     max_size: 25000,
     initial: {
         type: "number",
