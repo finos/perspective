@@ -61,7 +61,7 @@ function treemap(container, settings) {
 
 treemap.plugin = {
     type: "d3_treemap",
-    name: "[D3] Treemap",
+    name: "Treemap",
     max_size: 25000,
     initial: {
         type: "number",
