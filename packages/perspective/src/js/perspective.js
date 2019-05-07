@@ -1244,7 +1244,8 @@ export default function(Module) {
     }
 
     /**
-     * The base class for Perspective's WebWorker architecture.
+     * The base class for Perspective's async API. It initializes and keeps track of tables, views, and processes
+     * messages from the user into Perspective.
      *
      * Child classes must implement the `post()` interface, which defines how the worker sends messages.
      */
@@ -1254,6 +1255,9 @@ export default function(Module) {
             this._views = {};
         }
 
+        /**
+         * Host must be extended and the `post` method implemented before it can be initialized.
+         */
         init(msg) {
             this.post(msg);
         }
@@ -1430,9 +1434,7 @@ export default function(Module) {
     }
 
     /**
-     * Create a WebWorker API that communicates with Perspective.
-     *
-     * `post()` is implemented through the worker's `postMessage()` method.
+     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
      */
     class WorkerHost extends Host {
         constructor() {
@@ -1457,6 +1459,9 @@ export default function(Module) {
         }
     }
 
+    /**
+     * Use WorkerHost as default inside a WebWorker, where `window` is replaced with `self`.
+     */
     if (typeof self !== "undefined" && self.addEventListener) {
         new WorkerHost();
     }

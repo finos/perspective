@@ -200,6 +200,9 @@ class WebSocketHost extends module.exports.Host {
     /**
      * Send an asynchronous message to the Perspective web worker.
      *
+     * If the `transferable` param is set, pass two messages: the string representation of the message and then
+     * the ArrayBuffer data that needs to be transfered.
+     *
      * @param {*} msg
      * @param {*} transferable
      */

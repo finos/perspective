@@ -65,6 +65,8 @@ export function subscribe(method, cmd) {
 /**
  * Add a method call to the queue, preparing it for execution.
  *
+ * Returns a bound function that calls the desired method on the server.
+ *
  * @param {*} method
  * @param {*} cmd
  */

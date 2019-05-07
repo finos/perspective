@@ -15,6 +15,8 @@ import {bindall} from "../utils.js";
  * Perspective's worker API handles and processes asynchronous messages, interfacing with the WASM engine.
  *
  * Child classes must implement the `send()` interface, which defines how messages are dispatched in different contexts.
+ *
+ * `handlers` is a dictionary of resolve/reject callbacks for each method the worker receives.
  */
 export function worker() {
     this._worker = {
@@ -27,6 +29,9 @@ export function worker() {
     bindall(this);
 }
 
+/**
+ * Remove a listener for a Perspective-generated event.
+ */
 worker.prototype.unsubscribe = function(cmd, handler) {
     for (let key of Object.keys(this._worker.handlers)) {
         if (this._worker.handlers[key].resolve === handler) {
@@ -35,6 +40,9 @@ worker.prototype.unsubscribe = function(cmd, handler) {
     }
 };
 
+/**
+ * Process an asynchronous message.
+ */
 worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     if (resolve) {
         this._worker.handlers[++this._worker.msg_id] = {resolve, reject, keep_alive};
@@ -47,6 +55,9 @@ worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     }
 };
 
+/**
+ * Must be implemented in order to transport commands to the server.
+ */
 worker.prototype.send = function() {
     throw new Error("send() not implemented");
 };
@@ -61,6 +72,11 @@ worker.prototype.open_view = function(name) {
 
 let _initialized = false;
 
+/**
+ * Handle a command from Perspective. If the worker is not initialized, initialize it and dispatch the `perspective-ready` event.
+ *
+ * Otherwise, reject or resolve the incoming command.
+ */
 worker.prototype._handle = function(e) {
     if (!this._worker.initialized.value) {
         if (!_initialized) {

@@ -11,7 +11,7 @@ import {subscribe, unsubscribe, async_queue} from "./dispatch.js";
 import {bindall} from "../utils.js";
 
 /**
- * Create a new view in the worker.
+ * Construct a proxy for the view object by creating a "view" message and sending it through the worker.
  *
  * @param {*} worker
  * @param {*} table_name

@@ -12,7 +12,7 @@ import {view} from "./view_api.js";
 import {bindall} from "../utils.js";
 
 /**
- * Create a new Perspective table by dispatching the "table" command to the worker.
+ * Construct a proxy for the table object by creating a "table" message and sending it through the worker.
  *
  * @param {*} worker
  * @param {*} data
@@ -20,7 +20,6 @@ import {bindall} from "../utils.js";
  */
 export function table(worker, data, options) {
     this._worker = worker;
-    // Set up msg
     name = options.name || Math.random() + "";
     var msg = {
         cmd: "table",

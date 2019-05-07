@@ -53,6 +53,8 @@ const override = new class {
 
 /**
  * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
+ *
+ * This class serves as the client API for transporting messages to/from Web Workers.s
  */
 class WebWorker extends worker {
     constructor() {
@@ -77,6 +79,11 @@ class WebWorker extends worker {
         this._detect_transferable();
     }
 
+    /**
+     * Send a message from the worker, using transferables if necessary.
+     *
+     * @param {*} msg
+     */
     send(msg) {
         if (this._worker.transferable && msg.args && msg.args[0] instanceof ArrayBuffer) {
             this._worker.postMessage(msg, msg.args);
@@ -106,6 +113,8 @@ class WebWorker extends worker {
  * Given a WebSocket URL, connect to the socket located at `url`.
  *
  * The `onmessage` handler receives incoming messages and sends it to the WebWorker through `this._handle`.
+ *
+ * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
  */
 class WebSocketWorker extends worker {
     constructor(url) {
