@@ -62,6 +62,9 @@ class WebWorker extends worker {
         this.register();
     }
 
+    /**
+     * When the worker is created, load either the ASM or WASM bundle depending on WebAssembly compatibility.
+     */
     async register() {
         let worker;
         const msg = {cmd: "init"};
