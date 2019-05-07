@@ -8,7 +8,7 @@
  */
 
 import {treeData} from "../../../../src/js/data/treeData";
-import {data, splitData, mainValues, crossValues} from "./testData";
+import {data, splitData, mainValues, crossValues} from "./testTreeData";
 
 describe("treeData should", () => {
     test("create a structure with the right number of levels", () => {
