@@ -101,83 +101,68 @@ export class Host {
                 eval("f = " + msg.f);
                 f(this._tables[msg.name]);
                 break;
+            case "table_method":
+            case "view_method":
+                this.process_method_call(msg);
+                break;
             case "view":
+                // create a new view and track it with `client_id`
                 this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
                 this._views[msg.view_name].client_id = client_id;
                 break;
-            case "table_method": {
-                let obj = this._tables[msg.name];
-                let result;
+        }
+    }
 
-                try {
-                    if (msg.subscribe) {
-                        obj[msg.method](e => {
-                            this.post({
-                                id: msg.id,
-                                data: e
-                            });
-                        });
-                    } else {
-                        result = obj[msg.method].apply(obj, msg.args);
-                        if (result && result.then) {
-                            result
-                                .then(data => {
-                                    if (data) {
-                                        this.post({
-                                            id: msg.id,
-                                            data: data
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    this.post({
-                                        id: msg.id,
-                                        error: error_to_json(error)
-                                    });
-                                });
-                        } else {
-                            this.post({
-                                id: msg.id,
-                                data: result
-                            });
-                        }
-                    }
-                } catch (e) {
-                    this.post({
-                        id: msg.id,
-                        error: error_to_json(e)
-                    });
-                    return;
-                }
+    /**
+     * Send an error to the client.
+     */
+    process_error(id, error) {
+        this.post({
+            id: id,
+            error: error_to_json(error)
+        });
+    }
 
-                break;
-            }
-            case "view_method": {
-                let obj = this._views[msg.name];
-                if (!obj) {
-                    this.post({
-                        id: msg.id,
-                        error: {message: "View is not initialized"}
-                    });
-                    return;
-                }
-                if (msg.subscribe) {
-                    try {
-                        obj[msg.method](e => {
-                            this.post({
-                                id: msg.id,
-                                data: e
-                            });
-                        });
-                    } catch (error) {
-                        this.post({
-                            id: msg.id,
-                            error: error_to_json(error)
-                        });
-                    }
-                } else {
-                    obj[msg.method]
-                        .apply(obj, msg.args)
+    /**
+     * Execute a subscription to a Perspective event.
+     */
+    process_subscribe(msg, obj) {
+        try {
+            obj[msg.method](ev => {
+                this.post({
+                    id: msg.id,
+                    data: ev
+                });
+            });
+        } catch (error) {
+            this.process_error(msg.id, error);
+            return;
+        }
+    }
+
+    /**
+     * Given a call to a table or view method, process it.
+     *
+     * @param {Object} msg
+     */
+    process_method_call(msg) {
+        let obj, result;
+        msg.cmd === "table_method" ? (obj = this._tables[msg.name]) : (obj = this._views[msg.name]);
+
+        if (!obj && msg.cmd === "view_method") {
+            // cannot have a host without a table, but can have a host without a view
+            this.process_error(msg.id, {message: "View is not initialized"});
+            return;
+        }
+
+        try {
+            if (msg.subscribe) {
+                this.process_subscribe(msg, obj);
+                return;
+            } else {
+                result = obj[msg.method].apply(obj, msg.args);
+                if (result && result.then) {
+                    result
                         .then(result => {
                             if (msg.method === "delete") {
                                 delete this._views[msg.name];
@@ -197,15 +182,18 @@ export class Host {
                                 });
                             }
                         })
-                        .catch(error => {
-                            this.post({
-                                id: msg.id,
-                                error: error_to_json(error)
-                            });
-                        });
+                        .catch(error => this.process_error(msg.id, error));
+                } else if (msg.cmd === "table_method") {
+                    // Only send table methods without promise framework
+                    this.post({
+                        id: msg.id,
+                        data: result
+                    });
                 }
-                break;
             }
+        } catch (error) {
+            this.process_error(msg.id, error);
+            return;
         }
     }
 }

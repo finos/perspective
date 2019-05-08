@@ -1226,39 +1226,6 @@ export default function(Module) {
         f(this);
     };
 
-    /**
-     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
-     */
-    class WorkerHost extends Host {
-        constructor(perspective) {
-            super(perspective);
-            self.addEventListener("message", e => this.process(e.data), false);
-        }
-
-        post(msg, transfer) {
-            self.postMessage(msg, transfer);
-        }
-
-        init({buffer}) {
-            if (typeof WebAssembly === "undefined") {
-                console.log("Loading asm.js");
-            } else {
-                console.log("Loading wasm");
-                __MODULE__ = __MODULE__({
-                    wasmBinary: buffer,
-                    wasmJSMethod: "native-wasm"
-                });
-            }
-        }
-    }
-
-    /**
-     * Use WorkerHost as default inside a WebWorker, where `window` is replaced with `self`.
-     */
-    if (typeof self !== "undefined" && self.addEventListener) {
-        new WorkerHost(perspective);
-    }
-
     /******************************************************************************
      *
      * Perspective
@@ -1354,6 +1321,39 @@ export default function(Module) {
 
     for (let prop of Object.keys(defaults)) {
         perspective[prop] = defaults[prop];
+    }
+
+    /**
+     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
+     */
+    class WorkerHost extends Host {
+        constructor(perspective) {
+            super(perspective);
+            self.addEventListener("message", e => this.process(e.data), false);
+        }
+
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
+        }
+
+        init({buffer}) {
+            if (typeof WebAssembly === "undefined") {
+                console.log("Loading asm.js");
+            } else {
+                console.log("Loading wasm");
+                __MODULE__ = __MODULE__({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm"
+                });
+            }
+        }
+    }
+
+    /**
+     * Use WorkerHost as default inside a WebWorker, where `window` is replaced with `self`.
+     */
+    if (typeof self !== "undefined" && self.addEventListener) {
+        new WorkerHost(perspective);
     }
 
     return perspective;

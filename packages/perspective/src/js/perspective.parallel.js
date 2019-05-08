@@ -54,7 +54,7 @@ const override = new class {
 /**
  * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
  *
- * This class serves as the client API for transporting messages to/from Web Workers.s
+ * This class serves as the client API for transporting messages to/from Web Workers.
  */
 class WebWorker extends worker {
     constructor() {
