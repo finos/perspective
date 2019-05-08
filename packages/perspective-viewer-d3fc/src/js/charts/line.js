@@ -50,7 +50,7 @@ function lineChart(container, settings) {
     const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
 
     chart.yNice && chart.yNice();
-    chart.yTickFormat && chart.yTickFormat(valueformatter);
+    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

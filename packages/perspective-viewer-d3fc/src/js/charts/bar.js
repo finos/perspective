@@ -55,7 +55,7 @@ function barChart(container, settings) {
         bars.align("left");
     }
     chart.xNice && chart.xNice();
-    chart.xTickFormat && chart.xTickFormat(valueformatter);
+    chart.xTickFormat && chart.xTickFormat(valueformatter(xAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)
