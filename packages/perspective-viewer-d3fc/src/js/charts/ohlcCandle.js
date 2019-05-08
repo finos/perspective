@@ -19,6 +19,7 @@ import nearbyTip from "../tooltip/nearbyTip";
 import {ohlcCandleSeries} from "../series/ohlcCandleSeries";
 import {colorScale, setOpacity} from "../series/seriesColors";
 import {colorLegend} from "../legend/legend";
+import valueformatter from "../axis/valueFormatter";
 
 function ohlcCandle(seriesCanvas) {
     return function(container, settings) {
@@ -71,6 +72,7 @@ function ohlcCandle(seriesCanvas) {
         );
 
         chart.yNice && chart.yNice();
+        chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
         const zoomChart = zoomableChart()
             .chart(chart)

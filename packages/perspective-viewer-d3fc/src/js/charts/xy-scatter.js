@@ -20,6 +20,7 @@ import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
+import valueformatter from "../axis/valueFormatter";
 
 function xyScatter(container, settings) {
     const data = pointData(settings, filterDataByGroup(settings));
@@ -68,6 +69,9 @@ function xyScatter(container, settings) {
 
     chart.xNice && chart.xNice();
     chart.yNice && chart.yNice();
+
+    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
+    chart.xTickFormat && chart.xTickFormat(valueformatter(xAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)
