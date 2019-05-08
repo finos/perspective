@@ -33,6 +33,8 @@ export type PerspectiveWidgetOptions = {
     index?: string;
     limit?: number;
     computedcolumns?: { [colname: string]: string }[];
+    filters?: string[][];
+    plugin_config?: any;
     settings?: boolean;
     embed?: boolean;
     dark?: boolean;
@@ -60,6 +62,8 @@ export type PerspectiveWidgetOptions = {
  * @param {string} index - Primary key column name
  * @param {number} limit - limit to this many records
  * @param {{[colname: string]: string}[]} computedcolumns - Computed columns to use
+ * @param {string[][]} filters - list of filters to use
+ * @param {any} filters - configuration for plugin restore
  * @param {boolean} settings - show settings 
  * @param {boolean} embed - Embed mode TODO
  * @param {boolean} dark - use dark CSS
@@ -121,6 +125,8 @@ export
         let index: string = options.index || '';
         let limit: number = options.limit || -1;
         let computedcolumns: { [colname: string]: string }[] = options.computedcolumns || [];
+        let filters: string[][] = options.filters || [];
+        let plugin_config: any = options.plugin_config || {};
         let settings: boolean = options.settings || false;
         let embed: boolean = options.embed || false;
         let dark: boolean = options.dark || false;
@@ -134,6 +140,8 @@ export
         this.view = view;
         this.rowpivots = rowpivots;
         this.columnpivots = columnpivots;
+        this.filters = filters;
+        this.plugin_config = plugin_config;
         this.sort = sort;
         this.columns = columns;
         this.index = index;
@@ -399,6 +407,24 @@ export
         }
     }
 
+    get filters() { return this._filters; }
+    set filters(filters: string[][]) {
+        this._filters = filters;
+        if (this._filters.length > 0) {
+            this.pspNode.setAttribute('filters', JSON.stringify(this._filters));
+        } else {
+            this.pspNode.removeAttribute('filters');
+        }
+    }
+
+    get plugin_config() { return this._plugin_config; }
+    set plugin_config(plugin_config: any) {
+        this._plugin_config = plugin_config;
+        if (this._plugin_config) {
+            this.pspNode.restore(this._plugin_config);
+        }
+    }
+
     get limit() { return this._limit; }
     set limit(limit: number) {
         this._limit = limit;
@@ -449,6 +475,8 @@ export
     private _index: string;
     private _limit: number;
     private _computedcolumns: { [colname: string]: string }[];
+    private _filters: string[][];
+    private _plugin_config: any;
 
     private _settings: boolean;
     private _embed: boolean;
