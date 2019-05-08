@@ -9,8 +9,8 @@
 
 import * as d3 from "d3";
 import {calcWidth, calcHeight} from "./treemapSeries";
-import {toggleLabels, preventTextCollisions, lockTextOpacity, unlockTextOpacity, textOpacity, selectVisibleNodes, adjustLabelsThatOverflow} from "./treemapLabel";
-import {calculateSubTreeMap} from "./treemapLevelCalculation";
+import {labelMapExists, toggleLabels, preventTextCollisions, lockTextOpacity, unlockTextOpacity, textOpacity, selectVisibleNodes, adjustLabelsThatOverflow, restoreLabels} from "./treemapLabel";
+import {calculateSubTreeMap, saveLabelMap} from "./treemapLevelCalculation";
 
 export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
     if (settings.treemapLevel > 0) {
@@ -43,14 +43,13 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
     executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, settings.treemapLevel, crossValues, parentCtrls);
 }
 
-function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration) {
-    const transitionDuration = !!duration ? duration : 350;
-    const textFadeTransitionDuration = 350;
+function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration = 350) {
+    const textFadeTransitionDuration = duration;
     const parent = d.parent;
 
     const t = treemapSvg
-        .transition()
-        .duration(transitionDuration)
+        .transition("main transition")
+        .duration(duration)
         .ease(d3.easeCubicOut);
 
     nodesMerge.each(d => (d.target = d.mapLevel[treemapLevel]));
@@ -76,10 +75,17 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         })
         .attrTween("x", d => () => d.current.x0 + calcWidth(d.current) / 2)
         .attrTween("y", d => () => d.current.y0 + calcHeight(d.current) / 2)
+        .on("interrupt", () => console.error("transy interrupted yo", d.data.name))
         .end()
-        .then(() => preventTextCollisions(visibleLabelNodes))
-        .then(() => adjustLabelsThatOverflow(visibleLabelNodes))
-        .then(() => fadeTextTransition(labels, treemapSvg, textFadeTransitionDuration));
+        .catch(ex => console.error("caught exception in main transition", ex))
+        .then(() => {
+            if (!labelMapExists(d)) {
+                preventTextCollisions(visibleLabelNodes);
+                adjustLabelsThatOverflow(visibleLabelNodes);
+                fadeTextTransition(labels, treemapSvg, textFadeTransitionDuration);
+                saveLabelMap(nodesMerge, treemapLevel);
+            }
+        });
 
     // hide hidden svgs
     nodesMerge
@@ -91,38 +97,43 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         .styleTween("opacity", d => () => d.current.opacity)
         .attrTween("pointer-events", d => () => (d.target.visible ? "all" : "none"));
 
-    labels.each((_, i, labels) => lockTextOpacity(labels[i]));
-    toggleLabels(nodesMerge, treemapLevel, crossValues);
+    if (!labelMapExists(d)) {
+        labels.each((_, i, labels) => lockTextOpacity(labels[i]));
+        toggleLabels(nodesMerge, treemapLevel, crossValues);
+    } else {
+        restoreLabels(nodesMerge);
+    }
     const visibleLabelNodes = selectVisibleNodes(nodesMerge);
 
     if (parent) {
         parentCtrls
             .hide(false)
             .text(d.data.name)
-            .onClick(() => changeLevel(parent, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls))();
+            .onClick(() => changeLevel(parent, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls, duration))();
     } else {
         parentCtrls.hide(true)();
     }
 }
 
-function fadeTextTransition(labels, treemapSvg, duration) {
+async function fadeTextTransition(labels, treemapSvg, duration) {
     const transitionDuration = !!duration ? duration : 350;
 
     const t = treemapSvg
-        .transition()
+        .transition("text fade transition")
         .duration(transitionDuration)
         .ease(d3.easeCubicOut);
 
-    labels
+    await labels
         .transition(t)
         .filter(d => d.target.visible)
         .tween("data", (d, i, labels) => {
             const label = labels[i];
             const interpolation = d3.interpolate(lockedOpacity(d), targetOpacity(label));
-            return t => (d.current = interpolation(t));
+            return t => (d.current.opacity = interpolation(t));
         })
-        .styleTween("opacity", d => () => d.current)
+        .styleTween("opacity", d => () => d.current.opacity)
         .end()
+        .catch(ex => console.error("caught exception in text fade transition", ex))
         .then(() => labels.each((_, i, labels) => unlockTextOpacity(labels[i])));
 }
 

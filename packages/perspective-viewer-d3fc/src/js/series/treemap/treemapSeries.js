@@ -11,7 +11,7 @@ import {toggleLabels, adjustLabelsThatOverflow, selectVisibleNodes} from "./tree
 import treemapLayout from "./treemapLayout";
 import {changeLevel, returnToLevel} from "./treemapTransitions";
 import {parentControls} from "./treemapControls";
-import {calculateRootLevelMap} from "./treemapLevelCalculation";
+import {calculateRootLevelMap, saveLabelMap} from "./treemapLevelCalculation";
 
 export const nodeLevel = {leaf: "leafnode", branch: "branchnode", root: "rootnode"};
 export const calcWidth = d => d.x1 - d.x0;
@@ -60,11 +60,13 @@ export function treemapSeries() {
             .attr("y", d => d.y0 + calcHeight(d) / 2)
             .text(d => d.data.name);
 
-        toggleLabels(nodesMerge, settings.treemapLevel, []);
-        adjustLabelsThatOverflow(selectVisibleNodes(nodesMerge));
-
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
+
+        toggleLabels(nodesMerge, settings.treemapLevel, []);
+        adjustLabelsThatOverflow(selectVisibleNodes(nodesMerge));
+        saveLabelMap(nodesMerge, 0);
+
         if (settings.treemapRoute.length === 0) settings.treemapRoute.push(rootNode.crossValue);
         rects.filter(d => d.children).on("click", d => changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls));
 

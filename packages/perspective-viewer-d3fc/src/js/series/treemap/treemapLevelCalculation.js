@@ -41,6 +41,18 @@ export function calculateRootLevelMap(nodesMerge, rootNode) {
     calculateTextOpacities(nodesMerge, 0);
 }
 
+export const saveLabelMap = (nodes, treemapLevel) => {
+    nodes.each((d, i, nodes) => {
+        const label = select(nodes[i]).selectAll("text");
+        d.mapLevel[treemapLevel].textAttributes = {
+            dx: label.attr("dx"),
+            dy: label.attr("dy"),
+            class: label.attr("class"),
+            "font-size": label.style("font-size")
+        };
+    });
+};
+
 function approximateAttributesForAllNodes(d, crossValues, nodesMerge, treemapLevel, rootNode) {
     const oldDimensions = {x: d.x0, y: d.y0, width: d.x1 - d.x0, height: d.y1 - d.y0};
     const newDimensions = {width: rootNode.x1 - rootNode.x0, height: rootNode.y1 - rootNode.y0};

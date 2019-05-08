@@ -12,6 +12,8 @@ import {isElementOverlapping, isElementOverflowing} from "../../utils/utils";
 
 const minTextSize = 7;
 
+export const labelMapExists = d => (d.target && d.target.textAttributes ? true : false);
+
 export const toggleLabels = (nodes, treemapLevel, crossValues) => {
     nodes
         .selectAll("text")
@@ -23,9 +25,20 @@ export const toggleLabels = (nodes, treemapLevel, crossValues) => {
     preventTextCollisions(visibleNodes);
 };
 
+export const restoreLabels = nodes => {
+    nodes.each((d, i, nodes) => {
+        const label = select(nodes[i]).selectAll("text");
+        label
+            .attr("dx", d.target.textAttributes.dx)
+            .attr("dy", d.target.textAttributes.dy)
+            .attr("class", d.target.textAttributes.class)
+            .style("font-size", d.target.textAttributes["font-size"]);
+    });
+};
+
 export const preventTextCollisions = nodes => {
     const textCollisionFuzzFactorPx = -2;
-    const textAdjustPx = 16;
+    const textAdjustPx = 19; // This should remain the same as the css value for .top => font-size in the chart.less
     const rect = element => element.getBoundingClientRect();
 
     const topNodes = [];
@@ -76,12 +89,12 @@ const shrinkOrHideText = d => {
     const textRect = d.getBoundingClientRect();
     const rectRect = rect.getBoundingClientRect();
 
-    if (!needsAShrinkOrHide(d, rectRect, textRect, "left") && !needsAShrinkOrHide(d, rectRect, textRect, "bottom")) {
+    if (!needsToShrinkOrHide(d, rectRect, textRect, "left") && !needsToShrinkOrHide(d, rectRect, textRect, "bottom")) {
         select(d).attr("class", select(d).attr("class"));
     }
 };
 
-const needsAShrinkOrHide = (d, rectRect, textRect, direction) => {
+const needsToShrinkOrHide = (d, rectRect, textRect, direction) => {
     if (isElementOverflowing(rectRect, textRect, direction)) {
         const fontSize = parseInt(select(d).style("font-size"));
         if (fontSize > minTextSize) {
