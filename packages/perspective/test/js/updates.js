@@ -11,6 +11,8 @@ const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
 const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test.arrow")).buffer;
+const partial_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial.arrow")).buffer;
+const partial_missing_rows_arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "partial_missing_rows.arrow")).buffer;
 
 var data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z: true}, {x: 4, y: "d", z: false}];
 
@@ -204,16 +206,6 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
-
-        it("Arrow `update()`s", async function() {
-            var table = perspective.table(arrow.slice());
-            table.update(arrow.slice());
-            var view = table.view();
-            let result = await view.to_json();
-            expect(result).toEqual(arrow_result.concat(arrow_result));
-            view.delete();
-            table.delete();
-        });
     });
 
     describe("Computed column updates", function() {
@@ -236,6 +228,57 @@ module.exports = perspective => {
             view2.delete();
             table.delete();
             table2.delete();
+        });
+    });
+
+    describe("Arrow Updates", function() {
+        it("arrow contructor then arrow `update()`", async function() {
+            var table = perspective.table(arrow.slice());
+            table.update(arrow.slice());
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual(arrow_result.concat(arrow_result));
+            view.delete();
+            table.delete();
+        });
+
+        it("non-arrow constructor then arrow `update()`", async function() {
+            let table = perspective.table(arrow_result);
+            let view = table.view();
+            let generated_arrow = await view.to_arrow();
+            table.update(generated_arrow);
+            let result = await view.to_json();
+            expect(result).toEqual(arrow_result.concat(arrow_result));
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("arrow partial `update()` a single column", async function() {
+            let table = perspective.table(arrow.slice(), {index: "i64"});
+            table.update(partial_arrow.slice());
+            let view = table.view();
+            let result = await view.to_json();
+            let expected = arrow_indexed_result.map((d, idx) => {
+                idx % 2 == 0 ? (d["bool"] = false) : (d["bool"] = true);
+                return d;
+            });
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it.skip("arrow partial `update()` a single column with missing rows", async function() {
+            let table = perspective.table(arrow.slice(), {index: "i64"});
+            table.update(partial_missing_rows_arrow.slice());
+            let view = table.view();
+            let result = await view.to_json();
+            let expected = arrow_indexed_result.map(d => {
+                d["bool"] = false;
+                return d;
+            });
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
         });
     });
 

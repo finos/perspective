@@ -524,6 +524,11 @@ namespace binding {
         return t.to_double();
     }
     template <>
+    std::uint8_t
+    get_scalar<std::uint8_t>(t_tscalar& t) {
+        return static_cast<std::uint8_t>(t.to_int64());
+    }
+    template <>
     std::int8_t
     get_scalar<std::int8_t>(t_tscalar& t) {
         return static_cast<std::int8_t>(t.to_int64());
@@ -557,22 +562,66 @@ namespace binding {
         int data_size = data.size() - start_idx;
         std::vector<T> vals;
         vals.reserve(data.size());
+
+        // Validity map must have a length that is a multiple of 64
         int nullSize = ceil(data_size / 64.0) * 2;
         int nullCount = 0;
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
+
         for (int idx = 0; idx < data.size() - start_idx; idx++) {
             t_tscalar scalar = data[idx + start_idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 vals.push_back(get_scalar<F, T>(scalar));
+                // Mark the slot as non-null (valid)
                 validityMap[idx / 32] |= 1 << (idx % 32);
             } else {
                 vals.push_back({});
                 nullCount++;
             }
         }
+
         val arr = val::global("Array").new_();
         arr.call<void>("push", typed_array<O>.new_(vector_to_typed_array(vals)["buffer"]));
+        arr.call<void>("push", nullCount);
+        arr.call<void>("push", vector_to_typed_array(validityMap));
+        return arr;
+    }
+
+    template <>
+    val
+    col_to_typed_array<bool>(std::vector<t_tscalar> data, bool column_pivot_only) {
+        int start_idx = column_pivot_only ? 1 : 0;
+        int data_size = data.size() - start_idx;
+
+        std::vector<std::int8_t> vals;
+        vals.reserve(data.size());
+
+        // Validity map must have a length that is a multiple of 64
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::uint32_t> validityMap;
+        validityMap.resize(nullSize);
+
+        for (int idx = 0; idx < data.size() - start_idx; idx++) {
+            t_tscalar scalar = data[idx + start_idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                // get boolean and write into array
+                std::int8_t val = get_scalar<std::int8_t>(scalar);
+                vals.push_back(val);
+                // bit mask based on value in array
+                vals[idx / 8] |= val << (idx % 8);
+                // Mark the slot as non-null (valid)
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                vals.push_back({});
+                nullCount++;
+            }
+        }
+
+        val arr = val::global("Array").new_();
+        arr.call<void>(
+            "push", typed_array<std::int8_t>.new_(vector_to_typed_array(vals)["buffer"]));
         arr.call<void>("push", nullCount);
         arr.call<void>("push", vector_to_typed_array(validityMap));
         return arr;
@@ -662,6 +711,9 @@ namespace binding {
             } break;
             case DTYPE_FLOAT64: {
                 return col_to_typed_array<double>(data, column_pivot_only);
+            } break;
+            case DTYPE_BOOL: {
+                return col_to_typed_array<bool>(data, column_pivot_only);
             } break;
             case DTYPE_STR: {
                 return col_to_typed_array<std::string>(data, column_pivot_only);
@@ -784,7 +836,7 @@ namespace binding {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            // arrow packs bools into a bitmap
+            // bools are stored using a bit mask
             val data = accessor["values"];
             for (auto i = 0; i < nrows; ++i) {
                 std::uint8_t elem = data[i / 8].as<std::uint8_t>();
