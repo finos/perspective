@@ -43,8 +43,8 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
     executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, settings.treemapLevel, crossValues, parentCtrls);
 }
 
-function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration = 350) {
-    const textFadeTransitionDuration = duration;
+function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration = 500) {
+    const textFadeTransitionDuration = 400;
     const parent = d.parent;
 
     const t = treemapSvg
@@ -53,6 +53,8 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         .ease(d3.easeCubicOut);
 
     nodesMerge.each(d => (d.target = d.mapLevel[treemapLevel]));
+
+    if (!labelMapExists(d)) preventUserInteraction(nodesMerge, parentCtrls);
 
     rects
         .transition(t)
@@ -75,16 +77,23 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         })
         .attrTween("x", d => () => d.current.x0 + calcWidth(d.current) / 2)
         .attrTween("y", d => () => d.current.y0 + calcHeight(d.current) / 2)
-        .on("interrupt", () => console.error("transy interrupted yo", d.data.name))
         .end()
-        .catch(ex => console.error("caught exception in main transition", ex))
+        .catch(ex => {
+            console.error("Exception in main transition", ex);
+            enableUserInteraction(nodesMerge);
+        })
         .then(() => {
             if (!labelMapExists(d)) {
                 preventTextCollisions(visibleLabelNodes);
                 adjustLabelsThatOverflow(visibleLabelNodes);
                 fadeTextTransition(labels, treemapSvg, textFadeTransitionDuration);
                 saveLabelMap(nodesMerge, treemapLevel);
+                enableUserInteraction(nodesMerge, parentCtrls, parent);
             }
+        })
+        .catch(ex => {
+            console.error("Exception completing promises after main transition", ex);
+            enableUserInteraction(nodesMerge, parentCtrls, parent);
         });
 
     // hide hidden svgs
@@ -103,6 +112,7 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
     } else {
         restoreLabels(nodesMerge);
     }
+
     const visibleLabelNodes = selectVisibleNodes(nodesMerge);
 
     if (parent) {
@@ -115,12 +125,10 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
     }
 }
 
-async function fadeTextTransition(labels, treemapSvg, duration) {
-    const transitionDuration = !!duration ? duration : 350;
-
+async function fadeTextTransition(labels, treemapSvg, duration = 400) {
     const t = treemapSvg
         .transition("text fade transition")
-        .duration(transitionDuration)
+        .duration(duration)
         .ease(d3.easeCubicOut);
 
     await labels
@@ -133,9 +141,27 @@ async function fadeTextTransition(labels, treemapSvg, duration) {
         })
         .styleTween("opacity", d => () => d.current.opacity)
         .end()
-        .catch(ex => console.error("caught exception in text fade transition", ex))
+        .catch(ex => console.error("Exception in text fade transition", ex))
         .then(() => labels.each((_, i, labels) => unlockTextOpacity(labels[i])));
 }
 
 const lockedOpacity = d => d.target.textLockedAt.opacity;
 const targetOpacity = d => textOpacity[d3.select(d).attr("class")];
+
+const preventUserInteraction = (nodes, parentCtrls) => {
+    parentCtrls.deactivate(true);
+
+    nodes.each((_, i, nodes) => {
+        const rect = d3.select(nodes[i]).selectAll("rect");
+        rect.attr("pointer-events", "none");
+    });
+};
+
+const enableUserInteraction = (nodes, parentCtrls) => {
+    parentCtrls.deactivate(false);
+
+    nodes.each((_, i, nodes) => {
+        const rect = d3.select(nodes[i]).selectAll("rect");
+        rect.attr("pointer-events", null);
+    });
+};
