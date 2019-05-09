@@ -19,7 +19,6 @@ import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import valueformatter from "../axis/valueFormatter";
 
 function yScatter(container, settings) {
     const data = groupData(settings, filterData(settings));
@@ -53,7 +52,6 @@ function yScatter(container, settings) {
     const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
 
     chart.yNice && chart.yNice();
-    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

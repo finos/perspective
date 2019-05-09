@@ -16,7 +16,6 @@ import {splitAndBaseData} from "../data/splitAndBaseData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
-import valueformatter from "../axis/valueFormatter";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -47,7 +46,6 @@ function areaChart(container, settings) {
     const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
 
     chart.yNice && chart.yNice();
-    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

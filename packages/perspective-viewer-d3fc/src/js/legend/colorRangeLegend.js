@@ -10,7 +10,6 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
 import valueformatter from "../axis/valueFormatter";
-import {AXIS_TYPES} from "../axis/axisType";
 
 export function colorRangeLegend() {
     let scale = null;
@@ -63,7 +62,7 @@ export function colorRangeLegend() {
             .axisRight(yScale)
             .tickValues(tickValues)
             .tickSizeOuter(0)
-            .tickFormat(d => valueformatter(AXIS_TYPES.linear)(d));
+            .tickFormat(d => valueformatter(d));
 
         const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)

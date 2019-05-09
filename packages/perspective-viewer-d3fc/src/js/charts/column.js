@@ -18,7 +18,6 @@ import {filterData} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
-import valueformatter from "../axis/valueFormatter";
 
 function columnChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -54,7 +53,6 @@ function columnChart(container, settings) {
         bars.align("left");
     }
     chart.yNice && chart.yNice();
-    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

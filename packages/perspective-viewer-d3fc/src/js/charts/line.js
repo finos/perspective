@@ -20,7 +20,6 @@ import withGridLines from "../gridlines/gridlines";
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
-import valueformatter from "../axis/valueFormatter";
 
 function lineChart(container, settings) {
     const data = splitData(settings, filterData(settings));
@@ -50,7 +49,6 @@ function lineChart(container, settings) {
     const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
 
     chart.yNice && chart.yNice();
-    chart.yTickFormat && chart.yTickFormat(valueformatter(yAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

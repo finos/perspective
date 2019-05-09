@@ -19,7 +19,6 @@ import withGridLines from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
-import valueformatter from "../axis/valueFormatter";
 
 function barChart(container, settings) {
     const data = groupAndStackData(settings, filterData(settings));
@@ -55,7 +54,6 @@ function barChart(container, settings) {
         bars.align("left");
     }
     chart.xNice && chart.xNice();
-    chart.xTickFormat && chart.xTickFormat(valueformatter(xAxis.type));
 
     const zoomChart = zoomableChart()
         .chart(chart)

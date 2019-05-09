@@ -10,6 +10,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import {flattenArray} from "./flatten";
 import {extentLinear as customExtent} from "../d3fc/extent/extentLinear";
+import valueformatter from "./valueFormatter";
 
 export const scale = () => d3.scaleLinear();
 
@@ -68,3 +69,5 @@ export const domain = () => {
 };
 
 export const labelFunction = valueName => d => d[valueName][0];
+
+export const tickFormatFunction = d => (Math.abs(d) >= 10000000 ? d3.format(".3s")(d) : Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
