@@ -70,4 +70,4 @@ export const domain = () => {
 
 export const labelFunction = valueName => d => d[valueName][0];
 
-export const tickFormatFunction = d => (Math.abs(d) >= 10000000 ? d3.format(".3s")(d) : Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
+export const tickFormatFunction = valueformatter;
