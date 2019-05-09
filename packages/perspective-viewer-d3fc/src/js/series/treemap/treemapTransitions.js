@@ -20,7 +20,7 @@ export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, t
         settings.treemapRoute.slice(1, settings.treemapRoute.length).forEach(cv => {
             const d = nodesMerge.filter(d => d.crossValue === cv).datum();
             const crossValues = d.crossValue.split("|");
-            calculateSubTreeMap(d, crossValues, nodesMerge, d.depth, rootNode);
+            calculateSubTreeMap(d, crossValues, nodesMerge, d.depth, rootNode, treemapDiv);
             executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, d.depth, crossValues, parentCtrls, 1, false);
         });
     }
@@ -37,7 +37,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
 
     const crossValues = d.crossValue.split("|");
     if (!d.mapLevel[settings.treemapLevel] || !d.mapLevel[settings.treemapLevel].levelRoot) {
-        calculateSubTreeMap(d, crossValues, nodesMerge, settings.treemapLevel, rootNode);
+        calculateSubTreeMap(d, crossValues, nodesMerge, settings.treemapLevel, rootNode, treemapDiv);
     }
 
     executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, settings.treemapLevel, crossValues, parentCtrls);
