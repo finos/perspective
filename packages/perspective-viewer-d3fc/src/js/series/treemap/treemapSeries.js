@@ -63,7 +63,7 @@ export function treemapSeries() {
         const rootNode = rects.filter(d => d.crossValue === "").datum();
         calculateRootLevelMap(nodesMerge, rootNode);
 
-        toggleLabels(nodesMerge, settings.treemapLevel, []);
+        toggleLabels(nodesMerge, 0, []);
         adjustLabelsThatOverflow(selectVisibleNodes(nodesMerge));
         saveLabelMap(nodesMerge, 0);
 

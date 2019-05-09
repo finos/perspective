@@ -15,13 +15,13 @@ import {calculateSubTreeMap, saveLabelMap} from "./treemapLevelCalculation";
 export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
     if (settings.treemapLevel > 0) {
         const crossValues = rootNode.crossValue.split("|");
-        executeTransition(rootNode, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, 0, crossValues, parentCtrls, 1);
+        executeTransition(rootNode, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, 0, crossValues, parentCtrls, 1, false);
 
         settings.treemapRoute.slice(1, settings.treemapRoute.length).forEach(cv => {
             const d = nodesMerge.filter(d => d.crossValue === cv).datum();
             const crossValues = d.crossValue.split("|");
             calculateSubTreeMap(d, crossValues, nodesMerge, d.depth, rootNode);
-            executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, d.depth, crossValues, parentCtrls, 1);
+            executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, d.depth, crossValues, parentCtrls, 1, false);
         });
     }
 }
@@ -43,8 +43,7 @@ export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, 
     executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, settings.treemapLevel, crossValues, parentCtrls);
 }
 
-function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration = 500) {
-    const textFadeTransitionDuration = 400;
+function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, treemapLevel, crossValues, parentCtrls, duration = 500, recordLabelMap = true) {
     const parent = d.parent;
 
     const t = treemapSvg
@@ -86,8 +85,8 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
             if (!labelMapExists(d)) {
                 preventTextCollisions(visibleLabelNodes);
                 adjustLabelsThatOverflow(visibleLabelNodes);
-                fadeTextTransition(labels, treemapSvg, textFadeTransitionDuration);
-                saveLabelMap(nodesMerge, treemapLevel);
+                fadeTextTransition(labels, treemapSvg, duration);
+                if (recordLabelMap) saveLabelMap(nodesMerge, treemapLevel);
                 enableUserInteraction(nodesMerge, parentCtrls, parent);
             }
         })
@@ -158,7 +157,7 @@ const preventUserInteraction = (nodes, parentCtrls) => {
 };
 
 const enableUserInteraction = (nodes, parentCtrls) => {
-    parentCtrls.deactivate(false);
+    if (parentCtrls) parentCtrls.deactivate(false);
 
     nodes.each((_, i, nodes) => {
         const rect = d3.select(nodes[i]).selectAll("rect");
