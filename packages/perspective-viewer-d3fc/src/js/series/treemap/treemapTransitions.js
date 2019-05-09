@@ -55,13 +55,19 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
 
     if (!labelMapExists(d)) preventUserInteraction(nodesMerge, parentCtrls);
 
-    rects
+    // hide hidden svgs
+    nodesMerge
         .transition(t)
-        .filter(d => d.target.visible)
         .tween("data", d => {
             const i = d3.interpolate(d.current, d.target);
             return t => (d.current = i(t));
         })
+        .styleTween("opacity", d => () => d.current.opacity)
+        .attrTween("pointer-events", d => () => (d.target.visible ? "all" : "none"));
+
+    rects
+        .transition(t)
+        .filter(d => d.target.visible)
         .styleTween("x", d => () => `${d.current.x0}px`)
         .styleTween("y", d => () => `${d.current.y0}px`)
         .styleTween("width", d => () => `${d.current.x1 - d.current.x0}px`)
@@ -70,10 +76,6 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
     labels
         .transition(t)
         .filter(d => d.target.visible)
-        .tween("data", d => {
-            const i = d3.interpolate(d.current, d.target);
-            return t => (d.current = i(t));
-        })
         .attrTween("x", d => () => d.current.x0 + calcWidth(d.current) / 2)
         .attrTween("y", d => () => d.current.y0 + calcHeight(d.current) / 2)
         .end()
@@ -94,16 +96,6 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
             console.error("Exception completing promises after main transition", ex);
             enableUserInteraction(nodesMerge, parentCtrls, parent);
         });
-
-    // hide hidden svgs
-    nodesMerge
-        .transition(t)
-        .tween("data", d => {
-            const i = d3.interpolate(d.current, d.target);
-            return t => (d.current = i(t));
-        })
-        .styleTween("opacity", d => () => d.current.opacity)
-        .attrTween("pointer-events", d => () => (d.target.visible ? "all" : "none"));
 
     if (!labelMapExists(d)) {
         labels.each((_, i, labels) => lockTextOpacity(labels[i]));

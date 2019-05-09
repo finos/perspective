@@ -55,6 +55,7 @@ export function treemapSeries() {
         color && rects.style("fill", d => color(d.data.color));
 
         const labels = nodesMerge
+            .filter(d => d.value !== 0)
             .select("text")
             .attr("x", d => d.x0 + calcWidth(d) / 2)
             .attr("y", d => d.y0 + calcHeight(d) / 2)
