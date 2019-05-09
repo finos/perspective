@@ -201,10 +201,11 @@ class WebSocketHost extends module.exports.Host {
      * Send an asynchronous message to the Perspective web worker.
      *
      * If the `transferable` param is set, pass two messages: the string representation of the message and then
-     * the ArrayBuffer data that needs to be transfered.
+     * the ArrayBuffer data that needs to be transferred. The `is_transferable` flag tells the client to expect the next message
+     * to be a transferable object.
      *
-     * @param {*} msg
-     * @param {*} transferable
+     * @param {Object} msg a valid JSON-serializable message to pass to the client
+     * @param {*} transferable a transferable object to be sent to the client
      */
     post(msg, transferable) {
         if (transferable) {

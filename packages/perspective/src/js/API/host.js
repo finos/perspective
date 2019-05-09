@@ -116,9 +116,9 @@ export class Host {
     /**
      * Send an error to the client.
      */
-    process_error(id, error) {
+    process_error(msg, error) {
         this.post({
-            id: id,
+            id: msg.id,
             error: error_to_json(error)
         });
     }
@@ -135,7 +135,7 @@ export class Host {
                 });
             });
         } catch (error) {
-            this.process_error(msg.id, error);
+            this.process_error(msg, error);
             return;
         }
     }
@@ -151,7 +151,7 @@ export class Host {
 
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a view
-            this.process_error(msg.id, {message: "View is not initialized"});
+            this.process_error(msg, {message: "View is not initialized"});
             return;
         }
 
@@ -182,7 +182,7 @@ export class Host {
                                 });
                             }
                         })
-                        .catch(error => this.process_error(msg.id, error));
+                        .catch(error => this.process_error(msg, error));
                 } else if (msg.cmd === "table_method") {
                     // Only send table methods without promise framework
                     this.post({
@@ -192,7 +192,7 @@ export class Host {
                 }
             }
         } catch (error) {
-            this.process_error(msg.id, error);
+            this.process_error(msg, error);
             return;
         }
     }

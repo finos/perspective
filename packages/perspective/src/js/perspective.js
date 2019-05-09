@@ -1323,19 +1323,41 @@ export default function(Module) {
         perspective[prop] = defaults[prop];
     }
 
-    /**
+    /*
+     * Hosting Perspective
+     *
      * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
+     *
+     * If Perspective is running inside a Web Worker, use the WorkerHost as default.
+     *
+     * @extends Host
      */
     class WorkerHost extends Host {
+        /**
+         * On initialization, listen for messages posted from the client and send it to `Host.process()`.
+         *
+         * @param perspective a reference to the Perspective module, allowing the `Host` to access Perspective methods.
+         */
         constructor(perspective) {
             super(perspective);
             self.addEventListener("message", e => this.process(e.data), false);
         }
 
+        /**
+         * Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
+         *
+         * @param {Object} msg a message to pass to the client
+         * @param {*} transfer a transferable object to pass to the client, if needed
+         */
         post(msg, transfer) {
             self.postMessage(msg, transfer);
         }
 
+        /**
+         * When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
+         *
+         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
+         */
         init({buffer}) {
             if (typeof WebAssembly === "undefined") {
                 console.log("Loading asm.js");
@@ -1350,7 +1372,7 @@ export default function(Module) {
     }
 
     /**
-     * Use WorkerHost as default inside a WebWorker, where `window` is replaced with `self`.
+     * Use WorkerHost as default inside a Web Worker, where `window` is replaced with `self`.
      */
     if (typeof self !== "undefined" && self.addEventListener) {
         new WorkerHost(perspective);

@@ -95,6 +95,9 @@ export function detect_iphone() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 }
 
+/**
+ * String.includes() polyfill
+ */
 if (!String.prototype.includes) {
     String.prototype.includes = function(search, start) {
         if (typeof start !== "number") {

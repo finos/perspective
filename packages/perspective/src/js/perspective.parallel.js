@@ -140,6 +140,11 @@ class WebSocketWorker extends worker {
                 delete this._pending_arrow;
             } else {
                 msg = JSON.parse(msg.data);
+                /**
+                 * If the `is_transferable` flag is set, the worker expects the next message to be a transferable object.
+                 *
+                 * This sets the `_pending_arrow` flag, which triggers a special handler for the ArrayBuffer containing arrow data.
+                 */
                 if (msg.is_transferable) {
                     console.warn("Arrow transfer detected!");
                     this._pending_arrow = msg.id;
