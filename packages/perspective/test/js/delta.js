@@ -64,6 +64,36 @@ module.exports = perspective => {
                 table.update(partial_change_y);
             });
 
+            it("returns added rows", async function(done) {
+                let table = perspective.table(data);
+                let view = table.view();
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([4, 5]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns deleted columns", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view();
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 3]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update([{x: 1, y: null}, {x: 4, y: null}]);
+            });
+
             it("returns changed rows in sorted context", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
@@ -81,7 +111,7 @@ module.exports = perspective => {
                 table.update(partial_change_y);
             });
 
-            it.skip("returns changed rows in non-sequential update", async function(done) {
+            it("returns changed rows in non-sequential update", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
                 view.on_update(

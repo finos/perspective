@@ -385,7 +385,7 @@ t_ctx1::get_row_delta(t_index bidx, t_index eidx) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     bidx = std::min(bidx, t_index(m_traversal->size()));
     eidx = std::min(eidx, t_index(m_traversal->size()));
-    std::vector<std::int32_t> rows;
+    std::vector<t_index> rows;
 
     const auto& deltas = m_tree->get_deltas();
     for (t_index idx = bidx; idx < eidx; ++idx) {

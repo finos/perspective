@@ -63,6 +63,10 @@ public:
     void get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_tscalar>& pkeys,
         tsl::hopscotch_map<t_tscalar, t_index>& out_map) const;
 
+    std::vector<t_index> get_row_indices(const std::unordered_set<t_tscalar>& pkeys) const;
+
+    t_index get_row_index(t_tscalar pkey) const;
+
     void reset();
 
     void check_size();

@@ -42,7 +42,7 @@ t_ctx0::step_begin() {
         return;
 
     m_deltas = std::make_shared<t_zcdeltas>();
-    m_rows_changed_indices.clear();
+    m_delta_pkeys.clear();
     m_rows_changed = false;
     m_columns_changed = false;
     m_traversal->step_begin();
@@ -304,55 +304,51 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
 t_rowdelta
 t_ctx0::get_row_delta() {
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
-    std::vector<std::int32_t> rows;
-
-    if (m_traversal->empty_sort_by()) {
-        // Extract set into vector for Emscripten compatibility
-        std::unordered_set<std::int32_t> changed_rows = get_rows_changed_indices();
-        std::copy(changed_rows.begin(), changed_rows.end(), std::back_inserter(rows));
-    } else {
-        // sorted contexts require more processing
-        t_index bidx = 0;
-        t_index eidx = m_traversal->size();
-        std::unordered_set<t_tscalar> pkeys;
-        t_tscalar prev_pkey;
-        prev_pkey.set(t_none());
-
-        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
-             = m_deltas->get<by_zc_pkey_colidx>().begin();
-             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
-            if (prev_pkey != iter->m_pkey) {
-                pkeys.insert(iter->m_pkey);
-                prev_pkey = iter->m_pkey;
-            }
-        }
-
-        // get row indices and assign into r_indices
-        tsl::hopscotch_map<t_tscalar, t_index> r_indices;
-        m_traversal->get_row_indices(pkeys, r_indices);
-
-        for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
-             = m_deltas->get<by_zc_pkey_colidx>().begin();
-             iter != m_deltas->get<by_zc_pkey_colidx>().end(); ++iter) {
-            t_index row = r_indices[iter->m_pkey];
-            bool valid_ridx = bidx <= row && row <= eidx;
-            bool unique_ridx = std::find(rows.begin(), rows.end(), row) == rows.end();
-            if (valid_ridx && unique_ridx) {
-                rows.push_back(row);
-            }
-        }
-    }
-
+    std::unordered_set<t_tscalar> changed_pkeys = get_delta_pkeys();
+    // Given a set of primary keys, transform them into row indices
+    std::vector<t_index> rows = m_traversal->get_row_indices(changed_pkeys);
     std::sort(rows.begin(), rows.end());
     t_rowdelta rval(rows_changed, rows);
     clear_deltas();
     return rval;
 }
 
-std::unordered_set<std::int32_t>
-t_ctx0::get_rows_changed_indices() const {
-    // TODO: return copy or reference?
-    return m_rows_changed_indices;
+/* t_rowdelta
+t_ctx0::get_row_delta_data() {
+    // TODO: finish
+    t_uindex ctx_nrows = get_row_count();
+    t_uindex ctx_ncols = get_column_count();
+    auto ext = sanitize_get_data_extents(
+        ctx_nrows, ctx_ncols, 0, ctx_nrows, 0, ctx_ncols);
+
+    t_index nrows = ext.m_erow - ext.m_srow;
+    t_index stride = ext.m_ecol - ext.m_scol;
+    std::vector<t_tscalar> values(nrows * stride);
+
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
+    auto none = mknone();
+
+    for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
+        std::vector<t_tscalar> out_data(pkeys.size());
+        m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
+
+        for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
+            auto v = out_data[ridx - ext.m_srow];
+
+            // todo: fix null handling
+            if (!v.is_valid())
+                v.set(none);
+
+            values[(ridx - ext.m_srow) * stride + (cidx - ext.m_scol)] = v;
+        }
+    }
+
+    return values;
+} */
+
+const std::unordered_set<t_tscalar>&
+t_ctx0::get_delta_pkeys() const {
+    return m_delta_pkeys;
 }
 
 std::vector<std::string>
@@ -436,14 +432,15 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
                 } break;
                 default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
             }
+
+            // add the pkey for updated rows
+            add_delta_pkey(pkey);
         }
         psp_log_time(repr() + " notify.has_filter_path.updated_traversal");
 
         // calculate deltas
         calc_step_delta(flattened, prev, curr, transitions);
-        calc_row_delta(flattened, transitions);
-        m_has_delta
-            = m_deltas->size() > 0 || m_rows_changed_indices.size() > 0 || delete_encountered;
+        m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
         psp_log_time(repr() + " notify.has_filter_path.exit");
 
@@ -472,15 +469,16 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
                 PSP_COMPLAIN_AND_ABORT("Unexpected OP");
             } break;
         }
+
+        // add the pkey for updated rows
+        add_delta_pkey(pkey);
     }
 
     psp_log_time(repr() + " notify.no_filter_path.updated_traversal");
 
     // calculate deltas
     calc_step_delta(flattened, prev, curr, transitions);
-    calc_row_delta(flattened, transitions);
-    m_has_delta
-        = m_deltas->size() > 0 || m_rows_changed_indices.size() > 0 || delete_encountered;
+    m_has_delta = m_deltas->size() > 0 || m_delta_pkeys.size() > 0 || delete_encountered;
 
     psp_log_time(repr() + " notify.no_filter_path.exit");
 }
@@ -576,33 +574,15 @@ t_ctx0::calc_step_delta(const t_table& flattened, const t_table& prev, const t_t
         }
     }
 }
+
+/**
+ * @brief Mark a primary key as updated by adding it to the tracking set.
+ *
+ * @param pkey
+ */
 void
-t_ctx0::calc_row_delta(const t_table& flattened, const t_table& transitions) {
-    // TODO: does not work for non-contiguous partial updates
-    t_uindex nrows = flattened.size();
-    t_uindex ncols = m_config.get_num_columns();
-
-    for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
-        std::string col = m_config.col_at(cidx);
-
-        const t_column* tcol = transitions.get_const_column(col).get();
-
-        for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
-            const std::uint8_t* trans_ = tcol->get_nth<std::uint8_t>(ridx);
-            std::uint8_t trans = *trans_;
-            t_value_transition tr = static_cast<t_value_transition>(trans);
-
-            switch (tr) {
-                case VALUE_TRANSITION_NVEQ_FT:
-                case VALUE_TRANSITION_NEQ_FT:
-                case VALUE_TRANSITION_NEQ_TDT:
-                case VALUE_TRANSITION_NEQ_TT: {
-                    m_rows_changed_indices.insert(ridx);
-                } break;
-                default: {}
-            }
-        }
-    }
+t_ctx0::add_delta_pkey(t_tscalar pkey) {
+    m_delta_pkeys.insert(pkey);
 }
 
 std::vector<t_minmax>

@@ -687,7 +687,7 @@ t_ctx2::get_row_delta(t_index bidx, t_index eidx) {
     t_uindex end_row = eidx;
     t_uindex start_col = 1;
     t_uindex end_col = get_num_view_columns();
-    std::vector<std::int32_t> rows;
+    std::vector<t_index> rows;
 
     t_uindex ctx_nrows = get_row_count();
     t_uindex ctx_ncols = get_column_count();

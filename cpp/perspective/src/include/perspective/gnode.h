@@ -200,6 +200,14 @@ void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_colu
     const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
     std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
+/**
+ * @brief Given a t_table and a context handler, construct the t_tables relating to delta
+ * calculation and notify the context with the constructed tables.
+ *
+ * @tparam CTX_T
+ * @param flattened
+ * @param ctxh
+ */
 template <typename CTX_T>
 void
 t_gnode::notify_context(const t_table& flattened, const t_ctx_handle& ctxh) {
