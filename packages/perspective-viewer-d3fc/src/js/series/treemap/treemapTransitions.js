@@ -27,6 +27,8 @@ export function returnToLevel(rects, nodesMerge, labels, settings, treemapDiv, t
 }
 
 export function changeLevel(d, rects, nodesMerge, labels, settings, treemapDiv, treemapSvg, rootNode, parentCtrls) {
+    if (!d.children) return;
+
     if (settings.treemapLevel < d.depth) {
         settings.treemapRoute.push(d.crossValue);
     } else {
@@ -79,10 +81,7 @@ function executeTransition(d, rects, nodesMerge, labels, settings, treemapDiv, t
         .attrTween("x", d => () => d.current.x0 + calcWidth(d.current) / 2)
         .attrTween("y", d => () => d.current.y0 + calcHeight(d.current) / 2)
         .end()
-        .catch(ex => {
-            console.error("Exception in main transition", ex);
-            enableUserInteraction(nodesMerge);
-        })
+        .catch(() => enableUserInteraction(nodesMerge))
         .then(() => {
             if (!labelMapExists(d)) {
                 preventTextCollisions(visibleLabelNodes);
