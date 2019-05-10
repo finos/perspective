@@ -700,7 +700,7 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        let d = this._View.get_row_delta(0, 2147483647);
+        let d = this._View.get_row_delta();
         return extract_vector(d.rows);
     };
 
@@ -712,14 +712,14 @@ export default function(Module) {
      * @param {function} callback A callback function invoked on update.  The
      * parameter to this callback is dependent on the `mode` parameter:
      *     - "none" (default): The callback is invoked without an argument.
-     *     - "rows": The callback is invoked with the changed rows.
+     *     - "cell": The callback is invoked with the new data for each updated cell, serialized to JSON format.
+     *     - "pkey": The callback is invoked with an Array of the primary keys for the updated rows
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        _clear_process(this.pool);
-        if (["none", "rows", "pkey"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
+        if (["none", "cell", "pkey"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "pkey".`);
         }
-        if (mode === "rows" || mode === "pkey") {
+        if (mode === "cell" || mode === "pkey") {
             // Enable deltas only if needed by callback
             if (!this._View._get_deltas_enabled()) {
                 this._View._set_deltas_enabled(true);
@@ -729,7 +729,7 @@ export default function(Module) {
             view: this,
             callback: async () => {
                 switch (mode) {
-                    case "rows":
+                    case "cell":
                         {
                             callback(await this._get_step_delta());
                         }

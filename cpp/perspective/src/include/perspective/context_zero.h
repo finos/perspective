@@ -35,6 +35,8 @@ public:
 
     std::vector<std::string> get_column_names() const;
 
+    std::unordered_set<std::int32_t> get_rows_changed_indices() const;
+
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
 
@@ -47,9 +49,12 @@ protected:
     void calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
         const t_table& transitions);
 
+    void calc_row_delta(const t_table& flattened, const t_table& transitions);
+
 private:
     std::shared_ptr<t_ftrav> m_traversal;
     std::shared_ptr<t_zcdeltas> m_deltas;
+    std::unordered_set<std::int32_t> m_rows_changed_indices;
     std::vector<t_minmax> m_minmax;
     t_symtable m_symtable;
     bool m_has_delta;

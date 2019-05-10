@@ -212,6 +212,21 @@ t_gnode::notify_context(const t_table& flattened, const t_ctx_handle& ctxh) {
     notify_context<CTX_T>(ctx, flattened, delta, prev, current, transitions, existed);
 }
 
+/**
+ * @brief Given multiple `t_table`s containing the different states of the context,
+ * update the context with new data.
+ *
+ * Called on updates and additions AFTER a view is constructed from the table/context.
+ *
+ * @tparam CTX_T
+ * @param ctx
+ * @param flattened a `t_table` containing the flat data for the context
+ * @param delta a `t_table` containing the changes to the dataset
+ * @param prev a `t_table` containing the previous state
+ * @param current a `t_table` containing the current state
+ * @param transitions a `t_table` containing operations to transform the context
+ * @param existed
+ */
 template <typename CTX_T>
 void
 t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& delta,
@@ -229,6 +244,15 @@ t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& del
     }
 }
 
+/**
+ * @brief Given a flattened `t_table`, update the context with the table.
+ *
+ * Called with the context is initialized with a table.
+ *
+ * @tparam CTX_T the template type
+ * @param ctx a pointer to a `t_context` object
+ * @param flattened the flattened `t_table` containing data for the context
+ */
 template <typename CTX_T>
 void
 t_gnode::update_context_from_state(CTX_T* ctx, const t_table& flattened) {

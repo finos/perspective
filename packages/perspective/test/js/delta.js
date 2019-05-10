@@ -12,7 +12,7 @@ let data = [{x: 1, y: "a", z: true}, {x: 2, y: "b", z: false}, {x: 3, y: "c", z:
 let partial_change_y = [{x: 1, y: "string1"}, {x: 2, y: "string2"}];
 let partial_change_z = [{x: 1, z: false}, {x: 2, z: true}];
 let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z: true}];
-let partial_change_nonseq = [{x: 1, y: "string1", z: false}, undefined, undefined, {x: 4, y: "string2", z: true}];
+let partial_change_nonseq = [{x: 1, y: "string1", z: false}, {x: 4, y: "string2", z: true}];
 
 module.exports = perspective => {
     describe("Step delta", function() {
@@ -26,7 +26,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(partial_change_y);
         });
@@ -41,7 +41,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(partial_change_nonseq);
         });
@@ -86,7 +86,7 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([2, 3]);
+                        expect(delta).toEqual([0, 3]);
                         view.delete();
                         table.delete();
                         done();
@@ -97,7 +97,7 @@ module.exports = perspective => {
             });
         });
 
-        describe("1-sided row delta", function() {
+        describe.skip("1-sided row delta", function() {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
@@ -133,7 +133,7 @@ module.exports = perspective => {
             });
         });
 
-        describe("2-sided row delta", function() {
+        describe.skip("2-sided row delta", function() {
             it("returns changed rows when updated data in row pivot", async function(done) {
                 let table = perspective.table(data, {index: "y"});
                 let view = table.view({

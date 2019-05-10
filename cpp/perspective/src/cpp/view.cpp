@@ -450,8 +450,8 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 
 template <typename CTX_T>
 t_rowdelta
-View<CTX_T>::get_row_delta(t_index bidx, t_index eidx) const {
-    return m_ctx->get_row_delta(bidx, eidx);
+View<CTX_T>::get_row_delta() const {
+    return m_ctx->get_row_delta();
 }
 
 template <typename CTX_T>

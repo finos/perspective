@@ -366,6 +366,12 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
     return rval;
 }
 
+t_rowdelta
+t_ctx1::get_row_delta() {
+    t_rowdelta rval;
+    return rval;
+}
+
 /**
  * @brief Returns the row indices that have been updated with new data.
  *

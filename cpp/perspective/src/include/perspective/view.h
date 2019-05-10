@@ -144,7 +144,7 @@ public:
     std::vector<t_sortspec> get_sort() const;
     std::vector<t_tscalar> get_row_path(t_uindex idx) const;
     t_stepdelta get_step_delta(t_index bidx, t_index eidx) const;
-    t_rowdelta get_row_delta(t_index bidx, t_index eidx) const;
+    t_rowdelta get_row_delta() const;
     bool is_column_only() const;
 
 private:
