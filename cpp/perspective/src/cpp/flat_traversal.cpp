@@ -198,8 +198,8 @@ t_ftrav::get_row_index(t_tscalar pkey) const {
             return idx;
         }
     }
-
     PSP_COMPLAIN_AND_ABORT("Invalid primary key in row lookup!");
+    return t_index();
 }
 
 void
