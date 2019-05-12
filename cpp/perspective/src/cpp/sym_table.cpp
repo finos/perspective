@@ -11,7 +11,7 @@
 #include <perspective/base.h>
 #include <perspective/sym_table.h>
 #include <perspective/column.h>
-#include <unordered_map>
+#include <tsl/hopscotch_map.h>
 #include <functional>
 #include <mutex>
 

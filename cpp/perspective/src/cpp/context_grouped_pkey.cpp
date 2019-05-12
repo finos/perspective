@@ -21,7 +21,7 @@
 #include <perspective/filter_utils.h>
 #include <queue>
 #include <tuple>
-#include <unordered_set>
+#include <tsl/hopscotch_set.h>
 
 namespace perspective {
 
@@ -308,7 +308,7 @@ t_ctx_grouped_pkey::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& 
 
     std::vector<t_tscalar> rval;
 
-    std::unordered_set<t_uindex> seen;
+    tsl::hopscotch_set<t_uindex> seen;
 
     for (const auto& c : cells) {
         auto ptidx = m_traversal->get_tree_index(c.first);
@@ -531,7 +531,7 @@ t_ctx_grouped_pkey::rebuild() {
     auto pkey_col = tbl->get_const_column("psp_pkey").get();
 
     std::vector<t_datum> data(nrows);
-    std::unordered_map<t_tscalar, t_uindex> child_ridx_map;
+    tsl::hopscotch_map<t_tscalar, t_uindex> child_ridx_map;
     std::vector<bool> self_pkey_eq(nrows);
 
     for (t_uindex idx = 0; idx < nrows; ++idx) {
@@ -575,7 +575,7 @@ t_ctx_grouped_pkey::rebuild() {
         ++nroot_children;
     }
 
-    std::unordered_map<t_tscalar, std::pair<t_uindex, t_uindex>> p_range_map;
+    tsl::hopscotch_map<t_tscalar, std::pair<t_uindex, t_uindex>> p_range_map;
 
     t_uindex brange = nroot_children;
     for (t_uindex idx = nroot_children; idx < nrows; ++idx) {
@@ -588,7 +588,7 @@ t_ctx_grouped_pkey::rebuild() {
     p_range_map[data.back().m_parent] = std::pair<t_uindex, t_uindex>(brange, nrows);
 
     // map from unsorted space to sorted space
-    std::unordered_map<t_uindex, t_uindex> sortidx_map;
+    tsl::hopscotch_map<t_uindex, t_uindex> sortidx_map;
 
     for (t_uindex idx = 0; idx < nrows; ++idx) {
         sortidx_map[data[idx].m_idx] = idx;

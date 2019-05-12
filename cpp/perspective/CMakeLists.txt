@@ -33,7 +33,7 @@ function (psp_build_dep name cmake_file)
 		${CMAKE_BINARY_DIR}/${name}-build
 		EXCLUDE_FROM_ALL)
 
-	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/gtest/include)
+	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
 	include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
 	include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 endfunction()
@@ -143,6 +143,7 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
+	psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
 	set(CMAKE_C_COMPILER emcc)
 	set(CMAKE_CXX_COMPILER em++)
 	set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake")

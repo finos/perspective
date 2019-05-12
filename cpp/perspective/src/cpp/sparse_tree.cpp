@@ -746,7 +746,7 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate)
     static bool const enable_aggregate_reordering = true;
     static bool const enable_fix_double_calculation = true;
 
-    std::unordered_set<t_column*> dst_visited;
+    tsl::hopscotch_set<t_column*> dst_visited;
     auto push_column = [&](size_t idx) {
         if (enable_fix_double_calculation) {
             t_column* dst = agg_update_info.m_dst[idx];
@@ -1219,7 +1219,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 new_value.set(
                     gstate.reduce<std::function<std::uint32_t(std::vector<t_tscalar>&)>>(pkeys,
                         spec.get_dependencies()[0].name(), [](std::vector<t_tscalar>& values) {
-                            std::unordered_set<t_tscalar> vset;
+                            tsl::hopscotch_set<t_tscalar> vset;
                             for (const auto& v : values) {
                                 vset.insert(v);
                             }

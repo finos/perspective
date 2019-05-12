@@ -17,6 +17,7 @@ const LIMIT = args.indexOf("--limit");
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
 const UNPKG_VERSIONS = [
+    "0.2.23",
     "0.2.22",
     "0.2.21",
     "0.2.20",

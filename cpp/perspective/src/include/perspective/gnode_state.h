@@ -12,18 +12,19 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/table.h>
-#include <boost/unordered_map.hpp>
+#include <tsl/hopscotch_map.h>
 #include <boost/unordered_set.hpp>
 #include <perspective/mask.h>
 #include <perspective/sym_table.h>
 #include <perspective/rlookup.h>
+#include <tsl/hopscotch_map.h>
 
 namespace perspective {
 
 std::pair<t_tscalar, t_tscalar> get_vec_min_max(const std::vector<t_tscalar>& vec);
 
 class PERSPECTIVE_EXPORT t_gstate {
-    typedef boost::unordered_map<t_tscalar, t_uindex> t_mapping;
+    typedef tsl::hopscotch_map<t_tscalar, t_uindex> t_mapping;
 
     typedef boost::unordered_set<t_uindex> t_free_items;
 
