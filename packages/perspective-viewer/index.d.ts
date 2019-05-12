@@ -23,7 +23,7 @@ declare module '@finos/perspective-viewer' {
 
         schema?: Schema;
         index?: string;
-        last?: number;
+        limit?: number;
 
     } & HTMLElement;
 

@@ -139,10 +139,9 @@ export
         this.dark = dark;
         this._schema = schema; // dont trigger setter
         this.view = view;
+        this.plugin_config = plugin_config;
         this.rowpivots = rowpivots;
         this.columnpivots = columnpivots;
-        this.filters = filters;
-        this.plugin_config = plugin_config;
         this.sort = sort;
         this.columns = columns;
         this.index = index;
@@ -157,6 +156,7 @@ export
 
         // do computed last
         this.computedcolumns = computedcolumns;
+        this.filters = filters;
 
         this._key = key;
         this._wrap = wrap;
