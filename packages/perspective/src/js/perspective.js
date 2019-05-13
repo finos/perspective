@@ -62,6 +62,22 @@ export default function(Module) {
         return limit_index;
     }
 
+    let _POOL_DEBOUNCES = [];
+
+    function _set_process(pool) {
+        if (_POOL_DEBOUNCES.indexOf(pool) === -1) {
+            _POOL_DEBOUNCES.push(pool);
+            setTimeout(() => _clear_process(pool));
+        }
+    }
+
+    function _clear_process(pool) {
+        if (_POOL_DEBOUNCES.indexOf(pool) !== -1) {
+            pool._process();
+            _POOL_DEBOUNCES = _POOL_DEBOUNCES.filter(x => x !== pool);
+        }
+    }
+
     /**
      * Common logic for creating and registering a gnode/t_table.
      *
@@ -85,6 +101,12 @@ export default function(Module) {
         } else {
             gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
+        }
+
+        if (is_update || is_delete) {
+            _set_process(pool);
+        } else {
+            pool._process();
         }
 
         return [gnode, limit_index];
@@ -260,6 +282,7 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
+        await new Promise(setTimeout);
         this._View.delete();
         this.ctx.delete();
 
@@ -340,6 +363,7 @@ export default function(Module) {
     };
 
     const to_format = async function(options, formatter) {
+        await new Promise(setTimeout);
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -800,7 +824,8 @@ export default function(Module) {
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    table.prototype.delete = function() {
+    table.prototype.delete = async function() {
+        await new Promise(setTimeout);
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
@@ -962,6 +987,7 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(_config = {}) {
+        _clear_process(this.pool);
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
