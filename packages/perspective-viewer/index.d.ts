@@ -5,17 +5,26 @@ declare module '@finos/perspective-viewer' {
         load(data: TableData): void;
         load(schema: Schema, options: TableOptions): void;
         update(data: TableData): void;
-        delete(): void;
-
         notifyResize(): void;
+        delete(): Promise<void>;
+        flush(): Promise<void>;
+        toggleConfig(): void;
+        save(): any;
+        restore(x: any): Promise<void>;
+
+
+        sort?: Array<string>;
+        columns?: Array<string>;
+        aggregates?: Array<AggregateConfig>;
+        filters?: Array<Array<string>>;
+        view?: string;
+        column_pivots?: Array<string>;
+        row_pivots?: Array<string>;
 
         schema?: Schema;
-        row_pivots?: Array<string>;
-        column_pivots?: Array<string>;
-        sort?: Array<string>;
-        filter?: Array<Array<string>>;
-        aggregate: Array<AggregateConfig>;
-        index: string;
+        index?: string;
+        limit?: number;
+
     } & HTMLElement;
 
 }
