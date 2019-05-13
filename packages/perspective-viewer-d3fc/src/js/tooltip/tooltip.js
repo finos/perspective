@@ -105,7 +105,7 @@ function showTooltip(containerNode, node, tooltipDiv, centered) {
 
     if (centered) [left, top] = centerTip(tooltipDiv, containerRect);
 
-    shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top);
+    shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top, centered);
 }
 
 function centerTip(tooltipDiv, containerRect) {
@@ -121,7 +121,7 @@ function centerTip(tooltipDiv, containerRect) {
     return [newLeft, newTop];
 }
 
-function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
+function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top, centered = false) {
     const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
 
     if (isElementOverflowing(containerRect, tooltipDivRect)) {
@@ -131,6 +131,18 @@ function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
 
     if (isElementOverflowing(containerRect, tooltipDivRect, "bottom")) {
         const topAdjust = tooltipDivRect.bottom - containerRect.bottom;
+        tooltipDiv.style("top", `${top - topAdjust}px`);
+    }
+
+    if (!centered) return;
+
+    if (isElementOverflowing(containerRect, tooltipDivRect, "left")) {
+        const leftAdjust = tooltipDivRect.left - containerRect.left;
+        tooltipDiv.style("left", `${left - leftAdjust}px`);
+    }
+
+    if (isElementOverflowing(containerRect, tooltipDivRect, "top")) {
+        const topAdjust = tooltipDivRect.top - containerRect.top;
         tooltipDiv.style("top", `${top - topAdjust}px`);
     }
 }
