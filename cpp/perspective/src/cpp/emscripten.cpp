@@ -1565,7 +1565,7 @@ namespace binding {
         }
 
         _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow,
-            !(is_new_gnode || new_gnode->mapping_size() == 0));
+            (is_update || new_gnode->mapping_size() > 0));
 
         // Set up pkey and op columns
         if (is_delete) {
