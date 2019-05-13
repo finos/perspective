@@ -22,13 +22,13 @@
 #include <perspective/exports.h>
 #include <perspective/sym_table.h>
 #include <set>
-#include <unordered_map>
+#include <tsl/hopscotch_map.h>
 
 namespace perspective {
 
 class PERSPECTIVE_EXPORT t_ftrav {
-    typedef std::unordered_map<t_tscalar, t_index> t_pkeyidx_map;
-    typedef std::unordered_map<t_tscalar, t_mselem> t_pkmselem_map;
+    typedef tsl::hopscotch_map<t_tscalar, t_index> t_pkeyidx_map;
+    typedef tsl::hopscotch_map<t_tscalar, t_mselem> t_pkmselem_map;
 
 public:
     t_ftrav(bool handle_nan_sort);
@@ -57,11 +57,11 @@ public:
 
     t_index size() const;
 
-    void get_row_indices(const std::unordered_set<t_tscalar>& pkeys,
-        std::unordered_map<t_tscalar, t_index>& out_map) const;
+    void get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys,
+        tsl::hopscotch_map<t_tscalar, t_index>& out_map) const;
 
-    void get_row_indices(t_index bidx, t_index eidx, const std::unordered_set<t_tscalar>& pkeys,
-        std::unordered_map<t_tscalar, t_index>& out_map) const;
+    void get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_tscalar>& pkeys,
+        tsl::hopscotch_map<t_tscalar, t_index>& out_map) const;
 
     void reset();
 

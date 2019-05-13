@@ -17,12 +17,12 @@
 #include <functional>
 #include <limits>
 #include <cmath>
-#include <unordered_map>
+#include <tsl/hopscotch_map.h>
 
 namespace perspective {
 
 class PERSPECTIVE_EXPORT t_vocab {
-    typedef std::unordered_map<const char*, t_uindex, t_cchar_umap_hash, t_cchar_umap_cmp>
+    typedef tsl::hopscotch_map<const char*, t_uindex, t_cchar_umap_hash, t_cchar_umap_cmp>
         t_sidxmap;
 
 public:

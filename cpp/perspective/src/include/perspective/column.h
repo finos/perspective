@@ -20,7 +20,7 @@
 #include <functional>
 #include <limits>
 #include <cmath>
-#include <unordered_map>
+#include <tsl/hopscotch_map.h>
 
 #ifdef PSP_ENABLE_PYTHON
 namespace py = boost::python;

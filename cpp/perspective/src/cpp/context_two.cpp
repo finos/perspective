@@ -579,7 +579,7 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
 
 std::vector<t_tscalar>
 t_ctx2::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    std::unordered_set<t_tscalar> all_pkeys;
+    tsl::hopscotch_set<t_tscalar> all_pkeys;
 
     auto tree_info = resolve_cells(cells);
     for (t_index idx = 0, loop_end = tree_info.size(); idx < loop_end; ++idx) {

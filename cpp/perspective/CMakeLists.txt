@@ -33,7 +33,7 @@ function (psp_build_dep name cmake_file)
 		${CMAKE_BINARY_DIR}/${name}-build
 		EXCLUDE_FROM_ALL)
 
-	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/gtest/include)
+	include_directories(${CMAKE_BINARY_DIR}/${name}-src/extras/${name}/include)
 	include_directories(${CMAKE_BINARY_DIR}/${name}-src/include)
 	include_directories(${CMAKE_BINARY_DIR}/${name}-src)
 endfunction()
@@ -143,8 +143,12 @@ if (PSP_WASM_BUILD)
 	####################
 	# EMSCRIPTEN BUILD #
 	####################
-	set(CMAKE_C_COMPILER emcc)
-	set(CMAKE_CXX_COMPILER em++)
+	execute_process(COMMAND which emcc OUTPUT_VARIABLE EMCC)
+	execute_process(COMMAND which em++ OUTPUT_VARIABLE EMPP)
+	string(STRIP ${EMCC} EMCC)
+	string(STRIP ${EMPP} EMPP)
+	set(CMAKE_C_COMPILER ${EMCC})
+	set(CMAKE_CXX_COMPILER ${EMPP})
 	set(CMAKE_TOOLCHAIN_FILE "$ENV{EMSCRIPTEN_ROOT}/cmake/Modules/Platform/Emscripten.cmake")
 	set(CMAKE_AR emar)
 	set(CMAKE_RANLIB emranlib)
@@ -251,6 +255,9 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		#####################
 	endif()
 endif()
+
+psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
+
 #####################
 
 
@@ -363,7 +370,6 @@ if (PSP_WASM_BUILD)
 	set_target_properties(perspective.sync PROPERTIES COMPILE_FLAGS "${SYNC_MODE_FLAGS}")
 	set_target_properties(perspective.sync PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 	set_target_properties(perspective.sync PROPERTIES OUTPUT_NAME "psp.sync")
-	add_dependencies(perspective.sync perspective.async)
 
 	if (NOT CMAKE_BUILD_TYPE_LOWER STREQUAL debug)
 		add_executable(perspective.asm src/cpp/emscripten.cpp)
@@ -372,7 +378,6 @@ if (PSP_WASM_BUILD)
 		set_target_properties(perspective.asm PROPERTIES COMPILE_FLAGS "${ASMJS_MODE_FLAGS}")
 		set_target_properties(perspective.asm PROPERTIES RUNTIME_OUTPUT_DIRECTORY "./build/")
 		set_target_properties(perspective.asm PROPERTIES OUTPUT_NAME "psp.asmjs")
-		add_dependencies(perspective.asm perspective.sync)
 	endif()
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")

@@ -10,12 +10,12 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/scalar.h>
-#include <unordered_map>
+#include <tsl/hopscotch_map.h>
 
 namespace perspective {
 
 class t_symtable {
-    typedef std::unordered_map<const char*, const char*, t_cchar_umap_hash, t_cchar_umap_cmp>
+    typedef tsl::hopscotch_map<const char*, const char*, t_cchar_umap_hash, t_cchar_umap_cmp>
         t_mapping;
 
 public:
