@@ -8,21 +8,37 @@
  */
 
 import {select} from "d3";
-import {isElementOverlapping} from "../../utils/utils";
+import {isElementOverlapping, isElementOverflowing} from "../../utils/utils";
+
+const minTextSize = 7;
+
+export const labelMapExists = d => (d.target && d.target.textAttributes ? true : false);
 
 export const toggleLabels = (nodes, treemapLevel, crossValues) => {
     nodes
         .selectAll("text")
-        .attr("dx", 0)
-        .attr("dy", 0)
+        .style("font-size", null)
         .attr("class", d => textLevelHelper(d, treemapLevel, crossValues));
-    nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
-    preventTextCollisions(nodes);
+
+    const visibleNodes = selectVisibleNodes(nodes);
+    centerLabels(visibleNodes);
+    preventTextCollisions(visibleNodes);
+};
+
+export const restoreLabels = nodes => {
+    nodes.each((d, i, nodes) => {
+        const label = select(nodes[i]).selectAll("text");
+        label
+            .attr("dx", d.target.textAttributes.dx)
+            .attr("dy", d.target.textAttributes.dy)
+            .attr("class", d.target.textAttributes.class)
+            .style("font-size", d.target.textAttributes["font-size"]);
+    });
 };
 
 export const preventTextCollisions = nodes => {
     const textCollisionFuzzFactorPx = -2;
-    const textAdjustPx = 16;
+    const textAdjustPx = 19; // This should remain the same as the css value for .top => font-size in the chart.less
     const rect = element => element.getBoundingClientRect();
 
     const topNodes = [];
@@ -42,7 +58,57 @@ export const preventTextCollisions = nodes => {
         });
 };
 
-const centerText = node => select(node).attr("dx", select(node).attr("dx") - node.getBoundingClientRect().width / 2);
+export const lockTextOpacity = d => select(d).style("opacity", textOpacity[select(d).attr("class")]);
+
+export const unlockTextOpacity = d => select(d).style("opacity", null);
+
+export const textOpacity = {top: 1, mid: 0.7, lower: 0};
+
+export const selectVisibleNodes = nodes =>
+    nodes.filter(
+        (_, i, nodes) =>
+            select(nodes[i])
+                .selectAll("text")
+                .attr("class") !== textVisability.zero
+    );
+
+export const adjustLabelsThatOverflow = nodes => nodes.selectAll("text").each((_, i, nodes) => shrinkOrHideText(nodes[i]));
+
+const centerLabels = nodes => nodes.selectAll("text").each((_, i, nodes) => centerText(nodes[i]));
+
+const centerText = d => {
+    const nodeSelect = select(d);
+    const rect = d.getBoundingClientRect();
+    nodeSelect.attr("dx", 0 - rect.width / 2).attr("dy", 0 + rect.height / 4);
+};
+
+const shrinkOrHideText = d => {
+    const parent = d.parentNode;
+    const rect = parent.childNodes[0];
+
+    const textRect = d.getBoundingClientRect();
+    const rectRect = rect.getBoundingClientRect();
+
+    if (!needsToShrinkOrHide(d, rectRect, textRect, "left") && !needsToShrinkOrHide(d, rectRect, textRect, "bottom")) {
+        select(d).attr("class", select(d).attr("class"));
+    }
+};
+
+const needsToShrinkOrHide = (d, rectRect, textRect, direction) => {
+    if (isElementOverflowing(rectRect, textRect, direction)) {
+        const fontSize = parseInt(select(d).style("font-size"));
+        if (fontSize > minTextSize) {
+            select(d).style("font-size", `${fontSize - 1}px`);
+            centerText(d);
+            shrinkOrHideText(d);
+        } else {
+            select(d).style("font-size", null);
+            select(d).attr("class", textVisability.zero);
+        }
+        return true;
+    }
+    return false;
+};
 
 const textLevelHelper = (d, treemapLevel, crossValues) => {
     if (!crossValues.filter(x => x !== "").every(x => d.crossValue.split("|").includes(x))) return textVisability.zero;
@@ -56,8 +122,4 @@ const textLevelHelper = (d, treemapLevel, crossValues) => {
     }
 };
 
-const textVisability = {
-    high: "top",
-    low: "mid",
-    zero: "lower"
-};
+const textVisability = {high: "top", low: "mid", zero: "lower"};
