@@ -258,6 +258,7 @@ export default function(Module) {
             this._View = __MODULE__.make_view_two(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         }
 
+        this.pool = pool;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
         this.callbacks = callbacks;
@@ -713,6 +714,7 @@ export default function(Module) {
      *     - "rows": The callback is invoked with the changed rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+        _clear_process(this.pool);
         if (["none", "rows", "pkey"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
         }
@@ -745,6 +747,7 @@ export default function(Module) {
     };
 
     view.prototype.remove_update = function(callback) {
+        _clear_process(this.pool);
         this.callbacks = this.callbacks.filter(x => x.callback !== callback);
     };
 
