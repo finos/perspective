@@ -12,6 +12,7 @@ import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
+import {Host} from "./API/host.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -1227,222 +1228,6 @@ export default function(Module) {
 
     /******************************************************************************
      *
-     * Worker API
-     *
-     */
-
-    function error_to_json(error) {
-        const obj = {};
-        if (typeof error !== "string") {
-            Object.getOwnPropertyNames(error).forEach(key => {
-                obj[key] = error[key];
-            }, error);
-        } else {
-            obj["message"] = error;
-        }
-        return obj;
-    }
-
-    class Host {
-        constructor() {
-            this._tables = {};
-            this._views = {};
-        }
-
-        init(msg) {
-            this.post(msg);
-        }
-
-        post() {
-            throw new Error("post() not implemented!");
-        }
-
-        clear_views(client_id) {
-            for (let key of Object.keys(this._views)) {
-                if (this._views[key].client_id === client_id) {
-                    try {
-                        this._views[key].delete();
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    delete this._views[key];
-                }
-            }
-            console.debug(`GC ${Object.keys(this._views).length} views in memory`);
-        }
-
-        process(msg, client_id) {
-            switch (msg.cmd) {
-                case "init":
-                    this.init(msg);
-                    break;
-                case "table":
-                    this._tables[msg.name] = perspective.table(msg.args[0], msg.options);
-                    break;
-                case "add_computed":
-                    let table = this._tables[msg.original];
-                    let computed = msg.computed;
-                    // rehydrate computed column functions
-                    for (let i = 0; i < computed.length; ++i) {
-                        let column = computed[i];
-                        eval("column.func = " + column.func);
-                    }
-                    this._tables[msg.name] = table.add_computed(computed);
-                    break;
-                case "table_generate":
-                    let g;
-                    eval("g = " + msg.args);
-                    g(function(tbl) {
-                        this._tables[msg.name] = tbl;
-                        this.post({
-                            id: msg.id,
-                            data: "created!"
-                        });
-                    });
-                    break;
-                case "table_execute":
-                    let f;
-                    eval("f = " + msg.f);
-                    f(this._tables[msg.name]);
-                    break;
-                case "view":
-                    this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
-                    this._views[msg.view_name].client_id = client_id;
-                    break;
-                case "table_method": {
-                    let obj = this._tables[msg.name];
-                    let result;
-
-                    try {
-                        if (msg.subscribe) {
-                            obj[msg.method](e => {
-                                this.post({
-                                    id: msg.id,
-                                    data: e
-                                });
-                            });
-                        } else {
-                            result = obj[msg.method].apply(obj, msg.args);
-                            if (result && result.then) {
-                                result
-                                    .then(data => {
-                                        if (data) {
-                                            this.post({
-                                                id: msg.id,
-                                                data: data
-                                            });
-                                        }
-                                    })
-                                    .catch(error => {
-                                        this.post({
-                                            id: msg.id,
-                                            error: error_to_json(error)
-                                        });
-                                    });
-                            } else {
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        this.post({
-                            id: msg.id,
-                            error: error_to_json(e)
-                        });
-                        return;
-                    }
-
-                    break;
-                }
-                case "view_method": {
-                    let obj = this._views[msg.name];
-                    if (!obj) {
-                        this.post({
-                            id: msg.id,
-                            error: {message: "View is not initialized"}
-                        });
-                        return;
-                    }
-                    if (msg.subscribe) {
-                        try {
-                            obj[msg.method](e => {
-                                this.post({
-                                    id: msg.id,
-                                    data: e
-                                });
-                            });
-                        } catch (error) {
-                            this.post({
-                                id: msg.id,
-                                error: error_to_json(error)
-                            });
-                        }
-                    } else {
-                        obj[msg.method]
-                            .apply(obj, msg.args)
-                            .then(result => {
-                                if (msg.method === "delete") {
-                                    delete this._views[msg.name];
-                                }
-                                if (msg.method === "to_arrow") {
-                                    this.post(
-                                        {
-                                            id: msg.id,
-                                            data: result
-                                        },
-                                        [result]
-                                    );
-                                } else {
-                                    this.post({
-                                        id: msg.id,
-                                        data: result
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                this.post({
-                                    id: msg.id,
-                                    error: error_to_json(error)
-                                });
-                            });
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    class WorkerHost extends Host {
-        constructor() {
-            super();
-            self.addEventListener("message", e => this.process(e.data), false);
-        }
-
-        post(msg, transfer) {
-            self.postMessage(msg, transfer);
-        }
-
-        init({buffer}) {
-            if (typeof WebAssembly === "undefined") {
-                console.log("Loading asm.js");
-            } else {
-                console.log("Loading wasm");
-                __MODULE__ = __MODULE__({
-                    wasmBinary: buffer,
-                    wasmJSMethod: "native-wasm"
-                });
-            }
-        }
-    }
-
-    if (typeof self !== "undefined" && self.addEventListener) {
-        new WorkerHost();
-    }
-
-    /******************************************************************************
-     *
      * Perspective
      *
      */
@@ -1536,6 +1321,61 @@ export default function(Module) {
 
     for (let prop of Object.keys(defaults)) {
         perspective[prop] = defaults[prop];
+    }
+
+    /*
+     * Hosting Perspective
+     *
+     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
+     *
+     * If Perspective is running inside a Web Worker, use the WorkerHost as default.
+     *
+     * @extends Host
+     */
+    class WorkerHost extends Host {
+        /**
+         * On initialization, listen for messages posted from the client and send it to `Host.process()`.
+         *
+         * @param perspective a reference to the Perspective module, allowing the `Host` to access Perspective methods.
+         */
+        constructor(perspective) {
+            super(perspective);
+            self.addEventListener("message", e => this.process(e.data), false);
+        }
+
+        /**
+         * Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
+         *
+         * @param {Object} msg a message to pass to the client
+         * @param {*} transfer a transferable object to pass to the client, if needed
+         */
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
+        }
+
+        /**
+         * When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
+         *
+         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
+         */
+        init({buffer}) {
+            if (typeof WebAssembly === "undefined") {
+                console.log("Loading asm.js");
+            } else {
+                console.log("Loading wasm");
+                __MODULE__ = __MODULE__({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm"
+                });
+            }
+        }
+    }
+
+    /**
+     * Use WorkerHost as default inside a Web Worker, where `window` is replaced with `self`.
+     */
+    if (typeof self !== "undefined" && self.addEventListener) {
+        new WorkerHost(perspective);
     }
 
     return perspective;
