@@ -111,6 +111,11 @@ try {
                 cmd += " --scope=@finos/${PACKAGE}";
             }
             cmd += " -- yarn --silent test:run";
+            if (args.indexOf("-t") > -1) {
+                const regex = args.slice(args.indexOf("-t") + 1).join(" ");
+                console.log(`-- Qualifying search '${regex}'`);
+                cmd += ` -t "${regex}"`;
+            }
             execute((IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd);
             execute(slow_jest());
         } else {
