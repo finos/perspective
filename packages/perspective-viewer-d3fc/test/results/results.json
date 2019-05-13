@@ -1,5 +1,5 @@
 {
-    "scatter.html/displays visible columns.": "5a4c6d30a51cd17a0bb5f77fa16f91b3",
+    "scatter.html/displays visible columns.": "c16f81300e8fb894bea5ca531a85ca5d",
     "line.html/shows a grid without any settings applied.": "0c7f5727c69f16688dd5aa6a487129ba",
     "line.html/pivots by a row.": "e35807b1903fd67334749de0d49f3683",
     "line.html/pivots by two rows.": "37975a7cdc9de3c13be9b6bdb0797646",
@@ -120,5 +120,5 @@
     "sunburst.html/highlights invalid filter.": "e48566c24b1655a202d1d227424f71c5",
     "sunburst.html/sorts by an alpha column.": "dca6a09d9b0c4b4a3fd6cdb91fa1eb1a",
     "sunburst.html/displays visible columns.": "92769650f8ccaf823d070f3bd12aa73b",
-    "__GIT_COMMIT__": "d28fd7499d1dcec261da13caa940b3d03cfeee95"
+    "__GIT_COMMIT__": "9b45391e0459405bc214073327edcbda409b16c9"
 }

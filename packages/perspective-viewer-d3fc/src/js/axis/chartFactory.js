@@ -22,11 +22,13 @@ const chartFactory = (xAxis, yAxis, cartesian) => {
         .xLabel(xAxis.label)
         .xAxisHeight(xAxis.size)
         .xDecorate(xAxis.decorate)
+        .xTickFormat(xAxis.tickFormatFunction)
         .yDomain(yAxis.domain)
         .yLabel(yAxis.label)
         .yAxisWidth(yAxis.size)
         .yDecorate(yAxis.decorate)
-        .yOrient("left");
+        .yOrient("left")
+        .yTickFormat(yAxis.tickFormatFunction);
 
     // Padding defaults can be overridden
     chart.xPaddingInner && chart.xPaddingInner(1);
