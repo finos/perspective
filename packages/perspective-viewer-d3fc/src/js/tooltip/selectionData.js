@@ -27,7 +27,7 @@ export function getGroupValues(data, settings) {
 
 export function getSplitValues(data, settings) {
     if (settings.splitValues.length === 0) return [];
-    const splitValues = data.key ? data.key.split("|") : data.mainValue.split("|");
+    const splitValues = data.key ? data.key.split("|") : data.mainValue.split ? data.mainValue.split("|") : [data.mainValue];
     return settings.splitValues.map((split, i) => ({name: split.name, value: toValue(split.type, splitValues[i])}));
 }
 
@@ -46,7 +46,7 @@ export function getDataValues(data, settings) {
     return [
         {
             name: settings.mainValues[0].name,
-            value: toValue(settings.mainValues[0].type, data.colorValue || data.mainValue - data.baseValue || data.mainValue)
+            value: toValue(settings.mainValues[0].type, data.colorValue || data.mainValue - data.baseValue || data.mainValue || data.mainValues)
         }
     ];
 }

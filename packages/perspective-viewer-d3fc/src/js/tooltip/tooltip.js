@@ -18,6 +18,7 @@ export const tooltip = () => {
     let alwaysShow = false;
     let tooltipDiv = null;
     let settings = null;
+    let centered = false;
 
     const _tooltip = selection => {
         const node = selection.node();
@@ -32,7 +33,7 @@ export const tooltip = () => {
 
         const showTip = (data, i, nodes) => {
             generateHtml(tooltipDiv, data, settings);
-            showTooltip(container.node(), nodes[i], tooltipDiv);
+            showTooltip(container.node(), nodes[i], tooltipDiv, centered);
             select(nodes[i]).style("opacity", "0.7");
         };
         const hideTip = (data, i, nodes) => {
@@ -53,6 +54,14 @@ export const tooltip = () => {
             return alwaysShow;
         }
         alwaysShow = args[0];
+        return _tooltip;
+    };
+
+    _tooltip.centered = (...args) => {
+        if (!args.length) {
+            return centered;
+        }
+        centered = args[0];
         return _tooltip;
     };
 
@@ -78,12 +87,14 @@ function getTooltipDiv(container) {
     );
 }
 
-function showTooltip(containerNode, barNode, tooltipDiv) {
+function showTooltip(containerNode, node, tooltipDiv, centered) {
     const containerRect = containerNode.getBoundingClientRect();
-    const barRect = barNode.getBoundingClientRect();
+    const rect = node.getBoundingClientRect();
 
-    const left = barRect.left + barRect.width / 2 - containerRect.left;
-    const top = barRect.top - containerRect.top + containerNode.scrollTop;
+    let left = rect.left + rect.width / 2 - containerRect.left;
+    let top = rect.top - containerRect.top + containerNode.scrollTop;
+
+    if (centered) top = rect.top + rect.height / 2 - containerRect.top + containerNode.scrollTop;
 
     tooltipDiv
         .style("left", `${left}px`)
@@ -92,7 +103,22 @@ function showTooltip(containerNode, barNode, tooltipDiv) {
         .duration(200)
         .style("opacity", 0.9);
 
+    if (centered) [left, top] = centerTip(tooltipDiv, containerRect);
+
     shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top);
+}
+
+function centerTip(tooltipDiv, containerRect) {
+    const tooltipDivRect = tooltipDiv.node().getBoundingClientRect();
+
+    const leftAdjust = tooltipDivRect.width / 2;
+    const newLeft = tooltipDivRect.left - leftAdjust - containerRect.left;
+    tooltipDiv.style("left", `${newLeft}px`);
+
+    const topAdjust = tooltipDivRect.height / 2;
+    const newTop = tooltipDivRect.top - topAdjust - containerRect.top;
+    tooltipDiv.style("top", `${newTop}px`);
+    return [newLeft, newTop];
 }
 
 function shiftIfOverflowingChartArea(tooltipDiv, containerRect, left, top) {
