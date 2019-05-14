@@ -11,7 +11,7 @@ declare module '@finos/perspective-viewer' {
         toggleConfig(): void;
         save(): any;
         restore(x: any): Promise<void>;
-
+        restyleElement(): void;
 
         sort?: Array<string>;
         columns?: Array<string>;
