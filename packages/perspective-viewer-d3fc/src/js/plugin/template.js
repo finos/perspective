@@ -8,14 +8,17 @@
  */
 import * as d3 from "d3";
 
+import {css as chartCss} from "@d3fc/d3fc-chart/src/css";
+import {css as elementCss} from "@d3fc/d3fc-element/src/css";
 import style from "../../less/chart.less";
+
 import template from "../../html/d3fc-chart.html";
 import {areArraysEqualSimple} from "../utils/utils";
 import {initialiseStyles} from "../series/colorStyles";
 
 import {bindTemplate} from "@finos/perspective-viewer/cjs/js/utils";
 
-const styleWithD3FC = `${style}${getD3FCStyles()}`;
+const styleWithD3FC = `${style}${elementCss}${chartCss}`;
 
 @bindTemplate(template, styleWithD3FC) // eslint-disable-next-line no-unused-vars
 class D3FCChartElement extends HTMLElement {
@@ -105,15 +108,4 @@ class D3FCChartElement extends HTMLElement {
         this.remove();
         return newSettings;
     }
-}
-
-function getD3FCStyles() {
-    const headerStyles = document.querySelector("head").querySelectorAll("style");
-    const d3fcStyles = [];
-    headerStyles.forEach(s => {
-        if (s.innerText.indexOf("d3fc-") !== -1) {
-            d3fcStyles.push(s.innerText);
-        }
-    });
-    return d3fcStyles.join("");
 }
