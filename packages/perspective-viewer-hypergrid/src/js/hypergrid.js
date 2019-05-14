@@ -235,8 +235,8 @@ bindTemplate(TEMPLATE, style)(
                 const grid_properties = generateGridProperties(light_theme_overrides);
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
-                this.apply_styles();
                 this.grid.addProperties(grid_properties);
+                this.apply_styles();
 
                 this.grid.localization.header = {
                     format: value => this.grid.behavior.formatColumnHeader(value)
