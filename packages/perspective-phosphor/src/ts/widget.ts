@@ -161,6 +161,7 @@ export
         this._key = key;
         this._wrap = wrap;
         this._delete = delete_;
+        this._displayed = false;
     }
 
     /**********************/
@@ -192,6 +193,7 @@ export
     onAfterShow(msg: Message): void {
         this.pspNode.notifyResize();
         super.onAfterShow(msg);
+        this._displayed = true;
     }
 
     /**
@@ -199,7 +201,9 @@ export
      *
      */
     onResize(msg: Widget.ResizeMessage): void {
-        this.pspNode.notifyResize();
+        if (this._displayed){
+            this.pspNode.notifyResize();
+        }
         super.onResize(msg);
     }
 
@@ -460,6 +464,9 @@ export
             this.node.classList.add(PSP_CONTAINER_CLASS);
             this.node.classList.remove(PSP_CONTAINER_CLASS_DARK);
         }
+        if (this._displayed){
+            this.pspNode.restyleElement();
+        }
     }
 
     private _data: any = [];
@@ -486,6 +493,7 @@ export
     private _key: string;
     private _wrap: boolean;
     private _delete: boolean;
+    private _displayed: boolean;
 }
 
 
