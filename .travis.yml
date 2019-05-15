@@ -35,8 +35,8 @@ env:
     - EM_USE_GLOBAL_CACHE=1
 
 install:
-  - if [ "$TEST" = "CPP_OSX" ]; then brew install node@11 || echo "node installed"; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then brew unlink node && brew link node@11; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then brew install node@10 || echo "node installed"; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then brew unlink node && brew link node@10; fi
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
   - if [ "$TEST" = "CPP_OSX" ]; then export PATH=/usr/local/bin:$PATH; fi
   - if [ "$TEST" = "CPP_OSX" ]; then which node; fi
