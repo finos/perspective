@@ -22,13 +22,11 @@ matrix:
       services: docker
 
     - language: c++
-      node_js: "8"
       env: TEST=CPP_OSX
       os: osx
 
   allow_failures:
     - language: c++
-      node_js: "8"
       env: TEST=CPP_OSX
       os: osx
 
@@ -37,8 +35,12 @@ env:
     - EM_USE_GLOBAL_CACHE=1
 
 install:
-  - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then nvm install node; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then export PATH=/usr/local/bin:$PATH; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then brew install node@8; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then brew unlink node && brew link node@8; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then rm -rf ~/.nvm; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then which node; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then npm install -g yarn; fi
   - yarn
  
 script:
