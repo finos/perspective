@@ -30,6 +30,7 @@
         "@finos/perspective-viewer": "^0.3.0-rc.1",
         "@finos/perspective-viewer-highcharts": "^0.3.0-rc.1",
         "@finos/perspective-viewer-hypergrid": "^0.3.0-rc.1",
+        "@finos/perspective-viewer-d3fc": "^0.3.0-rc.1",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },

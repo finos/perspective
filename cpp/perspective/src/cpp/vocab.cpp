@@ -9,7 +9,7 @@
 
 #include <perspective/first.h>
 #include <perspective/vocab.h>
-#include <unordered_set>
+#include <tsl/hopscotch_set.h>
 
 namespace perspective {
 
@@ -139,7 +139,7 @@ t_vocab::verify() const {
     PSP_VERBOSE_ASSERT(std::string(zero->second), == "", "0 mapped to unknown");
 #endif
 
-    std::unordered_set<std::string> seen;
+    tsl::hopscotch_set<std::string> seen;
 #ifndef PSP_ENABLE_WASM
     seen.insert(std::string(""));
 #endif

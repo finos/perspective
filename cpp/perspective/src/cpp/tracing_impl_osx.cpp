@@ -67,14 +67,14 @@ th_trace_fini() {
 
     t_instrec* irecs = static_cast<t_instrec*>(iptr);
 
-    std::unordered_set<void*> fptrs;
+    tsl::hopscotch_set<void*> fptrs;
 
     for (t_index idx = 0; idx < ndrecs; ++idx) {
         t_instrec* irec = irecs + idx;
         fptrs.emplace(irec->t_fntrace.m_fn);
     }
 
-    for (std::unordered_set<void*>::const_iterator iter = fptrs.begin(); iter != fptrs.end();
+    for (tsl::hopscotch_set<void*>::const_iterator iter = fptrs.begin(); iter != fptrs.end();
          ++iter) {
 
         of << *iter << " ";

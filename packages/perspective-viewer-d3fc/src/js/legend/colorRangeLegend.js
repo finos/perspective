@@ -9,11 +9,10 @@
 import * as d3 from "d3";
 import * as fc from "d3fc";
 import {getOrCreateElement} from "../utils/utils";
+import valueformatter from "../axis/valueFormatter";
 
 export function colorRangeLegend() {
     let scale = null;
-
-    const formatFunc = d => (Number.isInteger(d) ? d3.format(",.0f")(d) : d3.format(",.2f")(d));
 
     function legend(container) {
         const legendSelection = getOrCreateElement(container, "div.legend-container", () =>
@@ -63,7 +62,7 @@ export function colorRangeLegend() {
             .axisRight(yScale)
             .tickValues(tickValues)
             .tickSizeOuter(0)
-            .tickFormat(d => formatFunc(d));
+            .tickFormat(d => valueformatter(d));
 
         const legendSvg = getOrCreateElement(legendSelection, "svg", () => legendSelection.append("svg"))
             .style("width", width)

@@ -9,23 +9,14 @@
 import WebsocketHeartbeatJs from "websocket-heartbeat-js";
 import * as defaults from "./defaults.js";
 
-import {worker} from "./api.js";
+import {worker} from "./API/worker.js";
 
 import asmjs_worker from "./perspective.asmjs.js";
 import wasm_worker from "./perspective.wasm.js";
 
 import wasm from "./psp.async.wasm.js";
 
-/******************************************************************************
- *
- * Utilities
- *
- */
-
-// https://github.com/kripken/emscripten/issues/6042
-function detect_iphone() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-}
+import {detect_iphone} from "./utils.js";
 
 /**
  * Singleton WASM file download cache.
@@ -60,12 +51,20 @@ const override = new class {
     }
 }();
 
+/**
+ * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
+ *
+ * This class serves as the client API for transporting messages to/from Web Workers.
+ */
 class WebWorker extends worker {
     constructor() {
         super();
         this.register();
     }
 
+    /**
+     * When the worker is created, load either the ASM or WASM bundle depending on WebAssembly compatibility.
+     */
     async register() {
         let worker;
         const msg = {cmd: "init"};
@@ -83,6 +82,11 @@ class WebWorker extends worker {
         this._detect_transferable();
     }
 
+    /**
+     * Send a message from the worker, using transferables if necessary.
+     *
+     * @param {*} msg
+     */
     send(msg) {
         if (this._worker.transferable && msg.args && msg.args[0] instanceof ArrayBuffer) {
             this._worker.postMessage(msg, msg.args);
@@ -108,6 +112,13 @@ class WebWorker extends worker {
     }
 }
 
+/**
+ * Given a WebSocket URL, connect to the socket located at `url`.
+ *
+ * The `onmessage` handler receives incoming messages and sends it to the WebWorker through `this._handle`.
+ *
+ * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
+ */
 class WebSocketWorker extends worker {
     constructor(url) {
         super();
@@ -129,6 +140,11 @@ class WebSocketWorker extends worker {
                 delete this._pending_arrow;
             } else {
                 msg = JSON.parse(msg.data);
+                /**
+                 * If the `is_transferable` flag is set, the worker expects the next message to be a transferable object.
+                 *
+                 * This sets the `_pending_arrow` flag, which triggers a special handler for the ArrayBuffer containing arrow data.
+                 */
                 if (msg.is_transferable) {
                     console.warn("Arrow transfer detected!");
                     this._pending_arrow = msg.id;
@@ -166,6 +182,10 @@ const WORKER_SINGLETON = (function() {
     };
 })();
 
+/**
+ * If Perspective is loaded with the `preload` attribute, pre-initialize
+ * the worker so it is available at page render.
+ */
 if (document.currentScript && document.currentScript.hasAttribute("preload")) {
     WORKER_SINGLETON.getInstance();
 }
@@ -173,6 +193,12 @@ if (document.currentScript && document.currentScript.hasAttribute("preload")) {
 const mod = {
     override: x => override.set(x),
 
+    /**
+     * Create a new WebWorker instance. If the `url` parameter is provided, load the worker
+     * at `url` using a WebSocket.
+     *s
+     * @param {*} url
+     */
     worker(url) {
         if (url) {
             return new WebSocketWorker(url);

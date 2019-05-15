@@ -12,6 +12,7 @@ import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map, extract_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
+import {Host} from "./API/host.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -62,6 +63,22 @@ export default function(Module) {
         return limit_index;
     }
 
+    let _POOL_DEBOUNCES = [];
+
+    function _set_process(pool) {
+        if (_POOL_DEBOUNCES.indexOf(pool) === -1) {
+            _POOL_DEBOUNCES.push(pool);
+            setTimeout(() => _clear_process(pool));
+        }
+    }
+
+    function _clear_process(pool) {
+        if (_POOL_DEBOUNCES.indexOf(pool) !== -1) {
+            pool._process();
+            _POOL_DEBOUNCES = _POOL_DEBOUNCES.filter(x => x !== pool);
+        }
+    }
+
     /**
      * Common logic for creating and registering a gnode/t_table.
      *
@@ -85,6 +102,12 @@ export default function(Module) {
         } else {
             gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
+        }
+
+        if (is_update || is_delete) {
+            _set_process(pool);
+        } else {
+            pool._process();
         }
 
         return [gnode, limit_index];
@@ -236,6 +259,7 @@ export default function(Module) {
             this._View = __MODULE__.make_view_two(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         }
 
+        this.pool = pool;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
         this.callbacks = callbacks;
@@ -260,6 +284,7 @@ export default function(Module) {
      * they are garbage collected - you must call this method to reclaim these.
      */
     view.prototype.delete = async function() {
+        await new Promise(setTimeout);
         this._View.delete();
         this.ctx.delete();
 
@@ -340,6 +365,7 @@ export default function(Module) {
     };
 
     const to_format = async function(options, formatter) {
+        await new Promise(setTimeout);
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -689,6 +715,7 @@ export default function(Module) {
      *     - "rows": The callback is invoked with the changed rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+        _clear_process(this.pool);
         if (["none", "rows", "pkey"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "rows" and "pkey".`);
         }
@@ -721,6 +748,7 @@ export default function(Module) {
     };
 
     view.prototype.remove_update = function(callback) {
+        _clear_process(this.pool);
         this.callbacks = this.callbacks.filter(x => x.callback !== callback);
     };
 
@@ -800,7 +828,8 @@ export default function(Module) {
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    table.prototype.delete = function() {
+    table.prototype.delete = async function() {
+        await new Promise(setTimeout);
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
@@ -962,6 +991,7 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(_config = {}) {
+        _clear_process(this.pool);
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
@@ -1227,222 +1257,6 @@ export default function(Module) {
 
     /******************************************************************************
      *
-     * Worker API
-     *
-     */
-
-    function error_to_json(error) {
-        const obj = {};
-        if (typeof error !== "string") {
-            Object.getOwnPropertyNames(error).forEach(key => {
-                obj[key] = error[key];
-            }, error);
-        } else {
-            obj["message"] = error;
-        }
-        return obj;
-    }
-
-    class Host {
-        constructor() {
-            this._tables = {};
-            this._views = {};
-        }
-
-        init(msg) {
-            this.post(msg);
-        }
-
-        post() {
-            throw new Error("post() not implemented!");
-        }
-
-        clear_views(client_id) {
-            for (let key of Object.keys(this._views)) {
-                if (this._views[key].client_id === client_id) {
-                    try {
-                        this._views[key].delete();
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    delete this._views[key];
-                }
-            }
-            console.debug(`GC ${Object.keys(this._views).length} views in memory`);
-        }
-
-        process(msg, client_id) {
-            switch (msg.cmd) {
-                case "init":
-                    this.init(msg);
-                    break;
-                case "table":
-                    this._tables[msg.name] = perspective.table(msg.args[0], msg.options);
-                    break;
-                case "add_computed":
-                    let table = this._tables[msg.original];
-                    let computed = msg.computed;
-                    // rehydrate computed column functions
-                    for (let i = 0; i < computed.length; ++i) {
-                        let column = computed[i];
-                        eval("column.func = " + column.func);
-                    }
-                    this._tables[msg.name] = table.add_computed(computed);
-                    break;
-                case "table_generate":
-                    let g;
-                    eval("g = " + msg.args);
-                    g(function(tbl) {
-                        this._tables[msg.name] = tbl;
-                        this.post({
-                            id: msg.id,
-                            data: "created!"
-                        });
-                    });
-                    break;
-                case "table_execute":
-                    let f;
-                    eval("f = " + msg.f);
-                    f(this._tables[msg.name]);
-                    break;
-                case "view":
-                    this._views[msg.view_name] = this._tables[msg.table_name].view(msg.config);
-                    this._views[msg.view_name].client_id = client_id;
-                    break;
-                case "table_method": {
-                    let obj = this._tables[msg.name];
-                    let result;
-
-                    try {
-                        if (msg.subscribe) {
-                            obj[msg.method](e => {
-                                this.post({
-                                    id: msg.id,
-                                    data: e
-                                });
-                            });
-                        } else {
-                            result = obj[msg.method].apply(obj, msg.args);
-                            if (result && result.then) {
-                                result
-                                    .then(data => {
-                                        if (data) {
-                                            this.post({
-                                                id: msg.id,
-                                                data: data
-                                            });
-                                        }
-                                    })
-                                    .catch(error => {
-                                        this.post({
-                                            id: msg.id,
-                                            error: error_to_json(error)
-                                        });
-                                    });
-                            } else {
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
-                            }
-                        }
-                    } catch (e) {
-                        this.post({
-                            id: msg.id,
-                            error: error_to_json(e)
-                        });
-                        return;
-                    }
-
-                    break;
-                }
-                case "view_method": {
-                    let obj = this._views[msg.name];
-                    if (!obj) {
-                        this.post({
-                            id: msg.id,
-                            error: {message: "View is not initialized"}
-                        });
-                        return;
-                    }
-                    if (msg.subscribe) {
-                        try {
-                            obj[msg.method](e => {
-                                this.post({
-                                    id: msg.id,
-                                    data: e
-                                });
-                            });
-                        } catch (error) {
-                            this.post({
-                                id: msg.id,
-                                error: error_to_json(error)
-                            });
-                        }
-                    } else {
-                        obj[msg.method]
-                            .apply(obj, msg.args)
-                            .then(result => {
-                                if (msg.method === "delete") {
-                                    delete this._views[msg.name];
-                                }
-                                if (msg.method === "to_arrow") {
-                                    this.post(
-                                        {
-                                            id: msg.id,
-                                            data: result
-                                        },
-                                        [result]
-                                    );
-                                } else {
-                                    this.post({
-                                        id: msg.id,
-                                        data: result
-                                    });
-                                }
-                            })
-                            .catch(error => {
-                                this.post({
-                                    id: msg.id,
-                                    error: error_to_json(error)
-                                });
-                            });
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    class WorkerHost extends Host {
-        constructor() {
-            super();
-            self.addEventListener("message", e => this.process(e.data), false);
-        }
-
-        post(msg, transfer) {
-            self.postMessage(msg, transfer);
-        }
-
-        init({buffer}) {
-            if (typeof WebAssembly === "undefined") {
-                console.log("Loading asm.js");
-            } else {
-                console.log("Loading wasm");
-                __MODULE__ = __MODULE__({
-                    wasmBinary: buffer,
-                    wasmJSMethod: "native-wasm"
-                });
-            }
-        }
-    }
-
-    if (typeof self !== "undefined" && self.addEventListener) {
-        new WorkerHost();
-    }
-
-    /******************************************************************************
-     *
      * Perspective
      *
      */
@@ -1536,6 +1350,61 @@ export default function(Module) {
 
     for (let prop of Object.keys(defaults)) {
         perspective[prop] = defaults[prop];
+    }
+
+    /*
+     * Hosting Perspective
+     *
+     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
+     *
+     * If Perspective is running inside a Web Worker, use the WorkerHost as default.
+     *
+     * @extends Host
+     */
+    class WorkerHost extends Host {
+        /**
+         * On initialization, listen for messages posted from the client and send it to `Host.process()`.
+         *
+         * @param perspective a reference to the Perspective module, allowing the `Host` to access Perspective methods.
+         */
+        constructor(perspective) {
+            super(perspective);
+            self.addEventListener("message", e => this.process(e.data), false);
+        }
+
+        /**
+         * Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
+         *
+         * @param {Object} msg a message to pass to the client
+         * @param {*} transfer a transferable object to pass to the client, if needed
+         */
+        post(msg, transfer) {
+            self.postMessage(msg, transfer);
+        }
+
+        /**
+         * When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
+         *
+         * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
+         */
+        init({buffer}) {
+            if (typeof WebAssembly === "undefined") {
+                console.log("Loading asm.js");
+            } else {
+                console.log("Loading wasm");
+                __MODULE__ = __MODULE__({
+                    wasmBinary: buffer,
+                    wasmJSMethod: "native-wasm"
+                });
+            }
+        }
+    }
+
+    /**
+     * Use WorkerHost as default inside a Web Worker, where `window` is replaced with `self`.
+     */
+    if (typeof self !== "undefined" && self.addEventListener) {
+        new WorkerHost(perspective);
     }
 
     return perspective;

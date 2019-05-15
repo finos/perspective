@@ -1565,7 +1565,7 @@ namespace binding {
         }
 
         _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow,
-            !(is_new_gnode || new_gnode->mapping_size() == 0));
+            (is_update || new_gnode->mapping_size() > 0));
 
         // Set up pkey and op columns
         if (is_delete) {
@@ -1601,8 +1601,6 @@ namespace binding {
         }
 
         pool->send(new_gnode->get_id(), 0, tbl);
-        pool->_process();
-
         return new_gnode;
     }
 
@@ -2148,6 +2146,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
         .function<void>("unregister_gnode", &t_pool::unregister_gnode)
+        .function<void>("_process", &t_pool::_process)
         .function<void>("set_update_delegate", &t_pool::set_update_delegate);
 
     /******************************************************************************

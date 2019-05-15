@@ -10,8 +10,8 @@
 const CSV = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.csv";
 const ARROW = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
 
-const ITERATIONS = 50;
-const TOSS_ITERATIONS = 10;
+const ITERATIONS = 100;
+const TOSS_ITERATIONS = 5;
 
 const AGG_OPTIONS = [[{column: "Sales", op: "sum"}], [{column: "State", op: "dominant"}], [{column: "Order Date", op: "dominant"}]];
 
@@ -29,6 +29,27 @@ function to_name({aggregate, row_pivot, column_pivot}) {
         row_pivots: row_pivot.join("/") || "-",
         column_pivots: column_pivot.join("/") || "-"
     };
+}
+
+async function* filterOutliers(someArray) {
+    const values = [], orig = [];
+    for await (const row of someArray) {
+        values.push(row.time);
+        orig.push(row);
+    }
+    values.sort((a, b) => a - b);
+
+    const q1 = values[Math.floor((values.length / 4))];
+    const q3 = values[Math.ceil((values.length * (3 / 4)))];
+    const iqr = q3 - q1;
+    const maxValue = q3 + iqr;
+    const minValue = q1 - iqr;
+
+    for (const idx in orig) {
+        row = orig[idx];
+        row.outlier = (row.time > maxValue) || (row.time < minValue)
+        yield row;
+    }
 }
 
 async function get_data(worker) {
@@ -127,7 +148,8 @@ async function* run_to_format_cases(table, config, format) {
     await view.delete();
 }
 
-async function* run_on_update_cases(table, config, mode) {
+async function* run_on_update_cases(arrow, config, mode) {
+    const table = worker.table(arrow.slice());
     const token = to_name(config);
     const name = `view(${JSON.stringify(token)})`;
 
@@ -153,8 +175,8 @@ async function* run_on_update_cases(table, config, mode) {
             };
         }
     }
-
     await view.delete();
+    await table.delete();
 }
 
 async function* run_all_cases() {
@@ -163,12 +185,12 @@ async function* run_all_cases() {
     const {csv, arrow, rows, columns} = await get_data(worker);
     console.assert(rows.length === columns[Object.keys(columns)[0]].length);
 
-    yield* run_table_cases(worker, csv, "table(csv)");
-    yield* run_table_cases(worker, arrow, "table(arrow)");
-    yield* run_table_cases(worker, rows, "table(row json)");
-    yield* run_table_cases(worker, columns, "table(column json)");
+    yield* filterOutliers(run_table_cases(worker, csv, "table(csv)"));
+    yield* filterOutliers(run_table_cases(worker, arrow, "table(arrow)"));
+    yield* filterOutliers(run_table_cases(worker, rows, "table(row json)"));
+    yield* filterOutliers(run_table_cases(worker, columns, "table(column json)"));
 
-    const table = worker.table(arrow);
+    let table = worker.table(arrow.slice());
     await table.schema();
 
     for (const aggregate of AGG_OPTIONS) {
@@ -176,24 +198,23 @@ async function* run_all_cases() {
             for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
                 const config = {aggregate, row_pivot, column_pivot};
 
-                yield* run_view_cases(table, config);
-                yield* run_to_format_cases(table, config, "to_json");
-                yield* run_to_format_cases(table, config, "to_columns");
-                yield* run_to_format_cases(table, config, "to_arrow");
+                yield* filterOutliers(run_view_cases(table, config));
+                yield* filterOutliers(run_to_format_cases(table, config, "to_json"));
+                yield* filterOutliers(run_to_format_cases(table, config, "to_columns"));
+                yield* filterOutliers(run_to_format_cases(table, config, "to_arrow"));
             }
         }
     }
 
-    const aggregate = AGG_OPTIONS[0];
-    for (const row_pivot of ROW_PIVOT_OPTIONS) {
-        for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
-            const config = {aggregate, row_pivot, column_pivot};
-
-            yield* run_on_update_cases(table, config, "none");
-            yield* run_on_update_cases(table, config, "rows");
-            yield* run_on_update_cases(table, config, "pkey");
-        }
-    }
+    // const aggregate = AGG_OPTIONS[0];
+    // for (const row_pivot of ROW_PIVOT_OPTIONS) {
+    //     for (const column_pivot of COLUMN_PIVOT_OPTIONS) {
+    //         const config = {aggregate, row_pivot, column_pivot};
+    //         yield* filterOutliers(run_on_update_cases(arrow, config, "none"));
+    //         yield* filterOutliers(run_on_update_cases(arrow, config, "rows"));
+    //         yield* filterOutliers(run_on_update_cases(arrow, config, "pkey"));
+    //     }
+    // }
 }
 
 // Run entire test suite

@@ -218,7 +218,7 @@ t_ctx0::get_cell_data(const std::vector<std::pair<t_uindex, t_uindex>>& cells) c
  */
 std::vector<t_cellupd>
 t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
-    std::unordered_set<t_tscalar> pkeys;
+    tsl::hopscotch_set<t_tscalar> pkeys;
     t_tscalar prev_pkey;
     prev_pkey.set(t_none());
 
@@ -255,7 +255,7 @@ t_ctx0::get_cell_delta(t_index bidx, t_index eidx) const {
             }
         }
 
-        std::unordered_map<t_tscalar, t_index> r_indices;
+        tsl::hopscotch_map<t_tscalar, t_index> r_indices;
         m_traversal->get_row_indices(pkeys, r_indices);
 
         for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter
@@ -307,7 +307,7 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
     std::vector<std::int32_t> rows;
 
-    std::unordered_set<t_tscalar> pkeys;
+    tsl::hopscotch_set<t_tscalar> pkeys;
     t_tscalar prev_pkey;
     prev_pkey.set(t_none());
 
@@ -337,7 +337,7 @@ t_ctx0::get_row_delta(t_index bidx, t_index eidx) {
         }
 
         // get row indices and assign into r_indices
-        std::unordered_map<t_tscalar, t_index> r_indices;
+        tsl::hopscotch_map<t_tscalar, t_index> r_indices;
         m_traversal->get_row_indices(pkeys, r_indices);
 
         for (t_zcdeltas::index<by_zc_pkey_colidx>::type::iterator iter

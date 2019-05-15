@@ -16,7 +16,8 @@ const LIMIT = args.indexOf("--limit");
 
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
-const UNPKG_VERSIONS = [
+const JPMC_VERSIONS = [
+    //"0.2.23", /* memory leak */
     "0.2.22",
     "0.2.21",
     "0.2.20",
@@ -38,12 +39,17 @@ const UNPKG_VERSIONS = [
     "0.2.0"
 ];
 
-const UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${UNPKG_VERSIONS}/build/perspective.js`;
+const FINOS_VERSIONS = [
+    "0.3.0-rc.1"
+]
 
-const OLD_FORMAT_UNPKG_VERSIONS = ["0.2.0-beta.3"];
-const OLD_FORMAT_UNPKG_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective-examples@${OLD_FORMAT_UNPKG_VERSIONS}/build/perspective.js`;
+const JPMC_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${JPMC_VERSIONS}/build/perspective.js`;
+const FINOS_URLS = multi_template`https://unpkg.com/@finos/perspective@${FINOS_VERSIONS}/build/perspective.js`
 
-const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective.js`]], UNPKG_URLS, OLD_FORMAT_UNPKG_URLS);
+const OLD_FORMAT_JPMC_VERSIONS = ["0.2.0-beta.3"];
+const OLD_FORMAT_JPMC_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective-examples@${OLD_FORMAT_JPMC_VERSIONS}/build/perspective.js`;
+
+const URLS = [].concat([["master", `http://localhost:8080/perspective.js`]], FINOS_URLS, JPMC_URLS, OLD_FORMAT_JPMC_URLS);
 
 const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 

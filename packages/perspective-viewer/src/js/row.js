@@ -103,7 +103,9 @@ class Row extends HTMLElement {
                 }
             }
         });
-        selector.evaluate();
+        if (filter_operand.value === "") {
+            selector.evaluate();
+        }
         filter_operand.focus();
         this._filter_operand.addEventListener("focus", () => {
             if (filter_operand.value.trim().length === 0) {

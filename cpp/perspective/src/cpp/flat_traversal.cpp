@@ -46,7 +46,7 @@ t_ftrav::get_all_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) 
 
 std::vector<t_tscalar>
 t_ftrav::get_pkeys(const std::vector<std::pair<t_uindex, t_uindex>>& cells) const {
-    std::unordered_set<t_tscalar> all_pkeys;
+    tsl::hopscotch_set<t_tscalar> all_pkeys;
 
     std::set<t_index> all_rows;
 
@@ -145,8 +145,8 @@ t_ftrav::size() const {
 }
 
 void
-t_ftrav::get_row_indices(const std::unordered_set<t_tscalar>& pkeys,
-    std::unordered_map<t_tscalar, t_index>& out_map) const {
+t_ftrav::get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys,
+    tsl::hopscotch_map<t_tscalar, t_index>& out_map) const {
     for (t_index idx = 0, loop_end = size(); idx < loop_end; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
         if (pkeys.find(pkey) != pkeys.end()) {
@@ -156,8 +156,8 @@ t_ftrav::get_row_indices(const std::unordered_set<t_tscalar>& pkeys,
 }
 
 void
-t_ftrav::get_row_indices(t_index bidx, t_index eidx, const std::unordered_set<t_tscalar>& pkeys,
-    std::unordered_map<t_tscalar, t_index>& out_map) const {
+t_ftrav::get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_tscalar>& pkeys,
+    tsl::hopscotch_map<t_tscalar, t_index>& out_map) const {
     for (t_index idx = bidx; idx < eidx; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
         if (pkeys.find(pkey) != pkeys.end()) {
@@ -174,7 +174,7 @@ t_ftrav::reset() {
 
 void
 t_ftrav::check_size() {
-    std::unordered_set<t_tscalar> pkey_set;
+    tsl::hopscotch_set<t_tscalar> pkey_set;
     for (t_index idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
         if (pkey_set.find((*m_index)[idx].m_pkey) != pkey_set.end()) {
             std::cout << "Duplicate entry for " << (*m_index)[idx].m_pkey << std::endl;

@@ -58,7 +58,8 @@ export const axisFactory = settings => {
             },
             size: component.size,
             decorate: component.decorate,
-            label: settings[settingName].map(v => v.name).join(", ")
+            label: settings[settingName].map(v => v.name).join(", "),
+            tickFormatFunction: axis.tickFormatFunction
         };
     };
 

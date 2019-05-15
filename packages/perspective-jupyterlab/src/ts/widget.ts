@@ -48,6 +48,8 @@ class PerspectiveModel extends DOMWidgetModel {
             index: '',
             limit: -1,
             computedcolumns: [],
+            filters: [],
+            plugin_config: {},
             settings: false,
             embed: false,
             dark: false
@@ -86,6 +88,8 @@ class PerspectiveView extends DOMWidgetView {
              index: this.model.get('index'),
              limit: this.model.get('limit'),
              computedcolumns: this.model.get('computedcolumns'),
+             filters: this.model.get('filters'),
+             plugin_config: this.model.get('plugin_config'),
              settings: this.model.get('settings'),
              embed: this.model.get('embed'),
              dark: this.model.get('dark'),
@@ -106,6 +110,8 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:aggregates', this.aggregates_changed, this);
         this.model.on('change:sort', this.sort_changed, this);
         this.model.on('change:computedcolumns', this.computedcolumns_changed, this);
+        this.model.on('change:filters', this.filters_changed, this);
+        this.model.on('change:plugin_config', this.plugin_config_changed, this);
         this.model.on('change:settings', this.settings_changed, this);
         this.model.on('change:embed', this.embed_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
@@ -177,7 +183,15 @@ class PerspectiveView extends DOMWidgetView {
     computedcolumns_changed(){
         this.psp.computedcolumns = this.model.get('computedcolumns');
     }
-    
+
+    filters_changed(){
+        this.psp.filters = this.model.get('filters');
+    }
+
+    plugin_config_changed(){
+        this.psp.plugin_config = this.model.get('plugin_config');
+    }
+
     limit_changed(){
         this.psp.limit = this.model.get('limit');
     }

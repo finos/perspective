@@ -14,7 +14,7 @@ SUPPRESS_WARNINGS_VC(4505)
 #include <perspective/defaults.h>
 #include <perspective/base.h>
 #include <perspective/sym_table.h>
-#include <unordered_set>
+#include <tsl/hopscotch_set.h>
 
 #ifdef PSP_ENABLE_PYTHON
 namespace py = boost::python;

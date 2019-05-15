@@ -14,6 +14,7 @@ export function parentControls(container) {
     let onClick = null;
     let text = null;
     let hide = true;
+    let deactivated = false;
 
     const parent = getOrCreateElement(container, ".parent-controls", () =>
         container
@@ -27,8 +28,25 @@ export function parentControls(container) {
         parent
             .style("display", hide ? "none" : "")
             .select("#goto-parent")
+            .style("pointer-events", deactivated ? "none" : null)
             .html(`⇪ ${text}`)
             .on("click", () => onClick());
+    };
+
+    controls.deactivate = (...args) => {
+        if (!args.length) {
+            return deactivated;
+        }
+        deactivated = args[0];
+
+        const button = parent.select("#goto-parent");
+        if (deactivated) {
+            button.style("pointer-events", "none");
+        } else {
+            button.style("pointer-events", null);
+        }
+
+        return controls;
     };
 
     controls.hide = (...args) => {

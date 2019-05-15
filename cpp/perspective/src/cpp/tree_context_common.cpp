@@ -17,7 +17,7 @@
 #include <perspective/env_vars.h>
 #include <perspective/dense_tree.h>
 #include <perspective/dense_tree_context.h>
-#include <unordered_set>
+#include <tsl/hopscotch_set.h>
 
 namespace perspective {
 

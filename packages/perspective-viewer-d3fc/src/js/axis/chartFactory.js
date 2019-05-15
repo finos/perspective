@@ -25,10 +25,14 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
         .xDomain(xAxis.domain)
         .xLabel(xAxis.label)
         .xAxisHeight(xAxis.size)
+        .xDecorate(xAxis.decorate)
+        .xTickFormat(xAxis.tickFormatFunction)
         .yDomain(yAxis.domain)
         .yLabel(yAxis.label)
         .yAxisWidth(yAxis.size)
-        .yOrient("left");
+        .yDecorate(yAxis.decorate)
+        .yOrient("left")
+        .yTickFormat(yAxis.tickFormatFunction);
 
     if (xAxis.decorate) chart.xDecorate(xAxis.decorate);
     if (yAxis.decorate) chart.yDecorate(yAxis.decorate);
