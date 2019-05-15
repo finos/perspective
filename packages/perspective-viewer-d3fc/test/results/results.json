@@ -6,13 +6,13 @@
     "line.html/pivots by a column.": "2e9742b49756f888bb90e9e62e4d9fa8",
     "line.html/pivots by a row and a column.": "d4ce04924761a78fd7158c9fc5474925",
     "line.html/pivots by two rows and two columns.": "44d2493bb955dbe218f41748a90767fb",
-    "line.html/sorts by a hidden column.": "3dc585f46f7df4fa73baf9c420b573e8",
+    "line.html/sorts by a hidden column.": "3649f649d13f09d661f9345ae1007f57",
     "line.html/sorts by a numeric column.": "3a9c6c82543a3d9d3f6a827d91df6130",
     "line.html/filters by a numeric column.": "759a1bb900eb92179898fc656fcfb706",
     "line.html/filters by a datetime column.": "4056a083691dc0b38512cd91f1775c1b",
     "line.html/highlights invalid filter.": "b3c75abfed5dc9e4f90909598e973f59",
     "line.html/sorts by an alpha column.": "ba630a497a7995723198fce64a9e87db",
-    "line.html/displays visible columns.": "720088c97cda3a8aef84570c637372a4",
+    "line.html/displays visible columns.": "cac30d35fa3c8d3da7cb5a4e11cd775b",
     "bar.html/shows a grid without any settings applied.": "1c9db86cfe87a5a920495a75b0d52910",
     "bar.html/pivots by a row.": "41120594ece3603976abcca83d6eacf7",
     "bar.html/pivots by two rows.": "1d21d9c320c04de2a70210387723e87e",
@@ -120,5 +120,5 @@
     "sunburst.html/highlights invalid filter.": "e48566c24b1655a202d1d227424f71c5",
     "sunburst.html/sorts by an alpha column.": "dca6a09d9b0c4b4a3fd6cdb91fa1eb1a",
     "sunburst.html/displays visible columns.": "92769650f8ccaf823d070f3bd12aa73b",
-    "__GIT_COMMIT__": "d28fd7499d1dcec261da13caa940b3d03cfeee95"
+    "__GIT_COMMIT__": "5b26818d9b92443cdb11f2fbf68bdd7429c999c4"
 }
