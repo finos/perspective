@@ -38,6 +38,9 @@ install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install node@12 || echo "node installed"; fi
   - if [ "$TEST" = "CPP_OSX" ]; then brew unlink node && brew link node@12; fi
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then npm -v; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then node -v; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then which node; fi
   - yarn
  
 script:
