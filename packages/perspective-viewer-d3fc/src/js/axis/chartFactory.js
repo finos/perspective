@@ -6,12 +6,16 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import * as d3 from "d3";
 import * as fc from "d3fc";
 
-export const chartSvgFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartSvgCartesian);
-export const chartCanvasFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartCanvasCartesian);
+export const chartSvgFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartSvgCartesian, false);
+export const chartCanvasFactory = (xAxis, yAxis) => chartFactory(xAxis, yAxis, fc.chartCanvasCartesian, true);
 
-const chartFactory = (xAxis, yAxis, cartesian) => {
+const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
+    let axisSplitter = null;
+    let altAxis = null;
+
     const chart = cartesian({
         xScale: xAxis.scale,
         yScale: yAxis.scale,
@@ -30,11 +34,120 @@ const chartFactory = (xAxis, yAxis, cartesian) => {
         .yOrient("left")
         .yTickFormat(yAxis.tickFormatFunction);
 
+    if (xAxis.decorate) chart.xDecorate(xAxis.decorate);
+    if (yAxis.decorate) chart.yDecorate(yAxis.decorate);
+
     // Padding defaults can be overridden
     chart.xPaddingInner && chart.xPaddingInner(1);
     chart.xPaddingOuter && chart.xPaddingOuter(0.5);
     chart.yPaddingInner && chart.yPaddingInner(1);
     chart.yPaddingOuter && chart.yPaddingOuter(0.5);
+
+    chart.axisSplitter = (...args) => {
+        if (!args.length) {
+            return axisSplitter;
+        }
+        axisSplitter = args[0];
+        return chart;
+    };
+
+    chart.altAxis = (...args) => {
+        if (!args.length) {
+            return altAxis;
+        }
+        altAxis = args[0];
+        return chart;
+    };
+
+    const oldDecorate = chart.decorate();
+    chart.decorate((container, data) => {
+        oldDecorate(container, data);
+        if (!axisSplitter) return;
+
+        if (axisSplitter.haveSplit()) {
+            // Render a second axis on the right of the chart
+            const altData = axisSplitter.altData();
+
+            const y2AxisDataJoin = fc.dataJoin("d3fc-svg", "y2-axis").key(d => d);
+            const ySeriesDataJoin = fc.dataJoin("g", "y-series").key(d => d);
+
+            // Column 5 of the grid
+            container
+                .enter()
+                .append("div")
+                .attr("class", "y2-label-container")
+                .style("grid-column", 5)
+                .style("-ms-grid-column", 5)
+                .style("grid-row", 3)
+                .style("-ms-grid-row", 3)
+                .style("width", "1em")
+                .style("display", "flex")
+                .style("align-items", "center")
+                .style("justify-content", "center")
+                .append("div")
+                .attr("class", "y-label")
+                .style("transform", "rotate(-90deg)");
+
+            const y2Scale = altAxis.scale.domain(altAxis.domain);
+            const yAxisComponent = fc.axisRight(y2Scale);
+
+            // Render the axis
+            y2AxisDataJoin(container, ["right"])
+                .attr("class", d => `y-axis ${d}-axis`)
+                .on("measure", (d, i, nodes) => {
+                    const {width, height} = d3.event.detail;
+                    if (d === "left") {
+                        d3.select(nodes[i])
+                            .select("svg")
+                            .attr("viewBox", `${-width} 0 ${width} ${height}`);
+                    }
+                    y2Scale.range([height, 0]);
+                })
+                .on("draw", (d, i, nodes) => {
+                    d3.select(nodes[i])
+                        .select("svg")
+                        .call(yAxisComponent);
+                });
+
+            // Render all the series using either the primary or alternate y-scales
+            if (canvas) {
+                const drawMultiCanvasSeries = selection => {
+                    const canvasPlotArea = chart.plotArea();
+                    canvasPlotArea.context(selection.node().getContext("2d")).xScale(xAxis.scale);
+
+                    const yScales = [yAxis.scale, y2Scale];
+                    [data, altData].forEach((d, i) => {
+                        canvasPlotArea.yScale(yScales[i]);
+                        canvasPlotArea(d);
+                    });
+                };
+
+                container.select("d3fc-canvas.plot-area").on("draw", (d, i, nodes) => {
+                    drawMultiCanvasSeries(d3.select(nodes[i]).select("canvas"));
+                });
+            } else {
+                const drawMultiSvgSeries = selection => {
+                    const svgPlotArea = chart.plotArea();
+                    svgPlotArea.xScale(xAxis.scale);
+
+                    const yScales = [yAxis.scale, y2Scale];
+                    ySeriesDataJoin(selection, [data, altData]).each((d, i, nodes) => {
+                        svgPlotArea.yScale(yScales[i]);
+                        d3.select(nodes[i])
+                            .datum(d)
+                            .call(svgPlotArea);
+                    });
+                };
+
+                container.select("d3fc-svg.plot-area").on("draw", (d, i, nodes) => {
+                    drawMultiSvgSeries(d3.select(nodes[i]).select("svg"));
+                });
+            }
+        }
+
+        // Render any UI elements the splitter component requires
+        axisSplitter(container);
+    });
 
     return chart;
 };

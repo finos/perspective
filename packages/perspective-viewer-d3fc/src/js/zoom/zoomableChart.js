@@ -69,7 +69,9 @@ export default () => {
                 }
             });
 
-            chart.decorate(sel => {
+            const oldDecorate = chart.decorate();
+            chart.decorate((sel, data) => {
+                oldDecorate(sel, data);
                 if (!bound) {
                     bound = true;
                     // add the zoom interaction on the enter selection
