@@ -38,7 +38,7 @@ env:
 
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
-  - if [ "$TEST" = "CPP_OSX" ]; then which node; fi
+  - if [ "$TEST" = "CPP_OSX" ]; then nvm install node; fi
   - yarn
  
 script:
