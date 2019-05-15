@@ -35,6 +35,7 @@ env:
     - EM_USE_GLOBAL_CACHE=1
 
 install:
+  - if [ "$TEST" = "CPP_OSX" ]; then brew upgrade node; fi
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
   - yarn
  
