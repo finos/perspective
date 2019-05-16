@@ -449,9 +449,16 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 }
 
 template <typename CTX_T>
-t_rowdelta
+std::vector<t_index>
 View<CTX_T>::get_row_delta() const {
-    return m_ctx->get_row_delta();
+    // convert to vector for emscripten compatibility
+    t_rowdelta delta = m_ctx->get_row_delta();
+    tsl::hopscotch_set<t_index> delta_rows = delta.rows;
+    std::vector<t_index> rows;
+    rows.reserve(delta_rows.size());
+    std::copy(delta_rows.begin(), delta_rows.end(), std::back_inserter(rows));
+    std::sort(rows.begin(), rows.end());
+    return rows;
 }
 
 template <typename CTX_T>

@@ -57,10 +57,6 @@ t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
 t_rowdelta get_row_delta();
 
-t_rowdelta get_row_delta(t_index bidx, t_index eidx);
-
-t_rowdelta get_row_delta_data();
-
 std::vector<t_cellupd> get_cell_delta(t_index bidx, t_index eidx) const;
 
 void clear_deltas();

@@ -127,7 +127,7 @@ module.exports = perspective => {
             });
         });
 
-        describe.skip("1-sided row delta", function() {
+        describe("1-sided row delta", function() {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
@@ -161,9 +161,62 @@ module.exports = perspective => {
                 );
                 table.update(partial_change_z);
             });
+
+            it("returns added rows", async function(done) {
+                let table = perspective.table(data);
+                let view = table.view({
+                    row_pivots: ["y"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 5, 6]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it("returns deleted columns", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        // underlying data changes, but only total aggregate row is affected
+                        expect(delta).toEqual([0]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update([{x: 1, y: null}, {x: 4, y: null}]);
+            });
+
+            it("returns changed rows in non-sequential update", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
+                        expect(delta).toEqual([3, 4]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_nonseq);
+            });
         });
 
-        describe.skip("2-sided row delta", function() {
+        describe("2-sided row delta", function() {
             it("returns changed rows when updated data in row pivot", async function(done) {
                 let table = perspective.table(data, {index: "y"});
                 let view = table.view({
@@ -234,6 +287,62 @@ module.exports = perspective => {
                     {mode: "pkey"}
                 );
                 table.update(partial_change_z);
+            });
+
+            it("returns added rows", async function(done) {
+                let table = perspective.table(data);
+                let view = table.view({
+                    row_pivots: ["y"],
+                    column_pivots: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        expect(delta).toEqual([0, 5, 6]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_y);
+            });
+
+            it.skip("returns deleted columns", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y"],
+                    column_pivots: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        // underlying data changes, but only total aggregate row is affected
+                        expect(delta).toEqual([0]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update([{x: 1, y: null}, {x: 2, y: null}, {x: 4, y: null}]);
+            });
+
+            it("returns changed rows in non-sequential update", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    row_pivots: ["y"],
+                    column_pivots: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
+                        expect(delta).toEqual([3, 4]);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "pkey"}
+                );
+                table.update(partial_change_nonseq);
             });
         });
     });

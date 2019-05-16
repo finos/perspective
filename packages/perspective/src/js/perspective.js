@@ -700,8 +700,7 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        let d = this._View.get_row_delta();
-        return extract_vector(d.rows);
+        return extract_vector(this._View.get_row_delta());
     };
 
     /**
@@ -716,6 +715,7 @@ export default function(Module) {
      *     - "pkey": The callback is invoked with an Array of the primary keys for the updated rows
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
+        _clear_process(this.pool);
         if (["none", "cell", "pkey"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "pkey".`);
         }

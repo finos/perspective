@@ -304,49 +304,17 @@ t_ctx0::get_step_delta(t_index bidx, t_index eidx) {
 t_rowdelta
 t_ctx0::get_row_delta() {
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
-    std::unordered_set<t_tscalar> changed_pkeys = get_delta_pkeys();
+
     // Given a set of primary keys, transform them into row indices
-    std::vector<t_index> rows = m_traversal->get_row_indices(changed_pkeys);
-    std::sort(rows.begin(), rows.end());
+    tsl::hopscotch_set<t_tscalar> changed_pkeys = get_delta_pkeys();
+    tsl::hopscotch_set<t_index> rows = m_traversal->get_row_indices(changed_pkeys);
+
     t_rowdelta rval(rows_changed, rows);
     clear_deltas();
     return rval;
 }
 
-/* t_rowdelta
-t_ctx0::get_row_delta_data() {
-    // TODO: finish
-    t_uindex ctx_nrows = get_row_count();
-    t_uindex ctx_ncols = get_column_count();
-    auto ext = sanitize_get_data_extents(
-        ctx_nrows, ctx_ncols, 0, ctx_nrows, 0, ctx_ncols);
-
-    t_index nrows = ext.m_erow - ext.m_srow;
-    t_index stride = ext.m_ecol - ext.m_scol;
-    std::vector<t_tscalar> values(nrows * stride);
-
-    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(ext.m_srow, ext.m_erow);
-    auto none = mknone();
-
-    for (t_index cidx = ext.m_scol; cidx < ext.m_ecol; ++cidx) {
-        std::vector<t_tscalar> out_data(pkeys.size());
-        m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
-
-        for (t_index ridx = ext.m_srow; ridx < ext.m_erow; ++ridx) {
-            auto v = out_data[ridx - ext.m_srow];
-
-            // todo: fix null handling
-            if (!v.is_valid())
-                v.set(none);
-
-            values[(ridx - ext.m_srow) * stride + (cidx - ext.m_scol)] = v;
-        }
-    }
-
-    return values;
-} */
-
-const std::unordered_set<t_tscalar>&
+const tsl::hopscotch_set<t_tscalar>&
 t_ctx0::get_delta_pkeys() const {
     return m_delta_pkeys;
 }
