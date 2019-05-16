@@ -675,15 +675,15 @@ t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
  */
 t_rowdelta
 t_ctx2::get_row_delta() {
-    t_uindex nrows = get_row_count();
-    t_uindex ncols = get_num_view_columns();
+    t_index nrows = get_row_count();
+    t_index ncols = get_num_view_columns();
     tsl::hopscotch_set<t_index> rows;
 
     std::vector<std::pair<t_uindex, t_uindex>> cells;
 
     // get cells and imbue with additional information
     for (t_index ridx = 0; ridx < nrows; ++ridx) {
-        for (t_uindex cidx = 1; cidx < ncols; ++cidx) {
+        for (t_index cidx = 1; cidx < ncols; ++cidx) {
             cells.push_back(std::pair<t_index, t_index>(ridx, cidx));
         }
     }

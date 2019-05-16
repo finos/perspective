@@ -66,8 +66,6 @@ public:
     tsl::hopscotch_set<t_index> get_row_indices(
         const tsl::hopscotch_set<t_tscalar>& pkeys) const;
 
-    t_index get_row_index(t_tscalar pkey) const;
-
     void reset();
 
     void check_size();

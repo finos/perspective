@@ -184,24 +184,6 @@ t_ftrav::get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys) const {
     return rows;
 }
 
-/**
- * @brief Given a primary key, return the row index at which the primary key is mapped.
- *
- * @param pkey
- * @return t_index
- */
-t_index
-t_ftrav::get_row_index(t_tscalar pkey) const {
-    for (t_index idx = 0, loop_end = size(); idx < loop_end; ++idx) {
-        const t_tscalar& found_pkey = (*m_index)[idx].m_pkey;
-        if (found_pkey == pkey) {
-            return idx;
-        }
-    }
-    PSP_COMPLAIN_AND_ABORT("Invalid primary key in row lookup!");
-    return t_index();
-}
-
 void
 t_ftrav::reset() {
     if (m_index.get())

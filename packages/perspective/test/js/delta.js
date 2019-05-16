@@ -307,16 +307,18 @@ module.exports = perspective => {
                 table.update(partial_change_y);
             });
 
-            it.skip("returns deleted columns", async function(done) {
+            it("returns deleted columns", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
                     row_pivots: ["y"],
-                    column_pivots: ["x"]
+                    column_pivots: ["x"],
+                    aggregates: {y: "unique"},
+                    columns: ["x", "y", "z"]
                 });
                 view.on_update(
                     async function(delta) {
                         // underlying data changes, but only total aggregate row is affected
-                        expect(delta).toEqual([0]);
+                        expect(delta).toEqual([0, 1, 2, 4]);
                         view.delete();
                         table.delete();
                         done();
