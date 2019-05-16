@@ -54,7 +54,9 @@ export const axisFactory = settings => {
             labelFunction: axis.labelFunction,
             component: {
                 bottom: component.bottom,
-                left: component.left
+                left: component.left,
+                top: component.top,
+                right: component.right
             },
             size: component.size,
             decorate: component.decorate,
@@ -73,6 +75,8 @@ export const axisFactory = settings => {
     const defaultComponent = () => ({
         bottom: fc.axisBottom,
         left: fc.axisLeft,
+        top: fc.axisTop,
+        right: fc.axisRight,
         decorate: () => {}
     });
 

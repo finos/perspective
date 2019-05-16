@@ -10,7 +10,7 @@ import * as d3 from "d3";
 import * as fc from "d3fc";
 import minBandwidth from "./minBandwidth";
 import {flattenArray} from "./flatten";
-import {multiAxisBottom, multiAxisLeft} from "../d3fc/axis/multi-axis";
+import {multiAxisBottom, multiAxisLeft, multiAxisTop, multiAxisRight} from "../d3fc/axis/multi-axis";
 import {getChartContainer} from "../plugin/root";
 
 export const scale = () => minBandwidth(d3.scaleBand()).padding(0.5);
@@ -69,8 +69,8 @@ export const component = settings => {
         const tickSizeInner = multiLevel ? groupTickLayout.map(l => l.size) : groupTickLayout[0].size;
         const tickSizeOuter = groupTickLayout.reduce((s, v) => s + v.size, 0);
 
-        const createAxis = scale => {
-            const axis = pickAxis(multiLevel)(scale);
+        const createAxis = base => scale => {
+            const axis = base(scale);
 
             if (multiLevel) {
                 axis.groups(levelGroups)
@@ -87,9 +87,12 @@ export const component = settings => {
             hideOverlappingLabels(s, rotation);
         };
 
+        const axisSet = getAxisSet(multiLevel);
         return {
-            bottom: createAxis,
-            left: createAxis,
+            bottom: createAxis(axisSet.bottom),
+            left: createAxis(axisSet.left),
+            right: createAxis(axisSet.right),
+            top: createAxis(axisSet.top),
             size: `${tickSizeOuter + 10}px`,
             decorate
         };
@@ -100,6 +103,24 @@ export const component = settings => {
             return orient === "horizontal" ? multiAxisBottom : multiAxisLeft;
         }
         return orient === "horizontal" ? fc.axisOrdinalBottom : fc.axisOrdinalLeft;
+    };
+
+    const getAxisSet = multiLevel => {
+        if (multiLevel) {
+            return {
+                bottom: multiAxisBottom,
+                left: multiAxisLeft,
+                top: multiAxisTop,
+                right: multiAxisRight
+            };
+        } else {
+            return {
+                bottom: fc.axisOrdinalBottom,
+                left: fc.axisOrdinalLeft,
+                top: fc.axisOrdinalTop,
+                right: fc.axisOrdinalRight
+            };
+        }
     };
 
     const axisGroups = domain => {
