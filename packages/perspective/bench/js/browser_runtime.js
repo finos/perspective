@@ -32,22 +32,23 @@ function to_name({aggregate, row_pivot, column_pivot}) {
 }
 
 async function* filterOutliers(someArray) {
-    const values = [], orig = [];
+    const values = [],
+        orig = [];
     for await (const row of someArray) {
         values.push(row.time);
         orig.push(row);
     }
     values.sort((a, b) => a - b);
 
-    const q1 = values[Math.floor((values.length / 4))];
-    const q3 = values[Math.ceil((values.length * (3 / 4)))];
+    const q1 = values[Math.floor(values.length / 4)];
+    const q3 = values[Math.ceil(values.length * (3 / 4))];
     const iqr = q3 - q1;
     const maxValue = q3 + iqr;
     const minValue = q1 - iqr;
 
     for (const idx in orig) {
-        row = orig[idx];
-        row.outlier = (row.time > maxValue) || (row.time < minValue)
+        let row = orig[idx];
+        row.outlier = row.time > maxValue || row.time < minValue;
         yield row;
     }
 }

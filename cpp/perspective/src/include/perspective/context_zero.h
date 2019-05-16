@@ -17,6 +17,7 @@
 #include <perspective/traversal.h>
 #include <perspective/flat_traversal.h>
 #include <perspective/table.h>
+#include <tsl/hopscotch_set.h>
 
 namespace perspective {
 
@@ -35,6 +36,8 @@ public:
 
     std::vector<std::string> get_column_names() const;
 
+    const tsl::hopscotch_set<t_tscalar>& get_delta_pkeys() const;
+
     void sort_by();
     std::vector<t_sortspec> get_sort_by() const;
 
@@ -47,9 +50,14 @@ protected:
     void calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
         const t_table& transitions);
 
+    void calc_row_delta(const t_table& flattened, const t_table& transitions);
+
+    void add_delta_pkey(t_tscalar pkey);
+
 private:
     std::shared_ptr<t_ftrav> m_traversal;
     std::shared_ptr<t_zcdeltas> m_deltas;
+    tsl::hopscotch_set<t_tscalar> m_delta_pkeys;
     std::vector<t_minmax> m_minmax;
     t_symtable m_symtable;
     bool m_has_delta;

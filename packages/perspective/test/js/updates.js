@@ -293,7 +293,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(data);
         });
@@ -313,7 +313,7 @@ module.exports = perspective => {
                         done();
                     }
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(data);
         });
@@ -334,7 +334,7 @@ module.exports = perspective => {
                     table2.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table1.update(data);
         });
@@ -358,7 +358,7 @@ module.exports = perspective => {
                     table2.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table1.update(data);
         });
@@ -474,7 +474,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(data_2);
         });
@@ -492,7 +492,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(data_2);
         });
@@ -536,7 +536,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(partial);
         });
@@ -561,7 +561,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(partial);
         });
@@ -585,7 +585,7 @@ module.exports = perspective => {
                     table.delete();
                     done();
                 },
-                {mode: "rows"}
+                {mode: "cell"}
             );
             table.update(partial);
         });

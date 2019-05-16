@@ -47,9 +47,15 @@ t_stepdelta::t_stepdelta(
 // t_rowdelta contains a vector of row indices that have been changed
 t_rowdelta::t_rowdelta() {}
 
-t_rowdelta::t_rowdelta(bool rows_changed, const std::vector<std::int32_t>& rows)
+t_rowdelta::t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows)
     : rows_changed(rows_changed)
     , rows(rows) {}
+
+t_rowdelta::t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows,
+    const std::vector<t_tscalar>& data)
+    : rows_changed(rows_changed)
+    , rows(rows)
+    , data(data) {}
 } // end namespace perspective
 
 namespace std {

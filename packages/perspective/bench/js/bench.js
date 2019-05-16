@@ -39,17 +39,15 @@ const JPMC_VERSIONS = [
     "0.2.0"
 ];
 
-const FINOS_VERSIONS = [
-    "0.3.0-rc.1"
-]
+const FINOS_VERSIONS = ["0.3.0-rc.1"];
 
 const JPMC_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective@${JPMC_VERSIONS}/build/perspective.js`;
-const FINOS_URLS = multi_template`https://unpkg.com/@finos/perspective@${FINOS_VERSIONS}/build/perspective.js`
+const FINOS_URLS = multi_template`https://unpkg.com/@finos/perspective@${FINOS_VERSIONS}/build/perspective.js`;
 
 const OLD_FORMAT_JPMC_VERSIONS = ["0.2.0-beta.3"];
 const OLD_FORMAT_JPMC_URLS = multi_template`https://unpkg.com/@jpmorganchase/perspective-examples@${OLD_FORMAT_JPMC_VERSIONS}/build/perspective.js`;
 
-const URLS = [].concat([["master", `http://localhost:8080/perspective.js`]], FINOS_URLS, JPMC_URLS, OLD_FORMAT_JPMC_URLS);
+const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective.js`]], FINOS_URLS, JPMC_URLS, OLD_FORMAT_JPMC_URLS);
 
 const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 

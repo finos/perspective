@@ -166,6 +166,24 @@ t_ftrav::get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_
     }
 }
 
+/**
+ * @brief Given a set of primary keys, return the corresponding row indices.
+ *
+ * @param pkeys
+ * @return tsl::hopscotch_set<t_index>
+ */
+tsl::hopscotch_set<t_index>
+t_ftrav::get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys) const {
+    tsl::hopscotch_set<t_index> rows;
+    for (t_index idx = 0, loop_end = size(); idx < loop_end; ++idx) {
+        const t_tscalar& pkey = (*m_index)[idx].m_pkey;
+        if (pkeys.find(pkey) != pkeys.end()) {
+            rows.insert(idx);
+        }
+    }
+    return rows;
+}
+
 void
 t_ftrav::reset() {
     if (m_index.get())

@@ -200,6 +200,14 @@ void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_colu
     const std::uint8_t* op_base, std::vector<t_rlookup>& lkup,
     std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
+/**
+ * @brief Given a t_table and a context handler, construct the t_tables relating to delta
+ * calculation and notify the context with the constructed tables.
+ *
+ * @tparam CTX_T
+ * @param flattened
+ * @param ctxh
+ */
 template <typename CTX_T>
 void
 t_gnode::notify_context(const t_table& flattened, const t_ctx_handle& ctxh) {
@@ -212,6 +220,21 @@ t_gnode::notify_context(const t_table& flattened, const t_ctx_handle& ctxh) {
     notify_context<CTX_T>(ctx, flattened, delta, prev, current, transitions, existed);
 }
 
+/**
+ * @brief Given multiple `t_table`s containing the different states of the context,
+ * update the context with new data.
+ *
+ * Called on updates and additions AFTER a view is constructed from the table/context.
+ *
+ * @tparam CTX_T
+ * @param ctx
+ * @param flattened a `t_table` containing the flat data for the context
+ * @param delta a `t_table` containing the changes to the dataset
+ * @param prev a `t_table` containing the previous state
+ * @param current a `t_table` containing the current state
+ * @param transitions a `t_table` containing operations to transform the context
+ * @param existed
+ */
 template <typename CTX_T>
 void
 t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& delta,
@@ -229,6 +252,15 @@ t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& del
     }
 }
 
+/**
+ * @brief Given a flattened `t_table`, update the context with the table.
+ *
+ * Called with the context is initialized with a table.
+ *
+ * @tparam CTX_T the template type
+ * @param ctx a pointer to a `t_context` object
+ * @param flattened the flattened `t_table` containing data for the context
+ */
 template <typename CTX_T>
 void
 t_gnode::update_context_from_state(CTX_T* ctx, const t_table& flattened) {

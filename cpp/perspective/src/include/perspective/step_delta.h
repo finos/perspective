@@ -13,6 +13,7 @@
 #include <perspective/scalar.h>
 #include <perspective/exports.h>
 #include <vector>
+#include <tsl/hopscotch_set.h>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -86,10 +87,14 @@ struct PERSPECTIVE_EXPORT t_stepdelta {
 struct PERSPECTIVE_EXPORT t_rowdelta {
     t_rowdelta();
 
-    t_rowdelta(bool rows_changed, const std::vector<std::int32_t>& rows);
+    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows);
+
+    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows,
+        const std::vector<t_tscalar>& data);
 
     bool rows_changed;
-    std::vector<std::int32_t> rows;
+    tsl::hopscotch_set<t_index> rows;
+    std::vector<t_tscalar> data;
 };
 
 } // end namespace perspective
