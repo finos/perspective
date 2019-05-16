@@ -13,6 +13,10 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 <img src="https://perspective.finos.org/img/demo.gif">
 
+Perspective development is lead by a team of engineers at J.P. Morgan.
+
+![](https://perspective.finos.org/img/jpm.png)
+
 ## Features
 
 - A fast, memory efficient streaming pivot engine written principally in C++ and
