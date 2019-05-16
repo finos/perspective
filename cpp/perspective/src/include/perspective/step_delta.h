@@ -87,13 +87,13 @@ struct PERSPECTIVE_EXPORT t_stepdelta {
 struct PERSPECTIVE_EXPORT t_rowdelta {
     t_rowdelta();
 
-    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows);
+    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_uindex>& rows);
 
-    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_index>& rows,
+    t_rowdelta(bool rows_changed, const tsl::hopscotch_set<t_uindex>& rows,
         const std::vector<t_tscalar>& data);
 
     bool rows_changed;
-    tsl::hopscotch_set<t_index> rows;
+    tsl::hopscotch_set<t_uindex> rows;
     std::vector<t_tscalar> data;
 };
 

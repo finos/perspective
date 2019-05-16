@@ -63,7 +63,7 @@ public:
     void get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_tscalar>& pkeys,
         tsl::hopscotch_map<t_tscalar, t_index>& out_map) const;
 
-    tsl::hopscotch_set<t_index> get_row_indices(
+    tsl::hopscotch_set<t_uindex> get_row_indices(
         const tsl::hopscotch_set<t_tscalar>& pkeys) const;
 
     void reset();

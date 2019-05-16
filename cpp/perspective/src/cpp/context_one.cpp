@@ -375,8 +375,8 @@ t_rowdelta
 t_ctx1::get_row_delta() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_index eidx = t_index(m_traversal->size());
-    tsl::hopscotch_set<t_index> rows;
+    t_uindex eidx = t_uindex(m_traversal->size());
+    tsl::hopscotch_set<t_uindex> rows;
 
     const auto& deltas = m_tree->get_deltas();
     for (t_index idx = 0; idx < eidx; ++idx) {

@@ -47,6 +47,31 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
     m_stride = m_end_col - m_start_col;
 }
 
+/**
+ * @brief Construct a new data slice, with a vector of row indices on which to access the
+ * underlying data.
+ *
+ * @tparam CTX_T
+ * @param ctx
+ * @param slice
+ * @param row_indices
+ */
+template <typename CTX_T>
+t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
+    const std::vector<t_tscalar>& slice, std::vector<t_uindex> row_indices)
+    : m_ctx(ctx)
+    , m_slice(slice)
+    , m_row_indices(row_indices) {
+    auto start_row = m_row_indices.begin();
+    auto end_row = m_row_indices.end();
+
+    m_start_row = *start_row;
+    m_end_row = *end_row;
+    m_start_col = 0;
+    m_end_col = m_ctx->get_column_count();
+    m_stride = m_end_col;
+}
+
 template <typename CTX_T>
 t_data_slice<CTX_T>::~t_data_slice() {}
 
@@ -82,6 +107,12 @@ template <typename CTX_T>
 const std::vector<t_tscalar>&
 t_data_slice<CTX_T>::get_slice() const {
     return m_slice;
+}
+
+template <typename CTX_T>
+const std::vector<t_uindex>&
+t_data_slice<CTX_T>::get_row_indices() const {
+    return m_row_indices;
 }
 
 template <typename CTX_T>

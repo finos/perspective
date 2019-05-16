@@ -446,16 +446,18 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 }
 
 template <typename CTX_T>
-std::vector<t_index>
+std::shared_ptr<t_data_slice<CTX_T>>
 View<CTX_T>::get_row_delta() const {
-    // convert to vector for emscripten compatibility
     t_rowdelta delta = m_ctx->get_row_delta();
-    tsl::hopscotch_set<t_index> delta_rows = delta.rows;
-    std::vector<t_index> rows;
+    const std::vector<t_tscalar>& data = delta.data;
+    const tsl::hopscotch_set<t_uindex>& delta_rows = delta.rows;
+
+    std::vector<t_uindex> rows;
     rows.reserve(delta_rows.size());
     std::copy(delta_rows.begin(), delta_rows.end(), std::back_inserter(rows));
-    std::sort(rows.begin(), rows.end());
-    return rows;
+
+    auto data_slice_ptr = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, rows);
+    return data_slice_ptr;
 }
 
 template <typename CTX_T>

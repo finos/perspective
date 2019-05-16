@@ -10,7 +10,7 @@
 import * as defaults from "./defaults.js";
 import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
-import {extract_map, extract_vector} from "./emscripten.js";
+import {extract_map} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Host} from "./API/host.js";
 
@@ -364,6 +364,12 @@ export default function(Module) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
+    view.prototype.get_data_slice = async function(start_row, end_row, start_col, end_col) {
+        const num_sides = this.sides();
+        const nidx = ["zero", "one", "two"][num_sides];
+        return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+    };
+
     const to_format = async function(options, formatter) {
         await new Promise(setTimeout);
         options = options || {};
@@ -380,7 +386,7 @@ export default function(Module) {
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
 
-        const slice = __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
+        const slice = await this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
         const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
 
@@ -505,6 +511,15 @@ export default function(Module) {
      *
      * @param {string} column_name The name of the column to serialize.
      *
+     * @param {Object} options An optional configuration object.
+     *
+     * @param {*} options.data_slice A data slice object from which to serialize.
+     *
+     * @param {number} options.start_row The starting row index from which
+     * to serialize.
+     * @param {number} options.end_row The ending row index from which
+     * to serialize.
+     *
      * @returns {Promise<TypedArray>} A promise resolving to a TypedArray
      * representing the data of the column as retrieved from the {@link module:perspective~view} - all
      * pivots, aggregates, sorts, and filters have been applied onto the values
@@ -515,27 +530,31 @@ export default function(Module) {
      */
     view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
         const names = await this._column_names();
-        const num_rows = await this.num_rows();
-        const column_pivot_only = this.config.row_pivots[0] === "psp_okey" || this.column_only === true;
-
         let idx = names.indexOf(col_name);
 
-        const start_row = options.start_row || 0;
-        const end_row = (options.end_row || num_rows) + (column_pivot_only ? 1 : 0);
-
-        // type-checking is handled in c++ to accomodate column-pivoted views
         if (idx === -1) {
             return undefined;
         }
 
-        if (this.sides() === 0) {
-            return __MODULE__.col_to_js_typed_array_zero(this._View, idx, false, start_row, end_row);
-        } else if (this.sides() === 1) {
-            // columns start at 1 for > 0-sided views
-            return __MODULE__.col_to_js_typed_array_one(this._View, idx + 1, false, start_row, end_row);
-        } else {
-            return __MODULE__.col_to_js_typed_array_two(this._View, idx + 1, column_pivot_only, start_row, end_row);
+        // determine start/end row
+        const num_rows = await this.num_rows();
+        const start_row = options.start_row || 0;
+        const end_row = options.end_row || num_rows;
+
+        // mutate the column index if necessary: in pivoted views, columns start at 1
+        const num_sides = this.sides();
+        if (num_sides > 0) {
+            idx++;
         }
+
+        // use a specified data slice, if provided
+        let data_slice = options.data_slice;
+        if (!data_slice) {
+            data_slice = await this.get_data_slice(start_row, end_row, idx, idx + 1);
+        }
+
+        const nidx = ["zero", "one", "two"][num_sides];
+        return __MODULE__[`col_to_js_typed_array_${nidx}`](data_slice, idx);
     };
 
     /**
@@ -544,6 +563,9 @@ export default function(Module) {
      * @async
      *
      * @param {Object} [options] An optional configuration object.
+     *
+     * @param {*} options.data_slice A data slice object from which to serialize.
+     *
      * @param {number} options.start_row The starting row index from which
      * to serialize.
      * @param {number} options.end_row The ending row index from which
@@ -700,7 +722,8 @@ export default function(Module) {
      * @private
      */
     view.prototype._get_row_delta = async function() {
-        return extract_vector(this._View.get_row_delta());
+        let delta_slice = this._View.get_row_delta();
+        return await this.to_arrow({data_slice: delta_slice});
     };
 
     /**

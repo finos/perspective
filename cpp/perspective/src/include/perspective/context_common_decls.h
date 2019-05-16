@@ -14,6 +14,8 @@ perspective::t_index get_column_count() const;
 std::vector<t_tscalar> get_data(
     t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
 
+std::vector<t_tscalar> get_data(const tsl::hopscotch_set<t_tscalar>& pkeys) const;
+
 void sort_by(const std::vector<t_sortspec>& sortby);
 
 void reset_sortby();
