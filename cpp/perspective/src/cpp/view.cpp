@@ -216,11 +216,10 @@ template <>
 std::shared_ptr<t_data_slice<t_ctx0>>
 View<t_ctx0>::get_data(
     t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
-    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
-        m_ctx->get_data(start_row, end_row, start_col, end_col));
+    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx0>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, col_names);
+        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
@@ -228,14 +227,13 @@ template <>
 std::shared_ptr<t_data_slice<t_ctx1>>
 View<t_ctx1>::get_data(
     t_uindex start_row, t_uindex end_row, t_uindex start_col, t_uindex end_col) {
-    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(
-        m_ctx->get_data(start_row, end_row, start_col, end_col));
+    std::vector<t_tscalar> slice = m_ctx->get_data(start_row, end_row, start_col, end_col);
     auto col_names = column_names();
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     col_names.insert(col_names.begin(), std::vector<t_tscalar>{row_path});
     auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx1>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, col_names);
+        start_col, end_col, m_row_offset, m_col_offset, slice, col_names);
     return data_slice_ptr;
 }
 
@@ -293,9 +291,8 @@ View<t_ctx2>::get_data(
     t_tscalar row_path;
     row_path.set("__ROW_PATH__");
     cols.insert(cols.begin(), std::vector<t_tscalar>{row_path});
-    auto slice_ptr = std::make_shared<std::vector<t_tscalar>>(slice);
     auto data_slice_ptr = std::make_shared<t_data_slice<t_ctx2>>(m_ctx, start_row, end_row,
-        start_col, end_col, m_row_offset, m_col_offset, slice_ptr, cols, column_indices);
+        start_col, end_col, m_row_offset, m_col_offset, slice, cols, column_indices);
     return data_slice_ptr;
 }
 
