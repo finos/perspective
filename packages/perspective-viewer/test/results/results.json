@@ -8,7 +8,6 @@
     "superstore.html/sorts by an alpha column.": "27ddfcbdd25fa522fe9bccb742bc6f41",
     "superstore.html/displays visible columns.": "21b4adf6abd84306f79c9585f31bd5f9",
     "superstore.html/sorts by a hidden column.": "d484e3ed9e389ba16569a8fa1969cacc",
-    "superstore.html/shows horizontal columns on small viewports.": "77d8d48d180b577541909b0033ef4235",
     "superstore.html/filters by a numeric column.": "274fb1906b2001221e85dc2f13b73e26",
     "superstore.html/filters by a datetime column.": "189efbcc39af204ab32f35c1f7bc780a",
     "superstore.html/setting a valid column should set it as input.": "0cec28e2f6084639ecc402d854371963",
@@ -34,5 +33,7 @@
     "superstore.html/saving a duplicate column should fail with error message.": "d9618357228698c5fbe9978b3ed1f668",
     "superstore.html/highlights invalid filter.": "b31284a7b2a401d232ed077ec097a653",
     "superstore.html/replaces all rows.": "7a7265b18d5c94f8f90abcad4f3f7781",
-    "__GIT_COMMIT__": "87772b51fba4802095f9fa3b4b680d4a804be5d5"
+    "__GIT_COMMIT__": "cd46875bca138191b17b11452c3ef703c28eb17c",
+    "superstore.html/shows horizontal columns on small vertical viewports.": "05d7c917b5eb9e05387d52e3a6372c67",
+    "superstore.html/shows horizontal columns on small vertical and horizontal viewports.": "4cde889ccdbecba750e76f287707626f"
 }

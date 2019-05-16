@@ -8,19 +8,36 @@
  */
 
 exports.default = function() {
-    const viewport = {
-        height: 400,
-        width: 600
-    };
-
     // must specify timeout AND viewport
     test.capture(
-        "shows horizontal columns on small viewports.",
+        "shows horizontal columns on small vertical viewports.",
         async page => {
             const viewer = await page.$("perspective-viewer");
             await page.shadow_click("perspective-viewer", "#config_button");
             await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
         },
-        {timeout: 60000, viewport}
+        {
+            timeout: 60000,
+            viewport: {
+                height: 400,
+                width: 800
+            }
+        }
+    );
+
+    test.capture(
+        "shows horizontal columns on small vertical and horizontal viewports.",
+        async page => {
+            const viewer = await page.$("perspective-viewer");
+            await page.shadow_click("perspective-viewer", "#config_button");
+            await page.evaluate(element => element.setAttribute("columns", '["Discount","Profit","Sales"]'), viewer);
+        },
+        {
+            timeout: 60000,
+            viewport: {
+                height: 400,
+                width: 500
+            }
+        }
     );
 };
