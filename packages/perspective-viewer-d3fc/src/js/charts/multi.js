@@ -14,6 +14,7 @@ import domainMatchOrigins from "../axis/domainMatchOrigins";
 import {seriesColors} from "../series/seriesColors";
 import {colorLegend} from "../legend/legend";
 import withGridLines from "../gridlines/gridlines";
+import {symbolType} from "../series/categoryPointSeries";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
@@ -21,13 +22,17 @@ import nearbyTip from "../tooltip/nearbyTip";
 
 import {getDataAndSeries as getLineDataAndSeries} from "./line";
 import {getDataAndSeries as getColumnDataAndSeries} from "./column";
+import {getDataAndSeries as getAreaDataAndSeries} from "./area";
+import {getDataAndSeries as getYScatterDataAndSeries} from "./y-scatter";
 
 import seriesPicker from "../picker/series-picker";
 import {getChartElement} from "../plugin/root";
 
 const seriesFunctions = {
     line: getLineDataAndSeries,
-    column: getColumnDataAndSeries
+    column: getColumnDataAndSeries,
+    area: getAreaDataAndSeries,
+    yscatter: getYScatterDataAndSeries
 };
 
 function multiChart(container, settings) {
@@ -38,7 +43,8 @@ function multiChart(container, settings) {
     const mixCharts = multiTypes.primary != multiTypes.alternate;
 
     const color = seriesColors(settings);
-    const {data, series, splitFn, xScaleFn} = primarySeriesFn(settings, color, {mixCharts});
+    const symbols = symbolType(settings);
+    const {data, series, splitFn, xScaleFn} = primarySeriesFn(settings, color, symbols, {mixCharts});
 
     const legend = colorLegend()
         .settings(settings)
@@ -97,7 +103,7 @@ function multiChart(container, settings) {
         .data(data);
 
     if (splitter.haveSplit()) {
-        const alt = altSeriesFn(settings, color, {mixCharts});
+        const alt = altSeriesFn(settings, color, symbols, {mixCharts});
         const altData = alt.splitFn(alt.data, splitter.isOnAltAxis);
         splitter.altData(altData);
 

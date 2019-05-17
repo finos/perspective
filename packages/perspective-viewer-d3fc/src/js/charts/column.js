@@ -105,7 +105,7 @@ const getSplitFn = (settings, options) => {
     return grouped ? multiGroupBlankFunction : groupBlankFunction;
 };
 
-export const getDataAndSeries = (settings, color, options = {mixCharts: false}) => {
+export const getDataAndSeries = (settings, color, symbols, options = {mixCharts: false}) => {
     const data = getData(settings);
     return {
         data,
