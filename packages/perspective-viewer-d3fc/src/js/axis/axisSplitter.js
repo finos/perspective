@@ -19,23 +19,23 @@ export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) 
 
     // Renderer to show the special controls for moving between axes
     const splitter = selection => {
-        if (settings["mainValues"].length === 1) return;
+        if (settings["mainValues"].length !== 1) {
+            const labelsInfo = settings["mainValues"].map((v, i) => ({
+                index: i,
+                name: v.name
+            }));
+            const mainLabels = labelsInfo.filter(v => !splitter.isOnAltAxis(v.name));
+            const altLabels = labelsInfo.filter(v => splitter.isOnAltAxis(v.name));
 
-        const labelsInfo = settings["mainValues"].map((v, i) => ({
-            index: i,
-            name: v.name
-        }));
-        const mainLabels = labelsInfo.filter(v => !splitter.isOnAltAxis(v.name));
-        const altLabels = labelsInfo.filter(v => splitter.isOnAltAxis(v.name));
+            const labeller = () => splitterLabels(settings).color(color);
 
-        const labeller = () => splitterLabels(settings).color(color);
-
-        selection.select(".y-label-container>.y-label").call(labeller().labels(mainLabels));
-        selection.select(".y2-label-container>.y-label").call(
-            labeller()
-                .labels(altLabels)
-                .alt(true)
-        );
+            selection.select(".y-label-container>.y-label").call(labeller().labels(mainLabels));
+            selection.select(".y2-label-container>.y-label").call(
+                labeller()
+                    .labels(altLabels)
+                    .alt(true)
+            );
+        }
 
         decorate(selection.select(".y-label-container"), 0);
         decorate(selection.select(".y2-label-container"), 1);
