@@ -15,6 +15,7 @@ export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) 
     let color;
     let data;
     let altData;
+    let decorate = () => {};
 
     // Renderer to show the special controls for moving between axes
     const splitter = selection => {
@@ -35,6 +36,9 @@ export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) 
                 .labels(altLabels)
                 .alt(true)
         );
+
+        decorate(selection.select(".y-label-container"), 0);
+        decorate(selection.select(".y2-label-container"), 1);
     };
 
     splitter.isOnAltAxis = name => {
@@ -72,6 +76,13 @@ export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) 
             return altData;
         }
         altData = args[0];
+        return splitter;
+    };
+    splitter.decorate = (...args) => {
+        if (!args.length) {
+            return decorate;
+        }
+        decorate = args[0];
         return splitter;
     };
 

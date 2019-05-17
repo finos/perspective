@@ -22,6 +22,9 @@ import nearbyTip from "../tooltip/nearbyTip";
 import {getDataAndSeries as getLineDataAndSeries} from "./line";
 import {getDataAndSeries as getColumnDataAndSeries} from "./column";
 
+import seriesPicker from "../picker/series-picker";
+import {getChartElement} from "../plugin/root";
+
 const seriesFunctions = {
     line: getLineDataAndSeries,
     column: getColumnDataAndSeries
@@ -58,7 +61,18 @@ function multiChart(container, settings) {
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data, splitFn).color(color);
+    const splitter = axisSplitter(settings, data, splitFn)
+        .color(color)
+        .decorate((container, i) => {
+            const multiSide = i === 0 ? "primary" : "alternate";
+            seriesPicker()
+                .current(multiTypes[multiSide])
+                .onChange(newType => {
+                    multiTypes[multiSide] = newType;
+                    settings.multiTypes = multiTypes;
+                    redrawChart(container);
+                })(container);
+        });
 
     const yAxis1 = yAxisFactory(splitter.data());
 
@@ -121,3 +135,9 @@ multiChart.plugin = {
 };
 
 export default multiChart;
+
+const redrawChart = selection => {
+    const chartElement = getChartElement(selection.node());
+    chartElement.remove();
+    chartElement.draw();
+};
