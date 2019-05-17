@@ -106,7 +106,8 @@ class D3FCChartElement extends HTMLElement {
 
         // Some settings can be preserved even when the chart schema changes
         const preserved = oldSettings && {
-            multiTypes: oldSettings.multiTypes
+            multiTypes: oldSettings.multiTypes,
+            legend: oldSettings.legend && {left: oldSettings.legend.left, top: oldSettings.legend.top}
         };
         return {...preserved, ...newSettings};
     }
