@@ -6,25 +6,36 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {AXIS_TYPES} from "../axis/axisType";
 import {chartSvgFactory} from "../axis/chartFactory";
-import {axisSplitter, dataSplitFunction} from "../axis/axisSplitter";
+import {axisSplitter} from "../axis/axisSplitter";
+import domainMatchOrigins from "../axis/domainMatchOrigins";
 import {seriesColors} from "../series/seriesColors";
-import {lineSeries} from "../series/lineSeries";
-import {splitData} from "../data/splitData";
 import {colorLegend} from "../legend/legend";
-import {filterData} from "../legend/filter";
 import withGridLines from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
 import zoomableChart from "../zoom/zoomableChart";
 import nearbyTip from "../tooltip/nearbyTip";
 
-function lineChart(container, settings) {
+import {getDataAndSeries as getLineDataAndSeries} from "./line";
+import {getDataAndSeries as getColumnDataAndSeries} from "./column";
+
+const seriesFunctions = {
+    line: getLineDataAndSeries,
+    column: getColumnDataAndSeries
+};
+
+function multiChart(container, settings) {
+    const multiTypes = settings.multiTypes || {primary: "line", alternate: "column"};
+
+    const primarySeriesFn = seriesFunctions[multiTypes.primary];
+    const altSeriesFn = seriesFunctions[multiTypes.alternate];
+    const mixCharts = multiTypes.primary != multiTypes.alternate;
+
     const color = seriesColors(settings);
-    const {data, series, splitFn} = getDataAndSeries(settings, color);
+    const {data, series, splitFn, xScaleFn} = primarySeriesFn(settings, color, {mixCharts});
 
     const legend = colorLegend()
         .settings(settings)
@@ -41,6 +52,7 @@ function lineChart(container, settings) {
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
+        .excludeType(AXIS_TYPES.ordinal)
         .orient("vertical")
         .include([0])
         .paddingStrategy(paddingStrategy);
@@ -71,12 +83,30 @@ function lineChart(container, settings) {
         .data(data);
 
     if (splitter.haveSplit()) {
+        const alt = altSeriesFn(settings, color, {mixCharts});
+        const altData = alt.splitFn(alt.data, splitter.isOnAltAxis);
+        splitter.altData(altData);
+
         // Create the y-axis data for the alt-axis
         const yAxis2 = yAxisFactory(splitter.altData());
-        chart.altAxis(yAxis2);
+
+        const altXScale = xAxis.scale.copy();
+        alt.xScaleFn && alt.xScaleFn(altXScale);
+
+        domainMatchOrigins(yAxis1.domain, yAxis2.domain);
+        chart
+            .yDomain(yAxis1.domain)
+            .altAxis(yAxis2)
+            .altXScale(altXScale)
+            .altPlotArea(alt.series);
+
+        zoomChart.altXScale(altXScale);
+
         // Give the tooltip the information (i.e. 2 datasets with different scales)
         toolTip.data(splitter.data()).altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
+        if (xScaleFn) toolTip.xScale(altXScale);
     }
+    xScaleFn && xScaleFn(xAxis.scale);
 
     // render
     container.datum(splitter.data()).call(zoomChart);
@@ -84,21 +114,10 @@ function lineChart(container, settings) {
     container.call(legend);
 }
 
-lineChart.plugin = {
-    type: "d3_y_line",
-    name: "Y Line Chart",
+multiChart.plugin = {
+    type: "d3_y_multi",
+    name: "Multi Chart",
     max_size: 25000
 };
 
-export default lineChart;
-
-const getData = settings => splitData(settings, filterData(settings));
-const getSeries = (settings, color) => fc.seriesSvgRepeat().series(lineSeries(settings, color).orient("vertical"));
-
-export const getDataAndSeries = (settings, color) => {
-    return {
-        data: getData(settings),
-        series: getSeries(settings, color),
-        splitFn: dataSplitFunction
-    };
-};
+export default multiChart;
