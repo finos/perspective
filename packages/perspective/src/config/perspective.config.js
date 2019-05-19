@@ -1,5 +1,6 @@
 const path = require("path");
 const common = require("./common.config.js");
+const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = Object.assign({}, common({build_worker: true}), {
     entry: "./cjs/js/perspective.parallel.js",
@@ -9,5 +10,47 @@ module.exports = Object.assign({}, common({build_worker: true}), {
         libraryTarget: "umd",
         libraryExport: "default",
         path: path.resolve(__dirname, "../../build")
+    },
+    optimization: {
+        minimizer: [
+            new TerserPlugin({
+                cache: true,
+                parallel: true,
+                test: /\.js(\?.*)?$/i,
+                exclude: /(wasm|asmjs)/,
+                sourceMap: true
+            }),
+            new TerserPlugin({
+                cache: true,
+                parallel: true,
+                test: /wasm/,
+                sourceMap: true,
+                terserOptions: {
+                    mangle: false
+                }
+            }),
+            new TerserPlugin({
+                cache: true,
+                parallel: true,
+                test: /asmjs/,
+                exclude: /psp/,
+                sourceMap: false,
+                terserOptions: {
+                    ecma: undefined,
+                    warnings: false,
+                    parse: undefined,
+                    compress: false,
+                    mangle: false,
+                    module: false,
+                    output: null,
+                    toplevel: false,
+                    nameCache: null,
+                    ie8: true,
+                    keep_classnames: true,
+                    keep_fnames: true,
+                    safari10: true
+                }
+            })
+        ]
     }
 });

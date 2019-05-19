@@ -26,6 +26,7 @@
         "eslint-config-prettier": "^3.0.1",
         "eslint-plugin-prettier": "^2.6.2",
         "graceful-fs": "https://github.com/mekwall/node-graceful-fs.git#patch-1",
+        "html-loader-jest": "^0.2.1",
         "jest": "^24.5.0",
         "js-beautify": "^1.8.6",
         "jsdoc": "^3.5.5",
@@ -38,10 +39,10 @@
         "pre-commit": "^1.2.2",
         "prettier": "^1.14.2",
         "rimraf": "^2.6.2",
+        "sinon": "^7.3.1",
         "ts-loader": "^3.5.0",
         "typescript": "~2.9.2",
-        "uglifyjs-webpack-plugin": "^0.4.6",
-        "webpack": "^3.5.6"
+        "webpack": "^4.31.0"
     },
     "pre-commit": [
         "precommit"
@@ -88,5 +89,10 @@
             "packages/perspective-viewer-d3fc"
         ],
         "verbose": true
+    },
+    "dependencies": {
+        "mini-css-extract-plugin": "^0.6.0",
+        "on-build-webpack": "^0.1.0",
+        "webpack-cli": "^3.3.2"
     }
 }

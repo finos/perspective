@@ -71,11 +71,5 @@
         "d3-svg-legend": "^2.25.6",
         "d3fc": "^14.0.34",
         "gradient-parser": "0.1.5"
-    },
-    "devDependencies": {
-        "babel-loader": "^8.0.5",
-        "html-loader-jest": "^0.2.1",
-        "sinon": "^7.3.1",
-        "webpack": "^3.5.6"
     }
 }

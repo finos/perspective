@@ -102,7 +102,11 @@ exports.pitch = function pitch(request) {
 
         if (entries[0]) {
             worker.file = entries[0].files[0];
-            return cb(null, this._compilation.assets[worker.file].children[0]._value);
+            let asset = this._compilation.assets[worker.file];
+            if (asset.children) {
+                asset = asset.children[0]._value;
+            }
+            return cb(null, asset);
         }
 
         return cb(null, null);
