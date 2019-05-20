@@ -11,7 +11,8 @@ const CSV = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/
 const ARROW = "https://unpkg.com/@jpmorganchase/perspective-examples@0.2.0-beta.2/build/superstore.arrow";
 
 const ITERATIONS = 100;
-const TOSS_ITERATIONS = 5;
+const ITERATION_TIME = 5000;
+const TOSS_ITERATIONS = 0;
 
 const AGG_OPTIONS = [[{column: "Sales", op: "sum"}], [{column: "State", op: "dominant"}], [{column: "Order Date", op: "dominant"}]];
 
@@ -76,16 +77,39 @@ async function get_data(worker) {
     return {csv, arrow, rows, columns};
 }
 
+function* case_iter(name) {
+    let start;
+    name = name.replace(/\{/g, "\\{").replace(/\}/g, "\\}");
+    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+        if (x >= TOSS_ITERATIONS && start == undefined) {
+            start = Date.now();
+        }
+        const now = Date.now();
+        if (now - start > ITERATION_TIME) {
+            const completed = x - TOSS_ITERATIONS;
+            const total = ITERATIONS - TOSS_ITERATIONS;
+            const time = (now - start) / 1000;
+            const completed_per = completed / total;
+            const color = completed_per < 0.33 ? "redBright" : completed_per < 0.66 ? "yellowBright" : "greenBright";
+            let log = `{${color} ${completed}}{whiteBright /${total} ({${color} ${((100 * completed) / total).toFixed(2)}}%)}`;
+            log += `   {whiteBright ${time.toFixed(3)}}s {whiteBright ${(time / completed).toFixed(2)}} reps/sec -- ${name}`;
+            console.log(log);
+            break;
+        }
+
+        yield x >= TOSS_ITERATIONS;
+    }
+}
+
 // Define benchmark cases
 
 async function* run_table_cases(worker, data, test) {
-    console.log(`Benchmarking \`${test}\``);
     try {
-        for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+        for (const not_warmup of case_iter(test)) {
             const start = performance.now();
             const table = worker.table(data.slice ? data.slice() : data);
             await table.size();
-            if (x >= TOSS_ITERATIONS) {
+            if (not_warmup) {
                 yield {
                     test,
                     time: performance.now() - start,
@@ -105,12 +129,11 @@ async function* run_table_cases(worker, data, test) {
 async function* run_view_cases(table, config) {
     const token = to_name(config);
     const test = `view(${JSON.stringify(token)})`;
-    console.log(`Benchmarking \`${test}\``);
-    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+    for (const not_warmup of case_iter(test)) {
         const start = performance.now();
         const view = table.view(config);
         await view.num_rows();
-        if (x >= TOSS_ITERATIONS) {
+        if (not_warmup) {
             yield {
                 test,
                 time: performance.now() - start,
@@ -132,11 +155,10 @@ async function* run_to_format_cases(table, config, format) {
     }
     await view.schema();
 
-    console.log(`Benchmarking \`${name}.${format}()\``);
-    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+    for (const not_warmup of case_iter(`${name}.${format}()`)) {
         const start = performance.now();
         await view[format]();
-        if (x >= TOSS_ITERATIONS) {
+        if (not_warmup) {
             yield {
                 time: performance.now() - start,
                 test: `${format}(${name})`,
@@ -158,7 +180,7 @@ async function* run_on_update_cases(arrow, config, mode) {
     view.on_update(function() {}, {mode: mode});
     console.log(`Benchmarking \`${name}.on_update(${mode})()\``);
 
-    for (let x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
+    for (const not_warmup of case_iter()) {
         const start = performance.now();
         for (let i = 0; i < 100; i++) {
             await table.update([
@@ -167,7 +189,7 @@ async function* run_on_update_cases(arrow, config, mode) {
                 }
             ]);
         }
-        if (x >= TOSS_ITERATIONS) {
+        if (not_warmup) {
             yield {
                 time: performance.now() - start,
                 test: `on_update(${mode})(${name})`,

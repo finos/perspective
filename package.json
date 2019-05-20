@@ -91,6 +91,7 @@
         "verbose": true
     },
     "dependencies": {
+        "chalk": "^2.4.2",
         "mini-css-extract-plugin": "^0.6.0",
         "on-build-webpack": "^0.1.0",
         "webpack-cli": "^3.3.2"

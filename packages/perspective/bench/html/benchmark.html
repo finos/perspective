@@ -17,6 +17,7 @@
     <script src="perspective.view.js"></script>
     <script src="hypergrid.plugin.js"></script>
     <script src="highcharts.plugin.js"></script>
+    <script src="d3fc.plugin.js"></script>
 
     <link rel='stylesheet' href="index.css">
     <link rel='stylesheet' href="material.css" is="custom-style">   
@@ -29,11 +30,13 @@
 
     <script>
         window.addEventListener('WebComponentsReady', async () => {
-            const req = await fetch("benchmark.json");
-            const json = await req.json();
             const el = document.getElementsByTagName('perspective-viewer')[0];
-            el.load(json);
+            const req = await fetch("benchmark.arrow");
+            const arrow = await req.arrayBuffer();
+            el.load(arrow);
             el.toggleConfig();
+            el.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(el.save())));
+            el.restore(JSON.parse(localStorage.getItem("layout")));
         });
     </script>
 

@@ -10,10 +10,13 @@
 const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
+const perspective = require("@finos/perspective");
+const chalk = require("chalk");
 
 const args = process.argv.slice(2);
 const LIMIT = args.indexOf("--limit");
 
+const BUILD_DIR = path.join(__dirname, "..", "..", "build");
 const multi_template = (xs, ...ys) => ys[0].map((y, i) => [y, xs.reduce((z, x, ix) => (ys[ix] ? z + x + ys[ix][i] : z + x), "")]);
 
 const JPMC_VERSIONS = [
@@ -51,11 +54,17 @@ const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective
 
 const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 
+function color(string) {
+    string = [string];
+    string.raw = string;
+    return chalk(string);
+}
+
 async function run_version(browser, url, is_delta = false) {
     let page = await browser.newPage();
     page.on("console", msg => {
         if (msg.type() !== "warning") {
-            console.log(` ${msg.type() === "error" ? " !" : "->"} ${msg.text()}`);
+            console.log(` ${chalk.whiteBright(msg.type() === "error" ? " !" : "->")} ${color(msg.text())}`);
         }
     });
     page.on("pageerror", msg => console.log(` -> ${msg.message}`));
@@ -74,14 +83,6 @@ async function run_version(browser, url, is_delta = false) {
     return results;
 }
 
-function transpose(json) {
-    const obj = {};
-    for (let key of Object.keys(json[0])) {
-        obj[key] = json.map(x => x[key]);
-    }
-    return obj;
-}
-
 async function run() {
     // Allow users to set a limit on version lookbacks
     let psp_urls = URLS;
@@ -95,8 +96,8 @@ async function run() {
         }
     }
 
-    let data = [],
-        version_index = 1;
+    let version_index = 1;
+    let table = undefined;
     for (let [version, url] of psp_urls) {
         let browser = await puppeteer.launch({
             headless: true,
@@ -106,9 +107,16 @@ async function run() {
         let bins = await run_version(browser, url, is_delta);
         bins = bins.map(result => ({...result, version, version_index}));
         version_index++;
-        data = data.concat(bins);
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.json`), JSON.stringify(transpose(data)));
-        fs.writeFileSync(path.join(__dirname, "..", "..", "build", `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}.html`)).toString());
+        if (table === undefined) {
+            table = perspective.table(bins);
+        } else {
+            table.update(bins);
+        }
+        const view = table.view();
+        const arrow = await view.to_arrow();
+        view.delete();
+        fs.writeFileSync(path.join(BUILD_DIR, `${benchmark_name}.arrow`), new Buffer(arrow), "binary");
+        fs.writeFileSync(path.join(BUILD_DIR, `${benchmark_name}.html`), fs.readFileSync(path.join(__dirname, "..", "html", `${benchmark_name}.html`)).toString());
 
         await browser.close();
     }
