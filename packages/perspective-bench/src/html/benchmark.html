@@ -31,12 +31,12 @@
     <script>
         window.addEventListener('WebComponentsReady', async () => {
             const el = document.getElementsByTagName('perspective-viewer')[0];
+            el.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(el.save())));
+            el.restore(JSON.parse(localStorage.getItem("layout")));
             const req = await fetch("benchmark.arrow");
             const arrow = await req.arrayBuffer();
             el.load(arrow);
             el.toggleConfig();
-            el.addEventListener("perspective-config-update", () => localStorage.setItem("layout", JSON.stringify(el.save())));
-            el.restore(JSON.parse(localStorage.getItem("layout")));
         });
     </script>
 

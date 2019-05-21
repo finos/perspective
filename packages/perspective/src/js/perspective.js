@@ -1266,7 +1266,9 @@ export default function(Module) {
 
         Host: Host,
 
-        worker: function() {},
+        worker: function() {
+            return this;
+        },
 
         /**
          * A factory method for constructing {@link module:perspective~table}s.

@@ -1,0 +1,59 @@
+/******************************************************************************
+ *
+ * Copyright (c) 2017, the Perspective Authors.
+ *
+ * This file is part of the Perspective library, distributed under the terms of
+ * the Apache License 2.0.  The full license can be found in the LICENSE file.
+ *
+ */
+
+const PerspectiveBench = require("@finos/perspective-bench");
+
+const JPMC_VERSIONS = [
+    //"0.2.23", /* memory leak */
+    "0.2.22",
+    "0.2.21",
+    "0.2.20",
+    "0.2.18",
+    "0.2.16",
+    "0.2.15",
+    "0.2.12",
+    "0.2.11",
+    "0.2.10",
+    "0.2.9",
+    "0.2.8",
+    "0.2.7",
+    "0.2.6",
+    "0.2.5",
+    "0.2.4",
+    "0.2.3",
+    "0.2.2",
+    "0.2.1",
+    "0.2.0"
+];
+
+const FINOS_VERSIONS = ["0.3.0-rc.1"];
+
+async function run() {
+    await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://host.docker.internal:8080/perspective.js`, {output: "build/benchmark", puppeteer: true});
+
+    for (const version of FINOS_VERSIONS) {
+        const url = `https://unpkg.com/@finos/perspective@${version}/build/perspective.js`;
+        await PerspectiveBench.run(version, "bench/perspective.benchmark.js", url, {
+            output: "build/benchmark",
+            read: true,
+            puppeteer: true
+        });
+    }
+
+    for (const version of JPMC_VERSIONS) {
+        const url = `https://unpkg.com/@jpmorganchase/perspective@${version}/build/perspective.js`;
+        await PerspectiveBench.run(version, "bench/perspective.benchmark.js", url, {
+            output: "build/benchmark",
+            read: true,
+            puppeteer: true
+        });
+    }
+}
+
+run();

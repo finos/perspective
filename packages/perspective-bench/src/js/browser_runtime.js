@@ -8,7 +8,7 @@
  */
 
 const ITERATIONS = 100;
-const ITERATION_TIME = 10000;
+const ITERATION_TIME = 500;
 const TOSS_ITERATIONS = 0;
 const INDENT_LEVEL = 2;
 
@@ -39,23 +39,28 @@ function quotechalk(x) {
 }
 
 class Benchmark {
-    constructor(desc, body, indent, categories, after_each) {
+    constructor(desc, body, indent, categories, after_each, iterations, timeout, toss) {
         this._desc = quotechalk(desc);
         this._body = body;
         this._indent = indent;
         this._after_each = after_each;
         this._categories = categories;
+        this._iterations = iterations;
+        this._timeout = timeout;
+        this._toss = toss;
     }
 
     log(reps, t) {
-        const completed = reps - TOSS_ITERATIONS;
-        const total = ITERATIONS - TOSS_ITERATIONS;
+        const completed = reps - this._toss();
+        const total = this._iterations() - this._toss();
         const time = t / 1000;
         const completed_per = completed / total;
+        const time_per = time / completed;
         const color = completed_per < 0.33 ? "redBright" : completed_per < 0.66 ? "yellowBright" : "greenBright";
         let log = " ".repeat(this._indent + INDENT_LEVEL);
-        log += `{${color} ${completed}}{whiteBright /${total} ({${color} ${((100 * completed) / total).toFixed(2)}}%)}`;
-        log += `    {whiteBright ${time.toFixed(3)}}s {whiteBright ${(time / completed).toFixed(2)}} secs/op`;
+        log += `{${color} ${completed}}{whiteBright /${total} `;
+        log += `({${color} ${(100 * completed_per).toFixed(2)}}%)}`;
+        log += `    {whiteBright ${time.toFixed(3)}}s {whiteBright ${time_per.toFixed(2)}} secs/op`;
         log += `    {whiteBright ${this._desc}}`;
 
         console.log(log);
@@ -63,17 +68,17 @@ class Benchmark {
 
     *case_iter() {
         let x, start, now;
-        for (x = 0; x < ITERATIONS + TOSS_ITERATIONS; x++) {
-            if (x >= TOSS_ITERATIONS && start == undefined) {
+        for (x = 0; x < this._iterations() + this._toss(); x++) {
+            if (x >= this._toss() && start == undefined) {
                 start = Date.now();
             }
             now = Date.now();
-            if (now - start > ITERATION_TIME) {
+            if (now - start > this._timeout()) {
                 this.log(x, now - start);
                 return;
             }
 
-            yield x >= TOSS_ITERATIONS;
+            yield x >= this._toss();
         }
         this.log(x, now - start);
     }
@@ -81,7 +86,6 @@ class Benchmark {
     async *run() {
         try {
             const categories = this._categories();
-            //console.log(quotechalk(JSON.stringify(categories)));
             for (const not_warmup of this.case_iter(this._desc)) {
                 const start = performance.now();
                 await this._body();
@@ -102,8 +106,17 @@ class Benchmark {
     }
 }
 
+function unwind(stack) {
+    return stack.reduce((obj, x) => {
+        if (x instanceof Suite) {
+            obj[x._category] = x._name;
+        }
+        return obj;
+    }, {});
+}
+
 class Suite {
-    constructor(name, body, context, indent = 0) {
+    constructor(name, body, context, indent = 0, iterations = ITERATIONS, timeout = ITERATION_TIME, toss = TOSS_ITERATIONS) {
         this._benchmarks = [];
         this._indent = indent;
         this._promises = [];
@@ -111,27 +124,29 @@ class Suite {
         this._name = name.replace(/\{/g, "\\{").replace(/\}/g, "\\}");
         this._context = context || [this];
         this._category = `Category ${indent / INDENT_LEVEL}`;
+        this._iterations = iterations;
+        this._timeout = timeout;
+        this._toss = toss;
     }
 
     benchmark(desc, body) {
         const context = this._context[0];
         const stack = this._context.slice();
         context._benchmarks.push(
-            new Benchmark(
-                desc,
-                body,
-                context._indent,
-                () => {
-                    return stack.reduce((obj, x) => {
-                        if (x instanceof Suite) {
-                            obj[x._category] = x._name;
-                        }
-                        return obj;
-                    }, {});
-                },
-                () => context._after_each && context._after_each()
-            )
+            new Benchmark(desc, body, context._indent, () => unwind(stack), () => context._after_each && context._after_each(), () => context._iterations, () => context._timeout, () => context._toss)
         );
+    }
+
+    setIterations(iter) {
+        this._context[0]._iterations = iter;
+    }
+
+    setTimeout(timeout) {
+        this._context[0]._timeout = timeout;
+    }
+
+    setToss(toss) {
+        this._context[0]._toss = toss;
     }
 
     category(cat) {
@@ -150,9 +165,15 @@ class Suite {
         this._context[0]._after_each = body;
     }
 
-    description(description, body) {
-        const suite = new Suite(description, body, this._context, this._context[0]._indent + INDENT_LEVEL);
+    describe(description, body) {
+        // todo closures here like Benchmark
+        const suite = new Suite(description, body, this._context, this._context[0]._indent + INDENT_LEVEL, this._context[0]._iterations, this._context[0]._timeout, this._context[0]._toss);
         this._context[0]._benchmarks.push(suite);
+    }
+
+    commandArg(x) {
+        // eslint-disable-next-line no-undef
+        return __PLACEHOLDER__[x];
     }
 
     async *run_all_cases() {
@@ -203,4 +224,10 @@ class Suite {
             return x;
         });
     }
+}
+
+window = window || global || {};
+const mod = (window.PerspectiveBench = new Suite("perspective"));
+for (const key of ["beforeAll", "afterAll", "afterEach", "describe", "benchmark"]) {
+    window[key] = mod[key].bind(mod);
 }

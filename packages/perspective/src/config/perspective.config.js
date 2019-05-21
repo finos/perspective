@@ -18,7 +18,10 @@ module.exports = Object.assign({}, common({build_worker: true}), {
                 parallel: true,
                 test: /\.js(\?.*)?$/i,
                 exclude: /(wasm|asmjs)/,
-                sourceMap: true
+                sourceMap: true,
+                terserOptions: {
+                    keep_infinity: true
+                }
             }),
             new TerserPlugin({
                 cache: true,
@@ -26,7 +29,8 @@ module.exports = Object.assign({}, common({build_worker: true}), {
                 test: /wasm/,
                 sourceMap: true,
                 terserOptions: {
-                    mangle: false
+                    mangle: false,
+                    keep_infinity: true
                 }
             }),
             new TerserPlugin({

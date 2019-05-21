@@ -38,6 +38,7 @@ let CLIENT_ID_GEN = 0;
 
 const DEFAULT_ASSETS = [
     "@finos/perspective/build",
+    "@finos/perspective-bench/build",
     "@finos/perspective-viewer/build",
     "@finos/perspective-viewer-highcharts/build",
     "@finos/perspective-viewer-hypergrid/build",
@@ -192,7 +193,7 @@ class WebSocketHost extends module.exports.Host {
         this._server.listen(port, () => {
             console.log(`Listening on port ${port}`);
             if (on_start) {
-                on_start();
+                on_start.bind(this)();
             }
         });
     }
