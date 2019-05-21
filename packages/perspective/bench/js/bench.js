@@ -52,7 +52,8 @@ const OLD_FORMAT_JPMC_URLS = multi_template`https://unpkg.com/@jpmorganchase/per
 
 const URLS = [].concat([["master", `http://host.docker.internal:8080/perspective.js`]], FINOS_URLS, JPMC_URLS, OLD_FORMAT_JPMC_URLS);
 
-const RUN_TEST = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
+const RUN_TEST = fs.readFileSync(path.join(__dirname, "perspective.benchmark.js")).toString();
+const BROWSER_RUNTIME = fs.readFileSync(path.join(__dirname, "browser_runtime.js")).toString();
 
 function color(string) {
     string = [string];
@@ -69,7 +70,7 @@ async function run_version(browser, url, is_delta = false) {
     });
     page.on("pageerror", msg => console.log(` -> ${msg.message}`));
 
-    await page.setContent(`<html><head><script src="${url}" async></script><script>${RUN_TEST}</script></head><body></body></html>`);
+    await page.setContent(`<html><head><script src="${url}" async></script><script>${BROWSER_RUNTIME};${RUN_TEST}</script></head><body></body></html>`);
     await page.waitFor(() => window.hasOwnProperty("perspective"));
 
     let results;
