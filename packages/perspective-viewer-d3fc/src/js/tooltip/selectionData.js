@@ -37,7 +37,7 @@ export function getDataValues(data, settings) {
             return [
                 {
                     name: data.key,
-                    value: data.mainValue
+                    value: data.mainValue - (data.baseValue || 0)
                 }
             ];
         }
