@@ -13,10 +13,6 @@ simple to build real-time & user configurable analytics entirely in the browser.
 
 <img src="https://perspective.finos.org/img/demo.gif">
 
-## Team
-<img width="25%" src="https://perspective.finos.org/img/jpm.png">
-
-Perspective development is lead by a team of engineers at J.P. Morgan, with contributions from numerous individuals and companies around the world.
 
 ## Features
 
@@ -57,3 +53,9 @@ Perspective development is lead by a team of engineers at J.P. Morgan, with cont
 * [Developer's Guide](https://perspective.finos.org/docs/md/development.html)
 * [Perspective API](https://github.com/finos/perspective/blob/master/packages/perspective/README.md)
 * [Perspective Viewer API](https://github.com/finos/perspective/blob/master/packages/perspective-viewer/README.md)
+
+## Team
+<img width="25%" src="https://perspective.finos.org/img/jpm.png">
+
+Perspective development is lead by a team of engineers at J.P. Morgan, with contributions from numerous individuals and companies around the world, including:
+<img width="25%" src="https://perspective.finos.org/img/sl.png">
