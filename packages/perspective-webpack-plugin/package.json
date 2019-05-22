@@ -39,6 +39,6 @@
         "worker-loader": "^2.0.0"
     },
     "peerDependencies": {
-        "webpack": ">=3.5 <4"
+        "webpack": ">=3.5 <5"
     }
 }

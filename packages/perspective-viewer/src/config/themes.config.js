@@ -1,11 +1,33 @@
 const path = require("path");
-const fs = require("fs");
+//const fs = require("fs");
 const common = require("@finos/perspective/src/config/common.config.js");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const fs = require("fs");
+const WebpackOnBuildPlugin = require("on-build-webpack");
+
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+const THEMES = fs.readdirSync(path.resolve(__dirname, "..", "themes"));
 
 module.exports = Object.assign({}, common(), {
     entry: "./src/js/themes.js",
     devtool: undefined,
+    entry: THEMES.reduce((obj, theme) => {
+        obj[theme.replace(".less", "")] = path.resolve(__dirname, "..", "themes", theme);
+        return obj;
+    }, {}),
+    plugins: [
+        new MiniCssExtractPlugin({
+            splitChunks: {
+                chunks: "all"
+            },
+            filename: "[name].css"
+        }),
+        new WebpackOnBuildPlugin(() => {
+            for (const theme of THEMES) {
+                fs.unlinkSync(path.resolve(__dirname, "..", "..", "build", theme.replace("less", "js")));
+            }
+        })
+    ],
     stats: {
         modules: false
     },
@@ -14,24 +36,16 @@ module.exports = Object.assign({}, common(), {
             {
                 test: /\.(woff|ttf|eot|svg|woff2)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
                 loader: "base64-font-loader"
+            },
+            {
+                test: /themes\/.+?\.less$/,
+                use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", "less-loader"]
             }
         ]
     },
     output: {
-        filename: "__themes.js",
+        filename: "[name].js",
         libraryTarget: "umd",
         path: path.resolve(__dirname, "../../build")
     }
 });
-
-for (const file of fs.readdirSync("src/themes")) {
-    const extract = new ExtractTextPlugin({filename: file.replace("less", "css")});
-    module.exports.module.rules.push({
-        test: new RegExp(file),
-        loader: extract.extract({
-            fallback: "style-loader",
-            use: ["css-loader", "less-loader"]
-        })
-    });
-    module.exports.plugins.push(extract);
-}
