@@ -58,4 +58,5 @@ simple to build real-time & user configurable analytics entirely in the browser.
 <img width="25%" src="https://perspective.finos.org/img/jpm.png">
 
 Perspective development is lead by a team of engineers at J.P. Morgan, with contributions from numerous individuals and companies around the world, including:
+
 <img width="25%" src="https://perspective.finos.org/img/sl.png">
