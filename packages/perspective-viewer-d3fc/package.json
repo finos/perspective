@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-d3fc",
-    "version": "0.3.0-rc.1",
+    "version": "0.3.0-rc.2",
     "description": "Perspective.js",
     "main": "./cjs/js/index.js",
     "module": "./cjs/js/index.js",
@@ -63,8 +63,8 @@
     "author": "",
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.3.0-rc.1",
-        "@finos/perspective-viewer": "^0.3.0-rc.1",
+        "@finos/perspective": "^0.3.0-rc.2",
+        "@finos/perspective-viewer": "^0.3.0-rc.2",
         "babel-runtime": "^6.26.0",
         "chroma-js": "^1.3.4",
         "d3": "^5.7.0",

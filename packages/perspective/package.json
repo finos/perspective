@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "0.3.0-rc.1",
+    "version": "0.3.0-rc.2",
     "description": "Perspective.js",
     "main": "build/perspective.node.js",
     "unpkg": "build/perspective.js",
@@ -66,7 +66,7 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1",
-        "@finos/perspective-bench": "^0.3.0-rc.1"
+        "@finos/perspective-bench": "^0.3.0-rc.2",
+        "@finos/perspective-webpack-plugin": "^0.3.0-rc.2"
     }
 }

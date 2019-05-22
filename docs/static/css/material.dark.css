@@ -124,7 +124,8 @@ perspective-viewer {
   --highcharts-grid-line--stroke: #3b3f46;
   --highcharts-tooltip--background: #2a2c2f;
   --d3fc-legend--text: #bbbbbb;
-  --d3fc-sunburst--labels: #bbbbbb;
+  --d3fc-treedata--labels: #bbbbbb;
+  --d3fc-treedata--hover-highlight: #ffffff;
   --d3fc-axis--ticks: #bbbbbb;
   --d3fc-axis--lines: #555555;
   --d3fc-tooltip--background: #333333;

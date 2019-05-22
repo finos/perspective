@@ -39,6 +39,10 @@ The main API module for Perspective.
         * [.add_computed(computed)](#module_perspective..table+add_computed)
         * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Array.&lt;string&gt;</code>
         * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Array.&lt;object&gt;</code>
+    * [~WorkerHost](#module_perspective..WorkerHost)
+        * [new WorkerHost(perspective)](#new_module_perspective..WorkerHost_new)
+        * [.post(msg, transfer)](#module_perspective..WorkerHost+post)
+        * [.init(buffer)](#module_perspective..WorkerHost+init)
 
 
 * * *
@@ -330,7 +334,8 @@ aggregated row deltas.
 - callback <code>function</code> - A callback function invoked on update.  The
 parameter to this callback is dependent on the `mode` parameter:
     - "none" (default): The callback is invoked without an argument.
-    - "rows": The callback is invoked with the changed rows.
+    - "cell": The callback is invoked with the new data for each updated cell, serialized to JSON format.
+    - "pkey": The callback is invoked with an Array of the primary keys for the updated rows
 
 
 * * *
@@ -608,6 +613,58 @@ If the column is computed, the `computed` property is an Object containing:
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>Array.&lt;object&gt;</code> - An array of Objects containing metadata for each column.  
+
+* * *
+
+<a name="module_perspective..WorkerHost"></a>
+
+### perspective~WorkerHost
+**Kind**: inner class of [<code>perspective</code>](#module_perspective)  
+
+* [~WorkerHost](#module_perspective..WorkerHost)
+    * [new WorkerHost(perspective)](#new_module_perspective..WorkerHost_new)
+    * [.post(msg, transfer)](#module_perspective..WorkerHost+post)
+    * [.init(buffer)](#module_perspective..WorkerHost+init)
+
+
+* * *
+
+<a name="new_module_perspective..WorkerHost_new"></a>
+
+#### new WorkerHost(perspective)
+On initialization, listen for messages posted from the client and send it to `Host.process()`.
+
+**Params**
+
+- perspective - a reference to the Perspective module, allowing the `Host` to access Perspective methods.
+
+
+* * *
+
+<a name="module_perspective..WorkerHost+post"></a>
+
+#### workerHost.post(msg, transfer)
+Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
+
+**Kind**: instance method of [<code>WorkerHost</code>](#module_perspective..WorkerHost)  
+**Params**
+
+- msg <code>Object</code> - a message to pass to the client
+- transfer <code>\*</code> - a transferable object to pass to the client, if needed
+
+
+* * *
+
+<a name="module_perspective..WorkerHost+init"></a>
+
+#### workerHost.init(buffer)
+When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
+
+**Kind**: instance method of [<code>WorkerHost</code>](#module_perspective..WorkerHost)  
+**Params**
+
+- buffer <code>ArrayBuffer</code> - an ArrayBuffer containing the Perspective WASM code
+
 
 * * *
 
