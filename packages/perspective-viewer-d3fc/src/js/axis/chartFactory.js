@@ -80,7 +80,7 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 .style("-ms-grid-column", 5)
                 .style("grid-row", 3)
                 .style("-ms-grid-row", 3)
-                .style("width", "1em")
+                .style("width", altAxis.size || "1em")
                 .style("display", "flex")
                 .style("align-items", "center")
                 .style("justify-content", "center")
@@ -89,7 +89,9 @@ const chartFactory = (xAxis, yAxis, cartesian, canvas) => {
                 .style("transform", "rotate(-90deg)");
 
             const y2Scale = altAxis.scale.domain(altAxis.domain);
-            const yAxisComponent = fc.axisRight(y2Scale);
+            const yAxisComponent = altAxis.component.right(y2Scale);
+            yAxisComponent.tickFormat(altAxis.tickFormatFunction);
+            if (altAxis.decorate) yAxisComponent.decorate(altAxis.decorate);
 
             // Render the axis
             y2AxisDataJoin(container, ["right"])

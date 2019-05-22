@@ -8,8 +8,10 @@
  */
 import {splitterLabels} from "./splitterLabels";
 
-export const axisSplitter = (settings, sourceData) => {
+export const axisSplitter = (settings, sourceData, splitFn = dataSplitFunction) => {
     let color;
+    let data;
+    let altData;
 
     // splitMainValues is an array of main-value names to put into the alt-axis
     const splitMainValues = settings.splitMainValues || [];
@@ -21,8 +23,8 @@ export const axisSplitter = (settings, sourceData) => {
     const haveSplit = settings["mainValues"].some(m => altValue(m.name));
 
     // Split the data into main and alt displays
-    const data = haveSplit ? sourceData.map(d => d.filter(v => !altValue(v.key))) : sourceData;
-    const altData = haveSplit ? sourceData.map(d => d.filter(v => altValue(v.key))) : null;
+    data = haveSplit ? splitFn(sourceData, key => !altValue(key)) : sourceData;
+    altData = haveSplit ? splitFn(sourceData, altValue) : null;
 
     // Renderer to show the special controls for moving between axes
     const splitter = selection => {
@@ -54,8 +56,39 @@ export const axisSplitter = (settings, sourceData) => {
     };
 
     splitter.haveSplit = () => haveSplit;
-    splitter.data = () => data;
-    splitter.altData = () => altData;
+
+    splitter.data = (...args) => {
+        if (!args.length) {
+            return data;
+        }
+        data = args[0];
+        return splitter;
+    };
+    splitter.altData = (...args) => {
+        if (!args.length) {
+            return altData;
+        }
+        altData = args[0];
+        return splitter;
+    };
 
     return splitter;
+};
+
+export const dataSplitFunction = (sourceData, isIncludedFn) => {
+    return sourceData.map(d => d.filter(v => isIncludedFn(v.key)));
+};
+
+export const dataBlankFunction = (sourceData, isIncludedFn) => {
+    return sourceData.map(series => {
+        if (!isIncludedFn(series.key)) {
+            // Blank this data
+            return series.map(v => Object.assign({}, v, {mainValue: null}));
+        }
+        return series;
+    });
+};
+
+export const groupedBlankFunction = (sourceData, isIncludedFn) => {
+    return sourceData.map(group => dataBlankFunction(group, isIncludedFn));
 };

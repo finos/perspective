@@ -9,6 +9,8 @@
 import * as fc from "d3fc";
 import {axisFactory} from "../axis/axisFactory";
 import {chartSvgFactory} from "../axis/chartFactory";
+import domainMatchOrigins from "../axis/domainMatchOrigins";
+import {axisSplitter, dataBlankFunction, groupedBlankFunction} from "../axis/axisSplitter";
 import {AXIS_TYPES} from "../axis/axisType";
 import {barSeries} from "../series/barSeries";
 import {seriesColors} from "../series/seriesColors";
@@ -37,15 +39,26 @@ function columnChart(container, settings) {
         .excludeType(AXIS_TYPES.linear)
         .settingName("crossValues")
         .valueName("crossValue")(data);
-    const yAxis = axisFactory(settings)
+    const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
         .excludeType(AXIS_TYPES.ordinal)
         .orient("vertical")
         .include([0])
-        .paddingStrategy(hardLimitZeroPadding())(data);
+        .paddingStrategy(hardLimitZeroPadding());
 
-    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("vertical"));
+    // Check whether we've split some values into a second y-axis
+    const blankFunction = settings.mainValues.length > 1 ? groupedBlankFunction : dataBlankFunction;
+    const splitter = axisSplitter(settings, data, blankFunction).color(color);
+
+    const yAxis1 = yAxisFactory(splitter.data());
+
+    // No grid lines if splitting y-axis
+    const plotSeries = splitter.haveSplit() ? series : withGridLines(series).orient("vertical");
+
+    const chart = chartSvgFactory(xAxis, yAxis1)
+        .axisSplitter(splitter)
+        .plotArea(plotSeries);
 
     if (chart.xPaddingInner) {
         chart.xPaddingInner(0.5);
@@ -59,8 +72,16 @@ function columnChart(container, settings) {
         .settings(settings)
         .xScale(xAxis.scale);
 
+    if (splitter.haveSplit()) {
+        // Create the y-axis data for the alt-axis
+        const yAxis2 = yAxisFactory(splitter.altData());
+
+        domainMatchOrigins(yAxis1.domain, yAxis2.domain);
+        chart.yDomain(yAxis1.domain).altAxis(yAxis2);
+    }
+
     // render
-    container.datum(data).call(zoomChart);
+    container.datum(splitter.data()).call(zoomChart);
     container.call(legend);
 }
 columnChart.plugin = {
