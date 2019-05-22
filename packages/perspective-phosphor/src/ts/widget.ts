@@ -181,8 +181,9 @@ export
      *
      */
     onAfterAttach(msg: Message): void {
-        this.pspNode.notifyResize();
         super.onAfterAttach(msg);
+        let observer = new MutationObserver(()=>{this.notifyResize()});
+        observer.observe(this.node, { attributes: true });
     }
 
 
@@ -191,9 +192,8 @@ export
      *
      */
     onAfterShow(msg: Message): void {
-        this.pspNode.notifyResize();
+        this.notifyResize();
         super.onAfterShow(msg);
-        this._displayed = true;
     }
 
     /**
@@ -201,9 +201,7 @@ export
      *
      */
     onResize(msg: Widget.ResizeMessage): void {
-        if (this._displayed){
-            this.pspNode.notifyResize();
-        }
+        this.notifyResize();
         super.onResize(msg);
     }
 
@@ -230,7 +228,16 @@ export
      *
      */
     notifyResize(): void {
-        this.pspNode.notifyResize();
+        if(this.isAttached && !this.displayed){
+            if(this.data.length === 0 && Object.keys(this.data).length === 0){
+                return
+            }
+            this._render();
+            this._displayed = true;
+        } else if (this.isAttached){
+            this.pspNode.notifyResize();
+
+        }
     }
 
     /**
@@ -469,6 +476,8 @@ export
         }
     }
 
+    get displayed(){ return this._displayed; }
+
     private _data: any = [];
 
     private _psp: PerspectiveViewer;
@@ -493,6 +502,7 @@ export
     private _key: string;
     private _wrap: boolean;
     private _delete: boolean;
+
     private _displayed: boolean;
 }
 
@@ -524,14 +534,6 @@ namespace Private {
         div.style.setProperty('display', 'flex');
         div.style.setProperty('flex-direction', 'row');
         node.appendChild(div);
-
-
-        if (!psp.notifyResize) {
-            console.warn('Warning: not bound to real element');
-        } else {
-            let observer = new MutationObserver(psp.notifyResize.bind(psp));
-            observer.observe(node, { attributes: true });
-        }
         return psp;
     }
 }
