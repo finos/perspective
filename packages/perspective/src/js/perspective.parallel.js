@@ -66,17 +66,17 @@ class WebWorker extends worker {
      * When the worker is created, load either the ASM or WASM bundle depending on WebAssembly compatibility.
      */
     async register() {
-        let worker;
+        let _worker;
         const msg = {cmd: "init"};
         if (typeof WebAssembly === "undefined" || detect_iphone()) {
-            worker = await asmjs_worker();
+            _worker = await asmjs_worker();
         } else {
-            [worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
+            [_worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
         }
         for (var key in this._worker) {
-            worker[key] = this._worker[key];
+            _worker[key] = this._worker[key];
         }
-        this._worker = worker;
+        this._worker = _worker;
         this._worker.addEventListener("message", this._handle.bind(this));
         this._worker.postMessage(msg, [msg.buffer]);
         this._detect_transferable();

@@ -23,7 +23,8 @@ module.exports = function({build_worker, no_minify} = {}) {
                     terserOptions: {
                         output: {
                             ascii_only: true
-                        }
+                        },
+                        keep_infinity: true
                     },
                     cache: true,
                     parallel: true,

@@ -17,7 +17,6 @@
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "bench": "node ../../scripts/bench.js",
         "prebuild": "mkdirp build && mkdirp obj",
         "cpp": "npm-run-all build:cpp test:cpp",
         "build": "npm-run-all build:babel build:webpack",
@@ -67,6 +66,7 @@
         "ws": "^6.1.2"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1"
+        "@finos/perspective-webpack-plugin": "^0.3.0-rc.1",
+        "@finos/perspective-bench": "^0.3.0-rc.1"
     }
 }

@@ -30,7 +30,8 @@ module.exports = Object.assign({}, common(), {
                 test: /node/,
                 sourceMap: true,
                 terserOptions: {
-                    mangle: false
+                    mangle: false,
+                    keep_infinity: true
                 }
             })
         ]
