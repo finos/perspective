@@ -739,10 +739,10 @@ export default function(Module) {
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
         _clear_process(this.pool);
-        if (["none", "cell", "pkey"].indexOf(mode) === -1) {
-            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "pkey".`);
+        if (["none", "cell", "row"].indexOf(mode) === -1) {
+            throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
         }
-        if (mode === "cell" || mode === "pkey") {
+        if (mode === "cell" || mode === "row") {
             // Enable deltas only if needed by callback
             if (!this._View._get_deltas_enabled()) {
                 this._View._set_deltas_enabled(true);
@@ -757,7 +757,7 @@ export default function(Module) {
                             callback(await this._get_step_delta());
                         }
                         break;
-                    case "pkey":
+                    case "row":
                         {
                             callback(await this._get_row_delta());
                         }

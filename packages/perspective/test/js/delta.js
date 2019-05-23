@@ -47,24 +47,28 @@ module.exports = perspective => {
         });
     });
 
+    /**
+     * TODO: complete set of test suite around data return, especially in terms of ordering + column-only
+     */
     describe("Row delta", function() {
-        describe.skip("0-sided row delta", function() {
+        describe("0-sided row delta", function() {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
+                        const expected = [{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}];
                         let table2 = perspective.table(delta);
                         let view2 = table2.view();
                         let json = await view2.to_json();
-                        expect(json).toEqual([]);
+                        expect(json).toEqual(expected);
                         view2.delete();
                         view.delete();
                         table2.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -74,12 +78,18 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([4, 5]);
+                        const expected = [{x: 1, y: "string1", z: null}, {x: 2, y: "string2", z: null}];
+                        let table2 = perspective.table(delta);
+                        let view2 = table2.view();
+                        let json = await view2.to_json();
+                        expect(json).toEqual(expected);
+                        view2.delete();
                         view.delete();
+                        table2.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -89,12 +99,18 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3]);
+                        const expected = [{x: 1, y: null, z: true}, {x: 4, y: null, z: false}];
+                        let table2 = perspective.table(delta);
+                        let view2 = table2.view();
+                        let json = await view2.to_json();
+                        expect(json).toEqual(expected);
+                        view2.delete();
                         view.delete();
+                        table2.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
@@ -106,12 +122,18 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([2, 3]);
+                        const expected = [{x: 2, y: "string2", z: false}, {x: 1, y: "string1", z: true}];
+                        let table2 = perspective.table(delta);
+                        let view2 = table2.view();
+                        let json = await view2.to_json();
+                        expect(json).toEqual(expected);
+                        view2.delete();
                         view.delete();
+                        table2.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -121,12 +143,18 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3]);
+                        const expected = partial_change_nonseq;
+                        let table2 = perspective.table(delta);
+                        let view2 = table2.view();
+                        let json = await view2.to_json();
+                        expect(json).toEqual(expected);
+                        view2.delete();
                         view.delete();
+                        table2.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });
@@ -145,7 +173,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -162,7 +190,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -179,7 +207,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -197,7 +225,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
@@ -215,7 +243,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });
@@ -235,7 +263,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -253,7 +281,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -271,7 +299,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y_z);
             });
@@ -289,7 +317,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -307,7 +335,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -328,7 +356,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 2, y: null}, {x: 4, y: null}]);
             });
@@ -347,7 +375,7 @@ module.exports = perspective => {
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });

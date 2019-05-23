@@ -187,6 +187,25 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("does not break when booleans are undefined", async function() {
+            let table = perspective.table([{int: 1, bool: true}, {int: 2, bool: false}, {int: 3, bool: true}, {int: 4, bool: undefined}]);
+            let view = table.view();
+            let arrow = await view.to_arrow();
+            let json = await view.to_json();
+
+            expect(json).toEqual([{int: 1, bool: true}, {int: 2, bool: false}, {int: 3, bool: true}, {int: 4, bool: null}]);
+
+            let table2 = perspective.table(arrow);
+            let view2 = table2.view();
+            let json2 = await view2.to_json();
+            expect(json2).toEqual(json);
+
+            view2.delete();
+            table2.delete();
+            view.delete();
+            table.delete();
+        });
+
         it("Transitive arrow output 0-sided", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
