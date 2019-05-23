@@ -156,6 +156,60 @@ t_ctx1::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
     return values;
 }
 
+std::vector<t_tscalar>
+t_ctx1::get_data(const std::vector<t_uindex>& rows) const {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex nrows = rows.size();
+    t_uindex ncols = get_column_count();
+
+    std::vector<t_tscalar> tmpvalues(nrows * ncols);
+    std::vector<t_tscalar> values(nrows * ncols);
+
+    std::vector<const t_column*> aggcols(m_config.get_num_aggregates());
+
+    auto aggtable = m_tree->get_aggtable();
+    t_schema aggschema = aggtable->get_schema();
+    auto none = mknone();
+
+    for (t_uindex aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+        const std::string& aggname = aggschema.m_columns[aggidx];
+        aggcols[aggidx] = aggtable->get_const_column(aggname).get();
+    }
+
+    const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
+
+    // access data for changed rows, but write them into the slice as if we start from 0
+    for (t_index idx = 0; idx < nrows; ++idx) {
+        t_uindex ridx = rows[idx];
+        t_index nidx = m_traversal->get_tree_index(ridx);
+        t_index pnidx = m_tree->get_parent_idx(nidx);
+
+        t_uindex agg_ridx = m_tree->get_aggidx(nidx);
+        t_index agg_pridx = pnidx == INVALID_INDEX ? INVALID_INDEX : m_tree->get_aggidx(pnidx);
+
+        t_tscalar tree_value = m_tree->get_value(nidx);
+        tmpvalues[idx * ncols] = tree_value;
+
+        for (t_index aggidx = 0, loop_end = aggcols.size(); aggidx < loop_end; ++aggidx) {
+            t_tscalar value
+                = extract_aggregate(aggspecs[aggidx], aggcols[aggidx], agg_ridx, agg_pridx);
+            if (!value.is_valid())
+                value.set(none); // todo: fix null handling
+            tmpvalues[idx * ncols + 1 + aggidx].set(value);
+        }
+    }
+
+    for (auto ridx = 0; ridx < nrows; ++ridx) {
+        for (auto cidx = 0; cidx < ncols; ++cidx) {
+            auto idx = ridx * ncols + cidx;
+            values[idx].set(tmpvalues[idx]);
+        }
+    }
+
+    return values;
+}
+
 void
 t_ctx1::notify(const t_table& flattened, const t_table& delta, const t_table& prev,
     const t_table& current, const t_table& transitions, const t_table& existed) {
@@ -367,7 +421,9 @@ t_ctx1::get_step_delta(t_index bidx, t_index eidx) {
 }
 
 /**
- * @brief Returns the row indices that have been updated with new data.
+ * @brief Returns a `t_rowdelta` object containing:
+ * - the row indices that have been updated
+ * - the data from those updated rows
  *
  * @return t_rowdelta
  */
@@ -375,10 +431,19 @@ t_rowdelta
 t_ctx1::get_row_delta() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    t_uindex eidx = t_uindex(m_traversal->size());
-    std::vector<t_uindex> rows;
+    std::vector<t_uindex> rows = get_rows_changed();
+    std::vector<t_tscalar> data = get_data(rows);
+    t_rowdelta rval(m_rows_changed, rows, data);
+    m_tree->clear_deltas();
+    return rval;
+}
 
+std::vector<t_uindex>
+t_ctx1::get_rows_changed() {
+    std::vector<t_uindex> rows;
     const auto& deltas = m_tree->get_deltas();
+    t_uindex eidx = t_uindex(m_traversal->size());
+
     for (t_uindex idx = 0; idx < eidx; ++idx) {
         t_index ptidx = m_traversal->get_tree_index(idx);
         // Retrieve delta from storage and check if the row has been changed
@@ -389,9 +454,7 @@ t_ctx1::get_row_delta() {
     }
 
     std::sort(rows.begin(), rows.end());
-    t_rowdelta rval(m_rows_changed, rows);
-    m_tree->clear_deltas();
-    return rval;
+    return rows;
 }
 
 std::vector<t_cellupd>

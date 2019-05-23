@@ -14,6 +14,15 @@ let partial_change_z = [{x: 1, z: false}, {x: 2, z: true}];
 let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z: true}];
 let partial_change_nonseq = [{x: 1, y: "string1", z: false}, {x: 4, y: "string2", z: true}];
 
+async function match_delta(perspective, delta, expected) {
+    let table = perspective.table(delta);
+    let view = table.view();
+    let json = await view.to_json();
+    expect(json).toEqual(expected);
+    view.delete();
+    table.delete();
+}
+
 module.exports = perspective => {
     describe("Step delta", function() {
         it("Should calculate step delta for 0-sided contexts", async function(done) {
@@ -47,9 +56,6 @@ module.exports = perspective => {
         });
     });
 
-    /**
-     * TODO: complete set of test suite around data return, especially in terms of ordering + column-only
-     */
     describe("Row delta", function() {
         describe("0-sided row delta", function() {
             it("returns changed rows", async function(done) {
@@ -58,13 +64,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         const expected = [{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}];
-                        let table2 = perspective.table(delta);
-                        let view2 = table2.view();
-                        let json = await view2.to_json();
-                        expect(json).toEqual(expected);
-                        view2.delete();
+                        await match_delta(perspective, delta, expected);
                         view.delete();
-                        table2.delete();
                         table.delete();
                         done();
                     },
@@ -79,13 +80,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         const expected = [{x: 1, y: "string1", z: null}, {x: 2, y: "string2", z: null}];
-                        let table2 = perspective.table(delta);
-                        let view2 = table2.view();
-                        let json = await view2.to_json();
-                        expect(json).toEqual(expected);
-                        view2.delete();
+                        await match_delta(perspective, delta, expected);
                         view.delete();
-                        table2.delete();
                         table.delete();
                         done();
                     },
@@ -100,13 +96,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         const expected = [{x: 1, y: null, z: true}, {x: 4, y: null, z: false}];
-                        let table2 = perspective.table(delta);
-                        let view2 = table2.view();
-                        let json = await view2.to_json();
-                        expect(json).toEqual(expected);
-                        view2.delete();
+                        await match_delta(perspective, delta, expected);
                         view.delete();
-                        table2.delete();
                         table.delete();
                         done();
                     },
@@ -123,13 +114,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         const expected = [{x: 2, y: "string2", z: false}, {x: 1, y: "string1", z: true}];
-                        let table2 = perspective.table(delta);
-                        let view2 = table2.view();
-                        let json = await view2.to_json();
-                        expect(json).toEqual(expected);
-                        view2.delete();
+                        await match_delta(perspective, delta, expected);
                         view.delete();
-                        table2.delete();
                         table.delete();
                         done();
                     },
@@ -144,13 +130,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         const expected = partial_change_nonseq;
-                        let table2 = perspective.table(delta);
-                        let view2 = table2.view();
-                        let json = await view2.to_json();
-                        expect(json).toEqual(expected);
-                        view2.delete();
+                        await match_delta(perspective, delta, expected);
                         view.delete();
-                        table2.delete();
                         table.delete();
                         done();
                     },
@@ -160,7 +141,7 @@ module.exports = perspective => {
             });
         });
 
-        describe.skip("1-sided row delta", function() {
+        describe("1-sided row delta", function() {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
@@ -168,7 +149,8 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([3, 4]);
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -185,7 +167,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([]);
+                        await match_delta(perspective, delta, []);
                         view.delete();
                         table.delete();
                         done();
@@ -202,7 +184,8 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const expected = [{x: 13, y: 6, z: 3}, {x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -220,7 +203,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // underlying data changes, but only total aggregate row is affected
-                        expect(delta).toEqual([0]);
+                        const expected = [{x: 10, y: 3, z: 2}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -238,7 +222,8 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
-                        expect(delta).toEqual([3, 4]);
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 4, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
