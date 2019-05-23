@@ -74,6 +74,8 @@ public:
      */
     std::vector<t_tscalar> get_row_path(t_uindex ridx) const;
 
+    std::vector<t_tscalar> get_column_slice(t_uindex cidx) const;
+
     // Getters
     std::shared_ptr<CTX_T> get_context() const;
     const std::vector<t_tscalar>& get_slice() const;

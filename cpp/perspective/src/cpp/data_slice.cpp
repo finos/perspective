@@ -62,14 +62,13 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
     : m_ctx(ctx)
     , m_slice(slice)
     , m_row_indices(row_indices) {
-    auto start_row = m_row_indices.begin();
-    auto end_row = m_row_indices.end();
-
-    m_start_row = *start_row;
-    m_end_row = *end_row;
+    m_start_row = 0;
+    m_end_row = m_row_indices.size();
     m_start_col = 0;
     m_end_col = m_ctx->get_column_count();
     m_stride = m_end_col;
+    m_row_offset = 0;
+    m_col_offset = 0;
 }
 
 template <typename CTX_T>
@@ -88,6 +87,27 @@ t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
         rv = m_slice.operator[](idx);
     }
     return rv;
+}
+
+template <typename CTX_T>
+std::vector<t_tscalar>
+t_data_slice<CTX_T>::get_column_slice(t_uindex cidx) const {
+    std::vector<t_tscalar> column_data;
+    t_uindex end_row = m_end_row;
+
+    if (m_row_indices.size() > 0) {
+        end_row = m_row_indices.size();
+    }
+
+    column_data.reserve(end_row);
+
+    for (auto ridx = 0; ridx < end_row; ++ridx) {
+        ridx += m_row_offset;
+        t_tscalar value = get(ridx, cidx);
+        column_data.push_back(value);
+    }
+
+    return column_data;
 }
 
 template <typename CTX_T>

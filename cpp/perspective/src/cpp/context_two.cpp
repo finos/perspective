@@ -675,10 +675,9 @@ t_ctx2::get_step_delta(t_index bidx, t_index eidx) {
  */
 t_rowdelta
 t_ctx2::get_row_delta() {
-    t_index nrows = get_row_count();
-    t_index ncols = get_num_view_columns();
-    tsl::hopscotch_set<t_uindex> rows;
-
+    t_uindex nrows = get_row_count();
+    t_uindex ncols = get_num_view_columns();
+    std::vector<t_uindex> rows;
     std::vector<std::pair<t_uindex, t_uindex>> cells;
 
     // get cells and imbue with additional information
@@ -696,10 +695,12 @@ t_ctx2::get_row_delta() {
         const auto& deltas = m_trees[c.m_treenum]->get_deltas();
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(c.m_idx);
         auto ridx = c.m_ridx;
-        if ((iterators.first != iterators.second))
-            rows.insert(ridx);
+        bool unique_ridx = std::find(rows.begin(), rows.end(), ridx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
+            rows.push_back(ridx);
     }
 
+    std::sort(rows.begin(), rows.end());
     t_rowdelta rval(true, rows);
     clear_deltas();
     return rval;

@@ -140,31 +140,26 @@ t_ctx0::get_data(t_index start_row, t_index end_row, t_index start_col, t_index 
 }
 
 /**
- * @brief Given a vector of primary keys, return the underlying data for those rows.
+ * @brief Given a vector of row indices, which may not be contiguous, return the underlying data
+ * for these rows.
  *
- * @param pkeys a vector of scalar primary keys
+ * @param rows a vector of row indices
  * @return std::vector<t_tscalar> a vector of scalars containing the underlying data
  */
 std::vector<t_tscalar>
-t_ctx0::get_data(const tsl::hopscotch_set<t_tscalar>& pkeys) const {
-    t_uindex num_pkeys = pkeys.size();
+t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
     t_uindex stride = get_column_count();
-    std::vector<t_tscalar> values(num_pkeys * stride);
-
-    std::vector<t_tscalar> changed_pkeys;
-    changed_pkeys.reserve(num_pkeys);
-    std::copy(pkeys.begin(), pkeys.end(), std::back_inserter(changed_pkeys));
+    std::vector<t_tscalar> values(rows.size() * stride);
+    std::vector<t_tscalar> pkeys = m_traversal->get_pkeys(rows);
 
     auto none = mknone();
+    for (t_uindex cidx = 0; cidx < stride; ++cidx) {
+        std::vector<t_tscalar> out_data(rows.size());
+        m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
 
-    for (t_index cidx = 0; cidx < stride; ++cidx) {
-        std::vector<t_tscalar> out_data(num_pkeys);
-        m_state->read_column(m_config.col_at(cidx), changed_pkeys, out_data);
-
-        for (t_index ridx = 0; ridx < num_pkeys; ++ridx) {
+        for (t_index ridx = 0; ridx < rows.size(); ++ridx) {
             auto v = out_data[ridx];
 
-            // todo: fix null handling
             if (!v.is_valid())
                 v.set(none);
 
@@ -350,9 +345,10 @@ t_rowdelta
 t_ctx0::get_row_delta() {
     bool rows_changed = m_rows_changed || !m_traversal->empty_sort_by();
     tsl::hopscotch_set<t_tscalar> pkeys = get_delta_pkeys();
-    tsl::hopscotch_set<t_uindex> ridxs = m_traversal->get_row_indices(pkeys);
-    std::vector<t_tscalar> data = get_data(pkeys);
-    t_rowdelta rval(rows_changed, ridxs, data);
+    std::vector<t_uindex> rows = m_traversal->get_row_indices(pkeys);
+    std::sort(rows.begin(), rows.end());
+    std::vector<t_tscalar> data = get_data(rows);
+    t_rowdelta rval(rows_changed, rows, data);
     clear_deltas();
     return rval;
 }

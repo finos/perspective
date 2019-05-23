@@ -376,17 +376,19 @@ t_ctx1::get_row_delta() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     t_uindex eidx = t_uindex(m_traversal->size());
-    tsl::hopscotch_set<t_uindex> rows;
+    std::vector<t_uindex> rows;
 
     const auto& deltas = m_tree->get_deltas();
-    for (t_index idx = 0; idx < eidx; ++idx) {
+    for (t_uindex idx = 0; idx < eidx; ++idx) {
         t_index ptidx = m_traversal->get_tree_index(idx);
         // Retrieve delta from storage and check if the row has been changed
         auto iterators = deltas->get<by_tc_nidx_aggidx>().equal_range(ptidx);
-        if ((iterators.first != iterators.second))
-            rows.insert(idx);
+        bool unique_ridx = std::find(rows.begin(), rows.end(), idx) == rows.end();
+        if ((iterators.first != iterators.second) && unique_ridx)
+            rows.push_back(idx);
     }
 
+    std::sort(rows.begin(), rows.end());
     t_rowdelta rval(m_rows_changed, rows);
     m_tree->clear_deltas();
     return rval;

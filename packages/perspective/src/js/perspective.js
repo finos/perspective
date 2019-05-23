@@ -536,11 +536,6 @@ export default function(Module) {
             return undefined;
         }
 
-        // determine start/end row
-        const num_rows = await this.num_rows();
-        const start_row = options.start_row || 0;
-        const end_row = options.end_row || num_rows;
-
         // mutate the column index if necessary: in pivoted views, columns start at 1
         const num_sides = this.sides();
         if (num_sides > 0) {
@@ -549,12 +544,22 @@ export default function(Module) {
 
         // use a specified data slice, if provided
         let data_slice = options.data_slice;
+        let slice;
+
         if (!data_slice) {
+            // determine start/end row
+            const num_rows = await this.num_rows();
+            const start_row = options.start_row || 0;
+            const end_row = options.end_row || num_rows;
             data_slice = await this.get_data_slice(start_row, end_row, idx, idx + 1);
+            slice = data_slice.get_slice();
+        } else {
+            // return just one column of data, always return whole dataset
+            slice = data_slice.get_column_slice(idx);
         }
 
         const nidx = ["zero", "one", "two"][num_sides];
-        return __MODULE__[`col_to_js_typed_array_${nidx}`](data_slice, idx);
+        return __MODULE__[`col_to_js_typed_array_${nidx}`](data_slice, slice, idx);
     };
 
     /**
@@ -723,7 +728,8 @@ export default function(Module) {
      */
     view.prototype._get_row_delta = async function() {
         let delta_slice = this._View.get_row_delta();
-        return await this.to_arrow({data_slice: delta_slice});
+        let arrow = await this.to_arrow({data_slice: delta_slice});
+        return arrow;
     };
 
     /**

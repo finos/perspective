@@ -568,7 +568,7 @@ namespace binding {
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
 
-        for (int idx = 0; idx < data.size(); idx++) {
+        for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 vals.push_back(get_scalar<F, T>(scalar));
@@ -601,7 +601,7 @@ namespace binding {
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
 
-        for (int idx = 0; idx < data.size(); idx++) {
+        for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 // get boolean and write into array
@@ -640,7 +640,7 @@ namespace binding {
         val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
         val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
 
-        for (int idx = 0; idx < data.size(); idx++) {
+        for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 auto adx = vocab.get_interned(scalar.to_string());
@@ -679,9 +679,9 @@ namespace binding {
     // Given a column index, serialize data to TypedArray
     template <typename T>
     val
-    col_to_js_typed_array(std::shared_ptr<t_data_slice<T>> data_slice, t_index idx) {
+    col_to_js_typed_array(std::shared_ptr<t_data_slice<T>> data_slice,
+        const std::vector<t_tscalar>& data, t_index idx) {
         std::shared_ptr<T> ctx = data_slice->get_context();
-        const std::vector<t_tscalar>& data = data_slice->get_slice();
         auto dtype = ctx->get_column_dtype(idx);
 
         switch (dtype) {
@@ -834,7 +834,22 @@ namespace binding {
             // bools are stored using a bit mask
             val data = accessor["values"];
             for (auto i = 0; i < nrows; ++i) {
-                std::uint8_t elem = data[i / 8].as<std::uint8_t>();
+                val item = data[i / 8];
+
+                if (item.isUndefined()) {
+                    continue;
+                }
+
+                if (item.isNull()) {
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
+                    continue;
+                }
+
+                std::uint8_t elem = item.as<std::uint8_t>();
                 bool v = elem & (1 << (i % 8));
                 col->set_nth(i, v);
             }
@@ -2100,6 +2115,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx0>::get_slice)
         .function<const std::vector<t_uindex>&>(
             "get_row_indices", &t_data_slice<t_ctx0>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
@@ -2107,6 +2125,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx1>::get_slice)
         .function<const std::vector<t_uindex>&>(
             "get_row_indices", &t_data_slice<t_ctx1>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
@@ -2115,6 +2136,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx2>::get_slice)
         .function<const std::vector<t_uindex>&>(
             "get_row_indices", &t_data_slice<t_ctx2>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
