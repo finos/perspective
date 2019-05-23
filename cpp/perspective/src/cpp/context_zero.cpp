@@ -157,7 +157,7 @@ t_ctx0::get_data(const std::vector<t_uindex>& rows) const {
         std::vector<t_tscalar> out_data(rows.size());
         m_state->read_column(m_config.col_at(cidx), pkeys, out_data);
 
-        for (t_index ridx = 0; ridx < rows.size(); ++ridx) {
+        for (t_uindex ridx = 0; ridx < rows.size(); ++ridx) {
             auto v = out_data[ridx];
 
             if (!v.is_valid())

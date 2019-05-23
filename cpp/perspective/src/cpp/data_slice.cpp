@@ -101,7 +101,7 @@ t_data_slice<CTX_T>::get_column_slice(t_uindex cidx) const {
 
     column_data.reserve(end_row);
 
-    for (auto ridx = 0; ridx < end_row; ++ridx) {
+    for (t_uindex ridx = 0; ridx < end_row; ++ridx) {
         ridx += m_row_offset;
         t_tscalar value = get(ridx, cidx);
         column_data.push_back(value);

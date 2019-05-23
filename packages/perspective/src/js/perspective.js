@@ -722,8 +722,8 @@ export default function(Module) {
     };
 
     /**
-     * Returns an array of row indices indicating which rows have been changed
-     * in an update.
+     * Returns an Arrow-serialized dataset that contains the data from updated rows.
+     *
      * @private
      */
     view.prototype._get_row_delta = async function() {
