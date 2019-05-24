@@ -136,7 +136,7 @@ export class Host {
 
                 // post transferable data for arrow
                 if (msg.args && msg.args[0]) {
-                    if (msg.method === "on_update" && msg.args[0]["mode"] === "rows") {
+                    if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
                         this.post(result, [ev]);
                         return;
                     }
