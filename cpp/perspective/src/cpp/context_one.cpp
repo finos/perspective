@@ -180,7 +180,7 @@ t_ctx1::get_data(const std::vector<t_uindex>& rows) const {
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
     // access data for changed rows, but write them into the slice as if we start from 0
-    for (t_index idx = 0; idx < nrows; ++idx) {
+    for (t_uindex idx = 0; idx < nrows; ++idx) {
         t_uindex ridx = rows[idx];
         t_index nidx = m_traversal->get_tree_index(ridx);
         t_index pnidx = m_tree->get_parent_idx(nidx);
@@ -200,9 +200,9 @@ t_ctx1::get_data(const std::vector<t_uindex>& rows) const {
         }
     }
 
-    for (auto ridx = 0; ridx < nrows; ++ridx) {
-        for (auto cidx = 0; cidx < ncols; ++cidx) {
-            auto idx = ridx * ncols + cidx;
+    for (t_uindex ridx = 0; ridx < nrows; ++ridx) {
+        for (t_uindex cidx = 0; cidx < ncols; ++cidx) {
+            t_uindex idx = ridx * ncols + cidx;
             values[idx].set(tmpvalues[idx]);
         }
     }

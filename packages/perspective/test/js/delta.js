@@ -234,7 +234,7 @@ module.exports = perspective => {
             });
         });
 
-        describe.skip("2-sided row delta", function() {
+        describe("2-sided row delta", function() {
             it("returns changed rows when updated data in row pivot", async function(done) {
                 let table = perspective.table(data, {index: "y"});
                 let view = table.view({
@@ -243,7 +243,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -261,7 +266,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 1, 2]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -279,7 +289,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3, 4]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = [json[0], json[3], json[4]];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -297,7 +312,7 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([]);
+                        await match_delta(perspective, delta, []);
                         view.delete();
                         table.delete();
                         done();
@@ -315,7 +330,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -336,7 +356,12 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // underlying data changes, but only total aggregate row is affected
-                        expect(delta).toEqual([0, 1, 2, 4]);
+                        const expected = await view.to_json();
+                        expected.splice(3, 1);
+                        expected.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
@@ -355,7 +380,35 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
-                        expect(delta).toEqual([3, 4]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = [json[3], json[4]];
+                        await match_delta(perspective, delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
+                );
+                table.update(partial_change_nonseq);
+            });
+
+            it("returns changed rows in column-only pivots", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    column_pivots: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        const json = await view.to_json();
+                        const expected = [
+                            {"1|x": 1, "1|y": "string1", "1|z": false, "2|x": 2, "2|y": "b", "2|z": false, "3|x": 3, "3|y": "c", "3|z": true, "4|x": 4, "4|y": "string2", "4|z": true},
+                            json[0],
+                            json[3]
+                        ];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
