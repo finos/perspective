@@ -24,7 +24,10 @@ module.exports = Object.assign({}, common(), {
         }),
         new WebpackOnBuildPlugin(() => {
             for (const theme of THEMES) {
-                fs.unlinkSync(path.resolve(__dirname, "..", "..", "build", theme.replace("less", "js")));
+                const filePath = path.resolve(__dirname, "..", "..", "build", theme.replace("less", "js"));
+                if (fs.existsSync(filePath)) {
+                    fs.unlinkSync(filePath);
+                }
             }
         })
     ],
@@ -38,7 +41,7 @@ module.exports = Object.assign({}, common(), {
                 loader: "base64-font-loader"
             },
             {
-                test: /themes\/.+?\.less$/,
+                test: /themes[\\/].+?\.less$/,
                 use: [{loader: MiniCssExtractPlugin.loader}, "css-loader", "less-loader"]
             }
         ]
