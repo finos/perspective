@@ -306,9 +306,6 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
     const std::vector<t_aggspec>& aggspecs = m_config.get_aggregates();
 
     for (t_uindex idx = 0; idx < nrows; ++idx) {
-        t_uindex ridx = rows[idx]; // access proper row from dataset, but write into the output
-                                   // slice as if starting from row 0
-
         for (t_uindex cidx = 1; cidx < ncols; ++cidx) {
             t_uindex insert_idx = idx * ncols + cidx;
             const t_cellinfo& cinfo = cells_info[insert_idx];
@@ -318,11 +315,11 @@ t_ctx2::get_data(const std::vector<t_uindex>& rows) const {
             } else {
                 auto aggcol = aggmap[t_aggpair(cinfo.m_treenum, cinfo.m_agg_index)];
 
-                t_uindex p_idx = m_trees[cinfo.m_treenum]->get_parent_idx(cinfo.m_idx);
+                t_index p_idx = m_trees[cinfo.m_treenum]->get_parent_idx(cinfo.m_idx);
 
-                t_uindex agg_ridx = m_trees[cinfo.m_treenum]->get_aggidx(cinfo.m_idx);
+                t_index agg_ridx = m_trees[cinfo.m_treenum]->get_aggidx(cinfo.m_idx);
 
-                t_uindex agg_pridx = p_idx == INVALID_INDEX
+                t_index agg_pridx = p_idx == INVALID_INDEX
                     ? INVALID_INDEX
                     : m_trees[cinfo.m_treenum]->get_aggidx(p_idx);
 
