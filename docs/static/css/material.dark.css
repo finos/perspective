@@ -149,6 +149,3 @@ perspective-viewer {
   --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
   --warning--color: #333;
 }
-.homeContainer #app {
-  background-color: #2A2C2F !important;
-}
