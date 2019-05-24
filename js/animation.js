@@ -15,87 +15,18 @@ function newRow() {
     };
 }
 
-var PHASES = ["a", "b", "c"];
-var CONFIGS = [
-    {
-        view: "y_bar",
-        "row-pivots": '["name"]',
-        "column-pivots": "[]",
-        aggregates: '{"bid":"sum"}',
-        columns: '["bid"]',
-        sort: "[]"
-    },
-    {
-        view: "xy_scatter",
-        "row-pivots": '["name"]',
-        "column-pivots": "[]",
-        columns: '["bid", "ask", "vol", "id"]',
-        aggregates: '{"bid":"avg","ask":"avg", "vol":"avg"}',
-        sort: "[]"
-    },
-    {
-        view: "x_bar",
-        "row-pivots": '["name"]',
-        "column-pivots": '["client"]',
-        aggregates: '{"chg":"sum"}',
-        columns: '["chg"]',
-        sort: "[]"
-    },
-    {
-        view: "xy_line",
-        "row-pivots": "[]",
-        "column-pivots": '["name"]',
-        columns: '["lastUpdate", "bid"]',
-        sort: '[["lastUpdate","asc"]]'
-    },
-    {
-        view: "hypergrid",
-        "row-pivots": '["name"]',
-        "column-pivots": '["client"]',
-        columns: '["bid", "chg"]',
-        sort: "[]"
-    },
-    {
-        view: "hypergrid",
-        "row-pivots": "[]",
-        "column-pivots": "[]",
-        columns: '["name", "chg", "lastUpdate", "bid", "ask", "client", "vol", "id"]',
-        sort: '[["lastUpdate","asc"]]'
-    },
-    {
-        view: "sunburst",
-        "row-pivots": '["name","client"]',
-        "column-pivots": "[]",
-        columns: '["ask", "chg"]',
-        sort: '[["chg","asc"]]'
-    },
-    {
-        view: "treemap",
-        "row-pivots": '["name","client"]',
-        "column-pivots": "[]",
-        columns: '["bid", "chg"]',
-        sort: '[["lastUpdate","asc"]]'
-    }
-];
+var styleElement = document.createElement("style");
+styleElement.innerText = `
+.homeContainer perspective-viewer, perspective-viewer {
+    --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%) !important;
+    --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
+    --d3fc-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;
+    --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%) !important;
+    --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
+    --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;  
+}`;
 
-var last_index = 5,
-    widget;
-
-function rotate(next_index) {
-    widget = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
-    if (!next_index) {
-        while (!next_index || last_index === next_index) {
-            next_index = Math.floor(Math.random() * CONFIGS.length);
-        }
-    }
-    last_index = next_index;
-
-    var config = CONFIGS[next_index];
-    for (var key in config) {
-        widget.setAttribute(key, config[key]);
-    }
-    setTimeout(rotate, 10000);
-}
+document.head.appendChild(styleElement);
 
 var tbl,
     freq = 0,
@@ -147,8 +78,8 @@ function select(id) {
                 view: "xy_scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
-                columns: '["bid", "ask", "vol", "id"]',
-                aggregates: '{"bid":"avg","ask":"avg", "vol":"avg"}',
+                columns: ["bid", "ask", "vol", "id"],
+                aggregates: {bid: "avg", ask: "avg", vol: "avg"},
                 sort: []
             },
             "#intersect": {
@@ -163,8 +94,8 @@ function select(id) {
                 view: "y_line",
                 "row-pivots": ["lastUpdate"],
                 "column-pivots": ["client"],
-                columns: '["bid"]',
-                aggregates: '{"bid":"avg","chg":"avg", "name":"last"}',
+                columns: ["bid"],
+                aggregates: {bid: "avg", chg: "avg", name: "last"},
                 sort: []
             }
         }[id] || {}
