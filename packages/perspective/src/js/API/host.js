@@ -129,11 +129,21 @@ export class Host {
     process_subscribe(msg, obj) {
         try {
             obj[msg.method](ev => {
-                this.post({
+                let result = {
                     id: msg.id,
                     data: ev
-                });
-            });
+                };
+
+                // post transferable data for arrow
+                if (msg.args && msg.args[0]) {
+                    if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                        this.post(result, [ev]);
+                        return;
+                    }
+                }
+
+                this.post(result);
+            }, ...msg.args); // make sure we are passing arguments into the callback
         } catch (error) {
             this.process_error(msg, error);
             return;

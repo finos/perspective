@@ -14,6 +14,8 @@ perspective::t_index get_column_count() const;
 std::vector<t_tscalar> get_data(
     t_index start_row, t_index end_row, t_index start_col, t_index end_col) const;
 
+std::vector<t_tscalar> get_data(const std::vector<t_uindex>& rows) const;
+
 void sort_by(const std::vector<t_sortspec>& sortby);
 
 void reset_sortby();
@@ -56,6 +58,8 @@ std::vector<t_minmax> get_min_max() const;
 t_stepdelta get_step_delta(t_index bidx, t_index eidx);
 
 t_rowdelta get_row_delta();
+
+std::vector<t_uindex> get_rows_changed();
 
 std::vector<t_cellupd> get_cell_delta(t_index bidx, t_index eidx) const;
 

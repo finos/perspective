@@ -76,6 +76,17 @@ t_ftrav::get_pkeys(t_index begin_row, t_index end_row) const {
 }
 
 std::vector<t_tscalar>
+t_ftrav::get_pkeys(const std::vector<t_uindex>& rows) const {
+    std::vector<t_tscalar> rval;
+    rval.reserve(rows.size());
+    for (auto it = rows.begin(); it != rows.end(); ++it) {
+        t_uindex ridx = *it;
+        rval.push_back((*m_index)[ridx].m_pkey);
+    }
+    return rval;
+}
+
+std::vector<t_tscalar>
 t_ftrav::get_pkeys() const {
     return get_pkeys(0, size());
 }
@@ -170,15 +181,15 @@ t_ftrav::get_row_indices(t_index bidx, t_index eidx, const tsl::hopscotch_set<t_
  * @brief Given a set of primary keys, return the corresponding row indices.
  *
  * @param pkeys
- * @return tsl::hopscotch_set<t_index>
+ * @return std::vector<t_index>
  */
-tsl::hopscotch_set<t_index>
+std::vector<t_uindex>
 t_ftrav::get_row_indices(const tsl::hopscotch_set<t_tscalar>& pkeys) const {
-    tsl::hopscotch_set<t_index> rows;
-    for (t_index idx = 0, loop_end = size(); idx < loop_end; ++idx) {
+    std::vector<t_uindex> rows;
+    for (t_uindex idx = 0, loop_end = size(); idx < loop_end; ++idx) {
         const t_tscalar& pkey = (*m_index)[idx].m_pkey;
         if (pkeys.find(pkey) != pkeys.end()) {
-            rows.insert(idx);
+            rows.push_back(idx);
         }
     }
     return rows;
@@ -231,7 +242,7 @@ t_ftrav::step_end() {
 
     t_pkeyidx_map added;
 
-    for (t_index idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
+    for (t_uindex idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
         t_mselem& elem = (*m_index)[idx];
         if (!elem.m_deleted) {
             new_index->push_back(elem);

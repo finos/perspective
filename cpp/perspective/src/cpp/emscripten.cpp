@@ -557,9 +557,8 @@ namespace binding {
 
     template <typename T, typename F = T, typename O = T>
     val
-    col_to_typed_array(std::vector<t_tscalar> data, bool column_pivot_only) {
-        int start_idx = column_pivot_only ? 1 : 0;
-        int data_size = data.size() - start_idx;
+    col_to_typed_array(std::vector<t_tscalar> data) {
+        int data_size = data.size();
         std::vector<T> vals;
         vals.reserve(data.size());
 
@@ -569,8 +568,8 @@ namespace binding {
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
 
-        for (int idx = 0; idx < data.size() - start_idx; idx++) {
-            t_tscalar scalar = data[idx + start_idx];
+        for (int idx = 0; idx < data_size; idx++) {
+            t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 vals.push_back(get_scalar<F, T>(scalar));
                 // Mark the slot as non-null (valid)
@@ -590,9 +589,8 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<bool>(std::vector<t_tscalar> data, bool column_pivot_only) {
-        int start_idx = column_pivot_only ? 1 : 0;
-        int data_size = data.size() - start_idx;
+    col_to_typed_array<bool>(std::vector<t_tscalar> data) {
+        int data_size = data.size();
 
         std::vector<std::int8_t> vals;
         vals.reserve(data.size());
@@ -603,8 +601,8 @@ namespace binding {
         std::vector<std::uint32_t> validityMap;
         validityMap.resize(nullSize);
 
-        for (int idx = 0; idx < data.size() - start_idx; idx++) {
-            t_tscalar scalar = data[idx + start_idx];
+        for (int idx = 0; idx < data_size; idx++) {
+            t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 // get boolean and write into array
                 std::int8_t val = get_scalar<std::int8_t>(scalar);
@@ -629,9 +627,8 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<std::string>(std::vector<t_tscalar> data, bool column_pivot_only) {
-        int start_idx = column_pivot_only ? 1 : 0;
-        int data_size = data.size() - start_idx;
+    col_to_typed_array<std::string>(std::vector<t_tscalar> data) {
+        int data_size = data.size();
 
         t_vocab vocab;
         vocab.init(false);
@@ -643,8 +640,8 @@ namespace binding {
         val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
         val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
 
-        for (int idx = 0; idx < data.size(); idx++) {
-            t_tscalar scalar = data[idx + start_idx];
+        for (int idx = 0; idx < data_size; idx++) {
+            t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 auto adx = vocab.get_interned(scalar.to_string());
                 indexArray.call<void>("fill", val(adx), idx, idx + 1);
@@ -680,43 +677,36 @@ namespace binding {
     }
 
     // Given a column index, serialize data to TypedArray
-    template <typename T>
     val
-    col_to_js_typed_array(std::shared_ptr<View<T>> view, t_index idx, bool column_pivot_only,
-        t_uindex start_row, t_uindex end_row) {
-        std::shared_ptr<T> ctx = view->get_context();
-        std::vector<t_tscalar> data = ctx->get_data(start_row, end_row, idx, idx + 1);
-        auto dtype = ctx->get_column_dtype(idx);
-
+    col_to_js_typed_array(const std::vector<t_tscalar>& data, t_dtype dtype, t_index idx) {
         switch (dtype) {
             case DTYPE_INT8: {
-                return col_to_typed_array<std::int8_t>(data, column_pivot_only);
+                return col_to_typed_array<std::int8_t>(data);
             } break;
             case DTYPE_INT16: {
-                return col_to_typed_array<std::int16_t>(data, column_pivot_only);
+                return col_to_typed_array<std::int16_t>(data);
             } break;
             case DTYPE_TIME: {
-                return col_to_typed_array<double, t_date, std::int32_t>(
-                    data, column_pivot_only);
+                return col_to_typed_array<double, t_date, std::int32_t>(data);
             } break;
             case DTYPE_INT32:
             case DTYPE_UINT32: {
-                return col_to_typed_array<std::uint32_t>(data, column_pivot_only);
+                return col_to_typed_array<std::uint32_t>(data);
             } break;
             case DTYPE_INT64: {
-                return col_to_typed_array<std::int32_t>(data, column_pivot_only);
+                return col_to_typed_array<std::int32_t>(data);
             } break;
             case DTYPE_FLOAT32: {
-                return col_to_typed_array<float>(data, column_pivot_only);
+                return col_to_typed_array<float>(data);
             } break;
             case DTYPE_FLOAT64: {
-                return col_to_typed_array<double>(data, column_pivot_only);
+                return col_to_typed_array<double>(data);
             } break;
             case DTYPE_BOOL: {
-                return col_to_typed_array<bool>(data, column_pivot_only);
+                return col_to_typed_array<bool>(data);
             } break;
             case DTYPE_STR: {
-                return col_to_typed_array<std::string>(data, column_pivot_only);
+                return col_to_typed_array<std::string>(data);
             } break;
             default: {
                 PSP_COMPLAIN_AND_ABORT("Unhandled aggregate type");
@@ -839,7 +829,22 @@ namespace binding {
             // bools are stored using a bit mask
             val data = accessor["values"];
             for (auto i = 0; i < nrows; ++i) {
-                std::uint8_t elem = data[i / 8].as<std::uint8_t>();
+                val item = data[i / 8];
+
+                if (item.isUndefined()) {
+                    continue;
+                }
+
+                if (item.isNull()) {
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
+                    continue;
+                }
+
+                std::uint8_t elem = item.as<std::uint8_t>();
                 bool v = elem & (1 << (i % 8));
                 col->set_nth(i, v);
             }
@@ -2016,6 +2021,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_row_delta", &View<t_ctx0>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -2041,6 +2047,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_row_delta", &View<t_ctx1>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -2067,6 +2074,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_row_delta", &View<t_ctx2>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -2105,17 +2113,32 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx0>::get_slice)
+        .function<const std::vector<t_uindex>&>(
+            "get_row_indices", &t_data_slice<t_ctx0>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
 
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx1>::get_slice)
+        .function<const std::vector<t_uindex>&>(
+            "get_row_indices", &t_data_slice<t_ctx1>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx1>::get_column_names)
         .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
 
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
+        .function<std::vector<t_tscalar>>(
+            "get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
+        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx2>::get_slice)
+        .function<const std::vector<t_uindex>&>(
+            "get_row_indices", &t_data_slice<t_ctx2>::get_row_indices)
         .function<const std::vector<std::vector<t_tscalar>>&>(
             "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
         .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
@@ -2247,9 +2270,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
-    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
-    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);
+    function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
     function("make_view_one", &make_view_one<val>, allow_raw_pointers());
     function("make_view_two", &make_view_two<val>, allow_raw_pointers());

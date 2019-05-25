@@ -14,6 +14,15 @@ let partial_change_z = [{x: 1, z: false}, {x: 2, z: true}];
 let partial_change_y_z = [{x: 1, y: "string1", z: false}, {x: 2, y: "string2", z: true}];
 let partial_change_nonseq = [{x: 1, y: "string1", z: false}, {x: 4, y: "string2", z: true}];
 
+async function match_delta(perspective, delta, expected) {
+    let table = perspective.table(delta);
+    let view = table.view();
+    let json = await view.to_json();
+    expect(json).toEqual(expected);
+    view.delete();
+    table.delete();
+}
+
 module.exports = perspective => {
     describe("Step delta", function() {
         it("Should calculate step delta for 0-sided contexts", async function(done) {
@@ -54,12 +63,13 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 1]);
+                        const expected = [{x: 1, y: "string1", z: true}, {x: 2, y: "string2", z: false}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -69,12 +79,13 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([4, 5]);
+                        const expected = [{x: 1, y: "string1", z: null}, {x: 2, y: "string2", z: null}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -84,12 +95,13 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3]);
+                        const expected = [{x: 1, y: null, z: true}, {x: 4, y: null, z: false}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
@@ -101,12 +113,13 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([2, 3]);
+                        const expected = [{x: 2, y: "string2", z: false}, {x: 1, y: "string1", z: true}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -116,12 +129,13 @@ module.exports = perspective => {
                 let view = table.view();
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3]);
+                        const expected = partial_change_nonseq;
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });
@@ -135,12 +149,13 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([3, 4]);
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -152,12 +167,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([]);
+                        await match_delta(perspective, delta, []);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -169,12 +184,13 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const expected = [{x: 13, y: 6, z: 3}, {x: 1, y: 1, z: 1}, {x: 2, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -187,12 +203,13 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // underlying data changes, but only total aggregate row is affected
-                        expect(delta).toEqual([0]);
+                        const expected = [{x: 10, y: 3, z: 2}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 4, y: null}]);
             });
@@ -205,12 +222,13 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
-                        expect(delta).toEqual([3, 4]);
+                        const expected = [{x: 1, y: 1, z: 1}, {x: 4, y: 1, z: 1}];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });
@@ -225,12 +243,17 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -243,12 +266,17 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 1, 2]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -261,12 +289,17 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 3, 4]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = [json[0], json[3], json[4]];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y_z);
             });
@@ -279,12 +312,12 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([]);
+                        await match_delta(perspective, delta, []);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_z);
             });
@@ -297,12 +330,17 @@ module.exports = perspective => {
                 });
                 view.on_update(
                     async function(delta) {
-                        expect(delta).toEqual([0, 5, 6]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = json.slice(0, 3);
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update(partial_change_y);
             });
@@ -318,12 +356,17 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // underlying data changes, but only total aggregate row is affected
-                        expect(delta).toEqual([0, 1, 2, 4]);
+                        const expected = await view.to_json();
+                        expected.splice(3, 1);
+                        expected.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
                 );
                 table.update([{x: 1, y: null}, {x: 2, y: null}, {x: 4, y: null}]);
             });
@@ -337,12 +380,40 @@ module.exports = perspective => {
                 view.on_update(
                     async function(delta) {
                         // aggregates are sorted, in this case by string comparator - "string1" and "string2" are at the end
-                        expect(delta).toEqual([3, 4]);
+                        const json = await view.to_json();
+                        json.map(d => {
+                            delete d["__ROW_PATH__"];
+                        });
+                        const expected = [json[3], json[4]];
+                        await match_delta(perspective, delta, expected);
                         view.delete();
                         table.delete();
                         done();
                     },
-                    {mode: "pkey"}
+                    {mode: "row"}
+                );
+                table.update(partial_change_nonseq);
+            });
+
+            it("returns changed rows in column-only pivots", async function(done) {
+                let table = perspective.table(data, {index: "x"});
+                let view = table.view({
+                    column_pivots: ["x"]
+                });
+                view.on_update(
+                    async function(delta) {
+                        const json = await view.to_json();
+                        const expected = [
+                            {"1|x": 1, "1|y": "string1", "1|z": false, "2|x": 2, "2|y": "b", "2|z": false, "3|x": 3, "3|y": "c", "3|z": true, "4|x": 4, "4|y": "string2", "4|z": true},
+                            json[0],
+                            json[3]
+                        ];
+                        await match_delta(perspective, delta, expected);
+                        view.delete();
+                        table.delete();
+                        done();
+                    },
+                    {mode: "row"}
                 );
                 table.update(partial_change_nonseq);
             });
