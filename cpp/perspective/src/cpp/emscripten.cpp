@@ -677,13 +677,8 @@ namespace binding {
     }
 
     // Given a column index, serialize data to TypedArray
-    template <typename T>
     val
-    col_to_js_typed_array(std::shared_ptr<t_data_slice<T>> data_slice,
-        const std::vector<t_tscalar>& data, t_index idx) {
-        std::shared_ptr<T> ctx = data_slice->get_context();
-        auto dtype = ctx->get_column_dtype(idx);
-
+    col_to_js_typed_array(const std::vector<t_tscalar>& data, t_dtype dtype, t_index idx) {
         switch (dtype) {
             case DTYPE_INT8: {
                 return col_to_typed_array<std::int8_t>(data);
@@ -2026,6 +2021,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx0>::get_sort)
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_row_delta", &View<t_ctx0>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -2051,6 +2047,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_sort", &View<t_ctx1>::get_sort)
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_row_delta", &View<t_ctx1>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -2077,6 +2074,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_path", &View<t_ctx2>::get_row_path)
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_row_delta", &View<t_ctx2>::get_row_delta)
+        .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -2272,9 +2270,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<val>);
-    function("col_to_js_typed_array_zero", &col_to_js_typed_array<t_ctx0>);
-    function("col_to_js_typed_array_one", &col_to_js_typed_array<t_ctx1>);
-    function("col_to_js_typed_array_two", &col_to_js_typed_array<t_ctx2>);
+    function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
     function("make_view_one", &make_view_one<val>, allow_raw_pointers());
     function("make_view_two", &make_view_two<val>, allow_raw_pointers());

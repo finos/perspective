@@ -448,12 +448,17 @@ View<CTX_T>::get_step_delta(t_index bidx, t_index eidx) const {
 template <typename CTX_T>
 std::shared_ptr<t_data_slice<CTX_T>>
 View<CTX_T>::get_row_delta() const {
-    // TODO: how do we make this a little less complicated, and make the API more approachable?
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
     const std::vector<t_uindex>& rows = delta.rows;
     auto data_slice_ptr = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, rows);
     return data_slice_ptr;
+}
+
+template <typename CTX_T>
+t_dtype
+View<CTX_T>::get_column_dtype(t_uindex idx) const {
+    return m_ctx->get_column_dtype(idx);
 }
 
 template <typename CTX_T>

@@ -223,6 +223,18 @@ module.exports = perspective => {
     });
 
     describe("Typed Arrays", function() {
+        it("Respects start/end rows", async function() {
+            var table = perspective.table(int_float_data);
+            var view = table.view();
+            const result = await view.col_to_js_typed_array("int", {
+                start_row: 1,
+                end_row: 2
+            });
+            expect(result[0].byteLength).toEqual(4);
+            view.delete();
+            table.delete();
+        });
+
         it("Int, 0-sided view", async function() {
             var table = perspective.table(int_float_data);
             var view = table.view();
