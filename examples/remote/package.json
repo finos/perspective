@@ -1,0 +1,17 @@
+{
+    "name": "remote",
+    "private": true,
+    "version": "0.3.0-rc.2",
+    "description": "An example of 2 Perspectives, one client and one server, streaming via Apache Arrow.",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "keywords": [],
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@finos/perspective": "^0.3.0-rc.2",
+        "@finos/perspective-viewer": "^0.3.0-rc.2",
+        "@finos/perspective-viewer-highcharts": "^0.3.0-rc.2",
+        "@finos/perspective-viewer-hypergrid": "^0.3.0-rc.2"
+    }
+}
