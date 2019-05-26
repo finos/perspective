@@ -134,6 +134,7 @@ class WebSocketHost extends module.exports.Host {
         this._server = http.createServer(create_http_server(assets, host_psp));
 
         this.REQS = {};
+        this.REQ_ID_MAP = new Map();
 
         // Serve Worker API through WebSockets
         this._wss = new WebSocket.Server({noServer: true, perMessageDeflate: true});
@@ -151,7 +152,10 @@ class WebSocketHost extends module.exports.Host {
                     return;
                 }
                 msg = JSON.parse(msg);
-                this.REQS[msg.id] = ws;
+                const compound_id = msg.id + ws.id;
+                this.REQ_ID_MAP.set(compound_id, msg.id);
+                msg.id = compound_id;
+                this.REQS[msg.id] = {ws, msg};
                 try {
                     // Send all messages to the handler defined in Perspective.Host
                     this.process(msg, ws.id);
@@ -209,14 +213,24 @@ class WebSocketHost extends module.exports.Host {
      * @param {*} transferable a transferable object to be sent to the client
      */
     post(msg, transferable) {
+        const req = this.REQS[msg.id];
+        const id = msg.id;
+        if (req.ws.readyState > 1) {
+            delete this.REQS[id];
+            throw new Error("Connection closed");
+        }
+        msg.id = this.REQ_ID_MAP.get(id);
         if (transferable) {
             msg.is_transferable = true;
-            this.REQS[msg.id].send(JSON.stringify(msg));
-            this.REQS[msg.id].send(transferable[0]);
+            req.ws.send(JSON.stringify(msg));
+            req.ws.send(transferable[0]);
         } else {
-            this.REQS[msg.id].send(JSON.stringify(msg));
+            req.ws.send(JSON.stringify(msg));
         }
-        delete this.REQS[msg.id];
+        if (!req.msg.subscribe) {
+            this.REQ_ID_MAP.delete(id);
+            delete this.REQS[id];
+        }
     }
 
     /**
