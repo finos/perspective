@@ -6,6 +6,11 @@ set (TEST_FILES
 include_directories("include")
 add_executable(psp_test ${TEST_FILES})
 
+if(PSP_PYTHON_BUILD)
+    set_target_properties(psp_test PROPERTIES
+             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../tests/)
+endif()
+
 if(WIN32)
 	target_compile_definitions(psp_test PRIVATE WIN32=1)
 endif()
