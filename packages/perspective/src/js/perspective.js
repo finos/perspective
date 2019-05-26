@@ -789,9 +789,25 @@ export default function(Module) {
         });
     };
 
+    function filterInPlace(a, condition) {
+        let i = 0,
+            j = 0;
+
+        while (i < a.length) {
+            const val = a[i];
+            if (condition(val, i, a)) a[j++] = val;
+            i++;
+        }
+
+        a.length = j;
+        return a;
+    }
+
     view.prototype.remove_update = function(callback) {
         _clear_process(this.pool);
-        this.callbacks = this.callbacks.filter(x => x.callback !== callback);
+        const total = this.callbacks.length;
+        filterInPlace(this.callbacks, x => x.orig_callback !== callback);
+        console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
     };
 
     /**
