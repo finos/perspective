@@ -20,12 +20,6 @@
       "md/usage": {
         "title": "User Guide"
       },
-      "obj/perspective-viewer": {
-        "title": "`perspective-viewer` API"
-      },
-      "obj/perspective": {
-        "title": "`perspective` API"
-      },
       "README": {
         "title": "README"
       }
