@@ -450,8 +450,8 @@ std::shared_ptr<t_data_slice<CTX_T>>
 View<CTX_T>::get_row_delta() const {
     t_rowdelta delta = m_ctx->get_row_delta();
     const std::vector<t_tscalar>& data = delta.data;
-    const std::vector<t_uindex>& rows = delta.rows;
-    auto data_slice_ptr = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, rows);
+    t_uindex num_rows_changed = delta.num_rows_changed;
+    auto data_slice_ptr = std::make_shared<t_data_slice<CTX_T>>(m_ctx, data, num_rows_changed);
     return data_slice_ptr;
 }
 

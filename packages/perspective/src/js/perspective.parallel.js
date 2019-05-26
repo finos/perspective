@@ -23,7 +23,7 @@ const HEARTBEAT_TIMEOUT = 15000;
 /**
  * Singleton WASM file download cache.
  */
-const override = new (class {
+const override = new class {
     _fetch(url) {
         return new Promise(resolve => {
             let wasmXHR = new XMLHttpRequest();
@@ -51,7 +51,7 @@ const override = new (class {
         }
         return this._wasm;
     }
-})();
+}();
 
 /**
  * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
