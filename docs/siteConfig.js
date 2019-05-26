@@ -40,9 +40,9 @@ const siteConfig = {
     scripts: [
         "https://buttons.github.io/buttons.js",
         "https://unpkg.com/@finos/perspective/build/perspective.js",
-        "perspective.view.js",
+        "https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js",
         "https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js",
-        "https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js",
+        "https://unpkg.com/@finos/perspective-viewer-d3fc/build/d3fc.plugin.js",
         "js/animation.js"
     ],
 
@@ -51,7 +51,6 @@ const siteConfig = {
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
         "https://fonts.googleapis.com/css?family=Roboto+Mono"
-        //   "css/material.dark.css"
     ],
 
     onPageNav: "separate",

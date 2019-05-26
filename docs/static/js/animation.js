@@ -9,6 +9,7 @@ function randn_bm() {
     while (v === 0) v = Math.random();
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
+
 function newRow() {
     id = id % 1000;
     return {
@@ -72,20 +73,20 @@ function select(id) {
             },
             "#cyclone": {
                 columns: ["chg"],
-                view: "x_bar",
+                view: "d3_x_bar",
                 sort: [["chg", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#pivot": {
                 columns: ["vol"],
-                view: "heatmap",
+                view: "d3_heatmap",
                 sort: [["vol", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#crosssect": {
-                view: "xy_scatter",
+                view: "d3_xy_scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
                 columns: ["bid", "ask", "vol", "id"],
@@ -93,7 +94,7 @@ function select(id) {
                 sort: []
             },
             "#intersect": {
-                view: "treemap",
+                view: "d3_treemap",
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
@@ -101,7 +102,7 @@ function select(id) {
                 sort: [["name", "desc"], ["chg", "desc"]]
             },
             "#enhance": {
-                view: "y_line",
+                view: "d3_y_line",
                 "row-pivots": ["lastUpdate"],
                 "column-pivots": ["client"],
                 columns: ["bid"],
