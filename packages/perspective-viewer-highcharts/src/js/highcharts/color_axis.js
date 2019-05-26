@@ -17,14 +17,15 @@ function _get_gradient(type) {
         gradient = getComputedStyle(this).getPropertyValue(`--highcharts-heatmap-gradient-${type}`);
     }
 
-    return gparser.parse(gradient)[0].colorStops.map(x => {
+    const parsed = gparser.parse(gradient)[0].colorStops;
+    return parsed.map((x, i) => {
         let color;
         if (x.type === "rgb") {
             color = `rgb(${x.value.join(",")})`;
         } else {
             color = `#${x.value}`;
         }
-        return [Number.parseFloat(x.length.value) / 100, color];
+        return [Number.parseFloat(x.length ? x.length.value / 100 : `${i / (parsed.length - 1)}`), color];
     });
 }
 
