@@ -6,7 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-import WebsocketHeartbeatJs from "websocket-heartbeat-js";
+
 import * as defaults from "./defaults.js";
 
 import {worker} from "./API/worker.js";
@@ -18,10 +18,12 @@ import wasm from "./psp.async.wasm.js";
 
 import {detect_iphone} from "./utils.js";
 
+const HEARTBEAT_TIMEOUT = 15000;
+
 /**
  * Singleton WASM file download cache.
  */
-const override = new class {
+const override = new (class {
     _fetch(url) {
         return new Promise(resolve => {
             let wasmXHR = new XMLHttpRequest();
@@ -49,7 +51,7 @@ const override = new class {
         }
         return this._wasm;
     }
-}();
+})();
 
 /**
  * WebWorker extends Perspective's `worker` class and defines interactions using the WebWorker API.
@@ -122,15 +124,16 @@ class WebWorker extends worker {
 class WebSocketWorker extends worker {
     constructor(url) {
         super();
-        this._ws = new WebsocketHeartbeatJs({
-            url,
-            pingTimeout: 15000,
-            pingMsg: "heartbeat"
-        });
-        this._ws.ws.binaryType = "arraybuffer";
+        this._ws = new WebSocket(url);
+        this._ws.binaryType = "arraybuffer";
         this._ws.onopen = () => {
             this.send({id: -1, cmd: "init"});
         };
+        const heartbeat = () => {
+            this._ws.send("heartbeat");
+            setTimeout(heartbeat, HEARTBEAT_TIMEOUT);
+        };
+        setTimeout(heartbeat, 15000);
         this._ws.onmessage = msg => {
             if (msg.data === "heartbeat") {
                 return;
@@ -140,13 +143,12 @@ class WebSocketWorker extends worker {
                 delete this._pending_arrow;
             } else {
                 msg = JSON.parse(msg.data);
-                /**
-                 * If the `is_transferable` flag is set, the worker expects the next message to be a transferable object.
-                 *
-                 * This sets the `_pending_arrow` flag, which triggers a special handler for the ArrayBuffer containing arrow data.
-                 */
+
+                // If the `is_transferable` flag is set, the worker expects the
+                // next message to be a transferable object.
+                // This sets the `_pending_arrow` flag, which triggers a special
+                // handler for the ArrayBuffer containing arrow data.
                 if (msg.is_transferable) {
-                    console.warn("Arrow transfer detected!");
                     this._pending_arrow = msg.id;
                 } else {
                     this._handle({data: msg});

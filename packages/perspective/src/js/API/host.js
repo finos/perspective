@@ -128,22 +128,29 @@ export class Host {
      */
     process_subscribe(msg, obj) {
         try {
-            obj[msg.method](ev => {
+            const _callback = ev => {
                 let result = {
                     id: msg.id,
                     data: ev
                 };
+                try {
+                    // post transferable data for arrow
+                    if (msg.args && msg.args[0]) {
+                        if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                            this.post(result, [ev]);
+                            return;
+                        }
+                    }
 
-                // post transferable data for arrow
-                if (msg.args && msg.args[0]) {
-                    if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
-                        this.post(result, [ev]);
-                        return;
+                    this.post(result);
+                } catch (e) {
+                    console.error("Removing callback after failed on_update() (presumably due to closed connection)");
+                    if (msg.method === "on_update") {
+                        obj["remove_update"](_callback);
                     }
                 }
-
-                this.post(result);
-            }, ...msg.args); // make sure we are passing arguments into the callback
+            };
+            obj[msg.method](_callback, ...msg.args); // make sure we are passing arguments into the callback
         } catch (error) {
             this.process_error(msg, error);
             return;

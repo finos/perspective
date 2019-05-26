@@ -29,7 +29,7 @@
         "html-loader-jest": "^0.2.1",
         "jest": "^24.5.0",
         "js-beautify": "^1.8.6",
-        "jsdoc": "^3.5.5",
+        "jsdoc": "3.5.5",
         "jsdoc-babel": "^0.5.0",
         "jsdoc-to-markdown": "^4.0.1",
         "lerna": "^2.11.0",

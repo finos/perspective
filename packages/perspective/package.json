@@ -62,7 +62,6 @@
         "papaparse": "^4.3.6",
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
-        "websocket-heartbeat-js": "^1.0.7",
         "ws": "^6.1.2"
     },
     "devDependencies": {
