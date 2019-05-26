@@ -10,10 +10,9 @@
 import * as d3 from "d3";
 
 export default (width, height) => {
-    const padding = 30;
     const treemapLayout = d3
         .treemap()
-        .size([width - padding, height - padding])
+        .size([width, height])
         .paddingInner(d => 1 + 2 * d.height);
 
     treemapLayout.tile(d3.treemapBinary);

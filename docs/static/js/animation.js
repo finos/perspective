@@ -31,12 +31,6 @@ styleElement.innerText = `
     box-shadow: none !important;
     overflow: visible !important;
     --plugin--box-shadow: 0 5px 5px rgba(0,0,0,0.2);
-    --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%) !important;
-    --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
-    --d3fc-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;
-    --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%) !important;
-    --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
-    --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;  
 }`;
 
 document.head.appendChild(styleElement);
@@ -100,7 +94,7 @@ function select(id) {
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
-                aggregates: {bid: "avg", chg: "low", name: "last"},
+                aggregates: {bid: "sum", chg: "low", name: "last"},
                 sort: [["name", "desc"], ["chg", "desc"]]
             },
             "#enhance": {
