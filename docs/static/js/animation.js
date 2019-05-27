@@ -11,7 +11,7 @@ function randn_bm() {
 }
 
 function newRow() {
-    id = id % 1000;
+    id = id % 100;
     return {
         name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
         client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -99,11 +99,12 @@ function select(id) {
             },
             "#enhance": {
                 view: "d3_y_line",
-                "row-pivots": ["lastUpdate"],
+                "row-pivots": [],
+                "column-pivots": [],
+                sort: [["lastUpdate", "desc"]],
                 "column-pivots": ["client"],
                 columns: ["bid"],
-                aggregates: {bid: "avg", chg: "avg", name: "last"},
-                sort: []
+                aggregates: {bid: "avg", chg: "avg", name: "last"}
             }
         }[id] || {}
     );
