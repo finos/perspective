@@ -19,6 +19,17 @@
         padding: 15px;
         overflow: hidden;
 
+        &.d3_heatmap, &.d3_treemap {
+            d3fc-group.cartesian-chart {
+                grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(0em, max-content);
+                grid-template-rows: minmax(0em, max-content) auto 1fr auto minmax(0em, max-content);
+            }       
+        }    
+
+        .chart-label {
+            display: none;
+        }
+
         &.d3_heatmap {
             padding-right: 120px;
         }
@@ -434,4 +445,5 @@
         padding: 0;
         list-style-type: none;
     }
+
 }
