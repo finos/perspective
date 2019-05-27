@@ -1121,6 +1121,7 @@ export default function(Module) {
             meter = function update(x) {
                 _msgs += x;
             };
+            console.log("Profiling initialized");
         }
     }
 
@@ -1356,6 +1357,8 @@ export default function(Module) {
         worker: function() {
             return this;
         },
+
+        initialize_profile_thread,
 
         /**
          * A factory method for constructing {@link module:perspective~table}s.

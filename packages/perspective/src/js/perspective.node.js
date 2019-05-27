@@ -126,7 +126,7 @@ function create_http_server(assets, host_psp) {
  */
 class WebSocketHost extends module.exports.Host {
     constructor({port, assets, host_psp, on_start}) {
-        super();
+        super(module.exports);
         port = typeof port === "undefined" ? 8080 : port;
         assets = assets || ["./"];
 
