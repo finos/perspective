@@ -773,16 +773,18 @@ export default function(Module) {
         this.callbacks.push({
             view: this,
             orig_callback: callback,
-            callback: async () => {
+            callback: async cache => {
                 switch (mode) {
                     case "cell":
                         {
-                            callback(await this._get_step_delta());
+                            cache.step_delta = cache.step_delta || (await this._get_step_delta());
+                            callback(cache.step_delta);
                         }
                         break;
                     case "row":
                         {
-                            callback(await this._get_row_delta());
+                            cache.row_delta = cache.row_delta || (await this._get_row_delta());
+                            callback(cache.row_delta);
                         }
                         break;
                     default: {
@@ -863,9 +865,10 @@ export default function(Module) {
         bindall(this);
     }
 
-    table.prototype._update_callback = function() {
+    table.prototype._update_callback = async function() {
+        let cache = {};
         for (let e in this.callbacks) {
-            this.callbacks[e].callback();
+            this.callbacks[e].callback(cache);
         }
     };
 
