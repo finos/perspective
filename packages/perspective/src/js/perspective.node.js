@@ -152,7 +152,7 @@ class WebSocketHost extends module.exports.Host {
                     return;
                 }
                 msg = JSON.parse(msg);
-                const compound_id = msg.id + ws.id;
+                const compound_id = `${msg.id}/${ws.id}`;
                 this.REQ_ID_MAP.set(compound_id, msg.id);
                 msg.id = compound_id;
                 this.REQS[msg.id] = {ws, msg};

@@ -769,6 +769,7 @@ export default function(Module) {
         }
         this.callbacks.push({
             view: this,
+            orig_callback: callback,
             callback: async () => {
                 switch (mode) {
                     case "cell":
@@ -1104,6 +1105,25 @@ export default function(Module) {
         return v;
     };
 
+    let meter;
+
+    function initialize_profile_thread() {
+        if (meter === undefined) {
+            let _msgs = 0;
+            let start = performance.now();
+            setTimeout(function poll() {
+                let now = performance.now();
+                console.log(`${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`);
+                _msgs = 0;
+                start = now;
+                setTimeout(poll, 5000);
+            }, 5000);
+            meter = function update(x) {
+                _msgs += x;
+            };
+        }
+    }
+
     /**
      * Updates the rows of a {@link module:perspective~table}. Updated rows are pushed down to any
      * derived {@link module:perspective~view} objects.
@@ -1129,6 +1149,9 @@ export default function(Module) {
                 throw new Error("Overriding Arrow Schema is not supported.");
             }
             pdata = load_arrow_buffer(data, cols, types);
+            if (meter) {
+                meter(pdata.map(x => x.row_count).reduce((x, y) => x + y));
+            }
             is_arrow = true;
         } else if (typeof data === "string") {
             if (data[0] === ",") {
@@ -1137,10 +1160,16 @@ export default function(Module) {
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {header: true}).data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            if (meter) {
+                meter(accessor.row_count);
+            }
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            if (meter) {
+                meter(accessor.row_count);
+            }
         }
 
         if (accessor.row_count === 0) {
