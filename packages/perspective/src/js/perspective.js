@@ -460,7 +460,9 @@ export default function(Module) {
 
         const dtype = this._View.get_column_dtype(idx);
 
-        return format_function(slice, dtype, idx);
+        const rst = format_function(slice, dtype, idx);
+        slice.delete();
+        return rst;
     };
 
     /**
@@ -742,6 +744,7 @@ export default function(Module) {
     view.prototype._get_row_delta = async function() {
         let delta_slice = this._View.get_row_delta();
         let arrow = await this.to_arrow({data_slice: delta_slice});
+        delta_slice.delete();
         return arrow;
     };
 
