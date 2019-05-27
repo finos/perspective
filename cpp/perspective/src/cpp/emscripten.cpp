@@ -98,6 +98,10 @@ namespace binding {
 
         // Construct aggregates from config object
         for (const std::string& agg_column : aggs) {
+            if (std::find(columns.begin(), columns.end(), agg_column) == columns.end()) {
+                continue;
+            }
+
             std::string agg_op = j_aggs[agg_column].as<std::string>();
             std::vector<t_dep> dependencies;
 
@@ -128,7 +132,7 @@ namespace binding {
                 = std::find(columns.begin(), columns.end(), column) == columns.end();
             bool not_aggregated = std::find(aggs.begin(), aggs.end(), column) == aggs.end();
 
-            if (is_hidden_column && not_aggregated) {
+            if (is_hidden_column) {
                 bool is_pivot = (std::find(row_pivots.begin(), row_pivots.end(), column)
                                     != row_pivots.end())
                     || (std::find(column_pivots.begin(), column_pivots.end(), column)
@@ -137,8 +141,8 @@ namespace binding {
                 std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
                 t_aggtype agg_op;
 
-                if (is_pivot) {
-                    agg_op = t_aggtype::AGGTYPE_UNIQUE;
+                if (is_pivot || row_pivots.size() == 0 || column_only) {
+                    agg_op = t_aggtype::AGGTYPE_ANY;
                 } else {
                     t_dtype dtype = schema.get_dtype(column);
                     agg_op = _get_default_aggregate(dtype);
