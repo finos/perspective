@@ -12,7 +12,7 @@ require("./index.less");
 
 require("@finos/perspective-viewer");
 require("@finos/perspective-viewer-hypergrid");
-require("@finos/perspective-viewer-highcharts");
+require("@finos/perspective-viewer-d3fc");
 
 window.addEventListener("WebComponentsReady", () => {
     const worker = perspective.worker();

@@ -24,8 +24,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
   host for responsiveness at high frequency.
 
 - A suite of simple visualization plugins for some common Javascript libraries such as
-  [d3fc](https://d3fc.io/), [Hypergrid](https://github.com/fin-hypergrid/core) and
-  [HighCharts](https://github.com/highcharts/highcharts).
+  [d3fc](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
 
 - Integration with [Jupyterlab](https://github.com/finos/perspective/tree/master/packages/perspective-jupyterlab).
 
