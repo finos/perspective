@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost, table} = require("@finos/perspective");
+const {WebSocketHost, table, initialize_profile_thread} = require("@finos/perspective");
 
 /******************************************************************************
  *
@@ -23,12 +23,16 @@ var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl
 var CACHE_INPUT = false;
 var CACHE_ENTRIES = 200;
 var TABLE_SIZE = 10000;
+var UPDATE_SIZE = 50;
+var TICK_RATE = 20;
 
-var __CACHE__ = {};
+var __CACHE__ = [];
+
+initialize_profile_thread();
 
 function newRows() {
     var rows = [];
-    for (var x = 0; x < 50; x++) {
+    for (var x = 0; x < UPDATE_SIZE; x++) {
         rows.push({
             name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
             client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
@@ -66,11 +70,12 @@ async function init() {
     host.host_view("data_source_one", tbl.view());
     (function postRow() {
         if (CACHE_INPUT) {
-            tbl.update(__CACHE__[Math.floor(Math.random() * __CACHE__.length)]);
+            const entry = __CACHE__[Math.floor(Math.random() * __CACHE__.length)];
+            tbl.update(entry);
         } else {
             tbl.update(newRows());
         }
-        setTimeout(postRow, 20);
+        setTimeout(postRow, TICK_RATE);
     })();
 }
 

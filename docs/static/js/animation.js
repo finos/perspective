@@ -35,7 +35,7 @@ styleElement.innerText = `
 
 document.head.appendChild(styleElement);
 
-var freq = 0,
+var freq = 1,
     freqdir = 1,
     elem;
 
