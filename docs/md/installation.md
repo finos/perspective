@@ -50,7 +50,6 @@ CDN by simply adding these scripts to your `.html`'s `<head>` section:
 <script src="https://unpkg.com/@finos/perspective-viewer"></script>
 <script src="https://unpkg.com/@finos/perspective-viewer-hypergrid"></script>
 <script src="https://unpkg.com/@finos/perspective-viewer-d3fc"></script>
-<script src="https://unpkg.com/@finos/perspective-viewer-highcharts"></script>
 ```
 
 Ultimately, for production you'll want Perspective incorporated directly into your

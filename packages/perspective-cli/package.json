@@ -29,7 +29,7 @@
     "dependencies": {
         "@finos/perspective": "^0.3.0-rc.2",
         "@finos/perspective-viewer": "^0.3.0-rc.2",
-        "@finos/perspective-viewer-highcharts": "^0.3.0-rc.2",
+        "@finos/perspective-viewer-d3fc": "^0.3.0-rc.2",
         "@finos/perspective-viewer-hypergrid": "^0.3.0-rc.2",
         "commander": "^2.19.0"
     }

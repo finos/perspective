@@ -19,8 +19,26 @@
         padding: 15px;
         overflow: hidden;
 
+        &.d3_heatmap,
+        &.d3_treemap {
+            d3fc-group.cartesian-chart {
+                grid-template-columns: minmax(0em, max-content) auto 1fr auto minmax(
+                        0em,
+                        max-content
+                    );
+                grid-template-rows: minmax(0em, max-content) auto 1fr auto minmax(
+                        0em,
+                        max-content
+                    );
+            }
+        }
+
+        .chart-label {
+            display: none;
+        }
+
         &.d3_heatmap {
-            padding-right: 105px;
+            padding-right: 120px;
         }
 
         &.d3_sunburst {
@@ -64,8 +82,7 @@
         }
 
         &.d3_treemap {
-            padding: 0;
-            padding-right: 105px;
+            padding-right: 120px;
 
             & .treemap-container {
                 position: relative;
@@ -90,7 +107,10 @@
                 }
 
                 & .treerect {
-                    stroke: var(--d3fc-axis--lines, white);
+                    stroke: var(
+                        --d3fc-treedata-axis--lines,
+                        var(--d3fc-axis--lines, white)
+                    );
                     fill: var(--d3fc-series, rgba(31, 119, 180, 0.5));
                     &:hover {
                         cursor: pointer;

@@ -69,6 +69,9 @@ export class Host {
      */
     process(msg, client_id) {
         switch (msg.cmd) {
+            case "init_profile_thread":
+                this.perspective.initialize_profile_thread();
+                break;
             case "init":
                 this.init(msg);
                 break;

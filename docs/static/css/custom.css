@@ -15,6 +15,15 @@
 @media only screen and (min-width: 1500px) {
 }
 
+.promoSection .buttonWrapper {
+   transition: color 0.2s ease-in-out;
+}
+
+.homeContainer .buttonWrapper.selected a {
+    border: 1px solid #f9f9f9;
+    color: #f9f9f9 
+}
+
 .titleViewer {
     margin-top:24px;
     margin-bottom:48px;
@@ -27,6 +36,7 @@
     box-shadow: 0px 5px 5px rgba(0,0,0,0.2);
     max-width: 1000px;
     border: none;
+    word-wrap: normal;
 }
 
 .titleViewer ul {
@@ -42,22 +52,19 @@
     color: #1A7DA1 !important;
 }
 
-h2.headerTitleWithLogo {
+h2.headerTitle, h2.headerTitleWithLogo {
     font-family: "Montserrat";
     color: #f9f9f9 !important;
+    transition: opacity 0.1s ease-in;
 }
 
 .mainContainer .blockImage img {
     width: 100px;
 }
 
-perspective-viewer #config_button:before {
-    font-family: "Material Icons";
-    content: "more_vert" !important;
-}
-
 .homeContainer {
     background-color: #242526;
+    padding-bottom: 96px;
 }
 
 .homeContainer .projectTitle {
@@ -70,8 +77,9 @@ perspective-viewer #config_button:before {
 }
 
 .homeContainer .buttonWrapper a {
-    border: 1px solid #f9f9f9;
-    color: #f9f9f9 !important;
+    border: 1px solid #666;
+    color: #666;
+    cursor: default; 
 }
 
 .nav-footer a {
@@ -80,4 +88,13 @@ perspective-viewer #config_button:before {
 
 .nav-footer a:hover {
     color: #1A7DA1 !important;
+}
+
+.homeContainer perspective-viewer, perspective-viewer {
+    --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);
+    --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+    --d3fc-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);
+    --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%);
+    --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
+    --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);  
 }

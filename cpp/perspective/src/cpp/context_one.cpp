@@ -433,7 +433,7 @@ t_ctx1::get_row_delta() {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     std::vector<t_uindex> rows = get_rows_changed();
     std::vector<t_tscalar> data = get_data(rows);
-    t_rowdelta rval(m_rows_changed, rows, data);
+    t_rowdelta rval(m_rows_changed, rows.size(), data);
     m_tree->clear_deltas();
     return rval;
 }

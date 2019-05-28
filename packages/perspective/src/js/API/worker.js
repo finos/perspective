@@ -57,6 +57,14 @@ worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     }
 };
 
+worker.prototype.initialize_profile_thread = function() {
+    if (this._worker.initialized.value) {
+        this.send({id: -1, cmd: "init_profile_thread"});
+    } else {
+        this._worker.messages.push(() => this.send({id: -1, cmd: "init_profile_thread"}));
+    }
+};
+
 /**
  * Must be implemented in order to transport commands to the server.
  */

@@ -10,7 +10,6 @@
 /* perspective components */
 import "@finos/perspective-viewer";
 import "@finos/perspective-viewer-hypergrid";
-import "@finos/perspective-viewer-highcharts";
 import "@finos/perspective-viewer-d3fc";
 
 import { Message } from '@phosphor/messaging';

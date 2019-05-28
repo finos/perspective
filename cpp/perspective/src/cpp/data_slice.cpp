@@ -57,13 +57,12 @@ t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx, t_uindex start_row
  * @param row_indices
  */
 template <typename CTX_T>
-t_data_slice<CTX_T>::t_data_slice(std::shared_ptr<CTX_T> ctx,
-    const std::vector<t_tscalar>& slice, std::vector<t_uindex> row_indices)
+t_data_slice<CTX_T>::t_data_slice(
+    std::shared_ptr<CTX_T> ctx, const std::vector<t_tscalar>& slice, t_uindex end_row)
     : m_ctx(ctx)
-    , m_slice(slice)
-    , m_row_indices(row_indices) {
+    , m_end_row(end_row)
+    , m_slice(slice) {
     m_start_row = 0;
-    m_end_row = m_row_indices.size();
     m_start_col = 0;
     m_end_col = m_ctx->get_column_count();
     m_stride = m_end_col;
@@ -93,15 +92,9 @@ template <typename CTX_T>
 std::vector<t_tscalar>
 t_data_slice<CTX_T>::get_column_slice(t_uindex cidx) const {
     std::vector<t_tscalar> column_data;
-    t_uindex end_row = m_end_row;
+    column_data.reserve(m_end_row);
 
-    if (m_row_indices.size() > 0) {
-        end_row = m_row_indices.size();
-    }
-
-    column_data.reserve(end_row);
-
-    for (t_uindex ridx = 0; ridx < end_row; ++ridx) {
+    for (t_uindex ridx = 0; ridx < m_end_row; ++ridx) {
         ridx += m_row_offset;
         t_tscalar value = get(ridx, cidx);
         column_data.push_back(value);
@@ -127,12 +120,6 @@ template <typename CTX_T>
 const std::vector<t_tscalar>&
 t_data_slice<CTX_T>::get_slice() const {
     return m_slice;
-}
-
-template <typename CTX_T>
-const std::vector<t_uindex>&
-t_data_slice<CTX_T>::get_row_indices() const {
-    return m_row_indices;
 }
 
 template <typename CTX_T>

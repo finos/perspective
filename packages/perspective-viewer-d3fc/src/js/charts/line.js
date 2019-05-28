@@ -16,6 +16,7 @@ import {lineSeries} from "../series/lineSeries";
 import {splitData} from "../data/splitData";
 import {colorLegend} from "../legend/legend";
 import {filterData} from "../legend/filter";
+import {transposeData} from "../data/transposeData";
 import withGridLines from "../gridlines/gridlines";
 
 import {hardLimitZeroPadding} from "../d3fc/padding/hardLimitZero";
@@ -30,7 +31,10 @@ function lineChart(container, settings) {
         .settings(settings)
         .scale(color);
 
-    const series = fc.seriesSvgRepeat().series(lineSeries(settings, color).orient("vertical"));
+    const series = fc
+        .seriesSvgRepeat()
+        .series(lineSeries(settings, color))
+        .orient("horizontal");
 
     const paddingStrategy = hardLimitZeroPadding()
         .pad([0.1, 0.1])
@@ -44,7 +48,6 @@ function lineChart(container, settings) {
         .settingName("mainValues")
         .valueName("mainValue")
         .orient("vertical")
-        .include([0])
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
@@ -81,7 +84,7 @@ function lineChart(container, settings) {
     }
 
     // render
-    container.datum(splitter.data()).call(zoomChart);
+    container.datum(transposeData(splitter.data())).call(zoomChart);
     container.call(toolTip);
     container.call(legend);
 }

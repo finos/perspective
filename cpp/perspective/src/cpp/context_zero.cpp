@@ -348,7 +348,7 @@ t_ctx0::get_row_delta() {
     std::vector<t_uindex> rows = m_traversal->get_row_indices(pkeys);
     std::sort(rows.begin(), rows.end());
     std::vector<t_tscalar> data = get_data(rows);
-    t_rowdelta rval(rows_changed, rows, data);
+    t_rowdelta rval(rows_changed, rows.size(), data);
     clear_deltas();
     return rval;
 }

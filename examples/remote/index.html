@@ -21,7 +21,7 @@
     <script src="perspective.js"></script>
 
     <link rel='stylesheet' href="index.css">
-    <link rel='stylesheet' href="material.css">
+    <link rel='stylesheet' href="material.dark.css">
 
 </head>
 
@@ -44,7 +44,8 @@
             var elem = document.getElementById('view1');
             var client = perspective.worker(window.location.origin.replace('http', 'ws'));
             var view = client.open_view('data_source_one');
-            let arrow = await view.to_arrow();
+            var arrow = await view.to_arrow();
+            elem.worker.initialize_profile_thread();
             elem.load(arrow, {limit: 10000});
             view.on_update(x => {
                 elem.update(x);

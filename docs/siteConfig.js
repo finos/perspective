@@ -17,13 +17,13 @@ const siteConfig = {
 
     headerLinks: [
         {doc: "md/installation", label: "Docs"},
-        {doc: "obj/perspective-viewer", label: "API"},
+        // {doc: "obj/perspective-viewer-site", label: "API"},
         {blog: true, label: "Blog"},
         {href: "https://github.com/finos/perspective/", label: "GitHub"}
     ],
 
-    headerIcon: "img/perspective2.svg",
-    footerIcon: "img/perspective2.svg",
+    //headerIcon: "img/perspective2.svg",
+    // footerIcon: "img/perspective2.svg",
     favicon: "img/favicon.png",
 
     colors: {
@@ -42,7 +42,7 @@ const siteConfig = {
         "https://unpkg.com/@finos/perspective/build/perspective.js",
         "https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js",
         "https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js",
-        "https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js",
+        "https://unpkg.com/@finos/perspective-viewer-d3fc/build/d3fc.plugin.js",
         "js/animation.js"
     ],
 
@@ -50,8 +50,7 @@ const siteConfig = {
         "https://fonts.googleapis.com/css?family=Montserrat:300",
         "https://fonts.googleapis.com/css?family=Material+Icons",
         "https://fonts.googleapis.com/css?family=Open+Sans",
-        "https://fonts.googleapis.com/css?family=Roboto+Mono",
-        "css/material.dark.css"
+        "https://fonts.googleapis.com/css?family=Roboto+Mono"
     ],
 
     onPageNav: "separate",

@@ -460,7 +460,9 @@ export default function(Module) {
 
         const dtype = this._View.get_column_dtype(idx);
 
-        return format_function(slice, dtype, idx);
+        const rst = format_function(slice, dtype, idx);
+        slice.delete();
+        return rst;
     };
 
     /**
@@ -742,6 +744,7 @@ export default function(Module) {
     view.prototype._get_row_delta = async function() {
         let delta_slice = this._View.get_row_delta();
         let arrow = await this.to_arrow({data_slice: delta_slice});
+        delta_slice.delete();
         return arrow;
     };
 
@@ -769,16 +772,19 @@ export default function(Module) {
         }
         this.callbacks.push({
             view: this,
-            callback: async () => {
+            orig_callback: callback,
+            callback: async cache => {
                 switch (mode) {
                     case "cell":
                         {
-                            callback(await this._get_step_delta());
+                            cache.step_delta = cache.step_delta || (await this._get_step_delta());
+                            callback(cache.step_delta);
                         }
                         break;
                     case "row":
                         {
-                            callback(await this._get_row_delta());
+                            cache.row_delta = cache.row_delta || (await this._get_row_delta());
+                            callback(cache.row_delta);
                         }
                         break;
                     default: {
@@ -859,9 +865,10 @@ export default function(Module) {
         bindall(this);
     }
 
-    table.prototype._update_callback = function() {
+    table.prototype._update_callback = async function() {
+        let cache = {};
         for (let e in this.callbacks) {
-            this.callbacks[e].callback();
+            this.callbacks[e].callback(cache);
         }
     };
 
@@ -1104,6 +1111,26 @@ export default function(Module) {
         return v;
     };
 
+    let meter;
+
+    function initialize_profile_thread() {
+        if (meter === undefined) {
+            let _msgs = 0;
+            let start = performance.now();
+            setTimeout(function poll() {
+                let now = performance.now();
+                console.log(`${((1000 * _msgs) / (now - start)).toFixed(2)} msgs/sec`);
+                _msgs = 0;
+                start = now;
+                setTimeout(poll, 5000);
+            }, 5000);
+            meter = function update(x) {
+                _msgs += x;
+            };
+            console.log("Profiling initialized");
+        }
+    }
+
     /**
      * Updates the rows of a {@link module:perspective~table}. Updated rows are pushed down to any
      * derived {@link module:perspective~view} objects.
@@ -1129,6 +1156,9 @@ export default function(Module) {
                 throw new Error("Overriding Arrow Schema is not supported.");
             }
             pdata = load_arrow_buffer(data, cols, types);
+            if (meter) {
+                meter(pdata.map(x => x.row_count).reduce((x, y) => x + y));
+            }
             is_arrow = true;
         } else if (typeof data === "string") {
             if (data[0] === ",") {
@@ -1137,10 +1167,16 @@ export default function(Module) {
             accessor.init(__MODULE__, papaparse.parse(data.trim(), {header: true}).data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            if (meter) {
+                meter(accessor.row_count);
+            }
         } else {
             accessor.init(__MODULE__, data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            if (meter) {
+                meter(accessor.row_count);
+            }
         }
 
         if (accessor.row_count === 0) {
@@ -1327,6 +1363,8 @@ export default function(Module) {
         worker: function() {
             return this;
         },
+
+        initialize_profile_thread,
 
         /**
          * A factory method for constructing {@link module:perspective~table}s.

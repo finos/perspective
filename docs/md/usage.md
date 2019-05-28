@@ -53,7 +53,8 @@ themselves automatically, and the renderers they export will be available in the
 
 -   `@finos/perspective-viewer-highcharts`  
     A `<perspective-viewer>` plugin for [HighCharts](https://github.com/highcharts/highcharts).
-    This plugin has a dependency on Highcharts' [mixed commercial license](https://creativecommons.org/licenses/by-nc/3.0/).
+    This plugin has a dependency on Highcharts' [mixed commercial license](https://creativecommons.org/licenses/by-nc/3.0/),
+    and is no longer under active development.
 
 Depending on your requirements, you may need just one, or all Perspective modules.
 Some basic guidelines to help you decide what is most appropriate for your
@@ -63,7 +64,7 @@ project:
     data visualization widget, you probably only need the
     `@finos/perspective-viewer` module and optionally its plugins
     `@finos/perspective-viewer-hypergrid` for data grids, and
-    `@finos/perspective-viewer-d3fc` or `@finos/perspective-viewer-highcharts`
+    `@finos/perspective-viewer-d3fc`
     for charting. The core data engine `@finos/perspective` is a 
     depedency of these packages and does not need to be imported on its own for 
     basic usage. Details for these can be found [here](#perspective-viewer-web-component).
