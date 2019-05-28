@@ -1,370 +1,0 @@
-<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>`perspective-viewer` API · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;&lt;a name=&quot;module_perspective-viewer&quot;&gt;&lt;/a&gt;&lt;/p&gt;
-"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="`perspective-viewer` API · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="&lt;p&gt;&lt;a name=&quot;module_perspective-viewer&quot;&gt;&lt;/a&gt;&lt;/p&gt;
-"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai.min.css"/><link rel="alternate" type="application/atom+xml" href="https://perspective.finos.org/blog/atom.xml" title="Perspective Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://perspective.finos.org/blog/feed.xml" title="Perspective Blog RSS Feed"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective/build/perspective.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-highcharts/build/highcharts.plugin.js"></script><script type="text/javascript" src="js/animation.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/docs/md/installation.html" target="_self">Docs</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><i></i></div><h2><i>›</i><span>API</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Getting Started</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/md/installation.html">Installation</a></li><li class="navListItem"><a class="navItem" href="/docs/md/usage.html">User Guide</a></li><li class="navListItem"><a class="navItem" href="/docs/md/development.html">Developer Guide</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">API</h3><ul class=""><li class="navListItem"><a class="navItem" href="/docs/obj/perspective.html">`perspective` API</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/docs/obj/perspective-viewer.html">`perspective-viewer` API</a></li></ul></div></div></section></div><script>
-            var coll = document.getElementsByClassName('collapsible');
-            var checkActiveCategory = true;
-            for (var i = 0; i < coll.length; i++) {
-              var links = coll[i].nextElementSibling.getElementsByTagName('*');
-              if (checkActiveCategory){
-                for (var j = 0; j < links.length; j++) {
-                  if (links[j].classList.contains('navListItemActive')){
-                    coll[i].nextElementSibling.classList.toggle('hide');
-                    coll[i].childNodes[1].classList.toggle('rotate');
-                    checkActiveCategory = false;
-                    break;
-                  }
-                }
-              }
-
-              coll[i].addEventListener('click', function() {
-                var arrow = this.childNodes[1];
-                arrow.classList.toggle('rotate');
-                var content = this.nextElementSibling;
-                content.classList.toggle('hide');
-              });
-            }
-
-            document.addEventListener('DOMContentLoaded', function() {
-              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
-              createToggler('#tocToggler', 'body', 'tocActive');
-
-              const headings = document.querySelector('.toc-headings');
-              headings && headings.addEventListener('click', function(event) {
-                if (event.target.tagName === 'A') {
-                  document.body.classList.remove('tocActive');
-                }
-              }, false);
-
-              function createToggler(togglerSelector, targetSelector, className) {
-                var toggler = document.querySelector(togglerSelector);
-                var target = document.querySelector(targetSelector);
-
-                if (!toggler) {
-                  return;
-                }
-
-                toggler.onclick = function(event) {
-                  event.preventDefault();
-
-                  target.classList.toggle(className);
-                };
-              }
-            });
-        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">`perspective-viewer` API</h1></header><article><div><span><p><a name="module_perspective-viewer"></a></p>
-<h2><a class="anchor" aria-hidden="true" id="perspective-viewer"></a><a href="#perspective-viewer" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspective-viewer</h2>
-<p>Module for <code>&lt;perspective-viewer&gt;</code> custom element.  There are no exports fromthis module, however importing it has a side effect:  the<a href="module:perspective_viewer~PerspectiveViewer">module:perspective_viewer~PerspectiveViewer</a> class is registered as acustom element, after which it can be used as a standard DOM element.  Thedocumentation in this module defines the instance structure of a<code>&lt;perspective-viewer&gt;</code> DOM object instantiated typically, through HTML or anyrelevent DOM method e.g. <code>document.createElement(&quot;perspective-viewer&quot;)</code> or<code>document.getElementsByTagName(&quot;perspective-viewer&quot;)</code>.</p>
-<ul>
-<li><a href="#module_perspective-viewer">perspective-viewer</a>
-<ul>
-<li><a href="#module_perspective-viewer..PerspectiveViewer">~PerspectiveViewer</a> ⇐ <code>HTMLElement</code>
-<ul>
-<li><a href="#new_module_perspective-viewer..PerspectiveViewer_new">new PerspectiveViewer()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+sort">.sort</a> : <code>array.&lt;string&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+columns">.columns</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+computed-columns">.computed-columns</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+aggregates">.aggregates</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+filters">.filters</a> : <code>array</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a> : <code>string</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+column-pivots">.column-pivots</a> : <code>Array.&lt;String&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+row-pivots">.row-pivots</a> : <code>array.&lt;string&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+worker">.worker</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+table">.table</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+load">.load(data)</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+update">.update(data)</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+notifyResize">.notifyResize()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+clone">.clone(widget)</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+delete">.delete(delete_table)</a> ⇒ <code>Promise.&lt;boolean&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+restyleElement">.restyleElement()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+save">.save()</a> ⇒ <code>object</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+restore">.restore(config)</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+flush">.flush()</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+clear">.clear()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+replace">.replace()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+reset">.reset()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+copy">.copy()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+toggleConfig">.toggleConfig()</a></li>
-</ul></li>
-</ul></li>
-</ul>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer"></a></p>
-<h3><a class="anchor" aria-hidden="true" id="perspective-viewer-perspectiveviewer-code-htmlelement-code"></a><a href="#perspective-viewer-perspectiveviewer-code-htmlelement-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspective-viewer~PerspectiveViewer ⇐ <code>HTMLElement</code></h3>
-<p><strong>Kind</strong>: inner class of <a href="#module_perspective-viewer"><code>perspective-viewer</code></a>  <br>
-<strong>Extends</strong>: <code>HTMLElement</code></p>
-<ul>
-<li><a href="#module_perspective-viewer..PerspectiveViewer">~PerspectiveViewer</a> ⇐ <code>HTMLElement</code>
-<ul>
-<li><a href="#new_module_perspective-viewer..PerspectiveViewer_new">new PerspectiveViewer()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+sort">.sort</a> : <code>array.&lt;string&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+columns">.columns</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+computed-columns">.computed-columns</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+aggregates">.aggregates</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+filters">.filters</a> : <code>array</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a> : <code>string</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+column-pivots">.column-pivots</a> : <code>Array.&lt;String&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+row-pivots">.row-pivots</a> : <code>array.&lt;string&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+worker">.worker</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+table">.table</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+load">.load(data)</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+update">.update(data)</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+notifyResize">.notifyResize()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+clone">.clone(widget)</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+delete">.delete(delete_table)</a> ⇒ <code>Promise.&lt;boolean&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+restyleElement">.restyleElement()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+save">.save()</a> ⇒ <code>object</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+restore">.restore(config)</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+flush">.flush()</a> ⇒ <code>Promise.&lt;void&gt;</code></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+clear">.clear()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+replace">.replace()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+reset">.reset()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+copy">.copy()</a></li>
-<li><a href="#module_perspective-viewer..PerspectiveViewer+toggleConfig">.toggleConfig()</a></li>
-</ul></li>
-</ul>
-<hr>
-<p><a name="new_module_perspective-viewer..PerspectiveViewer_new"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="new-perspectiveviewer"></a><a href="#new-perspectiveviewer" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>new PerspectiveViewer()</h4>
-<p>HTMLElement class for <code>&lt;perspective-viewer&gt;</code> custom element.  This class isnot exported, so this constructor cannot be invoked in the typical manner;instead, instances of the class are created through the Custom Elements DOMAPI.Properties of an instance of this class, such as <a href="module:perspective_viewer~PerspectiveViewer#columns">module:perspective_viewer~PerspectiveViewer#columns</a>,are reflected on the DOM element as Attributes, and should be accessed assuch - e.g. <code>instance.setAttribute(&quot;columns&quot;, JSON.stringify([&quot;a&quot;, &quot;b&quot;]))</code>.</p>
-<p><strong>Example</strong></p>
-<pre><code class="hljs css language-js"><span class="hljs-comment">// Create a new `&lt;perspective-viewer&gt;`</span><span class="hljs-keyword">const</span> elem = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"perspective-viewer"</span>);elem.setAttribute(<span class="hljs-string">"columns"</span>, <span class="hljs-built_in">JSON</span>.stringify([<span class="hljs-string">"a"</span>, <span class="hljs-string">"b"</span>]));<span class="hljs-built_in">document</span>.body.appendChild(elem);
-</code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+sort"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewersort-code-array-lt-string-gt-code"></a><a href="#perspectiveviewersort-code-array-lt-string-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.sort : <code>array.&lt;string&gt;</code></h4>
-<p>Sets this <code>perspective.table.view</code>'s <code>sort</code> property, an array of columnnames.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code>  <br>
-<strong>Example</strong> <em>(via Javascript DOM)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);
-elem.setAttribute(<span class="hljs-string">'sort'</span>, <span class="hljs-built_in">JSON</span>.stringify([[<span class="hljs-string">"x"</span>,<span class="hljs-string">"desc"</span>]));
-</code></pre>
-<p><strong>Example</strong> <em>(via HTML)</em></p>
-<pre><code class="hljs css language-js">&lt;perspective-viewer sort=<span class="hljs-string">'[["x","desc"]]'</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
-</span></code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+columns"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewercolumns"></a><a href="#perspectiveviewercolumns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.columns</h4>
-<p>The set of visible columns.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>columns <code>array</code> - An array of strings, the names of visible columns.</li>
-</ul>
-<p><strong>Example</strong> <em>(via Javascript DOM)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);
-elem.setAttribute(<span class="hljs-string">'columns'</span>, <span class="hljs-built_in">JSON</span>.stringify([<span class="hljs-string">"x"</span>, <span class="hljs-string">"y'"</span>]));
-</code></pre>
-<p><strong>Example</strong> <em>(via HTML)</em></p>
-<pre><code class="hljs css language-js">&lt;perspective-viewer columns=<span class="hljs-string">'["x", "y"]'</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
-</span></code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+computed-columns"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewercomputed-columns"></a><a href="#perspectiveviewercomputed-columns" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.computed-columns</h4>
-<p>The set of visible columns.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>computed-columns <code>array</code> - An array of computed column objects</li>
-</ul>
-<p><strong>Example</strong> <em>(via Javascript DOM)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);
-elem.setAttribute(<span class="hljs-string">'computed-columns'</span>, <span class="hljs-built_in">JSON</span>.stringify([{<span class="hljs-attr">name</span>: <span class="hljs-string">"x+y"</span>, <span class="hljs-attr">func</span>: <span class="hljs-string">"add"</span>, <span class="hljs-attr">inputs</span>: [<span class="hljs-string">"x"</span>, <span class="hljs-string">"y"</span>]}]));
-</code></pre>
-<p><strong>Example</strong> <em>(via HTML)</em></p>
-<pre><code class="hljs css language-js">&lt;perspective-viewer computed-columns="[{name:'x+y',func:'add',inputs:['x','y']}]""&gt;&lt;/perspective-viewer&gt;
-</code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+aggregates"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectivevieweraggregates"></a><a href="#perspectivevieweraggregates" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.aggregates</h4>
-<p>The set of column aggregate configurations.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>aggregates <code>object</code> - A dictionary whose keys are column names, andvalues are valid aggregations.  The <code>aggergates</code> attribute works as anoverride;  in lieu of a key for a column supplied by the developers, adefault will be selected and reflected to the attribute based on thecolumn's type.  See <a href="perspective/src/js/defaults.js">perspective/src/js/defaults.js</a></li>
-</ul>
-<p><strong>Example</strong> <em>(via Javascript DOM)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);
-elem.setAttribute(<span class="hljs-string">'aggregates'</span>, <span class="hljs-built_in">JSON</span>.stringify({<span class="hljs-attr">x</span>: <span class="hljs-string">"distinct count"</span>}));
-</code></pre>
-<p><strong>Example</strong> <em>(via HTML)</em></p>
-<pre><code class="hljs css language-js">&lt;perspective-viewer aggregates=<span class="hljs-string">'{"x": "distinct count"}'</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
-</span></code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+filters"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerfilters-code-array-code"></a><a href="#perspectiveviewerfilters-code-array-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.filters : <code>array</code></h4>
-<p>The set of column filter configurations.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code>  <br>
-<strong>Example</strong> <em>(via Javascript DOM)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> filters = [
-    [<span class="hljs-string">"x"</span>, <span class="hljs-string">"&lt;"</span>, <span class="hljs-number">3</span>],
-    [<span class="hljs-string">"y"</span>, <span class="hljs-string">"contains"</span>, <span class="hljs-string">"abc"</span>]
-];
-<span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);
-elem.setAttribute(<span class="hljs-string">'filters'</span>, <span class="hljs-built_in">JSON</span>.stringify(filters));
-</code></pre>
-<p><strong>Example</strong> <em>(via HTML)</em></p>
-<pre><code class="hljs css language-js">&lt;perspective-viewer filters=<span class="hljs-string">'[["x", "&lt;", 3], ["y", "contains", "abc"]]'</span>&gt;<span class="xml"><span class="hljs-tag">&lt;/<span class="hljs-name">perspective-viewer</span>&gt;</span>
-</span></code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+view"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerview-code-string-code"></a><a href="#perspectiveviewerview-code-string-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.view : <code>string</code></h4>
-<p>Sets the currently selected plugin, via its <code>name</code> field.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+column-pivots"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewercolumn-pivots-code-array-lt-string-gt-code"></a><a href="#perspectiveviewercolumn-pivots-code-array-lt-string-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.column-pivots : <code>Array.&lt;String&gt;</code></h4>
-<p>Sets this <code>perspective.table.view</code>'s <code>column_pivots</code> property.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+row-pivots"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerrow-pivots-code-array-lt-string-gt-code"></a><a href="#perspectiveviewerrow-pivots-code-array-lt-string-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.row-pivots : <code>array.&lt;string&gt;</code></h4>
-<p>Sets this <code>perspective.table.view</code>'s <code>row_pivots</code> property.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+worker"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerworker"></a><a href="#perspectiveviewerworker" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.worker</h4>
-<p>This element's <code>perspective</code> worker instance.  This property is notreflected as an HTML attribute, and is readonly;  it can be effectivelyset however by calling the <code>load() method with a</code>perspective.table`instance from the preferred worker.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Read only</strong>: true<br>
-<strong>Example</strong></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">let</span> elem = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'my_viewer'</span>);<span class="hljs-keyword">let</span> table = elem.worker.table([{<span class="hljs-attr">x</span>:<span class="hljs-number">1</span>, <span class="hljs-attr">y</span>:<span class="hljs-number">2</span>}]);elem.load(table);
-</code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+table"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewertable"></a><a href="#perspectiveviewertable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.table</h4>
-<p>This element's <code>perspective.table</code> instance.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Read only</strong>: true</p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+view"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerview"></a><a href="#perspectiveviewerview" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.view</h4>
-<p>This element's <code>perspective.table.view</code> instance.  The instance itselfwill change after every <code>PerspectiveViewer#perspective-config-update</code> event.</p>
-<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Read only</strong>: true</p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+load"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerloaddata-code-promise-lt-void-gt-code"></a><a href="#perspectiveviewerloaddata-code-promise-lt-void-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.load(data) ⇒ <code>Promise.&lt;void&gt;</code></h4>
-<p>Load data.  If <code>load</code> or <code>update</code> have already been called on thiselement, its internal <code>perspective.table</code> will also be deleted.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Returns</strong>: <code>Promise.&lt;void&gt;</code> - A promise which resolves once the data isloaded and a <code>perspective.view</code> has been created.<br>
-<strong>Emits</strong>: <code>module:perspective_viewer~PerspectiveViewer#perspective-click PerspectiveViewer#event:perspective-view-update</code>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>data <code>any</code> - The data to load.  Works with the same input typessupported by <code>perspective.table</code>.</li>
-</ul>
-<p><strong>Example</strong> <em>(Load JSON)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);
-my_viewer.load([
-    {<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'a'</span>},
-    {<span class="hljs-attr">x</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'b'</span>}
-]);
-</code></pre>
-<p><strong>Example</strong> <em>(Load CSV)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);
-my_viewer.load(<span class="hljs-string">"x,y\n1,a\n2,b"</span>);
-</code></pre>
-<p><strong>Example</strong> <em>(Load perspective.table)</em></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);
-<span class="hljs-keyword">const</span> tbl = perspective.table(<span class="hljs-string">"x,y\n1,a\n2,b"</span>);
-my_viewer.load(tbl);
-</code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+update"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerupdatedata"></a><a href="#perspectiveviewerupdatedata" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.update(data)</h4>
-<p>Updates this element's <code>perspective.table</code> with new data.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-view-update</code>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>data <code>any</code> - The data to load.  Works with the same input typessupported by <code>perspective.table.update</code>.</li>
-</ul>
-<p><strong>Example</strong></p>
-<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> my_viewer = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'#my_viewer'</span>);my_viewer.update([    {<span class="hljs-attr">x</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'a'</span>},    {<span class="hljs-attr">x</span>: <span class="hljs-number">2</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">'b'</span>}]);
-</code></pre>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+notifyResize"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewernotifyresize"></a><a href="#perspectiveviewernotifyresize" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.notifyResize()</h4>
-<p>Determine whether to reflow the viewer and redraw.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+clone"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerclonewidget"></a><a href="#perspectiveviewerclonewidget" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.clone(widget)</h4>
-<p>Duplicate an existing <code>&lt;perspective-element&gt;</code>, including data and viewsettings.  The underlying <code>perspective.table</code> will be shared between bothelements</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Params</strong></p>
-<ul>
-<li>widget <code>any</code> - A <code>&lt;perspective-viewer&gt;</code> instance to clone.</li>
-</ul>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+delete"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerdeletedelete_table-code-promise-lt-boolean-gt-code"></a><a href="#perspectiveviewerdeletedelete_table-code-promise-lt-boolean-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.delete(delete_table) ⇒ <code>Promise.&lt;boolean&gt;</code></h4>
-<p>Deletes this element's data and clears it's internal state (but not itsuser state).  This (or the underlying <code>perspective.table</code>'s equivalentmethod) must be called in order for its memory to be reclaimed.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Returns</strong>: <code>Promise.&lt;boolean&gt;</code> - Whether or not this call resulted in theunderlying <code>perspective.table</code> actually being deleted.<br>
-<strong>Params</strong></p>
-<ul>
-<li>delete_table <code>boolean</code> <code> = true</code> - Should a delete call also be made to theunderlying <code>table()</code>.</li>
-</ul>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+restyleElement"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerrestyleelement"></a><a href="#perspectiveviewerrestyleelement" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.restyleElement()</h4>
-<p>Restyles the elements and to pick up any style changes</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+save"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewersave-code-object-code"></a><a href="#perspectiveviewersave-code-object-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.save() ⇒ <code>object</code></h4>
-<p>Serialize this element's attribute/interaction state.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Returns</strong>: <code>object</code> - a serialized element.</p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+restore"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerrestoreconfig-code-promise-lt-void-gt-code"></a><a href="#perspectiveviewerrestoreconfig-code-promise-lt-void-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.restore(config) ⇒ <code>Promise.&lt;void&gt;</code></h4>
-<p>Restore this element to a state as generated by a reciprocal call to<code>save</code> or <code>serialize</code>.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Returns</strong>: <code>Promise.&lt;void&gt;</code> - A promise which resolves when the changes havebeen applied.<br>
-<strong>Params</strong></p>
-<ul>
-<li>config <code>object</code> | <code>string</code> - returned by <code>save</code> or <code>serialize</code>.</li>
-</ul>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+flush"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerflush-code-promise-lt-void-gt-code"></a><a href="#perspectiveviewerflush-code-promise-lt-void-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.flush() ⇒ <code>Promise.&lt;void&gt;</code></h4>
-<p>Flush any pending attribute modifications to this element.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
-<strong>Returns</strong>: <code>Promise.&lt;void&gt;</code> - A promise which resolves when the currentattribute state has been applied.</p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+clear"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerclear"></a><a href="#perspectiveviewerclear" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.clear()</h4>
-<p>Clears the rows in the current <a href="table">table</a>.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+replace"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerreplace"></a><a href="#perspectiveviewerreplace" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.replace()</h4>
-<p>Replaces all rows in the current <a href="table">table</a>.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+reset"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewerreset"></a><a href="#perspectiveviewerreset" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.reset()</h4>
-<p>Reset's this element's view state and attributes to default.  Does notdelete this element's <code>perspective.table</code> or otherwise modify the datastate.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+copy"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewercopy"></a><a href="#perspectiveviewercopy" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.copy()</h4>
-<p>Copies this element's view data (as a CSV) to the clipboard.  This methodmust be called from an event handler, subject to the browser'srestrictions on clipboard access.  See<a href="https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard">https://www.w3.org/TR/clipboard-apis/#allow-read-clipboard</a>.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-<p><a name="module_perspective-viewer..PerspectiveViewer+toggleConfig"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="perspectiveviewertoggleconfig"></a><a href="#perspectiveviewertoggleconfig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.toggleConfig()</h4>
-<p>Opens/closes the element's config menu.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a></p>
-<hr>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/obj/perspective.html"><span class="arrow-prev">← </span><span>`perspective` API</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#perspective-viewer">perspective-viewer</a><ul class="toc-headings"><li><a href="#perspective-viewer-perspectiveviewer-code-htmlelement-code">perspective-viewer~PerspectiveViewer ⇐ HTMLElement</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>

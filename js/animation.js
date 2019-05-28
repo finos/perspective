@@ -1,16 +1,25 @@
 var SECURITIES = ["AAPL.N", "AMZN.N", "QQQ.N", "NVDA.N", "TSLA.N", "FB.N", "MSFT.N", "CSCO.N", "GOOGL.N", "PCLN.N"];
 var CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie"];
 var id = 0;
+
+function randn_bm() {
+    var u = 0,
+        v = 0;
+    while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+}
+
 function newRow() {
     id = id % 100;
     return {
         name: SECURITIES[Math.floor(Math.random() * SECURITIES.length)],
         client: CLIENTS[Math.floor(Math.random() * CLIENTS.length)],
         lastUpdate: new Date(),
-        chg: Math.random() * 20 - 10,
-        bid: Math.random() * 10 + 90,
-        ask: Math.random() * 10 + 100,
-        vol: Math.random() * 10 + 100,
+        chg: randn_bm() * 10,
+        bid: randn_bm() * 5 + 95,
+        ask: randn_bm() * 5 + 105,
+        vol: randn_bm() * 5 + 105,
         id: id++
     };
 }
@@ -18,22 +27,20 @@ function newRow() {
 var styleElement = document.createElement("style");
 styleElement.innerText = `
 .homeContainer perspective-viewer, perspective-viewer {
-    --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%) !important;
-    --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
-    --d3fc-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;
-    --highcharts-heatmap-gradient-full: linear-gradient(#feeb65 0%, #e4521b 22.5%, #4d342f 42.5%, #222222 50%, #1a237e 57.5%, #42b3d5 67.5%, #dcedc8 100%) !important;
-    --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%) !important;
-    --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%) !important;  
+    background: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    --plugin--box-shadow: 0 5px 5px rgba(0,0,0,0.2);
 }`;
 
 document.head.appendChild(styleElement);
 
-var tbl,
-    freq = 0,
-    freqdir = 1;
+var freq = 1,
+    freqdir = 1,
+    elem;
 
 function update() {
-    tbl.update([newRow(), newRow(), newRow()]);
+    elem.update([newRow(), newRow(), newRow()]);
     if (freq === 0) {
         setTimeout(update, 3000);
         freqdir = 1;
@@ -62,20 +69,20 @@ function select(id) {
             },
             "#cyclone": {
                 columns: ["chg"],
-                view: "x_bar",
+                view: "d3_x_bar",
                 sort: [["chg", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#pivot": {
                 columns: ["vol"],
-                view: "heatmap",
+                view: "d3_heatmap",
                 sort: [["vol", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#crosssect": {
-                view: "xy_scatter",
+                view: "d3_xy_scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
                 columns: ["bid", "ask", "vol", "id"],
@@ -83,20 +90,21 @@ function select(id) {
                 sort: []
             },
             "#intersect": {
-                view: "treemap",
+                view: "d3_treemap",
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
-                aggregates: {bid: "avg", chg: "low", name: "last"},
+                aggregates: {bid: "sum", chg: "low", name: "last"},
                 sort: [["name", "desc"], ["chg", "desc"]]
             },
             "#enhance": {
-                view: "y_line",
-                "row-pivots": ["lastUpdate"],
+                view: "d3_y_line",
+                "row-pivots": [],
+                "column-pivots": [],
+                sort: [["lastUpdate", "desc"]],
                 "column-pivots": ["client"],
                 columns: ["bid"],
-                aggregates: {bid: "avg", chg: "avg", name: "last"},
-                sort: []
+                aggregates: {bid: "avg", chg: "avg", name: "last"}
             }
         }[id] || {}
     );
@@ -107,14 +115,16 @@ window.addEventListener("WebComponentsReady", function() {
     for (var x = 0; x < 100; x++) {
         data.push(newRow());
     }
-    var elems = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"));
-    var worker = elems[0].worker;
-    tbl = worker.table(data, {index: "id"});
-    elems[0].load(tbl);
-    elems[0]._toggle_config();
+    elem = Array.prototype.slice.call(document.querySelectorAll("perspective-viewer"))[0];
+    var worker = elem.worker;
+    var tbl = worker.table(data, {index: "id"});
+    elem.load(tbl);
+    elem._toggle_config();
+
     setTimeout(function() {
         update(0);
     });
+
     // setTimeout(function() {
     //     rotate(1);
     // }, 0);

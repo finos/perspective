@@ -10,7 +10,5 @@
 <url> <loc>https://perspective.finos.org/docs/md/development.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/md/development.html" /> </url>
 <url> <loc>https://perspective.finos.org/docs/md/installation.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/md/installation.html" /> </url>
 <url> <loc>https://perspective.finos.org/docs/md/usage.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/md/usage.html" /> </url>
-<url> <loc>https://perspective.finos.org/docs/obj/perspective-viewer.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/obj/perspective-viewer.html" /> </url>
-<url> <loc>https://perspective.finos.org/docs/obj/perspective.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/obj/perspective.html" /> </url>
 <url> <loc>https://perspective.finos.org/docs/README.html</loc> <changefreq>hourly</changefreq> <priority>1.0</priority> <xhtml:link rel="alternate" hreflang="en" href="https://perspective.finos.org/docs/README.html" /> </url>
 </urlset>
