@@ -438,15 +438,15 @@ In Node.js:
 
 ```javascript
 const {
-    WebSocketHost,
+    WebSocketServer,
     table
-} = require("@finos/perspective/build/perspective.node.js");
+} = require("@finos/perspective");
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
 // the `WorkerHost()` to also serves the file structure rooted in this
 // module's directory.
-const host = new WebSocketHost({ assets: [__dirname], port: 8080 });
+const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 
 // Read an arrow file from the file system and load it as a named table.
 const arr = fs.readFileSync(__dirname + "/superstore.arrow");
