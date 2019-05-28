@@ -20,7 +20,7 @@ import {bindall} from "../utils.js";
  *
  * @export
  */
-export function worker() {
+export function Client() {
     this._worker = {
         initialized: {value: false},
         transferable: false,
@@ -34,7 +34,7 @@ export function worker() {
 /**
  * Remove a listener for a Perspective-generated event.
  */
-worker.prototype.unsubscribe = function(cmd, handler) {
+Client.prototype.unsubscribe = function(cmd, handler) {
     for (let key of Object.keys(this._worker.handlers)) {
         if (this._worker.handlers[key].resolve === handler) {
             delete this._worker.handlers[key];
@@ -45,7 +45,7 @@ worker.prototype.unsubscribe = function(cmd, handler) {
 /**
  * Process an asynchronous message.
  */
-worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
+Client.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     if (resolve) {
         this._worker.handlers[++this._worker.msg_id] = {resolve, reject, keep_alive};
     }
@@ -57,7 +57,7 @@ worker.prototype.post = function(msg, resolve, reject, keep_alive = false) {
     }
 };
 
-worker.prototype.initialize_profile_thread = function() {
+Client.prototype.initialize_profile_thread = function() {
     if (this._worker.initialized.value) {
         this.send({id: -1, cmd: "init_profile_thread"});
     } else {
@@ -68,26 +68,26 @@ worker.prototype.initialize_profile_thread = function() {
 /**
  * Must be implemented in order to transport commands to the server.
  */
-worker.prototype.send = function() {
+Client.prototype.send = function() {
     throw new Error("send() not implemented");
 };
 
-worker.prototype.open_table = function(name) {
+Client.prototype.open_table = function(name) {
     return new proxy_table(this, name);
 };
 
-worker.prototype.open_view = function(name) {
+Client.prototype.open_view = function(name) {
     return new proxy_view(this, name);
 };
 
 let _initialized = false;
 
 /**
- * Handle a command from Perspective. If the worker is not initialized, initialize it and dispatch the `perspective-ready` event.
+ * Handle a command from Perspective. If the Client is not initialized, initialize it and dispatch the `perspective-ready` event.
  *
  * Otherwise, reject or resolve the incoming command.
  */
-worker.prototype._handle = function(e) {
+Client.prototype._handle = function(e) {
     if (!this._worker.initialized.value) {
         if (!_initialized) {
             var event = document.createEvent("Event");
@@ -118,11 +118,11 @@ worker.prototype._handle = function(e) {
     }
 };
 
-worker.prototype.table = function(data, options) {
+Client.prototype.table = function(data, options) {
     return new table(this, data, options || {});
 };
 
-worker.prototype.terminate = function() {
+Client.prototype.terminate = function() {
     this._worker.terminate();
     this._worker = undefined;
 };

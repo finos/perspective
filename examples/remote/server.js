@@ -7,7 +7,7 @@
  *
  */
 
-const {WebSocketHost, table, initialize_profile_thread} = require("@finos/perspective");
+const {WebSocketServer, table, initialize_profile_thread} = require("@finos/perspective");
 
 /******************************************************************************
  *
@@ -55,7 +55,7 @@ async function newArrow() {
     return arrow;
 }
 
-const host = new WebSocketHost({assets: [__dirname]});
+const host = new WebSocketServer({assets: [__dirname]});
 
 async function init() {
     if (CACHE_INPUT) {

@@ -38,20 +38,17 @@
 
     <script>
 
-       
-
         window.addEventListener('WebComponentsReady', async function() {
             var elem = document.getElementById('view1');
-            var client = perspective.worker(window.location.origin.replace('http', 'ws'));
+            var client = perspective.websocket();
             var view = client.open_view('data_source_one');
             var arrow = await view.to_arrow();
+            var tbl = elem.worker.table(arrow, {limit: 10000});
+            view.on_update(x => tbl.update(x), {mode: "row"});
             elem.worker.initialize_profile_thread();
-            elem.load(arrow, {limit: 10000});
-            view.on_update(x => {
-                elem.update(x);
-            }, {mode: "row"});
-            
+            elem.load(tbl);
         });
+
     </script>
 
 </body>
