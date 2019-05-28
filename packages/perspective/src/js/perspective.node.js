@@ -124,7 +124,7 @@ function create_http_server(assets, host_psp) {
  * A WebSocket server instance for a remote perspective, and convenience HTTP
  * file server for easy hosting.
  */
-class WebSocketHost extends module.exports.Host {
+class WebSocketServer extends module.exports.Server {
     constructor({port, assets, host_psp, on_start}) {
         super(module.exports);
         port = typeof port === "undefined" ? 8080 : port;
@@ -157,7 +157,7 @@ class WebSocketHost extends module.exports.Host {
                 msg.id = compound_id;
                 this.REQS[msg.id] = {ws, msg};
                 try {
-                    // Send all messages to the handler defined in Perspective.Host
+                    // Send all messages to the handler defined in Perspective.Server
                     this.process(msg, ws.id);
                 } catch (e) {
                     console.error(e);
@@ -259,4 +259,4 @@ class WebSocketHost extends module.exports.Host {
     }
 }
 
-module.exports.WebSocketHost = WebSocketHost;
+module.exports.WebSocketServer = WebSocketServer;

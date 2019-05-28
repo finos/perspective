@@ -7,5 +7,5 @@
  *
  */
 
-const {WebSocketHost} = require("@finos/perspective");
-new WebSocketHost({assets: [__dirname]});
+const {WebSocketServer} = require("@finos/perspective");
+new WebSocketServer({assets: [__dirname]});

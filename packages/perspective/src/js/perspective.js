@@ -12,7 +12,7 @@ import {DataAccessor} from "./DataAccessor/DataAccessor.js";
 import {DateParser} from "./DataAccessor/DateParser.js";
 import {extract_map} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
-import {Host} from "./API/host.js";
+import {Server} from "./API/server.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -757,7 +757,7 @@ export default function(Module) {
      * parameter to this callback is dependent on the `mode` parameter:
      *     - "none" (default): The callback is invoked without an argument.
      *     - "cell": The callback is invoked with the new data for each updated cell, serialized to JSON format.
-     *     - "pkey": The callback is invoked with an Array of the primary keys for the updated rows
+     *     - "row": The callback is invoked with an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
         _clear_process(this.pool);
@@ -777,13 +777,17 @@ export default function(Module) {
                 switch (mode) {
                     case "cell":
                         {
-                            cache.step_delta = cache.step_delta || (await this._get_step_delta());
+                            if (cache.step_delta === undefined) {
+                                cache.step_delta = await this._get_step_delta();
+                            }
                             callback(cache.step_delta);
                         }
                         break;
                     case "row":
                         {
-                            cache.row_delta = cache.row_delta || (await this._get_row_delta());
+                            if (cache.row_delta === undefined) {
+                                cache.row_delta = await this._get_row_delta();
+                            }
                             callback(cache.row_delta);
                         }
                         break;
@@ -1358,7 +1362,7 @@ export default function(Module) {
     const perspective = {
         __module__: __MODULE__,
 
-        Host: Host,
+        Server,
 
         worker: function() {
             return this;
@@ -1450,20 +1454,23 @@ export default function(Module) {
         perspective[prop] = defaults[prop];
     }
 
-    /*
+    /**
      * Hosting Perspective
      *
-     * Create a WebWorker API that loads perspective in `init` and extends `post` using the worker's `postMessage` method.
+     * Create a WebWorker API that loads perspective in `init` and extends
+     * `post` using the worker's `postMessage` method.
      *
-     * If Perspective is running inside a Web Worker, use the WorkerHost as default.
+     * If Perspective is running inside a Web Worker, use the WebSorkerServer
+     * as default.
      *
-     * @extends Host
+     * @extends Server
+     * @private
      */
-    class WorkerHost extends Host {
+    class WebWorkerServer extends Server {
         /**
-         * On initialization, listen for messages posted from the client and send it to `Host.process()`.
+         * On initialization, listen for messages posted from the client and send it to `Server.process()`.
          *
-         * @param perspective a reference to the Perspective module, allowing the `Host` to access Perspective methods.
+         * @param perspective a reference to the Perspective module, allowing the `Server` to access Perspective methods.
          */
         constructor(perspective) {
             super(perspective);
@@ -1471,7 +1478,7 @@ export default function(Module) {
         }
 
         /**
-         * Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
+         * Implements the `Server`'s `post()` method using the Web Worker `postMessage()` API.
          *
          * @param {Object} msg a message to pass to the client
          * @param {*} transfer a transferable object to pass to the client, if needed
@@ -1499,10 +1506,10 @@ export default function(Module) {
     }
 
     /**
-     * Use WorkerHost as default inside a Web Worker, where `window` is replaced with `self`.
+     * Use WebSorkerServer as default inside a Web Worker, where `window` is replaced with `self`.
      */
     if (typeof self !== "undefined" && self.addEventListener) {
-        new WorkerHost(perspective);
+        new WebWorkerServer(perspective);
     }
 
     return perspective;

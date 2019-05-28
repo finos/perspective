@@ -40,8 +40,8 @@
     <script>
         window.addEventListener('WebComponentsReady', async function() {
             var elem = document.getElementById('view1');
-            var worker = perspective.worker(window.location.origin.replace('http', 'ws'));
-            let view = worker.open_view('data_source_one');
+            var client = perspective.websocket();
+            let view = client.open_view('data_source_one');
             let arrow = await view.to_arrow();
             elem.load(perspective.worker().table(arrow));
         });

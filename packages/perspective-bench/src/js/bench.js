@@ -60,7 +60,7 @@ async function run_node_version(args, run_test) {
 function new_host() {
     return new Promise(
         resolve =>
-            new perspective.WebSocketHost({
+            new perspective.WebSocketServer({
                 assets: ["build"],
                 port: 0,
                 on_start: function() {

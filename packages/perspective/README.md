@@ -13,7 +13,7 @@ The main API module for Perspective.
         * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
-        * [.col_to_js_typed_array(column_name)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+        * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
         * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
         * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
@@ -39,10 +39,6 @@ The main API module for Perspective.
         * [.add_computed(computed)](#module_perspective..table+add_computed)
         * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Array.&lt;string&gt;</code>
         * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Array.&lt;object&gt;</code>
-    * [~WorkerHost](#module_perspective..WorkerHost)
-        * [new WorkerHost(perspective)](#new_module_perspective..WorkerHost_new)
-        * [.post(msg, transfer)](#module_perspective..WorkerHost+post)
-        * [.init(buffer)](#module_perspective..WorkerHost+init)
 
 
 * * *
@@ -60,7 +56,7 @@ The main API module for Perspective.
     * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [.col_to_js_typed_array(column_name)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+    * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
     * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
     * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
@@ -219,7 +215,7 @@ config object.
 
 <a name="module_perspective..view+col_to_js_typed_array"></a>
 
-#### view.col\_to\_js\_typed\_array(column_name) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+#### view.col\_to\_js\_typed\_array(column_name, options) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
 Serializes a view column into a TypedArray.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
@@ -233,6 +229,12 @@ integer/float type, the Promise returns undefined.
 **Params**
 
 - column_name <code>string</code> - The name of the column to serialize.
+- options <code>Object</code> - An optional configuration object.
+    - .data_slice <code>\*</code> - A data slice object from which to serialize.
+    - .start_row <code>number</code> - The starting row index from which
+to serialize.
+    - .end_row <code>number</code> - The ending row index from which
+to serialize.
 
 
 * * *
@@ -248,6 +250,7 @@ data from the view.
 **Params**
 
 - [options] <code>Object</code> - An optional configuration object.
+    - .data_slice <code>\*</code> - A data slice object from which to serialize.
     - .start_row <code>number</code> - The starting row index from which
 to serialize.
     - .end_row <code>number</code> - The ending row index from which
@@ -613,58 +616,6 @@ If the column is computed, the `computed` property is an Object containing:
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
 **Returns**: <code>Array.&lt;object&gt;</code> - An array of Objects containing metadata for each column.  
-
-* * *
-
-<a name="module_perspective..WorkerHost"></a>
-
-### perspective~WorkerHost
-**Kind**: inner class of [<code>perspective</code>](#module_perspective)  
-
-* [~WorkerHost](#module_perspective..WorkerHost)
-    * [new WorkerHost(perspective)](#new_module_perspective..WorkerHost_new)
-    * [.post(msg, transfer)](#module_perspective..WorkerHost+post)
-    * [.init(buffer)](#module_perspective..WorkerHost+init)
-
-
-* * *
-
-<a name="new_module_perspective..WorkerHost_new"></a>
-
-#### new WorkerHost(perspective)
-On initialization, listen for messages posted from the client and send it to `Host.process()`.
-
-**Params**
-
-- perspective - a reference to the Perspective module, allowing the `Host` to access Perspective methods.
-
-
-* * *
-
-<a name="module_perspective..WorkerHost+post"></a>
-
-#### workerHost.post(msg, transfer)
-Implements the `Host`'s `post()` method using the Web Worker `postMessage()` API.
-
-**Kind**: instance method of [<code>WorkerHost</code>](#module_perspective..WorkerHost)  
-**Params**
-
-- msg <code>Object</code> - a message to pass to the client
-- transfer <code>\*</code> - a transferable object to pass to the client, if needed
-
-
-* * *
-
-<a name="module_perspective..WorkerHost+init"></a>
-
-#### workerHost.init(buffer)
-When initialized, replace Perspective's internal `__MODULE` variable with the WASM binary.
-
-**Kind**: instance method of [<code>WorkerHost</code>](#module_perspective..WorkerHost)  
-**Params**
-
-- buffer <code>ArrayBuffer</code> - an ArrayBuffer containing the Perspective WASM code
-
 
 * * *
 

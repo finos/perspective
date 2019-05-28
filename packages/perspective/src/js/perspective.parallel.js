@@ -9,7 +9,7 @@
 
 import * as defaults from "./defaults.js";
 
-import {worker} from "./API/worker.js";
+import {Client} from "./API/client.js";
 
 import asmjs_worker from "./perspective.asmjs.js";
 import wasm_worker from "./perspective.wasm.js";
@@ -58,7 +58,7 @@ const override = new (class {
  *
  * This class serves as the client API for transporting messages to/from Web Workers.
  */
-class WebWorker extends worker {
+class WebWorkerClient extends Client {
     constructor() {
         super();
         this.register();
@@ -121,7 +121,7 @@ class WebWorker extends worker {
  *
  * If the message has a transferable asset, set the `pending_arrow` flag to tell the worker the next message is an ArrayBuffer.
  */
-class WebSocketWorker extends worker {
+class WebSocketClient extends Client {
     constructor(url) {
         super();
         this._ws = new WebSocket(url);
@@ -177,7 +177,7 @@ const WORKER_SINGLETON = (function() {
     return {
         getInstance: function() {
             if (__WORKER__ === undefined) {
-                __WORKER__ = new WebWorker();
+                __WORKER__ = new WebWorkerClient();
             }
             return __WORKER__;
         }
@@ -196,17 +196,22 @@ const mod = {
     override: x => override.set(x),
 
     /**
-     * Create a new WebWorker instance. If the `url` parameter is provided, load the worker
-     * at `url` using a WebSocket.
+     * Create a new WebWorkerClient instance.
      *s
      * @param {*} url
      */
-    worker(url) {
-        if (url) {
-            return new WebSocketWorker(url);
-        } else {
-            return new WebWorker();
-        }
+    worker() {
+        return new WebWorkerClient();
+    },
+
+    /**
+     * Create a new WebSocketClient instance. The `url` parameter is provided, load the worker
+     * at `url` using a WebSocket.
+     *s
+     * @param {*} url Defaults to `window.location.origin`
+     */
+    websocket(url = window.location.origin.replace("http", "ws")) {
+        return new WebSocketClient(url);
     },
 
     shared_worker() {

@@ -25,7 +25,7 @@ function error_to_json(error) {
  *
  * Child classes must implement the `post()` interface, which defines how the worker sends messages.
  */
-export class Host {
+export class Server {
     constructor(perspective) {
         this.perspective = perspective;
         this._tables = {};
@@ -33,7 +33,7 @@ export class Host {
     }
 
     /**
-     * Host must be extended and the `post` method implemented before it can be initialized.
+     * `Server` must be extended and the `post` method implemented before it can be initialized.
      */
     init(msg) {
         this.post(msg);
