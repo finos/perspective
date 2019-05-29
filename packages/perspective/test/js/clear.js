@@ -36,5 +36,20 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("replace the rows in the table atomically", async function() {
+            const table = perspective.table([{x: 1, y: 2}, {x: 3, y: 4}]);
+            const view = table.view();
+            setTimeout(() => table.replace([{x: 5, y: 6}]));
+            let json = await view.to_json();
+            expect(json).toHaveLength(2);
+            expect(json).toEqual([{x: 1, y: 2}, {x: 3, y: 4}]);
+            await new Promise(setTimeout);
+            json = await view.to_json();
+            expect(json).toHaveLength(1);
+            expect(json).toEqual([{x: 5, y: 6}]);
+            view.delete();
+            table.delete();
+        });
     });
 };

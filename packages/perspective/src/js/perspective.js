@@ -79,6 +79,10 @@ export default function(Module) {
         }
     }
 
+    function _reset_process(pool) {
+        _POOL_DEBOUNCES = _POOL_DEBOUNCES.filter(x => x !== pool);
+    }
+
     /**
      * Common logic for creating and registering a gnode/t_table.
      *
@@ -283,8 +287,8 @@ export default function(Module) {
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    view.prototype.delete = async function() {
-        await new Promise(setTimeout);
+    view.prototype.delete = function() {
+        _reset_process(this.pool);
         this._View.delete();
         this.ctx.delete();
 
@@ -364,7 +368,7 @@ export default function(Module) {
         return extract_vector_scalar(this._View.column_names(skip, depth)).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
     };
 
-    view.prototype.get_data_slice = async function(start_row, end_row, start_col, end_col) {
+    view.prototype.get_data_slice = function(start_row, end_row, start_col, end_col) {
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
         return __MODULE__[`get_data_slice_${nidx}`](this._View, start_row, end_row, start_col, end_col);
@@ -376,7 +380,7 @@ export default function(Module) {
      * @private
      */
     const to_format = async function(options, formatter) {
-        await new Promise(setTimeout);
+        _clear_process(this.pool);
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -391,7 +395,7 @@ export default function(Module) {
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
 
-        const slice = await this.get_data_slice(start_row, end_row, start_col, end_col);
+        const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
         const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
 
@@ -452,7 +456,7 @@ export default function(Module) {
         let slice;
 
         if (!options.data_slice) {
-            const data_slice = await this.get_data_slice(start_row, end_row, idx, idx + 1);
+            const data_slice = this.get_data_slice(start_row, end_row, idx, idx + 1);
             slice = data_slice.get_slice();
         } else {
             slice = options.data_slice.get_column_slice(idx);
@@ -881,6 +885,7 @@ export default function(Module) {
      * construction options.
      */
     table.prototype.clear = function() {
+        _reset_process(this.pool);
         this.gnode.reset();
     };
 
@@ -888,8 +893,10 @@ export default function(Module) {
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
+        _reset_process(this.pool);
         this.gnode.reset();
         this.update(data);
+        _clear_process(this.pool);
     };
 
     /**
@@ -897,11 +904,11 @@ export default function(Module) {
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    table.prototype.delete = async function() {
-        await new Promise(setTimeout);
+    table.prototype.delete = function() {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
+        _reset_process(this.pool);
         this.pool.unregister_gnode(this.gnode.get_id());
         this.gnode.delete();
         this.pool.delete();

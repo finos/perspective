@@ -32,7 +32,7 @@ const JPMC_VERSIONS = [
     "0.2.0"
 ];
 
-const FINOS_VERSIONS = ["0.3.0-rc.1"];
+const FINOS_VERSIONS = ["0.3.0-rc.3", "0.3.0-rc.2", "0.3.0-rc.1"];
 
 async function run() {
     await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://host.docker.internal:8080/perspective.js`, {output: "build/benchmark", puppeteer: true});
