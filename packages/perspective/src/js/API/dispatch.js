@@ -7,6 +7,9 @@
  *
  */
 
+const __CALLBACK_CACHE__ = new WeakMap();
+let __CALLBACK_INDEX__ = 0;
+
 /**
  * Unbind a listener to an event.
  *
@@ -23,12 +26,15 @@ export function unsubscribe(method, cmd) {
                 resolve = args.splice(i, 1)[0];
             }
         }
+        const callback_id = __CALLBACK_CACHE__.get(resolve);
+        __CALLBACK_CACHE__.delete(resolve);
         let msg = {
             cmd: cmd || "view_method",
             name: this._name,
             method: method,
             args: args,
-            subscribe: true
+            subscribe: true,
+            callback_id
         };
         this._worker.post(msg, resolve, reject);
         this._worker.unsubscribe(cmd, resolve);
@@ -51,12 +57,14 @@ export function subscribe(method, cmd) {
                 resolve = args.splice(i, 1)[0];
             }
         }
+        __CALLBACK_CACHE__.set(resolve, __CALLBACK_INDEX__++);
         let msg = {
             cmd: cmd || "view_method",
             name: this._name,
             method: method,
             args: args,
-            subscribe: true
+            subscribe: true,
+            callback_id: __CALLBACK_INDEX__
         };
         this._worker.post(msg, resolve, reject, true);
     };

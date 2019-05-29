@@ -30,6 +30,8 @@ export class Server {
         this.perspective = perspective;
         this._tables = {};
         this._views = {};
+
+        this._callback_cache = new WeakMap();
     }
 
     /**
@@ -131,29 +133,36 @@ export class Server {
      */
     process_subscribe(msg, obj) {
         try {
-            const _callback = ev => {
-                let result = {
-                    id: msg.id,
-                    data: ev
-                };
-                try {
-                    // post transferable data for arrow
-                    if (msg.args && msg.args[0]) {
-                        if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
-                            this.post(result, [ev]);
-                            return;
+            let callback;
+            if (msg.cmd.slice(0, 2) === "on") {
+                callback = ev => {
+                    let result = {
+                        id: msg.id,
+                        data: ev
+                    };
+                    try {
+                        // post transferable data for arrow
+                        if (msg.args && msg.args[0]) {
+                            if (msg.method === "on_update" && msg.args[0]["mode"] === "row") {
+                                this.post(result, [ev]);
+                                return;
+                            }
                         }
-                    }
 
-                    this.post(result);
-                } catch (e) {
-                    console.error("Removing callback after failed on_update() (presumably due to closed connection)");
-                    if (msg.method === "on_update") {
-                        obj["remove_update"](_callback);
+                        this.post(result);
+                    } catch (e) {
+                        console.error("Removing callback after failed on_update() (presumably due to closed connection)");
+                        //if (msg.method === "on_update") {
+                        obj["remove_update"](callback);
+                        //}
                     }
-                }
-            };
-            obj[msg.method](_callback, ...msg.args); // make sure we are passing arguments into the callback
+                };
+                this._callback_cache.set(msg.callback_id, callback);
+            } else {
+                callback = this._callback_cache.get(msg.callback_id);
+                this._callback_cache.delete(msg.callback_id);
+            }
+            obj[msg.method](callback, ...msg.args); // make sure we are passing arguments into the callback
         } catch (error) {
             this.process_error(msg, error);
             return;
