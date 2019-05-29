@@ -279,7 +279,8 @@ module.exports = perspective => {
         it("['x']", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                row_pivots: ["x"]
+                row_pivots: ["x"],
+                aggregates: {y: "distinct count", z: "distinct count"}
             });
             var answer = [
                 {__ROW_PATH__: [], x: 10, y: 4, z: 2},
@@ -324,7 +325,8 @@ module.exports = perspective => {
                 var table = perspective.table(dataWithNulls);
 
                 var view = table.view({
-                    row_pivots: ["name"]
+                    row_pivots: ["name"],
+                    aggregates: {name: "distinct count"}
                 });
 
                 const answer = [
@@ -348,7 +350,8 @@ module.exports = perspective => {
                 table.update(dataWithNull2);
 
                 var view = table.view({
-                    row_pivots: ["name"]
+                    row_pivots: ["name"],
+                    aggregates: {name: "distinct count"}
                 });
 
                 const answer = [
@@ -440,7 +443,8 @@ module.exports = perspective => {
         it("['z']", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                row_pivots: ["z"]
+                row_pivots: ["z"],
+                aggregates: {y: "distinct count", z: "distinct count"}
             });
             var answer = [{__ROW_PATH__: [], x: 10, y: 4, z: 2}, {__ROW_PATH__: [false], x: 6, y: 2, z: 1}, {__ROW_PATH__: [true], x: 4, y: 2, z: 1}];
             let result2 = await view.to_json();
@@ -452,7 +456,8 @@ module.exports = perspective => {
         it("['x', 'z']", async function() {
             var table = perspective.table(data);
             var view = table.view({
-                row_pivots: ["x", "z"]
+                row_pivots: ["x", "z"],
+                aggregates: {y: "distinct count", z: "distinct count"}
             });
             var answer = [
                 {__ROW_PATH__: [], x: 10, y: 4, z: 2},
@@ -495,7 +500,8 @@ module.exports = perspective => {
             var table = perspective.table(data);
             var view = table.view({
                 row_pivots: ["x", "z"],
-                row_pivot_depth: 1
+                row_pivot_depth: 1,
+                aggregates: {y: "distinct count", z: "distinct count"}
             });
             var answer = [
                 {__ROW_PATH__: [], x: 10, y: 4, z: 2},
@@ -706,7 +712,8 @@ module.exports = perspective => {
             var view = table.view({
                 column_pivots: ["z"],
                 row_pivots: ["y"],
-                sort: [["x", "desc"]]
+                sort: [["x", "desc"]],
+                aggregates: {y: "distinct count", z: "distinct count"}
             });
 
             let answer = [

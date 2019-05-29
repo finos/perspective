@@ -62,12 +62,12 @@ export const TYPE_AGGREGATES = {
 };
 
 export const AGGREGATE_DEFAULTS = {
-    string: "distinct count",
+    string: "count",
     float: "sum",
     integer: "sum",
-    boolean: "distinct count",
-    datetime: "distinct count",
-    date: "distinct count"
+    boolean: "count",
+    datetime: "count",
+    date: "count"
 };
 
 const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];

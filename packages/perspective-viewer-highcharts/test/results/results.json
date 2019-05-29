@@ -20,10 +20,10 @@
     "bar.html/displays visible columns.": "02a08ab15b92f1239613f5f1bd57db48",
     "bar.html/tooltip shows on hover.": "ba5e455a9d3f877cf0c773d417777fd9",
     "line.html/shows a grid without any settings applied.": "daa48e26ee315f01377eaaf054088934",
-    "line.html/pivots by a row.": "0dc927e96871604d69af1a1231226fef",
-    "line.html/pivots by two rows.": "eb60573a7c5db9428a76ead148f93526",
-    "line.html/pivots by a row and a column.": "528597dd74c230aae15ca9674211476d",
-    "line.html/pivots by two rows and two columns.": "e6d603f510d0e5744634469cc53b0e42",
+    "line.html/pivots by a row.": "54b93d39cf054189aa62c7562ee17411",
+    "line.html/pivots by two rows.": "06c3b143bcd638c5162e9b354698399e",
+    "line.html/pivots by a row and a column.": "1f99a4c6dc1bfaa47f357569c1112f80",
+    "line.html/pivots by two rows and two columns.": "a005e2a073c87e6d82f303fc589584d6",
     "line.html/sorts by a numeric column.": "0528b15217f04b7a3e54103b9eb1eb0d",
     "line.html/sorts by an alpha column.": "2f47d9f69cc14d0a6495a70d45265f0b",
     "line.html/sorts by a hidden column.": "f3fb4394b7cf0dd0792471ddb728c559",
@@ -83,7 +83,7 @@
     "scatter.html/tooltip shows proper column labels.": "efe51febbbe56d4a7147050c45a6673e",
     "scatter.html/tooltip shows pivot labels.": "d78d20df908ae116908b213782ce2af0",
     "line.html/tooltip shows proper column labels.": "9754ca4d31e51374b6d943669e979616",
-    "line.html/tooltip shows pivot labels.": "6762583b0ff5ddc9380d51fce80945ef",
+    "line.html/tooltip shows pivot labels.": "27dbb4659637d8dec7a6ccf50145b227",
     "render_warning.html/render warning should not show under size limit.": "8b216a2b86af03bbd65f71261e2f1167",
     "render_warning.html/render warning should show above size limit.": "66773602a12017c7aafff7043dc612cd",
     "render_warning.html/dismissing render warning should trigger render.": "f0dbd0bb32ddd7f500aae54d65b6c10a",
@@ -100,5 +100,5 @@
     "bar.html/perspective dispatches perspective-click event with one filter.": "32d64db28af46dfe77fad5cc1ca8af9c",
     "bar.html/perspective dispatches perspective-click event with filters.": "c18f49270244dfe4a6b32270ec30d99d",
     "bar.html/dates on the x-axis display correctly.": "591a1c8e9493451b6885b9651917ffff",
-    "__GIT_COMMIT__": "87772b51fba4802095f9fa3b4b680d4a804be5d5"
+    "__GIT_COMMIT__": "b35932f5217f9847c9684a980b6a50f675c9a8d2"
 }
