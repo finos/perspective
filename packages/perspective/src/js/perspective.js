@@ -287,7 +287,7 @@ export default function(Module) {
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    view.prototype.delete = function() {
+    view.prototype.delete = async function() {
         _reset_process(this.pool);
         this._View.delete();
         this.ctx.delete();
@@ -884,7 +884,7 @@ export default function(Module) {
      * Remove all rows in this {@link module:perspective~table} while preserving the schema and
      * construction options.
      */
-    table.prototype.clear = function() {
+    table.prototype.clear = async function() {
         _reset_process(this.pool);
         this.gnode.reset();
     };
@@ -892,7 +892,7 @@ export default function(Module) {
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
-    table.prototype.replace = function(data) {
+    table.prototype.replace = async function(data) {
         _reset_process(this.pool);
         this.gnode.reset();
         this.update(data);
@@ -904,7 +904,7 @@ export default function(Module) {
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    table.prototype.delete = function() {
+    table.prototype.delete = async function() {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
