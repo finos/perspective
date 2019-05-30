@@ -33,7 +33,7 @@ function jest() {
     }
 
     if (args.indexOf("--debug") > -1) {
-        console.log("Running tests in debug mode - all console.log statements are preserved.");
+        console.log("-- Running tests in debug mode - all console.log statements are preserved.");
     } else {
         cmd += " --silent 2>&1";
     }

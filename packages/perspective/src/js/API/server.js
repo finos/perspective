@@ -31,7 +31,7 @@ export class Server {
         this._tables = {};
         this._views = {};
 
-        this._callback_cache = new WeakMap();
+        this._callback_cache = new Map();
     }
 
     /**
@@ -134,7 +134,7 @@ export class Server {
     process_subscribe(msg, obj) {
         try {
             let callback;
-            if (msg.cmd.slice(0, 2) === "on") {
+            if (msg.method.slice(0, 2) === "on") {
                 callback = ev => {
                     let result = {
                         id: msg.id,
@@ -152,17 +152,21 @@ export class Server {
                         this.post(result);
                     } catch (e) {
                         console.error("Removing callback after failed on_update() (presumably due to closed connection)");
-                        //if (msg.method === "on_update") {
                         obj["remove_update"](callback);
-                        //}
                     }
                 };
-                this._callback_cache.set(msg.callback_id, callback);
-            } else {
+                if (msg.callback_id) {
+                    this._callback_cache.set(msg.callback_id, callback);
+                }
+            } else if (msg.callback_id) {
                 callback = this._callback_cache.get(msg.callback_id);
                 this._callback_cache.delete(msg.callback_id);
             }
-            obj[msg.method](callback, ...msg.args); // make sure we are passing arguments into the callback
+            if (callback) {
+                obj[msg.method](callback, ...msg.args);
+            } else {
+                console.error(`Callback not found for remote call "${msg}"`);
+            }
         } catch (error) {
             this.process_error(msg, error);
             return;
