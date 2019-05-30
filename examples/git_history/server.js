@@ -11,13 +11,14 @@ const {WebSocketServer, table} = require("@finos/perspective");
 const exec = require("child_process").exec;
 
 function execute(command, callback) {
-    exec(command, function(error, stdout) {
+    exec(command, {maxBuffer: 1024 * 5000}, function(error, stdout) {
         callback(stdout);
     });
 }
 
+const server = new WebSocketServer({assets: [__dirname]});
+
 execute(`git log --date=iso --pretty=format:'"%h","%an","%aD","%s","%ae"'`, log => {
-    const server = new WebSocketServer({assets: [__dirname]});
     const tbl = table("Hash,Name,Date,Message,Email\n" + log);
     server.host_table("data_source_one", tbl);
 });
