@@ -145,7 +145,8 @@ module.exports = perspective => {
             it("returns changed rows", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivots: ["y"]
+                    row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -163,7 +164,8 @@ module.exports = perspective => {
             it("returns nothing when updated data is not in pivot", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivots: ["y"]
+                    row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -180,7 +182,8 @@ module.exports = perspective => {
             it("returns added rows", async function(done) {
                 let table = perspective.table(data);
                 let view = table.view({
-                    row_pivots: ["y"]
+                    row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -198,7 +201,8 @@ module.exports = perspective => {
             it("returns deleted columns", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivots: ["y"]
+                    row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -217,7 +221,8 @@ module.exports = perspective => {
             it("returns changed rows in non-sequential update", async function(done) {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
-                    row_pivots: ["y"]
+                    row_pivots: ["y"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -308,7 +313,8 @@ module.exports = perspective => {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
                     row_pivots: ["y"],
-                    column_pivots: ["x"]
+                    column_pivots: ["x"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {
@@ -375,7 +381,8 @@ module.exports = perspective => {
                 let table = perspective.table(data, {index: "x"});
                 let view = table.view({
                     row_pivots: ["y"],
-                    column_pivots: ["x"]
+                    column_pivots: ["x"],
+                    aggregates: {y: "distinct count", z: "distinct count"}
                 });
                 view.on_update(
                     async function(delta) {

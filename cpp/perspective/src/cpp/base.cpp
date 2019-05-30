@@ -459,7 +459,7 @@ _get_default_aggregate(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op = t_aggtype::AGGTYPE_SUM;
         } break;
-        default: { agg_op = t_aggtype::AGGTYPE_DISTINCT_COUNT; }
+        default: { agg_op = t_aggtype::AGGTYPE_COUNT; }
     }
     return agg_op;
 }
@@ -480,7 +480,7 @@ _get_default_aggregate_string(t_dtype dtype) {
         case DTYPE_INT64: {
             agg_op_str = "sum";
         } break;
-        default: { agg_op_str = "distinct count"; }
+        default: { agg_op_str = "count"; }
     }
     return agg_op_str;
 }
