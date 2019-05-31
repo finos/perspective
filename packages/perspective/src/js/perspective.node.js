@@ -6,6 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+const {Client} = require("./API/client.js");
+const {Server} = require("./API/server.js");
 
 const perspective = require("./perspective.js").default;
 
@@ -27,12 +29,32 @@ const wasm = require("./psp.sync.wasm.js");
 
 const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 
-module.exports = perspective(
+const sync_module = perspective(
     load_perspective({
         wasmBinary: buffer,
         wasmJSMethod: "native-wasm"
     })
 );
+
+const SYNC_SERVER = new (class extends Server {
+    post(msg) {
+        SYNC_CLIENT._handle({data: msg});
+    }
+})(sync_module);
+
+const SYNC_CLIENT = new (class extends Client {
+    constructor() {
+        super();
+        setTimeout(() => this.send({id: -1, cmd: "init"}));
+    }
+
+    send(msg) {
+        SYNC_SERVER.process(msg);
+    }
+})();
+
+module.exports = SYNC_CLIENT;
+module.exports.sync_module = () => sync_module;
 
 let CLIENT_ID_GEN = 0;
 
@@ -124,7 +146,7 @@ function create_http_server(assets, host_psp) {
  * A WebSocket server instance for a remote perspective, and convenience HTTP
  * file server for easy hosting.
  */
-class WebSocketServer extends module.exports.Server {
+class WebSocketServer extends Server {
     constructor({port, assets, host_psp, on_start}) {
         super(module.exports);
         port = typeof port === "undefined" ? 8080 : port;

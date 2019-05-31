@@ -20,7 +20,7 @@ import {bindall} from "../utils.js";
  */
 export function table(worker, data, options) {
     this._worker = worker;
-    name = options.name || Math.random() + "";
+    let name = options.name || Math.random() + "";
     var msg = {
         cmd: "table",
         name: name,
