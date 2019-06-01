@@ -278,7 +278,7 @@ export default function(Module) {
      *
      * @returns {object} Shared the same key/values properties as {@link module:perspective~view}
      */
-    view.prototype.get_config = async function() {
+    view.prototype.get_config = function() {
         return JSON.parse(JSON.stringify(this.config));
     };
 
@@ -287,7 +287,7 @@ export default function(Module) {
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    view.prototype.delete = async function() {
+    view.prototype.delete = function() {
         _reset_process(this.pool);
         this._View.delete();
         this.ctx.delete();
@@ -360,7 +360,7 @@ export default function(Module) {
      *
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~view}'s schema.
      */
-    view.prototype.schema = async function() {
+    view.prototype.schema = function() {
         return extract_map(this._View.schema());
     };
 
@@ -379,7 +379,7 @@ export default function(Module) {
      *
      * @private
      */
-    const to_format = async function(options, formatter) {
+    const to_format = function(options, formatter) {
         _clear_process(this.pool);
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
@@ -435,11 +435,11 @@ export default function(Module) {
      *
      * @private
      */
-    const column_to_format = async function(col_name, options, format_function) {
-        const num_rows = await this.num_rows();
+    const column_to_format = function(col_name, options, format_function) {
+        const num_rows = this.num_rows();
         const start_row = options.start_row || 0;
         const end_row = options.end_row || num_rows;
-        const names = await this._column_names();
+        const names = this._column_names();
         let idx = names.indexOf(col_name);
 
         if (idx === -1) {
@@ -492,7 +492,7 @@ export default function(Module) {
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
-    view.prototype.to_columns = async function(options) {
+    view.prototype.to_columns = function(options) {
         return to_format.call(this, options, formatters.jsonTableFormatter);
     };
 
@@ -519,7 +519,7 @@ export default function(Module) {
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
-    view.prototype.to_json = async function(options) {
+    view.prototype.to_json = function(options) {
         return to_format.call(this, options, formatters.jsonFormatter);
     };
 
@@ -548,7 +548,7 @@ export default function(Module) {
      * parameter supplied, the keys of this object will be comma-prepended with
      * their comma-separated column paths.
      */
-    view.prototype.to_csv = async function(options) {
+    view.prototype.to_csv = function(options) {
         return to_format.call(this, options, formatters.csvFormatter);
     };
 
@@ -576,7 +576,7 @@ export default function(Module) {
      * Float32Array or Float64Array. If the column cannot be found, or is not of an
      * integer/float type, the Promise returns undefined.
      */
-    view.prototype.col_to_js_typed_array = async function(col_name, options = {}) {
+    view.prototype.col_to_js_typed_array = function(col_name, options = {}) {
         const format_function = __MODULE__[`col_to_js_typed_array`];
         return column_to_format.call(this, col_name, options, format_function);
     };
@@ -602,9 +602,9 @@ export default function(Module) {
      * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
      * data from the view.
      */
-    view.prototype.to_arrow = async function(options = {}) {
-        const names = await this._column_names();
-        const schema = await this.schema();
+    view.prototype.to_arrow = function(options = {}) {
+        const names = this._column_names();
+        const schema = this.schema();
 
         const vectors = [];
 
@@ -616,19 +616,19 @@ export default function(Module) {
             const col_path = name.split(defaults.COLUMN_SEPARATOR_STRING);
             const type = schema[col_path[col_path.length - 1]];
             if (type === "float") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Float(new Float64(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "integer") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Int(new Int32(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "boolean") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "date" || type === "datetime") {
-                const [vals, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "string") {
-                const [vals, offsets, indices, nullCount, nullArray] = await this.col_to_js_typed_array(name, options);
+                const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
                 const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
                 vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
@@ -649,7 +649,7 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of aggregated rows.
      */
-    view.prototype.num_rows = async function() {
+    view.prototype.num_rows = function() {
         return this._View.num_rows();
     };
 
@@ -662,7 +662,7 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of aggregated columns.
      */
-    view.prototype.num_columns = async function() {
+    view.prototype.num_columns = function() {
         const ncols = this._View.num_columns();
         const nhidden = this._num_hidden();
         return ncols - (ncols / (this.config.columns.length + nhidden)) * nhidden;
@@ -675,7 +675,7 @@ export default function(Module) {
      *
      * @returns {Promise<bool>} Whether this row is expanded.
      */
-    view.prototype.get_row_expanded = async function(idx) {
+    view.prototype.get_row_expanded = function(idx) {
         return this._View.get_row_expanded(idx);
     };
 
@@ -686,7 +686,7 @@ export default function(Module) {
      *
      * @returns {Promise<void>}
      */
-    view.prototype.expand = async function(idx) {
+    view.prototype.expand = function(idx) {
         return this._View.expand(idx, this.config.row_pivots.length);
     };
 
@@ -697,7 +697,7 @@ export default function(Module) {
      *
      * @returns {Promise<void>}
      */
-    view.prototype.collapse = async function(idx) {
+    view.prototype.collapse = function(idx) {
         return this._View.collapse(idx);
     };
 
@@ -705,7 +705,7 @@ export default function(Module) {
      * Set expansion `depth` of the pivot tree.
      *
      */
-    view.prototype.set_depth = async function(depth) {
+    view.prototype.set_depth = function(depth) {
         return this._View.set_depth(depth, this.config.row_pivots.length);
     };
 
@@ -719,20 +719,18 @@ export default function(Module) {
         let data;
         if (delta.cells.size() === 0) {
             // FIXME This is currently not implemented for 1+ sided contexts.
-            data = await this.to_json();
+            data = this.to_json();
         } else {
             let rows = {};
             for (let x = 0; x < delta.cells.size(); x++) {
                 rows[delta.cells.get(x).row] = true;
             }
             rows = Object.keys(rows);
-            const results = await Promise.all(
-                rows.map(row =>
-                    this.to_json({
-                        start_row: Number.parseInt(row),
-                        end_row: Number.parseInt(row) + 1
-                    })
-                )
+            const results = rows.map(row =>
+                this.to_json({
+                    start_row: Number.parseInt(row),
+                    end_row: Number.parseInt(row) + 1
+                })
             );
             data = [].concat.apply([], results);
         }
@@ -747,7 +745,7 @@ export default function(Module) {
      */
     view.prototype._get_row_delta = async function() {
         let delta_slice = this._View.get_row_delta();
-        let arrow = await this.to_arrow({data_slice: delta_slice});
+        let arrow = this.to_arrow({data_slice: delta_slice});
         delta_slice.delete();
         return arrow;
     };
@@ -873,7 +871,7 @@ export default function(Module) {
         bindall(this);
     }
 
-    table.prototype._update_callback = async function() {
+    table.prototype._update_callback = function() {
         let cache = {};
         for (let e in this.callbacks) {
             this.callbacks[e].callback(cache);
@@ -884,7 +882,7 @@ export default function(Module) {
      * Remove all rows in this {@link module:perspective~table} while preserving the schema and
      * construction options.
      */
-    table.prototype.clear = async function() {
+    table.prototype.clear = function() {
         _reset_process(this.pool);
         this.gnode.reset();
     };
@@ -892,7 +890,7 @@ export default function(Module) {
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
-    table.prototype.replace = async function(data) {
+    table.prototype.replace = function(data) {
         _reset_process(this.pool);
         this.gnode.reset();
         this.update(data);
@@ -904,7 +902,7 @@ export default function(Module) {
      * Table objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
      */
-    table.prototype.delete = async function() {
+    table.prototype.delete = function() {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
@@ -938,7 +936,7 @@ export default function(Module) {
      *
      * @returns {Promise<number>} The number of accumulated rows.
      */
-    table.prototype.size = async function() {
+    table.prototype.size = function() {
         return this.gnode.get_table().size();
     };
 
@@ -970,7 +968,7 @@ export default function(Module) {
      * (default false)
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = async function(computed = false) {
+    table.prototype.schema = function(computed = false) {
         return this._schema(computed);
     };
 
@@ -1005,7 +1003,7 @@ export default function(Module) {
      *
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s computed schema.
      */
-    table.prototype.computed_schema = async function() {
+    table.prototype.computed_schema = function() {
         return this._computed_schema();
     };
 
@@ -1294,7 +1292,7 @@ export default function(Module) {
      * (default false)
      * @returns {Array<string>} An array of column names for this table.
      */
-    table.prototype.columns = async function(computed = false) {
+    table.prototype.columns = function(computed = false) {
         return this._columns(computed);
     };
 

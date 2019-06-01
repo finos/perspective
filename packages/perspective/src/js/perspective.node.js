@@ -43,15 +43,12 @@ const SYNC_SERVER = new (class extends Server {
 })(sync_module);
 
 const SYNC_CLIENT = new (class extends Client {
-    constructor() {
-        super();
-        setTimeout(() => this.send({id: -1, cmd: "init"}));
-    }
-
     send(msg) {
         SYNC_SERVER.process(msg);
     }
 })();
+
+SYNC_CLIENT.send({id: -1, cmd: "init"});
 
 module.exports = SYNC_CLIENT;
 module.exports.sync_module = () => sync_module;

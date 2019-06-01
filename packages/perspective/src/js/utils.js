@@ -38,12 +38,15 @@ export function get_column_type(val) {
  * @param {*} self
  */
 export function bindall(self) {
-    for (const key of Object.getOwnPropertyNames(self.constructor.prototype)) {
-        const value = self[key];
-        if (key !== "constructor" && typeof value === "function") {
-            self[key] = value.bind(self);
+    let obj = self;
+    do {
+        for (const key of Object.getOwnPropertyNames(obj)) {
+            const value = self[key];
+            if (key !== "constructor" && typeof value === "function") {
+                self[key] = value.bind(self);
+            }
         }
-    }
+    } while ((obj = obj !== Object && Object.getPrototypeOf(obj)));
 }
 
 /**

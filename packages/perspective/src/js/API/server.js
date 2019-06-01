@@ -194,7 +194,7 @@ export class Server {
                 return;
             } else {
                 result = obj[msg.method].apply(obj, msg.args);
-                if (result && result.then) {
+                if (result instanceof Promise) {
                     result
                         .then(result => {
                             if (msg.method === "delete") {
@@ -216,12 +216,24 @@ export class Server {
                             }
                         })
                         .catch(error => this.process_error(msg, error));
-                } else if (msg.cmd === "table_method") {
-                    // Only send table methods without promise framework
-                    this.post({
-                        id: msg.id,
-                        data: result
-                    });
+                } else {
+                    if (msg.method === "delete") {
+                        delete this._views[msg.name];
+                    }
+                    if (msg.method === "to_arrow") {
+                        this.post(
+                            {
+                                id: msg.id,
+                                data: result
+                            },
+                            [result]
+                        );
+                    } else {
+                        this.post({
+                            id: msg.id,
+                            data: result
+                        });
+                    }
                 }
             }
         } catch (error) {
