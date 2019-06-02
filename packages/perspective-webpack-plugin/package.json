@@ -22,7 +22,6 @@
         "@webpack-contrib/schema-utils": "^1.0.0-beta.0",
         "arraybuffer-loader": "^1.0.2",
         "base64-font-loader": "0.0.4",
-        "bufferutil": "~3.0.0",
         "clean-css-cli": "4.2.1",
         "clean-css-loader": "^1.1.0",
         "core-js": "^2.5.7",
@@ -37,6 +36,9 @@
         "style-loader": "^0.18.2",
         "tslib": "^1.9.3",
         "worker-loader": "^2.0.0"
+    },
+    "optionalDependencies": {
+        "bufferutil": "~3.0.0"
     },
     "peerDependencies": {
         "webpack": ">=3.5 <5"

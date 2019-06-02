@@ -53,7 +53,6 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "bufferutil": "~3.0.0",
         "d3-array": "^1.2.1",
         "detectie": "1.0.0",
         "flatbuffers": "^1.10.2",
@@ -63,6 +62,9 @@
         "text-encoding-utf-8": "^1.0.2",
         "tslib": "^1.9.3",
         "ws": "^6.1.2"
+    },
+    "optionalDependencies": {
+        "bufferutil": "~3.0.0"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.0-rc.4"
