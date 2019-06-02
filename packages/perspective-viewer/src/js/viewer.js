@@ -369,7 +369,7 @@ class PerspectiveViewer extends ActionElement {
             data = data.trim();
         } catch (e) {}
         let table;
-        if (data.hasOwnProperty("_name")) {
+        if (data.hasOwnProperty("_name") && data.hasOwnProperty("view")) {
             table = data;
         } else {
             table = this.worker.table(data, options);

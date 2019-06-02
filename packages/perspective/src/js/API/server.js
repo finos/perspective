@@ -78,7 +78,17 @@ export class Server {
                 this.init(msg);
                 break;
             case "table":
-                this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
+                if (typeof msg.args[0] === "undefined") {
+                    this._tables[msg.name] = [];
+                } else {
+                    const msgs = this._tables[msg.name];
+                    this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
+                    if (msgs) {
+                        for (const msg of msgs) {
+                            this.process(msg);
+                        }
+                    }
+                }
                 break;
             case "add_computed":
                 let table = this._tables[msg.original];
@@ -205,6 +215,11 @@ export class Server {
         if (!obj && msg.cmd === "view_method") {
             // cannot have a host without a table, but can have a host without a view
             this.process_error(msg, {message: "View is not initialized"});
+            return;
+        }
+
+        if (obj && obj.push) {
+            obj.push(msg);
             return;
         }
 

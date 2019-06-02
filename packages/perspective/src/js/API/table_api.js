@@ -23,13 +23,33 @@ export function table(worker, data, options) {
     let name = options.name || Math.random() + "";
     this._name = name;
     bindall(this);
-    var msg = {
-        cmd: "table",
-        name: name,
-        args: [data],
-        options: options || {}
-    };
-    this._worker.post(msg);
+    if (data.to_arrow) {
+        var msg = {
+            cmd: "table",
+            name: name,
+            args: [],
+            options: options || {}
+        };
+        this._worker.post(msg);
+        data.to_arrow().then(arrow => {
+            var msg = {
+                cmd: "table",
+                name: name,
+                args: [arrow],
+                options: options || {}
+            };
+            this._worker.post(msg);
+            data.on_update(this.update, {mode: "row"});
+        });
+    } else {
+        var msg = {
+            cmd: "table",
+            name: name,
+            args: [data],
+            options: options || {}
+        };
+        this._worker.post(msg);
+    }
 }
 
 /**
