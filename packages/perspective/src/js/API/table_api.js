@@ -21,6 +21,8 @@ import {bindall} from "../utils.js";
 export function table(worker, data, options) {
     this._worker = worker;
     let name = options.name || Math.random() + "";
+    this._name = name;
+    bindall(this);
     var msg = {
         cmd: "table",
         name: name,
@@ -28,9 +30,6 @@ export function table(worker, data, options) {
         options: options || {}
     };
     this._worker.post(msg);
-    this._name = name;
-
-    bindall(this);
 }
 
 /**

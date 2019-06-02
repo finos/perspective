@@ -173,6 +173,26 @@ export class Server {
         }
     }
 
+    process_method_call_response(msg, result) {
+        if (msg.method === "delete") {
+            delete this._views[msg.name];
+        }
+        if (msg.method === "to_arrow") {
+            this.post(
+                {
+                    id: msg.id,
+                    data: result
+                },
+                [result]
+            );
+        } else {
+            this.post({
+                id: msg.id,
+                data: result
+            });
+        }
+    }
+
     /**
      * Given a call to a table or view method, process it.
      *
@@ -195,45 +215,9 @@ export class Server {
             } else {
                 result = obj[msg.method].apply(obj, msg.args);
                 if (result instanceof Promise) {
-                    result
-                        .then(result => {
-                            if (msg.method === "delete") {
-                                delete this._views[msg.name];
-                            }
-                            if (msg.method === "to_arrow") {
-                                this.post(
-                                    {
-                                        id: msg.id,
-                                        data: result
-                                    },
-                                    [result]
-                                );
-                            } else {
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
-                            }
-                        })
-                        .catch(error => this.process_error(msg, error));
+                    result.then(result => this.process_method_call_response(msg, result)).catch(error => this.process_error(msg, error));
                 } else {
-                    if (msg.method === "delete") {
-                        delete this._views[msg.name];
-                    }
-                    if (msg.method === "to_arrow") {
-                        this.post(
-                            {
-                                id: msg.id,
-                                data: result
-                            },
-                            [result]
-                        );
-                    } else {
-                        this.post({
-                            id: msg.id,
-                            data: result
-                        });
-                    }
+                    this.process_method_call_response(msg, result);
                 }
             }
         } catch (error) {
