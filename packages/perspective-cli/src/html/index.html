@@ -49,7 +49,7 @@
     <script>
         window.addEventListener('WebComponentsReady', function() {
             var elem = document.getElementById('view1');
-            var worker = perspective.worker(window.location.origin.replace('http', 'ws'));
+            var worker = perspective.websocket();
             elem.load(worker.open_table('data_source_one'));
         });
     </script>

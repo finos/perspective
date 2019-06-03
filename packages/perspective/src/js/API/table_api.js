@@ -52,6 +52,8 @@ export function table(worker, data, options) {
     }
 }
 
+table.prototype.type = "table";
+
 /**
  * Create a new computed table, serializing each computation to a string for processing by the engine.
  *
