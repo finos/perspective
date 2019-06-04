@@ -20,18 +20,39 @@ import {bindall} from "../utils.js";
  */
 export function table(worker, data, options) {
     this._worker = worker;
-    name = options.name || Math.random() + "";
-    var msg = {
-        cmd: "table",
-        name: name,
-        args: [data],
-        options: options || {}
-    };
-    this._worker.post(msg);
+    let name = options.name || Math.random() + "";
     this._name = name;
-
     bindall(this);
+    if (data.to_arrow) {
+        var msg = {
+            cmd: "table",
+            name: name,
+            args: [],
+            options: options || {}
+        };
+        this._worker.post(msg);
+        data.to_arrow().then(arrow => {
+            var msg = {
+                cmd: "table",
+                name: name,
+                args: [arrow],
+                options: options || {}
+            };
+            this._worker.post(msg);
+            data.on_update(this.update, {mode: "row"});
+        });
+    } else {
+        var msg = {
+            cmd: "table",
+            name: name,
+            args: [data],
+            options: options || {}
+        };
+        this._worker.post(msg);
+    }
 }
+
+table.prototype.type = "table";
 
 /**
  * Create a new computed table, serializing each computation to a string for processing by the engine.

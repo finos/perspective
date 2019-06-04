@@ -287,6 +287,34 @@ A `table()` can have as many `view()` associated with it as you need!
 Perspective will conserve memory and updates by relying on a single instance of
 a `table()` to power multiple `view()`s concurrently.
 
+### Flattening a `view()` into a `table()`
+
+You can provide a `view()` instance to the `perspective.table()` method to
+create a new `table()` based off of this view's data, including it's future
+updates.  This is especially useful for piping together `perspective` data from
+different context, such as streaming a server-side `view()` in node.js into a
+`table()` in a WebWorker on the browser-side.
+
+```javascript
+// Create two WebWorkers.
+const worker1 = perspective.worker();
+const worker2 = perspective.worker();
+
+// Create a `table and `view` on `worker1`.
+const table = worker1.table(data);
+const view = table.view({filter: [["State", "==", "Texas"]]});
+
+// Create a table from `view` in `worker2`
+const table2 = worker2.table(view);
+const view2 = table2.view({filter: [["City", "==", "Austin"]]});
+
+//  Both `view1` and `view2` are updated.
+table.update([{State: "Texas", City: "Austin"}]);
+
+//  Only `view1` is updated.
+table.update([{State: "Texas", City: "San Antonio"}]);
+```
+
 ### Deleting a `table()` or `view()`
 
 Unlike standard Javascript objects, Perspective objects such as `table()` and
@@ -426,7 +454,7 @@ view2.load(table);
 table.update([{ x: 5, y: "e", z: true }]);
 ```
 
-### Remote Perspective via `WorkerHost()`
+### Remote Perspective via `WebSocketServer()`
 
 For exceptionally large datasets, a `<perspective-viewer>` can be bound to a
 `perspective.table()` instance running in node.js remotely, rather than
@@ -464,14 +492,15 @@ In the browser:
 const elem = document.getElementsByTagName("perspective-viewer")[0];
 
 // Bind to the server's worker instead of instantiating a Web Worker.
-const worker = perspective.worker(window.location.origin.replace("http", "ws"));
+const websocket = perspective.websocket(window.location.origin.replace("http", "ws"));
 
-// Bind the viewer to the preloaded data source.
-elem.load(worker.open_table("table_one"));
+// Bind the viewer to the preloaded data source.  `table` and `view` objects 
+// live on the server.
+elem.load(websocket.open_table("table_one"));
 
-// Or load data from a view
-const arrow = await worker.open_view("view_one").to_arrow();
-elem.load(arrow);
+// Or load data from a view.  The browser now also has a copy of this view in
+// its own `table`, as well as its updates.  Transfer uses Arrows.
+elem.load(websocket.open_view("view_one"));
 ```
 
 `<perspective-viewer>` instances bound in this way are otherwise no different

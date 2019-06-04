@@ -8,7 +8,7 @@
  */
 
 const exec = require("child_process").exec;
-const {table} = require("@finos/perspective/build/perspective.node.js");
+const {table} = require("@finos/perspective");
 
 const OPEN = port => `
 if which xdg-open > /dev/null
@@ -47,7 +47,7 @@ module.exports.read_stdin = function read_stdin() {
             .on("readable", function() {
                 let chunk;
                 while ((chunk = process.stdin.read())) {
-                    ret.push(new Buffer(chunk));
+                    ret.push(Buffer.from(chunk));
                     len += chunk.length;
                 }
             })

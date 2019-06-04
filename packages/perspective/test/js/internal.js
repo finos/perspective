@@ -15,6 +15,11 @@ const arrow = fs.readFileSync(path.join(__dirname, "..", "arrow", "test-null.arr
 var arrow_psp_internal_schema = [9, 10, 1, 2, 3, 4, 11, 19, 19, 12, 12, 12, 2];
 
 module.exports = (perspective, mode) => {
+    // Get the internal module;
+    if (perspective.sync_module) {
+        perspective = perspective.sync_module();
+    }
+
     describe("Internal API", function() {
         it("is actually using the correct runtime", async function() {
             expect(perspective.__module__.wasmJSMethod).toEqual(mode === "ASMJS" ? "asmjs" : "native-wasm");

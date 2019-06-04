@@ -78,7 +78,17 @@ export class Server {
                 this.init(msg);
                 break;
             case "table":
-                this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
+                if (typeof msg.args[0] === "undefined") {
+                    this._tables[msg.name] = [];
+                } else {
+                    const msgs = this._tables[msg.name];
+                    this._tables[msg.name] = this.perspective.table(msg.args[0], msg.options);
+                    if (msgs) {
+                        for (const msg of msgs) {
+                            this.process(msg);
+                        }
+                    }
+                }
                 break;
             case "add_computed":
                 let table = this._tables[msg.original];
@@ -173,6 +183,26 @@ export class Server {
         }
     }
 
+    process_method_call_response(msg, result) {
+        if (msg.method === "delete") {
+            delete this._views[msg.name];
+        }
+        if (msg.method === "to_arrow") {
+            this.post(
+                {
+                    id: msg.id,
+                    data: result
+                },
+                [result]
+            );
+        } else {
+            this.post({
+                id: msg.id,
+                data: result
+            });
+        }
+    }
+
     /**
      * Given a call to a table or view method, process it.
      *
@@ -188,40 +218,21 @@ export class Server {
             return;
         }
 
+        if (obj && obj.push) {
+            obj.push(msg);
+            return;
+        }
+
         try {
             if (msg.subscribe) {
                 this.process_subscribe(msg, obj);
                 return;
             } else {
                 result = obj[msg.method].apply(obj, msg.args);
-                if (result && result.then) {
-                    result
-                        .then(result => {
-                            if (msg.method === "delete") {
-                                delete this._views[msg.name];
-                            }
-                            if (msg.method === "to_arrow") {
-                                this.post(
-                                    {
-                                        id: msg.id,
-                                        data: result
-                                    },
-                                    [result]
-                                );
-                            } else {
-                                this.post({
-                                    id: msg.id,
-                                    data: result
-                                });
-                            }
-                        })
-                        .catch(error => this.process_error(msg, error));
-                } else if (msg.cmd === "table_method") {
-                    // Only send table methods without promise framework
-                    this.post({
-                        id: msg.id,
-                        data: result
-                    });
+                if (result instanceof Promise) {
+                    result.then(result => this.process_method_call_response(msg, result)).catch(error => this.process_error(msg, error));
+                } else {
+                    this.process_method_call_response(msg, result);
                 }
             }
         } catch (error) {

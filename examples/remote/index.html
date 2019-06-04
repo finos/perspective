@@ -39,14 +39,26 @@
     <script>
 
         window.addEventListener('WebComponentsReady', async function() {
-            var elem = document.getElementById('view1');
-            var client = perspective.websocket();
-            var view = client.open_view('data_source_one');
-            var arrow = await view.to_arrow();
-            var tbl = elem.worker.table(arrow, {limit: 10000});
-            view.on_update(x => tbl.update(x), {mode: "row"});
-            elem.worker.initialize_profile_thread();
-            elem.load(tbl);
+
+            // Create two perspective interfaces, one remotely via WebSocket, 
+            // and one local via WebWorker.
+            const websocket = perspective.websocket();
+            const worker = perspective.worker();
+            worker.initialize_profile_thread();
+
+            // Get a proxy for a view named "data_source_one", registered on
+            // the server with a reciprcal call to `host_view()`.
+            // No data is transferred, `view` is a virtual handle for data on
+            // the server.
+            const view = websocket.open_view('data_source_one');
+
+            // Create a `table` from this, owned by the local WebWorker.
+            // Data is transferred from `view` to the local WebWorker, both
+            // the current state and all future updates, as Arrows.
+            const table = worker.table(view, {limit: 10000});
+            
+            // Load this in the `<perspective-viewer>`.
+            document.getElementById('view1').load(table);
         });
 
     </script>
