@@ -282,7 +282,7 @@ export
             }
 
             let data;
-            if (this._key) {
+            if (this._key && !Array.isArray(this.data)) {
                 data = this.data[this._key];
             } else {
                 data = this.data;
@@ -302,14 +302,19 @@ export
 
                 this.pspNode.load(this.schema as Schema, options as TableOptions);
             }
-            if (data.length > 0) {
+
+            if (Array.isArray(data) && data.length > 0) {
                 if (this._wrap) {
                     this.pspNode.update([data]);
                 } else {
                     this.pspNode.update(data);
                 }
             } else {
-                console.warn('Perspective received length 0 data');
+                if(Object.keys(data)){
+                    this.pspNode.update(data);
+                } else {
+                    console.warn('Perspective received length 0 data');
+                }
             }
             /****************/
         }
