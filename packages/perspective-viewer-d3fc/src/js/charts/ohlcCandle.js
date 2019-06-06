@@ -65,7 +65,7 @@ function ohlcCandle(seriesCanvas) {
             .paddingStrategy(paddingStrategy)(data);
 
         const chart = chartCanvasFactory(xAxis, yAxis).plotArea(
-            withGridLines(multi)
+            withGridLines(multi, settings)
                 .orient("vertical")
                 .canvas(true)
         );
