@@ -270,10 +270,22 @@ class PerspectiveViewer extends ActionElement {
      * @fires PerspectiveViewer#perspective-config-update
      */
     set view(v) {
-        this._vis_selector.value = this.getAttribute("view");
-        this._set_row_styles();
-        this._set_column_defaults();
-        this.dispatchEvent(new Event("perspective-config-update"));
+        const plugin_names = Object.keys(renderers.getInstance());
+        let plugin = this.getAttribute("view");
+        if (plugin_names.indexOf(plugin) === -1) {
+            const guess_plugin = plugin_names.find(x => x.indexOf(plugin) > -1);
+            if (guess_plugin) {
+                console.warn(`Unknown plugin "${plugin}", using "${guess_plugin}"`);
+                this.setAttribute("view", guess_plugin);
+            } else {
+                console.error(`Unknown plugin "${plugin}"`);
+            }
+        } else {
+            this._vis_selector.value = plugin;
+            this._set_row_styles();
+            this._set_column_defaults();
+            this.dispatchEvent(new Event("perspective-config-update"));
+        }
     }
 
     /**
