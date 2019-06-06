@@ -46,7 +46,7 @@ function barChart(container, settings) {
         .valueName("crossValue")
         .orient("vertical")(data);
 
-    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series).orient("horizontal"));
+    const chart = chartSvgFactory(xAxis, yAxis).plotArea(withGridLines(series, settings).orient("horizontal"));
 
     if (chart.yPaddingInner) {
         chart.yPaddingInner(0.5);

@@ -20,7 +20,8 @@ export const initialiseStyles = (container, settings) => {
         const styles = {
             scheme: [],
             gradient: {},
-            interpolator: {}
+            interpolator: {},
+            grid: {}
         };
 
         const computed = computedStyle(container);
@@ -33,6 +34,7 @@ export const initialiseStyles = (container, settings) => {
         });
 
         styles.opacity = getOpacityFromColor(styles.series);
+        styles.grid.gridLineColor = computed`--d3fc-gridline--color`;
 
         const gradients = ["full", "positive", "negative"];
         gradients.forEach(g => {

@@ -8,7 +8,12 @@
  */
 import * as fc from "d3fc";
 
-const mainGridSvg = x => x.style("opacity", "0.3").style("stroke-width", "1.0");
+const mainGridSvg = settings => x =>
+    x
+        .style("opacity", "0.3")
+        .style("stroke-width", "1.0")
+        .style("stroke", settings ? settings.colorStyles.grid.gridLineColor : "#bbb");
+
 const mainGridCanvas = c => {
     c.globalAlpha = 0.3;
     c.lineWidth = 1.0;
@@ -19,7 +24,7 @@ const crossGridCanvas = c => {
     c.globalAlpha = 0;
 };
 
-export default series => {
+export default (series, settings) => {
     let orient = "both";
     let canvas = false;
     let xScale = null;
@@ -28,7 +33,7 @@ export default series => {
 
     let seriesMulti = fc.seriesSvgMulti();
     let annotationGridline = fc.annotationSvgGridline();
-    let mainGrid = mainGridSvg;
+    let mainGrid = mainGridSvg(settings);
     let crossGrid = crossGridSvg;
 
     const _withGridLines = function(...args) {

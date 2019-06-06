@@ -44,6 +44,7 @@ function lineChart(container, settings) {
         .excludeType(AXIS_TYPES.linear)
         .settingName("crossValues")
         .valueName("crossValue")(data);
+
     const yAxisFactory = axisFactory(settings)
         .settingName("mainValues")
         .valueName("mainValue")
@@ -51,12 +52,12 @@ function lineChart(container, settings) {
         .paddingStrategy(paddingStrategy);
 
     // Check whether we've split some values into a second y-axis
-    const splitter = axisSplitter(settings, data).color(color);
+    const splitter = axisSplitter(settings, transposeData(data)).color(color);
 
     const yAxis1 = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit() ? series : withGridLines(series).orient("vertical");
+    const plotSeries = splitter.haveSplit() ? series : withGridLines(series, settings).orient("vertical");
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)
         .plotArea(plotSeries);
@@ -83,8 +84,10 @@ function lineChart(container, settings) {
         toolTip.data(splitter.data()).altDataWithScale({yScale: yAxis2.scale, data: splitter.altData()});
     }
 
+    const transposed_data = splitter.data();
+
     // render
-    container.datum(transposeData(splitter.data())).call(zoomChart);
+    container.datum(transposed_data).call(zoomChart);
     container.call(toolTip);
     container.call(legend);
 }

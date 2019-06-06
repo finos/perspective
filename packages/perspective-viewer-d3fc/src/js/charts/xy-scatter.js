@@ -64,7 +64,7 @@ function xyScatter(container, settings) {
     const chart = chartCanvasFactory(xAxis, yAxis)
         .xLabel(settings.mainValues[0].name)
         .yLabel(settings.mainValues[1].name)
-        .plotArea(withGridLines(series).canvas(true));
+        .plotArea(withGridLines(series, settings).canvas(true));
 
     chart.xNice && chart.xNice();
     chart.yNice && chart.yNice();

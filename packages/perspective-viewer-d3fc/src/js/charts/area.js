@@ -50,7 +50,7 @@ function areaChart(container, settings) {
     const yAxis1 = yAxisFactory(splitter.data());
 
     // No grid lines if splitting y-axis
-    const plotSeries = splitter.haveSplit() ? series : withGridLines(series).orient("vertical");
+    const plotSeries = splitter.haveSplit() ? series : withGridLines(series, settings).orient("vertical");
 
     const chart = chartSvgFactory(xAxis, yAxis1)
         .axisSplitter(splitter)
