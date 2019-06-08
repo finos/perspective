@@ -136,3 +136,5 @@ docs/python
 package.json.bak
 yarn.lock.bak
 docs/static/img
+
+docs/static/arrow/

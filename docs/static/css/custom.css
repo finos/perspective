@@ -19,9 +19,17 @@
    transition: color 0.2s ease-in-out;
 }
 
+.nav-footer {
+    background: #242526;
+}
+
 .homeContainer .buttonWrapper.selected a {
     border: 1px solid #f9f9f9;
     color: #f9f9f9 
+}
+
+.homeContainer .button:hover {
+    background: #242526;
 }
 
 .titleViewer {
@@ -46,6 +54,10 @@
 .titleViewer {
     font: initial;
     font-family:Arial;
+}
+
+.fixedHeaderContainer {
+    background: #242526 !important;
 }
 
 .post h1, .post h2, .post h3, .post h4, .post h5, .post h6 {
@@ -90,6 +102,19 @@ h2.headerTitle, h2.headerTitleWithLogo {
     color: #1A7DA1 !important;
 }
 
+.darkBackground a {
+    color:#222;
+}
+
+#get_started {
+    background: #242526;
+    color: white;
+}
+
+#get_started pre {
+    border: 1px solid #333;
+}
+
 .homeContainer perspective-viewer, perspective-viewer {
     --d3fc-gradient-full: linear-gradient(#4d342f 0%, #e4521b 22.5%, #feeb65 42.5%, #f0f0f0 50%, #dcedc8 57.5%, #42b3d5 67.5%, #1a237e 100%);
     --d3fc-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
@@ -98,3 +123,39 @@ h2.headerTitle, h2.headerTitleWithLogo {
     --highcharts-heatmap-gradient-positive: linear-gradient(#222222 0%, #1a237e 35%, #42b3d5 70%, #dcedc8 100%);
     --highcharts-heatmap-gradient-negative: linear-gradient(#feeb65 0%, #e4521b 35%, #4d342f 70%, #222222 100%);  
 }
+
+.blockContent perpsective-viewer {
+    --plugin--box-shadow: none !important;
+}
+
+perspective-viewer {
+    border: none !important;
+}
+
+
+#psp1 {
+    margin-bottom: -48px;
+    margin-right: -48px;
+}
+.blockContent {
+    counter-reset: list-counter;
+}
+
+ol li {
+    list-style-type: none;
+    counter-increment: list-counter;
+}
+
+ol li::before {
+    content: counter(list-counter) ".";
+    font-weight: bold;
+    font-size: 2rem;
+    margin-right: 0.5rem;
+    font-family: "Montserrat", Helvetica;
+    line-height: 1;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Montserrat", Helvetica;
+}
+  

@@ -27,10 +27,13 @@ function newRow() {
 var styleElement = document.createElement("style");
 styleElement.innerText = `
 .homeContainer perspective-viewer, perspective-viewer {
-    background: none !important;
     box-shadow: none !important;
     overflow: visible !important;
     --plugin--box-shadow: 0 5px 5px rgba(0,0,0,0.2);
+}
+
+.homeContainer perspective-viewer {
+    background: none !important;
 }`;
 
 document.head.appendChild(styleElement);
@@ -110,6 +113,16 @@ function select(id) {
     );
 }
 
+function get_arrow(callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "arrow/superstore.arrow", true);
+    xhr.responseType = "arraybuffer";
+    xhr.onload = function() {
+        callback(xhr.response);
+    };
+    xhr.send(null);
+}
+
 window.addEventListener("WebComponentsReady", function() {
     var data = [];
     for (var x = 0; x < 100; x++) {
@@ -125,10 +138,6 @@ window.addEventListener("WebComponentsReady", function() {
         update(0);
     });
 
-    // setTimeout(function() {
-    //     rotate(1);
-    // }, 0);
-
     document.querySelector("#grid").addEventListener("mouseenter", () => select("#grid"));
     document.querySelector("#cyclone").addEventListener("mouseenter", () => select("#cyclone"));
     document.querySelector("#pivot").addEventListener("mouseenter", () => select("#pivot"));
@@ -137,6 +146,28 @@ window.addEventListener("WebComponentsReady", function() {
     document.querySelector("#enhance").addEventListener("mouseenter", () => select("#enhance"));
 
     select("#grid");
+
+    get_arrow(function(arrow) {
+        const psp1 = document.querySelector("#demo1 perspective-viewer");
+        psp1.load(arrow.slice());
+        psp1.restore({
+            "row-pivots": ["Sub-Category"],
+            "column-pivots": ["Segment"],
+            columns: ["Sales"],
+            view: "d3_y_bar"
+        });
+
+        const psp2 = document.querySelector("#get_started perspective-viewer");
+        psp2.load(arrow);
+        psp2.restore({
+            view: "d3_heatmap",
+            "row-pivots": ["Sub-Category"],
+            "column-pivots": ["State"],
+            sort: [["Sales", "col asc"]],
+            columns: ["Profit"],
+            aggregates: {Profit: "low"}
+        });
+    });
 });
 
 setTimeout(() => {

@@ -123,7 +123,7 @@ export default function(Module) {
      *
      * @private
      * @param {object} data Array buffer
-     * @returns An array containing chunked data objects with five properties:
+     * @returns {Array<Object>} An array containing chunked data objects with five properties:
      * row_count: the number of rows in the chunk
      * is_arrow: internal flag for marking arrow data
      * names: column names for the arrow data
@@ -276,7 +276,7 @@ export default function(Module) {
      * A copy of the config object passed to the {@link table#view} method
      * which created this {@link module:perspective~view}.
      *
-     * @returns {object} Shared the same key/values properties as {@link module:perspective~view}
+     * @returns {Promise<object>} Shared the same key/values properties as {@link module:perspective~view}
      */
     view.prototype.get_config = function() {
         return JSON.parse(JSON.stringify(this.config));
@@ -286,6 +286,8 @@ export default function(Module) {
      * Delete this {@link module:perspective~view} and clean up all resources associated with it.
      * View objects do not stop consuming resources or processing updates when
      * they are garbage collected - you must call this method to reclaim these.
+     *
+     * @async
      */
     view.prototype.delete = function() {
         _reset_process(this.pool);
@@ -311,7 +313,6 @@ export default function(Module) {
      * How many pivoted sides does this view have?
      *
      * @private
-     *
      * @returns {number} sides The number of sides of this `View`.
      */
     view.prototype.sides = function() {
@@ -599,7 +600,7 @@ export default function(Module) {
      * @param {number} options.end_col The ending column index from which
      * to serialize.
      *
-     * @returns {Promise<TypedArray>} A Table in the Apache Arrow format containing
+     * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format containing
      * data from the view.
      */
     view.prototype.to_arrow = function(options = {}) {
@@ -1023,7 +1024,7 @@ export default function(Module) {
      *
      * @param {Array<string>} [filter] A filter configuration array to test
      *
-     * @returns {boolean} Whether the filter is valid
+     * @returns {Promise<boolean>} Whether the filter is valid
      */
     table.prototype.is_valid_filter = function(filter) {
         return this._is_valid_filter(filter);
@@ -1290,7 +1291,7 @@ export default function(Module) {
      * @async
      * @param {boolean} computed Should computed columns be included?
      * (default false)
-     * @returns {Array<string>} An array of column names for this table.
+     * @returns {Promise<Array<string>>} An array of column names for this table.
      */
     table.prototype.columns = function(computed = false) {
         return this._columns(computed);
@@ -1347,8 +1348,7 @@ export default function(Module) {
      *  Otherwise, `computed` is `undefined`.
      *
      * @async
-     *
-     * @returns {Array<object>} An array of Objects containing metadata for each column.
+     * @returns {Promise<Array<object>>} An array of Objects containing metadata for each column.
      */
     table.prototype.column_metadata = function() {
         return this._column_metadata();

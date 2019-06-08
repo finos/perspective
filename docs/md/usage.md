@@ -81,7 +81,8 @@ project:
 ## `perspective` library
 
 The main module exporting `table()` and `view()`, as well as process
-management functions such as `worker()` and `WorkerHost()`. This module is
+management functions such as `worker()` and `websocket()` (in the browser) and 
+`WebSocketServer()` (in node.js). This module is
 not needed if you only intend to use `<perspective-viewer>` to visualize
 simple data, and is a dependency of the `@finos/perspective-viewer`
 module. For a complete reference on all exported methods in `perspective`, see the
@@ -95,12 +96,8 @@ nearly identical API.
 
 ### Importing in the browser
 
-The `main` entry point for `@finos/perspective` runs in a Web
-Worker, such that the CPU workload is segregated from the web application in
-which it is embedded, and so the bulk of engine code can be lazy-loaded only
-after browser feature detection determines whether WebAssembly is supported.
-
-The library can be imported ia ES6 module and/or Babel:
+`perspective` can be imported ES6 module and/or `require` syntax if you're using
+a bundler such as Webpack (and the `@finos/perspective-webpack-plugin`):
 
 ```javascript
 import perspective from "@finos/perspective";
@@ -112,9 +109,13 @@ or
 const perspective = require("@finos/perspective");
 ```
 
-Perspective can also be referenced via the global `perspective` module name in vanilla
-Javascript, when e.g. importing `@finos/perspective`
+`@finos/perspective` also comes with pre-built bundle which exports the global
+`perspective` module name in vanilla Javascript, when e.g. importing
 [via a CDN](https://unpkg.com/@finos/perspective/build/perspective.js).
+
+```html
+<script src="perspective.js"></script>
+```
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()`
 method. This will create a new WebWorker (browser) or Process (node.js), and
@@ -472,7 +473,7 @@ const {
 const fs = require("fs");
 
 // Start a WS/HTTP host on port 8080.  The `assets` property allows
-// the `WorkerHost()` to also serves the file structure rooted in this
+// the `WebSocketServer()` to also serves the file structure rooted in this
 // module's directory.
 const host = new WebSocketServer({ assets: [__dirname], port: 8080 });
 

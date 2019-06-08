@@ -7,14 +7,14 @@ The main API module for Perspective.
 * [perspective](#module_perspective)
     * [~view](#module_perspective..view)
         * [new view()](#new_module_perspective..view_new)
-        * [.get_config()](#module_perspective..view+get_config) ⇒ <code>object</code>
+        * [.get_config()](#module_perspective..view+get_config) ⇒ <code>Promise.&lt;object&gt;</code>
         * [.delete()](#module_perspective..view+delete)
         * [.schema()](#module_perspective..view+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
         * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
         * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
-        * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+        * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
         * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>Promise.&lt;bool&gt;</code>
@@ -32,13 +32,13 @@ The main API module for Perspective.
         * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
         * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
+        * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>Promise.&lt;boolean&gt;</code>
         * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
         * [.update(data)](#module_perspective..table+update)
         * [.remove(data)](#module_perspective..table+remove)
         * [.add_computed(computed)](#module_perspective..table+add_computed)
-        * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Array.&lt;string&gt;</code>
-        * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Array.&lt;object&gt;</code>
+        * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+        * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 
 
 * * *
@@ -50,14 +50,14 @@ The main API module for Perspective.
 
 * [~view](#module_perspective..view)
     * [new view()](#new_module_perspective..view_new)
-    * [.get_config()](#module_perspective..view+get_config) ⇒ <code>object</code>
+    * [.get_config()](#module_perspective..view+get_config) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.delete()](#module_perspective..view+delete)
     * [.schema()](#module_perspective..view+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.to_columns([options])](#module_perspective..view+to_columns) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.to_json([options])](#module_perspective..view+to_json) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.to_csv([options])](#module_perspective..view+to_csv) ⇒ <code>Promise.&lt;string&gt;</code>
     * [.col_to_js_typed_array(column_name, options)](#module_perspective..view+col_to_js_typed_array) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
-    * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+    * [.to_arrow([options])](#module_perspective..view+to_arrow) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
     * [.num_rows()](#module_perspective..view+num_rows) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.num_columns()](#module_perspective..view+num_columns) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.get_row_expanded()](#module_perspective..view+get_row_expanded) ⇒ <code>Promise.&lt;bool&gt;</code>
@@ -93,12 +93,12 @@ table.view({row_pivots: ["name"]});
 
 <a name="module_perspective..view+get_config"></a>
 
-#### view.get\_config() ⇒ <code>object</code>
+#### view.get\_config() ⇒ <code>Promise.&lt;object&gt;</code>
 A copy of the config object passed to the [table#view](table#view) method
 which created this [view](#module_perspective..view).
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>object</code> - Shared the same key/values properties as [view](#module_perspective..view)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - Shared the same key/values properties as [view](#module_perspective..view)  
 
 * * *
 
@@ -241,11 +241,11 @@ to serialize.
 
 <a name="module_perspective..view+to_arrow"></a>
 
-#### view.to\_arrow([options]) ⇒ <code>Promise.&lt;TypedArray&gt;</code>
+#### view.to\_arrow([options]) ⇒ <code>Promise.&lt;ArrayBuffer&gt;</code>
 Serializes a view to arrow.
 
 **Kind**: instance method of [<code>view</code>](#module_perspective..view)  
-**Returns**: <code>Promise.&lt;TypedArray&gt;</code> - A Table in the Apache Arrow format containing
+**Returns**: <code>Promise.&lt;ArrayBuffer&gt;</code> - A Table in the Apache Arrow format containing
 data from the view.  
 **Params**
 
@@ -338,7 +338,7 @@ aggregated row deltas.
 parameter to this callback is dependent on the `mode` parameter:
     - "none" (default): The callback is invoked without an argument.
     - "cell": The callback is invoked with the new data for each updated cell, serialized to JSON format.
-    - "pkey": The callback is invoked with an Array of the primary keys for the updated rows
+    - "row": The callback is invoked with an Arrow of the updated rows.
 
 
 * * *
@@ -373,13 +373,13 @@ is deleted, this callback will be invoked.
     * [.size()](#module_perspective..table+size) ⇒ <code>Promise.&lt;number&gt;</code>
     * [.schema(computed)](#module_perspective..table+schema) ⇒ <code>Promise.&lt;Object&gt;</code>
     * [.computed_schema()](#module_perspective..table+computed_schema) ⇒ <code>Promise.&lt;Object&gt;</code>
-    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>boolean</code>
+    * [.is_valid_filter([filter])](#module_perspective..table+is_valid_filter) ⇒ <code>Promise.&lt;boolean&gt;</code>
     * [.view([config])](#module_perspective..table+view) ⇒ <code>view</code>
     * [.update(data)](#module_perspective..table+update)
     * [.remove(data)](#module_perspective..table+remove)
     * [.add_computed(computed)](#module_perspective..table+add_computed)
-    * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Array.&lt;string&gt;</code>
-    * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Array.&lt;object&gt;</code>
+    * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
+    * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 
 
 * * *
@@ -486,11 +486,11 @@ Object containing the associated column_name, column_type, and computation.
 
 <a name="module_perspective..table+is_valid_filter"></a>
 
-#### table.is\_valid\_filter([filter]) ⇒ <code>boolean</code>
+#### table.is\_valid\_filter([filter]) ⇒ <code>Promise.&lt;boolean&gt;</code>
 Determines whether a given filter is valid.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>boolean</code> - Whether the filter is valid  
+**Returns**: <code>Promise.&lt;boolean&gt;</code> - Whether the filter is valid  
 **Params**
 
 - [filter] <code>Array.&lt;string&gt;</code> - A filter configuration array to test
@@ -589,11 +589,11 @@ Create a new table with the addition of new computed columns (defined as javascr
 
 <a name="module_perspective..table+columns"></a>
 
-#### table.columns(computed) ⇒ <code>Array.&lt;string&gt;</code>
+#### table.columns(computed) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
 The column names of this table.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>Array.&lt;string&gt;</code> - An array of column names for this table.  
+**Returns**: <code>Promise.&lt;Array.&lt;string&gt;&gt;</code> - An array of column names for this table.  
 **Params**
 
 - computed <code>boolean</code> - Should computed columns be included?
@@ -604,7 +604,7 @@ The column names of this table.
 
 <a name="module_perspective..table+column_metadata"></a>
 
-#### table.column\_metadata() ⇒ <code>Array.&lt;object&gt;</code>
+#### table.column\_metadata() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 Column metadata for this table.
 
 If the column is computed, the `computed` property is an Object containing:
@@ -615,7 +615,7 @@ If the column is computed, the `computed` property is an Object containing:
  Otherwise, `computed` is `undefined`.
 
 **Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>Array.&lt;object&gt;</code> - An array of Objects containing metadata for each column.  
+**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - An array of Objects containing metadata for each column.  
 
 * * *
 
