@@ -3,6 +3,7 @@ module.exports = {
         [
             "@babel/preset-env",
             {
+                modules: false,
                 useBuiltIns: "usage",
                 corejs: 2
             }
@@ -10,6 +11,8 @@ module.exports = {
     ],
     sourceType: "unambiguous",
     plugins: [
+        "lodash",
+        "@babel/transform-runtime",
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
         [
