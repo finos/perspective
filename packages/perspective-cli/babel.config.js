@@ -12,6 +12,7 @@ module.exports = {
     sourceType: "unambiguous",
     plugins: [
         "lodash",
+        "@babel/transform-runtime",
         ["@babel/plugin-proposal-decorators", {legacy: true}],
         "transform-custom-element-classes",
         [
