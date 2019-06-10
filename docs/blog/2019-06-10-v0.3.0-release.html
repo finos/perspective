@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>0.3.0 Release · Perspective</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="&lt;p&gt;Perspective 0.3.0 is out now, thanks to the tireless effots of the Perspective&lt;/p&gt;
+"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="0.3.0 Release · Perspective"/><meta property="og:type" content="website"/><meta property="og:url" content="https://perspective.finos.org//index.html"/><meta property="og:description" content="&lt;p&gt;Perspective 0.3.0 is out now, thanks to the tireless effots of the Perspective&lt;/p&gt;
+"/><meta property="og:image" content="https://perspective.finos.org/img/perspective.png"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://perspective.finos.org/img/perspective.png"/><link rel="shortcut icon" href="/img/favicon.png"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/monokai.min.css"/><link rel="alternate" type="application/atom+xml" href="https://perspective.finos.org/blog/atom.xml" title="Perspective Blog ATOM Feed"/><link rel="alternate" type="application/rss+xml" href="https://perspective.finos.org/blog/feed.xml" title="Perspective Blog RSS Feed"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective/build/perspective.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js"></script><script type="text/javascript" src="https://unpkg.com/@finos/perspective-viewer-d3fc/build/d3fc.plugin.js"></script><script type="text/javascript" src="js/animation.js"></script><link rel="stylesheet" href="/css/main.css"/><script src="/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/"><h2 class="headerTitle">Perspective</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/docs/md/installation.html" target="_self">Docs</a></li><li class=""><a href="/blog/" target="_self">Blog</a></li><li class=""><a href="https://github.com/finos/perspective/" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">0.3.0 Release</h1></header><article><div><span><p>Perspective 0.3.0 is out now, thanks to the tireless effots of the Perspective
+<a href="https://github.com/jpmorganchase/perspective/graphs/contributors">Contributors</a>!
+With this release comes the standard new-release Features, APIs, and Fixes;
+more importantly, it also features - a new home!</p>
+<!--truncate-->
+<style>.post img {width:300px;float:left;padding-right:30px;padding-bottom:20px;display:inline-block}img:</style>
+<p><img src="../../../../img/2019-06-10-v0.3.0-release/finos.png"></img></p>
+<p><code>@jpmorganchase/perspective</code> is now <code>@finos/perspective</code> as Perspective moves to the
+<a href="https://www.finos.org/">Fintech Open Source Foundation</a>. The project <a href="https://github.com/finos/perspective/">Github</a>,
+<a href="">Gitter</a> and <a href="https://travis-ci.org/finos/perspective/">Travis CI</a> have moved as well.</p>
+<p>... of course, the Features, Fixes and APIs are really important too. So
+much so that they have their own section.</p>
+<p><br style="clear:both;" /></p>
+<h3><a class="anchor" aria-hidden="true" id="d3fc-plugin"></a><a href="#d3fc-plugin" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>D3FC Plugin</h3>
+<p><img src="../../../../img/2019-06-10-v0.3.0-release/d3fc.png"></img></p>
+<p>An entirely new charting plugin based on <a href="https://d3fc.io/">D3FC</a>, with new
+chart types as well as all your old favorites.  <code>@finos/perspective-viewer-d3fc</code> is
+completely OSS, and fully replaces <code>@finos/perspective-viewer-highcharts</code>.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2019-06-10-v0.3.0-release/d3fc2.png"></img></p>
+<p>Featuring new charts like Candlestick, as well as new zoom interactions, resizable
+and repositionable legends, multiple Y-axes, and more!</p>
+<p><br style="clear:both;" /></p>
+<h3><a class="anchor" aria-hidden="true" id="data"></a><a href="#data" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Data</h3>
+<p><img src="../../../../img/2019-06-10-v0.3.0-release/performance2.png"></img></p>
+<p>Perspective now supports full streaming via Apache Arrow.  Load your data into
+a <code>perspective</code> instance on the server via node.js, and stream state &amp; updates via
+<a href="">Apache Arrow</a> to a <code>perspective</code> instance in the browser, without ever
+converting touching JSON.</p>
+<p>CPU time and memory usage improvements to reading,
+querying and writing performance have been made, as well
+as a new scheduler with substantially better overall data throughput.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2019-06-10-v0.3.0-release/performance.png"></img></p>
+<p>With the new <a href=""><code>perspective-cli</code></a> command-line tool, encode an Arrow from a CSV
+or even host a simple Perspective HTTP/WebSocket server.</p>
+<p><br style="clear:both;" /></p>
+<h3><a class="anchor" aria-hidden="true" id="ux"></a><a href="#ux" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>UX</h3>
+<p><img src="../../../../img/2019-06-10-v0.3.0-release/linked.png"></img></p>
+<p><code>&lt;perspective-viewer&gt;</code> now emits interaction events for all plugins types, which
+can be hooked wired together with other <code>&lt;perspective-viewer&gt;</code>s to create
+complex cross-filtered dashboards.</p>
+<p><br style="clear:both;" />
+<img src="../../../../img/2019-06-10-v0.3.0-release/warning.png"></img></p>
+<p>New <code>copy</code>, <code>download</code>, <code>reset</code> actions available via an options toolbar, and
+flatten quickly with<code>shift-click</code>.  Render warnings prevent huge visualizations
+from unintentionally overwhelming the browser.  Smart category filters, column
+sorting, and more!</p>
+<p><br style="clear:both;" /></p>
+<ul>
+<li><p>New APIs</p>
+<ul>
+<li><code>@finos/perspective-viewer-d3fc</code>  <a href="">D3FC</a> plugin - a new comprehensive OSS charting replacement.</li>
+<li><code>@finos/perspective-cli</code> A handy <code>perspective</code> CLI tool for manipulating and inspecting data.</li>
+<li><code>@finos/perspective-webpack-plugin</code> module for building Webpack applications containing perspective.</li>
+<li><code>@finos/perspective-phosphor</code>  <a href="">PhosphorJS</a> component.</li>
+<li><code>perspective-click</code> events (for cross-filtering).</li>
+<li><code>to_arrow()</code> methods has been added to <code>view()</code>.</li>
+<li><code>replace()</code>, <code>clear()</code>, <code>get_config()</code>, methods have been added to <code>table()</code>.</li>
+<li><code>copy()</code>, <code>download()</code>, <code>reset()</code>, <code>flush()</code>, <code>styleElement()</code> methods have been added to <code>&lt;perspective-viewer&gt;</code></li>
+<li><code>on_update()</code> now optionally provides modified rows as an Apache Arrow encoded <code>ArrayBuffer</code>.</li>
+<li>New CSS custom-style options for all plugin types, including for <code>@finos/persiect-veivewer-d3fc</code>.</li>
+<li><code>date</code> type, in addition to existing <code>datetime</code>.</li>
+<li>Column sorting directions <code>&quot;col asc&quot;</code>, <code>&quot;col desc&quot;</code>, <code>&quot;col abs asc&quot;</code>, <code>&quot;col abs desc&quot;</code>.</li>
+</ul></li>
+<li><p>Structural improvements</p>
+<ul>
+<li>Shadow DOM</li>
+<li>Windows build support</li>
+</ul></li>
+</ul>
+</span></div></article></div><div class="docs-prevnext"></div></div></div><nav class="onPageNav"></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>

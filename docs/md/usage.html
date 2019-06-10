@@ -125,7 +125,8 @@ you will likely need all Perspective modules.</p></li>
 </ul>
 <h2><a class="anchor" aria-hidden="true" id="perspective-library"></a><a href="#perspective-library" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>perspective</code> library</h2>
 <p>The main module exporting <code>table()</code> and <code>view()</code>, as well as process
-management functions such as <code>worker()</code> and <code>WorkerHost()</code>. This module is
+management functions such as <code>worker()</code> and <code>websocket()</code> (in the browser) and
+<code>WebSocketServer()</code> (in node.js). This module is
 not needed if you only intend to use <code>&lt;perspective-viewer&gt;</code> to visualize
 simple data, and is a dependency of the <code>@finos/perspective-viewer</code>
 module. For a complete reference on all exported methods in <code>perspective</code>, see the
@@ -136,19 +137,18 @@ and sort operations for tabular data. The engine can be instantiated in process,
 or in a Web Worker (browser only); in both cases, <code>perspective</code> exports a
 nearly identical API.</p>
 <h3><a class="anchor" aria-hidden="true" id="importing-in-the-browser"></a><a href="#importing-in-the-browser" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Importing in the browser</h3>
-<p>The <code>main</code> entry point for <code>@finos/perspective</code> runs in a Web
-Worker, such that the CPU workload is segregated from the web application in
-which it is embedded, and so the bulk of engine code can be lazy-loaded only
-after browser feature detection determines whether WebAssembly is supported.</p>
-<p>The library can be imported ia ES6 module and/or Babel:</p>
+<p><code>perspective</code> can be imported ES6 module and/or <code>require</code> syntax if you're using
+a bundler such as Webpack (and the <code>@finos/perspective-webpack-plugin</code>):</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">import</span> perspective <span class="hljs-keyword">from</span> <span class="hljs-string">"@finos/perspective"</span>;
 </code></pre>
 <p>or</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> perspective = <span class="hljs-built_in">require</span>(<span class="hljs-string">"@finos/perspective"</span>);
 </code></pre>
-<p>Perspective can also be referenced via the global <code>perspective</code> module name in vanilla
-Javascript, when e.g. importing <code>@finos/perspective</code>
+<p><code>@finos/perspective</code> also comes with pre-built bundle which exports the global
+<code>perspective</code> module name in vanilla Javascript, when e.g. importing
 <a href="https://unpkg.com/@finos/perspective/build/perspective.js">via a CDN</a>.</p>
+<pre><code class="hljs css language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">"perspective.js"</span>&gt;</span><span class="undefined"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+</code></pre>
 <p>Once imported, you'll need to instance a <code>perspective</code> engine via the <code>worker()</code>
 method. This will create a new WebWorker (browser) or Process (node.js), and
 load the appropriate supported WebAssembly or asm.js binary; all calculation
@@ -275,6 +275,30 @@ view.to_columns().then(<span class="hljs-function"><span class="hljs-params">jso
 <p>A <code>table()</code> can have as many <code>view()</code> associated with it as you need!
 Perspective will conserve memory and updates by relying on a single instance of
 a <code>table()</code> to power multiple <code>view()</code>s concurrently.</p>
+<h3><a class="anchor" aria-hidden="true" id="flattening-a-view-into-a-table"></a><a href="#flattening-a-view-into-a-table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Flattening a <code>view()</code> into a <code>table()</code></h3>
+<p>You can provide a <code>view()</code> instance to the <code>perspective.table()</code> method to
+create a new <code>table()</code> based off of this view's data, including it's future
+updates.  This is especially useful for piping together <code>perspective</code> data from
+different context, such as streaming a server-side <code>view()</code> in node.js into a
+<code>table()</code> in a WebWorker on the browser-side.</p>
+<pre><code class="hljs css language-javascript"><span class="hljs-comment">// Create two WebWorkers.</span>
+<span class="hljs-keyword">const</span> worker1 = perspective.worker();
+<span class="hljs-keyword">const</span> worker2 = perspective.worker();
+
+<span class="hljs-comment">// Create a `table and `view` on `worker1`.</span>
+<span class="hljs-keyword">const</span> table = worker1.table(data);
+<span class="hljs-keyword">const</span> view = table.view({<span class="hljs-attr">filter</span>: [[<span class="hljs-string">"State"</span>, <span class="hljs-string">"=="</span>, <span class="hljs-string">"Texas"</span>]]});
+
+<span class="hljs-comment">// Create a table from `view` in `worker2`</span>
+<span class="hljs-keyword">const</span> table2 = worker2.table(view);
+<span class="hljs-keyword">const</span> view2 = table2.view({<span class="hljs-attr">filter</span>: [[<span class="hljs-string">"City"</span>, <span class="hljs-string">"=="</span>, <span class="hljs-string">"Austin"</span>]]});
+
+<span class="hljs-comment">//  Both `view1` and `view2` are updated.</span>
+table.update([{<span class="hljs-attr">State</span>: <span class="hljs-string">"Texas"</span>, <span class="hljs-attr">City</span>: <span class="hljs-string">"Austin"</span>}]);
+
+<span class="hljs-comment">//  Only `view1` is updated.</span>
+table.update([{<span class="hljs-attr">State</span>: <span class="hljs-string">"Texas"</span>, <span class="hljs-attr">City</span>: <span class="hljs-string">"San Antonio"</span>}]);
+</code></pre>
 <h3><a class="anchor" aria-hidden="true" id="deleting-a-table-or-view"></a><a href="#deleting-a-table-or-view" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Deleting a <code>table()</code> or <code>view()</code></h3>
 <p>Unlike standard Javascript objects, Perspective objects such as <code>table()</code> and
 <code>view()</code> store their associated data in the WebAssembly heap. Due of this,
@@ -382,7 +406,7 @@ view2.load(table);
 <span class="hljs-comment">// Both `view1` and `view2` will reflect this update</span>
 table.update([{ <span class="hljs-attr">x</span>: <span class="hljs-number">5</span>, <span class="hljs-attr">y</span>: <span class="hljs-string">"e"</span>, <span class="hljs-attr">z</span>: <span class="hljs-literal">true</span> }]);
 </code></pre>
-<h3><a class="anchor" aria-hidden="true" id="remote-perspective-via-workerhost"></a><a href="#remote-perspective-via-workerhost" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Remote Perspective via <code>WorkerHost()</code></h3>
+<h3><a class="anchor" aria-hidden="true" id="remote-perspective-via-websocketserver"></a><a href="#remote-perspective-via-websocketserver" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Remote Perspective via <code>WebSocketServer()</code></h3>
 <p>For exceptionally large datasets, a <code>&lt;perspective-viewer&gt;</code> can be bound to a
 <code>perspective.table()</code> instance running in node.js remotely, rather than
 creating one in a Web Worker and downloading the entire data set. This
@@ -396,7 +420,7 @@ browser memory and CPU footprint.</p>
 <span class="hljs-keyword">const</span> fs = <span class="hljs-built_in">require</span>(<span class="hljs-string">"fs"</span>);
 
 <span class="hljs-comment">// Start a WS/HTTP host on port 8080.  The `assets` property allows</span>
-<span class="hljs-comment">// the `WorkerHost()` to also serves the file structure rooted in this</span>
+<span class="hljs-comment">// the `WebSocketServer()` to also serves the file structure rooted in this</span>
 <span class="hljs-comment">// module's directory.</span>
 <span class="hljs-keyword">const</span> host = <span class="hljs-keyword">new</span> WebSocketServer({ <span class="hljs-attr">assets</span>: [__dirname], <span class="hljs-attr">port</span>: <span class="hljs-number">8080</span> });
 
@@ -413,14 +437,15 @@ host.host_view(<span class="hljs-string">"view_one"</span>, view);
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> elem = <span class="hljs-built_in">document</span>.getElementsByTagName(<span class="hljs-string">"perspective-viewer"</span>)[<span class="hljs-number">0</span>];
 
 <span class="hljs-comment">// Bind to the server's worker instead of instantiating a Web Worker.</span>
-<span class="hljs-keyword">const</span> worker = perspective.worker(<span class="hljs-built_in">window</span>.location.origin.replace(<span class="hljs-string">"http"</span>, <span class="hljs-string">"ws"</span>));
+<span class="hljs-keyword">const</span> websocket = perspective.websocket(<span class="hljs-built_in">window</span>.location.origin.replace(<span class="hljs-string">"http"</span>, <span class="hljs-string">"ws"</span>));
 
-<span class="hljs-comment">// Bind the viewer to the preloaded data source.</span>
-elem.load(worker.open_table(<span class="hljs-string">"table_one"</span>));
+<span class="hljs-comment">// Bind the viewer to the preloaded data source.  `table` and `view` objects </span>
+<span class="hljs-comment">// live on the server.</span>
+elem.load(websocket.open_table(<span class="hljs-string">"table_one"</span>));
 
-<span class="hljs-comment">// Or load data from a view</span>
-<span class="hljs-keyword">const</span> arrow = <span class="hljs-keyword">await</span> worker.open_view(<span class="hljs-string">"view_one"</span>).to_arrow();
-elem.load(arrow);
+<span class="hljs-comment">// Or load data from a view.  The browser now also has a copy of this view in</span>
+<span class="hljs-comment">// its own `table`, as well as its updates.  Transfer uses Arrows.</span>
+elem.load(websocket.open_view(<span class="hljs-string">"view_one"</span>));
 </code></pre>
 <p><code>&lt;perspective-viewer&gt;</code> instances bound in this way are otherwise no different
 than <code>&lt;perspective-viewer&gt;</code>s which rely on a Web Worker, and can even share a
@@ -486,4 +511,4 @@ property returns the associated row data.</p>
     elem.restore(config);
 });
 </code></pre>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/md/installation.html"><span class="arrow-prev">← </span><span>Installation</span></a><a class="docs-next button" href="/docs/md/development.html"><span>Developer Guide</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#perspective-library"><code>perspective</code> library</a><ul class="toc-headings"><li><a href="#importing-in-the-browser">Importing in the browser</a></li><li><a href="#importing-in-nodejs">Importing in Node.js</a></li><li><a href="#loading-data-with-table">Loading data with <code>table()</code></a></li><li><a href="#querying-data-with-view">Querying data with <code>view()</code></a></li><li><a href="#deleting-a-table-or-view">Deleting a <code>table()</code> or <code>view()</code></a></li></ul></li><li><a href="#perspective-viewer-web-component"><code>perspective-viewer</code> web component</a><ul class="toc-headings"><li><a href="#loading-data">Loading data</a></li><li><a href="#sharing-a-table-between-multiple-perspective-viewer-s">Sharing a <code>table()</code> between multiple <code>perspective-viewer</code>s</a></li><li><a href="#remote-perspective-via-workerhost">Remote Perspective via <code>WorkerHost()</code></a></li><li><a href="#setting-reading-viewer-configuration-via-attributes">Setting &amp; reading viewer configuration via Attributes</a></li><li><a href="#update-events">Update events</a></li><li><a href="#click-events">Click events</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/md/installation.html"><span class="arrow-prev">← </span><span>Installation</span></a><a class="docs-next button" href="/docs/md/development.html"><span>Developer Guide</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#overview">Overview</a></li><li><a href="#perspective-library"><code>perspective</code> library</a><ul class="toc-headings"><li><a href="#importing-in-the-browser">Importing in the browser</a></li><li><a href="#importing-in-nodejs">Importing in Node.js</a></li><li><a href="#loading-data-with-table">Loading data with <code>table()</code></a></li><li><a href="#querying-data-with-view">Querying data with <code>view()</code></a></li><li><a href="#flattening-a-view-into-a-table">Flattening a <code>view()</code> into a <code>table()</code></a></li><li><a href="#deleting-a-table-or-view">Deleting a <code>table()</code> or <code>view()</code></a></li></ul></li><li><a href="#perspective-viewer-web-component"><code>perspective-viewer</code> web component</a><ul class="toc-headings"><li><a href="#loading-data">Loading data</a></li><li><a href="#sharing-a-table-between-multiple-perspective-viewer-s">Sharing a <code>table()</code> between multiple <code>perspective-viewer</code>s</a></li><li><a href="#remote-perspective-via-websocketserver">Remote Perspective via <code>WebSocketServer()</code></a></li><li><a href="#setting-reading-viewer-configuration-via-attributes">Setting &amp; reading viewer configuration via Attributes</a></li><li><a href="#update-events">Update events</a></li><li><a href="#click-events">Click events</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>

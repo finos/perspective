@@ -4,7 +4,7 @@
         <title>Perspective Blog</title>
         <link>https://perspective.finos.org//blog</link>
         <description>The best place to stay up-to-date with the latest Perspective news and events.</description>
-        <lastBuildDate>Mon, 08 Oct 2018 06:00:00 GMT</lastBuildDate>
+        <lastBuildDate>Mon, 10 Jun 2019 06:00:00 GMT</lastBuildDate>
         <docs>http://blogs.law.harvard.edu/tech/rss</docs>
         <generator>Feed for Node.js</generator>
         <image>
@@ -13,6 +13,17 @@
             <link>https://perspective.finos.org//blog</link>
         </image>
         <copyright>Copyright © 2019 Perspective Authors</copyright>
+        <item>
+            <title><![CDATA[0.3.0 Release]]></title>
+            <link>https://perspective.finos.org//blog/2019/06/10/v0.3.0-release.html</link>
+            <guid>https://perspective.finos.org//blog/2019/06/10/v0.3.0-release.html</guid>
+            <pubDate>Mon, 10 Jun 2019 06:00:00 GMT</pubDate>
+            <description><![CDATA[<p>Perspective 0.3.0 is out now, thanks to the tireless effots of the Perspective
+<a href="https://github.com/jpmorganchase/perspective/graphs/contributors">Contributors</a>!
+With this release comes the standard new-release Features, APIs, and Fixes;
+more importantly, it also features - a new home!</p>
+]]></description>
+        </item>
         <item>
             <title><![CDATA[NYC Citibike Analytics in Real-Time, Part 1]]></title>
             <link>https://perspective.finos.org//blog/2018/10/08/nyc-citibike-analysis-1.html</link>
