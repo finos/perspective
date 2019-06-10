@@ -11,7 +11,7 @@
       "blog/2018-10-08-nyc-citibike-analysis-1": {
         "title": "NYC Citibike Analytics in Real-Time, Part 1"
       },
-      "blog/2019-06-04-v0.3.0-release": {
+      "blog/2019-06-10-v0.3.0-release": {
         "title": "0.3.0 Release"
       },
       "md/development": {
@@ -22,12 +22,6 @@
       },
       "md/usage": {
         "title": "User Guide"
-      },
-      "obj/perspective-viewer": {
-        "title": "`perspective-viewer` API"
-      },
-      "obj/perspective": {
-        "title": "`perspective` API"
       },
       "README": {
         "title": "README"

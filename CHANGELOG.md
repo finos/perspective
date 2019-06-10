@@ -1,5 +1,25 @@
 # Changelog
 
+[0.3.0] - 2019-06-02
+### Added
+* [#558](https://github.com/jpmorganchase/perspective/pull/558) `@jpmorganchase/perspective*` is now `@finos/perspective*`.
+* [#599](https://github.com/jpmorganchase/perspective/pull/599) `perspective-viewer-d3fc` is the default chart plugin.
+* [#574](https://github.com/jpmorganchase/perspective/pull/574) Auto-conflation of messages for `table()`.  `update()` and `on_update()` calls are no longer 1:1, but overall update throughput has been greatly increased.
+* [#589](https://github.com/jpmorganchase/perspective/pull/589) `on_update()` method now returns Apache Arrow with `mode: "row"` option, enabling full Arrow server->client real-time streaming.
+* [#563](https://github.com/jpmorganchase/perspective/pull/563) Treemaps added to `perspective-viewer-d3fc`.
+* [#564](https://github.com/jpmorganchase/perspective/pull/564) Dual-axis support added to `perspective-viewer-d3fc` line charts.
+* [#581](https://github.com/jpmorganchase/perspective/pull/581) Dual-axis support added to `perspective-viewer-d3fc` area, scatter and column charts.
+* [#553](https://github.com/jpmorganchase/perspective/pull/553) Added `style_element()` method to `<perspective-viewer>` to refresh styles when CSS is updated.
+* [#557](https://github.com/jpmorganchase/perspective/pull/557) Category filters on `<perspective-viewer>` now auto-select and auto-focus.
+
+### Fixes
+* [#561](https://github.com/jpmorganchase/perspective/pull/561) Handle `boolean` columns in Apache Arrow correctly.
+* [#580](https://github.com/jpmorganchase/perspective/pull/580) Better responsive layout for narrow `<perspective-viewer>`s.
+
+### Internal
+* [#587](https://github.com/jpmorganchase/perspective/pull/587) Port to Webpack 4.
+* [#588](https://github.com/jpmorganchase/perspective/pull/588) new stand-alone benchmarking tool `perspective-bench`.
+
 # [0.2.23] - 2019-04-22
 ### Added
 * [#547](https://github.com/jpmorganchase/perspective/pull/547) Added `to_arrow()` support to remote perspective, as well as ability to host `view()`s in addition to `table()`s.
