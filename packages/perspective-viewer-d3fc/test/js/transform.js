@@ -7,4 +7,7 @@
  *
  */
 
-module.exports = require("babel-jest").createTransformer(require("../../babel.config.js"));
+const config = require("../../babel.config.js");
+config.presets[0][1].modules = "auto";
+
+module.exports = require("babel-jest").createTransformer(config);
