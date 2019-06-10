@@ -30,7 +30,7 @@ module.exports = {
 };
 ```
 
-Alternatively, you may use the built-in `WorkerHost` Node.js server, host
+Alternatively, you may use the built-in `WebSocketServer` Node.js server, host
 the contents of a package's `build/` in your application's build script, or
 otherwise making sure these directories are visible to your web server, e.g.:
 

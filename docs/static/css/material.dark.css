@@ -78,7 +78,8 @@ perspective-viewer {
   --hypergrid-header--font-family: "Open Sans";
   --d3fc-treedata-axis--lines: none;
 }
-.homeContainer {
+.homeContainer,
+#get_started {
   /******************************************************************************
  *
  * Copyright (c) 2017, the Perspective Authors.
@@ -91,7 +92,8 @@ perspective-viewer {
   @import url("https://fonts.googleapis.com/css?family=Material+Icons");
   @import url("https://fonts.googleapis.com/css?family=Roboto+Mono");
 }
-.homeContainer perspective-viewer {
+.homeContainer perspective-viewer,
+#get_started perspective-viewer {
   background-color: #2a2c2f;
   color: #cfd8dc;
   --plugin--background: #2f3136;

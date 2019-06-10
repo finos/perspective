@@ -11,6 +11,7 @@ const CompLibrary = require("../../core/CompLibrary.js");
 const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
 const Container = CompLibrary.Container;
 const GridBlock = CompLibrary.GridBlock;
+const classNames = require("classnames");
 
 const siteConfig = require(process.cwd() + "/siteConfig.js");
 
@@ -76,7 +77,6 @@ class HomeSplash extends React.Component {
         let language = this.props.language || "";
         return (
             <SplashContainer>
-                {/* <Logo img_src={imgUrl('docusaurus.svg')} /> */}
                 <div className="inner">
                     <ProjectTitle />
                     <perspective-viewer class="titleViewer" />
@@ -88,10 +88,6 @@ class HomeSplash extends React.Component {
                         <Button id="crosssect">Crosssect</Button>
                         <Button id="intersect">Retrospect</Button>
                         <Button id="pivot">Enhance</Button>
-                        {/* <Button href="https://jsfiddle.net/user/texodus/fiddles/">Examples</Button>
-                        <Button href="https://perspective.finos.org/docs/installation.html">Docs</Button>
-                        <Button href="https://www.npmjs.com/package/@finos/perspective">NPM</Button>
-                        <Button href="https://github.com/finos/perspective">Github</Button> */}
                     </PromoSection>
                 </div>
             </SplashContainer>
@@ -101,9 +97,41 @@ class HomeSplash extends React.Component {
 
 const Block = props => (
     <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
-        <GridBlock align="center" contents={props.children} layout={props.layout} />
+        <GridBlock contents={props.children} layout={props.layout} />
     </Container>
 );
+
+const PerspectiveBlock = props => {
+    const block = props.children[0];
+    let beforeImage, afterImage;
+    if (block.imageAlign === "right") {
+        afterImage = (
+            <div className="blockImage">
+                <perspective-viewer />
+            </div>
+        );
+    } else {
+        beforeImage = (
+            <div className="blockImage">
+                <perspective-viewer />
+            </div>
+        );
+    }
+    return (
+        <Container padding={["bottom", "top"]} id={props.id} background={props.background}>
+            <div className={classNames({imageAlignRight: !!afterImage, imageAlignLeft: !!beforeImage, imageAlignSide: true})} key={block.title}>
+                {beforeImage}
+                <div className="blockContent">
+                    <h2>
+                        <MarkdownBlock>{block.title}</MarkdownBlock>
+                    </h2>
+                    <MarkdownBlock>{block.content}</MarkdownBlock>
+                </div>
+                {afterImage}
+            </div>
+        </Container>
+    );
+};
 
 const Features = props => (
     <Block layout="fourColumn">
@@ -131,7 +159,7 @@ const Features = props => (
 );
 
 const FeatureCallout = props => (
-    <div style={{textAlign: "center"}} background="dark">
+    <Container padding={["bottom", "top"]} background="dark">
         <h2>Features</h2>
         <MarkdownBlock background="dark">
             A fast, memory efficient streaming pivot engine written principally in C++ and compiled to both WebAssembly and asm.js via the [emscripten](https://github.com/kripken/emscripten) compiler.
@@ -145,46 +173,59 @@ const FeatureCallout = props => (
         </MarkdownBlock>
         <MarkdownBlock>Integration with Jupyterlab.</MarkdownBlock>
         <MarkdownBlock>Runtimes for the Browser and Node.js.</MarkdownBlock>
-    </div>
+    </Container>
 );
 
-const LearnHow = props => (
-    <Block background="light">
-        {[
-            {
-                content: "Talk about learning how to use this",
-                image: imgUrl("docusaurus.svg"),
-                imageAlign: "right",
-                title: "Learn How"
-            }
-        ]}
-    </Block>
-);
-
-const TryOut = props => (
-    <Block id="try">
-        {[
-            {
-                content: "Talk about trying this out",
-                image: imgUrl("docusaurus.svg"),
-                imageAlign: "left",
-                title: "Try it Out"
-            }
-        ]}
-    </Block>
-);
+const DESCRIPTION_TEXT = `
+# What is Perspective?
+Originally developed for J.P. Morgan's trading business, Perspective is
+an <i>interactive</i> visualization component for <i>large</i>, <i>real-time</i>
+datasets.  Use it to build reports, dashboards, notebooks and applications.
+Perspective comes with:
+* A fast, memory efficient streaming query engine, written in C++ and compiled to [WebAssembly](), with read/write/stream support for [Apache Arrow]().
+* A framework-agnostic query configuration UI component, based on [Web Components](https://www.webcomponents.org/), and a WebWorker and/or WebSocket data engine host for stable interactivity at high frequency.
+* A suite of simple, context-aware visualization plugins for some common Javascript libraries such as [D3FC](https://d3fc.io/) and [Hypergrid](https://github.com/fin-hypergrid/core).
+* Integration with [Jupyterlab](), Runtimes for the Browser and Node.js.
+`;
 
 const Description = props => (
-    <Block background="dark">
+    <PerspectiveBlock background="dark" id="demo1">
         {[
             {
-                //   content: 'We created Perspective to help our users answer questions about their <i>data</i>, without relying on chart settings, style options, or tedious configuration.',
-                // image: imgUrl('2018-10-01-v0.2.0-release/hierarchial.png'),
+                content: DESCRIPTION_TEXT,
                 imageAlign: "right"
-                // title: 'Ask Your Data',
             }
         ]}
-    </Block>
+    </PerspectiveBlock>
+);
+
+const GETTING_STARTED_TEXT = `
+# Get Started
+1. Add \`@finos/perspective-cli\` to your project:
+\`\`\`bash
+$ yarn add --dev @finos/perspective-cli
+\`\`\`
+2. Run a test server on a CSV, JSON or [Apache Arrow]():
+\`\`\`bash
+$ yarn perspective host < superstore.arrow
+Listening on port 8080
+\`\`\`
+
+`;
+
+const GetStarted = props => (
+    <PerspectiveBlock id="get_started">
+        {[
+            {
+                content: GETTING_STARTED_TEXT,
+                image: imgUrl("2018-10-01-v0.2.0-release/theme.png"),
+                imageAlign: "left"
+            }
+        ]}
+    </PerspectiveBlock>
+    // <Container padding={["bottom", "top"]} id="get_started">
+    //     <MarkdownBlock>{GETTING_STARTED_TEXT}</MarkdownBlock>
+    // </Container>
 );
 
 const Showcase = props => {
@@ -224,16 +265,8 @@ class Index extends React.Component {
         return (
             <div>
                 <HomeSplash language={language} />
-                <div className="mainContainer">
-                    <Features />
-                    {/* <Description />  */}
-                    <FeatureCallout />
-                    {/* <FeatureCallout />
-          <LearnHow />
-          <TryOut />
-          */}
-                    {/* <Showcase language={language} /> */}
-                </div>
+                <Description />
+                <GetStarted />
             </div>
         );
     }

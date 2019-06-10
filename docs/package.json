@@ -5,8 +5,9 @@
     "scripts": {
         "theme": "lessc static/css/material.dark.less > static/css/material.dark.css",
         "examples": "docusaurus-examples",
-        "start": "npm run theme && docusaurus-start",
-        "docs": "npm run theme && docusaurus-build",
+        "start": "npm run build:arrow && npm run theme && docusaurus-start",
+        "build:arrow": "cpx ../examples/simple/superstore.arrow static/arrow/",
+        "docs": "npm run build:arrow && npm run theme && docusaurus-build",
         "publish-gh-pages": "npm run theme && docusaurus-publish",
         "write-translations": "docusaurus-write-translations"
     },
