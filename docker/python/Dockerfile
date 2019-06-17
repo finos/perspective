@@ -9,7 +9,9 @@
 FROM python:3.7
 
 RUN apt-get update
-RUN apt-get -y install apt-transport-https libtbb-dev cmake nodejs npm
+RUN apt-get -y install apt-transport-https libtbb-dev cmake sudo
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+RUN apt-get -y install npm
 RUN apt-get -y remove python3
 
 RUN python3.7 -m pip install numpy pandas
@@ -24,5 +26,8 @@ RUN cd boost_1_67_0 && CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/includ
 RUN ln -s /usr/local/lib/libboost_python37.so /usr/local/lib/libboost_python.so
 RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
 
-RUN python3 -m pip install codecov nose2 mock flake8
+RUN python3 -m pip install codecov nose2 mock flake8 pytest pytest-cov
 RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
+
+RUN npm install --global yarn
+RUN yarn --version

@@ -74,6 +74,14 @@ t_time::as_tm(struct tm& out) const {
     return gmtime(out, as_seconds(), 0) == 1;
 }
 
+std::tm
+t_time::get_tm() const {
+    std::tm rval;
+    gmtime(rval, microseconds(), 0);
+    std::cout << str(rval);
+    return rval;
+}
+
 std::int32_t
 isleap(long int year) {
     return (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)) ? 1 : 0;

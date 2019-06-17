@@ -1,0 +1,34 @@
+include LICENSE
+include README.md
+include CONTRIBUTING.md
+
+include requirements.txt
+include setup.cfg
+include pyproject.toml
+include .bumpversion.cfg
+include Makefile
+
+graft perspective/tests
+
+# Documentation
+graft docs
+exclude docs/\#*
+
+# docs subdirs we want to skip
+prune docs/build
+prune docs/gh-pages
+prune docs/dist
+
+# Webapp files
+include package.json
+include tsconfig.json
+include tslint.json
+graft src
+graft style
+
+# Patterns to exclude from any directory
+global-exclude *~
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .git
+global-exclude .ipynb_checkpoints

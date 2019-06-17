@@ -869,7 +869,7 @@ namespace binding {
     }
 
     void
-    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name,
+    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -1174,7 +1174,7 @@ namespace binding {
      */
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
         bool is_arrow, bool is_update) {
         switch (type) {
             case DTYPE_INT64: {
@@ -1391,7 +1391,7 @@ namespace binding {
 
     template <>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
-    make_filter_term(t_dtype column_type, t_val date_parser, const std::string column_name, const std::string& filter_op_str, t_val filter_term) {
+    make_filter_term(t_dtype column_type, t_val date_parser, const std::string& column_name, const std::string& filter_op_str, t_val filter_term) {
         t_filter_op filter_op = str_to_filter_op(filter_op_str);
         std::vector<t_tscalar> terms;
 

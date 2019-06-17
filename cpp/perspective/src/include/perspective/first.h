@@ -59,11 +59,8 @@
 #endif
 
 #ifdef PSP_ENABLE_PYTHON
-#include <boost/python.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/numpy.hpp>
-#include <numpy/arrayobject.h>
-
-namespace py = boost::python;
-namespace np = boost::python::numpy;
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+namespace py = pybind11;
 #endif
+

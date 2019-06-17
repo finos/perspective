@@ -8,7 +8,7 @@
  */
 #pragma once
 
-#if defined(PSP_ENABLE_WASM) || defined(PSP_ENABLE_PYTHON)
+#ifdef(PSP_ENABLE_PYTHON)
 
 #include <perspective/base.h>
 

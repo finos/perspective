@@ -117,6 +117,7 @@ website/i18n/*
 cmake-build-debug
 .ipynb_checkpoints
 .python-version
+.pytest_cache
 
 package.json.lerna_backup
 website/static/css/material.dark.css

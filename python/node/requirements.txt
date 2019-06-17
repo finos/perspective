@@ -1,0 +1,4 @@
+numpy>=1.13.1
+pandas>=0.22.0
+psutil>=5.4.8
+zerorpc>=0.6.1

@@ -178,7 +178,7 @@ namespace binding {
 
     template <typename T>
     void _fill_data_helper(T accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
         bool is_arrow, bool is_update);
 
     /**
@@ -192,7 +192,7 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update);
+    void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update);
 
     /**
      * @brief Create and populate a table.
@@ -261,7 +261,7 @@ namespace binding {
     */
     template <typename T>
     std::tuple<std::string, std::string, std::vector<t_tscalar>> make_filter_term(
-        t_dtype column_type, T date_parser, const std::string column_name, const std::string& filter_op_str, T filter_term);
+        t_dtype column_type, T date_parser, const std::string& column_name, const std::string& filter_op_str, T filter_term);
     /**
      * @brief Create a `t_view_config` object from the binding language's `view_config` object.
      *

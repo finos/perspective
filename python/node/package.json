@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "name": "perspective-python.node",
+  "version": "0.0.1",
+  "dependencies": {
+    "@finos/perspective": "^0.3.0",
+    "zerorpc": "^0.9.8"
+  },
+  "devDependencies": {
+    "@finos/perspective-webpack-plugin": "^0.3.0",
+    "cpx": "^1.5.0",
+    "file-loader": "^0.11.1",
+    "jest": "^24.8.0",
+    "jest-transform-css": "^2.0.0",
+    "native-ext-loader": "^2.3.0",
+    "rimraf": "^2.5.2",
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1"
+  },
+  "scripts": {
+    "build": "webpack --color --config ./webpack.config.js ./src/* && cpx \"node_modules/@finos/perspective/build/*.wasm\" \"perspective/node/assets\"&& cpx \"node_modules/zeromq/build/Release/zmq.node\" \"perspective/node/assets\"",
+    "clean": "rimraf build",
+    "test": "NODE_ENV=test jest -i --coverage --no-cache --collectCoverageFrom=ts/**/*.{ts}"
+  },
+  "files": [
+    "src/server.js"
+  ],
+  "main": "src/server.js"
+}

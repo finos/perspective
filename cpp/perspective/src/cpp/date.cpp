@@ -68,6 +68,21 @@ t_date::consecutive_day_idx() const {
         + CUMULATIVE_DAYS[leap_selector][m - 1];
 }
 
+std::tm
+t_date::get_tm() const {
+    std::tm rval;
+
+    rval.tm_year = year() - 1900; // tm years are since 1900
+    rval.tm_mon = month() - 1; // tm months from 0
+    rval.tm_mday = day();
+    rval.tm_hour = 0;
+    rval.tm_min = 0;
+    rval.tm_sec = 0;
+    rval.tm_isdst = -1; // let std::mktime decide whether DST is in effect
+
+    return rval;
+}
+
 t_date
 from_consecutive_day_idx(std::int32_t idx) {
     std::int32_t y = static_cast<std::int32_t>(idx / 365.2425);

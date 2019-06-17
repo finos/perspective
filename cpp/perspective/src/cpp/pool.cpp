@@ -41,7 +41,7 @@ t_pool::t_pool()
 #else
 
 t_pool::t_pool()
-    : m_sleep(100)
+    : m_sleep(0)
     , m_has_python_dep(false) {
     m_run.clear();
 }
