@@ -15,9 +15,6 @@ from perspective.table.libbinding import t_schema, t_gnode
 
 
 class TestGnode(object):
-    def setUp(self):
-        pass
-
     def test_gnode(self):
         column_names = ['Col1', 'Col2', 'Col3', 'Col4', 'Col5']
         types = [int, str, float, np.int64, np.float64]

@@ -14,38 +14,41 @@ from perspective.table import Perspective
 
 
 class TestTable(object):
-    def setUp(self):
-        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
-
     def test_table(self):
         print('\nfrom list of int test:\n')
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col1', [1, 2, 3, 4])
         self.t.print()
 
     def test_table2(self):
         print('\nfrom list of string test:\n')
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col2', ["abcd", "defg", "csdf", "dasf"])
         self.t.print()
 
     def test_table3(self):
         print('\nfrom list of float test:\n')
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col3', [1.1, 2.2, 3.3, 4.4])
         self.t.print()
 
     def test_table4(self):
         print('\nfrom np array of int test:\n')
         arr1 = np.array([1, 2, 3, 4])
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col4', arr1)
         self.t.print()
 
     def test_table5(self):
         print('\nfrom np array of float test:\n')
         arr2 = np.array([1.1, 2.2, 3.3, 4.4])
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col5', arr2)
         self.t.print()
 
     def test_table6(self):
         print('\nprint types:\n')
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         print(self.t['Col1'], type(self.t['Col1']))
         # print(self.t['Col2'])
         print(self.t['Col3'], type(self.t['Col1']))
@@ -53,6 +56,7 @@ class TestTable(object):
         print(self.t['Col5'], type(self.t['Col1']))
 
     def test_table_to_df(self):
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         self.t.load('Col1', [1, 2, 3, 4])
         self.t.load('Col2', ["abcd", "defg", "csdf", "dasf"])
         self.t.load('Col3', [1.1, 2.2, 3.3, 4.4])
@@ -66,6 +70,7 @@ class TestTable(object):
 
     def test_table_from_df(self):
         print('\nfrom dataframe test:\n')
+        self.t = Perspective(['Col1', 'Col2', 'Col3', 'Col4', 'Col5'], [int, str, float, np.int64, np.float64])
         file = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'test_data', 'ohlc.csv'))
 
         if os.path.exists(file):

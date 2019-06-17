@@ -22,7 +22,11 @@ function docker(image = "emsdk") {
 }
 
 try {
-    let cmd = "cd python/table && python3 -m flake8 perspective && echo OK";
+    let cmd = "cd python/table &&\
+     curl -sL https://deb.nodesource.com/setup_8.x | bash - &&\
+     apt-get install npm &&\
+     python3 -m pip install -q -U pytest pytest-cov flake8 pylint codecov pylantern sphinx &&\
+     python3 -m flake8 perspective && echo OK";
     if (process.env.PSP_DOCKER) {
         execute(docker("python") + " bash -c \"" + cmd + '\"');
     } else {

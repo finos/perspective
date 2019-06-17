@@ -17,20 +17,25 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/usr/src/app/python/perspective -w /usr/src/app/python/perspective perspective/${image}`;
+    cmd += ` -v $(pwd):/usr/src/app/python/node -w /usr/src/app/python/node perspective/${image}`;
     return cmd;
 }
 
 try {
-    let cmd = "cd python/perspective && python3 -m pip install -q -r requirements.txt &&\
-    python3 -m pip install -q -U pytest pytest-cov flake8 pylint codecov pylantern sphinx &&\
-        python3 -m flake8 perspective && echo OK";
+    // install dependencies
+    let cmd = "cd python/node && \
+     curl -sL https://deb.nodesource.com/setup_8.x | bash - &&\
+     apt-get install npm &&\
+     python3 -m pip install -q -r requirements.txt &&\
+     python3 -m pip install -q -U pytest pytest-cov flake8 pylint codecov pylantern sphinx &&\
+     python3 -m pytest -v perspective --cov=perspective";
+;
     if (process.env.PSP_DOCKER) {
-        execute(docker("python") + " bash -c \"" + cmd + '\"');
+        execute(docker("python") + ' bash -c "' + cmd + '"');
     } else {
         execute(cmd);
     }
 } catch (e) {
-    console.log(e);
+    console.log(e.message);
     process.exit(1);
 }

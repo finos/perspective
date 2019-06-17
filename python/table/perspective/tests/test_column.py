@@ -14,9 +14,6 @@ from perspective.table import Perspective, t_column, t_table, t_schema
 
 
 class TestColumn(object):
-    def setUp(self):
-        pass
-
     def test_column(self):
         col = t_column()
         col.pprint()

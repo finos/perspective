@@ -25,6 +25,15 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     requires = f.read().split()
 
+if not os.path.exists(os.path.join(os.path.dirname(__file__), '..', 'perspective', 'setup.py')):
+    raise Exception('Must checkout perspective-python submodule')
+else:
+    with open(os.path.join(os.path.dirname(__file__), '..', 'perspective', 'setup.py')) as fp:
+        for line in fp:
+            if 'version=\'' in line:
+                version = line.strip().replace('version=', '').replace("'", '').replace(',', '')
+                print('building version %s' % version)
+
 if sys.version_info.major < 3 or sys.version_info.minor < 7:
     raise Exception('Must be python3.7 or above')
 
@@ -96,11 +105,10 @@ class CMakeBuild(build_ext):
 
 setup(
     name='perspective-python.table',
-    version='0.1.3',
+    version=version,
     description='Analytics library',
     long_description=long_description,
     url='https://github.com/finos/perspective',
-    download_url='https://github.com/timkpaine/aat/archive/v0.0.2.tar.gz',
     author='Tim Paine',
     author_email='timothy.k.paine@gmail.com',
     license='Apache 2.0',

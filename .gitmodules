@@ -1,0 +1,3 @@
+[submodule "python/perspective-python"]
+	path = python/perspective
+	url = https://github.com/timkpaine/perspective-python

@@ -9,7 +9,9 @@
 FROM python:3.7
 
 RUN apt-get update
-RUN apt-get -y install apt-transport-https libtbb-dev cmake nodejs npm
+RUN apt-get -y install apt-transport-https libtbb-dev cmake
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+RUN apt-get install npm
 RUN apt-get -y remove python3
 
 RUN python3.7 -m pip install numpy pandas
