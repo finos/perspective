@@ -17,13 +17,17 @@ function docker(image = "emsdk") {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v $(pwd):/usr/src/app/python/perspective -w /usr/src/app/python/perspective perspective/${image}`;
+    cmd += ` -v $(pwd):/usr/src/app/python/ -w /usr/src/app/python/ perspective/${image}`;
     return cmd;
 }
 
 try {
-    // dont need to reinstall deps
-    cmd = "cd python/perspective && python3 -m pytest -v perspective --cov=perspective";
+    // install dependencies
+    let cmd =
+        "cd python/ && \
+    python3.7 -m pip install -r requirements.txt &&\
+    python3.7 -m pip install -U flake8 nose2 codecov &&\
+    python3.7 -m nose2 -v perspective --with-coverage --coverage=perspective";
     if (process.env.PSP_DOCKER) {
         execute(docker("python") + ' bash -c "' + cmd + '"');
     } else {

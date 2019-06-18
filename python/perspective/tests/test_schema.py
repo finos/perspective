@@ -11,14 +11,14 @@ import os.path
 import numpy as np
 import pandas as pd
 from perspective.table import Perspective
-from perspective.table.libbinding import t_schema, t_gnode
+from perspective.libbinding import t_schema
 
 
-class TestGnode(object):
+class TestSchema(object):
     def setUp(self):
         pass
 
-    def test_gnode(self):
+    def test_schema(self):
         column_names = ['Col1', 'Col2', 'Col3', 'Col4', 'Col5']
         types = [int, str, float, np.int64, np.float64]
 
@@ -28,6 +28,4 @@ class TestGnode(object):
 
         assert len(column_names) == len(dtypes)
         schema = t_schema(column_names, dtypes)
-        gnode = t_gnode(schema, schema)
-        # gnode.pprint()
-
+        print(schema.str())
