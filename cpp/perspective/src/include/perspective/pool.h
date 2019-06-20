@@ -16,7 +16,7 @@
 #include <atomic>
 
 #ifdef PSP_ENABLE_WASM
-#include <emscripten/val.h>
+#include <perspective/val.h>
 #endif
 
 namespace perspective {
@@ -39,7 +39,7 @@ public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 #ifdef PSP_ENABLE_WASM
-    void set_update_delegate(emscripten::val ud);
+    void set_update_delegate(t_val ud);
     void register_context(
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
     void py_notify_userspace();
@@ -92,7 +92,7 @@ private:
     std::vector<t_gnode*> m_gnodes;
 
 #ifdef PSP_ENABLE_WASM
-    emscripten::val m_update_delegate;
+    t_val m_update_delegate;
 #endif
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;

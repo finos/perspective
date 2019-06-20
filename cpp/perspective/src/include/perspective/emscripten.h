@@ -16,6 +16,7 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <perspective/val.h>
 #include <random>
 #include <cmath>
 #include <sstream>
@@ -26,8 +27,8 @@ namespace perspective {
 namespace binding {
 
     // Date parsing
-    t_date jsdate_to_t_date(emscripten::val date);
-    emscripten::val t_date_to_jsdate(t_date date);
+    t_date jsdate_to_t_date(t_val date);
+    t_val t_date_to_jsdate(t_date date);
 
     /**
      * Converts a scalar value to its JS representation.
@@ -38,16 +39,16 @@ namespace binding {
      *
      * Returns
      * -------
-     * val
+     * t_val
      */
     template <>
-    emscripten::val scalar_to(const t_tscalar& scalar);
-    emscripten::val scalar_to_val(
+    t_val scalar_to(const t_tscalar& scalar);
+    t_val scalar_to_val(
         const t_tscalar& scalar, bool cast_double = false, bool cast_string = false);
 
     template <>
-    emscripten::val scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
-    emscripten::val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
+    t_val scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
+    t_val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
 
     /**
      *
@@ -61,7 +62,7 @@ namespace binding {
      *
      */
     template <typename T>
-    emscripten::val get_data_js(T ctx, std::uint32_t start_row, std::uint32_t end_row,
+    t_val get_data_js(T ctx, std::uint32_t start_row, std::uint32_t end_row,
         std::uint32_t start_col, std::uint32_t end_col);
 
 } // namespace binding
