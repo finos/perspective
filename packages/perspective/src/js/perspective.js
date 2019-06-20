@@ -1438,6 +1438,7 @@ export default function(Module) {
 
             try {
                 pool = new __MODULE__.t_pool();
+                console.log("POOL", pool);
 
                 [gnode, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
 
