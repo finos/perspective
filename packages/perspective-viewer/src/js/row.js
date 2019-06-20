@@ -39,7 +39,9 @@ function get_text_width(text, max = 0) {
 class Row extends HTMLElement {
     set name(n) {
         let elem = this.shadowRoot.querySelector("#name");
-        elem.innerHTML = this.getAttribute("name");
+        let name = this.getAttribute("name");
+        elem.innerHTML = name;
+        elem.title = name;
     }
 
     set type(t) {
