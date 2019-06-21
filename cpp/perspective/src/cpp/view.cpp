@@ -13,8 +13,8 @@
 
 namespace perspective {
 template <typename CTX_T>
-View<CTX_T>::View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gnode> gnode,
-    std::string name, std::string separator, t_config config)
+View<CTX_T>::View(std::shared_ptr<t_pool> pool, std::shared_ptr<CTX_T> ctx,
+    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, t_config config)
     : m_pool(pool)
     , m_ctx(ctx)
     , m_gnode(gnode)

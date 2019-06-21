@@ -17,23 +17,38 @@
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
+#include <perspective/sym_table.h>
 #include <perspective/view.h>
 #include <random>
 #include <cmath>
 #include <sstream>
-#include <perspective/sym_table.h>
 #include <codecvt>
 
 typedef std::codecvt_utf8<wchar_t> utf8convert_type;
 typedef std::codecvt_utf8_utf16<wchar_t> utf16convert_type;
 
 namespace perspective {
+
+/**
+ * @brief the `binding` namespace contains methods which ingest, return, or otherwise manipulate
+ * values in Perspective's binding language.
+ *
+ * For Emscripten WASM builds, the type is defined as `emscripten::val`, shadowed using our
+ * `t_val` construct.
+ *
+ * For Python, the type is `py::object`.
+ *
+ * Templated functions in this namespace should be explicitly instantiated with
+ * the correct object type for the binding language.
+ *
+ */
 namespace binding {
 
     /******************************************************************************
      *
      * Utility
      */
+
     template <typename T, typename U>
     std::vector<U> vecFromArray(T& arr);
 
@@ -44,8 +59,6 @@ namespace binding {
      *
      * Data Loading
      */
-
-    // Aggregate parsing utilities
 
     t_index _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name);
 
@@ -95,32 +108,31 @@ namespace binding {
     std::vector<t_fterm> _get_fterms(const t_schema& schema, T j_date_parser, T j_filters);
 
     /**
-     * Converts a scalar value to its language-specific representation.
+     * @brief Converts a `t_scalar` to a value in the binding language.
      *
-     * Params
-     * ------
-     * t_tscalar scalar
-     *
-     * Returns
-     * -------
-     * T
+     * @tparam T
+     * @param scalar
      */
     template <typename T>
     T scalar_to(const t_tscalar& scalar);
 
+    /**
+     * @brief Converts a `t_scalar` in a vector to a value in the binding language.
+     *
+     * @tparam T
+     * @param scalar
+     */
     template <typename T>
     T scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
 
     /**
+     * @brief namespace `arrow` contains utilities for writing data in the Apache arrow format.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * Implementations of these methods access underlying heap memory and create contiguous
+     * blocks of data which conform to the arrow schema; these methods should not be used to
+     * parse `.arrow` files or access arrow-formatted data in memory. Instead, arrow data
+     * parsing and manipulation should be implemented in the binding language, using appropriate
+     * libraries.
      */
     namespace arrow {
 
@@ -136,6 +148,21 @@ namespace binding {
 
     } // namespace arrow
 
+    /**
+     * @brief Retrieve and cast a `t_scalar` value.
+     *
+     * @tparam F
+     * @tparam F
+     * @param t
+     * @return T
+     */
+    template <typename F, typename T = F>
+    T get_scalar(t_tscalar& t);
+
+    /**
+     * @brief Given a data accessor and a pointer to a column, iterate through the data and fill
+     * the column.
+     */
     template <typename T>
     void _fill_col_numeric(T accessor, t_table& tbl, std::shared_ptr<t_column> col,
         std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
@@ -161,46 +188,32 @@ namespace binding {
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     /**
-     * Fills the table with data from language.
-     *
-     * Params
-     * ------
-     * tbl - pointer to the table object
-     * ocolnames - vector of column names
-     * accessor - the data accessor interface
-     * odt - vector of data types
-     * offset
-     * is_arrow - flag for arrow data
-     *
-     * Returns
-     * -------
-     *
+     * @brief Change a value at a given index inside the column.
      */
-    template <typename T>
-    void _fill_data(t_table& tbl, std::vector<std::string> ocolnames, T accessor,
-        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update);
-
-    /******************************************************************************
-     *
-     * Public
-     */
-
     template <typename T>
     void set_column_nth(t_column* col, t_uindex idx, T value);
 
     /**
-     * Helper function for computed columns
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @brief Create a new computed column.
      */
     template <typename T>
     void table_add_computed_column(t_table& table, T computed_defs);
+
+    /**
+     * @brief Given a table, iterate through each column and fill it with data.
+     *
+     * @tparam T
+     * @param tbl
+     * @param accessor
+     * @param col_names
+     * @param data_types
+     * @param offset
+     * @param is_arrow
+     * @param is_update
+     */
+    template <typename T>
+    void _fill_data(t_table& tbl, T accessor, std::vector<std::string> col_names,
+        std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update);
 
     /**
      * DataAccessor
@@ -211,7 +224,7 @@ namespace binding {
 
     // Name parsing
     template <typename T>
-    std::vector<std::string> column_names(T data, std::int32_t format);
+    std::vector<std::string> get_column_names(T data, std::int32_t format);
 
     // Type inferrence for fill_col and data_types
     template <typename T, typename U>
@@ -221,56 +234,58 @@ namespace binding {
     t_dtype get_data_type(T data, std::int32_t format, std::string name, U date_validator);
 
     template <typename T, typename U>
-    std::vector<t_dtype> data_types(
+    std::vector<t_dtype> get_data_types(
         T data, std::int32_t format, std::vector<std::string> names, U date_validator);
 
     /**
-     * Create a default gnode.
+     * @brief Create and populate a table.
      *
-     * Params
-     * ------
-     * j_colnames - a JS Array of column names.
-     * j_dtypes - a JS Array of column types.
-     *
-     * Returns
-     * -------
-     * A gnode.
-     */
-    std::shared_ptr<t_gnode> make_gnode(const t_schema& iscm);
-
-    /**
-     * Create a populated table.
-     *
-     * Params
-     * ------
-     * chunk - a JS object containing parsed data and associated metadata
-     * offset
-     * limit
-     * index
-     * is_delete - sets the table operation
-     *
-     * Returns
-     * -------
-     * a populated table.
+     * @tparam
+     * @param pool
+     * @param gnode
+     * @param accessor
+     * @param computed
+     * @param offset
+     * @param limit
+     * @param index
+     * @param is_update
+     * @param is_delete
+     * @param is_arrow
+     * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<t_gnode> make_table(t_pool* pool, T gnode, T accessor, T computed,
-        std::uint32_t offset, std::uint32_t limit, std::string index, bool is_update,
-        bool is_delete, bool is_arrow);
+    std::shared_ptr<t_gnode> make_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
+        T computed, std::uint32_t offset, std::uint32_t limit, std::string index,
+        bool is_update, bool is_delete, bool is_arrow);
 
     /**
-     * Copies the internal table from a gnode
+     * @brief Create a new `t_pool` and embed it in a shared pointer.
      *
-     * Params
-     * ------
+     * @return std::shared_ptr<t_pool>
+     */
+    std::shared_ptr<t_pool> make_pool();
+
+    /**
+     * @brief Given a schema, create a graph node that is able to own underlying Perspective
+     * tables.
      *
-     * Returns
-     * -------
-     * A gnode.
+     * @param in_schema
+     * @return std::shared_ptr<t_gnode>
+     */
+    std::shared_ptr<t_gnode> make_gnode(const t_schema& in_schema);
+
+    /**
+     * @brief Create a new gnode with an already-created table.
+     *
+     * @tparam T
+     * @param pool
+     * @param gnode
+     * @param computed
+     * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
     std::shared_ptr<t_gnode> clone_gnode_table(
-        t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed);
+        std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode, T computed);
 
     /**
      * @brief Extracts and validates the config from the binding language,
@@ -288,124 +303,108 @@ namespace binding {
         const t_schema& schema, std::string separator, T date_parser, T config);
 
     /**
-     * Creates a new zero-sided View.
+     * @brief Create a new zero-sided view.
      *
-     * Params
-     * ------
+     * Zero-sided views have no aggregates applied.
      *
-     * Returns
-     * -------
-     * A shared pointer to a View<CTX_T>.
+     * @tparam T
+     * @param pool
+     * @param gnode
+     * @param name
+     * @param separator
+     * @param config
+     * @param date_parser
+     * @return std::shared_ptr<View<t_ctx0>>
      */
-
     template <typename T>
-    std::shared_ptr<View<t_ctx0>> make_view_zero(t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, T config, T date_parser);
+    std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<t_pool> pool,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
 
     /**
-     * Creates a new one-sided View.
+     * @brief Create a new one-sided view.
      *
-     * Params
-     * ------
+     * One-sided views have one or more `row-pivots` applied,
      *
-     * Returns
-     * -------
-     * A shared pointer to a View<t_ctx1>.
+     * @tparam T
+     * @param pool
+     * @param gnode
+     * @param name
+     * @param separator
+     * @param config
+     * @param date_parser
+     * @return std::shared_ptr<View<t_ctx1>>
      */
-
     template <typename T>
-    std::shared_ptr<View<t_ctx1>> make_view_one(t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, T config, T date_parser);
+    std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<t_pool> pool,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
 
     /**
-     * Creates a new two-sided View.
+     * @brief Create a new two-sided view.
      *
-     * Params
-     * ------
+     * Two sided views have one or more `row-pivots` and `column-pivots` applied, or they have
+     * one or more `column-pivots` applied without any row pivots, hence the term `column_only`.
      *
-     * Returns
-     * -------
-     * A shared pointer to a View<t_ctx2>.
+     * @tparam T
+     * @param pool
+     * @param gnode
+     * @param name
+     * @param separator
+     * @param config
+     * @param date_parser
+     * @return std::shared_ptr<View<t_ctx2>>
      */
-
     template <typename T>
-    std::shared_ptr<View<t_ctx2>> make_view_two(t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, T config, T date_parser);
+    std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<t_pool> pool,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
+        T date_parser);
 
     /**
+     * @brief Create a new zero-sided context.
      *
+     * Contexts contain the underlying aggregates, sort specifications, filter terms, and other
+     * metadata allowing for data manipulation and view creation.
      *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @return std::shared_ptr<t_ctx0>
      */
     std::shared_ptr<t_ctx0> make_context_zero(t_schema schema, t_filter_op combiner,
         std::vector<std::string> columns, std::vector<t_fterm> filters,
-        std::vector<t_sortspec> sorts, t_pool* pool, std::shared_ptr<t_gnode> gnode,
-        std::string name);
-
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
-    std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
-        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, t_pool* pool,
+        std::vector<t_sortspec> sorts, std::shared_ptr<t_pool> pool,
         std::shared_ptr<t_gnode> gnode, std::string name);
 
     /**
+     * @brief Create a new one-sided context.
      *
+     * @return std::shared_ptr<t_ctx1>
+     */
+    std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
+        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::shared_ptr<t_pool> pool,
+        std::shared_ptr<t_gnode> gnode, std::string name);
+
+    /**
+     * @brief Create a new two-sided context.
      *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @return std::shared_ptr<t_ctx2>
      */
     std::shared_ptr<t_ctx2> make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
         std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
         std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
         std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        bool column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name);
-
-    template <typename T>
-    void sort(std::shared_ptr<t_ctx2> ctx2, T j_sortby);
-
-    template <typename T>
-    T get_column_data(std::shared_ptr<t_table> table, std::string colname);
+        bool column_only, std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
+        std::string name);
 
     /**
+     * @brief Get a slice of data for a single column, serialized to t_val.
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * @tparam
+     * @param table
+     * @param colname
+     * @return t_val
      */
-    template <typename CTX_T, typename T>
-    T get_data(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
-        std::uint32_t end_row, std::uint32_t start_col, std::uint32_t end_col);
-
     template <typename T>
-    T get_data_two_skip_headers(std::shared_ptr<View<t_ctx2>> view, std::uint32_t depth,
-        std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-        std::uint32_t end_col);
+    T get_column_data(std::shared_ptr<t_table> table, std::string colname);
 
     /**
      * @brief Get the t_data_slice object, which contains an underlying slice of data and

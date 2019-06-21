@@ -1252,7 +1252,7 @@ export default function(Module) {
         let pool, gnode;
 
         try {
-            pool = new __MODULE__.t_pool();
+            pool = __MODULE__.make_pool();
             gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
@@ -1437,8 +1437,7 @@ export default function(Module) {
                 limit_index = 0;
 
             try {
-                pool = new __MODULE__.t_pool();
-                console.log("POOL", pool);
+                pool = __MODULE__.make_pool();
 
                 [gnode, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
 

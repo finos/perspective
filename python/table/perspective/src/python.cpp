@@ -301,26 +301,21 @@ py::object scalar_to(const t_tscalar& scalar) {
     }
 }
 
-
 /**
- * Fills the table with data from Javascript.
+ * @brief Given a table, iterate through each column and fill it with data.
  *
- * Params
- * ------
- * tbl - pointer to the table object
- * ocolnames - vector of column names
- * accessor - the JS data accessor interface
- * odt - vector of data types
- * offset
- * is_arrow - flag for arrow data
- *
- * Returns
- * -------
- *
+ * @tparam T
+ * @param tbl
+ * @param accessor
+ * @param col_names
+ * @param data_types
+ * @param offset
+ * @param is_arrow
+ * @param is_update
  */
 void
-_fill_data(t_table& tbl, std::vector<std::string> ocolnames, py::object accessor,
-    std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update) {
+_fill_data(t_table& tbl, py::object accessor, std::vector<std::string> col_names, 
+    std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
     //TODO
 }
 
@@ -358,7 +353,7 @@ void table_add_computed_column(t_table& table, T computed_defs) {
 
 // Name parsing
 std::vector<std::string>
-column_names(py::object data, std::int32_t format) {
+get_column_names(py::object data, std::int32_t format) {
     //TODO
     std::vector<std::string> names;
     return names;
@@ -379,7 +374,7 @@ get_data_type(py::object data, std::int32_t format, std::string name, py::object
 }
 
 std::vector<t_dtype>
-data_types(py::object data, std::int32_t format, std::vector<std::string> names, py::object date_validator) {
+get_data_types(py::object data, std::int32_t format, std::vector<std::string> names, py::object date_validator) {
     //TODO
     if (names.size() == 0) {
         PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
@@ -401,26 +396,26 @@ data_types(py::object data, std::int32_t format, std::vector<std::string> names,
  * A gnode.
  */
 std::shared_ptr<t_gnode>
-make_gnode(const t_schema& iscm) {
-    std::vector<std::string> ocolnames(iscm.columns());
-    std::vector<t_dtype> odt(iscm.types());
+make_gnode(const t_schema& in_schema) {
+    std::vector<std::string> col_names(in_schema.columns());
+    std::vector<t_dtype> data_types(in_schema.types());
 
-    if (iscm.has_column("psp_pkey")) {
-        t_uindex idx = iscm.get_colidx("psp_pkey");
-        ocolnames.erase(ocolnames.begin() + idx);
-        odt.erase(odt.begin() + idx);
+    if (in_schema.has_column("psp_pkey")) {
+        t_uindex idx = in_schema.get_colidx("psp_pkey");
+        col_names.erase(col_names.begin() + idx);
+        data_types.erase(data_types.begin() + idx);
     }
 
-    if (iscm.has_column("psp_op")) {
-        t_uindex idx = iscm.get_colidx("psp_op");
-        ocolnames.erase(ocolnames.begin() + idx);
-        odt.erase(odt.begin() + idx);
+    if (in_schema.has_column("psp_op")) {
+        t_uindex idx = in_schema.get_colidx("psp_op");
+        col_names.erase(col_names.begin() + idx);
+        data_types.erase(data_types.begin() + idx);
     }
 
-    t_schema oscm(ocolnames, odt);
+    t_schema out_schema(col_names, data_types);
 
     // Create a gnode
-    auto gnode = std::make_shared<t_gnode>(oscm, iscm);
+    auto gnode = std::make_shared<t_gnode>(out_schema, in_schema);
     gnode->init();
 
     return gnode;
@@ -480,45 +475,11 @@ clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed) {
     return new_gnode;
 }
 
-template<>
-void sort(std::shared_ptr<t_ctx2> ctx2, py::object j_sortby){
-
-}
-
 template <>
 py::object get_column_data(std::shared_ptr<t_table> table, std::string colname) {
     py::list arr;
     return arr;
 }
-
-/**
- *
- *
- * Params
- * ------
- *
- *
- * Returns
- * -------
- *
- */
-template <typename CTX_T>
-py::object get_data(std::shared_ptr<View<CTX_T> > view, std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-    std::uint32_t end_col) {
-    py::list arr;
-    return arr;
-}
-
-template <>
-py::object get_data_two_skip_headers(std::shared_ptr<View<t_ctx2> > view, std::uint32_t depth,
-    std::uint32_t start_row, std::uint32_t end_row, std::uint32_t start_col,
-    std::uint32_t end_col) {
-    py::list arr;
-    return arr;
-}
-
-
-
 
 }
 }

@@ -26,6 +26,12 @@ matrix:
       os: osx
 
   allow_failures:
+    - python: "3.6"
+      language: python
+      env: TEST=PYTHON
+      cache: pip
+      services: docker
+
     - language: c++
       env: TEST=CPP_OSX
       os: osx

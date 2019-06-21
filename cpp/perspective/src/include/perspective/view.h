@@ -28,8 +28,9 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, t_config config);
+    View(std::shared_ptr<t_pool> pool, std::shared_ptr<CTX_T> ctx,
+        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator,
+        t_config config);
 
     ~View();
 
@@ -165,7 +166,7 @@ private:
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
-    t_pool* m_pool;
+    std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<CTX_T> m_ctx;
     std::shared_ptr<t_gnode> m_gnode;
     std::string m_name;
