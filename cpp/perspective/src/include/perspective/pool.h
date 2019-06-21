@@ -16,7 +16,8 @@
 #include <atomic>
 
 #ifdef PSP_ENABLE_WASM
-#include <perspective/val.h>
+#include <emscripten/val.h>
+typedef emscripten::val t_val;
 #endif
 
 namespace perspective {

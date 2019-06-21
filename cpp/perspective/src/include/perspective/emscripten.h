@@ -8,39 +8,40 @@
  */
 #pragma once
 
-#include <perspective/base.h>
 #include <perspective/binding.h>
-#include <perspective/gnode.h>
-#include <perspective/table.h>
-#include <perspective/pool.h>
-#include <perspective/context_zero.h>
-#include <perspective/context_one.h>
-#include <perspective/context_two.h>
-#include <perspective/val.h>
-#include <random>
-#include <cmath>
-#include <sstream>
-#include <perspective/sym_table.h>
-#include <codecvt>
+#include <boost/optional.hpp>
+#include <emscripten.h>
+#include <emscripten/bind.h>
+
+#ifdef PSP_ENABLE_WASM
+#include <emscripten/val.h>
+typedef emscripten::val t_val;
+#endif
 
 namespace perspective {
 namespace binding {
+
+    /**
+     * @brief namespace `js_typed_array` contains utility bindings that initialize typed arrays
+     * using Emscripten.
+     *
+     */
+    namespace js_typed_array {} // namespace js_typed_array
+
+    /**
+     * @brief Given a vector of scalar data objects, write it into a typed array.
+     *
+     * @tparam T
+     * @tparam T
+     * @tparam T
+     */
+    template <typename T, typename F = T, typename O = T>
+    t_val col_to_typed_array(std::vector<t_tscalar> data);
 
     // Date parsing
     t_date jsdate_to_t_date(t_val date);
     t_val t_date_to_jsdate(t_date date);
 
-    /**
-     * Converts a scalar value to its JS representation.
-     *
-     * Params
-     * ------
-     * t_tscalar scalar
-     *
-     * Returns
-     * -------
-     * t_val
-     */
     template <>
     t_val scalar_to(const t_tscalar& scalar);
     t_val scalar_to_val(
@@ -49,21 +50,6 @@ namespace binding {
     template <>
     t_val scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
     t_val scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
-
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
-    template <typename T>
-    t_val get_data_js(T ctx, std::uint32_t start_row, std::uint32_t end_row,
-        std::uint32_t start_col, std::uint32_t end_col);
 
 } // namespace binding
 } // namespace perspective
