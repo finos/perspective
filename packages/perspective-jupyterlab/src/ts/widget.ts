@@ -77,7 +77,7 @@ class PerspectiveView extends DOMWidgetView {
     render() {
         this.psp = new PerspectiveWidget(undefined,
             {datasrc: this.model.get('datasrc'),
-             data: this.model.get('datasrc') == 'arrow'?this.model.get('_bin_data') : this.model.get('_data'),
+             data: this.model.get('datasrc') === 'arrow' ? this.model.get('_bin_data').buffer : this.model.get('_data'),
              schema: this.model.get('schema'),
              view: this.model.get('view'),
              columns: this.model.get('columns'),
@@ -135,12 +135,18 @@ class PerspectiveView extends DOMWidgetView {
     }
 
     data_changed() {
+        if(this.model.get('datasrc') === 'arrow'){
+            return;
+        }
         this.psp.data = this.model.get('_data');
         this.psp._render();
     }
 
     bin_data_changed() {
-        this.psp.data = this.model.get('_bin_data');
+        if(this.model.get('datasrc') !== 'arrow'){
+            return;
+        }
+        this.psp.data = this.model.get('_bin_data').buffer;
         this.psp._render();
     }
 

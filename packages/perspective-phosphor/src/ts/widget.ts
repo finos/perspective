@@ -278,7 +278,7 @@ export
                 this.pspNode.load(this.schema as Schema, options as TableOptions);
             }
             if (data) {
-                this.pspNode.update(data.buffer);
+                this.pspNode.update(data);
             }
             /*****************/
         } else {
