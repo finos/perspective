@@ -81,9 +81,6 @@ export
         super({ node: options.bindto || document.createElement('div') });
         this._psp = Private.createNode(this.node as HTMLDivElement);
 
-        let observer = new MutationObserver(()=>{this.notifyResize()});
-        observer.observe(this.node, { attributes: true });
-
         this.title.label = name;
         this.title.caption = `${name}`;
         this.id = `${name}-` + _increment;
@@ -281,7 +278,7 @@ export
                 this.pspNode.load(this.schema as Schema, options as TableOptions);
             }
             if (data) {
-                this.pspNode.load(data.buffer);
+                this.pspNode.update(data.buffer);
             }
             /*****************/
         } else {
@@ -550,6 +547,14 @@ namespace Private {
         div.style.setProperty('display', 'flex');
         div.style.setProperty('flex-direction', 'row');
         node.appendChild(div);
+
+
+        if (!psp.notifyResize) {
+            console.warn('Warning: not bound to real element');
+        } else {
+            let observer = new MutationObserver(psp.notifyResize.bind(psp));
+            observer.observe(node, { attributes: true });
+        }
         return psp;
     }
 }

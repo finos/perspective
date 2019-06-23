@@ -98,7 +98,6 @@ class PerspectiveView extends DOMWidgetView {
              wrap: false, // wrap: handled by perspective-python
              delete_: true, // delete_: handled by perspective-python
         });
-
         this.model.on('change:_data', this.data_changed, this);
         this.model.on('change:_bin_data', this.bin_data_changed, this);
         // Dont trigger on datasrc change until data is updated
