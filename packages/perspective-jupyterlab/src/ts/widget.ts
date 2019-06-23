@@ -129,7 +129,7 @@ class PerspectiveView extends DOMWidgetView {
 
     _update(msg: any) {
         if (msg.type === 'update') {
-            this.psp.pspNode.update(msg.data);
+            this.psp._update(msg.data);
         } else if (msg.type === 'delete') {
             this.psp.delete();
         }

@@ -16,25 +16,26 @@ import "@finos/perspective-viewer-highcharts";
 import { Message } from '@phosphor/messaging';
 import { Widget } from '@phosphor/widgets';
 import { MIME_TYPE, PSP_CLASS, PSP_CONTAINER_CLASS, PSP_CONTAINER_CLASS_DARK } from './utils';
-import { Schema, TableOptions } from '@finos/perspective';
+import {TableData, TableOptions, Schema} from '@finos/perspective';
+
 import { PerspectiveViewer } from '@finos/perspective-viewer';
 
 let _increment = 0;
 
 export type PerspectiveWidgetOptions = {
     datasrc?: string;
-    data?: any;
-    schema?: { [colname: string]: string };
+    data?: TableData;
+    schema?: Schema;
     view?: string;
-    columns?: string[];
-    rowpivots?: string[];
-    columnpivots?: string[];
+    columns?: Array<string>;
+    rowpivots?: Array<string>;
+    columnpivots?: Array<string>;
     aggregates?: { [colname: string]: string };
-    sort?: string[];
+    sort?: Array<string>;
     index?: string;
     limit?: number;
     computedcolumns?: { [colname: string]: string }[];
-    filters?: string[][];
+    filters?: Array<Array<string>>;
     plugin_config?: any;
     settings?: boolean;
     embed?: boolean;
@@ -53,17 +54,17 @@ export type PerspectiveWidgetOptions = {
  * @param {options} options object consisting of the fields below
  * @param {string} name - Name of phosphor widget
  * @param {string} datasrc - type of datasrc, either '' for json or 'pyarrow' for arrow TODO
- * @param {{[colname: string]: string}} schema - Perspective schema to load
+ * @param {Schema} schema - Perspective schema to load
  * @param {string} view - PerspectiveViewer view type
- * @param {string[]} columns - Columns to show
- * @param {string[]} rowpivots - Row pivots to use
- * @param {string[]} columnpivots - Column pivots to use
+ * @param {Array<string>} columns - Columns to show
+ * @param {Array<string>} rowpivots - Row pivots to use
+ * @param {Array<string>} columnpivots - Column pivots to use
  * @param {{[colname: string]: string}} aggregates - Aggregates to apply to pivoted data
- * @param {string[]} sort - sort by these [column, {'asc', 'dsc',...}]
+ * @param {Array<string>} sort - sort by these [column, {'asc', 'dsc',...}]
  * @param {string} index - Primary key column name
  * @param {number} limit - limit to this many records
  * @param {{[colname: string]: string}[]} computedcolumns - Computed columns to use
- * @param {string[][]} filters - list of filters to use
+ * @param {Array<Array<string>>} filters - list of filters to use
  * @param {any} filters - configuration for plugin restore
  * @param {boolean} settings - show settings 
  * @param {boolean} embed - Embed mode TODO
@@ -79,6 +80,9 @@ export
         options: PerspectiveWidgetOptions = {}) {
         super({ node: options.bindto || document.createElement('div') });
         this._psp = Private.createNode(this.node as HTMLDivElement);
+
+        let observer = new MutationObserver(()=>{this.notifyResize()});
+        observer.observe(this.node, { attributes: true });
 
         this.title.label = name;
         this.title.caption = `${name}`;
@@ -112,21 +116,21 @@ export
     }
 
     _load(options: PerspectiveWidgetOptions) {
-        let data: any = options.data || [];
+        let data: TableData = options.data || [];
         this._data = data;
 
         let datasrc: string = options.datasrc || '';
-        let schema: { [colname: string]: string } = options.schema || {};
+        let schema: Schema = options.schema || {};
         let view: string = options.view || 'hypergrid';
-        let columns: string[] = options.columns || [];
-        let rowpivots: string[] = options.rowpivots || [];
-        let columnpivots: string[] = options.columnpivots || [];
+        let columns: Array<string> = options.columns || [];
+        let rowpivots: Array<string> = options.rowpivots || [];
+        let columnpivots: Array<string> = options.columnpivots || [];
         let aggregates: { [colname: string]: string } = options.aggregates || {};
-        let sort: string[] = options.sort || [];
+        let sort: Array<string> = options.sort || [];
         let index: string = options.index || '';
         let limit: number = options.limit || -1;
         let computedcolumns: { [colname: string]: string }[] = options.computedcolumns || [];
-        let filters: string[][] = options.filters || [];
+        let filters: Array<Array<string>> = options.filters || [];
         let plugin_config: any = options.plugin_config || {};
         let settings: boolean = options.settings || false;
         let embed: boolean = options.embed || false;
@@ -182,8 +186,6 @@ export
      */
     onAfterAttach(msg: Message): void {
         super.onAfterAttach(msg);
-        let observer = new MutationObserver(()=>{this.notifyResize()});
-        observer.observe(this.node, { attributes: true });
     }
 
 
@@ -222,6 +224,15 @@ export
     delete(): void {
         this.pspNode.delete();
     }
+
+    /**
+     * update underlying perspective table
+     *
+     */
+    _update(data: any): void {
+        this.pspNode.update(data);
+    }
+
 
     /**
      * other non-phosphor resizes
@@ -371,7 +382,7 @@ export
     }
 
     get columns() { return this._columns; }
-    set columns(columns: string[]) {
+    set columns(columns: Array<string>) {
         this._columns = columns;
         if (this._columns.length > 0) {
             this.pspNode.setAttribute('columns', JSON.stringify(this._columns));
@@ -381,13 +392,13 @@ export
     }
 
     get rowpivots() { return this._rowpivots; }
-    set rowpivots(rowpivots: string[]) {
+    set rowpivots(rowpivots: Array<string>) {
         this._rowpivots = rowpivots;
         this.pspNode.setAttribute('row-pivots', JSON.stringify(this._rowpivots));
     }
 
     get columnpivots() { return this._columnpivots; }
-    set columnpivots(columnpivots: string[]) {
+    set columnpivots(columnpivots: Array<string>) {
         this._columnpivots = columnpivots;
         this.pspNode.setAttribute('column-pivots', JSON.stringify(this._columnpivots));
     }
@@ -399,7 +410,7 @@ export
     }
 
     get sort() { return this._sort; }
-    set sort(sort: string[]) {
+    set sort(sort: Array<string>) {
         this._sort = sort;
         this.pspNode.setAttribute('sort', JSON.stringify(this._sort));
     }
@@ -425,7 +436,7 @@ export
     }
 
     get filters() { return this._filters; }
-    set filters(filters: string[][]) {
+    set filters(filters: Array<Array<string>>) {
         this._filters = filters;
         if (this._filters.length > 0) {
             this.pspNode.setAttribute('filters', JSON.stringify(this._filters));
@@ -489,15 +500,15 @@ export
     private _datasrc: string;
     private _schema: { [colname: string]: string };
     private _view: string;
-    private _columns: string[];
-    private _rowpivots: string[];
-    private _columnpivots: string[];
+    private _columns: Array<string>;
+    private _rowpivots: Array<string>;
+    private _columnpivots: Array<string>;
     private _aggregates: { [colname: string]: string };
-    private _sort: string[];
+    private _sort: Array<string>;
     private _index: string;
     private _limit: number;
     private _computedcolumns: { [colname: string]: string }[];
-    private _filters: string[][];
+    private _filters: Array<Array<string>>;
     private _plugin_config: any;
 
     private _settings: boolean;
