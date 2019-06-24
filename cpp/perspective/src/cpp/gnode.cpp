@@ -337,20 +337,16 @@ t_gnode::clear_deltas() {
     }
 }
 
-void
-t_gnode::_process() {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+std::shared_ptr<t_table>
+t_gnode::_process_table() {
+
     m_was_updated = false;
-    PSP_VERBOSE_ASSERT(
-        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
-    psp_log_time(repr() + " _process.enter");
-    auto t1 = std::chrono::high_resolution_clock::now();
+    auto t1 = std::chrono::high_resolution_clock::now();    
 
     std::shared_ptr<t_port>& iport = m_iports[0];
 
     if (iport->get_table()->size() == 0) {
-        return;
+        return nullptr;
     }
 
     m_was_updated = true;
@@ -403,7 +399,7 @@ t_gnode::_process() {
         PSP_GNODE_VERIFY_TABLE(stable);
 #endif
 
-        return;
+        return nullptr;
     }
 
     for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
@@ -687,7 +683,21 @@ t_gnode::_process() {
                   << std::endl;
     }
 
-    notify_contexts(*flattened_masked);
+    return flattened_masked;
+}
+
+void
+t_gnode::_process() {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    PSP_VERBOSE_ASSERT(
+        m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
+    psp_log_time(repr() + " _process.enter");
+    
+    std::shared_ptr<t_table> flattened_masked = _process_table();
+    if (flattened_masked) {
+        notify_contexts(*flattened_masked);
+    }
 
     psp_log_time(repr() + " _process.noinit_path.exit");
 }

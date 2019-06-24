@@ -454,10 +454,10 @@ export default function(Module) {
         }
 
         // use a specified data slice, if provided
-        let slice;
+        let slice, data_slice;
 
         if (!options.data_slice) {
-            const data_slice = this.get_data_slice(start_row, end_row, idx, idx + 1);
+            data_slice = this.get_data_slice(start_row, end_row, idx, idx + 1);
             slice = data_slice.get_slice();
         } else {
             slice = options.data_slice.get_column_slice(idx);
@@ -467,6 +467,9 @@ export default function(Module) {
 
         const rst = format_function(slice, dtype, idx);
         slice.delete();
+        if (data_slice) {
+            data_slice.delete();
+        }
         return rst;
     };
 
@@ -1509,6 +1512,13 @@ export default function(Module) {
             }
         }
     }
+
+    //     var ea = 38304
+    //     , v = e.TOTAL_MEMORY || 16777216;
+    //   5242880 > v && r("TOTAL_MEMORY should be larger than TOTAL_STACK, was " + v + "! (TOTAL_STACK=5242880)");
+    //   e.buffer ? z = e.buffer : ("object" === typeof WebAssembly && "function" === typeof WebAssembly.Memory ? (ia = new WebAssembly.Memory({
+    //       initial: v / 65536
+    //   }),
 
     /**
      * Use WebSorkerServer as default inside a Web Worker, where `window` is replaced with `self`.

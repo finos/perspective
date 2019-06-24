@@ -176,6 +176,7 @@ private:
     void populate_icols_in_flattened(
         const std::vector<t_rlookup>& lkup, std::shared_ptr<t_table>& flat) const;
 
+    std::shared_ptr<t_table> _process_table();
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
     t_schema m_tblschema;
