@@ -200,6 +200,12 @@ function sortColumn(event) {
     }
 }
 
+const right_click_handler = e => {
+    const old_event = e.detail.primitiveEvent;
+    const new_event = new MouseEvent(old_event.type, old_event);
+    e.target.parentElement.parentElement.parentElement.dispatchEvent(new_event);
+};
+
 // `install` makes this a Hypergrid plug-in
 exports.install = function(grid) {
     addSortChars(grid.behavior.charMap);
@@ -209,11 +215,8 @@ exports.install = function(grid) {
     Object.getPrototypeOf(grid.behavior).formatColumnHeader = formatColumnHeader;
 
     grid.addEventListener("fin-column-sort", sortColumn.bind(grid));
-    grid.addEventListener("fin-context-menu", e => {
-        const old_event = e.detail.primitiveEvent.primitiveEvent.detail.primitiveEvent;
-        const new_event = new MouseEvent(old_event.type, old_event);
-        e.target.parentElement.parentElement.parentElement.dispatchEvent(new_event);
-    });
+
+    grid.addEventListener("fin-canvas-context-menu", right_click_handler);
     Object.getPrototypeOf(grid.behavior).cellClicked = async function(event) {
         event.primitiveEvent.preventDefault();
         event.handled = true;
