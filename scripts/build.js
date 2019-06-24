@@ -42,14 +42,6 @@ const getBaseDir = packageName => path.join(__dirname, "..", "cpp", packageName,
 const getBuildDir = packageName => path.join(getBaseDir(packageName), "build");
 const getOuputDir = packageName => path.join(__dirname, "..", "packages", packageName);
 
-const templateSource = source => `
-var window = window || {};
-
-exports.load_perspective = function (Module) {
-    ${source};
-    return Module;
-};`;
-
 function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     console.log("-- Building %s", inputFile);
 
@@ -71,7 +63,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
         })
     );
 
-    let source = templateSource(runtimeText);
+    let source = runtimeText;
     if (format) {
         console.debug("Formatting code");
         source = prettier.format(source, {

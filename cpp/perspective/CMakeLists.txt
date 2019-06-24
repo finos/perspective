@@ -166,6 +166,9 @@ if (PSP_WASM_BUILD)
 		-s NO_EXIT_RUNTIME=1 \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
+		-s MODULARIZE=1 \
+		-s EXPORT_NAME=\"load_perspective\" \
+		-s EXPORT_ES6=1 \
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
 
@@ -173,6 +176,7 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O0 \
 			-g4 \
+			--profiling 1 \
 			-s SAFE_HEAP=1 \
 			-s DISABLE_EXCEPTION_CATCHING=0 \
 			-s ASSERTIONS=2 \
