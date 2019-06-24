@@ -341,7 +341,7 @@ std::shared_ptr<t_table>
 t_gnode::_process_table() {
 
     m_was_updated = false;
-    auto t1 = std::chrono::high_resolution_clock::now();    
+    auto t1 = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<t_port>& iport = m_iports[0];
 
@@ -693,7 +693,7 @@ t_gnode::_process() {
     PSP_VERBOSE_ASSERT(
         m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
     psp_log_time(repr() + " _process.enter");
-    
+
     std::shared_ptr<t_table> flattened_masked = _process_table();
     if (flattened_masked) {
         notify_contexts(*flattened_masked);
