@@ -55,10 +55,6 @@ exports.pitch = function pitch(request) {
         regExp: options.regExp
     });
 
-    if (process.env.PSP_DEBUG && filename.indexOf("asmjs") > -1) {
-        return;
-    }
-
     const cb = this.async();
 
     const worker = {};

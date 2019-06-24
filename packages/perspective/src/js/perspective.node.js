@@ -18,14 +18,14 @@ const process = require("process");
 
 const path = require("path");
 
-const load_perspective = require("../../obj/psp.sync.js").load_perspective;
+const load_perspective = require("../../obj/psp.async.js").load_perspective;
 
 // eslint-disable-next-line no-undef
 const RESOLVER = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__.resolve : module.require.resolve;
 
 const LOCAL_PATH = path.join(process.cwd(), "node_modules");
 
-const wasm = require("./psp.sync.wasm.js");
+const wasm = require("./psp.async.wasm.js");
 
 const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 
