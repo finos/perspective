@@ -77,7 +77,7 @@ class PerspectiveView extends DOMWidgetView {
     render() {
         this.psp = new PerspectiveWidget(undefined,
             {datasrc: this.model.get('datasrc'),
-             data: this.model.get('datasrc') == 'arrow'?this.model.get('_bin_data') : this.model.get('_data'),
+             data: this.model.get('datasrc') === 'arrow' ? this.model.get('_bin_data').buffer : this.model.get('_data'),
              schema: this.model.get('schema'),
              view: this.model.get('view'),
              columns: this.model.get('columns'),
@@ -98,7 +98,6 @@ class PerspectiveView extends DOMWidgetView {
              wrap: false, // wrap: handled by perspective-python
              delete_: true, // delete_: handled by perspective-python
         });
-
         this.model.on('change:_data', this.data_changed, this);
         this.model.on('change:_bin_data', this.bin_data_changed, this);
         // Dont trigger on datasrc change until data is updated
@@ -129,19 +128,25 @@ class PerspectiveView extends DOMWidgetView {
 
     _update(msg: any) {
         if (msg.type === 'update') {
-            this.psp.pspNode.update(msg.data);
+            this.psp._update(msg.data);
         } else if (msg.type === 'delete') {
             this.psp.delete();
         }
     }
 
     data_changed() {
+        if(this.model.get('datasrc') === 'arrow'){
+            return;
+        }
         this.psp.data = this.model.get('_data');
         this.psp._render();
     }
 
     bin_data_changed() {
-        this.psp.data = this.model.get('_bin_data');
+        if(this.model.get('datasrc') !== 'arrow'){
+            return;
+        }
+        this.psp.data = this.model.get('_bin_data').buffer;
         this.psp._render();
     }
 

@@ -1,19 +1,9 @@
-# Perspective JupyterLab Extension
+# Perspective Phosphor Extension
 
-This extension allows in-lining perspective based charts in jupyterlab notebooks.
-
-[Example](https://github.com/finos/perspective/blob/master/packages/perspective-jupyterlab/example.ipynb)
+This extension implements `perspective-viewer` in a [PhosphorJS](https://phosphorjs.github.io) widget, making it trivial to integrate perspective in `phosphor` based apps, such as JupyterLab. 
 
 ## Installation
 
 ### From npm
+`npm install @finos/perspective-phosphor`
 
-```bash
-jupyter labextension install @finos/perspective-jupyterlab
-```
-
-### PIP
-
-```bash
-pip install perspective-python
-```
