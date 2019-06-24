@@ -19,16 +19,6 @@ const os = require("os");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 /**
- * ASMJS Output Options
- */
-const WEB_ASMJS_OPTIONS = {
-    inputFile: "psp.asmjs.js",
-    format: false,
-    packageName: "perspective",
-    build: !!argv.asmjs // should we build asm?
-};
-
-/**
  * WASM Output Options
  */
 const WEB_WASM_OPTIONS = {
@@ -40,24 +30,9 @@ const WEB_WASM_OPTIONS = {
 };
 
 /**
- * Node.JS Output Options
- */
-const NODE_OPTIONS = {
-    inputFile: "psp.sync.js",
-    inputWasmFile: "psp.sync.wasm",
-    format: false,
-    packageName: "perspective",
-    build: !!argv.node // flag as to whether to build the node version
-};
-
-/**
  * Filter for the runtimes we should build
  */
-const AVAILABLE_RUNTIMES = [WEB_WASM_OPTIONS, NODE_OPTIONS];
-
-if (!process.env.PSP_DEBUG) {
-    AVAILABLE_RUNTIMES.push(WEB_ASMJS_OPTIONS);
-}
+const AVAILABLE_RUNTIMES = [WEB_WASM_OPTIONS];
 
 // Select the runtimes - if no builds are specified then build everything
 const RUNTIMES = AVAILABLE_RUNTIMES.filter(runtime => runtime.build).length ? AVAILABLE_RUNTIMES.filter(runtime => runtime.build) : AVAILABLE_RUNTIMES;

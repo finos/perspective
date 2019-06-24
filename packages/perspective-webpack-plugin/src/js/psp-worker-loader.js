@@ -42,10 +42,6 @@ exports.default = function loader(content) {
         regExp: options.regExp
     });
 
-    if (process.env.PSP_DEBUG && emitPath.indexOf("asmjs") > -1) {
-        return `module.exports = function() {  throw new Error('asm.js disabled in debug mode.'); };`;
-    }
-
     if (!options.compiled) {
         var inputPath = this.resourcePath;
         if (!options.inline) {

@@ -13,11 +13,6 @@ const RUNTIMES = {
     NODE: node_perspective
 };
 
-if (!process.env.PSP_DEBUG) {
-    require("../../build/perspective.asmjs.worker.js");
-    RUNTIMES.ASMJS = global.perspective;
-}
-
 const clear_tests = require("./clear.js");
 const constructor_tests = require("./constructors.js");
 const pivot_tests = require("./pivots.js");
