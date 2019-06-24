@@ -263,23 +263,21 @@ export
 
             let data = this.data;
 
-            if (Object.keys(this.schema).length > 0) {
-                let limit = this.limit;
-                let index = this.index;
-                let options = {} as { [key: string]: any };
+            // Arrow provides its own schema
+            let limit = this.limit;
+            let index = this.index;
+            let options = {} as { [key: string]: any };
 
-                if (limit > 0) {
-                    options['limit'] = limit;
-                }
-                if (index) {
-                    options['index'] = index;
-                }
-
-                this.pspNode.load(this.schema as Schema, options as TableOptions);
+            if (limit > 0) {
+                options['limit'] = limit;
+            }
+            if (index) {
+                options['index'] = index;
             }
             if (data) {
-                this.pspNode.update(data);
+                this.pspNode.load(data, options as TableOptions);
             }
+            
             /*****************/
         } else {
             /****************/
