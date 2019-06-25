@@ -59,7 +59,7 @@ class CMakeBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir, 'perspective')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(extdir, 'perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',
@@ -88,7 +88,7 @@ class CMakeBuild(build_ext):
             self.distribution.get_version())
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', os.path.abspath(os.path.join(ext.sourcedir, '..', 'cpp', 'perspective'))] + cmake_args,
+        subprocess.check_call(['cmake', os.path.abspath(os.path.join(ext.sourcedir, '..', '..', 'cpp', 'perspective'))] + cmake_args,
                               cwd=self.build_temp, env=env)
         subprocess.check_call(['cmake', '--build', '.'] + build_args,
                               cwd=self.build_temp)

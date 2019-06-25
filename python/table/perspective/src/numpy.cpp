@@ -9,7 +9,17 @@
 
 #if defined(PSP_ENABLE_PYTHON)
 
+#include <perspective/first.h>
+
+#define PY_ARRAY_UNIQUE_SYMBOL _perspectiveNumpy
+#include <numpy/arrayobject.h>
+#include <perspective/base.h>
+#include <perspective/exports.h>
 #include <perspective/numpy.h>
+#include <perspective/raw_types.h>
+
+namespace py = boost::python;
+namespace np = boost::python::numpy;
 
 extern "C" {
 void PERSPECTIVE_EXPORT

@@ -8,7 +8,7 @@
 
 import numpy as np
 import pandas as pd
-from perspective.libbinding import t_schema, t_dtype, t_table, t_column, t_gnode  # noqa: F401
+from .libbinding import t_schema, t_dtype, t_table, t_column, t_gnode  # noqa: F401
 
 
 class Perspective(object):

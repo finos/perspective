@@ -39,7 +39,6 @@ try {
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
         clean(path.join(".", "cpp", "perspective", "obj"));
         clean(path.join(".", "cpp", "perspective", "cppbuild"));
-        clean(path.join(".", "python", "build"));
     }
     if (!IS_SCREENSHOTS) {
         execute("lerna run clean");

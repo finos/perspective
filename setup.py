@@ -68,6 +68,15 @@ class build_ext(build_ext_orig):
             self.spawn(['cmake', '--build', '.', ] + build_args)
         os.chdir(str(cwd))
 
+        def find(pattern, path):
+            for root, dirs, files in os.walk(path):
+                for name in files:
+                    if fnmatch.fnmatch(name, pattern):
+                        return os.path.join(root, name)
+        copy(find('libbinding.*', 'build'), 'python/perspective/table')
+        copy(find('libpsp.*', 'build'), 'python/perspective/table')
+
+
 setup(
     name='perspective-python.table',
     version='0.1.3',
