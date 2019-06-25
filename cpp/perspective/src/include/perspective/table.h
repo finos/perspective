@@ -12,6 +12,7 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
+#include <perspective/data_accessor.h>
 #include <perspective/gnode.h>
 #include <perspective/pool.h>
 #include <perspective/data_table.h>
@@ -27,10 +28,9 @@ namespace perspective {
  *
  * @tparam T
  */
-template <typename T>
 class PERSPECTIVE_EXPORT Table {
 public:
-    Table(T data_accessor, std::vector<std::string> column_names,
+    Table(t_data_accessor data_accessor, std::vector<std::string> column_names,
         std::vector<t_dtype> data_types, std::string index, std::uint32_t size, bool is_arrow,
         bool is_delete, bool is_update);
     ~Table();
@@ -41,7 +41,7 @@ public:
     void set_gnode(std::shared_ptr<t_gnode> gnode);
 
     std::shared_ptr<t_data_table> get_data_table() const;
-    const T& get_data_accessor() const;
+    const t_data_accessor& get_data_accessor() const;
     std::shared_ptr<t_pool> get_pool() const;
     std::shared_ptr<t_gnode> get_gnode() const;
     const t_schema& get_schema() const;
@@ -51,7 +51,7 @@ public:
 
 private:
     std::shared_ptr<t_data_table> m_data_table;
-    T m_data_accessor;
+    t_data_accessor m_data_accessor;
     std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;

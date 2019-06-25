@@ -689,7 +689,7 @@ namespace binding {
      */
 
     void
-    _fill_col_int64(t_val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_int64(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -704,7 +704,7 @@ namespace binding {
     }
 
     void
-    _fill_col_time(t_val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -750,7 +750,7 @@ namespace binding {
     }
 
     void
-    _fill_col_date(t_val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -794,7 +794,7 @@ namespace binding {
     }
 
     void
-    _fill_col_bool(t_val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -844,7 +844,7 @@ namespace binding {
     }
 
     void
-    _fill_col_string(t_val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
 
         t_uindex nrows = col->size();
@@ -915,8 +915,9 @@ namespace binding {
     }
 
     void
-    _fill_col_numeric(t_val accessor, t_data_table& tbl, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+    _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
@@ -1178,7 +1179,7 @@ namespace binding {
      */
 
     void
-    _fill_data(t_data_table& tbl, t_val accessor, std::vector<std::string> col_names,
+    _fill_data(t_data_table& tbl, t_data_accessor accessor, std::vector<std::string> col_names,
         std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
 
         for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
@@ -1425,8 +1426,9 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_gnode>
-    make_data_table(std::shared_ptr<t_pool> pool, t_val gnode, t_val accessor, t_val computed,
-        std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
+    make_data_table(std::shared_ptr<t_pool> pool, t_val gnode, t_data_accessor accessor,
+        t_val computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
+        bool is_arrow) {
         std::uint32_t size = accessor["row_count"].as<std::int32_t>();
 
         std::vector<std::string> column_names;

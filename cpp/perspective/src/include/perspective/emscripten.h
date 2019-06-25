@@ -15,6 +15,8 @@
 
 #ifdef PSP_ENABLE_WASM
 #include <emscripten/val.h>
+// for WASM builds, typedef all data structures for binding languages to emscripten::val
+typedef t_val t_data_accessor;
 typedef emscripten::val t_val;
 #endif
 

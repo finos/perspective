@@ -10,8 +10,7 @@
 #include <perspective/table.h>
 
 namespace perspective {
-template <typename T>
-Table<T>::Table(T data_accessor, std::vector<std::string> column_names,
+Table::Table(t_data_accessor data_accessor, std::vector<std::string> column_names,
     std::vector<t_dtype> data_types, std::string index, std::uint32_t size, bool is_update,
     bool is_delete, bool is_arrow)
     : m_data_accessor(data_accessor)
@@ -27,63 +26,53 @@ Table<T>::Table(T data_accessor, std::vector<std::string> column_names,
     m_data_table->extend(m_size);
 }
 
-template <typename T>
 void
-Table<T>::set_pool(std::shared_ptr<t_pool> pool) {
+Table::set_pool(std::shared_ptr<t_pool> pool) {
     m_pool = pool;
 }
 
-template <typename T>
 void
-Table<T>::set_gnode(std::shared_ptr<t_gnode> gnode) {
+Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
     m_gnode = gnode;
 }
 
-template <typename T>
 std::shared_ptr<t_data_table>
-Table<T>::get_data_table() const {
+Table::get_data_table() const {
     return m_data_table;
 }
 
-template <typename T>
-const T&
-Table<T>::get_data_accessor() const {
+const t_data_accessor&
+Table::get_data_accessor() const {
     return m_data_accessor;
 }
 
-template <typename T>
 std::shared_ptr<t_pool>
-Table<T>::get_pool() const {
+Table::get_pool() const {
     return m_pool;
 }
 
-template <typename T>
 std::shared_ptr<t_gnode>
-Table<T>::get_gnode() const {
+Table::get_gnode() const {
     return m_gnode;
 }
 
-template <typename T>
 const t_schema&
-Table<T>::get_schema() const {
+Table::get_schema() const {
     return m_data_table->get_schema();
 }
 
-template <typename T>
 const std::vector<std::string>&
-Table<T>::get_column_names() const {
+Table::get_column_names() const {
     return m_column_names;
 }
 
-template <typename T>
 const std::vector<t_dtype>&
-Table<T>::get_data_types() const {
+Table::get_data_types() const {
     return m_data_types;
 }
 
-template <typename T>
 const std::string&
-Table<T>::get_index() const {
+Table::get_index() const {
     return m_index;
 }
 } // namespace perspective
