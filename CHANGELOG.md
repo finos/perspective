@@ -1,5 +1,13 @@
 # Changelog
 
+[0.3.1] - 2019-06-25
+### Added
+* [#629](https://github.com/jpmorganchase/perspective/pull/629) asm.js/IE support removed.
+
+### Fixes
+* [#628](https://github.com/jpmorganchase/perspective/pull/628) Better memory utilization.
+* [#625](https://github.com/jpmorganchase/perspective/pull/625) Fixes to `perspective-phosphor`.
+
 [0.3.0] - 2019-06-02
 ### Added
 * [#558](https://github.com/jpmorganchase/perspective/pull/558) `@jpmorganchase/perspective*` is now `@finos/perspective*`.
