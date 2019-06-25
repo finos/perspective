@@ -7,11 +7,13 @@
  *
  */
 
-const load_perspective = require("../../obj/psp.async.js").load_perspective;
-const perspective = require("./perspective.js").default;
+import load_perspective from "../../obj/psp.async.js";
+import perspective from "./perspective.js";
+
+let _perspective_instance;
 
 if (global.document !== undefined && typeof WebAssembly !== "undefined") {
-    module.exports = global.perspective = perspective(
+    _perspective_instance = global.perspective = perspective(
         load_perspective({
             wasmJSMethod: "native-wasm",
             printErr: x => console.error(x),
@@ -19,5 +21,7 @@ if (global.document !== undefined && typeof WebAssembly !== "undefined") {
         })
     );
 } else {
-    module.exports = global.perspective = perspective(load_perspective);
+    _perspective_instance = global.perspective = perspective(load_perspective);
 }
+
+export default _perspective_instance;
