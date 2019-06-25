@@ -3,6 +3,14 @@ module.exports = {
         [
             "@babel/preset-env",
             {
+                targets: {
+                    chrome: "57",
+                    node: "8",
+                    ios: "11",
+                    safari: "11",
+                    edge: "16",
+                    firefox: "52"
+                },
                 modules: false,
                 useBuiltIns: "usage",
                 corejs: 2
@@ -10,16 +18,5 @@ module.exports = {
         ]
     ],
     sourceType: "unambiguous",
-    plugins: [
-        "lodash",
-        "@babel/transform-runtime",
-        ["@babel/plugin-proposal-decorators", {legacy: true}],
-        "transform-custom-element-classes",
-        [
-            "@babel/plugin-transform-for-of",
-            {
-                loose: true
-            }
-        ]
-    ]
+    plugins: ["lodash", ["@babel/plugin-proposal-decorators", {legacy: true}], "transform-custom-element-classes"]
 };

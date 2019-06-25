@@ -5,7 +5,7 @@ const TerserPlugin = require("terser-webpack-plugin");
 module.exports = Object.assign({}, common(), {
     entry: "./cjs/js/perspective.node.js",
     target: "node",
-    externals: [/^([a-z0-9]|\@(?!apache\-arrow)).*?(?!wasm)$/g],
+    externals: [/^[a-z0-9].*?$/g],
     node: {
         __dirname: false,
         __filename: false
