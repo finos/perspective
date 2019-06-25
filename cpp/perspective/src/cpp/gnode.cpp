@@ -207,7 +207,7 @@ t_gnode::init() {
     }
 
     std::shared_ptr<t_port>& iport = m_iports[0];
-    std::shared_ptr<t_table> flattened = iport->get_table()->flatten();
+    std::shared_ptr<t_data_table> flattened = iport->get_table()->flatten();
     m_init = true;
 }
 
@@ -219,7 +219,7 @@ t_gnode::repr() const {
 }
 
 void
-t_gnode::_send(t_uindex portid, const t_table& fragments) {
+t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(portid == 0, "Only simple dataflows supported currently");
@@ -229,7 +229,7 @@ t_gnode::_send(t_uindex portid, const t_table& fragments) {
 }
 
 void
-t_gnode::_send_and_process(const t_table& fragments) {
+t_gnode::_send_and_process(const t_data_table& fragments) {
     _send(0, fragments);
     _process();
 }
@@ -270,7 +270,7 @@ t_gnode::calc_transition(bool prev_existed, bool row_pre_existed, bool exists, b
 
 void
 t_gnode::populate_icols_in_flattened(
-    const std::vector<t_rlookup>& lkup, std::shared_ptr<t_table>& flat) const {
+    const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const {
     PSP_VERBOSE_ASSERT(lkup.size() == flat->size(), "Mismatched sizes encountered");
 
     t_uindex nrows = lkup.size();
@@ -281,7 +281,7 @@ t_gnode::populate_icols_in_flattened(
     std::vector<std::string> cnames(ncols);
 
     t_uindex count = 0;
-    const t_table* stable = get_table();
+    const t_data_table* stable = get_table();
 
     for (const auto& cname : m_expr_icols) {
         icols[count] = stable->get_const_column(cname).get();
@@ -337,7 +337,7 @@ t_gnode::clear_deltas() {
     }
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gnode::_process_table() {
 
     m_was_updated = false;
@@ -363,7 +363,7 @@ t_gnode::_process_table() {
         }
     }
 
-    std::shared_ptr<t_table> flattened(iport->get_table()->flatten());
+    std::shared_ptr<t_data_table> flattened(iport->get_table()->flatten());
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
@@ -408,23 +408,23 @@ t_gnode::_process_table() {
 
     t_uindex fnrows = flattened->num_rows();
 
-    std::shared_ptr<t_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
+    std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     delta->clear();
     delta->reserve(fnrows);
 
-    std::shared_ptr<t_table> prev = m_oports[PSP_PORT_PREV]->get_table();
+    std::shared_ptr<t_data_table> prev = m_oports[PSP_PORT_PREV]->get_table();
     prev->clear();
     prev->reserve(fnrows);
 
-    std::shared_ptr<t_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
+    std::shared_ptr<t_data_table> current = m_oports[PSP_PORT_CURRENT]->get_table();
     current->clear();
     current->reserve(fnrows);
 
-    std::shared_ptr<t_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
+    std::shared_ptr<t_data_table> transitions = m_oports[PSP_PORT_TRANSITIONS]->get_table();
     transitions->clear();
     transitions->reserve(fnrows);
 
-    std::shared_ptr<t_table> existed = m_oports[PSP_PORT_EXISTED]->get_table();
+    std::shared_ptr<t_data_table> existed = m_oports[PSP_PORT_EXISTED]->get_table();
     existed->clear();
     existed->reserve(fnrows);
     existed->set_size(fnrows);
@@ -436,7 +436,7 @@ t_gnode::_process_table() {
 
     t_column* pkey_col = pkey_col_sptr.get();
     t_column* op_col = op_col_sptr.get();
-    t_table* stable = get_table();
+    t_data_table* stable = get_table();
     PSP_GNODE_VERIFY_TABLE(stable);
     const t_schema& sschema = m_state->get_schema();
 
@@ -622,7 +622,7 @@ t_gnode::_process_table() {
 
     psp_log_time(repr() + " _process.noinit_path.post_process_helper");
 
-    std::shared_ptr<t_table> flattened_masked
+    std::shared_ptr<t_data_table> flattened_masked
         = mask.count() == flattened->size() ? flattened : flattened->clone(mask);
     PSP_GNODE_VERIFY_TABLE(flattened_masked);
 #ifdef PSP_GNODE_VERIFY
@@ -694,7 +694,7 @@ t_gnode::_process() {
         m_mode == NODE_PROCESSING_SIMPLE_DATAFLOW, "Only simple dataflows supported currently");
     psp_log_time(repr() + " _process.enter");
 
-    std::shared_ptr<t_table> flattened_masked = _process_table();
+    std::shared_ptr<t_data_table> flattened_masked = _process_table();
     if (flattened_masked) {
         notify_contexts(*flattened_masked);
     }
@@ -707,7 +707,7 @@ t_gnode::mapping_size() const {
     return m_state->mapping_size();
 }
 
-t_table*
+t_data_table*
 t_gnode::_get_otable(t_uindex portidx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -715,7 +715,7 @@ t_gnode::_get_otable(t_uindex portidx) {
     return m_oports[portidx]->get_table().get();
 }
 
-t_table*
+t_data_table*
 t_gnode::_get_itable(t_uindex portidx) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -723,14 +723,14 @@ t_gnode::_get_itable(t_uindex portidx) {
     return m_iports[portidx]->get_table().get();
 }
 
-t_table*
+t_data_table*
 t_gnode::get_table() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_state->get_table().get();
 }
 
-const t_table*
+const t_data_table*
 t_gnode::get_table() const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -771,7 +771,7 @@ t_gnode::set_ctx_state(void* ptr) {
 }
 
 void
-t_gnode::_update_contexts_from_state(const t_table& tbl) {
+t_gnode::_update_contexts_from_state(const t_data_table& tbl) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
@@ -856,7 +856,7 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
 
     bool should_update = m_state->mapping_size() > 0;
 
-    std::shared_ptr<t_table> flattened;
+    std::shared_ptr<t_data_table> flattened;
 
     if (should_update) {
         flattened = m_state->get_pkeyed_table();
@@ -939,7 +939,7 @@ t_gnode::_unregister_context(const std::string& name) {
 }
 
 void
-t_gnode::notify_contexts(const t_table& flattened) {
+t_gnode::notify_contexts(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + "notify_contexts.enter");
@@ -1279,7 +1279,7 @@ t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* s
     }
 }
 
-t_table*
+t_data_table*
 t_gnode::_get_pkeyed_table() const {
     return m_state->_get_pkeyed_table();
 }
@@ -1335,7 +1335,7 @@ t_gnode::clear_updated() {
     m_was_updated = false;
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gnode::get_sorted_pkeyed_table() const {
     return m_state->get_sorted_pkeyed_table();
 }

@@ -12,7 +12,7 @@
 #include <perspective/binding.h>
 #include <perspective/python.h>
 #include <perspective/gnode.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/pool.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
@@ -71,7 +71,7 @@ void _fill_col_np(np::ndarray& dcol, std::shared_ptr<perspective::t_column>col)
     }
 }
 
-void _fill_data_single_column(perspective::t_table& tbl,
+void _fill_data_single_column(perspective::t_data_table& tbl,
                               const std::string& colname_i,
                               py::list& data_cols_i,
                               perspective::t_dtype col_type)
@@ -144,7 +144,7 @@ void _fill_data_single_column(perspective::t_table& tbl,
 }
 
 void
-_fill_data_single_column_np(perspective::t_table& tbl,
+_fill_data_single_column_np(perspective::t_data_table& tbl,
                             const std::string& colname_i,
                             np::ndarray& dcol,
                             perspective::t_dtype col_type)
@@ -172,7 +172,7 @@ _fill_data_single_column_np(perspective::t_table& tbl,
 }
 
 
-np::ndarray _get_as_numpy(perspective::t_table& tbl, const std::string& colname_i)
+np::ndarray _get_as_numpy(perspective::t_data_table& tbl, const std::string& colname_i)
 {
     std::string name = colname_i;
     std::shared_ptr<perspective::t_column> col = tbl.get_column(name);
@@ -314,7 +314,7 @@ py::object scalar_to(const t_tscalar& scalar) {
  * @param is_update
  */
 void
-_fill_data(t_table& tbl, py::object accessor, std::vector<std::string> col_names, 
+_fill_data(t_data_table& tbl, py::object accessor, std::vector<std::string> col_names, 
     std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
     //TODO
 }
@@ -340,7 +340,7 @@ void set_column_nth(t_column* col, t_uindex idx, T value) {
  *
  */
 template<typename T>
-void table_add_computed_column(t_table& table, T computed_defs) {
+void table_add_computed_column(t_data_table& table, T computed_defs) {
     //TODO
 }
 
@@ -446,7 +446,7 @@ make_table(t_pool* pool, T gnode, T accessor, T computed, std::uint32_t offset,
     std::vector<std::string> colnames;
     std::vector<t_dtype> dtypes;
     // Create the table
-    t_table tbl(t_schema(colnames, dtypes));
+    t_data_table tbl(t_schema(colnames, dtypes));
     tbl.init();
     tbl.extend(0);
     std::shared_ptr<t_gnode> new_gnode;
@@ -466,7 +466,7 @@ make_table(t_pool* pool, T gnode, T accessor, T computed, std::uint32_t offset,
 template<typename T>
 std::shared_ptr<t_gnode>
 clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed) {
-    t_table* tbl = gnode->_get_pkeyed_table();
+    t_data_table* tbl = gnode->_get_pkeyed_table();
     table_add_computed_column(*tbl, computed);
     std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
     pool->register_gnode(new_gnode.get());
@@ -476,7 +476,7 @@ clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, T computed) {
 }
 
 template <>
-py::object get_column_data(std::shared_ptr<t_table> table, std::string colname) {
+py::object get_column_data(std::shared_ptr<t_data_table> table, std::string colname) {
     py::list arr;
     return arr;
 }

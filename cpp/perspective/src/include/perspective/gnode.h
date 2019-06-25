@@ -76,8 +76,8 @@ public:
 
     // send data to input port with at index idx
     // schema should match port schema
-    void _send(t_uindex idx, const t_table& fragments);
-    void _send_and_process(const t_table& fragments);
+    void _send(t_uindex idx, const t_data_table& fragments);
+    void _send_and_process(const t_data_table& fragments);
     void _process();
     void _process_self();
     void _register_context(const std::string& name, t_ctx_type type, std::int64_t ptr);
@@ -86,12 +86,12 @@ public:
     void begin_step();
     void end_step();
 
-    void update_history(const t_table* tbl);
+    void update_history(const t_data_table* tbl);
 
-    t_table* _get_otable(t_uindex portidx);
-    t_table* _get_itable(t_uindex portidx);
-    t_table* get_table();
-    const t_table* get_table() const;
+    t_data_table* _get_otable(t_uindex portidx);
+    t_data_table* _get_itable(t_uindex portidx);
+    t_data_table* get_table();
+    const t_data_table* get_table() const;
 
     void pprint() const;
     std::vector<std::string> get_registered_contexts() const;
@@ -112,8 +112,8 @@ public:
     void clear_input_ports();
     void clear_output_ports();
 
-    t_table* _get_pkeyed_table() const;
-    std::shared_ptr<t_table> get_sorted_pkeyed_table() const;
+    t_data_table* _get_pkeyed_table() const;
+    std::shared_ptr<t_data_table> get_sorted_pkeyed_table() const;
 
     bool has_pkey(t_tscalar pkey) const;
 
@@ -133,7 +133,7 @@ public:
     t_uindex mapping_size() const;
 
     // helper function for tests
-    std::shared_ptr<t_table> tstep(std::shared_ptr<const t_table> input_table);
+    std::shared_ptr<t_data_table> tstep(std::shared_ptr<const t_data_table> input_table);
 
     void promote_column(const std::string& name, t_dtype new_type);
 
@@ -145,18 +145,18 @@ public:
 
 protected:
     bool have_context(const std::string& name) const;
-    void notify_contexts(const t_table& flattened);
+    void notify_contexts(const t_data_table& flattened);
 
     template <typename CTX_T>
-    void notify_context(const t_table& flattened, const t_ctx_handle& ctxh);
+    void notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh);
 
     template <typename CTX_T>
-    void notify_context(CTX_T* ctx, const t_table& flattened, const t_table& delta,
-        const t_table& prev, const t_table& current, const t_table& transitions,
-        const t_table& existed);
+    void notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
+        const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+        const t_data_table& existed);
 
     template <typename CTX_T>
-    void update_context_from_state(CTX_T* ctx, const t_table& tbl);
+    void update_context_from_state(CTX_T* ctx, const t_data_table& tbl);
 
     template <typename CTX_T>
     void set_ctx_state(void* ptr);
@@ -170,15 +170,15 @@ protected:
     t_value_transition calc_transition(bool prev_existed, bool row_pre_existed, bool exists,
         bool prev_valid, bool cur_valid, bool prev_cur_eq, bool prev_pkey_eq);
 
-    void _update_contexts_from_state(const t_table& tbl);
+    void _update_contexts_from_state(const t_data_table& tbl);
     void _update_contexts_from_state();
     void clear_deltas();
 
 private:
     void populate_icols_in_flattened(
-        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_table>& flat) const;
+        const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const;
 
-    std::shared_ptr<t_table> _process_table();
+    std::shared_ptr<t_data_table> _process_table();
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
     t_schema m_tblschema;
@@ -204,7 +204,7 @@ void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_colu
     std::vector<bool>& prev_pkey_eq_vec, std::vector<t_uindex>& added_vec);
 
 /**
- * @brief Given a t_table and a context handler, construct the t_tables relating to delta
+ * @brief Given a t_data_table and a context handler, construct the t_tables relating to delta
  * calculation and notify the context with the constructed tables.
  *
  * @tparam CTX_T
@@ -213,36 +213,36 @@ void t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_colu
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(const t_table& flattened, const t_ctx_handle& ctxh) {
+t_gnode::notify_context(const t_data_table& flattened, const t_ctx_handle& ctxh) {
     CTX_T* ctx = ctxh.get<CTX_T>();
-    const t_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
-    const t_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
-    const t_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
-    const t_table& transitions = *(m_oports[PSP_PORT_TRANSITIONS]->get_table().get());
-    const t_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
+    const t_data_table& delta = *(m_oports[PSP_PORT_DELTA]->get_table().get());
+    const t_data_table& prev = *(m_oports[PSP_PORT_PREV]->get_table().get());
+    const t_data_table& current = *(m_oports[PSP_PORT_CURRENT]->get_table().get());
+    const t_data_table& transitions = *(m_oports[PSP_PORT_TRANSITIONS]->get_table().get());
+    const t_data_table& existed = *(m_oports[PSP_PORT_EXISTED]->get_table().get());
     notify_context<CTX_T>(ctx, flattened, delta, prev, current, transitions, existed);
 }
 
 /**
- * @brief Given multiple `t_table`s containing the different states of the context,
+ * @brief Given multiple `t_data_table`s containing the different states of the context,
  * update the context with new data.
  *
  * Called on updates and additions AFTER a view is constructed from the table/context.
  *
  * @tparam CTX_T
  * @param ctx
- * @param flattened a `t_table` containing the flat data for the context
- * @param delta a `t_table` containing the changes to the dataset
- * @param prev a `t_table` containing the previous state
- * @param current a `t_table` containing the current state
- * @param transitions a `t_table` containing operations to transform the context
+ * @param flattened a `t_data_table` containing the flat data for the context
+ * @param delta a `t_data_table` containing the changes to the dataset
+ * @param prev a `t_data_table` containing the previous state
+ * @param current a `t_data_table` containing the current state
+ * @param transitions a `t_data_table` containing operations to transform the context
  * @param existed
  */
 template <typename CTX_T>
 void
-t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& delta,
-    const t_table& prev, const t_table& current, const t_table& transitions,
-    const t_table& existed) {
+t_gnode::notify_context(CTX_T* ctx, const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+    const t_data_table& existed) {
     auto t1 = std::chrono::high_resolution_clock::now();
     ctx->step_begin();
     ctx->notify(flattened, delta, prev, current, transitions, existed);
@@ -256,17 +256,17 @@ t_gnode::notify_context(CTX_T* ctx, const t_table& flattened, const t_table& del
 }
 
 /**
- * @brief Given a flattened `t_table`, update the context with the table.
+ * @brief Given a flattened `t_data_table`, update the context with the table.
  *
  * Called with the context is initialized with a table.
  *
  * @tparam CTX_T the template type
  * @param ctx a pointer to a `t_context` object
- * @param flattened the flattened `t_table` containing data for the context
+ * @param flattened the flattened `t_data_table` containing data for the context
  */
 template <typename CTX_T>
 void
-t_gnode::update_context_from_state(CTX_T* ctx, const t_table& flattened) {
+t_gnode::update_context_from_state(CTX_T* ctx, const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     PSP_VERBOSE_ASSERT(

@@ -24,7 +24,7 @@
 #include <perspective/dense_tree_context.h>
 #include <perspective/gnode_state.h>
 #include <perspective/config.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/filter_utils.h>
 #include <perspective/context_two.h>
 #include <set>
@@ -127,7 +127,7 @@ t_stree::init() {
     t_schema schema(columns, dtypes);
 
     t_uindex capacity = DEFAULT_EMPTY_CAPACITY;
-    m_aggregates = std::make_shared<t_table>(schema, capacity);
+    m_aggregates = std::make_shared<t_data_table>(schema, capacity);
     m_aggregates->init();
     m_aggregates->set_size(capacity);
 
@@ -244,7 +244,7 @@ t_stree::build_strand_table_phase_2(t_tscalar pkey, t_uindex idx, t_uindex npivo
 }
 
 t_build_strand_table_common_rval
-t_stree::build_strand_table_common(const t_table& flattened,
+t_stree::build_strand_table_common(const t_data_table& flattened,
     const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -303,10 +303,10 @@ t_stree::build_strand_table_common(const t_table& flattened,
 
 // can contain additional rows
 // notably pivot changed rows will be added
-std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>>
-t_stree::build_strand_table(const t_table& flattened, const t_table& delta, const t_table& prev,
-    const t_table& current, const t_table& transitions, const std::vector<t_aggspec>& aggspecs,
-    const t_config& config) const {
+std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
+t_stree::build_strand_table(const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+    const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
 
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -314,11 +314,11 @@ t_stree::build_strand_table(const t_table& flattened, const t_table& delta, cons
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 
     // strand table
-    std::shared_ptr<t_table> strands = std::make_shared<t_table>(rv.m_strand_schema);
+    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(rv.m_strand_schema);
     strands->init();
 
     // strand table
-    std::shared_ptr<t_table> aggs = std::make_shared<t_table>(rv.m_aggschema);
+    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(rv.m_aggschema);
     aggs->init();
 
     std::shared_ptr<const t_column> pkey_col = flattened.get_const_column("psp_pkey");
@@ -445,25 +445,26 @@ t_stree::build_strand_table(const t_table& flattened, const t_table& delta, cons
     aggs->reserve(insert_count);
     aggs->set_size(insert_count);
     agg_scount->valid_raw_fill();
-    return std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>>(strands, aggs);
+    return std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>(
+        strands, aggs);
 }
 
 // can contain additional rows
 // notably pivot changed rows will be added
-std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>>
-t_stree::build_strand_table(const t_table& flattened, const std::vector<t_aggspec>& aggspecs,
-    const t_config& config) const {
+std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>
+t_stree::build_strand_table(const t_data_table& flattened,
+    const std::vector<t_aggspec>& aggspecs, const t_config& config) const {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     auto rv = build_strand_table_common(flattened, aggspecs, config);
 
     // strand table
-    std::shared_ptr<t_table> strands = std::make_shared<t_table>(rv.m_strand_schema);
+    std::shared_ptr<t_data_table> strands = std::make_shared<t_data_table>(rv.m_strand_schema);
     strands->init();
 
     // strand table
-    std::shared_ptr<t_table> aggs = std::make_shared<t_table>(rv.m_aggschema);
+    std::shared_ptr<t_data_table> aggs = std::make_shared<t_data_table>(rv.m_aggschema);
     aggs->init();
 
     std::shared_ptr<const t_column> pkey_col = flattened.get_const_column("psp_pkey");
@@ -544,7 +545,8 @@ t_stree::build_strand_table(const t_table& flattened, const std::vector<t_aggspe
     aggs->reserve(insert_count);
     aggs->set_size(insert_count);
     agg_scount->valid_raw_fill();
-    return std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>>(strands, aggs);
+    return std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>>(
+        strands, aggs);
 }
 
 bool
@@ -720,7 +722,7 @@ t_stree::mark_zero_desc() {
 
 void
 t_stree::update_aggs_from_static(const t_dtree_ctx& ctx, const t_gstate& gstate) {
-    const t_table& src_aggtable = ctx.get_aggtable();
+    const t_data_table& src_aggtable = ctx.get_aggtable();
 
     t_agg_update_info agg_update_info;
     t_schema aggschema = m_aggregates->get_schema();
@@ -1344,12 +1346,12 @@ t_stree::get_aggidx(t_uindex idx) const {
     return iter->m_aggidx;
 }
 
-std::shared_ptr<const t_table>
+std::shared_ptr<const t_data_table>
 t_stree::get_aggtable() const {
     return m_aggregates;
 }
 
-t_table*
+t_data_table*
 t_stree::_get_aggtable() {
     return m_aggregates.get();
 }
@@ -1826,7 +1828,7 @@ t_stree::node_exists(t_uindex idx) {
     return iter != m_nodes->get<by_idx>().end();
 }
 
-t_table*
+t_data_table*
 t_stree::get_aggtable() {
     return m_aggregates.get();
 }

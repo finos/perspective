@@ -10,7 +10,7 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/base.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 
 namespace perspective {
 
@@ -24,12 +24,12 @@ public:
     t_port(t_port_mode mode, const t_schema& schema);
     ~t_port();
     void init();
-    std::shared_ptr<t_table> get_table();
-    void set_table(std::shared_ptr<t_table> tbl);
+    std::shared_ptr<t_data_table> get_table();
+    void set_table(std::shared_ptr<t_data_table> tbl);
 
     // append to existing table
-    void send(std::shared_ptr<const t_table> tbl);
-    void send(const t_table& tbl);
+    void send(std::shared_ptr<const t_data_table> tbl);
+    void send(const t_data_table& tbl);
 
     t_schema get_schema() const;
 
@@ -40,7 +40,7 @@ private:
     // t_port_mode m_mode;
     t_schema m_schema;
     bool m_init;
-    std::shared_ptr<t_table> m_table;
+    std::shared_ptr<t_data_table> m_table;
     t_uindex m_prevsize;
 };
 

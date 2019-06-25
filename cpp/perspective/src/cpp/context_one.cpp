@@ -211,8 +211,9 @@ t_ctx1::get_data(const std::vector<t_uindex>& rows) const {
 }
 
 void
-t_ctx1::notify(const t_table& flattened, const t_table& delta, const t_table& prev,
-    const t_table& current, const t_table& transitions, const t_table& existed) {
+t_ctx1::notify(const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+    const t_data_table& existed) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + " notify.enter");
@@ -523,7 +524,7 @@ t_ctx1::get_agg_min_max(t_uindex aggidx, t_depth depth) const {
 }
 
 void
-t_ctx1::notify(const t_table& flattened) {
+t_ctx1::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     notify_sparse_tree(m_tree, m_traversal, true, m_config.get_aggregates(),
@@ -687,11 +688,11 @@ t_ctx1::clear_deltas() {
 void
 t_ctx1::unity_init_load_step_end() {}
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_ctx1::get_table() const {
     auto schema = m_tree->get_aggtable()->get_schema();
     auto pivots = m_config.get_row_pivots();
-    auto tbl = std::make_shared<t_table>(schema, m_tree->size());
+    auto tbl = std::make_shared<t_data_table>(schema, m_tree->size());
     tbl->init();
     tbl->extend(m_tree->size());
 

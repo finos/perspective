@@ -9,7 +9,7 @@
 
 #pragma once
 #include <perspective/first.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/gnode.h>
 #include <perspective/exports.h>
 #include <mutex>
@@ -57,7 +57,7 @@ public:
 
     void unregister_context(t_uindex gnode_id, const std::string& name);
 
-    void send(t_uindex gnode_id, t_uindex port_id, const t_table& table);
+    void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
     void _process();
     void _process_helper();

@@ -12,7 +12,7 @@
 
 #include <perspective/base.h>
 #include <perspective/gnode.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/pool.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
@@ -164,7 +164,7 @@ namespace binding {
      * the column.
      */
     template <typename T>
-    void _fill_col_numeric(T accessor, t_table& tbl, std::shared_ptr<t_column> col,
+    void _fill_col_numeric(T accessor, t_data_table& tbl, std::shared_ptr<t_column> col,
         std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
 
     template <typename T>
@@ -197,7 +197,7 @@ namespace binding {
      * @brief Create a new computed column.
      */
     template <typename T>
-    void table_add_computed_column(t_table& table, T computed_defs);
+    void table_add_computed_column(t_data_table& table, T computed_defs);
 
     /**
      * @brief Given a table, iterate through each column and fill it with data.
@@ -212,7 +212,7 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_table& tbl, T accessor, std::vector<std::string> col_names,
+    void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names,
         std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update);
 
     /**
@@ -254,9 +254,9 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<t_gnode> make_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
-        T computed, std::uint32_t offset, std::uint32_t limit, std::string index,
-        bool is_update, bool is_delete, bool is_arrow);
+    std::shared_ptr<t_gnode> make_data_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
+        T computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
+        bool is_arrow);
 
     /**
      * @brief Create a new `t_pool` and embed it in a shared pointer.
@@ -404,7 +404,7 @@ namespace binding {
      * @return t_val
      */
     template <typename T>
-    T get_column_data(std::shared_ptr<t_table> table, std::string colname);
+    T get_column_data(std::shared_ptr<t_data_table> table, std::string colname);
 
     /**
      * @brief Get the t_data_slice object, which contains an underlying slice of data and

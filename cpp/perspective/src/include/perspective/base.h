@@ -254,7 +254,7 @@ enum t_ctx_type {
     GROUPED_COLUMNS_CONTEXT
 };
 
-enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
+enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR, OP_UPDATE };
 
 enum t_value_transition {
     VALUE_TRANSITION_EQ_FF,

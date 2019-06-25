@@ -14,7 +14,7 @@
 #include <perspective/pivot.h>
 #include <perspective/dense_nodes.h>
 #include <perspective/exports.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/tree_iterator.h>
 #include <perspective/column.h>
 #include <sstream>
@@ -32,7 +32,7 @@ class t_dtree {
 public:
     typedef t_dense_tnode t_tnode;
     typedef std::vector<t_tnode> t_tnodevec;
-    typedef std::shared_ptr<const t_table> t_dssptr;
+    typedef std::shared_ptr<const t_data_table> t_dssptr;
 
     t_dtree(t_dssptr ds, const std::vector<t_pivot>& pivots,
         const std::vector<std::pair<std::string, std::string>>& sortby_columns);

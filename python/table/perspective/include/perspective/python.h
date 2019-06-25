@@ -12,7 +12,7 @@
 #include <perspective/first.h>
 #include <perspective/base.h>
 #include <perspective/binding.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/column.h>
 #include <perspective/gnode.h>
 #include <iostream>
@@ -29,17 +29,17 @@ template<typename T>
 void _fill_col_np(np::ndarray& dcol, std::shared_ptr<perspective::t_column> col);
 
 
-void _fill_data_single_column(perspective::t_table& tbl,
+void _fill_data_single_column(perspective::t_data_table& tbl,
                               const std::string& colname_i,
                               py::list& data_cols_i,
                               perspective::t_dtype col_type);
 
-void _fill_data_single_column_np(perspective::t_table& tbl,
+void _fill_data_single_column_np(perspective::t_data_table& tbl,
                                  const std::string& colname_i,
                                  np::ndarray& data_cols_i,
                                  perspective::t_dtype col_type);
 
-np::ndarray _get_as_numpy(perspective::t_table& tbl, const std::string& colname_i);
+np::ndarray _get_as_numpy(perspective::t_data_table& tbl, const std::string& colname_i);
 }
 }
 
@@ -68,40 +68,40 @@ BOOST_PYTHON_MODULE(libbinding)
 
     /******************************************************************************
      *
-     * t_table
+     * t_data_table
      */
     // need boost:noncopyable for PSP_NON_COPYABLE
-    py::class_<perspective::t_table, boost::noncopyable>("t_table", py::init<perspective::t_schema>())
-        .def("init", &perspective::t_table::init)
-        .def("clear", &perspective::t_table::clear)
-        .def("reset", &perspective::t_table::reset)
-        .def("size", &perspective::t_table::size)
-        .def("reserve", &perspective::t_table::reserve)
-        .def("extend", &perspective::t_table::extend)
-        .def("set_size", &perspective::t_table::set_size)
+    py::class_<perspective::t_data_table, boost::noncopyable>("t_data_table", py::init<perspective::t_schema>())
+        .def("init", &perspective::t_data_table::init)
+        .def("clear", &perspective::t_data_table::clear)
+        .def("reset", &perspective::t_data_table::reset)
+        .def("size", &perspective::t_data_table::size)
+        .def("reserve", &perspective::t_data_table::reserve)
+        .def("extend", &perspective::t_data_table::extend)
+        .def("set_size", &perspective::t_data_table::set_size)
 
-        .def("num_columns", &perspective::t_table::num_columns)
-        .def("get_capacity", &perspective::t_table::get_capacity)
+        .def("num_columns", &perspective::t_data_table::num_columns)
+        .def("get_capacity", &perspective::t_data_table::get_capacity)
 
         // when returning const, need return_value_policy<copy_const_reference>
-        .def("name", &perspective::t_table::name, py::return_value_policy<py::copy_const_reference>())
-        .def("get_schema", &perspective::t_table::get_schema, py::return_value_policy<py::copy_const_reference>())
+        .def("name", &perspective::t_data_table::name, py::return_value_policy<py::copy_const_reference>())
+        .def("get_schema", &perspective::t_data_table::get_schema, py::return_value_policy<py::copy_const_reference>())
 
         // when multiple overloading methods, need to static_cast to specify
-        .def("num_rows", static_cast<perspective::t_uindex (perspective::t_table::*)() const> (&perspective::t_table::num_rows))
+        .def("num_rows", static_cast<perspective::t_uindex (perspective::t_data_table::*)() const> (&perspective::t_data_table::num_rows))
         
-        .def("pprint", static_cast<void (perspective::t_table::*)() const>(&perspective::t_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_table::*)(perspective::t_uindex, std::ostream*) const>(&perspective::t_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_table::*)(const std::string&) const>(&perspective::t_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_table::*)(const std::vector<perspective::t_uindex>&) const>(&perspective::t_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_data_table::*)() const>(&perspective::t_data_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_data_table::*)(perspective::t_uindex, std::ostream*) const>(&perspective::t_data_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_data_table::*)(const std::string&) const>(&perspective::t_data_table::pprint))
+        .def("pprint", static_cast<void (perspective::t_data_table::*)(const std::vector<perspective::t_uindex>&) const>(&perspective::t_data_table::pprint))
 
 
         // custom add ins
         // .def("load_column", _fill_data_single_column)
-        .def("load_column", static_cast<void (*)(perspective::t_table& tbl, const std::string& colname_i, py::list& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column))
-        .def("load_column", static_cast<void (*)(perspective::t_table& tbl, const std::string& colname_i, np::ndarray& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column_np))
+        .def("load_column", static_cast<void (*)(perspective::t_data_table& tbl, const std::string& colname_i, py::list& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column))
+        .def("load_column", static_cast<void (*)(perspective::t_data_table& tbl, const std::string& colname_i, np::ndarray& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column_np))
         .def("get_column", _get_as_numpy)
-        .def("add_column", &perspective::t_table::add_column, py::return_value_policy<py::reference_existing_object>())
+        .def("add_column", &perspective::t_data_table::add_column, py::return_value_policy<py::reference_existing_object>())
     ;
 
     /******************************************************************************

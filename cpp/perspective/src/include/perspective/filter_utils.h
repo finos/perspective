@@ -10,13 +10,13 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/config.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/mask.h>
 
 namespace perspective {
 
 inline t_mask
-filter_table_for_config(const t_table& tbl, const t_config& config) {
+filter_table_for_config(const t_data_table& tbl, const t_config& config) {
 
     switch (config.get_fmode()) {
         case FMODE_SIMPLE_CLAUSES: {

@@ -84,7 +84,7 @@ export default function(Module) {
     }
 
     /**
-     * Common logic for creating and registering a gnode/t_table.
+     * Common logic for creating and registering a gnode/t_data_table.
      *
      * @param {*} pdata
      * @param {*} pool
@@ -97,18 +97,18 @@ export default function(Module) {
      * @private
      * @returns {Table}
      */
-    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, is_update, is_delete, is_arrow) {
+    function make_data_table(accessor, pool, gnode, computed, index, limit, limit_index, op, is_arrow) {
         if (is_arrow) {
             for (let chunk of accessor) {
-                gnode = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
+                gnode = __MODULE__.make_data_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
                 limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
             }
         } else {
-            gnode = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, is_update, is_delete, is_arrow);
+            gnode = __MODULE__.make_data_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
 
-        if (is_update || is_delete) {
+        if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool);
         } else {
             pool._process();
@@ -1195,7 +1195,8 @@ export default function(Module) {
         }
 
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, true, false, is_arrow);
+            const op = __MODULE__.t_op.OP_UPDATE;
+            [, this.limit_index] = make_data_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1233,7 +1234,8 @@ export default function(Module) {
         }
 
         try {
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, false, true, is_arrow);
+            const op = __MODULE__.t_op.OP_DELETE;
+            [, this.limit_index] = make_data_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1439,7 +1441,8 @@ export default function(Module) {
             try {
                 pool = __MODULE__.make_pool();
 
-                [gnode, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, false, false, is_arrow);
+                const op = __MODULE__.t_op.OP_INSERT;
+                [gnode, limit_index] = make_data_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
 
                 return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
             } catch (e) {

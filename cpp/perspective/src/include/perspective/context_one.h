@@ -14,7 +14,7 @@
 #include <perspective/traversal_nodes.h>
 #include <perspective/sort_specification.h>
 #include <perspective/traversal.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 
 namespace perspective {
 

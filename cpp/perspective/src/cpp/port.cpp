@@ -25,30 +25,30 @@ t_port::~t_port() { LOG_DESTRUCTOR("t_port"); }
 void
 t_port::init() {
     m_table = nullptr;
-    m_table = std::make_shared<t_table>(
+    m_table = std::make_shared<t_data_table>(
         "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_table->init();
     m_init = true;
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_port::get_table() {
     return m_table;
 }
 
 void
-t_port::set_table(std::shared_ptr<t_table> table) {
+t_port::set_table(std::shared_ptr<t_data_table> table) {
     m_table = nullptr;
     m_table = table;
 }
 
 void
-t_port::send(std::shared_ptr<const t_table> table) {
+t_port::send(std::shared_ptr<const t_data_table> table) {
     m_table->append(*table.get());
 }
 
 void
-t_port::send(const t_table& table) {
+t_port::send(const t_data_table& table) {
     m_table->append(table);
 }
 
@@ -67,7 +67,7 @@ t_port::release()
     t_uindex size = m_table->size();
 
     m_table = nullptr;
-    m_table = std::make_shared<t_table>(
+    m_table = std::make_shared<t_data_table>(
         "", "", m_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_table->init();
 

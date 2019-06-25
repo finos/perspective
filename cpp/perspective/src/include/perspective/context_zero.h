@@ -16,12 +16,12 @@
 #include <perspective/sym_table.h>
 #include <perspective/traversal.h>
 #include <perspective/flat_traversal.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <tsl/hopscotch_set.h>
 
 namespace perspective {
 
-class t_table;
+class t_data_table;
 
 class PERSPECTIVE_EXPORT t_ctx0 : public t_ctxbase<t_ctx0> {
 public:
@@ -47,10 +47,10 @@ protected:
     std::vector<t_tscalar> get_all_pkeys(
         const std::vector<std::pair<t_uindex, t_uindex>>& cells) const;
 
-    void calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
-        const t_table& transitions);
+    void calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
+        const t_data_table& curr, const t_data_table& transitions);
 
-    void calc_row_delta(const t_table& flattened, const t_table& transitions);
+    void calc_row_delta(const t_data_table& flattened, const t_data_table& transitions);
 
     void add_delta_pkey(t_tscalar pkey);
 

@@ -46,7 +46,7 @@ export class DataAccessor {
         }
     }
 
-    get_row_count(data) {
+    count_rows(data) {
         if (this.format === this.data_formats.row) {
             return data.length;
         } else if (this.format === this.data_formats.column) {
@@ -54,6 +54,10 @@ export class DataAccessor {
         } else {
             return 0;
         }
+    }
+
+    get_row_count() {
+        return this.row_count;
     }
 
     get(column_name, row_index) {
@@ -153,7 +157,7 @@ export class DataAccessor {
     init(__MODULE__, data) {
         this.data = data;
         this.format = this.is_format(this.data);
-        this.row_count = this.get_row_count(this.data);
+        this.row_count = this.count_rows(this.data);
         if (this.format === this.data_formats.row) {
             if (data.length > 0) {
                 this.names = Object.keys(data[0]);

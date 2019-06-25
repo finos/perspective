@@ -13,7 +13,7 @@
 #include <perspective/node_processor.h>
 #include <perspective/comparators.h>
 #include <perspective/sort_specification.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 
 namespace perspective {
 

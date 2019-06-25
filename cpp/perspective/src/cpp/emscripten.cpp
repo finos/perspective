@@ -915,7 +915,7 @@ namespace binding {
     }
 
     void
-    _fill_col_numeric(t_val accessor, t_table& tbl, std::shared_ptr<t_column> col,
+    _fill_col_numeric(t_val accessor, t_data_table& tbl, std::shared_ptr<t_column> col,
         std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -1067,7 +1067,7 @@ namespace binding {
 
     template <>
     void
-    table_add_computed_column(t_table& table, t_val computed_defs) {
+    table_add_computed_column(t_data_table& table, t_val computed_defs) {
         auto vcomputed_defs = vecFromArray<t_val, t_val>(computed_defs);
         for (auto i = 0; i < vcomputed_defs.size(); ++i) {
             t_val coldef = vcomputed_defs[i];
@@ -1178,7 +1178,7 @@ namespace binding {
      */
 
     void
-    _fill_data(t_table& tbl, t_val accessor, std::vector<std::string> col_names,
+    _fill_data(t_data_table& tbl, t_val accessor, std::vector<std::string> col_names,
         std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
 
         for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
@@ -1425,17 +1425,18 @@ namespace binding {
 
     template <>
     std::shared_ptr<t_gnode>
-    make_table(std::shared_ptr<t_pool> pool, t_val gnode, t_val accessor, t_val computed,
-        std::uint32_t offset, std::uint32_t limit, std::string index, bool is_update,
-        bool is_delete, bool is_arrow) {
+    make_data_table(std::shared_ptr<t_pool> pool, t_val gnode, t_val accessor, t_val computed,
+        std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
         std::uint32_t size = accessor["row_count"].as<std::int32_t>();
 
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
 
+        bool is_update = op == OP_UPDATE;
+        bool is_delete = op == OP_DELETE;
+
         // Determine metadata
         if (is_arrow || (is_update || is_delete)) {
-            // TODO: fully remove intermediate passed-through JS arrays for non-arrow data
             t_val names = accessor["names"];
             t_val types = accessor["types"];
             column_names = vecFromArray<t_val, std::string>(names);
@@ -1472,7 +1473,7 @@ namespace binding {
 
         // Create the table
         // TODO assert size > 0
-        t_table tbl(t_schema(column_names, data_types));
+        t_data_table tbl(t_schema(column_names, data_types));
         tbl.init();
         tbl.extend(size);
 
@@ -1558,7 +1559,7 @@ namespace binding {
     std::shared_ptr<t_gnode>
     clone_gnode_table(
         std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode, t_val computed) {
-        t_table* tbl = gnode->_get_pkeyed_table();
+        t_data_table* tbl = gnode->_get_pkeyed_table();
         table_add_computed_column(*tbl, computed);
         std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
         pool->register_gnode(new_gnode.get());
@@ -1808,7 +1809,7 @@ namespace binding {
 
     template <>
     t_val
-    get_column_data(std::shared_ptr<t_table> table, std::string colname) {
+    get_column_data(std::shared_ptr<t_data_table> table, std::string colname) {
         t_val arr = t_val::array();
         auto col = table->get_column(colname);
         for (auto idx = 0; idx < col->size(); ++idx) {
@@ -1951,12 +1952,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_table
+     * t_data_table
      */
-    class_<t_table>("t_table")
-        .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
-        .function<unsigned long>(
-            "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
+    class_<t_data_table>("t_data_table")
+        .smart_ptr<std::shared_ptr<t_data_table>>("shared_ptr<t_data_table>")
+        .function<unsigned long>("size",
+            reinterpret_cast<unsigned long (t_data_table::*)() const>(&t_data_table::size));
 
     /******************************************************************************
      *
@@ -1977,7 +1978,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
         .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
         .function<void>("reset", &t_gnode::reset)
-        .function<t_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
+        .function<t_data_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
 
     /******************************************************************************
      *
@@ -2121,9 +2122,19 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_op
+     */
+    enum_<t_op>("t_op")
+        .value("OP_INSERT", OP_INSERT)
+        .value("OP_DELETE", OP_DELETE)
+        .value("OP_CLEAR", OP_CLEAR)
+        .value("OP_UPDATE", OP_UPDATE);
+
+    /******************************************************************************
+     *
      * assorted functions
      */
-    function("make_table", &make_table<t_val>);
+    function("make_data_table", &make_data_table<t_val>);
     function("make_pool", &make_pool);
     function("clone_gnode_table", &clone_gnode_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
