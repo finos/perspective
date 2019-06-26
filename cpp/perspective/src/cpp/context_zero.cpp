@@ -473,9 +473,7 @@ t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
                 m_traversal->delete_row(pkey);
                 delete_encountered = true;
             } break;
-            case OP_CLEAR: {
-                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
-            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
         }
 
         // add the pkey for updated rows

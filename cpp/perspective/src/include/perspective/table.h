@@ -12,7 +12,6 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
-#include <perspective/data_accessor.h>
 #include <perspective/gnode.h>
 #include <perspective/pool.h>
 #include <perspective/data_table.h>
@@ -30,36 +29,52 @@ namespace perspective {
  */
 class PERSPECTIVE_EXPORT Table {
 public:
-    Table(t_data_accessor data_accessor, std::vector<std::string> column_names,
-        std::vector<t_dtype> data_types, std::string index, std::uint32_t size, bool is_arrow,
-        bool is_delete, bool is_update);
-    ~Table();
+    PSP_NON_COPYABLE(Table);
+    /**
+     * @brief Construct a new Table object
+     *
+     * FIXME: bind in t_data_accessor somehow
+     *
+     * @param column_names
+     * @param data_types
+     * @param offset
+     * @param limit
+     * @param index
+     * @param size
+     * @param op
+     * @param is_arrow
+     */
+    Table(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
+        std::uint32_t offset, std::uint32_t limit, std::string index, std::uint32_t size,
+        t_op op, bool is_arrow);
 
-    void fill(std::uint32_t offset, bool is_arrow, bool is_update);
+    void process_op_column();
+    void process_index_column();
 
     void set_pool(std::shared_ptr<t_pool> pool);
     void set_gnode(std::shared_ptr<t_gnode> gnode);
 
     std::shared_ptr<t_data_table> get_data_table() const;
-    const t_data_accessor& get_data_accessor() const;
     std::shared_ptr<t_pool> get_pool() const;
     std::shared_ptr<t_gnode> get_gnode() const;
     const t_schema& get_schema() const;
     const std::vector<std::string>& get_column_names() const;
     const std::vector<t_dtype>& get_data_types() const;
+    std::uint32_t get_offset() const;
+    std::uint32_t get_limit() const;
     const std::string& get_index() const;
 
 private:
     std::shared_ptr<t_data_table> m_data_table;
-    t_data_accessor m_data_accessor;
     std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;
     std::vector<t_dtype> m_data_types;
+    std::uint32_t m_offset;
+    std::uint32_t m_limit;
     std::string m_index;
     std::uint32_t m_size;
-    bool m_is_update;
-    bool m_is_delete;
+    t_op m_op;
     bool m_is_arrow;
 };
 

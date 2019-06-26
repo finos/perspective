@@ -18,6 +18,7 @@
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
 #include <perspective/sym_table.h>
+#include <perspective/table.h>
 #include <perspective/view.h>
 #include <random>
 #include <cmath>
@@ -160,6 +161,28 @@ namespace binding {
     T get_scalar(t_tscalar& t);
 
     /**
+     * DataAccessor
+     *
+     * parses and converts input data into a canonical format for
+     * interfacing with Perspective.
+     */
+
+    // Name parsing
+    template <typename T>
+    std::vector<std::string> get_column_names(T data, std::int32_t format);
+
+    // Type inferrence for fill_col and data_types
+    template <typename T, typename U>
+    t_dtype infer_type(T x, U date_validator);
+
+    template <typename T, typename U>
+    t_dtype get_data_type(T data, std::int32_t format, std::string name, U date_validator);
+
+    template <typename T, typename U>
+    std::vector<t_dtype> get_data_types(
+        T data, std::int32_t format, std::vector<std::string> names, U date_validator);
+
+    /**
      * @brief Given a data accessor and a pointer to a column, iterate through the data and fill
      * the column.
      */
@@ -214,28 +237,6 @@ namespace binding {
     template <typename T>
     void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names,
         std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update);
-
-    /**
-     * DataAccessor
-     *
-     * parses and converts input data into a canonical format for
-     * interfacing with Perspective.
-     */
-
-    // Name parsing
-    template <typename T>
-    std::vector<std::string> get_column_names(T data, std::int32_t format);
-
-    // Type inferrence for fill_col and data_types
-    template <typename T, typename U>
-    t_dtype infer_type(T x, U date_validator);
-
-    template <typename T, typename U>
-    t_dtype get_data_type(T data, std::int32_t format, std::string name, U date_validator);
-
-    template <typename T, typename U>
-    std::vector<t_dtype> get_data_types(
-        T data, std::int32_t format, std::vector<std::string> names, U date_validator);
 
     /**
      * @brief Create and populate a table.

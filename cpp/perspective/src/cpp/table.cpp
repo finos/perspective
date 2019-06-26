@@ -10,20 +10,49 @@
 #include <perspective/table.h>
 
 namespace perspective {
-Table::Table(t_data_accessor data_accessor, std::vector<std::string> column_names,
-    std::vector<t_dtype> data_types, std::string index, std::uint32_t size, bool is_update,
-    bool is_delete, bool is_arrow)
-    : m_data_accessor(data_accessor)
-    , m_column_names(column_names)
+Table::Table(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
+    std::uint32_t offset, std::uint32_t limit, std::string index, std::uint32_t size, t_op op,
+    bool is_arrow)
+    : m_column_names(column_names)
     , m_data_types(data_types)
+    , m_offset(offset)
+    , m_limit(limit)
     , m_index(index)
     , m_size(size)
-    , m_is_update(is_update)
-    , m_is_delete(is_delete)
+    , m_op(op)
     , m_is_arrow(is_arrow) {
     m_data_table = std::make_shared<t_data_table>(t_schema(column_names, data_types));
     m_data_table->init();
     m_data_table->extend(m_size);
+}
+
+void
+Table::process_op_column() {
+    auto op_col = m_data_table->add_column("psp_op", DTYPE_UINT8, false);
+    switch (m_op) {
+        case OP_DELETE: {
+            op_col->raw_fill<std::uint8_t>(OP_DELETE);
+        } break;
+        default: { op_col->raw_fill<std::uint8_t>(OP_INSERT); }
+    }
+}
+
+void
+Table::process_index_column() {
+    if (m_index == "") {
+        // If user doesn't specify an column to use as the pkey index, just use
+        // row number
+        auto key_col = m_data_table->add_column("psp_pkey", DTYPE_INT32, true);
+        auto okey_col = m_data_table->add_column("psp_okey", DTYPE_INT32, true);
+
+        for (std::uint32_t ridx = 0; ridx < m_data_table->size(); ++ridx) {
+            key_col->set_nth<std::int32_t>(ridx, (ridx + m_offset) % m_limit);
+            okey_col->set_nth<std::int32_t>(ridx, (ridx + m_offset) % m_limit);
+        }
+    } else {
+        m_data_table->clone_column(m_index, "psp_pkey");
+        m_data_table->clone_column(m_index, "psp_okey");
+    }
 }
 
 void
@@ -39,11 +68,6 @@ Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
 std::shared_ptr<t_data_table>
 Table::get_data_table() const {
     return m_data_table;
-}
-
-const t_data_accessor&
-Table::get_data_accessor() const {
-    return m_data_accessor;
 }
 
 std::shared_ptr<t_pool>
@@ -75,4 +99,5 @@ const std::string&
 Table::get_index() const {
     return m_index;
 }
+
 } // namespace perspective

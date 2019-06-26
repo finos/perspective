@@ -683,6 +683,194 @@ namespace binding {
         }
     }
 
+
+
+    /******************************************************************************
+     *
+     * Data accessor API
+     */
+
+    std::vector<std::string>
+    get_column_names(t_val data, std::int32_t format) {
+        std::vector<std::string> names;
+        t_val Object = t_val::global("Object");
+
+        if (format == 0) {
+            std::int32_t max_check = 50;
+            t_val data_names = Object.call<t_val>("keys", data[0]);
+            names = vecFromArray<t_val, std::string>(data_names);
+            std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
+
+            for (auto ix = 0; ix < check_index; ix++) {
+                t_val next = Object.call<t_val>("keys", data[ix]);
+
+                if (names.size() != next["length"].as<std::int32_t>()) {
+                    auto old_size = names.size();
+                    auto new_names = vecFromJSArray<std::string>(next);
+                    if (max_check == 50) {
+                        std::cout << "Data parse warning: Array data has inconsistent rows"
+                                  << std::endl;
+                    }
+
+                    for (auto s = new_names.begin(); s != new_names.end(); ++s) {
+                        if (std::find(names.begin(), names.end(), *s) == names.end()) {
+                            names.push_back(*s);
+                        }
+                    }
+
+                    std::cout << "Extended from " << old_size << "to " << names.size()
+                              << std::endl;
+                    max_check *= 2;
+                }
+            }
+        } else if (format == 1 || format == 2) {
+            t_val keys = Object.call<t_val>("keys", data);
+            names = vecFromArray<t_val, std::string>(keys);
+        }
+
+        return names;
+    }
+
+    t_dtype
+    infer_type(t_val x, t_val date_validator) {
+        std::string jstype = x.typeOf().as<std::string>();
+        t_dtype t = t_dtype::DTYPE_STR;
+
+        // Unwrap numbers inside strings
+        t_val x_number = t_val::global("Number").call<t_val>("call", t_val::object(), x);
+        bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
+            && (!t_val::global("isNaN").call<bool>("call", t_val::object(), x_number));
+
+        if (x.isNull()) {
+            t = t_dtype::DTYPE_NONE;
+        } else if (jstype == "number" || number_in_string) {
+            if (number_in_string) {
+                x = x_number;
+            }
+            double x_float64 = x.as<double>();
+            if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0)
+                && (x_float64 != 0.0)) {
+                t = t_dtype::DTYPE_INT32;
+            } else {
+                t = t_dtype::DTYPE_FLOAT64;
+            }
+        } else if (jstype == "boolean") {
+            t = t_dtype::DTYPE_BOOL;
+        } else if (x.instanceof (t_val::global("Date"))) {
+            std::int32_t hours = x.call<t_val>("getHours").as<std::int32_t>();
+            std::int32_t minutes = x.call<t_val>("getMinutes").as<std::int32_t>();
+            std::int32_t seconds = x.call<t_val>("getSeconds").as<std::int32_t>();
+            std::int32_t milliseconds = x.call<t_val>("getMilliseconds").as<std::int32_t>();
+
+            if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
+                t = t_dtype::DTYPE_DATE;
+            } else {
+                t = t_dtype::DTYPE_TIME;
+            }
+        } else if (jstype == "string") {
+            if (date_validator.call<t_val>("call", t_val::object(), x).as<bool>()) {
+                t = t_dtype::DTYPE_TIME;
+            } else {
+                std::string lower = x.call<t_val>("toLowerCase").as<std::string>();
+                if (lower == "true" || lower == "false") {
+                    t = t_dtype::DTYPE_BOOL;
+                } else {
+                    t = t_dtype::DTYPE_STR;
+                }
+            }
+        }
+
+        return t;
+    }
+
+    t_dtype
+    get_data_type(
+        t_val data, std::int32_t format, const std::string& name, t_val date_validator) {
+        std::int32_t i = 0;
+        boost::optional<t_dtype> inferredType;
+
+        if (format == 0) {
+            // loop parameters differ slightly so rewrite the loop
+            while (!inferredType.is_initialized() && i < 100
+                && i < data["length"].as<std::int32_t>()) {
+                if (data[i].call<t_val>("hasOwnProperty", name).as<bool>() == true) {
+                    if (!data[i][name].isNull()) {
+                        inferredType = infer_type(data[i][name], date_validator);
+                    } else {
+                        inferredType = t_dtype::DTYPE_STR;
+                    }
+                }
+
+                i++;
+            }
+        } else if (format == 1) {
+            while (!inferredType.is_initialized() && i < 100
+                && i < data[name]["length"].as<std::int32_t>()) {
+                if (!data[name][i].isNull()) {
+                    inferredType = infer_type(data[name][i], date_validator);
+                } else {
+                    inferredType = t_dtype::DTYPE_STR;
+                }
+
+                i++;
+            }
+        }
+
+        if (!inferredType.is_initialized()) {
+            return t_dtype::DTYPE_STR;
+        } else {
+            return inferredType.get();
+        }
+    }
+
+    std::vector<t_dtype>
+    get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names,
+        t_val date_validator) {
+        if (names.size() == 0) {
+            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
+        }
+
+        std::vector<t_dtype> types;
+
+        if (format == 2) {
+            t_val keys = t_val::global("Object").template call<t_val>("keys", data);
+            std::vector<std::string> data_names = vecFromArray<t_val, std::string>(keys);
+
+            for (const std::string& name : data_names) {
+                std::string value = data[name].as<std::string>();
+                t_dtype type;
+
+                if (value == "integer") {
+                    type = t_dtype::DTYPE_INT32;
+                } else if (value == "float") {
+                    type = t_dtype::DTYPE_FLOAT64;
+                } else if (value == "string") {
+                    type = t_dtype::DTYPE_STR;
+                } else if (value == "boolean") {
+                    type = t_dtype::DTYPE_BOOL;
+                } else if (value == "datetime") {
+                    type = t_dtype::DTYPE_TIME;
+                } else if (value == "date") {
+                    type = t_dtype::DTYPE_DATE;
+                } else {
+                    PSP_COMPLAIN_AND_ABORT(
+                        "Unknown type '" + value + "' for key '" + name + "'");
+                }
+
+                types.push_back(type);
+            }
+
+            return types;
+        } else {
+            for (const std::string& name : names) {
+                t_dtype type = get_data_type(data, format, name, date_validator);
+                types.push_back(type);
+            }
+        }
+
+        return types;
+    }
+
     /******************************************************************************
      *
      * Fill columns with data
@@ -1235,192 +1423,6 @@ namespace binding {
 
     /******************************************************************************
      *
-     * Data accessor API
-     */
-
-    std::vector<std::string>
-    get_column_names(t_val data, std::int32_t format) {
-        std::vector<std::string> names;
-        t_val Object = t_val::global("Object");
-
-        if (format == 0) {
-            std::int32_t max_check = 50;
-            t_val data_names = Object.call<t_val>("keys", data[0]);
-            names = vecFromArray<t_val, std::string>(data_names);
-            std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
-
-            for (auto ix = 0; ix < check_index; ix++) {
-                t_val next = Object.call<t_val>("keys", data[ix]);
-
-                if (names.size() != next["length"].as<std::int32_t>()) {
-                    auto old_size = names.size();
-                    auto new_names = vecFromJSArray<std::string>(next);
-                    if (max_check == 50) {
-                        std::cout << "Data parse warning: Array data has inconsistent rows"
-                                  << std::endl;
-                    }
-
-                    for (auto s = new_names.begin(); s != new_names.end(); ++s) {
-                        if (std::find(names.begin(), names.end(), *s) == names.end()) {
-                            names.push_back(*s);
-                        }
-                    }
-
-                    std::cout << "Extended from " << old_size << "to " << names.size()
-                              << std::endl;
-                    max_check *= 2;
-                }
-            }
-        } else if (format == 1 || format == 2) {
-            t_val keys = Object.call<t_val>("keys", data);
-            names = vecFromArray<t_val, std::string>(keys);
-        }
-
-        return names;
-    }
-
-    t_dtype
-    infer_type(t_val x, t_val date_validator) {
-        std::string jstype = x.typeOf().as<std::string>();
-        t_dtype t = t_dtype::DTYPE_STR;
-
-        // Unwrap numbers inside strings
-        t_val x_number = t_val::global("Number").call<t_val>("call", t_val::object(), x);
-        bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
-            && (!t_val::global("isNaN").call<bool>("call", t_val::object(), x_number));
-
-        if (x.isNull()) {
-            t = t_dtype::DTYPE_NONE;
-        } else if (jstype == "number" || number_in_string) {
-            if (number_in_string) {
-                x = x_number;
-            }
-            double x_float64 = x.as<double>();
-            if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0)
-                && (x_float64 != 0.0)) {
-                t = t_dtype::DTYPE_INT32;
-            } else {
-                t = t_dtype::DTYPE_FLOAT64;
-            }
-        } else if (jstype == "boolean") {
-            t = t_dtype::DTYPE_BOOL;
-        } else if (x.instanceof (t_val::global("Date"))) {
-            std::int32_t hours = x.call<t_val>("getHours").as<std::int32_t>();
-            std::int32_t minutes = x.call<t_val>("getMinutes").as<std::int32_t>();
-            std::int32_t seconds = x.call<t_val>("getSeconds").as<std::int32_t>();
-            std::int32_t milliseconds = x.call<t_val>("getMilliseconds").as<std::int32_t>();
-
-            if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
-                t = t_dtype::DTYPE_DATE;
-            } else {
-                t = t_dtype::DTYPE_TIME;
-            }
-        } else if (jstype == "string") {
-            if (date_validator.call<t_val>("call", t_val::object(), x).as<bool>()) {
-                t = t_dtype::DTYPE_TIME;
-            } else {
-                std::string lower = x.call<t_val>("toLowerCase").as<std::string>();
-                if (lower == "true" || lower == "false") {
-                    t = t_dtype::DTYPE_BOOL;
-                } else {
-                    t = t_dtype::DTYPE_STR;
-                }
-            }
-        }
-
-        return t;
-    }
-
-    t_dtype
-    get_data_type(
-        t_val data, std::int32_t format, const std::string& name, t_val date_validator) {
-        std::int32_t i = 0;
-        boost::optional<t_dtype> inferredType;
-
-        if (format == 0) {
-            // loop parameters differ slightly so rewrite the loop
-            while (!inferredType.is_initialized() && i < 100
-                && i < data["length"].as<std::int32_t>()) {
-                if (data[i].call<t_val>("hasOwnProperty", name).as<bool>() == true) {
-                    if (!data[i][name].isNull()) {
-                        inferredType = infer_type(data[i][name], date_validator);
-                    } else {
-                        inferredType = t_dtype::DTYPE_STR;
-                    }
-                }
-
-                i++;
-            }
-        } else if (format == 1) {
-            while (!inferredType.is_initialized() && i < 100
-                && i < data[name]["length"].as<std::int32_t>()) {
-                if (!data[name][i].isNull()) {
-                    inferredType = infer_type(data[name][i], date_validator);
-                } else {
-                    inferredType = t_dtype::DTYPE_STR;
-                }
-
-                i++;
-            }
-        }
-
-        if (!inferredType.is_initialized()) {
-            return t_dtype::DTYPE_STR;
-        } else {
-            return inferredType.get();
-        }
-    }
-
-    std::vector<t_dtype>
-    get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names,
-        t_val date_validator) {
-        if (names.size() == 0) {
-            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
-        }
-
-        std::vector<t_dtype> types;
-
-        if (format == 2) {
-            t_val keys = t_val::global("Object").template call<t_val>("keys", data);
-            std::vector<std::string> data_names = vecFromArray<t_val, std::string>(keys);
-
-            for (const std::string& name : data_names) {
-                std::string value = data[name].as<std::string>();
-                t_dtype type;
-
-                if (value == "integer") {
-                    type = t_dtype::DTYPE_INT32;
-                } else if (value == "float") {
-                    type = t_dtype::DTYPE_FLOAT64;
-                } else if (value == "string") {
-                    type = t_dtype::DTYPE_STR;
-                } else if (value == "boolean") {
-                    type = t_dtype::DTYPE_BOOL;
-                } else if (value == "datetime") {
-                    type = t_dtype::DTYPE_TIME;
-                } else if (value == "date") {
-                    type = t_dtype::DTYPE_DATE;
-                } else {
-                    PSP_COMPLAIN_AND_ABORT(
-                        "Unknown type '" + value + "' for key '" + name + "'");
-                }
-
-                types.push_back(type);
-            }
-
-            return types;
-        } else {
-            for (const std::string& name : names) {
-                t_dtype type = get_data_type(data, format, name, date_validator);
-                types.push_back(type);
-            }
-        }
-
-        return types;
-    }
-
-    /******************************************************************************
-     *
      * Table API
      */
 
@@ -1458,26 +1460,9 @@ namespace binding {
             PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
         }
 
-        bool is_new_gnode = gnode.isUndefined();
-        std::shared_ptr<t_gnode> new_gnode;
-        if (!is_new_gnode) {
-            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
-            if (is_arrow && is_update && new_gnode->get_table()->size() == 0) {
-                auto schema = new_gnode->get_table()->get_schema();
-                for (auto idx = 0; idx < schema.m_types.size(); ++idx) {
-                    if (dtypes[idx] == DTYPE_INT64) {
-                        std::cout << "Promoting int64 `" << colnames[idx] << "`" << std::endl;
-                        new_gnode->promote_column(colnames[idx], DTYPE_INT64);
-                    }
-                }
-            }
-        }
-
-        // Create the table
-        // TODO assert size > 0
-        t_data_table tbl(t_schema(column_names, data_types));
-        tbl.init();
-        tbl.extend(size);
+        Table tbl(column_names, data_types, offset, limit, index, size, op, is_arrow);
+        t_data_table* data_table_ptr = tbl.get_data_table().get();
+        t_data_table& data_table = *data_table_ptr;
 
         bool is_new_gnode = gnode.isUndefined();
         std::shared_ptr<t_gnode> new_gnode;
@@ -1485,35 +1470,14 @@ namespace binding {
             new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
         }
 
-        _fill_data(tbl, accessor, column_names, data_types, offset, is_arrow,
+        _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow,
             (is_update || new_gnode->mapping_size() > 0));
 
-        // Set up pkey and op columns
-        if (is_delete) {
-            auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-            op_col->raw_fill<std::uint8_t>(OP_DELETE);
-        } else {
-            auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-            op_col->raw_fill<std::uint8_t>(OP_INSERT);
-        }
-
-        if (index == "") {
-            // If user doesn't specify an column to use as the pkey index, just use
-            // row number
-            auto key_col = tbl.add_column("psp_pkey", DTYPE_INT32, true);
-            auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
-
-            for (auto ridx = 0; ridx < tbl.size(); ++ridx) {
-                key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
-                okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
-            }
-        } else {
-            tbl.clone_column(index, "psp_pkey");
-            tbl.clone_column(index, "psp_okey");
-        }
+        tbl.process_op_column();
+        tbl.process_index_column();
 
         if (!computed.isUndefined()) {
-            table_add_computed_column(tbl, computed);
+            table_add_computed_column(data_table, computed);
         }
 
         if (is_new_gnode) {
@@ -1521,8 +1485,10 @@ namespace binding {
             pool->register_gnode(new_gnode.get());
         }
 
-        pool->send(new_gnode->get_id(), 0, tbl);
-        return new_gnode;
+        pool->send(new_gnode->get_id(), 0, data_table);
+        tbl.set_pool(pool);
+        tbl.set_gnode(new_gnode);
+        return tbl.get_gnode();
     }
 
     std::shared_ptr<t_pool>
@@ -1870,6 +1836,16 @@ EM_ASM({
  */
 
 EMSCRIPTEN_BINDINGS(perspective) {
+    /******************************************************************************
+     *
+     * Table
+     */
+    class_<Table>("Table")
+        .constructor<std::vector<std::string>, std::vector<t_dtype>, std::uint32_t,
+            std::uint32_t, std::string, std::uint32_t, t_op, bool>()
+        .function("process_op_column", &Table::process_op_column)
+        .function("process_index_column", &Table::process_index_column)
+        .function("get_data_table", &Table::get_data_table);
     /******************************************************************************
      *
      * View
