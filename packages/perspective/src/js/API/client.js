@@ -95,13 +95,19 @@ Client.prototype._handle = function(e) {
             window.dispatchEvent(event);
             _initialized = true;
         }
-        for (var m in this._worker.messages) {
-            if (this._worker.messages.hasOwnProperty(m)) {
-                this._worker.messages[m]();
-            }
-        }
+
+        const msgs = this._worker.messages;
+
         this._worker.initialized.value = true;
         this._worker.messages = [];
+
+        if (msgs) {
+            for (const m in msgs) {
+                if (msgs.hasOwnProperty(m)) {
+                    setTimeout(msgs[m]);
+                }
+            }
+        }
     }
     if (e.data.id) {
         var handler = this._worker.handlers[e.data.id];
