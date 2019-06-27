@@ -29,18 +29,21 @@ const wasm = require("./psp.async.wasm.js");
 
 const buffer = fs.readFileSync(path.join(__dirname, wasm)).buffer;
 
-const sync_module = perspective(
-    load_perspective({
-        wasmBinary: buffer,
-        wasmJSMethod: "native-wasm"
-    })
-);
-
 const SYNC_SERVER = new (class extends Server {
+    init(msg) {
+        load_perspective({
+            wasmBinary: buffer,
+            wasmJSMethod: "native-wasm"
+        }).then(core => {
+            this.perspective = perspective(core);
+            this.post(msg);
+        });
+    }
+
     post(msg) {
         SYNC_CLIENT._handle({data: msg});
     }
-})(sync_module);
+})();
 
 const SYNC_CLIENT = new (class extends Client {
     send(msg) {
@@ -51,7 +54,7 @@ const SYNC_CLIENT = new (class extends Client {
 SYNC_CLIENT.send({id: -1, cmd: "init"});
 
 module.exports = SYNC_CLIENT;
-module.exports.sync_module = () => sync_module;
+module.exports.sync_module = () => SYNC_SERVER.perspective;
 
 let CLIENT_ID_GEN = 0;
 
