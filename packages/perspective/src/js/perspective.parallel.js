@@ -64,7 +64,9 @@ class WebWorkerClient extends Client {
     }
 
     /**
-     * When the worker is created, load either the ASM or WASM bundle depending on WebAssembly compatibility.
+     * When the worker is created, load either the ASM or WASM bundle depending
+     * on WebAssembly compatibility.  Don't use transferrable so multiple
+     * workers can be instantiated.
      */
     async register() {
         let _worker;
@@ -79,7 +81,7 @@ class WebWorkerClient extends Client {
         }
         this._worker = _worker;
         this._worker.addEventListener("message", this._handle.bind(this));
-        this._worker.postMessage(msg, [msg.buffer]);
+        this._worker.postMessage(msg);
         this._detect_transferable();
     }
 
