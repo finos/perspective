@@ -95,7 +95,9 @@ apply_filters_helper(const t_table& tbl, const std::string& column, t_mask& mask
 
                 tbl, column, mask, values);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown filter_op detected"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown filter_op detected");
+        }
     };
 }
 

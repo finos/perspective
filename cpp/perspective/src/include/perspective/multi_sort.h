@@ -108,7 +108,9 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
                     return false;
                 } break;
                 case CMP_OP_EQ:
-                default: { continue; } break;
+                default: {
+                    continue;
+                } break;
             }
         }
 

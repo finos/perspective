@@ -130,7 +130,9 @@ get_minmax_idx(const std::vector<t_tscalar>& vec, t_sorttype stype) {
             rval.m_max = 0;
             return rval;
         } break;
-        default: { return rval; }
+        default: {
+            return rval;
+        }
     }
 
     return rval;

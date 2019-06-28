@@ -359,7 +359,9 @@ t_config::get_totals_string() const {
         case TOTALS_AFTER: {
             return "after";
         } break;
-        default: { return "INVALID_TOTALS"; } break;
+        default: {
+            return "INVALID_TOTALS";
+        } break;
     }
 }
 
@@ -447,7 +449,9 @@ t_config::has_filters() const {
         case FMODE_SIMPLE_CLAUSES: {
             return !m_fterms.empty();
         } break;
-        default: { return false; }
+        default: {
+            return false;
+        }
     }
     return false;
 }

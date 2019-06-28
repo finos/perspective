@@ -332,7 +332,9 @@ t_gnode::clear_deltas() {
             case GROUPED_PKEY_CONTEXT: {
                 static_cast<t_ctx_grouped_pkey*>(kv.second.m_ctx)->clear_deltas();
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 }
@@ -518,7 +520,9 @@ t_gnode::_process_table() {
                     mask.set(idx, false);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
 
         prev_pkey = pkey;
@@ -613,7 +617,9 @@ t_gnode::_process_table() {
                     _process_helper<std::string>(fcolumn, scolumn, dcolumn, pcolumn, ccolumn,
                         tcolumn, op_base, lkup, prev_pkey_eq_vec, added_offset);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
+                }
             }
         }
 #ifdef PSP_PARALLEL_FOR
@@ -781,7 +787,9 @@ t_gnode::_update_contexts_from_state(const t_table& tbl) {
                 ctx->reset();
                 update_context_from_state<t_ctx_grouped_pkey>(ctx, tbl);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 }
@@ -812,7 +820,9 @@ t_gnode::get_registered_contexts() const {
                 auto ctx = static_cast<const t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ss << ctx->repr() << ")";
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
 
         rval.push_back(ss.str());
@@ -906,7 +916,9 @@ t_gnode::_register_context(const std::string& name, t_ctx_type type, std::int64_
             if (should_update)
                 update_context_from_state<t_ctx_grouped_pkey>(ctx, *flattened);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+        } break;
     }
 }
 
@@ -951,7 +963,9 @@ t_gnode::notify_contexts(const t_table& flattened) {
             case GROUPED_PKEY_CONTEXT: {
                 notify_context<t_ctx_grouped_pkey>(flattened, ctxh);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     };
 
@@ -1002,7 +1016,9 @@ t_gnode::get_pivots() const {
             case GROUPED_PKEY_CONTEXT: {
                 // no pivots
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1046,7 +1062,9 @@ t_gnode::get_trees() {
                 auto trees = ctx->get_trees();
                 rval.insert(rval.end(), std::begin(trees), std::end(trees));
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
     return rval;
@@ -1107,7 +1125,9 @@ t_gnode::get_contexts_last_updated() const {
                     rval.push_back(kv.first);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1159,7 +1179,9 @@ t_gnode::reset() {
                 auto ctx = reinterpret_cast<t_ctx_grouped_pkey*>(ctxh.m_ctx);
                 ctx->reset();
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected context type"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected context type");
+            } break;
         }
     }
 
@@ -1257,7 +1279,9 @@ t_gnode::_process_helper<std::string>(const t_column* fcolumn, const t_column* s
                     tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
     }
 }

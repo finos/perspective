@@ -136,7 +136,7 @@ namespace binding {
                 bool is_pivot = (std::find(row_pivots.begin(), row_pivots.end(), column)
                                     != row_pivots.end())
                     || (std::find(column_pivots.begin(), column_pivots.end(), column)
-                           != column_pivots.end());
+                        != column_pivots.end());
 
                 std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
                 t_aggtype agg_op;

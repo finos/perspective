@@ -187,7 +187,9 @@ t_ctx2::get_ctraversal_indices() const {
             }
             return rval;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown total type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown total type");
+        }
     }
     return std::vector<t_index>();
 }
@@ -598,7 +600,9 @@ t_ctx2::translate_column_index(t_index idx) const {
             m_ctraversal->get_leaves(leaves);
             rval = leaves[(idx - 1) / m_config.get_num_aggregates()];
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown totals type encountered."); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown totals type encountered.");
+        }
     }
 
     return rval;
@@ -641,7 +645,9 @@ t_ctx2::set_depth(t_header header, t_depth depth) {
             m_column_depth = new_depth;
             m_column_depth_set = true;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Invalid header"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Invalid header");
+        } break;
     }
 }
 

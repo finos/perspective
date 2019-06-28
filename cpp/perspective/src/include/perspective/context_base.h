@@ -214,7 +214,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_column(
                 s.is_column_expanded().push_back(
                     reinterpret_cast<const DERIVED_T*>(this)->unity_get_column_expanded(idx));
             } break;
-            default: {}
+            default: {
+            }
         }
     }
 }
@@ -241,7 +242,8 @@ t_ctxbase<DERIVED_T>::unity_populate_slice_row(
             case FETCH_ROW_DEPTH: {
                 s.row_depth().push_back(cptr->unity_get_row_depth(idx));
             } break;
-            default: {}
+            default: {
+            }
         }
     }
 }

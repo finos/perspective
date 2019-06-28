@@ -1252,7 +1252,9 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 if (!skip)
                     dst->set_scalar(dst_ridx, new_value);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Not implemented"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Not implemented");
+            }
         } // end switch
 
         bool val_neq = old_value != new_value;

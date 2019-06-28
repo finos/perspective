@@ -347,7 +347,9 @@ t_gnode::_process_helper(const t_column* fcolumn, const t_column* scolumn, t_col
                     tcolumn->set_nth<std::uint8_t>(added_count, VALUE_TRANSITION_NEQ_TDF);
                 }
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unknown OP"); }
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unknown OP");
+            }
         }
     }
 }

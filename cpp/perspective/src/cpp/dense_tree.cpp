@@ -244,7 +244,9 @@ t_dtree::pivot(const t_filter& filter, t_uindex level) {
                     next_neidx = t_pivot_processor<DTYPE_UINT32>()(
                         pivcol, &m_nodes, &(m_values[pidx]), &m_leaves, nbidx, neidx, mask);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Not supported yet"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Not supported yet");
+                } break;
             }
             nbidx = neidx;
             neidx = next_neidx;

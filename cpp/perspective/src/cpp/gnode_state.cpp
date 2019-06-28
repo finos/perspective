@@ -176,7 +176,9 @@ t_gstate::update_history(const t_table* tbl) {
                 case OP_DELETE: {
                     _mark_deleted(idx);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+                } break;
             }
         }
 
@@ -204,7 +206,9 @@ t_gstate::update_history(const t_table* tbl) {
             case OP_DELETE: {
                 erase(pkey);
             } break;
-            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+            default: {
+                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+            } break;
         }
     }
 
@@ -295,7 +299,9 @@ t_gstate::update_history(const t_table* tbl) {
                         const char* s = fcolumn->get_nth<const char>(idx);
                         scolumn->set_nth<const char*>(stableidx, s);
                     } break;
-                    default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+                    default: {
+                        PSP_COMPLAIN_AND_ABORT("Unexpected type");
+                    }
                 }
             }
         }

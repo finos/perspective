@@ -244,7 +244,9 @@ get_simple_accumulator_type(t_dtype coltype) {
             return DTYPE_FLOAT64;
         }
 
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected coltype"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected coltype");
+        }
     }
     return DTYPE_NONE;
 }
@@ -361,7 +363,9 @@ t_aggspec::get_output_specs(const t_schema& schema) const {
         case AGGTYPE_DISTINCT_COUNT: {
             return mk_col_name_type_vec(name(), DTYPE_UINT32);
         }
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown agg type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown agg type");
+        }
     }
 
     return std::vector<t_col_name_type>();

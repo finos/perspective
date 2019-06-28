@@ -210,7 +210,9 @@ t_table::flatten_body(FLATTENED_T flattened) const {
         case DTYPE_FLOAT32: {
             flatten_helper_1<FLATTENED_T, float>(flattened);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unsupported key type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unsupported key type");
+        }
     }
 
     return;
@@ -394,7 +396,9 @@ t_table::flatten_helper_1(FLATTENED_T flattened) const {
                 case DTYPE_STR: {
                     this->flatten_helper_2<t_uindex, t_rpvec>(sorted, fltrecs, scol, dcol);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unsupported column dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unsupported column dtype");
+                }
             }
         }
 #ifdef PSP_PARALLEL_FOR

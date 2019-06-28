@@ -96,7 +96,9 @@ extract_aggregate(
             }
             return rval;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected agg type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected agg type");
+        }
     }
 
     return mknone();

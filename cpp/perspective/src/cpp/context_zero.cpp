@@ -437,7 +437,9 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
                     m_traversal->delete_row(pkey);
                     delete_encountered = true;
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected OP");
+                } break;
             }
 
             // add the pkey for updated rows
@@ -536,7 +538,9 @@ t_ctx0::notify(const t_table& flattened) {
             case OP_INSERT: {
                 m_traversal->add_row(m_state, m_config, pkey);
             } break;
-            default: { } break; }
+            default: {
+            } break;
+        }
     }
 }
 
@@ -576,7 +580,8 @@ t_ctx0::calc_step_delta(const t_table& flattened, const t_table& prev, const t_t
                         cidx, get_interned_tscalar(pcol->get_scalar(ridx)),
                         get_interned_tscalar(ccol->get_scalar(ridx))));
                 } break;
-                default: {}
+                default: {
+                }
             }
         }
     }

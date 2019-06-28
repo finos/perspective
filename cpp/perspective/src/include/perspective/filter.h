@@ -155,7 +155,9 @@ struct PERSPECTIVE_EXPORT t_fterm {
             case FILTER_OP_IN: {
                 rv = std::find(m_bag.begin(), m_bag.end(), s) != m_bag.end();
             } break;
-            default: { rv = s.cmp(m_op, m_threshold); } break;
+            default: {
+                rv = s.cmp(m_op, m_threshold);
+            } break;
         }
 
         return m_negated ? (!rv) : rv;

@@ -309,7 +309,9 @@ t_column::push_back<t_tscalar>(t_tscalar elem) {
         case DTYPE_STR: {
             push_back(elem.get<const char*>(), elem.m_status);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
     ++m_size;
 }
@@ -421,7 +423,9 @@ t_column::get_scalar(t_uindex idx) const {
                 = m_data->get_nth<std::pair<double, double>>(idx);
             rv.set(pair->first / pair->second);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 
     if (is_status_enabled())
@@ -477,7 +481,9 @@ t_column::clear(t_uindex idx, t_status status) {
             v.second = 0;
             set_nth<std::pair<std::uint64_t, std::uint64_t>>(idx, v, status);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 
@@ -634,7 +640,9 @@ t_column::set_scalar(t_uindex idx, t_tscalar value) {
                 set_nth<const char*>(idx, empty.c_str(), value.m_status);
             }
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 
@@ -839,7 +847,9 @@ t_column::copy(const t_column* other, const std::vector<t_uindex>& indices, t_ui
         case DTYPE_STR: {
             copy_helper<const char>(other, indices, offset);
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unexpected type"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unexpected type");
+        }
     }
 }
 

@@ -253,7 +253,9 @@ t_lstore::~t_lstore() {
             unfreeze_impl();
 #endif
         } break;
-        default: { PSP_VERBOSE_ASSERT(false, "Unknown backing store"); } break;
+        default: {
+            PSP_VERBOSE_ASSERT(false, "Unknown backing store");
+        } break;
     }
 }
 
@@ -310,7 +312,9 @@ t_lstore::init() {
 
             PSP_VERBOSE_ASSERT(m_base, "MALLOC_FAILED");
         } break;
-        default: { PSP_VERBOSE_ASSERT(false, "Unknown backing store"); } break;
+        default: {
+            PSP_VERBOSE_ASSERT(false, "Unknown backing store");
+        } break;
     }
 
     m_init = true;
@@ -392,7 +396,9 @@ t_lstore::reserve_impl(t_uindex capacity, bool allow_shrink) {
             resize_mapping(capacity);
             ++m_version;
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("unknown backing medium"); }
+        default: {
+            PSP_COMPLAIN_AND_ABORT("unknown backing medium");
+        }
     }
 
     if (capacity > ocapacity) {

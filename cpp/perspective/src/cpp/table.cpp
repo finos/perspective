@@ -512,7 +512,9 @@ t_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterms_) c
                 mask.set(ridx, pass);
             }
         } break;
-        default: { PSP_COMPLAIN_AND_ABORT("Unknown filter op"); } break;
+        default: {
+            PSP_COMPLAIN_AND_ABORT("Unknown filter op");
+        } break;
     }
 
     return mask;
@@ -615,7 +617,9 @@ t_table::promote_column(
                     std::string fval = std::to_string(*val);
                     promoted_col->set_nth(i, fval);
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Bad promotion"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Bad promotion");
+                }
             }
         }
     }

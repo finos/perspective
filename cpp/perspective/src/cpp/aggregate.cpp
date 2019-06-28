@@ -64,7 +64,9 @@ t_aggregate::init() {
                     build_aggregate<
                         t_aggimpl_sum<std::uint8_t, std::uint64_t, std::uint64_t>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_MUL: {
@@ -107,7 +109,9 @@ t_aggregate::init() {
                     build_aggregate<
                         t_aggimpl_mul<std::uint8_t, std::uint64_t, std::uint64_t>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_COUNT: {
@@ -160,7 +164,9 @@ t_aggregate::init() {
                     build_aggregate<
                         t_aggimpl_count<std::uint8_t, std::uint64_t, std::uint64_t>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_MEAN: {
@@ -208,7 +214,9 @@ t_aggregate::init() {
                     build_aggregate<
                         t_aggimpl_mean<std::uint8_t, std::pair<double, double>, double>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_LAST_VALUE: {
@@ -261,7 +269,9 @@ t_aggregate::init() {
                     build_aggregate<
                         t_aggimpl_last_value<const char*, const char*, const char*>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_HIGH_WATER_MARK: {
@@ -307,7 +317,9 @@ t_aggregate::init() {
                 case DTYPE_STR: {
                     build_aggregate<t_aggimpl_hwm<const char*, const char*, const char*>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         case AGGTYPE_LOW_WATER_MARK: {
@@ -353,7 +365,9 @@ t_aggregate::init() {
                 case DTYPE_STR: {
                     build_aggregate<t_aggimpl_lwm<const char*, const char*, const char*>>();
                 } break;
-                default: { PSP_COMPLAIN_AND_ABORT("Unexpected dtype"); }
+                default: {
+                    PSP_COMPLAIN_AND_ABORT("Unexpected dtype");
+                }
             }
         } break;
         default: {
