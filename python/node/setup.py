@@ -92,6 +92,7 @@ setup(
 
     keywords='analytics tools plotting',
     packages=['perspective.node'],
+    package_dir={'perspective.node': 'perspective/node'},
     include_package_data=True,
     zip_safe=False,
     extras_require={'dev': requires + ['pytest', 'pytest-cov', 'pylint', 'flake8', 'mock']},
