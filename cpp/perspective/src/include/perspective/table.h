@@ -30,28 +30,18 @@ namespace perspective {
 class PERSPECTIVE_EXPORT Table {
 public:
     PSP_NON_COPYABLE(Table);
-    /**
-     * @brief Construct a new Table object
-     *
-     * FIXME: bind in t_data_accessor somehow
-     *
-     * @param column_names
-     * @param data_types
-     * @param offset
-     * @param limit
-     * @param index
-     * @param size
-     * @param op
-     * @param is_arrow
-     */
-    Table(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
-        std::uint32_t offset, std::uint32_t limit, std::string index, std::uint32_t size,
-        t_op op, bool is_arrow);
 
-    void process_op_column();
-    void process_index_column();
+    Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
+        std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
+        std::string index, t_op op, bool is_arrow);
 
-    void set_pool(std::shared_ptr<t_pool> pool);
+    void init(t_data_table& data_table);
+    t_uindex size() const;
+
+    std::shared_ptr<t_gnode> make_gnode(const t_schema& in_schema);
+
+    void clone_data_table(t_data_table* data_table);
+
     void set_gnode(std::shared_ptr<t_gnode> gnode);
 
     std::shared_ptr<t_data_table> get_data_table() const;
@@ -65,6 +55,18 @@ public:
     const std::string& get_index() const;
 
 private:
+    /**
+     * @brief Create a column for the table operation - either insert or delete.
+     *
+     */
+    void process_op_column(t_data_table& data_table);
+
+    /**
+     * @brief Create the index column using a provided index or the row number.
+     *
+     */
+    void process_index_column(t_data_table& data_table);
+
     std::shared_ptr<t_data_table> m_data_table;
     std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<t_gnode> m_gnode;
@@ -73,9 +75,10 @@ private:
     std::uint32_t m_offset;
     std::uint32_t m_limit;
     std::string m_index;
-    std::uint32_t m_size;
     t_op m_op;
     bool m_is_arrow;
+    bool m_data_table_set;
+    bool m_gnode_set;
 };
 
 } // namespace perspective

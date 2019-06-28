@@ -97,14 +97,15 @@ export default function(Module) {
      * @private
      * @returns {Table}
      */
-    function make_data_table(accessor, pool, gnode, computed, index, limit, limit_index, op, is_arrow) {
+    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, op, is_arrow) {
+        let _Table;
         if (is_arrow) {
             for (let chunk of accessor) {
-                gnode = __MODULE__.make_data_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+                _Table = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
                 limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
             }
         } else {
-            gnode = __MODULE__.make_data_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+            _Table = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
 
@@ -114,7 +115,7 @@ export default function(Module) {
             pool._process();
         }
 
-        return [gnode, limit_index];
+        return [_Table, limit_index];
     }
 
     /**
@@ -860,9 +861,10 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function table(gnode, pool, index, computed, limit, limit_index) {
-        this.gnode = gnode;
-        this.pool = pool;
+    function table(_Table, index, computed, limit, limit_index) {
+        this._Table = _Table;
+        this.gnode = this._Table.get_gnode();
+        this.pool = this._Table.get_pool();
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
@@ -1196,7 +1198,7 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_UPDATE;
-            [, this.limit_index] = make_data_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1235,7 +1237,7 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
-            [, this.limit_index] = make_data_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1251,21 +1253,21 @@ export default function(Module) {
      * @param {Computation} computed A computation specification object
      */
     table.prototype.add_computed = function(computed) {
-        let pool, gnode;
+        let pool, _Table;
 
         try {
             pool = __MODULE__.make_pool();
-            gnode = __MODULE__.clone_gnode_table(pool, this.gnode, computed);
+            _Table = __MODULE__.clone_table(this._Table, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
-            return new table(gnode, pool, this.index, computed, this.limit, this.limit_index);
+            return new table(_Table, this.index, computed, this.limit, this.limit_index);
         } catch (e) {
             if (pool) {
                 pool.delete();
             }
-            if (gnode) {
-                gnode.delete();
+            if (_Table) {
+                _Table.delete();
             }
             throw e;
         }
@@ -1434,23 +1436,23 @@ export default function(Module) {
                 throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
             }
 
-            let gnode,
-                pool,
+            let pool,
+                _Table,
                 limit_index = 0;
 
             try {
                 pool = __MODULE__.make_pool();
 
                 const op = __MODULE__.t_op.OP_INSERT;
-                [gnode, limit_index] = make_data_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
+                [_Table, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
 
-                return new table(gnode, pool, options.index, undefined, options.limit, limit_index);
+                return new table(_Table, options.index, undefined, options.limit, limit_index);
             } catch (e) {
                 if (pool) {
                     pool.delete();
                 }
-                if (gnode) {
-                    gnode.delete();
+                if (_Table) {
+                    _Table.delete();
                 }
                 console.error(`Table initialization failed: ${e}`);
                 throw e;

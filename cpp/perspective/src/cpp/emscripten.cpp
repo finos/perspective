@@ -683,8 +683,6 @@ namespace binding {
         }
     }
 
-
-
     /******************************************************************************
      *
      * Data accessor API
@@ -1427,8 +1425,8 @@ namespace binding {
      */
 
     template <>
-    std::shared_ptr<t_gnode>
-    make_data_table(std::shared_ptr<t_pool> pool, t_val gnode, t_data_accessor accessor,
+    std::shared_ptr<Table>
+    make_table(std::shared_ptr<t_pool> pool, t_val gnode, t_data_accessor accessor,
         t_val computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
         bool is_arrow) {
         std::uint32_t size = accessor["row_count"].as<std::int32_t>();
@@ -1460,35 +1458,29 @@ namespace binding {
             PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
         }
 
-        Table tbl(column_names, data_types, offset, limit, index, size, op, is_arrow);
-        t_data_table* data_table_ptr = tbl.get_data_table().get();
-        t_data_table& data_table = *data_table_ptr;
+        auto tbl = std::make_shared<Table>(
+            pool, column_names, data_types, offset, limit, index, op, is_arrow);
+
+        t_data_table data_table(t_schema(column_names, data_types));
+        data_table.init();
+        data_table.extend(size);
 
         bool is_new_gnode = gnode.isUndefined();
         std::shared_ptr<t_gnode> new_gnode;
         if (!is_new_gnode) {
             new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
+            tbl->set_gnode(new_gnode);
         }
 
         _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow,
             (is_update || new_gnode->mapping_size() > 0));
 
-        tbl.process_op_column();
-        tbl.process_index_column();
-
         if (!computed.isUndefined()) {
             table_add_computed_column(data_table, computed);
         }
 
-        if (is_new_gnode) {
-            new_gnode = make_gnode(tbl.get_schema());
-            pool->register_gnode(new_gnode.get());
-        }
-
-        pool->send(new_gnode->get_id(), 0, data_table);
-        tbl.set_pool(pool);
-        tbl.set_gnode(new_gnode);
-        return tbl.get_gnode();
+        tbl->init(data_table);
+        return tbl;
     }
 
     std::shared_ptr<t_pool>
@@ -1497,43 +1489,16 @@ namespace binding {
         return pool;
     }
 
-    std::shared_ptr<t_gnode>
-    make_gnode(const t_schema& in_schema) {
-        std::vector<std::string> col_names(in_schema.columns());
-        std::vector<t_dtype> data_types(in_schema.types());
-
-        if (in_schema.has_column("psp_pkey")) {
-            t_uindex idx = in_schema.get_colidx("psp_pkey");
-            col_names.erase(col_names.begin() + idx);
-            data_types.erase(data_types.begin() + idx);
-        }
-
-        if (in_schema.has_column("psp_op")) {
-            t_uindex idx = in_schema.get_colidx("psp_op");
-            col_names.erase(col_names.begin() + idx);
-            data_types.erase(data_types.begin() + idx);
-        }
-
-        t_schema out_schema(col_names, data_types);
-
-        // Create a gnode
-        auto gnode = std::make_shared<t_gnode>(out_schema, in_schema);
-        gnode->init();
-
-        return gnode;
-    }
-
     template <>
-    std::shared_ptr<t_gnode>
-    clone_gnode_table(
-        std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode, t_val computed) {
-        t_data_table* tbl = gnode->_get_pkeyed_table();
-        table_add_computed_column(*tbl, computed);
-        std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
-        pool->register_gnode(new_gnode.get());
-        pool->send(new_gnode->get_id(), 0, *tbl);
-        pool->_process();
-        return new_gnode;
+    std::shared_ptr<Table>
+    clone_table(std::shared_ptr<Table> table, t_val computed) {
+        auto gnode = table->get_gnode();
+
+        t_data_table* data_table = gnode->_get_pkeyed_table();
+        table_add_computed_column(*data_table, computed);
+        table->clone_data_table(data_table);
+
+        return table;
     }
 
     /******************************************************************************
@@ -1841,11 +1806,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * Table
      */
     class_<Table>("Table")
-        .constructor<std::vector<std::string>, std::vector<t_dtype>, std::uint32_t,
-            std::uint32_t, std::string, std::uint32_t, t_op, bool>()
-        .function("process_op_column", &Table::process_op_column)
-        .function("process_index_column", &Table::process_index_column)
-        .function("get_data_table", &Table::get_data_table);
+        .constructor<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
+            std::uint32_t, std::uint32_t, std::string, t_op, bool>()
+        .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
+        .function("size", &Table::size)
+        .function("get_pool", &Table::get_pool)
+        .function("get_gnode", &Table::get_gnode);
     /******************************************************************************
      *
      * View
@@ -2112,9 +2078,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
      *
      * assorted functions
      */
-    function("make_data_table", &make_data_table<t_val>);
+    function("make_table", &make_table<t_val>);
     function("make_pool", &make_pool);
-    function("clone_gnode_table", &clone_gnode_table<t_val>);
+    function("clone_table", &clone_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<t_val>);

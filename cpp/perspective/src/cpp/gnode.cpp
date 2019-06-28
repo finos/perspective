@@ -219,6 +219,16 @@ t_gnode::repr() const {
 }
 
 void
+t_gnode::_send(t_uindex portid, std::shared_ptr<t_data_table> fragments) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    PSP_VERBOSE_ASSERT(portid == 0, "Only simple dataflows supported currently");
+
+    std::shared_ptr<t_port>& iport = m_iports[portid];
+    iport->send(fragments);
+}
+
+void
 t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
@@ -737,11 +747,13 @@ t_gnode::get_table() const {
     return m_state->get_table().get();
 }
 
-/**
- * Convenience method for promoting a column.  This is a hack used to
- * interop with javascript more efficiently, and does not handle all
- * possible type conversions.  Non-public.
- */
+std::shared_ptr<t_data_table>
+t_gnode::get_table_sptr() {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_state->get_table();
+}
+
 void
 t_gnode::promote_column(const std::string& name, t_dtype new_type) {
     PSP_TRACE_SENTINEL();

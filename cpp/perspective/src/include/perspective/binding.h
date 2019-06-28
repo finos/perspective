@@ -255,7 +255,7 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<t_gnode> make_data_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
+    std::shared_ptr<Table> make_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
         T computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
         bool is_arrow);
 
@@ -267,15 +267,6 @@ namespace binding {
     std::shared_ptr<t_pool> make_pool();
 
     /**
-     * @brief Given a schema, create a graph node that is able to own underlying Perspective
-     * tables.
-     *
-     * @param in_schema
-     * @return std::shared_ptr<t_gnode>
-     */
-    std::shared_ptr<t_gnode> make_gnode(const t_schema& in_schema);
-
-    /**
      * @brief Create a new gnode with an already-created table.
      *
      * @tparam T
@@ -285,8 +276,7 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<t_gnode> clone_gnode_table(
-        std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode, T computed);
+    std::shared_ptr<Table> clone_table(std::shared_ptr<Table> table, T computed);
 
     /**
      * @brief Extracts and validates the config from the binding language,

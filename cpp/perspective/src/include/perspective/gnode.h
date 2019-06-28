@@ -76,6 +76,7 @@ public:
 
     // send data to input port with at index idx
     // schema should match port schema
+    void _send(t_uindex idx, std::shared_ptr<t_data_table> fragments);
     void _send(t_uindex idx, const t_data_table& fragments);
     void _send_and_process(const t_data_table& fragments);
     void _process();
@@ -92,6 +93,7 @@ public:
     t_data_table* _get_itable(t_uindex portidx);
     t_data_table* get_table();
     const t_data_table* get_table() const;
+    std::shared_ptr<t_data_table> get_table_sptr();
 
     void pprint() const;
     std::vector<std::string> get_registered_contexts() const;

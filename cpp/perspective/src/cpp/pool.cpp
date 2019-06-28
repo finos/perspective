@@ -90,6 +90,27 @@ t_pool::unregister_gnode(t_uindex idx) {
 }
 
 void
+t_pool::send(t_uindex gnode_id, t_uindex port_id, std::shared_ptr<t_data_table> table) {
+    {
+        std::lock_guard<std::mutex> lg(m_mtx);
+        m_data_remaining.store(true);
+        if (m_gnodes[gnode_id]) {
+            m_gnodes[gnode_id]->_send(port_id, table);
+        }
+
+        if (t_env::log_progress()) {
+            std::cout << "t_pool.send gnode_id => " << gnode_id << " port_id => " << port_id
+                      << " tbl_size => " << table->size() << std::endl;
+        }
+
+        if (t_env::log_data_pool_send()) {
+            std::cout << "t_pool.send" << std::endl;
+            table->pprint();
+        }
+    }
+}
+
+void
 t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
     {
         std::lock_guard<std::mutex> lg(m_mtx);
