@@ -21,7 +21,6 @@ Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names
     , m_index(index)
     , m_op(op)
     , m_is_arrow(is_arrow)
-    , m_data_table_set(false)
     , m_gnode_set(false) {}
 
 void
@@ -37,15 +36,37 @@ Table::init(t_data_table& data_table) {
         m_pool->register_gnode(m_gnode.get());
     }
 
+    PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
+
     // retrieve the table from the gnode, thus discarding the passed-in reference
     m_pool->send(m_gnode->get_id(), 0, data_table);
-    m_data_table = m_gnode->get_table_sptr();
-    m_data_table_set = true;
+
+    // force the pool to process the updated table
+    if ((m_op == t_op::OP_UPDATE) || (m_op == t_op::OP_DELETE)) {
+        m_pool->_process();
+    }
+}
+
+void
+Table::update(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
+    std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
+    m_column_names = column_names;
+    m_data_types = data_types;
+    m_offset = offset;
+    m_limit = limit;
+    m_index = index;
+    m_op = op;
+    m_is_arrow = is_arrow;
 }
 
 t_uindex
 Table::size() const {
-    return m_data_table->size();
+    return m_gnode->get_table()->size();
+}
+
+t_schema
+Table::get_schema() const {
+    return m_gnode->get_tblschema();
 }
 
 void
@@ -55,8 +76,6 @@ Table::clone_data_table(t_data_table* data_table) {
     m_pool->register_gnode(m_gnode.get());
     m_pool->send(m_gnode->get_id(), 0, *data_table);
     m_pool->_process();
-    m_data_table = m_gnode->get_table_sptr();
-    m_data_table_set = true;
 }
 
 std::shared_ptr<t_gnode>
@@ -91,9 +110,24 @@ Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
     m_gnode_set = true;
 }
 
-std::shared_ptr<t_data_table>
-Table::get_data_table() const {
-    return m_data_table;
+void
+Table::set_column_names(const std::vector<std::string>& column_names) {
+    m_column_names = column_names;
+}
+
+void
+Table::set_data_types(const std::vector<t_dtype>& data_types) {
+    m_data_types = data_types;
+}
+
+void
+Table::unregister_gnode() {
+    m_pool->unregister_gnode(m_gnode->get_id());
+}
+
+void
+Table::reset() {
+    m_gnode->reset();
 }
 
 std::shared_ptr<t_pool>

@@ -20,7 +20,7 @@ namespace binding {
      */
     template <>
     bool
-    hasValue(t_val item) {
+    has_value(t_val item) {
         return (!item.isUndefined() && !item.isNull());
     }
 
@@ -184,9 +184,9 @@ namespace binding {
         auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<t_val> filter) {
             if (type == DTYPE_DATE || type == DTYPE_TIME) {
                 t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                return hasValue(parsed_date);
+                return has_value(parsed_date);
             } else {
-                return hasValue(filter[2]);
+                return has_value(filter[2]);
             }
         };
 
@@ -1426,16 +1426,12 @@ namespace binding {
 
     template <>
     std::shared_ptr<Table>
-    make_table(std::shared_ptr<t_pool> pool, t_val gnode, t_data_accessor accessor,
-        t_val computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
-        bool is_arrow) {
-        std::uint32_t size = accessor["row_count"].as<std::int32_t>();
-
-        std::vector<std::string> column_names;
-        std::vector<t_dtype> data_types;
-
+    make_table(t_val table, t_data_accessor accessor, t_val computed, std::uint32_t offset,
+        std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
         bool is_update = op == OP_UPDATE;
         bool is_delete = op == OP_DELETE;
+        std::vector<std::string> column_names;
+        std::vector<t_dtype> data_types;
 
         // Determine metadata
         if (is_arrow || (is_update || is_delete)) {
@@ -1458,22 +1454,27 @@ namespace binding {
             PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
         }
 
-        auto tbl = std::make_shared<Table>(
-            pool, column_names, data_types, offset, limit, index, op, is_arrow);
+        bool table_initialized = has_value(table);
+        std::shared_ptr<Table> tbl;
+        std::shared_ptr<t_pool> pool;
 
-        t_data_table data_table(t_schema(column_names, data_types));
-        data_table.init();
-        data_table.extend(size);
-
-        bool is_new_gnode = gnode.isUndefined();
-        std::shared_ptr<t_gnode> new_gnode;
-        if (!is_new_gnode) {
-            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
-            tbl->set_gnode(new_gnode);
+        if (table_initialized) {
+            tbl = table.as<std::shared_ptr<Table>>();
+            tbl->update(column_names, data_types, offset, limit, index, op, is_arrow);
+            // use gnode metadata to help decide if we need to update
+            is_update = (is_update || tbl->get_gnode()->mapping_size() > 0);
+        } else {
+            pool = make_pool();
+            tbl = std::make_shared<Table>(
+                pool, column_names, data_types, offset, limit, index, op, is_arrow);
         }
 
-        _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow,
-            (is_update || new_gnode->mapping_size() > 0));
+        std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
+        t_data_table data_table(t_schema(column_names, data_types));
+        data_table.init();
+        data_table.extend(row_count);
+
+        _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow, is_update);
 
         if (!computed.isUndefined()) {
             table_add_computed_column(data_table, computed);
@@ -1528,11 +1529,11 @@ namespace binding {
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
-        if (hasValue(j_row_pivots)) {
+        if (has_value(j_row_pivots)) {
             row_pivots = vecFromArray<t_val, std::string>(j_row_pivots);
         }
 
-        if (hasValue(j_column_pivots)) {
+        if (has_value(j_column_pivots)) {
             column_pivots = vecFromArray<t_val, std::string>(j_column_pivots);
         }
 
@@ -1543,7 +1544,7 @@ namespace binding {
             column_only = true;
         }
 
-        if (hasValue(j_sort)) {
+        if (has_value(j_sort)) {
             sortbys = vecFromArray<t_val, t_val>(j_sort);
         }
 
@@ -1552,9 +1553,9 @@ namespace binding {
             schema, row_pivots, column_pivots, column_only, columns, sortbys, j_aggregates);
         aggregate_names = _get_aggregate_names(aggregates);
 
-        if (hasValue(j_filter)) {
+        if (has_value(j_filter)) {
             filters = _get_fterms(schema, date_parser, j_filter);
-            if (hasValue(config["filter_op"])) {
+            if (has_value(config["filter_op"])) {
                 filter_op = str_to_filter_op(config["filter_op"].as<std::string>());
             }
         }
@@ -1572,29 +1573,28 @@ namespace binding {
 
     template <>
     std::shared_ptr<View<t_ctx0>>
-    make_view_zero(std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, t_val config, t_val date_parser) {
-        auto schema = gnode->get_tblschema();
+    make_view_zero(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
         t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         auto col_names = view_config.get_column_names();
         auto filter_op = view_config.get_combiner();
         auto filters = view_config.get_fterms();
         auto sorts = view_config.get_sortspecs();
-        auto ctx = make_context_zero(
-            schema, filter_op, col_names, filters, sorts, pool, gnode, name);
+        auto ctx = make_context_zero(table, schema, filter_op, col_names, filters, sorts, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx0>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx0>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx1>>
-    make_view_one(std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, t_val config, t_val date_parser) {
-        auto schema = gnode->get_tblschema();
+    make_view_one(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
         t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         auto aggregates = view_config.get_aggregates();
@@ -1604,24 +1604,24 @@ namespace binding {
         auto sorts = view_config.get_sortspecs();
 
         std::int32_t pivot_depth = -1;
-        if (hasValue(config["row_pivot_depth"])) {
+        if (has_value(config["row_pivot_depth"])) {
             pivot_depth = config["row_pivot_depth"].as<std::int32_t>();
         }
 
-        auto ctx = make_context_one(schema, row_pivots, filter_op, filters, aggregates, sorts,
-            pivot_depth, pool, gnode, name);
+        auto ctx = make_context_one(table, schema, row_pivots, filter_op, filters, aggregates,
+            sorts, pivot_depth, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx1>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx1>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx2>>
-    make_view_two(std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, t_val config, t_val date_parser) {
-        auto schema = gnode->get_tblschema();
+    make_view_two(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
         t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         bool column_only = view_config.is_column_only();
@@ -1637,20 +1637,20 @@ namespace binding {
         std::int32_t rpivot_depth = -1;
         std::int32_t cpivot_depth = -1;
 
-        if (hasValue(config["row_pivot_depth"])) {
+        if (has_value(config["row_pivot_depth"])) {
             rpivot_depth = config["row_pivot_depth"].as<std::int32_t>();
         }
 
-        if (hasValue(config["column_pivot_depth"])) {
+        if (has_value(config["column_pivot_depth"])) {
             cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
         }
 
-        auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
-            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, pool, gnode,
-            name);
+        auto ctx
+            = make_context_two(table, schema, row_pivots, column_pivots, filter_op, filters,
+                aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx2>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
@@ -1661,28 +1661,34 @@ namespace binding {
      */
 
     std::shared_ptr<t_ctx0>
-    make_context_zero(t_schema schema, t_filter_op combiner, std::vector<std::string> columns,
-        std::vector<t_fterm> filters, std::vector<t_sortspec> sorts,
-        std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode, std::string name) {
+    make_context_zero(std::shared_ptr<Table> table, t_schema schema, t_filter_op combiner,
+        std::vector<std::string> columns, std::vector<t_fterm> filters,
+        std::vector<t_sortspec> sorts, std::string name) {
         auto cfg = t_config(columns, combiner, filters);
         auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
         ctx0->init();
         ctx0->sort_by(sorts);
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx0.get()));
+
         return ctx0;
     }
 
     std::shared_ptr<t_ctx1>
-    make_context_one(t_schema schema, std::vector<t_pivot> pivots, t_filter_op combiner,
-        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name) {
+    make_context_one(std::shared_ptr<Table> table, t_schema schema, std::vector<t_pivot> pivots,
+        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::string name) {
         auto cfg = t_config(pivots, aggregates, combiner, filters);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
         ctx1->sort_by(sorts);
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx1.get()));
 
@@ -1696,11 +1702,11 @@ namespace binding {
     }
 
     std::shared_ptr<t_ctx2>
-    make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
-        std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
-        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
-        std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        bool column_only, std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
+    make_context_two(std::shared_ptr<Table> table, t_schema schema,
+        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
+        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
+        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
         std::string name) {
         t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
@@ -1709,6 +1715,9 @@ namespace binding {
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx2.get()));
 
@@ -1810,6 +1819,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
             std::uint32_t, std::uint32_t, std::string, t_op, bool>()
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
+        .function("unregister_gnode", &Table::unregister_gnode)
+        .function("reset", &Table::reset)
+        .function("get_schema", &Table::get_schema)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);
     /******************************************************************************
@@ -1819,8 +1831,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
     // Bind a View for each context type
 
     class_<View<t_ctx0>>("View_ctx0")
-        .constructor<std::shared_ptr<t_pool>, std::shared_ptr<t_ctx0>, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx0>>>("shared_ptr<View_ctx0>")
         .function("sides", &View<t_ctx0>::sides)
         .function("num_rows", &View<t_ctx0>::num_rows)
@@ -1842,8 +1854,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
-        .constructor<std::shared_ptr<t_pool>, std::shared_ptr<t_ctx1>, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx1>>>("shared_ptr<View_ctx1>")
         .function("sides", &View<t_ctx1>::sides)
         .function("num_rows", &View<t_ctx1>::num_rows)
@@ -1868,8 +1880,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
-        .constructor<std::shared_ptr<t_pool>, std::shared_ptr<t_ctx2>, std::shared_ptr<t_gnode>,
-            std::string, std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx2>>>("shared_ptr<View_ctx2>")
         .function("sides", &View<t_ctx2>::sides)
         .function("num_rows", &View<t_ctx2>::num_rows)

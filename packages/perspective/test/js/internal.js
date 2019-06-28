@@ -33,7 +33,7 @@ module.exports = (perspective, mode) => {
             let schema, stypes;
             let types = [];
             try {
-                schema = table.gnode.get_tblschema();
+                schema = table._Table.get_schema();
                 stypes = schema.types();
 
                 for (let i = 0; i < stypes.size(); i++) {

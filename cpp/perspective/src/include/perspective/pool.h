@@ -57,7 +57,6 @@ public:
 
     void unregister_context(t_uindex gnode_id, const std::string& name);
 
-    void send(t_uindex gnode_id, t_uindex port_id, std::shared_ptr<t_data_table> table);
     void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
     void _process();

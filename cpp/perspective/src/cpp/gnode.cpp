@@ -219,16 +219,6 @@ t_gnode::repr() const {
 }
 
 void
-t_gnode::_send(t_uindex portid, std::shared_ptr<t_data_table> fragments) {
-    PSP_TRACE_SENTINEL();
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-    PSP_VERBOSE_ASSERT(portid == 0, "Only simple dataflows supported currently");
-
-    std::shared_ptr<t_port>& iport = m_iports[portid];
-    iport->send(fragments);
-}
-
-void
 t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");

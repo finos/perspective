@@ -84,11 +84,10 @@ export default function(Module) {
     }
 
     /**
-     * Common logic for creating and registering a gnode/t_data_table.
+     * Common logic for creating and registering a Table.
      *
      * @param {*} pdata
-     * @param {*} pool
-     * @param {*} gnode
+     * @param {*} table
      * @param {*} computed
      * @param {*} index
      * @param {*} limit
@@ -97,18 +96,18 @@ export default function(Module) {
      * @private
      * @returns {Table}
      */
-    function make_table(accessor, pool, gnode, computed, index, limit, limit_index, op, is_arrow) {
-        let _Table;
+    function make_table(accessor, _Table, computed, index, limit, limit_index, op, is_arrow) {
         if (is_arrow) {
             for (let chunk of accessor) {
-                _Table = __MODULE__.make_table(pool, gnode, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+                _Table = __MODULE__.make_table(_Table, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
                 limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
             }
         } else {
-            _Table = __MODULE__.make_table(pool, gnode, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+            _Table = __MODULE__.make_table(_Table, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
 
+        const pool = _Table.get_pool();
         if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool);
         } else {
@@ -251,25 +250,24 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(pool, sides, gnode, config, name, callbacks, table) {
+    function view(table, sides, config, name, callbacks) {
         this._View = undefined;
         this.date_parser = new DateParser();
         this.config = config || {};
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(pool, gnode, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
         }
 
-        this.pool = pool;
+        this.table = table;
         this.ctx = this._View.get_context();
         this.column_only = this._View.is_column_only();
         this.callbacks = callbacks;
         this.name = name;
-        this.table = table;
         bindall(this);
     }
 
@@ -291,7 +289,7 @@ export default function(Module) {
      * @async
      */
     view.prototype.delete = function() {
-        _reset_process(this.pool);
+        _reset_process(this.table._Table.get_pool()); // FIXME: reduce number of chain call
         this._View.delete();
         this.ctx.delete();
 
@@ -382,7 +380,7 @@ export default function(Module) {
      * @private
      */
     const to_format = function(options, formatter) {
-        _clear_process(this.pool);
+        _clear_process(this.table._Table.get_pool());
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -767,7 +765,7 @@ export default function(Module) {
      *     - "row": The callback is invoked with an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        _clear_process(this.pool);
+        _clear_process(this.table._Table.get_pool());
         if (["none", "cell", "row"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
         }
@@ -821,7 +819,7 @@ export default function(Module) {
     }
 
     view.prototype.remove_update = function(callback) {
-        _clear_process(this.pool);
+        _clear_process(this.table._Table.get_pool());
         const total = this.callbacks.length;
         filterInPlace(this.callbacks, x => x.orig_callback !== callback);
         console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
@@ -863,12 +861,10 @@ export default function(Module) {
      */
     function table(_Table, index, computed, limit, limit_index) {
         this._Table = _Table;
-        this.gnode = this._Table.get_gnode();
-        this.pool = this._Table.get_pool();
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
-        this.pool.set_update_delegate(this);
+        this._Table.get_pool().set_update_delegate(this);
         this.computed = computed || [];
         this.callbacks = [];
         this.views = [];
@@ -889,18 +885,18 @@ export default function(Module) {
      * construction options.
      */
     table.prototype.clear = function() {
-        _reset_process(this.pool);
-        this.gnode.reset();
+        _reset_process(this._Table.get_pool());
+        this._Table.reset();
     };
 
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        _reset_process(this.pool);
-        this.gnode.reset();
+        _reset_process(this._Table.get_pool());
+        this._Table.reset();
         this.update(data);
-        _clear_process(this.pool);
+        _clear_process(this._Table.get_pool());
     };
 
     /**
@@ -912,10 +908,9 @@ export default function(Module) {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
-        _reset_process(this.pool);
-        this.pool.unregister_gnode(this.gnode.get_id());
-        this.gnode.delete();
-        this.pool.delete();
+        _reset_process(this._Table.get_pool());
+        this._Table.unregister_gnode();
+        this._Table.delete();
         if (this._delete_callback) {
             this._delete_callback();
         }
@@ -943,11 +938,11 @@ export default function(Module) {
      * @returns {Promise<number>} The number of accumulated rows.
      */
     table.prototype.size = function() {
-        return this.gnode.get_table().size();
+        return this._Table.size();
     };
 
     table.prototype._schema = function(computed) {
-        let schema = this.gnode.get_tblschema();
+        let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
         let new_schema = {};
@@ -1071,7 +1066,7 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(_config = {}) {
-        _clear_process(this.pool);
+        _clear_process(this._Table.get_pool());
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
@@ -1121,7 +1116,7 @@ export default function(Module) {
             sides = 0;
         }
 
-        let v = new view(this.pool, sides, this.gnode, config, name, this.callbacks, this);
+        let v = new view(this, sides, config, name, this.callbacks);
         this.views.push(v);
         return v;
     };
@@ -1160,7 +1155,7 @@ export default function(Module) {
     table.prototype.update = function(data) {
         let pdata;
         let cols = this._columns();
-        let schema = this.gnode.get_tblschema();
+        let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
 
@@ -1176,14 +1171,14 @@ export default function(Module) {
             if (data[0] === ",") {
                 data = "_" + data;
             }
-            accessor.init(__MODULE__, papaparse.parse(data.trim(), {header: true}).data);
+            accessor.init(papaparse.parse(data.trim(), {header: true}).data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
             if (meter) {
                 meter(accessor.row_count);
             }
         } else {
-            accessor.init(__MODULE__, data);
+            accessor.init(data);
             accessor.names = cols;
             accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
             if (meter) {
@@ -1198,7 +1193,7 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_UPDATE;
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            [, this.limit_index] = make_table(pdata, this._Table, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1219,7 +1214,7 @@ export default function(Module) {
     table.prototype.remove = function(data) {
         let pdata;
         let cols = this._columns();
-        let schema = this.gnode.get_tblschema();
+        let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
 
@@ -1229,7 +1224,7 @@ export default function(Module) {
             pdata = load_arrow_buffer(data, [this.index], types);
             is_arrow = true;
         } else {
-            accessor.init(__MODULE__, data);
+            accessor.init(data);
             accessor.names = [this.index];
             accessor.types = [accessor.extract_typevec(types)[cols.indexOf(this.index)]];
             pdata = accessor;
@@ -1237,7 +1232,7 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
-            [, this.limit_index] = make_table(pdata, this.pool, this.gnode, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            [, this.limit_index] = make_table(pdata, this._Table, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1253,19 +1248,15 @@ export default function(Module) {
      * @param {Computation} computed A computation specification object
      */
     table.prototype.add_computed = function(computed) {
-        let pool, _Table;
+        let _Table;
 
         try {
-            pool = __MODULE__.make_pool();
             _Table = __MODULE__.clone_table(this._Table, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
             return new table(_Table, this.index, computed, this.limit, this.limit_index);
         } catch (e) {
-            if (pool) {
-                pool.delete();
-            }
             if (_Table) {
                 _Table.delete();
             }
@@ -1274,7 +1265,7 @@ export default function(Module) {
     };
 
     table.prototype._columns = function(computed = false) {
-        let schema = this.gnode.get_tblschema();
+        let schema = this._Table.get_schema();
         let computed_schema = this._computed_schema();
         let cols = schema.columns();
         let names = [];
@@ -1302,7 +1293,7 @@ export default function(Module) {
     };
 
     table.prototype._column_metadata = function() {
-        let schema = this.gnode.get_tblschema();
+        let schema = this._Table.get_schema();
         let computed_schema = this._computed_schema();
         let cols = schema.columns();
         let types = schema.types();
@@ -1428,7 +1419,7 @@ export default function(Module) {
                 }
 
                 accessor.clean();
-                accessor.init(__MODULE__, data);
+                accessor.init(data);
                 data_accessor = accessor;
             }
 
@@ -1436,21 +1427,15 @@ export default function(Module) {
                 throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
             }
 
-            let pool,
-                _Table,
+            let _Table,
                 limit_index = 0;
 
             try {
-                pool = __MODULE__.make_pool();
-
                 const op = __MODULE__.t_op.OP_INSERT;
-                [_Table, limit_index] = make_table(data_accessor, pool, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
+                [_Table, limit_index] = make_table(data_accessor, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
 
                 return new table(_Table, options.index, undefined, options.limit, limit_index);
             } catch (e) {
-                if (pool) {
-                    pool.delete();
-                }
                 if (_Table) {
                     _Table.delete();
                 }

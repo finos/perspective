@@ -36,18 +36,25 @@ public:
         std::string index, t_op op, bool is_arrow);
 
     void init(t_data_table& data_table);
+    void update(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
+        std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow);
     t_uindex size() const;
+    t_schema get_schema() const;
 
     std::shared_ptr<t_gnode> make_gnode(const t_schema& in_schema);
 
     void clone_data_table(t_data_table* data_table);
 
     void set_gnode(std::shared_ptr<t_gnode> gnode);
+    void set_column_names(const std::vector<std::string>& column_names);
+    void set_data_types(const std::vector<t_dtype>& data_types);
 
-    std::shared_ptr<t_data_table> get_data_table() const;
+    // gnode/pool ops
+    void unregister_gnode();
+    void reset();
+
     std::shared_ptr<t_pool> get_pool() const;
     std::shared_ptr<t_gnode> get_gnode() const;
-    const t_schema& get_schema() const;
     const std::vector<std::string>& get_column_names() const;
     const std::vector<t_dtype>& get_data_types() const;
     std::uint32_t get_offset() const;
@@ -67,7 +74,6 @@ private:
      */
     void process_index_column(t_data_table& data_table);
 
-    std::shared_ptr<t_data_table> m_data_table;
     std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;
@@ -77,7 +83,6 @@ private:
     std::string m_index;
     t_op m_op;
     bool m_is_arrow;
-    bool m_data_table_set;
     bool m_gnode_set;
 };
 

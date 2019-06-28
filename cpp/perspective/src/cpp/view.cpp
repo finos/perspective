@@ -13,11 +13,10 @@
 
 namespace perspective {
 template <typename CTX_T>
-View<CTX_T>::View(std::shared_ptr<t_pool> pool, std::shared_ptr<CTX_T> ctx,
-    std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, t_config config)
-    : m_pool(pool)
+View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
+    std::string separator, t_config config)
+    : m_table(table)
     , m_ctx(ctx)
-    , m_gnode(gnode)
     , m_name(name)
     , m_separator(separator)
     , m_col_offset(0)
@@ -43,7 +42,9 @@ View<CTX_T>::View(std::shared_ptr<t_pool> pool, std::shared_ptr<CTX_T> ctx,
 
 template <typename CTX_T>
 View<CTX_T>::~View() {
-    m_pool->unregister_context(m_gnode->get_id(), m_name);
+    auto pool = m_table->get_pool();
+    auto gnode = m_table->get_gnode();
+    pool->unregister_context(gnode->get_id(), m_name);
 }
 
 template <>
@@ -160,7 +161,7 @@ View<t_ctx0>::column_names(bool skip, std::int32_t depth) const {
 template <typename CTX_T>
 std::map<std::string, std::string>
 View<CTX_T>::schema() const {
-    auto schema = m_gnode->get_tblschema();
+    auto schema = m_table->get_schema();
     auto _types = schema.types();
     auto names = schema.columns();
 
@@ -189,7 +190,7 @@ View<CTX_T>::schema() const {
 template <>
 std::map<std::string, std::string>
 View<t_ctx0>::schema() const {
-    t_schema schema = m_gnode->get_tblschema();
+    t_schema schema = m_table->get_schema();
     std::vector<t_dtype> _types = schema.types();
     std::vector<std::string> names = schema.columns();
 

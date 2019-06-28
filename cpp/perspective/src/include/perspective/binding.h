@@ -54,7 +54,7 @@ namespace binding {
     std::vector<U> vecFromArray(T& arr);
 
     template <typename T>
-    bool hasValue(T val);
+    bool has_value(T val);
 
     /******************************************************************************
      *
@@ -255,9 +255,8 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> make_table(std::shared_ptr<t_pool> pool, T gnode, T accessor,
-        T computed, std::uint32_t offset, std::uint32_t limit, std::string index, t_op op,
-        bool is_arrow);
+    std::shared_ptr<Table> make_table(T table, T accessor, T computed, std::uint32_t offset,
+        std::uint32_t limit, std::string index, t_op op, bool is_arrow);
 
     /**
      * @brief Create a new `t_pool` and embed it in a shared pointer.
@@ -299,8 +298,7 @@ namespace binding {
      * Zero-sided views have no aggregates applied.
      *
      * @tparam T
-     * @param pool
-     * @param gnode
+     * @param table
      * @param name
      * @param separator
      * @param config
@@ -308,9 +306,8 @@ namespace binding {
      * @return std::shared_ptr<View<t_ctx0>>
      */
     template <typename T>
-    std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<Table> table, std::string name,
+        std::string separator, T config, T date_parser);
 
     /**
      * @brief Create a new one-sided view.
@@ -318,8 +315,7 @@ namespace binding {
      * One-sided views have one or more `row-pivots` applied,
      *
      * @tparam T
-     * @param pool
-     * @param gnode
+     * @param table
      * @param name
      * @param separator
      * @param config
@@ -327,9 +323,8 @@ namespace binding {
      * @return std::shared_ptr<View<t_ctx1>>
      */
     template <typename T>
-    std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<Table> table, std::string name,
+        std::string separator, T config, T date_parser);
 
     /**
      * @brief Create a new two-sided view.
@@ -338,8 +333,7 @@ namespace binding {
      * one or more `column-pivots` applied without any row pivots, hence the term `column_only`.
      *
      * @tparam T
-     * @param pool
-     * @param gnode
+     * @param table
      * @param name
      * @param separator
      * @param config
@@ -347,9 +341,8 @@ namespace binding {
      * @return std::shared_ptr<View<t_ctx2>>
      */
     template <typename T>
-    std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name, std::string separator, T config,
-        T date_parser);
+    std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<Table> table, std::string name,
+        std::string separator, T config, T date_parser);
 
     /**
      * @brief Create a new zero-sided context.
@@ -359,31 +352,30 @@ namespace binding {
      *
      * @return std::shared_ptr<t_ctx0>
      */
-    std::shared_ptr<t_ctx0> make_context_zero(t_schema schema, t_filter_op combiner,
-        std::vector<std::string> columns, std::vector<t_fterm> filters,
-        std::vector<t_sortspec> sorts, std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name);
+    std::shared_ptr<t_ctx0> make_context_zero(std::shared_ptr<Table> table, t_schema schema,
+        t_filter_op combiner, std::vector<std::string> columns, std::vector<t_fterm> filters,
+        std::vector<t_sortspec> sorts, std::string name);
 
     /**
      * @brief Create a new one-sided context.
      *
      * @return std::shared_ptr<t_ctx1>
      */
-    std::shared_ptr<t_ctx1> make_context_one(t_schema schema, std::vector<t_pivot> pivots,
-        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::shared_ptr<t_pool> pool,
-        std::shared_ptr<t_gnode> gnode, std::string name);
+    std::shared_ptr<t_ctx1> make_context_one(std::shared_ptr<Table> table, t_schema schema,
+        std::vector<t_pivot> pivots, t_filter_op combiner, std::vector<t_fterm> filters,
+        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
+        std::int32_t pivot_depth, std::string name);
 
     /**
      * @brief Create a new two-sided context.
      *
      * @return std::shared_ptr<t_ctx2>
      */
-    std::shared_ptr<t_ctx2> make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
-        std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
-        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
-        std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        bool column_only, std::shared_ptr<t_pool> pool, std::shared_ptr<t_gnode> gnode,
+    std::shared_ptr<t_ctx2> make_context_two(std::shared_ptr<Table> table, t_schema schema,
+        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
+        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
+        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
         std::string name);
 
     /**
