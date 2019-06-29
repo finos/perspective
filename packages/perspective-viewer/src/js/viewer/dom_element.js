@@ -7,7 +7,6 @@
  *
  */
 
-import detectIE from "detectie";
 import perspective from "@finos/perspective";
 import {undrag} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
@@ -184,10 +183,6 @@ export class DomElement extends PerspectiveElement {
             }
         }
         this.shadowRoot.querySelector("#psp_styles").innerHTML = style;
-
-        if (detectIE()) {
-            window.ShadyCSS.styleDocument();
-        }
     }
 
     _show_column_selectors() {

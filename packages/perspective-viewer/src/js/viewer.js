@@ -8,7 +8,6 @@
  */
 
 import "@webcomponents/webcomponentsjs";
-import "@webcomponents/shadycss/custom-style-interface.min.js";
 
 import _ from "lodash";
 import {polyfill} from "mobile-drag-drop";
