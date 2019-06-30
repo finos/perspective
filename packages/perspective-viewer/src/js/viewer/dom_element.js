@@ -8,7 +8,7 @@
  */
 
 import perspective from "@finos/perspective";
-import {undrag} from "./dragdrop.js";
+import {dragend} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 
 import {PerspectiveElement} from "./perspective_element.js";
@@ -91,7 +91,7 @@ export class DomElement extends PerspectiveElement {
         row.addEventListener("visibility-clicked", this._column_visibility_clicked.bind(this));
         row.addEventListener("aggregate-selected", this._column_aggregate_clicked.bind(this));
         row.addEventListener("filter-selected", this._column_filter_clicked.bind(this));
-        row.addEventListener("close-clicked", event => undrag.call(this, event.detail));
+        row.addEventListener("close-clicked", event => dragend.call(this, event.detail));
         row.addEventListener("sort-order", this._sort_order_clicked.bind(this));
 
         row.addEventListener("row-drag", () => {
