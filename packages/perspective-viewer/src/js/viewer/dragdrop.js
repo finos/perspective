@@ -7,8 +7,6 @@
  *
  */
 
-import detectIE from "detectie";
-
 function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
@@ -42,10 +40,6 @@ export function dragend(event) {
     let attr_value = JSON.parse(this.getAttribute(attr_name));
     attr_value.splice(idx, 1);
     this.setAttribute(attr_name, JSON.stringify(attr_value));
-
-    if (detectIE()) {
-        window.ShadyCSS.styleDocument();
-    }
 }
 
 export function drop(ev) {

@@ -71,6 +71,7 @@ export class DomElement extends PerspectiveElement {
                     row.choices(json.slice(1, json.length).map(x => x.__ROW_PATH__));
                     v.delete();
                 });
+                v.delete();
             }
         }
 
