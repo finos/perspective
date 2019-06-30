@@ -162,6 +162,22 @@ module.exports = perspective => {
             // make sure that number of separators = num of column pivots
             expect((name.match(/\|/g) || []).length).toEqual(2);
         });
+
+        it("should return dates in native form by default", async function () {
+            let table = perspective.table([{datetime: new Date("2016-06-13")}, 
+                                           {datetime: new Date("2016-06-14")}]);
+            let view = table.view();
+            let json = await view.to_json();
+            expect(json).toEqual([{datetime: 1465776000000}, {datetime: 1465862400000}]);
+        });
+
+        it("should return dates in readable format on passing string in options", async function () {
+            let table = perspective.table([{datetime: new Date("2016-06-13")}, 
+                                           {datetime: new Date("2016-06-14")}]);
+            let view = table.view();
+            let json = await view.to_json({date_format: "string"});
+            expect(json).toEqual([{datetime: "13/06/2016"}, {datetime: "14/06/2016"}]);
+        });
     });
 
     describe("to_arrow()", function() {
