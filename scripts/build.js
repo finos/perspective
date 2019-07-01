@@ -53,7 +53,7 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
 
     if (inputWasmFile) {
         console.log("-- Copying WASM file %s", inputWasmFile);
-        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "dist", "cdn", inputWasmFile));
+        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "dist", "umd", inputWasmFile));
     }
 
     console.debug("-- Creating wrapped js runtime");

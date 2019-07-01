@@ -2,8 +2,8 @@
     "name": "@finos/perspective",
     "version": "0.3.1",
     "description": "Perspective.js",
-    "main": "dist/cdn/perspective.node.js",
-    "unpkg": "dist/cdn/perspective.js",
+    "main": "dist/umd/perspective.node.js",
+    "unpkg": "dist/umd/perspective.js",
     "browser": "dist/esm/perspective.parallel.js",
     "module": "dist/esm/perspective.parallel.js",
     "publishConfig": {

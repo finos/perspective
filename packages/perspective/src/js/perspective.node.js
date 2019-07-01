@@ -60,7 +60,7 @@ let CLIENT_ID_GEN = 0;
 
 const DEFAULT_ASSETS = [
     "@finos/perspective/dist/umd",
-    "@finos/perspective-bench/dist/umd",
+    "@finos/perspective-bench/dist",
     "@finos/perspective-viewer/dist/umd",
     "@finos/perspective-viewer-highcharts/dist/umd",
     "@finos/perspective-viewer-hypergrid/dist/umd",
