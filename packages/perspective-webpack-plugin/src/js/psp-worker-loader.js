@@ -46,9 +46,10 @@ exports.default = function loader(content) {
         var inputPath = this.resourcePath;
         if (!options.inline) {
             inputPath = inputPath
-                .replace(path.join("perspective", "build"), "perspective")
+                .replace(path.join("perspective", "dist", "esm"), path.join("perspective", "dist", "umd"))
+                .replace(path.join("perspective", "dist", "cjs"), path.join("perspective", "dist", "umd"))
                 .replace(/\.js/, ".worker.js")
-                .replace(path.join("cjs", "js"), "build");
+                .replace(path.join("dist", "esm"), path.join("dist", "umd"));
         }
         content = fs.readFileSync(inputPath).toString();
         if (!options.inline) {

@@ -29,34 +29,11 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
-        const rules = [
-            {
-                test: /\.less$/,
-                exclude: /themes/,
-                include: this.options.load_path,
-                use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
-            },
-            {
-                test: /\.(html)$/,
-                include: this.options.load_path,
-                use: {
-                    loader: "html-loader",
-                    options: {}
-                }
-            },
-            {
-                test: /\.(arrow)$/,
-                include: this.options.load_path,
-                use: {
-                    loader: "arraybuffer-loader",
-                    options: {}
-                }
-            }
-        ];
+        const rules = [];
 
         if (this.options.build_worker) {
             rules.push({
-                test: /perspective\.(asmjs|wasm)\.js$/,
+                test: /perspective\.wasm\.js$/,
                 include: this.options.load_path,
                 use: [
                     {
@@ -71,7 +48,7 @@ class PerspectiveWebpackPlugin {
             });
         } else {
             rules.push({
-                test: /perspective\.(wasm|asmjs)\.js$/,
+                test: /perspective\.wasm\.js$/,
                 include: this.options.load_path,
                 use: {
                     loader: PSP_WORKER_LOADER,
@@ -102,7 +79,7 @@ class PerspectiveWebpackPlugin {
         });
 
         rules.push({
-            test: /psp\.(sync|async)\.wasm\.js$/,
+            test: /psp\.async\.wasm\.js$/,
             include: this.options.load_path,
             use: {
                 loader: WASM_LOADER,

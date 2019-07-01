@@ -49,11 +49,11 @@ function compileRuntime({inputFile, inputWasmFile, format, packageName}) {
     const BUILD_DIRECTORY = getBuildDir(packageName);
 
     mkdirp.sync(path.join(OUTPUT_DIRECTORY, "obj"));
-    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "build"));
+    mkdirp.sync(path.join(OUTPUT_DIRECTORY, "dist", "umd"));
 
     if (inputWasmFile) {
         console.log("-- Copying WASM file %s", inputWasmFile);
-        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "build", inputWasmFile));
+        fs.copyFileSync(path.join(BUILD_DIRECTORY, inputWasmFile), path.join(OUTPUT_DIRECTORY, "dist", "cdn", inputWasmFile));
     }
 
     console.debug("-- Creating wrapped js runtime");
@@ -102,7 +102,7 @@ function compileCPP(packageName) {
 }
 
 function lerna() {
-    let cmd = `lerna run build --loglevel silent --stream `;
+    let cmd = `lerna run build --loglevel silent `;
     if (process.env.PACKAGE) {
         cmd += `--scope=@finos/${process.env.PACKAGE} `;
     }
