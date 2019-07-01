@@ -1,22 +1,26 @@
 {
-  "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "target": "es2016",
-    "outDir": "",
-    "lib": [
-      "es2016",
-      "ES2015.Promise",
-      "DOM"
-    ],
-    "types": [
-      "@finos/perspective-viewer"
+    "compilerOptions": {
+        "declaration": true,
+        "noImplicitAny": true,
+        "noEmitOnError": true,
+        "noUnusedLocals": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "target": "es2016",
+        "outDir": "dist/cjs",
+        "sourceMap": true,
+        "inlineSourceMap": false,
+        "lib": [
+            "es2016",
+            "ES2015.Promise",
+            "DOM"
+        ],
+        "types": [
+            "@finos/perspective-viewer"
+        ]
+    },
+    "include": [
+        "src/ts/*"
     ]
-  },
-  "include": ["src/ts/*"]
 }

@@ -59,12 +59,12 @@ module.exports.sync_module = () => SYNC_SERVER.perspective;
 let CLIENT_ID_GEN = 0;
 
 const DEFAULT_ASSETS = [
-    "@finos/perspective/build",
-    "@finos/perspective-bench/build",
-    "@finos/perspective-viewer/build",
-    "@finos/perspective-viewer-highcharts/build",
-    "@finos/perspective-viewer-hypergrid/build",
-    "@finos/perspective-viewer-d3fc/build"
+    "@finos/perspective/dist/umd",
+    "@finos/perspective-bench/dist",
+    "@finos/perspective-viewer/dist/umd",
+    "@finos/perspective-viewer-highcharts/dist/umd",
+    "@finos/perspective-viewer-hypergrid/dist/umd",
+    "@finos/perspective-viewer-d3fc/dist/umd"
 ];
 
 const CONTENT_TYPES = {

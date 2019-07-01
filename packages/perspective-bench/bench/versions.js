@@ -35,12 +35,12 @@ const JPMC_VERSIONS = [
 const FINOS_VERSIONS = ["0.3.0-rc.3", "0.3.0-rc.2", "0.3.0-rc.1"];
 
 async function run() {
-    await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://host.docker.internal:8080/perspective.js`, {output: "build/benchmark", puppeteer: true});
+    await PerspectiveBench.run("master", "bench/perspective.benchmark.js", `http://host.docker.internal:8080/perspective.js`, {output: "dist/benchmark", puppeteer: true});
 
     for (const version of FINOS_VERSIONS) {
         const url = `https://unpkg.com/@finos/perspective@${version}/build/perspective.js`;
         await PerspectiveBench.run(version, "bench/perspective.benchmark.js", url, {
-            output: "build/benchmark",
+            output: "dist/benchmark",
             read: true,
             puppeteer: true
         });
@@ -49,7 +49,7 @@ async function run() {
     for (const version of JPMC_VERSIONS) {
         const url = `https://unpkg.com/@jpmorganchase/perspective@${version}/build/perspective.js`;
         await PerspectiveBench.run(version, "bench/perspective.benchmark.js", url, {
-            output: "build/benchmark",
+            output: "dist/benchmark",
             read: true,
             puppeteer: true
         });

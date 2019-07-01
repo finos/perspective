@@ -3,15 +3,12 @@
     "version": "0.3.1",
     "description": "Perspective.js",
     "files": [
-        "build/*.d.ts",
-        "build/*.js.map",
-        "build/*.js",
-        "build/*.wasm",
+        "dist/**/*",
         "src/css/*.css",
         "babel.config.js"
     ],
-    "main": "build/index.js",
-    "types": "build/index.d.ts",
+    "main": "dist/cjs/index.js",
+    "types": "dist/cjs/index.d.ts",
     "license": "Apache-2.0",
     "publishConfig": {
         "access": "public"
@@ -22,8 +19,8 @@
         "bench:run": "echo \"No Benchmarks\"",
         "test": "npm-run-all test:run",
         "test:run": "echo done",
-        "build": "webpack --color --config src/config/plugin.config.js",
-        "clean": "rimraf build"
+        "build": "webpack --color --config src/config/cjs.config.js",
+        "clean": "rimraf dist"
     },
     "dependencies": {
         "@finos/perspective": "^0.3.1",
@@ -37,17 +34,13 @@
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.1",
         "@types/jest": "^23.3.9",
-        "css-loader": "^0.26.1",
         "file-loader": "^0.11.1",
         "identity-obj-proxy": "^3.0.0",
         "isomorphic-fetch": "^2.2.1",
-        "jest": "^23.6.0",
         "jest-transform-css": "^2.0.0",
         "rimraf": "^2.5.2",
         "source-map-support": "^0.5.9",
-        "style-loader": "^0.13.1",
         "ts-jest": "^23.10.4",
-        "typescript": "^3.2.4",
-        "webpack": "^2.2.1"
+        "typescript": "^3.2.4"
     }
 }

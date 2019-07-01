@@ -42,7 +42,7 @@ cp -r node_modules/@finos/perspective/build my_build/assets/
 
 By far the easiest way to get started with Perspective in the browser, the full
 library can be used directly from
-[unpkg.com](https://unpkg.com/@finos/perspective-examples/build/perspective.view.js)
+[unpkg.com](https://unpkg.com/@finos/perspective-examples/build/perspective-viewer.js)
 CDN by simply adding these scripts to your `.html`'s `<head>` section:
 
 ```html

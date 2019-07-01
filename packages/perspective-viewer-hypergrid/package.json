@@ -2,25 +2,27 @@
     "name": "@finos/perspective-viewer-hypergrid",
     "version": "0.3.1",
     "description": "Perspective.js",
-    "main": "cjs/js/hypergrid.js",
-    "module": "cjs/js/hypergrid.js",
-    "browser": "cjs/js/hypergrid.js",
+    "main": "dist/cjs/perspective-viewer-hypergrid.js",
+    "module": "dist/cjs/perspective-viewer-hypergrid.js",
+    "browser": "dist/cjs/perspective-viewer-hypergrid.js",
+    "unpkg": "dist/umd/perspective-viewer-hypergrid.js",
     "files": [
-        "build/**/*",
-        "cjs/**/*"
+        "dist/**/*",
+        "babel.config.js"
     ],
     "scripts": {
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "prebuild": "mkdirp cjs",
-        "build:babel": "cpx \"src/**/*\" cjs && babel src/js --source-maps --out-dir cjs/js",
-        "build:webpack": "webpack --color --config src/config/hypergrid.plugin.config.js",
-        "build": "npm-run-all build:babel build:webpack",
-        "test:build": "cpx \"test/html/*\" build",
+        "prebuild": "mkdirp dist/esm",
+        "build:babel": "cpx \"src/**/*\" dist && babel src/js --source-maps --out-dir dist/esm",
+        "build:webpack:esm": "webpack --color --config src/config/cjs.config.js",
+        "build:webpack:umd": "webpack --color --config src/config/umd.config.js",
+        "build": "npm-run-all build:babel build:webpack:esm build:webpack:umd",
+        "test:build": "cpx \"test/html/*\" dist/umd",
         "test:run": "jest --silent --color",
         "test": "npm-run-all test:build test:run",
-        "clean": "rimraf build && rimraf cjs",
+        "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
     },
     "jest": {

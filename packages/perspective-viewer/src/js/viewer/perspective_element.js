@@ -25,7 +25,7 @@ function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1};
+let TYPE_ORDER = {integer: 2, string: 0, float: 3, boolean: 4, datetime: 1, date: 1};
 
 const column_sorter = schema => (a, b) => {
     const s1 = TYPE_ORDER[schema[a]];
@@ -235,7 +235,7 @@ export class PerspectiveElement extends StateElement {
     }
 
     _is_config_changed(config) {
-        const plugin_name = this.getAttribute("view");
+        const plugin_name = this.getAttribute("plugin");
         if (_.isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
             return false;
         } else {

@@ -9,7 +9,7 @@
 
 describe("perspective.js module", function() {
     it("does not access the WASM module until it is ready", async () => {
-        const tbl = require("../../build/perspective.node.js").table([{x: 1}]);
+        const tbl = require("../../dist/umd/perspective.node.js").table([{x: 1}]);
         const size = await tbl.size();
         expect(size).toEqual(1);
     });

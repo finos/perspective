@@ -7,7 +7,7 @@
  *
  */
 
-const node_perspective = require("../../build/perspective.node.js");
+const node_perspective = require("../../dist/umd/perspective.node.js");
 
 const RUNTIMES = {
     NODE: node_perspective

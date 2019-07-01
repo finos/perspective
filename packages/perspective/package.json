@@ -2,10 +2,10 @@
     "name": "@finos/perspective",
     "version": "0.3.1",
     "description": "Perspective.js",
-    "main": "build/perspective.node.js",
-    "unpkg": "build/perspective.js",
-    "browser": "cjs/js/perspective.parallel.js",
-    "module": "cjs/js/perspective.parallel.js",
+    "main": "dist/umd/perspective.node.js",
+    "unpkg": "dist/umd/perspective.js",
+    "browser": "dist/esm/perspective.parallel.js",
+    "module": "dist/esm/perspective.parallel.js",
     "publishConfig": {
         "access": "public"
     },
@@ -17,10 +17,10 @@
     ],
     "typings": "index.d.ts",
     "scripts": {
-        "prebuild": "mkdirp build && mkdirp obj",
+        "prebuild": "mkdirp dist && mkdirp obj",
         "cpp": "npm-run-all build:cpp test:cpp",
         "build": "npm-run-all build:babel build:webpack",
-        "build:babel": "babel src/js --source-maps --out-dir cjs/js",
+        "build:babel": "babel src/js --source-maps --out-dir dist/esm",
         "build:webpack": "npm-run-all -p build:webpack:*",
         "build:webpack:umd": "webpack --color --config src/config/perspective.config.js",
         "build:webpack:node": "webpack --color --config src/config/perspective.node.config.js",
@@ -30,7 +30,7 @@
         "test:build": "cpx \"test/html/*\" build",
         "test:run": "jest --color --ci",
         "test": "npm-run-all test:build test:run",
-        "clean": "rimraf build && rimraf obj && rimraf cjs"
+        "clean": "rimraf dist"
     },
     "jest": {
         "roots": [

@@ -32,7 +32,7 @@ exports.with_server = function with_server({paths}, body) {
             throw "ERROR";
         }
         server = new WebSocketServer({
-            assets: paths || [path.join(test_root, "build")],
+            assets: paths || [path.join(test_root, "dist", "umd")],
             port: 0,
             on_start: () => {
                 __PORT__ = server._server.address().port;

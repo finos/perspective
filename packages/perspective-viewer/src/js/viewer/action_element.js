@@ -7,7 +7,7 @@
  *
  */
 
-import {undrag, column_undrag, column_dragleave, column_dragover, column_drop, drop, drag_enter, allow_drop, disallow_drop} from "./dragdrop.js";
+import {dragend, column_dragend, column_dragleave, column_dragover, column_drop, drop, dragenter, dragover, dragleave} from "./dragdrop.js";
 
 import {DomElement} from "./dom_element.js";
 
@@ -201,28 +201,28 @@ export class ActionElement extends DomElement {
     // most of these are drag and drop handlers - how to clean up?
     _register_callbacks() {
         this._sort.addEventListener("drop", drop.bind(this));
-        this._sort.addEventListener("dragend", undrag.bind(this));
-        this._sort.addEventListener("dragenter", drag_enter.bind(this));
-        this._sort.addEventListener("dragover", allow_drop.bind(this));
-        this._sort.addEventListener("dragleave", disallow_drop.bind(this));
+        this._sort.addEventListener("dragend", dragend.bind(this));
+        this._sort.addEventListener("dragenter", dragenter.bind(this));
+        this._sort.addEventListener("dragover", dragover.bind(this));
+        this._sort.addEventListener("dragleave", dragleave.bind(this));
         this._row_pivots.addEventListener("drop", drop.bind(this));
-        this._row_pivots.addEventListener("dragend", undrag.bind(this));
-        this._row_pivots.addEventListener("dragenter", drag_enter.bind(this));
-        this._row_pivots.addEventListener("dragover", allow_drop.bind(this));
-        this._row_pivots.addEventListener("dragleave", disallow_drop.bind(this));
+        this._row_pivots.addEventListener("dragend", dragend.bind(this));
+        this._row_pivots.addEventListener("dragenter", dragenter.bind(this));
+        this._row_pivots.addEventListener("dragover", dragover.bind(this));
+        this._row_pivots.addEventListener("dragleave", dragleave.bind(this));
         this._column_pivots.addEventListener("drop", drop.bind(this));
-        this._column_pivots.addEventListener("dragend", undrag.bind(this));
-        this._column_pivots.addEventListener("dragenter", drag_enter.bind(this));
-        this._column_pivots.addEventListener("dragover", allow_drop.bind(this));
-        this._column_pivots.addEventListener("dragleave", disallow_drop.bind(this));
+        this._column_pivots.addEventListener("dragend", dragend.bind(this));
+        this._column_pivots.addEventListener("dragenter", dragenter.bind(this));
+        this._column_pivots.addEventListener("dragover", dragover.bind(this));
+        this._column_pivots.addEventListener("dragleave", dragleave.bind(this));
         this._filters.addEventListener("drop", drop.bind(this));
-        this._filters.addEventListener("dragend", undrag.bind(this));
-        this._filters.addEventListener("dragenter", drag_enter.bind(this));
-        this._filters.addEventListener("dragover", allow_drop.bind(this));
-        this._filters.addEventListener("dragleave", disallow_drop.bind(this));
+        this._filters.addEventListener("dragend", dragend.bind(this));
+        this._filters.addEventListener("dragenter", dragenter.bind(this));
+        this._filters.addEventListener("dragover", dragover.bind(this));
+        this._filters.addEventListener("dragleave", dragleave.bind(this));
         this._active_columns.addEventListener("drop", column_drop.bind(this));
-        this._active_columns.addEventListener("dragenter", drag_enter.bind(this));
-        this._active_columns.addEventListener("dragend", column_undrag.bind(this));
+        this._active_columns.addEventListener("dragenter", dragenter.bind(this));
+        this._active_columns.addEventListener("dragend", column_dragend.bind(this));
         this._active_columns.addEventListener("dragover", column_dragover.bind(this));
         this._active_columns.addEventListener("dragleave", column_dragleave.bind(this));
         this._add_computed_column.addEventListener("click", this._open_computed_column.bind(this));
@@ -235,10 +235,10 @@ export class ActionElement extends DomElement {
         this._copy_button.addEventListener("click", event => this.copy(event.shiftKey));
         this._download_button.addEventListener("click", event => this.download(event.shiftKey));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
-        this._drop_target.addEventListener("dragover", allow_drop.bind(this));
+        this._drop_target.addEventListener("dragover", dragover.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
-            this.setAttribute("view", this._vis_selector.value);
+            this.setAttribute("plugin", this._vis_selector.value);
             this._debounce_update();
         });
 

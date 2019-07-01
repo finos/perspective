@@ -12,7 +12,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
         * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns)
         * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates)
         * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>array</code>
-        * [.view](#module_perspective-viewer..PerspectiveViewer+view) : <code>string</code>
+        * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
         * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
         * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
         * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
@@ -49,7 +49,7 @@ Module for `<perspective-viewer>` custom element.  There are no exports fromthi
     * [.computed-columns](#module_perspective-viewer..PerspectiveViewer+computed-columns)
     * [.aggregates](#module_perspective-viewer..PerspectiveViewer+aggregates)
     * [.filters](#module_perspective-viewer..PerspectiveViewer+filters) : <code>array</code>
-    * [.view](#module_perspective-viewer..PerspectiveViewer+view) : <code>string</code>
+    * [.plugin](#module_perspective-viewer..PerspectiveViewer+plugin) : <code>string</code>
     * [.column-pivots](#module_perspective-viewer..PerspectiveViewer+column-pivots) : <code>Array.&lt;String&gt;</code>
     * [.row-pivots](#module_perspective-viewer..PerspectiveViewer+row-pivots) : <code>array.&lt;string&gt;</code>
     * [.worker](#module_perspective-viewer..PerspectiveViewer+worker)
@@ -196,9 +196,9 @@ elem.setAttribute('filters', JSON.stringify(filters));
 
 * * *
 
-<a name="module_perspective-viewer..PerspectiveViewer+view"></a>
+<a name="module_perspective-viewer..PerspectiveViewer+plugin"></a>
 
-#### perspectiveViewer.view : <code>string</code>
+#### perspectiveViewer.plugin : <code>string</code>
 Sets the currently selected plugin, via its `name` field.
 
 **Kind**: instance property of [<code>PerspectiveViewer</code>](#module_perspective-viewer..PerspectiveViewer)  
