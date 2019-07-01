@@ -235,7 +235,7 @@ export class PerspectiveElement extends StateElement {
     }
 
     _is_config_changed(config) {
-        const plugin_name = this.getAttribute("view");
+        const plugin_name = this.getAttribute("plugin");
         if (_.isEqual(config, this._previous_config) && plugin_name === this._previous_plugin_name) {
             return false;
         } else {

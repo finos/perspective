@@ -21,7 +21,7 @@
 
 <body>
 
-    <perspective-viewer view="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
+    <perspective-viewer plugin="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
         columns='["Open","Close","High","Low"]'
         aggregates='{"Date":"distinct count","Change%":"sum","High":"sum","Low":"sum","Open":"sum","Close":"sum","Vol.":"sum"}'>
 

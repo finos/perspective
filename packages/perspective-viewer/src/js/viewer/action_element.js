@@ -238,7 +238,7 @@ export class ActionElement extends DomElement {
         this._drop_target.addEventListener("dragover", dragover.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
-            this.setAttribute("view", this._vis_selector.value);
+            this.setAttribute("plugin", this._vis_selector.value);
             this._debounce_update();
         });
 
