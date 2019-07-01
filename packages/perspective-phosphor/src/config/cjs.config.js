@@ -8,16 +8,18 @@
  */
 
 const path = require("path");
-const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
+    mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: "./src/ts/index.ts",
+    devtool: "source-map",
     resolve: {
         extensions: [".ts", ".js", ".json"]
     },
-    externals: /\@jupyter|\@phosphor/,
-    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/), new PerspectivePlugin()],
+    externals: [/^[a-z0-9@]/],
+    plugins: [new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /(en|es|fr)$/)],
+    stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
     module: {
         rules: [
             {
@@ -30,6 +32,6 @@ module.exports = {
     output: {
         filename: "index.js",
         libraryTarget: "umd",
-        path: path.resolve(__dirname, "../../build")
+        path: path.resolve(__dirname, "../../dist/cjs")
     }
 };

@@ -12,8 +12,9 @@ import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base
 import {PERSPECTIVE_VERSION} from './version';
 
 import perspective from "@finos/perspective";
-import * as wasm from "arraybuffer-loader!@finos/perspective/build/psp.async.wasm";
-import * as worker from "file-worker-loader?inline=true!@finos/perspective/build/perspective.wasm.worker.js";
+
+import * as wasm from "@finos/perspective/dist/umd/psp.async.wasm";
+import * as worker from "!!file-worker-loader?inline=true!@finos/perspective/dist/umd/perspective.wasm.worker.js";
 
 if (perspective) {
     perspective.override({wasm, worker});
@@ -21,7 +22,7 @@ if (perspective) {
     console.warn('Perspective was undefined - wasm load errors may occur');
 }
 
-import {PerspectiveWidget} from '@finos/perspective-phosphor/src/ts/index';
+import {PerspectiveWidget} from '@finos/perspective-phosphor';
 
 export
 class PerspectiveModel extends DOMWidgetModel {

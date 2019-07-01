@@ -8,6 +8,29 @@ module.exports = function({build_worker, no_minify} = {}) {
     return {
         mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG || no_minify ? "development" : process.env.NODE_ENV || "production",
         plugins: plugins,
+        module: {
+            rules: [
+                {
+                    test: /\.less$/,
+                    exclude: /node_modules/,
+                    use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
+                },
+                {
+                    test: /\.(html)$/,
+                    use: {
+                        loader: "html-loader",
+                        options: {}
+                    }
+                },
+                {
+                    test: /\.(arrow)$/,
+                    use: {
+                        loader: "arraybuffer-loader",
+                        options: {}
+                    }
+                }
+            ]
+        },
         devtool: "source-map",
         node: {
             fs: "empty"
@@ -17,6 +40,7 @@ module.exports = function({build_worker, no_minify} = {}) {
             maxEntrypointSize: 512000,
             maxAssetSize: 512000
         },
+        stats: {modules: false, hash: false, version: false, builtAt: false, entrypoints: false},
         optimization: {
             minimizer: [
                 new TerserPlugin({
