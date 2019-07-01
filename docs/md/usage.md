@@ -374,9 +374,9 @@ you can just import the pre-bundled assets from their respective modules, which
 export their default visualizations.
 
 ```html
-<script src="perspective.view.js"></script>
-<script src="hypergrid.plugin.js"></script>
-<script src="d3fc.plugin.js"></script>
+<script src="perspective-viewer.js"></script>
+<script src="perspective-viewer-hypergrid.js"></script>
+<script src="perspective-viewer-d3fc.js"></script>
 
 <!-- Theme available separately if you are so inclined -->
 <link rel='stylesheet' href='material.css'>
