@@ -70,7 +70,7 @@ Table::get_schema() const {
 }
 
 void
-Table::clone_data_table(t_data_table* data_table) {
+Table::replace_data_table(t_data_table* data_table) {
     auto new_gnode = make_gnode(data_table->get_schema());
     set_gnode(new_gnode);
     m_pool->register_gnode(m_gnode.get());
@@ -105,6 +105,16 @@ Table::make_gnode(const t_schema& in_schema) {
 }
 
 void
+Table::unregister_gnode(t_uindex id) {
+    m_pool->unregister_gnode(id);
+}
+
+void
+Table::reset_gnode(t_uindex id) {
+    m_pool->get_gnode(id)->reset();
+}
+
+void
 Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
     m_gnode = gnode;
     m_gnode_set = true;
@@ -118,16 +128,6 @@ Table::set_column_names(const std::vector<std::string>& column_names) {
 void
 Table::set_data_types(const std::vector<t_dtype>& data_types) {
     m_data_types = data_types;
-}
-
-void
-Table::unregister_gnode() {
-    m_pool->unregister_gnode(m_gnode->get_id());
-}
-
-void
-Table::reset() {
-    m_gnode->reset();
 }
 
 std::shared_ptr<t_pool>

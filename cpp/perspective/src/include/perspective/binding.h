@@ -259,13 +259,6 @@ namespace binding {
         std::uint32_t limit, std::string index, t_op op, bool is_arrow);
 
     /**
-     * @brief Create a new `t_pool` and embed it in a shared pointer.
-     *
-     * @return std::shared_ptr<t_pool>
-     */
-    std::shared_ptr<t_pool> make_pool();
-
-    /**
      * @brief Create a new gnode with an already-created table.
      *
      * @tparam T
@@ -275,7 +268,14 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> clone_table(std::shared_ptr<Table> table, T computed);
+    std::shared_ptr<Table> replace_table(std::shared_ptr<Table> table, T computed);
+
+    /**
+     * @brief Create a new `t_pool` and embed it in a shared pointer.
+     *
+     * @return std::shared_ptr<t_pool>
+     */
+    std::shared_ptr<t_pool> make_pool();
 
     /**
      * @brief Extracts and validates the config from the binding language,

@@ -289,7 +289,7 @@ export default function(Module) {
      * @async
      */
     view.prototype.delete = function() {
-        _reset_process(this.table._Table.get_pool()); // FIXME: reduce number of chain call
+        _reset_process(this.table.get_pool());
         this._View.delete();
         this.ctx.delete();
 
@@ -380,7 +380,7 @@ export default function(Module) {
      * @private
      */
     const to_format = function(options, formatter) {
-        _clear_process(this.table._Table.get_pool());
+        _clear_process(this.table.get_pool());
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -765,7 +765,7 @@ export default function(Module) {
      *     - "row": The callback is invoked with an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        _clear_process(this.table._Table.get_pool());
+        _clear_process(this.table.get_pool());
         if (["none", "cell", "row"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
         }
@@ -819,7 +819,7 @@ export default function(Module) {
     }
 
     view.prototype.remove_update = function(callback) {
-        _clear_process(this.table._Table.get_pool());
+        _clear_process(this.table.get_pool());
         const total = this.callbacks.length;
         filterInPlace(this.callbacks, x => x.orig_callback !== callback);
         console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
@@ -861,6 +861,7 @@ export default function(Module) {
      */
     function table(_Table, index, computed, limit, limit_index) {
         this._Table = _Table;
+        this.gnode_id = this._Table.get_gnode().get_id();
         this.name = Math.random() + "";
         this.initialized = false;
         this.index = index;
@@ -872,6 +873,10 @@ export default function(Module) {
         this.limit_index = limit_index;
         bindall(this);
     }
+
+    table.prototype.get_pool = function() {
+        return this._Table.get_pool();
+    };
 
     table.prototype._update_callback = function() {
         let cache = {};
@@ -885,16 +890,16 @@ export default function(Module) {
      * construction options.
      */
     table.prototype.clear = function() {
-        _reset_process(this._Table.get_pool());
-        this._Table.reset();
+        _reset_process(this.get_pool());
+        this._Table.reset_gnode(this.gnode_id);
     };
 
     /**
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        _reset_process(this._Table.get_pool());
-        this._Table.reset();
+        _reset_process(this.get_pool());
+        this._Table.reset_gnode(this.gnode_id);
         this.update(data);
         _clear_process(this._Table.get_pool());
     };
@@ -908,8 +913,8 @@ export default function(Module) {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
-        _reset_process(this._Table.get_pool());
-        this._Table.unregister_gnode();
+        _reset_process(this.get_pool());
+        this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
         if (this._delete_callback) {
             this._delete_callback();
@@ -941,7 +946,16 @@ export default function(Module) {
         return this._Table.size();
     };
 
-    table.prototype._schema = function(computed) {
+    /**
+     * The schema of this {@link module:perspective~table}.  A schema is an Object whose keys are the
+     * columns of this {@link module:perspective~table}, and whose values are their string type names.
+     *
+     * @async
+     * @param {boolean} computed Should computed columns be included?
+     * (default false)
+     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
+     */
+    table.prototype.schema = function(computed = false) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
@@ -961,19 +975,15 @@ export default function(Module) {
     };
 
     /**
-     * The schema of this {@link module:perspective~table}.  A schema is an Object whose keys are the
-     * columns of this {@link module:perspective~table}, and whose values are their string type names.
+     * The computed schema of this {@link module:perspective~table}. Returns a schema of only computed
+     * columns added by the user, the keys of which are computed columns and the values an
+     * Object containing the associated column_name, column_type, and computation.
      *
      * @async
-     * @param {boolean} computed Should computed columns be included?
-     * (default false)
-     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
+     *
+     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s computed schema.
      */
-    table.prototype.schema = function(computed = false) {
-        return this._schema(computed);
-    };
-
-    table.prototype._computed_schema = function() {
+    table.prototype.computed_schema = function() {
         if (this.computed.length < 0) return {};
 
         const computed_schema = {};
@@ -995,25 +1005,12 @@ export default function(Module) {
         return computed_schema;
     };
 
-    /**
-     * The computed schema of this {@link module:perspective~table}. Returns a schema of only computed
-     * columns added by the user, the keys of which are computed columns and the values an
-     * Object containing the associated column_name, column_type, and computation.
-     *
-     * @async
-     *
-     * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s computed schema.
-     */
-    table.prototype.computed_schema = function() {
-        return this._computed_schema();
-    };
-
     table.prototype._is_date_filter = function(schema) {
         return key => schema[key] === "datetime" || schema[key] === "date";
     };
 
     table.prototype._is_valid_filter = function(filter) {
-        const schema = this._schema();
+        const schema = this.schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
         return typeof value !== "undefined" && value !== null;
@@ -1066,7 +1063,7 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(_config = {}) {
-        _clear_process(this._Table.get_pool());
+        _clear_process(this.get_pool());
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {
@@ -1100,7 +1097,7 @@ export default function(Module) {
 
         if (config.columns === undefined) {
             // If columns are not provided, use all columns
-            config.columns = this._columns(true);
+            config.columns = this.columns(true);
         }
 
         let name = Math.random() + "";
@@ -1154,7 +1151,7 @@ export default function(Module) {
      */
     table.prototype.update = function(data) {
         let pdata;
-        let cols = this._columns();
+        let cols = this.columns();
         let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
@@ -1213,7 +1210,7 @@ export default function(Module) {
      */
     table.prototype.remove = function(data) {
         let pdata;
-        let cols = this._columns();
+        let cols = this.columns();
         let schema = this._Table.get_schema();
         let types = schema.types();
         let is_arrow = false;
@@ -1251,7 +1248,7 @@ export default function(Module) {
         let _Table;
 
         try {
-            _Table = __MODULE__.clone_table(this._Table, computed);
+            _Table = __MODULE__.replace_table(this._Table, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
@@ -1264,9 +1261,17 @@ export default function(Module) {
         }
     };
 
-    table.prototype._columns = function(computed = false) {
+    /**
+     * The column names of this table.
+     *
+     * @async
+     * @param {boolean} computed Should computed columns be included?
+     * (default false)
+     * @returns {Promise<Array<string>>} An array of column names for this table.
+     */
+    table.prototype.columns = function(computed = false) {
         let schema = this._Table.get_schema();
-        let computed_schema = this._computed_schema();
+        let computed_schema = this.computed_schema();
         let cols = schema.columns();
         let names = [];
         for (let cidx = 0; cidx < cols.size(); cidx++) {
@@ -1278,75 +1283,6 @@ export default function(Module) {
         schema.delete();
         cols.delete();
         return names;
-    };
-
-    /**
-     * The column names of this table.
-     *
-     * @async
-     * @param {boolean} computed Should computed columns be included?
-     * (default false)
-     * @returns {Promise<Array<string>>} An array of column names for this table.
-     */
-    table.prototype.columns = function(computed = false) {
-        return this._columns(computed);
-    };
-
-    table.prototype._column_metadata = function() {
-        let schema = this._Table.get_schema();
-        let computed_schema = this._computed_schema();
-        let cols = schema.columns();
-        let types = schema.types();
-
-        let metadata = [];
-        for (let cidx = 0; cidx < cols.size(); cidx++) {
-            let name = cols.get(cidx);
-            let meta = {};
-
-            if (name === "psp_okey") {
-                continue;
-            }
-
-            meta.name = name;
-            meta.type = get_column_type(types.get(cidx).value);
-
-            let computed_col = computed_schema[name];
-
-            if (computed_col !== undefined) {
-                meta.computed = {
-                    input_columns: computed_col.input_columns,
-                    input_type: computed_col.input_type,
-                    computation: computed_col.computation
-                };
-            } else {
-                meta.computed = undefined;
-            }
-
-            metadata.push(meta);
-        }
-
-        types.delete();
-        cols.delete();
-        schema.delete();
-
-        return metadata;
-    };
-
-    /**
-     * Column metadata for this table.
-     *
-     * If the column is computed, the `computed` property is an Object containing:
-     *  - Array `input_columns`
-     *  - String `input_type`
-     *  - Object `computation`.
-     *
-     *  Otherwise, `computed` is `undefined`.
-     *
-     * @async
-     * @returns {Promise<Array<object>>} An array of Objects containing metadata for each column.
-     */
-    table.prototype.column_metadata = function() {
-        return this._column_metadata();
     };
 
     table.prototype.execute = function(f) {

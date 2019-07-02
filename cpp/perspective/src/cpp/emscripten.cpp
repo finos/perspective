@@ -523,9 +523,9 @@ namespace binding {
         return *reinterpret_cast<double*>(&x);
     }
 
-    template <typename T, typename F = T, typename O = T>
+    template <typename T, typename F, typename O>
     val
-    col_to_typed_array(std::vector<t_tscalar> const& data) {
+    col_to_typed_array(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
         std::vector<T> vals;
         vals.reserve(data.size());
@@ -557,7 +557,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<bool>(std::vector<t_tscalar> const& data) {
+    col_to_typed_array<bool>(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
 
         std::vector<std::int8_t> vals;
@@ -595,7 +595,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<std::string>(std::vector<t_tscalar> const& data) {
+    col_to_typed_array<std::string>(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
 
         t_vocab vocab;
@@ -1484,22 +1484,22 @@ namespace binding {
         return tbl;
     }
 
-    std::shared_ptr<t_pool>
-    make_pool() {
-        auto pool = std::make_shared<t_pool>();
-        return pool;
-    }
-
     template <>
     std::shared_ptr<Table>
-    clone_table(std::shared_ptr<Table> table, t_val computed) {
+    replace_table(std::shared_ptr<Table> table, t_val computed) {
         auto gnode = table->get_gnode();
 
         t_data_table* data_table = gnode->_get_pkeyed_table();
         table_add_computed_column(*data_table, computed);
-        table->clone_data_table(data_table);
+        table->replace_data_table(data_table);
 
         return table;
+    }
+
+    std::shared_ptr<t_pool>
+    make_pool() {
+        auto pool = std::make_shared<t_pool>();
+        return pool;
     }
 
     /******************************************************************************
@@ -1820,7 +1820,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
         .function("unregister_gnode", &Table::unregister_gnode)
-        .function("reset", &Table::reset)
+        .function("reset_gnode", &Table::reset_gnode)
         .function("get_schema", &Table::get_schema)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);
@@ -2092,7 +2092,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     function("make_table", &make_table<t_val>);
     function("make_pool", &make_pool);
-    function("clone_table", &clone_table<t_val>);
+    function("replace_table", &replace_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<t_val>);

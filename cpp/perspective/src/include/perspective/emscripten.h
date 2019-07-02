@@ -38,7 +38,7 @@ namespace binding {
      * @tparam T
      */
     template <typename T, typename F = T, typename O = T>
-    t_val col_to_typed_array(std::vector<t_tscalar> data);
+    t_val col_to_typed_array(const std::vector<t_tscalar>& data);
 
     // Date parsing
     t_date jsdate_to_t_date(t_val date);
