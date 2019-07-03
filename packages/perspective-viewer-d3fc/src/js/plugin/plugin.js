@@ -39,22 +39,24 @@ export function register(...plugins) {
 }
 
 function drawChart(chart) {
-    return async function(el, view, task) {
+    return async function(el, view, task, limit) {
         const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
         if (task.cancelled) {
             return;
         }
-        const {columns, row_pivots, column_pivots, filter} = config;
 
+        const {columns, row_pivots, column_pivots, filter} = config;
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
+        const mapped = filtered.map(dataMap);
+        const limited = limit ? mapped.slice(0, limit) : mapped;
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: columns.map(a => ({name: a, type: schema[a]})),
             splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
-            data: filtered.map(dataMap)
+            data: limited
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
