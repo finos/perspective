@@ -61,15 +61,6 @@ export const TYPE_AGGREGATES = {
     date: STRING_AGGREGATES
 };
 
-export const AGGREGATE_DEFAULTS = {
-    string: "count",
-    float: "sum",
-    integer: "sum",
-    boolean: "count",
-    datetime: "count",
-    date: "count"
-};
-
 const BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"];
 
 const NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is nan", "is not nan"];
@@ -87,15 +78,6 @@ export const TYPE_FILTERS = {
     boolean: BOOLEAN_FILTERS,
     datetime: DATETIME_FILTERS,
     date: DATETIME_FILTERS
-};
-
-export const FILTER_DEFAULTS = {
-    string: "==",
-    float: "==",
-    integer: "==",
-    boolean: "==",
-    datetime: "==",
-    date: "=="
 };
 
 export const TYPED_ARRAY_SENTINEL_VALUE_INT8 = 255;

@@ -139,8 +139,6 @@ declare module '@finos/perspective' {
     type perspective = {
         TYPE_AGGREGATES: ValuesByType,
         TYPE_FILTERS: ValuesByType,
-        AGGREGATE_DEFAULTS: ValueByType,
-        FILTER_DEFAULTS: ValueByType,
         SORT_ORDERS: SortOrders,
         table(): Table,
         worker(): PerspectiveWorker,
