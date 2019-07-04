@@ -16,6 +16,7 @@ import wasm_worker from "./perspective.wasm.js";
 import wasm from "./psp.async.wasm.js";
 
 import {detect_iphone} from "./utils.js";
+import {get_config} from "./config.js";
 
 const HEARTBEAT_TIMEOUT = 15000;
 
@@ -70,7 +71,7 @@ class WebWorkerClient extends Client {
      */
     async register() {
         let _worker;
-        const msg = {cmd: "init"};
+        const msg = {cmd: "init", config: get_config()};
         if (typeof WebAssembly === "undefined" || detect_iphone()) {
             throw new Error("WebAssembly not supported. Support for ASM.JS has been removed as of 0.3.1.");
         } else {
@@ -174,12 +175,17 @@ class WebSocketClient extends Client {
  */
 
 const WORKER_SINGLETON = (function() {
-    let __WORKER__;
+    let __WORKER__, __CONFIG__;
     return {
-        getInstance: function() {
+        getInstance: function(config) {
             if (__WORKER__ === undefined) {
                 __WORKER__ = new WebWorkerClient();
             }
+            const config_str = JSON.stringify(config);
+            if (config_str !== __CONFIG__) {
+                throw new Error(`Confiuration object for shared_worker() has changed - this is probably a bug in your application.`);
+            }
+            __CONFIG__ = config_str;
             return __WORKER__;
         }
     };
@@ -199,10 +205,10 @@ const mod = {
     /**
      * Create a new WebWorkerClient instance.
      *s
-     * @param {*} url
+     * @param {*} [config] An optional perspective config object override
      */
-    worker() {
-        return new WebWorkerClient();
+    worker(config) {
+        return new WebWorkerClient(config);
     },
 
     /**
@@ -210,13 +216,14 @@ const mod = {
      * at `url` using a WebSocket.
      *s
      * @param {*} url Defaults to `window.location.origin`
+     * @param {*} [config] An optional perspective config object override
      */
     websocket(url = window.location.origin.replace("http", "ws")) {
         return new WebSocketClient(url);
     },
 
-    shared_worker() {
-        return WORKER_SINGLETON.getInstance();
+    shared_worker(config) {
+        return WORKER_SINGLETON.getInstance(config);
     }
 };
 

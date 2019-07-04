@@ -95,7 +95,10 @@ function get_config_file() {
 let cached_config;
 
 module.exports.override_config = function(config) {
-    cached_config = config;
+    if (cached_config) {
+        console.warn("Config already initialized!");
+    }
+    cached_config = mergeDeep(DEFAULT_CONFIG, config);
 };
 
 module.exports.get_config = function get_config() {

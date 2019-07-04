@@ -1500,25 +1500,18 @@ export default function(Module) {
          *
          * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
          */
-        init({buffer}) {
+        init(msg) {
             if (typeof WebAssembly === "undefined") {
                 console.log("Loading asm.js");
             } else {
                 console.log("Loading wasm");
                 __MODULE__ = __MODULE__({
-                    wasmBinary: buffer,
+                    wasmBinary: msg.buffer,
                     wasmJSMethod: "native-wasm"
-                });
+                }).then(() => super.init(msg));
             }
         }
     }
-
-    //     var ea = 38304
-    //     , v = e.TOTAL_MEMORY || 16777216;
-    //   5242880 > v && r("TOTAL_MEMORY should be larger than TOTAL_STACK, was " + v + "! (TOTAL_STACK=5242880)");
-    //   e.buffer ? z = e.buffer : ("object" === typeof WebAssembly && "function" === typeof WebAssembly.Memory ? (ia = new WebAssembly.Memory({
-    //       initial: v / 65536
-    //   }),
 
     /**
      * Use WebSorkerServer as default inside a Web Worker, where `window` is replaced with `self`.

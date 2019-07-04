@@ -36,7 +36,7 @@ const SYNC_SERVER = new (class extends Server {
             wasmJSMethod: "native-wasm"
         }).then(core => {
             this.perspective = perspective(core);
-            this.post(msg);
+            super.init(msg);
         });
     }
 

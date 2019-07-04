@@ -7,6 +7,8 @@
  *
  */
 
+import {override_config} from "../config.js";
+
 function error_to_json(error) {
     const obj = {};
     if (typeof error !== "string") {
@@ -38,6 +40,9 @@ export class Server {
      * `Server` must be extended and the `post` method implemented before it can be initialized.
      */
     init(msg) {
+        if (msg.config) {
+            override_config(msg.config);
+        }
         this.post(msg);
     }
 
