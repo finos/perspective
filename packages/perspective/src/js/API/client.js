@@ -97,14 +97,13 @@ Client.prototype._handle = function(e) {
         }
 
         const msgs = this._worker.messages;
-
         this._worker.initialized.value = true;
         this._worker.messages = [];
 
         if (msgs) {
             for (const m in msgs) {
                 if (msgs.hasOwnProperty(m)) {
-                    setTimeout(msgs[m]);
+                    msgs[m]();
                 }
             }
         }
