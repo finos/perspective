@@ -19,7 +19,8 @@ const DEFAULT_CONFIG = {
         },
         float: {
             filter_operator: "==",
-            aggregate: "sum"
+            aggregate: "sum",
+            precision: 2
         },
         integer: {
             filter_operator: "==",

@@ -22,6 +22,7 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
+import {get_type_config} from "@finos/perspective/src/js/config";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -247,8 +248,8 @@ bindTemplate(TEMPLATE, style)(
 
                 const float_formatter = null_formatter(
                     new this.grid.localization.NumberFormatter("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
+                        minimumFractionDigits: get_type_config("float").precision,
+                        maximumFractionDigits: get_type_config("float").precision
                     })
                 );
                 this.grid.localization.add("FinanceFloat", float_formatter);

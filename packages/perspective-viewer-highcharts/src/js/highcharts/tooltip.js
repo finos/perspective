@@ -7,6 +7,8 @@
  *
  */
 
+import {get_type_config} from "@finos/perspective/dist/esm/config.js";
+
 export function format_tooltip(context, type, schema, axis_titles, pivot_titles) {
     const row_pivots_titles = pivot_titles.row,
         column_pivot_titles = pivot_titles.column;
@@ -157,7 +159,10 @@ function format_value(value, type) {
 
 function format_number(num, format) {
     if (format === "float") {
-        return Number.parseFloat(num).toLocaleString();
+        return Number.parseFloat(num).toLocaleString({
+            minimumFractionDigits: get_type_config("float").precision,
+            maximumFractionDigits: get_type_config("float").precision
+        });
     } else {
         return Number.parseInt(num).toLocaleString();
     }

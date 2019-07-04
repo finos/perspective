@@ -8,6 +8,7 @@
  */
 import {select} from "d3";
 import {getGroupValues, getSplitValues, getDataValues} from "./selectionData";
+import {get_type_config} from "@finos/perspective/dist/esm/config.js";
 
 export function generateHtml(tooltipDiv, data, settings) {
     const tooltipValues = getGroupValues(data, settings)
@@ -30,4 +31,9 @@ function addDataValues(tooltipDiv, values) {
         });
 }
 
-const formatNumber = value => value.toLocaleString(undefined, {style: "decimal"});
+const formatNumber = value =>
+    value.toLocaleString(undefined, {
+        style: "decimal",
+        minimumFractionDigits: get_type_config("float").precision,
+        maximumFractionDigits: get_type_config("float").precision
+    });
