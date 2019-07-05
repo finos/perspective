@@ -28,7 +28,7 @@ matrix:
   allow_failures:
     - python: "3.6"
       language: python
-      env: TEST=PYTHON
+      env: TEST=PYTHON_TABLE
       cache: pip
       services: docker
 
