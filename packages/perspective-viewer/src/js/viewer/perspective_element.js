@@ -10,7 +10,7 @@
 import _ from "lodash";
 
 import perspective from "@finos/perspective";
-import {get_type_config} from "@finos/perspective/dist/esm/config.js";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 import {COMPUTATIONS} from "../computed_column.js";
 

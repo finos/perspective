@@ -7,16 +7,13 @@
  *
  */
 
-import * as defaults from "./defaults.js";
-
-import {Client} from "./API/client.js";
+import * as defaults from "./config/constants.js";
+import {get_config} from "./config";
+import {Client} from "./api/client.js";
+import {detect_iphone} from "./utils.js";
 
 import wasm_worker from "./perspective.wasm.js";
-
 import wasm from "./psp.async.wasm.js";
-
-import {detect_iphone} from "./utils.js";
-import {get_config} from "./config.js";
 
 const HEARTBEAT_TIMEOUT = 15000;
 

@@ -7,7 +7,7 @@
  *
  */
 
-import {get_type_config} from "@finos/perspective/dist/esm/config.js";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 
 export function format_tooltip(context, type, schema, axis_titles, pivot_titles) {
     const row_pivots_titles = pivot_titles.row,

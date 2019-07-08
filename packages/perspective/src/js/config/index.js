@@ -57,7 +57,8 @@ function get_config_file() {
                         return json;
                     }
                 } else {
-                    return REQUIRE(candidate);
+                    const mod = REQUIRE(candidate);
+                    return mod.default || mod;
                 }
             }
         }

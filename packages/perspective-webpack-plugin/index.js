@@ -10,7 +10,7 @@
 const PSP_WORKER_LOADER = require.resolve("./src/js/psp-worker-loader");
 const WASM_LOADER = require.resolve("./src/js/wasm-loader.js");
 const PSP_WORKER_COMPILER_LOADER = require.resolve("./src/js/psp-worker-compiler-loader.js");
-const {get_config} = require("@finos/perspective/dist/esm/config.js");
+const {get_config} = require("@finos/perspective/dist/esm/config");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -83,7 +83,7 @@ class PerspectiveWebpackPlugin {
         if (perspective_config) {
             rules.push({
                 test: /\.js$/,
-                include: /perspective[\\/].+?[\\/]config\.js$/,
+                include: /perspective[\\/].+?[\\/]config[\\/]index\.js$/,
                 use: [
                     {
                         loader: "string-replace-loader",
