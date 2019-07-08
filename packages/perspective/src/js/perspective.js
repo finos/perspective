@@ -7,12 +7,12 @@
  *
  */
 
-import * as defaults from "./defaults.js";
-import {DataAccessor} from "./DataAccessor/DataAccessor.js";
-import {DateParser} from "./DataAccessor/DateParser.js";
+import * as defaults from "./config/constants.js";
+import {DataAccessor} from "./data_accessor";
+import {DateParser} from "./data_accessor/date_parser.js";
 import {extract_map} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
-import {Server} from "./API/server.js";
+import {Server} from "./api/server.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";

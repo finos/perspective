@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {Client} = require("./API/client.js");
-const {Server} = require("./API/server.js");
+const {Client} = require("./api/client.js");
+const {Server} = require("./api/server.js");
 
 const perspective = require("./perspective.js").default;
 

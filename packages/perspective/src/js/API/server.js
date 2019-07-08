@@ -7,7 +7,7 @@
  *
  */
 
-import {override_config} from "../config.js";
+import {override_config} from "../config";
 
 function error_to_json(error) {
     const obj = {};

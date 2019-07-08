@@ -147,9 +147,9 @@ function value_exists(value) {
 
 function format_value(value, type) {
     if (type === "datetime") {
-        return new Date(value).toLocaleString();
+        return new Date(value).toLocaleString("en-us", get_type_config("datetime").format);
     } else if (type === "date") {
-        return new Date(value).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"});
+        return new Date(value).toLocaleString("en-us", get_type_config("date").format);
     } else if (type === "float" || type === "integer") {
         return format_number(value, type);
     } else {
@@ -159,11 +159,8 @@ function format_value(value, type) {
 
 function format_number(num, format) {
     if (format === "float") {
-        return Number.parseFloat(num).toLocaleString({
-            minimumFractionDigits: get_type_config("float").precision,
-            maximumFractionDigits: get_type_config("float").precision
-        });
+        return Number.parseFloat(num).toLocaleString(get_type_config("float").format);
     } else {
-        return Number.parseInt(num).toLocaleString();
+        return Number.parseInt(num).toLocaleString(get_type_config("float").format);
     }
 }

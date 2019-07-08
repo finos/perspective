@@ -246,41 +246,15 @@ bindTemplate(TEMPLATE, style)(
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
 
-                const float_formatter = null_formatter(
-                    new this.grid.localization.NumberFormatter("en-US", {
-                        minimumFractionDigits: get_type_config("float").precision,
-                        maximumFractionDigits: get_type_config("float").precision
-                    })
-                );
-                this.grid.localization.add("FinanceFloat", float_formatter);
+                const float_formatter = new this.grid.localization.NumberFormatter("en-US", get_type_config("float").format);
+                const integer_formatter = new this.grid.localization.NumberFormatter("en-us", get_type_config("integer").format);
+                this.grid.localization.add("FinanceFloat", null_formatter(float_formatter));
+                this.grid.localization.add("FinanceInteger", null_formatter(integer_formatter));
 
-                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter("en-us", {}));
-                this.grid.localization.add("FinanceInteger", integer_formatter);
-
-                const datetime_formatter = null_formatter(
-                    new this.grid.localization.DateFormatter("en-us", {
-                        week: "numeric",
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric"
-                    }),
-                    -1
-                );
-
-                const date_formatter = null_formatter(
-                    new this.grid.localization.DateFormatter("en-us", {
-                        week: "numeric",
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric"
-                    }),
-                    -1
-                );
-                this.grid.localization.add("FinanceDatetime", datetime_formatter);
-                this.grid.localization.add("FinanceDate", date_formatter);
+                const datetime_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("datetime").format);
+                const date_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("date").format);
+                this.grid.localization.add("FinanceDatetime", null_formatter(datetime_formatter, -1));
+                this.grid.localization.add("FinanceDate", null_formatter(date_formatter, -1));
 
                 this.grid.localization.add("FinanceTree", {
                     format: function(val, type) {

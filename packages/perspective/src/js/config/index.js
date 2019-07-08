@@ -7,39 +7,11 @@
  *
  */
 
+const DEFAULT_CONFIG = require("./settings.js").default;
+
 // eslint-disable-next-line no-undef
 const REQUIRE = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__ : module.require;
 const NAMES = ["perspective.config.js", "perspective.config.json", "package.json"];
-
-const DEFAULT_CONFIG = {
-    types: {
-        string: {
-            filter_operator: "==",
-            aggregate: "count"
-        },
-        float: {
-            filter_operator: "==",
-            aggregate: "sum",
-            precision: 2
-        },
-        integer: {
-            filter_operator: "==",
-            aggregate: "sum"
-        },
-        boolean: {
-            filter_operator: "==",
-            aggregate: "count"
-        },
-        datetime: {
-            filter_operator: "==",
-            aggregate: "count"
-        },
-        date: {
-            filter_operator: "==",
-            aggregate: "count"
-        }
-    }
-};
 
 module.exports.get_type_config = function(type) {
     return module.exports.get_config().types[type] || {};
