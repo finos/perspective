@@ -94,7 +94,7 @@ namespace binding {
      */
     template <typename T>
     std::vector<t_sortspec> _get_sort(const std::vector<std::string>& columns,
-        bool is_column_sort, const std::vector<T>& sortbys);
+        const std::vector<T>& sortbys, bool is_column_sort);
 
     /**
      * @brief From the binding language, retrieve what we need to filter the dataset by.

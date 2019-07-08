@@ -139,9 +139,9 @@ namespace binding {
 
     template <>
     std::vector<t_sortspec>
-    _get_sort(const std::vector<std::string>& columns, bool is_column_sort,
-        const std::vector<t_val>& sortbys) {
-        std::vector<t_sortspec> svec{};
+    _get_sort(const std::vector<std::string>& columns, const std::vector<t_val>& sortbys,
+        bool is_column_sort) {
+        std::vector<t_sortspec> svec;
 
         auto _is_valid_sort = [is_column_sort](t_val sort_item) {
             /**
@@ -1570,8 +1570,8 @@ namespace binding {
         }
 
         if (sortbys.size() > 0) {
-            sorts = _get_sort(aggregate_names, false, sortbys);
-            col_sorts = _get_sort(aggregate_names, true, sortbys);
+            sorts = _get_sort(aggregate_names, sortbys, false);
+            col_sorts = _get_sort(aggregate_names, sortbys, true);
         }
 
         auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,

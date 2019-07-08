@@ -12,78 +12,7 @@
 
 namespace perspective {
 
-t_config_recipe::t_config_recipe()
-    : m_child_pkey_column("psp_pkey") {}
-
-t_config::t_config() {}
-
-t_config::t_config(const t_config_recipe& r)
-    : m_detail_columns(r.m_detail_columns)
-    , m_totals(r.m_totals)
-    , m_combiner(r.m_combiner)
-    , m_handle_nan_sort(r.m_handle_nan_sort)
-    , m_parent_pkey_column(r.m_parent_pkey_column)
-    , m_child_pkey_column(r.m_child_pkey_column)
-    , m_grouping_label_column(r.m_grouping_label_column)
-    , m_fmode(r.m_fmode)
-    , m_filter_exprs(r.m_filter_exprs)
-
-{
-    for (const auto& v : r.m_row_pivots) {
-        m_row_pivots.push_back(t_pivot(v));
-    }
-
-    for (const auto& v : r.m_col_pivots) {
-        m_col_pivots.push_back(t_pivot(v));
-    }
-
-    for (const auto& v : r.m_aggregates) {
-        m_aggregates.push_back(t_aggspec(v));
-    }
-
-    if (m_fmode == FMODE_SIMPLE_CLAUSES) {
-        for (const auto& v : r.m_fterms) {
-            m_fterms.push_back(t_fterm(v));
-        }
-    }
-
-    std::vector<std::string> sort_pivot;
-    std::vector<std::string> sort_pivot_by;
-
-    for (const auto& v : r.m_sortby) {
-        sort_pivot.push_back(v.first);
-        sort_pivot_by.push_back(v.second);
-    }
-
-    setup(m_detail_columns, sort_pivot, sort_pivot_by);
-}
-
-t_config::t_config(const std::vector<t_pivot>& row_pivots,
-    const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
-    const std::vector<std::string>& detail_columns, const t_totals totals,
-    const std::vector<std::string>& sort_pivot, const std::vector<std::string>& sort_pivot_by,
-    t_filter_op combiner, const std::vector<t_fterm>& fterms, bool handle_nan_sort,
-    const std::string& parent_pkey_column, const std::string& child_pkey_column,
-    const std::string& grouping_label_column, t_fmode fmode,
-    const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str)
-    : m_row_pivots(row_pivots)
-    , m_col_pivots(col_pivots)
-    , m_aggregates(aggregates)
-    , m_detail_columns(detail_columns)
-    , m_totals(totals)
-    , m_combiner(combiner)
-    , m_fterms(fterms)
-    , m_handle_nan_sort(handle_nan_sort)
-    , m_parent_pkey_column(parent_pkey_column)
-    , m_child_pkey_column(child_pkey_column)
-    , m_grouping_label_column(grouping_label_column)
-    , m_fmode(fmode)
-    , m_filter_exprs(filter_exprs)
-    , m_grand_agg_str(grand_agg_str) {
-    setup(detail_columns, sort_pivot, sort_pivot_by);
-}
-
-// view config
+// Construct view config
 t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
     const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
@@ -104,43 +33,29 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     }
 };
 
-t_config::t_config(
-    const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates)
+// t_ctx0
+t_config::t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
+    const std::vector<t_fterm>& fterms)
+    : m_detail_columns(detail_columns)
+    , m_combiner(combiner)
+    , m_fterms(fterms)
+    , m_fmode(FMODE_SIMPLE_CLAUSES) {}
+
+// t_ctx1
+t_config::t_config(const std::vector<t_pivot>& row_pivots,
+    const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
+    const std::vector<t_fterm>& fterms)
     : m_row_pivots(row_pivots)
     , m_aggregates(aggregates)
+    , m_totals(TOTALS_BEFORE)
+    , m_combiner(combiner)
+    , m_fterms(fterms)
+    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 
-// grouped_pkeys
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<std::string>& detail_columns, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms, const std::string& parent_pkey_column,
-    const std::string& child_pkey_column, const std::string& grouping_label_column)
-    : m_detail_columns(detail_columns)
-    , m_combiner(combiner)
-    , m_fterms(fterms)
-    , m_handle_nan_sort(true)
-    , m_parent_pkey_column(parent_pkey_column)
-    , m_child_pkey_column(child_pkey_column)
-    , m_grouping_label_column(grouping_label_column)
-    , m_fmode(FMODE_SIMPLE_CLAUSES)
-
-{
-    for (const auto& p : row_pivots) {
-        m_row_pivots.push_back(t_pivot(p));
-    }
-
-    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
-}
-
-// ctx2
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates)
-    : t_config(row_pivots, col_pivots, aggregates, TOTALS_HIDDEN, FILTER_OP_AND, {})
-
-{}
-
+// t_ctx2
 t_config::t_config(const std::vector<t_pivot>& row_pivots,
     const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
     const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
@@ -156,6 +71,11 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
+
+// Constructors used for C++ tests
+t_config::t_config(const std::vector<std::string>& row_pivots,
+    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates)
+    : t_config(row_pivots, col_pivots, aggregates, TOTALS_HIDDEN, FILTER_OP_AND, {}) {}
 
 t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
@@ -177,7 +97,14 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 
-// t_ctx1
+t_config::t_config(
+    const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates)
+    : m_row_pivots(row_pivots)
+    , m_aggregates(aggregates)
+    , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
+}
+
 t_config::t_config(
     const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates)
     : m_aggregates(aggregates)
@@ -205,45 +132,10 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 
-t_config::t_config(const std::vector<t_pivot>& row_pivots,
-    const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
-    : m_row_pivots(row_pivots)
-    , m_aggregates(aggregates)
-    , m_totals(TOTALS_BEFORE)
-    , m_combiner(combiner)
-    , m_fterms(fterms)
-    , m_handle_nan_sort(true)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {
-    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
-}
-
-t_config::t_config(const std::vector<std::string>& row_pivots,
-    const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
-    : m_aggregates(aggregates)
-    , m_totals(TOTALS_BEFORE)
-    , m_combiner(combiner)
-    , m_fterms(fterms)
-    , m_handle_nan_sort(true)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {
-    for (const auto& p : row_pivots) {
-        m_row_pivots.push_back(t_pivot(p));
-    }
-
-    setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
-}
-
-// t_ctx0
 t_config::t_config(const std::vector<std::string>& detail_columns)
     : t_config(detail_columns, FILTER_OP_AND, {}) {}
 
-t_config::t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-    const std::vector<t_fterm>& fterms)
-    : m_detail_columns(detail_columns)
-    , m_combiner(combiner)
-    , m_fterms(fterms)
-    , m_fmode(FMODE_SIMPLE_CLAUSES) {}
+t_config::t_config() {}
 
 void
 t_config::setup(const std::vector<std::string>& detail_columns,
@@ -494,38 +386,6 @@ t_config::get_child_pkey_column() const {
 const std::string&
 t_config::get_grouping_label_column() const {
     return m_grouping_label_column;
-}
-
-t_config_recipe
-t_config::get_recipe() const {
-    t_config_recipe rv;
-
-    for (const auto& p : m_row_pivots) {
-        rv.m_row_pivots.push_back(p.get_recipe());
-    }
-
-    for (const auto& p : m_col_pivots) {
-        rv.m_col_pivots.push_back(p.get_recipe());
-    }
-
-    rv.m_sortby = get_sortby_pairs();
-
-    for (const auto& a : m_aggregates) {
-        rv.m_aggregates.push_back(a.get_recipe());
-    }
-
-    rv.m_totals = m_totals;
-    rv.m_combiner = m_combiner;
-
-    for (const auto& ft : m_fterms) {
-        rv.m_fterms.push_back(ft.get_recipe());
-    }
-
-    rv.m_handle_nan_sort = m_handle_nan_sort;
-    rv.m_parent_pkey_column = m_parent_pkey_column;
-    rv.m_child_pkey_column = m_child_pkey_column;
-    rv.m_grouping_label_column = m_grouping_label_column;
-    return rv;
 }
 
 std::string
