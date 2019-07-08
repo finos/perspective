@@ -221,7 +221,7 @@ class PerspectiveViewer extends ActionElement {
      * config object is an array of three elements:
      *     * The column name.
      *     * The filter operation as a string.  See
-     *       {@link perspective/src/js/defaults.js}
+     *       {@link perspective/src/js/config/constants.js}
      *     * The filter argument, as a string, float or Array<string> as the
      *       filter operation demands.
      * @fires PerspectiveViewer#perspective-config-update

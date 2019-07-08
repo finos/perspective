@@ -10,6 +10,7 @@
 import _ from "lodash";
 
 import perspective from "@finos/perspective";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {CancelTask} from "./cancel_task.js";
 import {COMPUTATIONS} from "../computed_column.js";
 
@@ -47,7 +48,7 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
         found.add(col.column);
         if (type) {
             if (col.op === "" || perspective.TYPE_AGGREGATES[type].indexOf(col.op) === -1) {
-                col.op = perspective.AGGREGATE_DEFAULTS[type];
+                col.op = get_type_config(type).aggregate;
             }
             aggregates.push(col);
         } else {
@@ -60,7 +61,7 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
         if (!found.has(col)) {
             aggregates.push({
                 column: col,
-                op: perspective.AGGREGATE_DEFAULTS[schema[col]]
+                op: get_type_config(schema[col]).aggregate
             });
         }
     }

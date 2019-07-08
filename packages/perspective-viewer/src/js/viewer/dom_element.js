@@ -7,7 +7,7 @@
  *
  */
 
-import perspective from "@finos/perspective";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 import {dragend} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 
@@ -56,10 +56,10 @@ export class DomElement extends PerspectiveElement {
                 if (aggregate) {
                     aggregate = aggregate.op;
                 } else {
-                    aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                    aggregate = get_type_config(type).aggregate;
                 }
             } else {
-                aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                aggregate = get_type_config(type).aggregate;
             }
         }
 

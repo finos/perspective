@@ -22,6 +22,7 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
+import {get_type_config} from "@finos/perspective/src/js/config";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -245,41 +246,15 @@ bindTemplate(TEMPLATE, style)(
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
 
-                const float_formatter = null_formatter(
-                    new this.grid.localization.NumberFormatter("en-US", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    })
-                );
-                this.grid.localization.add("FinanceFloat", float_formatter);
+                const float_formatter = new this.grid.localization.NumberFormatter("en-US", get_type_config("float").format);
+                const integer_formatter = new this.grid.localization.NumberFormatter("en-us", get_type_config("integer").format);
+                this.grid.localization.add("FinanceFloat", null_formatter(float_formatter));
+                this.grid.localization.add("FinanceInteger", null_formatter(integer_formatter));
 
-                const integer_formatter = null_formatter(new this.grid.localization.NumberFormatter("en-us", {}));
-                this.grid.localization.add("FinanceInteger", integer_formatter);
-
-                const datetime_formatter = null_formatter(
-                    new this.grid.localization.DateFormatter("en-us", {
-                        week: "numeric",
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "numeric",
-                        second: "numeric"
-                    }),
-                    -1
-                );
-
-                const date_formatter = null_formatter(
-                    new this.grid.localization.DateFormatter("en-us", {
-                        week: "numeric",
-                        year: "numeric",
-                        month: "numeric",
-                        day: "numeric"
-                    }),
-                    -1
-                );
-                this.grid.localization.add("FinanceDatetime", datetime_formatter);
-                this.grid.localization.add("FinanceDate", date_formatter);
+                const datetime_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("datetime").format);
+                const date_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("date").format);
+                this.grid.localization.add("FinanceDatetime", null_formatter(datetime_formatter, -1));
+                this.grid.localization.add("FinanceDate", null_formatter(date_formatter, -1));
 
                 this.grid.localization.add("FinanceTree", {
                     format: function(val, type) {

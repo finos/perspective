@@ -7,12 +7,12 @@
  *
  */
 
-import * as defaults from "./defaults.js";
-import {DataAccessor} from "./DataAccessor/DataAccessor.js";
-import {DateParser} from "./DataAccessor/DateParser.js";
+import * as defaults from "./config/constants.js";
+import {DataAccessor} from "./data_accessor";
+import {DateParser} from "./data_accessor/date_parser.js";
 import {extract_map} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
-import {Server} from "./API/server.js";
+import {Server} from "./api/server.js";
 
 import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
@@ -1500,25 +1500,18 @@ export default function(Module) {
          *
          * @param {ArrayBuffer} buffer an ArrayBuffer containing the Perspective WASM code
          */
-        init({buffer}) {
+        init(msg) {
             if (typeof WebAssembly === "undefined") {
                 console.log("Loading asm.js");
             } else {
                 console.log("Loading wasm");
                 __MODULE__ = __MODULE__({
-                    wasmBinary: buffer,
+                    wasmBinary: msg.buffer,
                     wasmJSMethod: "native-wasm"
-                });
+                }).then(() => super.init(msg));
             }
         }
     }
-
-    //     var ea = 38304
-    //     , v = e.TOTAL_MEMORY || 16777216;
-    //   5242880 > v && r("TOTAL_MEMORY should be larger than TOTAL_STACK, was " + v + "! (TOTAL_STACK=5242880)");
-    //   e.buffer ? z = e.buffer : ("object" === typeof WebAssembly && "function" === typeof WebAssembly.Memory ? (ia = new WebAssembly.Memory({
-    //       initial: v / 65536
-    //   }),
 
     /**
      * Use WebSorkerServer as default inside a Web Worker, where `window` is replaced with `self`.

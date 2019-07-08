@@ -7,6 +7,8 @@
  *
  */
 
+import {get_type_config} from "@finos/perspective/dist/esm/config";
+
 export function format_tooltip(context, type, schema, axis_titles, pivot_titles) {
     const row_pivots_titles = pivot_titles.row,
         column_pivot_titles = pivot_titles.column;
@@ -145,9 +147,9 @@ function value_exists(value) {
 
 function format_value(value, type) {
     if (type === "datetime") {
-        return new Date(value).toLocaleString();
+        return new Date(value).toLocaleString("en-us", get_type_config("datetime").format);
     } else if (type === "date") {
-        return new Date(value).toLocaleString("en-us", {year: "numeric", month: "numeric", day: "numeric"});
+        return new Date(value).toLocaleString("en-us", get_type_config("date").format);
     } else if (type === "float" || type === "integer") {
         return format_number(value, type);
     } else {
@@ -157,8 +159,8 @@ function format_value(value, type) {
 
 function format_number(num, format) {
     if (format === "float") {
-        return Number.parseFloat(num).toLocaleString();
+        return Number.parseFloat(num).toLocaleString(get_type_config("float").format);
     } else {
-        return Number.parseInt(num).toLocaleString();
+        return Number.parseInt(num).toLocaleString(get_type_config("float").format);
     }
 }
