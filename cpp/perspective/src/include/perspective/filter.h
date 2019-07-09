@@ -125,19 +125,8 @@ struct t_operator_contains<t_uindex, DTYPE_STR> {
     }
 };
 
-struct PERSPECTIVE_EXPORT t_fterm_recipe {
-    t_fterm_recipe() {}
-
-    std::string m_colname;
-    t_filter_op m_op;
-    t_tscalar m_threshold;
-    std::vector<t_tscalar> m_bag;
-};
-
 struct PERSPECTIVE_EXPORT t_fterm {
     t_fterm();
-
-    t_fterm(const t_fterm_recipe& v);
 
     t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
         const std::vector<t_tscalar>& bag);
@@ -164,7 +153,6 @@ struct PERSPECTIVE_EXPORT t_fterm {
     std::string get_expr() const;
 
     void coerce_numeric(t_dtype dtype);
-    t_fterm_recipe get_recipe() const;
 
     std::string m_colname;
     t_filter_op m_op;

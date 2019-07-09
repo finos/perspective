@@ -14,15 +14,6 @@ namespace perspective {
 
 t_fterm::t_fterm() {}
 
-t_fterm::t_fterm(const t_fterm_recipe& v) {
-    m_colname = v.m_colname;
-    m_op = v.m_op;
-    m_threshold = v.m_threshold;
-    m_bag = v.m_bag;
-    m_use_interned
-        = (m_op == FILTER_OP_EQ || m_op == FILTER_OP_NE) && m_threshold.m_type == DTYPE_STR;
-}
-
 t_fterm::t_fterm(const std::string& colname, t_filter_op op, t_tscalar threshold,
     const std::vector<t_tscalar>& bag, bool negated, bool is_primary)
     : m_colname(colname)
@@ -53,16 +44,6 @@ t_fterm::coerce_numeric(t_dtype dtype) {
     for (auto& f : m_bag) {
         f.set(f.coerce_numeric_dtype(dtype));
     }
-}
-
-t_fterm_recipe
-t_fterm::get_recipe() const {
-    t_fterm_recipe rv;
-    rv.m_colname = m_colname;
-    rv.m_op = m_op;
-    rv.m_threshold = m_threshold;
-    rv.m_bag = m_bag;
-    return rv;
 }
 
 std::string

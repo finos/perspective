@@ -346,6 +346,7 @@ set (SOURCE_FILES
 	src/cpp/utils.cpp
 	src/cpp/update_task.cpp
 	src/cpp/view.cpp
+	src/cpp/view_config.cpp
 	src/cpp/vocab.cpp
 	)
 

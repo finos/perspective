@@ -1515,6 +1515,7 @@ namespace binding {
      *
      * View API
      */
+
     template <>
     t_config
     make_view_config(
@@ -1918,6 +1919,16 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_view_config
+     */
+    class_<t_view_config>("t_view_config")
+        .constructor<std::vector<std::string>, std::vector<std::string>,
+            std::vector<std::string>, std::map<std::string, std::string>,
+            std::vector<std::tuple<std::string, std::string, t_tscalar>>,
+            std::vector<std::vector<std::string>>, bool>();
+
+    /******************************************************************************
+     *
      * t_data_table
      */
     class_<t_data_table>("t_data_table")
@@ -2043,13 +2054,14 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * vector
      */
     register_vector<std::int32_t>("std::vector<std::int32_t>");
+    register_vector<std::string>("std::vector<std::string>");
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
-    register_vector<std::vector<t_tscalar>>("std::vector<std::vector<t_tscalar>>");
-    register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
+    register_vector<std::vector<t_tscalar>>("std::vector<std::vector<t_tscalar>>");
+    register_vector<std::vector<std::string>>("std::vector<std::vector<std::string>>");
 
     /******************************************************************************
      *

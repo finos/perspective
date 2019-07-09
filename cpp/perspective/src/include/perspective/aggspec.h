@@ -25,28 +25,11 @@ struct PERSPECTIVE_EXPORT t_col_name_type {
     t_dtype m_type;
 };
 
-struct PERSPECTIVE_EXPORT t_aggspec_recipe {
-    t_aggspec_recipe() {}
-    std::string m_name;
-    std::string m_disp_name;
-    t_aggtype m_agg;
-    std::vector<t_dep_recipe> m_dependencies;
-    std::vector<t_dep_recipe> m_odependencies;
-    t_sorttype m_sort_type;
-    t_uindex m_agg_one_idx;
-    t_uindex m_agg_two_idx;
-    double m_agg_one_weight;
-    double m_agg_two_weight;
-    t_invmode m_invmode;
-};
-
 class PERSPECTIVE_EXPORT t_aggspec {
 public:
     t_aggspec();
 
     ~t_aggspec();
-
-    t_aggspec(const t_aggspec_recipe& v);
 
     t_aggspec(
         const std::string& aggname, t_aggtype agg, const std::vector<t_dep>& dependencies);
@@ -64,6 +47,7 @@ public:
     t_aggspec(const std::string& aggname, const std::string& disp_aggname, t_aggtype agg,
         t_uindex agg_one_idx, t_uindex agg_two_idx, double agg_one_weight,
         double agg_two_weight);
+
     std::string name() const;
     t_tscalar name_scalar() const;
     std::string disp_name() const;
@@ -92,8 +76,6 @@ public:
     bool is_non_delta() const;
 
     std::string get_first_depname() const;
-
-    t_aggspec_recipe get_recipe() const;
 
 private:
     std::string m_name;
