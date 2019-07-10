@@ -1,6 +1,7 @@
 {
     "hypergrid.html/perspective dispatches perspective-click event with one filter.": "790bd42a743f61f25db901c63d0bd8e9",
     "hypergrid.html/perspective dispatches perspective-click event with filters.": "7c6edfeb3e0d2d316a9b26b3d2a2c4f1",
+    "hypergrid.html/perspective-click event with column-pivots clicking on the row header.": "14d0ba702180b69b2ade2834e22e4290",
     "superstore.html/shows a grid without any settings applied.": "03d37f914c1e1bd0e669513e016458a5",
     "superstore.html/pivots by a row.": "9cf12a76f83c4fdfee4bc3f2e2f7274b",
     "superstore.html/pivots by two rows.": "7378f3a3d8b746f9ee7b6599796e65fe",

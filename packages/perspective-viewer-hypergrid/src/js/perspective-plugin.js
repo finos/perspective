@@ -247,7 +247,8 @@ exports.install = function(grid) {
                     const pivot_value = column_pivot_values[index];
                     return pivot_value ? [pivot, "==", pivot_value] : undefined;
                 })
-                .filter(x => x);
+                .filter(x => x)
+                .filter(([, , value]) => value !== "__ROW_PATH__");
         }
 
         const filters = config.filter.concat(row_filters).concat(column_filters);
@@ -266,14 +267,6 @@ exports.install = function(grid) {
 
         return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
     };
-
-    // function isCanvasBlank(canvas) {
-    //     var blank = document.createElement("canvas");
-    //     blank.width = canvas.width;
-    //     blank.height = canvas.height;
-
-    //     return canvas.toDataURL() == blank.toDataURL();
-    // }
 
     grid.canvas.resize = async function(force, reset) {
         const width = (this.width = Math.floor(this.div.clientWidth));
