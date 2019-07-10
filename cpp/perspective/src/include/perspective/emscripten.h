@@ -22,6 +22,24 @@ typedef emscripten::val t_val;
 
 namespace perspective {
 namespace binding {
+    /**
+     * @brief Helper function for creating `std::vector`s for use in Javascript.
+     *
+     * @tparam T
+     * @return std::vector<T>
+     */
+    template <typename T>
+    std::vector<T> make_vector();
+
+    /**
+     * @brief Helper function for creating `std::vector`s for use in Javascript.
+     *
+     * @tparam K
+     * @tparam V
+     * @return std::map<K, V>
+     */
+    template <typename K, typename V>
+    std::map<K, V> make_map();
 
     /**
      * @brief namespace `js_typed_array` contains utility bindings that initialize typed arrays

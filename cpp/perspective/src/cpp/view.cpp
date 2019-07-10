@@ -14,27 +14,25 @@
 namespace perspective {
 template <typename CTX_T>
 View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
-    std::string separator, t_config config)
+    std::string separator, t_view_config view_config)
     : m_table(table)
     , m_ctx(ctx)
     , m_name(name)
     , m_separator(separator)
     , m_col_offset(0)
-    , m_config(config) {
+    , m_view_config(view_config) {
 
-    // We should deprecate t_pivot and just use string column names throughout
-    for (const t_pivot& rp : m_config.get_row_pivots()) {
-        m_row_pivots.push_back(rp.name());
-    }
+    auto schema = table->get_schema(); // FIXME: less dependencies
+    m_aggregates = m_view_config.get_aggregates(schema);
+    auto aggregate_names = m_view_config.get_aggregate_names(
+        m_aggregates); // FIXME: we should not have to do this
 
-    for (const t_pivot& cp : m_config.get_column_pivots()) {
-        m_column_pivots.push_back(cp.name());
-    }
-
-    m_aggregates = m_config.get_aggregates();
-    m_columns = m_config.get_column_names();
-    m_filter = m_config.get_fterms();
-    m_sort = m_config.get_sortspecs();
+    m_row_pivots = m_view_config.get_row_pivots();
+    m_column_pivots = m_view_config.get_column_pivots();
+    m_columns = m_view_config.get_columns();
+    m_filter = m_view_config.get_filter();
+    m_sort = std::get<0>(
+        m_view_config.get_sort(aggregate_names)); // FIXME: we should not have to do this
 
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
@@ -45,6 +43,12 @@ View<CTX_T>::~View() {
     auto pool = m_table->get_pool();
     auto gnode = m_table->get_gnode();
     pool->unregister_context(gnode->get_id(), m_name);
+}
+
+template <typename CTX_T>
+t_view_config
+View<CTX_T>::get_view_config() const {
+    return m_view_config;
 }
 
 template <>
@@ -465,7 +469,7 @@ View<CTX_T>::get_column_dtype(t_uindex idx) const {
 template <typename CTX_T>
 bool
 View<CTX_T>::is_column_only() const {
-    return m_config.is_column_only();
+    return m_view_config.is_column_only();
 }
 
 /******************************************************************************

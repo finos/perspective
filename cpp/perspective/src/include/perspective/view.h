@@ -12,12 +12,12 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
-#include <perspective/config.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
 #include <perspective/data_slice.h>
 #include <perspective/table.h>
+#include <perspective/view_config.h>
 #include <cstddef>
 #include <memory>
 #include <map>
@@ -28,9 +28,15 @@ template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
     View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
-        std::string separator, t_config config);
-
+        std::string separator, t_view_config view_config);
     ~View();
+
+    /**
+     * @brief The `t_view_config` object that created this `View`.
+     *
+     * @return t_view_config
+     */
+    t_view_config get_view_config() const;
 
     /**
      * @brief The number of pivoted sides of this View.
@@ -179,6 +185,6 @@ private:
     t_uindex m_row_offset;
     t_uindex m_col_offset;
 
-    t_config m_config;
+    t_view_config m_view_config;
 };
 } // end namespace perspective
