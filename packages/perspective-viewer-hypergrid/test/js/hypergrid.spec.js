@@ -10,7 +10,7 @@
 const utils = require("@finos/perspective-viewer/test/js/utils.js");
 const path = require("path");
 
-const click_details = async page => {
+const click_details = async (page, x = 310) => {
     const viewer = await page.$("perspective-viewer");
 
     const click_event = page.evaluate(element => {
@@ -21,7 +21,7 @@ const click_details = async page => {
         });
     }, viewer);
 
-    await page.mouse.click(310, 300);
+    await page.mouse.click(x, 300);
     return await click_event;
 };
 
@@ -84,6 +84,22 @@ utils.with_server({}, () => {
                         const detail = await click_details(page);
                         expect(detail.config).toEqual({
                             filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Madison"], ["Region", "==", "Central"]]
+                        });
+                    });
+
+                    test.capture("perspective-click event with column-pivots clicking on the row header.", async page => {
+                        await page.waitFor(100);
+                        const viewer = await page.$("perspective-viewer");
+                        page.evaluate(element => {
+                            element.setAttribute("filters", '[["Segment", "==", "Consumer"]]');
+                            element.setAttribute("column-pivots", '["Region"]');
+                            element.setAttribute("row-pivots", '["Country", "City"]');
+                        }, viewer);
+                        await page.waitForSelector("perspective-viewer:not([updating])");
+
+                        const detail = await click_details(page, 100);
+                        expect(detail.config).toEqual({
+                            filters: [["Segment", "==", "Consumer"], ["Country", "==", "United States"], ["City", "==", "Madison"]]
                         });
                     });
                 });
