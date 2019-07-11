@@ -23,6 +23,7 @@ const internal_tests = require("./internal.js");
 const toformat_tests = require("./to_format.js");
 const sort_tests = require("./sort.js");
 const multiple_tests = require("./multiple.js");
+const pivot_nulls = require("./pivot_nulls.js");
 
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
@@ -37,6 +38,7 @@ describe("perspective.js", function() {
             internal_tests(RUNTIMES[mode], mode);
             sort_tests(RUNTIMES[mode], mode);
             multiple_tests(RUNTIMES[mode], mode);
+            pivot_nulls(RUNTIMES[mode], mode);
         });
     });
 });
