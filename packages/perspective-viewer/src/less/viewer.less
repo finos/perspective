@@ -413,6 +413,7 @@
         }
     }
     #side_panel {
+        position: relative;
         flex: 0 0 auto;
         padding: var(--side_panel--padding, 10px 10px 0px 11px);
     }
@@ -437,5 +438,14 @@
         &:hover {
             color: var(--button-hover--color, inherit);
         }
+    }
+
+    #resize_bar {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 8px;
+        cursor: col-resize;
     }
 }
