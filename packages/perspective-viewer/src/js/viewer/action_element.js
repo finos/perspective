@@ -198,6 +198,18 @@ export class ActionElement extends DomElement {
         this.setAttribute("column-pivots", row_pivots);
     }
 
+    _resize_sidepanel() {
+        const resize = event => {
+            this._side_panel.style.width = `${event.clientX}px`;
+        };
+        const stop = () => {
+            document.removeEventListener("mousemove", resize);
+            document.removeEventListener("mouseup", stop);
+        };
+        document.addEventListener("mousemove", resize);
+        document.addEventListener("mouseup", stop);
+    }
+
     // most of these are drag and drop handlers - how to clean up?
     _register_callbacks() {
         this._sort.addEventListener("drop", drop.bind(this));
@@ -236,6 +248,7 @@ export class ActionElement extends DomElement {
         this._download_button.addEventListener("click", event => this.download(event.shiftKey));
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._drop_target.addEventListener("dragover", dragover.bind(this));
+        this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
             this.setAttribute("plugin", this._vis_selector.value);
