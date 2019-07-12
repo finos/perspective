@@ -1,7 +1,7 @@
 {
     "name": "webpack",
     "private": true,
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "An example of using the Perspective Webpack plugin to build a JS file with Webpack.",
     "scripts": {
         "start": "npm-run-all -l -p webpack-watch host:app host:bundles",
@@ -12,10 +12,10 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.3.3",
-        "@finos/perspective-viewer": "^0.3.3",
-        "@finos/perspective-viewer-d3fc": "^0.3.3",
-        "@finos/perspective-viewer-hypergrid": "^0.3.3"
+        "@finos/perspective": "^0.3.4",
+        "@finos/perspective-viewer": "^0.3.4",
+        "@finos/perspective-viewer-d3fc": "^0.3.4",
+        "@finos/perspective-viewer-hypergrid": "^0.3.4"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.2",

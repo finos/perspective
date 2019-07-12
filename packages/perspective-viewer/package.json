@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective-viewer.js",
     "browser": "dist/cjs/perspective-viewer.js",
@@ -50,7 +50,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.3.3",
+        "@finos/perspective": "^0.3.4",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",

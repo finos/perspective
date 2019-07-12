@@ -1,7 +1,7 @@
 {
     "name": "simple",
     "private": true,
-    "version": "0.3.3",
+    "version": "0.3.4",
     "description": "A collection of simple client-side Perspective examples.",
     "scripts": {
         "start": "node server.js"
@@ -9,9 +9,9 @@
     "keywords": [],
     "license": "Apache-2.0",
     "dependencies": {
-        "@finos/perspective": "^0.3.3",
-        "@finos/perspective-viewer": "^0.3.3",
-        "@finos/perspective-viewer-d3fc": "^0.3.3",
-        "@finos/perspective-viewer-hypergrid": "^0.3.3"
+        "@finos/perspective": "^0.3.4",
+        "@finos/perspective-viewer": "^0.3.4",
+        "@finos/perspective-viewer-d3fc": "^0.3.4",
+        "@finos/perspective-viewer-hypergrid": "^0.3.4"
     }
 }
