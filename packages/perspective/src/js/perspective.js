@@ -10,7 +10,7 @@
 import * as defaults from "./config/constants.js";
 import {DataAccessor} from "./data_accessor";
 import {DateParser} from "./data_accessor/date_parser.js";
-import {extract_map, fill_vector, fill_map} from "./emscripten.js";
+import {extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
@@ -260,7 +260,7 @@ export default function(Module) {
         this.view_config = view_config || new view_config();
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         } else if (sides === 1) {
             this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.view_config, this.date_parser);
         } else if (sides === 2) {
@@ -880,11 +880,6 @@ export default function(Module) {
     view_config.prototype.get_column_pivots = function() {
         let vector = __MODULE__.make_string_vector();
         return fill_vector(vector, this.column_pivots);
-    };
-
-    view_config.prototype.get_aggregates = function() {
-        let map = __MODULE__.make_string_map();
-        return fill_map(map, this.aggregates);
     };
 
     view_config.prototype.get_columns = function() {

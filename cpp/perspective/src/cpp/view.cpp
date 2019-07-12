@@ -22,17 +22,12 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     , m_col_offset(0)
     , m_view_config(view_config) {
 
-    auto schema = table->get_schema(); // FIXME: less dependencies
-    m_aggregates = m_view_config.get_aggregates(schema);
-    auto aggregate_names = m_view_config.get_aggregate_names(
-        m_aggregates); // FIXME: we should not have to do this
-
     m_row_pivots = m_view_config.get_row_pivots();
     m_column_pivots = m_view_config.get_column_pivots();
+    m_aggregates = m_view_config.get_aggspecs();
     m_columns = m_view_config.get_columns();
-    m_filter = m_view_config.get_filter();
-    m_sort = std::get<0>(
-        m_view_config.get_sort(aggregate_names)); // FIXME: we should not have to do this
+    m_filter = m_view_config.get_fterm();
+    m_sort = m_view_config.get_sortspec();
 
     // configure data window for column-only rows
     is_column_only() ? m_row_offset = 1 : m_row_offset = 0;
@@ -477,39 +472,26 @@ View<CTX_T>::is_column_only() const {
  * Private
  */
 
-/* template <typename CTX_T>
-std::int32_t
-View<CTX_T>::_num_hidden_cols() {
-    std::int32_t hidden = 0;
-    for (const t_sortspec& sort : m_sort) {
-    }
-    return hidden;
-} */
-
 template <typename CTX_T>
 std::string
 View<CTX_T>::_map_aggregate_types(
     const std::string& name, const std::string& typestring) const {
-    std::vector<std::string> INTEGER_AGGS
-        = {"distinct_count", "distinct count", "distinctcount", "distinct", "count"};
-    std::vector<std::string> FLOAT_AGGS
-        = {"avg", "mean", "mean by count", "mean_by_count", "weighted mean", "weighted_mean",
-            "pct sum parent", "pct_sum_parent", "pct sum grand total", "pct_sum_grand_total"};
 
     for (const t_aggspec& agg : m_aggregates) {
         if (agg.name() == name) {
-            std::string agg_str = agg.agg_str();
-            bool int_agg = std::find(INTEGER_AGGS.begin(), INTEGER_AGGS.end(), agg_str)
-                != INTEGER_AGGS.end();
-            bool float_agg
-                = std::find(FLOAT_AGGS.begin(), FLOAT_AGGS.end(), agg_str) != FLOAT_AGGS.end();
-
-            if (int_agg) {
-                return "integer";
-            } else if (float_agg) {
-                return "float";
-            } else {
-                return typestring;
+            switch (agg.agg()) {
+                case AGGTYPE_DISTINCT_COUNT:
+                case AGGTYPE_COUNT: {
+                    return "integer";
+                } break;
+                case AGGTYPE_MEAN:
+                case AGGTYPE_MEAN_BY_COUNT:
+                case AGGTYPE_WEIGHTED_MEAN:
+                case AGGTYPE_PCT_SUM_PARENT:
+                case AGGTYPE_PCT_SUM_GRAND_TOTAL: {
+                    return "float";
+                } break;
+                default: { return typestring; } break;
             }
         }
     }

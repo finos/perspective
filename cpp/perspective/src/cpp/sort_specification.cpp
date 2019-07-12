@@ -13,6 +13,12 @@
 
 namespace perspective {
 
+t_sortspec::t_sortspec(const std::string& column_name, t_index agg_index, t_sorttype sort_type)
+    : m_colname(column_name)
+    , m_agg_index(agg_index)
+    , m_sort_type(sort_type)
+    , m_sortspec_type(SORTSPEC_TYPE_IDX) {}
+
 t_sortspec::t_sortspec(t_index agg_index, t_sorttype sort_type)
     : m_agg_index(agg_index)
     , m_sort_type(sort_type)

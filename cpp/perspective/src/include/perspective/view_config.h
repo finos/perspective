@@ -41,6 +41,8 @@ public:
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
         std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only);
 
+    void init(const t_schema& schema);
+
     /**
      * @brief Add filter terms manually, as the filter term must be calculated from the value
      * passed through the binding.
@@ -49,47 +51,32 @@ public:
      */
     void add_filter_term(std::tuple<std::string, std::string, std::vector<t_tscalar>> term);
 
-    std::vector<std::string> get_row_pivots();
+    std::vector<std::string> get_row_pivots() const;
 
-    std::vector<std::string> get_column_pivots();
+    std::vector<std::string> get_column_pivots() const;
 
-    /**
-     * @brief Construct a vector of `t_aggspec` for use in the engine, where configs stored as
-     * built-in types are not yet supported.
-     *
-     * @param schema
-     * @return std::vector<t_aggspec>
-     */
-    std::vector<t_aggspec> get_aggregates(const t_schema& schema); // FIXME: reduce deps
+    std::vector<t_aggspec> get_aggspecs() const;
 
-    std::vector<std::string> get_columns();
+    std::vector<std::string> get_columns() const;
 
-    std::vector<t_fterm> get_filter();
+    std::vector<t_fterm> get_fterm() const;
 
-    /**
-     * @brief Return how the `View` should be sorted. The first member of the tuple is the
-     * regular sort specification, and the second member is the column sort specification. //
-     * FIXME: cleanup
-     *
-     * FIXME: what's the point of column sorts
-     *
-     * @param aggregate_names `t_sortspec` requires the aggregate index
-     * @return std::tuple<std::vector<t_sortspec>, std::vector<t_sortspec>>
-     */
-    std::tuple<std::vector<t_sortspec>, std::vector<t_sortspec>> get_sort(
-        const std::vector<std::string>& aggregate_names);
+    std::vector<t_sortspec> get_sortspec() const;
 
-    // FIXME: we should not need this
-    t_index get_aggregate_index(
-        const std::vector<std::string>& agg_names, const std::string& column) const;
-
-    // FIXME: we should not need this
-    std::vector<std::string> get_aggregate_names(const std::vector<t_aggspec>& aggs) const;
+    std::vector<t_sortspec> get_col_sortspec() const;
 
     t_filter_op get_filter_op() const;
     bool is_column_only() const;
 
 private:
+    std::vector<t_aggspec> make_aggspecs(const t_schema& schema);
+
+    std::vector<t_fterm> make_fterm();
+
+    std::tuple<std::vector<t_sortspec>, std::vector<t_sortspec>> make_sortspec();
+
+    t_index get_aggregate_index(const std::string& column) const;
+
     std::vector<std::string> m_row_pivots;
     std::vector<std::string> m_column_pivots;
     std::map<std::string, std::string> m_aggregates;
@@ -98,17 +85,25 @@ private:
     std::vector<std::vector<std::string>> m_sort;
 
     /**
-     * @brief If a `filter_op` is specified - TODO: finish
+     * @brief The ordered list of aggregate columns:
+     *
+     * 1. all columns marked as "shown" by the user in `m_columns`
+     * 2. all specified aggregates from `m_aggregates`
+     * 3. all "hidden sorts", i.e. columns to sort by that do not appear in `m_columns`
      *
      */
+    std::vector<std::string> m_aggregate_names;
     std::string m_filter_op;
-
-    /**
-     * @brief should the `View` be `column_only`, that is, pivoted by 1+ columns without a row
-     * pivot?
-     *
-     */
     bool m_column_only;
+
+    // store abstractions, for now
+    std::vector<t_aggspec> m_aggspecs;
+
+    std::vector<t_fterm> m_fterm;
+
+    std::vector<t_sortspec> m_sortspec;
+
+    std::vector<t_sortspec> m_col_sortspec;
 };
 } // end namespace perspective
 

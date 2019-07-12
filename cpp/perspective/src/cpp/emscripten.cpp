@@ -182,25 +182,27 @@ namespace binding {
 
             agg_index = _get_aggregate_index(columns, column);
 
-            svec.push_back(t_sortspec(agg_index, sorttype));
+            svec.push_back(t_sortspec(column, agg_index, sorttype));
         }
         return svec;
     }
+
+    template <>
+    bool
+    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term) {
+        if (type == DTYPE_DATE || type == DTYPE_TIME) {
+            t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
+            return has_value(parsed_date);
+        } else {
+            return has_value(filter_term);
+        }
+    };
 
     template <>
     std::vector<t_fterm>
     _get_fterms(const t_schema& schema, t_val j_date_parser, t_val j_filters) {
         std::vector<t_fterm> fvec{};
         std::vector<t_val> filters = vecFromArray<t_val, t_val>(j_filters);
-
-        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<t_val> filter) {
-            if (type == DTYPE_DATE || type == DTYPE_TIME) {
-                t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                return has_value(parsed_date);
-            } else {
-                return has_value(filter[2]);
-            }
-        };
 
         for (auto fidx = 0; fidx < filters.size(); ++fidx) {
             std::vector<t_val> filter = vecFromArray<t_val, t_val>(filters[fidx]);
@@ -209,7 +211,7 @@ namespace binding {
 
             // check validity and if_date
             t_dtype col_type = schema.get_dtype(col);
-            bool is_valid = _is_valid_filter(col_type, filter);
+            bool is_valid = is_valid_filter(col_type, j_date_parser, filter[2]);
 
             if (!is_valid) {
                 continue;
@@ -1529,28 +1531,11 @@ namespace binding {
      */
     template <>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
-    make_filter_term(const t_schema& schema, t_val date_parser, std::vector<t_val> filter) {
-        auto _is_valid_filter = [date_parser, filter](t_dtype type) {
-            if (type == DTYPE_DATE || type == DTYPE_TIME) {
-                t_val parsed_date = date_parser.call<t_val>("parse", filter[2]);
-                return has_value(parsed_date);
-            } else {
-                return has_value(filter[2]);
-            }
-        };
-
+    make_filter_term(t_dtype type, t_val date_parser, std::vector<t_val> filter) {
+        // TODO: structure properly
         std::string col = filter[0].as<std::string>();
         std::string comp_str = filter[1].as<std::string>();
         t_filter_op comp = str_to_filter_op(comp_str);
-
-        // check validity and if_date
-        t_dtype col_type = schema.get_dtype(col);
-        bool is_valid = _is_valid_filter(col_type);
-
-        if (!is_valid) {
-            return {};
-        }
-
         std::vector<t_tscalar> terms;
 
         switch (comp) {
@@ -1563,7 +1548,7 @@ namespace binding {
                 }
             } break;
             default: {
-                switch (col_type) {
+                switch (type) {
                     case DTYPE_INT32: {
                         terms.push_back(mktscalar(filter[2].as<std::int32_t>()));
                     } break;
@@ -1665,10 +1650,20 @@ namespace binding {
         // extract vectors from JS, where they were created
         auto row_pivots = config.call<std::vector<std::string>>("get_row_pivots");
         auto column_pivots = config.call<std::vector<std::string>>("get_column_pivots");
-        auto aggregates = config.call<std::map<std::string, std::string>>("get_aggregates");
         auto columns = config.call<std::vector<std::string>>("get_columns");
         auto sort = config.call<std::vector<std::vector<std::string>>>("get_sort");
         auto filter_op = config["filter_op"].as<std::string>();
+
+        // aggregates require manual parsing - std::maps read from JS are empty
+        std::map<std::string, std::string> aggregates;
+        t_val j_aggregate_keys
+            = t_val::global("Object").call<t_val>("keys", config["aggregates"]);
+        auto aggregate_names = vecFromArray<t_val, std::string>(j_aggregate_keys);
+
+        std::cout << aggregate_names << std::endl;
+        for (const auto& name : aggregate_names) {
+            aggregates[name] = config["aggregates"][name].as<std::string>();
+        };
 
         bool column_only = false;
 
@@ -1683,8 +1678,13 @@ namespace binding {
         // construct filters with filter terms
         auto filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
         for (auto f : filter) {
-            view_config.add_filter_term(make_filter_term(schema, date_parser, f));
+            t_dtype type = schema.get_dtype(f[0].as<std::string>());
+            if (is_valid_filter(type, date_parser, f[2])) {
+                view_config.add_filter_term(make_filter_term(type, date_parser, f));
+            }
         }
+
+        view_config.init(schema);
 
         return view_config;
     }
@@ -1692,17 +1692,14 @@ namespace binding {
     template <>
     std::shared_ptr<View<t_ctx0>>
     make_view_zero(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val config, t_val j_view_config, t_val date_parser) {
+        t_val j_view_config, t_val date_parser) {
         auto schema = table->get_schema();
         t_view_config view_config = make_view_config<t_val>(schema, date_parser, j_view_config);
 
-        // need aggregates to be calculated for sorting FIXME: we shouldn't have to do this
-        auto aggregates = view_config.get_aggregates(schema);
-        auto aggregate_names = _get_aggregate_names(aggregates);
         auto columns = view_config.get_columns();
         auto filter_op = view_config.get_filter_op();
-        auto filter = view_config.get_filter();
-        auto sort = std::get<0>(view_config.get_sort(aggregate_names));
+        auto filter = view_config.get_fterm();
+        auto sort = view_config.get_sortspec();
 
         auto ctx = make_context_zero(table, schema, filter_op, columns, filter, sort, name);
 
