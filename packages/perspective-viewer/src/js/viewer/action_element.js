@@ -198,9 +198,11 @@ export class ActionElement extends DomElement {
         this.setAttribute("column-pivots", row_pivots);
     }
 
-    _resize_sidepanel() {
+    _resize_sidepanel(event) {
+        const start = event.clientX;
+        const width = this._side_panel.offsetWidth;
         const resize = event => {
-            this._side_panel.style.width = `${event.clientX}px`;
+            this._side_panel.style.width = `${width + (event.clientX - start)}px`;
         };
         const stop = () => {
             document.removeEventListener("mousemove", resize);
