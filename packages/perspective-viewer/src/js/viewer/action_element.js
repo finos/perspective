@@ -199,6 +199,8 @@ export class ActionElement extends DomElement {
     }
 
     _resize_sidepanel(event) {
+        const initial = document.body.style.cursor;
+        document.body.style.cursor = "col-resize";
         const start = event.clientX;
         const width = this._side_panel.offsetWidth;
         const resize = event => {
@@ -206,6 +208,7 @@ export class ActionElement extends DomElement {
             this._side_panel.style.width = `${new_width}px`;
         };
         const stop = () => {
+            document.body.style.cursor = initial;
             document.removeEventListener("mousemove", resize);
             document.removeEventListener("mouseup", stop);
         };
