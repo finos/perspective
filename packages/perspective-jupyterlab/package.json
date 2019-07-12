@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "description": "Perspective.js",
     "files": [
         "dist/*.d.ts",
@@ -29,7 +29,7 @@
         "clean": "rimraf dist"
     },
     "dependencies": {
-        "@finos/perspective-phosphor": "^0.3.2",
+        "@finos/perspective-phosphor": "^0.3.3",
         "@jupyter-widgets/base": "^1.1.10",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
