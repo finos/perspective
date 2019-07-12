@@ -202,7 +202,8 @@ export class ActionElement extends DomElement {
         const start = event.clientX;
         const width = this._side_panel.offsetWidth;
         const resize = event => {
-            this._side_panel.style.width = `${width + (event.clientX - start)}px`;
+            const new_width = Math.max(0, Math.min(width + (event.clientX - start), this.offsetWidth - 10));
+            this._side_panel.style.width = `${new_width}px`;
         };
         const stop = () => {
             document.removeEventListener("mousemove", resize);
