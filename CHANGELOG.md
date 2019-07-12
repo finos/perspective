@@ -1,5 +1,18 @@
 # Changelog
 
+[0.3.2] - 2019-07-12
+### Added
+* [#644](https://github.com/jpmorganchase/perspective/pull/644) Global project config via `perspective.config.js`
+* [#639](https://github.com/jpmorganchase/perspective/pull/629) New perspective-viewer API.
+* [#641](https://github.com/jpmorganchase/perspective/pull/641) Simplified `@finos/perspective-webpack-plugin`.
+* [#650](https://github.com/jpmorganchase/perspective/pull/650) Resizable panels for `@finos/perspective-viewer`.
+  
+### Fixes
+* [#634](https://github.com/jpmorganchase/perspective/pull/634) Fixed node.js async load error.
+* [#635](https://github.com/jpmorganchase/perspective/pull/635) Fixed issue with multiple web workers.
+* [#649](https://github.com/jpmorganchase/perspective/pull/649) Fixed click event bug in `@finos/perspective-viewer-hypergrid`.
+* [#651](https://github.com/jpmorganchase/perspective/pull/651) Fixed issue pivotting on `null` values.
+
 [0.3.1] - 2019-06-25
 ### Added
 * [#629](https://github.com/jpmorganchase/perspective/pull/629) asm.js/IE support removed.

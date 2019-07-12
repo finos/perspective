@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer-hypergrid",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective-viewer-hypergrid.js",
     "module": "dist/cjs/perspective-viewer-hypergrid.js",
@@ -45,8 +45,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.3.1",
-        "@finos/perspective-viewer": "^0.3.1",
+        "@finos/perspective": "^0.3.2",
+        "@finos/perspective-viewer": "^0.3.2",
         "datasaur-local": "3.0.0",
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
@@ -55,6 +55,6 @@
         "superscript-number": "^1.0.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.1"
+        "@finos/perspective-webpack-plugin": "^0.3.2"
     }
 }

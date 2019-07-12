@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-phosphor",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "Perspective.js",
     "files": [
         "dist/**/*",
@@ -23,16 +23,16 @@
         "clean": "rimraf dist"
     },
     "dependencies": {
-        "@finos/perspective": "^0.3.1",
-        "@finos/perspective-viewer": "^0.3.1",
-        "@finos/perspective-viewer-d3fc": "^0.3.1",
-        "@finos/perspective-viewer-highcharts": "^0.3.1",
-        "@finos/perspective-viewer-hypergrid": "^0.3.1",
+        "@finos/perspective": "^0.3.2",
+        "@finos/perspective-viewer": "^0.3.2",
+        "@finos/perspective-viewer-d3fc": "^0.3.2",
+        "@finos/perspective-viewer-highcharts": "^0.3.2",
+        "@finos/perspective-viewer-hypergrid": "^0.3.2",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.1",
+        "@finos/perspective-webpack-plugin": "^0.3.2",
         "@types/jest": "^23.3.9",
         "file-loader": "^0.11.1",
         "identity-obj-proxy": "^3.0.0",
