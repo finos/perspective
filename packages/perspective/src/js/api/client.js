@@ -46,7 +46,7 @@ Client.prototype.unsubscribe = function(cmd, handler) {
  * Process an asynchronous message.
  */
 Client.prototype.post = function(msg, resolve, reject, keep_alive = false) {
-    if (resolve) {
+    if (resolve || reject) {
         this._worker.handlers[++this._worker.msg_id] = {resolve, reject, keep_alive};
     }
     msg.id = this._worker.msg_id;
@@ -97,14 +97,13 @@ Client.prototype._handle = function(e) {
         }
 
         const msgs = this._worker.messages;
-
         this._worker.initialized.value = true;
         this._worker.messages = [];
 
         if (msgs) {
             for (const m in msgs) {
                 if (msgs.hasOwnProperty(m)) {
-                    setTimeout(msgs[m]);
+                    msgs[m]();
                 }
             }
         }

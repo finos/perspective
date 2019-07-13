@@ -6,8 +6,8 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-const {Client} = require("./API/client.js");
-const {Server} = require("./API/server.js");
+const {Client} = require("./api/client.js");
+const {Server} = require("./api/server.js");
 
 const perspective = require("./perspective.js").default;
 
@@ -36,7 +36,7 @@ const SYNC_SERVER = new (class extends Server {
             wasmJSMethod: "native-wasm"
         }).then(core => {
             this.perspective = perspective(core);
-            this.post(msg);
+            super.init(msg);
         });
     }
 
@@ -59,12 +59,12 @@ module.exports.sync_module = () => SYNC_SERVER.perspective;
 let CLIENT_ID_GEN = 0;
 
 const DEFAULT_ASSETS = [
-    "@finos/perspective/build",
-    "@finos/perspective-bench/build",
-    "@finos/perspective-viewer/build",
-    "@finos/perspective-viewer-highcharts/build",
-    "@finos/perspective-viewer-hypergrid/build",
-    "@finos/perspective-viewer-d3fc/build"
+    "@finos/perspective/dist/umd",
+    "@finos/perspective-bench/dist",
+    "@finos/perspective-viewer/dist/umd",
+    "@finos/perspective-viewer-highcharts/dist/umd",
+    "@finos/perspective-viewer-hypergrid/dist/umd",
+    "@finos/perspective-viewer-d3fc/dist/umd"
 ];
 
 const CONTENT_TYPES = {

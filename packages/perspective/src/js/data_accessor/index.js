@@ -7,7 +7,7 @@
  *
  */
 
-import {DateParser, is_valid_date} from "./DateParser.js";
+import {DateParser, is_valid_date} from "./date_parser.js";
 import {get_column_type} from "../utils.js";
 
 export class DataAccessor {

@@ -13,15 +13,15 @@
 <head>
 
     <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
-    <script src="perspective.view.js"></script>
-    <script src="d3fc.plugin.js"></script>
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
 
     <link rel='stylesheet' href="demo.css">
 </head>
 
 <body>
 
-    <perspective-viewer view="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
+    <perspective-viewer plugin="{view-name}" row-pivots='["Date"]' column-pivots='[]' filters='[]' sort='[]'
         columns='["Open","Close","High","Low"]'
         aggregates='{"Date":"distinct count","Change%":"sum","High":"sum","Low":"sum","Open":"sum","Close":"sum","Vol.":"sum"}'>
 

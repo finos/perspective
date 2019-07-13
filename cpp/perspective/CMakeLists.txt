@@ -176,7 +176,7 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O0 \
 			-g4 \
-			--profiling 1 \
+			--profiling \
 			-s SAFE_HEAP=1 \
 			-s DISABLE_EXCEPTION_CATCHING=0 \
 			-s ASSERTIONS=2 \

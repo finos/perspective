@@ -10,6 +10,7 @@
 const PSP_WORKER_LOADER = require.resolve("./src/js/psp-worker-loader");
 const WASM_LOADER = require.resolve("./src/js/wasm-loader.js");
 const PSP_WORKER_COMPILER_LOADER = require.resolve("./src/js/psp-worker-compiler-loader.js");
+const {get_config} = require("@finos/perspective/dist/esm/config");
 
 class PerspectiveWebpackPlugin {
     constructor(options = {}) {
@@ -29,34 +30,11 @@ class PerspectiveWebpackPlugin {
     }
 
     apply(compiler) {
-        const rules = [
-            {
-                test: /\.less$/,
-                exclude: /themes/,
-                include: this.options.load_path,
-                use: [{loader: "css-loader"}, {loader: "clean-css-loader", options: {level: 2}}, {loader: "less-loader"}]
-            },
-            {
-                test: /\.(html)$/,
-                include: this.options.load_path,
-                use: {
-                    loader: "html-loader",
-                    options: {}
-                }
-            },
-            {
-                test: /\.(arrow)$/,
-                include: this.options.load_path,
-                use: {
-                    loader: "arraybuffer-loader",
-                    options: {}
-                }
-            }
-        ];
+        const rules = [];
 
         if (this.options.build_worker) {
             rules.push({
-                test: /perspective\.(asmjs|wasm)\.js$/,
+                test: /perspective\.wasm\.js$/,
                 include: this.options.load_path,
                 use: [
                     {
@@ -71,7 +49,7 @@ class PerspectiveWebpackPlugin {
             });
         } else {
             rules.push({
-                test: /perspective\.(wasm|asmjs)\.js$/,
+                test: /perspective\.wasm\.js$/,
                 include: this.options.load_path,
                 use: {
                     loader: PSP_WORKER_LOADER,
@@ -101,8 +79,25 @@ class PerspectiveWebpackPlugin {
             ]
         });
 
+        const perspective_config = get_config();
+        if (perspective_config) {
+            rules.push({
+                test: /\.js$/,
+                include: /perspective[\\/].+?[\\/]config[\\/]index\.js$/,
+                use: [
+                    {
+                        loader: "string-replace-loader",
+                        options: {
+                            search: "global.__TEMPLATE_CONFIG__",
+                            replace: JSON.stringify(perspective_config, null, 4)
+                        }
+                    }
+                ]
+            });
+        }
+
         rules.push({
-            test: /psp\.(sync|async)\.wasm\.js$/,
+            test: /psp\.async\.wasm\.js$/,
             include: this.options.load_path,
             use: {
                 loader: WASM_LOADER,

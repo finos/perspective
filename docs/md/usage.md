@@ -333,6 +333,38 @@ view.delete();
 // on this `table()`!
 table.delete();
 ```
+### Customizing behavior with `perspective.config.js`
+
+For ease of configu synchronization between the Node.js, WebWorker and Browser,
+Perspective supports configuration statically.  You may override Perspective's
+[default settings](https://github.com/finos/perspective/blob/master/packages/perspective/src/js/config/settings.js)
+via a `perspective.config.js` or `perspective.config.json`
+file in your project's root or parent path, or via the `"perspective"` key in
+your project's `package.json`.
+
+Note that, while in Node.js this config file is read at runtime, for the browser
+this file must be read at compile time (handled automatically via
+[`@finos/perspective-webpack-plugin`](https://github.com/finos/perspective/tree/master/packages/perspective-webpack-plugin)).
+Thus, to update it you must either
+rebuild your code, or supply the JSON configuration object to the `worker()`
+constructor on initialization.
+
+```javascript
+module.exports = {
+    types: {
+        string: {
+            aggregate: "dominant"
+        },
+        float: {
+            format: {
+                style: "decimal",
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        }
+    }
+};
+```
 
 ## `perspective-viewer` web component
 
@@ -374,9 +406,9 @@ you can just import the pre-bundled assets from their respective modules, which
 export their default visualizations.
 
 ```html
-<script src="perspective.view.js"></script>
-<script src="hypergrid.plugin.js"></script>
-<script src="d3fc.plugin.js"></script>
+<script src="perspective-viewer.js"></script>
+<script src="perspective-viewer-hypergrid.js"></script>
+<script src="perspective-viewer-d3fc.js"></script>
 
 <!-- Theme available separately if you are so inclined -->
 <link rel='stylesheet' href='material.css'>

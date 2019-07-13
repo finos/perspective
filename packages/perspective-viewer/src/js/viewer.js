@@ -8,7 +8,6 @@
  */
 
 import "@webcomponents/webcomponentsjs";
-import "@webcomponents/shadycss/custom-style-interface.min.js";
 
 import _ from "lodash";
 import {polyfill} from "mobile-drag-drop";
@@ -222,7 +221,7 @@ class PerspectiveViewer extends ActionElement {
      * config object is an array of three elements:
      *     * The column name.
      *     * The filter operation as a string.  See
-     *       {@link perspective/src/js/defaults.js}
+     *       {@link perspective/src/js/config/constants.js}
      *     * The filter argument, as a string, float or Array<string> as the
      *       filter operation demands.
      * @fires PerspectiveViewer#perspective-config-update
@@ -269,14 +268,14 @@ class PerspectiveViewer extends ActionElement {
      * @type {string}
      * @fires PerspectiveViewer#perspective-config-update
      */
-    set view(v) {
+    set plugin(v) {
         const plugin_names = Object.keys(renderers.getInstance());
-        let plugin = this.getAttribute("view");
+        let plugin = this.getAttribute("plugin");
         if (plugin_names.indexOf(plugin) === -1) {
             const guess_plugin = plugin_names.find(x => x.indexOf(plugin) > -1);
             if (guess_plugin) {
                 console.warn(`Unknown plugin "${plugin}", using "${guess_plugin}"`);
-                this.setAttribute("view", guess_plugin);
+                this.setAttribute("plugin", guess_plugin);
             } else {
                 console.error(`Unknown plugin "${plugin}"`);
             }
@@ -556,7 +555,7 @@ class PerspectiveViewer extends ActionElement {
         } else {
             this.removeAttribute("columns");
         }
-        this.setAttribute("view", Object.keys(renderers.getInstance())[0]);
+        this.setAttribute("plugin", Object.keys(renderers.getInstance())[0]);
         this.dispatchEvent(new Event("perspective-config-update"));
         this._hide_context_menu();
     }

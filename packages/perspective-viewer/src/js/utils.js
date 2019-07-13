@@ -7,8 +7,6 @@
  *
  */
 
-import detectIE from "detectie";
-
 /**
  * Instantiate a Template DOM object from an HTML text string.
  *
@@ -54,7 +52,6 @@ export function registerElement(templateString, styleString, proto) {
     if (styleString) {
         template.innerHTML = `<style>${styleString.toString()}</style>` + template.innerHTML;
     }
-    window.ShadyCSS && window.ShadyCSS.prepareTemplate(template, template.getAttribute("id"));
     template.innerHTML = `<style id="psp_styles" scope="${template.getAttribute("id")}">test{}</style>` + template.innerHTML;
 
     const _perspective_element = class extends proto {
@@ -65,8 +62,6 @@ export function registerElement(templateString, styleString, proto) {
         }
 
         connectedCallback() {
-            window.ShadyCSS && window.ShadyCSS.styleElement(this);
-
             if (this._initialized) {
                 return;
             }
@@ -187,32 +182,3 @@ export function copy_to_clipboard(csv) {
 
 export const json_attribute = _attribute(() => ({}));
 export const array_attribute = _attribute(() => []);
-
-function get(url) {
-    return new Promise(resolve => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.onload = () => resolve(xhr.responseText);
-        xhr.send(null);
-    });
-}
-
-async function load_themes() {
-    const themes = document.head.querySelectorAll("link[is=custom-style]");
-    for (let theme of themes) {
-        const url = theme.getAttribute("href");
-        console.log(`Loading theme ${url} asynchronously due to IE`);
-        const css = await get(url);
-        window.ShadyCSS.CustomStyleInterface.addCustomStyle({
-            getStyle() {
-                const style = document.createElement("style");
-                style.textContent = css;
-                return style;
-            }
-        });
-    }
-}
-
-if (detectIE()) {
-    window.addEventListener("load", load_themes);
-}

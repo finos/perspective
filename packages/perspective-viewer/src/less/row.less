@@ -117,6 +117,12 @@
     }
 }
 
+@keyframes expand3 {
+    from {
+        transform: scale(0.9);
+    }
+}
+
 :host(:hover) .is_visible {
     color: var(--button-hover--color, --column-selector--color);
 }
@@ -247,6 +253,10 @@
             --column-drop-target--background,
             rgb(240, 240, 255)
         ) !important;
+        animation: var(
+            --drop-target--animation,
+            var(--row_draggable--animation, expand3 0.5s ease-out)
+        );
         border: 1px solid #1078d1 !important;
     }
 }

@@ -15,6 +15,7 @@ import awesomplete_style from "!!css-loader!awesomplete/awesomplete.css";
 import {bindTemplate} from "./utils.js";
 
 import perspective from "@finos/perspective";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
 import template from "../html/row.html";
 
 import style from "../less/row.less";
@@ -73,7 +74,7 @@ class Row extends HTMLElement {
             default:
         }
         if (!this.hasAttribute("aggregate")) {
-            this.setAttribute("aggregate", perspective.AGGREGATE_DEFAULTS[type]);
+            this.setAttribute("aggregate", get_type_config(type).aggregate);
         }
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._callback = event => this._update_filter(event);
@@ -119,7 +120,7 @@ class Row extends HTMLElement {
         const filter_dropdown = this.shadowRoot.querySelector("#filter_operator");
         const filter = JSON.parse(this.getAttribute("filter"));
         if (filter_dropdown.value !== filter.operator) {
-            filter_dropdown.value = filter.operator || perspective.FILTER_DEFAULTS[this.getAttribute("type")];
+            filter_dropdown.value = filter.operator || get_type_config(this.getAttribute("type")).filter_operator;
         }
         filter_dropdown.style.width = get_text_width(filter_dropdown.value);
         const filter_input = this.shadowRoot.querySelector("#filter_operand");
@@ -135,7 +136,7 @@ class Row extends HTMLElement {
         let aggregate = this.getAttribute("aggregate");
         if (agg_dropdown.value !== aggregate && this.hasAttribute("type")) {
             let type = this.getAttribute("type");
-            agg_dropdown.value = aggregate || perspective.AGGREGATE_DEFAULTS[type];
+            agg_dropdown.value = aggregate || get_type_config(type).aggregate;
         }
     }
 
@@ -190,7 +191,7 @@ class Row extends HTMLElement {
         } else {
             event.dataTransfer.setData(
                 "text",
-                JSON.stringify([this.getAttribute("name"), perspective.FILTER_DEFAULTS[this.getAttribute("type")], undefined, this.getAttribute("type"), this.getAttribute("aggregate")])
+                JSON.stringify([this.getAttribute("name"), get_type_config(this.getAttribute("type")).filter_operator, undefined, this.getAttribute("type"), this.getAttribute("aggregate")])
             );
         }
         this.dispatchEvent(new CustomEvent("row-drag"));

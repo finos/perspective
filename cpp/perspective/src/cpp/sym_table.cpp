@@ -60,6 +60,7 @@ t_symtable::get_interned_tscalar(const t_tscalar& s) {
 
     t_tscalar rval;
     rval.set(get_interned_cstr(s.get_char_ptr()));
+    rval.m_status = s.m_status;
     return rval;
 }
 

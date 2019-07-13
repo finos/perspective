@@ -13,7 +13,7 @@ import template from "../../html/d3fc-chart.html";
 import {areArraysEqualSimple} from "../utils/utils";
 import {initialiseStyles} from "../series/colorStyles";
 
-import {bindTemplate} from "@finos/perspective-viewer/cjs/js/utils";
+import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils";
 
 const styleWithD3FC = `${style}${getD3FCStyles()}`;
 

@@ -39,10 +39,10 @@ const siteConfig = {
 
     scripts: [
         "https://buttons.github.io/buttons.js",
-        "https://unpkg.com/@finos/perspective/build/perspective.js",
-        "https://unpkg.com/@finos/perspective-viewer/build/perspective.view.js",
-        "https://unpkg.com/@finos/perspective-viewer-hypergrid/build/hypergrid.plugin.js",
-        "https://unpkg.com/@finos/perspective-viewer-d3fc/build/d3fc.plugin.js",
+        "https://unpkg.com/@finos/perspective",
+        "https://unpkg.com/@finos/perspective-viewer",
+        "https://unpkg.com/@finos/perspective-viewer-hypergrid",
+        "https://unpkg.com/@finos/perspective-viewer-d3fc",
         "js/animation.js"
     ],
 

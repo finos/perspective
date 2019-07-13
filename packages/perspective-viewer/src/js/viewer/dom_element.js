@@ -7,9 +7,8 @@
  *
  */
 
-import detectIE from "detectie";
-import perspective from "@finos/perspective";
-import {undrag} from "./dragdrop.js";
+import {get_type_config} from "@finos/perspective/dist/esm/config";
+import {dragend} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 
 import {PerspectiveElement} from "./perspective_element.js";
@@ -57,10 +56,10 @@ export class DomElement extends PerspectiveElement {
                 if (aggregate) {
                     aggregate = aggregate.op;
                 } else {
-                    aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                    aggregate = get_type_config(type).aggregate;
                 }
             } else {
-                aggregate = perspective.AGGREGATE_DEFAULTS[type];
+                aggregate = get_type_config(type).aggregate;
             }
         }
 
@@ -70,8 +69,8 @@ export class DomElement extends PerspectiveElement {
                 const v = this._table.view({row_pivots: [name], aggregates: {}});
                 v.to_json().then(json => {
                     row.choices(json.slice(1, json.length).map(x => x.__ROW_PATH__));
-                    v.delete();
                 });
+                v.delete();
             }
         }
 
@@ -92,7 +91,7 @@ export class DomElement extends PerspectiveElement {
         row.addEventListener("visibility-clicked", this._column_visibility_clicked.bind(this));
         row.addEventListener("aggregate-selected", this._column_aggregate_clicked.bind(this));
         row.addEventListener("filter-selected", this._column_filter_clicked.bind(this));
-        row.addEventListener("close-clicked", event => undrag.call(this, event.detail));
+        row.addEventListener("close-clicked", event => dragend.call(this, event.detail));
         row.addEventListener("sort-order", this._sort_order_clicked.bind(this));
 
         row.addEventListener("row-drag", () => {
@@ -184,10 +183,6 @@ export class DomElement extends PerspectiveElement {
             }
         }
         this.shadowRoot.querySelector("#psp_styles").innerHTML = style;
-
-        if (detectIE()) {
-            window.ShadyCSS.styleDocument();
-        }
     }
 
     _show_column_selectors() {
@@ -275,6 +270,7 @@ export class DomElement extends PerspectiveElement {
         this._plugin_information_action = this.shadowRoot.querySelector(".plugin_information__action");
         this._plugin_information_dismiss = this.shadowRoot.querySelector(".plugin_information__action--dismiss");
         this._plugin_information_message = this.shadowRoot.querySelector("#plugin_information_count");
+        this._resize_bar = this.shadowRoot.querySelector("#resize_bar");
     }
 
     // sets state, manipulates DOM

@@ -561,7 +561,7 @@ namespace binding {
 
     template <typename T, typename F = T, typename O = T>
     val
-    col_to_typed_array(std::vector<t_tscalar> data) {
+    col_to_typed_array(std::vector<t_tscalar> const& data) {
         int data_size = data.size();
         std::vector<T> vals;
         vals.reserve(data.size());
@@ -593,7 +593,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<bool>(std::vector<t_tscalar> data) {
+    col_to_typed_array<bool>(std::vector<t_tscalar> const& data) {
         int data_size = data.size();
 
         std::vector<std::int8_t> vals;
@@ -631,7 +631,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<std::string>(std::vector<t_tscalar> data) {
+    col_to_typed_array<std::string>(std::vector<t_tscalar> const& data) {
         int data_size = data.size();
 
         t_vocab vocab;
@@ -690,6 +690,7 @@ namespace binding {
             case DTYPE_INT16: {
                 return col_to_typed_array<std::int16_t>(data);
             } break;
+            case DTYPE_DATE:
             case DTYPE_TIME: {
                 return col_to_typed_array<double, t_date, std::int32_t>(data);
             } break;

@@ -15,9 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
     <script src="perspective.js"></script>
-    <script src="perspective.view.js"></script>
-    <script src="hypergrid.plugin.js"></script>
-    <script src="d3fc.plugin.js"></script>
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-hypergrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
 
     <script src="perspective.js"></script>
 
@@ -73,7 +73,7 @@
             sort='[["num_bikes_available","desc"]]'>
         </perspective-viewer>
         <perspective-viewer 
-            view='d3_xy_scatter' 
+            plugin='d3_xy_scatter' 
             row-pivots='["name"]' 
             columns='["lon","lat","num_bikes_available"]' 
             sort='[["num_bikes_available","asc"]]'>

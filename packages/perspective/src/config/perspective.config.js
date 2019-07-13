@@ -3,13 +3,13 @@ const common = require("./common.config.js");
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = Object.assign({}, common({build_worker: true}), {
-    entry: "./cjs/js/perspective.parallel.js",
+    entry: "./dist/esm/perspective.parallel.js",
     output: {
         filename: "perspective.js",
         library: "perspective",
         libraryTarget: "umd",
         libraryExport: "default",
-        path: path.resolve(__dirname, "../../build")
+        path: path.resolve(__dirname, "../../dist/umd")
     },
     optimization: {
         minimizer: [

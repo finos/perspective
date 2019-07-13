@@ -3,7 +3,7 @@ const common = require("./common.config.js");
 const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = Object.assign({}, common(), {
-    entry: "./cjs/js/perspective.node.js",
+    entry: "./dist/esm/perspective.node.js",
     target: "node",
     externals: [/^[a-z0-9].*?$/g],
     node: {
@@ -12,7 +12,7 @@ module.exports = Object.assign({}, common(), {
     },
     output: {
         filename: "perspective.node.js",
-        path: path.resolve(__dirname, "../../build"),
+        path: path.resolve(__dirname, "../../dist/umd"),
         libraryTarget: "umd"
     },
     optimization: {

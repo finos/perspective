@@ -7,8 +7,6 @@
  *
  */
 
-import detectIE from "detectie";
-
 function calc_index(event) {
     if (this._active_columns.children.length == 0) {
         return 0;
@@ -23,7 +21,13 @@ function calc_index(event) {
     }
 }
 
-export function undrag(event) {
+function _clear_classes() {
+    for (const active_column of this._active_columns.children) {
+        active_column.className = "";
+    }
+}
+
+export function dragend(event) {
     let div = event.target.getRootNode().host;
     let parent = div;
     if (parent.tagName === "PERSPECTIVE-VIEWER") {
@@ -33,13 +37,9 @@ export function undrag(event) {
     }
     let idx = Array.prototype.slice.call(parent.children).indexOf(div.tagName === "PERSPECTIVE-ROW" ? div : event.target);
     let attr_name = parent.getAttribute("for");
-    let pivots = JSON.parse(this.getAttribute(attr_name));
-    pivots.splice(idx, 1);
-    this.setAttribute(attr_name, JSON.stringify(pivots));
-
-    if (detectIE()) {
-        window.ShadyCSS.styleDocument();
-    }
+    let attr_value = JSON.parse(this.getAttribute(attr_name));
+    attr_value.splice(idx, 1);
+    this.setAttribute(attr_name, JSON.stringify(attr_value));
 }
 
 export function drop(ev) {
@@ -84,11 +84,9 @@ export function drop(ev) {
 }
 
 // Handle column actions
-export function column_undrag(event) {
+export function column_dragend(event) {
     let data = event.target.parentElement.parentElement;
-    Array.prototype.slice.call(this._active_columns.children).map(x => {
-        x.className = "";
-    });
+    _clear_classes.bind(this)();
     if (this._get_visible_column_count() > 1 && event.dataTransfer.dropEffect !== "move") {
         this._active_columns.removeChild(data);
         this._update_column_view();
@@ -142,29 +140,27 @@ export function column_drop(ev) {
     if (this._drop_target_hover.parentElement === this._active_columns) {
         this._drop_target_hover.removeAttribute("drop-target");
     }
-    Array.prototype.slice.call(this._active_columns.children).map(x => {
-        x.className = "";
-    });
+    _clear_classes.bind(this)();
     let data = ev.dataTransfer.getData("text");
     if (!data) return;
 
     this._update_column_view();
 }
 
-export function drag_enter(ev) {
+export function dragenter(ev) {
     ev.stopPropagation();
     ev.preventDefault();
     ev.currentTarget.classList.add("dropping");
 }
 
-export function allow_drop(ev) {
+export function dragover(ev) {
     ev.stopPropagation();
     ev.preventDefault();
     ev.currentTarget.classList.add("dropping");
     ev.dataTransfer.dropEffect = "move";
 }
 
-export function disallow_drop(ev) {
+export function dragleave(ev) {
     if (ev.currentTarget == ev.target) {
         ev.stopPropagation();
         ev.preventDefault();
