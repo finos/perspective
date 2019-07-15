@@ -9,8 +9,6 @@
 
 const DEFAULT_CONFIG = require("./settings.js").default;
 
-// eslint-disable-next-line no-undef
-const REQUIRE = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__ : module.require;
 const NAMES = ["perspective.config.js", "perspective.config.json", "package.json"];
 
 module.exports.get_type_config = function(type) {
@@ -40,6 +38,8 @@ function mergeDeep(target, ...sources) {
 }
 
 function get_config_file() {
+    // eslint-disable-next-line no-undef
+    const REQUIRE = typeof __non_webpack_require__ !== "undefined" ? __non_webpack_require__ : module.require;
     const path = REQUIRE("path");
     const fs = REQUIRE("fs");
     const [root, ...curr] = process.cwd().split(path.sep);
