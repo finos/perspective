@@ -179,9 +179,8 @@ export class PerspectiveElement extends StateElement {
             if (count >= this._plugin.max_size) {
                 this._plugin_information.classList.remove("hidden");
                 const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
-                const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
+                const warning = `Rendering ${this._plugin.max_size} of estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
-                this._plugin_information_action_limit.innerText = `Show only the first ${this._plugin.max_size} points`;
                 this.removeAttribute("updating");
                 return true;
             } else {
@@ -247,7 +246,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view({force_update = false, ignore_size_check = false, limit_points = false} = {}) {
+    async _new_view({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -296,10 +295,7 @@ export class PerspectiveElement extends StateElement {
         this._view = this._table.view(config);
 
         if (!ignore_size_check) {
-            if (await this._warn_render_size_exceeded()) {
-                this._datavis.innerHTML = "";
-                return;
-            }
+            this._warn_render_size_exceeded();
         }
 
         this._view_updater = () => this._view_on_update();
@@ -382,7 +378,7 @@ export class PerspectiveElement extends StateElement {
             this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
         }, 0);
 
-        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = false} = {}) => {
+        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = true} = {}) => {
             if (this._table) {
                 let resolve = this._set_updating();
                 await new Promise(resolve => _update(resolve, ignore_size_check, force_update, limit_points));
