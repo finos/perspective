@@ -33,13 +33,13 @@ simple to build real-time & user configurable analytics entirely in the browser.
 ## Examples
 |||
 |:--|:--|
-|[Superstore](https://bl.ocks.org/JHawk/b29192cd425bfc9443dd12626cc2f606)| A static `superstore.arrow` demo.|
-|[Linked Superstore](https://bl.ocks.org/JHawk/9b20383f042853f27c6e720baf4a19db)| An example of `<perspective-viewer>`s linked through click events.|
-|[Olympics](https://bl.ocks.org/JHawk/2a29387438af750614cc983f23040732)| An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.|
-|[Streaming](https://bl.ocks.org/JHawk/952262145299ffd7fa58d22a51de905d)| A streaming random data demo.|
+|[Superstore](https://bl.ocks.org/texodus/372d406997d5522ebaafb17f0f521d97)| A static `superstore.arrow` demo.|
+|[Linked Superstore](https://bl.ocks.org/texodus/08fb5f1afccbd33e333453dc70db88ea)| An example of `<perspective-viewer>`s linked through click events.|
+|[Olympics](https://bl.ocks.org/texodus/6d4fa16fff331d71ac58ad256f0c5f94)| An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.|
+|[Streaming](https://bl.ocks.org/texodus/9bec2f8041471bafc2c56db2272a9381)| A streaming random data demo.|
 |[Streaming Stock Trades](https://bl.ocks.org/timkpaine/064a50a309f25b80c9cfb0b2b84fbdf3)|A streaming financial data demo.|
-|[CSV](https://bl.ocks.org/JHawk/ef28337d5c96c0360f07ca502b872c10)|Upload a CSV of your own.|
-|[NYC Citibike](https://bl.ocks.org/JHawk/ade09a2ea62bb708cc0beab8c35609b0)|An example of a join on two real-time datasets, from the NYC Citibike feed.|
+|[CSV](https://bl.ocks.org/texodus/02d8fd10aef21b19d6165cf92e43e668)|Upload a CSV of your own.|
+|[NYC Citibike](https://bl.ocks.org/texodus/bc8d7e6f72e09c9dbd7424b4332cacad)|An example of a join on two real-time datasets, from the NYC Citibike feed.|
 |[Real-time cryptocurrency charting](https://bl.ocks.org/ColinEberhardt/6e287f871410ecd970b038343b166514)|An example that uses the coinbased web socket feed to plot orders in real-time|
 |[Financial Data from IEX](https://bl.ocks.org/timkpaine/97e0e7389875f3d21095e434e361a18f)|An example that uses the [IEX cloud](https://iexcloud.io) api to build a financial dashboard.|
 
