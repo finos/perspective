@@ -257,6 +257,7 @@ export class ActionElement extends DomElement {
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
+            this._plugin_information.classList.add("hidden");
             this.setAttribute("plugin", this._vis_selector.value);
             this._debounce_update();
         });

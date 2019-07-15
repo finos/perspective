@@ -355,8 +355,15 @@
             cursor: pointer;
         }
 
-        .plugin_information__action--limit, .plugin_information__action--dismiss {
+        .plugin_information__actions {
             margin-left: auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .plugin_information__action--limit, .plugin_information__action--dismiss {
+            margin-left: 15px;
         }
     }
 

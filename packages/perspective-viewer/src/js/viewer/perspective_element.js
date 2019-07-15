@@ -297,6 +297,7 @@ export class PerspectiveElement extends StateElement {
 
         if (!ignore_size_check) {
             if (await this._warn_render_size_exceeded()) {
+                this._datavis.innerHTML = "";
                 return;
             }
         }
