@@ -1,6 +1,6 @@
 # Changelog
 
-[0.3.2] - 2019-07-12
+[0.3.5] - 2019-07-14
 ### Added
 * [#644](https://github.com/jpmorganchase/perspective/pull/644) Global project config via `perspective.config.js`
 * [#639](https://github.com/jpmorganchase/perspective/pull/629) New perspective-viewer API.
