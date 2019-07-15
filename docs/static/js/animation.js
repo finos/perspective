@@ -63,7 +63,7 @@ function select(id) {
     viewer.restore(
         {
             "#grid": {
-                view: "hypergrid",
+                plugin: "hypergrid",
                 columns: ["ask", "bid", "chg"],
                 sort: [["name", "desc"], ["lastUpdate", "desc"]],
                 aggregates: {name: "last", lastUpdate: "last"},
@@ -72,20 +72,20 @@ function select(id) {
             },
             "#cyclone": {
                 columns: ["chg"],
-                view: "d3_x_bar",
+                plugin: "d3_x_bar",
                 sort: [["chg", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#pivot": {
                 columns: ["vol"],
-                view: "d3_heatmap",
+                plugin: "d3_heatmap",
                 sort: [["vol", "asc"]],
                 "row-pivots": ["name"],
                 "column-pivots": ["client"]
             },
             "#crosssect": {
-                view: "d3_xy_scatter",
+                plugin: "d3_xy_scatter",
                 "row-pivots": ["name"],
                 "column-pivots": [],
                 columns: ["bid", "ask", "vol", "id"],
@@ -93,7 +93,7 @@ function select(id) {
                 sort: []
             },
             "#intersect": {
-                view: "d3_treemap",
+                plugin: "d3_treemap",
                 "row-pivots": ["name", "client"],
                 "column-pivots": [],
                 columns: ["bid", "chg"],
@@ -101,7 +101,7 @@ function select(id) {
                 sort: [["name", "desc"], ["chg", "desc"]]
             },
             "#enhance": {
-                view: "d3_y_line",
+                plugin: "d3_y_line",
                 "row-pivots": [],
                 "column-pivots": [],
                 sort: [["lastUpdate", "desc"]],
@@ -154,13 +154,13 @@ window.addEventListener("WebComponentsReady", function() {
             "row-pivots": ["Sub-Category"],
             "column-pivots": ["Segment"],
             columns: ["Sales"],
-            view: "d3_y_bar"
+            plugin: "d3_y_bar"
         });
 
         const psp2 = document.querySelector("#get_started perspective-viewer");
         psp2.load(arrow);
         psp2.restore({
-            view: "d3_heatmap",
+            plugin: "d3_heatmap",
             "row-pivots": ["Sub-Category"],
             "column-pivots": ["State"],
             sort: [["Sales", "col asc"]],
