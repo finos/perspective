@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-webpack-plugin",
-    "version": "0.3.5",
+    "version": "0.3.6",
     "description": "Perspective.js Webpack Plugin",
     "main": "index.js",
     "publishConfig": {
@@ -31,7 +31,7 @@
         "bufferutil": "~3.0.0"
     },
     "peerDependencies": {
-        "@finos/perspective": "0.3.4",
+        "@finos/perspective": "0.3.6",
         "webpack": ">=3.5 <5"
     }
 }

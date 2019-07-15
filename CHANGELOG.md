@@ -1,5 +1,9 @@
 # Changelog
 
+[0.3.6] - 2019-07-15
+### Fixes
+* [#660](https://github.com/jpmorganchase/perspective/pull/660) Fixed webpack path resolution bug.
+  
 [0.3.5] - 2019-07-14
 ### Added
 * [#644](https://github.com/jpmorganchase/perspective/pull/644) Global project config via `perspective.config.js`
