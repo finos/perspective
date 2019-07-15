@@ -213,7 +213,6 @@ utils.with_server({}, () => {
                         {},
                         viewer
                     );
-                    await page.evaluate(element => element.shadowRoot.querySelector(".plugin_information__action.plugin_information__action--dismiss").click(), viewer);
                     await page.evaluate(element => {
                         element.setAttribute("columns", '["col_b"]');
                     }, viewer);
