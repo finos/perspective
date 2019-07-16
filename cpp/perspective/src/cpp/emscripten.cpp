@@ -1562,17 +1562,26 @@ namespace binding {
             PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
         }
 
+        bool is_new_gnode = gnode.isUndefined();
+        std::shared_ptr<t_gnode> new_gnode;
+        if (!is_new_gnode) {
+            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
+            if (is_arrow && is_update && new_gnode->get_table()->size() == 0) {
+                auto schema = new_gnode->get_table()->get_schema();
+                for (auto idx = 0; idx < schema.m_types.size(); ++idx) {
+                    if (dtypes[idx] == DTYPE_INT64) {
+                        std::cout << "Promoting int64 `" << colnames[idx] << "`" << std::endl;
+                        new_gnode->promote_column(colnames[idx], DTYPE_INT64);
+                    }
+                }
+            }
+        }
+
         // Create the table
         // TODO assert size > 0
         t_table tbl(t_schema(colnames, dtypes));
         tbl.init();
         tbl.extend(size);
-
-        bool is_new_gnode = gnode.isUndefined();
-        std::shared_ptr<t_gnode> new_gnode;
-        if (!is_new_gnode) {
-            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
-        }
 
         _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow,
             (is_update || new_gnode->mapping_size() > 0));
