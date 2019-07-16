@@ -1165,9 +1165,6 @@ export default function(Module) {
         pdata = accessor;
 
         if (data instanceof ArrayBuffer) {
-            if (this.size() === 0) {
-                throw new Error("Overriding Arrow Schema is not supported.");
-            }
             pdata = load_arrow_buffer(data, cols, types);
             if (meter) {
                 meter(pdata.map(x => x.row_count).reduce((x, y) => x + y));
@@ -1192,7 +1189,7 @@ export default function(Module) {
             }
         }
 
-        if (accessor.row_count === 0) {
+        if (pdata.row_count === 0) {
             console.warn("table.update called with no data - ignoring");
             return;
         }

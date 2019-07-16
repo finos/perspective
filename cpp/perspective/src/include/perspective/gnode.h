@@ -135,6 +135,8 @@ public:
     // helper function for tests
     std::shared_ptr<t_table> tstep(std::shared_ptr<const t_table> input_table);
 
+    void promote_column(const std::string& name, t_dtype new_type);
+
     // Gnode will steal a reference to the context
     void register_context(const std::string& name, std::shared_ptr<t_ctx0> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx1> ctx);
