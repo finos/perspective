@@ -62,52 +62,20 @@ namespace binding {
      * Data Loading
      */
 
-    t_index _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name);
-
-    std::vector<std::string> _get_aggregate_names(const std::vector<t_aggspec>& aggs);
-
     /**
-     * @brief Calculate aggregates specified in `j_aggs` and use default aggregates for
-     * columns marked in `columns`.
+     * @brief For date/datetime values, is the filter term a valid date?
      *
-     * @tparam
-     * @param schema
-     * @param row_pivots
-     * @param column_pivots
-     * @param sortbys
-     * @param columns
-     * @param j_aggs
-     */
-    template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(const t_schema& schema,
-        const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots, bool column_only,
-        const std::vector<std::string>& columns, const std::vector<T>& sortbys, T j_aggs);
-
-    /**
-     * @brief Retrieve and validate how we sort the dataset in the view.
+     * Otherwise, make sure the filter term is not null/undefined
      *
      * @tparam T
-     * @param columns
-     * @param is_column_sort
-     * @param sortbys
-     * @return std::vector<t_sortspec>
+     * @param type
+     * @param date_parser
+     * @param filter
+     * @return true
+     * @return false
      */
     template <typename T>
-    std::vector<t_sortspec> _get_sort(const std::vector<std::string>& columns,
-        const std::vector<T>& sortbys, bool is_column_sort);
-
-    /**
-     * @brief From the binding language, retrieve what we need to filter the dataset by.
-     *
-     * @tparam T
-     * @param schema
-     * @param j_date_parser
-     * @param j_filters
-     * @return std::vector<t_fterm>
-     */
-    template <typename T>
-    std::vector<t_fterm> _get_fterms(const t_schema& schema, T j_date_parser, T j_filters);
+    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
 
     /**
      * @brief Converts a `t_scalar` to a value in the binding language.
@@ -284,37 +252,6 @@ namespace binding {
     template <typename T>
     std::tuple<std::string, std::string, std::vector<t_tscalar>> make_filter_term(
         t_dtype type, T date_parser, std::vector<T> filter);
-
-    /**
-     * @brief For date/datetime values, is the filter term a valid date?
-     *
-     * Otherwise, make sure the filter term is not null/undefined
-     *
-     * @tparam T
-     * @param type
-     * @param date_parser
-     * @param filter
-     * @return true
-     * @return false
-     */
-    template <typename T>
-    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
-
-    /**
-     * @brief Extracts and validates the config from the binding language,
-     * creating a t_config for the new View.
-     *
-     * @tparam T
-     * @param schema
-     * @param separator
-     * @param date_parser
-     * @param config
-     * @return t_config
-     */
-    template <typename T>
-    t_config make_config(
-        const t_schema& schema, std::string separator, T date_parser, T config);
-
     /**
      * @brief Create a `t_view_config` object from the binding language's `view_config` object.
      *
@@ -342,7 +279,7 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T j_view_config, T date_parser);
+        std::string separator, T view_config, T date_parser);
 
     /**
      * @brief Create a new one-sided view.
@@ -359,7 +296,7 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T config, T j_view_config, T date_parser);
+        std::string separator, T view_config, T date_parser);
 
     /**
      * @brief Create a new two-sided view.
@@ -377,7 +314,7 @@ namespace binding {
      */
     template <typename T>
     std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T config, T j_view_config, T date_parser);
+        std::string separator, T view_config, T date_parser);
 
     /**
      * @brief Create a new zero-sided context.
@@ -387,31 +324,24 @@ namespace binding {
      *
      * @return std::shared_ptr<t_ctx0>
      */
-    std::shared_ptr<t_ctx0> make_context_zero(std::shared_ptr<Table> table, t_schema schema,
-        t_filter_op combiner, std::vector<std::string> columns, std::vector<t_fterm> filters,
-        std::vector<t_sortspec> sorts, std::string name);
+    std::shared_ptr<t_ctx0> make_context_zero(std::shared_ptr<Table> table,
+        const t_schema& schema, const t_view_config& view_config, std::string name);
 
     /**
      * @brief Create a new one-sided context.
      *
      * @return std::shared_ptr<t_ctx1>
      */
-    std::shared_ptr<t_ctx1> make_context_one(std::shared_ptr<Table> table, t_schema schema,
-        std::vector<t_pivot> pivots, t_filter_op combiner, std::vector<t_fterm> filters,
-        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
-        std::int32_t pivot_depth, std::string name);
+    std::shared_ptr<t_ctx1> make_context_one(std::shared_ptr<Table> table,
+        const t_schema& schema, const t_view_config& view_config, std::string name);
 
     /**
      * @brief Create a new two-sided context.
      *
      * @return std::shared_ptr<t_ctx2>
      */
-    std::shared_ptr<t_ctx2> make_context_two(std::shared_ptr<Table> table, t_schema schema,
-        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
-        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
-        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
-        std::string name);
+    std::shared_ptr<t_ctx2> make_context_two(std::shared_ptr<Table> table,
+        const t_schema& schema, const t_view_config& view_config, std::string name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

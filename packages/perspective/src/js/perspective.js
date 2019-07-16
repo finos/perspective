@@ -262,9 +262,9 @@ export default function(Module) {
         if (sides === 0) {
             this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.view_config, this.date_parser);
+            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         }
 
         this.table = table;
@@ -846,15 +846,16 @@ export default function(Module) {
     };
 
     /**
-     * A view config object is a set of options that transforms the underlying {@link module:perspective~table}.
-     * The user passes in an `Object` containing configuration options, and the `view_config` transforms it into a
+     * A view config is a set of options that configures the underlying {@link module:perspective~view}, specifying
+     * its pivots, columns to show, aggregates, filters, and sorts.
+     *
+     * The view config receives an `Object` containing configuration options, and the `view_config` transforms it into a
      * canonical format for interfacing with the core engine.
      *
      * <strong>Note</strong> This constructor is not public - view config objects should be created using standard
-     * Javascript `Object`s in the {@link module:perspective~table#view} method. Configuration fields are documented in
-     * the {@link module:perspective~table#View} method.
+     * Javascript `Object`s in the {@link module:perspective~table#view} method, which has an `options` parameter.
      *
-     * @param {Object} config the configuration object passed by the user to the {@link module:perspective~table#view} method.
+     * @param {Object} config the configuration `Object` passed by the user to the {@link module:perspective~table#view} method.
      *
      * @class
      * @hideconstructor
@@ -867,10 +868,15 @@ export default function(Module) {
         this.filter = config.filter || [];
         this.sort = config.sort || [];
         this.filter_op = config.filter_op || "and";
+        this.row_pivot_depth = config.row_pivot_depth;
+        this.column_pivot_depth = config.column_pivot_depth;
     }
 
     /**
-     * Transform configuration items into `std::vector` and `std::map` objects for interface with C++.
+     * Transform configuration items into `std::vector` objects for interface with C++.
+     *
+     * `this.aggregates` is not transformed into a C++ map, as the use of `ordered_map` in the engine
+     * makes binding more difficult.
      */
     view_config.prototype.get_row_pivots = function() {
         let vector = __MODULE__.make_string_vector();

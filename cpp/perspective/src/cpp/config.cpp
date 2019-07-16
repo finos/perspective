@@ -42,33 +42,39 @@ t_config::t_config(const std::vector<std::string>& detail_columns, t_filter_op c
     , m_fmode(FMODE_SIMPLE_CLAUSES) {}
 
 // t_ctx1
-t_config::t_config(const std::vector<t_pivot>& row_pivots,
+t_config::t_config(const std::vector<std::string>& row_pivots,
     const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
     const std::vector<t_fterm>& fterms)
-    : m_row_pivots(row_pivots)
-    , m_aggregates(aggregates)
+    : m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)
     , m_fterms(fterms)
     , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    for (const auto& p : row_pivots) {
+        m_row_pivots.push_back(t_pivot(p));
+    }
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 
 // t_ctx2
-t_config::t_config(const std::vector<t_pivot>& row_pivots,
-    const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
+t_config::t_config(const std::vector<std::string>& row_pivots,
+    const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
     const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
     bool column_only)
-    : m_row_pivots(row_pivots)
-    , m_col_pivots(col_pivots)
-    , m_column_only(column_only)
+    : m_column_only(column_only)
     , m_aggregates(aggregates)
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
     , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
+    for (const auto& p : row_pivots) {
+        m_row_pivots.push_back(t_pivot(p));
+    }
+    for (const auto& p : col_pivots) {
+        m_col_pivots.push_back(t_pivot(p));
+    }
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
 

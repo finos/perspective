@@ -66,8 +66,9 @@ public:
      * @param combiner
      * @param fterms
      */
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
 
     /**
      * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
@@ -81,9 +82,10 @@ public:
      * @param fterms
      * @param column_only
      */
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
-        const std::vector<t_aggspec>& aggregates, const t_totals totals, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, bool column_only);
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
+        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+        bool column_only);
 
     // Constructors used for C++ tests, not exposed to other parts of the engine
     t_config(const std::vector<std::string>& row_pivots,

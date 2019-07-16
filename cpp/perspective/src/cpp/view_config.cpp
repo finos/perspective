@@ -12,8 +12,8 @@
 namespace perspective {
 
 t_view_config::t_view_config(std::vector<std::string> row_pivots,
-    std::vector<std::string> column_pivots, std::map<std::string, std::string> aggregates,
-    std::vector<std::string> columns,
+    std::vector<std::string> column_pivots,
+    tsl::ordered_map<std::string, std::string> aggregates, std::vector<std::string> columns,
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
     std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only)
     : m_row_pivots(row_pivots)
@@ -22,23 +22,32 @@ t_view_config::t_view_config(std::vector<std::string> row_pivots,
     , m_columns(columns)
     , m_filter(filter)
     , m_sort(sort)
+    , m_row_pivot_depth(-1)
+    , m_column_pivot_depth(-1)
     , m_filter_op(filter_op)
     , m_column_only(column_only) {}
 
 void
 t_view_config::init(const t_schema& schema) {
-    m_aggspecs = make_aggspecs(schema);
-    m_fterm = make_fterm();
-
-    const auto sortspecs = make_sortspec();
-    m_sortspec = std::get<0>(sortspecs);
-    m_col_sortspec = std::get<1>(sortspecs);
+    fill_aggspecs(schema);
+    fill_fterm();
+    fill_sortspec();
 }
 
 void
 t_view_config::add_filter_term(
     std::tuple<std::string, std::string, std::vector<t_tscalar>> term) {
     m_filter.push_back(term);
+}
+
+void
+t_view_config::set_row_pivot_depth(std::int32_t depth) {
+    m_row_pivot_depth = depth;
+}
+
+void
+t_view_config::set_column_pivot_depth(std::int32_t depth) {
+    m_column_pivot_depth = depth;
 }
 
 std::vector<std::string>
@@ -51,7 +60,6 @@ t_view_config::get_column_pivots() const {
     return m_column_pivots;
 }
 
-// TODO: remove these eventually as after they point to non-abstracted structures
 std::vector<t_aggspec>
 t_view_config::get_aggspecs() const {
     return m_aggspecs;
@@ -87,11 +95,19 @@ t_view_config::is_column_only() const {
     return m_column_only;
 }
 
-// PRIVATE
-std::vector<t_aggspec>
-t_view_config::make_aggspecs(const t_schema& schema) {
-    std::vector<t_aggspec> aggspecs;
+std::int32_t
+t_view_config::get_row_pivot_depth() const {
+    return m_row_pivot_depth;
+}
 
+std::int32_t
+t_view_config::get_column_pivot_depth() const {
+    return m_column_pivot_depth;
+}
+
+// PRIVATE
+void
+t_view_config::fill_aggspecs(const t_schema& schema) {
     /**
      * Provide aggregates for columns that are shown but NOT specified in `m_aggregates`.
      */
@@ -109,12 +125,12 @@ t_view_config::make_aggspecs(const t_schema& schema) {
             agg_type = _get_default_aggregate(dtype);
         }
 
-        aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+        // create aggregate specification, and memoize the column name
+        m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
         m_aggregate_names.push_back(column);
     }
 
     // Construct aggregates from config object
-    // FIXME: this will NOT be in the right order unless we use `tsl::ordered_map`
     for (auto const& iter : m_aggregates) {
         auto column = iter.first;
         auto aggregate = iter.second;
@@ -133,13 +149,13 @@ t_view_config::make_aggspecs(const t_schema& schema) {
 
         if (agg_type == AGGTYPE_FIRST || agg_type == AGGTYPE_LAST) {
             dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
-            aggspecs.push_back(
+            m_aggspecs.push_back(
                 t_aggspec(column, column, agg_type, dependencies, SORTTYPE_ASCENDING));
         } else {
-            aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+            m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
         }
 
-        m_aggregate_names.push_back(column); // FIXME: side effects should be avoided
+        m_aggregate_names.push_back(column);
     }
 
     // construct aggspecs for hidden sorts
@@ -166,42 +182,33 @@ t_view_config::make_aggspecs(const t_schema& schema) {
                 agg_type = _get_default_aggregate(dtype);
             }
 
-            aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
+            m_aggspecs.push_back(t_aggspec(column, agg_type, dependencies));
             m_aggregate_names.push_back(column);
         }
     }
-
-    return aggspecs;
 }
 
-std::vector<t_fterm>
-t_view_config::make_fterm() {
-    std::vector<t_fterm> rval;
-
+void
+t_view_config::fill_fterm() {
     for (auto filter : m_filter) {
         t_filter_op op = str_to_filter_op(std::get<1>(filter));
         switch (op) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
-                rval.push_back(
+                m_fterm.push_back(
                     t_fterm(std::get<0>(filter), op, mktscalar(0), std::get<2>(filter)));
             } break;
             default: {
                 t_tscalar filter_term = std::get<2>(filter)[0];
-                rval.push_back(
+                m_fterm.push_back(
                     t_fterm(std::get<0>(filter), op, filter_term, std::vector<t_tscalar>()));
             }
         }
     }
-
-    return rval;
 }
 
-std::tuple<std::vector<t_sortspec>, std::vector<t_sortspec>>
-t_view_config::make_sortspec() {
-    std::vector<t_sortspec> sort;
-    std::vector<t_sortspec> column_sort;
-
+void
+t_view_config::fill_sortspec() {
     for (auto s : m_sort) {
         t_index agg_index = get_aggregate_index(s[0]);
         t_sorttype sort_type = str_to_sorttype(s[1]);
@@ -210,13 +217,11 @@ t_view_config::make_sortspec() {
 
         bool is_column_sort = s[1].find("col") != std::string::npos;
         if (is_column_sort) {
-            column_sort.push_back(spec);
+            m_col_sortspec.push_back(spec);
         } else {
-            sort.push_back(spec);
+            m_sortspec.push_back(spec);
         }
     }
-
-    return std::make_tuple(sort, column_sort);
 }
 
 t_index
