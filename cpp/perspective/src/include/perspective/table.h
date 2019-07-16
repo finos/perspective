@@ -155,6 +155,7 @@ private:
      */
     void process_index_column(t_data_table& data_table);
 
+    bool m_init;
     std::shared_ptr<t_pool> m_pool;
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;

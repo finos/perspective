@@ -744,6 +744,23 @@ t_gnode::get_table_sptr() {
     return m_state->get_table();
 }
 
+/**
+ * Convenience method for promoting a column.  This is a hack used to
+ * interop with javascript more efficiently, and does not handle all
+ * possible type conversions.  Non-public.
+ */
+void
+t_gnode::promote_column(const std::string& name, t_dtype new_type) {
+    PSP_TRACE_SENTINEL();
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    get_table()->promote_column(name, new_type, 0, false);
+    _get_otable(0)->promote_column(name, new_type, 0, false);
+    _get_itable(0)->promote_column(name, new_type, 0, false);
+    m_tblschema.retype_column(name, new_type);
+    m_ischemas[0].retype_column(name, new_type);
+    m_oschemas[0].retype_column(name, new_type);
+}
+
 void
 t_gnode::promote_column(const std::string& name, t_dtype new_type) {
     PSP_TRACE_SENTINEL();

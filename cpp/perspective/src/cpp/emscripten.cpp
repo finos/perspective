@@ -1460,9 +1460,25 @@ namespace binding {
 
         if (table_initialized) {
             tbl = table.as<std::shared_ptr<Table>>();
+            auto current_gnode = tbl->get_gnode();
             tbl->update(column_names, data_types, offset, limit, index, op, is_arrow);
+
             // use gnode metadata to help decide if we need to update
-            is_update = (is_update || tbl->get_gnode()->mapping_size() > 0);
+            is_update = (is_update || current_gnode->mapping_size() > 0);
+
+            // if performing an arrow schema update, promote columns
+            auto current_data_table = current_gnode->get_table();
+
+            if (is_arrow && is_update && current_data_table->size() == 0) {
+                auto current_schema = current_data_table->get_schema();
+                for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
+                    if (data_types[idx] == DTYPE_INT64) {
+                        std::cout << "Promoting int64 `" << column_names[idx] << "`"
+                                  << std::endl;
+                        current_gnode->promote_column(column_names[idx], DTYPE_INT64);
+                    }
+                }
+            }
         } else {
             pool = make_pool();
             tbl = std::make_shared<Table>(

@@ -556,6 +556,11 @@ t_data_table::promote_column(
     if (fill) {
         for (auto i = 0; i < iter_limit; ++i) {
             switch (new_dtype) {
+                case DTYPE_INT64: {
+                    std::int32_t* val = current_col->get_nth<std::int32_t>(i);
+                    std::int64_t fval = static_cast<std::int64_t>(*val);
+                    promoted_col->set_nth(i, fval);
+                } break;
                 case DTYPE_FLOAT64: {
                     std::int32_t* val = current_col->get_nth<std::int32_t>(i);
                     double fval = static_cast<double>(*val);

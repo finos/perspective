@@ -13,7 +13,8 @@ namespace perspective {
 Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
     std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
     std::string index, t_op op, bool is_arrow)
-    : m_pool(pool)
+    : m_init(false)
+    , m_pool(pool)
     , m_column_names(column_names)
     , m_data_types(data_types)
     , m_offset(offset)
@@ -38,18 +39,21 @@ Table::init(t_data_table& data_table) {
 
     PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
 
-    // retrieve the table from the gnode, thus discarding the passed-in reference
+    // pass the gnode to the pool, thus the Table does not store the underlying data_table
     m_pool->send(m_gnode->get_id(), 0, data_table);
 
     // force the pool to process the updated table
     if ((m_op == t_op::OP_UPDATE) || (m_op == t_op::OP_DELETE)) {
         m_pool->_process();
     }
+
+    m_init = true;
 }
 
 void
 Table::update(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
     std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_column_names = column_names;
     m_data_types = data_types;
     m_offset = offset;
@@ -61,16 +65,19 @@ Table::update(std::vector<std::string> column_names, std::vector<t_dtype> data_t
 
 t_uindex
 Table::size() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_gnode->get_table()->size();
 }
 
 t_schema
 Table::get_schema() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_gnode->get_tblschema();
 }
 
 void
 Table::replace_data_table(t_data_table* data_table) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto new_gnode = make_gnode(data_table->get_schema());
     set_gnode(new_gnode);
     m_pool->register_gnode(m_gnode.get());
@@ -80,6 +87,8 @@ Table::replace_data_table(t_data_table* data_table) {
 
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+
     std::vector<std::string> col_names(in_schema.columns());
     std::vector<t_dtype> data_types(in_schema.types());
 
@@ -106,57 +115,68 @@ Table::make_gnode(const t_schema& in_schema) {
 
 void
 Table::unregister_gnode(t_uindex id) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_pool->unregister_gnode(id);
 }
 
 void
 Table::reset_gnode(t_uindex id) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_pool->get_gnode(id)->reset();
 }
 
 void
 Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_gnode = gnode;
     m_gnode_set = true;
 }
 
 void
 Table::set_column_names(const std::vector<std::string>& column_names) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_column_names = column_names;
 }
 
 void
 Table::set_data_types(const std::vector<t_dtype>& data_types) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_data_types = data_types;
 }
 
 std::shared_ptr<t_pool>
 Table::get_pool() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_pool;
 }
 
 std::shared_ptr<t_gnode>
 Table::get_gnode() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_gnode;
 }
 
 const std::vector<std::string>&
 Table::get_column_names() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_column_names;
 }
 
 const std::vector<t_dtype>&
 Table::get_data_types() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_data_types;
 }
 
 const std::string&
 Table::get_index() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_index;
 }
 
 void
 Table::process_op_column(t_data_table& data_table) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     auto op_col = data_table.add_column("psp_op", DTYPE_UINT8, false);
     switch (m_op) {
         case OP_DELETE: {
@@ -168,6 +188,7 @@ Table::process_op_column(t_data_table& data_table) {
 
 void
 Table::process_index_column(t_data_table& data_table) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     if (m_index == "") {
         // If user doesn't specify an column to use as the pkey index, just use
         // row number
