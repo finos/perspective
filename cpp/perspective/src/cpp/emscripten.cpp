@@ -1300,8 +1300,14 @@ namespace binding {
 
     template <>
     bool
-    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term) {
-        if (type == DTYPE_DATE || type == DTYPE_TIME) {
+    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term, t_val filter_operand) {
+        std::string comp_str = filter_operand.as<std::string>();
+        t_filter_op comp = str_to_filter_op(comp_str);
+
+        if (comp == t_filter_op::FILTER_OP_IS_NULL
+            || comp == t_filter_op::FILTER_OP_IS_NOT_NULL) {
+            return true;
+        } else if (type == DTYPE_DATE || type == DTYPE_TIME) {
             t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
             return has_value(parsed_date);
         } else {
@@ -1325,6 +1331,10 @@ namespace binding {
                 for (auto term : filter_terms) {
                     terms.push_back(mktscalar(get_interned_cstr(term.c_str())));
                 }
+            } break;
+            case FILTER_OP_IS_NULL:
+            case FILTER_OP_IS_NOT_NULL: {
+                terms.push_back(mktscalar(0));
             } break;
             default: {
                 switch (type) {
@@ -1394,7 +1404,7 @@ namespace binding {
             t_dtype type = schema.get_dtype(f[0].as<std::string>());
 
             // validate the filter before it goes into the core engine
-            if (is_valid_filter(type, date_parser, f[2])) {
+            if (is_valid_filter(type, date_parser, f[2], f[1])) {
                 filter.push_back(make_filter_term(type, date_parser, f));
             }
         }

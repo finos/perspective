@@ -443,7 +443,7 @@ t_data_table::filter_cpp(t_filter_op combiner, const std::vector<t_fterm>& fterm
                         tval = ft(cell_val);
                     }
 
-                    if (!cell_val.is_valid() || !tval) {
+                    if ((ft.m_op != FILTER_OP_IS_NULL && !cell_val.is_valid()) || !tval) {
                         pass = false;
                         break;
                     }

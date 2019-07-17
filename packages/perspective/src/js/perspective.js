@@ -1086,6 +1086,11 @@ export default function(Module) {
     };
 
     table.prototype._is_valid_filter = function(filter) {
+        // isNull and isNotNull filter operators are always valid and apply to all schema types
+        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
+            return true;
+        }
+
         if (filter[2] === null) {
             return false;
         }
