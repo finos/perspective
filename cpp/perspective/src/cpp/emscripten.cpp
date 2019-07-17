@@ -180,15 +180,18 @@ namespace binding {
     _get_fterms(const t_schema& schema, t_val j_date_parser, t_val j_filters) {
         std::vector<t_fterm> fvec{};
         std::vector<t_val> filters = vecFromArray<t_val, t_val>(j_filters);
-
-        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<t_val> filter) {
-            if (type == DTYPE_DATE || type == DTYPE_TIME) {
-                t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                return has_value(parsed_date);
-            } else {
-                return has_value(filter[2]);
-            }
-        };
+        auto _is_valid_filter
+            = [j_date_parser](t_dtype type, std::vector<t_val> filter, t_filter_op comp) {
+                  if (comp == t_filter_op::FILTER_OP_IS_NULL
+                      || comp == t_filter_op::FILTER_OP_IS_NOT_NULL) {
+                      return true;
+                  } else if (type == DTYPE_DATE || type == DTYPE_TIME) {
+                      t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
+                      return has_value(parsed_date);
+                  } else {
+                      return has_value(filter[2]);
+                  }
+              };
 
         for (auto fidx = 0; fidx < filters.size(); ++fidx) {
             std::vector<t_val> filter = vecFromArray<t_val, t_val>(filters[fidx]);
@@ -197,7 +200,7 @@ namespace binding {
 
             // check validity and if_date
             t_dtype col_type = schema.get_dtype(col);
-            bool is_valid = _is_valid_filter(col_type, filter);
+            bool is_valid = _is_valid_filter(col_type, filter, comp);
 
             if (!is_valid) {
                 continue;
@@ -213,6 +216,10 @@ namespace binding {
                         terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
                     }
                     fvec.push_back(t_fterm(col, comp, mktscalar(0), terms));
+                } break;
+                case FILTER_OP_IS_NULL:
+                case FILTER_OP_IS_NOT_NULL: {
+                    fvec.push_back(t_fterm(col, comp, mktscalar(0), std::vector<t_tscalar>()));
                 } break;
                 default: {
                     t_tscalar term;

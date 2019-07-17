@@ -295,6 +295,12 @@ filter_op_to_str(t_filter_op op) {
         case FILTER_OP_AND: {
             return "and";
         } break;
+        case FILTER_OP_IS_NULL: {
+            return "is null";
+        } break;
+        case FILTER_OP_IS_NOT_NULL: {
+            return "is not null";
+        } break;
         case FILTER_OP_IS_VALID: {
             return "is not None";
         } break;
@@ -334,6 +340,10 @@ str_to_filter_op(std::string str) {
         return t_filter_op::FILTER_OP_AND;
     } else if (str == "|") {
         return t_filter_op::FILTER_OP_OR;
+    } else if (str == "is null") {
+        return t_filter_op::FILTER_OP_IS_NULL;
+    } else if (str == "is not null") {
+        return t_filter_op::FILTER_OP_IS_NOT_NULL;
     } else if (str == "is not None") {
         return t_filter_op::FILTER_OP_IS_VALID;
     } else if (str == "is None") {
