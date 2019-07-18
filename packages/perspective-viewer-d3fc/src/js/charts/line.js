@@ -95,7 +95,7 @@ function lineChart(container, settings) {
 lineChart.plugin = {
     type: "d3_y_line",
     name: "Y Line Chart",
-    max_size: 25000
+    max_size: 4000
 };
 
 export default lineChart;

@@ -70,7 +70,7 @@ function sunburst(container, settings) {
 sunburst.plugin = {
     type: "d3_sunburst",
     name: "Sunburst",
-    max_size: 25000,
+    max_size: 5000,
     initial: {
         type: "number",
         count: 2,

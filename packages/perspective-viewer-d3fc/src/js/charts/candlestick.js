@@ -13,7 +13,7 @@ const candlestick = ohlcCandle(seriesCanvasCandlestick);
 candlestick.plugin = {
     type: "d3_candlestick",
     name: "Candlestick Chart",
-    max_size: 25000,
+    max_size: 4000,
     initial: {
         type: "number",
         count: 4,

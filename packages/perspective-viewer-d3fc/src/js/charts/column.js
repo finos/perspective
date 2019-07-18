@@ -87,7 +87,7 @@ function columnChart(container, settings) {
 columnChart.plugin = {
     type: "d3_y_bar",
     name: "Y Bar Chart",
-    max_size: 25000
+    max_size: 1000
 };
 
 export default columnChart;

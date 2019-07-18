@@ -13,7 +13,7 @@ const ohlc = ohlcCandle(seriesCanvasOhlc);
 ohlc.plugin = {
     type: "d3_ohlc",
     name: "OHLC Chart",
-    max_size: 25000,
+    max_size: 3500,
     initial: {
         type: "number",
         count: 4,
