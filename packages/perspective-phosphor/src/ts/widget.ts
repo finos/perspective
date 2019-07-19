@@ -26,7 +26,7 @@ export type PerspectiveWidgetOptions = {
     datasrc?: string;
     data?: TableData;
     schema?: Schema;
-    view?: string;
+    plugin?: string;
     columns?: Array<string>;
     rowpivots?: Array<string>;
     columnpivots?: Array<string>;
@@ -55,7 +55,7 @@ export type PerspectiveWidgetOptions = {
  * @param {string} name - Name of phosphor widget
  * @param {string} datasrc - type of datasrc, either '' for json or 'pyarrow' for arrow TODO
  * @param {Schema} schema - Perspective schema to load
- * @param {string} view - PerspectiveViewer view type
+ * @param {string} plugin - PerspectiveViewer plugin type
  * @param {Array<string>} columns - Columns to show
  * @param {Array<string>} rowpivots - Row pivots to use
  * @param {Array<string>} columnpivots - Column pivots to use
@@ -118,7 +118,7 @@ export
 
         let datasrc: string = options.datasrc || '';
         let schema: Schema = options.schema || {};
-        let view: string = options.view || 'hypergrid';
+        let plugin: string = options.plugin || 'hypergrid';
         let columns: Array<string> = options.columns || [];
         let rowpivots: Array<string> = options.rowpivots || [];
         let columnpivots: Array<string> = options.columnpivots || [];
@@ -139,7 +139,7 @@ export
         this.settings = settings;
         this.dark = dark;
         this._schema = schema; // dont trigger setter
-        this.view = view;
+        this.plugin = plugin;
         this.plugin_config = plugin_config;
         this.rowpivots = rowpivots;
         this.columnpivots = columnpivots;
@@ -370,10 +370,10 @@ export
         this._schema = schema;
     }
 
-    get view() { return this._view; }
-    set view(view: string) {
-        this._view = view;
-        this.pspNode.setAttribute('view', this._view);
+    get plugin() { return this._plugin; }
+    set plugin(plugin: string) {
+        this._plugin = plugin;
+        this.pspNode.setAttribute('plugin', this._plugin);
     }
 
     get columns() { return this._columns; }
@@ -494,7 +494,7 @@ export
     private _psp: PerspectiveViewer;
     private _datasrc: string;
     private _schema: { [colname: string]: string };
-    private _view: string;
+    private _plugin: string;
     private _columns: Array<string>;
     private _rowpivots: Array<string>;
     private _columnpivots: Array<string>;
