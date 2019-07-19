@@ -59,6 +59,7 @@ perspective-viewer {
   --column_type--padding: 0px 0px 0px 0px;
   --column_type--width: 25px;
   --column-selector--font-family: "Material Icons";
+  --close_button--before: "close";
   --active-column-selector--height: 45px;
   --column_selector--width: 31px;
   --column_selector--font-size: 16px;
