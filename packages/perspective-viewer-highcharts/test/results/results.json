@@ -100,5 +100,5 @@
     "bar.html/perspective dispatches perspective-click event with one filter.": "32d64db28af46dfe77fad5cc1ca8af9c",
     "bar.html/perspective dispatches perspective-click event with filters.": "c18f49270244dfe4a6b32270ec30d99d",
     "bar.html/dates on the x-axis display correctly.": "591a1c8e9493451b6885b9651917ffff",
-    "__GIT_COMMIT__": "b35932f5217f9847c9684a980b6a50f675c9a8d2"
+    "__GIT_COMMIT__": "e821170c1e341e1b54d83a7d76a54009aa5a35ab"
 }
