@@ -65,17 +65,13 @@ export class DomElement extends PerspectiveElement {
 
         if (filter) {
             row.setAttribute("filter", filter);
+
             if (type === "string") {
-                const v = this._table.view({row_pivots: [name], aggregates: {}});
-                v.to_json().then(json => {
-                    row.choices(
-                        json
-                            .slice(1, json.length)
-                            .map(x => x.__ROW_PATH__)
-                            .filter(x => (Array.isArray(x) ? x.filter(v => !!v).length > 0 : !!x))
-                    );
-                });
-                v.delete();
+                const view = this._table.view({row_pivots: [name], aggregates: {}});
+                view.to_json().then(json => {
+                    row.choices(this._autocomplete_choices(json)) }
+                );
+                view.delete();
             }
         }
 
@@ -298,5 +294,12 @@ export class DomElement extends PerspectiveElement {
             } catch (e) {}
             this.load(data);
         }
+    }
+
+    _autocomplete_choices(json) {
+        return json
+            .slice(1, json.length)
+            .map(x => x.__ROW_PATH__)
+            .filter(x => (Array.isArray(x) ? x.filter(v => !!v).length > 0 : !!x));
     }
 }

@@ -22,7 +22,8 @@
         "build": "npm-run-all --silent build:babel build:webpack:cjs build:webpack:umd",
         "watch": "webpack --color --watch --config src/config/view.config.js",
         "test:build": "cpx \"test/html/*\" dist/umd && cpx \"test/csv/*\" dist/umd && cpx \"test/css/*\" dist/umd",
-        "test:run": "jest --silent --color",
+        "test:run": "jest --silent --color 2>&1",
+        "test:unit": "jest --config=test/js/jest.unit.config.js --color --watch",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\"",
@@ -40,7 +41,14 @@
         "verbose": true,
         "testURL": "http://localhost/",
         "transform": {},
-        "automock": false
+        "automock": false,
+        "transform": {
+            ".js$": "./test/js/transform.js",
+            ".html$": "html-loader-jest"
+        },
+        "setupFiles": [
+            "./test/js/beforeEachSpec.js"
+        ]
     },
     "repository": {
         "type": "git",

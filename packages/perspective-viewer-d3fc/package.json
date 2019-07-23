@@ -30,7 +30,7 @@
         "build:webpack:cjs": "webpack --color --config src/config/cjs.config.js",
         "build:webpack:umd": "webpack --color --config src/config/umd.config.js",
         "build:webpack": "npm-run-all build:webpack:cjs build:webpack:umd",
-        "build": "npm-run-all --silent build:babel build:webpack",
+        "build": "npm-run-all --silent build:babel build:webpack:cjs build:webpack:umd",
         "test:build": "cpx \"test/html/*\" dist/umd",
         "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
         "test:run": "jest --silent --color 2>&1",

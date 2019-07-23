@@ -138,8 +138,8 @@ class ComputedColumn extends HTMLElement {
         this.state.swap_target = false;
 
         for (let i = 0; i < computation.num_params; i++) {
-            this._input_columns.innerHTML += `<div class="psp-cc-computation__input-column" 
-                      data-index="${i}" 
+            this._input_columns.innerHTML += `<div class="psp-cc-computation__input-column"
+                      data-index="${i}"
                       drop-target>
                       <span class="psp-label__requiredType ${input_type}"></span>
                       <span class="psp-label__placeholder">Param ${i + 1}</span>
