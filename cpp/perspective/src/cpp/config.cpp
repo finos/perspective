@@ -21,7 +21,6 @@ t_config::t_config(const t_config_recipe& r)
     : m_detail_columns(r.m_detail_columns)
     , m_totals(r.m_totals)
     , m_combiner(r.m_combiner)
-    , m_handle_nan_sort(r.m_handle_nan_sort)
     , m_parent_pkey_column(r.m_parent_pkey_column)
     , m_child_pkey_column(r.m_child_pkey_column)
     , m_grouping_label_column(r.m_grouping_label_column)
@@ -62,7 +61,7 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     const std::vector<t_pivot>& col_pivots, const std::vector<t_aggspec>& aggregates,
     const std::vector<std::string>& detail_columns, const t_totals totals,
     const std::vector<std::string>& sort_pivot, const std::vector<std::string>& sort_pivot_by,
-    t_filter_op combiner, const std::vector<t_fterm>& fterms, bool handle_nan_sort,
+    t_filter_op combiner, const std::vector<t_fterm>& fterms,
     const std::string& parent_pkey_column, const std::string& child_pkey_column,
     const std::string& grouping_label_column, t_fmode fmode,
     const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str)
@@ -73,7 +72,6 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(handle_nan_sort)
     , m_parent_pkey_column(parent_pkey_column)
     , m_child_pkey_column(child_pkey_column)
     , m_grouping_label_column(grouping_label_column)
@@ -120,7 +118,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     : m_detail_columns(detail_columns)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_parent_pkey_column(parent_pkey_column)
     , m_child_pkey_column(child_pkey_column)
     , m_grouping_label_column(grouping_label_column)
@@ -152,7 +149,6 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
@@ -164,7 +160,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -183,7 +178,6 @@ t_config::t_config(
     : m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -196,7 +190,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
     : m_aggregates(std::vector<t_aggspec>{agg})
     , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -213,7 +206,6 @@ t_config::t_config(const std::vector<t_pivot>& row_pivots,
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     setup(m_detail_columns, std::vector<std::string>{}, std::vector<std::string>{});
 }
@@ -225,7 +217,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -476,11 +467,6 @@ t_config::get_pivots() const {
     return rval;
 }
 
-bool
-t_config::handle_nan_sort() const {
-    return m_handle_nan_sort;
-}
-
 std::string
 t_config::get_parent_pkey_column() const {
     return m_parent_pkey_column;
@@ -521,7 +507,6 @@ t_config::get_recipe() const {
         rv.m_fterms.push_back(ft.get_recipe());
     }
 
-    rv.m_handle_nan_sort = m_handle_nan_sort;
     rv.m_parent_pkey_column = m_parent_pkey_column;
     rv.m_child_pkey_column = m_child_pkey_column;
     rv.m_grouping_label_column = m_grouping_label_column;

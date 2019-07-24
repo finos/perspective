@@ -854,7 +854,6 @@ t_stree::gen_aggidx() {
 void
 t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_ridx,
     t_uindex dst_ridx, t_index nstrands, const t_gstate& gstate) {
-    static bool const enable_sticky_nan_fix = true;
     for (t_uindex idx : info.m_dst_topo_sorted) {
         const t_column* src = info.m_src[idx];
         t_column* dst = info.m_dst[idx];
@@ -870,8 +869,7 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                 t_tscalar dst_scalar = dst->get_scalar(dst_ridx);
                 old_value.set(dst_scalar);
                 new_value.set(dst_scalar.add(src_scalar));
-                if (enable_sticky_nan_fix
-                    && old_value.is_nan()) // is_nan returns false for non-float types
+                if (old_value.is_nan()) // is_nan returns false for non-float types
                 {
                     // if we previously had a NaN, add can't make it finite again; recalculate
                     // entire sum in case it is now finite
@@ -1162,11 +1160,13 @@ t_stree::update_agg_table(t_uindex nidx, t_agg_update_info& info, t_uindex src_r
                             t_tscalar rval;
                             rval.set(std::uint64_t(0));
                             rval.m_type = values[0].m_type;
+
                             for (const auto& v : values) {
                                 if (v.is_nan())
                                     continue;
                                 rval = rval.add(v);
                             }
+
                             return rval;
                         }));
                 dst->set_scalar(dst_ridx, new_value);

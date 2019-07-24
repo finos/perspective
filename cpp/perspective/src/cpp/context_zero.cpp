@@ -199,7 +199,7 @@ t_ctx0::get_column_name(t_index idx) {
 
 void
 t_ctx0::init() {
-    m_traversal = std::make_shared<t_ftrav>(m_config.handle_nan_sort());
+    m_traversal = std::make_shared<t_ftrav>();
     m_deltas = std::make_shared<t_zcdeltas>();
     m_init = true;
 }

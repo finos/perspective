@@ -32,7 +32,6 @@ struct PERSPECTIVE_EXPORT t_config_recipe {
     t_totals m_totals;
     t_filter_op m_combiner;
     std::vector<t_fterm_recipe> m_fterms;
-    bool m_handle_nan_sort;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;
@@ -50,10 +49,10 @@ public:
         const std::vector<std::string>& detail_columns, const t_totals totals,
         const std::vector<std::string>& sort_pivot,
         const std::vector<std::string>& sort_pivot_by, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, bool handle_nan_sort,
-        const std::string& parent_pkey_column, const std::string& child_pkey_column,
-        const std::string& grouping_label_column, t_fmode fmode,
-        const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str);
+        const std::vector<t_fterm>& fterms, const std::string& parent_pkey_column,
+        const std::string& child_pkey_column, const std::string& grouping_label_column,
+        t_fmode fmode, const std::vector<std::string>& filter_exprs,
+        const std::string& grand_agg_str);
 
     // view config
     t_config(const std::vector<std::string>& row_pivots,
@@ -142,8 +141,6 @@ public:
 
     t_filter_op get_combiner() const;
 
-    bool handle_nan_sort() const;
-
     std::string get_parent_pkey_column() const;
 
     std::string get_child_pkey_column() const;
@@ -180,7 +177,6 @@ private:
     // t_uindex m_col_expand_depth;
     t_filter_op m_combiner;
     std::vector<t_fterm> m_fterms;
-    bool m_handle_nan_sort;
     std::string m_parent_pkey_column;
     std::string m_child_pkey_column;
     std::string m_grouping_label_column;

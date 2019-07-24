@@ -19,10 +19,9 @@
 
 namespace perspective {
 
-t_ftrav::t_ftrav(bool handle_nan_sort)
+t_ftrav::t_ftrav()
     : m_step_deletes(0)
-    , m_step_inserts(0)
-    , m_handle_nan_sort(handle_nan_sort) {
+    , m_step_inserts(0) {
     m_index = std::make_shared<std::vector<t_mselem>>();
 }
 
@@ -131,7 +130,7 @@ t_ftrav::sort_by(std::shared_ptr<const t_gstate> state, const t_config& config,
     const std::vector<t_sortspec>& sortby) {
     if (sortby.empty())
         return;
-    t_multisorter sorter(get_sort_orders(sortby), m_handle_nan_sort);
+    t_multisorter sorter(get_sort_orders(sortby));
     t_index size = m_index->size();
     auto sort_elems = std::make_shared<std::vector<t_mselem>>(static_cast<size_t>(size));
     m_sortby = sortby;
@@ -262,7 +261,7 @@ t_ftrav::step_end() {
         }
     }
     std::swap(new_index, m_index);
-    t_multisorter sorter(get_sort_orders(m_sortby), m_handle_nan_sort);
+    t_multisorter sorter(get_sort_orders(m_sortby));
     std::sort(m_index->begin(), m_index->end(), sorter);
 
     m_pkeyidx.clear();
@@ -328,7 +327,7 @@ t_ftrav::reset_step_state() {
 t_uindex
 t_ftrav::lower_bound_row_idx(std::shared_ptr<const t_gstate> state, const t_config& config,
     const std::vector<t_tscalar>& row) const {
-    t_multisorter sorter(get_sort_orders(m_sortby), m_handle_nan_sort);
+    t_multisorter sorter(get_sort_orders(m_sortby));
     t_mselem target_val;
 
     fill_sort_elem(state, config, row, target_val);
