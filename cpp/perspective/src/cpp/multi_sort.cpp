@@ -200,19 +200,17 @@ nan_compare(t_sorttype order, const t_tscalar& a, const t_tscalar& b) {
     return rval;
 }
 
-t_multisorter::t_multisorter(const std::vector<t_sorttype>& order, bool handle_nans)
-    : m_sort_order(order)
-    , m_handle_nans(handle_nans) {}
+t_multisorter::t_multisorter(const std::vector<t_sorttype>& order)
+    : m_sort_order(order) {}
 
-t_multisorter::t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
-    const std::vector<t_sorttype>& order, bool handle_nans)
+t_multisorter::t_multisorter(
+    std::shared_ptr<const std::vector<t_mselem>> elems, const std::vector<t_sorttype>& order)
     : m_sort_order(order)
-    , m_elems(elems)
-    , m_handle_nans(handle_nans) {}
+    , m_elems(elems) {}
 
 bool
 t_multisorter::operator()(const t_mselem& a, const t_mselem& b) const {
-    return cmp_mselem(a, b, m_sort_order, m_handle_nans);
+    return cmp_mselem(a, b, m_sort_order);
 }
 
 bool

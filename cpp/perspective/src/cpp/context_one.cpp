@@ -33,8 +33,7 @@ t_ctx1::init() {
     auto pivots = m_config.get_row_pivots();
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
-    m_traversal
-        = std::shared_ptr<t_traversal>(new t_traversal(m_tree, m_config.handle_nan_sort()));
+    m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
     m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
@@ -482,8 +481,7 @@ t_ctx1::reset() {
     m_tree = std::make_shared<t_stree>(pivots, m_config.get_aggregates(), m_schema, m_config);
     m_tree->init();
     m_tree->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
-    m_traversal
-        = std::shared_ptr<t_traversal>(new t_traversal(m_tree, m_config.handle_nan_sort()));
+    m_traversal = std::shared_ptr<t_traversal>(new t_traversal(m_tree));
 }
 
 void

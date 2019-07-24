@@ -32,7 +32,7 @@ class t_ctx2;
 
 class t_traversal {
 public:
-    t_traversal(std::shared_ptr<const t_stree> tree, bool handle_nan_sort);
+    t_traversal(std::shared_ptr<const t_stree> tree);
 
     t_index expand_node(t_index exp_idx);
 
@@ -111,7 +111,6 @@ public:
 private:
     std::shared_ptr<const t_stree> m_tree;
     std::shared_ptr<std::vector<t_tvnode>> m_nodes;
-    bool m_handle_nan_sort;
 };
 
 template <typename SRC_T>
@@ -171,7 +170,7 @@ t_traversal::sort_by(const t_config& config, const std::vector<t_sortspec>& sort
             }
 
             std::vector<t_sorttype> sort_orders = get_sort_orders(sortby);
-            t_multisorter sorter(sortelems, sort_orders, m_handle_nan_sort);
+            t_multisorter sorter(sortelems, sort_orders);
             argsort(sorted_idx, sorter);
 
             std::int32_t nchild = n_changed;

@@ -1086,6 +1086,10 @@ export default function(Module) {
     };
 
     table.prototype._is_valid_filter = function(filter) {
+        if (filter[2] === null) {
+            return false;
+        }
+
         const schema = this.schema();
         const isDateFilter = this._is_date_filter(schema);
         const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];

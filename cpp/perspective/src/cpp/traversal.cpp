@@ -31,9 +31,8 @@ t_vdnode::t_vdnode(bool expanded, bool has_children)
     : m_expanded(expanded)
     , m_has_children(has_children) {}
 
-t_traversal::t_traversal(std::shared_ptr<const t_stree> tree, bool handle_nan_sort)
-    : m_tree(tree)
-    , m_handle_nan_sort(handle_nan_sort) {
+t_traversal::t_traversal(std::shared_ptr<const t_stree> tree)
+    : m_tree(tree) {
     t_stnode_vec rchildren;
     tree->get_child_nodes(0, rchildren);
     populate_root_children(rchildren);
@@ -153,7 +152,7 @@ t_traversal::expand_node(const std::vector<t_sortspec>& sortby, t_index exp_idx,
         }
 
         std::vector<t_sorttype> sort_orders = get_sort_orders(sortby);
-        t_multisorter sorter(sortelems, sort_orders, m_handle_nan_sort);
+        t_multisorter sorter(sortelems, sort_orders);
         argsort(sorted_idx, sorter);
     } else {
         for (t_index i = 0, loop_end = sorted_idx.size(); i != loop_end; ++i)

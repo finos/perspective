@@ -80,8 +80,7 @@ PERSPECTIVE_EXPORT t_nancmp nan_compare(
     t_sorttype order, const t_tscalar& a, const t_tscalar& b);
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& sort_order,
-    bool handle_nans) {
+cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& sort_order) {
     typedef std::pair<double, t_tscalar> dpair;
 
     if (a.m_row.size() != b.m_row.size() || a.m_row.size() != sort_order.size()) {
@@ -99,7 +98,7 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
         t_sorttype order = sort_order[idx];
         t_nancmp nancmp = nan_compare(order, first, second);
 
-        if (handle_nans && first.is_floating_point() && nancmp.m_active) {
+        if (first.is_floating_point() && nancmp.m_active) {
             switch (nancmp.m_cmpval) {
                 case CMP_OP_LT: {
                     return true;
@@ -146,18 +145,17 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
 }
 
 inline PERSPECTIVE_EXPORT bool
-cmp_mselem(const t_mselem* a, const t_mselem* b, const std::vector<t_sorttype>& sort_order,
-    bool handle_nans) {
-    return cmp_mselem(*a, *b, sort_order, handle_nans);
+cmp_mselem(const t_mselem* a, const t_mselem* b, const std::vector<t_sorttype>& sort_order) {
+    return cmp_mselem(*a, *b, sort_order);
 }
 
 // Helper for sorting taking multiple sort specifications
 // into account
 struct PERSPECTIVE_EXPORT t_multisorter {
-    t_multisorter(const std::vector<t_sorttype>& order, bool handle_nans);
+    t_multisorter(const std::vector<t_sorttype>& order);
 
     t_multisorter(std::shared_ptr<const std::vector<t_mselem>> elems,
-        const std::vector<t_sorttype>& order, bool handle_nans);
+        const std::vector<t_sorttype>& order);
 
     bool operator()(const t_mselem& a, const t_mselem& b) const;
 
@@ -165,7 +163,6 @@ struct PERSPECTIVE_EXPORT t_multisorter {
 
     std::vector<t_sorttype> m_sort_order;
     std::shared_ptr<const std::vector<t_mselem>> m_elems;
-    bool m_handle_nans;
 };
 
 } // end namespace perspective
