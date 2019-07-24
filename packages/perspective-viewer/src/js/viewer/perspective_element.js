@@ -175,7 +175,9 @@ export class PerspectiveElement extends StateElement {
         if (this._show_warnings && typeof this._plugin.max_size !== "undefined") {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
+
             const count = num_columns * num_rows;
+
             if (count >= this._plugin.max_size) {
                 this._plugin_information.classList.remove("hidden");
                 const over_per = Math.floor((this._plugin.max_size / count) * 100);
@@ -183,6 +185,7 @@ export class PerspectiveElement extends StateElement {
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
+            } else if (num_columns > this._plugin.max_size) {
             } else {
                 this._plugin_information.classList.add("hidden");
             }
@@ -296,6 +299,7 @@ export class PerspectiveElement extends StateElement {
 
         if (!ignore_size_check) {
             if (await this._warn_render_size_exceeded()) {
+                // TODO opacity change?
             }
         }
 
@@ -312,7 +316,7 @@ export class PerspectiveElement extends StateElement {
 
         try {
             if (limit_points) {
-                await this._plugin.create.call(this, this._datavis, this._view, task, this._plugin.max_size);
+                await this._plugin.create_limited.call(this, this._datavis, this._view, task);
             } else {
                 await this._plugin.create.call(this, this._datavis, this._view, task);
             }

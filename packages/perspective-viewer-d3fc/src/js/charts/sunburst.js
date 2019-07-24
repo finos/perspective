@@ -67,10 +67,12 @@ function sunburst(container, settings) {
             tooltip().settings(settings)(sunburstElement.selectAll("g.segment"));
         });
 }
+
 sunburst.plugin = {
     type: "d3_sunburst",
     name: "Sunburst",
     max_size: 5000,
+    max_virtual_column_count: 10,
     initial: {
         type: "number",
         count: 2,

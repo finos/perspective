@@ -29,6 +29,7 @@ export function register(...plugins) {
                 ...DEFAULT_PLUGIN_SETTINGS,
                 ...chart.plugin,
                 create: drawChart(chart),
+                create_limited: drawLimitedChart(chart.plugin, chart),
                 resize: resizeChart,
                 delete: deleteChart,
                 save,
@@ -38,25 +39,63 @@ export function register(...plugins) {
     });
 }
 
-function drawChart(chart) {
-    return async function(el, view, task, limit) {
+export function drawLimitedChart(plugin, chart) {
+    return _drawChart(chart, limit_data(plugin.max_size, plugin.max_virtual_column_count));
+}
+
+export function drawChart(chart) {
+    return _drawChart(chart);
+}
+
+export function limit_data(max_points, max_virtual_columns) {
+    return function(data, column_count) {
+        if (!data || data.length === 0) {
+            return [];
+        }
+        const keys = Object.keys(data[0]);
+
+        let limited_data;
+
+        console.log(`column_count`);
+        console.log(column_count);
+
+        const column_cutoff = max_virtual_columns * column_count + 1;
+        if (keys.length > column_cutoff) {
+            const limited_keys = keys.slice(0, column_cutoff);
+            limited_data = data.map(d => {
+                const copy = {};
+                for (const k of limited_keys) {
+                    copy[k] = d[k];
+                }
+                return copy;
+            });
+        } else {
+            limited_data = data;
+        }
+        return limited_data.slice(0, max_points);
+    };
+}
+
+function _drawChart(chart, dataFn = x => x) {
+    return async function(el, view, task) {
         const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
         if (task.cancelled) {
             return;
         }
 
         const {columns, row_pivots, column_pivots, filter} = config;
+
+        console.log({columns, row_pivots, column_pivots, filter});
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
         const mapped = filtered.map(dataMap);
-        const limited = limit ? mapped.slice(0, limit) : mapped;
 
         let settings = {
             crossValues: row_pivots.map(r => ({name: r, type: tschema[r]})),
             mainValues: columns.map(a => ({name: a, type: schema[a]})),
             splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
-            data: limited
+            data: dataFn(mapped, columns.length)
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
