@@ -96,6 +96,7 @@ xyScatter.plugin = {
     type: "d3_xy_scatter",
     name: "X/Y Scatter Chart",
     max_size: 7500,
+    max_virtual_column_count: 50,
     initial: {
         type: "number",
         count: 2,

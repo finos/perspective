@@ -63,6 +63,7 @@ treemap.plugin = {
     type: "d3_treemap",
     name: "Treemap",
     max_size: 5000,
+    max_virtual_column_count: 50,
     initial: {
         type: "number",
         count: 2

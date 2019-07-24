@@ -42,7 +42,7 @@ describe("limit_data", () => {
         });
 
         test("truncates the data", () => {
-            expect(limit_fn(data)).toEqual([]);
+            expect(limit_fn(data, 2)).toEqual([]);
         });
     });
 
@@ -54,16 +54,16 @@ describe("limit_data", () => {
         });
 
         test("truncates the data", () => {
-            expect(limit_fn(data)).toEqual([{__ROW_PATH__: ["Copiers"], x: 1}, {__ROW_PATH__: ["Phones"], x: 2}]);
+            expect(limit_fn(data, 2)).toEqual([{__ROW_PATH__: ["Copiers"], x: 1}, {__ROW_PATH__: ["Phones"], x: 2}]);
         });
     });
 
     describe("when virtual column count exceeded", () => {
         const data = [
-            {__ROW_PATH__: ["Copiers"], "Central|Sales": 1, "East|Sales": null, "South|Sales": null, "West|Sales": null},
-            {__ROW_PATH__: ["Phones"], "Central|Sales": 2, "East|Sales": null, "South|Sales": 3, "West|Sales": null},
-            {__ROW_PATH__: ["Furnishings"], "Central|Sales": 4, "East|Sales": null, "South|Sales": 5, "West|Sales": null},
-            {__ROW_PATH__: ["Envelopes"], "Central|Sales": null, "East|Sales": null, "South|Sales": 6, "West|Sales": null}
+            {__ROW_PATH__: ["Copiers"], "Central|Sales": 1, "East|Sales": null, "South|Sales": null, "West|Sales": null, REMOVED: 100},
+            {__ROW_PATH__: ["Phones"], "Central|Sales": 2, "East|Sales": null, "South|Sales": 3, "West|Sales": null, REMOVED: 100},
+            {__ROW_PATH__: ["Furnishings"], "Central|Sales": 4, "East|Sales": null, "South|Sales": 5, "West|Sales": null, REMOVED: 100},
+            {__ROW_PATH__: ["Envelopes"], "Central|Sales": null, "East|Sales": null, "South|Sales": 6, "West|Sales": null, REMOVED: 100}
         ];
 
         beforeEach(() => {
@@ -71,11 +71,11 @@ describe("limit_data", () => {
         });
 
         test("truncates the columns", () => {
-            expect(limit_fn(data)).toEqual([
-                {__ROW_PATH__: ["Copiers"], "Central|Sales": 1, "East|Sales": null},
-                {__ROW_PATH__: ["Phones"], "Central|Sales": 2, "East|Sales": null},
-                {__ROW_PATH__: ["Furnishings"], "Central|Sales": 4, "East|Sales": null},
-                {__ROW_PATH__: ["Envelopes"], "Central|Sales": null, "East|Sales": null}
+            expect(limit_fn(data, 2)).toEqual([
+                {__ROW_PATH__: ["Copiers"], "Central|Sales": 1, "East|Sales": null, "South|Sales": null, "West|Sales": null},
+                {__ROW_PATH__: ["Phones"], "Central|Sales": 2, "East|Sales": null, "South|Sales": 3, "West|Sales": null},
+                {__ROW_PATH__: ["Furnishings"], "Central|Sales": 4, "East|Sales": null, "South|Sales": 5, "West|Sales": null},
+                {__ROW_PATH__: ["Envelopes"], "Central|Sales": null, "East|Sales": null, "South|Sales": 6, "West|Sales": null}
             ]);
         });
     });

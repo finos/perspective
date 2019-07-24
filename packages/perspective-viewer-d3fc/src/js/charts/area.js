@@ -86,7 +86,8 @@ function areaChart(container, settings) {
 areaChart.plugin = {
     type: "d3_y_area",
     name: "Y Area Chart",
-    max_size: 4000
+    max_size: 4000,
+    max_virtual_column_count: 50
 };
 
 export default areaChart;

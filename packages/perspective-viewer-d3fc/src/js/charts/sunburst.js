@@ -72,7 +72,7 @@ sunburst.plugin = {
     type: "d3_sunburst",
     name: "Sunburst",
     max_size: 5000,
-    max_virtual_column_count: 10,
+    max_virtual_column_count: 50,
     initial: {
         type: "number",
         count: 2,

@@ -175,17 +175,23 @@ export class PerspectiveElement extends StateElement {
         if (this._show_warnings && typeof this._plugin.max_size !== "undefined") {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
-
+            const schema = await this._view.schema();
             const count = num_columns * num_rows;
+            const _cols = num_columns / (Object.keys(schema).length || 1);
 
-            if (count >= this._plugin.max_size) {
+            if (this._plugin.max_virtual_column_count && _cols > this._plugin.max_virtual_column_count) {
+                this._plugin_information.classList.remove("hidden");
+                const over_per = Math.floor((this._plugin.max_virtual_column_count / _cols) * 100);
+                const warning = `Rendering ${numberWithCommas(this._plugin.max_virtual_column_count)} of estimated ${numberWithCommas(_cols)} (${numberWithCommas(over_per)}%) columns.`;
+                this._plugin_information_message.innerText = warning;
+                this.removeAttribute("updating");
+            } else if (count >= this._plugin.max_size) {
                 this._plugin_information.classList.remove("hidden");
                 const over_per = Math.floor((this._plugin.max_size / count) * 100);
                 const warning = `Rendering ${numberWithCommas(this._plugin.max_size)} of estimated ${numberWithCommas(count)} (${numberWithCommas(over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
-            } else if (num_columns > this._plugin.max_size) {
             } else {
                 this._plugin_information.classList.add("hidden");
             }

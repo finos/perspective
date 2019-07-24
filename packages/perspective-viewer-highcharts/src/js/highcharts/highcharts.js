@@ -32,10 +32,22 @@ const MAXIMUM_RENDER_SIZE = {
     heatmap: 20000
 };
 
+const MAX_VIRTUAL_COLUMN_COUNT = {
+    line: 100,
+    area: 100,
+    scatter: 100,
+    bubble: 100,
+    column: 100,
+    treemap: 100,
+    sunburst: 50,
+    heatmap: 50
+};
+
 const PLUGINS = {
     x_bar: {
         name: "X Bar Chart",
         create: draw("x_bar", true),
+        create_limited: draw("x_bar", true),
         update: draw("x_bar", false),
         resize: resize,
         initial: {
@@ -44,12 +56,14 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["column"]
+        max_size: MAXIMUM_RENDER_SIZE["column"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["column"]
     },
 
     y_bar: {
         name: "Y Bar Chart",
         create: draw("y_bar", true),
+        create_limited: draw("y_bar", true),
         update: draw("y_bar", false),
         resize: resize,
         initial: {
@@ -58,12 +72,14 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["column"]
+        max_size: MAXIMUM_RENDER_SIZE["column"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["column"]
     },
 
     y_line: {
         name: "Y Line Chart",
         create: draw("y_line", true),
+        create_limited: draw("y_line", true),
         update: draw("y_line", false),
         resize: resize,
         initial: {
@@ -72,12 +88,14 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["line"]
+        max_size: MAXIMUM_RENDER_SIZE["line"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["line"]
     },
 
     y_scatter: {
         name: "Y Scatter Chart",
         create: draw("y_scatter", true),
+        create_limited: draw("y_scatter", true),
         update: draw("y_scatter", false),
         resize: resize,
         initial: {
@@ -86,12 +104,14 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"]
+        max_size: MAXIMUM_RENDER_SIZE["scatter"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
     },
 
     y_area: {
         name: "Y Area Chart",
         create: draw("y_area", true),
+        create_limited: draw("y_area", true),
         update: draw("y_area", false),
         resize: resize,
         initial: {
@@ -100,12 +120,14 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["area"]
+        max_size: MAXIMUM_RENDER_SIZE["area"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["area"]
     },
 
     xy_line: {
         name: "X/Y Line Chart",
         create: draw("line", true),
+        create_limited: draw("line", true),
         update: draw("line", false),
         resize: resize,
         initial: {
@@ -115,12 +137,14 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"]
+        max_size: MAXIMUM_RENDER_SIZE["scatter"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
     },
 
     xy_scatter: {
         name: "X/Y Scatter Chart",
         create: draw("scatter", true),
+        create_limited: draw("scatter", true),
         update: draw("scatter", false),
         resize: resize,
         styleElement: draw("scatter", false, true),
@@ -131,12 +155,14 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"]
+        max_size: MAXIMUM_RENDER_SIZE["scatter"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
     },
 
     treemap: {
         name: "Treemap",
         create: draw("treemap", true),
+        create_limited: draw("treemap", true),
         update: draw("treemap", false),
         resize: resize,
         styleElement: draw("treemap", false, true),
@@ -147,12 +173,14 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: function() {},
-        max_size: MAXIMUM_RENDER_SIZE["treemap"]
+        max_size: MAXIMUM_RENDER_SIZE["treemap"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["treemap"]
     },
 
     sunburst: {
         name: "Sunburst",
         create: draw("sunburst", true),
+        create_limited: draw("sunburst", true),
         update: draw("sunburst", false),
         styleElement: draw("sunburst", false, true),
         resize: resize,
@@ -163,12 +191,14 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: function() {},
-        max_size: MAXIMUM_RENDER_SIZE["sunburst"]
+        max_size: MAXIMUM_RENDER_SIZE["sunburst"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["sunburst"]
     },
 
     heatmap: {
         name: "Heatmap",
         create: draw("heatmap", true),
+        create_limited: draw("heatmap", true),
         update: draw("heatmap", false),
         resize: resize,
         initial: {
@@ -177,7 +207,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["heatmap"]
+        max_size: MAXIMUM_RENDER_SIZE["heatmap"],
+        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["heatmap"]
     }
 };
 

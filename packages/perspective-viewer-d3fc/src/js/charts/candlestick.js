@@ -14,6 +14,7 @@ candlestick.plugin = {
     type: "d3_candlestick",
     name: "Candlestick Chart",
     max_size: 4000,
+    max_virtual_column_count: 50,
     initial: {
         type: "number",
         count: 4,

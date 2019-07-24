@@ -52,15 +52,14 @@ export function limit_data(max_points, max_virtual_columns) {
         if (!data || data.length === 0) {
             return [];
         }
-        const keys = Object.keys(data[0]);
+        const keys = Object.keys(data[0]).filter(x => x !== "__ROW_PATH__");
 
-        let limited_data;
-
-        console.log(`column_count`);
-        console.log(column_count);
-
-        const column_cutoff = max_virtual_columns * column_count + 1;
-        if (keys.length > column_cutoff) {
+        let limited_data = data;
+        const column_cutoff = max_virtual_columns * column_count;
+        let is_cut = false;
+        if (!isNaN(column_cutoff) && keys.length > column_cutoff) {
+            is_cut = true;
+            console.log(`will cut ${keys.length - column_cutoff} of ${keys.length} columns`);
             const limited_keys = keys.slice(0, column_cutoff);
             limited_data = data.map(d => {
                 const copy = {};
@@ -69,10 +68,28 @@ export function limit_data(max_points, max_virtual_columns) {
                 }
                 return copy;
             });
-        } else {
-            limited_data = data;
         }
-        return limited_data.slice(0, max_points);
+        const limited_columns_count = Object.keys(limited_data[0]).filter(x => x !== "__ROW_PATH__").length;
+        const row_cutoff = Math.ceil(max_points / limited_columns_count);
+        // const _limited_rows = limited_data.slice(0, Math.ceil(row_cutoff));
+
+        if (limited_data.length > row_cutoff) {
+            is_cut = true;
+            console.log(`Will cut ${data.length - row_cutoff} of ${data.length} rows`);
+        }
+
+        if (is_cut) {
+            const final_rows = limited_data.length > row_cutoff ? row_cutoff : data.length;
+            const final_cols = !isNaN(column_cutoff) && keys.length > column_cutoff ? column_cutoff : keys.length;
+            console.log(
+                `There will be ${final_rows} * ${final_cols} = ${final_rows * final_cols} cells left after cutting ${keys.length - column_cutoff > 0 ? keys.length - column_cutoff : 0} columns and ${
+                    data.length - row_cutoff > 0 ? data.length - row_cutoff : 0
+                } rows`
+            );
+        } else {
+            console.log("nothing to do here!");
+        }
+        return data;
     };
 }
 
@@ -84,8 +101,6 @@ function _drawChart(chart, dataFn = x => x) {
         }
 
         const {columns, row_pivots, column_pivots, filter} = config;
-
-        console.log({columns, row_pivots, column_pivots, filter});
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;
         const dataMap = (col, i) => (!row_pivots.length ? {...col, __ROW_PATH__: [i]} : col);
         const mapped = filtered.map(dataMap);
