@@ -129,13 +129,17 @@ export class PerspectiveElement extends StateElement {
         cols.sort(column_sorter(schema));
 
         // Update aggregates
-        const computed_aggregates = Object.entries(computed_schema).map(([column, op]) => ({
-            column,
-            op
-        }));
+        const aggregate_attribute = this.get_aggregate_attribute();
+
+        Object.entries(computed_schema).forEach(([column, op]) => {
+            const already_configured = aggregate_attribute.find(agg => agg.column === column);
+            if (!already_configured) {
+                aggregate_attribute.push({column, op});
+            }
+        });
 
         const all_cols = cols.concat(Object.keys(computed_schema));
-        const aggregates = get_aggregates_with_defaults(this.get_aggregate_attribute().concat(computed_aggregates), schema, all_cols);
+        const aggregates = get_aggregates_with_defaults(aggregate_attribute, schema, all_cols);
 
         let shown = JSON.parse(this.getAttribute("columns")).filter(x => all_cols.indexOf(x) > -1);
         if (shown.length === 0) {

@@ -216,6 +216,20 @@ utils.with_server({}, () => {
                 await page.evaluate(element => element.setAttribute("columns", '["Row ID", "Quantity"]'), viewer);
                 await page.evaluate(element => element.setAttribute("columns", '["Row ID", "Quantity", "new_cc"]'), viewer);
             });
+
+            test.capture("user defined aggregates maintained on computed columns", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+
+                await page.evaluate(element => {
+                    element.restore({
+                        aggregates: {Computed: "mean"},
+                        "computed-columns": [{name: "Computed", inputs: ["Sales", "Profit"], func: "add"}],
+                        columns: ["Computed", "Quantity"],
+                        "row-pivots": ["Category"]
+                    });
+                }, viewer);
+            });
         },
         {
             root: path.join(__dirname, "..", "..")
