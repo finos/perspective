@@ -90,8 +90,18 @@ public:
     t_schema get_schema() const;
 
     /**
-     * @brief Given a schema, create a `t_gnode` that expects a `t_data_table` conforming to the
-     * column names and data types.
+     * @brief Given a new `t_data_table`, replace this instance's `m_data_table` with the new
+     * object, and perform registration operations so the new table is recognized.
+     *
+     * Used during construction of computed columns, as we don't need to create a new `Table`
+     * object each time.
+     *
+     * @param data_table
+     */
+    void replace_data_table(t_data_table* data_table);
+
+    /**
+     * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.
      *
      * A `t_gnode` and `t_pool` must be created and registered in order for the core engine to
      * work.
@@ -102,15 +112,11 @@ public:
     std::shared_ptr<t_gnode> make_gnode(const t_schema& in_schema);
 
     /**
-     * @brief Given a new `t_data_table`, replace this instance's `m_data_table` with the new
-     * object, and perform registration operations so the new table is recognized.
+     * @brief Set the internal `m_gnode` reference and the corresponding flag.
      *
-     * Used during construction of computed columns, as we don't need to create a new `Table`
-     * object each time.
-     *
-     * @param data_table
+     * @param gnode
      */
-    void replace_data_table(t_data_table* data_table);
+    void set_gnode(std::shared_ptr<t_gnode> gnode);
 
     /**
      * @brief Unregister the gnode with the given `id` from this instance's `t_pool`, thus
@@ -127,11 +133,6 @@ public:
      * @param id
      */
     void reset_gnode(t_uindex id);
-
-    // Setters
-    void set_gnode(std::shared_ptr<t_gnode> gnode);
-    void set_column_names(const std::vector<std::string>& column_names);
-    void set_data_types(const std::vector<t_dtype>& data_types);
 
     // Getters
     std::shared_ptr<t_pool> get_pool() const;

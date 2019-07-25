@@ -1248,7 +1248,7 @@ export default function(Module) {
         let _Table;
 
         try {
-            _Table = __MODULE__.replace_table(this._Table, computed);
+            _Table = __MODULE__.make_computed_table(this._Table, computed);
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }

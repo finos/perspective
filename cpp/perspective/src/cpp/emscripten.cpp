@@ -1456,7 +1456,6 @@ namespace binding {
 
         bool table_initialized = has_value(table);
         std::shared_ptr<Table> tbl;
-        std::shared_ptr<t_pool> pool;
 
         if (table_initialized) {
             tbl = table.as<std::shared_ptr<Table>>();
@@ -1480,7 +1479,7 @@ namespace binding {
                 }
             }
         } else {
-            pool = make_pool();
+            std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
             tbl = std::make_shared<Table>(
                 pool, column_names, data_types, offset, limit, index, op, is_arrow);
         }
@@ -1502,7 +1501,7 @@ namespace binding {
 
     template <>
     std::shared_ptr<Table>
-    replace_table(std::shared_ptr<Table> table, t_val computed) {
+    make_computed_table(std::shared_ptr<Table> table, t_val computed) {
         auto gnode = table->get_gnode();
 
         t_data_table* data_table = gnode->_get_pkeyed_table();
@@ -1510,12 +1509,6 @@ namespace binding {
         table->replace_data_table(data_table);
 
         return table;
-    }
-
-    std::shared_ptr<t_pool>
-    make_pool() {
-        auto pool = std::make_shared<t_pool>();
-        return pool;
     }
 
     /******************************************************************************
@@ -1835,9 +1828,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
             std::uint32_t, std::uint32_t, std::string, t_op, bool>()
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
+        .function("get_schema", &Table::get_schema)
         .function("unregister_gnode", &Table::unregister_gnode)
         .function("reset_gnode", &Table::reset_gnode)
-        .function("get_schema", &Table::get_schema)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);
     /******************************************************************************
@@ -2107,8 +2100,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * assorted functions
      */
     function("make_table", &make_table<t_val>);
-    function("make_pool", &make_pool);
-    function("replace_table", &replace_table<t_val>);
+    function("make_computed_table", &make_computed_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<t_val>);

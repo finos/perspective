@@ -259,7 +259,8 @@ namespace binding {
         std::uint32_t limit, std::string index, t_op op, bool is_arrow);
 
     /**
-     * @brief Create a new gnode with an already-created table.
+     * @brief Given an array-like container with new computed columns, add them to the
+     * already-existing `Table`.
      *
      * @tparam T
      * @param pool
@@ -268,14 +269,7 @@ namespace binding {
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> replace_table(std::shared_ptr<Table> table, T computed);
-
-    /**
-     * @brief Create a new `t_pool` and embed it in a shared pointer.
-     *
-     * @return std::shared_ptr<t_pool>
-     */
-    std::shared_ptr<t_pool> make_pool();
+    std::shared_ptr<Table> make_computed_table(std::shared_ptr<Table> table, T computed);
 
     /**
      * @brief Extracts and validates the config from the binding language,
