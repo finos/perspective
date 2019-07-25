@@ -155,7 +155,7 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                         element.setAttribute("columns", '["col_b"]');
                     }, viewer);
                     await page.waitForFunction(
@@ -178,7 +178,7 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                         element.setAttribute("columns", '["col_b"]');
                     }, viewer);
                     await page.waitForFunction(
@@ -203,7 +203,7 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                         element.setAttribute("columns", '["col_a", "col_b"]');
                     }, viewer);
                     await page.waitForFunction(
@@ -228,7 +228,7 @@ utils.with_server({}, () => {
                 "underlying data updates should not trigger rerender if warning is visible.",
                 async page => {
                     await page.evaluate(() => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                     });
 
                     const viewer = await page.$("perspective-viewer");

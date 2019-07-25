@@ -21,7 +21,7 @@ function delete_chart() {
     }
 }
 
-const MAXIMUM_RENDER_SIZE = {
+const MAX_CELL_COUNT = {
     line: 25000,
     area: 25000,
     scatter: 100000,
@@ -32,7 +32,7 @@ const MAXIMUM_RENDER_SIZE = {
     heatmap: 20000
 };
 
-const MAX_VIRTUAL_COLUMN_COUNT = {
+const MAX_COLUMN_COUNT = {
     line: 100,
     area: 100,
     scatter: 100,
@@ -55,8 +55,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["column"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["column"]
+        max_cells: MAX_CELL_COUNT["column"],
+        max_columns: MAX_COLUMN_COUNT["column"]
     },
 
     y_bar: {
@@ -70,8 +70,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["column"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["column"]
+        max_cells: MAX_CELL_COUNT["column"],
+        max_columns: MAX_COLUMN_COUNT["column"]
     },
 
     y_line: {
@@ -85,8 +85,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["line"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["line"]
+        max_cells: MAX_CELL_COUNT["line"],
+        max_columns: MAX_COLUMN_COUNT["line"]
     },
 
     y_scatter: {
@@ -100,8 +100,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
+        max_cells: MAX_CELL_COUNT["scatter"],
+        max_columns: MAX_COLUMN_COUNT["scatter"]
     },
 
     y_area: {
@@ -115,8 +115,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["area"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["area"]
+        max_cells: MAX_CELL_COUNT["area"],
+        max_columns: MAX_COLUMN_COUNT["area"]
     },
 
     xy_line: {
@@ -131,8 +131,8 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
+        max_cells: MAX_CELL_COUNT["scatter"],
+        max_columns: MAX_COLUMN_COUNT["scatter"]
     },
 
     xy_scatter: {
@@ -148,8 +148,8 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["scatter"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["scatter"]
+        max_cells: MAX_CELL_COUNT["scatter"],
+        max_columns: MAX_COLUMN_COUNT["scatter"]
     },
 
     treemap: {
@@ -165,8 +165,8 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: function() {},
-        max_size: MAXIMUM_RENDER_SIZE["treemap"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["treemap"]
+        max_cells: MAX_CELL_COUNT["treemap"],
+        max_columns: MAX_COLUMN_COUNT["treemap"]
     },
 
     sunburst: {
@@ -182,8 +182,8 @@ const PLUGINS = {
         },
         selectMode: "toggle",
         delete: function() {},
-        max_size: MAXIMUM_RENDER_SIZE["sunburst"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["sunburst"]
+        max_cells: MAX_CELL_COUNT["sunburst"],
+        max_columns: MAX_COLUMN_COUNT["sunburst"]
     },
 
     heatmap: {
@@ -197,8 +197,8 @@ const PLUGINS = {
         },
         selectMode: "select",
         delete: delete_chart,
-        max_size: MAXIMUM_RENDER_SIZE["heatmap"],
-        max_virtual_column_count: MAX_VIRTUAL_COLUMN_COUNT["heatmap"]
+        max_cells: MAX_CELL_COUNT["heatmap"],
+        max_columns: MAX_COLUMN_COUNT["heatmap"]
     }
 };
 

@@ -176,13 +176,13 @@ export class PerspectiveElement extends StateElement {
         const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
         const schema_columns = Object.keys(schema).length || 1;
 
-        if (typeof this._plugin.max_virtual_column_count !== "undefined") {
-            const column_limit = schema_columns * this._plugin.max_virtual_column_count;
+        if (typeof this._plugin.max_columns !== "undefined") {
+            const column_limit = schema_columns * this._plugin.max_columns;
             max_cols = column_limit < num_columns ? column_limit : num_columns;
         }
 
-        if (typeof this._plugin.max_size !== "undefined") {
-            max_rows = max_cols ? Math.ceil(this._plugin.max_size / max_cols) : this._plugin.max_size;
+        if (typeof this._plugin.max_cells !== "undefined") {
+            max_rows = max_cols ? Math.ceil(this._plugin.max_cells / max_cols) : this._plugin.max_cells;
         }
 
         return {max_cols, max_rows};
