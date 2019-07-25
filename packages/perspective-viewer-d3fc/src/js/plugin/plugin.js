@@ -40,7 +40,18 @@ export function register(...plugins) {
 
 function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
-        const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, end_col}), view.get_config()]);
+        let tschema, schema, json, config;
+
+        if (end_col && end_row) {
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, end_col}), view.get_config()]);
+        } else if (end_col) {
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_col}), view.get_config()]);
+        } else if (end_row) {
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row}), view.get_config()]);
+        } else {
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
+        }
+
         if (task.cancelled) {
             return;
         }
