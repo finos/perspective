@@ -171,24 +171,54 @@ export class PerspectiveElement extends StateElement {
         resolve();
     }
 
-    async _warn_render_size_exceeded() {
-        if (this._show_warnings && typeof this._plugin.max_size !== "undefined") {
+    async get_maxes() {
+        let max_cols, max_rows;
+        const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
+        const schema_columns = Object.keys(schema).length || 1;
+
+        console.log(`schema_columns`);
+
+        if (typeof this._plugin.max_virtual_column_count !== "undefined") {
+            const column_limit = schema_columns * this._plugin.max_virtual_column_count;
+            max_cols = column_limit < num_columns ? column_limit : num_columns;
+        }
+
+        if (typeof this._plugin.max_size !== "undefined") {
+            max_rows = max_cols ? Math.ceil(this._plugin.max_size / max_cols) : this._plugin.max_size;
+        }
+
+        return {max_cols, max_rows};
+    }
+
+    async _warn_render_size_exceeded(max_cols, max_rows) {
+        if (this._show_warnings && (max_cols || max_rows)) {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
-            const schema = await this._view.schema();
             const count = num_columns * num_rows;
-            const _cols = num_columns / (Object.keys(schema).length || 1);
 
-            if (this._plugin.max_virtual_column_count && _cols > this._plugin.max_virtual_column_count) {
+            const columns_are_truncated = max_cols && max_cols < num_columns;
+            const rows_are_truncated = max_rows && max_rows < num_rows;
+            if (columns_are_truncated && rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const over_per = Math.floor((this._plugin.max_virtual_column_count / _cols) * 100);
-                const warning = `Rendering ${numberWithCommas(this._plugin.max_virtual_column_count)} of estimated ${numberWithCommas(_cols)} (${numberWithCommas(over_per)}%) columns.`;
+                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
+                const points_over_per = Math.floor((max_rows / count) * 100);
+                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns and ${numberWithCommas(
+                    max_cols * max_rows
+                )} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
-            } else if (count >= this._plugin.max_size) {
+                return true;
+            } else if (columns_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const over_per = Math.floor((this._plugin.max_size / count) * 100);
-                const warning = `Rendering ${numberWithCommas(this._plugin.max_size)} of estimated ${numberWithCommas(count)} (${numberWithCommas(over_per)}%) points.`;
+                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
+                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns.`;
+                this._plugin_information_message.innerText = warning;
+                this.removeAttribute("updating");
+                return true;
+            } else if (rows_are_truncated) {
+                this._plugin_information.classList.remove("hidden");
+                const points_over_per = Math.floor((max_rows / count) * 100);
+                const warning = `Rendering ${numberWithCommas(num_columns * max_rows)} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
@@ -303,8 +333,9 @@ export class PerspectiveElement extends StateElement {
 
         this._view = this._table.view(config);
 
+        const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
-            if (await this._warn_render_size_exceeded()) {
+            if (await this._warn_render_size_exceeded(max_cols, max_rows)) {
                 // TODO opacity change?
             }
         }
@@ -322,7 +353,7 @@ export class PerspectiveElement extends StateElement {
 
         try {
             if (limit_points) {
-                await this._plugin.create_limited.call(this, this._datavis, this._view, task);
+                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows);
             } else {
                 await this._plugin.create.call(this, this._datavis, this._view, task);
             }

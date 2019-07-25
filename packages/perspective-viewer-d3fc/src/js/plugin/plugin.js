@@ -29,7 +29,6 @@ export function register(...plugins) {
                 ...DEFAULT_PLUGIN_SETTINGS,
                 ...chart.plugin,
                 create: drawChart(chart),
-                create_limited: drawLimitedChart(chart.plugin, chart),
                 resize: resizeChart,
                 delete: deleteChart,
                 save,
@@ -39,63 +38,9 @@ export function register(...plugins) {
     });
 }
 
-export function drawLimitedChart(plugin, chart) {
-    return _drawChart(chart, limit_data(plugin.max_size, plugin.max_virtual_column_count));
-}
-
-export function drawChart(chart) {
-    return _drawChart(chart);
-}
-
-export function limit_data(max_points, max_virtual_columns) {
-    return function(data, column_count) {
-        if (!data || data.length === 0) {
-            return [];
-        }
-        const keys = Object.keys(data[0]).filter(x => x !== "__ROW_PATH__");
-
-        let limited_data = data;
-        const column_cutoff = max_virtual_columns * column_count;
-        let is_cut = false;
-        if (!isNaN(column_cutoff) && keys.length > column_cutoff) {
-            is_cut = true;
-            console.log(`will cut ${keys.length - column_cutoff} of ${keys.length} columns`);
-            const limited_keys = keys.slice(0, column_cutoff);
-            limited_data = data.map(d => {
-                const copy = {};
-                for (const k of limited_keys) {
-                    copy[k] = d[k];
-                }
-                return copy;
-            });
-        }
-        const limited_columns_count = Object.keys(limited_data[0]).filter(x => x !== "__ROW_PATH__").length;
-        const row_cutoff = Math.ceil(max_points / limited_columns_count);
-        // const _limited_rows = limited_data.slice(0, Math.ceil(row_cutoff));
-
-        if (limited_data.length > row_cutoff) {
-            is_cut = true;
-            console.log(`Will cut ${data.length - row_cutoff} of ${data.length} rows`);
-        }
-
-        if (is_cut) {
-            const final_rows = limited_data.length > row_cutoff ? row_cutoff : data.length;
-            const final_cols = !isNaN(column_cutoff) && keys.length > column_cutoff ? column_cutoff : keys.length;
-            console.log(
-                `There will be ${final_rows} * ${final_cols} = ${final_rows * final_cols} cells left after cutting ${keys.length - column_cutoff > 0 ? keys.length - column_cutoff : 0} columns and ${
-                    data.length - row_cutoff > 0 ? data.length - row_cutoff : 0
-                } rows`
-            );
-        } else {
-            console.log("nothing to do here!");
-        }
-        return data;
-    };
-}
-
-function _drawChart(chart, dataFn = x => x) {
-    return async function(el, view, task) {
-        const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
+function drawChart(chart) {
+    return async function(el, view, task, end_col, end_row) {
+        const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, end_col}), view.get_config()]);
         if (task.cancelled) {
             return;
         }
@@ -110,7 +55,7 @@ function _drawChart(chart, dataFn = x => x) {
             mainValues: columns.map(a => ({name: a, type: schema[a]})),
             splitValues: column_pivots.map(r => ({name: r, type: tschema[r]})),
             filter,
-            data: dataFn(mapped, columns.length)
+            data: mapped
         };
 
         createOrUpdateChart.call(this, el, chart, settings);
