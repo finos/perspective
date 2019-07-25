@@ -47,7 +47,6 @@ const PLUGINS = {
     x_bar: {
         name: "X Bar Chart",
         create: draw("x_bar", true),
-        create_limited: draw("x_bar", true),
         update: draw("x_bar", false),
         resize: resize,
         initial: {
@@ -63,7 +62,6 @@ const PLUGINS = {
     y_bar: {
         name: "Y Bar Chart",
         create: draw("y_bar", true),
-        create_limited: draw("y_bar", true),
         update: draw("y_bar", false),
         resize: resize,
         initial: {
@@ -79,7 +77,6 @@ const PLUGINS = {
     y_line: {
         name: "Y Line Chart",
         create: draw("y_line", true),
-        create_limited: draw("y_line", true),
         update: draw("y_line", false),
         resize: resize,
         initial: {
@@ -95,7 +92,6 @@ const PLUGINS = {
     y_scatter: {
         name: "Y Scatter Chart",
         create: draw("y_scatter", true),
-        create_limited: draw("y_scatter", true),
         update: draw("y_scatter", false),
         resize: resize,
         initial: {
@@ -111,7 +107,6 @@ const PLUGINS = {
     y_area: {
         name: "Y Area Chart",
         create: draw("y_area", true),
-        create_limited: draw("y_area", true),
         update: draw("y_area", false),
         resize: resize,
         initial: {
@@ -127,7 +122,6 @@ const PLUGINS = {
     xy_line: {
         name: "X/Y Line Chart",
         create: draw("line", true),
-        create_limited: draw("line", true),
         update: draw("line", false),
         resize: resize,
         initial: {
@@ -144,7 +138,6 @@ const PLUGINS = {
     xy_scatter: {
         name: "X/Y Scatter Chart",
         create: draw("scatter", true),
-        create_limited: draw("scatter", true),
         update: draw("scatter", false),
         resize: resize,
         styleElement: draw("scatter", false, true),
@@ -162,7 +155,6 @@ const PLUGINS = {
     treemap: {
         name: "Treemap",
         create: draw("treemap", true),
-        create_limited: draw("treemap", true),
         update: draw("treemap", false),
         resize: resize,
         styleElement: draw("treemap", false, true),
@@ -180,7 +172,6 @@ const PLUGINS = {
     sunburst: {
         name: "Sunburst",
         create: draw("sunburst", true),
-        create_limited: draw("sunburst", true),
         update: draw("sunburst", false),
         styleElement: draw("sunburst", false, true),
         resize: resize,
@@ -198,7 +189,6 @@ const PLUGINS = {
     heatmap: {
         name: "Heatmap",
         create: draw("heatmap", true),
-        create_limited: draw("heatmap", true),
         update: draw("heatmap", false),
         resize: resize,
         initial: {

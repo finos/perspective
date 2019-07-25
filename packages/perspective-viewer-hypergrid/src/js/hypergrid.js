@@ -389,7 +389,6 @@ async function grid_create(div, view, task) {
 global.registerPlugin("hypergrid", {
     name: "Grid",
     create: grid_create,
-    create_limited: grid_create,
     selectMode: "toggle",
     update: grid_update,
     deselectMode: "pivots",
