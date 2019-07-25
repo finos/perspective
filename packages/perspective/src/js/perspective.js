@@ -63,24 +63,25 @@ export default function(Module) {
         return limit_index;
     }
 
-    let _POOL_DEBOUNCES = [];
+    let _POOL_DEBOUNCES = {};
 
-    function _set_process(pool) {
-        if (_POOL_DEBOUNCES.indexOf(pool) === -1) {
-            _POOL_DEBOUNCES.push(pool);
-            setTimeout(() => _clear_process(pool));
+    function _set_process(pool, table_id) {
+        if (!_POOL_DEBOUNCES[table_id]) {
+            _POOL_DEBOUNCES[table_id] = pool;
+            setTimeout(() => _clear_process(table_id));
         }
     }
 
-    function _clear_process(pool) {
-        if (_POOL_DEBOUNCES.indexOf(pool) !== -1) {
+    function _clear_process(table_id) {
+        const pool = _POOL_DEBOUNCES[table_id];
+        if (pool) {
             pool._process();
-            _POOL_DEBOUNCES = _POOL_DEBOUNCES.filter(x => x !== pool);
+            _reset_process(table_id);
         }
     }
 
-    function _reset_process(pool) {
-        _POOL_DEBOUNCES = _POOL_DEBOUNCES.filter(x => x !== pool);
+    function _reset_process(table_id) {
+        delete _POOL_DEBOUNCES[table_id];
     }
 
     /**
@@ -108,8 +109,10 @@ export default function(Module) {
         }
 
         const pool = _Table.get_pool();
+        const table_id = _Table.get_id();
+        console.log(table_id);
         if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
-            _set_process(pool);
+            _set_process(pool, table_id);
         } else {
             pool._process();
         }
@@ -289,7 +292,7 @@ export default function(Module) {
      * @async
      */
     view.prototype.delete = function() {
-        _reset_process(this.table.get_pool());
+        _reset_process(this.table.get_id());
         this._View.delete();
         this.ctx.delete();
 
@@ -380,7 +383,7 @@ export default function(Module) {
      * @private
      */
     const to_format = function(options, formatter) {
-        _clear_process(this.table.get_pool());
+        _clear_process(this.table.get_id());
         options = options || {};
         const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
         const max_rows = this._View.num_rows();
@@ -765,7 +768,7 @@ export default function(Module) {
      *     - "row": The callback is invoked with an Arrow of the updated rows.
      */
     view.prototype.on_update = function(callback, {mode = "none"} = {}) {
-        _clear_process(this.table.get_pool());
+        _clear_process(this.table.get_id());
         if (["none", "cell", "row"].indexOf(mode) === -1) {
             throw new Error(`Invalid update mode "${mode}" - valid modes are "none", "cell" and "row".`);
         }
@@ -819,7 +822,7 @@ export default function(Module) {
     }
 
     view.prototype.remove_update = function(callback) {
-        _clear_process(this.table.get_pool());
+        _clear_process(this.table.get_id());
         const total = this.callbacks.length;
         filterInPlace(this.callbacks, x => x.orig_callback !== callback);
         console.assert(total > this.callbacks.length, `"callback" does not match a registered updater`);
@@ -874,6 +877,10 @@ export default function(Module) {
         bindall(this);
     }
 
+    table.prototype.get_id = function() {
+        return this._Table.get_id();
+    };
+
     table.prototype.get_pool = function() {
         return this._Table.get_pool();
     };
@@ -890,7 +897,7 @@ export default function(Module) {
      * construction options.
      */
     table.prototype.clear = function() {
-        _reset_process(this.get_pool());
+        _reset_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
     };
 
@@ -898,10 +905,10 @@ export default function(Module) {
      * Replace all rows in this {@link module:perspective~table} the input data.
      */
     table.prototype.replace = function(data) {
-        _reset_process(this.get_pool());
+        _reset_process(this.get_id());
         this._Table.reset_gnode(this.gnode_id);
         this.update(data);
-        _clear_process(this._Table.get_pool());
+        _clear_process(this._Table.get_id());
     };
 
     /**
@@ -913,7 +920,7 @@ export default function(Module) {
         if (this.views.length > 0) {
             throw "Table still has contexts - refusing to delete.";
         }
-        _reset_process(this.get_pool());
+        _reset_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
         if (this._delete_callback) {
@@ -1063,7 +1070,7 @@ export default function(Module) {
      * bound to this table
      */
     table.prototype.view = function(_config = {}) {
-        _clear_process(this.get_pool());
+        _clear_process(this.get_id());
         let config = {};
         for (const key of Object.keys(_config)) {
             if (defaults.CONFIG_ALIASES[key]) {

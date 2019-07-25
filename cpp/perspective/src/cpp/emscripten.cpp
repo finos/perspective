@@ -1831,6 +1831,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_schema", &Table::get_schema)
         .function("unregister_gnode", &Table::unregister_gnode)
         .function("reset_gnode", &Table::reset_gnode)
+        .function("get_id", &Table::get_id)
         .function("get_pool", &Table::get_pool)
         .function("get_gnode", &Table::get_gnode);
     /******************************************************************************

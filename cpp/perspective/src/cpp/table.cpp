@@ -9,11 +9,14 @@
 
 #include <perspective/table.h>
 
+static perspective::t_uindex GLOBAL_ID = 0;
+
 namespace perspective {
 Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
     std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
     std::string index, t_op op, bool is_arrow)
     : m_init(false)
+    , m_id(GLOBAL_ID++)
     , m_pool(pool)
     , m_column_names(column_names)
     , m_data_types(data_types)
@@ -40,11 +43,6 @@ Table::init(t_data_table& data_table) {
     PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
 
     m_pool->send(m_gnode->get_id(), 0, data_table);
-
-    // force the pool to process the updated table
-    if ((m_op == t_op::OP_UPDATE) || (m_op == t_op::OP_DELETE)) {
-        m_pool->_process();
-    }
 
     m_init = true;
 }
@@ -86,8 +84,6 @@ Table::replace_data_table(t_data_table* data_table) {
 
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
     std::vector<std::string> col_names(in_schema.columns());
     std::vector<t_dtype> data_types(in_schema.types());
 
@@ -114,7 +110,6 @@ Table::make_gnode(const t_schema& in_schema) {
 
 void
 Table::set_gnode(std::shared_ptr<t_gnode> gnode) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_gnode = gnode;
     m_gnode_set = true;
 }
@@ -129,6 +124,11 @@ void
 Table::reset_gnode(t_uindex id) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_pool->get_gnode(id)->reset();
+}
+
+t_uindex
+Table::get_id() const {
+    return m_id;
 }
 
 std::shared_ptr<t_pool>
@@ -163,8 +163,6 @@ Table::get_index() const {
 
 void
 Table::process_op_column(t_data_table& data_table) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
     auto op_col = data_table.add_column("psp_op", DTYPE_UINT8, false);
     switch (m_op) {
         case OP_DELETE: {
@@ -176,8 +174,6 @@ Table::process_op_column(t_data_table& data_table) {
 
 void
 Table::process_index_column(t_data_table& data_table) {
-    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
-
     if (m_index == "") {
         // If user doesn't specify an column to use as the pkey index, just use
         // row number
