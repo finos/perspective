@@ -183,7 +183,7 @@ export class PerspectiveElement extends StateElement {
         }
 
         if (typeof this._plugin.max_cells !== "undefined") {
-            max_rows = max_cols ? Math.ceil(this._plugin.max_cells / max_cols) : this._plugin.max_cells / (num_columns || 1);
+            max_rows = Math.ceil(max_cols ? this._plugin.max_cells / max_cols : this._plugin.max_cells / (num_columns || 1));
         }
 
         return {max_cols, max_rows};

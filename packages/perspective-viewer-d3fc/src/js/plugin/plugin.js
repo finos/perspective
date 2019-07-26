@@ -38,23 +38,46 @@ export function register(...plugins) {
     });
 }
 
+function right_the_wrong(array) {
+    if (array.length === 0) {
+        return array;
+    }
+    const keys = Object.keys(array[0]);
+    const columns = new Set(keys);
+    for (const row of array) {
+        for (const col of columns) {
+            if (row[col] !== null) {
+                columns.delete(col);
+            }
+        }
+    }
+    for (const row of array) {
+        for (const col of columns) {
+            delete row[col];
+        }
+    }
+    return array;
+}
+
 function drawChart(chart) {
     return async function(el, view, task, end_col, end_row) {
         let tschema, schema, json, config;
 
         if (end_col && end_row) {
-            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, end_col}), view.get_config()]);
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, end_col, leaves_only: true}), view.get_config()]);
         } else if (end_col) {
-            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_col}), view.get_config()]);
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_col, leaves_only: true}), view.get_config()]);
         } else if (end_row) {
-            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row}), view.get_config()]);
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({end_row, leaves_only: true}), view.get_config()]);
         } else {
-            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
+            [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json({leaves_only: true}), view.get_config()]);
         }
 
         if (task.cancelled) {
             return;
         }
+
+        json = right_the_wrong(json);
 
         const {columns, row_pivots, column_pivots, filter} = config;
         const filtered = row_pivots.length > 0 ? json.filter(col => col.__ROW_PATH__ && col.__ROW_PATH__.length == row_pivots.length) : json;

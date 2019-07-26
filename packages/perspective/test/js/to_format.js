@@ -46,6 +46,21 @@ module.exports = perspective => {
             expect(json[0]).toEqual(comparator);
         });
 
+        it("should respect end rows when larger than data size", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view();
+            let json = await view.to_json({
+                start_row: 2,
+                end_row: 6
+            });
+            expect(json).toEqual(
+                int_float_string_data.slice(2).map(x => {
+                    x.datetime = +x.datetime;
+                    return x;
+                })
+            );
+        });
+
         it("should respect start/end columns", async function() {
             let table = perspective.table(int_float_string_data);
             let view = table.view();
@@ -161,6 +176,22 @@ module.exports = perspective => {
             let name = Object.keys(json[0])[1];
             // make sure that number of separators = num of column pivots
             expect((name.match(/\|/g) || []).length).toEqual(2);
+        });
+    });
+
+    describe("leaves_only flag", function() {
+        it("only emits leaves when leaves_only is set", async function() {
+            let table = perspective.table(int_float_string_data);
+            let view = table.view({
+                row_pivots: ["int"]
+            });
+            let json = await view.to_json({leaves_only: true});
+            expect(json).toEqual([
+                {__ROW_PATH__: [1], datetime: 1, float: 2.25, int: 1, string: 1},
+                {__ROW_PATH__: [2], datetime: 1, float: 3.5, int: 2, string: 1},
+                {__ROW_PATH__: [3], datetime: 1, float: 4.75, int: 3, string: 1},
+                {__ROW_PATH__: [4], datetime: 1, float: 5.25, int: 4, string: 1}
+            ]);
         });
     });
 
