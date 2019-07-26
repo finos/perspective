@@ -216,7 +216,7 @@ export class PerspectiveElement extends StateElement {
                 return true;
             } else if (rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const points_over_per = Math.floor((max_rows / count) * 100);
+                const points_over_per = Math.floor(((num_columns * max_rows) / count) * 100);
                 const warning = `Rendering ${numberWithCommas(num_columns * max_rows)} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
