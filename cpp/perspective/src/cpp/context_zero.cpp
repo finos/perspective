@@ -392,8 +392,9 @@ t_ctx0::sidedness() const {
  * @param existed
  */
 void
-t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& prev,
-    const t_table& curr, const t_table& transitions, const t_table& existed) {
+t_ctx0::notify(const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& curr, const t_data_table& transitions,
+    const t_data_table& existed) {
     psp_log_time(repr() + " notify.enter");
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
@@ -472,9 +473,7 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
                 m_traversal->delete_row(pkey);
                 delete_encountered = true;
             } break;
-            case OP_CLEAR: {
-                PSP_COMPLAIN_AND_ABORT("Unexpected OP");
-            } break;
+            default: { PSP_COMPLAIN_AND_ABORT("Unexpected OP"); } break;
         }
 
         // add the pkey for updated rows
@@ -496,7 +495,7 @@ t_ctx0::notify(const t_table& flattened, const t_table& delta, const t_table& pr
  * @param flattened
  */
 void
-t_ctx0::notify(const t_table& flattened) {
+t_ctx0::notify(const t_data_table& flattened) {
     t_uindex nrecs = flattened.size();
     std::shared_ptr<const t_column> pkey_sptr = flattened.get_const_column("psp_pkey");
     std::shared_ptr<const t_column> op_sptr = flattened.get_const_column("psp_op");
@@ -541,8 +540,8 @@ t_ctx0::notify(const t_table& flattened) {
 }
 
 void
-t_ctx0::calc_step_delta(const t_table& flattened, const t_table& prev, const t_table& curr,
-    const t_table& transitions) {
+t_ctx0::calc_step_delta(const t_data_table& flattened, const t_data_table& prev,
+    const t_data_table& curr, const t_data_table& transitions) {
     t_uindex nrows = flattened.size();
 
     PSP_VERBOSE_ASSERT(prev.size() == nrows, "Shape violation detected");

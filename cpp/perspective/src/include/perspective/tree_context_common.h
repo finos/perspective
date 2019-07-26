@@ -16,8 +16,8 @@
 
 namespace perspective {
 
-PERSPECTIVE_EXPORT void notify_sparse_tree_common(std::shared_ptr<t_table> strands,
-    std::shared_ptr<t_table> strand_deltas, std::shared_ptr<t_stree> tree,
+PERSPECTIVE_EXPORT void notify_sparse_tree_common(std::shared_ptr<t_data_table> strands,
+    std::shared_ptr<t_data_table> strand_deltas, std::shared_ptr<t_stree> tree,
     std::shared_ptr<t_traversal> traversal, bool process_traversal,
     const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
@@ -27,16 +27,17 @@ PERSPECTIVE_EXPORT void notify_sparse_tree(std::shared_ptr<t_stree> tree,
     std::shared_ptr<t_traversal> traversal, bool process_traversal,
     const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
-    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_table& delta,
-    const t_table& prev, const t_table& current, const t_table& transitions,
-    const t_table& existed, const t_config& config, const t_gstate& gstate);
+    const std::vector<t_sortspec>& ctx_sortby, const t_data_table& flattened,
+    const t_data_table& delta, const t_data_table& prev, const t_data_table& current,
+    const t_data_table& transitions, const t_data_table& existed, const t_config& config,
+    const t_gstate& gstate);
 
 PERSPECTIVE_EXPORT void notify_sparse_tree(std::shared_ptr<t_stree> tree,
     std::shared_ptr<t_traversal> traversal, bool process_traversal,
     const std::vector<t_aggspec>& aggregates,
     const std::vector<std::pair<std::string, std::string>>& tree_sortby,
-    const std::vector<t_sortspec>& ctx_sortby, const t_table& flattened, const t_config& config,
-    const t_gstate& gstate);
+    const std::vector<t_sortspec>& ctx_sortby, const t_data_table& flattened,
+    const t_config& config, const t_gstate& gstate);
 
 template <typename CONTEXT_T>
 void

@@ -109,8 +109,6 @@ table.prototype.view = function(config) {
 
 table.prototype.schema = async_queue("schema", "table_method");
 
-table.prototype.column_metadata = async_queue("column_metadata", "table_method");
-
 table.prototype.computed_schema = async_queue("computed_schema", "table_method");
 
 table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");

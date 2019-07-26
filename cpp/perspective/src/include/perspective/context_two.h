@@ -16,7 +16,7 @@
 #include <perspective/sparse_tree_node.h>
 #include <perspective/traversal_nodes.h>
 #include <perspective/traversal.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 
 namespace perspective {
 

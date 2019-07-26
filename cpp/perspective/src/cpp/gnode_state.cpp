@@ -32,7 +32,7 @@ t_gstate::~t_gstate() { LOG_DESTRUCTOR("t_gstate"); }
 
 void
 t_gstate::init() {
-    m_table = std::make_shared<t_table>(
+    m_table = std::make_shared<t_data_table>(
         "", "", m_pkeyed_schema, DEFAULT_EMPTY_CAPACITY, BACKING_STORE_MEMORY);
     m_table->init();
     m_pkcol = m_table->get_column("psp_pkey");
@@ -111,7 +111,7 @@ t_gstate::lookup_or_create(const t_tscalar& pkey) {
 }
 
 void
-t_gstate::update_history(const t_table* tbl) {
+t_gstate::update_history(const t_data_table* tbl) {
     const t_schema& fschema = tbl->get_schema();
     const t_schema& sschema = m_table->get_schema();
 
@@ -325,12 +325,12 @@ t_gstate::get_cpp_mask() const {
     return msk;
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gstate::get_table() {
     return m_table;
 }
 
-std::shared_ptr<const t_table>
+std::shared_ptr<const t_data_table>
 t_gstate::get_table() const {
     return m_table;
 }
@@ -464,11 +464,11 @@ t_gstate::get_pkey_dtype() const {
     return iter->first.get_dtype();
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gstate::get_sorted_pkeyed_table() const {
     std::map<t_tscalar, t_uindex> ordered(m_mapping.begin(), m_mapping.end());
     auto sch = m_pkeyed_schema.drop({"psp_op"});
-    auto rv = std::make_shared<t_table>(sch, 0);
+    auto rv = std::make_shared<t_data_table>(sch, 0);
     rv->init();
     rv->reserve(mapping_size());
 
@@ -493,29 +493,29 @@ t_gstate::get_sorted_pkeyed_table() const {
     return rv;
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gstate::get_pkeyed_table(const t_schema& schema) const {
-    return std::shared_ptr<t_table>(_get_pkeyed_table(schema));
+    return std::shared_ptr<t_data_table>(_get_pkeyed_table(schema));
 }
 
-std::shared_ptr<t_table>
+std::shared_ptr<t_data_table>
 t_gstate::get_pkeyed_table() const {
     if (m_mapping.size() == m_table->size())
         return m_table;
-    return std::shared_ptr<t_table>(_get_pkeyed_table(m_pkeyed_schema));
+    return std::shared_ptr<t_data_table>(_get_pkeyed_table(m_pkeyed_schema));
 }
 
-t_table*
+t_data_table*
 t_gstate::_get_pkeyed_table() const {
     return _get_pkeyed_table(m_pkeyed_schema);
 }
 
-t_table*
+t_data_table*
 t_gstate::_get_pkeyed_table(const std::vector<t_tscalar>& pkeys) const {
     return _get_pkeyed_table(m_pkeyed_schema, pkeys);
 }
 
-t_table*
+t_data_table*
 t_gstate::_get_pkeyed_table(const t_schema& schema, const std::vector<t_tscalar>& pkeys) const {
     t_mask mask(size());
 
@@ -529,24 +529,24 @@ t_gstate::_get_pkeyed_table(const t_schema& schema, const std::vector<t_tscalar>
     return _get_pkeyed_table(schema, mask);
 }
 
-t_table*
+t_data_table*
 t_gstate::_get_pkeyed_table(const t_schema& schema) const {
     auto mask = get_cpp_mask();
     return _get_pkeyed_table(schema, mask);
 }
 
-t_table*
+t_data_table*
 t_gstate::_get_pkeyed_table(const t_schema& schema, const t_mask& mask) const {
     static bool const enable_pkeyed_table_mask_fix = true;
     t_uindex o_ncols = schema.m_columns.size();
     auto sz = enable_pkeyed_table_mask_fix ? mask.count() : mask.size();
-    auto rval = new t_table(schema, sz);
+    auto rval = new t_data_table(schema, sz);
     rval->init();
     rval->set_size(sz);
 
     const auto& sch_cols = schema.m_columns;
 
-    const t_table* tbl = m_table.get();
+    const t_data_table* tbl = m_table.get();
 
 #ifdef PSP_PARALLEL_FOR
     PSP_PFOR(0, int(o_ncols), 1,

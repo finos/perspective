@@ -14,7 +14,7 @@
 namespace perspective {
 
 t_mask
-apply_filters(const t_table& tbl, const std::vector<t_fterm>& filters) {
+apply_filters(const t_data_table& tbl, const std::vector<t_fterm>& filters) {
     t_mask mask(tbl.size());
 
     // If filters are defined

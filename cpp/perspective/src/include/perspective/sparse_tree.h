@@ -27,7 +27,7 @@ SUPPRESS_WARNINGS_VC(4503)
 #include <perspective/min_max.h>
 #include <perspective/mask.h>
 #include <perspective/sym_table.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/dense_tree.h>
 #include <vector>
 #include <algorithm>
@@ -169,13 +169,13 @@ public:
         std::vector<t_column*>& agg_acols, t_column* agg_scount, t_column* spkey,
         t_uindex& insert_count, const std::vector<std::string>& pivot_like) const;
 
-    std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>> build_strand_table(
-        const t_table& flattened, const t_table& delta, const t_table& prev,
-        const t_table& current, const t_table& transitions,
+    std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>> build_strand_table(
+        const t_data_table& flattened, const t_data_table& delta, const t_data_table& prev,
+        const t_data_table& current, const t_data_table& transitions,
         const std::vector<t_aggspec>& aggspecs, const t_config& config) const;
 
-    std::pair<std::shared_ptr<t_table>, std::shared_ptr<t_table>> build_strand_table(
-        const t_table& flattened, const std::vector<t_aggspec>& aggspecs,
+    std::pair<std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>> build_strand_table(
+        const t_data_table& flattened, const std::vector<t_aggspec>& aggspecs,
         const t_config& config) const;
 
     void update_shape_from_static(const t_dtree_ctx& ctx);
@@ -200,9 +200,9 @@ public:
     t_index get_sibling_idx(t_index p_ptidx, t_index p_nchild, t_uindex c_ptidx) const;
     t_uindex get_aggidx(t_uindex idx) const;
 
-    std::shared_ptr<const t_table> get_aggtable() const;
+    std::shared_ptr<const t_data_table> get_aggtable() const;
 
-    t_table* _get_aggtable();
+    t_data_table* _get_aggtable();
 
     t_tnode get_node(t_uindex idx) const;
 
@@ -266,7 +266,7 @@ public:
 
     bool node_exists(t_uindex nidx);
 
-    t_table* get_aggtable();
+    t_data_table* get_aggtable();
 
     void clear_aggregates(const std::vector<t_uindex>& indices);
 
@@ -296,7 +296,7 @@ protected:
 
     bool is_leaf(t_uindex nidx) const;
 
-    t_build_strand_table_common_rval build_strand_table_common(const t_table& flattened,
+    t_build_strand_table_common_rval build_strand_table_common(const t_data_table& flattened,
         const std::vector<t_aggspec>& aggspecs, const t_config& config) const;
 
     void populate_pkey_idx(const t_dtree_ctx& ctx, const t_dtree& dtree, t_uindex dptidx,
@@ -309,7 +309,7 @@ private:
     std::shared_ptr<t_idxpkey> m_idxpkey;
     std::shared_ptr<t_idxleaf> m_idxleaf;
     t_uindex m_curidx;
-    std::shared_ptr<t_table> m_aggregates;
+    std::shared_ptr<t_data_table> m_aggregates;
     std::vector<t_aggspec> m_aggspecs;
     t_schema m_schema;
     std::vector<t_uindex> m_agg_freelist;

@@ -13,7 +13,7 @@
 #include <perspective/context_base.h>
 #include <perspective/traversal.h>
 #include <perspective/sparse_tree.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/path.h>
 #include <perspective/sym_table.h>
 

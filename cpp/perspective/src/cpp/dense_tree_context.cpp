@@ -15,8 +15,8 @@
 
 namespace perspective {
 
-t_dtree_ctx::t_dtree_ctx(std::shared_ptr<const t_table> strands,
-    std::shared_ptr<const t_table> strand_deltas, const t_dtree& tree,
+t_dtree_ctx::t_dtree_ctx(std::shared_ptr<const t_data_table> strands,
+    std::shared_ptr<const t_data_table> strand_deltas, const t_dtree& tree,
     const std::vector<t_aggspec>& aggspecs)
     : m_strands(strands)
     , m_strand_deltas(strand_deltas)
@@ -63,7 +63,7 @@ t_dtree_ctx::build_aggregates() {
 
     t_schema aggschema(columns, dtypes);
 
-    m_aggregates = std::make_shared<t_table>(aggschema, m_tree.size());
+    m_aggregates = std::make_shared<t_data_table>(aggschema, m_tree.size());
 
     m_aggregates->init();
     m_aggregates->set_size(m_tree.size());
@@ -72,7 +72,8 @@ t_dtree_ctx::build_aggregates() {
         const t_aggspec& aggspec = m_aggspecs[idx];
         const std::vector<t_dep>& deps = aggspec.get_dependencies();
 
-        const t_table* tbl = aggspec.is_non_delta() ? m_strands.get() : m_strand_deltas.get();
+        const t_data_table* tbl
+            = aggspec.is_non_delta() ? m_strands.get() : m_strand_deltas.get();
 
         std::vector<std::shared_ptr<const t_column>> icolumns;
         for (const auto& d : deps) {
@@ -86,7 +87,7 @@ t_dtree_ctx::build_aggregates() {
     }
 }
 
-const t_table&
+const t_data_table&
 t_dtree_ctx::get_aggtable() const {
     return *(m_aggregates.get());
 }
@@ -156,12 +157,12 @@ t_dtree_ctx::get_strand_count_col() const {
     return m_strand_deltas->get_const_column("psp_strand_count");
 }
 
-std::shared_ptr<const t_table>
+std::shared_ptr<const t_data_table>
 t_dtree_ctx::get_strands() const {
     return m_strands;
 }
 
-std::shared_ptr<const t_table>
+std::shared_ptr<const t_data_table>
 t_dtree_ctx::get_strand_deltas() const {
     return m_strand_deltas;
 }

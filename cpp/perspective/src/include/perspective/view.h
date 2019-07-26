@@ -12,13 +12,12 @@
 #include <perspective/exports.h>
 #include <perspective/base.h>
 #include <perspective/raw_types.h>
-#include <perspective/gnode.h>
-#include <perspective/pool.h>
 #include <perspective/config.h>
 #include <perspective/context_zero.h>
 #include <perspective/context_one.h>
 #include <perspective/context_two.h>
 #include <perspective/data_slice.h>
+#include <perspective/table.h>
 #include <cstddef>
 #include <memory>
 #include <map>
@@ -28,8 +27,8 @@ namespace perspective {
 template <typename CTX_T>
 class PERSPECTIVE_EXPORT View {
 public:
-    View(t_pool* pool, std::shared_ptr<CTX_T> ctx, std::shared_ptr<t_gnode> gnode,
-        std::string name, std::string separator, t_config config);
+    View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std::string name,
+        std::string separator, t_config config);
 
     ~View();
 
@@ -165,9 +164,8 @@ private:
     std::string _map_aggregate_types(
         const std::string& name, const std::string& typestring) const;
 
-    t_pool* m_pool;
+    std::shared_ptr<Table> m_table;
     std::shared_ptr<CTX_T> m_ctx;
-    std::shared_ptr<t_gnode> m_gnode;
     std::string m_name;
     std::string m_separator;
 

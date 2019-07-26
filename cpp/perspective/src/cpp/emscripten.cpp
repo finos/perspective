@@ -7,25 +7,7 @@
  *
  */
 
-#include <perspective/base.h>
-#include <perspective/binding.h>
 #include <perspective/emscripten.h>
-#include <perspective/gnode.h>
-#include <perspective/table.h>
-#include <perspective/pool.h>
-#include <perspective/context_zero.h>
-#include <perspective/context_one.h>
-#include <perspective/context_two.h>
-#include <perspective/view.h>
-#include <random>
-#include <cmath>
-#include <sstream>
-#include <emscripten.h>
-#include <emscripten/bind.h>
-#include <emscripten/val.h>
-#include <perspective/sym_table.h>
-#include <codecvt>
-#include <boost/optional.hpp>
 
 using namespace emscripten;
 using namespace perspective;
@@ -38,7 +20,7 @@ namespace binding {
      */
     template <>
     bool
-    hasValue(val item) {
+    has_value(t_val item) {
         return (!item.isUndefined() && !item.isNull());
     }
 
@@ -49,10 +31,9 @@ namespace binding {
 
     t_index
     _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name) {
-        for (std::size_t idx = 0, max = agg_names.size(); idx != max; ++idx) {
-            if (agg_names[idx] == name) {
-                return t_index(idx);
-            }
+        auto it = std::find(agg_names.begin(), agg_names.end(), name);
+        if (it != agg_names.end()) {
+            return t_index(std::distance(agg_names.begin(), it));
         }
         return t_index();
     }
@@ -70,10 +51,11 @@ namespace binding {
     std::vector<t_aggspec>
     _get_aggspecs(const t_schema& schema, const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots, bool column_only,
-        const std::vector<std::string>& columns, const std::vector<val>& sortbys, val j_aggs) {
+        const std::vector<std::string>& columns, const std::vector<t_val>& sortbys,
+        t_val j_aggs) {
         std::vector<t_aggspec> aggspecs;
-        val agg_columns = val::global("Object").call<val>("keys", j_aggs);
-        std::vector<std::string> aggs = vecFromArray<val, std::string>(agg_columns);
+        t_val agg_columns = t_val::global("Object").call<t_val>("keys", j_aggs);
+        std::vector<std::string> aggs = vecFromArray<t_val, std::string>(agg_columns);
 
         /**
          * Provide aggregates for columns that are shown but NOT specified in
@@ -158,10 +140,10 @@ namespace binding {
     template <>
     std::vector<t_sortspec>
     _get_sort(const std::vector<std::string>& columns, bool is_column_sort,
-        const std::vector<val>& sortbys) {
+        const std::vector<t_val>& sortbys) {
         std::vector<t_sortspec> svec{};
 
-        auto _is_valid_sort = [is_column_sort](val sort_item) {
+        auto _is_valid_sort = [is_column_sort](t_val sort_item) {
             /**
              * If column sort, make sure string matches. Otherwise make
              * sure string is *not* a column sort.
@@ -172,7 +154,7 @@ namespace binding {
         };
 
         for (auto idx = 0; idx < sortbys.size(); ++idx) {
-            val sort_item = sortbys[idx];
+            t_val sort_item = sortbys[idx];
             t_index agg_index;
             std::string column;
             t_sorttype sorttype;
@@ -195,21 +177,21 @@ namespace binding {
 
     template <>
     std::vector<t_fterm>
-    _get_fterms(const t_schema& schema, val j_date_parser, val j_filters) {
+    _get_fterms(const t_schema& schema, t_val j_date_parser, t_val j_filters) {
         std::vector<t_fterm> fvec{};
-        std::vector<val> filters = vecFromArray<val, val>(j_filters);
+        std::vector<t_val> filters = vecFromArray<t_val, t_val>(j_filters);
 
-        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<val> filter) {
+        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<t_val> filter) {
             if (type == DTYPE_DATE || type == DTYPE_TIME) {
-                val parsed_date = j_date_parser.call<val>("parse", filter[2]);
-                return hasValue(parsed_date);
+                t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
+                return has_value(parsed_date);
             } else {
-                return hasValue(filter[2]);
+                return has_value(filter[2]);
             }
         };
 
         for (auto fidx = 0; fidx < filters.size(); ++fidx) {
-            std::vector<val> filter = vecFromArray<val, val>(filters[fidx]);
+            std::vector<t_val> filter = vecFromArray<t_val, t_val>(filters[fidx]);
             std::string col = filter[0].as<std::string>();
             t_filter_op comp = str_to_filter_op(filter[1].as<std::string>());
 
@@ -226,7 +208,7 @@ namespace binding {
                 case FILTER_OP_IN: {
                     std::vector<t_tscalar> terms{};
                     std::vector<std::string> j_terms
-                        = vecFromArray<val, std::string>(filter[2]);
+                        = vecFromArray<t_val, std::string>(filter[2]);
                     for (auto jidx = 0; jidx < j_terms.size(); ++jidx) {
                         terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
                     }
@@ -246,13 +228,13 @@ namespace binding {
                             term = mktscalar(filter[2].as<bool>());
                         } break;
                         case DTYPE_DATE: {
-                            val parsed_date = j_date_parser.call<val>("parse", filter[2]);
+                            t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
                             term = mktscalar(jsdate_to_t_date(parsed_date));
                         } break;
                         case DTYPE_TIME: {
-                            val parsed_date = j_date_parser.call<val>("parse", filter[2]);
+                            t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
                             term = mktscalar(t_time(static_cast<std::int64_t>(
-                                parsed_date.call<val>("getTime").as<double>())));
+                                parsed_date.call<t_val>("getTime").as<double>())));
                         } break;
                         default: {
                             term = mktscalar(
@@ -273,60 +255,53 @@ namespace binding {
      */
 
     t_date
-    jsdate_to_t_date(val date) {
-        return t_date(date.call<val>("getFullYear").as<std::int32_t>(),
-            date.call<val>("getMonth").as<std::int32_t>(),
-            date.call<val>("getDate").as<std::int32_t>());
+    jsdate_to_t_date(t_val date) {
+        return t_date(date.call<t_val>("getFullYear").as<std::int32_t>(),
+            date.call<t_val>("getMonth").as<std::int32_t>(),
+            date.call<t_val>("getDate").as<std::int32_t>());
     }
 
-    val
+    t_val
     t_date_to_jsdate(t_date date) {
-        val jsdate = val::global("Date").new_();
-        jsdate.call<val>("setYear", date.year());
-        jsdate.call<val>("setMonth", date.month());
-        jsdate.call<val>("setDate", date.day());
-        jsdate.call<val>("setHours", 0);
-        jsdate.call<val>("setMinutes", 0);
-        jsdate.call<val>("setSeconds", 0);
-        jsdate.call<val>("setMilliseconds", 0);
+        t_val jsdate = t_val::global("Date").new_();
+        jsdate.call<t_val>("setYear", date.year());
+        jsdate.call<t_val>("setMonth", date.month());
+        jsdate.call<t_val>("setDate", date.day());
+        jsdate.call<t_val>("setHours", 0);
+        jsdate.call<t_val>("setMinutes", 0);
+        jsdate.call<t_val>("setSeconds", 0);
+        jsdate.call<t_val>("setMilliseconds", 0);
         return jsdate;
     }
 
-    /**
-     * Converts a scalar value to its JS representation.
+    /******************************************************************************
      *
-     * Params
-     * ------
-     * t_tscalar scalar
-     *
-     * Returns
-     * -------
-     * val
+     * Manipulate scalar values
      */
-    val
+    t_val
     scalar_to_val(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         if (!scalar.is_valid()) {
-            return val::null();
+            return t_val::null();
         }
         switch (scalar.get_dtype()) {
             case DTYPE_BOOL: {
                 if (scalar) {
-                    return val(true);
+                    return t_val(true);
                 } else {
-                    return val(false);
+                    return t_val(false);
                 }
             }
             case DTYPE_TIME: {
                 if (cast_double) {
                     auto x = scalar.to_uint64();
                     double y = *reinterpret_cast<double*>(&x);
-                    return val(y);
+                    return t_val(y);
                 } else if (cast_string) {
                     double ms = scalar.to_double();
-                    emscripten::val date = val::global("Date").new_(ms);
-                    return date.call<val>("toLocaleString");
+                    t_val date = t_val::global("Date").new_(ms);
+                    return date.call<t_val>("toLocaleString");
                 } else {
-                    return val(scalar.to_double());
+                    return t_val(scalar.to_double());
                 }
             }
             case DTYPE_FLOAT64:
@@ -334,13 +309,13 @@ namespace binding {
                 if (cast_double) {
                     auto x = scalar.to_uint64();
                     double y = *reinterpret_cast<double*>(&x);
-                    return val(y);
+                    return t_val(y);
                 } else {
-                    return val(scalar.to_double());
+                    return t_val(scalar.to_double());
                 }
             }
             case DTYPE_DATE: {
-                return t_date_to_jsdate(scalar.get<t_date>()).call<val>("getTime");
+                return t_date_to_jsdate(scalar.get<t_date>()).call<t_val>("getTime");
             }
             case DTYPE_UINT8:
             case DTYPE_UINT16:
@@ -348,30 +323,30 @@ namespace binding {
             case DTYPE_INT8:
             case DTYPE_INT16:
             case DTYPE_INT32: {
-                return val(static_cast<std::int32_t>(scalar.to_int64()));
+                return t_val(static_cast<std::int32_t>(scalar.to_int64()));
             }
             case DTYPE_UINT64:
             case DTYPE_INT64: {
                 // This could potentially lose precision
-                return val(static_cast<std::int32_t>(scalar.to_int64()));
+                return t_val(static_cast<std::int32_t>(scalar.to_int64()));
             }
             case DTYPE_NONE: {
-                return val::null();
+                return t_val::null();
             }
             case DTYPE_STR:
             default: {
                 std::wstring_convert<utf8convert_type, wchar_t> converter("", L"<Invalid>");
-                return val(converter.from_bytes(scalar.to_string()));
+                return t_val(converter.from_bytes(scalar.to_string()));
             }
         }
     }
 
-    val
+    t_val
     scalar_vec_to_val(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
         return scalar_to_val(scalars[idx]);
     }
 
-    val
+    t_val
     scalar_vec_to_string(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
         return scalar_to_val(scalars[idx], false, true);
     }
@@ -383,13 +358,13 @@ namespace binding {
     }
 
     template <>
-    val
+    t_val
     scalar_to(const t_tscalar& scalar) {
         return scalar_to_val(scalar);
     }
 
     template <>
-    val
+    t_val
     scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx) {
         return scalar_vec_to_val(scalars, idx);
     }
@@ -399,47 +374,39 @@ namespace binding {
      * WebAssembly heap.
      */
     template <typename T>
-    val
+    t_val
     vector_to_typed_array(std::vector<T>& xs) {
         T* st = &xs[0];
         uintptr_t offset = reinterpret_cast<uintptr_t>(st);
-        return val::module_property("HEAPU8").call<val>(
+        return t_val::module_property("HEAPU8").call<t_val>(
             "slice", offset, offset + (sizeof(T) * xs.size()));
     }
 
-    /**
+    /******************************************************************************
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * Write data in the Apache Arrow format
      */
-
     namespace arrow {
 
         template <>
         void
         vecFromTypedArray(
-            const val& typedArray, void* data, std::int32_t length, const char* destType) {
-            val memory = val::module_property("buffer");
+            const t_val& typedArray, void* data, std::int32_t length, const char* destType) {
+            t_val memory = t_val::module_property("buffer");
             if (destType == nullptr) {
-                val memoryView = typedArray["constructor"].new_(
+                t_val memoryView = typedArray["constructor"].new_(
                     memory, reinterpret_cast<std::uintptr_t>(data), length);
-                memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
+                memoryView.call<void>("set", typedArray.call<t_val>("slice", 0, length));
             } else {
-                val memoryView = val::global(destType).new_(
+                t_val memoryView = t_val::global(destType).new_(
                     memory, reinterpret_cast<std::uintptr_t>(data), length);
-                memoryView.call<void>("set", typedArray.call<val>("slice", 0, length));
+                memoryView.call<void>("set", typedArray.call<t_val>("slice", 0, length));
             }
         }
 
         template <>
         void
-        fill_col_valid(val dcol, std::shared_ptr<t_column> col) {
+        fill_col_valid(t_val dcol, std::shared_ptr<t_column> col) {
             // dcol should be the Uint8Array containing the null bitmap
             t_uindex nrows = col->size();
 
@@ -453,17 +420,17 @@ namespace binding {
 
         template <>
         void
-        fill_col_dict(val dictvec, std::shared_ptr<t_column> col) {
+        fill_col_dict(t_val dictvec, std::shared_ptr<t_column> col) {
             // ptaylor: This assumes the dictionary is either a Binary or Utf8 Vector. Should it
             // support other Vector types?
-            val vdata = dictvec["values"];
+            t_val vdata = dictvec["values"];
             std::int32_t vsize = vdata["length"].as<std::int32_t>();
             std::vector<unsigned char> data;
             data.reserve(vsize);
             data.resize(vsize);
             vecFromTypedArray(vdata, data.data(), vsize);
 
-            val voffsets = dictvec["valueOffsets"];
+            t_val voffsets = dictvec["valueOffsets"];
             std::int32_t osize = voffsets["length"].as<std::int32_t>();
             std::vector<std::int32_t> offsets;
             offsets.reserve(osize);
@@ -488,34 +455,31 @@ namespace binding {
     } // namespace arrow
 
     namespace js_typed_array {
-        val ArrayBuffer = val::global("ArrayBuffer");
-        val Int8Array = val::global("Int8Array");
-        val Int16Array = val::global("Int16Array");
-        val Int32Array = val::global("Int32Array");
-        val UInt8Array = val::global("Uint8Array");
-        val UInt32Array = val::global("Uint32Array");
-        val Float32Array = val::global("Float32Array");
-        val Float64Array = val::global("Float64Array");
+        t_val ArrayBuffer = t_val::global("ArrayBuffer");
+        t_val Int8Array = t_val::global("Int8Array");
+        t_val Int16Array = t_val::global("Int16Array");
+        t_val Int32Array = t_val::global("Int32Array");
+        t_val UInt8Array = t_val::global("Uint8Array");
+        t_val UInt32Array = t_val::global("Uint32Array");
+        t_val Float32Array = t_val::global("Float32Array");
+        t_val Float64Array = t_val::global("Float64Array");
     } // namespace js_typed_array
 
     template <typename T>
-    const val typed_array = val::null();
+    const t_val typed_array = t_val::null();
 
     template <>
-    const val typed_array<double> = js_typed_array::Float64Array;
+    const t_val typed_array<double> = js_typed_array::Float64Array;
     template <>
-    const val typed_array<float> = js_typed_array::Float32Array;
+    const t_val typed_array<float> = js_typed_array::Float32Array;
     template <>
-    const val typed_array<std::int8_t> = js_typed_array::Int8Array;
+    const t_val typed_array<std::int8_t> = js_typed_array::Int8Array;
     template <>
-    const val typed_array<std::int16_t> = js_typed_array::Int16Array;
+    const t_val typed_array<std::int16_t> = js_typed_array::Int16Array;
     template <>
-    const val typed_array<std::int32_t> = js_typed_array::Int32Array;
+    const t_val typed_array<std::int32_t> = js_typed_array::Int32Array;
     template <>
-    const val typed_array<std::uint32_t> = js_typed_array::UInt32Array;
-
-    template <typename F, typename T = F>
-    T get_scalar(t_tscalar& t);
+    const t_val typed_array<std::uint32_t> = js_typed_array::UInt32Array;
 
     template <>
     double
@@ -559,9 +523,9 @@ namespace binding {
         return *reinterpret_cast<double*>(&x);
     }
 
-    template <typename T, typename F = T, typename O = T>
+    template <typename T, typename F, typename O>
     val
-    col_to_typed_array(std::vector<t_tscalar> const& data) {
+    col_to_typed_array(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
         std::vector<T> vals;
         vals.reserve(data.size());
@@ -584,7 +548,7 @@ namespace binding {
             }
         }
 
-        val arr = val::global("Array").new_();
+        t_val arr = t_val::global("Array").new_();
         arr.call<void>("push", typed_array<O>.new_(vector_to_typed_array(vals)["buffer"]));
         arr.call<void>("push", nullCount);
         arr.call<void>("push", vector_to_typed_array(validityMap));
@@ -593,7 +557,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<bool>(std::vector<t_tscalar> const& data) {
+    col_to_typed_array<bool>(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
 
         std::vector<std::int8_t> vals;
@@ -609,10 +573,10 @@ namespace binding {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 // get boolean and write into array
-                std::int8_t val = get_scalar<std::int8_t>(scalar);
-                vals.push_back(val);
+                std::int8_t t_val = get_scalar<std::int8_t>(scalar);
+                vals.push_back(t_val);
                 // bit mask based on value in array
-                vals[idx / 8] |= val << (idx % 8);
+                vals[idx / 8] |= t_val << (idx % 8);
                 // Mark the slot as non-null (valid)
                 validityMap[idx / 32] |= 1 << (idx % 32);
             } else {
@@ -621,7 +585,7 @@ namespace binding {
             }
         }
 
-        val arr = val::global("Array").new_();
+        t_val arr = t_val::global("Array").new_();
         arr.call<void>(
             "push", typed_array<std::int8_t>.new_(vector_to_typed_array(vals)["buffer"]));
         arr.call<void>("push", nullCount);
@@ -631,7 +595,7 @@ namespace binding {
 
     template <>
     val
-    col_to_typed_array<std::string>(std::vector<t_tscalar> const& data) {
+    col_to_typed_array<std::string>(const std::vector<t_tscalar>& data) {
         int data_size = data.size();
 
         t_vocab vocab;
@@ -641,22 +605,22 @@ namespace binding {
         int nullCount = 0;
         std::vector<std::uint32_t> validityMap; // = new std::uint32_t[nullSize];
         validityMap.resize(nullSize);
-        val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
-        val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
+        t_val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
+        t_val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
 
         for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
             if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
                 auto adx = vocab.get_interned(scalar.to_string());
-                indexArray.call<void>("fill", val(adx), idx, idx + 1);
+                indexArray.call<void>("fill", t_val(adx), idx, idx + 1);
                 validityMap[idx / 32] |= 1 << (idx % 32);
             } else {
                 nullCount++;
             }
         }
-        val dictBuffer = js_typed_array::ArrayBuffer.new_(
+        t_val dictBuffer = js_typed_array::ArrayBuffer.new_(
             vocab.get_vlendata()->size() - vocab.get_vlenidx());
-        val dictArray = js_typed_array::UInt8Array.new_(dictBuffer);
+        t_val dictArray = js_typed_array::UInt8Array.new_(dictBuffer);
         std::vector<std::uint32_t> offsets;
         offsets.reserve(vocab.get_vlenidx() + 1);
         std::uint32_t index = 0;
@@ -664,13 +628,13 @@ namespace binding {
             const char* str = vocab.unintern_c(i);
             offsets.push_back(index);
             while (*str) {
-                dictArray.call<void>("fill", val(*str++), index, index + 1);
+                dictArray.call<void>("fill", t_val(*str++), index, index + 1);
                 index++;
             }
         }
         offsets.push_back(index);
 
-        val arr = val::global("Array").new_();
+        t_val arr = t_val::global("Array").new_();
         arr.call<void>("push", dictArray);
         arr.call<void>(
             "push", js_typed_array::UInt32Array.new_(vector_to_typed_array(offsets)["buffer"]));
@@ -680,8 +644,7 @@ namespace binding {
         return arr;
     }
 
-    // Given a column index, serialize data to TypedArray
-    val
+    t_val
     col_to_js_typed_array(const std::vector<t_tscalar>& data, t_dtype dtype, t_index idx) {
         switch (dtype) {
             case DTYPE_INT8: {
@@ -715,18 +678,209 @@ namespace binding {
             } break;
             default: {
                 PSP_COMPLAIN_AND_ABORT("Unhandled aggregate type");
-                return val::undefined();
+                return t_val::undefined();
             }
         }
     }
 
+    /******************************************************************************
+     *
+     * Data accessor API
+     */
+
+    std::vector<std::string>
+    get_column_names(t_val data, std::int32_t format) {
+        std::vector<std::string> names;
+        t_val Object = t_val::global("Object");
+
+        if (format == 0) {
+            std::int32_t max_check = 50;
+            t_val data_names = Object.call<t_val>("keys", data[0]);
+            names = vecFromArray<t_val, std::string>(data_names);
+            std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
+
+            for (auto ix = 0; ix < check_index; ix++) {
+                t_val next = Object.call<t_val>("keys", data[ix]);
+
+                if (names.size() != next["length"].as<std::int32_t>()) {
+                    auto old_size = names.size();
+                    auto new_names = vecFromJSArray<std::string>(next);
+                    if (max_check == 50) {
+                        std::cout << "Data parse warning: Array data has inconsistent rows"
+                                  << std::endl;
+                    }
+
+                    for (auto s = new_names.begin(); s != new_names.end(); ++s) {
+                        if (std::find(names.begin(), names.end(), *s) == names.end()) {
+                            names.push_back(*s);
+                        }
+                    }
+
+                    std::cout << "Extended from " << old_size << "to " << names.size()
+                              << std::endl;
+                    max_check *= 2;
+                }
+            }
+        } else if (format == 1 || format == 2) {
+            t_val keys = Object.call<t_val>("keys", data);
+            names = vecFromArray<t_val, std::string>(keys);
+        }
+
+        return names;
+    }
+
+    t_dtype
+    infer_type(t_val x, t_val date_validator) {
+        std::string jstype = x.typeOf().as<std::string>();
+        t_dtype t = t_dtype::DTYPE_STR;
+
+        // Unwrap numbers inside strings
+        t_val x_number = t_val::global("Number").call<t_val>("call", t_val::object(), x);
+        bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
+            && (!t_val::global("isNaN").call<bool>("call", t_val::object(), x_number));
+
+        if (x.isNull()) {
+            t = t_dtype::DTYPE_NONE;
+        } else if (jstype == "number" || number_in_string) {
+            if (number_in_string) {
+                x = x_number;
+            }
+            double x_float64 = x.as<double>();
+            if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0)
+                && (x_float64 != 0.0)) {
+                t = t_dtype::DTYPE_INT32;
+            } else {
+                t = t_dtype::DTYPE_FLOAT64;
+            }
+        } else if (jstype == "boolean") {
+            t = t_dtype::DTYPE_BOOL;
+        } else if (x.instanceof (t_val::global("Date"))) {
+            std::int32_t hours = x.call<t_val>("getHours").as<std::int32_t>();
+            std::int32_t minutes = x.call<t_val>("getMinutes").as<std::int32_t>();
+            std::int32_t seconds = x.call<t_val>("getSeconds").as<std::int32_t>();
+            std::int32_t milliseconds = x.call<t_val>("getMilliseconds").as<std::int32_t>();
+
+            if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
+                t = t_dtype::DTYPE_DATE;
+            } else {
+                t = t_dtype::DTYPE_TIME;
+            }
+        } else if (jstype == "string") {
+            if (date_validator.call<t_val>("call", t_val::object(), x).as<bool>()) {
+                t = t_dtype::DTYPE_TIME;
+            } else {
+                std::string lower = x.call<t_val>("toLowerCase").as<std::string>();
+                if (lower == "true" || lower == "false") {
+                    t = t_dtype::DTYPE_BOOL;
+                } else {
+                    t = t_dtype::DTYPE_STR;
+                }
+            }
+        }
+
+        return t;
+    }
+
+    t_dtype
+    get_data_type(
+        t_val data, std::int32_t format, const std::string& name, t_val date_validator) {
+        std::int32_t i = 0;
+        boost::optional<t_dtype> inferredType;
+
+        if (format == 0) {
+            // loop parameters differ slightly so rewrite the loop
+            while (!inferredType.is_initialized() && i < 100
+                && i < data["length"].as<std::int32_t>()) {
+                if (data[i].call<t_val>("hasOwnProperty", name).as<bool>() == true) {
+                    if (!data[i][name].isNull()) {
+                        inferredType = infer_type(data[i][name], date_validator);
+                    } else {
+                        inferredType = t_dtype::DTYPE_STR;
+                    }
+                }
+
+                i++;
+            }
+        } else if (format == 1) {
+            while (!inferredType.is_initialized() && i < 100
+                && i < data[name]["length"].as<std::int32_t>()) {
+                if (!data[name][i].isNull()) {
+                    inferredType = infer_type(data[name][i], date_validator);
+                } else {
+                    inferredType = t_dtype::DTYPE_STR;
+                }
+
+                i++;
+            }
+        }
+
+        if (!inferredType.is_initialized()) {
+            return t_dtype::DTYPE_STR;
+        } else {
+            return inferredType.get();
+        }
+    }
+
+    std::vector<t_dtype>
+    get_data_types(t_val data, std::int32_t format, const std::vector<std::string>& names,
+        t_val date_validator) {
+        if (names.size() == 0) {
+            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
+        }
+
+        std::vector<t_dtype> types;
+
+        if (format == 2) {
+            t_val keys = t_val::global("Object").template call<t_val>("keys", data);
+            std::vector<std::string> data_names = vecFromArray<t_val, std::string>(keys);
+
+            for (const std::string& name : data_names) {
+                std::string value = data[name].as<std::string>();
+                t_dtype type;
+
+                if (value == "integer") {
+                    type = t_dtype::DTYPE_INT32;
+                } else if (value == "float") {
+                    type = t_dtype::DTYPE_FLOAT64;
+                } else if (value == "string") {
+                    type = t_dtype::DTYPE_STR;
+                } else if (value == "boolean") {
+                    type = t_dtype::DTYPE_BOOL;
+                } else if (value == "datetime") {
+                    type = t_dtype::DTYPE_TIME;
+                } else if (value == "date") {
+                    type = t_dtype::DTYPE_DATE;
+                } else {
+                    PSP_COMPLAIN_AND_ABORT(
+                        "Unknown type '" + value + "' for key '" + name + "'");
+                }
+
+                types.push_back(type);
+            }
+
+            return types;
+        } else {
+            for (const std::string& name : names) {
+                t_dtype type = get_data_type(data, format, name, date_validator);
+                types.push_back(type);
+            }
+        }
+
+        return types;
+    }
+
+    /******************************************************************************
+     *
+     * Fill columns with data
+     */
+
     void
-    _fill_col_int64(val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_int64(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            val data = accessor["values"];
+            t_val data = accessor["values"];
             // arrow packs 64 bit into two 32 bit ints
             arrow::vecFromTypedArray(data, col->get_nth<std::int64_t>(0), nrows * 2);
         } else {
@@ -736,12 +890,12 @@ namespace binding {
     }
 
     void
-    _fill_col_time(val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            val data = accessor["values"];
+            t_val data = accessor["values"];
             // arrow packs 64 bit into two 32 bit ints
             arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
 
@@ -760,7 +914,7 @@ namespace binding {
             }
         } else {
             for (auto i = 0; i < nrows; ++i) {
-                val item = accessor.call<val>("marshal", cidx, i, type);
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
                 if (item.isUndefined())
                     continue;
@@ -775,19 +929,19 @@ namespace binding {
                 }
 
                 auto elem = static_cast<std::int64_t>(
-                    item.call<val>("getTime").as<double>()); // dcol[i].as<T>();
+                    item.call<t_val>("getTime").as<double>()); // dcol[i].as<T>();
                 col->set_nth(i, elem);
             }
         }
     }
 
     void
-    _fill_col_date(val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            // val data = dcol["values"];
+            // t_val data = dcol["values"];
             // // arrow packs 64 bit into two 32 bit ints
             // arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
 
@@ -806,7 +960,7 @@ namespace binding {
             // }
         } else {
             for (auto i = 0; i < nrows; ++i) {
-                val item = accessor.call<val>("marshal", cidx, i, type);
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
                 if (item.isUndefined())
                     continue;
@@ -826,15 +980,15 @@ namespace binding {
     }
 
     void
-    _fill_col_bool(val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
             // bools are stored using a bit mask
-            val data = accessor["values"];
+            t_val data = accessor["values"];
             for (auto i = 0; i < nrows; ++i) {
-                val item = data[i / 8];
+                t_val item = data[i / 8];
 
                 if (item.isUndefined()) {
                     continue;
@@ -855,7 +1009,7 @@ namespace binding {
             }
         } else {
             for (auto i = 0; i < nrows; ++i) {
-                val item = accessor.call<val>("marshal", cidx, i, type);
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
                 if (item.isUndefined())
                     continue;
@@ -876,7 +1030,7 @@ namespace binding {
     }
 
     void
-    _fill_col_string(val accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
 
         t_uindex nrows = col->size();
@@ -884,7 +1038,7 @@ namespace binding {
         if (is_arrow) {
             if (accessor["constructor"]["name"].as<std::string>() == "DictionaryVector") {
 
-                val dictvec = accessor["dictionary"];
+                t_val dictvec = accessor["dictionary"];
                 arrow::fill_col_dict(dictvec, col);
 
                 // Now process index into dictionary
@@ -892,21 +1046,21 @@ namespace binding {
                 // Perspective stores string indices in a 32bit unsigned array
                 // Javascript's typed arrays handle copying from various bitwidth arrays
                 // properly
-                val vkeys = accessor["indices"]["values"];
+                t_val vkeys = accessor["indices"]["values"];
                 arrow::vecFromTypedArray(
                     vkeys, col->get_nth<t_uindex>(0), nrows, "Uint32Array");
 
             } else if (accessor["constructor"]["name"].as<std::string>() == "Utf8Vector"
                 || accessor["constructor"]["name"].as<std::string>() == "BinaryVector") {
 
-                val vdata = accessor["values"];
+                t_val vdata = accessor["values"];
                 std::int32_t vsize = vdata["length"].as<std::int32_t>();
                 std::vector<std::uint8_t> data;
                 data.reserve(vsize);
                 data.resize(vsize);
                 arrow::vecFromTypedArray(vdata, data.data(), vsize);
 
-                val voffsets = accessor["valueOffsets"];
+                t_val voffsets = accessor["valueOffsets"];
                 std::int32_t osize = voffsets["length"].as<std::int32_t>();
                 std::vector<std::int32_t> offsets;
                 offsets.reserve(osize);
@@ -924,7 +1078,7 @@ namespace binding {
             }
         } else {
             for (auto i = 0; i < nrows; ++i) {
-                val item = accessor.call<val>("marshal", cidx, i, type);
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
                 if (item.isUndefined())
                     continue;
@@ -947,12 +1101,13 @@ namespace binding {
     }
 
     void
-    _fill_col_numeric(val accessor, t_table& tbl, std::shared_ptr<t_column> col,
-        std::string name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+    _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
         if (is_arrow) {
-            val data = accessor["values"];
+            t_val data = accessor["values"];
 
             switch (type) {
                 case DTYPE_INT8: {
@@ -975,7 +1130,7 @@ namespace binding {
             }
         } else {
             for (auto i = 0; i < nrows; ++i) {
-                val item = accessor.call<val>("marshal", cidx, i, type);
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
                 if (item.isUndefined())
                     continue;
@@ -1031,84 +1186,9 @@ namespace binding {
         }
     }
 
-    /**
-     * Fills the table with data from Javascript.
-     *
-     * Params
-     * ------
-     * tbl - pointer to the table object
-     * ocolnames - vector of column names
-     * accessor - the JS data accessor interface
-     * odt - vector of data types
-     * offset
-     * is_arrow - flag for arrow data
-     *
-     * Returns
-     * -------
-     *
-     */
-    void
-    _fill_data(t_table& tbl, std::vector<std::string> ocolnames, val accessor,
-        std::vector<t_dtype> odt, std::uint32_t offset, bool is_arrow, bool is_update) {
-
-        for (auto cidx = 0; cidx < ocolnames.size(); ++cidx) {
-            auto name = ocolnames[cidx];
-            auto col = tbl.get_column(name);
-            auto col_type = odt[cidx];
-
-            val dcol = val::undefined();
-
-            if (is_arrow) {
-                dcol = accessor["cdata"][cidx];
-            } else {
-                dcol = accessor;
-            }
-
-            switch (col_type) {
-                case DTYPE_INT64: {
-                    _fill_col_int64(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_BOOL: {
-                    _fill_col_bool(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_DATE: {
-                    _fill_col_date(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_TIME: {
-                    _fill_col_time(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_STR: {
-                    _fill_col_string(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_NONE: {
-                    break;
-                }
-                default:
-                    _fill_col_numeric(
-                        dcol, tbl, col, name, cidx, col_type, is_arrow, is_update);
-            }
-
-            if (is_arrow) {
-                // Fill validity bitmap
-                std::uint32_t null_count = dcol["nullCount"].as<std::uint32_t>();
-
-                if (null_count == 0) {
-                    col->valid_raw_fill();
-                } else {
-                    val validity = dcol["nullBitmap"];
-                    arrow::fill_col_valid(validity, col);
-                }
-            }
-        }
-    }
-
-    /******************************************************************************
-     *
-     * Public
-     */
     template <>
     void
-    set_column_nth(t_column* col, t_uindex idx, val value) {
+    set_column_nth(t_column* col, t_uindex idx, t_val value) {
 
         // Check if the value is a javascript null
         if (value.isNull()) {
@@ -1172,27 +1252,16 @@ namespace binding {
         }
     }
 
-    /**
-     * Helper function for computed columns
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
     template <>
     void
-    table_add_computed_column(t_table& table, val computed_defs) {
-        auto vcomputed_defs = vecFromArray<val, val>(computed_defs);
+    table_add_computed_column(t_data_table& table, t_val computed_defs) {
+        auto vcomputed_defs = vecFromArray<t_val, t_val>(computed_defs);
         for (auto i = 0; i < vcomputed_defs.size(); ++i) {
-            val coldef = vcomputed_defs[i];
+            t_val coldef = vcomputed_defs[i];
             std::string name = coldef["column"].as<std::string>();
-            val inputs = coldef["inputs"];
-            val func = coldef["func"];
-            val type = coldef["type"];
+            t_val inputs = coldef["inputs"];
+            t_val func = coldef["func"];
+            t_val type = coldef["type"];
 
             std::string stype;
 
@@ -1218,7 +1287,7 @@ namespace binding {
             }
 
             // Get list of input column names
-            auto icol_names = vecFromArray<val, std::string>(inputs);
+            auto icol_names = vecFromArray<t_val, std::string>(inputs);
 
             // Get t_column* for all input columns
             std::vector<const t_column*> icols;
@@ -1231,12 +1300,12 @@ namespace binding {
             // Add new column
             t_column* out = table.add_column(name, dtype, true);
 
-            val i1 = val::undefined(), i2 = val::undefined(), i3 = val::undefined(),
-                i4 = val::undefined();
+            t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
+                  i4 = t_val::undefined();
 
             t_uindex size = table.size();
             for (t_uindex ridx = 0; ridx < size; ++ridx) {
-                val value = val::undefined();
+                t_val value = t_val::undefined();
 
                 switch (arity) {
                     case 0: {
@@ -1290,371 +1359,172 @@ namespace binding {
         }
     }
 
-    /**
-     * DataAccessor
+    /******************************************************************************
      *
-     * parses and converts input data into a canonical format for
-     * interfacing with Perspective.
+     * Fill tables with data
      */
 
-    // Name parsing
-    std::vector<std::string>
-    column_names(val data, std::int32_t format) {
-        std::vector<std::string> names;
-        val Object = val::global("Object");
+    void
+    _fill_data(t_data_table& tbl, t_data_accessor accessor, std::vector<std::string> col_names,
+        std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
 
-        if (format == 0) {
-            std::int32_t max_check = 50;
-            val data_names = Object.call<val>("keys", data[0]);
-            names = vecFromArray<val, std::string>(data_names);
-            std::int32_t check_index = std::min(max_check, data["length"].as<std::int32_t>());
+        for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
+            auto name = col_names[cidx];
+            auto col = tbl.get_column(name);
+            auto col_type = data_types[cidx];
 
-            for (auto ix = 0; ix < check_index; ix++) {
-                val next = Object.call<val>("keys", data[ix]);
+            t_val dcol = t_val::undefined();
 
-                if (names.size() != next["length"].as<std::int32_t>()) {
-                    auto old_size = names.size();
-                    auto new_names = vecFromJSArray<std::string>(next);
-                    if (max_check == 50) {
-                        std::cout << "Data parse warning: Array data has inconsistent rows"
-                                  << std::endl;
-                    }
-
-                    for (auto s = new_names.begin(); s != new_names.end(); ++s) {
-                        if (std::find(names.begin(), names.end(), *s) == names.end()) {
-                            names.push_back(*s);
-                        }
-                    }
-
-                    std::cout << "Extended from " << old_size << "to " << names.size()
-                              << std::endl;
-                    max_check *= 2;
-                }
-            }
-        } else if (format == 1 || format == 2) {
-            val keys = Object.call<val>("keys", data);
-            names = vecFromArray<val, std::string>(keys);
-        }
-
-        return names;
-    }
-
-    // Type inferrence for fill_col and data_types
-    t_dtype
-    infer_type(val x, val date_validator) {
-        std::string jstype = x.typeOf().as<std::string>();
-        t_dtype t = t_dtype::DTYPE_STR;
-
-        // Unwrap numbers inside strings
-        val x_number = val::global("Number").call<val>("call", val::object(), x);
-        bool number_in_string = (jstype == "string") && (x["length"].as<std::int32_t>() != 0)
-            && (!val::global("isNaN").call<bool>("call", val::object(), x_number));
-
-        if (x.isNull()) {
-            t = t_dtype::DTYPE_NONE;
-        } else if (jstype == "number" || number_in_string) {
-            if (number_in_string) {
-                x = x_number;
-            }
-            double x_float64 = x.as<double>();
-            if ((std::fmod(x_float64, 1.0) == 0.0) && (x_float64 < 10000.0)
-                && (x_float64 != 0.0)) {
-                t = t_dtype::DTYPE_INT32;
+            if (is_arrow) {
+                dcol = accessor["cdata"][cidx];
             } else {
-                t = t_dtype::DTYPE_FLOAT64;
+                dcol = accessor;
             }
-        } else if (jstype == "boolean") {
-            t = t_dtype::DTYPE_BOOL;
-        } else if (x.instanceof (val::global("Date"))) {
-            std::int32_t hours = x.call<val>("getHours").as<std::int32_t>();
-            std::int32_t minutes = x.call<val>("getMinutes").as<std::int32_t>();
-            std::int32_t seconds = x.call<val>("getSeconds").as<std::int32_t>();
-            std::int32_t milliseconds = x.call<val>("getMilliseconds").as<std::int32_t>();
 
-            if (hours == 0 && minutes == 0 && seconds == 0 && milliseconds == 0) {
-                t = t_dtype::DTYPE_DATE;
-            } else {
-                t = t_dtype::DTYPE_TIME;
+            switch (col_type) {
+                case DTYPE_INT64: {
+                    _fill_col_int64(dcol, col, name, cidx, col_type, is_arrow, is_update);
+                } break;
+                case DTYPE_BOOL: {
+                    _fill_col_bool(dcol, col, name, cidx, col_type, is_arrow, is_update);
+                } break;
+                case DTYPE_DATE: {
+                    _fill_col_date(dcol, col, name, cidx, col_type, is_arrow, is_update);
+                } break;
+                case DTYPE_TIME: {
+                    _fill_col_time(dcol, col, name, cidx, col_type, is_arrow, is_update);
+                } break;
+                case DTYPE_STR: {
+                    _fill_col_string(dcol, col, name, cidx, col_type, is_arrow, is_update);
+                } break;
+                case DTYPE_NONE: {
+                    break;
+                }
+                default:
+                    _fill_col_numeric(
+                        dcol, tbl, col, name, cidx, col_type, is_arrow, is_update);
             }
-        } else if (jstype == "string") {
-            if (date_validator.call<val>("call", val::object(), x).as<bool>()) {
-                t = t_dtype::DTYPE_TIME;
-            } else {
-                std::string lower = x.call<val>("toLowerCase").as<std::string>();
-                if (lower == "true" || lower == "false") {
-                    t = t_dtype::DTYPE_BOOL;
+
+            if (is_arrow) {
+                // Fill validity bitmap
+                std::uint32_t null_count = dcol["nullCount"].as<std::uint32_t>();
+
+                if (null_count == 0) {
+                    col->valid_raw_fill();
                 } else {
-                    t = t_dtype::DTYPE_STR;
+                    t_val validity = dcol["nullBitmap"];
+                    arrow::fill_col_valid(validity, col);
                 }
             }
-        }
-
-        return t;
-    }
-
-    t_dtype
-    get_data_type(val data, std::int32_t format, const std::string& name, val date_validator) {
-        std::int32_t i = 0;
-        boost::optional<t_dtype> inferredType;
-
-        if (format == 0) {
-            // loop parameters differ slightly so rewrite the loop
-            while (!inferredType.is_initialized() && i < 100
-                && i < data["length"].as<std::int32_t>()) {
-                if (data[i].call<val>("hasOwnProperty", name).as<bool>() == true) {
-                    if (!data[i][name].isNull()) {
-                        inferredType = infer_type(data[i][name], date_validator);
-                    } else {
-                        inferredType = t_dtype::DTYPE_STR;
-                    }
-                }
-
-                i++;
-            }
-        } else if (format == 1) {
-            while (!inferredType.is_initialized() && i < 100
-                && i < data[name]["length"].as<std::int32_t>()) {
-                if (!data[name][i].isNull()) {
-                    inferredType = infer_type(data[name][i], date_validator);
-                } else {
-                    inferredType = t_dtype::DTYPE_STR;
-                }
-
-                i++;
-            }
-        }
-
-        if (!inferredType.is_initialized()) {
-            return t_dtype::DTYPE_STR;
-        } else {
-            return inferredType.get();
         }
     }
 
-    std::vector<t_dtype>
-    data_types(val data, std::int32_t format, const std::vector<std::string>& names,
-        val date_validator) {
-        if (names.size() == 0) {
-            PSP_COMPLAIN_AND_ABORT("Cannot determine data types without column names!");
-        }
-
-        std::vector<t_dtype> types;
-
-        if (format == 2) {
-            val keys = val::global("Object").template call<val>("keys", data);
-            std::vector<std::string> data_names = vecFromArray<val, std::string>(keys);
-
-            for (const std::string& name : data_names) {
-                std::string value = data[name].as<std::string>();
-                t_dtype type;
-
-                if (value == "integer") {
-                    type = t_dtype::DTYPE_INT32;
-                } else if (value == "float") {
-                    type = t_dtype::DTYPE_FLOAT64;
-                } else if (value == "string") {
-                    type = t_dtype::DTYPE_STR;
-                } else if (value == "boolean") {
-                    type = t_dtype::DTYPE_BOOL;
-                } else if (value == "datetime") {
-                    type = t_dtype::DTYPE_TIME;
-                } else if (value == "date") {
-                    type = t_dtype::DTYPE_DATE;
-                } else {
-                    PSP_COMPLAIN_AND_ABORT(
-                        "Unknown type '" + value + "' for key '" + name + "'");
-                }
-
-                types.push_back(type);
-            }
-
-            return types;
-        } else {
-            for (const std::string& name : names) {
-                t_dtype type = get_data_type(data, format, name, date_validator);
-                types.push_back(type);
-            }
-        }
-
-        return types;
-    }
-
-    /**
-     * Create a default gnode.
+    /******************************************************************************
      *
-     * Params
-     * ------
-     * j_colnames - a JS Array of column names.
-     * j_dtypes - a JS Array of column types.
-     *
-     * Returns
-     * -------
-     * A gnode.
+     * Table API
      */
-    std::shared_ptr<t_gnode>
-    make_gnode(const t_schema& iscm) {
-        std::vector<std::string> ocolnames(iscm.columns());
-        std::vector<t_dtype> odt(iscm.types());
 
-        if (iscm.has_column("psp_pkey")) {
-            t_uindex idx = iscm.get_colidx("psp_pkey");
-            ocolnames.erase(ocolnames.begin() + idx);
-            odt.erase(odt.begin() + idx);
-        }
-
-        if (iscm.has_column("psp_op")) {
-            t_uindex idx = iscm.get_colidx("psp_op");
-            ocolnames.erase(ocolnames.begin() + idx);
-            odt.erase(odt.begin() + idx);
-        }
-
-        t_schema oscm(ocolnames, odt);
-
-        // Create a gnode
-        auto gnode = std::make_shared<t_gnode>(oscm, iscm);
-        gnode->init();
-
-        return gnode;
-    }
-
-    /**
-     * Create a populated table.
-     *
-     * Params
-     * ------
-     * chunk - a JS object containing parsed data and associated metadata
-     * offset
-     * limit
-     * index
-     * is_delete - sets the table operation
-     *
-     * Returns
-     * -------
-     * a populated table.
-     */
     template <>
-    std::shared_ptr<t_gnode>
-    make_table(t_pool* pool, val gnode, val accessor, val computed, std::uint32_t offset,
-        std::uint32_t limit, std::string index, bool is_update, bool is_delete, bool is_arrow) {
-        std::uint32_t size = accessor["row_count"].as<std::int32_t>();
-
-        std::vector<std::string> colnames;
-        std::vector<t_dtype> dtypes;
+    std::shared_ptr<Table>
+    make_table(t_val table, t_data_accessor accessor, t_val computed, std::uint32_t offset,
+        std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
+        bool is_update = op == OP_UPDATE;
+        bool is_delete = op == OP_DELETE;
+        std::vector<std::string> column_names;
+        std::vector<t_dtype> data_types;
 
         // Determine metadata
         if (is_arrow || (is_update || is_delete)) {
-            // TODO: fully remove intermediate passed-through JS arrays for non-arrow data
-            val names = accessor["names"];
-            val types = accessor["types"];
-            colnames = vecFromArray<val, std::string>(names);
-            dtypes = vecFromArray<val, t_dtype>(types);
+            t_val names = accessor["names"];
+            t_val types = accessor["types"];
+            column_names = vecFromArray<t_val, std::string>(names);
+            data_types = vecFromArray<t_val, t_dtype>(types);
         } else {
             // Infer names and types
-            val data = accessor["data"];
+            t_val data = accessor["data"];
             std::int32_t format = accessor["format"].as<std::int32_t>();
-            colnames = column_names(data, format);
-            dtypes = data_types(data, format, colnames, accessor["date_validator"]);
+            column_names = get_column_names(data, format);
+            data_types = get_data_types(data, format, column_names, accessor["date_validator"]);
         }
 
         // Check if index is valid after getting column names
-        bool valid_index = std::find(colnames.begin(), colnames.end(), index) != colnames.end();
+        bool valid_index
+            = std::find(column_names.begin(), column_names.end(), index) != column_names.end();
         if (index != "" && !valid_index) {
             PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
         }
 
-        bool is_new_gnode = gnode.isUndefined();
-        std::shared_ptr<t_gnode> new_gnode;
-        if (!is_new_gnode) {
-            new_gnode = gnode.as<std::shared_ptr<t_gnode>>();
-            if (is_arrow && is_update && new_gnode->get_table()->size() == 0) {
-                auto schema = new_gnode->get_table()->get_schema();
-                for (auto idx = 0; idx < schema.m_types.size(); ++idx) {
-                    if (dtypes[idx] == DTYPE_INT64) {
-                        std::cout << "Promoting int64 `" << colnames[idx] << "`" << std::endl;
-                        new_gnode->promote_column(colnames[idx], DTYPE_INT64);
+        bool table_initialized = has_value(table);
+        std::shared_ptr<Table> tbl;
+
+        if (table_initialized) {
+            tbl = table.as<std::shared_ptr<Table>>();
+            auto current_gnode = tbl->get_gnode();
+            tbl->update(column_names, data_types, offset, limit, index, op, is_arrow);
+
+            // use gnode metadata to help decide if we need to update
+            is_update = (is_update || current_gnode->mapping_size() > 0);
+
+            // if performing an arrow schema update, promote columns
+            auto current_data_table = current_gnode->get_table();
+
+            if (is_arrow && is_update && current_data_table->size() == 0) {
+                auto current_schema = current_data_table->get_schema();
+                for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
+                    if (data_types[idx] == DTYPE_INT64) {
+                        std::cout << "Promoting int64 `" << column_names[idx] << "`"
+                                  << std::endl;
+                        current_gnode->promote_column(column_names[idx], DTYPE_INT64);
                     }
                 }
             }
-        }
-
-        // Create the table
-        // TODO assert size > 0
-        t_table tbl(t_schema(colnames, dtypes));
-        tbl.init();
-        tbl.extend(size);
-
-        _fill_data(tbl, colnames, accessor, dtypes, offset, is_arrow,
-            (is_update || new_gnode->mapping_size() > 0));
-
-        // Set up pkey and op columns
-        if (is_delete) {
-            auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-            op_col->raw_fill<std::uint8_t>(OP_DELETE);
         } else {
-            auto op_col = tbl.add_column("psp_op", DTYPE_UINT8, false);
-            op_col->raw_fill<std::uint8_t>(OP_INSERT);
+            std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
+            tbl = std::make_shared<Table>(
+                pool, column_names, data_types, offset, limit, index, op, is_arrow);
         }
 
-        if (index == "") {
-            // If user doesn't specify an column to use as the pkey index, just use
-            // row number
-            auto key_col = tbl.add_column("psp_pkey", DTYPE_INT32, true);
-            auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
+        std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
+        t_data_table data_table(t_schema(column_names, data_types));
+        data_table.init();
+        data_table.extend(row_count);
 
-            for (auto ridx = 0; ridx < tbl.size(); ++ridx) {
-                key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
-                okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
-            }
-        } else {
-            tbl.clone_column(index, "psp_pkey");
-            tbl.clone_column(index, "psp_okey");
-        }
+        _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow, is_update);
 
         if (!computed.isUndefined()) {
-            table_add_computed_column(tbl, computed);
+            table_add_computed_column(data_table, computed);
         }
 
-        if (is_new_gnode) {
-            new_gnode = make_gnode(tbl.get_schema());
-            pool->register_gnode(new_gnode.get());
-        }
-
-        pool->send(new_gnode->get_id(), 0, tbl);
-        return new_gnode;
+        tbl->init(data_table);
+        return tbl;
     }
 
-    /**
-     * Copies the internal table from a gnode
-     *
-     * Params
-     * ------
-     *
-     * Returns
-     * -------
-     * A gnode.
-     */
     template <>
-    std::shared_ptr<t_gnode>
-    clone_gnode_table(t_pool* pool, std::shared_ptr<t_gnode> gnode, val computed) {
-        t_table* tbl = gnode->_get_pkeyed_table();
-        table_add_computed_column(*tbl, computed);
-        std::shared_ptr<t_gnode> new_gnode = make_gnode(tbl->get_schema());
-        pool->register_gnode(new_gnode.get());
-        pool->send(new_gnode->get_id(), 0, *tbl);
-        pool->_process();
-        return new_gnode;
+    std::shared_ptr<Table>
+    make_computed_table(std::shared_ptr<Table> table, t_val computed) {
+        auto gnode = table->get_gnode();
+
+        t_data_table* data_table = gnode->_get_pkeyed_table();
+        table_add_computed_column(*data_table, computed);
+        table->replace_data_table(data_table);
+
+        return table;
     }
 
+    /******************************************************************************
+     *
+     * View API
+     */
     template <>
     t_config
     make_view_config(
-        const t_schema& schema, std::string separator, val date_parser, val config) {
-        val j_row_pivots = config["row_pivots"];
-        val j_column_pivots = config["column_pivots"];
-        val j_aggregates = config["aggregates"];
-        val j_columns = config["columns"];
-        val j_filter = config["filter"];
-        val j_sort = config["sort"];
+        const t_schema& schema, std::string separator, t_val date_parser, t_val config) {
+        t_val j_row_pivots = config["row_pivots"];
+        t_val j_column_pivots = config["column_pivots"];
+        t_val j_aggregates = config["aggregates"];
+        t_val j_columns = config["columns"];
+        t_val j_filter = config["filter"];
+        t_val j_sort = config["sort"];
 
         std::vector<std::string> row_pivots;
         std::vector<std::string> column_pivots;
@@ -1662,18 +1532,18 @@ namespace binding {
         std::vector<std::string> aggregate_names;
         std::vector<std::string> columns;
         std::vector<t_fterm> filters;
-        std::vector<val> sortbys;
+        std::vector<t_val> sortbys;
         std::vector<t_sortspec> sorts;
         std::vector<t_sortspec> col_sorts;
 
         t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
 
-        if (hasValue(j_row_pivots)) {
-            row_pivots = vecFromArray<val, std::string>(j_row_pivots);
+        if (has_value(j_row_pivots)) {
+            row_pivots = vecFromArray<t_val, std::string>(j_row_pivots);
         }
 
-        if (hasValue(j_column_pivots)) {
-            column_pivots = vecFromArray<val, std::string>(j_column_pivots);
+        if (has_value(j_column_pivots)) {
+            column_pivots = vecFromArray<t_val, std::string>(j_column_pivots);
         }
 
         bool column_only = false;
@@ -1683,18 +1553,18 @@ namespace binding {
             column_only = true;
         }
 
-        if (hasValue(j_sort)) {
-            sortbys = vecFromArray<val, val>(j_sort);
+        if (has_value(j_sort)) {
+            sortbys = vecFromArray<t_val, t_val>(j_sort);
         }
 
-        columns = vecFromArray<val, std::string>(j_columns);
+        columns = vecFromArray<t_val, std::string>(j_columns);
         aggregates = _get_aggspecs(
             schema, row_pivots, column_pivots, column_only, columns, sortbys, j_aggregates);
         aggregate_names = _get_aggregate_names(aggregates);
 
-        if (hasValue(j_filter)) {
+        if (has_value(j_filter)) {
             filters = _get_fterms(schema, date_parser, j_filter);
-            if (hasValue(config["filter_op"])) {
+            if (has_value(config["filter_op"])) {
                 filter_op = str_to_filter_op(config["filter_op"].as<std::string>());
             }
         }
@@ -1710,43 +1580,31 @@ namespace binding {
         return view_config;
     }
 
-    /**
-     * Creates a new View.
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     * A shared pointer to a View<CTX_T>.
-     */
     template <>
     std::shared_ptr<View<t_ctx0>>
-    make_view_zero(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
-        std::string separator, val config, val date_parser) {
-        auto schema = gnode->get_tblschema();
-        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+    make_view_zero(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
+        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         auto col_names = view_config.get_column_names();
         auto filter_op = view_config.get_combiner();
         auto filters = view_config.get_fterms();
         auto sorts = view_config.get_sortspecs();
-        auto ctx = make_context_zero(
-            schema, filter_op, col_names, filters, sorts, pool, gnode, name);
+        auto ctx = make_context_zero(table, schema, filter_op, col_names, filters, sorts, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx0>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx0>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx1>>
-    make_view_one(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
-        std::string separator, val config, val date_parser) {
-        auto schema = gnode->get_tblschema();
-        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+    make_view_one(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
+        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         auto aggregates = view_config.get_aggregates();
         auto row_pivots = view_config.get_row_pivots();
@@ -1755,25 +1613,25 @@ namespace binding {
         auto sorts = view_config.get_sortspecs();
 
         std::int32_t pivot_depth = -1;
-        if (hasValue(config["row_pivot_depth"])) {
+        if (has_value(config["row_pivot_depth"])) {
             pivot_depth = config["row_pivot_depth"].as<std::int32_t>();
         }
 
-        auto ctx = make_context_one(schema, row_pivots, filter_op, filters, aggregates, sorts,
-            pivot_depth, pool, gnode, name);
+        auto ctx = make_context_one(table, schema, row_pivots, filter_op, filters, aggregates,
+            sorts, pivot_depth, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx1>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx1>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
 
     template <>
     std::shared_ptr<View<t_ctx2>>
-    make_view_two(t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name,
-        std::string separator, val config, val date_parser) {
-        auto schema = gnode->get_tblschema();
-        t_config view_config = make_view_config<val>(schema, separator, date_parser, config);
+    make_view_two(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val config, t_val date_parser) {
+        auto schema = table->get_schema();
+        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
 
         bool column_only = view_config.is_column_only();
         auto column_names = view_config.get_column_names();
@@ -1788,69 +1646,58 @@ namespace binding {
         std::int32_t rpivot_depth = -1;
         std::int32_t cpivot_depth = -1;
 
-        if (hasValue(config["row_pivot_depth"])) {
+        if (has_value(config["row_pivot_depth"])) {
             rpivot_depth = config["row_pivot_depth"].as<std::int32_t>();
         }
 
-        if (hasValue(config["column_pivot_depth"])) {
+        if (has_value(config["column_pivot_depth"])) {
             cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
         }
 
-        auto ctx = make_context_two(schema, row_pivots, column_pivots, filter_op, filters,
-            aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, pool, gnode,
-            name);
+        auto ctx
+            = make_context_two(table, schema, row_pivots, column_pivots, filter_op, filters,
+                aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, name);
 
         auto view_ptr
-            = std::make_shared<View<t_ctx2>>(pool, ctx, gnode, name, separator, view_config);
+            = std::make_shared<View<t_ctx2>>(table, ctx, name, separator, view_config);
 
         return view_ptr;
     }
 
-    /**
+    /******************************************************************************
      *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
+     * Context API
      */
+
     std::shared_ptr<t_ctx0>
-    make_context_zero(t_schema schema, t_filter_op combiner, std::vector<std::string> columns,
-        std::vector<t_fterm> filters, std::vector<t_sortspec> sorts, t_pool* pool,
-        std::shared_ptr<t_gnode> gnode, std::string name) {
+    make_context_zero(std::shared_ptr<Table> table, t_schema schema, t_filter_op combiner,
+        std::vector<std::string> columns, std::vector<t_fterm> filters,
+        std::vector<t_sortspec> sorts, std::string name) {
         auto cfg = t_config(columns, combiner, filters);
         auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
         ctx0->init();
         ctx0->sort_by(sorts);
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, ZERO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx0.get()));
+
         return ctx0;
     }
 
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
     std::shared_ptr<t_ctx1>
-    make_context_one(t_schema schema, std::vector<t_pivot> pivots, t_filter_op combiner,
-        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, t_pool* pool,
-        std::shared_ptr<t_gnode> gnode, std::string name) {
+    make_context_one(std::shared_ptr<Table> table, t_schema schema, std::vector<t_pivot> pivots,
+        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::string name) {
         auto cfg = t_config(pivots, aggregates, combiner, filters);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
         ctx1->sort_by(sorts);
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx1.get()));
 
@@ -1863,23 +1710,13 @@ namespace binding {
         return ctx1;
     }
 
-    /**
-     *
-     *
-     * Params
-     * ------
-     *
-     *
-     * Returns
-     * -------
-     *
-     */
     std::shared_ptr<t_ctx2>
-    make_context_two(t_schema schema, std::vector<t_pivot> rpivots,
-        std::vector<t_pivot> cpivots, t_filter_op combiner, std::vector<t_fterm> filters,
-        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
-        std::vector<t_sortspec> col_sorts, std::int32_t rpivot_depth, std::int32_t cpivot_depth,
-        bool column_only, t_pool* pool, std::shared_ptr<t_gnode> gnode, std::string name) {
+    make_context_two(std::shared_ptr<Table> table, t_schema schema,
+        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
+        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
+        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
+        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
+        std::string name) {
         t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
 
         auto cfg
@@ -1887,6 +1724,9 @@ namespace binding {
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();
+
+        auto pool = table->get_pool();
+        auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx2.get()));
 
@@ -1918,18 +1758,10 @@ namespace binding {
      * Data serialization
      */
 
-    /**
-     * @brief Get a slice of data for a single column, serialized to val.
-     *
-     * @tparam
-     * @param table
-     * @param colname
-     * @return val
-     */
     template <>
-    val
-    get_column_data(std::shared_ptr<t_table> table, std::string colname) {
-        val arr = val::array();
+    t_val
+    get_column_data(std::shared_ptr<t_data_table> table, std::string colname) {
+        t_val arr = t_val::array();
         auto col = table->get_column(colname);
         for (auto idx = 0; idx < col->size(); ++idx) {
             arr.set(idx, scalar_to_val(col->get_scalar(idx)));
@@ -1937,17 +1769,6 @@ namespace binding {
         return arr;
     }
 
-    /**
-     * @brief Get the t_data_slice object, which contains an underlying slice of data and
-     * metadata required to interact with it.
-     *
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
     template <typename CTX_T>
     std::shared_ptr<t_data_slice<CTX_T>>
     get_data_slice(std::shared_ptr<View<CTX_T>> view, std::uint32_t start_row,
@@ -1956,19 +1777,8 @@ namespace binding {
         return data_slice;
     }
 
-    /**
-     * @brief Retrieve a single value from the data slice and serialize it to an output
-     * type that interfaces with the binding language.
-     *
-     * @param view
-     * @param start_row
-     * @param end_row
-     * @param start_col
-     * @param end_col
-     * @return val
-     */
     template <typename CTX_T>
-    val
+    t_val
     get_from_data_slice(
         std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx) {
         auto d = data_slice->get(ridx, cidx);
@@ -2011,13 +1821,28 @@ EM_ASM({
 EMSCRIPTEN_BINDINGS(perspective) {
     /******************************************************************************
      *
+     * Table
+     */
+    class_<Table>("Table")
+        .constructor<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
+            std::uint32_t, std::uint32_t, std::string, t_op, bool>()
+        .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
+        .function("size", &Table::size)
+        .function("get_schema", &Table::get_schema)
+        .function("unregister_gnode", &Table::unregister_gnode)
+        .function("reset_gnode", &Table::reset_gnode)
+        .function("get_id", &Table::get_id)
+        .function("get_pool", &Table::get_pool)
+        .function("get_gnode", &Table::get_gnode);
+    /******************************************************************************
+     *
      * View
      */
     // Bind a View for each context type
 
     class_<View<t_ctx0>>("View_ctx0")
-        .constructor<t_pool*, std::shared_ptr<t_ctx0>, std::shared_ptr<t_gnode>, std::string,
-            std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx0>>>("shared_ptr<View_ctx0>")
         .function("sides", &View<t_ctx0>::sides)
         .function("num_rows", &View<t_ctx0>::num_rows)
@@ -2039,8 +1864,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
-        .constructor<t_pool*, std::shared_ptr<t_ctx1>, std::shared_ptr<t_gnode>, std::string,
-            std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx1>>>("shared_ptr<View_ctx1>")
         .function("sides", &View<t_ctx1>::sides)
         .function("num_rows", &View<t_ctx1>::num_rows)
@@ -2065,8 +1890,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
-        .constructor<t_pool*, std::shared_ptr<t_ctx2>, std::shared_ptr<t_gnode>, std::string,
-            std::string, t_config>()
+        .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
+            t_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx2>>>("shared_ptr<View_ctx2>")
         .function("sides", &View<t_ctx2>::sides)
         .function("num_rows", &View<t_ctx2>::num_rows)
@@ -2093,12 +1918,12 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * t_table
+     * t_data_table
      */
-    class_<t_table>("t_table")
-        .smart_ptr<std::shared_ptr<t_table>>("shared_ptr<t_table>")
-        .function<unsigned long>(
-            "size", reinterpret_cast<unsigned long (t_table::*)() const>(&t_table::size));
+    class_<t_data_table>("t_data_table")
+        .smart_ptr<std::shared_ptr<t_data_table>>("shared_ptr<t_data_table>")
+        .function<unsigned long>("size",
+            reinterpret_cast<unsigned long (t_data_table::*)() const>(&t_data_table::size));
 
     /******************************************************************************
      *
@@ -2119,7 +1944,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
             "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
         .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
         .function<void>("reset", &t_gnode::reset)
-        .function<t_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
+        .function<t_data_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
 
     /******************************************************************************
      *
@@ -2263,17 +2088,27 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
+     * t_op
+     */
+    enum_<t_op>("t_op")
+        .value("OP_INSERT", OP_INSERT)
+        .value("OP_DELETE", OP_DELETE)
+        .value("OP_CLEAR", OP_CLEAR)
+        .value("OP_UPDATE", OP_UPDATE);
+
+    /******************************************************************************
+     *
      * assorted functions
      */
-    function("make_table", &make_table<val>, allow_raw_pointers());
-    function("clone_gnode_table", &clone_gnode_table<val>, allow_raw_pointers());
+    function("make_table", &make_table<t_val>);
+    function("make_computed_table", &make_computed_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
-    function("table_add_computed_column", &table_add_computed_column<val>);
+    function("table_add_computed_column", &table_add_computed_column<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
-    function("make_view_zero", &make_view_zero<val>, allow_raw_pointers());
-    function("make_view_one", &make_view_one<val>, allow_raw_pointers());
-    function("make_view_two", &make_view_two<val>, allow_raw_pointers());
+    function("make_view_zero", &make_view_zero<t_val>);
+    function("make_view_one", &make_view_one<t_val>);
+    function("make_view_two", &make_view_two<t_val>);
     function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_data_slice_one", &get_data_slice<t_ctx1>, allow_raw_pointers());

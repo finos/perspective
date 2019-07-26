@@ -25,10 +25,10 @@ t_updctx::t_updctx(t_uindex gnode_id, const std::string& ctx)
     , m_ctx(ctx) {}
 
 #ifdef PSP_ENABLE_WASM
-emscripten::val
+t_val
 empty_callback() {
-    emscripten::val callback = emscripten::val::global("Object").new_();
-    callback.set("_update_callback", emscripten::val::global("Function").new_());
+    t_val callback = t_val::global("Object").new_();
+    callback.set("_update_callback", t_val::global("Function").new_());
     return callback;
 }
 
@@ -90,7 +90,7 @@ t_pool::unregister_gnode(t_uindex idx) {
 }
 
 void
-t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_table& table) {
+t_pool::send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table) {
     {
         std::lock_guard<std::mutex> lg(m_mtx);
         m_data_remaining.store(true);
@@ -171,7 +171,7 @@ t_pool::get_trees() {
 
 #ifdef PSP_ENABLE_WASM
 void
-t_pool::set_update_delegate(emscripten::val ud) {
+t_pool::set_update_delegate(t_val ud) {
     m_update_delegate = ud;
 }
 #endif

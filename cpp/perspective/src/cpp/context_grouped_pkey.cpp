@@ -176,8 +176,9 @@ t_ctx_grouped_pkey::get_data(
 }
 
 void
-t_ctx_grouped_pkey::notify(const t_table& flattened, const t_table& delta, const t_table& prev,
-    const t_table& current, const t_table& transitions, const t_table& existed) {
+t_ctx_grouped_pkey::notify(const t_data_table& flattened, const t_data_table& delta,
+    const t_data_table& prev, const t_data_table& current, const t_data_table& transitions,
+    const t_data_table& existed) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     rebuild();
@@ -678,7 +679,7 @@ t_ctx_grouped_pkey::pprint() const {
 }
 
 void
-t_ctx_grouped_pkey::notify(const t_table& flattened) {
+t_ctx_grouped_pkey::notify(const t_data_table& flattened) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     psp_log_time(repr() + " notify.enter");

@@ -47,8 +47,6 @@ var meta_3 = {
     z: "boolean"
 };
 
-let column_meta = [{name: "x", type: "integer", computed: undefined}, {name: "y", type: "string", computed: undefined}, {name: "z", type: "boolean", computed: undefined}];
-
 var arrow_result = [
     {
         f32: 1.5,
@@ -931,13 +929,6 @@ module.exports = perspective => {
                 table2.delete();
                 table.delete();
             });
-        });
-
-        it("Column metadata returns names and type", async function() {
-            let table = perspective.table(data);
-            let result = await table.column_metadata();
-            expect(result).toEqual(column_meta);
-            table.delete();
         });
 
         it("allocates a large tables", async function() {

@@ -10,7 +10,7 @@
 #pragma once
 #include <perspective/base.h>
 #include <perspective/first.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/config.h>
 #include <cstdint>
 
@@ -25,7 +25,7 @@ enum class t_do_pivot
 template <typename CTX_T, typename PKEY_TYPE_T = std::int64_t,
     int PKEY_DTYPE = DTYPE_INT64>
 std::shared_ptr<CTX_T>
-do_pivot(t_do_pivot mode, const t_table& tbl, const t_config& cfg)
+do_pivot(t_do_pivot mode, const t_data_table& tbl, const t_config& cfg)
 {
     PSP_VERBOSE_ASSERT(mode == t_do_pivot::PIVOT_NON_PKEYED, "Unexpected mode");
     auto copy = tbl.clone();

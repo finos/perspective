@@ -10,7 +10,7 @@ import os
 import os.path
 import numpy as np
 import pandas as pd
-from perspective.table import Perspective, t_column, t_table, t_schema
+from perspective.table import Perspective, t_column, t_data_table, t_schema
 
 
 class TestColumn(object):
@@ -31,7 +31,7 @@ class TestColumn(object):
 
         assert len(column_names) == len(dtypes)
         schema = t_schema(column_names, dtypes)
-        tt = t_table(schema)
+        tt = t_data_table(schema)
         tt.init()
 
         # col = tt.make_column('Test', Perspective._type_to_dtype(int), True)

@@ -2,7 +2,7 @@
 
 #include <perspective/base.h>
 #include <perspective/config.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/date.h>
 #include <perspective/time.h>
 #include <perspective/test_utils.h>

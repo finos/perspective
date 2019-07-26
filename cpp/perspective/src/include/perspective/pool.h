@@ -9,7 +9,7 @@
 
 #pragma once
 #include <perspective/first.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/gnode.h>
 #include <perspective/exports.h>
 #include <mutex>
@@ -17,6 +17,7 @@
 
 #ifdef PSP_ENABLE_WASM
 #include <emscripten/val.h>
+typedef emscripten::val t_val;
 #endif
 
 namespace perspective {
@@ -39,7 +40,7 @@ public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
 #ifdef PSP_ENABLE_WASM
-    void set_update_delegate(emscripten::val ud);
+    void set_update_delegate(t_val ud);
     void register_context(
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
     void py_notify_userspace();
@@ -56,7 +57,7 @@ public:
 
     void unregister_context(t_uindex gnode_id, const std::string& name);
 
-    void send(t_uindex gnode_id, t_uindex port_id, const t_table& table);
+    void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
     void _process();
     void _process_helper();
@@ -92,7 +93,7 @@ private:
     std::vector<t_gnode*> m_gnodes;
 
 #ifdef PSP_ENABLE_WASM
-    emscripten::val m_update_delegate;
+    t_val m_update_delegate;
 #endif
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;

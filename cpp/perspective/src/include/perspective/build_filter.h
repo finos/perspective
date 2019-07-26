@@ -10,7 +10,7 @@
 #pragma once
 #include <perspective/first.h>
 #include <perspective/filter.h>
-#include <perspective/table.h>
+#include <perspective/data_table.h>
 #include <perspective/mask.h>
 #include <perspective/comparators.h>
 
@@ -18,17 +18,17 @@ namespace perspective {
 
 template <typename DATA_T, int DTYPE_T, typename OPERATOR_T>
 void
-fop_apply(
-    const t_table& tbl, const std::string& colname, t_mask& mask, DATA_T reference_value) {}
+fop_apply(const t_data_table& tbl, const std::string& colname, t_mask& mask,
+    DATA_T reference_value) {}
 
 template <typename DATA_T, int DTYPE_T, typename OPERATOR_T>
 void
-fop_apply(const t_table& tbl, const std::string& colname, t_mask& mask,
+fop_apply(const t_data_table& tbl, const std::string& colname, t_mask& mask,
     const std::set<DATA_T, t_filter_comparator<DATA_T>>& reference_values) {}
 
 template <typename CTYPE_T, int DTYPE_T>
 void
-apply_filters_helper(const t_table& tbl, const std::string& column, t_mask& mask,
+apply_filters_helper(const t_data_table& tbl, const std::string& column, t_mask& mask,
     t_tscalar threshold, const t_fterm& filter) {
     CTYPE_T thr = threshold.get<CTYPE_T>();
 
@@ -99,6 +99,6 @@ apply_filters_helper(const t_table& tbl, const std::string& column, t_mask& mask
     };
 }
 
-t_mask apply_filters(const t_table& tbl, const std::vector<t_fterm>& filters);
+t_mask apply_filters(const t_data_table& tbl, const std::vector<t_fterm>& filters);
 
 } // end namespace perspective
