@@ -16,7 +16,8 @@ t_view_config::t_view_config(std::vector<std::string> row_pivots,
     tsl::ordered_map<std::string, std::string> aggregates, std::vector<std::string> columns,
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
     std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only)
-    : m_row_pivots(row_pivots)
+    : m_init(false)
+    , m_row_pivots(row_pivots)
     , m_column_pivots(column_pivots)
     , m_aggregates(aggregates)
     , m_columns(columns)
@@ -32,76 +33,92 @@ t_view_config::init(const t_schema& schema) {
     fill_aggspecs(schema);
     fill_fterm();
     fill_sortspec();
+
+    m_init = true;
 }
 
 void
 t_view_config::add_filter_term(
     std::tuple<std::string, std::string, std::vector<t_tscalar>> term) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_filter.push_back(term);
 }
 
 void
 t_view_config::set_row_pivot_depth(std::int32_t depth) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_row_pivot_depth = depth;
 }
 
 void
 t_view_config::set_column_pivot_depth(std::int32_t depth) {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     m_column_pivot_depth = depth;
 }
 
 std::vector<std::string>
 t_view_config::get_row_pivots() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_row_pivots;
 }
 
 std::vector<std::string>
 t_view_config::get_column_pivots() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_column_pivots;
 }
 
 std::vector<t_aggspec>
 t_view_config::get_aggspecs() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_aggspecs;
 }
 
 std::vector<std::string>
 t_view_config::get_columns() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_columns;
 }
 
 std::vector<t_fterm>
 t_view_config::get_fterm() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_fterm;
 }
 
 std::vector<t_sortspec>
 t_view_config::get_sortspec() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_sortspec;
 }
 
 std::vector<t_sortspec>
 t_view_config::get_col_sortspec() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_col_sortspec;
 }
 
 t_filter_op
 t_view_config::get_filter_op() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return str_to_filter_op(m_filter_op);
 }
 
 bool
 t_view_config::is_column_only() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_column_only;
 }
 
 std::int32_t
 t_view_config::get_row_pivot_depth() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_row_pivot_depth;
 }
 
 std::int32_t
 t_view_config::get_column_pivot_depth() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
     return m_column_pivot_depth;
 }
 
@@ -234,11 +251,3 @@ t_view_config::get_aggregate_index(const std::string& column) const {
 }
 
 } // end namespace perspective
-
-namespace std {
-std::ostream&
-operator<<(std::ostream& os, const perspective::t_view_config& vc) {
-    os << "t_view_config"; // TODO: finish
-    return os;
-}
-} // end namespace std

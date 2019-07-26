@@ -33,22 +33,6 @@ namespace binding {
 
     /******************************************************************************
      *
-     * Data Loading
-     */
-
-    template <>
-    bool
-    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term) {
-        if (type == DTYPE_DATE || type == DTYPE_TIME) {
-            t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
-            return has_value(parsed_date);
-        } else {
-            return has_value(filter_term);
-        }
-    };
-
-    /******************************************************************************
-     *
      * Date Parsing
      */
 
@@ -1313,10 +1297,21 @@ namespace binding {
      *
      * View API
      */
+
+    template <>
+    bool
+    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term) {
+        if (type == DTYPE_DATE || type == DTYPE_TIME) {
+            t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
+            return has_value(parsed_date);
+        } else {
+            return has_value(filter_term);
+        }
+    };
+
     template <>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
     make_filter_term(t_dtype type, t_val date_parser, std::vector<t_val> filter) {
-        // TODO: structure properly
         std::string col = filter[0].as<std::string>();
         std::string comp_str = filter[1].as<std::string>();
         t_filter_op comp = str_to_filter_op(comp_str);
@@ -1385,6 +1380,7 @@ namespace binding {
 
         bool column_only = false;
 
+        // make sure that primary keys are created for column-only views
         if (row_pivots.size() == 0 && column_pivots.size() > 0) {
             row_pivots.push_back("psp_okey");
             column_only = true;
@@ -1396,11 +1392,14 @@ namespace binding {
 
         for (auto f : js_filter) {
             t_dtype type = schema.get_dtype(f[0].as<std::string>());
+
+            // validate the filter before it goes into the core engine
             if (is_valid_filter(type, date_parser, f[2])) {
                 filter.push_back(make_filter_term(type, date_parser, f));
             }
         }
 
+        // create the `t_view_config`
         t_view_config view_config(row_pivots, column_pivots, aggregates, columns, filter, sort,
             filter_op, column_only);
 
@@ -1419,44 +1418,16 @@ namespace binding {
         return view_config;
     }
 
-    template <>
-    std::shared_ptr<View<t_ctx0>>
-    make_view_zero(std::shared_ptr<Table> table, std::string name, std::string separator,
+    template <typename CTX_T>
+    std::shared_ptr<View<CTX_T>>
+    make_view(std::shared_ptr<Table> table, std::string name, std::string separator,
         t_val view_config, t_val date_parser) {
         auto schema = table->get_schema();
         t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
 
-        auto ctx = make_context_zero(table, schema, config, name);
+        auto ctx = make_context<CTX_T>(table, schema, config, name);
 
-        auto view_ptr = std::make_shared<View<t_ctx0>>(table, ctx, name, separator, config);
-
-        return view_ptr;
-    }
-
-    template <>
-    std::shared_ptr<View<t_ctx1>>
-    make_view_one(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val view_config, t_val date_parser) {
-        auto schema = table->get_schema();
-        t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
-
-        auto ctx = make_context_one(table, schema, config, name);
-
-        auto view_ptr = std::make_shared<View<t_ctx1>>(table, ctx, name, separator, config);
-
-        return view_ptr;
-    }
-
-    template <>
-    std::shared_ptr<View<t_ctx2>>
-    make_view_two(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val view_config, t_val date_parser) {
-        auto schema = table->get_schema();
-        t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
-
-        auto ctx = make_context_two(table, schema, config, name);
-
-        auto view_ptr = std::make_shared<View<t_ctx2>>(table, ctx, name, separator, config);
+        auto view_ptr = std::make_shared<View<CTX_T>>(table, ctx, name, separator, config);
 
         return view_ptr;
     }
@@ -1466,8 +1437,9 @@ namespace binding {
      * Context API
      */
 
+    template <>
     std::shared_ptr<t_ctx0>
-    make_context_zero(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
         const t_view_config& view_config, std::string name) {
         auto columns = view_config.get_columns();
         auto filter_op = view_config.get_filter_op();
@@ -1487,8 +1459,9 @@ namespace binding {
         return ctx0;
     }
 
+    template <>
     std::shared_ptr<t_ctx1>
-    make_context_one(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
         const t_view_config& view_config, std::string name) {
         auto row_pivots = view_config.get_row_pivots();
         auto aggspecs = view_config.get_aggspecs();
@@ -1517,8 +1490,9 @@ namespace binding {
         return ctx1;
     }
 
+    template <>
     std::shared_ptr<t_ctx2>
-    make_context_two(std::shared_ptr<Table> table, const t_schema& schema,
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
         const t_view_config& view_config, std::string name) {
         bool column_only = view_config.is_column_only();
         auto row_pivots = view_config.get_row_pivots();
@@ -1943,9 +1917,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
-    function("make_view_zero", &make_view_zero<t_val>);
-    function("make_view_one", &make_view_one<t_val>);
-    function("make_view_two", &make_view_two<t_val>);
+    function("make_view_zero", &make_view<t_ctx0>);
+    function("make_view_one", &make_view<t_ctx1>);
+    function("make_view_two", &make_view<t_ctx2>);
     function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_data_slice_one", &get_data_slice<t_ctx1>, allow_raw_pointers());

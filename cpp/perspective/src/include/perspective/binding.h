@@ -59,23 +59,8 @@ namespace binding {
 
     /******************************************************************************
      *
-     * Data Loading
+     * Manipulate scalar values
      */
-
-    /**
-     * @brief For date/datetime values, is the filter term a valid date?
-     *
-     * Otherwise, make sure the filter term is not null/undefined
-     *
-     * @tparam T
-     * @param type
-     * @param date_parser
-     * @param filter
-     * @return true
-     * @return false
-     */
-    template <typename T>
-    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
 
     /**
      * @brief Converts a `t_scalar` to a value in the binding language.
@@ -240,6 +225,26 @@ namespace binding {
     template <typename T>
     std::shared_ptr<Table> make_computed_table(std::shared_ptr<Table> table, T computed);
 
+    /******************************************************************************
+     *
+     * View API
+     */
+
+    /**
+     * @brief For date/datetime values, is the filter term a valid date?
+     *
+     * Otherwise, make sure the filter term is not null/undefined.
+     *
+     * @tparam T
+     * @param type
+     * @param date_parser
+     * @param filter
+     * @return true
+     * @return false
+     */
+    template <typename T>
+    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
+
     /**
      * @brief Create a filter by parsing the filter term from the binding language.
      *
@@ -265,41 +270,13 @@ namespace binding {
     t_view_config make_view_config(const t_schema& schema, T date_parser, T config);
 
     /**
-     * @brief Create a new zero-sided view.
+     * @brief Create a new view.
      *
-     * Zero-sided views have no aggregates applied.
+     * Zero-sided views have no pivots or aggregates applied.
      *
-     * @tparam T
-     * @param table
-     * @param name
-     * @param separator
-     * @param config
-     * @param date_parser
-     * @return std::shared_ptr<View<t_ctx0>>
-     */
-    template <typename T>
-    std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T view_config, T date_parser);
-
-    /**
-     * @brief Create a new one-sided view.
+     * Views are backed by an underlying `t_ctx_*` object, represented by the `CTX_T` template.
      *
-     * One-sided views have one or more `row-pivots` applied,
-     *
-     * @tparam T
-     * @param table
-     * @param name
-     * @param separator
-     * @param config
-     * @param date_parser
-     * @return std::shared_ptr<View<t_ctx1>>
-     */
-    template <typename T>
-    std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T view_config, T date_parser);
-
-    /**
-     * @brief Create a new two-sided view.
+     * One-sided views have one or more `row-pivots` applied.
      *
      * Two sided views have one or more `row-pivots` and `column-pivots` applied, or they have
      * one or more `column-pivots` applied without any row pivots, hence the term `column_only`.
@@ -310,38 +287,26 @@ namespace binding {
      * @param separator
      * @param config
      * @param date_parser
-     * @return std::shared_ptr<View<t_ctx2>>
+     * @return std::shared_ptr<View<CTX_T>>
      */
-    template <typename T>
-    std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<Table> table, std::string name,
+    template <typename T, typename CTX_T>
+    std::shared_ptr<View<CTX_T>> make_view(std::shared_ptr<Table> table, std::string name,
         std::string separator, T view_config, T date_parser);
 
     /**
-     * @brief Create a new zero-sided context.
+     * @brief Create a new context of type `CTX_T`, which will be one of 3 types:
+     *
+     * `t_ctx0`, `t_ctx1`, `t_ctx2`.
+     *
      *
      * Contexts contain the underlying aggregates, sort specifications, filter terms, and other
      * metadata allowing for data manipulation and view creation.
      *
-     * @return std::shared_ptr<t_ctx0>
+     * @return std::shared_ptr<CTX_T>
      */
-    std::shared_ptr<t_ctx0> make_context_zero(std::shared_ptr<Table> table,
-        const t_schema& schema, const t_view_config& view_config, std::string name);
-
-    /**
-     * @brief Create a new one-sided context.
-     *
-     * @return std::shared_ptr<t_ctx1>
-     */
-    std::shared_ptr<t_ctx1> make_context_one(std::shared_ptr<Table> table,
-        const t_schema& schema, const t_view_config& view_config, std::string name);
-
-    /**
-     * @brief Create a new two-sided context.
-     *
-     * @return std::shared_ptr<t_ctx2>
-     */
-    std::shared_ptr<t_ctx2> make_context_two(std::shared_ptr<Table> table,
-        const t_schema& schema, const t_view_config& view_config, std::string name);
+    template <typename CTX_T>
+    std::shared_ptr<CTX_T> make_context(std::shared_ptr<Table> table, const t_schema& schema,
+        const t_view_config& view_config, std::string name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

@@ -41,6 +41,12 @@ public:
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
         std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only);
 
+    /**
+     * @brief Given a `t_schema` specifying the underlying `Table`'s columns, construct the
+     * abstractions necessary for the core engine.
+     *
+     * @param schema
+     */
     void init(const t_schema& schema);
 
     /**
@@ -81,6 +87,8 @@ public:
     std::int32_t get_column_pivot_depth() const;
 
 private:
+    bool m_init;
+
     /**
      * @brief Fill the `m_aggspecs` vector with `t_aggspec` objects which define the view's
      * aggregate settings.
@@ -119,6 +127,13 @@ private:
      */
     void fill_sortspec();
 
+    /**
+     * @brief Given a column name, find its position in `m_aggregate_names`. Used for
+     * determining sort specifications.
+     *
+     * @param column
+     * @return t_index
+     */
     t_index get_aggregate_index(const std::string& column) const;
 
     // containers for primitive data that does not need transformation into abstractions
@@ -171,7 +186,3 @@ private:
     bool m_column_only;
 };
 } // end namespace perspective
-
-namespace std {
-std::ostream& operator<<(std::ostream& os, const perspective::t_view_config& vc);
-} // end namespace std

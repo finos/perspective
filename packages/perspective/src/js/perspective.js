@@ -110,7 +110,7 @@ export default function(Module) {
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
-        console.log(table_id);
+
         if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool, table_id);
         } else {
