@@ -38,9 +38,9 @@ const MAX_COLUMN_COUNT = {
     scatter: 100,
     bubble: 100,
     column: 100,
-    treemap: 100,
-    sunburst: 50,
-    heatmap: 50
+    treemap: 24,
+    sunburst: 24,
+    heatmap: 24
 };
 
 const PLUGINS = {
