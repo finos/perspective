@@ -334,9 +334,7 @@ export class PerspectiveElement extends StateElement {
 
         const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
-            if (await this._warn_render_size_exceeded(max_cols, max_rows)) {
-                // TODO opacity change?
-            }
+            this._warn_render_size_exceeded(max_cols, max_rows);
         }
 
         this._view_updater = () => this._view_on_update();
