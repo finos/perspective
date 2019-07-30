@@ -7,14 +7,14 @@
  *
  */
 
-const path = require('path');
-const packagejson = require('../../package.json');
-const webpackjson = require('../../src/config/plugin.config.js');
+const path = require("path");
+const packagejson = require("../../package.json");
+const webpackjson = require("../../src/config/plugin.config.js");
 
 describe("output test", () => {
     test("ensure valid jupyterlab output", () => {
-        expect(packagejson.main).toEqual('dist/index.js');
-        expect(webpackjson.output.filename).toEqual('index.js');
+        expect(packagejson.main).toEqual("dist/index.js");
+        expect(webpackjson.output.filename).toEqual("index.js");
         expect(webpackjson.output.path).toEqual(path.resolve(__dirname, "../../dist"));
         console.log(webpackjson);
     });
