@@ -40,7 +40,7 @@ class PerspectiveModel extends DOMWidgetModel {
 
             datasrc: '',
             schema: {},
-            view: 'hypergrid',
+            plugin: 'hypergrid',
             columns: [],
             rowpivots: [],
             columnpivots: [],
@@ -80,7 +80,7 @@ class PerspectiveView extends DOMWidgetView {
             {datasrc: this.model.get('datasrc'),
              data: this.model.get('datasrc') === 'arrow' ? this.model.get('_bin_data').buffer : this.model.get('_data'),
              schema: this.model.get('schema'),
-             view: this.model.get('view'),
+             plugin: this.model.get('plugin'),
              columns: this.model.get('columns'),
              rowpivots: this.model.get('rowpivots'),
              columnpivots: this.model.get('columnpivots'),
@@ -103,7 +103,7 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:_bin_data', this.bin_data_changed, this);
         // Dont trigger on datasrc change until data is updated
         this.model.on('change:schema', this.schema_changed, this);
-        this.model.on('change:view', this.view_changed, this);
+        this.model.on('change:plugin', this.plugin_changed, this);
         this.model.on('change:columns', this.columns_changed, this);
         this.model.on('change:rowpivots', this.rowpivots_changed, this);
         this.model.on('change:columnpivots', this.columnpivots_changed, this);
@@ -156,36 +156,36 @@ class PerspectiveView extends DOMWidgetView {
         this.psp._render();
     }
 
-    
+
     schema_changed(){
         this.psp.schema = this.model.get('schema');
         this.psp._render();
     }
-    
-    view_changed(){
-        this.psp.view = this.model.get('view');
+
+    plugin_changed(){
+        this.psp.plugin = this.model.get('plugin');
     }
-    
+
     columns_changed(){
         this.psp.columns = this.model.get('columns');
     }
-    
+
     rowpivots_changed(){
         this.psp.rowpivots = this.model.get('rowpivots');
     }
-    
+
     columnpivots_changed(){
         this.psp.columnpivots = this.model.get('columnpivots');
     }
-    
+
     aggregates_changed(){
         this.psp.aggregates = this.model.get('aggregates');
     }
-    
+
     sort_changed(){
         this.psp.sort = this.model.get('sort');
     }
-    
+
     computedcolumns_changed(){
         this.psp.computedcolumns = this.model.get('computedcolumns');
     }
@@ -201,15 +201,15 @@ class PerspectiveView extends DOMWidgetView {
     limit_changed(){
         this.psp.limit = this.model.get('limit');
     }
-    
+
     settings_changed(){
         this.psp.settings = this.model.get('settings');
     }
-    
+
     embed_changed(){
         this.psp.embed = this.model.get('embed');
     }
-    
+
     dark_changed(){
         this.psp.dark = this.model.get('dark');
     }
