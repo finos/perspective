@@ -2250,7 +2250,7 @@ TEST(GNODE_TEST, get_registered_contexts)
     std::vector<t_tscalar> expected_ctx0_pkeys{1_ts};
     EXPECT_EQ(ctx0_pkeys, expected_ctx0_pkeys);
 
-    ctx0->sort_by(std::vector<t_sortspec>{{0, SORTTYPE_DESCENDING}});
+    ctx0->sort_by(std::vector<t_sortspec>{{"i", 0, SORTTYPE_DESCENDING}});
     EXPECT_EQ(ctx0->get_cell_data({{0, 0}}), std::vector<t_tscalar>{"b"_ts});
 
     auto trees = gn->get_trees();

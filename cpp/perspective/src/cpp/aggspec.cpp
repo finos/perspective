@@ -23,27 +23,6 @@ t_col_name_type::t_col_name_type(const std::string& name, t_dtype type)
 
 t_aggspec::t_aggspec() {}
 
-t_aggspec::t_aggspec(const t_aggspec_recipe& v) {
-    m_name = v.m_name;
-    m_disp_name = v.m_name;
-    m_agg = v.m_agg;
-
-    for (const auto& d : v.m_dependencies) {
-        m_dependencies.push_back(d);
-    }
-
-    for (const auto& d : v.m_odependencies) {
-        m_odependencies.push_back(d);
-    }
-
-    m_sort_type = v.m_sort_type;
-    m_agg_one_idx = v.m_agg_one_idx;
-    m_agg_two_idx = v.m_agg_two_idx;
-    m_agg_one_weight = v.m_agg_one_weight;
-    m_agg_two_weight = v.m_agg_two_weight;
-    m_invmode = v.m_invmode;
-}
-
 t_aggspec::t_aggspec(
     const std::string& name, t_aggtype agg, const std::vector<t_dep>& dependencies)
     : m_name(name)
@@ -405,31 +384,6 @@ t_aggspec::get_first_depname() const {
         return "";
 
     return m_dependencies[0].name();
-}
-
-t_aggspec_recipe
-t_aggspec::get_recipe() const {
-    t_aggspec_recipe rv;
-    rv.m_name = m_name;
-    rv.m_disp_name = m_name;
-    rv.m_agg = m_agg;
-
-    for (const auto& d : m_dependencies) {
-        rv.m_dependencies.push_back(d.get_recipe());
-    }
-
-    for (const auto& d : m_odependencies) {
-        rv.m_odependencies.push_back(d.get_recipe());
-    }
-
-    rv.m_sort_type = m_sort_type;
-    rv.m_agg_one_idx = m_agg_one_idx;
-    rv.m_agg_two_idx = m_agg_two_idx;
-    rv.m_agg_one_weight = m_agg_one_weight;
-    rv.m_agg_two_weight = m_agg_two_weight;
-    rv.m_invmode = m_invmode;
-
-    return rv;
 }
 
 } // end namespace perspective

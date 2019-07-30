@@ -18,235 +18,17 @@ namespace binding {
      *
      * Utility
      */
+
+    template <typename T>
+    std::vector<T>
+    make_vector() {
+        return std::vector<T>{};
+    }
+
     template <>
     bool
     has_value(t_val item) {
         return (!item.isUndefined() && !item.isNull());
-    }
-
-    /******************************************************************************
-     *
-     * Data Loading
-     */
-
-    t_index
-    _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name) {
-        auto it = std::find(agg_names.begin(), agg_names.end(), name);
-        if (it != agg_names.end()) {
-            return t_index(std::distance(agg_names.begin(), it));
-        }
-        return t_index();
-    }
-
-    std::vector<std::string>
-    _get_aggregate_names(const std::vector<t_aggspec>& aggs) {
-        std::vector<std::string> names;
-        for (const t_aggspec& agg : aggs) {
-            names.push_back(agg.name());
-        }
-        return names;
-    }
-
-    template <>
-    std::vector<t_aggspec>
-    _get_aggspecs(const t_schema& schema, const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots, bool column_only,
-        const std::vector<std::string>& columns, const std::vector<t_val>& sortbys,
-        t_val j_aggs) {
-        std::vector<t_aggspec> aggspecs;
-        t_val agg_columns = t_val::global("Object").call<t_val>("keys", j_aggs);
-        std::vector<std::string> aggs = vecFromArray<t_val, std::string>(agg_columns);
-
-        /**
-         * Provide aggregates for columns that are shown but NOT specified in
-         * the `j_aggs` object.
-         */
-        for (const std::string& column : columns) {
-            if (std::find(aggs.begin(), aggs.end(), column) != aggs.end()) {
-                continue;
-            }
-
-            t_dtype dtype = schema.get_dtype(column);
-            std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
-            t_aggtype agg_op
-                = t_aggtype::AGGTYPE_ANY; // use aggtype here since we are not parsing aggs
-
-            if (!column_only) {
-                agg_op = _get_default_aggregate(dtype);
-            }
-
-            aggspecs.push_back(t_aggspec(column, agg_op, dependencies));
-        }
-
-        // Construct aggregates from config object
-        for (const std::string& agg_column : aggs) {
-            if (std::find(columns.begin(), columns.end(), agg_column) == columns.end()) {
-                continue;
-            }
-
-            std::string agg_op = j_aggs[agg_column].as<std::string>();
-            std::vector<t_dep> dependencies;
-
-            if (column_only) {
-                agg_op = "any";
-            }
-
-            dependencies.push_back(t_dep(agg_column, DEPTYPE_COLUMN));
-
-            t_aggtype aggtype = str_to_aggtype(agg_op);
-
-            if (aggtype == AGGTYPE_FIRST || aggtype == AGGTYPE_LAST) {
-                if (dependencies.size() == 1) {
-                    dependencies.push_back(t_dep("psp_pkey", DEPTYPE_COLUMN));
-                }
-                aggspecs.push_back(t_aggspec(
-                    agg_column, agg_column, aggtype, dependencies, SORTTYPE_ASCENDING));
-            } else {
-                aggspecs.push_back(t_aggspec(agg_column, aggtype, dependencies));
-            }
-        }
-
-        // construct aggspecs for hidden sorts
-        for (auto sortby : sortbys) {
-            std::string column = sortby[0].as<std::string>();
-
-            bool is_hidden_column
-                = std::find(columns.begin(), columns.end(), column) == columns.end();
-            bool not_aggregated = std::find(aggs.begin(), aggs.end(), column) == aggs.end();
-
-            if (is_hidden_column) {
-                bool is_pivot = (std::find(row_pivots.begin(), row_pivots.end(), column)
-                                    != row_pivots.end())
-                    || (std::find(column_pivots.begin(), column_pivots.end(), column)
-                           != column_pivots.end());
-
-                std::vector<t_dep> dependencies{t_dep(column, DEPTYPE_COLUMN)};
-                t_aggtype agg_op;
-
-                if (is_pivot || row_pivots.size() == 0 || column_only) {
-                    agg_op = t_aggtype::AGGTYPE_ANY;
-                } else {
-                    t_dtype dtype = schema.get_dtype(column);
-                    agg_op = _get_default_aggregate(dtype);
-                }
-
-                aggspecs.push_back(t_aggspec(column, agg_op, dependencies));
-            }
-        }
-
-        return aggspecs;
-    }
-
-    template <>
-    std::vector<t_sortspec>
-    _get_sort(const std::vector<std::string>& columns, bool is_column_sort,
-        const std::vector<t_val>& sortbys) {
-        std::vector<t_sortspec> svec{};
-
-        auto _is_valid_sort = [is_column_sort](t_val sort_item) {
-            /**
-             * If column sort, make sure string matches. Otherwise make
-             * sure string is *not* a column sort.
-             */
-            std::string op = sort_item[1].as<std::string>();
-            bool is_col_sortop = op.find("col") != std::string::npos;
-            return (is_column_sort && is_col_sortop) || (!is_col_sortop && !is_column_sort);
-        };
-
-        for (auto idx = 0; idx < sortbys.size(); ++idx) {
-            t_val sort_item = sortbys[idx];
-            t_index agg_index;
-            std::string column;
-            t_sorttype sorttype;
-
-            std::string sort_op_str;
-            if (!_is_valid_sort(sort_item)) {
-                continue;
-            }
-
-            column = sort_item[0].as<std::string>();
-            sort_op_str = sort_item[1].as<std::string>();
-            sorttype = str_to_sorttype(sort_op_str);
-
-            agg_index = _get_aggregate_index(columns, column);
-
-            svec.push_back(t_sortspec(agg_index, sorttype));
-        }
-        return svec;
-    }
-
-    template <>
-    std::vector<t_fterm>
-    _get_fterms(const t_schema& schema, t_val j_date_parser, t_val j_filters) {
-        std::vector<t_fterm> fvec{};
-        std::vector<t_val> filters = vecFromArray<t_val, t_val>(j_filters);
-
-        auto _is_valid_filter = [j_date_parser](t_dtype type, std::vector<t_val> filter) {
-            if (type == DTYPE_DATE || type == DTYPE_TIME) {
-                t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                return has_value(parsed_date);
-            } else {
-                return has_value(filter[2]);
-            }
-        };
-
-        for (auto fidx = 0; fidx < filters.size(); ++fidx) {
-            std::vector<t_val> filter = vecFromArray<t_val, t_val>(filters[fidx]);
-            std::string col = filter[0].as<std::string>();
-            t_filter_op comp = str_to_filter_op(filter[1].as<std::string>());
-
-            // check validity and if_date
-            t_dtype col_type = schema.get_dtype(col);
-            bool is_valid = _is_valid_filter(col_type, filter);
-
-            if (!is_valid) {
-                continue;
-            }
-
-            switch (comp) {
-                case FILTER_OP_NOT_IN:
-                case FILTER_OP_IN: {
-                    std::vector<t_tscalar> terms{};
-                    std::vector<std::string> j_terms
-                        = vecFromArray<t_val, std::string>(filter[2]);
-                    for (auto jidx = 0; jidx < j_terms.size(); ++jidx) {
-                        terms.push_back(mktscalar(get_interned_cstr(j_terms[jidx].c_str())));
-                    }
-                    fvec.push_back(t_fterm(col, comp, mktscalar(0), terms));
-                } break;
-                default: {
-                    t_tscalar term;
-                    switch (col_type) {
-                        case DTYPE_INT32: {
-                            term = mktscalar(filter[2].as<std::int32_t>());
-                        } break;
-                        case DTYPE_INT64:
-                        case DTYPE_FLOAT64: {
-                            term = mktscalar(filter[2].as<double>());
-                        } break;
-                        case DTYPE_BOOL: {
-                            term = mktscalar(filter[2].as<bool>());
-                        } break;
-                        case DTYPE_DATE: {
-                            t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                            term = mktscalar(jsdate_to_t_date(parsed_date));
-                        } break;
-                        case DTYPE_TIME: {
-                            t_val parsed_date = j_date_parser.call<t_val>("parse", filter[2]);
-                            term = mktscalar(t_time(static_cast<std::int64_t>(
-                                parsed_date.call<t_val>("getTime").as<double>())));
-                        } break;
-                        default: {
-                            term = mktscalar(
-                                get_interned_cstr(filter[2].as<std::string>().c_str()));
-                        }
-                    }
-
-                    fvec.push_back(t_fterm(col, comp, term, std::vector<t_tscalar>()));
-                }
-            }
-        }
-        return fvec;
     }
 
     /******************************************************************************
@@ -1515,151 +1297,137 @@ namespace binding {
      *
      * View API
      */
+
     template <>
-    t_config
-    make_view_config(
-        const t_schema& schema, std::string separator, t_val date_parser, t_val config) {
-        t_val j_row_pivots = config["row_pivots"];
-        t_val j_column_pivots = config["column_pivots"];
-        t_val j_aggregates = config["aggregates"];
-        t_val j_columns = config["columns"];
-        t_val j_filter = config["filter"];
-        t_val j_sort = config["sort"];
+    bool
+    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term) {
+        if (type == DTYPE_DATE || type == DTYPE_TIME) {
+            t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
+            return has_value(parsed_date);
+        } else {
+            return has_value(filter_term);
+        }
+    };
 
-        std::vector<std::string> row_pivots;
-        std::vector<std::string> column_pivots;
-        std::vector<t_aggspec> aggregates;
-        std::vector<std::string> aggregate_names;
-        std::vector<std::string> columns;
-        std::vector<t_fterm> filters;
-        std::vector<t_val> sortbys;
-        std::vector<t_sortspec> sorts;
-        std::vector<t_sortspec> col_sorts;
+    template <>
+    std::tuple<std::string, std::string, std::vector<t_tscalar>>
+    make_filter_term(t_dtype type, t_val date_parser, std::vector<t_val> filter) {
+        std::string col = filter[0].as<std::string>();
+        std::string comp_str = filter[1].as<std::string>();
+        t_filter_op comp = str_to_filter_op(comp_str);
+        std::vector<t_tscalar> terms;
 
-        t_filter_op filter_op = t_filter_op::FILTER_OP_AND;
-
-        if (has_value(j_row_pivots)) {
-            row_pivots = vecFromArray<t_val, std::string>(j_row_pivots);
+        switch (comp) {
+            case FILTER_OP_NOT_IN:
+            case FILTER_OP_IN: {
+                std::vector<std::string> filter_terms
+                    = vecFromArray<t_val, std::string>(filter[2]);
+                for (auto term : filter_terms) {
+                    terms.push_back(mktscalar(get_interned_cstr(term.c_str())));
+                }
+            } break;
+            default: {
+                switch (type) {
+                    case DTYPE_INT32: {
+                        terms.push_back(mktscalar(filter[2].as<std::int32_t>()));
+                    } break;
+                    case DTYPE_INT64:
+                    case DTYPE_FLOAT64: {
+                        terms.push_back(mktscalar(filter[2].as<double>()));
+                    } break;
+                    case DTYPE_BOOL: {
+                        terms.push_back(mktscalar(filter[2].as<bool>()));
+                    } break;
+                    case DTYPE_DATE: {
+                        t_val parsed_date = date_parser.call<t_val>("parse", filter[2]);
+                        terms.push_back(mktscalar(jsdate_to_t_date(parsed_date)));
+                    } break;
+                    case DTYPE_TIME: {
+                        t_val parsed_date = date_parser.call<t_val>("parse", filter[2]);
+                        terms.push_back(mktscalar(t_time(static_cast<std::int64_t>(
+                            parsed_date.call<t_val>("getTime").as<double>()))));
+                    } break;
+                    default: {
+                        terms.push_back(
+                            mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str())));
+                    }
+                }
+            }
         }
 
-        if (has_value(j_column_pivots)) {
-            column_pivots = vecFromArray<t_val, std::string>(j_column_pivots);
-        }
+        return std::make_tuple(col, comp_str, terms);
+    }
+
+    template <>
+    t_view_config
+    make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
+        // extract vectors from JS, where they were created
+        auto row_pivots = config.call<std::vector<std::string>>("get_row_pivots");
+        auto column_pivots = config.call<std::vector<std::string>>("get_column_pivots");
+        auto columns = config.call<std::vector<std::string>>("get_columns");
+        auto sort = config.call<std::vector<std::vector<std::string>>>("get_sort");
+        auto filter_op = config["filter_op"].as<std::string>();
+
+        // aggregates require manual parsing - std::maps read from JS are empty
+        t_val j_aggregate_keys
+            = t_val::global("Object").call<t_val>("keys", config["aggregates"]);
+        auto aggregate_names = vecFromArray<t_val, std::string>(j_aggregate_keys);
+
+        tsl::ordered_map<std::string, std::string> aggregates;
+        for (const auto& name : aggregate_names) {
+            aggregates[name] = config["aggregates"][name].as<std::string>();
+        };
 
         bool column_only = false;
 
+        // make sure that primary keys are created for column-only views
         if (row_pivots.size() == 0 && column_pivots.size() > 0) {
             row_pivots.push_back("psp_okey");
             column_only = true;
         }
 
-        if (has_value(j_sort)) {
-            sortbys = vecFromArray<t_val, t_val>(j_sort);
-        }
+        // construct filters with filter terms, and fill the vector of tuples
+        auto js_filter = config.call<std::vector<std::vector<t_val>>>("get_filter");
+        std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
 
-        columns = vecFromArray<t_val, std::string>(j_columns);
-        aggregates = _get_aggspecs(
-            schema, row_pivots, column_pivots, column_only, columns, sortbys, j_aggregates);
-        aggregate_names = _get_aggregate_names(aggregates);
+        for (auto f : js_filter) {
+            t_dtype type = schema.get_dtype(f[0].as<std::string>());
 
-        if (has_value(j_filter)) {
-            filters = _get_fterms(schema, date_parser, j_filter);
-            if (has_value(config["filter_op"])) {
-                filter_op = str_to_filter_op(config["filter_op"].as<std::string>());
+            // validate the filter before it goes into the core engine
+            if (is_valid_filter(type, date_parser, f[2])) {
+                filter.push_back(make_filter_term(type, date_parser, f));
             }
         }
 
-        if (sortbys.size() > 0) {
-            sorts = _get_sort(aggregate_names, false, sortbys);
-            col_sorts = _get_sort(aggregate_names, true, sortbys);
+        // create the `t_view_config`
+        t_view_config view_config(row_pivots, column_pivots, aggregates, columns, filter, sort,
+            filter_op, column_only);
+
+        // set pivot depths if provided
+        if (has_value(config["row_pivot_depth"])) {
+            view_config.set_row_pivot_depth(config["row_pivot_depth"].as<std::int32_t>());
         }
 
-        auto view_config = t_config(row_pivots, column_pivots, aggregates, sorts, col_sorts,
-            filter_op, filters, aggregate_names, column_only);
+        if (has_value(config["column_pivot_depth"])) {
+            view_config.set_column_pivot_depth(config["column_pivot_depth"].as<std::int32_t>());
+        }
+
+        // transform primitive values into abstractions that the engine can use
+        view_config.init(schema);
 
         return view_config;
     }
 
-    template <>
-    std::shared_ptr<View<t_ctx0>>
-    make_view_zero(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val config, t_val date_parser) {
+    template <typename CTX_T>
+    std::shared_ptr<View<CTX_T>>
+    make_view(std::shared_ptr<Table> table, std::string name, std::string separator,
+        t_val view_config, t_val date_parser) {
         auto schema = table->get_schema();
-        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
+        t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
 
-        auto col_names = view_config.get_column_names();
-        auto filter_op = view_config.get_combiner();
-        auto filters = view_config.get_fterms();
-        auto sorts = view_config.get_sortspecs();
-        auto ctx = make_context_zero(table, schema, filter_op, col_names, filters, sorts, name);
+        auto ctx = make_context<CTX_T>(table, schema, config, name);
 
-        auto view_ptr
-            = std::make_shared<View<t_ctx0>>(table, ctx, name, separator, view_config);
-
-        return view_ptr;
-    }
-
-    template <>
-    std::shared_ptr<View<t_ctx1>>
-    make_view_one(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val config, t_val date_parser) {
-        auto schema = table->get_schema();
-        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
-
-        auto aggregates = view_config.get_aggregates();
-        auto row_pivots = view_config.get_row_pivots();
-        auto filter_op = view_config.get_combiner();
-        auto filters = view_config.get_fterms();
-        auto sorts = view_config.get_sortspecs();
-
-        std::int32_t pivot_depth = -1;
-        if (has_value(config["row_pivot_depth"])) {
-            pivot_depth = config["row_pivot_depth"].as<std::int32_t>();
-        }
-
-        auto ctx = make_context_one(table, schema, row_pivots, filter_op, filters, aggregates,
-            sorts, pivot_depth, name);
-
-        auto view_ptr
-            = std::make_shared<View<t_ctx1>>(table, ctx, name, separator, view_config);
-
-        return view_ptr;
-    }
-
-    template <>
-    std::shared_ptr<View<t_ctx2>>
-    make_view_two(std::shared_ptr<Table> table, std::string name, std::string separator,
-        t_val config, t_val date_parser) {
-        auto schema = table->get_schema();
-        t_config view_config = make_view_config<t_val>(schema, separator, date_parser, config);
-
-        bool column_only = view_config.is_column_only();
-        auto column_names = view_config.get_column_names();
-        auto row_pivots = view_config.get_row_pivots();
-        auto column_pivots = view_config.get_column_pivots();
-        auto aggregates = view_config.get_aggregates();
-        auto filter_op = view_config.get_combiner();
-        auto filters = view_config.get_fterms();
-        auto sorts = view_config.get_sortspecs();
-        auto col_sorts = view_config.get_col_sortspecs();
-
-        std::int32_t rpivot_depth = -1;
-        std::int32_t cpivot_depth = -1;
-
-        if (has_value(config["row_pivot_depth"])) {
-            rpivot_depth = config["row_pivot_depth"].as<std::int32_t>();
-        }
-
-        if (has_value(config["column_pivot_depth"])) {
-            cpivot_depth = config["column_pivot_depth"].as<std::int32_t>();
-        }
-
-        auto ctx
-            = make_context_two(table, schema, row_pivots, column_pivots, filter_op, filters,
-                aggregates, sorts, col_sorts, rpivot_depth, cpivot_depth, column_only, name);
-
-        auto view_ptr
-            = std::make_shared<View<t_ctx2>>(table, ctx, name, separator, view_config);
+        auto view_ptr = std::make_shared<View<CTX_T>>(table, ctx, name, separator, config);
 
         return view_ptr;
     }
@@ -1669,14 +1437,19 @@ namespace binding {
      * Context API
      */
 
+    template <>
     std::shared_ptr<t_ctx0>
-    make_context_zero(std::shared_ptr<Table> table, t_schema schema, t_filter_op combiner,
-        std::vector<std::string> columns, std::vector<t_fterm> filters,
-        std::vector<t_sortspec> sorts, std::string name) {
-        auto cfg = t_config(columns, combiner, filters);
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+        const t_view_config& view_config, std::string name) {
+        auto columns = view_config.get_columns();
+        auto filter_op = view_config.get_filter_op();
+        auto fterm = view_config.get_fterm();
+        auto sortspec = view_config.get_sortspec();
+
+        auto cfg = t_config(columns, filter_op, fterm);
         auto ctx0 = std::make_shared<t_ctx0>(schema, cfg);
         ctx0->init();
-        ctx0->sort_by(sorts);
+        ctx0->sort_by(sortspec);
 
         auto pool = table->get_pool();
         auto gnode = table->get_gnode();
@@ -1686,41 +1459,56 @@ namespace binding {
         return ctx0;
     }
 
+    template <>
     std::shared_ptr<t_ctx1>
-    make_context_one(std::shared_ptr<Table> table, t_schema schema, std::vector<t_pivot> pivots,
-        t_filter_op combiner, std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::int32_t pivot_depth, std::string name) {
-        auto cfg = t_config(pivots, aggregates, combiner, filters);
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+        const t_view_config& view_config, std::string name) {
+        auto row_pivots = view_config.get_row_pivots();
+        auto aggspecs = view_config.get_aggspecs();
+        auto filter_op = view_config.get_filter_op();
+        auto fterm = view_config.get_fterm();
+        auto sortspec = view_config.get_sortspec();
+        auto row_pivot_depth = view_config.get_row_pivot_depth();
+
+        auto cfg = t_config(row_pivots, aggspecs, filter_op, fterm);
         auto ctx1 = std::make_shared<t_ctx1>(schema, cfg);
 
         ctx1->init();
-        ctx1->sort_by(sorts);
+        ctx1->sort_by(sortspec);
 
         auto pool = table->get_pool();
         auto gnode = table->get_gnode();
         pool->register_context(gnode->get_id(), name, ONE_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx1.get()));
 
-        if (pivot_depth > -1) {
-            ctx1->set_depth(pivot_depth - 1);
+        if (row_pivot_depth > -1) {
+            ctx1->set_depth(row_pivot_depth - 1);
         } else {
-            ctx1->set_depth(pivots.size());
+            ctx1->set_depth(row_pivots.size());
         }
 
         return ctx1;
     }
 
+    template <>
     std::shared_ptr<t_ctx2>
-    make_context_two(std::shared_ptr<Table> table, t_schema schema,
-        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
-        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
-        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
-        std::string name) {
-        t_totals total = sorts.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
+    make_context(std::shared_ptr<Table> table, const t_schema& schema,
+        const t_view_config& view_config, std::string name) {
+        bool column_only = view_config.is_column_only();
+        auto row_pivots = view_config.get_row_pivots();
+        auto column_pivots = view_config.get_column_pivots();
+        auto aggspecs = view_config.get_aggspecs();
+        auto filter_op = view_config.get_filter_op();
+        auto fterm = view_config.get_fterm();
+        auto sortspec = view_config.get_sortspec();
+        auto col_sortspec = view_config.get_col_sortspec();
+        auto row_pivot_depth = view_config.get_row_pivot_depth();
+        auto column_pivot_depth = view_config.get_column_pivot_depth();
 
-        auto cfg
-            = t_config(rpivots, cpivots, aggregates, total, combiner, filters, column_only);
+        t_totals total = sortspec.size() > 0 ? TOTALS_BEFORE : TOTALS_HIDDEN;
+
+        auto cfg = t_config(
+            row_pivots, column_pivots, aggspecs, total, filter_op, fterm, column_only);
         auto ctx2 = std::make_shared<t_ctx2>(schema, cfg);
 
         ctx2->init();
@@ -1730,24 +1518,24 @@ namespace binding {
         pool->register_context(gnode->get_id(), name, TWO_SIDED_CONTEXT,
             reinterpret_cast<std::uintptr_t>(ctx2.get()));
 
-        if (rpivot_depth > -1) {
-            ctx2->set_depth(t_header::HEADER_ROW, rpivot_depth - 1);
+        if (row_pivot_depth > -1) {
+            ctx2->set_depth(t_header::HEADER_ROW, row_pivot_depth - 1);
         } else {
-            ctx2->set_depth(t_header::HEADER_ROW, rpivots.size());
+            ctx2->set_depth(t_header::HEADER_ROW, row_pivots.size());
         }
 
-        if (cpivot_depth > -1) {
-            ctx2->set_depth(t_header::HEADER_COLUMN, cpivot_depth - 1);
+        if (column_pivot_depth > -1) {
+            ctx2->set_depth(t_header::HEADER_COLUMN, column_pivot_depth - 1);
         } else {
-            ctx2->set_depth(t_header::HEADER_COLUMN, cpivots.size());
+            ctx2->set_depth(t_header::HEADER_COLUMN, column_pivots.size());
         }
 
-        if (sorts.size() > 0) {
-            ctx2->sort_by(sorts);
+        if (sortspec.size() > 0) {
+            ctx2->sort_by(sortspec);
         }
 
-        if (col_sorts.size() > 0) {
-            ctx2->column_sort_by(col_sorts);
+        if (col_sortspec.size() > 0) {
+            ctx2->column_sort_by(col_sortspec);
         }
 
         return ctx2;
@@ -1842,7 +1630,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     class_<View<t_ctx0>>("View_ctx0")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
-            t_config>()
+            t_view_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx0>>>("shared_ptr<View_ctx0>")
         .function("sides", &View<t_ctx0>::sides)
         .function("num_rows", &View<t_ctx0>::num_rows)
@@ -1865,7 +1653,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     class_<View<t_ctx1>>("View_ctx1")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
-            t_config>()
+            t_view_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx1>>>("shared_ptr<View_ctx1>")
         .function("sides", &View<t_ctx1>::sides)
         .function("num_rows", &View<t_ctx1>::num_rows)
@@ -1891,7 +1679,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     class_<View<t_ctx2>>("View_ctx2")
         .constructor<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
-            t_config>()
+            t_view_config>()
         .smart_ptr<std::shared_ptr<View<t_ctx2>>>("shared_ptr<View_ctx2>")
         .function("sides", &View<t_ctx2>::sides)
         .function("num_rows", &View<t_ctx2>::num_rows)
@@ -1915,6 +1703,17 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_row_delta", &View<t_ctx2>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
+
+    /******************************************************************************
+     *
+     * t_view_config
+     */
+    class_<t_view_config>("t_view_config")
+        .constructor<std::vector<std::string>, std::vector<std::string>,
+            tsl::ordered_map<std::string, std::string>, std::vector<std::string>,
+            std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>,
+            std::vector<std::vector<std::string>>, std::string, bool>()
+        .function("add_filter_term", &t_view_config::add_filter_term);
 
     /******************************************************************************
      *
@@ -2043,13 +1842,16 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * vector
      */
     register_vector<std::int32_t>("std::vector<std::int32_t>");
+    register_vector<std::string>("std::vector<std::string>");
     register_vector<t_dtype>("std::vector<t_dtype>");
     register_vector<t_cellupd>("std::vector<t_cellupd>");
     register_vector<t_tscalar>("std::vector<t_tscalar>");
-    register_vector<std::vector<t_tscalar>>("std::vector<std::vector<t_tscalar>>");
-    register_vector<std::string>("std::vector<std::string>");
     register_vector<t_updctx>("std::vector<t_updctx>");
     register_vector<t_uindex>("std::vector<t_uindex>");
+    register_vector<t_val>("std::vector<t_val>");
+    register_vector<std::vector<t_tscalar>>("std::vector<std::vector<t_tscalar>>");
+    register_vector<std::vector<std::string>>("std::vector<std::vector<std::string>>");
+    register_vector<std::vector<t_val>>("std::vector<std::vector<t_val>>");
 
     /******************************************************************************
      *
@@ -2098,7 +1900,16 @@ EMSCRIPTEN_BINDINGS(perspective) {
 
     /******************************************************************************
      *
-     * assorted functions
+     * Construct `std::vector`s
+     */
+    function("make_string_vector", &make_vector<std::string>);
+    function("make_val_vector", &make_vector<t_val>);
+    function("make_2d_string_vector", &make_vector<std::vector<std::string>>);
+    function("make_2d_val_vector", &make_vector<std::vector<t_val>>);
+
+    /******************************************************************************
+     *
+     * Perspective functions
      */
     function("make_table", &make_table<t_val>);
     function("make_computed_table", &make_computed_table<t_val>);
@@ -2106,9 +1917,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("scalar_vec_to_string", &scalar_vec_to_string);
     function("table_add_computed_column", &table_add_computed_column<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
-    function("make_view_zero", &make_view_zero<t_val>);
-    function("make_view_one", &make_view_one<t_val>);
-    function("make_view_two", &make_view_two<t_val>);
+    function("make_view_zero", &make_view<t_ctx0>);
+    function("make_view_one", &make_view<t_ctx1>);
+    function("make_view_two", &make_view<t_ctx2>);
     function("get_data_slice_zero", &get_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_from_data_slice_zero", &get_from_data_slice<t_ctx0>, allow_raw_pointers());
     function("get_data_slice_one", &get_data_slice<t_ctx1>, allow_raw_pointers());

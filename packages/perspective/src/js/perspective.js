@@ -10,7 +10,7 @@
 import * as defaults from "./config/constants.js";
 import {DataAccessor} from "./data_accessor";
 import {DateParser} from "./data_accessor/date_parser.js";
-import {extract_map} from "./emscripten.js";
+import {extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
@@ -110,7 +110,7 @@ export default function(Module) {
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
-        console.log(table_id);
+
         if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool, table_id);
         } else {
@@ -253,17 +253,18 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(table, sides, config, name, callbacks) {
+    function view(table, sides, config, view_config, name, callbacks) {
         this._View = undefined;
         this.date_parser = new DateParser();
         this.config = config || {};
+        this.view_config = view_config || new view_config();
 
         if (sides === 0) {
-            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_zero(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         } else if (sides === 1) {
-            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_one(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         } else if (sides === 2) {
-            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.config, this.date_parser);
+            this._View = __MODULE__.make_view_two(table._Table, name, defaults.COLUMN_SEPARATOR_STRING, this.view_config, this.date_parser);
         }
 
         this.table = table;
@@ -844,6 +845,74 @@ export default function(Module) {
         this._delete_callback = undefined;
     };
 
+    /**
+     * A view config is a set of options that configures the underlying {@link module:perspective~view}, specifying
+     * its pivots, columns to show, aggregates, filters, and sorts.
+     *
+     * The view config receives an `Object` containing configuration options, and the `view_config` transforms it into a
+     * canonical format for interfacing with the core engine.
+     *
+     * <strong>Note</strong> This constructor is not public - view config objects should be created using standard
+     * Javascript `Object`s in the {@link module:perspective~table#view} method, which has an `options` parameter.
+     *
+     * @param {Object} config the configuration `Object` passed by the user to the {@link module:perspective~table#view} method.
+     *
+     * @class
+     * @hideconstructor
+     */
+    function view_config(config) {
+        this.row_pivots = config.row_pivots || [];
+        this.column_pivots = config.column_pivots || [];
+        this.aggregates = config.aggregates || {};
+        this.columns = config.columns;
+        this.filter = config.filter || [];
+        this.sort = config.sort || [];
+        this.filter_op = config.filter_op || "and";
+        this.row_pivot_depth = config.row_pivot_depth;
+        this.column_pivot_depth = config.column_pivot_depth;
+    }
+
+    /**
+     * Transform configuration items into `std::vector` objects for interface with C++.
+     *
+     * `this.aggregates` is not transformed into a C++ map, as the use of `ordered_map` in the engine
+     * makes binding more difficult.
+     */
+    view_config.prototype.get_row_pivots = function() {
+        let vector = __MODULE__.make_string_vector();
+        return fill_vector(vector, this.row_pivots);
+    };
+
+    view_config.prototype.get_column_pivots = function() {
+        let vector = __MODULE__.make_string_vector();
+        return fill_vector(vector, this.column_pivots);
+    };
+
+    view_config.prototype.get_columns = function() {
+        let vector = __MODULE__.make_string_vector();
+        return fill_vector(vector, this.columns);
+    };
+
+    view_config.prototype.get_filter = function() {
+        let vector = __MODULE__.make_2d_val_vector();
+        for (let filter of this.filter) {
+            let filter_vector = __MODULE__.make_val_vector();
+            let filled = fill_vector(filter_vector, filter);
+            vector.push_back(filled);
+        }
+        return vector;
+    };
+
+    view_config.prototype.get_sort = function() {
+        let vector = __MODULE__.make_2d_string_vector();
+        for (let sort of this.sort) {
+            let sort_vector = __MODULE__.make_string_vector();
+            let filled = fill_vector(sort_vector, sort);
+            vector.push_back(filled);
+        }
+        return vector;
+    };
+
     /******************************************************************************
      *
      * Table
@@ -1120,7 +1189,8 @@ export default function(Module) {
             sides = 0;
         }
 
-        let v = new view(this, sides, config, name, this.callbacks);
+        let vc = new view_config(config);
+        let v = new view(this, sides, config, vc, name, this.callbacks);
         this.views.push(v);
         return v;
     };

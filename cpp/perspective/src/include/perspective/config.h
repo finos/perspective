@@ -20,83 +20,91 @@
 
 namespace perspective {
 
-struct PERSPECTIVE_EXPORT t_config_recipe {
-    t_config_recipe();
-
-    std::vector<t_pivot_recipe> m_row_pivots;
-    std::vector<t_pivot_recipe> m_col_pivots;
-    std::vector<std::pair<std::string, std::string>> m_sortby;
-    std::vector<std::pair<std::string, std::string>> m_col_sortby;
-    std::vector<t_aggspec_recipe> m_aggregates;
-    std::vector<std::string> m_detail_columns;
-    t_totals m_totals;
-    t_filter_op m_combiner;
-    std::vector<t_fterm_recipe> m_fterms;
-    bool m_handle_nan_sort;
-    std::string m_parent_pkey_column;
-    std::string m_child_pkey_column;
-    std::string m_grouping_label_column;
-    t_fmode m_fmode;
-    std::vector<std::string> m_filter_exprs;
-};
-
+/**
+ * @brief `t_config` contains metadata for the `View` and `t_ctx*` structures, containing
+ * specifications for how pivots, columns, filters, and sorts should be constructed.
+ *
+ */
 class PERSPECTIVE_EXPORT t_config {
 public:
-    t_config();
-    t_config(const t_config_recipe& r);
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
-        const std::vector<t_aggspec>& aggregates,
-        const std::vector<std::string>& detail_columns, const t_totals totals,
-        const std::vector<std::string>& sort_pivot,
-        const std::vector<std::string>& sort_pivot_by, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, bool handle_nan_sort,
-        const std::string& parent_pkey_column, const std::string& child_pkey_column,
-        const std::string& grouping_label_column, t_fmode fmode,
-        const std::vector<std::string>& filter_exprs, const std::string& grand_agg_str);
-
-    // view config
+    /**
+     * @brief Construct a config for a `View` object. Pivots are passed in as vectors of
+     * strings, which are converted to `t_pivot` objects.
+     *
+     * @param row_pivots
+     * @param column_pivots
+     * @param aggregates
+     * @param sortspecs
+     * @param col_sortspecs
+     * @param combiner
+     * @param fterms
+     * @param col_names
+     * @param column_only
+     */
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& column_pivots, const std::vector<t_aggspec>& aggregates,
         const std::vector<t_sortspec>& sortspecs, const std::vector<t_sortspec>& col_sortspecs,
         t_filter_op combiner, const std::vector<t_fterm>& fterms,
         const std::vector<std::string>& col_names, bool column_only);
 
-    // grouped_pkeys
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, const std::string& parent_pkey_column,
-        const std::string& child_pkey_column, const std::string& grouping_label_column);
+    /**
+     * @brief Construct a new config for a `t_ctx0` object.
+     *
+     * @param detail_columns the columns to be displayed in the context
+     * @param combiner
+     * @param fterms specifications for filtering down the context
+     */
+    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
 
-    // ctx2
+    /**
+     * @brief Construct a new config for a `t_ctx1` object, which has 1 or more `row_pivot`s
+     * applied.
+     *
+     * @param row_pivots
+     * @param aggregates
+     * @param combiner
+     * @param fterms
+     */
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
+        const std::vector<t_fterm>& fterms);
+
+    /**
+     * @brief Construct a new config for a `t_ctx2` object, which has 1 or more `row_pivot`s and
+     * 1 or more `col_pivot`s applied.
+     *
+     * @param row_pivots
+     * @param col_pivots
+     * @param aggregates
+     * @param totals
+     * @param combiner
+     * @param fterms
+     * @param column_only
+     */
+    t_config(const std::vector<std::string>& row_pivots,
+        const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
+        const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms,
+        bool column_only);
+
+    // Constructors used for C++ tests, not exposed to other parts of the engine
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates);
-
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_pivot>& col_pivots,
-        const std::vector<t_aggspec>& aggregates, const t_totals totals, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms, bool column_only);
 
     t_config(const std::vector<std::string>& row_pivots,
         const std::vector<std::string>& col_pivots, const std::vector<t_aggspec>& aggregates,
         const t_totals totals, t_filter_op combiner, const std::vector<t_fterm>& fterms);
 
-    // t_ctx1
+    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates);
+
     t_config(
         const std::vector<std::string>& row_pivots, const std::vector<t_aggspec>& aggregates);
 
     t_config(const std::vector<std::string>& row_pivots, const t_aggspec& agg);
 
-    t_config(const std::vector<t_pivot>& row_pivots, const std::vector<t_aggspec>& aggregates,
-        t_filter_op combiner, const std::vector<t_fterm>& fterms);
-
-    t_config(const std::vector<std::string>& row_pivots,
-        const std::vector<t_aggspec>& aggregates, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
-
-    // t_ctx0
     t_config(const std::vector<std::string>& detail_columns);
-    t_config(const std::vector<std::string>& detail_columns, t_filter_op combiner,
-        const std::vector<t_fterm>& fterms);
+
+    t_config();
 
     void setup(const std::vector<std::string>& detail_columns,
         const std::vector<std::string>& sort_pivot,
@@ -149,8 +157,6 @@ public:
     std::string get_child_pkey_column() const;
 
     const std::string& get_grouping_label_column() const;
-
-    t_config_recipe get_recipe() const;
 
     std::string unity_get_column_name(t_uindex idx) const;
     std::string unity_get_column_display_name(t_uindex idx) const;

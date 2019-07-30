@@ -20,6 +20,7 @@
 #include <perspective/sym_table.h>
 #include <perspective/table.h>
 #include <perspective/view.h>
+#include <perspective/view_config.h>
 #include <random>
 #include <cmath>
 #include <sstream>
@@ -58,55 +59,8 @@ namespace binding {
 
     /******************************************************************************
      *
-     * Data Loading
+     * Manipulate scalar values
      */
-
-    t_index _get_aggregate_index(const std::vector<std::string>& agg_names, std::string name);
-
-    std::vector<std::string> _get_aggregate_names(const std::vector<t_aggspec>& aggs);
-
-    /**
-     * @brief Calculate aggregates specified in `j_aggs` and use default aggregates for
-     * columns marked in `columns`.
-     *
-     * @tparam
-     * @param schema
-     * @param row_pivots
-     * @param column_pivots
-     * @param sortbys
-     * @param columns
-     * @param j_aggs
-     */
-    template <typename T>
-    std::vector<t_aggspec> _get_aggspecs(const t_schema& schema,
-        const std::vector<std::string>& row_pivots,
-        const std::vector<std::string>& column_pivots, bool column_only,
-        const std::vector<std::string>& columns, const std::vector<T>& sortbys, T j_aggs);
-
-    /**
-     * @brief Retrieve and validate how we sort the dataset in the view.
-     *
-     * @tparam T
-     * @param columns
-     * @param is_column_sort
-     * @param sortbys
-     * @return std::vector<t_sortspec>
-     */
-    template <typename T>
-    std::vector<t_sortspec> _get_sort(const std::vector<std::string>& columns,
-        bool is_column_sort, const std::vector<T>& sortbys);
-
-    /**
-     * @brief From the binding language, retrieve what we need to filter the dataset by.
-     *
-     * @tparam T
-     * @param schema
-     * @param j_date_parser
-     * @param j_filters
-     * @return std::vector<t_fterm>
-     */
-    template <typename T>
-    std::vector<t_fterm> _get_fterms(const t_schema& schema, T j_date_parser, T j_filters);
 
     /**
      * @brief Converts a `t_scalar` to a value in the binding language.
@@ -271,57 +225,58 @@ namespace binding {
     template <typename T>
     std::shared_ptr<Table> make_computed_table(std::shared_ptr<Table> table, T computed);
 
+    /******************************************************************************
+     *
+     * View API
+     */
+
     /**
-     * @brief Extracts and validates the config from the binding language,
-     * creating a t_config for the new View.
+     * @brief For date/datetime values, is the filter term a valid date?
+     *
+     * Otherwise, make sure the filter term is not null/undefined.
+     *
+     * @tparam T
+     * @param type
+     * @param date_parser
+     * @param filter
+     * @return true
+     * @return false
+     */
+    template <typename T>
+    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
+
+    /**
+     * @brief Create a filter by parsing the filter term from the binding language.
      *
      * @tparam T
      * @param schema
-     * @param separator
+     * @param date_parser
+     * @param filter
+     * @return std::tuple<std::string, std::string, std::vector<t_tscalar>>
+     */
+    template <typename T>
+    std::tuple<std::string, std::string, std::vector<t_tscalar>> make_filter_term(
+        t_dtype type, T date_parser, std::vector<T> filter);
+    /**
+     * @brief Create a `t_view_config` object from the binding language's `view_config` object.
+     *
+     * @tparam T
+     * @param schema
      * @param date_parser
      * @param config
      * @return t_config
      */
     template <typename T>
-    t_config make_view_config(
-        const t_schema& schema, std::string separator, T date_parser, T config);
+    t_view_config make_view_config(const t_schema& schema, T date_parser, T config);
 
     /**
-     * @brief Create a new zero-sided view.
+     * @brief Create a new view.
      *
-     * Zero-sided views have no aggregates applied.
+     * Zero-sided views have no pivots or aggregates applied.
      *
-     * @tparam T
-     * @param table
-     * @param name
-     * @param separator
-     * @param config
-     * @param date_parser
-     * @return std::shared_ptr<View<t_ctx0>>
-     */
-    template <typename T>
-    std::shared_ptr<View<t_ctx0>> make_view_zero(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T config, T date_parser);
-
-    /**
-     * @brief Create a new one-sided view.
+     * Views are backed by an underlying `t_ctx_*` object, represented by the `CTX_T` template.
      *
-     * One-sided views have one or more `row-pivots` applied,
-     *
-     * @tparam T
-     * @param table
-     * @param name
-     * @param separator
-     * @param config
-     * @param date_parser
-     * @return std::shared_ptr<View<t_ctx1>>
-     */
-    template <typename T>
-    std::shared_ptr<View<t_ctx1>> make_view_one(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T config, T date_parser);
-
-    /**
-     * @brief Create a new two-sided view.
+     * One-sided views have one or more `row-pivots` applied.
      *
      * Two sided views have one or more `row-pivots` and `column-pivots` applied, or they have
      * one or more `column-pivots` applied without any row pivots, hence the term `column_only`.
@@ -332,45 +287,26 @@ namespace binding {
      * @param separator
      * @param config
      * @param date_parser
-     * @return std::shared_ptr<View<t_ctx2>>
+     * @return std::shared_ptr<View<CTX_T>>
      */
-    template <typename T>
-    std::shared_ptr<View<t_ctx2>> make_view_two(std::shared_ptr<Table> table, std::string name,
-        std::string separator, T config, T date_parser);
+    template <typename T, typename CTX_T>
+    std::shared_ptr<View<CTX_T>> make_view(std::shared_ptr<Table> table, std::string name,
+        std::string separator, T view_config, T date_parser);
 
     /**
-     * @brief Create a new zero-sided context.
+     * @brief Create a new context of type `CTX_T`, which will be one of 3 types:
+     *
+     * `t_ctx0`, `t_ctx1`, `t_ctx2`.
+     *
      *
      * Contexts contain the underlying aggregates, sort specifications, filter terms, and other
      * metadata allowing for data manipulation and view creation.
      *
-     * @return std::shared_ptr<t_ctx0>
+     * @return std::shared_ptr<CTX_T>
      */
-    std::shared_ptr<t_ctx0> make_context_zero(std::shared_ptr<Table> table, t_schema schema,
-        t_filter_op combiner, std::vector<std::string> columns, std::vector<t_fterm> filters,
-        std::vector<t_sortspec> sorts, std::string name);
-
-    /**
-     * @brief Create a new one-sided context.
-     *
-     * @return std::shared_ptr<t_ctx1>
-     */
-    std::shared_ptr<t_ctx1> make_context_one(std::shared_ptr<Table> table, t_schema schema,
-        std::vector<t_pivot> pivots, t_filter_op combiner, std::vector<t_fterm> filters,
-        std::vector<t_aggspec> aggregates, std::vector<t_sortspec> sorts,
-        std::int32_t pivot_depth, std::string name);
-
-    /**
-     * @brief Create a new two-sided context.
-     *
-     * @return std::shared_ptr<t_ctx2>
-     */
-    std::shared_ptr<t_ctx2> make_context_two(std::shared_ptr<Table> table, t_schema schema,
-        std::vector<t_pivot> rpivots, std::vector<t_pivot> cpivots, t_filter_op combiner,
-        std::vector<t_fterm> filters, std::vector<t_aggspec> aggregates,
-        std::vector<t_sortspec> sorts, std::vector<t_sortspec> col_sorts,
-        std::int32_t rpivot_depth, std::int32_t cpivot_depth, bool column_only,
-        std::string name);
+    template <typename CTX_T>
+    std::shared_ptr<CTX_T> make_context(std::shared_ptr<Table> table, const t_schema& schema,
+        const t_view_config& view_config, std::string name);
 
     /**
      * @brief Get a slice of data for a single column, serialized to t_val.

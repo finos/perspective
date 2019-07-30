@@ -20,15 +20,16 @@ enum t_sortspec_type { SORTSPEC_TYPE_IDX, SORTSPEC_TYPE_COLNAME, SORTSPEC_TYPE_P
 
 struct PERSPECTIVE_EXPORT t_sortspec {
     t_sortspec();
+    t_sortspec(const std::string& column_name, t_index agg_index, t_sorttype sort_type);
     t_sortspec(t_index agg_index, t_sorttype sort_type);
     t_sortspec(const std::vector<t_tscalar>& path, t_index agg_index, t_sorttype sort_type);
 
     bool operator==(const t_sortspec& s2) const;
     bool operator!=(const t_sortspec& s2) const;
 
+    std::string m_colname;
     t_index m_agg_index;
     t_sorttype m_sort_type;
-    bool m_colname;
     t_sortspec_type m_sortspec_type;
     std::vector<t_tscalar> m_path;
 };

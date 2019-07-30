@@ -30,7 +30,6 @@ public:
     const std::vector<t_data>& column_data() const;
     const std::vector<t_uindex>& row_depth() const;
     const std::vector<t_uindex>& column_depth() const;
-    const t_config_recipe& config_recipe() const;
     const std::vector<t_uindex>& is_row_expanded() const;
     const std::vector<t_uindex>& is_column_expanded() const;
 
@@ -57,7 +56,6 @@ private:
     std::vector<t_uindex> m_is_root;
     std::vector<t_uindex> m_is_row_expanded;
     std::vector<t_uindex> m_is_column_expanded;
-    t_config_recipe m_config_recipe;
     std::vector<t_uindex> m_row_depth;
     std::vector<t_uindex> m_column_depth;
 };

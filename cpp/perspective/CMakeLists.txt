@@ -259,6 +259,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 endif()
 
 psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
+psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
 
 #####################
 
@@ -346,6 +347,7 @@ set (SOURCE_FILES
 	src/cpp/utils.cpp
 	src/cpp/update_task.cpp
 	src/cpp/view.cpp
+	src/cpp/view_config.cpp
 	src/cpp/vocab.cpp
 	)
 
