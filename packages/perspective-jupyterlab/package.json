@@ -26,7 +26,8 @@
         "test": "npm-run-all test:run",
         "test:run": "echo done",
         "build": "webpack --color --config src/config/plugin.config.js",
-        "clean": "rimraf dist"
+        "clean": "rimraf dist",
+        "version": "yarn build"
     },
     "dependencies": {
         "@finos/perspective-phosphor": "^0.3.6",
