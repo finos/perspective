@@ -17,7 +17,7 @@ declare module '@finos/perspective-viewer' {
         columns?: Array<string>;
         aggregates?: Array<AggregateConfig>;
         filters?: Array<Array<string>>;
-        view?: string;
+        plugin?: string;
         column_pivots?: Array<string>;
         row_pivots?: Array<string>;
 
