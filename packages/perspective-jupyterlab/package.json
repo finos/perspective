@@ -24,13 +24,13 @@
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
         "test": "npm-run-all test:run",
-        "test:run": "echo done",
+        "test:run": "jest --silent --color 2>&1",
         "build": "webpack --color --config src/config/plugin.config.js",
         "clean": "rimraf dist"
     },
     "dependencies": {
         "@finos/perspective-phosphor": "^0.3.6",
-        "@jupyter-widgets/base": "^1.1.10",
+        "@jupyter-widgets/base": "^2.0.1",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
