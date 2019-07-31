@@ -1085,6 +1085,12 @@ t_tscalar::cmp(t_filter_op op, const t_tscalar& other) const {
         case FILTER_OP_CONTAINS: {
             return value.contains(other);
         } break;
+        case FILTER_OP_IS_NULL: {
+            return m_status != STATUS_VALID;
+        } break;
+        case FILTER_OP_IS_NOT_NULL: {
+            return m_status == STATUS_VALID;
+        } break;
         case FILTER_OP_IS_VALID: {
             return m_status == STATUS_VALID;
         } break;

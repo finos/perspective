@@ -364,6 +364,8 @@ BOOST_PYTHON_MODULE(libbinding)
         .value("FILTER_OP_IN", perspective::FILTER_OP_IN)
         .value("FILTER_OP_NOT_IN", perspective::FILTER_OP_NOT_IN)
         .value("FILTER_OP_AND", perspective::FILTER_OP_AND)
+        .value("FILTER_OP_IS_NULL", perspective::FILTER_OP_IS_NULL)
+        .value("FILTER_OP_IS_NOT_NULL", perspective::FILTER_OP_IS_NOT_NULL)
         .value("FILTER_OP_IS_VALID", perspective::FILTER_OP_IS_VALID)
         .value("FILTER_OP_IS_NOT_VALID", perspective::FILTER_OP_IS_NOT_VALID);
 
