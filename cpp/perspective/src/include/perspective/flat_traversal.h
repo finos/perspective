@@ -31,7 +31,7 @@ class PERSPECTIVE_EXPORT t_ftrav {
     typedef tsl::hopscotch_map<t_tscalar, t_mselem> t_pkmselem_map;
 
 public:
-    t_ftrav(bool handle_nan_sort);
+    t_ftrav();
 
     void init();
 
@@ -100,7 +100,6 @@ private:
     t_pkmselem_map m_new_elems;
     std::vector<t_sortspec> m_sortby;
     std::shared_ptr<std::vector<t_mselem>> m_index;
-    bool m_handle_nan_sort;
     t_symtable m_symtable;
 };
 

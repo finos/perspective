@@ -57,6 +57,24 @@ module.exports = perspective => {
             table.delete();
         });
 
+        it("aggregates that return NaN render correctly", async function() {
+            const dataWithNull1 = [{name: "Homer", value: 3}, {name: "Homer", value: 1}, {name: "Marge", value: null}, {name: "Marge", value: null}];
+
+            var table = perspective.table(dataWithNull1);
+
+            var view = table.view({
+                row_pivots: ["name"],
+                aggregates: {value: "avg"}
+            });
+
+            const answer = [{__ROW_PATH__: [], name: 4, value: 2}, {__ROW_PATH__: ["Homer"], name: 2, value: 2}, {__ROW_PATH__: ["Marge"], name: 2, value: null}];
+
+            let results = await view.to_json();
+            expect(results).toEqual(answer);
+            view.delete();
+            table.delete();
+        });
+
         it("aggregates nulls correctly", async function() {
             const data = [{x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: "AAAAAAAAAAAAAA"}, {x: null}, {x: null}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}, {x: "BBBBBBBBBBBBBB"}];
             const tbl = perspective.table(data);

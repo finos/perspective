@@ -49,7 +49,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_totals(TOTALS_BEFORE)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -67,7 +66,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -90,7 +88,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots,
     , m_totals(totals)
     , m_combiner(combiner)
     , m_fterms(fterms)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -116,7 +113,6 @@ t_config::t_config(
     : m_aggregates(aggregates)
     , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -129,7 +125,6 @@ t_config::t_config(const std::vector<std::string>& row_pivots, const t_aggspec& 
     : m_aggregates(std::vector<t_aggspec>{agg})
     , m_totals(TOTALS_BEFORE)
     , m_combiner(FILTER_OP_AND)
-    , m_handle_nan_sort(true)
     , m_fmode(FMODE_SIMPLE_CLAUSES) {
     for (const auto& p : row_pivots) {
         m_row_pivots.push_back(t_pivot(p));
@@ -372,11 +367,6 @@ t_config::get_pivots() const {
         rval.push_back(piv);
     }
     return rval;
-}
-
-bool
-t_config::handle_nan_sort() const {
-    return m_handle_nan_sort;
 }
 
 std::string

@@ -66,9 +66,9 @@ t_ctx2::init() {
         m_trees[treeidx]->init();
     }
 
-    m_rtraversal = std::make_shared<t_traversal>(rtree(), m_config.handle_nan_sort());
+    m_rtraversal = std::make_shared<t_traversal>(rtree());
 
-    m_ctraversal = std::make_shared<t_traversal>(ctree(), m_config.handle_nan_sort());
+    m_ctraversal = std::make_shared<t_traversal>(ctree());
     m_minmax = std::vector<t_minmax>(m_config.get_num_aggregates());
     m_init = true;
 }
@@ -806,8 +806,8 @@ t_ctx2::reset() {
         m_trees[treeidx]->set_deltas_enabled(get_feature_state(CTX_FEAT_DELTA));
     }
 
-    m_rtraversal = std::make_shared<t_traversal>(rtree(), m_config.handle_nan_sort());
-    m_ctraversal = std::make_shared<t_traversal>(ctree(), m_config.handle_nan_sort());
+    m_rtraversal = std::make_shared<t_traversal>(rtree());
+    m_ctraversal = std::make_shared<t_traversal>(ctree());
 }
 
 bool
