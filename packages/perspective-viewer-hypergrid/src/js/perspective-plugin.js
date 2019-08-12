@@ -10,7 +10,6 @@
 const rectangular = require("rectangular");
 const superscript = require("superscript-number");
 const lodash = require("lodash");
-const {get_styles} = require("./styles.js");
 
 /**
  * @this {Behavior}

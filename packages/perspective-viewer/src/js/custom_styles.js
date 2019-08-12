@@ -41,7 +41,15 @@ function get_font(elem, title) {
 function copy_defined(source, dest, f) {
     for (const key of Object.keys(source)) {
         const val = source[key];
-        if (typeof val === "string" && f) {
+        if (Array.isArray(val) && f) {
+            for (const candidate of val) {
+                const style = f(candidate);
+                if (style !== undefined) {
+                    dest[key] = style;
+                    break;
+                }
+            }
+        } else if (typeof val === "string" && f) {
             const style = f(val);
             if (style !== undefined) {
                 dest[key] = style;
@@ -56,6 +64,7 @@ function copy_defined(source, dest, f) {
 }
 
 function calc_rec(result, type, elem, types, iter, f) {
+    result[type] = result[type] || {};
     for (const props of iter) {
         copy_defined(props, result[type], name => f(elem, name));
         for (const parent of types[type]) {
@@ -65,7 +74,7 @@ function calc_rec(result, type, elem, types, iter, f) {
 }
 
 function get_type_deps() {
-    const types = {};
+    const types = {"": []};
     for (const type of get_types()) {
         types[type] = [];
         let parent = type;
@@ -86,11 +95,6 @@ export class PropsBuilder {
         this._staged_fonts = [];
     }
 
-    add(props) {
-        this._staged_raw_props.push(props);
-        this._initialized = false;
-    }
-
     add_styles(props) {
         this._staged_props.push(props);
         this._initialized = false;
@@ -109,11 +113,9 @@ export class PropsBuilder {
         if (!elem[STYLE_PROPERTIES]) {
             const types = get_type_deps();
             const result = (elem[STYLE_PROPERTIES] = {});
-            for (const props of this._staged_raw_props) {
-                copy_defined(props, result);
-            }
+            calc_rec(result, "", elem, types, this._staged_props, get_style);
+            calc_rec(result, "", elem, types, this._staged_fonts, get_font);
             for (const type of get_types()) {
-                result[type] = {};
                 calc_rec(result, type, elem, types, this._staged_props, get_style);
                 calc_rec(result, type, elem, types, this._staged_fonts, get_font);
             }

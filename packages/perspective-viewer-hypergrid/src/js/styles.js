@@ -23,7 +23,7 @@ properties.add_styles({
     treeHeaderBackgroundColor: `${title}-tree-header--background`,
     backgroundColor: `${title}--background`,
     treeHeaderColor: `${title}-tree-header--color`,
-    color: `${title}--color`,
+    color: [`${title}--color`, `color`],
     columnHeaderBackgroundColor: `${title}-header--background`,
     columnHeaderSeparatorColor: `${title}-separator--color`,
     columnHeaderColor: `${title}-header--color`,
