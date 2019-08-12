@@ -1,0 +1,55 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+    <script src="perspective-viewer.js"></script>
+    <script src="perspective-viewer-hypergrid.js"></script>
+    <script src="perspective-viewer-d3fc.js"></script>
+
+    <script src="perspective.js"></script>
+    <script src="colors.js"></script>
+
+    <link rel='stylesheet' href="index.css">
+    <link rel='stylesheet' href="material.dark.css" is="custom-style">
+    <style>
+
+        perspective-viewer {
+            --hypergrid-row-hover--background: rgba(0,0,0,0.2);
+            --hypergrid-cell-hover--background: rgba(0,0,0,0.3);
+
+            --notional--hypergrid--font-family: "Roboto Mono";
+            --notional--hypergrid--font-size: 12px; 
+            --notional--hypergrid-positive--background: #55a755;
+            --notional--hypergrid-positive--color: #ffffff;
+            --notional--hypergrid-negative--background: #c25a5a;
+            --notional--hypergrid-negative--color: #ffffff;
+        }
+    
+    </style>    
+
+</head>
+
+<body>
+    <input id="color" max="358" min="1" type="range"></input>
+    <input id="color2" max="358" min="1" type="range"></input>
+    <input id="color3" max="358" min="1" type="range"></input>
+
+    <perspective-viewer row-pivots='["name"]' column-pivots='["client"]' columns='["chg"]' sort='["ask"]'>
+
+    </perspective-viewer>
+
+</body>
+
+</html>
