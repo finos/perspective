@@ -35,6 +35,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 |:--|:--|
 |[Superstore](https://bl.ocks.org/texodus/372d406997d5522ebaafb17f0f521d97)| A static `superstore.arrow` demo.|
 |[Linked Superstore](https://bl.ocks.org/texodus/08fb5f1afccbd33e333453dc70db88ea)| An example of `<perspective-viewer>`s linked through click events.|
+|[Fractal](https://bl.ocks.org/texodus/1ce655d6bc0cc0d9db852d562af3e487)| `<perspective-viewer>` fractal playground.|
 |[Olympics](https://bl.ocks.org/texodus/6d4fa16fff331d71ac58ad256f0c5f94)| An example of sharing a single `perspective.table` among multiple `<perspective-viewer>`s.|
 |[Streaming](https://bl.ocks.org/texodus/9bec2f8041471bafc2c56db2272a9381)| A streaming random data demo.|
 |[Streaming Stock Trades](https://bl.ocks.org/timkpaine/064a50a309f25b80c9cfb0b2b84fbdf3)|A streaming financial data demo.|
