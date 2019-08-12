@@ -14,6 +14,7 @@ import {detect_iphone} from "./utils.js";
 
 import wasm_worker from "./perspective.wasm.js";
 import wasm from "./psp.async.wasm.js";
+import {override_config} from "../../dist/esm/config/index.js";
 
 const HEARTBEAT_TIMEOUT = 15000;
 
@@ -56,7 +57,10 @@ const override = new (class {
  * This class serves as the client API for transporting messages to/from Web Workers.
  */
 class WebWorkerClient extends Client {
-    constructor() {
+    constructor(config) {
+        if (config) {
+            override_config(config);
+        }
         super();
         this.register();
     }
@@ -176,10 +180,10 @@ const WORKER_SINGLETON = (function() {
     return {
         getInstance: function(config) {
             if (__WORKER__ === undefined) {
-                __WORKER__ = new WebWorkerClient();
+                __WORKER__ = new WebWorkerClient(config);
             }
             const config_str = JSON.stringify(config);
-            if (config_str !== __CONFIG__) {
+            if (__CONFIG__ && config_str !== __CONFIG__) {
                 throw new Error(`Confiuration object for shared_worker() has changed - this is probably a bug in your application.`);
             }
             __CONFIG__ = config_str;

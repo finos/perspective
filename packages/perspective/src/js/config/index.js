@@ -80,18 +80,18 @@ function get_config_file() {
     }
 }
 
-let cached_config;
+global.__PERSPECTIVE_CONFIG__ = undefined;
 
 module.exports.override_config = function(config) {
-    if (cached_config) {
+    if (global.__PERSPECTIVE_CONFIG__) {
         console.warn("Config already initialized!");
     }
-    cached_config = mergeDeep(DEFAULT_CONFIG, config);
+    global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, config);
 };
 
 module.exports.get_config = function get_config() {
-    if (!cached_config) {
-        cached_config = mergeDeep(DEFAULT_CONFIG, typeof window === "undefined" ? get_config_file() : global.__TEMPLATE_CONFIG__ || {});
+    if (!global.__PERSPECTIVE_CONFIG__) {
+        global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, typeof window === "undefined" ? get_config_file() : global.__TEMPLATE_CONFIG__ || {});
     }
-    return cached_config;
+    return JSON.parse(JSON.stringify(global.__PERSPECTIVE_CONFIG__));
 };
