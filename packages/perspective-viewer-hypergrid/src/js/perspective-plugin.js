@@ -10,6 +10,7 @@
 const rectangular = require("rectangular");
 const superscript = require("superscript-number");
 const lodash = require("lodash");
+const {get_styles} = require("./styles.js");
 
 /**
  * @this {Behavior}
@@ -98,9 +99,9 @@ function setColumnPropsByType(column) {
     } else {
         props.format = `perspective-${column.type}`;
     }
-
-    if (this.grid._cached_props[column.type]) {
-        Object.assign(props, this.grid._cached_props[column.type]);
+    const styles = this.grid.get_styles();
+    if (styles[column.type]) {
+        Object.assign(props, styles[column.type]);
     }
 }
 

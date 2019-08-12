@@ -55,46 +55,69 @@ function copy_defined(source, dest, f) {
     }
 }
 
-export class PropsBuilder {
-    constructor(elem) {
-        this._props = {};
-        this._elem = elem;
-        this._types = {};
-
-        for (const type of get_types()) {
-            this._types[type] = [];
-            this._props[type] = {};
-            let parent = type;
-            while (parent && parent.length) {
-                this._types[type].unshift(parent);
-                parent = get_type_config(parent).type;
-            }
+function calc_rec(result, type, elem, types, iter, f) {
+    for (const props of iter) {
+        copy_defined(props, result[type], name => f(elem, name));
+        for (const parent of types[type]) {
+            copy_defined(props, result[type], name => f(elem, `--${parent}${name}`));
         }
+    }
+}
+
+function get_type_deps() {
+    const types = {};
+    for (const type of get_types()) {
+        types[type] = [];
+        let parent = type;
+        while (parent && parent.length) {
+            types[type].unshift(parent);
+            parent = get_type_config(parent).type;
+        }
+    }
+    return types;
+}
+
+const STYLE_PROPERTIES = Symbol("Perspective Style Properties");
+
+export class PropsBuilder {
+    constructor() {
+        this._staged_props = [];
+        this._staged_raw_props = [];
+        this._staged_fonts = [];
     }
 
     add(props) {
-        copy_defined(props, this._props);
+        this._staged_raw_props.push(props);
+        this._initialized = false;
     }
 
     add_styles(props) {
-        for (const type of get_types()) {
-            copy_defined(props, this._props[type], name => get_style(this._elem, name));
-            for (const parent of this._types[type]) {
-                copy_defined(props, this._props[type], name => get_style(this._elem, `--${parent}${name}`));
-            }
-        }
+        this._staged_props.push(props);
+        this._initialized = false;
     }
 
     add_fonts(props) {
-        for (const type of get_types()) {
-            copy_defined(props, this._props[type], name => get_font(this._elem, name));
-            for (const type of this._types[type]) {
-                copy_defined(props, this._props[type], name => get_font(this._elem, `--${type}${name}`));
-            }
-        }
+        this._staged_fonts.push(props);
+        this._initialized = false;
     }
 
-    get props() {
-        return this._props;
+    clear_properties(elem) {
+        delete elem[STYLE_PROPERTIES];
+    }
+
+    get_properties(elem) {
+        if (!elem[STYLE_PROPERTIES]) {
+            const types = get_type_deps();
+            const result = (elem[STYLE_PROPERTIES] = {});
+            for (const props of this._staged_raw_props) {
+                copy_defined(props, result);
+            }
+            for (const type of get_types()) {
+                result[type] = {};
+                calc_rec(result, type, elem, types, this._staged_props, get_style);
+                calc_rec(result, type, elem, types, this._staged_fonts, get_font);
+            }
+        }
+        return elem[STYLE_PROPERTIES];
     }
 }

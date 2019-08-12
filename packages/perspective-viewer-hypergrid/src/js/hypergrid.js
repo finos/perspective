@@ -23,7 +23,7 @@ const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
 import {get_type_config, get_types} from "@finos/perspective/dist/esm/config";
-import {get_styles} from "./styles.js";
+import {get_styles, clear_styles} from "./styles.js";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -161,6 +161,7 @@ bindTemplate(TEMPLATE, style)(
                 this.grid = new Hypergrid(host, {DataModel: PerspectiveDataModel});
                 this.grid.canvas.stopResizeLoop();
                 host.removeAttribute("hidden");
+                this.grid.get_styles = () => get_styles(this);
 
                 // window.g = this.grid; window.p = g.properties; // for debugging convenience in console
 
@@ -194,9 +195,7 @@ bindTemplate(TEMPLATE, style)(
                 this.grid.addProperties(grid_properties);
                 const styles = get_styles(this);
                 this.grid.addProperties(styles[""]);
-                this.grid._cached_props = {};
                 const formatters = {};
-                this.grid._cached_props = styles;
                 for (const type of get_types()) {
                     const config = get_type_config(type);
                     const format_function = {
@@ -255,10 +254,10 @@ async function grid_update(div, view, task) {
 function style_element() {
     if (this[PRIVATE]) {
         const element = this[PRIVATE].grid;
-        const styles = get_styles(this);
+        clear_styles(element);
+        const styles = get_styles(element);
         if (element.grid) {
             element.grid.addProperties(styles[""]);
-            element.grid._cached_props = styles;
         }
         element.grid.behavior.createColumns();
         element.grid.canvas.paintNow();
