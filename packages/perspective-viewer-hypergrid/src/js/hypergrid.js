@@ -22,7 +22,8 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
-import {get_type_config} from "@finos/perspective/dist/esm/config";
+import {get_type_config, get_types} from "@finos/perspective/dist/esm/config";
+import {get_styles} from "./styles.js";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
 const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
@@ -152,52 +153,6 @@ bindTemplate(TEMPLATE, style)(
             }
         }
 
-        get_style(name) {
-            if (window.ShadyCSS) {
-                return window.ShadyCSS.getComputedStyleValue(this, name);
-            } else {
-                return getComputedStyle(this).getPropertyValue(name);
-            }
-        }
-
-        apply_styles() {
-            const font = `${this.get_style("--hypergrid--font-size")} ${this.get_style("--hypergrid--font-family")}`;
-            const headerfont = `${this.get_style("--hypergrid-header--font-size")} ${this.get_style("--hypergrid-header--font-family")}`;
-            const hoverRowHighlight = {
-                enabled: true,
-                backgroundColor: this.get_style("--hypergrid-row-hover--background"),
-                color: this.get_style("--hypergrid-row-hover--color")
-            };
-
-            const hoverCellHighlight = {
-                enabled: true,
-                backgroundColor: this.get_style("--hypergrid-cell-hover--background"),
-                color: this.get_style("--hypergrid-cell-hover--color")
-            };
-
-            const grid_properties = {
-                treeHeaderBackgroundColor: this.get_style("--hypergrid-tree-header--background"),
-                backgroundColor: this.get_style("--hypergrid-tree-header--background"),
-                treeHeaderColor: this.get_style("--hypergrid-tree-header--color"),
-                color: this.get_style("--hypergrid-tree-header--color"),
-                columnHeaderBackgroundColor: this.get_style("--hypergrid-header--background"),
-                columnHeaderSeparatorColor: this.get_style("--hypergrid-separator--color"),
-                columnHeaderColor: this.get_style("--hypergrid-header--color"),
-                columnColorNumberPositive: this.get_style("--hypergrid-positive--color"),
-                columnColorNumberNegative: this.get_style("--hypergrid-negative--color"),
-                columnBackgroundColorNumberPositive: this.get_style("--hypergrid-positive--background"),
-                columnBackgroundColorNumberNegative: this.get_style("--hypergrid-negative--background"),
-                columnHeaderFont: headerfont,
-                font,
-                rowHeaderFont: font,
-                treeHeaderFont: font,
-                hoverRowHighlight,
-                hoverCellHighlight
-            };
-
-            this.grid && this.grid.addProperties(grid_properties);
-        }
-
         connectedCallback() {
             if (!this.grid) {
                 const host = this.shadowRoot.querySelector("#mainGrid");
@@ -237,7 +192,24 @@ bindTemplate(TEMPLATE, style)(
 
                 grid_properties["showRowNumbers"] = grid_properties["showCheckboxes"] || grid_properties["showRowNumbers"];
                 this.grid.addProperties(grid_properties);
-                this.apply_styles();
+                const styles = get_styles(this);
+                this.grid.addProperties(styles[""]);
+                this.grid._cached_props = {};
+                const formatters = {};
+                this.grid._cached_props = styles;
+                for (const type of get_types()) {
+                    const config = get_type_config(type);
+                    const format_function = {
+                        float: this.grid.localization.NumberFormatter,
+                        integer: this.grid.localization.NumberFormatter,
+                        datetime: this.grid.localization.DateFormatter,
+                        date: this.grid.localization.DateFormatter
+                    }[config.type || type];
+                    if (format_function) {
+                        formatters[type] = null_formatter(new format_function("en-us", config.format), config.null_value);
+                        this.grid.localization.add(`perspective-${type}`, formatters[type]);
+                    }
+                }
 
                 this.grid.localization.header = {
                     format: value => this.grid.behavior.formatColumnHeader(value)
@@ -245,25 +217,9 @@ bindTemplate(TEMPLATE, style)(
 
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
-
-                const float_formatter = new this.grid.localization.NumberFormatter("en-US", get_type_config("float").format);
-                const integer_formatter = new this.grid.localization.NumberFormatter("en-us", get_type_config("integer").format);
-                this.grid.localization.add("FinanceFloat", null_formatter(float_formatter));
-                this.grid.localization.add("FinanceInteger", null_formatter(integer_formatter));
-
-                const datetime_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("datetime").format);
-                const date_formatter = new this.grid.localization.DateFormatter("en-us", get_type_config("date").format);
-                this.grid.localization.add("FinanceDatetime", null_formatter(datetime_formatter, -1));
-                this.grid.localization.add("FinanceDate", null_formatter(date_formatter, -1));
-
                 this.grid.localization.add("FinanceTree", {
                     format: function(val, type) {
-                        const f = {
-                            date: date_formatter,
-                            datetime: datetime_formatter,
-                            integer: integer_formatter,
-                            float: float_formatter
-                        }[type];
+                        const f = formatters[type];
                         if (f) {
                             return f.format(val);
                         }
@@ -297,9 +253,16 @@ async function grid_update(div, view, task) {
 }
 
 function style_element() {
-    const element = this[PRIVATE].grid;
-    element.apply_styles();
-    element.grid.canvas.paintNow();
+    if (this[PRIVATE]) {
+        const element = this[PRIVATE].grid;
+        const styles = get_styles(this);
+        if (element.grid) {
+            element.grid.addProperties(styles[""]);
+            element.grid._cached_props = styles;
+        }
+        element.grid.behavior.createColumns();
+        element.grid.canvas.paintNow();
+    }
 }
 /**
  * Create a new <perspective-hypergrid> web component, and attach it to the DOM.
