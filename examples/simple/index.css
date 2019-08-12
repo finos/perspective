@@ -8,11 +8,24 @@
  */
 
  perspective-viewer {
-    position: absolute !important;
+     flex: 1;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
+    margin: 0;
+    padding: 0;
+}
+
+input {
+    margin: 24px;
+    max-width: 300px;
 }
 
 @media (max-width: 600px) {
