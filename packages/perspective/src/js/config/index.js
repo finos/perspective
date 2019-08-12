@@ -11,8 +11,22 @@ const DEFAULT_CONFIG = require("./settings.js").default;
 
 const NAMES = ["perspective.config.js", "perspective.config.json", "package.json"];
 
+module.exports.get_types = function() {
+    return Object.keys(module.exports.get_config().types);
+};
+
 module.exports.get_type_config = function(type) {
-    return module.exports.get_config().types[type] || {};
+    const config = {};
+    if (module.exports.get_config().types[type]) {
+        Object.assign(config, module.exports.get_config().types[type]);
+    }
+    if (config.type) {
+        const props = module.exports.get_type_config(config.type);
+        Object.assign(props, config);
+        return props;
+    } else {
+        return config;
+    }
 };
 
 function isObject(item) {

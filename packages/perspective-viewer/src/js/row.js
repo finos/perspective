@@ -47,10 +47,14 @@ class Row extends HTMLElement {
         let elem = this.shadowRoot.querySelector("#name");
         let type = this.getAttribute("type");
         if (!type) return;
+        let type_config = get_type_config(type);
+        if (type_config.type) {
+            elem.classList.add(type_config.type);
+        }
         elem.classList.add(type);
         let agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
         let filter_dropdown = this.shadowRoot.querySelector("#filter_operator");
-        switch (type) {
+        switch (type_config.type || type) {
             case "float":
             case "integer":
                 agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.float.map(agg => `<option value="${agg}">${agg}</option>`).join("");
@@ -74,7 +78,7 @@ class Row extends HTMLElement {
             default:
         }
         if (!this.hasAttribute("aggregate")) {
-            this.setAttribute("aggregate", get_type_config(type).aggregate);
+            this.setAttribute("aggregate", type_config.aggregate);
         }
 
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");

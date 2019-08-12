@@ -9,6 +9,7 @@
 
 import {DateParser, is_valid_date} from "./date_parser.js";
 import {get_column_type} from "../utils.js";
+import {get_type_config} from "../config/index.js";
 
 export class DataAccessor {
     constructor() {
@@ -161,17 +162,29 @@ export class DataAccessor {
         this.data = data;
         this.format = this.is_format(this.data);
         this.row_count = this.count_rows(this.data);
+        const overridden_types = {};
         if (this.format === this.data_formats.row) {
             if (data.length > 0) {
                 this.names = Object.keys(data[0]);
             } else {
                 this.clean.names = [];
             }
-        } else if (this.format === this.data_formats.column || this.format === this.data_formats.schema) {
+        } else if (this.format === this.data_formats.column) {
             this.names = Object.keys(data);
+        } else if (this.format === this.data_formats.schema) {
+            this.names = Object.keys(data);
+            for (const name of this.names) {
+                const new_type = get_type_config(data[name]);
+                if (new_type.type) {
+                    console.debug(`Converting "${data[name]}" to "${new_type.type}"`);
+                    overridden_types[name] = data[name];
+                    data[name] = new_type.type;
+                }
+            }
         } else {
             throw "Unknown data format!";
         }
+        return overridden_types;
     }
 }
 
