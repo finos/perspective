@@ -52,7 +52,7 @@ export const draw = (mode, set_config, restyle) =>
         const col_pivots = config.column_pivots;
         const columns = config.columns;
 
-        const [schema, tschema] = await Promise.all([view.schema(), this._table.schema()]);
+        const [schema, tschema] = await Promise.all([view.schema(false), this._table.schema(false, false)]);
         let js, element;
 
         if (task.cancelled) {

@@ -278,7 +278,7 @@ export function default_config(aggregates, mode) {
             valueDecimals: 2,
             formatter: function(highcharts_tooltip) {
                 that._view
-                    .schema()
+                    .schema(false)
                     .then(schema => {
                         let tooltip_text = tooltip.format_tooltip(this, hover_type, schema, axis_titles, pivot_titles);
                         highcharts_tooltip.label.attr({
