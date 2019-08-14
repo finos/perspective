@@ -13,7 +13,6 @@ const groupedHeaderPlugin = require("fin-hypergrid-grouped-header-plugin");
 
 const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
-const treeLineRendererPaint = require("./hypergrid-tree-cell-renderer").treeLineRendererPaint;
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 const {cloneDeep} = require("lodash");
 
@@ -22,11 +21,12 @@ import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 const TEMPLATE = require("../html/hypergrid.html");
 
 import style from "../less/hypergrid.less";
-import {get_type_config, get_types} from "@finos/perspective/dist/esm/config";
 import {get_styles, clear_styles} from "./styles.js";
+import {set_formatters} from "./formatters.js";
+import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
-const GROUP_LABEL_FONT = "12px Open Sans, sans-serif"; // overrides COLUMN_HEADER_FONT for group labels
+const GROUP_LABEL_FONT = "12px Open Sans, sans-serif";
 
 const base_grid_properties = {
     autoSelectRows: false,
@@ -123,25 +123,6 @@ function generateGridProperties(overrides) {
     return Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(overrides));
 }
 
-function null_formatter(formatter, null_value = "") {
-    let old = formatter.format.bind(formatter);
-    formatter.format = val => {
-        if (typeof val === "string") {
-            return val;
-        }
-        if (null_value === val) {
-            return "-";
-        }
-        let x = old(val);
-        if (x === "") {
-            return "-";
-        }
-        return x;
-    };
-
-    return formatter;
-}
-
 bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
         set_data(data, schema, tschema, row_pivots, columns) {
@@ -195,37 +176,11 @@ bindTemplate(TEMPLATE, style)(
                 this.grid.addProperties(grid_properties);
                 const styles = get_styles(this);
                 this.grid.addProperties(styles[""]);
-                const formatters = {};
-                for (const type of get_types()) {
-                    const config = get_type_config(type);
-                    const format_function = {
-                        float: this.grid.localization.NumberFormatter,
-                        integer: this.grid.localization.NumberFormatter,
-                        datetime: this.grid.localization.DateFormatter,
-                        date: this.grid.localization.DateFormatter
-                    }[config.type || type];
-                    if (format_function) {
-                        formatters[type] = null_formatter(new format_function("en-us", config.format), config.null_value);
-                        this.grid.localization.add(`perspective-${type}`, formatters[type]);
-                    }
-                }
 
-                this.grid.localization.header = {
-                    format: value => this.grid.behavior.formatColumnHeader(value)
-                };
+                set_formatters(this.grid);
 
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
-                this.grid.localization.add("FinanceTree", {
-                    format: function(val, type) {
-                        const f = formatters[type];
-                        if (f) {
-                            return f.format(val);
-                        }
-                        return val;
-                    },
-                    parse: x => x
-                });
 
                 if (this._hg_data) {
                     this.grid.behavior.setPSP(this._hg_data);

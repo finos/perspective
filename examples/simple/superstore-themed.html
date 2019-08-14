@@ -28,7 +28,9 @@
         perspective-viewer {
             --hypergrid-row-hover--background: rgba(0,0,0,0.05);
             --hypergrid-cell-hover--background: rgba(0,0,0,0.1);
- 
+
+            --notional--hypergrid--font-family: "Roboto Mono";
+            --notional--hypergrid--font-size: 12px;
             --notional--hypergrid-positive--background: #55a755;
             --notional--hypergrid-positive--color: #ffffff;
             --notional--hypergrid-negative--background: #c25a5a;
@@ -67,54 +69,55 @@
     </perspective-viewer>
 
     <script>
-
         const WORKER = window.perspective.worker({
             types: {
                 notional: {
                     type: "float",
                     aggregate: "avg",
-                    format: {
-                        style: "decimal",
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 4
-                    }
+
+                    // Perspective config must be serializable
+                    format: "(function(x){return x<0?'-$'+(-x):'$'+x;})"
                 }
             }
         });
+
+        const SCHEMA = {
+            "Category": "string",
+            "City": "string",
+            "Country": "string",
+            "Customer ID": "string",
+            "Customer Name": "string",
+            "Discount": "float",
+            "Order Date": "datetime",
+            "Order ID": "string",
+            "Postal Code": "string",
+            "Product ID": "string",
+            "Product Name": "string",
+            "Profit": "notional",
+            "Quantity": "integer",
+            "Region": "string",
+            "Row ID": "integer",
+            "Sales": "float",
+            "Segment": "string",
+            "Ship Date": "datetime",
+            "Ship Mode": "string",
+            "State": "string",
+            "Sub-Category": "string"
+        };
+
+        function on_load() {
+            var el = document.getElementsByTagName('perspective-viewer')[0];
+            const table = WORKER.table(SCHEMA);
+            table.update(this.response);
+            el.load(table);
+            el.toggleConfig();
+        }
 
         window.addEventListener('WebComponentsReady', function() {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', 'superstore.arrow', true);
             xhr.responseType = "arraybuffer"
-            xhr.onload = function() {
-                var el = document.getElementsByTagName('perspective-viewer')[0];
-                const table = WORKER.table({
-                    "Category": "string",
-                    "City": "string",
-                    "Country": "string",
-                    "Customer ID": "string",
-                    "Customer Name": "string",
-                    "Discount": "float",
-                    "Order Date": "datetime",
-                    "Order ID": "string",
-                    "Postal Code": "string",
-                    "Product ID": "string",
-                    "Product Name": "string",
-                    "Profit": "notional",
-                    "Quantity": "integer",
-                    "Region": "string",
-                    "Row ID": "integer",
-                    "Sales": "float",
-                    "Segment": "string",
-                    "Ship Date": "datetime",
-                    "Ship Mode": "string",
-                    "State": "string",
-                    "Sub-Category": "string"
-                });
-                table.update(xhr.response);
-                el.load(table);
-                el.toggleConfig();
-            }
+            xhr.onload = on_load.bind(xhr);
             xhr.send(null);
         });
     </script>
