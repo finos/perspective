@@ -1413,6 +1413,9 @@ namespace binding {
         t_view_config view_config(row_pivots, column_pivots, aggregates, columns, filter, sort,
             filter_op, column_only);
 
+        // transform primitive values into abstractions that the engine can use
+        view_config.init(schema);
+
         // set pivot depths if provided
         if (has_value(config["row_pivot_depth"])) {
             view_config.set_row_pivot_depth(config["row_pivot_depth"].as<std::int32_t>());
@@ -1421,9 +1424,6 @@ namespace binding {
         if (has_value(config["column_pivot_depth"])) {
             view_config.set_column_pivot_depth(config["column_pivot_depth"].as<std::int32_t>());
         }
-
-        // transform primitive values into abstractions that the engine can use
-        view_config.init(schema);
 
         return view_config;
     }
