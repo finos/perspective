@@ -365,13 +365,15 @@ export default function(Module) {
      *
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~view}'s schema.
      */
-    view.prototype.schema = function() {
+    view.prototype.schema = function(override = true) {
         const schema = extract_map(this._View.schema());
-        for (const key of Object.keys(schema)) {
-            let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
-            colname = colname[colname.length - 1];
-            if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
-                schema[key] = this.overridden_types[colname];
+        if (override) {
+            for (const key of Object.keys(schema)) {
+                let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
+                colname = colname[colname.length - 1];
+                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                    schema[key] = this.overridden_types[colname];
+                }
             }
         }
         return schema;
@@ -1041,7 +1043,7 @@ export default function(Module) {
      * (default false)
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = function(computed = false) {
+    table.prototype.schema = function(computed = false, override = true) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
@@ -1052,7 +1054,7 @@ export default function(Module) {
             if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
                 continue;
             }
-            if (this.overridden_types[name]) {
+            if (override && this.overridden_types[name]) {
                 new_schema[name] = this.overridden_types[name];
             } else {
                 new_schema[name] = get_column_type(types.get(key).value);

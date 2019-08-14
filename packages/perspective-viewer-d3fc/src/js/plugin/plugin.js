@@ -40,7 +40,7 @@ export function register(...plugins) {
 
 function drawChart(chart) {
     return async function(el, view, task) {
-        const [tschema, schema, json, config] = await Promise.all([this._table.schema(), view.schema(), view.to_json(), view.get_config()]);
+        const [tschema, schema, json, config] = await Promise.all([this._table.schema(false, false), view.schema(false), view.to_json(), view.get_config()]);
         if (task.cancelled) {
             return;
         }
