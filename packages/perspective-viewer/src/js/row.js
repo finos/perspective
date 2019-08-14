@@ -80,7 +80,6 @@ class Row extends HTMLElement {
         if (!this.hasAttribute("aggregate")) {
             this.setAttribute("aggregate", type_config.aggregate);
         }
-
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");
         this._callback = event => this._update_filter(event);
         filter_operand.addEventListener("keyup", this._callback.bind(this));
@@ -133,12 +132,7 @@ class Row extends HTMLElement {
         if (!this._initialized) {
             filter_input.value = operand;
         }
-        if (filter_dropdown.value === perspective.FILTER_OPERATORS.isNull || filter_dropdown.value === perspective.FILTER_OPERATORS.isNotNull) {
-            filter_input.style.display = "none";
-        } else {
-            filter_input.style.display = "inline-block";
-            filter_input.style.width = get_text_width(operand, 30);
-        }
+        filter_input.style.width = get_text_width(operand, 30);
     }
 
     set aggregate(a) {
@@ -187,7 +181,7 @@ class Row extends HTMLElement {
             case "string":
             default:
         }
-        if (filter_operator.value === perspective.FILTER_OPERATORS.isIn || filter_operator.value === perspective.FILTER_OPERATORS.isNotIn) {
+        if (filter_operator.value === "in" || filter_operator.value === "not in") {
             val = val.split(",").map(x => x.trim());
         }
         this.setAttribute("filter", JSON.stringify({operator: filter_operator.value, operand: val}));

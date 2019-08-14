@@ -231,22 +231,19 @@ namespace binding {
      */
 
     /**
-     * @brief is the filter term and operand combination valid?
+     * @brief For date/datetime values, is the filter term a valid date?
      *
-     * If the operand is null/not null then it is always valid.
-     * Is the filter term is a valid date?  Otherwise, make sure
-     * the filter term is not null/undefined.
+     * Otherwise, make sure the filter term is not null/undefined.
      *
      * @tparam T
      * @param type
      * @param date_parser
-     * @param filter_term
-     * @param filter_operand
+     * @param filter
      * @return true
      * @return false
      */
     template <typename T>
-    bool is_valid_filter(t_dtype type, T date_parser, T filter_term, T filter_operand);
+    bool is_valid_filter(t_dtype type, T date_parser, T filter_term);
 
     /**
      * @brief Create a filter by parsing the filter term from the binding language.
