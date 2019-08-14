@@ -44,12 +44,14 @@ perspective-viewer {
 |||
 |:--|:--|
 |`color`<br/>`--hypergrid--color`<br/>`--`TYPE`--hypergrid--color`|The primary text and interface color.|
-|`background`|For the element, e.g. the control panel `background`|
-|`background-color`|For the element, e.g. the control panel `background-color`|
+|`background`<br/>`--hypergrid--background`|For the element, e.g. the control panel `background`|
 |`font-family`<br/>`--hypergrid--font-family`<br/>`--`TYPE`--hypergrid--font-family`|The default `font-family`.|
 |`font-size`<br/>`--hypergrid--font-size`<br/>`--`TYPE`--hypergrid--font-size`|The default `font-size`.|
-|`--hypergrid--font-size`<br/>`--`TYPE`--hypergrid--font-size`|The default `font-size`.|
-|`--d3fc-gradient-full`<br/>`--highcharts-gradient-full`|The color gradient for [-, +] ranges on numeric columns.|
-|`--d3fc-gradient-positive`<br/>`--highcharts-gradient-positive`|The color gradient for [+, +] ranges on numeric columns.|
-|`--d3fc-gradient-negative`<br/>`--highcharts-gradient-negative`|The color gradient for [-, -] ranges on numeric columns.|
+|`--hypergrid-row-hover--background`|Row background on hover (additive)|
+|`--hypergrid-cell-hover--background`|Column background on hover (additive)|
+|`--hypergrid-positive--color`<br/>`--`TYPE`--hypergrid-positive--color`|Foreground color for (+)|
+|`--hypergrid-negative--color`<br/>`--`TYPE`--hypergrid-negative--color`|Foreground color for (-)|
+|`--d3fc-full--gradient`<br/>`--highcharts-full--gradient`|The color gradient for [-, +] ranges on numeric columns.|
+|`--d3fc-positive--gradient`<br/>`--highcharts-positive--gradient`|The color gradient for [+, +] ranges on numeric columns.|
+|`--d3fc-negative--gradient`<br/>`--highcharts-negative--gradient`|The color gradient for [-, -] ranges on numeric columns.|
 
