@@ -1,6 +1,6 @@
 {
   "docs": {
-    "Getting Started": ["md/installation", "md/usage", "md/development"],
+    "Getting Started": ["md/installation", "md/usage", "md/styles", "md/development"],
     "API": ["obj/perspective", "obj/perspective-viewer"]
   }
 }
