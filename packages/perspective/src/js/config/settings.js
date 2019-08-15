@@ -65,7 +65,8 @@ module.exports.default = {
                 hour: "numeric",
                 minute: "numeric",
                 second: "numeric"
-            }
+            },
+            null_value: -1
         },
         date: {
             filter_operator: "==",
@@ -75,7 +76,8 @@ module.exports.default = {
                 year: "numeric",
                 month: "numeric",
                 day: "numeric"
-            }
+            },
+            null_value: -1
         }
     }
 };

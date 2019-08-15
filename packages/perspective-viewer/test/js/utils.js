@@ -103,7 +103,6 @@ beforeAll(async () => {
     });
     page.on("pageerror", msg => {
         errors.push(msg.message);
-        private_console.log(`${__name}: ${msg.message}`);
     });
 
     results = (() => {
@@ -216,6 +215,21 @@ test.run = function run(name, body, viewport = null) {
 
 const OLD_SETTINGS = {};
 
+expect.extend({
+    toNotError(received) {
+        if (received.length > 0) {
+            return {
+                message: () => `Errors emitted during evaluation: ${JSON.stringify(received)}`,
+                pass: false
+            };
+        }
+        return {
+            message: () => ``,
+            pass: true
+        };
+    }
+});
+
 test.capture = function capture(name, body, {timeout = 60000, viewport = null, wait_for_update = true} = {}) {
     const _url = page_url;
     const _reload_page = page_reload;
@@ -296,7 +310,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     new_results[_url + "/" + name] = hash;
                 }
 
-                expect(errors).toEqual([]);
+                expect(errors).toNotError();
                 expect(hash).toBe(results[_url + "/" + name]);
             }
         },

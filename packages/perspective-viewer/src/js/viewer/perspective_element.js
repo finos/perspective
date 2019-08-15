@@ -45,10 +45,11 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
     const aggregates = [];
     for (const col of aggregate_attribute) {
         const type = schema[col.column];
+        const type_config = get_type_config(type);
         found.add(col.column);
-        if (type) {
-            if (col.op === "" || perspective.TYPE_AGGREGATES[type].indexOf(col.op) === -1) {
-                col.op = get_type_config(type).aggregate;
+        if (type_config.type || type) {
+            if (col.op === "" || perspective.TYPE_AGGREGATES[type_config.type || type].indexOf(col.op) === -1) {
+                col.op = type_config.aggregate;
             }
             aggregates.push(col);
         } else {

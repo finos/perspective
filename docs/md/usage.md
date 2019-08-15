@@ -366,6 +366,28 @@ module.exports = {
 };
 ```
 
+#### Creating new types
+
+For customizing the behavior or style of specific columns, perspective supports
+the definition of new types, deriving from an existing built-in type.  First,
+add a new type and declare its base in your `perspctive.config.js`.
+
+```javascript
+module.exports = {
+    types: {
+        price: {type: "float"}
+    }
+};
+```
+
+Perspective will not infer these types for you, so you'll need to create your
+table [from a schema](#loading-data-with-table) to use them.
+
+```javascript
+const table = worker.table({volume: "integer", price: "price"});
+table.update([{volume: 10, price: 100.75}]);
+```
+
 ## `perspective-viewer` web component
 
 As a component, `perspective-viewer` provides a complete graphical UI for

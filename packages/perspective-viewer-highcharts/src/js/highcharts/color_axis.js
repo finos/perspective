@@ -12,9 +12,9 @@ import * as gparser from "gradient-parser";
 function _get_gradient(type) {
     let gradient;
     if (window.ShadyCSS) {
-        gradient = window.ShadyCSS.getComputedStyleValue(this, `--highcharts-heatmap-gradient-${type}`);
+        gradient = window.ShadyCSS.getComputedStyleValue(this, `--highcharts-${type}--gradient`);
     } else {
-        gradient = getComputedStyle(this).getPropertyValue(`--highcharts-heatmap-gradient-${type}`);
+        gradient = getComputedStyle(this).getPropertyValue(`--highcharts-${type}--gradient`);
     }
 
     const parsed = gparser.parse(gradient)[0].colorStops;

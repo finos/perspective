@@ -8,6 +8,7 @@
  */
 
 import * as defaults from "./config/constants.js";
+import {get_type_config} from "./config/index.js";
 import {DataAccessor} from "./data_accessor";
 import {DateParser} from "./data_accessor/date_parser.js";
 import {extract_map, fill_vector} from "./emscripten.js";
@@ -110,7 +111,6 @@ export default function(Module) {
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
-
         if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool, table_id);
         } else {
@@ -253,7 +253,7 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function view(table, sides, config, view_config, name, callbacks) {
+    function view(table, sides, config, view_config, name, callbacks, overridden_types) {
         this._View = undefined;
         this.date_parser = new DateParser();
         this.config = config || {};
@@ -272,6 +272,7 @@ export default function(Module) {
         this.column_only = this._View.is_column_only();
         this.callbacks = callbacks;
         this.name = name;
+        this.overridden_types = overridden_types;
         bindall(this);
     }
 
@@ -364,8 +365,18 @@ export default function(Module) {
      *
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~view}'s schema.
      */
-    view.prototype.schema = function() {
-        return extract_map(this._View.schema());
+    view.prototype.schema = function(override = true) {
+        const schema = extract_map(this._View.schema());
+        if (override) {
+            for (const key of Object.keys(schema)) {
+                let colname = key.split(defaults.COLUMN_SEPARATOR_STRING);
+                colname = colname[colname.length - 1];
+                if (this.overridden_types[colname] && get_type_config(this.overridden_types[colname]).type === schema[key]) {
+                    schema[key] = this.overridden_types[colname];
+                }
+            }
+        }
+        return schema;
     };
 
     view.prototype._column_names = function(skip = false, depth = 0) {
@@ -931,7 +942,7 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function table(_Table, index, computed, limit, limit_index) {
+    function table(_Table, index, computed, limit, limit_index, overridden_types) {
         this._Table = _Table;
         this.gnode_id = this._Table.get_gnode().get_id();
         this.name = Math.random() + "";
@@ -943,6 +954,7 @@ export default function(Module) {
         this.views = [];
         this.limit = limit;
         this.limit_index = limit_index;
+        this.overridden_types = overridden_types;
         bindall(this);
     }
 
@@ -1031,7 +1043,7 @@ export default function(Module) {
      * (default false)
      * @returns {Promise<Object>} A Promise of this {@link module:perspective~table}'s schema.
      */
-    table.prototype.schema = function(computed = false) {
+    table.prototype.schema = function(computed = false, override = true) {
         let schema = this._Table.get_schema();
         let columns = schema.columns();
         let types = schema.types();
@@ -1042,7 +1054,11 @@ export default function(Module) {
             if (name === "psp_okey" && (typeof computed_schema[name] === "undefined" || computed)) {
                 continue;
             }
-            new_schema[name] = get_column_type(types.get(key).value);
+            if (override && this.overridden_types[name]) {
+                new_schema[name] = this.overridden_types[name];
+            } else {
+                new_schema[name] = get_column_type(types.get(key).value);
+            }
         }
         schema.delete();
         columns.delete();
@@ -1199,7 +1215,7 @@ export default function(Module) {
         }
 
         let vc = new view_config(config);
-        let v = new view(this, sides, config, vc, name, this.callbacks);
+        let v = new view(this, sides, config, vc, name, this.callbacks, this.overridden_types);
         this.views.push(v);
         return v;
     };
@@ -1338,7 +1354,7 @@ export default function(Module) {
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
-            return new table(_Table, this.index, computed, this.limit, this.limit_index);
+            return new table(_Table, this.index, computed, this.limit, this.limit_index, this.overridden_types);
         } catch (e) {
             if (_Table) {
                 _Table.delete();
@@ -1428,6 +1444,7 @@ export default function(Module) {
 
             let data_accessor;
             let is_arrow = false;
+            let overridden_types = {};
 
             if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
                 data_accessor = load_arrow_buffer(data);
@@ -1441,7 +1458,7 @@ export default function(Module) {
                 }
 
                 accessor.clean();
-                accessor.init(data);
+                overridden_types = accessor.init(data);
                 data_accessor = accessor;
             }
 
@@ -1455,8 +1472,7 @@ export default function(Module) {
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
                 [_Table, limit_index] = make_table(data_accessor, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
-
-                return new table(_Table, options.index, undefined, options.limit, limit_index);
+                return new table(_Table, options.index, undefined, options.limit, limit_index, overridden_types);
             } catch (e) {
                 if (_Table) {
                     _Table.delete();
@@ -1511,7 +1527,7 @@ export default function(Module) {
          */
         init(msg) {
             if (typeof WebAssembly === "undefined") {
-                console.log("Loading asm.js");
+                throw new Error("WebAssembly not supported");
             } else {
                 console.log("Loading wasm");
                 __MODULE__ = __MODULE__({

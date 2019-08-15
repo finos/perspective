@@ -22,16 +22,16 @@ const styleVariables = {
     "--d3fc-series-8": "#7f7f7f",
     "--d3fc-series-9": "#bcbd22",
     "--d3fc-series-10": "#17becf",
-    "--d3fc-gradient-full": `linear-gradient(
+    "--d3fc-full--gradient": `linear-gradient(
         #4d342f 0%,
         #f0f0f0 50%,
         #1a237e 100%
     )`,
-    "--d3fc-gradient-positive": `linear-gradient(
+    "--d3fc-positive--gradient": `linear-gradient(
         #dcedc8 0%,
         #1a237e 100%
     )`,
-    "--d3fc-gradient-negative": `linear-gradient(
+    "--d3fc-negative--gradient": `linear-gradient(
         #feeb65 100%,
         #4d342f 0%
     )`

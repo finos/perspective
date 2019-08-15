@@ -38,7 +38,7 @@ export const initialiseStyles = (container, settings) => {
 
         const gradients = ["full", "positive", "negative"];
         gradients.forEach(g => {
-            const gradient = computed(`--d3fc-gradient-${g}`);
+            const gradient = computed(`--d3fc-${g}--gradient`);
             styles.gradient[g] = parseGradient(gradient, styles.opacity);
         });
 

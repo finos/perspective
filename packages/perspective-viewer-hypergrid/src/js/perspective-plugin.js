@@ -45,6 +45,7 @@ function setPSP(payload) {
     // fin-hypergrid-schema-loaded event (in that order). Here we inject a createColumns override
     // into `this` (behavior instance) to complete the setup before the event is dispatched.
     this.createColumns = createColumns;
+    this.refreshColumns = refreshColumns;
 
     if (
         this._memoized_schema &&
@@ -71,7 +72,12 @@ function setPSP(payload) {
  */
 function createColumns() {
     Object.getPrototypeOf(this).createColumns.call(this);
+    this.refreshColumns();
+    this.setHeaders(); // grouped-header override that sets all header cell renderers and header row height
+    this.schema_loaded = true;
+}
 
+function refreshColumns() {
     this.getActiveColumns().forEach(function(column) {
         setColumnPropsByType.call(this, column);
     }, this);
@@ -80,41 +86,21 @@ function createColumns() {
     if (treeColumn) {
         setColumnPropsByType.call(this, treeColumn);
     }
-
-    this.stashedWidths = undefined;
-
-    this.setHeaders(); // grouped-header override that sets all header cell renderers and header row height
-
-    this.schema_loaded = true;
 }
 
 /**
  * @this {Behavior}
  */
 function setColumnPropsByType(column) {
-    var props = column.properties;
-    switch (column.type) {
-        case "number":
-        case "float":
-            props.halign = "right";
-            props.columnHeaderHalign = "right";
-            props.format = "FinanceFloat";
-            break;
-        case "integer":
-            props.halign = "right";
-            props.columnHeaderHalign = "right";
-            props.format = "FinanceInteger";
-            break;
-        case "date":
-            props.format = "FinanceDate";
-            break;
-        case "datetime":
-            props.format = "FinanceDatetime";
-            break;
-        default:
-            if (column.index === this.treeColumnIndex) {
-                props.format = "FinanceTree";
-            }
+    const props = column.properties;
+    if (column.index === this.treeColumnIndex) {
+        props.format = "FinanceTree";
+    } else {
+        props.format = `perspective-${column.type}`;
+    }
+    const styles = this.grid.get_styles();
+    if (styles[column.type]) {
+        Object.assign(props, styles[column.type]);
     }
 }
 

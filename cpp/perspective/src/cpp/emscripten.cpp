@@ -1401,10 +1401,14 @@ namespace binding {
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
 
         for (auto f : js_filter) {
-            t_dtype type = schema.get_dtype(f[0].as<std::string>());
+            t_dtype type = schema.get_dtype(f.at(0).as<std::string>());
 
             // validate the filter before it goes into the core engine
-            if (is_valid_filter(type, date_parser, f[2], f[1])) {
+            t_val filter_term = t_val::null();
+            if (f.size() > 2) {
+                filter_term = f.at(2);
+            }
+            if (is_valid_filter(type, date_parser, filter_term, f.at(1))) {
                 filter.push_back(make_filter_term(type, date_parser, f));
             }
         }
@@ -1412,6 +1416,9 @@ namespace binding {
         // create the `t_view_config`
         t_view_config view_config(row_pivots, column_pivots, aggregates, columns, filter, sort,
             filter_op, column_only);
+
+        // transform primitive values into abstractions that the engine can use
+        view_config.init(schema);
 
         // set pivot depths if provided
         if (has_value(config["row_pivot_depth"])) {
@@ -1421,9 +1428,6 @@ namespace binding {
         if (has_value(config["column_pivot_depth"])) {
             view_config.set_column_pivot_depth(config["column_pivot_depth"].as<std::int32_t>());
         }
-
-        // transform primitive values into abstractions that the engine can use
-        view_config.init(schema);
 
         return view_config;
     }

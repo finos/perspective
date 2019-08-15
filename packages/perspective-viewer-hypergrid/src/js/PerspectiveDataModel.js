@@ -8,6 +8,7 @@
  */
 
 const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
+const {get_type_config} = require("@finos/perspective/dist/esm/config/index.js");
 
 function getSubrects(nrows) {
     if (!this.dataWindow) {
@@ -160,7 +161,11 @@ function cellStyle(gridCellConfig) {
     if (gridCellConfig.value === null || gridCellConfig.value === undefined) {
         gridCellConfig.value = "-";
     } else {
-        const type = this.schema[gridCellConfig.dataCell.x].type;
+        let type = this.schema[gridCellConfig.dataCell.x].type;
+        const type_config = get_type_config(type);
+        if (type_config.type) {
+            type = type_config.type;
+        }
         if (["number", "float", "integer"].indexOf(type) > -1) {
             if (gridCellConfig.value === 0) {
                 gridCellConfig.value = type === "float" ? "0.00" : "0";
