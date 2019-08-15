@@ -225,7 +225,7 @@ export function default_config(aggregates, mode) {
                             let column_pivot_values = [];
                             if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivots_values = this.name.split(", ");
+                                row_pivots_values = this.name ? this.name.split(", ") : [];
                             } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
                                 row_pivots_values = tooltip.get_pivot_values(this.category);
