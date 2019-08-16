@@ -93,5 +93,5 @@ module.exports.get_config = function get_config() {
     if (!global.__PERSPECTIVE_CONFIG__) {
         global.__PERSPECTIVE_CONFIG__ = mergeDeep(DEFAULT_CONFIG, typeof window === "undefined" ? get_config_file() : global.__TEMPLATE_CONFIG__ || {});
     }
-    return JSON.parse(JSON.stringify(global.__PERSPECTIVE_CONFIG__));
+    return global.__PERSPECTIVE_CONFIG__;
 };
