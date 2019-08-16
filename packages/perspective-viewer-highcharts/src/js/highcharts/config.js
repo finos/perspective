@@ -223,9 +223,9 @@ export function default_config(aggregates, mode) {
                         click: async function() {
                             let row_pivots_values = [];
                             let column_pivot_values = [];
-                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                            if ((type === "bubble" && mode === "scatter") || (type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
-                                row_pivots_values = this.name.split(", ");
+                                row_pivots_values = this.name ? this.name.split(", ") : [];
                             } else if (type === "column" || type === "line" || type === "scatter" || type === "area") {
                                 column_pivot_values = this.series.userOptions.name.split(", ");
                                 row_pivots_values = tooltip.get_pivot_values(this.category);
@@ -244,7 +244,7 @@ export function default_config(aggregates, mode) {
                             const start_row = this.index + 1;
                             const end_row = start_row + 1;
                             let column_names = [];
-                            if ((type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
+                            if ((type === "bubble" && mode === "scatter") || (type === "scatter" && mode === "scatter") || (type === "scatter" && mode === "line")) {
                                 column_names = axis_titles;
                             } else {
                                 const stack_name = this.series.userOptions ? this.series.userOptions.stack : "";
