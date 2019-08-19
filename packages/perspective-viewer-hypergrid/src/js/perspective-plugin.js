@@ -57,11 +57,11 @@ function setPSP(payload) {
     } else {
         this.grid.sbVScroller.index = 0;
         this.grid.sbHScroller.index = 0;
-
         this.grid.setData({
             data: payload.rows,
             schema: new_schema
         });
+        this.grid.allowEvents(true);
     }
     this._memoized_schema = new_schema;
     this._memoized_pivots = payload.rowPivots;
