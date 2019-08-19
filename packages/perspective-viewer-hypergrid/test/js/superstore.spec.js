@@ -11,19 +11,7 @@ const utils = require("@finos/perspective-viewer/test/js/utils.js");
 const path = require("path");
 
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
-
-async function set_lazy(page) {
-    const viewer = await page.$("perspective-viewer");
-    await page.evaluate(element => {
-        element.hypergrid.properties.repaintIntervalRate = 1;
-        if (!element.hypergrid._lazy_load) {
-            Object.defineProperty(element.hypergrid, "_lazy_load", {
-                set: () => {},
-                get: () => true
-            });
-        }
-    }, viewer);
-}
+const {set_lazy} = require("./utils.js");
 
 utils.with_server({}, () => {
     describe.page(

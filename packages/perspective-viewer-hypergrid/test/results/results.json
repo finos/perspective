@@ -29,6 +29,7 @@
     "superstore.html/shows a sort indicator": "5f4aae968d2dac96781c954e05d34303",
     "superstore.html/shows multiple sort indicators": "b6f6bd22638f550ee07cadc46c1c37c0",
     "superstore.html/shows a sort indicator on column split": "5391f996d29f1144d87ddc5f802e8c52",
-    "__GIT_COMMIT__": "e516798564eb956c7eae5cb02f81610c08071d6f",
-    "superstore.html/should reinterpret metadata when only row pivots are changed": "fb9c5cb1b9a4148023f6edf4bffd27db"
+    "__GIT_COMMIT__": "683a607ac1fbf5c842eac333a3fb5ab0f8ff7386",
+    "superstore.html/should reinterpret metadata when only row pivots are changed": "fb9c5cb1b9a4148023f6edf4bffd27db",
+    "empty.html/perspective-click is fired when an empty dataset is loaded first": "c9858679937200d7748610c312d7dee8"
 }

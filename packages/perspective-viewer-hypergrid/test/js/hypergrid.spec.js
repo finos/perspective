@@ -9,23 +9,24 @@
 
 const utils = require("@finos/perspective-viewer/test/js/utils.js");
 const path = require("path");
-
-const click_details = async (page, x = 310) => {
-    const viewer = await page.$("perspective-viewer");
-
-    const click_event = page.evaluate(element => {
-        return new Promise(resolve => {
-            element.addEventListener("perspective-click", e => {
-                resolve(e.detail);
-            });
-        });
-    }, viewer);
-
-    await page.mouse.click(x, 300);
-    return await click_event;
-};
+const {click_details, capture_update} = require("./utils.js");
 
 utils.with_server({}, () => {
+    describe.page(
+        "empty.html",
+        () => {
+            test.capture("perspective-click is fired when an empty dataset is loaded first", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.waitFor("perspective-viewer:not([updating])");
+                await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}]), viewer));
+                await page.waitFor("perspective-viewer:not([updating])");
+                const detail = await click_details(page, 30, 60);
+                expect(detail.row).toEqual({x: 3000});
+            });
+        },
+        {root: path.join(__dirname, "..", "..")}
+    );
+
     describe.page(
         "hypergrid.html",
         () => {
