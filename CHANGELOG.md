@@ -1,5 +1,21 @@
 # Changelog
 
+[0.3.7] - 2019-08-20
+### Added
+* [#676](https://github.com/jpmorganchase/perspective/pull/676) Added null-filtering API and UI.
+* [#682](https://github.com/jpmorganchase/perspective/pull/676) Added type-specific styling API, with additional style properties for `@finos/perspective-viewer-hypergrid`.
+
+### Fixes
+* [#663](https://github.com/jpmorganchase/perspective/pull/663) Allow Apache Arrow inputs to optionally declare a schema.
+* [#666](https://github.com/jpmorganchase/perspective/pull/666) Fixed `@finos/persoective-viewer` aggregate persistence for computed columns.
+* [#669](https://github.com/jpmorganchase/perspective/pull/669) Fixed `@finos/persoective-viewer` filtering on null values.
+* [#675](https://github.com/jpmorganchase/perspective/pull/675) Fixed `@finos/persoective-jupyterlab` publish versioning.
+* [#672](https://github.com/jpmorganchase/perspective/pull/672) Fixed config parsing.
+* [#683](https://github.com/jpmorganchase/perspective/pull/683) Fixed D3FC version regression
+* [#684](https://github.com/jpmorganchase/perspective/pull/684) Fixed scatter chart click events.
+* [#685](https://github.com/jpmorganchase/perspective/pull/685) Fixed config performance issue.
+* [#686](https://github.com/jpmorganchase/perspective/pull/686) Fixed `@finos/persoective-viewer-hypergrid` click propagation issue.
+  
 [0.3.6] - 2019-07-15
 ### Fixes
 * [#660](https://github.com/jpmorganchase/perspective/pull/660) Fixed webpack path resolution bug.

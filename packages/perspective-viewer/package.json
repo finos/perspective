@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-viewer",
-    "version": "0.3.6",
+    "version": "0.3.7",
     "description": "Perspective.js",
     "main": "dist/cjs/perspective-viewer.js",
     "browser": "dist/cjs/perspective-viewer.js",
@@ -40,12 +40,11 @@
         ],
         "verbose": true,
         "testURL": "http://localhost/",
-        "transform": {},
-        "automock": false,
         "transform": {
             ".js$": "./test/js/transform.js",
             ".html$": "html-loader-jest"
         },
+        "automock": false,
         "setupFiles": [
             "./test/js/beforeEachSpec.js"
         ]
@@ -58,7 +57,7 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.3.6",
+        "@finos/perspective": "^0.3.7",
         "@webcomponents/shadycss": "^1.5.2",
         "@webcomponents/webcomponentsjs": "~2.0.4",
         "awesomplete": "^1.1.2",
