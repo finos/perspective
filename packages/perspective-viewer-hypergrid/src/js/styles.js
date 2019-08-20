@@ -40,6 +40,12 @@ properties.add_styles({
     }
 });
 
+properties.add_measures({
+    width: `${title}--width`,
+    minimumColumnWidth: `${title}--min-width`,
+    maximumColumnWidth: `${title}--max-width`
+});
+
 properties.add_styles({
     hoverRowHighlight: {
         enabled: true,

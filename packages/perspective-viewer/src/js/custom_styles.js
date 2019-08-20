@@ -22,6 +22,19 @@ function get_style(elem, name) {
     return value;
 }
 
+function get_measure(elem, name) {
+    let value;
+    if (window.ShadyCSS) {
+        value = window.ShadyCSS.getComputedStyleValue(elem, name);
+    } else {
+        value = getComputedStyle(elem).getPropertyValue(name);
+    }
+    if (value.trim() === "") {
+        return undefined;
+    }
+    return parseInt(value);
+}
+
 function get_font(elem, title) {
     if (title.length > 0) {
         title += "--";
@@ -91,8 +104,13 @@ const STYLE_PROPERTIES = Symbol("Perspective Style Properties");
 export class PropsBuilder {
     constructor() {
         this._staged_props = [];
-        this._staged_raw_props = [];
         this._staged_fonts = [];
+        this._staged_measures = [];
+    }
+
+    add_measures(props) {
+        this._staged_measures.push(props);
+        this._initialized = false;
     }
 
     add_styles(props) {
@@ -113,9 +131,11 @@ export class PropsBuilder {
         if (!elem[STYLE_PROPERTIES]) {
             const types = get_type_deps();
             const result = (elem[STYLE_PROPERTIES] = {});
+            calc_rec(result, "", elem, types, this._staged_measures, get_measure);
             calc_rec(result, "", elem, types, this._staged_props, get_style);
             calc_rec(result, "", elem, types, this._staged_fonts, get_font);
             for (const type of get_types()) {
+                calc_rec(result, type, elem, types, this._staged_measures, get_measure);
                 calc_rec(result, type, elem, types, this._staged_props, get_style);
                 calc_rec(result, type, elem, types, this._staged_fonts, get_font);
             }
