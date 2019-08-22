@@ -253,7 +253,7 @@ t_ftrav::step_end() {
     std::vector<t_mselem> new_rows;
 
     for (t_pkmselem_map::const_iterator pkelem_iter = m_new_elems.begin();
-        pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
+         pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
         new_rows.push_back(pkelem_iter->second);
     }
     std::sort(new_rows.begin(), new_rows.end(), sorter);
@@ -276,11 +276,11 @@ t_ftrav::step_end() {
         } else {
             i++;
         }
-                
+
         m_pkeyidx[elem.m_pkey] = new_index->size();
         new_index->push_back(elem);
     }
-    
+
     while (i < m_index->size()) {
         const t_mselem& new_elem = (*m_index)[i++];
         if (new_elem.m_deleted) {
@@ -291,7 +291,7 @@ t_ftrav::step_end() {
         }
     }
 
-    std::swap(new_index, m_index);  
+    std::swap(new_index, m_index);
     m_new_elems.clear();
 }
 
