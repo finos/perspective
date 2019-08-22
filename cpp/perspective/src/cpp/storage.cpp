@@ -519,7 +519,9 @@ void
 t_lstore::clear() {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+#ifndef BUILD_WASM
     memset(m_base, 0, size_t(capacity()));
+#endif
     {
         t_unlock_store tmp(this);
         m_size = 0;

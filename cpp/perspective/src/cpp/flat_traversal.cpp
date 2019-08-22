@@ -248,38 +248,51 @@ t_ftrav::step_end() {
     auto new_index = std::make_shared<std::vector<t_mselem>>();
     new_index->reserve(new_size);
 
-    t_pkeyidx_map added;
-
-    for (t_uindex idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
-        t_mselem& elem = (*m_index)[idx];
-        if (!elem.m_deleted) {
-            new_index->push_back(elem);
-            added[elem.m_pkey] = idx;
-        }
-    }
+    t_uindex i = 0;
+    t_multisorter sorter(get_sort_orders(m_sortby));
+    std::vector<t_mselem> new_rows;
 
     for (t_pkmselem_map::const_iterator pkelem_iter = m_new_elems.begin();
-         pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
-
-        const t_mselem& elem = pkelem_iter->second;
-        t_pkeyidx_map::const_iterator iter = added.find(pkelem_iter->first);
-        if (iter == added.end()) {
-            new_index->push_back(elem);
+        pkelem_iter != m_new_elems.end(); ++pkelem_iter) {
+        new_rows.push_back(pkelem_iter->second);
+    }
+    std::sort(new_rows.begin(), new_rows.end(), sorter);
+    for (auto it = new_rows.begin(); it != new_rows.end(); ++it) {
+        const t_mselem& elem = *it;
+        if (!m_pkeyidx.contains(elem.m_pkey)) {
+            while (i < m_index->size()) {
+                const t_mselem& new_elem = (*m_index)[i];
+                if (new_elem.m_deleted) {
+                    i++;
+                    m_pkeyidx.erase(new_elem.m_pkey);
+                } else if (sorter(new_elem, elem)) {
+                    m_pkeyidx[new_elem.m_pkey] = new_index->size();
+                    new_index->push_back(new_elem);
+                    i++;
+                } else {
+                    break;
+                }
+            }
         } else {
-            (*new_index)[iter->second] = elem;
+            i++;
+        }
+                
+        m_pkeyidx[elem.m_pkey] = new_index->size();
+        new_index->push_back(elem);
+    }
+    
+    while (i < m_index->size()) {
+        const t_mselem& new_elem = (*m_index)[i++];
+        if (new_elem.m_deleted) {
+            m_pkeyidx.erase(new_elem.m_pkey);
+        } else {
+            m_pkeyidx[new_elem.m_pkey] = new_index->size();
+            new_index->push_back(new_elem);
         }
     }
-    std::swap(new_index, m_index);
-    t_multisorter sorter(get_sort_orders(m_sortby));
-    std::sort(m_index->begin(), m_index->end(), sorter);
 
-    m_pkeyidx.clear();
-
+    std::swap(new_index, m_index);  
     m_new_elems.clear();
-
-    for (t_index idx = 0, loop_end = m_index->size(); idx < loop_end; ++idx) {
-        m_pkeyidx[(*m_index)[idx].m_pkey] = idx;
-    }
 }
 
 void
