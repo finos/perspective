@@ -97,7 +97,7 @@ cmp_mselem(const t_mselem& a, const t_mselem& b, const std::vector<t_sorttype>& 
 
         t_sorttype order = sort_order[idx];
 
-#ifndef BUILD_WASM
+#ifndef PSP_ENABLE_WASM
         t_nancmp nancmp = nan_compare(order, first, second);
 
         if (first.is_floating_point() && nancmp.m_active) {

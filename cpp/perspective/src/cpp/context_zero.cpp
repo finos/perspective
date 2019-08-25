@@ -55,7 +55,7 @@ t_ctx0::step_end() {
     }
 
     m_traversal->step_end();
-#ifndef BUILD_WASM
+#ifndef PSP_ENABLE_WASM
     t_uindex ncols = m_config.get_num_columns();
     std::vector<t_minmax> rval(ncols);
 
