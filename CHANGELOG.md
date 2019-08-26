@@ -1,5 +1,10 @@
 # Changelog
 
+[0.3.8] - 2019-08-26
+### Fixes
+* [#689](https://github.com/jpmorganchase/perspective/pull/689) Performance enchancements for `update()`.
+* [#690](https://github.com/jpmorganchase/perspective/pull/690) Ported to `llvm-upstream` branch fo Emscripten.
+
 [0.3.7] - 2019-08-20
 ### Added
 * [#676](https://github.com/jpmorganchase/perspective/pull/676) Added null-filtering API and UI.
