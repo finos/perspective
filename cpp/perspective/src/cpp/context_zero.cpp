@@ -55,7 +55,7 @@ t_ctx0::step_end() {
     }
 
     m_traversal->step_end();
-
+#ifndef PSP_ENABLE_WASM
     t_uindex ncols = m_config.get_num_columns();
     std::vector<t_minmax> rval(ncols);
 
@@ -84,6 +84,7 @@ t_ctx0::step_end() {
 #endif
 
     m_minmax = rval;
+#endif
 }
 
 // ASGGrid data interface

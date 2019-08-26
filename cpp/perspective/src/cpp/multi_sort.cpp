@@ -19,30 +19,35 @@ namespace perspective {
 t_mselem::t_mselem()
     : m_pkey(mknone())
     , m_order(0)
-    , m_deleted(false) {}
+    , m_deleted(false)
+    , m_updated(false) {}
 
 t_mselem::t_mselem(const std::vector<t_tscalar>& row)
     : m_row(row)
     , m_pkey(mknone())
     , m_order(0)
-    , m_deleted(false) {}
+    , m_deleted(false)
+    , m_updated(false) {}
 
 t_mselem::t_mselem(const std::vector<t_tscalar>& row, t_uindex order)
     : m_row(row)
     , m_pkey(mknone())
     , m_order(order)
-    , m_deleted(false) {}
+    , m_deleted(false)
+    , m_updated(false) {}
 
 t_mselem::t_mselem(const t_tscalar& pkey, const std::vector<t_tscalar>& row)
     : m_row(row)
     , m_pkey(pkey)
     , m_order(0)
-    , m_deleted(false) {}
+    , m_deleted(false)
+    , m_updated(false) {}
 
 t_mselem::t_mselem(const t_mselem& other) {
     m_pkey = other.m_pkey;
     m_row = other.m_row;
     m_deleted = other.m_deleted;
+    m_updated = other.m_updated;
     m_order = other.m_order;
 }
 
@@ -50,6 +55,7 @@ t_mselem::t_mselem(t_mselem&& other) {
     m_pkey = other.m_pkey;
     m_row = std::move(other.m_row);
     m_deleted = other.m_deleted;
+    m_updated = other.m_updated;
     m_order = other.m_order;
 }
 
@@ -59,6 +65,7 @@ t_mselem::operator=(const t_mselem& other) {
     m_row = other.m_row;
     m_deleted = other.m_deleted;
     m_order = other.m_order;
+    m_updated = other.m_updated;
     return *this;
 }
 
@@ -67,6 +74,7 @@ t_mselem::operator=(t_mselem&& other) {
     m_pkey = other.m_pkey;
     m_row = std::move(other.m_row);
     m_deleted = other.m_deleted;
+    m_updated = other.m_updated;
     m_order = other.m_order;
     return *this;
 }
