@@ -63,22 +63,6 @@ class PerspectiveWebpackPlugin {
             loader: "source-map-loader"
         });
 
-        // FIXME Workaround for performance regression in @apache-arrow 4.0
-        rules.push({
-            test: /\.js$/,
-            include: /\@apache-arrow[/\\]es5-esm/,
-            use: [
-                {loader: "source-map-loader"},
-                {
-                    loader: "string-replace-loader",
-                    options: {
-                        search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
-                        replace: ""
-                    }
-                }
-            ]
-        });
-
         const perspective_config = get_config();
         if (perspective_config) {
             rules.push({
