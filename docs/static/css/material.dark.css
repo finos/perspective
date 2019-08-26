@@ -62,6 +62,7 @@ perspective-viewer {
   --active-column-selector--height: 45px;
   --column_selector--width: 31px;
   --column_selector--font-size: 16px;
+  --hypergrid--color: #666;
   --hypergrid--padding: 24px;
   --side_panel--padding: 24px 24px 24px 17px;
   --button--padding: 24px 17px 0px 17px;
@@ -105,15 +106,15 @@ perspective-viewer {
   --column_type-string--color: #ff8888;
   --psp-text-field--border-color: #22a0ce;
   --button-hover--color: #22a0ce;
+  --hypergrid--color: #eee;
   --hypergrid-tree-header--background: #2f3136;
+  --hypergrid--background: #2f3136;
   --hypergrid-tree-header--color: #eee;
   --hypergrid-header--background: #2f3136;
   --hypergrid-separator--color: #eee;
   --hypergrid-header--color: #eee;
   --hypergrid-positive--color: #22a0ce;
   --hypergrid-negative--color: #ff8888;
-  --hypergrid-positive--background: #2f3136;
-  --hypergrid-negative--background: #2f3136;
   --hypergrid--font-size: 12px;
   --hypergrid-header--font-size: 12px;
   --hypergrid--font-family: "Open Sans";

@@ -20,6 +20,9 @@
       "md/installation": {
         "title": "Installation"
       },
+      "md/styles": {
+        "title": "CSS Styles"
+      },
       "md/usage": {
         "title": "User Guide"
       },

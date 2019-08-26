@@ -89,10 +89,11 @@ class Benchmark {
             for (const not_warmup of this.case_iter(this._desc)) {
                 const start = performance.now();
                 await this._body();
+                const stop = performance.now() - start;
                 if (not_warmup) {
                     yield {
                         test: this._desc,
-                        time: performance.now() - start,
+                        time: stop,
                         ...categories
                     };
                 }

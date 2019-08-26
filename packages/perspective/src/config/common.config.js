@@ -39,7 +39,7 @@ module.exports = function({build_worker, no_minify} = {}) {
                             loader: "string-replace-loader",
                             options: {
                                 search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
-                                replace: "console.warn('Whoop')"
+                                replace: ""
                             }
                         }
                     ]
