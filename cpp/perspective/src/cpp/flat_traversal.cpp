@@ -258,36 +258,34 @@ t_ftrav::step_end() {
     }
     std::sort(new_rows.begin(), new_rows.end(), sorter);
     for (auto it = new_rows.begin(); it != new_rows.end(); ++it) {
-        const t_mselem& elem = *it;
-        if (!m_pkeyidx.contains(elem.m_pkey)) {
-            while (i < m_index->size()) {
-                const t_mselem& new_elem = (*m_index)[i];
-                if (new_elem.m_deleted) {
-                    i++;
-                    m_pkeyidx.erase(new_elem.m_pkey);
-                } else if (sorter(new_elem, elem)) {
-                    m_pkeyidx[new_elem.m_pkey] = new_index->size();
-                    new_index->push_back(new_elem);
-                    i++;
-                } else {
-                    break;
-                }
+        const t_mselem& new_elem = *it;
+        while (i < m_index->size()) {
+            const t_mselem& old_elem = (*m_index)[i];
+            if (old_elem.m_deleted) {
+                i++;
+                m_pkeyidx.erase(old_elem.m_pkey);
+            } else if (old_elem.m_updated) {
+                i++;
+            } else if (sorter(old_elem, new_elem)) {
+                m_pkeyidx[old_elem.m_pkey] = new_index->size();
+                new_index->push_back(old_elem);
+                i++;
+            } else {
+                break;
             }
-        } else {
-            i++;
         }
 
-        m_pkeyidx[elem.m_pkey] = new_index->size();
-        new_index->push_back(elem);
+        m_pkeyidx[new_elem.m_pkey] = new_index->size();
+        new_index->push_back(new_elem);
     }
 
     while (i < m_index->size()) {
-        const t_mselem& new_elem = (*m_index)[i++];
-        if (new_elem.m_deleted) {
-            m_pkeyidx.erase(new_elem.m_pkey);
-        } else {
-            m_pkeyidx[new_elem.m_pkey] = new_index->size();
-            new_index->push_back(new_elem);
+        const t_mselem& old_elem = (*m_index)[i++];
+        if (old_elem.m_deleted) {
+            m_pkeyidx.erase(old_elem.m_pkey);
+        } else if (!old_elem.m_updated) {
+            m_pkeyidx[old_elem.m_pkey] = new_index->size();
+            new_index->push_back(old_elem);
         }
     }
 
@@ -316,7 +314,8 @@ t_ftrav::update_row(
     }
     t_mselem mselem;
     fill_sort_elem(state, config, pkey, mselem);
-    (*m_index)[pkiter->second] = mselem;
+    (*m_index)[pkiter->second].m_updated = true;
+    m_new_elems[pkey] = mselem;
 }
 
 void

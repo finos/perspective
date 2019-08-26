@@ -31,6 +31,7 @@ struct PERSPECTIVE_EXPORT t_mselem {
     t_tscalar m_pkey;
     t_uindex m_order;
     bool m_deleted;
+    bool m_updated;
 };
 
 } // end namespace perspective
