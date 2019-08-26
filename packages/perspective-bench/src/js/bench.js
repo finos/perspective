@@ -53,7 +53,7 @@ async function run_node_version(args, run_test) {
     const old_log = console.log;
     console.log = (...args) => old_log(...args.map(color));
     const js = eval(`"use strict";${script};${run_test};PerspectiveBench`);
-    console.og = old_log;
+    console.log = old_log;
     return await js.run();
 }
 

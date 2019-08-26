@@ -20,6 +20,7 @@ utils.with_server({}, () => {
                 await page.waitFor("perspective-viewer:not([updating])");
                 await capture_update(page, viewer, () => page.evaluate(element => element.update([{x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}, {x: 3000}]), viewer));
                 await page.waitFor("perspective-viewer:not([updating])");
+                await page.waitFor(100);
                 const detail = await click_details(page, 30, 60);
                 expect(detail.row).toEqual({x: 3000});
             });

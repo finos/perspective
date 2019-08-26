@@ -161,8 +161,6 @@ if (PSP_WASM_BUILD)
 		--bind \
 		--source-map-base ./build/ \
 		--memory-init-file 0 \
-		-fno-rtti \
-		-DEMSCRIPTEN_HAS_UNBOUND_TYPE_NAMES=0 \
 		-s NO_EXIT_RUNTIME=1 \
 		-s NO_FILESYSTEM=1 \
 		-s ALLOW_MEMORY_GROWTH=1 \
@@ -186,6 +184,7 @@ if (PSP_WASM_BUILD)
 		set(OPT_FLAGS " \
 			-O3 \
 			-g0 \
+			-s WASM_OBJECT_FILES=0 \
 			--llvm-lto 3 \
 			--closure 1 \
 			-s AGGRESSIVE_VARIABLE_ELIMINATION=1 \

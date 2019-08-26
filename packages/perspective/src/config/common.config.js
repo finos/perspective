@@ -28,6 +28,37 @@ module.exports = function({build_worker, no_minify} = {}) {
                         loader: "arraybuffer-loader",
                         options: {}
                     }
+                },
+                // FIXME Workaround for performance regression in @apache-arrow 4.0
+                {
+                    test: /\.js$/,
+                    include: /\@apache-arrow[/\\]es5-esm/,
+                    use: [
+                        {loader: "source-map-loader"},
+                        {
+                            loader: "string-replace-loader",
+                            options: {
+                                search: "BaseVector.prototype[Symbol.isConcatSpreadable] = true;",
+                                replace: ""
+                            }
+                        }
+                    ]
+                },
+                // Will be replaced by `-s USE_ES6_IMPORT_META=0` in emscripten 1.38.43?
+                // https://github.com/emscripten-core/emscripten/pull/9234/files
+                {
+                    test: /\.js$/,
+                    include: /psp\.async\.js/,
+                    use: [
+                        {loader: "source-map-loader"},
+                        {
+                            loader: "string-replace-loader",
+                            options: {
+                                search: "import.meta.url",
+                                replace: "typeof document !== 'undefined' && document.currentScript ? document.currentScript.src : undefined"
+                            }
+                        }
+                    ]
                 }
             ]
         },

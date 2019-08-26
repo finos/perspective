@@ -174,16 +174,12 @@ namespace binding {
         void
         vecFromTypedArray(
             const t_val& typedArray, void* data, std::int32_t length, const char* destType) {
-            t_val memory = t_val::module_property("buffer");
-            if (destType == nullptr) {
-                t_val memoryView = typedArray["constructor"].new_(
-                    memory, reinterpret_cast<std::uintptr_t>(data), length);
-                memoryView.call<void>("set", typedArray.call<t_val>("slice", 0, length));
-            } else {
-                t_val memoryView = t_val::global(destType).new_(
-                    memory, reinterpret_cast<std::uintptr_t>(data), length);
-                memoryView.call<void>("set", typedArray.call<t_val>("slice", 0, length));
-            }
+            t_val constructor = destType == nullptr ? typedArray["constructor"] : t_val::global(destType);
+            t_val memory = t_val::module_property("HEAP8")["buffer"];
+            std::uintptr_t ptr = reinterpret_cast<std::uintptr_t>(data);
+            t_val memoryView = constructor.new_(memory, ptr, length);
+            t_val slice = typedArray.call<t_val>("slice", 0, length);                
+            memoryView.call<void>("set", slice);
         }
 
         template <>
@@ -1735,7 +1731,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_data_table>("t_data_table")
         .smart_ptr<std::shared_ptr<t_data_table>>("shared_ptr<t_data_table>")
-        .function<unsigned long>("size",
+        .function("size",
             reinterpret_cast<unsigned long (t_data_table::*)() const>(&t_data_table::size));
 
     /******************************************************************************
@@ -1743,9 +1739,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * t_schema
      */
     class_<t_schema>("t_schema")
-        .function<const std::vector<std::string>&>(
+        .function(
             "columns", &t_schema::columns, allow_raw_pointers())
-        .function<const std::vector<t_dtype>>("types", &t_schema::types, allow_raw_pointers());
+        .function("types", &t_schema::types, allow_raw_pointers());
 
     /******************************************************************************
      *
@@ -1753,11 +1749,8 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_gnode>("t_gnode")
         .smart_ptr<std::shared_ptr<t_gnode>>("shared_ptr<t_gnode>")
-        .function<t_uindex>(
-            "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id))
-        .function<t_schema>("get_tblschema", &t_gnode::get_tblschema)
-        .function<void>("reset", &t_gnode::reset)
-        .function<t_data_table*>("get_table", &t_gnode::get_table, allow_raw_pointers());
+        .function(
+            "get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id));
 
     /******************************************************************************
      *
@@ -1765,29 +1758,29 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<t_data_slice<t_ctx0>>("t_data_slice_ctx0")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx0>>>("shared_ptr<t_data_slice<t_ctx0>>>")
-        .function<std::vector<t_tscalar>>(
+        .function(
             "get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
-        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx0>::get_slice)
-        .function<const std::vector<std::vector<t_tscalar>>&>(
+        .function("get_slice", &t_data_slice<t_ctx0>::get_slice)
+        .function(
             "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
 
     class_<t_data_slice<t_ctx1>>("t_data_slice_ctx1")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx1>>>("shared_ptr<t_data_slice<t_ctx1>>>")
-        .function<std::vector<t_tscalar>>(
+        .function(
             "get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
-        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx1>::get_slice)
-        .function<const std::vector<std::vector<t_tscalar>>&>(
+        .function("get_slice", &t_data_slice<t_ctx1>::get_slice)
+        .function(
             "get_column_names", &t_data_slice<t_ctx1>::get_column_names)
-        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
+        .function("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
 
     class_<t_data_slice<t_ctx2>>("t_data_slice_ctx2")
         .smart_ptr<std::shared_ptr<t_data_slice<t_ctx2>>>("shared_ptr<t_data_slice<t_ctx2>>>")
-        .function<std::vector<t_tscalar>>(
+        .function(
             "get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
-        .function<const std::vector<t_tscalar>&>("get_slice", &t_data_slice<t_ctx2>::get_slice)
-        .function<const std::vector<std::vector<t_tscalar>>&>(
+        .function("get_slice", &t_data_slice<t_ctx2>::get_slice)
+        .function(
             "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
-        .function<std::vector<t_tscalar>>("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
+        .function("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
     /******************************************************************************
      *
@@ -1814,9 +1807,9 @@ EMSCRIPTEN_BINDINGS(perspective) {
     class_<t_pool>("t_pool")
         .constructor<>()
         .smart_ptr<std::shared_ptr<t_pool>>("shared_ptr<t_pool>")
-        .function<void>("unregister_gnode", &t_pool::unregister_gnode)
-        .function<void>("_process", &t_pool::_process)
-        .function<void>("set_update_delegate", &t_pool::set_update_delegate);
+        .function("unregister_gnode", &t_pool::unregister_gnode)
+        .function("_process", &t_pool::_process)
+        .function("set_update_delegate", &t_pool::set_update_delegate);
 
     /******************************************************************************
      *
