@@ -88,30 +88,33 @@ export default function(Module) {
     /**
      * Common logic for creating and registering a Table.
      *
-     * @param {*} pdata
-     * @param {*} table
-     * @param {*} computed
-     * @param {*} index
-     * @param {*} limit
-     * @param {*} limit_index
-     * @param {*} is_delete
+     * @param {DataAccessor|Object[]} accessor - the data we provide to the Table
+     * @param {Object} _Table - `undefined` if a new table will be created, or an `std::shared_ptr<Table>` if updating
+     * @param {Object[]} computed
+     * @param {String} index
+     * @param {Number} limit
+     * @param {Number} limit_index
+     * @param {t_op} op - either `OP_INSERT` or `OP_DELETE`
+     * @param {boolean} is_update - true if we are updating an already-created table
+     * @param {boolean} is_arrow - true if the dataset is in the Arrow format
+     *
      * @private
-     * @returns {Table}
+     * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, computed, index, limit, limit_index, op, is_arrow) {
+    function make_table(accessor, _Table, computed, index, limit, limit_index, op, is_update, is_arrow) {
         if (is_arrow) {
             for (let chunk of accessor) {
-                _Table = __MODULE__.make_table(_Table, chunk, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+                _Table = __MODULE__.make_table(_Table, chunk, computed, limit_index, limit || 4294967295, index, op, is_update, is_arrow);
                 limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
             }
         } else {
-            _Table = __MODULE__.make_table(_Table, accessor, computed, limit_index, limit || 4294967295, index, op, is_arrow);
+            _Table = __MODULE__.make_table(_Table, accessor, computed, limit_index, limit || 4294967295, index, op, is_update, is_arrow);
             limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
         }
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
-        if (op == __MODULE__.t_op.OP_UPDATE || op == __MODULE__.t_op.OP_DELETE) {
+        if (is_update || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool, table_id);
         } else {
             pool._process();
@@ -1291,8 +1294,8 @@ export default function(Module) {
         }
 
         try {
-            const op = __MODULE__.t_op.OP_UPDATE;
-            [, this.limit_index] = make_table(pdata, this._Table, this.computed, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            const op = __MODULE__.t_op.OP_INSERT;
+            [, this.limit_index] = make_table(pdata, this._Table, this.computed, this.index || "", this.limit, this.limit_index, op, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1331,7 +1334,7 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
-            [, this.limit_index] = make_table(pdata, this._Table, undefined, this.index || "", this.limit, this.limit_index, op, is_arrow);
+            [, this.limit_index] = make_table(pdata, this._Table, undefined, this.index || "", this.limit, this.limit_index, op, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1471,7 +1474,7 @@ export default function(Module) {
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                [_Table, limit_index] = make_table(data_accessor, undefined, undefined, options.index, options.limit, limit_index, op, is_arrow);
+                [_Table, limit_index] = make_table(data_accessor, undefined, undefined, options.index, options.limit, limit_index, op, false, is_arrow);
                 return new table(_Table, options.index, undefined, options.limit, limit_index, overridden_types);
             } catch (e) {
                 if (_Table) {

@@ -42,11 +42,10 @@ public:
      * @param limit
      * @param index
      * @param op
-     * @param is_arrow
      */
     Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
         std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow);
+        std::string index);
 
     /**
      * @brief Register the given `t_data_table` with the underlying pool and gnode, thus
@@ -54,23 +53,7 @@ public:
      *
      * @param data_table
      */
-    void init(t_data_table& data_table);
-
-    /**
-     * @brief Given new metadata about the underlying data table, data format, index, limit
-     * etc., update the current object with this new metadata, allowing for reuse of `Table`
-     * instances.
-     *
-     * @param column_names
-     * @param data_types
-     * @param offset
-     * @param limit
-     * @param index
-     * @param op
-     * @param is_arrow
-     */
-    void update(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
-        std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow);
+    void init(t_data_table& data_table, const t_op op);
 
     /**
      * @brief The size of the underlying `t_data_table`, i.e. a row count
@@ -144,12 +127,17 @@ public:
     std::uint32_t get_limit() const;
     const std::string& get_index() const;
 
+    // Setters
+    void set_column_names(const std::vector<std::string>& column_names);
+    void set_data_types(const std::vector<t_dtype>& data_types);
+    void set_offset(std::uint32_t offset);
+
 private:
     /**
      * @brief Create a column for the table operation - either insert or delete.
      *
      */
-    void process_op_column(t_data_table& data_table);
+    void process_op_column(t_data_table& data_table, const t_op op);
 
     /**
      * @brief Create the index column using a provided index or the row number.
@@ -164,10 +152,8 @@ private:
     std::vector<std::string> m_column_names;
     std::vector<t_dtype> m_data_types;
     std::uint32_t m_offset;
-    std::uint32_t m_limit;
-    std::string m_index;
-    t_op m_op;
-    bool m_is_arrow;
+    const std::uint32_t m_limit;
+    const std::string m_index;
     bool m_gnode_set;
 };
 

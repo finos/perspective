@@ -204,13 +204,12 @@ namespace binding {
      * @param limit
      * @param index
      * @param is_update
-     * @param is_delete
      * @param is_arrow
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
     std::shared_ptr<Table> make_table(T table, T accessor, T computed, std::uint32_t offset,
-        std::uint32_t limit, std::string index, t_op op, bool is_arrow);
+        std::uint32_t limit, std::string index, t_op op, bool is_update, bool is_arrow);
 
     /**
      * @brief Given an array-like container with new computed columns, add them to the

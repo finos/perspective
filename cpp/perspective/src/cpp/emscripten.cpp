@@ -1205,8 +1205,7 @@ namespace binding {
     template <>
     std::shared_ptr<Table>
     make_table(t_val table, t_data_accessor accessor, t_val computed, std::uint32_t offset,
-        std::uint32_t limit, std::string index, t_op op, bool is_arrow) {
-        bool is_update = op == OP_UPDATE;
+        std::uint32_t limit, std::string index, t_op op, bool is_update, bool is_arrow) {
         bool is_delete = op == OP_DELETE;
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
@@ -1236,9 +1235,13 @@ namespace binding {
         std::shared_ptr<Table> tbl;
 
         if (table_initialized) {
+            // Get a reference to the Table, and update its metadata
             tbl = table.as<std::shared_ptr<Table>>();
+            tbl->set_column_names(column_names);
+            tbl->set_data_types(data_types);
+            tbl->set_offset(offset);
+
             auto current_gnode = tbl->get_gnode();
-            tbl->update(column_names, data_types, offset, limit, index, op, is_arrow);
 
             // use gnode metadata to help decide if we need to update
             is_update = (is_update || current_gnode->mapping_size() > 0);
@@ -1259,7 +1262,7 @@ namespace binding {
         } else {
             std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
             tbl = std::make_shared<Table>(
-                pool, column_names, data_types, offset, limit, index, op, is_arrow);
+                pool, column_names, data_types, offset, limit, index);
         }
 
         std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
@@ -1273,7 +1276,7 @@ namespace binding {
             table_add_computed_column(data_table, computed);
         }
 
-        tbl->init(data_table);
+        tbl->init(data_table, op);
         return tbl;
     }
 
@@ -1623,7 +1626,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<Table>("Table")
         .constructor<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
-            std::uint32_t, std::uint32_t, std::string, t_op, bool>()
+            std::uint32_t, std::uint32_t, std::string>()
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
         .function("get_schema", &Table::get_schema)
@@ -1902,8 +1905,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
     enum_<t_op>("t_op")
         .value("OP_INSERT", OP_INSERT)
         .value("OP_DELETE", OP_DELETE)
-        .value("OP_CLEAR", OP_CLEAR)
-        .value("OP_UPDATE", OP_UPDATE);
+        .value("OP_CLEAR", OP_CLEAR);
 
     /******************************************************************************
      *
