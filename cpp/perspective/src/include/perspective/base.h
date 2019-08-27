@@ -278,7 +278,6 @@ enum t_value_transition {
 
 enum t_gnode_type {
     GNODE_TYPE_PKEYED,         // Explicit user set pkey
-    GNODE_TYPE_IMPLICIT_PKEYED // pkey is row based
 };
 
 enum t_gnode_port {

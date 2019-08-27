@@ -50,7 +50,8 @@ export default function(Module) {
      */
 
     /**
-     * Determines a table's limit index.
+     * Determines where in the table we should start to write data.
+     *
      * @private
      * @param {int} limit_index
      * @param {int} new_length
