@@ -49,22 +49,6 @@ export default function(Module) {
      *
      */
 
-    /**
-     * Determines where in the table we should start to write data.
-     *
-     * @private
-     * @param {int} limit_index
-     * @param {int} new_length
-     * @param {int} options_limit
-     */
-    function calc_limit_index(limit_index, new_length, options_limit) {
-        limit_index += new_length;
-        if (options_limit) {
-            limit_index = limit_index % options_limit;
-        }
-        return limit_index;
-    }
-
     let _POOL_DEBOUNCES = {};
 
     function _set_process(pool, table_id) {
@@ -91,10 +75,9 @@ export default function(Module) {
      *
      * @param {DataAccessor|Object[]} accessor - the data we provide to the Table
      * @param {Object} _Table - `undefined` if a new table will be created, or an `std::shared_ptr<Table>` if updating
-     * @param {Object[]} computed
-     * @param {String} index
-     * @param {Number} limit
-     * @param {Number} limit_index
+     * @param {Object[]} computed - An array of computed columns to be applied to the table.
+     * @param {String} index - A column name to be used as a primary key.
+     * @param {Number} limit - an upper bound on the number of rows in the table. If set, new rows that exceed the limit start overwriting old ones from row 0.
      * @param {t_op} op - either `OP_INSERT` or `OP_DELETE`
      * @param {boolean} is_update - true if we are updating an already-created table
      * @param {boolean} is_arrow - true if the dataset is in the Arrow format
@@ -102,26 +85,25 @@ export default function(Module) {
      * @private
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
-    function make_table(accessor, _Table, computed, index, limit, limit_index, op, is_update, is_arrow) {
+    function make_table(accessor, _Table, computed, index, limit, op, is_update, is_arrow) {
         if (is_arrow) {
             for (let chunk of accessor) {
-                _Table = __MODULE__.make_table(_Table, chunk, computed, limit_index, limit || 4294967295, index, op, is_update, is_arrow);
-                limit_index = calc_limit_index(limit_index, chunk.cdata[0].length, limit);
+                _Table = __MODULE__.make_table(_Table, chunk, computed, limit || 4294967295, index, op, is_update, is_arrow);
             }
         } else {
-            _Table = __MODULE__.make_table(_Table, accessor, computed, limit_index, limit || 4294967295, index, op, is_update, is_arrow);
-            limit_index = calc_limit_index(limit_index, accessor.row_count, limit);
+            _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
         }
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
+
         if (is_update || op == __MODULE__.t_op.OP_DELETE) {
             _set_process(pool, table_id);
         } else {
             pool._process();
         }
 
-        return [_Table, limit_index];
+        return _Table;
     }
 
     /**
@@ -946,7 +928,7 @@ export default function(Module) {
      * @class
      * @hideconstructor
      */
-    function table(_Table, index, computed, limit, limit_index, overridden_types) {
+    function table(_Table, index, computed, limit, overridden_types) {
         this._Table = _Table;
         this.gnode_id = this._Table.get_gnode().get_id();
         this.name = Math.random() + "";
@@ -957,7 +939,6 @@ export default function(Module) {
         this.callbacks = [];
         this.views = [];
         this.limit = limit;
-        this.limit_index = limit_index;
         this.overridden_types = overridden_types;
         bindall(this);
     }
@@ -1296,7 +1277,8 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_INSERT;
-            [, this.limit_index] = make_table(pdata, this._Table, this.computed, this.index || "", this.limit, this.limit_index, op, true, is_arrow);
+            // update the Table in C++, but don't keep the returned Table reference as it is identical
+            make_table(pdata, this._Table, this.computed, this.index || "", this.limit, op, true, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Update failed: ${e}`);
@@ -1335,7 +1317,8 @@ export default function(Module) {
 
         try {
             const op = __MODULE__.t_op.OP_DELETE;
-            [, this.limit_index] = make_table(pdata, this._Table, undefined, this.index || "", this.limit, this.limit_index, op, false, is_arrow);
+            // update the Table in C++, but don't keep the returned Table reference as it is identical
+            make_table(pdata, this._Table, undefined, this.index || "", this.limit, op, false, is_arrow);
             this.initialized = true;
         } catch (e) {
             console.error(`Remove failed`, e);
@@ -1358,7 +1341,7 @@ export default function(Module) {
             if (this.computed.length > 0) {
                 computed = this.computed.concat(computed);
             }
-            return new table(_Table, this.index, computed, this.limit, this.limit_index, this.overridden_types);
+            return new table(_Table, this.index, computed, this.limit, this.overridden_types);
         } catch (e) {
             if (_Table) {
                 _Table.delete();
@@ -1470,13 +1453,12 @@ export default function(Module) {
                 throw `Cannot specify both index '${options.index}' and limit '${options.limit}'.`;
             }
 
-            let _Table,
-                limit_index = 0;
+            let _Table;
 
             try {
                 const op = __MODULE__.t_op.OP_INSERT;
-                [_Table, limit_index] = make_table(data_accessor, undefined, undefined, options.index, options.limit, limit_index, op, false, is_arrow);
-                return new table(_Table, options.index, undefined, options.limit, limit_index, overridden_types);
+                _Table = make_table(data_accessor, undefined, undefined, options.index, options.limit, op, false, is_arrow);
+                return new table(_Table, options.index, undefined, options.limit, overridden_types);
             } catch (e) {
                 if (_Table) {
                     _Table.delete();

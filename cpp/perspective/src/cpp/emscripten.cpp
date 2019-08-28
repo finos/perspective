@@ -1144,7 +1144,7 @@ namespace binding {
 
     void
     _fill_data(t_data_table& tbl, t_data_accessor accessor, std::vector<std::string> col_names,
-        std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update) {
+        std::vector<t_dtype> data_types, bool is_arrow, bool is_update) {
 
         for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
             auto name = col_names[cidx];
@@ -1204,13 +1204,13 @@ namespace binding {
 
     template <>
     std::shared_ptr<Table>
-    make_table(t_val table, t_data_accessor accessor, t_val computed, std::uint32_t offset,
+    make_table(t_val table, t_data_accessor accessor, t_val computed,
         std::uint32_t limit, std::string index, t_op op, bool is_update, bool is_arrow) {
-        bool is_delete = op == OP_DELETE;
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
 
         // Determine metadata
+        bool is_delete = op == OP_DELETE;
         if (is_arrow || (is_update || is_delete)) {
             t_val names = accessor["names"];
             t_val types = accessor["types"];
@@ -1234,12 +1234,12 @@ namespace binding {
         bool table_initialized = has_value(table);
         std::shared_ptr<Table> tbl;
 
+        // If the Table has already been created, use it
         if (table_initialized) {
             // Get a reference to the Table, and update its metadata
             tbl = table.as<std::shared_ptr<Table>>();
             tbl->set_column_names(column_names);
             tbl->set_data_types(data_types);
-            tbl->set_offset(offset);
 
             auto current_gnode = tbl->get_gnode();
 
@@ -1262,7 +1262,7 @@ namespace binding {
         } else {
             std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
             tbl = std::make_shared<Table>(
-                pool, column_names, data_types, offset, limit, index);
+                pool, column_names, data_types, limit, index);
         }
 
         std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
@@ -1270,13 +1270,15 @@ namespace binding {
         data_table.init();
         data_table.extend(row_count);
 
-        _fill_data(data_table, accessor, column_names, data_types, offset, is_arrow, is_update);
+        _fill_data(data_table, accessor, column_names, data_types, is_arrow, is_update);
 
         if (!computed.isUndefined()) {
+            // re-add computed columns after update, delete, etc.
             table_add_computed_column(data_table, computed);
         }
 
-        tbl->init(data_table, op);
+        // calculate offset, limit, primary key index, and set the gnode
+        tbl->init(data_table, row_count, op);
         return tbl;
     }
 
@@ -1626,7 +1628,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      */
     class_<Table>("Table")
         .constructor<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
-            std::uint32_t, std::uint32_t, std::string>()
+        std::uint32_t, std::string>()
         .smart_ptr<std::shared_ptr<Table>>("shared_ptr<Table>")
         .function("size", &Table::size)
         .function("get_schema", &Table::get_schema)

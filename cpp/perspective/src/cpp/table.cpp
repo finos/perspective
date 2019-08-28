@@ -9,27 +9,33 @@
 
 #include <perspective/table.h>
 
-static perspective::t_uindex GLOBAL_ID = 0;
+// Give each Table a unique ID so that operations on it map back correctly
+static perspective::t_uindex GLOBAL_TABLE_ID = 0;
 
 namespace perspective {
 Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
-    std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
+    std::vector<t_dtype> data_types, std::uint32_t limit,
     std::string index)
     : m_init(false)
-    , m_id(GLOBAL_ID++)
+    , m_id(GLOBAL_TABLE_ID++)
     , m_pool(pool)
     , m_column_names(column_names)
     , m_data_types(data_types)
-    , m_offset(offset)
+    , m_offset(0)
     , m_limit(limit)
     , m_index(index)
     , m_gnode_set(false) {}
 
 void
-Table::init(t_data_table& data_table, const t_op op) {
-    // ensure the data table is indexed and has the operation column
+Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
+    /**
+     * For the Table to be initialized correctly, make sure that the operation and index columns are
+     * processed before the new offset is calculated. Calculating the offset before the `process_op_column`
+     * and `process_index_column` causes primary keys to be misaligned.
+     */
     process_op_column(data_table, op);
     process_index_column(data_table);
+    calculate_offset(row_count);
 
     if (!m_gnode_set) {
         // create a new gnode, send it to the table
@@ -111,6 +117,11 @@ Table::reset_gnode(t_uindex id) {
     m_pool->get_gnode(id)->reset();
 }
 
+void
+Table::calculate_offset(std::uint32_t row_count) {
+    m_offset = (m_offset + row_count) % m_limit;
+}
+
 t_uindex
 Table::get_id() const {
     return m_id;
@@ -154,11 +165,6 @@ Table::set_column_names(const std::vector<std::string>& column_names) {
 void 
 Table::set_data_types(const std::vector<t_dtype>& data_types) {
     m_data_types = data_types;
-}
-
-void
-Table::set_offset(std::uint32_t offset) {
-    m_offset = offset;
 }
 
 void

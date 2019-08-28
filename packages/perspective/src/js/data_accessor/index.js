@@ -43,7 +43,7 @@ export class DataAccessor {
         } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
             return this.data_formats.schema;
         } else {
-            throw "Unknown data format!";
+            throw `Could not determine data format for ${data}`;
         }
     }
 
@@ -61,10 +61,6 @@ export class DataAccessor {
         return this.format;
     }
 
-    get_row_count() {
-        return this.row_count;
-    }
-
     get(column_name, row_index) {
         let value = undefined;
 
@@ -80,7 +76,7 @@ export class DataAccessor {
         } else if (this.format === this.data_formats.schema) {
             value = undefined;
         } else {
-            throw "Unknown data format!";
+            throw `Could not get() from dataset - ${this.data} is poorly formatted.`;
         }
 
         return value;
@@ -182,7 +178,7 @@ export class DataAccessor {
                 }
             }
         } else {
-            throw "Unknown data format!";
+            throw `Could not initialize - failed to determine format for ${data}`;
         }
         return overridden_types;
     }
