@@ -471,7 +471,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("Arrow (chunked) constructor", async function() {
+        it("Arrow (chunked format) constructor", async function() {
             var table = perspective.table(chunked.slice());
             var view = table.view();
             let result = await view.to_json();

@@ -90,20 +90,9 @@ t_gnode::t_gnode(const t_gnode_options& options)
     }
 
     t_schema port_schema(options.m_port_schema);
-    if (m_gnode_type == GNODE_TYPE_IMPLICIT_PKEYED) {
-
-        // Make sure that gnode type is consistent with input schema
-        if (port_schema.is_pkey()) {
-            PSP_COMPLAIN_AND_ABORT("gnode type specified as implicit pkey, however input "
-                                   "schema has psp_pkey column.");
-        }
-        port_schema
-            = t_schema{{"psp_op", "psp_pkey"}, {DTYPE_UINT8, DTYPE_INT64}} + port_schema;
-    } else {
-        if (!(port_schema.is_pkey())) {
-            PSP_COMPLAIN_AND_ABORT("gnode type specified as explicit pkey, however input "
-                                   "schema is missing required columns.");
-        }
+    if (!(port_schema.is_pkey())) {
+        PSP_COMPLAIN_AND_ABORT("gnode type specified as explicit pkey, however input "
+                                "schema is missing required columns.");
     }
 
     t_schema trans_schema(m_tblschema.columns(), trans_types);
@@ -350,18 +339,6 @@ t_gnode::_process_table() {
     }
 
     m_was_updated = true;
-
-    if (m_gnode_type == GNODE_TYPE_IMPLICIT_PKEYED) {
-        auto tbl = iport->get_table();
-        auto op_col = tbl->add_column("psp_op", DTYPE_UINT8, false);
-        op_col->raw_fill<std::uint8_t>(OP_INSERT);
-
-        auto key_col = tbl->add_column("psp_pkey", DTYPE_INT64, true);
-        std::int64_t start = get_table()->size();
-        for (t_uindex ridx = 0; ridx < tbl->size(); ++ridx) {
-            key_col->set_nth<std::int64_t>(ridx, start + ridx);
-        }
-    }
 
     std::shared_ptr<t_data_table> flattened(iport->get_table()->flatten());
     PSP_GNODE_VERIFY_TABLE(flattened);

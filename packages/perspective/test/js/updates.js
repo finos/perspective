@@ -388,6 +388,16 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        it("{limit: 1} with arrow update", async function() {
+            var table = perspective.table(arrow.slice(), {limit: 1});
+            table.update(arrow.slice());
+            var view = table.view();
+            let result = await view.to_json();
+            expect(result).toEqual([arrow_result[arrow_result.length - 1]]);
+            view.delete();
+            table.delete();
+        });
     });
 
     describe("Indexed", function() {

@@ -24,8 +24,6 @@ namespace perspective {
  *
  * By encapsulating business logic and the creation of internal structures,
  * the `Table` class handles data loading, table creation, and management of backend resources.
- *
- * @tparam T
  */
 class PERSPECTIVE_EXPORT Table {
 public:
@@ -35,42 +33,26 @@ public:
      * @brief Construct a `Table` object, which handles all operations related to `t_pool` and
      * `t_gnode`, effectively acting as an orchestrator between those underlying components.
      *
-     * @param pool
+     * @param pool - the `t_pool` which manages the Table.
      * @param column_names
      * @param data_types
-     * @param offset
-     * @param limit
-     * @param index
+     * @param limit - an upper bound on the number of rows in the Table (optional).
+     * @param index - a string column name to be used as a primary key. If not explicitly set, a primary key will be generated.
      * @param op
-     * @param is_arrow
      */
     Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names,
-        std::vector<t_dtype> data_types, std::uint32_t offset, std::uint32_t limit,
-        std::string index, t_op op, bool is_arrow);
+        std::vector<t_dtype> data_types, std::uint32_t limit,
+        std::string index);
 
     /**
      * @brief Register the given `t_data_table` with the underlying pool and gnode, thus
      * allowing operations on it.
      *
      * @param data_table
-     */
-    void init(t_data_table& data_table);
-
-    /**
-     * @brief Given new metadata about the underlying data table, data format, index, limit
-     * etc., update the current object with this new metadata, allowing for reuse of `Table`
-     * instances.
-     *
-     * @param column_names
-     * @param data_types
-     * @param offset
-     * @param limit
-     * @param index
+     * @param row_count
      * @param op
-     * @param is_arrow
      */
-    void update(std::vector<std::string> column_names, std::vector<t_dtype> data_types,
-        std::uint32_t offset, std::uint32_t limit, std::string index, t_op op, bool is_arrow);
+    void init(t_data_table& data_table, std::uint32_t row_count, const t_op op);
 
     /**
      * @brief The size of the underlying `t_data_table`, i.e. a row count
@@ -134,6 +116,14 @@ public:
      */
     void reset_gnode(t_uindex id);
 
+    /**
+     * @brief The offset determines where we begin to write data into the Table. 
+     * Using `m_offset`, `m_limit`, and the length of the dataset, calculate the new position at which we write data.
+     * 
+     * @param row_count - the number of rows to write into the table 
+     */
+    void calculate_offset(std::uint32_t row_count);
+
     // Getters
     t_uindex get_id() const;
     std::shared_ptr<t_pool> get_pool() const;
@@ -144,16 +134,26 @@ public:
     std::uint32_t get_limit() const;
     const std::string& get_index() const;
 
+    // Setters
+    void set_column_names(const std::vector<std::string>& column_names);
+    void set_data_types(const std::vector<t_dtype>& data_types);
+
 private:
     /**
      * @brief Create a column for the table operation - either insert or delete.
      *
+     * @private
+     * @param data_table
+     * @param op
      */
-    void process_op_column(t_data_table& data_table);
+    void process_op_column(t_data_table& data_table, const t_op op);
 
     /**
-     * @brief Create the index column using a provided index or the row number.
-     *
+     * @brief Create the index column using a provided index or the row number. 
+     * This serves as the primary key for the Table.
+     * 
+     * @private
+     * @param data_table
      */
     void process_index_column(t_data_table& data_table);
 
@@ -163,11 +163,26 @@ private:
     std::shared_ptr<t_gnode> m_gnode;
     std::vector<std::string> m_column_names;
     std::vector<t_dtype> m_data_types;
+
+    /**
+     * @brief The row number at which we start to write into the Table. Recalculated on updates, removes, and inserts.
+     * 
+     */
     std::uint32_t m_offset;
-    std::uint32_t m_limit;
-    std::string m_index;
-    t_op m_op;
-    bool m_is_arrow;
+
+    /**
+     * @brief an upper bound on the number of total rows in the Table. 
+     * 
+     * When limit is set, new data that exceeds the limit will overwrite starting at row 0.
+     * Otherwise, limit is set to the highest number at 32 bits.
+     */
+    const t_uindex m_limit;
+
+    /**
+     * @brief The name of a column that should be used as the Table's primary key.
+     * 
+     */
+    const std::string m_index;
     bool m_gnode_set;
 };
 

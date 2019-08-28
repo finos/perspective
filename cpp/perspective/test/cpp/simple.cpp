@@ -50,18 +50,6 @@ TEST(GNODE, explicit_pkey)
 }
 
 
-TEST(GNODE, implicit_pkey)
-{
-    t_gnode_options options;
-    options.m_gnode_type = GNODE_TYPE_IMPLICIT_PKEYED;
-    options.m_port_schema = t_schema{
-            {"psp_op", "psp_pkey", "x"}, {DTYPE_UINT8, DTYPE_INT64, DTYPE_INT64}};
-
-#ifndef WIN32
-	EXPECT_EXIT(t_gnode::build(options), ::testing::KilledBySignal(SIGINT), "");
-#endif
-}
-
 TEST(SCALAR, scalar_literal_test)
 {
     auto s1 = 1_ts;
@@ -492,29 +480,7 @@ protected:
     t_tscalar clear;
 };
 
-template <t_dtype DTYPE_T>
-class GNodeTestImplicit : public BaseTest
-{
-public:
-    GNodeTestImplicit()
-    {
-        m_ischema = t_schema{{"x"}, {DTYPE_T}};
-        m_oschema = {{"psp_pkey", "x"}, {DTYPE_INT64, DTYPE_T}};
-        t_gnode_options options;
-        options.m_gnode_type = GNODE_TYPE_IMPLICIT_PKEYED;
-        options.m_port_schema = m_ischema;
-        m_g = t_gnode::build(options);
-    }
-
-    virtual std::shared_ptr<t_data_table>
-    get_step_otable()
-    {
-        return m_g->get_sorted_pkeyed_table();
-    }
-};
-
 typedef GNodeTest<DTYPE_INT64> I64GnodeTest;
-typedef GNodeTestImplicit<DTYPE_INT64> I64GnodeTestImplicit;
 
 // clang-format off
 TEST_F(I64GnodeTest, test_1) {
@@ -656,27 +622,6 @@ TEST_F(I64GnodeTest, test_9) {
         {
             {{dop, 1_ts, null}},
             {}
-        }
-    };
-
-    run(data);
-}
-
-
-TEST_F(I64GnodeTestImplicit, test_1) {
-
-    t_testdata data{
-        {
-            {{1_ts}},
-            {{0_ts, 1_ts}}
-        },
-        {
-            {{2_ts}},
-            {{0_ts, 1_ts}, {1_ts, 2_ts}}
-        },
-        {
-            {{3_ts}},
-            {{0_ts, 1_ts}, {1_ts, 2_ts}, {2_ts, 3_ts}}
         }
     };
 

@@ -254,7 +254,7 @@ enum t_ctx_type {
     GROUPED_COLUMNS_CONTEXT
 };
 
-enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR, OP_UPDATE };
+enum t_op { OP_INSERT, OP_DELETE, OP_CLEAR };
 
 enum t_value_transition {
     VALUE_TRANSITION_EQ_FF,
@@ -278,7 +278,6 @@ enum t_value_transition {
 
 enum t_gnode_type {
     GNODE_TYPE_PKEYED,         // Explicit user set pkey
-    GNODE_TYPE_IMPLICIT_PKEYED // pkey is row based
 };
 
 enum t_gnode_port {

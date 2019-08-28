@@ -184,13 +184,12 @@ namespace binding {
      * @param accessor
      * @param col_names
      * @param data_types
-     * @param offset
      * @param is_arrow
      * @param is_update
      */
     template <typename T>
     void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names,
-        std::vector<t_dtype> data_types, std::uint32_t offset, bool is_arrow, bool is_update);
+        std::vector<t_dtype> data_types, bool is_arrow, bool is_update);
 
     /**
      * @brief Create and populate a table.
@@ -200,17 +199,15 @@ namespace binding {
      * @param gnode
      * @param accessor
      * @param computed
-     * @param offset
      * @param limit
      * @param index
      * @param is_update
-     * @param is_delete
      * @param is_arrow
      * @return std::shared_ptr<t_gnode>
      */
     template <typename T>
-    std::shared_ptr<Table> make_table(T table, T accessor, T computed, std::uint32_t offset,
-        std::uint32_t limit, std::string index, t_op op, bool is_arrow);
+    std::shared_ptr<Table> make_table(T table, T accessor, T computed,
+        std::uint32_t limit, std::string index, t_op op, bool is_update, bool is_arrow);
 
     /**
      * @brief Given an array-like container with new computed columns, add them to the
