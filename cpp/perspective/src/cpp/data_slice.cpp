@@ -90,6 +90,14 @@ t_data_slice<CTX_T>::get(t_uindex ridx, t_uindex cidx) const {
 
 template <typename CTX_T>
 std::vector<t_tscalar>
+t_data_slice<CTX_T>::get_pkeys(t_uindex ridx, t_uindex cidx) const {
+    std::pair<t_uindex, t_uindex> pair{ridx, cidx};
+    std::vector<std::pair<t_uindex, t_uindex>> vec{pair};
+    return m_ctx->get_pkeys(vec);
+}
+
+template <typename CTX_T>
+std::vector<t_tscalar>
 t_data_slice<CTX_T>::get_column_slice(t_uindex cidx) const {
     std::vector<t_tscalar> column_data;
     column_data.reserve(m_end_row);

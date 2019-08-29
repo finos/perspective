@@ -1766,6 +1766,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function(
             "get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
         .function("get_slice", &t_data_slice<t_ctx0>::get_slice)
+        .function("get_pkeys", &t_data_slice<t_ctx0>::get_pkeys)
         .function(
             "get_column_names", &t_data_slice<t_ctx0>::get_column_names);
 
@@ -1774,6 +1775,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function(
             "get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
         .function("get_slice", &t_data_slice<t_ctx1>::get_slice)
+        .function("get_pkeys", &t_data_slice<t_ctx1>::get_pkeys)
         .function(
             "get_column_names", &t_data_slice<t_ctx1>::get_column_names)
         .function("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
@@ -1783,6 +1785,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function(
             "get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
         .function("get_slice", &t_data_slice<t_ctx2>::get_slice)
+        .function("get_pkeys", &t_data_slice<t_ctx2>::get_pkeys)
         .function(
             "get_column_names", &t_data_slice<t_ctx2>::get_column_names)
         .function("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
