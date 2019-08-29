@@ -65,6 +65,8 @@ public:
      */
     t_tscalar get(t_uindex ridx, t_uindex cidx) const;
 
+    std::vector<t_tscalar> get_pkeys(t_uindex ridx, t_uindex cidx) const;
+
     /**
      * @brief Returns the row path, which maps a specific piece of data to the
      * row and column that it belongs to.

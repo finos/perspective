@@ -348,5 +348,137 @@ module.exports = perspective => {
             view.delete();
             table.delete();
         });
+
+        describe("to_format with index", function() {
+            describe("0-sided", function() {
+                it("should return correct pkey for unindexed Table", async function() {
+                    let table = perspective.table(int_float_string_data);
+                    let view = table.view();
+                    let json = await view.to_json({
+                        start_row: 0,
+                        end_row: 1,
+                        start_col: 1,
+                        end_col: 2,
+                        index: true
+                    });
+                    expect(json).toEqual([{float: 2.25, __INDEX__: [0]}]);
+                });
+
+                it("should return correct pkey for float indexed table", async function() {
+                    let table = perspective.table(int_float_string_data, {index: "float"});
+                    let view = table.view();
+                    let json = await view.to_json({
+                        start_row: 0,
+                        end_row: 1,
+                        start_col: 1,
+                        end_col: 2,
+                        index: true
+                    });
+                    expect(json).toEqual([{float: 2.25, __INDEX__: [2.25]}]);
+                });
+
+                it("should return correct pkey for string indexed table", async function() {
+                    let table = perspective.table(int_float_string_data, {index: "string"});
+                    let view = table.view();
+                    let json = await view.to_json({
+                        start_row: 0,
+                        end_row: 1,
+                        start_col: 1,
+                        end_col: 2,
+                        index: true
+                    });
+                    expect(json).toEqual([{float: 2.25, __INDEX__: ["a"]}]);
+                });
+
+                it("should return correct pkey for date indexed table", async function() {
+                    // default data generates the same datetime for each row, thus pkeys get collapsed
+                    const data = [{int: 1, datetime: new Date()}, {int: 2, datetime: new Date()}];
+                    data[1].datetime.setDate(data[1].datetime.getDate() + 1);
+                    let table = perspective.table(data, {index: "datetime"});
+                    let view = table.view();
+                    let json = await view.to_json({
+                        start_row: 1,
+                        end_row: 2,
+                        index: true
+                    });
+                    expect(json).toEqual([{int: 2, datetime: data[1].datetime.getTime(), __INDEX__: [data[1].datetime.getTime()]}]);
+                });
+
+                it("should return correct pkey for all rows + columns on an unindexed table", async function() {
+                    let table = perspective.table(int_float_string_data);
+                    let view = table.view();
+                    let json = await view.to_json({
+                        index: true
+                    });
+
+                    for (let i = 0; i < json.length; i++) {
+                        expect(json[i].__INDEX__).toEqual([i]);
+                    }
+                });
+
+                it.skip("should return correct pkey for all rows + columns on an indexed table", async function() {
+                    let table = perspective.table(int_float_string_data, {index: "string"});
+                    let view = table.view();
+                    let json = await view.to_json({
+                        index: true
+                    });
+
+                    let pkeys = ["a", "b", "c", "d"];
+                    for (let i = 0; i < json.length; i++) {
+                        expect(json[i].__INDEX__).toEqual([pkeys[i]]);
+                    }
+                });
+            });
+        });
+
+        describe.skip("1-sided", function() {
+            it("should not generate pkey for 1-sided", async function() {
+                let table = perspective.table(int_float_string_data);
+                let view = table.view({
+                    row_pivots: ["int"]
+                });
+                let json = await view.to_json({
+                    start_row: 0,
+                    end_row: 1
+                });
+                expect(json).toEqual([{__ROW_PATH__: [], datetime: 4, float: 15.75, int: 10, string: 4}]);
+            });
+        });
+
+        describe.skip("2-sided", function() {
+            it("should not generate pkey for 2-sided", async function() {
+                let table = perspective.table(int_float_string_data);
+                let view = table.view({
+                    row_pivots: ["int"],
+                    column_pivots: ["float"]
+                });
+                let json = await view.to_json({
+                    start_row: 0,
+                    end_row: 1,
+                    index: true
+                });
+                expect(json).toEqual([
+                    {
+                        "2.25|datetime": 1,
+                        "2.25|float": 2.25,
+                        "2.25|int": 1,
+                        "2.25|string": 1,
+                        "3.5|datetime": 1,
+                        "3.5|float": 3.5,
+                        "3.5|int": 2,
+                        "3.5|string": 1,
+                        "4.75|datetime": 1,
+                        "4.75|float": 4.75,
+                        "4.75|int": 3,
+                        "4.75|string": 1,
+                        "5.25|datetime": 1,
+                        "5.25|float": 5.25,
+                        "5.25|int": 4,
+                        "5.25|string": 1,
+                        __ROW_PATH__: []
+                    }
+                ]);
+            });
+        });
     });
 };

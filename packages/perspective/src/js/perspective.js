@@ -393,6 +393,8 @@ export default function(Module) {
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
+        const get_pkeys = !!options.index;
+
         const num_sides = this.sides();
         const nidx = ["zero", "one", "two"][num_sides];
 
@@ -423,6 +425,16 @@ export default function(Module) {
                     formatter.setColumnValue(data, row, col_name, value);
                 }
             }
+
+            if (get_pkeys) {
+                const keys = slice.get_pkeys(ridx, 0);
+                formatter.initColumnValue(data, row, "__INDEX__");
+                for (let i = 0; i < keys.size(); i++) {
+                    const value = __MODULE__.scalar_vec_to_val(keys, i);
+                    formatter.addColumnValue(data, row, "__INDEX__", value);
+                }
+            }
+
             formatter.addRow(data, row);
         }
 
