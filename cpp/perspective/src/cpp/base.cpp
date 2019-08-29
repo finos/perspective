@@ -11,13 +11,22 @@
 #include <perspective/base.h>
 #include <cstdint>
 #include <limits>
+#ifdef PSP_ENABLE_WASM
+#include <emscripten.h>
+#endif
 
 namespace perspective {
 
 void
 psp_abort() {
     std::cerr << "abort()" << std::endl;
+#ifdef PSP_ENABLE_WASM
+    EM_ASM({
+        throw new Error("abort()");
+    });
+#else
     std::raise(SIGINT);
+#endif
 }
 
 bool

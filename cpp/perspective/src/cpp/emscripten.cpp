@@ -613,6 +613,10 @@ namespace binding {
             std::vector<std::string> data_names = vecFromArray<t_val, std::string>(keys);
 
             for (const std::string& name : data_names) {
+                if (name == "__INDEX__") {
+                    std::cout << "Warning: __INDEX__ column should not be in the Table schema." << std::endl;
+                    continue;
+                }
                 std::string value = data[name].as<std::string>();
                 t_dtype type;
 
@@ -639,6 +643,7 @@ namespace binding {
             return types;
         } else {
             for (const std::string& name : names) {
+                // infer type for each column
                 t_dtype type = get_data_type(data, format, name, date_validator);
                 types.push_back(type);
             }
@@ -1141,16 +1146,45 @@ namespace binding {
      *
      * Fill tables with data
      */
+    void
+    _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        bool is_arrow, bool is_update) {
+        switch (type) {
+            case DTYPE_INT64: {
+                _fill_col_int64(accessor, col, name, cidx, type, is_arrow, is_update);
+            } break;
+            case DTYPE_BOOL: {
+                _fill_col_bool(accessor, col, name, cidx, type, is_arrow, is_update);
+            } break;
+            case DTYPE_DATE: {
+                _fill_col_date(accessor, col, name, cidx, type, is_arrow, is_update);
+            } break;
+            case DTYPE_TIME: {
+                _fill_col_time(accessor, col, name, cidx, type, is_arrow, is_update);
+            } break;
+            case DTYPE_STR: {
+                _fill_col_string(accessor, col, name, cidx, type, is_arrow, is_update);
+            } break;
+            case DTYPE_NONE: {
+                break;
+            }
+            default:
+                _fill_col_numeric(
+                    accessor, tbl, col, name, cidx, type, is_arrow, is_update);
+        } 
+    }
 
     void
-    _fill_data(t_data_table& tbl, t_data_accessor accessor, std::vector<std::string> col_names,
-        std::vector<t_dtype> data_types, bool is_arrow, bool is_update) {
+    _fill_data(t_data_table& tbl, t_data_accessor accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update) {
+        bool implicit_index = false;
+        std::vector<std::string> col_names(input_schema.columns());
+        std::vector<t_dtype> data_types(input_schema.types());
 
         for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
             auto name = col_names[cidx];
-            auto col = tbl.get_column(name);
-            auto col_type = data_types[cidx];
-
+            auto type = data_types[cidx];
+ 
             t_val dcol = t_val::undefined();
 
             if (is_arrow) {
@@ -1159,29 +1193,16 @@ namespace binding {
                 dcol = accessor;
             }
 
-            switch (col_type) {
-                case DTYPE_INT64: {
-                    _fill_col_int64(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_BOOL: {
-                    _fill_col_bool(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_DATE: {
-                    _fill_col_date(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_TIME: {
-                    _fill_col_time(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_STR: {
-                    _fill_col_string(dcol, col, name, cidx, col_type, is_arrow, is_update);
-                } break;
-                case DTYPE_NONE: {
-                    break;
-                }
-                default:
-                    _fill_col_numeric(
-                        dcol, tbl, col, name, cidx, col_type, is_arrow, is_update);
+            if (name == "__INDEX__") {
+                implicit_index = true;
+                std::shared_ptr<t_column> pkey_col_sptr = tbl.add_column_sptr("psp_pkey", type, true);
+                _fill_data_helper(dcol, tbl, pkey_col_sptr, "psp_pkey", cidx, type, is_arrow, is_update);
+                tbl.clone_column("psp_pkey", "psp_okey");
+                continue;
             }
+
+            auto col = tbl.get_column(name);
+            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_arrow, is_update);
 
             if (is_arrow) {
                 // Fill validity bitmap
@@ -1193,6 +1214,23 @@ namespace binding {
                     t_val validity = dcol["nullBitmap"];
                     arrow::fill_col_valid(validity, col);
                 }
+            }
+        }
+
+        // Fill index column - recreated every time a `t_data_table` is created.
+        if (!implicit_index) {
+            if (index == "") {
+                // Use row number as index if not explicitly provided or provided with `__INDEX__`
+                auto key_col = tbl.add_column("psp_pkey", DTYPE_INT32, true);
+                auto okey_col = tbl.add_column("psp_okey", DTYPE_INT32, true);
+
+                for (std::uint32_t ridx = 0; ridx < tbl.size(); ++ridx) {
+                    key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
+                    okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
+                }
+            } else { 
+                tbl.clone_column(index, "psp_pkey");
+                tbl.clone_column(index, "psp_okey");
             }
         }
     }
@@ -1224,15 +1262,9 @@ namespace binding {
             data_types = get_data_types(data, format, column_names, accessor["date_validator"]);
         }
 
-        // Check if index is valid after getting column names
-        bool valid_index
-            = std::find(column_names.begin(), column_names.end(), index) != column_names.end();
-        if (index != "" && !valid_index) {
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + index + "' does not exist in data.")
-        }
-
         bool table_initialized = has_value(table);
         std::shared_ptr<Table> tbl;
+        std::uint32_t offset; 
 
         // If the Table has already been created, use it
         if (table_initialized) {
@@ -1240,6 +1272,7 @@ namespace binding {
             tbl = table.as<std::shared_ptr<Table>>();
             tbl->set_column_names(column_names);
             tbl->set_data_types(data_types);
+            offset = tbl->get_offset(); 
 
             auto current_gnode = tbl->get_gnode();
 
@@ -1263,21 +1296,38 @@ namespace binding {
             std::shared_ptr<t_pool> pool = std::make_shared<t_pool>();
             tbl = std::make_shared<Table>(
                 pool, column_names, data_types, limit, index);
+            offset = 0;
         }
 
+        // Create input schema - an input schema contains all columns to be displayed AND index + operation columns
+        t_schema input_schema(column_names, data_types);
+
+        // strip implicit index, if present
+        auto implicit_index_it = std::find(column_names.begin(), column_names.end(), "__INDEX__");
+        if (implicit_index_it != column_names.end()) {
+            auto idx = std::distance(column_names.begin(), implicit_index_it);
+            // position of the column is at the same index in both vectors
+            column_names.erase(column_names.begin() + idx);
+            data_types.erase(data_types.begin() + idx);
+        }
+
+        // Create output schema - contains only columns to be displayed to the user
+        t_schema output_schema(column_names, data_types); // names + types might have been mutated at this point after implicit index removal
+
         std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
-        t_data_table data_table(t_schema(column_names, data_types));
+        t_data_table data_table(output_schema);
         data_table.init();
         data_table.extend(row_count);
-
-        _fill_data(data_table, accessor, column_names, data_types, is_arrow, is_update);
+        
+        // write data at the correct row        
+        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
 
         if (!computed.isUndefined()) {
             // re-add computed columns after update, delete, etc.
             table_add_computed_column(data_table, computed);
         }
 
-        // calculate offset, limit, primary key index, and set the gnode
+        // calculate offset, limit, and set the gnode
         tbl->init(data_table, row_count, op);
         return tbl;
     }

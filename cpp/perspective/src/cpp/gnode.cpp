@@ -339,7 +339,6 @@ t_gnode::_process_table() {
     }
 
     m_was_updated = true;
-
     std::shared_ptr<t_data_table> flattened(iport->get_table()->flatten());
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());

@@ -516,20 +516,25 @@ t_data_table::clone() const {
     return rval;
 }
 
-t_column*
-t_data_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
+std::shared_ptr<t_column>
+t_data_table::add_column_sptr(const std::string& name, t_dtype dtype, bool status_enabled) {
     PSP_TRACE_SENTINEL();
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (m_schema.has_column(name)) {
-        return m_columns.at(m_schema.get_colidx(name)).get();
+        return m_columns.at(m_schema.get_colidx(name));
     }
     m_schema.add_column(name, dtype);
     m_columns.push_back(make_column(name, dtype, status_enabled));
     m_columns.back()->init();
     m_columns.back()->reserve(std::max(size(), std::max(static_cast<t_uindex>(8), m_capacity)));
     m_columns.back()->set_size(size());
-    return m_columns.back().get();
+    return m_columns.back();
+}
+
+t_column*
+t_data_table::add_column(const std::string& name, t_dtype dtype, bool status_enabled) {
+    return add_column_sptr(name, dtype, status_enabled).get();
 }
 
 void
@@ -598,7 +603,7 @@ t_data_table::clone_column(const std::string& existing_col, const std::string& n
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
 
     if (!m_schema.has_column(existing_col)) {
-        std::cout << "Cannot clone non existing column";
+        std::cout << "Cannot clone non existing column: " << existing_col << std::endl;
         return 0;
     }
 
