@@ -392,7 +392,10 @@ export default function(Module) {
         const end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
-        const date_format = options.date_format || "native";
+        let date_format;
+        if (options.date_format) {
+            date_format = new Intl.DateTimeFormat(options.date_format);
+        }
 
         const get_pkeys = !!options.index;
 
@@ -425,8 +428,11 @@ export default function(Module) {
                     }
                 } else {
                     let value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
-                    if (col_type === "datetime" && date_format === "string") {
-                        value = new Date(value).toLocaleDateString();
+                    if ((col_type === "datetime" || col_type === "date") && value !== undefined) {
+                        if (date_format) {
+                            value = new Date(value);
+                            value = date_format.format(value);
+                        }
                     }
                     formatter.setColumnValue(data, row, col_name, value);
                 }
