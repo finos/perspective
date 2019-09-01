@@ -658,21 +658,6 @@ namespace binding {
      */
 
     void
-    _fill_col_int64(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
-        t_uindex nrows = col->size();
-
-        if (is_arrow) {
-            t_val data = accessor["values"];
-            // arrow packs 64 bit into two 32 bit ints
-            arrow::vecFromTypedArray(data, col->get_nth<std::int64_t>(0), nrows * 2);
-        } else {
-            PSP_COMPLAIN_AND_ABORT(
-                "Unreachable - can't have DTYPE_INT64 column from non-arrow data");
-        }
-    }
-
-    void
     _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
@@ -881,6 +866,47 @@ namespace binding {
                 col->set_nth(i, elem);
             }
         }
+    }
+
+    void
+    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, std::string name,
+        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+        t_uindex nrows = col->size();
+
+        if (is_arrow) {
+            t_val data = accessor["values"];
+            // arrow packs 64 bit into two 32 bit ints
+            arrow::vecFromTypedArray(data, col->get_nth<std::int64_t>(0), nrows * 2);
+        } else {
+            t_uindex nrows = col->size();
+            for (auto i = 0; i < nrows; ++i) {
+                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+
+                if (item.isUndefined())
+                    continue;
+
+                if (item.isNull()) {
+                    if (is_update) {
+                        col->unset(i);
+                    } else {
+                        col->clear(i);
+                    }
+                    continue;
+                }
+
+                double fval = item.as<double>();
+                if (isnan(fval)) {
+                    std::cout << "Promoting to string" << std::endl;
+                    tbl.promote_column(name, DTYPE_STR, i, false);
+                    col = tbl.get_column(name);
+                    _fill_col_string(
+                        accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
+                    return;
+                } else {
+                    col->set_nth(i, static_cast<std::int64_t>(fval));
+                }
+            }
+        }        
     }
 
     void
@@ -1152,7 +1178,7 @@ namespace binding {
         bool is_arrow, bool is_update) {
         switch (type) {
             case DTYPE_INT64: {
-                _fill_col_int64(accessor, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_int64(accessor, tbl, col, name, cidx, type, is_arrow, is_update);
             } break;
             case DTYPE_BOOL: {
                 _fill_col_bool(accessor, col, name, cidx, type, is_arrow, is_update);
