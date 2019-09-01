@@ -389,13 +389,14 @@ export default function(Module) {
 
         const viewport = this.config.viewport ? this.config.viewport : {};
         const start_row = options.start_row || (viewport.top ? viewport.top : 0);
-        const end_row = options.end_row || (viewport.height ? start_row + viewport.height : max_rows);
+        const end_row = Math.min(max_rows, options.end_row || (viewport.height ? start_row + viewport.height : max_rows));
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
 
         const get_pkeys = !!options.index;
-
+        const leaves_only = !!options.leaves_only;
         const num_sides = this.sides();
+        const has_row_path = num_sides !== 0 && !this.column_only;
         const nidx = ["zero", "one", "two"][num_sides];
 
         const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
@@ -403,7 +404,13 @@ export default function(Module) {
         const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
 
         let data = formatter.initDataValue();
+
         for (let ridx = start_row; ridx < end_row; ridx++) {
+            let row_path = has_row_path ? slice.get_row_path(ridx) : undefined;
+            if (has_row_path && leaves_only && row_path.size() < this.config.row_pivots.length) {
+                row_path.delete();
+                continue;
+            }
             let row = formatter.initRowValue();
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
@@ -412,13 +419,11 @@ export default function(Module) {
                     continue;
                 } else if (cidx === start_col && num_sides !== 0) {
                     if (!this.column_only) {
-                        const row_path = slice.get_row_path(ridx);
                         formatter.initColumnValue(data, row, "__ROW_PATH__");
                         for (let i = 0; i < row_path.size(); i++) {
                             const value = __MODULE__.scalar_vec_to_val(row_path, i);
                             formatter.addColumnValue(data, row, "__ROW_PATH__", value);
                         }
-                        row_path.delete();
                     }
                 } else {
                     const value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
@@ -435,11 +440,13 @@ export default function(Module) {
                 }
             }
 
+            if (row_path) {
+                row_path.delete();
+            }
             formatter.addRow(data, row);
         }
 
         slice.delete();
-
         return formatter.formatData(data, options.config);
     };
 
