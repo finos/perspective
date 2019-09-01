@@ -500,6 +500,8 @@ export default function(Module) {
      * to serialize.
      * @param {number} options.end_col The ending column index from which
      * to serialize.
+     * @param {boolean} [config.index=false] Should the index from the underlying
+     * {@link module:perspective~table} be in the output (as `"__INDEX__"`).
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
      * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
@@ -884,9 +886,10 @@ export default function(Module) {
 
     /**
      * Transform configuration items into `std::vector` objects for interface with C++.
-     *
      * `this.aggregates` is not transformed into a C++ map, as the use of `ordered_map` in the engine
      * makes binding more difficult.
+     *
+     * @private
      */
     view_config.prototype.get_row_pivots = function() {
         let vector = __MODULE__.make_string_vector();
