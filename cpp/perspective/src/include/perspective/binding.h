@@ -176,20 +176,23 @@ namespace binding {
     template <typename T>
     void table_add_computed_column(t_data_table& table, T computed_defs);
 
+    template <typename T>
+    void _fill_data_helper(T accessor, t_data_table& tbl,
+        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        bool is_arrow, bool is_update);
+
     /**
      * @brief Given a table, iterate through each column and fill it with data.
      *
      * @tparam T
      * @param tbl
      * @param accessor
-     * @param col_names
-     * @param data_types
+     * @param input_schema 
      * @param is_arrow
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names,
-        std::vector<t_dtype> data_types, bool is_arrow, bool is_update);
+    void _fill_data(t_data_table& tbl, T accessor, std::vector<std::string> col_names, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update);
 
     /**
      * @brief Create and populate a table.

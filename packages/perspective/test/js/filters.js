@@ -125,9 +125,9 @@ module.exports = perspective => {
 
                 it("w > date as string", async function() {
                     var table = perspective.table(schema);
-                    table.update(date_range_data);
+                    table.update(date_results);
                     var view = table.view({
-                        filter: [["w", ">", "10/01/2018"]]
+                        filter: [["w", ">", "10/02/2018"]]
                     });
                     let json = await view.to_json();
                     expect(json).toEqual(date_results.slice(2, 4));
@@ -137,12 +137,12 @@ module.exports = perspective => {
 
                 it("w < date as string", async function() {
                     var table = perspective.table(schema);
-                    table.update(date_range_data);
+                    table.update(date_results);
                     var view = table.view({
-                        filter: [["w", "<", "10/01/2018"]]
+                        filter: [["w", "<", "10/02/2018"]]
                     });
                     let json = await view.to_json();
-                    expect(json).toEqual([date_results[0]]);
+                    expect(json).toEqual(date_results.slice(0, 2));
                     view.delete();
                     table.delete();
                 });

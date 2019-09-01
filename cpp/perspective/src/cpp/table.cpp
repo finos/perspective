@@ -24,7 +24,28 @@ Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names
     , m_offset(0)
     , m_limit(limit)
     , m_index(index)
-    , m_gnode_set(false) {}
+    , m_gnode_set(false) {
+        validate_columns(column_names);
+    }
+
+void
+Table::validate_columns(const std::vector<std::string>& column_names) {
+    bool implicit_index =
+        std::find(column_names.begin(), column_names.end(), "__INDEX__") != column_names.end();
+    if (m_index != "") {
+        // Check if index is valid after getting column names
+        bool explicit_index
+            = std::find(column_names.begin(), column_names.end(), m_index) != column_names.end();
+        if (!explicit_index) {
+            std::cout << "Specified index " << m_index << " does not exist in data." << std::endl;
+            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' does not exist in data.");
+        }
+        if (explicit_index && implicit_index) {
+            std::cout << "Specified index " << m_index << " twice - ignoring implicit __INDEX__" << std::endl;
+            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' twice; ignoring implicit index.");
+        }
+    }
+}
 
 void
 Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
@@ -34,7 +55,6 @@ Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
      * and `process_index_column` causes primary keys to be misaligned.
      */
     process_op_column(data_table, op);
-    process_index_column(data_table);
     calculate_offset(row_count);
 
     if (!m_gnode_set) {
@@ -45,7 +65,6 @@ Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {
     }
 
     PSP_VERBOSE_ASSERT(m_gnode_set, "gnode is not set!");
-
     m_pool->send(m_gnode->get_id(), 0, data_table);
 
     m_init = true;
@@ -75,27 +94,9 @@ Table::replace_data_table(t_data_table* data_table) {
 
 std::shared_ptr<t_gnode>
 Table::make_gnode(const t_schema& in_schema) {
-    std::vector<std::string> col_names(in_schema.columns());
-    std::vector<t_dtype> data_types(in_schema.types());
-
-    if (in_schema.has_column("psp_pkey")) {
-        t_uindex idx = in_schema.get_colidx("psp_pkey");
-        col_names.erase(col_names.begin() + idx);
-        data_types.erase(data_types.begin() + idx);
-    }
-
-    if (in_schema.has_column("psp_op")) {
-        t_uindex idx = in_schema.get_colidx("psp_op");
-        col_names.erase(col_names.begin() + idx);
-        data_types.erase(data_types.begin() + idx);
-    }
-
-    t_schema out_schema(col_names, data_types);
-
-    // Create a gnode
+    t_schema out_schema = in_schema.drop({"psp_pkey", "psp_op"}); 
     auto gnode = std::make_shared<t_gnode>(out_schema, in_schema);
     gnode->init();
-
     return gnode;
 }
 
@@ -157,8 +158,21 @@ Table::get_index() const {
     return m_index;
 }
 
+std::uint32_t
+Table::get_offset() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_offset;
+}
+
+std::uint32_t
+Table::get_limit() const {
+    PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    return m_limit;
+}
+
 void 
 Table::set_column_names(const std::vector<std::string>& column_names) {
+    validate_columns(column_names);
     m_column_names = column_names;
 }
 
@@ -175,24 +189,6 @@ Table::process_op_column(t_data_table& data_table, const t_op op) {
             op_col->raw_fill<std::uint8_t>(OP_DELETE);
         } break;
         default: { op_col->raw_fill<std::uint8_t>(OP_INSERT); }
-    }
-}
-
-void
-Table::process_index_column(t_data_table& data_table) {
-    if (m_index == "") {
-        // If user doesn't specify an column to use as the pkey index, just use
-        // row number
-        auto key_col = data_table.add_column("psp_pkey", DTYPE_INT32, true);
-        auto okey_col = data_table.add_column("psp_okey", DTYPE_INT32, true);
-
-        for (std::uint32_t ridx = 0; ridx < data_table.size(); ++ridx) {
-            key_col->set_nth<std::int32_t>(ridx, (ridx + m_offset) % m_limit);
-            okey_col->set_nth<std::int32_t>(ridx, (ridx + m_offset) % m_limit);
-        }
-    } else {
-        data_table.clone_column(m_index, "psp_pkey");
-        data_table.clone_column(m_index, "psp_okey");
     }
 }
 

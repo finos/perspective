@@ -82,7 +82,6 @@ t_gstate::erase(const t_tscalar& pkey) {
 t_uindex
 t_gstate::lookup_or_create(const t_tscalar& pkey) {
     auto pkey_ = m_symtable.get_interned_tscalar(pkey);
-
     t_mapping::const_iterator iter = m_mapping.find(pkey_);
 
     if (iter != m_mapping.end()) {
@@ -122,10 +121,6 @@ t_gstate::update_history(const t_data_table* tbl) {
     auto stable = m_table.get();
 
     std::vector<t_uindex> col_translation(stable->num_columns());
-
-    std::string opname("psp_op");
-    std::string pkeyname("psp_pkey");
-
     std::vector<const t_column*> fcolumns(tbl->num_columns());
 
     t_uindex count = 0;
@@ -143,6 +138,7 @@ t_gstate::update_history(const t_data_table* tbl) {
         scolumns[idx] = stable->get_column(cname).get();
     }
 
+    // insert into new table
     if (size() == 0) {
         m_free.clear();
         m_mapping.clear();

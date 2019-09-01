@@ -38,7 +38,6 @@ The main API module for Perspective.
         * [.remove(data)](#module_perspective..table+remove)
         * [.add_computed(computed)](#module_perspective..table+add_computed)
         * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-        * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 
 
 * * *
@@ -151,6 +150,8 @@ to serialize.
 to serialize.
     - .end_col <code>number</code> - The ending column index from which
 to serialize.
+    - [.index] <code>boolean</code> <code> = false</code> - Should the index from the underlying
+[table](#module_perspective..table) be in the output (as `"__INDEX__"`).
 
 
 * * *
@@ -379,7 +380,6 @@ is deleted, this callback will be invoked.
     * [.remove(data)](#module_perspective..table+remove)
     * [.add_computed(computed)](#module_perspective..table+add_computed)
     * [.columns(computed)](#module_perspective..table+columns) ⇒ <code>Promise.&lt;Array.&lt;string&gt;&gt;</code>
-    * [.column_metadata()](#module_perspective..table+column_metadata) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
 
 
 * * *
@@ -599,23 +599,6 @@ The column names of this table.
 - computed <code>boolean</code> - Should computed columns be included?
 (default false)
 
-
-* * *
-
-<a name="module_perspective..table+column_metadata"></a>
-
-#### table.column\_metadata() ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
-Column metadata for this table.
-
-If the column is computed, the `computed` property is an Object containing:
- - Array `input_columns`
- - String `input_type`
- - Object `computation`.
-
- Otherwise, `computed` is `undefined`.
-
-**Kind**: instance method of [<code>table</code>](#module_perspective..table)  
-**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - An array of Objects containing metadata for each column.  
 
 * * *
 

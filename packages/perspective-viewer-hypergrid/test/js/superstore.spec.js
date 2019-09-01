@@ -88,7 +88,7 @@ utils.with_server({}, () => {
                 test.capture("should reinterpret metadata when only row pivots are changed", async page => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => element.setAttribute("row-pivots", '["Region","OrderDate"]'), viewer);
+                    await page.evaluate(element => element.setAttribute("row-pivots", '["Region","Order Date"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.evaluate(element => element.setAttribute("row-pivots", '["Order Date"]'), viewer);
                     await page.waitForSelector("perspective-viewer:not([updating])");

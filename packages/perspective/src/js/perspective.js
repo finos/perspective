@@ -430,6 +430,7 @@ export default function(Module) {
                 const keys = slice.get_pkeys(ridx, 0);
                 formatter.initColumnValue(data, row, "__INDEX__");
                 for (let i = 0; i < keys.size(); i++) {
+                    // TODO: if __INDEX__ and set index have the same value, don't we need to make sure that it only emits one?
                     const value = __MODULE__.scalar_vec_to_val(keys, i);
                     formatter.addColumnValue(data, row, "__INDEX__", value);
                 }
@@ -499,6 +500,8 @@ export default function(Module) {
      * to serialize.
      * @param {number} options.end_col The ending column index from which
      * to serialize.
+     * @param {boolean} [config.index=false] Should the index from the underlying
+     * {@link module:perspective~table} be in the output (as `"__INDEX__"`).
      *
      * @returns {Promise<Array>} A Promise resolving to An array of Objects
      * representing the rows of this {@link module:perspective~view}.  If this {@link module:perspective~view} had a
@@ -865,7 +868,7 @@ export default function(Module) {
      * Javascript `Object`s in the {@link module:perspective~table#view} method, which has an `options` parameter.
      *
      * @param {Object} config the configuration `Object` passed by the user to the {@link module:perspective~table#view} method.
-     *
+     * @private
      * @class
      * @hideconstructor
      */
@@ -883,9 +886,10 @@ export default function(Module) {
 
     /**
      * Transform configuration items into `std::vector` objects for interface with C++.
-     *
      * `this.aggregates` is not transformed into a C++ map, as the use of `ordered_map` in the engine
      * makes binding more difficult.
+     *
+     * @private
      */
     view_config.prototype.get_row_pivots = function() {
         let vector = __MODULE__.make_string_vector();
@@ -1268,15 +1272,17 @@ export default function(Module) {
                 data = "_" + data;
             }
             accessor.init(papaparse.parse(data.trim(), {header: true}).data);
-            accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
+            accessor.types = accessor.extract_typevec(types).slice(0, accessor.names.length);
+
             if (meter) {
                 meter(accessor.row_count);
             }
         } else {
             accessor.init(data);
-            accessor.names = cols;
-            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
+            accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
+            accessor.types = accessor.extract_typevec(types).slice(0, accessor.names.length);
+
             if (meter) {
                 meter(accessor.row_count);
             }
@@ -1285,6 +1291,19 @@ export default function(Module) {
         if (pdata.row_count === 0) {
             console.warn("table.update called with no data - ignoring");
             return;
+        }
+
+        // process implicit index column
+        const has_index = accessor.names.indexOf("__INDEX__");
+        if (has_index != -1) {
+            const explicit_index = !!this.index;
+            if (explicit_index) {
+                // find the type of the index column
+                accessor.types.push(accessor.types[accessor.names.indexOf(this.index)]);
+            } else {
+                // default index is an integer
+                accessor.types.push(__MODULE__.t_dtype.DTYPE_INT32);
+            }
         }
 
         try {
