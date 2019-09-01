@@ -15,6 +15,7 @@ const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 const {cloneDeep} = require("lodash");
+const Textfield = require("fin-hypergrid/src/cellEditors/Textfield");
 
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 
@@ -40,9 +41,9 @@ const base_grid_properties = {
     columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
     columnsReorderable: false,
     defaultRowHeight: 24,
-    editable: false,
+    editable: true,
     editOnKeydown: true,
-    editor: "textfield",
+    editor: "perspective-editor",
     editorActivationKeys: ["alt", "esc"],
     enableContinuousRepaint: false,
     fixedColumnCount: 0,
@@ -203,6 +204,7 @@ async function grid_update(div, view, task) {
     const dataModel = this.hypergrid.behavior.dataModel;
     dataModel.setDirty(nrows);
     dataModel._view = view;
+    dataModel._table = this._table;
     this.hypergrid.canvas.paintNow();
 }
 
@@ -249,6 +251,7 @@ async function grid_create(div, view, task) {
     const hypergrid = this.hypergrid;
     if (hypergrid) {
         hypergrid.behavior.dataModel._view = undefined;
+        hypergrid.behavior.dataModel._table = undefined;
     }
 
     const config = await view.get_config();
@@ -282,6 +285,7 @@ async function grid_create(div, view, task) {
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
     dataModel._view = view;
+    dataModel._table = this._table;
     dataModel._config = config;
     dataModel._viewer = this;
 
