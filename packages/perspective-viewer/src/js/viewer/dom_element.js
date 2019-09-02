@@ -24,7 +24,9 @@ export class DomElement extends PerspectiveElement {
             "aggregates",
             JSON.stringify(
                 aggs.reduce((obj, agg) => {
-                    obj[agg.column] = agg.op;
+                    if (this._aggregate_defaults[agg.column] !== agg.op) {
+                        obj[agg.column] = agg.op;
+                    }
                     return obj;
                 }, {})
             )
@@ -69,8 +71,8 @@ export class DomElement extends PerspectiveElement {
             if (type === "string") {
                 const view = this._table.view({row_pivots: [name], aggregates: {}});
                 view.to_json().then(json => {
-                    row.choices(this._autocomplete_choices(json)) }
-                );
+                    row.choices(this._autocomplete_choices(json));
+                });
                 view.delete();
             }
         }

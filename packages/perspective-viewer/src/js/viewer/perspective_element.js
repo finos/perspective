@@ -40,6 +40,14 @@ const column_sorter = schema => (a, b) => {
     return r;
 };
 
+function get_aggregate_defaults(schema, cols) {
+    const aggregates = {};
+    for (const col of cols) {
+        aggregates[col] = get_type_config(schema[col]).aggregate;
+    }
+    return aggregates;
+}
+
 function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
     const found = new Set();
     const aggregates = [];
@@ -147,7 +155,7 @@ export class PerspectiveElement extends StateElement {
             shown = this._initial_col_order;
         }
 
-        this.set_aggregate_attribute(aggregates);
+        this._aggregate_defaults = get_aggregate_defaults(schema, all_cols);
 
         for (const name of all_cols) {
             const aggregate = aggregates.find(a => a.column === name).op;
