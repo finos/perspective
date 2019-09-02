@@ -379,7 +379,7 @@ exports.click_highcharts = async function click_highcharts(svg_selector, page) {
 exports.render_warning = {
     set_warning_threshold: async function(page, plugin_name, threshold) {
         await page.evaluate(() => {
-            window.getPlugin(plugin_name).max_size = threshold;
+            window.getPlugin(plugin_name).max_cells = threshold;
         });
     },
     wait_for_warning: async function(page, viewer) {

@@ -176,16 +176,55 @@ export class PerspectiveElement extends StateElement {
         resolve();
     }
 
-    async _warn_render_size_exceeded() {
-        if (this._show_warnings && typeof this._plugin.max_size !== "undefined") {
+    async get_maxes() {
+        let max_cols, max_rows;
+        const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
+        const schema_columns = Object.keys(schema || {}).length || 1;
+
+        if (typeof this._plugin.max_columns !== "undefined") {
+            const column_group_diff = this._plugin.max_columns % schema_columns;
+            const column_limit = this._plugin.max_columns + column_group_diff;
+            max_cols = column_limit < num_columns ? column_limit : undefined;
+        }
+
+        if (typeof this._plugin.max_cells !== "undefined") {
+            max_rows = Math.ceil(max_cols ? this._plugin.max_cells / max_cols : this._plugin.max_cells / (num_columns || 1));
+        }
+
+        return {max_cols, max_rows};
+    }
+
+    async _warn_render_size_exceeded(max_cols, max_rows) {
+        const total = (n, m) =>
+            `<span title="${numberWithCommas(n)} / ~${numberWithCommas(m)}" class="plugin_information--overflow-hint">&nbsp;<span class="plugin_information--overflow-hint-percent">${Math.floor(
+                (n / m) * 100
+            )}%</span>&nbsp;</span>`;
+        if (this._show_warnings && (max_cols || max_rows)) {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
             const count = num_columns * num_rows;
-            if (count >= this._plugin.max_size) {
+
+            const columns_are_truncated = max_cols && max_cols < num_columns;
+            const rows_are_truncated = max_rows && max_rows < num_rows;
+            if (columns_are_truncated && rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
-                const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
-                this._plugin_information_message.innerText = warning;
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns and </span>${total(
+                    num_columns * max_rows,
+                    count
+                )}<span style="white-space:nowrap"> of points.</span>`;
+                this._plugin_information_message.innerHTML = warning;
+                this.removeAttribute("updating");
+                return true;
+            } else if (columns_are_truncated) {
+                this._plugin_information.classList.remove("hidden");
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns.</span>`;
+                this._plugin_information_message.innerHTML = warning;
+                this.removeAttribute("updating");
+                return true;
+            } else if (rows_are_truncated) {
+                this._plugin_information.classList.remove("hidden");
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(num_columns * max_rows, count)}<span style="white-space:nowrap"> of points.</span>`;
+                this._plugin_information_message.innerHTML = warning;
                 this.removeAttribute("updating");
                 return true;
             } else {
@@ -195,7 +234,7 @@ export class PerspectiveElement extends StateElement {
         return false;
     }
 
-    _view_on_update() {
+    _view_on_update(limit_points) {
         if (!this._debounced) {
             this._debounced = setTimeout(async () => {
                 this._debounced = undefined;
@@ -206,7 +245,15 @@ export class PerspectiveElement extends StateElement {
                 const task = (this._task = new CancelTask());
                 const updater = this._plugin.update || this._plugin.create;
                 try {
-                    await updater.call(this, this._datavis, this._view, task);
+                    if (limit_points) {
+                        const {max_cols, max_rows} = await this.get_maxes();
+                        if (!task.cancelled) {
+                            this._warn_render_size_exceeded(max_cols, max_rows);
+                            await updater.call(this, this._datavis, this._view, task, max_cols, max_rows);
+                        }
+                    } else {
+                        await updater.call(this, this._datavis, this._view, task);
+                    }
                     timer();
                     task.cancel();
                 } catch (err) {
@@ -251,7 +298,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view({ignore_size_check = false, force_update = false} = {}) {
+    async _new_view({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -297,16 +344,17 @@ export class PerspectiveElement extends StateElement {
             this._view = undefined;
         }
 
-        this._view = this._table.view(config);
-
-        if (!ignore_size_check) {
-            if (await this._warn_render_size_exceeded()) {
-                return;
-            }
+        {
+            // this must be atomic
+            this._view = this._table.view(config);
+            this._view_updater = () => this._view_on_update(limit_points);
+            this._view.on_update(this._view_updater);
         }
 
-        this._view_updater = () => this._view_on_update();
-        this._view.on_update(this._view_updater);
+        const {max_cols, max_rows} = await this.get_maxes();
+        if (!ignore_size_check) {
+            this._warn_render_size_exceeded(max_cols, max_rows);
+        }
 
         const timer = this._render_time();
         this._render_count = (this._render_count || 0) + 1;
@@ -317,7 +365,11 @@ export class PerspectiveElement extends StateElement {
         const task = (this._task = new CancelTask(() => this._render_count--, true));
 
         try {
-            await this._plugin.create.call(this, this._datavis, this._view, task);
+            if (limit_points) {
+                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows);
+            } else {
+                await this._plugin.create.call(this, this._datavis, this._view, task);
+            }
         } catch (err) {
             console.warn(err);
         } finally {
@@ -376,15 +428,15 @@ export class PerspectiveElement extends StateElement {
         return resolve;
     }
 
-    // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check, force_update) => {
-            this._new_view({ignore_size_check, force_update}).then(resolve);
+        const _update = _.debounce((resolve, ignore_size_check, force_update, limit_points) => {
+            this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
         }, 0);
-        this._debounce_update = async ({ignore_size_check = false, force_update = false} = {}) => {
+
+        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = true} = {}) => {
             if (this._table) {
                 let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check, force_update));
+                await new Promise(resolve => _update(resolve, ignore_size_check, force_update, limit_points));
                 resolve();
             }
         };

@@ -347,16 +347,47 @@
         .plugin_information__text {
             font-size: 12px;
             margin-right: 0.25rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .plugin_information__text:before {
+            content: var(--overflow_hint--before);
+            font-family: var(--overflow_hint--font-family);
+            color: var(--overflow_hint--color);
+            padding: var(--overflow_hint--padding);
+            font-size: 16px;
         }
 
         .plugin_information__action {
             font-size: 12px;
             text-decoration: underline;
             cursor: pointer;
+            margin-right: 0.25rem;
         }
 
-        .plugin_information__action--dismiss {
+        .plugin_information__action--close {
+            margin-left: 12px;
+            display: inline-flex;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .plugin_information__actions {
             margin-left: auto;
+            display: flex;
+            align-items: center;
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .plugin_information--overflow-hint-percent {
+            font-weight: 700;
+        }
+
+        .plugin_information--overflow-hint {
+            white-space: nowrap;
         }
     }
 
@@ -401,6 +432,12 @@
     #reset_button:before {
         font-feature-settings: "liga";
         content: var(--reset_button--before, "Reset");
+    }
+
+    #close_button:before {
+        font-family: var(--button--font-family, Arial);
+        font-feature-settings: "liga";
+        content: var(--close_button--before, "Close");
     }
 
     #download_button:before {

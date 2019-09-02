@@ -61,7 +61,8 @@ function heatmapChart(container, settings) {
 heatmapChart.plugin = {
     type: "d3_heatmap",
     name: "Heatmap",
-    max_size: 25000
+    max_cells: 1000,
+    max_columns: 50
 };
 
 export default heatmapChart;

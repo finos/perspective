@@ -155,7 +155,7 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                         element.setAttribute("columns", '["col_b"]');
                     }, viewer);
                     await page.waitForFunction(
@@ -178,7 +178,7 @@ utils.with_server({}, () => {
                     const viewer = await page.$("perspective-viewer");
                     await page.shadow_click("perspective-viewer", "#config_button");
                     await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                         element.setAttribute("columns", '["col_b"]');
                     }, viewer);
                     await page.waitForFunction(
@@ -198,38 +198,10 @@ utils.with_server({}, () => {
             );
 
             test.capture(
-                "selecting 'do not show again' should stop render warnings.",
-                async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_size = 50;
-                        element.setAttribute("columns", '["col_a", "col_b"]');
-                    }, viewer);
-                    await page.waitForFunction(
-                        element => {
-                            return !element.shadowRoot.querySelector(".plugin_information.hidden");
-                        },
-                        {},
-                        viewer
-                    );
-                    await page.evaluate(element => element.shadowRoot.querySelector(".plugin_information__action.plugin_information__action--dismiss").click(), viewer);
-                    await page.evaluate(element => {
-                        element.setAttribute("columns", '["col_b"]');
-                    }, viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])", {timeout: 100000});
-                },
-                {
-                    timeout: 60000,
-                    wait_for_update: false
-                }
-            );
-
-            test.capture(
                 "underlying data updates should not trigger rerender if warning is visible.",
                 async page => {
                     await page.evaluate(() => {
-                        window.getPlugin("y_bar").max_size = 50;
+                        window.getPlugin("y_bar").max_cells = 50;
                     });
 
                     const viewer = await page.$("perspective-viewer");

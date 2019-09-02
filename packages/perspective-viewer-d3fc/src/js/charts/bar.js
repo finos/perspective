@@ -67,7 +67,8 @@ function barChart(container, settings) {
 barChart.plugin = {
     type: "d3_x_bar",
     name: "X Bar Chart",
-    max_size: 25000
+    max_cells: 1000,
+    max_columns: 50
 };
 
 export default barChart;

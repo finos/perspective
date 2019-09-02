@@ -10,7 +10,7 @@
 @import "../less/variables";
 
 @import (css) url("https://fonts.googleapis.com/css?family=Material+Icons");
-@import (css) url("https://fonts.googleapis.com/css?family=Open+Sans"); // ~typeface-open-sans/index.css");
+@import (css) url("https://fonts.googleapis.com/css?family=Open+Sans:400,700");// ~typeface-open-sans/index.css");
 @import (css) url("https://fonts.googleapis.com/css?family=Roboto+Mono"); // ~typeface-roboto-mono/index.css");
 
 perspective-viewer {
@@ -31,6 +31,10 @@ perspective-viewer {
 
     --config_button--before: "more_vert";
     --button--font-family: "Material Icons";
+    --overflow_hint--before: "error_outline";
+    --overflow_hint--font-family: "Material Icons";
+    --overflow_hint--color: rgba(0,0,0,0.2);
+    --overflow_hint--padding: 0 12px 0 6px;
 
     --copy_button--before: "file_copy";
     --download_button--before: "save_alt";
@@ -43,6 +47,7 @@ perspective-viewer {
     --sort-order-asc--before: "arrow_upward";
     --sort-order-desc--before: "arrow_downward";
     --sort-order-none--before: "remove";
+    --close_button--before: "close";
     --sort-order-col-asc--before: "arrow_back";
     --sort-order-col-desc--before: "arrow_forward";
     --sort_order-padding: 0 0 0 0px;

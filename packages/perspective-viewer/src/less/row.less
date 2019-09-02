@@ -21,16 +21,6 @@
 :host {
     display: block;
 
-    #row_close {
-        min-width: 5px;
-        max-width: 5px;
-        margin-right: 3px;
-        flex-grow: 0;
-        font-size: 10px;
-        cursor: pointer;
-        margin-left: 3px;
-    }
-
     .row_computed {
         display: none;
         flex-direction: row;
@@ -133,6 +123,12 @@
     #row_close {
         display: var(--row_close-display, inline);
         cursor: pointer;
+        min-width: 5px;
+        max-width: 5px;
+        margin-right: 3px;
+        flex-grow: 0;
+        font-size: 10px;
+        margin-left: 3px;
     }
 
     .is_visible:before {
