@@ -344,15 +344,17 @@ export class PerspectiveElement extends StateElement {
             this._view = undefined;
         }
 
-        this._view = this._table.view(config);
+        {
+            // this must be atomic
+            this._view = this._table.view(config);
+            this._view_updater = () => this._view_on_update(limit_points);
+            this._view.on_update(this._view_updater);
+        }
 
         const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
             this._warn_render_size_exceeded(max_cols, max_rows);
         }
-
-        this._view_updater = () => this._view_on_update(limit_points);
-        this._view.on_update(this._view_updater);
 
         const timer = this._render_time();
         this._render_count = (this._render_count || 0) + 1;
