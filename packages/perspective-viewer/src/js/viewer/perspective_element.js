@@ -261,7 +261,7 @@ export class PerspectiveElement extends StateElement {
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
-            }, calculate_throttle_timeout(this.getAttribute("render_time")));
+            }, calculate_throttle_timeout(this.__render_time));
         }
     }
 
@@ -373,7 +373,7 @@ export class PerspectiveElement extends StateElement {
         } catch (err) {
             console.warn(err);
         } finally {
-            if (!this.hasAttribute("render_time")) {
+            if (!this.__render_time) {
                 this.dispatchEvent(new Event("perspective-view-update"));
             }
             timer();
@@ -387,7 +387,7 @@ export class PerspectiveElement extends StateElement {
 
     _render_time() {
         const t = performance.now();
-        return () => this.setAttribute("render_time", performance.now() - t);
+        return () => (this.__render_time = `${performance.now() - t}`);
     }
 
     _restyle_plugin() {
