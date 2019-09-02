@@ -188,7 +188,7 @@ class ComputedColumn extends HTMLElement {
             drop_target.classList.add("dropping");
         }
         if (drop_target_hover && !drop_target_hover.hasAttribute("drop-target")) {
-            drop_target_hover.setAttribute("drop-target", "true");
+            drop_target_hover.toggleAttribute("drop-target", "true");
         }
 
         if (drop_target.children.length === 2) {
@@ -422,7 +422,7 @@ class ComputedColumn extends HTMLElement {
 
     // save button handlers
     _disable_save_button() {
-        this._save_button.setAttribute("disabled", "true");
+        this._save_button.toggleAttribute("disabled", true);
     }
 
     _enable_save_button() {

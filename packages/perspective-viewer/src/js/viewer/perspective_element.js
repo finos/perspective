@@ -428,7 +428,7 @@ export class PerspectiveElement extends StateElement {
     }
 
     _set_updating() {
-        this.setAttribute("updating", true);
+        this.toggleAttribute("updating", true);
         let resolve;
         this._updating_promise = new Promise(_resolve => {
             resolve = _resolve;

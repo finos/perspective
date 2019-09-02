@@ -75,7 +75,7 @@ class PerspectiveViewer extends ActionElement {
             register_debug_plugin();
         }
 
-        this.setAttribute("settings", true);
+        this.toggleAttribute("settings", true);
 
         this._register_ids();
         this._register_callbacks();

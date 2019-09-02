@@ -32,7 +32,7 @@ export class ActionElement extends DomElement {
             } else {
                 this._side_panel.style.display = "flex";
                 this._top_panel.style.display = "flex";
-                this.setAttribute("settings", true);
+                this.toggleAttribute("settings", true);
             }
             this._show_config = !this._show_config;
             this._plugin.resize.call(this, true);
