@@ -150,7 +150,7 @@ export const draw = (mode, set_config, restyle) =>
                 if (col_pivots.length === 0) {
                     let cols;
                     if (end_col || end_row) {
-                        cols = await view.to_columns({end_col, end_row, leaves_only: false});
+                        cols = await view.to_columns({end_col, end_row, leaves_only: true});
                     } else {
                         cols = await view.to_columns();
                     }
@@ -238,9 +238,18 @@ class HighchartsElement extends HTMLElement {
     render(mode, configs, callee) {
         if (this._charts.length > 0 && this._charts.length === configs.length) {
             let idx = 0;
-            for (let chart of this._charts) {
+            for (let cidx = 0; cidx < this._charts.length; cidx++) {
+                const chart = this._charts[cidx];
                 let config = configs[idx++];
-                if (mode === "scatter") {
+                if (config.boost) {
+                    let target = chart.renderTo;
+                    try {
+                        chart.destroy();
+                    } catch (e) {
+                        console.warn("Scatter plot destroy() call failed - this is probably leaking memory");
+                    }
+                    this._charts[cidx] = Highcharts.chart(target, config);
+                } else if (mode === "scatter") {
                     let conf = {
                         series: config.series,
                         plotOptions: {}
@@ -253,7 +262,7 @@ class HighchartsElement extends HTMLElement {
                 }
             }
         } else {
-            this.remove();
+            this.delete();
             for (let config of configs) {
                 let chart = document.createElement("div");
                 chart.className = "chart";
