@@ -110,7 +110,7 @@
     --row_draggable-height: var(--column--height, 21px);
 }
 
-:host(:not([row-pivots="[]"])) {
+:host([row-pivots]) {
     #active_columns perspective-row {
         height: var(--active-column--height, 41px);
         min-height: var(--active-column--height, 41px);

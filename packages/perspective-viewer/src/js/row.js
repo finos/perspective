@@ -78,7 +78,12 @@ class Row extends HTMLElement {
             default:
         }
         if (!this.hasAttribute("aggregate")) {
-            this.setAttribute("aggregate", type_config.aggregate);
+            this.aggregate = type_config.aggregate;
+        } else {
+            this.aggregate = this.getAttribute("aggregate");
+        }
+        if (this.hasAttribute("filter")) {
+            this.filter = this.getAttribute("filter");
         }
 
         let filter_operand = this.shadowRoot.querySelector("#filter_operand");

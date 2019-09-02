@@ -20,17 +20,36 @@ export class DomElement extends PerspectiveElement {
     }
 
     set_aggregate_attribute(aggs) {
-        this.setAttribute(
-            "aggregates",
-            JSON.stringify(
-                aggs.reduce((obj, agg) => {
-                    if (this._aggregate_defaults[agg.column] !== agg.op) {
-                        obj[agg.column] = agg.op;
-                    }
-                    return obj;
-                }, {})
-            )
-        );
+        let is_set = false;
+        let aggregates = aggs.reduce((obj, agg) => {
+            if (this._aggregate_defaults[agg.column] !== agg.op) {
+                obj[agg.column] = agg.op;
+                is_set = true;
+            }
+            return obj;
+        }, {});
+        if (is_set) {
+            this.setAttribute("aggregates", JSON.stringify(aggregates));
+        } else {
+            this.removeAttribute("aggregates");
+        }
+    }
+
+    _set_row_type(row, type) {
+        if (!type) {
+            let all = this._get_view_dom_columns("#inactive_columns perspective-row");
+            if (all.length > 0) {
+                type = all.find(x => x.getAttribute("name") === name);
+                if (type) {
+                    type = type.getAttribute("type");
+                } else {
+                    type = "integer";
+                }
+            } else {
+                type = "";
+            }
+        }
+        row.setAttribute("type", type);
     }
 
     // Generates a new row in state + DOM
@@ -160,7 +179,9 @@ export class DomElement extends PerspectiveElement {
                 }
             } else if (typeof name === "undefined") {
                 container.removeChild(col);
-            } else if (!accessor(name, col)) {
+            } else if (accessor(name, col)) {
+                this._set_row_type(col);
+            } else {
                 if (next_col && accessor(name, next_col)) {
                     container.removeChild(col);
                     i++;

@@ -179,7 +179,12 @@ export class PerspectiveElement extends StateElement {
 
         this._show_column_selectors();
 
-        this.filters = this.getAttribute("filters");
+        // Filters need type information to populate e.g. the operator dropdown,
+        // so reset them.
+        if (this.hasAttribute("filters")) {
+            this.filters = this.getAttribute("filters");
+        }
+
         await this._debounce_update({force_update: true});
         resolve();
     }

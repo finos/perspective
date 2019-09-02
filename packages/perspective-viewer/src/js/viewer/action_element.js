@@ -193,9 +193,24 @@ export class ActionElement extends DomElement {
 
     // edits state
     _transpose() {
-        let row_pivots = this.getAttribute("row-pivots");
-        this.setAttribute("row-pivots", this.getAttribute("column-pivots"));
-        this.setAttribute("column-pivots", row_pivots);
+        const has_row = this.hasAttribute("row-pivots");
+        const has_col = this.hasAttribute("column-pivots");
+        if (has_row && has_col) {
+            let row_pivots = this.getAttribute("row-pivots");
+            this.setAttribute("row-pivots", this.getAttribute("column-pivots"));
+            this.setAttribute("column-pivots", row_pivots);
+        } else if (has_row) {
+            let row_pivots = this.getAttribute("row-pivots");
+            this.removeAttribute("row-pivots");
+            this.setAttribute("column-pivots", row_pivots);
+        } else if (has_col) {
+            let column_pivots = this.getAttribute("column-pivots");
+            this.removeAttribute("column-pivots");
+            this.setAttribute("row-pivots", column_pivots);
+        } else {
+            this.removeAttribute("column-pivots");
+            this.removeAttribute("row-pivots");
+        }
     }
 
     _resize_sidepanel(event) {

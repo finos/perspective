@@ -37,9 +37,15 @@ export function dragend(event) {
     }
     let idx = Array.prototype.slice.call(parent.children).indexOf(div.tagName === "PERSPECTIVE-ROW" ? div : event.target);
     let attr_name = parent.getAttribute("for");
-    let attr_value = JSON.parse(this.getAttribute(attr_name));
-    attr_value.splice(idx, 1);
-    this.setAttribute(attr_name, JSON.stringify(attr_value));
+    if (this.hasAttribute(attr_name)) {
+        let attr_value = JSON.parse(this.getAttribute(attr_name));
+        attr_value.splice(idx, 1);
+        if (attr_value.length === 0) {
+            this.removeAttribute(attr_name);
+        } else {
+            this.setAttribute(attr_name, JSON.stringify(attr_value));
+        }
+    }
 }
 
 export function drop(ev) {
@@ -118,7 +124,7 @@ export function column_dragover(event) {
         event.currentTarget.classList.add("dropping");
     }
     if (!this._drop_target_hover.hasAttribute("drop-target")) {
-        this._drop_target_hover.setAttribute("drop-target", true);
+        this._drop_target_hover.toggleAttribute("drop-target", true);
     }
     let new_index = calc_index.call(this, event);
     let current_index = Array.prototype.slice.call(this._active_columns.children).indexOf(this._drop_target_hover);
