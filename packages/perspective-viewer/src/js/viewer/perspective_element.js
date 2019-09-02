@@ -176,15 +176,53 @@ export class PerspectiveElement extends StateElement {
         resolve();
     }
 
-    async _warn_render_size_exceeded() {
-        if (this._show_warnings && typeof this._plugin.max_size !== "undefined") {
+    async get_maxes() {
+        let max_cols, max_rows;
+        const [schema, num_columns] = await Promise.all([this._view.schema(), this._view.num_columns()]);
+        const schema_columns = Object.keys(schema || {}).length || 1;
+
+        if (typeof this._plugin.max_columns !== "undefined") {
+            const column_group_diff = this._plugin.max_columns % schema_columns;
+            const column_limit = this._plugin.max_columns + column_group_diff;
+            max_cols = column_limit < num_columns ? column_limit : undefined;
+        }
+
+        if (typeof this._plugin.max_cells !== "undefined") {
+            max_rows = Math.ceil(max_cols ? this._plugin.max_cells / max_cols : this._plugin.max_cells / (num_columns || 1));
+        }
+
+        return {max_cols, max_rows};
+    }
+
+    async _warn_render_size_exceeded(max_cols, max_rows) {
+        if (this._show_warnings && (max_cols || max_rows)) {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
             const count = num_columns * num_rows;
-            if (count >= this._plugin.max_size) {
+
+            const columns_are_truncated = max_cols && max_cols < num_columns;
+            const rows_are_truncated = max_rows && max_rows < num_rows;
+            if (columns_are_truncated && rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const over_per = Math.floor((count / this._plugin.max_size) * 100) - 100;
-                const warning = `Rendering estimated ${numberWithCommas(count)} (+${numberWithCommas(over_per)}%) points.  `;
+                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
+                const points_over_per = Math.floor((max_rows / count) * 100);
+                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns and ${numberWithCommas(
+                    max_cols * max_rows
+                )} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
+                this._plugin_information_message.innerText = warning;
+                this.removeAttribute("updating");
+                return true;
+            } else if (columns_are_truncated) {
+                this._plugin_information.classList.remove("hidden");
+                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
+                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns.`;
+                this._plugin_information_message.innerText = warning;
+                this.removeAttribute("updating");
+                return true;
+            } else if (rows_are_truncated) {
+                this._plugin_information.classList.remove("hidden");
+                const points_over_per = Math.floor(((num_columns * max_rows) / count) * 100);
+                const warning = `Rendering ${numberWithCommas(num_columns * max_rows)} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
                 this._plugin_information_message.innerText = warning;
                 this.removeAttribute("updating");
                 return true;
@@ -251,7 +289,7 @@ export class PerspectiveElement extends StateElement {
         }
     }
 
-    async _new_view({ignore_size_check = false, force_update = false} = {}) {
+    async _new_view({force_update = false, ignore_size_check = false, limit_points = true} = {}) {
         if (!this._table) return;
         this._check_responsive_layout();
         const row_pivots = this._get_view_row_pivots();
@@ -299,10 +337,9 @@ export class PerspectiveElement extends StateElement {
 
         this._view = this._table.view(config);
 
+        const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
-            if (await this._warn_render_size_exceeded()) {
-                return;
-            }
+            this._warn_render_size_exceeded(max_cols, max_rows);
         }
 
         this._view_updater = () => this._view_on_update();
@@ -317,7 +354,11 @@ export class PerspectiveElement extends StateElement {
         const task = (this._task = new CancelTask(() => this._render_count--, true));
 
         try {
-            await this._plugin.create.call(this, this._datavis, this._view, task);
+            if (limit_points) {
+                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows);
+            } else {
+                await this._plugin.create.call(this, this._datavis, this._view, task);
+            }
         } catch (err) {
             console.warn(err);
         } finally {
@@ -376,15 +417,15 @@ export class PerspectiveElement extends StateElement {
         return resolve;
     }
 
-    // setup for update
     _register_debounce_instance() {
-        const _update = _.debounce((resolve, ignore_size_check, force_update) => {
-            this._new_view({ignore_size_check, force_update}).then(resolve);
+        const _update = _.debounce((resolve, ignore_size_check, force_update, limit_points) => {
+            this._new_view({ignore_size_check, force_update, limit_points}).then(resolve);
         }, 0);
-        this._debounce_update = async ({ignore_size_check = false, force_update = false} = {}) => {
+
+        this._debounce_update = async ({force_update = false, ignore_size_check = false, limit_points = true} = {}) => {
             if (this._table) {
                 let resolve = this._set_updating();
-                await new Promise(resolve => _update(resolve, ignore_size_check, force_update));
+                await new Promise(resolve => _update(resolve, ignore_size_check, force_update, limit_points));
                 resolve();
             }
         };

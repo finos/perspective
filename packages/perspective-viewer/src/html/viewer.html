@@ -72,8 +72,10 @@
             <div id="pivot_chart_container">
                 <div class="plugin_information plugin_information--warning hidden" id="plugin_information--size">
                     <span class="plugin_information__text" id="plugin_information_count">Estimated rendering</span>
-                    <span class="plugin_information__action">Continue to Render</span>
-                    <span class="plugin_information__action plugin_information__action--dismiss">Don't Show Again</span>
+                    <span class="plugin_information__actions">
+                        <span class="plugin_information__action">Render all points</span>
+                        <span class="plugin_information__action--close" id="close_button"></span>
+                    </span>
                 </div>
                 <div id="pivot_chart"></div>
             </div>

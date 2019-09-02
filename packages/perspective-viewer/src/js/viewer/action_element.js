@@ -257,18 +257,18 @@ export class ActionElement extends DomElement {
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
+            this._plugin_information.classList.add("hidden");
             this.setAttribute("plugin", this._vis_selector.value);
             this._debounce_update();
         });
 
         this._plugin_information_action.addEventListener("click", () => {
-            this._debounce_update({ignore_size_check: true});
+            this._debounce_update({ignore_size_check: true, limit_points: false});
             this._plugin_information.classList.add("hidden");
         });
-        this._plugin_information_dismiss.addEventListener("click", () => {
-            this._debounce_update({ignore_size_check: true});
+
+        this._plugin_information_action_close.addEventListener("click", () => {
             this._plugin_information.classList.add("hidden");
-            this._show_warnings = false;
         });
     }
 }

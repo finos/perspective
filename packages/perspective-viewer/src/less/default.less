@@ -353,10 +353,22 @@
             font-size: 12px;
             text-decoration: underline;
             cursor: pointer;
+            margin-right: 0.25rem;
         }
 
-        .plugin_information__action--dismiss {
+        .plugin_information__action--close {
+            padding-top: 2px;
+            margin-left: 12px;
+
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .plugin_information__actions {
             margin-left: auto;
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
         }
     }
 
@@ -401,6 +413,12 @@
     #reset_button:before {
         font-feature-settings: "liga";
         content: var(--reset_button--before, "Reset");
+    }
+
+    #close_button:before {
+        font-family: var(--button--font-family, Arial);
+        font-feature-settings: "liga";
+        content: var(--close_button--before, "Close");
     }
 
     #download_button:before {
