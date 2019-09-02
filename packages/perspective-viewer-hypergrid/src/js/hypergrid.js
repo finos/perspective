@@ -277,7 +277,7 @@ async function grid_create(div, view, task) {
     }
 
     const dataModel = this.hypergrid.behavior.dataModel;
-    const columns = Object.keys(json);
+    let columns = Object.keys(json);
 
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
@@ -289,6 +289,9 @@ async function grid_create(div, view, task) {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
         let next_page = await dataModel._view.to_columns(range);
+        if (columns.length === 0) {
+            columns = Object.keys(await view.to_columns(window));
+        }
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
         const data = dataModel.data;

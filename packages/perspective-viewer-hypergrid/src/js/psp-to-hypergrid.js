@@ -14,7 +14,7 @@ const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").protot
 function page2hypergrid(data, row_pivots, columns) {
     const data_columns = Object.keys(data);
     const firstcol = data_columns.length > 0 ? data_columns[0] : undefined;
-    if (columns.length === 0 || data[firstcol].length === 0) {
+    if (columns.length === 0) {
         return [];
     }
 
