@@ -347,6 +347,17 @@
         .plugin_information__text {
             font-size: 12px;
             margin-right: 0.25rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .plugin_information__text:before {
+            content: var(--overflow_hint--before);
+            font-family: var(--overflow_hint--font-family);
+            color: var(--overflow_hint--color);
+            padding: var(--overflow_hint--padding);
+            font-size: 16px;
         }
 
         .plugin_information__action {
@@ -357,9 +368,8 @@
         }
 
         .plugin_information__action--close {
-            padding-top: 2px;
             margin-left: 12px;
-
+            display: inline-flex;
             font-size: 12px;
             cursor: pointer;
         }
@@ -367,8 +377,17 @@
         .plugin_information__actions {
             margin-left: auto;
             display: flex;
+            align-items: center;
             flex-direction: row;
             justify-content: flex-start;
+        }
+
+        .plugin_information--overflow-hint-percent {
+            font-weight: 700;
+        }
+
+        .plugin_information--overflow-hint {
+            white-space: nowrap;
         }
     }
 

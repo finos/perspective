@@ -195,6 +195,10 @@ export class PerspectiveElement extends StateElement {
     }
 
     async _warn_render_size_exceeded(max_cols, max_rows) {
+        const total = (n, m) =>
+            `<span title="${numberWithCommas(n)} / ~${numberWithCommas(m)}" class="plugin_information--overflow-hint">&nbsp;<span class="plugin_information--overflow-hint-percent">${Math.floor(
+                (n / m) * 100
+            )}%</span>&nbsp;</span>`;
         if (this._show_warnings && (max_cols || max_rows)) {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
@@ -204,26 +208,23 @@ export class PerspectiveElement extends StateElement {
             const rows_are_truncated = max_rows && max_rows < num_rows;
             if (columns_are_truncated && rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
-                const points_over_per = Math.floor((max_rows / count) * 100);
-                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns and ${numberWithCommas(
-                    max_cols * max_rows
-                )} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
-                this._plugin_information_message.innerText = warning;
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns and </span>${total(
+                    num_columns * max_rows,
+                    count
+                )}<span style="white-space:nowrap"> of points.</span>`;
+                this._plugin_information_message.innerHTML = warning;
                 this.removeAttribute("updating");
                 return true;
             } else if (columns_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const cols_over_per = Math.floor((max_cols / num_columns) * 100);
-                const warning = `Rendering ${numberWithCommas(max_cols)} of estimated ${numberWithCommas(num_columns)} (${numberWithCommas(cols_over_per)}%) columns.`;
-                this._plugin_information_message.innerText = warning;
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns.</span>`;
+                this._plugin_information_message.innerHTML = warning;
                 this.removeAttribute("updating");
                 return true;
             } else if (rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const points_over_per = Math.floor(((num_columns * max_rows) / count) * 100);
-                const warning = `Rendering ${numberWithCommas(num_columns * max_rows)} of estimated ${numberWithCommas(count)} (${numberWithCommas(points_over_per)}%) points.`;
-                this._plugin_information_message.innerText = warning;
+                const warning = `<span style="white-space:nowrap">Rendering </span>${total(num_columns * max_rows, count)}<span style="white-space:nowrap"> of points.</span>`;
+                this._plugin_information_message.innerHTML = warning;
                 this.removeAttribute("updating");
                 return true;
             } else {
@@ -233,7 +234,7 @@ export class PerspectiveElement extends StateElement {
         return false;
     }
 
-    _view_on_update() {
+    _view_on_update(limit_points) {
         if (!this._debounced) {
             this._debounced = setTimeout(async () => {
                 this._debounced = undefined;
@@ -244,7 +245,15 @@ export class PerspectiveElement extends StateElement {
                 const task = (this._task = new CancelTask());
                 const updater = this._plugin.update || this._plugin.create;
                 try {
-                    await updater.call(this, this._datavis, this._view, task);
+                    if (limit_points) {
+                        const {max_cols, max_rows} = await this.get_maxes();
+                        if (!task.cancelled) {
+                            this._warn_render_size_exceeded(max_cols, max_rows);
+                            await updater.call(this, this._datavis, this._view, task, max_cols, max_rows);
+                        }
+                    } else {
+                        await updater.call(this, this._datavis, this._view, task);
+                    }
                     timer();
                     task.cancel();
                 } catch (err) {
@@ -342,7 +351,7 @@ export class PerspectiveElement extends StateElement {
             this._warn_render_size_exceeded(max_cols, max_rows);
         }
 
-        this._view_updater = () => this._view_on_update();
+        this._view_updater = () => this._view_on_update(limit_points);
         this._view.on_update(this._view_updater);
 
         const timer = this._render_time();
