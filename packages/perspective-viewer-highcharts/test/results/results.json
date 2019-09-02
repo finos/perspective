@@ -85,10 +85,9 @@
     "line.html/tooltip shows proper column labels.": "9754ca4d31e51374b6d943669e979616",
     "line.html/tooltip shows pivot labels.": "27dbb4659637d8dec7a6ccf50145b227",
     "render_warning.html/render warning should not show under size limit.": "8b216a2b86af03bbd65f71261e2f1167",
-    "render_warning.html/render warning should show above size limit.": "66773602a12017c7aafff7043dc612cd",
+    "render_warning.html/render warning should show above size limit.": "b962cd6103977f5295dd24e773c9c426",
     "render_warning.html/dismissing render warning should trigger render.": "f0dbd0bb32ddd7f500aae54d65b6c10a",
-    "render_warning.html/selecting 'do not show again' should stop render warnings.": "f0dbd0bb32ddd7f500aae54d65b6c10a",
-    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "d1c783cbbb004fbc8d38a668116058d4",
+    "render_warning.html/underlying data updates should not trigger rerender if warning is visible.": "423ef1bf54472a0a9b8869130d164cc5",
     "bar.html/highlights invalid filter.": "d1de0d4a84bde25d5b2e33185923f5b6",
     "scatter.html/highlights invalid filter.": "6de6490dddf52cfccb56ca7fd67557e8",
     "line.html/highlights invalid filter.": "06752a9e251ff55c1e0afe3bb47216c5",
@@ -100,5 +99,5 @@
     "bar.html/perspective dispatches perspective-click event with one filter.": "32d64db28af46dfe77fad5cc1ca8af9c",
     "bar.html/perspective dispatches perspective-click event with filters.": "c18f49270244dfe4a6b32270ec30d99d",
     "bar.html/dates on the x-axis display correctly.": "591a1c8e9493451b6885b9651917ffff",
-    "__GIT_COMMIT__": "e516798564eb956c7eae5cb02f81610c08071d6f"
+    "__GIT_COMMIT__": "16ff08b2ef26f839973469f1775af489acd07a50"
 }
