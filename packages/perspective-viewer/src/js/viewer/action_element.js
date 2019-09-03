@@ -213,6 +213,10 @@ export class ActionElement extends DomElement {
         }
     }
 
+    _reset_sidepanel() {
+        this._side_panel.style.width = "";
+    }
+
     _resize_sidepanel(event) {
         const initial = document.body.style.cursor;
         document.body.style.cursor = "col-resize";
@@ -270,6 +274,7 @@ export class ActionElement extends DomElement {
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._drop_target.addEventListener("dragover", dragover.bind(this));
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
+        this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
             this._plugin_information.classList.add("hidden");
