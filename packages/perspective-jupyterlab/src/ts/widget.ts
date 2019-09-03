@@ -103,7 +103,7 @@ class PerspectiveView extends DOMWidgetView {
 
     _setElement(el: HTMLElement) {
         if (this.el || el !== this.pWidget.node) {
-            // Accordions don't allow setting the element beyond the initial creation.
+            // Disallow allow setting the element beyond the initial creation.
             throw new Error('Cannot reset the DOM element.');
         }
         this.el = this.pWidget.node;
