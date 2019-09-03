@@ -759,7 +759,7 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[2]["y"] = "new_string";
 
             expect(result).toEqual(expected);
@@ -779,7 +779,7 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[2]["x"] = 100;
             expected[2]["y"] = "new_string";
 
@@ -807,7 +807,7 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[0]["y"] = "new_string1";
             expected[1]["y"] = "new_string2";
             expected[2]["y"] = "new_string3";
@@ -840,7 +840,7 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[0]["y"] = "new_string1";
             expected[1]["y"] = "new_string2";
             expected[2]["y"] = "new_string3";
@@ -870,7 +870,7 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[0]["y"] = "new_string3";
 
             expect(result).toEqual(expected);
@@ -894,12 +894,85 @@ module.exports = perspective => {
             let view = table.view();
             let result = await view.to_json();
 
-            let expected = data.slice();
+            let expected = JSON.parse(JSON.stringify(data));
             expected[0]["y"] = "new_string";
             expected.push({x: null, y: "new_string", z: null});
 
             expect(result).toEqual(expected);
             view.delete();
+            table.delete();
+        });
+
+        it("should partial update on 1-sided views using implicit '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            let view = table.view({
+                row_pivots: ["x"]
+            });
+
+            table.update([
+                {
+                    __INDEX__: 0,
+                    x: 100
+                }
+            ]);
+
+            let result = await view.to_json();
+            // update should be applied properly
+            expect(result).toEqual([
+                {__ROW_PATH__: [], x: 109, y: 4, z: 4},
+                {__ROW_PATH__: [2], x: 2, y: 1, z: 1},
+                {__ROW_PATH__: [3], x: 3, y: 1, z: 1},
+                {__ROW_PATH__: [4], x: 4, y: 1, z: 1},
+                {__ROW_PATH__: [100], x: 100, y: 1, z: 1}
+            ]);
+
+            // check that un-pivoted view reflects data correctly
+            let view2 = table.view();
+            let result2 = await view2.to_json();
+            let expected = JSON.parse(JSON.stringify(data));
+            expected[0]["x"] = 100;
+
+            expect(result2).toEqual(expected);
+
+            view.delete();
+            view2.delete();
+            table.delete();
+        });
+
+        it("should partial update on 2-sided views using implicit '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            let view = table.view({
+                row_pivots: ["x"],
+                column_pivots: ["y"]
+            });
+
+            table.update([
+                {
+                    __INDEX__: 0,
+                    x: 100
+                }
+            ]);
+
+            let result = await view.to_json();
+            // update should be applied properly
+            expect(result).toEqual([
+                {__ROW_PATH__: [], "a|x": 100, "a|y": 1, "a|z": 1, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": 4, "d|y": 1, "d|z": 1},
+                {__ROW_PATH__: [2], "a|x": null, "a|y": null, "a|z": null, "b|x": 2, "b|y": 1, "b|z": 1, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null},
+                {__ROW_PATH__: [3], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": 3, "c|y": 1, "c|z": 1, "d|x": null, "d|y": null, "d|z": null},
+                {__ROW_PATH__: [4], "a|x": null, "a|y": null, "a|z": null, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": 4, "d|y": 1, "d|z": 1},
+                {__ROW_PATH__: [100], "a|x": 100, "a|y": 1, "a|z": 1, "b|x": null, "b|y": null, "b|z": null, "c|x": null, "c|y": null, "c|z": null, "d|x": null, "d|y": null, "d|z": null}
+            ]);
+
+            // check that un-pivoted view reflects data correctly
+            let view2 = table.view();
+            let result2 = await view2.to_json();
+            let expected = JSON.parse(JSON.stringify(data));
+            expected[0]["x"] = 100;
+
+            expect(result2).toEqual(expected);
+
+            view.delete();
+            view2.delete();
             table.delete();
         });
     });
