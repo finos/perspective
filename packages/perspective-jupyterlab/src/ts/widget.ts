@@ -7,6 +7,7 @@
  *
  */
 
+import {Message} from '@phosphor/messaging';
 import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base';
 
 import {PERSPECTIVE_VERSION} from './version';
@@ -22,7 +23,7 @@ if (perspective) {
     console.warn('Perspective was undefined - wasm load errors may occur');
 }
 
-import {PerspectiveWidget} from '@finos/perspective-phosphor';
+import {PerspectiveWidget, PerspectiveWidgetOptions} from '@finos/perspective-phosphor';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
@@ -71,6 +72,52 @@ class PerspectiveModel extends DOMWidgetModel {
 }
 
 
+export type JupyterPerspectiveWidgetOptions = {
+    view?: any;
+}
+
+
+export
+class JupyterPerspectiveWidget extends PerspectiveWidget {
+    constructor(name: string = 'Perspective', options: JupyterPerspectiveWidgetOptions & PerspectiveWidgetOptions) {
+        let view = options.view;
+        delete options.view;
+        super(name, options as PerspectiveWidgetOptions);
+        this._view = view;
+    }
+
+    /**
+     * Process the phosphor message.
+     *
+     * Any custom phosphor widget used inside a Jupyter widget should override
+     * the processMessage function like this.
+     */
+    processMessage(msg: Message) {
+        super.processMessage(msg);
+        this._view.processPhosphorMessage(msg);
+    }
+
+    /**
+     * Dispose the widget.
+     *
+     * This causes the view to be destroyed as well with 'remove'
+     */
+    dispose() {
+        if (this.isDisposed) {
+            return;
+        }
+        super.dispose();
+        if (this._view) {
+            this._view.remove();
+        }
+        this._view = null;
+    }
+
+    private _view: DOMWidgetView;
+}
+
+
+
 export
 class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveWidget;
@@ -98,7 +145,6 @@ class PerspectiveView extends DOMWidgetView {
              key: '', // key: handled by perspective-python
              wrap: false, // wrap: handled by perspective-python
              delete_: true, // delete_: handled by perspective-python
-             view: this, // necessary for ipywidgets
         });
         return this.pWidget.node;
     }
