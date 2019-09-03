@@ -40,6 +40,14 @@ const column_sorter = schema => (a, b) => {
     return r;
 };
 
+function get_aggregate_defaults(schema, cols) {
+    const aggregates = {};
+    for (const col of cols) {
+        aggregates[col] = get_type_config(schema[col]).aggregate;
+    }
+    return aggregates;
+}
+
 function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
     const found = new Set();
     const aggregates = [];
@@ -147,7 +155,7 @@ export class PerspectiveElement extends StateElement {
             shown = this._initial_col_order;
         }
 
-        this.set_aggregate_attribute(aggregates);
+        this._aggregate_defaults = get_aggregate_defaults(schema, all_cols);
 
         for (const name of all_cols) {
             const aggregate = aggregates.find(a => a.column === name).op;
@@ -171,7 +179,12 @@ export class PerspectiveElement extends StateElement {
 
         this._show_column_selectors();
 
-        this.filters = this.getAttribute("filters");
+        // Filters need type information to populate e.g. the operator dropdown,
+        // so reset them.
+        if (this.hasAttribute("filters")) {
+            this.filters = this.getAttribute("filters");
+        }
+
         await this._debounce_update({force_update: true});
         resolve();
     }
@@ -248,7 +261,7 @@ export class PerspectiveElement extends StateElement {
                     if (limit_points) {
                         const {max_cols, max_rows} = await this.get_maxes();
                         if (!task.cancelled) {
-                            this._warn_render_size_exceeded(max_cols, max_rows);
+                            await this._warn_render_size_exceeded(max_cols, max_rows);
                             await updater.call(this, this._datavis, this._view, task, max_cols, max_rows);
                         }
                     } else {
@@ -261,7 +274,7 @@ export class PerspectiveElement extends StateElement {
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
-            }, calculate_throttle_timeout(this.getAttribute("render_time")));
+            }, calculate_throttle_timeout(this.__render_time));
         }
     }
 
@@ -353,7 +366,7 @@ export class PerspectiveElement extends StateElement {
 
         const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
-            this._warn_render_size_exceeded(max_cols, max_rows);
+            await this._warn_render_size_exceeded(max_cols, max_rows);
         }
 
         const timer = this._render_time();
@@ -373,7 +386,7 @@ export class PerspectiveElement extends StateElement {
         } catch (err) {
             console.warn(err);
         } finally {
-            if (!this.hasAttribute("render_time")) {
+            if (!this.__render_time) {
                 this.dispatchEvent(new Event("perspective-view-update"));
             }
             timer();
@@ -387,7 +400,7 @@ export class PerspectiveElement extends StateElement {
 
     _render_time() {
         const t = performance.now();
-        return () => this.setAttribute("render_time", performance.now() - t);
+        return () => (this.__render_time = `${performance.now() - t}`);
     }
 
     _restyle_plugin() {
@@ -420,7 +433,7 @@ export class PerspectiveElement extends StateElement {
     }
 
     _set_updating() {
-        this.setAttribute("updating", true);
+        this.toggleAttribute("updating", true);
         let resolve;
         this._updating_promise = new Promise(_resolve => {
             resolve = _resolve;

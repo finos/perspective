@@ -56,6 +56,9 @@ export function registerElement(templateString, styleString, proto) {
 
     const _perspective_element = class extends proto {
         attributeChangedCallback(name, old, value) {
+            if (value === null) {
+                value = "null";
+            }
             if (name[0] !== "_" && old != value) {
                 this[name] = value;
             }
@@ -102,7 +105,7 @@ export function registerElement(templateString, styleString, proto) {
         if (descriptor && descriptor.set) {
             let old = descriptor.set;
             descriptor.set = function(val) {
-                if (this.getAttribute(key) !== val) {
+                if (!this.hasAttribute(key) || this.getAttribute(key) !== val) {
                     this.setAttribute(key, val);
                     return;
                 }
@@ -142,20 +145,18 @@ function _attribute(_default) {
         desc.set = function(x) {
             let attr = this.getAttribute(name);
             try {
-                if (x === null || x === undefined) {
+                if (x === null || x === undefined || x === "") {
                     x = _default();
                 }
                 if (typeof x !== "string") {
                     x = JSON.stringify(x);
                 }
                 if (x !== attr) {
-                    this.setAttribute(name, x);
                     attr = x;
-                    return;
                 }
                 attr = JSON.parse(attr);
             } catch (e) {
-                console.error(`Invalid value for attribute "${name}": ${x}`);
+                console.warn(`Invalid value for attribute "${name}": ${x}`);
                 attr = _default();
             }
             old_set.call(this, attr);
@@ -163,6 +164,8 @@ function _attribute(_default) {
         desc.get = function() {
             if (this.hasAttribute(name)) {
                 return JSON.parse(this.getAttribute(name));
+            } else {
+                return _default();
             }
         };
         delete desc["value"];

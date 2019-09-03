@@ -32,7 +32,7 @@ export class ActionElement extends DomElement {
             } else {
                 this._side_panel.style.display = "flex";
                 this._top_panel.style.display = "flex";
-                this.setAttribute("settings", true);
+                this.toggleAttribute("settings", true);
             }
             this._show_config = !this._show_config;
             this._plugin.resize.call(this, true);
@@ -193,9 +193,28 @@ export class ActionElement extends DomElement {
 
     // edits state
     _transpose() {
-        let row_pivots = this.getAttribute("row-pivots");
-        this.setAttribute("row-pivots", this.getAttribute("column-pivots"));
-        this.setAttribute("column-pivots", row_pivots);
+        const has_row = this.hasAttribute("row-pivots");
+        const has_col = this.hasAttribute("column-pivots");
+        if (has_row && has_col) {
+            let row_pivots = this.getAttribute("row-pivots");
+            this.setAttribute("row-pivots", this.getAttribute("column-pivots"));
+            this.setAttribute("column-pivots", row_pivots);
+        } else if (has_row) {
+            let row_pivots = this.getAttribute("row-pivots");
+            this.removeAttribute("row-pivots");
+            this.setAttribute("column-pivots", row_pivots);
+        } else if (has_col) {
+            let column_pivots = this.getAttribute("column-pivots");
+            this.removeAttribute("column-pivots");
+            this.setAttribute("row-pivots", column_pivots);
+        } else {
+            this.removeAttribute("column-pivots");
+            this.removeAttribute("row-pivots");
+        }
+    }
+
+    _reset_sidepanel() {
+        this._side_panel.style.width = "";
     }
 
     _resize_sidepanel(event) {
@@ -255,6 +274,7 @@ export class ActionElement extends DomElement {
         this._transpose_button.addEventListener("click", this._transpose.bind(this));
         this._drop_target.addEventListener("dragover", dragover.bind(this));
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
+        this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
 
         this._vis_selector.addEventListener("change", () => {
             this._plugin_information.classList.add("hidden");
