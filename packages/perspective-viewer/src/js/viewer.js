@@ -530,7 +530,11 @@ class PerspectiveViewer extends ActionElement {
         for (let key = 0; key < this.attributes.length; key++) {
             let attr = this.attributes[key];
             if (cols.has(attr.name)) {
-                obj[attr.name] = attr.value;
+                if (attr.name !== "plugin" && attr.value !== undefined && attr.value !== null) {
+                    obj[attr.name] = JSON.parse(attr.value);
+                } else {
+                    obj[attr.name] = attr.value;
+                }
                 cols.delete(attr.name);
             }
         }
