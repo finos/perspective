@@ -746,4 +746,161 @@ module.exports = perspective => {
             table.delete();
         });
     });
+
+    describe("implicit index", function() {
+        it("should apply single partial update on unindexed table using row id from '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 2,
+                    y: "new_string"
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[2]["y"] = "new_string";
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("should apply single multi-column partial update on unindexed table using row id from '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 2,
+                    y: "new_string",
+                    x: 100
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[2]["x"] = 100;
+            expected[2]["y"] = "new_string";
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("should apply multiple sequential partial updates on unindexed table using '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 0,
+                    y: "new_string1"
+                },
+                {
+                    __INDEX__: 1,
+                    y: "new_string2"
+                },
+                {
+                    __INDEX__: 2,
+                    y: "new_string3"
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[0]["y"] = "new_string1";
+            expected[1]["y"] = "new_string2";
+            expected[2]["y"] = "new_string3";
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("should correctly apply multiple out-of-sequence partial updates on unindexed table using '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 0,
+                    y: "new_string1"
+                },
+                {
+                    __INDEX__: 2,
+                    y: "new_string3"
+                },
+                {
+                    __INDEX__: 3,
+                    y: "new_string4"
+                },
+                {
+                    __INDEX__: 1,
+                    y: "new_string2"
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[0]["y"] = "new_string1";
+            expected[1]["y"] = "new_string2";
+            expected[2]["y"] = "new_string3";
+            expected[3]["y"] = "new_string4";
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("should stack multiple partial updates on unindexed table using the same '__INDEX__'", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 0,
+                    y: "new_string1"
+                },
+                {
+                    __INDEX__: 0,
+                    y: "new_string2"
+                },
+                {
+                    __INDEX__: 0,
+                    y: "new_string3"
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[0]["y"] = "new_string3";
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+
+        it("updates without '__INDEX' should append", async function() {
+            let table = perspective.table(data);
+            table.update([
+                {
+                    __INDEX__: 0,
+                    y: "new_string"
+                }
+            ]);
+            table.update([
+                {
+                    y: "new_string"
+                }
+            ]);
+            let view = table.view();
+            let result = await view.to_json();
+
+            let expected = data.slice();
+            expected[0]["y"] = "new_string";
+            expected.push({x: null, y: "new_string", z: null});
+
+            expect(result).toEqual(expected);
+            view.delete();
+            table.delete();
+        });
+    });
 };

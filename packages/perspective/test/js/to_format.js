@@ -14,6 +14,14 @@ var int_float_string_data = [
     {int: 4, float: 5.25, string: "d", datetime: new Date()}
 ];
 
+const pivoted_output = [
+    {__ROW_PATH__: [], int: 10, float: 15.75, string: 4, datetime: 4, __INDEX__: [3, 2, 1, 0]},
+    {__ROW_PATH__: [1], int: 1, float: 2.25, string: 1, datetime: 1, __INDEX__: [0]},
+    {__ROW_PATH__: [2], int: 2, float: 3.5, string: 1, datetime: 1, __INDEX__: [1]},
+    {__ROW_PATH__: [3], int: 3, float: 4.75, string: 1, datetime: 1, __INDEX__: [2]},
+    {__ROW_PATH__: [4], int: 4, float: 5.25, string: 1, datetime: 1, __INDEX__: [3]}
+];
+
 module.exports = perspective => {
     describe("data slice", function() {
         it("should filter out invalid start rows", async function() {
@@ -382,7 +390,7 @@ module.exports = perspective => {
 
         describe("to_format with index", function() {
             describe("0-sided", function() {
-                it("should return correct pkey for unindexed Table", async function() {
+                it("should return correct pkey for unindexed table", async function() {
                     let table = perspective.table(int_float_string_data);
                     let view = table.view();
                     let json = await view.to_json({
@@ -447,7 +455,7 @@ module.exports = perspective => {
                     }
                 });
 
-                it.skip("should return correct pkey for all rows + columns on an indexed table", async function() {
+                it("should return correct pkey for all rows + columns on an indexed table", async function() {
                     let table = perspective.table(int_float_string_data, {index: "string"});
                     let view = table.view();
                     let json = await view.to_json({
@@ -462,53 +470,40 @@ module.exports = perspective => {
             });
         });
 
-        describe.skip("1-sided", function() {
-            it("should not generate pkey for 1-sided", async function() {
+        describe("1-sided", function() {
+            it("should generate pkeys of aggregated rows for 1-sided", async function() {
                 let table = perspective.table(int_float_string_data);
                 let view = table.view({
                     row_pivots: ["int"]
                 });
                 let json = await view.to_json({
-                    start_row: 0,
-                    end_row: 1
+                    index: true
                 });
-                expect(json).toEqual([{__ROW_PATH__: [], datetime: 4, float: 15.75, int: 10, string: 4}]);
+
+                // total row contains all pkeys for underlying rows; each aggregated row should have pkeys for the rows that belong to it
+                expect(json).toEqual(pivoted_output);
             });
         });
 
-        describe.skip("2-sided", function() {
-            it("should not generate pkey for 2-sided", async function() {
+        describe("2-sided", function() {
+            it.skip("should generate pkey for 2-sided", async function() {
+                // 2-sided implicit pkeys do not work
                 let table = perspective.table(int_float_string_data);
                 let view = table.view({
                     row_pivots: ["int"],
                     column_pivots: ["float"]
                 });
                 let json = await view.to_json({
-                    start_row: 0,
-                    end_row: 1,
                     index: true
                 });
-                expect(json).toEqual([
-                    {
-                        "2.25|datetime": 1,
-                        "2.25|float": 2.25,
-                        "2.25|int": 1,
-                        "2.25|string": 1,
-                        "3.5|datetime": 1,
-                        "3.5|float": 3.5,
-                        "3.5|int": 2,
-                        "3.5|string": 1,
-                        "4.75|datetime": 1,
-                        "4.75|float": 4.75,
-                        "4.75|int": 3,
-                        "4.75|string": 1,
-                        "5.25|datetime": 1,
-                        "5.25|float": 5.25,
-                        "5.25|int": 4,
-                        "5.25|string": 1,
-                        __ROW_PATH__: []
-                    }
-                ]);
+
+                expect(json[0]["__INDEX__"]).toEqual([0, 1]); // total row should have indices for every row inside it
+
+                let idx = 0;
+                for (let item of json.slice(1)) {
+                    expect(item["__INDEX__"]).toEqual([idx]);
+                    idx++;
+                }
             });
         });
     });
