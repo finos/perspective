@@ -261,7 +261,7 @@ export class PerspectiveElement extends StateElement {
                     if (limit_points) {
                         const {max_cols, max_rows} = await this.get_maxes();
                         if (!task.cancelled) {
-                            this._warn_render_size_exceeded(max_cols, max_rows);
+                            await this._warn_render_size_exceeded(max_cols, max_rows);
                             await updater.call(this, this._datavis, this._view, task, max_cols, max_rows);
                         }
                     } else {
@@ -366,7 +366,7 @@ export class PerspectiveElement extends StateElement {
 
         const {max_cols, max_rows} = await this.get_maxes();
         if (!ignore_size_check) {
-            this._warn_render_size_exceeded(max_cols, max_rows);
+            await this._warn_render_size_exceeded(max_cols, max_rows);
         }
 
         const timer = this._render_time();
