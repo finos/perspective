@@ -190,7 +190,7 @@ enum t_filter_op {
 };
 
 PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);
-PERSPECTIVE_EXPORT t_filter_op str_to_filter_op(std::string str);
+PERSPECTIVE_EXPORT t_filter_op str_to_filter_op(const std::string& str);
 
 enum t_header { HEADER_ROW, HEADER_COLUMN };
 
@@ -202,7 +202,7 @@ enum t_sorttype {
     SORTTYPE_DESCENDING_ABS
 };
 
-PERSPECTIVE_EXPORT t_sorttype str_to_sorttype(std::string str);
+PERSPECTIVE_EXPORT t_sorttype str_to_sorttype(const std::string& str);
 PERSPECTIVE_EXPORT std::string sorttype_to_str(t_sorttype type);
 
 enum t_aggtype {
@@ -239,7 +239,7 @@ enum t_aggtype {
     AGGTYPE_PCT_SUM_GRAND_TOTAL
 };
 
-PERSPECTIVE_EXPORT t_aggtype str_to_aggtype(std::string str);
+PERSPECTIVE_EXPORT t_aggtype str_to_aggtype(const std::string& str);
 PERSPECTIVE_EXPORT t_aggtype _get_default_aggregate(t_dtype dtype);
 PERSPECTIVE_EXPORT std::string _get_default_aggregate_string(t_dtype dtype);
 

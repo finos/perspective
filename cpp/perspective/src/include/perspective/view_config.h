@@ -172,9 +172,9 @@ private:
     std::int32_t m_column_pivot_depth;
 
     /**
-     * @brief the `t_filter_op` used to combine values inside the engine, stored as a string.
+     * @brief the `t_filter_op` used to return data in the case of multiple filters being applied.
      *
-     * Defaults to "and" unless specified.
+     * Defaults to "and", which returns data that satisfies all the filters provided by the user. 
      */
     std::string m_filter_op;
 

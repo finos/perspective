@@ -704,7 +704,7 @@ namespace binding {
     }
 
     void
-    _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -748,7 +748,7 @@ namespace binding {
     }
 
     void
-    _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -798,7 +798,7 @@ namespace binding {
     }
 
     void
-    _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
 
         t_uindex nrows = col->size();
@@ -869,7 +869,7 @@ namespace binding {
     }
 
     void
-    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -911,7 +911,7 @@ namespace binding {
 
     void
     _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
         bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -1174,7 +1174,7 @@ namespace binding {
      */
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
         bool is_arrow, bool is_update) {
         switch (type) {
             case DTYPE_INT64: {
@@ -1269,7 +1269,7 @@ namespace binding {
     template <>
     std::shared_ptr<Table>
     make_table(t_val table, t_data_accessor accessor, t_val computed,
-        std::uint32_t limit, std::string index, t_op op, bool is_update, bool is_arrow) {
+        std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow) {
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
 
@@ -1377,14 +1377,11 @@ namespace binding {
 
     template <>
     bool
-    is_valid_filter(t_dtype type, t_val date_parser, t_val filter_term, t_val filter_operand) {
-        std::string comp_str = filter_operand.as<std::string>();
-        t_filter_op comp = str_to_filter_op(comp_str);
-
-        if (comp == t_filter_op::FILTER_OP_IS_NULL
-            || comp == t_filter_op::FILTER_OP_IS_NOT_NULL) {
+    is_valid_filter(t_dtype column_type, t_val date_parser, t_filter_op filter_operator, t_val filter_term) {
+        if (filter_operator == t_filter_op::FILTER_OP_IS_NULL
+            || filter_operator == t_filter_op::FILTER_OP_IS_NOT_NULL) {
             return true;
-        } else if (type == DTYPE_DATE || type == DTYPE_TIME) {
+        } else if (column_type == DTYPE_DATE || column_type == DTYPE_TIME) {
             t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
             return has_value(parsed_date);
         } else {
@@ -1394,17 +1391,15 @@ namespace binding {
 
     template <>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
-    make_filter_term(t_dtype type, t_val date_parser, std::vector<t_val> filter) {
-        std::string col = filter[0].as<std::string>();
-        std::string comp_str = filter[1].as<std::string>();
-        t_filter_op comp = str_to_filter_op(comp_str);
+    make_filter_term(t_dtype column_type, t_val date_parser, const std::string column_name, const std::string& filter_op_str, t_val filter_term) {
+        t_filter_op filter_op = str_to_filter_op(filter_op_str);
         std::vector<t_tscalar> terms;
 
-        switch (comp) {
+        switch (filter_op) {
             case FILTER_OP_NOT_IN:
             case FILTER_OP_IN: {
                 std::vector<std::string> filter_terms
-                    = vecFromArray<t_val, std::string>(filter[2]);
+                    = vecFromArray<t_val, std::string>(filter_term);
                 for (auto term : filter_terms) {
                     terms.push_back(mktscalar(get_interned_cstr(term.c_str())));
                 }
@@ -1414,35 +1409,35 @@ namespace binding {
                 terms.push_back(mktscalar(0));
             } break;
             default: {
-                switch (type) {
+                switch (column_type) {
                     case DTYPE_INT32: {
-                        terms.push_back(mktscalar(filter[2].as<std::int32_t>()));
+                        terms.push_back(mktscalar(filter_term.as<std::int32_t>()));
                     } break;
                     case DTYPE_INT64:
                     case DTYPE_FLOAT64: {
-                        terms.push_back(mktscalar(filter[2].as<double>()));
+                        terms.push_back(mktscalar(filter_term.as<double>()));
                     } break;
                     case DTYPE_BOOL: {
-                        terms.push_back(mktscalar(filter[2].as<bool>()));
+                        terms.push_back(mktscalar(filter_term.as<bool>()));
                     } break;
                     case DTYPE_DATE: {
-                        t_val parsed_date = date_parser.call<t_val>("parse", filter[2]);
+                        t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
                         terms.push_back(mktscalar(jsdate_to_t_date(parsed_date)));
                     } break;
                     case DTYPE_TIME: {
-                        t_val parsed_date = date_parser.call<t_val>("parse", filter[2]);
+                        t_val parsed_date = date_parser.call<t_val>("parse", filter_term);
                         terms.push_back(mktscalar(t_time(static_cast<std::int64_t>(
                             parsed_date.call<t_val>("getTime").as<double>()))));
                     } break;
                     default: {
                         terms.push_back(
-                            mktscalar(get_interned_cstr(filter[2].as<std::string>().c_str())));
+                            mktscalar(get_interned_cstr(filter_term.as<std::string>().c_str())));
                     }
                 }
             }
         }
 
-        return std::make_tuple(col, comp_str, terms);
+        return std::make_tuple(column_name, filter_op_str, terms);
     }
 
     template <>
@@ -1478,15 +1473,21 @@ namespace binding {
         std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter;
 
         for (auto f : js_filter) {
-            t_dtype type = schema.get_dtype(f.at(0).as<std::string>());
-
+            // parse filter details
+            std::string column_name = f.at(0).as<std::string>();
+            std::string filter_op_str = f.at(1).as<std::string>();
+            t_dtype column_type = schema.get_dtype(column_name);
+            t_filter_op filter_operator = str_to_filter_op(filter_op_str); 
+            
             // validate the filter before it goes into the core engine
             t_val filter_term = t_val::null();
             if (f.size() > 2) {
+                // null/not null filters do not have a filter term
                 filter_term = f.at(2);
             }
-            if (is_valid_filter(type, date_parser, filter_term, f.at(1))) {
-                filter.push_back(make_filter_term(type, date_parser, f));
+
+            if (is_valid_filter(column_type, date_parser, filter_operator, filter_term)) {
+                filter.push_back(make_filter_term(column_type, date_parser, column_name, filter_op_str, filter_term));
             }
         }
 
@@ -1511,7 +1512,7 @@ namespace binding {
 
     template <typename CTX_T>
     std::shared_ptr<View<CTX_T>>
-    make_view(std::shared_ptr<Table> table, std::string name, std::string separator,
+    make_view(std::shared_ptr<Table> table, const std::string& name, const std::string& separator,
         t_val view_config, t_val date_parser) {
         auto schema = table->get_schema();
         t_view_config config = make_view_config<t_val>(schema, date_parser, view_config);
@@ -1531,7 +1532,7 @@ namespace binding {
     template <>
     std::shared_ptr<t_ctx0>
     make_context(std::shared_ptr<Table> table, const t_schema& schema,
-        const t_view_config& view_config, std::string name) {
+        const t_view_config& view_config, const std::string& name) {
         auto columns = view_config.get_columns();
         auto filter_op = view_config.get_filter_op();
         auto fterm = view_config.get_fterm();
@@ -1553,7 +1554,7 @@ namespace binding {
     template <>
     std::shared_ptr<t_ctx1>
     make_context(std::shared_ptr<Table> table, const t_schema& schema,
-        const t_view_config& view_config, std::string name) {
+        const t_view_config& view_config, const std::string& name) {
         auto row_pivots = view_config.get_row_pivots();
         auto aggspecs = view_config.get_aggspecs();
         auto filter_op = view_config.get_filter_op();
@@ -1584,7 +1585,7 @@ namespace binding {
     template <>
     std::shared_ptr<t_ctx2>
     make_context(std::shared_ptr<Table> table, const t_schema& schema,
-        const t_view_config& view_config, std::string name) {
+        const t_view_config& view_config, const std::string& name) {
         bool column_only = view_config.is_column_only();
         auto row_pivots = view_config.get_row_pivots();
         auto column_pivots = view_config.get_column_pivots();
@@ -1639,7 +1640,7 @@ namespace binding {
 
     template <>
     t_val
-    get_column_data(std::shared_ptr<t_data_table> table, std::string colname) {
+    get_column_data(std::shared_ptr<t_data_table> table, const std::string& colname) {
         t_val arr = t_val::array();
         auto col = table->get_column(colname);
         for (auto idx = 0; idx < col->size(); ++idx) {

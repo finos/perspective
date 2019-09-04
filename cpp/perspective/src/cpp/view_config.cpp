@@ -17,15 +17,15 @@ t_view_config::t_view_config(std::vector<std::string> row_pivots,
     std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>> filter,
     std::vector<std::vector<std::string>> sort, std::string filter_op, bool column_only)
     : m_init(false)
-    , m_row_pivots(row_pivots)
-    , m_column_pivots(column_pivots)
-    , m_aggregates(aggregates)
-    , m_columns(columns)
-    , m_filter(filter)
-    , m_sort(sort)
+    , m_row_pivots(std::move(row_pivots))
+    , m_column_pivots(std::move(column_pivots))
+    , m_aggregates(std::move(aggregates))
+    , m_columns(std::move(columns))
+    , m_filter(std::move(filter))
+    , m_sort(std::move(sort))
     , m_row_pivot_depth(-1)
     , m_column_pivot_depth(-1)
-    , m_filter_op(filter_op)
+    , m_filter_op(std::move(filter_op))
     , m_column_only(column_only) {}
 
 void
