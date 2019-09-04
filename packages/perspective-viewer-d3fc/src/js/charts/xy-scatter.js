@@ -101,7 +101,8 @@ xyScatter.plugin = {
         type: "number",
         count: 2,
         names: ["X Axis", "Y Axis", "Color", "Size"]
-    }
+    },
+    selectMode: "toggle"
 };
 
 export default xyScatter;
