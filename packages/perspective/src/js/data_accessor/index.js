@@ -43,7 +43,7 @@ export class DataAccessor {
         } else if (typeof data[Object.keys(data)[0]] === "string" || typeof data[Object.keys(data)[0]] === "function") {
             return this.data_formats.schema;
         } else {
-            throw `Could not determine data format for ${data}`;
+            throw `Could not determine data format for ${JSON.stringify(data)}, with JS typeof ${typeof data}`;
         }
     }
 
