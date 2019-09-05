@@ -7,6 +7,7 @@
  *
  */
 
+import {Message} from '@phosphor/messaging';
 import {DOMWidgetModel, DOMWidgetView, ISerializers} from '@jupyter-widgets/base';
 
 import {PERSPECTIVE_VERSION} from './version';
@@ -22,7 +23,7 @@ if (perspective) {
     console.warn('Perspective was undefined - wasm load errors may occur');
 }
 
-import {PerspectiveWidget} from '@finos/perspective-phosphor';
+import {PerspectiveWidget, PerspectiveWidgetOptions} from '@finos/perspective-phosphor';
 
 export
 class PerspectiveModel extends DOMWidgetModel {
@@ -71,8 +72,56 @@ class PerspectiveModel extends DOMWidgetModel {
 }
 
 
+export type JupyterPerspectiveWidgetOptions = {
+    view?: any;
+}
+
+
+export
+class JupyterPerspectiveWidget extends PerspectiveWidget {
+    constructor(name: string = 'Perspective', options: JupyterPerspectiveWidgetOptions & PerspectiveWidgetOptions) {
+        let view = options.view;
+        delete options.view;
+        super(name, options as PerspectiveWidgetOptions);
+        this._view = view;
+    }
+
+    /**
+     * Process the phosphor message.
+     *
+     * Any custom phosphor widget used inside a Jupyter widget should override
+     * the processMessage function like this.
+     */
+    processMessage(msg: Message) {
+        super.processMessage(msg);
+        this._view.processPhosphorMessage(msg);
+    }
+
+    /**
+     * Dispose the widget.
+     *
+     * This causes the view to be destroyed as well with 'remove'
+     */
+    dispose() {
+        if (this.isDisposed) {
+            return;
+        }
+        super.dispose();
+        if (this._view) {
+            this._view.remove();
+        }
+        this._view = null;
+    }
+
+    private _view: DOMWidgetView;
+}
+
+
+
 export
 class PerspectiveView extends DOMWidgetView {
+    pWidget: PerspectiveWidget;
+
     _createElement(tagName: string) {
         this.pWidget = new PerspectiveWidget(undefined,
             {datasrc: this.model.get('datasrc'),
@@ -96,14 +145,13 @@ class PerspectiveView extends DOMWidgetView {
              key: '', // key: handled by perspective-python
              wrap: false, // wrap: handled by perspective-python
              delete_: true, // delete_: handled by perspective-python
-             view: this, // necessary for ipywidgets
         });
         return this.pWidget.node;
     }
 
     _setElement(el: HTMLElement) {
         if (this.el || el !== this.pWidget.node) {
-            // Accordions don't allow setting the element beyond the initial creation.
+            // Disallow allow setting the element beyond the initial creation.
             throw new Error('Cannot reset the DOM element.');
         }
         this.el = this.pWidget.node;
@@ -131,19 +179,19 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('msg:custom', this._update, this);
 
         this.displayed.then(()=> {
-            (this.pWidget as PerspectiveWidget)._render();
+            this.pWidget._render();
         });
     }
 
     remove() {
-        (this.pWidget as PerspectiveWidget).delete();
+        this.pWidget.delete();
     }
 
     _update(msg: any) {
         if (msg.type === 'update') {
-            (this.pWidget as PerspectiveWidget)._update(msg.data);
+            this.pWidget._update(msg.data);
         } else if (msg.type === 'delete') {
-            (this.pWidget as PerspectiveWidget).delete();
+            this.pWidget.delete();
         }
     }
 
@@ -151,78 +199,78 @@ class PerspectiveView extends DOMWidgetView {
         if(this.model.get('datasrc') === 'arrow'){
             return;
         }
-        (this.pWidget as PerspectiveWidget).data = this.model.get('_data');
-        (this.pWidget as PerspectiveWidget)._render();
+        this.pWidget.data = this.model.get('_data');
+        this.pWidget._render();
     }
 
     bin_data_changed() {
         if(this.model.get('datasrc') !== 'arrow'){
             return;
         }
-        (this.pWidget as PerspectiveWidget).data = this.model.get('_bin_data').buffer;
-        (this.pWidget as PerspectiveWidget)._render();
+        this.pWidget.data = this.model.get('_bin_data').buffer;
+        this.pWidget._render();
     }
 
     datasrc_changed(){
-        (this.pWidget as PerspectiveWidget).datasrc = this.model.get('datasrc');
-        (this.pWidget as PerspectiveWidget)._render();
+        this.pWidget.datasrc = this.model.get('datasrc');
+        this.pWidget._render();
     }
 
 
     schema_changed(){
-        (this.pWidget as PerspectiveWidget).schema = this.model.get('schema');
-        (this.pWidget as PerspectiveWidget)._render();
+        this.pWidget.schema = this.model.get('schema');
+        this.pWidget._render();
     }
 
     plugin_changed(){
-        (this.pWidget as PerspectiveWidget).plugin = this.model.get('plugin');
+        this.pWidget.plugin = this.model.get('plugin');
     }
 
     columns_changed(){
-        (this.pWidget as PerspectiveWidget).columns = this.model.get('columns');
+        this.pWidget.columns = this.model.get('columns');
     }
 
     rowpivots_changed(){
-        (this.pWidget as PerspectiveWidget).rowpivots = this.model.get('rowpivots');
+        this.pWidget.rowpivots = this.model.get('rowpivots');
     }
 
     columnpivots_changed(){
-        (this.pWidget as PerspectiveWidget).columnpivots = this.model.get('columnpivots');
+        this.pWidget.columnpivots = this.model.get('columnpivots');
     }
 
     aggregates_changed(){
-        (this.pWidget as PerspectiveWidget).aggregates = this.model.get('aggregates');
+        this.pWidget.aggregates = this.model.get('aggregates');
     }
 
     sort_changed(){
-        (this.pWidget as PerspectiveWidget).sort = this.model.get('sort');
+        this.pWidget.sort = this.model.get('sort');
     }
 
     computedcolumns_changed(){
-        (this.pWidget as PerspectiveWidget).computedcolumns = this.model.get('computedcolumns');
+        this.pWidget.computedcolumns = this.model.get('computedcolumns');
     }
 
     filters_changed(){
-        (this.pWidget as PerspectiveWidget).filters = this.model.get('filters');
+        this.pWidget.filters = this.model.get('filters');
     }
 
     plugin_config_changed(){
-        (this.pWidget as PerspectiveWidget).plugin_config = this.model.get('plugin_config');
+        this.pWidget.plugin_config = this.model.get('plugin_config');
     }
 
     limit_changed(){
-        (this.pWidget as PerspectiveWidget).limit = this.model.get('limit');
+        this.pWidget.limit = this.model.get('limit');
     }
 
     settings_changed(){
-        (this.pWidget as PerspectiveWidget).settings = this.model.get('settings');
+        this.pWidget.settings = this.model.get('settings');
     }
 
     embed_changed(){
-        (this.pWidget as PerspectiveWidget).embed = this.model.get('embed');
+        this.pWidget.embed = this.model.get('embed');
     }
 
     dark_changed(){
-        (this.pWidget as PerspectiveWidget).dark = this.model.get('dark');
+        this.pWidget.dark = this.model.get('dark');
     }
 }

@@ -44,7 +44,6 @@ export type PerspectiveWidgetOptions = {
     key?: string;
     wrap?: boolean;
     delete_?: boolean;
-    view?: any;
 }
 
 
@@ -74,7 +73,6 @@ export type PerspectiveWidgetOptions = {
  * @param {string} key - index object data by key
  * @param {boolean} wrap - wrap data in list
  * @param {boolean} delete_ - delete existing data on new data
- * @param {any} view - necessary for ipywidgets
  */
 export
     class PerspectiveWidget extends Widget {
@@ -82,10 +80,6 @@ export
         options: PerspectiveWidgetOptions = {}) {
         super({ node: options.bindto || document.createElement('div') });
         this._psp = Private.createNode(this.node as HTMLDivElement);
-
-        if (options.view){
-            this._view = options.view;
-        }
 
         this.title.label = name;
         this.title.caption = `${name}`;
@@ -182,19 +176,6 @@ export
     dispose(): void {
         this.delete();
         super.dispose();
-    }
-
-    /**
-     * Process the phosphor message.
-     *
-     * Any custom phosphor widget used inside a Jupyter widget should override
-     * the processMessage function like this.
-     */
-    processMessage(msg: Message) {
-        super.processMessage(msg);
-        if (this._view){
-            this._view.processPhosphorMessage(msg);
-        }
     }
 
     /**
@@ -533,8 +514,6 @@ export
     private _key: string;
     private _wrap: boolean;
     private _delete: boolean;
-
-    private _view: any;
 
     private _displayed: boolean;
 }
