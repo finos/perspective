@@ -15,7 +15,6 @@ const perspectivePlugin = require("./perspective-plugin");
 const PerspectiveDataModel = require("./PerspectiveDataModel");
 const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
 const {cloneDeep} = require("lodash");
-const Textfield = require("fin-hypergrid/src/cellEditors/Textfield");
 
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 
@@ -24,6 +23,7 @@ const TEMPLATE = require("../html/hypergrid.html");
 import style from "../less/hypergrid.less";
 import {get_styles, clear_styles} from "./styles.js";
 import {set_formatters} from "./formatters.js";
+import {set_editors} from "./editors.js";
 import {treeLineRendererPaint} from "./hypergrid-tree-cell-renderer";
 
 const COLUMN_HEADER_FONT = "12px Helvetica, sans-serif";
@@ -43,7 +43,6 @@ const base_grid_properties = {
     defaultRowHeight: 24,
     editable: true,
     editOnKeydown: true,
-    editor: "perspective-editor",
     editorActivationKeys: ["alt", "esc"],
     enableContinuousRepaint: false,
     fixedColumnCount: 0,
@@ -126,10 +125,10 @@ function generateGridProperties(overrides) {
 
 bindTemplate(TEMPLATE, style)(
     class HypergridElement extends HTMLElement {
-        set_data(data, schema, tschema, row_pivots, columns) {
+        set_data(data, schema, tschema, row_pivots, columns, force = false) {
             const hg_data = psp2hypergrid(data, schema, tschema, row_pivots, columns);
             if (this.grid) {
-                this.grid.behavior.setPSP(hg_data);
+                this.grid.behavior.setPSP(hg_data, force);
             } else {
                 this._hg_data = hg_data;
             }
@@ -144,8 +143,6 @@ bindTemplate(TEMPLATE, style)(
                 this.grid.canvas.stopResizeLoop();
                 host.removeAttribute("hidden");
                 this.grid.get_styles = () => get_styles(this);
-
-                // window.g = this.grid; window.p = g.properties; // for debugging convenience in console
 
                 this.grid.installPlugins([
                     perspectivePlugin,
@@ -179,6 +176,7 @@ bindTemplate(TEMPLATE, style)(
                 this.grid.addProperties(styles[""]);
 
                 set_formatters(this.grid);
+                set_editors(this.grid);
 
                 // Add tree cell renderer
                 this.grid.cellRenderers.add("TreeCell", Base.extend({paint: treeLineRendererPaint}));
@@ -246,7 +244,7 @@ async function getOrCreateHypergrid(div) {
     return perspectiveHypergridElement;
 }
 
-async function grid_create(div, view, task) {
+async function grid_create(div, view, task, max_rows, max_cols, force) {
     this[PRIVATE] = this[PRIVATE] || {};
     const hypergrid = this.hypergrid;
     if (hypergrid) {
@@ -303,7 +301,7 @@ async function grid_create(div, view, task) {
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
 
-    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns);
+    perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force);
     this.hypergrid.renderer.computeCellsBounds(true);
     await this.hypergrid.canvas.resize(true);
     this.hypergrid.canvas.paintNow();

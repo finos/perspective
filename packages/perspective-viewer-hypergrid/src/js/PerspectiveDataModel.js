@@ -135,6 +135,9 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     getCellEditorAt: function(columnIndex, rowIndex, declaredEditorName, options) {
+        if (!declaredEditorName) {
+            return;
+        }
         const offset = this.grid.renderer.dataWindow.top;
         const row = this._view.to_json({
             start_row: rowIndex + offset - 1,
@@ -143,24 +146,19 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
             end_col: columnIndex + 1,
             index: true
         });
-        const editor = this.grid.cellEditors.create("textfield", options);
-        editor.setEditorValue = function(old) {
-            return old;
-        };
+        const editor = this.grid.cellEditors.create(declaredEditorName, options);
+        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
         editor.getEditorValue = updated => {
             row.then(old => {
                 old = old[0];
                 const index = old.__INDEX__;
-                console.log(index);
                 delete old["__INDEX__"];
                 const colname = Object.keys(old)[0];
                 this._table.update([{__INDEX__: index, [colname]: updated}]);
-                console.log(old);
             });
             return updated;
         };
         return editor;
-        //this.grid.cellEditors.add("perspective-editor", editor);
     },
 
     getCell: function(config, rendererName) {

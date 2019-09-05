@@ -39,7 +39,7 @@ polyfill({});
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = ["editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
 
 /**
  * HTMLElement class for `<perspective-viewer>` custom element.  This class is
@@ -370,6 +370,26 @@ class PerspectiveViewer extends ActionElement {
         this._update_column_list(pivots, inner, pivot => this._new_row(pivot));
         this.dispatchEvent(new Event("perspective-config-update"));
         this._debounce_update();
+    }
+
+    /**
+     * Determines whether this viewer is editable or not (though it is
+     * ultimately up to the plugin as to whether editing is implemented).
+     *
+     * @kind member
+     * @type {boolean} Is this viewer editable?
+     * @fires PerspectiveViewer#perspective-config-update
+     */
+    set editable(x) {
+        if (x === "null") {
+            if (this.hasAttribute("editable")) {
+                this.removeAttribute("editable");
+            }
+        } else {
+            this.toggleAttribute("editable", true);
+        }
+        this._debounce_update({force_update: true});
+        this.dispatchEvent(new Event("perspective-config-update"));
     }
 
     /**
