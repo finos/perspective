@@ -140,6 +140,12 @@ public:
 
 private:
     /**
+     * @brief Make sure that the table does not have an explicit index AND an implicit index (with the `__INDEX__` column in data).
+     * 
+     * @param column_names 
+     */
+    void validate_columns(const std::vector<std::string>& column_names);
+    /**
      * @brief Create a column for the table operation - either insert or delete.
      *
      * @private
@@ -147,17 +153,6 @@ private:
      * @param op
      */
     void process_op_column(t_data_table& data_table, const t_op op);
-
-    /**
-     * @brief Create the index column using a provided index or the row number. 
-     * This serves as the primary key for the Table.
-     * 
-     * @private
-     * @param data_table
-     */
-    void process_index_column(t_data_table& data_table);
-
-    void validate_columns(const std::vector<std::string>& column_names);
 
     bool m_init;
     t_uindex m_id;

@@ -322,7 +322,7 @@ filter_op_to_str(t_filter_op op) {
 }
 
 t_filter_op
-str_to_filter_op(std::string str) {
+str_to_filter_op(const std::string& str) {
     if (str == "<") {
         return t_filter_op::FILTER_OP_LT;
     } else if (str == "<=") {
@@ -347,7 +347,7 @@ str_to_filter_op(std::string str) {
         return t_filter_op::FILTER_OP_NOT_IN;
     } else if (str == "&" || str == "and") {
         return t_filter_op::FILTER_OP_AND;
-    } else if (str == "|") {
+    } else if (str == "|" || str == "or") {
         return t_filter_op::FILTER_OP_OR;
     } else if (str == "is null") {
         return t_filter_op::FILTER_OP_IS_NULL;
@@ -365,7 +365,7 @@ str_to_filter_op(std::string str) {
 }
 
 t_sorttype
-str_to_sorttype(std::string str) {
+str_to_sorttype(const std::string& str) {
     if (str == "none") {
         return SORTTYPE_NONE;
     } else if (str == "asc" || str == "col asc") {
@@ -383,7 +383,7 @@ str_to_sorttype(std::string str) {
 }
 
 t_aggtype
-str_to_aggtype(std::string str) {
+str_to_aggtype(const std::string& str) {
     if (str == "distinct count" || str == "distinctcount" || str == "distinct"
         || str == "distinct_count") {
         return t_aggtype::AGGTYPE_DISTINCT_COUNT;

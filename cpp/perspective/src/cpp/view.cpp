@@ -17,10 +17,10 @@ View<CTX_T>::View(std::shared_ptr<Table> table, std::shared_ptr<CTX_T> ctx, std:
     std::string separator, t_view_config view_config)
     : m_table(table)
     , m_ctx(ctx)
-    , m_name(name)
-    , m_separator(separator)
+    , m_name(std::move(name))
+    , m_separator(std::move(separator))
     , m_col_offset(0)
-    , m_view_config(view_config) {
+    , m_view_config(std::move(view_config)) {
 
     m_row_pivots = m_view_config.get_row_pivots();
     m_column_pivots = m_view_config.get_column_pivots();

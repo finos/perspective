@@ -290,10 +290,11 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("y contains 'a' | y contains 'b'", async function() {
+            it("y contains 'a' OR y contains 'b'", async function() {
                 var table = perspective.table(data);
+                // when `filter_op` is provided, perspective returns data differently. In this case, returned data should satisfy either/or of the filter conditions.
                 var view = table.view({
-                    filter_op: "|",
+                    filter_op: "or",
                     filter: [["y", "contains", "a"], ["y", "contains", "b"]]
                 });
                 let json = await view.to_json();
