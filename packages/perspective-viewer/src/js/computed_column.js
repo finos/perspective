@@ -30,10 +30,22 @@ const month_of_year = function(val) {
     return ["01 January", "02 February", "03 March", "04 April", "05 May", "06 June", "07 July", "08 August", "09 September", "10 October", "11 November", "12 December"][new Date(val).getMonth()];
 };
 
+const second_bucket = function(val) {
+    return new Date(Math.floor(new Date(val).getTime() / 1000) * 1000);
+};
+
+const minute_bucket = function(val) {
+    let date = new Date(val);
+    date.setSeconds(0);
+    date.setMilliseconds(0);
+    return date;
+};
+
 const hour_bucket = function(val) {
     let date = new Date(val);
     date.setMinutes(0);
     date.setSeconds(0);
+    date.setMilliseconds(0);
     return date;
 };
 
@@ -42,6 +54,7 @@ const day_bucket = function(val) {
     date.setHours(0);
     date.setMinutes(0);
     date.setSeconds(0);
+    date.setMilliseconds(0);
     return date;
 };
 
@@ -69,6 +82,8 @@ export const COMPUTATIONS = {
     hour_of_day: new Computation("hour_of_day", "datetime", "integer", hour_of_day),
     day_of_week: new Computation("day_of_week", "datetime", "string", day_of_week),
     month_of_year: new Computation("month_of_year", "datetime", "string", month_of_year),
+    second_bucket: new Computation("second_bucket", "datetime", "datetime", second_bucket),
+    minute_bucket: new Computation("minute_bucket", "datetime", "datetime", minute_bucket),
     hour_bucket: new Computation("hour_bucket", "datetime", "datetime", hour_bucket),
     day_bucket: new Computation("day_bucket", "datetime", "date", day_bucket),
     week_bucket: new Computation("week_bucket", "datetime", "date", week_bucket),

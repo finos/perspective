@@ -1047,8 +1047,8 @@ namespace binding {
                 break;
             }
             case DTYPE_TIME: {
-                col->set_nth<std::int64_t>(
-                    idx, static_cast<std::int64_t>(value.as<double>()), STATUS_VALID);
+                auto elem = static_cast<std::int64_t>(value.call<t_val>("getTime").as<double>()); // dcol[i].as<T>();
+                col->set_nth(idx, elem, STATUS_VALID);
                 break;
             }
             case DTYPE_UINT8:
