@@ -76,6 +76,16 @@ function getEditorValueText(updated) {
     return this.localizer.format(updated);
 }
 
+function getEditorValueNumber(updated) {
+    this._row.then(([old]) => {
+        const index = old.__INDEX__;
+        delete old["__INDEX__"];
+        const colname = Object.keys(old)[0];
+        this._table.update([{__INDEX__: index, [colname]: Number(updated.replace(/,/g, ""))}]);
+    });
+    return this.localizer.format(updated);
+}
+
 function getEditorValueDate(updated) {
     updated = new Date(updated);
     this._row.then(([old]) => {
@@ -87,6 +97,13 @@ function getEditorValueDate(updated) {
     return this.localizer.format(updated);
 }
 
+function saveEditorValue(x) {
+    var save = !(x && x === this.initialValue) && this.grid.fireBeforeCellEdit(this.event.gridCell, this.initialValue, x, this);
+    if (save) {
+        this._data[this.event.gridCell.y - 1][this.event.gridCell.x] = x;
+    }
+}
+
 export function set_editors(grid) {
     const date = Textfield.extend("perspective-date", {
         localizer: grid.localization.get("chromeDate"),
@@ -95,7 +112,8 @@ export function set_editors(grid) {
         setEditorValue: setEditorValueDate,
         validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
-        selectAll: () => {}
+        selectAll: () => {},
+        saveEditorValue
     });
 
     const datetime = Textfield.extend("perspective-datetime", {
@@ -105,23 +123,23 @@ export function set_editors(grid) {
         setEditorValue: setEditorValueDatetime,
         validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
-        selectAll: () => {}
+        selectAll: () => {},
+        saveEditorValue
     });
 
     const text = Textfield.extend("perspective-text", {
         setBounds: setBoundsText,
         setEditorValue: setEditorValueText,
         getEditorValue: getEditorValueText,
-        validateEditorValue: function(str) {
-            return this.localizer.invalid && this.localizer.invalid(str || this.input.value);
-        }
+        saveEditorValue
     });
 
     const number = Textfield.extend("perspective-number", {
         setBounds: setBoundsText,
         setEditorValue: setEditorValueText,
-        getEditorValue: getEditorValueText,
-        validateEditorValue: x => isNaN(Number(x))
+        getEditorValue: getEditorValueNumber,
+        validateEditorValue: x => isNaN(Number(x.replace(/,/g, ""))),
+        saveEditorValue
     });
 
     grid.cellEditors.add(number);
