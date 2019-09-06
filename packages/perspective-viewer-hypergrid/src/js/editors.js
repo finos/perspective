@@ -19,7 +19,7 @@ function validateEditorValueDate(x) {
 }
 
 function setBoundsDate(cellBounds) {
-    var style = this.el.style;
+    const style = this.el.style;
     style.left = px(cellBounds.x + 4);
     style.top = px(cellBounds.y - 3);
     style.width = px(cellBounds.width + 50);
@@ -27,7 +27,7 @@ function setBoundsDate(cellBounds) {
 }
 
 function setBoundsText(cellBounds) {
-    var style = this.el.style;
+    const style = this.el.style;
     style.left = px(cellBounds.x + 4);
     style.top = px(cellBounds.y - 3);
     style.width = px(cellBounds.width - 10);
@@ -35,6 +35,9 @@ function setBoundsText(cellBounds) {
 }
 
 function setEditorValueDate(x) {
+    if (x === null) {
+        return;
+    }
     const now = +new Date(x);
     const day = ("0" + now.getDate()).slice(-2);
     const month = ("0" + (now.getMonth() + 1)).slice(-2);
@@ -42,6 +45,9 @@ function setEditorValueDate(x) {
 }
 
 function setEditorValueDatetime(x) {
+    if (x === null) {
+        return;
+    }
     const now = new Date(x);
     const day = ("0" + now.getDate()).slice(-2);
     const month = ("0" + (now.getMonth() + 1)).slice(-2);
@@ -51,34 +57,74 @@ function setEditorValueDatetime(x) {
     this.input.value = `${now.getFullYear()}-${month}-${day}T${hour}:${minute}:${ss}`;
 }
 
+function setEditorValueText(updated) {
+    if (updated === null) {
+        return "";
+    } else {
+        this.input.value = this.localizer.format(updated);
+        return updated;
+    }
+}
+
+function getEditorValueText(updated) {
+    this._row.then(([old]) => {
+        const index = old.__INDEX__;
+        delete old["__INDEX__"];
+        const colname = Object.keys(old)[0];
+        this._table.update([{__INDEX__: index, [colname]: updated}]);
+    });
+    return this.localizer.format(updated);
+}
+
+function getEditorValueDate(updated) {
+    updated = new Date(updated);
+    this._row.then(([old]) => {
+        const index = old.__INDEX__;
+        delete old["__INDEX__"];
+        const colname = Object.keys(old)[0];
+        this._table.update([{__INDEX__: index, [colname]: updated}]);
+    });
+    return this.localizer.format(updated);
+}
+
 export function set_editors(grid) {
-    const base_args = {
+    const date = Textfield.extend("perspective-date", {
         localizer: grid.localization.get("chromeDate"),
-        getEditorValue: x => new Date(x),
+        template: "<input class='hypergrid-textfield' type='date'>",
+        getEditorValue: getEditorValueDate,
+        setEditorValue: setEditorValueDate,
         validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
         selectAll: () => {}
-    };
-
-    const date = Textfield.extend("perspective-date", {
-        template: "<input class='hypergrid-textfield' type='date'>",
-        setEditorValue: setEditorValueDate,
-        setBounds: setBoundsDate,
-        ...base_args
     });
 
     const datetime = Textfield.extend("perspective-datetime", {
+        localizer: grid.localization.get("chromeDate"),
         template: "<input class='hypergrid-textfield' type='datetime-local'>",
-        getEditorValue: x => +new Date(x),
+        getEditorValue: getEditorValueDate,
         setEditorValue: setEditorValueDatetime,
+        validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
-        ...base_args
+        selectAll: () => {}
     });
 
     const text = Textfield.extend("perspective-text", {
-        setBounds: setBoundsText
+        setBounds: setBoundsText,
+        setEditorValue: setEditorValueText,
+        getEditorValue: getEditorValueText,
+        validateEditorValue: function(str) {
+            return this.localizer.invalid && this.localizer.invalid(str || this.input.value);
+        }
     });
 
+    const number = Textfield.extend("perspective-number", {
+        setBounds: setBoundsText,
+        setEditorValue: setEditorValueText,
+        getEditorValue: getEditorValueText,
+        validateEditorValue: x => isNaN(Number(x))
+    });
+
+    grid.cellEditors.add(number);
     grid.cellEditors.add(date);
     grid.cellEditors.add(datetime);
     grid.cellEditors.add(text);

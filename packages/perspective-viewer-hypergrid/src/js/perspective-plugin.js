@@ -103,11 +103,11 @@ function setColumnPropsByType(column) {
     const isEditable = this.grid.behavior.dataModel._viewer.hasAttribute("editable");
     if (isEditable && config.row_pivots.length === 0 && config.row_pivots.length === 0) {
         props.editor = {
-            integer: "perspective-text",
+            integer: "perspective-number",
             string: "perspective-text",
             date: "perspective-date",
             datetime: "perspective-datetime",
-            float: "perspective-text"
+            float: "perspective-number"
         }[column.type];
     }
     const styles = this.grid.get_styles();

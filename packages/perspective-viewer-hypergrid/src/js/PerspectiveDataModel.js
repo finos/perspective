@@ -139,25 +139,17 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
             return;
         }
         const offset = this.grid.renderer.dataWindow.top;
-        const row = this._view.to_json({
+        const editor = this.grid.cellEditors.create(declaredEditorName, options);
+        const args = {
             start_row: rowIndex + offset - 1,
             end_row: rowIndex + offset,
             start_col: columnIndex,
             end_col: columnIndex + 1,
             index: true
-        });
-        const editor = this.grid.cellEditors.create(declaredEditorName, options);
-        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
-        editor.getEditorValue = updated => {
-            row.then(old => {
-                old = old[0];
-                const index = old.__INDEX__;
-                delete old["__INDEX__"];
-                const colname = Object.keys(old)[0];
-                this._table.update([{__INDEX__: index, [colname]: updated}]);
-            });
-            return updated;
         };
+        editor._row = this._view.to_json(args);
+        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
+        editor._table = this._table;
         return editor;
     },
 
