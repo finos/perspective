@@ -123,7 +123,7 @@ class PerspectiveView extends DOMWidgetView {
     pWidget: PerspectiveWidget;
 
     _createElement(tagName: string) {
-        this.pWidget = new PerspectiveWidget(undefined,
+        this.pWidget = new JupyterPerspectiveWidget(undefined,
             {datasrc: this.model.get('datasrc'),
              data: this.model.get('datasrc') === 'arrow' ? this.model.get('_bin_data').buffer : this.model.get('_data'),
              schema: this.model.get('schema'),
@@ -145,6 +145,7 @@ class PerspectiveView extends DOMWidgetView {
              key: '', // key: handled by perspective-python
              wrap: false, // wrap: handled by perspective-python
              delete_: true, // delete_: handled by perspective-python
+             view: this,
         });
         return this.pWidget.node;
     }
