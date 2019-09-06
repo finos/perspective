@@ -259,10 +259,12 @@ export class DomElement extends PerspectiveElement {
     }
 
     _check_responsive_layout() {
-        if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
-            this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
-        } else {
-            this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
+        if(this.shadowRoot){
+            if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
+                this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
+            } else {
+                this.shadowRoot.querySelector("#app").classList.remove("columns_horizontal");
+            }
         }
     }
 
