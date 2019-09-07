@@ -14,43 +14,48 @@ utils.with_server({}, () => {
     describe.page(
         "blank.html",
         () => {
-            test.capture("Handles reloading with a schema.", async page => {
-                var schema = {_pkey: "string", a: "string"};
-                var data = {a: "a"};
+            test.capture(
+                "Handles reloading with a schema.",
+                async page => {
+                    var schema = {_pkey: "string", a: "string"};
+                    var data = {a: "a"};
+                    await page.waitFor(10000);
 
-                function getData(ver, count) {
-                    var rows = [];
-                    for (var index = 0; index < count; index++) {
-                        var row = Object.assign({}, data);
-                        row._pkey = String(ver) + "_" + index;
-                        rows.push(row);
+                    function getData(ver, count) {
+                        var rows = [];
+                        for (var index = 0; index < count; index++) {
+                            var row = Object.assign({}, data);
+                            row._pkey = String(ver) + "_" + index;
+                            rows.push(row);
+                        }
+                        return rows;
                     }
-                    return rows;
-                }
 
-                const viewer = await page.$("perspective-viewer");
-                await page.evaluate(
-                    (viewer, data, schema) => {
-                        viewer.load(schema);
-                        viewer.update(data);
-                    },
-                    viewer,
-                    getData(2, 1),
-                    schema
-                );
+                    const viewer = await page.$("perspective-viewer");
+                    await page.evaluate(
+                        (viewer, data, schema) => {
+                            viewer.load(schema);
+                            viewer.update(data);
+                        },
+                        viewer,
+                        getData(2, 1),
+                        schema
+                    );
 
-                await page.shadow_click("perspective-viewer", "#config_button");
+                    await page.shadow_click("perspective-viewer", "#config_button");
 
-                await page.evaluate(
-                    (viewer, data, schema) => {
-                        viewer.load(schema);
-                        viewer.update(data);
-                    },
-                    viewer,
-                    getData(3, 2),
-                    schema
-                );
-            });
+                    await page.evaluate(
+                        (viewer, data, schema) => {
+                            viewer.load(schema);
+                            viewer.update(data);
+                        },
+                        viewer,
+                        getData(3, 2),
+                        schema
+                    );
+                },
+                {wait_for_update: false}
+            );
         },
         {root: path.join(__dirname, "..", "..")}
     );

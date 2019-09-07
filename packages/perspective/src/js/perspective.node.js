@@ -96,7 +96,7 @@ function create_http_server(assets, host_psp) {
         response.setHeader("Access-Control-Request-Method", "*");
         response.setHeader("Access-Control-Allow-Methods", "OPTIONS,GET");
         response.setHeader("Access-Control-Allow-Headers", "*");
-        let url = request.url;
+        let url = request.url.split(/[\?\#]/)[0];
         if (url === "/") {
             url = "/index.html";
         }
