@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("./utils.js");
+const utils = require("@finos/perspective-test");
 const path = require("path");
 
 utils.with_server({}, () => {

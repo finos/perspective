@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("@finos/perspective-viewer/test/js/utils.js");
+const utils = require("@finos/perspective-test");
 const path = require("path");
 
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
@@ -130,16 +130,9 @@ utils.with_server({}, () => {
     );
 
     describe.page("null.html", () => {
-        test.capture(
-            "should handle null categories in a pivot",
-            async page => {
-                await page.waitForSelector("perspective-viewer:not([updating])");
-            },
-            {
-                timeout: 60000,
-                wait_for_update: false
-            }
-        );
+        test.capture("should handle null categories in a pivot", async page => {
+            await page.waitForSelector("perspective-viewer:not([updating])");
+        });
     });
 
     describe.page(
@@ -149,83 +142,62 @@ utils.with_server({}, () => {
                 await page.waitForSelector("perspective-viewer:not([updating])");
             });
 
-            test.capture(
-                "render warning should show above size limit.",
-                async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_cells = 50;
-                        element.setAttribute("columns", '["col_b"]');
-                    }, viewer);
-                    await page.waitForFunction(
-                        element => {
-                            return !element.shadowRoot.querySelector(".plugin_information.hidden");
-                        },
-                        {},
-                        viewer
-                    );
-                },
-                {
-                    timeout: 60000,
-                    wait_for_update: false
-                }
-            );
+            test.capture("render warning should show above size limit.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => {
+                    window.getPlugin("y_bar").max_cells = 50;
+                    element.setAttribute("columns", '["col_b"]');
+                }, viewer);
+                await page.waitForFunction(
+                    element => {
+                        return !element.shadowRoot.querySelector(".plugin_information.hidden");
+                    },
+                    {},
+                    viewer
+                );
+            });
 
-            test.capture(
-                "dismissing render warning should trigger render.",
-                async page => {
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => {
-                        window.getPlugin("y_bar").max_cells = 50;
-                        element.setAttribute("columns", '["col_b"]');
-                    }, viewer);
-                    await page.waitForFunction(
-                        element => {
-                            return !element.shadowRoot.querySelector(".plugin_information.hidden");
-                        },
-                        {},
-                        viewer
-                    );
-                    await page.evaluate(element => element.shadowRoot.querySelector(".plugin_information__action").click(), viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                },
-                {
-                    timeout: 100000,
-                    wait_for_update: false
-                }
-            );
+            test.capture("dismissing render warning should trigger render.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => {
+                    window.getPlugin("y_bar").max_cells = 50;
+                    element.setAttribute("columns", '["col_b"]');
+                }, viewer);
+                await page.waitForFunction(
+                    element => {
+                        return !element.shadowRoot.querySelector(".plugin_information.hidden");
+                    },
+                    {},
+                    viewer
+                );
+                await page.evaluate(element => element.shadowRoot.querySelector(".plugin_information__action").click(), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+            });
 
-            test.capture(
-                "underlying data updates should not trigger rerender if warning is visible.",
-                async page => {
-                    await page.evaluate(() => {
-                        window.getPlugin("y_bar").max_cells = 50;
-                    });
+            test.capture("underlying data updates should not trigger rerender if warning is visible.", async page => {
+                await page.evaluate(() => {
+                    window.getPlugin("y_bar").max_cells = 50;
+                });
 
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => {
-                        element.setAttribute("columns", '["col_a", "col_b"]');
-                    }, viewer);
-                    await page.waitForSelector("perspective-viewer[updating]", {timeout: 100000});
-                    await page.evaluate(element => {
-                        element.update([{col_a: 1234, col_b: 4321}]);
-                    }, viewer);
-                    await page.waitForFunction(
-                        element => {
-                            return !element.shadowRoot.querySelector(".plugin_information.hidden");
-                        },
-                        {},
-                        viewer
-                    );
-                },
-                {
-                    timeout: 60000,
-                    wait_for_update: false
-                }
-            );
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => {
+                    element.setAttribute("columns", '["col_a", "col_b"]');
+                }, viewer);
+                await page.waitForSelector("perspective-viewer[updating]", {timeout: 100000});
+                await page.evaluate(element => {
+                    element.update([{col_a: 1234, col_b: 4321}]);
+                }, viewer);
+                await page.waitForFunction(
+                    element => {
+                        return !element.shadowRoot.querySelector(".plugin_information.hidden");
+                    },
+                    {},
+                    viewer
+                );
+            });
         },
         {root: path.join(__dirname, "..", "..")}
     );

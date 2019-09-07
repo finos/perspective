@@ -292,8 +292,13 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
 
                 await body(page);
 
+                await page.mouse.move(1000, 1000);
+
                 if (wait_for_update) {
                     await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(async () => {
+                        await new Promise(requestAnimationFrame);
+                    });
                 }
 
                 const screenshot = await page.screenshot();

@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("./utils.js");
+const utils = require("@finos/perspective-test");
 const path = require("path");
 
 utils.with_server({}, () => {
@@ -19,7 +19,6 @@ utils.with_server({}, () => {
                 async page => {
                     var schema = {_pkey: "string", a: "string"};
                     var data = {a: "a"};
-                    await page.waitFor(10000);
 
                     function getData(ver, count) {
                         var rows = [];
@@ -41,7 +40,7 @@ utils.with_server({}, () => {
                         getData(2, 1),
                         schema
                     );
-
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                     await page.shadow_click("perspective-viewer", "#config_button");
 
                     await page.evaluate(
@@ -53,6 +52,7 @@ utils.with_server({}, () => {
                         getData(3, 2),
                         schema
                     );
+                    await page.waitForSelector("perspective-viewer:not([updating])");
                 },
                 {wait_for_update: false}
             );

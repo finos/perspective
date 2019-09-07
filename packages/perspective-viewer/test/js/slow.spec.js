@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("./utils.js");
+const utils = require("@finos/perspective-test");
 
 const mutation_tests = require("./mutation_tests.js");
 const path = require("path");

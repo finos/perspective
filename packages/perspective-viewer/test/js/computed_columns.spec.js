@@ -16,7 +16,7 @@
  *
  */
 
-const utils = require("./utils.js");
+const utils = require("@finos/perspective-test");
 const path = require("path");
 
 const add_computed_column = async page => {

@@ -7,7 +7,7 @@
  *
  */
 
-const {drag_drop} = require("./utils");
+const {drag_drop} = require("@finos/perspective-test");
 
 exports.default = function(method = "capture") {
     test[method]("shows a grid without any settings applied.", async () => {});

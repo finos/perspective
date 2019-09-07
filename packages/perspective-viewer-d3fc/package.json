@@ -33,26 +33,10 @@
         "build": "npm-run-all --silent build:babel build:webpack:cjs build:webpack:umd",
         "test:build": "cpx \"test/html/*\" dist/umd",
         "watch": "webpack --color --watch --config src/config/d3fc.watch.config.js",
-        "test:run": "jest --silent --color 2>&1",
-        "test:unit": "jest --config=test/js/jest.unit.config.js --color --watch",
+        "test:run": "jest --rootDir=. --config=../perspective-test/jest.config.js --silent --color 2>&1",
         "test": "npm-run-all test:build test:run",
         "clean": "rimraf dist",
         "clean:screenshots": "rimraf \"screenshots/**/*.@(failed|diff).png\""
-    },
-    "jest": {
-        "roots": [
-            "test/js"
-        ],
-        "verbose": true,
-        "testURL": "http://localhost/",
-        "automock": false,
-        "transform": {
-            ".js$": "./test/js/transform.js",
-            ".html$": "html-loader-jest"
-        },
-        "setupFiles": [
-            "./test/js/beforeEachSpec.js"
-        ]
     },
     "publishConfig": {
         "access": "public"
@@ -72,5 +56,8 @@
         "d3-svg-legend": "^2.25.6",
         "d3fc": "14.0.40",
         "gradient-parser": "0.1.5"
+    },
+    "devDependencies": {
+        "@finos/perspective-test": "^0.3.8"
     }
 }

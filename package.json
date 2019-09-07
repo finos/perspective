@@ -92,15 +92,5 @@
         "fix:json": "prettier --tab-width 4 --write **/package.json",
         "fix": "npm-run-all --silent fix:*",
         "toggle_puppeteer": "node scripts/toggle_puppeteer.js"
-    },
-    "jest": {
-        "projects": [
-            "packages/perspective",
-            "packages/perspective-viewer",
-            "packages/perspective-viewer-hypergrid",
-            "packages/perspective-viewer-highcharts",
-            "packages/perspective-viewer-d3fc"
-        ],
-        "verbose": true
     }
 }

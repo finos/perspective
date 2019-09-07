@@ -7,11 +7,7 @@
  *
  */
 
-global.CustomEvent = () => {};
-global.customElements = {define: () => {}};
-global.HTMLElement = class {
-    getAttribute() {}
-    hasAttribute() {}
-    removeAttribute() {}
-    setAttribute() {}
-};
+const config = require("@finos/perspective-test/babel.config");
+config.presets[0][1].modules = "auto";
+
+module.exports = require("babel-jest").createTransformer(config);
