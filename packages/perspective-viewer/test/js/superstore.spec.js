@@ -7,7 +7,7 @@
  *
  */
 
-const utils = require("./utils.js");
+const utils = require("@finos/perspective-test");
 
 const simple_tests = require("./simple_tests.js");
 const responsive_tests = require("./responsive_tests");

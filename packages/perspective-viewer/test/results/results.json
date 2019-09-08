@@ -33,7 +33,7 @@
     "superstore.html/saving a duplicate column should fail with error message.": "d9618357228698c5fbe9978b3ed1f668",
     "superstore.html/highlights invalid filter.": "b31284a7b2a401d232ed077ec097a653",
     "superstore.html/replaces all rows.": "7a7265b18d5c94f8f90abcad4f3f7781",
-    "__GIT_COMMIT__": "682b9ea55fbb37dab4d46d0c7460712939b3b139",
+    "__GIT_COMMIT__": "13d836c9ddaa8374b884e9807f8a433c3fc53a6e",
     "superstore.html/shows horizontal columns on small vertical viewports.": "05d7c917b5eb9e05387d52e3a6372c67",
     "superstore.html/shows horizontal columns on small vertical and horizontal viewports.": "4cde889ccdbecba750e76f287707626f",
     "superstore.html/user defined aggregates maintained on computed columns": "4047d2fd3b973a0492f805da9f604dbc"

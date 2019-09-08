@@ -57,10 +57,7 @@ let browser,
     errors = [],
     __name = "";
 
-beforeAll(async () => {
-    browser = await puppeteer.launch({
-        args: ["--disable-accelerated-2d-canvas", "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
-    });
+async function get_new_page() {
     page = await browser.newPage();
 
     page.shadow_click = async function(...path) {
@@ -104,7 +101,14 @@ beforeAll(async () => {
     page.on("pageerror", msg => {
         errors.push(msg.message);
     });
+    return page;
+}
 
+beforeAll(async () => {
+    browser = await puppeteer.launch({
+        args: ["--disable-accelerated-2d-canvas", "--disable-gpu", "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", '--proxy-server="direct://"', "--proxy-bypass-list=*"]
+    });
+    page = await get_new_page();
     results = (() => {
         const dir_name = path.join(test_root, "test", "results", RESULTS_FILENAME);
         if (fs.existsSync(dir_name)) {
@@ -249,12 +253,14 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
 
             for (let x = 0; x < iterations; x++) {
                 if (_reload_page) {
-                    await new Promise(setTimeout);
-                    await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+                    await page.close();
+                    page = await get_new_page();
+                    await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                 } else {
                     if (!OLD_SETTINGS[test_root + _url]) {
-                        await new Promise(setTimeout);
-                        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}`);
+                        await page.close();
+                        page = await get_new_page();
+                        await page.goto(`http://127.0.0.1:${__PORT__}/${_url}#test=${encodeURIComponent(name)}`, {waitUntil: "domcontentloaded"});
                     } else {
                         await page.evaluate(x => {
                             const viewer = document.querySelector("perspective-viewer");
@@ -267,7 +273,10 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 }
 
                 if (wait_for_update) {
-                    await page.waitForSelector("perspective-viewer[updating]", {timeout: 1000}).catch(() => {});
+                    await page.waitFor(() => {
+                        const elem = document.getElementsByTagName("perspective-viewer");
+                        return elem.length > 0 && elem[0].view !== undefined;
+                    });
                     await page.waitForSelector("perspective-viewer:not([updating])");
                 } else {
                     await page.waitForSelector("perspective-viewer");
@@ -283,8 +292,13 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
 
                 await body(page);
 
+                await page.mouse.move(1000, 1000);
+
                 if (wait_for_update) {
                     await page.waitForSelector("perspective-viewer:not([updating])");
+                    await page.evaluate(async () => {
+                        await new Promise(requestAnimationFrame);
+                    });
                 }
 
                 const screenshot = await page.screenshot();
@@ -310,6 +324,12 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                     new_results[_url + "/" + name] = hash;
                 }
 
+                if (process.env.PSP_PAUSE_ON_FAILURE) {
+                    if (hash !== results[_url + "/" + name]) {
+                        private_console.error(`Failed ${name}, pausing`);
+                        await new Promise(f => setTimeout(f, 1000000));
+                    }
+                }
                 expect(errors).toNotError();
                 expect(hash).toBe(results[_url + "/" + name]);
             }

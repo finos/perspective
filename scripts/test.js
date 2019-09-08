@@ -21,7 +21,7 @@ const IS_DOCKER = args.indexOf("--docker") !== -1 || process.env.PSP_DOCKER;
 const IS_LOCAL_PUPPETEER = fs.existsSync("node_modules/puppeteer");
 
 function jest() {
-    let cmd = "TZ=UTC node_modules/.bin/jest --color --verbose";
+    let cmd = "TZ=UTC node_modules/.bin/jest --rootDir=. --config=packages/perspective-test/jest.all.config.js --color --verbose";
 
     if (args.indexOf("--saturate") > -1) {
         console.log("-- Running the test suite in saturate mode");
@@ -85,7 +85,7 @@ try {
         if (IS_DOCKER && !IS_EMSDK) {
             execute(emsdk());
         } else {
-            execute("node_modules/.bin/lerna exec -- mkdir -p build");
+            execute("node_modules/.bin/lerna exec -- mkdir -p dist/umd");
             let cmd = "node_modules/.bin/lerna run test:build --stream";
             if (process.env.PACKAGE) {
                 cmd += " --scope=@finos/${PACKAGE}";
@@ -99,6 +99,12 @@ try {
     } else {
         if (IS_LOCAL_PUPPETEER) {
             execute(`yarn --silent clean --screenshots`);
+            execute("node_modules/.bin/lerna exec -- mkdir -p dist/umd");
+            let cmd = "node_modules/.bin/lerna run test:build --stream";
+            if (process.env.PACKAGE) {
+                cmd += " --scope=@finos/${PACKAGE}";
+            }
+            execute(cmd);
         }
         if (args.indexOf("--quiet") > -1) {
             console.log("-- Running test suite in quiet mode");

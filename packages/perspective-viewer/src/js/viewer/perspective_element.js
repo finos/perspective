@@ -226,19 +226,16 @@ export class PerspectiveElement extends StateElement {
                     count
                 )}<span style="white-space:nowrap"> of points.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else if (columns_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
                 const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else if (rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
                 const warning = `<span style="white-space:nowrap">Rendering </span>${total(num_columns * max_rows, count)}<span style="white-space:nowrap"> of points.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else {
                 this._plugin_information.classList.add("hidden");
@@ -346,7 +343,9 @@ export class PerspectiveElement extends StateElement {
         };
 
         if (!this._is_config_changed(config) && !ignore_size_check && !force_update) {
-            this.removeAttribute("updating");
+            if (this._render_count === 0) {
+                this.removeAttribute("updating");
+            }
             return;
         }
 

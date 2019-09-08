@@ -1,0 +1,28 @@
+{
+    "name": "@finos/perspective-test",
+    "version": "0.3.8",
+    "description": "Test utility based on perspective",
+    "private": true,
+    "main": "src/js/index.js",
+    "module": "src/js/index.js",
+    "files": [
+        "src/**/*"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/finos/perspective/packages/perspective-test"
+    },
+    "scripts": {
+        "prebench": "mkdirp build",
+        "bench": "node bench/versions.js"
+    },
+    "author": "",
+    "license": "Apache-2.0",
+    "dependencies": {
+        "@babel/runtime": "^7.3.4",
+        "@finos/perspective": "^0.3.8"
+    },
+    "devDependencies": {
+        "@finos/perspective-webpack-plugin": "^0.3.8"
+    }
+}

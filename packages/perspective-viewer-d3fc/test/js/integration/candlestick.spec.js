@@ -9,7 +9,7 @@
 
 const path = require("path");
 
-const utils = require("@finos/perspective-viewer/test/js/utils.js");
+const utils = require("@finos/perspective-test");
 
 const {withTemplate} = require("./simple-template");
 withTemplate("candlestick", "d3_candlestick", {template: "shares-template"});
