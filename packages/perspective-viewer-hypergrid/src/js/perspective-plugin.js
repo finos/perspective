@@ -15,7 +15,7 @@ const lodash = require("lodash");
  * @this {Behavior}
  * @param payload
  */
-function setPSP(payload) {
+function setPSP(payload, force = false) {
     const new_schema = [];
 
     if (payload.isTree) {
@@ -48,6 +48,7 @@ function setPSP(payload) {
     this.refreshColumns = refreshColumns;
 
     if (
+        !force &&
         this._memoized_schema &&
         lodash.isEqual(this._memoized_schema.slice(0, this._memoized_schema.length), new_schema.slice(0, new_schema.length)) &&
         lodash.isEqual(payload.rowPivots, this._memoized_pivots)
@@ -97,6 +98,17 @@ function setColumnPropsByType(column) {
         props.format = "FinanceTree";
     } else {
         props.format = `perspective-${column.type}`;
+    }
+    const config = this.grid.behavior.dataModel._config;
+    const isEditable = this.grid.behavior.dataModel._viewer.hasAttribute("editable");
+    if (isEditable && config.row_pivots.length === 0 && config.row_pivots.length === 0) {
+        props.editor = {
+            integer: "perspective-number",
+            string: "perspective-text",
+            date: "perspective-date",
+            datetime: "perspective-datetime",
+            float: "perspective-number"
+        }[column.type];
     }
     const styles = this.grid.get_styles();
     if (styles[column.type]) {

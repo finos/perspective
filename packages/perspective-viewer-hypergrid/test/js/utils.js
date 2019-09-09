@@ -7,6 +7,22 @@
  *
  */
 
+exports.dblclick = async (page, x = 310, y = 300) => {
+    await page.evaluate(
+        ({x, y}) => {
+            const example = document
+                .querySelector("perspective-viewer")
+                .shadowRoot.querySelector("perspective-hypergrid")
+                .shadowRoot.querySelector("canvas");
+
+            const event = document.createEvent("MouseEvents");
+            event.initMouseEvent("dblclick", true, false, window, 0, x, y, x, y, false, false, false, false, 2, null);
+            example.dispatchEvent(event);
+        },
+        {x, y}
+    );
+};
+
 exports.click_details = async (page, x = 310, y = 300) => {
     const viewer = await page.$("perspective-viewer");
 

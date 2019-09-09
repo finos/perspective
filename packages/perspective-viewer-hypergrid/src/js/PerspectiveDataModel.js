@@ -134,6 +134,26 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
+    getCellEditorAt: function(columnIndex, rowIndex, declaredEditorName, options) {
+        if (!declaredEditorName) {
+            return;
+        }
+        const offset = this.grid.renderer.dataWindow.top;
+        const editor = this.grid.cellEditors.create(declaredEditorName, options);
+        const args = {
+            start_row: rowIndex + offset - 1,
+            end_row: rowIndex + offset,
+            start_col: columnIndex,
+            end_col: columnIndex + 1,
+            index: true
+        };
+        editor._row = this._view.to_json(args);
+        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
+        editor._table = this._table;
+        editor._data = this.data;
+        return editor;
+    },
+
     getCell: function(config, rendererName) {
         var nextRow, depthDelta;
         if (config.isUserDataArea) {

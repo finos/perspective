@@ -378,9 +378,9 @@ export class PerspectiveElement extends StateElement {
 
         try {
             if (limit_points) {
-                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows);
+                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows, force_update);
             } else {
-                await this._plugin.create.call(this, this._datavis, this._view, task);
+                await this._plugin.create.call(this, this._datavis, this._view, task, undefined, undefined, force_update);
             }
         } catch (err) {
             console.warn(err);

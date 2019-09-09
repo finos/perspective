@@ -19,7 +19,8 @@ candlestick.plugin = {
         type: "number",
         count: 4,
         names: ["Open", "Close", "High", "Low"]
-    }
+    },
+    selectMode: "toggle"
 };
 
 export default candlestick;
