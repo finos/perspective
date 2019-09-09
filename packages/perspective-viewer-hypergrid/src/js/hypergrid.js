@@ -83,7 +83,9 @@ async function grid_update(div, view, task) {
     if (task.cancelled) {
         return;
     }
-
+    if (this.hypergrid.cellEditor) {
+        this.hypergrid.cellEditor.cancelEditing();
+    }
     const dataModel = this.hypergrid.behavior.dataModel;
     dataModel.setDirty(nrows);
     dataModel._view = view;
@@ -112,6 +114,7 @@ async function getOrCreateHypergrid(div) {
     let perspectiveHypergridElement;
     if (!this.hypergrid) {
         perspectiveHypergridElement = this[PRIVATE].grid = document.createElement("perspective-hypergrid");
+        perspectiveHypergridElement.setAttribute("tabindex", 1);
         Object.defineProperty(this, "hypergrid", {
             configurable: true,
             get: () => (this[PRIVATE].grid ? this[PRIVATE].grid.grid : undefined)

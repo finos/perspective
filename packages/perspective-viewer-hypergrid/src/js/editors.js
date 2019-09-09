@@ -20,18 +20,18 @@ function validateEditorValueDate(x) {
 
 function setBoundsDate(cellBounds) {
     const style = this.el.style;
-    style.left = px(cellBounds.x + 4);
-    style.top = px(cellBounds.y - 3);
+    style.left = px(cellBounds.x);
+    style.top = px(cellBounds.y);
     style.width = px(cellBounds.width + 50);
-    style.height = px(cellBounds.height);
+    style.height = px(cellBounds.height - 1);
 }
 
 function setBoundsText(cellBounds) {
     const style = this.el.style;
-    style.left = px(cellBounds.x + 4);
-    style.top = px(cellBounds.y - 3);
-    style.width = px(cellBounds.width - 10);
-    style.height = px(cellBounds.height);
+    style.left = px(cellBounds.x + 1);
+    style.top = px(cellBounds.y + 1);
+    style.width = px(cellBounds.width - 2);
+    style.height = px(cellBounds.height - 2);
 }
 
 function setEditorValueDate(x) {
@@ -58,6 +58,30 @@ function setEditorValueDatetime(x) {
 }
 
 function setEditorValueText(updated) {
+    // Move keyup so nav and edit don't conflict
+    this.input.addEventListener("keydown", keydown.bind(this));
+    // refire mouseover so hover does not go away when mouse stays over edit cell
+    this.input.addEventListener("mouseover", event => {
+        var mouseMoveEvent = document.createEvent("MouseEvents");
+        mouseMoveEvent.initMouseEvent(
+            "mouseover",
+            event.canBubble,
+            event.cancelable,
+            window,
+            event.detail,
+            event.screenX,
+            event.screenY,
+            event.clientX,
+            event.clientY,
+            event.ctrlKey,
+            event.altKye,
+            event.shiftKey,
+            event.metaKey,
+            event.button,
+            event.relatedTarget
+        );
+        this._canvas.dispatchEvent(mouseMoveEvent);
+    });
     if (updated === null) {
         return "";
     } else {
@@ -100,8 +124,72 @@ function getEditorValueDate(updated) {
 function saveEditorValue(x) {
     var save = !(x && x === this.initialValue) && this.grid.fireBeforeCellEdit(this.event.gridCell, this.initialValue, x, this);
     if (save) {
-        this._data[this.event.gridCell.y - 1][this.event.gridCell.x] = x;
+        const row = this.event.gridCell.y + this.grid.renderer.dataWindow.top - 1;
+        const col = this.event.gridCell.x;
+        this._data[row][col] = x;
+        this.grid.canvas.paintNow();
     }
+}
+
+function keyup() {}
+
+function keydown(e) {
+    let grid = this.grid,
+        cellProps = this.event.properties,
+        feedbackCount = cellProps.feedbackCount,
+        keyChar = grid.canvas.getKeyChar(e),
+        specialKeyup,
+        stopped;
+
+    if ((specialKeyup = this.specialKeyups[e.keyCode]) && (stopped = this[specialKeyup](feedbackCount))) {
+        grid.repaint();
+    }
+
+    if (cellProps.mappedNavKey(keyChar, e.ctrlKey)) {
+        if (!specialKeyup && (stopped = this.stopEditing(feedbackCount))) {
+            grid.repaint();
+        }
+    }
+
+    this.grid.fireSyntheticEditorKeyUpEvent(this, e);
+
+    return stopped;
+}
+
+function stopEditing(feedback) {
+    var str = this.input.value;
+
+    try {
+        var error = this.validateEditorValue(str);
+        if (!error) {
+            var value = this.getEditorValue(str);
+        }
+    } catch (err) {
+        error = err;
+    }
+
+    if (!error && this.grid.fireSyntheticEditorDataChangeEvent(this, this.initialValue, value)) {
+        try {
+            this.saveEditorValue(value);
+        } catch (err) {
+            error = err;
+        }
+    }
+
+    if (!error) {
+        this.hideEditor();
+        this.grid.cellEditor = null;
+        this.el.remove();
+        this.grid.div.parentNode.parentNode.host.focus();
+    } else if (feedback >= 0) {
+        // false when `feedback` undefined
+        this.errorEffectBegin(++this.errors % feedback === 0 && error);
+    } else {
+        // invalid but no feedback
+        this.cancelEditing();
+    }
+
+    return !error;
 }
 
 export function set_editors(grid) {
@@ -113,7 +201,9 @@ export function set_editors(grid) {
         validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
         selectAll: () => {},
-        saveEditorValue
+        saveEditorValue,
+        keyup,
+        stopEditing
     });
 
     const datetime = Textfield.extend("perspective-datetime", {
@@ -124,14 +214,18 @@ export function set_editors(grid) {
         validateEditorValue: validateEditorValueDate,
         setBounds: setBoundsDate,
         selectAll: () => {},
-        saveEditorValue
+        saveEditorValue,
+        keyup,
+        stopEditing
     });
 
     const text = Textfield.extend("perspective-text", {
         setBounds: setBoundsText,
         setEditorValue: setEditorValueText,
         getEditorValue: getEditorValueText,
-        saveEditorValue
+        saveEditorValue,
+        keyup,
+        stopEditing
     });
 
     const number = Textfield.extend("perspective-number", {
@@ -139,7 +233,9 @@ export function set_editors(grid) {
         setEditorValue: setEditorValueText,
         getEditorValue: getEditorValueNumber,
         validateEditorValue: x => isNaN(Number(x.replace(/,/g, ""))),
-        saveEditorValue
+        saveEditorValue,
+        keyup,
+        stopEditing
     });
 
     grid.cellEditors.add(number);

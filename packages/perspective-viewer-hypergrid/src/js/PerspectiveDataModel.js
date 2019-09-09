@@ -151,6 +151,7 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
         editor._table = this._table;
         editor._data = this.data;
+        editor._canvas = this.grid.canvas.canvas;
         return editor;
     },
 

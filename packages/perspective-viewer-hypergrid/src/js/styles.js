@@ -16,6 +16,8 @@ const title = `--hypergrid`;
 properties.add_fonts({
     font: title,
     columnHeaderFont: `${title}-header`,
+    columnHeaderForegroundSelectionFont: `${title}-header`,
+    foregroundSelectionFont: `${title}-header`,
     rowHeaderFont: title,
     treeHeaderFont: title
 });
@@ -24,14 +26,20 @@ properties.add_styles({
     treeHeaderBackgroundColor: `${title}-tree-header--background`,
     backgroundColor: `${title}--background`,
     treeHeaderColor: `${title}-tree-header--color`,
+    treeHeaderForegroundSelectionColor: `${title}-tree-header--color`,
+    treeHeaderBackgroundSelectionColor: `${title}-tree-header--background`,
+    foregroundSelectionColor: [`${title}--color`, `color`],
     color: [`${title}--color`, `color`],
     columnHeaderBackgroundColor: `${title}-header--background`,
     columnHeaderSeparatorColor: `${title}-separator--color`,
     columnHeaderColor: `${title}-header--color`,
+    columnHeaderForegroundSelectionColor: `${title}-header--color`,
     columnColorNumberPositive: `${title}-positive--color`,
     columnColorNumberNegative: `${title}-negative--color`,
     columnBackgroundColorNumberPositive: `${title}-positive--background`,
     columnBackgroundColorNumberNegative: `${title}-negative--background`,
+    selectionRegionOverlayColor: `${title}-editor--background`,
+    selectionRegionOutlineColor: `${title}-editor--border-color`,
     halign: `${title}--text-align`,
     columnHeaderHalign: `${title}--text-align`,
     hoverCellHighlight: {
@@ -73,14 +81,13 @@ const base_grid_properties = {
     columnSelection: false,
     rowSelection: false,
     checkboxOnlyRowSelections: false,
+    backgroundSelectionColor: `#ffffff`,
     columnClip: true,
     columnHeaderFont: COLUMN_HEADER_FONT,
-    columnHeaderForegroundSelectionFont: '12px "Arial", Helvetica, sans-serif',
+    columnHeaderForegroundSelectionFont: COLUMN_HEADER_FONT,
+    columnHeaderBackgroundSelectionColor: undefined,
     columnsReorderable: false,
     defaultRowHeight: 24,
-    editable: true,
-    editOnKeydown: true,
-    editorActivationKeys: ["alt", "esc"],
     enableContinuousRepaint: false,
     feedbackCount: 1000000,
     fixedColumnCount: 0,
@@ -123,12 +130,15 @@ const base_grid_properties = {
     scrollbarHoverOff: "visible",
     rowHeaderCheckboxes: false,
     rowHeaderNumbers: false,
+    selectionRegionOverlayColor: "transparent",
+    selectionRegionOutlineColor: "rgba(0,0,0,0.2)",
     showFilterRow: true,
     showHeaderRow: true,
     showTreeColumn: false,
     showRowNumbers: false,
     showCheckboxes: false,
     singleRowSelectionMode: false,
+    //    navKeyMap: {},
     sortColumns: [],
     sortOnDoubleClick: true,
     treeRenderer: "TreeCell",
@@ -143,22 +153,14 @@ const light_theme_overrides = {
     backgroundColor: "#ffffff",
     color: "#666",
     lineColor: "#AAA",
-    // font: '12px Arial, Helvetica, sans-serif',
     font: '12px "Open Sans", Helvetica, sans-serif',
-    foregroundSelectionFont: "12px amplitude-regular, Helvetica, sans-serif",
-    foregroundSelectionColor: "#666",
-    backgroundSelectionColor: "rgba(162, 183, 206, 0.3)",
-    selectionRegionOutlineColor: "rgb(45, 64, 85)",
     columnHeaderColor: "#666",
     columnHeaderHalign: "left", // except: group header labels always 'center'; numbers always 'right' per `setPSP`
     columnHeaderBackgroundColor: "#fff",
     columnHeaderForegroundSelectionColor: "#333",
-    columnHeaderBackgroundSelectionColor: "#40536d",
     rowHeaderForegroundSelectionFont: "12px Arial, Helvetica, sans-serif",
     treeHeaderColor: "#666",
     treeHeaderBackgroundColor: "#fff",
-    treeHeaderForegroundSelectionColor: "#333",
-    treeHeaderBackgroundSelectionColor: "#40536d",
     hoverCellHighlight: {
         enabled: true,
         backgroundColor: "#eeeeee"
@@ -169,6 +171,7 @@ const light_theme_overrides = {
     }
 };
 
-export function default_grid_properties(overrides = light_theme_overrides) {
-    return Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(overrides));
+export function default_grid_properties() {
+    const properties = Object.assign({}, cloneDeep(base_grid_properties), cloneDeep(light_theme_overrides));
+    return properties;
 }

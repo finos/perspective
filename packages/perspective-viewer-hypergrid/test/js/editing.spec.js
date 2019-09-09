@@ -32,32 +32,6 @@ utils.with_server({}, () => {
     describe.page(
         "editable.html",
         () => {
-            describe("editing UI opens", () => {
-                test.capture("should open an editor on a string column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
-
-                test.capture("should open an editor on an integer column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page, 50);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
-
-                test.capture("should open an editor on a datetime column", async page => {
-                    await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.waitForSelector("perspective-viewer[settings]");
-                    await dblclick(page, 400);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                });
-            });
-
             describe("editing UI saves", () => {
                 test.capture("should save edits to a string column", async page => {
                     await page.$("perspective-viewer");
