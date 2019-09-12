@@ -19,6 +19,15 @@ function getSubrects(nrows) {
     return [rect];
 }
 
+function find_row(rows, index) {
+    for (let ridx in rows) {
+        if (rows[ridx].__INDEX__ === index) {
+            return parseInt(ridx);
+        }
+    }
+    return -1;
+}
+
 module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     isTreeCol: function(x) {
         return x === TREE_COLUMN_INDEX && this.isTree();
@@ -93,6 +102,39 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         }
     },
 
+    _update_select_index: function() {
+        const has_selections = this.grid.selectionModel.hasSelections();
+        if (has_selections) {
+            const row = this.data[this.grid.selectionModel.getLastSelection().origin.y];
+            if (row) {
+                this._select_index = row.__INDEX__;
+            }
+        }
+    },
+
+    _update_editor: function([rect]) {
+        const editor = this.grid.cellEditor;
+        let new_index;
+
+        if (editor) {
+            new_index = find_row(this.data, editor._index);
+            editor.event.resetGridXY(editor.event.dataCell.x, new_index - rect.origin.y + 1);
+            editor.moveEditor();
+        }
+        return new_index;
+    },
+
+    _update_selection: function(new_index) {
+        const has_selections = this.grid.selectionModel.hasSelections();
+        if (has_selections) {
+            new_index = new_index || find_row(this.data, this._select_index);
+            if (new_index !== -1) {
+                const col = this.grid.selectionModel.getLastSelection().origin.x;
+                this.grid.selectionModel.select(col, new_index, 0, 0);
+            }
+        }
+    },
+
     fetchData: async function(rectangles, resolve) {
         rectangles = getSubrects.call(this.grid.renderer);
 
@@ -124,7 +166,12 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         );
 
         try {
+            this._update_select_index();
+
             await Promise.all(promises);
+
+            const new_index = this._update_editor(rectangles);
+            this._update_selection(new_index);
             const rects = getSubrects.call(this.grid.renderer);
             resolve(!!rects.find(uncachedRow, this));
         } catch (e) {
@@ -140,6 +187,8 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
         }
         const offset = this.grid.renderer.dataWindow.top;
         const editor = this.grid.cellEditors.create(declaredEditorName, options);
+        this.grid.selectionModel.select(columnIndex, rowIndex + offset - 1);
+        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
         const args = {
             start_row: rowIndex + offset - 1,
             end_row: rowIndex + offset,
@@ -148,10 +197,10 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
             index: true
         };
         editor._row = this._view.to_json(args);
-        editor.el.addEventListener("blur", () => setTimeout(() => editor.cancelEditing()));
         editor._table = this._table;
         editor._data = this.data;
         editor._canvas = this.grid.canvas.canvas;
+        editor._index = this.data[rowIndex + offset - 1].__INDEX__;
         return editor;
     },
 

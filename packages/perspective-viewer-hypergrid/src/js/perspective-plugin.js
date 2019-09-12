@@ -348,7 +348,9 @@ exports.install = function(grid) {
         event.primitiveEvent.preventDefault();
         if (!grid.cellEditor) {
             const count = this.getAutoScrollAcceleration();
-            grid.moveSingleSelect(0, count);
+            const {x, y} = grid.selectionModel.getLastSelection().origin;
+            grid.selectionModel.select(x, y + count, 0, 0);
+            grid.repaint();
         }
     };
 

@@ -83,9 +83,6 @@ async function grid_update(div, view, task) {
     if (task.cancelled) {
         return;
     }
-    if (this.hypergrid.cellEditor) {
-        this.hypergrid.cellEditor.cancelEditing();
-    }
     const dataModel = this.hypergrid.behavior.dataModel;
     dataModel.setDirty(nrows);
     dataModel._view = view;
@@ -150,7 +147,8 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     const rowPivots = config.row_pivots;
     const window = {
         start_row: 0,
-        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1)
+        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1),
+        index: true
     };
 
     const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(window), view.schema(), this._table.schema()]);
@@ -166,7 +164,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     }
 
     const dataModel = this.hypergrid.behavior.dataModel;
-    let columns = Object.keys(json);
+    let columns = Object.keys(json).filter(x => x !== "__INDEX__");
 
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
@@ -178,14 +176,15 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
+        range.index = true;
         let next_page = await dataModel._view.to_columns(range);
         if (columns.length === 0) {
             columns = Object.keys(await view.to_columns(window));
         }
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
-        const data = dataModel.data;
         const base = range.start_row;
+        const data = dataModel.data;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
 
