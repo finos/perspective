@@ -115,7 +115,6 @@ module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
     _update_editor: function([rect]) {
         const editor = this.grid.cellEditor;
         let new_index;
-
         if (editor) {
             new_index = find_row(this.data, editor._index);
             editor.event.resetGridXY(editor.event.dataCell.x, new_index - rect.origin.y + 1);
