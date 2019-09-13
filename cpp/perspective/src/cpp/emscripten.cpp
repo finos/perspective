@@ -869,7 +869,7 @@ namespace binding {
     }
 
     void
-    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, std::string name,
+    _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name,
         std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
         t_uindex nrows = col->size();
 
@@ -1174,7 +1174,7 @@ namespace binding {
      */
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
-        std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type,
+        std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
         bool is_arrow, bool is_update) {
         switch (type) {
             case DTYPE_INT64: {

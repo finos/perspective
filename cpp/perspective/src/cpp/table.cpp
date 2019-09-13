@@ -23,29 +23,10 @@ Table::Table(std::shared_ptr<t_pool> pool, std::vector<std::string> column_names
     , m_data_types(std::move(data_types))
     , m_offset(0)
     , m_limit(limit)
-    , m_index(index)
+    , m_index(std::move(index))
     , m_gnode_set(false) {
-        validate_columns(column_names);
+        validate_columns(m_column_names);
     }
-
-void
-Table::validate_columns(const std::vector<std::string>& column_names) {
-    bool implicit_index =
-        std::find(column_names.begin(), column_names.end(), "__INDEX__") != column_names.end();
-    if (m_index != "") {
-        // Check if index is valid after getting column names
-        bool explicit_index
-            = std::find(column_names.begin(), column_names.end(), m_index) != column_names.end();
-        if (!explicit_index) {
-            std::cout << "Specified index " << m_index << " does not exist in data." << std::endl;
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' does not exist in data.");
-        }
-        if (explicit_index && implicit_index) {
-            std::cout << "Specified index " << m_index << " twice - ignoring implicit __INDEX__" << std::endl;
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' twice; ignoring implicit index.");
-        }
-    }
-}
 
 void
 Table::init(t_data_table& data_table, std::uint32_t row_count, const t_op op) {

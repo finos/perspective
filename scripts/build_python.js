@@ -27,10 +27,8 @@ function docker(target = "perspective", image = "emsdk") {
 }
 
 try {
-    let cmd = "cd python/perspective &&\
-    python3 -m pip install -r requirements.txt --target=`pwd` &&\
-    python3 -m pip install pytest pytest-cov mock flake8 codecov  --target=`pwd` &&\
-    python3 setup.py build";
+    // install dependencies
+    let target = "perspective";
 
     if (HAS_TARGET) {
         const new_target = args[args.indexOf("--target") + 1];
@@ -40,7 +38,7 @@ try {
     }
 
     let cmd;
-    let build_cmd = "python3 setup.py build";
+    let pip_target = "";
 
     if (IS_DOCKER) {
         pip_target = " --target=`pwd`";

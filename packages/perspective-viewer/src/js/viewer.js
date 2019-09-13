@@ -39,7 +39,7 @@ polyfill({});
  * @module perspective-viewer
  */
 
-const PERSISTENT_ATTRIBUTES = ["plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
+const PERSISTENT_ATTRIBUTES = ["editable", "plugin", "row-pivots", "column-pivots", "aggregates", "filters", "sort", "computed-columns", "columns"];
 
 /**
  * HTMLElement class for `<perspective-viewer>` custom element.  This class is

@@ -226,19 +226,16 @@ export class PerspectiveElement extends StateElement {
                     count
                 )}<span style="white-space:nowrap"> of points.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else if (columns_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
                 const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else if (rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
                 const warning = `<span style="white-space:nowrap">Rendering </span>${total(num_columns * max_rows, count)}<span style="white-space:nowrap"> of points.</span>`;
                 this._plugin_information_message.innerHTML = warning;
-                this.removeAttribute("updating");
                 return true;
             } else {
                 this._plugin_information.classList.add("hidden");
@@ -381,9 +378,9 @@ export class PerspectiveElement extends StateElement {
 
         try {
             if (limit_points) {
-                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows);
+                await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows, force_update);
             } else {
-                await this._plugin.create.call(this, this._datavis, this._view, task);
+                await this._plugin.create.call(this, this._datavis, this._view, task, undefined, undefined, force_update);
             }
         } catch (err) {
             console.warn(err);

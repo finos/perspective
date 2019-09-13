@@ -104,8 +104,8 @@
     "heatmap.html/sorts by an alpha column.": "0baee7f2e20ce704d75d4fc59cc0a1b0",
     "heatmap.html/displays visible columns.": "382f28ea5e7e7f5af24ab6688884ac2b",
     "candlestick.html/filter to date range.": "5edaf5770c832422360b1ca8ddde01e8",
-    "candlestick.html/filter by a single instrument.": "f15786ce7b2e831cdf8af64489a2f840",
-    "ohlc.html/filter by a single instrument.": "187bbbc9a9265807b9fd517c14082271",
+    "candlestick.html/filter by a single instrument.": "f988ca6494d7a36bada09928cd1a544e",
+    "ohlc.html/filter by a single instrument.": "0110fac1f2befac1b97a9d33f0022acf",
     "ohlc.html/filter to date range.": "7252edbb00597bed894c89cc7b8301e7",
     "sunburst.html/shows a grid without any settings applied.": "e61a53b560304cfbe3a6464218910cb0",
     "sunburst.html/pivots by a row.": "099b036c83a9e2b50d1c59507f06ddc4",
@@ -120,5 +120,5 @@
     "sunburst.html/highlights invalid filter.": "e48566c24b1655a202d1d227424f71c5",
     "sunburst.html/sorts by an alpha column.": "dca6a09d9b0c4b4a3fd6cdb91fa1eb1a",
     "sunburst.html/displays visible columns.": "92769650f8ccaf823d070f3bd12aa73b",
-    "__GIT_COMMIT__": "7a828e3bd1081b553b02584ac18c6dc5c09e54d9"
+    "__GIT_COMMIT__": "13d836c9ddaa8374b884e9807f8a433c3fc53a6e"
 }
