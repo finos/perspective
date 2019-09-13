@@ -158,14 +158,11 @@ get_data_types(t_val data, std::int32_t format, std::vector<std::string> names,
             auto data_type = tup.second.get_type().attr("__name__").cast<std::string>();
             std::string value;
 
-            std::cout << data_type << std::endl;
             if (data_type == "type") {
                 value = py::str(tup.second.cast<py::object>().attr("__name__")).cast<std::string>();
             } else {
                 value = tup.second.cast<std::string>();
             }
-
-            std::cout << value << std::endl;
             
             t_dtype type;
 

@@ -38,6 +38,11 @@ class TestTableInfer(object):
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
 
+    def test_table_infer_date_from_datetime(self):
+        data = {"a": [None, None, None, None, None, None, datetime(2019, 7, 11)]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": datetime}
+
     def test_table_infer_valid_date(self):
         data = {"a": [None, None, None, None, None, None, "08/31/2019"]}
         tbl = Table(data)

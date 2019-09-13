@@ -18,7 +18,7 @@ class ViewConfig(object):
         '''
         self._row_pivots = config.get('row-pivots', [])
         self._column_pivots = config.get('column-pivots', [])
-        self._aggregates = config.get('aggregates', [])
+        self._aggregates = config.get('aggregates', {})
         self._columns = config.get('columns', [])
         self._sort = config.get('sort', [])
         self._filter = config.get('filter', [])
@@ -45,10 +45,8 @@ class ViewConfig(object):
     def get_aggregates(self):
         '''Defines the grouping of data within columns.
 
-        FIXME: defined as vector of vectors, not a map as in JS
-
         Returns:
-            list[list] : a vector of string vectors in which the first value is the column name, and the second value is the string representation of an aggregate
+           dict[str:str] : a vector of string vectors in which the first value is the column name, and the second value is the string representation of an aggregate
         '''
         return self._aggregates
 

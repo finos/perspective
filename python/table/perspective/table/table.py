@@ -8,7 +8,7 @@
 from perspective.table.libbinding import make_table, t_op
 from .view import View
 from ._accessor import _PerspectiveAccessor
-from ._utils import _dtype_to_str
+from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
 class Table(object):
@@ -35,12 +35,16 @@ class Table(object):
         self._views = []
 
     def size(self):
-        '''Returns the size of the Table, i.e. its row count
-        '''
+        '''Returns the row count of the Table.'''
         return self._table.size()
 
-    def schema(self):
-        '''Returns the schema of this Table. A schema provides the mapping of column names to data types.
+    def schema(self, as_string=False):
+        '''Returns the schema of this Table.
+
+        A schema provides the mapping of string column names to python data types.
+
+        Params:
+            as_string (bool) : returns the data types as string representations, if True
 
         Returns:
             dict : A key-value mapping of column names to data types.
@@ -51,7 +55,10 @@ class Table(object):
         schema = {}
         for i in range(0, len(columns)):
             if (columns[i] != "psp_okey"):
-                schema[columns[i]] = _dtype_to_str(types[i])
+                if as_string:
+                    schema[columns[i]] = _dtype_to_str(types[i])
+                else:
+                    schema[columns[i]] = _dtype_to_pythontype(types[i])
         return schema
 
     def columns(self, computed=False):
@@ -70,7 +77,7 @@ class Table(object):
             - to update the row with primary key "abc" on a Table with {"index": "a"}, `data` should be [{"a": "abc", "b": "new data"}]
 
         Params:
-            data (dict|list|df) : the data with which to update the Table
+            data (dict|list|dataframe) : the data with which to update the Table
         '''
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
@@ -98,8 +105,18 @@ class Table(object):
         make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_DELETE, True, False)
 
     def view(self, config=None):
+        ''' Create a new View from this table with the configuration options in `config`.
+
+        A View is an immutable set of transformations on the underlying Table, which allows
+        for querying, pivoting, aggregating, sorting, and filtering of data.
+
+        Params:
+            config (dict or None) : a dictionary containing any of the optional keys below:
+            - "row-pivots" (list[str]) : a list of column names to use as row pivots
+            - "column-pivots" (list[str]) : a list of column names to use as column pivots
+        '''
         config = config or {}
-        if len(config.get("columns", [])) == 0:
+        if config.get("columns") is None:
             config["columns"] = self.columns()
         view = View(self, config)
         self._views.append(view)

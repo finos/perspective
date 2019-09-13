@@ -54,14 +54,14 @@ class TestToFormat(object):
         data = [{"a": "1/2/2019", "b": "string2"}, {"a": "3/4/2019", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.schema() == {"a": "date", "b": "string"}
+        assert view.schema() == {"a": date, "b": str}
         assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_date_str_month_ymd(self):
         data = [{"a": "2019/01/02", "b": "string2"}, {"a": "2019/03/04", "b": "string4"}]
         tbl = Table(data)
         view = tbl.view()
-        assert view.schema() == {"a": "date", "b": "string"}
+        assert view.schema() == {"a": date, "b": str}
         assert view.to_records() == [{"a": datetime(2019, 1, 2), "b": "string2"}, {"a": datetime(2019, 3, 4), "b": "string4"}]
 
     def test_to_records_datetime(self):
@@ -328,7 +328,6 @@ class TestToFormat(object):
         assert np.array_equal(v["2|a"], np.array([1, 1]))
         assert np.array_equal(v["2|b"], np.array([2, 2]))
 
-
     def test_to_pandas_df_simple(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         df = pd.DataFrame(data)
@@ -348,4 +347,3 @@ class TestToFormat(object):
         df2 = view.to_df()
         assert np.array_equal(df2.columns, df.columns)
         assert np.array_equal(df2["a"].values, df["a"].values)
-

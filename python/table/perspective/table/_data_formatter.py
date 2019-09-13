@@ -1,3 +1,10 @@
+# *****************************************************************************
+#
+# Copyright (c) 2019, the Perspective Authors.
+#
+# This file is part of the Perspective library, distributed under the terms of
+# the Apache License 2.0.  The full license can be found in the LICENSE file.
+#
 import numpy as np
 from perspective.table.libbinding import get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING

@@ -31,8 +31,12 @@ is_valid_filter(t_dtype type, t_val date_parser, t_filter_op comp, t_val filter_
         || comp == t_filter_op::FILTER_OP_IS_NOT_NULL) {
         return true;
     } else if (type == DTYPE_DATE || type == DTYPE_TIME) {
-        t_val parsed_date = date_parser.attr("parse")(filter_term);
-        return !parsed_date.is_none();
+        if (py::isinstance<py::str>(filter_term)) {
+            t_val parsed_date = date_parser.attr("parse")(filter_term);
+            return !parsed_date.is_none();
+        } else {
+            return !filter_term.is_none();
+        }
     } else {
         return !filter_term.is_none();
     }
@@ -70,13 +74,22 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
                     terms.push_back(mktscalar(filter_term.cast<bool>()));
                 } break;
                 case DTYPE_DATE: {
-                    t_val parsed_date = date_parser.attr("parse")(filter_term);
-                    terms.push_back(mktscalar(pythondate_to_t_date(parsed_date)));
+                    if (py::isinstance<py::str>(filter_term)) {
+                        t_val parsed_date = date_parser.attr("parse")(filter_term);
+                        terms.push_back(mktscalar(pythondate_to_t_date(parsed_date)));
+                    } else {
+                        terms.push_back(mktscalar(pythondate_to_t_date(filter_term)));
+                    }
                 } break;
                 case DTYPE_TIME: {
-                    t_val parsed_date = date_parser.attr("parse")(filter_term);
-                    terms.push_back(mktscalar(t_time(static_cast<std::int64_t>(
-                    parsed_date.attr("timestamp")().cast<double>()))));
+                    if (py::isinstance<py::str>(filter_term)) {
+                        t_val parsed_date = date_parser.attr("parse")(filter_term);
+                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(parsed_date)));
+                        terms.push_back(timestamp);
+                    } else {
+                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(filter_term)));
+                        terms.push_back(timestamp);
+                    }
                 } break;
                 default: {
                     terms.push_back(
@@ -93,16 +106,15 @@ t_view_config
 make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
     auto row_pivots = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
     auto column_pivots = config.attr("get_column_pivots")().cast<std::vector<std::string>>();
+    auto p_aggregates = config.attr("get_aggregates")().cast<std::map<std::string, std::string>>();
     auto columns = config.attr("get_columns")().cast<std::vector<std::string>>();
     auto sort = config.attr("get_sort")().cast<std::vector<std::vector<std::string>>>();
     auto filter_op = config.attr("get_filter_op")().cast<std::string>();
 
-    // aggregates require manual parsing - std::maps read from JS are empty
-    auto p_aggregates= config.attr("get_aggregates")().cast<std::vector<std::vector<std::string>>>();
     tsl::ordered_map<std::string, std::string> aggregates;
 
-    for (const auto& vec : p_aggregates) {
-        aggregates[vec[0]] = vec[1];
+    for (const auto& agg : p_aggregates) {
+        aggregates[agg.first] = agg.second;
     };
 
     bool column_only = false;

@@ -34,8 +34,7 @@ pythondatetime_to_ms(t_val datetime) {
      * passing a datetime with the `microsecond` field set to a roundable value, i.e. 5500. On conversion, the 
      * microsecond value becomes 6000 due to the rounding error.
      */
-    auto ms = datetime.attr("timestamp")().cast<double>() * 1000;
-    return std::round(ms);
+    return static_cast<std::int64_t>(datetime.attr("timestamp")().cast<double>() * 1000);
 }
 
 t_dtype type_string_to_t_dtype(std::string value, std::string name){
@@ -134,9 +133,7 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
                 return py::cast(scalar.to_string(false)); // should reimplement
             } else {
                 auto ms = std::chrono::milliseconds(scalar.to_int64());
-                std::cout << scalar.to_int64() << std::endl;
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
-                std::cout << time_point.time_since_epoch().count() << std::endl;
                 return py::cast(time_point);
             }
         }
@@ -153,11 +150,8 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
         case DTYPE_DATE: {
             t_date date = scalar.get<t_date>();
             std::tm tm = date.get_tm();
-            std::cout << tm.tm_year << " " << tm.tm_mon << " " << tm.tm_mday << std::endl;
             auto mkt = std::mktime(&tm);
-            std::cout << mkt << std::endl;
             auto time_point = std::chrono::system_clock::from_time_t(mkt);
-            std::cout << time_point.time_since_epoch().count() << std::endl;
             return py::cast(time_point);
         }
         case DTYPE_UINT8:

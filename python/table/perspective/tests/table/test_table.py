@@ -178,6 +178,25 @@ class TestTable(object):
             "f": datetime
         }
 
+    def test_table_output_string_schema(self):
+        data = {"a": int,
+                "b": float,
+                "c": str,
+                "d": bool,
+                "e": date,
+                "f": datetime}
+
+        tbl = Table(data)
+
+        assert tbl.schema(True) == {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime"
+        }
+
     def test_table_symmetric_schema(self):
         data = {
             "a": [1, 2, 3],
@@ -203,6 +222,32 @@ class TestTable(object):
         tbl2 = Table(schema)
 
         assert tbl2.schema() == schema
+
+    def test_table_symmetric_string_schema(self):
+        data = {
+            "a": [1, 2, 3],
+            "b": [1.5, 2.5, 3.5],
+            "c": ["a", "b", "c"],
+            "d": [True, False, True],
+            "e": [date.today(), date.today(), date.today()],
+            "f": [datetime.now(), datetime.now(), datetime.now()]
+        }
+
+        tbl = Table(data)
+        schema = tbl.schema(True)
+
+        assert schema == {
+            "a": "integer",
+            "b": "float",
+            "c": "string",
+            "d": "boolean",
+            "e": "date",
+            "f": "datetime"
+        }
+
+        tbl2 = Table(schema)
+
+        assert tbl2.schema(True) == schema
 
     # index
 

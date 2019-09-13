@@ -63,7 +63,6 @@ _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
     }
 }
 
-// TODO: implement
 void
 _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
     std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {

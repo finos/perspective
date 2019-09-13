@@ -11,6 +11,7 @@ from perspective.table.libbinding import make_view_zero, make_view_one, make_vie
 from .view_config import ViewConfig
 from ._data_formatter import _PerspectiveDataFormatter
 from ._constants import COLUMN_SEPARATOR_STRING
+from ._utils import _str_to_pythontype
 
 
 class View(object):
@@ -65,15 +66,21 @@ class View(object):
         '''
         return self._view.num_columns()
 
-    def schema(self):
-        '''The schema of this view, which is a key-value map that contains the column names and their data types.
+    def schema(self, as_string=False):
+        '''The schema of this view, which is a key-value map that contains the column names and their Python data types.
 
         If the columns are aggregated, their aggregated types will be shown.
+
+        Params:
+            as_string (bool) : returns data types as string representations, if True
 
         Returns:
             schema : a map of strings to strings
         '''
-        return {item[0]: item[1] for item in self._view.schema().items()}
+        if as_string:
+            return {item[0]: item[1] for item in self._view.schema().items()}
+        else:
+            return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
 
     def to_records(self, options=None):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
@@ -144,6 +151,23 @@ class View(object):
         pass
 
     def to_df(self, options=None):
+        '''Serialize the view's dataset into a pandas dataframe.
+
+        If the view is aggregated, the aggregated dataset will be returned.
+
+        Params:
+            options (dict) :
+                user-provided options that specifies what data to return:
+                - start_row: defaults to 0
+                - end_row: defaults to the number of total rows in the view
+                - start_col: defaults to 0
+                - end_col: defaults to the total columns in the view
+                - index: whether to return an implicit pkey for each row. Defaults to False
+                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+
+        Returns:
+            pandas.DataFrame : a pandas dataframe containing the serialized data.
+        '''
         import pandas
         cols = self.to_numpy(options=options)
         return pandas.DataFrame(cols)
