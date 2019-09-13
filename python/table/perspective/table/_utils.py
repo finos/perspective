@@ -1,8 +1,25 @@
+# *****************************************************************************
+#
+# Copyright (c) 2019, the Perspective Authors.
+#
+# This file is part of the Perspective library, distributed under the terms of
+# the Apache License 2.0.  The full license can be found in the LICENSE file.
+#
 from perspective.table.libbinding import t_dtype
 from datetime import date, datetime
 
 
+def _extract_type(type, typemap):
+    rval = typemap.get(type)
+
+    if rval is None:
+        raise KeyError("unsupported type: {}".format(type))
+
+    return rval
+
+
 def _dtype_to_pythontype(dtype):
+    '''Returns the native Python type from a Perspective type'''
     mapping = {
         t_dtype.DTYPE_BOOL: bool,
         t_dtype.DTYPE_FLOAT32: float,
@@ -16,15 +33,11 @@ def _dtype_to_pythontype(dtype):
         t_dtype.DTYPE_STR: str
     }
 
-    rval = mapping.get(dtype)
-
-    if rval is None:
-        raise KeyError("unsupported type: {}".format(dtype))
-
-    return rval
+    return _extract_type(dtype, mapping)
 
 
 def _dtype_to_str(dtype):
+    '''Returns the normalized string representation of a Perspective type, compatible with Perspective.js'''
     mapping = {
         t_dtype.DTYPE_BOOL: "boolean",
         t_dtype.DTYPE_FLOAT32: "float",
@@ -38,15 +51,11 @@ def _dtype_to_str(dtype):
         t_dtype.DTYPE_STR: "string"
     }
 
-    rval = mapping.get(dtype)
-
-    if rval is None:
-        raise KeyError("unsupported type: {}".format(dtype))
-
-    return rval
+    return _extract_type(dtype, mapping)
 
 
 def _str_to_pythontype(typestring):
+    '''Returns a Python type from the normalized string representation of a Perspective type, i.e. from Perspective.js'''
     mapping = {
         "integer": int,
         "float": float,
@@ -56,9 +65,4 @@ def _str_to_pythontype(typestring):
         "datetime": datetime
     }
 
-    rval = mapping.get(typestring)
-
-    if rval is None:
-        raise KeyError("unsupported type: {}".format(typestring))
-
-    return rval
+    return _extract_type(typestring, mapping)

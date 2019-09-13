@@ -32,7 +32,6 @@ class Table(object):
         self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, False)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = []
-        self._views = []
 
     def size(self):
         '''Returns the row count of the Table.'''
@@ -118,9 +117,7 @@ class Table(object):
         config = config or {}
         if config.get("columns") is None:
             config["columns"] = self.columns()
-        view = View(self, config)
-        self._views.append(view)
-        return view
+        return View(self, config)
 
     def _update_callback(self):
         cache = {}

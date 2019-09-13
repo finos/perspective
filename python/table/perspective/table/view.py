@@ -173,6 +173,7 @@ class View(object):
         return pandas.DataFrame(cols)
 
     def _to_format_helper(self, options=None):
+        '''Retrieves the data slice and column names in preparation for data serialization.'''
         options = options or {}
         opts = self._parse_format_options(options)
 
