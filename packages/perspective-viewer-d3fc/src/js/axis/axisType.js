@@ -33,7 +33,7 @@ export const axisType = settings => {
 
         if (settings[settingName].length === 0) {
             return AXIS_TYPES.none;
-        } else if (excludeType != AXIS_TYPES.time && checkTypes(["datetime"])) {
+        } else if (excludeType != AXIS_TYPES.time && checkTypes(["datetime", "date"])) {
             return AXIS_TYPES.time;
         } else if (excludeType != AXIS_TYPES.linear && checkTypes(["integer", "float"])) {
             return AXIS_TYPES.linear;
