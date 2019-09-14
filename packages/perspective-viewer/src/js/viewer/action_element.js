@@ -225,6 +225,9 @@ export class ActionElement extends DomElement {
         const resize = event => {
             const new_width = Math.max(0, Math.min(width + (event.clientX - start), this.offsetWidth - 10));
             this._side_panel.style.width = `${new_width}px`;
+            if (this._plugin) {
+                this._resize_handler();
+            }
         };
         const stop = () => {
             document.body.style.cursor = initial;

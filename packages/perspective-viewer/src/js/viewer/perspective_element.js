@@ -452,6 +452,8 @@ export class PerspectiveElement extends StateElement {
                 resolve();
             }
         };
+
+        this._resize_handler = _.throttle(this.notifyResize, 100).bind(this);
     }
 
     _get_worker() {
