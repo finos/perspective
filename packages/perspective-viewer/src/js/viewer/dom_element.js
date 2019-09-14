@@ -35,40 +35,28 @@ export class DomElement extends PerspectiveElement {
         }
     }
 
-    _set_row_type(row, type) {
-        if (!type) {
-            let all = this._get_view_dom_columns("#inactive_columns perspective-row");
-            if (all.length > 0) {
-                type = all.find(x => x.getAttribute("name") === name);
-                if (type) {
-                    type = type.getAttribute("type");
-                } else {
-                    type = "integer";
-                }
+    _get_type(name) {
+        let all = this._get_view_dom_columns("#inactive_columns perspective-row");
+        if (all.length > 0) {
+            const type = all.find(x => x.getAttribute("name") === name);
+            if (type) {
+                return type.getAttribute("type");
             } else {
-                type = "";
+                return "integer";
             }
+        } else {
+            return "";
         }
-        row.setAttribute("type", type);
+    }
+
+    _set_row_type(row) {
+        row.setAttribute("type", this._get_type(row.getAttribute("name")));
     }
 
     // Generates a new row in state + DOM
     _new_row(name, type, aggregate, filter, sort, computed) {
         let row = document.createElement("perspective-row");
-
-        if (!type) {
-            let all = this._get_view_dom_columns("#inactive_columns perspective-row");
-            if (all.length > 0) {
-                type = all.find(x => x.getAttribute("name") === name);
-                if (type) {
-                    type = type.getAttribute("type");
-                } else {
-                    type = "integer";
-                }
-            } else {
-                type = "";
-            }
-        }
+        type = type || this._get_type(name);
 
         if (!aggregate) {
             let aggregates = this.get_aggregate_attribute();
@@ -259,7 +247,7 @@ export class DomElement extends PerspectiveElement {
     }
 
     _check_responsive_layout() {
-        if(this.shadowRoot){
+        if (this.shadowRoot) {
             if (this.clientHeight < 500 && this.clientWidth > 600 && this._get_view_columns({active: false}).length > this._get_view_columns().length) {
                 this.shadowRoot.querySelector("#app").classList.add("columns_horizontal");
             } else {

@@ -7,9 +7,9 @@
  *
  */
 
-const rectangular = require("rectangular");
-const superscript = require("superscript-number");
-const lodash = require("lodash");
+import rectangular from "rectangular";
+import superscript from "superscript-number";
+import lodash from "lodash";
 
 /**
  * @this {Behavior}
@@ -62,6 +62,7 @@ function setPSP(payload, force = false) {
             data: payload.rows,
             schema: new_schema
         });
+        this.grid.selectionModel.clear();
         this.grid.allowEvents(true);
     }
     this._memoized_schema = new_schema;
@@ -109,6 +110,14 @@ function setColumnPropsByType(column) {
             datetime: "perspective-datetime",
             float: "perspective-number"
         }[column.type];
+        Object.assign(props, {
+            editable: true,
+            editOnKeydown: true,
+            editOnNextCell: false,
+            editOnDoubleClick: true,
+            editorActivationKeys: ["alt", "esc"],
+            cellSelection: true
+        });
     }
     const styles = this.grid.get_styles();
     if (styles[column.type]) {
@@ -205,7 +214,7 @@ const right_click_handler = e => {
 };
 
 // `install` makes this a Hypergrid plug-in
-exports.install = function(grid) {
+export const install = function(grid) {
     addSortChars(grid.behavior.charMap);
 
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;
@@ -264,6 +273,139 @@ exports.install = function(grid) {
         );
 
         return this.dataModel.toggleRow(event.dataCell.y, event.dataCell.x, event);
+    };
+
+    // Prevents flashing of cell selection on scroll
+    const renderGrid = grid.renderer.renderGrid;
+    grid.renderer.renderGrid = function(gc) {
+        renderGrid.call(this, gc);
+        this.renderOverrides(gc);
+        this.renderLastSelection(gc);
+    };
+
+    // Corrects for deselection behavior on keyiup due to shadow-dom
+    grid.canvas.hasFocus = function() {
+        const grid_element = grid.div.parentNode.parentNode.host;
+        const view_shadow_root = grid_element.parentNode.parentNode.parentNode.parentNode.parentNode;
+        return view_shadow_root.activeElement === grid_element;
+    };
+
+    // Disable cell selection dragging
+    grid.lookupFeature("CellSelection").handleMouseDown = function(grid, event) {
+        var dx = event.gridCell.x,
+            dy = event.dataCell.y,
+            isSelectable = grid.behavior.getCellProperty(event.dataCell.x, event.gridCell.y, "cellSelection");
+
+        if (isSelectable && event.isDataCell && !event.primitiveEvent.detail.isRightClick) {
+            var dCell = grid.newPoint(dx, dy),
+                primEvent = event.primitiveEvent,
+                keys = primEvent.detail.keys;
+            this.extendSelection(grid, dCell, keys);
+        } else if (this.next) {
+            this.next.handleMouseDown(grid, event);
+        }
+    };
+
+    // Disable cell selection by shift-click
+    grid.lookupFeature("CellSelection").extendSelection = function(grid, gridCell, keys) {
+        var hasCTRL = keys.indexOf("CTRL") >= 0,
+            hasSHIFT = false,
+            mousePoint = grid.getMouseDown(),
+            x = gridCell.x, // - numFixedColumns + scrollLeft;
+            y = gridCell.y; // - numFixedRows + scrollTop;
+
+        //were outside of the grid do nothing
+        if (x < 0 || y < 0) {
+            return;
+        }
+
+        //we have repeated a click in the same spot deslect the value from last time
+        if (hasCTRL && x === mousePoint.x && y === mousePoint.y) {
+            grid.clearMostRecentSelection();
+            grid.popMouseDown();
+            grid.repaint();
+            return;
+        }
+
+        if (!hasCTRL && !hasSHIFT) {
+            grid.clearSelections();
+        }
+
+        if (hasSHIFT) {
+            grid.clearMostRecentSelection();
+            grid.select(mousePoint.x, mousePoint.y, x - mousePoint.x, y - mousePoint.y);
+            grid.setDragExtent(grid.newPoint(x - mousePoint.x, y - mousePoint.y));
+        } else {
+            grid.select(x, y, 0, 0);
+            grid.setMouseDown(grid.newPoint(x, y));
+            grid.setDragExtent(grid.newPoint(0, 0));
+        }
+        grid.repaint();
+    };
+
+    // Prevent multiple cell moves while pressing navigation keys while editing.
+    grid.lookupFeature("CellSelection").handleDOWN = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const max = grid.renderer.dataWindow.origin.y + grid.renderer.dataWindow.extent.y - 2;
+            if (y + count > max) {
+                grid.sbVScroller.index++;
+            }
+            y = Math.min(grid.behavior.dataModel.getRowCount() - 1, y + count);
+            grid.selectionModel.select(x, y, 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").handleUP = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const min = grid.renderer.dataWindow.origin.y;
+            if (y - count < min) {
+                grid.sbVScroller.index--;
+            }
+            y = Math.max(0, y - count);
+            grid.selectionModel.select(x, y, 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").handleLEFT = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const min = grid.renderer.dataWindow.origin.x;
+            if (x - count < min) {
+                grid.sbHScroller.index--;
+            }
+            x = Math.max(0, x - 1);
+            grid.selectionModel.select(x, y, 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").handleRIGHT = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const max = grid.renderer.dataWindow.origin.x + grid.renderer.dataWindow.extent.x - 1;
+            if (x + count > max) {
+                grid.sbHScroller.index++;
+            }
+            x = Math.min(grid.behavior.schema.length - 1, x + count);
+            grid.selectionModel.select(x, y, 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").moveShiftSelect = function(grid, offsetX, offsetY) {
+        grid.moveSingleSelect(offsetX, offsetY);
     };
 
     grid.canvas.resize = async function(force, reset) {

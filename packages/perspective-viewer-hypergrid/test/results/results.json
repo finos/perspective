@@ -33,11 +33,9 @@
     "superstore.html/should reinterpret metadata when only row pivots are changed": "fb9c5cb1b9a4148023f6edf4bffd27db",
     "empty.html/perspective-click is fired when an empty dataset is loaded first": "7e5b653226145e1ab9f82e2417d89d7b",
     "superstore.html/should not edit an immutable viewer": "8d99c2bc8bf7450a5f2cc4f5b1ca7412",
-    "editable.html/should open an editor on a string column": "06ad5b1db4e71e41979fc11fa6291895",
-    "editable.html/should open an editor on an integer column": "e50abe7159914a7990be5505ff3db62b",
-    "editable.html/should open an editor on a datetime column": "15e1d52a2097f704d928207fbfac4f63",
-    "editable.html/should save edits to a string column": "0f1e5aae7ca316d30e2926260fa4a049",
-    "editable.html/should save edits to an integer column": "81ef9bcde6197a213fba59ee33152c72",
-    "editable.html/should save edits of negative numbers to an integer column": "2007c3c6dc2b015f5e7e6223ad2c5be0",
-    "editable.html/should fail to save edits of invalid integers": "ffebbb0f4eac207176c26be89d072fba"
+    "editable.html/should save edits to a string column": "e1ccff5b0c2c15ee6363d1881f3a2754",
+    "editable.html/should save edits to an integer column": "0899c9636987608d306db60af44ec98f",
+    "editable.html/should save edits of negative numbers to an integer column": "81721a50fa662cc15818005b9fb85cd4",
+    "editable.html/should fail to save edits of invalid integers": "1f58c721fd26c7c71dae576f4a727de4",
+    "editable.html/should follow the indexed row when the data updates": "2b1aa9c3421e00e2bd547336a01e9f78"
 }

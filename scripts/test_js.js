@@ -41,9 +41,12 @@ function jest() {
     }
 
     if (args.indexOf("-t") > -1) {
-        const regex = args.slice(args.indexOf("-t") + 1).join(" ");
+        const regex = args
+            .slice(args.indexOf("-t") + 1)
+            .join(".")
+            .replace(/ /g, ".");
         console.log(`-- Qualifying search '${regex}'`);
-        cmd += ` -t '${regex}'`;
+        cmd += ` -t "${regex}"`;
     }
 
     return (IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd;
@@ -96,7 +99,15 @@ try {
         }
         if (!IS_EMSDK) {
             execute(`yarn --silent clean --screenshots`);
-            execute(docker() + " " + args.join(" "));
+            execute(
+                docker() +
+                    " " +
+                    args
+                        .map(function(arg) {
+                            return "'" + arg.replace(/'/g, "'\\''") + "'";
+                        })
+                        .join(" ")
+            );
         }
     } else {
         if (IS_LOCAL_PUPPETEER) {
@@ -120,8 +131,11 @@ try {
             }
             cmd += " -- yarn --silent test:run";
             if (args.indexOf("-t") > -1) {
-                const regex = args.slice(args.indexOf("-t") + 1).join(" ");
-                console.log(`-- Qualifying search '${regex}'`);
+                let regex = args.slice(args.indexOf("-t") + 1);
+                const len = regex.findIndex(x => x.indexOf('"' > -1));
+                regex = regex.slice(0, len + 1);
+                console.log(`-- Qualifying search '${regex.join(" ")}'`);
+                regex = regex.join(".").replace(/ /g, ".");
                 cmd += ` -t "${regex}"`;
             }
             execute((IS_WRITE ? "WRITE_TESTS=1 " : "") + cmd);

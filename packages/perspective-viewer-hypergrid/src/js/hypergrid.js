@@ -7,17 +7,17 @@
  *
  */
 
-const Hypergrid = require("fin-hypergrid");
-const Base = require("fin-hypergrid/src/Base");
-const groupedHeaderPlugin = require("fin-hypergrid-grouped-header-plugin");
+import Hypergrid from "fin-hypergrid";
+import Base from "fin-hypergrid/src/Base";
+import groupedHeaderPlugin from "fin-hypergrid-grouped-header-plugin";
 
-const perspectivePlugin = require("./perspective-plugin");
-const PerspectiveDataModel = require("./PerspectiveDataModel");
-const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
+import * as perspectivePlugin from "./perspective-plugin";
+import PerspectiveDataModel from "./PerspectiveDataModel";
+import {psp2hypergrid, page2hypergrid} from "./psp-to-hypergrid";
 
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 
-const TEMPLATE = require("../html/hypergrid.html");
+import TEMPLATE from "../html/hypergrid.html";
 
 import style from "../less/hypergrid.less";
 import {get_styles, clear_styles, default_grid_properties} from "./styles.js";
@@ -83,7 +83,6 @@ async function grid_update(div, view, task) {
     if (task.cancelled) {
         return;
     }
-
     const dataModel = this.hypergrid.behavior.dataModel;
     dataModel.setDirty(nrows);
     dataModel._view = view;
@@ -112,9 +111,16 @@ async function getOrCreateHypergrid(div) {
     let perspectiveHypergridElement;
     if (!this.hypergrid) {
         perspectiveHypergridElement = this[PRIVATE].grid = document.createElement("perspective-hypergrid");
+        perspectiveHypergridElement.setAttribute("tabindex", 1);
         Object.defineProperty(this, "hypergrid", {
             configurable: true,
             get: () => (this[PRIVATE].grid ? this[PRIVATE].grid.grid : undefined)
+        });
+        perspectiveHypergridElement.addEventListener("blur", () => {
+            if (perspectiveHypergridElement.grid && !perspectiveHypergridElement.grid._is_editing) {
+                perspectiveHypergridElement.grid.selectionModel.clear();
+                perspectiveHypergridElement.grid.paintNow();
+            }
         });
     } else {
         perspectiveHypergridElement = this[PRIVATE].grid;
@@ -147,7 +153,8 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     const rowPivots = config.row_pivots;
     const window = {
         start_row: 0,
-        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1)
+        end_row: Math.max(colPivots.length + 1, rowPivots.length + 1),
+        index: true
     };
 
     const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(window), view.schema(), this._table.schema()]);
@@ -163,7 +170,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     }
 
     const dataModel = this.hypergrid.behavior.dataModel;
-    let columns = Object.keys(json);
+    let columns = Object.keys(json).filter(x => x !== "__INDEX__");
 
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
@@ -175,14 +182,15 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
+        range.index = true;
         let next_page = await dataModel._view.to_columns(range);
         if (columns.length === 0) {
             columns = Object.keys(await view.to_columns(window));
         }
         dataModel.data = [];
         const rows = page2hypergrid(next_page, rowPivots, columns);
-        const data = dataModel.data;
         const base = range.start_row;
+        const data = dataModel.data;
         rows.forEach((row, offset) => (data[base + offset] = row));
     };
 
