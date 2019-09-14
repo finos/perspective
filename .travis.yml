@@ -46,8 +46,8 @@ install:
  
 script:
   - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn lint; fi
-  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn build; fi
-  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn test --quiet; fi
+  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn build_js; fi
+  - if [ "$TEST" = "WASM" ]; then PSP_DOCKER=1 yarn test_js --quiet; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
   - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn build_python:table; fi
