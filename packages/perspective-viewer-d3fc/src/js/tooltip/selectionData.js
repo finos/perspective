@@ -9,6 +9,7 @@
 
 function toValue(type, value) {
     switch (type) {
+        case "date":
         case "datetime":
             return value instanceof Date ? value : new Date(parseInt(value));
         case "integer":

@@ -9,7 +9,6 @@
 
 import "@webcomponents/webcomponentsjs";
 
-import _ from "lodash";
 import {polyfill} from "mobile-drag-drop";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
@@ -67,7 +66,6 @@ class PerspectiveViewer extends ActionElement {
         this._register_debounce_instance();
         this._show_config = true;
         this._show_warnings = true;
-        this._resize_handler = _.debounce(this.notifyResize, 250).bind(this);
         window.addEventListener("load", this._resize_handler);
         window.addEventListener("resize", this._resize_handler);
     }
