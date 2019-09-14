@@ -7,7 +7,7 @@
  *
  */
 
-const Textfield = require("fin-hypergrid/src/cellEditors/Textfield");
+import Textfield from "fin-hypergrid/src/cellEditors/Textfield";
 
 function px(n) {
     return n + "px";

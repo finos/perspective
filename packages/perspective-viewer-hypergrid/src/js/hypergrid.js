@@ -7,17 +7,17 @@
  *
  */
 
-const Hypergrid = require("fin-hypergrid");
-const Base = require("fin-hypergrid/src/Base");
-const groupedHeaderPlugin = require("fin-hypergrid-grouped-header-plugin");
+import Hypergrid from "fin-hypergrid";
+import Base from "fin-hypergrid/src/Base";
+import groupedHeaderPlugin from "fin-hypergrid-grouped-header-plugin";
 
-const perspectivePlugin = require("./perspective-plugin");
-const PerspectiveDataModel = require("./PerspectiveDataModel");
-const {psp2hypergrid, page2hypergrid} = require("./psp-to-hypergrid");
+import * as perspectivePlugin from "./perspective-plugin";
+import PerspectiveDataModel from "./PerspectiveDataModel";
+import {psp2hypergrid, page2hypergrid} from "./psp-to-hypergrid";
 
 import {bindTemplate} from "@finos/perspective-viewer/dist/esm/utils.js";
 
-const TEMPLATE = require("../html/hypergrid.html");
+import TEMPLATE from "../html/hypergrid.html";
 
 import style from "../less/hypergrid.less";
 import {get_styles, clear_styles, default_grid_properties} from "./styles.js";

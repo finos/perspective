@@ -7,9 +7,9 @@
  *
  */
 
-const rectangular = require("rectangular");
-const superscript = require("superscript-number");
-const lodash = require("lodash");
+import rectangular from "rectangular";
+import superscript from "superscript-number";
+import lodash from "lodash";
 
 /**
  * @this {Behavior}
@@ -214,7 +214,7 @@ const right_click_handler = e => {
 };
 
 // `install` makes this a Hypergrid plug-in
-exports.install = function(grid) {
+export const install = function(grid) {
     addSortChars(grid.behavior.charMap);
 
     Object.getPrototypeOf(grid.behavior).setPSP = setPSP;

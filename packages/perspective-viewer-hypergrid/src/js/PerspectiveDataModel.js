@@ -7,8 +7,12 @@
  *
  */
 
-const TREE_COLUMN_INDEX = require("fin-hypergrid/src/behaviors/Behavior").prototype.treeColumnIndex;
-const {get_type_config} = require("@finos/perspective/dist/esm/config/index.js");
+import Behavior from "fin-hypergrid/src/behaviors/Behavior";
+import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
+
+const {
+    prototype: {treeColumnIndex: TREE_COLUMN_INDEX}
+} = Behavior;
 
 function getSubrects(nrows) {
     if (!this.dataWindow) {
@@ -28,7 +32,7 @@ function find_row(rows, index) {
     return -1;
 }
 
-module.exports = require("datasaur-local").extend("PerspectiveDataModel", {
+export default require("datasaur-local").extend("PerspectiveDataModel", {
     isTreeCol: function(x) {
         return x === TREE_COLUMN_INDEX && this.isTree();
     },
