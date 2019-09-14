@@ -37,5 +37,5 @@
     "editable.html/should save edits to an integer column": "0899c9636987608d306db60af44ec98f",
     "editable.html/should save edits of negative numbers to an integer column": "81721a50fa662cc15818005b9fb85cd4",
     "editable.html/should fail to save edits of invalid integers": "1f58c721fd26c7c71dae576f4a727de4",
-    "editable.html/should follow the indexed row when the data updates": "4028176406a2b3c43aa6e591056f7e9d"
+    "editable.html/should follow the indexed row when the data updates": "2b1aa9c3421e00e2bd547336a01e9f78"
 }

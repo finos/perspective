@@ -20,18 +20,18 @@ function validateEditorValueDate(x) {
 
 function setBoundsDate(cellBounds) {
     const style = this.el.style;
-    style.left = px(cellBounds.x);
-    style.top = px(cellBounds.y);
-    style.width = px(cellBounds.width + 50);
-    style.height = px(cellBounds.height - 1);
+    style.left = px(cellBounds.x - 1);
+    style.top = px(cellBounds.y - 1);
+    style.width = px(cellBounds.width + 52);
+    style.height = px(cellBounds.height + 2);
 }
 
 function setBoundsText(cellBounds) {
     const style = this.el.style;
-    style.left = px(cellBounds.x + 1);
-    style.top = px(cellBounds.y + 1);
-    style.width = px(cellBounds.width - 2);
-    style.height = px(cellBounds.height - 2);
+    style.left = px(cellBounds.x - 1);
+    style.top = px(cellBounds.y - 1);
+    style.width = px(cellBounds.width + 2);
+    style.height = px(cellBounds.height + 2);
 }
 
 function setEditorValueDate(x) {

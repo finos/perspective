@@ -36,11 +36,11 @@
     input.hypergrid-textfield {
         position: absolute;
         outline: none;
-        border: none;
+        border: 1px solid var(--hypergrid-editor--border-color, rgba(0,0,0,0.4));
         color: var(--hypergrid--color, inherit);
         background: var(--hypergrid--background, white);
         box-sizing: border-box;
-        padding: 0px 4px 3px 4px;
+        padding: 0px 4px 3px 5px;
     }
 
     #gridWrapper {
@@ -62,6 +62,9 @@
         height: 100%;
         margin: 0px;
         padding: 0px;
+    }
+
+    #mainGrid > div {
         overflow: hidden;
     }
 
