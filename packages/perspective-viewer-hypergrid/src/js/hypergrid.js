@@ -116,6 +116,12 @@ async function getOrCreateHypergrid(div) {
             configurable: true,
             get: () => (this[PRIVATE].grid ? this[PRIVATE].grid.grid : undefined)
         });
+        perspectiveHypergridElement.addEventListener("blur", () => {
+            if (perspectiveHypergridElement.grid && !perspectiveHypergridElement.grid._is_editing) {
+                perspectiveHypergridElement.grid.selectionModel.clear();
+                perspectiveHypergridElement.grid.paintNow();
+            }
+        });
     } else {
         perspectiveHypergridElement = this[PRIVATE].grid;
     }

@@ -42,6 +42,7 @@ function setEditorValueDate(x) {
     const day = ("0" + now.getDate()).slice(-2);
     const month = ("0" + (now.getMonth() + 1)).slice(-2);
     this.input.value = `${now.getFullYear()}-${month}-${day}`;
+    this.input.addEventListener("keydown", keydown.bind(this));
 }
 
 function setEditorValueDatetime(x) {
@@ -55,6 +56,7 @@ function setEditorValueDatetime(x) {
     const minute = ("0" + now.getMinutes()).slice(-2);
     const ss = ("0" + now.getSeconds()).slice(-2);
     this.input.value = `${now.getFullYear()}-${month}-${day}T${hour}:${minute}:${ss}`;
+    this.input.addEventListener("keydown", keydown.bind(this));
 }
 
 function setEditorValueText(updated) {
@@ -182,7 +184,9 @@ function stopEditing(feedback) {
         this.grid.selectionModel.select(x, y + 1, 0, 0);
         this.hideEditor();
         this.grid.cellEditor = null;
+        this.grid._is_editing = true;
         this.el.remove();
+        this.grid._is_editing = false;
         this.grid.div.parentNode.parentNode.host.focus();
     } else if (feedback >= 0) {
         // false when `feedback` undefined
@@ -193,6 +197,18 @@ function stopEditing(feedback) {
     }
 
     return !error;
+}
+
+function cancelEditing() {
+    this.setEditorValue(this.initialValue);
+    this.hideEditor();
+    this.grid.cellEditor = null;
+    this.grid._is_editing = true;
+    this.el.remove();
+    this.grid._is_editing = false;
+    this.grid.takeFocus();
+
+    return true;
 }
 
 export function set_editors(grid) {
@@ -206,7 +222,8 @@ export function set_editors(grid) {
         selectAll: () => {},
         saveEditorValue,
         keyup,
-        stopEditing
+        stopEditing,
+        cancelEditing
     });
 
     const datetime = Textfield.extend("perspective-datetime", {
@@ -219,7 +236,8 @@ export function set_editors(grid) {
         selectAll: () => {},
         saveEditorValue,
         keyup,
-        stopEditing
+        stopEditing,
+        cancelEditing
     });
 
     const text = Textfield.extend("perspective-text", {
@@ -228,7 +246,8 @@ export function set_editors(grid) {
         getEditorValue: getEditorValueText,
         saveEditorValue,
         keyup,
-        stopEditing
+        stopEditing,
+        cancelEditing
     });
 
     const number = Textfield.extend("perspective-number", {
@@ -238,7 +257,8 @@ export function set_editors(grid) {
         validateEditorValue: x => isNaN(Number(x.replace(/,/g, ""))),
         saveEditorValue,
         keyup,
-        stopEditing
+        stopEditing,
+        cancelEditing
     });
 
     grid.cellEditors.add(number);

@@ -348,8 +348,13 @@ export const install = function(grid) {
         event.primitiveEvent.preventDefault();
         if (!grid.cellEditor) {
             const count = this.getAutoScrollAcceleration();
-            const {x, y} = grid.selectionModel.getLastSelection().origin;
-            grid.selectionModel.select(x, y + count, 0, 0);
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const max = grid.renderer.dataWindow.origin.y + grid.renderer.dataWindow.extent.y - 2;
+            if (y + count > max) {
+                grid.sbVScroller.index++;
+            }
+            y = Math.min(grid.behavior.dataModel.getRowCount() - 1, y + count);
+            grid.selectionModel.select(x, y, 0, 0);
             grid.repaint();
         }
     };
@@ -358,8 +363,13 @@ export const install = function(grid) {
         event.primitiveEvent.preventDefault();
         if (!grid.cellEditor) {
             const count = this.getAutoScrollAcceleration();
-            const {x, y} = grid.selectionModel.getLastSelection().origin;
-            grid.selectionModel.select(x, Math.max(0, y - count), 0, 0);
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const min = grid.renderer.dataWindow.origin.y;
+            if (y - count < min) {
+                grid.sbVScroller.index--;
+            }
+            y = Math.max(0, y - count);
+            grid.selectionModel.select(x, y, 0, 0);
             grid.repaint();
         }
     };
@@ -367,8 +377,14 @@ export const install = function(grid) {
     grid.lookupFeature("CellSelection").handleLEFT = function(grid, event) {
         event.primitiveEvent.preventDefault();
         if (!grid.cellEditor) {
-            const {x, y} = grid.selectionModel.getLastSelection().origin;
-            grid.selectionModel.select(Math.max(0, x - 1), y, 0, 0);
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const min = grid.renderer.dataWindow.origin.x;
+            if (x - count < min) {
+                grid.sbHScroller.index--;
+            }
+            x = Math.max(0, x - 1);
+            grid.selectionModel.select(x, y, 0, 0);
             grid.repaint();
         }
     };
@@ -376,10 +392,20 @@ export const install = function(grid) {
     grid.lookupFeature("CellSelection").handleRIGHT = function(grid, event) {
         event.primitiveEvent.preventDefault();
         if (!grid.cellEditor) {
-            const {x, y} = grid.selectionModel.getLastSelection().origin;
-            grid.selectionModel.select(x + 1, y, 0, 0);
+            const count = this.getAutoScrollAcceleration();
+            let {x, y} = grid.selectionModel.getLastSelection().origin;
+            const max = grid.renderer.dataWindow.origin.x + grid.renderer.dataWindow.extent.x - 1;
+            if (x + count > max) {
+                grid.sbHScroller.index++;
+            }
+            x = Math.min(grid.behavior.schema.length - 1, x + count);
+            grid.selectionModel.select(x, y, 0, 0);
             grid.repaint();
         }
+    };
+
+    grid.lookupFeature("CellSelection").moveShiftSelect = function(grid, offsetX, offsetY) {
+        grid.moveSingleSelect(offsetX, offsetY);
     };
 
     grid.canvas.resize = async function(force, reset) {
