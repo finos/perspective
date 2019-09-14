@@ -15,7 +15,7 @@ simple to build real-time & user configurable analytics entirely in the browser.
 ## Features
 
 - A fast, memory efficient streaming pivot engine written principally in C++ and
-  compiled to both WebAssembly and asm.js via the
+  compiled to WebAssembly via the
   [emscripten](https://github.com/kripken/emscripten) compiler.
 
 - An embeddable, framework-agnostic configuration UI, based
