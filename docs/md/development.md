@@ -18,15 +18,19 @@ however; the [Emscripten](https://github.com/kripken/emscripten) compiler, which
 is used to compile the core C++ engine to WebAssembly, and must be installed
 independently.
 
-### Building via Docker
+## Building
 
-For convenience, Perspective provides a Docker container for
-this; To use it, you only need to install [Docker](https://docs.docker.com/install/)
-itself, then build perspective via:
+To run a build, use
 
 ```bash
-yarn
-PSP_DOCKER=1 yarn build
+yarn build
+```
+
+If this is the first time you've built Perspective, you'll be asked to generate
+a `.perspectiverc` via a short survey.  This can be later re-configured via
+
+```bash
+yarn setup
 ```
 
 If everything is successful, you should be able to run any of the `examples/`
@@ -35,6 +39,15 @@ packages, e.g. `examples/simple` like so:
 ```bash
 yarn start simple
 ```
+
+For the WebAssembly compilation step, [Emscripten](https://github.com/kripken/emscripten)
+is required, which can has a few pre-requisites.
+
+### Building via Docker
+
+For convenience, Perspective provides a Docker container for
+this.  To use it, you only need to install [Docker](https://docs.docker.com/install/)
+itself.
 
 ### Building via EMSDK
 
@@ -88,16 +101,6 @@ for example (as per [here](http://vclf.blogspot.com/2014/08/emscripten-linking-t
 apt-get install libboost-all-dev
 cp -r /usr/include/boost ./packages/perspective/src/include/
 ```
-
-### Build Options
-
-Whichever method you choose, the build script respects a few environment flags:
-
--   `PSP_DOCKER` will compile C++ source via an Emscripten Docker container.
--   `PSP_DEBUG` will run a debug build of the C++ source.
--   `PSP_NO_MINIFY` will skip Javascript minification.
--   `PSP_CPU_COUNT` will set the concurrency limit for the build.
--   `PACKAGE` will restrict the build to only specific `@finos/` packages.
 
 ## Testing
 

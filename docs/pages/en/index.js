@@ -162,7 +162,7 @@ const FeatureCallout = props => (
     <Container padding={["bottom", "top"]} background="dark">
         <h2>Features</h2>
         <MarkdownBlock background="dark">
-            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to both WebAssembly and asm.js via the [emscripten](https://github.com/kripken/emscripten) compiler.
+            A fast, memory efficient streaming pivot engine written principally in C++ and compiled to WebAssembly via the [emscripten](https://github.com/kripken/emscripten) compiler.
         </MarkdownBlock>
         <MarkdownBlock>
             An embeddable, framework-agnostic configuration UI, based on [Web Components](https://www.webcomponents.org/), and a WebWorker engine host for responsiveness at high frequency.

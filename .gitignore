@@ -139,3 +139,4 @@ yarn.lock.bak
 docs/static/img
 
 docs/static/arrow/
+.perspectiverc

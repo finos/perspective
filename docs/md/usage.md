@@ -27,8 +27,8 @@ Perspective is designed for flexibility, allowing developers to pick and choose
 which modules they need for their specific use case. The main modules are:
 
 -   `@finos/perspective`  
-    The data engine library, as both a browser ES6 and Node.js module. Provides an
-    asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
+    The data engine library, as both a browser ES6 and Node.js module. Provides a
+    WebAssembly, WebWorker (browser) and Process (node.js)
     runtime.
 
 -   `@finos/perspective-viewer`  
@@ -119,7 +119,7 @@ const perspective = require("@finos/perspective");
 
 Once imported, you'll need to instance a `perspective` engine via the `worker()`
 method. This will create a new WebWorker (browser) or Process (node.js), and
-load the appropriate supported WebAssembly or asm.js binary; all calculation
+load the WebAssembly binary; all calculation
 and data accumulation will occur in this separate process.
 
 ```javascript
