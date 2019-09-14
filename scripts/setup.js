@@ -22,9 +22,10 @@ const CONFIG = new Proxy(
 
         add(new_config) {
             for (const key in new_config) {
-                if (new_config[key] !== "") {
-                    this._values[key] = new_config[key];
-                    this.config.push(`${key}=${new_config[key]}`);
+                const val = new_config[key];
+                if (val !== "" && !!val) {
+                    this._values[key] = val;
+                    this.config.push(`${key}=${val}`);
                 }
             }
         }
@@ -90,15 +91,43 @@ function focus_package() {
                         value: "perspective-viewer-highcharts"
                     }
                 ]
+            },
+            {
+                type: "confirm",
+                name: "PSP_DEBUG",
+                message: "Run debug build?",
+                default: CONFIG["PSP_DEBUG"] || false
+            },
+            {
+                type: "expand",
+                name: "PSP_TOGGLE_PUPPETEER",
+                message: "Use (l)ocal or (d)ocker Puppeteer for testing?",
+                default: fs.existsSync("node_modules/puppeteer") ? "local" : "docker",
+                choices: [
+                    {
+                        key: "l",
+                        name: "local",
+                        value: "local"
+                    },
+                    {
+                        key: "d",
+                        name: "docker",
+                        value: "docker"
+                    }
+                ]
             }
         ])
         .then(new_config => {
+            const puppeteer = fs.existsSync("node_modules/puppeteer") ? "local" : "docker";
+            if (new_config.PSP_TOGGLE_PUPPETEER !== puppeteer) {
+                require("./toggle_puppeteer");
+            }
             CONFIG.add(new_config);
             CONFIG.write();
         });
 }
 
-function main() {
+function choose_project() {
     inquirer
         .prompt([
             {
@@ -141,4 +170,20 @@ function main() {
         });
 }
 
-main();
+function choose_docker() {
+    inquirer
+        .prompt([
+            {
+                type: "confirm",
+                name: "PSP_DOCKER",
+                message: "Use docker for build env?",
+                default: CONFIG["PSP_DOCKER"] || false
+            }
+        ])
+        .then(answers => {
+            CONFIG.add(answers);
+            choose_project();
+        });
+}
+
+choose_docker();
