@@ -63,13 +63,13 @@ function docker() {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += " perspective/puppeteer node scripts/test.js --private-puppeteer";
+    cmd += " perspective/puppeteer node scripts/test_js.js --private-puppeteer";
     return cmd;
 }
 
 function emsdk() {
     console.log("-- Creating emsdk docker image");
-    return "npm run --silent _emsdk -- node scripts/test.js --private-emsdk " + args.join(" ");
+    return "npm run --silent _emsdk -- node scripts/test_js.js --private-emsdk " + args.join(" ");
 }
 
 function emsdk() {
@@ -78,7 +78,7 @@ function emsdk() {
     if (process.env.PSP_CPU_COUNT) {
         cmd += ` --cpus="${parseInt(process.env.PSP_CPU_COUNT)}.0"`;
     }
-    cmd += ` -v ${process.cwd()}:/src ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} perspective/emsdk node scripts/test.js --private-emsdk ` + args.join(" ");
+    cmd += ` -v ${process.cwd()}:/src ${process.env.PACKAGE ? `-e PACKAGE=${process.env.PACKAGE}` : ""} perspective/emsdk node scripts/test_js.js --private-emsdk ` + args.join(" ");
     return cmd;
 }
 
