@@ -79,8 +79,12 @@ function get_aggregates_with_defaults(aggregate_attribute, schema, cols) {
 }
 
 function calculate_throttle_timeout(render_time) {
+    if (!render_time || render_time.length < 5) {
+        return 0;
+    }
     const view_count = document.getElementsByTagName("perspective-viewer").length;
-    const timeout = render_time * view_count * 2;
+    const avg = render_time.reduce((x, y) => x + y, 0) / render_time.length;
+    const timeout = avg * view_count * 2;
     return Math.min(10000, Math.max(0, timeout));
 }
 
@@ -271,7 +275,7 @@ export class PerspectiveElement extends StateElement {
                 } finally {
                     this.dispatchEvent(new Event("perspective-view-update"));
                 }
-            }, calculate_throttle_timeout(this.__render_time));
+            }, calculate_throttle_timeout(this.__render_times));
         }
     }
 
@@ -385,7 +389,8 @@ export class PerspectiveElement extends StateElement {
         } catch (err) {
             console.warn(err);
         } finally {
-            if (!this.__render_time) {
+            if (!this.__render_times) {
+                this.__render_times = [];
                 this.dispatchEvent(new Event("perspective-view-update"));
             }
             timer();
@@ -399,7 +404,8 @@ export class PerspectiveElement extends StateElement {
 
     _render_time() {
         const t = performance.now();
-        return () => (this.__render_time = `${performance.now() - t}`);
+        let i = 0;
+        return () => (this.__render_times[i++ % 5] = performance.now() - t);
     }
 
     _restyle_plugin() {
