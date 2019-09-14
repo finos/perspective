@@ -354,6 +354,34 @@ exports.install = function(grid) {
         }
     };
 
+    grid.lookupFeature("CellSelection").handleUP = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const count = this.getAutoScrollAcceleration();
+            const {x, y} = grid.selectionModel.getLastSelection().origin;
+            grid.selectionModel.select(x, Math.max(0, y - count), 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").handleLEFT = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const {x, y} = grid.selectionModel.getLastSelection().origin;
+            grid.selectionModel.select(Math.max(0, x - 1), y, 0, 0);
+            grid.repaint();
+        }
+    };
+
+    grid.lookupFeature("CellSelection").handleRIGHT = function(grid, event) {
+        event.primitiveEvent.preventDefault();
+        if (!grid.cellEditor) {
+            const {x, y} = grid.selectionModel.getLastSelection().origin;
+            grid.selectionModel.select(x + 1, y, 0, 0);
+            grid.repaint();
+        }
+    };
+
     grid.canvas.resize = async function(force, reset) {
         const width = (this.width = Math.floor(this.div.clientWidth));
         const height = (this.height = Math.floor(this.div.clientHeight));

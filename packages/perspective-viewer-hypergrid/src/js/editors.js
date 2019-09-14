@@ -134,6 +134,7 @@ function saveEditorValue(x) {
 function keyup() {}
 
 function keydown(e) {
+    e.stopPropagation();
     let grid = this.grid,
         cellProps = this.event.properties,
         feedbackCount = cellProps.feedbackCount,
@@ -177,6 +178,8 @@ function stopEditing(feedback) {
     }
 
     if (!error) {
+        const {x, y} = this.grid.selectionModel.getLastSelection().origin;
+        this.grid.selectionModel.select(x, y + 1, 0, 0);
         this.hideEditor();
         this.grid.cellEditor = null;
         this.el.remove();
