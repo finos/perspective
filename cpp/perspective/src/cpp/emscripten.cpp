@@ -997,7 +997,7 @@ namespace binding {
 
     template <>
     void
-    set_column_nth(t_column* col, t_uindex idx, t_val value) {
+    set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value) {
 
         // Check if the value is a javascript null
         if (value.isNull()) {
@@ -1063,109 +1063,135 @@ namespace binding {
 
     template <>
     void
-    table_add_computed_column(t_data_table& table, t_val computed_defs) {
-        auto vcomputed_defs = vecFromArray<t_val, t_val>(computed_defs);
-        for (auto i = 0; i < vcomputed_defs.size(); ++i) {
-            t_val coldef = vcomputed_defs[i];
-            std::string name = coldef["column"].as<std::string>();
-            t_val inputs = coldef["inputs"];
-            t_val func = coldef["func"];
-            t_val type = coldef["type"];
+    add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def) {
+        std::uint32_t end = row_indices.size();
+        if (end == 0) {
+            // iterate through all rows if no row indices are specified
+            end = table->size();
+        }
 
-            std::string stype;
+        t_val input_names = computed_def["inputs"];
+        std::vector<std::string> input_column_names = vecFromArray<t_val, std::string>(input_names);
+        std::string output_column_name = computed_def["column"].as<std::string>();
+        t_val type = computed_def["type"];
+        t_val computed_func = computed_def["func"];
+        
+        std::string stype;
 
-            if (type.isUndefined()) {
-                stype = "string";
+        if (type.isUndefined()) {
+            stype = "string";
+        } else {
+            stype = type.as<std::string>();
+        }
+
+        // TODO: refactor into C++
+        t_dtype output_column_dtype;
+        if (stype == "integer") {
+            output_column_dtype = DTYPE_INT32;
+        } else if (stype == "float") {
+            output_column_dtype = DTYPE_FLOAT64;
+        } else if (stype == "boolean") {
+            output_column_dtype = DTYPE_BOOL;
+        } else if (stype == "date") {
+            output_column_dtype = DTYPE_DATE;
+        } else if (stype == "datetime") {
+            output_column_dtype = DTYPE_TIME;
+        } else {
+            output_column_dtype = DTYPE_STR;
+        }
+
+        std::vector<std::shared_ptr<t_column>> input_columns;
+        for (const auto& column_name : input_column_names) {
+            input_columns.push_back(table->get_column(column_name));
+        }
+
+        // don't double create output column
+        auto schema = table->get_schema();
+        std::shared_ptr<t_column> output_column;
+
+        if (schema.has_column(output_column_name)) {
+            output_column = table->get_column(output_column_name);
+        } else {
+            output_column = table->add_column_sptr(output_column_name, output_column_dtype, true);
+        }
+
+        t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
+                i4 = t_val::undefined();
+
+        auto arity = input_columns.size();
+        for (t_uindex idx = 0; idx < end; ++idx) {
+            // iterate through row indices OR through all rows
+            t_uindex ridx;
+            if (row_indices.size() > 0) {
+                ridx = row_indices[idx];
             } else {
-                stype = type.as<std::string>();
+                ridx = idx;
             }
 
-            t_dtype dtype;
-            if (stype == "integer") {
-                dtype = DTYPE_INT32;
-            } else if (stype == "float") {
-                dtype = DTYPE_FLOAT64;
-            } else if (stype == "boolean") {
-                dtype = DTYPE_BOOL;
-            } else if (stype == "date") {
-                dtype = DTYPE_DATE;
-            } else if (stype == "datetime") {
-                dtype = DTYPE_TIME;
-            } else {
-                dtype = DTYPE_STR;
-            }
+            t_val value = t_val::undefined();
 
-            // Get list of input column names
-            auto icol_names = vecFromArray<t_val, std::string>(inputs);
-
-            // Get t_column* for all input columns
-            std::vector<const t_column*> icols;
-            for (const auto& cc : icol_names) {
-                icols.push_back(table._get_column(cc));
-            }
-
-            int arity = icols.size();
-
-            // Add new column
-            t_column* out = table.add_column(name, dtype, true);
-
-            t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
-                  i4 = t_val::undefined();
-
-            t_uindex size = table.size();
-            for (t_uindex ridx = 0; ridx < size; ++ridx) {
-                t_val value = t_val::undefined();
-
-                switch (arity) {
-                    case 0: {
-                        value = func();
-                        break;
-                    }
-                    case 1: {
-                        i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                        if (!i1.isNull()) {
-                            value = func(i1);
-                        }
-                        break;
-                    }
-                    case 2: {
-                        i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                        i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                        if (!i1.isNull() && !i2.isNull()) {
-                            value = func(i1, i2);
-                        }
-                        break;
-                    }
-                    case 3: {
-                        i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                        i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                        i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-                        if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
-                            value = func(i1, i2, i3);
-                        }
-                        break;
-                    }
-                    case 4: {
-                        i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-                        i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-                        i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-                        i4 = scalar_to_val(icols[3]->get_scalar(ridx));
-                        if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
-                            value = func(i1, i2, i3, i4);
-                        }
-                        break;
-                    }
-                    default: {
-                        // Don't handle other arity values
-                        break;
-                    }
+            switch (arity) {
+                case 0: {
+                    value = computed_func();
+                    break;
                 }
-
-                if (!value.isUndefined()) {
-                    set_column_nth(out, ridx, value);
+                case 1: {
+                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
+                    if (!i1.isNull()) {
+                        value = computed_func(i1);
+                    }
+                    break;
                 }
+                case 2: {
+                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull()) {
+                        value = computed_func(i1, i2);
+                    }
+                    break;
+                }
+                case 3: {
+                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(input_columns[2]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
+                        value = computed_func(i1, i2, i3);
+                    }
+                    break;
+                }
+                case 4: {
+                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
+                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
+                    i3 = scalar_to_val(input_columns[2]->get_scalar(ridx));
+                    i4 = scalar_to_val(input_columns[3]->get_scalar(ridx));
+                    if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
+                        value = computed_func(i1, i2, i3, i4);
+                    }
+                    break;
+                }
+                default: {
+                    // Don't handle other arity values
+                    break;
+                }
+            }
+
+            if (!value.isUndefined()) {
+                set_column_nth(output_column, ridx, value);
             }
         }
+    }
+
+    template <>
+    std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>>
+    make_computed_lambdas(std::vector<t_val> computed) {
+        std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> converted;
+        for (const auto& j_computed_def : computed) {
+            converted.push_back(
+                [j_computed_def](std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices) {
+                add_computed_column(table, row_indices, j_computed_def); 
+            });
+        }
+        return converted; 
     }
 
     /******************************************************************************
@@ -1348,11 +1374,6 @@ namespace binding {
         // write data at the correct row        
         _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
 
-        if (!computed.isUndefined()) {
-            // re-add computed columns after update, delete, etc.
-            table_add_computed_column(data_table, computed);
-        }
-
         // calculate offset, limit, and set the gnode
         tbl->init(data_table, row_count, op);
         return tbl;
@@ -1362,11 +1383,13 @@ namespace binding {
     std::shared_ptr<Table>
     make_computed_table(std::shared_ptr<Table> table, t_val computed) {
         auto gnode = table->get_gnode();
-
-        t_data_table* data_table = gnode->_get_pkeyed_table();
-        table_add_computed_column(*data_table, computed);
-        table->replace_data_table(data_table);
-
+        auto pkeyed_table = gnode->get_pkeyed_table_sptr();
+        auto computed_defs = vecFromArray<t_val, t_val>(computed);
+        auto computed_lambdas = make_computed_lambdas(computed_defs);
+        for (const auto lambda : computed_lambdas) {
+            lambda(pkeyed_table, {});
+        }
+        table->replace_data_table(pkeyed_table, computed_lambdas);
         return table;
     }
 
@@ -2006,7 +2029,6 @@ EMSCRIPTEN_BINDINGS(perspective) {
     function("make_computed_table", &make_computed_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);
-    function("table_add_computed_column", &table_add_computed_column<t_val>);
     function("col_to_js_typed_array", &col_to_js_typed_array);
     function("make_view_zero", &make_view<t_ctx0>);
     function("make_view_one", &make_view<t_ctx1>);

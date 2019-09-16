@@ -80,7 +80,7 @@ public:
      *
      * @param data_table
      */
-    void replace_data_table(t_data_table* data_table);
+    void replace_data_table(std::shared_ptr<t_data_table> data_table, std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> computed_lambdas);
 
     /**
      * @brief Given a schema, create a `t_gnode` that manages the `t_data_table`.

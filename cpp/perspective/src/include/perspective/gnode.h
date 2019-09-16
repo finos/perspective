@@ -77,6 +77,7 @@ public:
     // send data to input port with at index idx
     // schema should match port schema
     void _send(t_uindex idx, const t_data_table& fragments);
+    void _send(t_uindex idx, const t_data_table& fragments, const std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>>& computed_lambdas);
     void _send_and_process(const t_data_table& fragments);
     void _process();
     void _process_self();
@@ -114,6 +115,7 @@ public:
     void clear_output_ports();
 
     t_data_table* _get_pkeyed_table() const;
+    std::shared_ptr<t_data_table> get_pkeyed_table_sptr() const;
     std::shared_ptr<t_data_table> get_sorted_pkeyed_table() const;
 
     bool has_pkey(t_tscalar pkey) const;
@@ -145,7 +147,12 @@ public:
     void register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx);
     void register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx);
 
+    std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> get_computed_lambdas() const;
+
 protected:
+    void recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs);
+    void append_computed_lambdas(std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> new_lambdas);
+
     bool have_context(const std::string& name) const;
     void notify_contexts(const t_data_table& flattened);
 
@@ -181,6 +188,8 @@ private:
         const std::vector<t_rlookup>& lkup, std::shared_ptr<t_data_table>& flat) const;
 
     std::shared_ptr<t_data_table> _process_table();
+    
+    std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> m_computed_lambdas;
     t_gnode_processing_mode m_mode;
     t_gnode_type m_gnode_type;
     t_schema m_tblschema;

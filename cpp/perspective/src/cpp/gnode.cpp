@@ -218,6 +218,12 @@ t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
 }
 
 void
+t_gnode::_send(t_uindex portid, const t_data_table& fragments, const std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>>& computed_lambdas) { 
+    _send(portid, fragments);
+    append_computed_lambdas(computed_lambdas);
+}
+
+void
 t_gnode::_send_and_process(const t_data_table& fragments) {
     _send(0, fragments);
     _process();
@@ -618,6 +624,17 @@ t_gnode::_process_table() {
     psp_log_time(repr() + " _process.noinit_path.post_update_history");
 
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
+
+    // get updated row indices and update computed columns
+    std::vector<t_uindex> updated_ridxs;
+
+    for (auto idx = 0; idx < fnrows; ++idx) {
+       t_tscalar pkey = pkey_col->get_scalar(idx); 
+       auto lk = m_state->lookup(pkey); // lookup after state has been updated
+       updated_ridxs.push_back(lk.m_idx);
+    }
+
+    recompute_columns(get_table_sptr(), updated_ridxs);
 
     if (t_env::log_data_gnode_flattened()) {
         std::cout << repr() << "gnode_process_flattened_mask" << std::endl;
@@ -1267,6 +1284,11 @@ t_gnode::_get_pkeyed_table() const {
     return m_state->_get_pkeyed_table();
 }
 
+std::shared_ptr<t_data_table>
+t_gnode::get_pkeyed_table_sptr() const {
+    return m_state->get_pkeyed_table();
+}
+
 std::vector<t_custom_column>
 t_gnode::get_custom_columns() const {
     return m_custom_columns;
@@ -1340,6 +1362,23 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx) 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
     _register_context(name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+
+void 
+t_gnode::recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs) {
+    for (auto l : m_computed_lambdas) {
+        l(flattened, updated_ridxs);
+    }
+}
+
+void 
+t_gnode::append_computed_lambdas(std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> new_lambdas) {
+    m_computed_lambdas.insert(m_computed_lambdas.end(), new_lambdas.begin(), new_lambdas.end());
+}
+
+std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> 
+t_gnode::get_computed_lambdas() const {
+    return m_computed_lambdas;
 }
 
 } // end namespace perspective
