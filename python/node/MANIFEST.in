@@ -1,4 +1,0 @@
-recursive-include perspective/node/assets/ *
-
-include requirements.txt
-

@@ -16,7 +16,9 @@ perspective-python
    installation
    quickstart
    advanced
-   api
+   node
+   widget
+   table
 
 
 .. |build-status| image:: https://travis-ci.org/timkpaine/perspective-python.svg?branch=master
@@ -72,7 +74,7 @@ From Source
 
     python setup.py install
 
-or 
+or
 
 .. code:: bash
 
@@ -118,7 +120,7 @@ The `psp` function
 
     :param view: what view to use. available in the enum View. default: hypergrid
     :type view: str/View
-     
+
     :param columns: what columns to display
     :type columns: list of strings
     :param rowpivots: what names to use as rowpivots
@@ -147,7 +149,7 @@ Advanced
 `psp` function targets
 ==================
 The `data` argument for the `psp` function can accept a variety of types:
-    
+
     - Pandas DataFrame
     - Python Dictionary
     - Python List
@@ -191,8 +193,18 @@ The following view types are supported through psp plugins
     - SUM_NOT_NULL
     - UNIQUE
 
-API
+Node
 ====
+
+.. automodule:: perspective.node
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Widget
+=======
+
 
 .. automodule:: perspective.core
     :members:
@@ -276,3 +288,16 @@ API
     :show-inheritance:
 
 
+Table
+=====
+
+.. automodule:: perspective.table.table
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+.. automodule:: perspective.table.view
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -3,7 +3,7 @@ const PerspectivePlugin = require("@finos/perspective-webpack-plugin");
 const webpack = require("webpack");
 
 module.exports = {
-    entry: './src/server.js',
+    entry: './js/server.js',
     target: "node",
     mode: 'development',
     node: {

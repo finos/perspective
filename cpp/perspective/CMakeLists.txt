@@ -241,7 +241,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("/usr/local/include/python3.7m")  # FIXME
-		include_directories("${CMAKE_SOURCE_DIR}/../../python/table/perspective/include")
+		include_directories("${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/include")
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
@@ -356,14 +356,14 @@ set (SOURCE_FILES
 	)
 
 set (PYTHON_SOURCE_FILES
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/accessor.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/context.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/fill.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/python.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/serialization.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/table.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/utils.cpp
-	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/view.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/accessor.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/context.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/fill.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/python.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/serialization.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/table.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/utils.cpp
+	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/view.cpp
 	)
 
 if (WIN32)
