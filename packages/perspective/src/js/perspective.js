@@ -1288,7 +1288,7 @@ export default function(Module) {
         } else {
             accessor.init(data);
             accessor.names = cols.concat(accessor.names.filter(x => x === "__INDEX__"));
-            accessor.types = accessor.extract_typevec(types).slice(0, accessor.names.length);
+            accessor.types = accessor.extract_typevec(types).slice(0, cols.length);
 
             if (meter) {
                 meter(accessor.row_count);
