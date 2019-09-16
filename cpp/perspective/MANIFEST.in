@@ -1,8 +1,0 @@
-prune examples/
-prune test_data/
-prune perspective/*.so
-prune perspective/include/
-prune perspective/src/
-prune src/
-include python/requirements.txt
-include CMakeList.txt

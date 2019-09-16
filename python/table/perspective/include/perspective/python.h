@@ -6,471 +6,321 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
-
 #pragma once
 #ifdef PSP_ENABLE_PYTHON
-#include <perspective/first.h>
-#include <perspective/base.h>
-#include <perspective/binding.h>
-#include <perspective/data_table.h>
-#include <perspective/column.h>
-#include <perspective/gnode.h>
-#include <iostream>
 
-
-namespace perspective {
-namespace binding {
-perspective::t_schema* t_schema_init(py::list& columns, py::list& types);
-
-template<typename T>
-void _fill_col(std::vector<T>& dcol, std::shared_ptr<perspective::t_column> col);
-
-template<typename T>
-void _fill_col_np(np::ndarray& dcol, std::shared_ptr<perspective::t_column> col);
-
-
-void _fill_data_single_column(perspective::t_data_table& tbl,
-                              const std::string& colname_i,
-                              py::list& data_cols_i,
-                              perspective::t_dtype col_type);
-
-void _fill_data_single_column_np(perspective::t_data_table& tbl,
-                                 const std::string& colname_i,
-                                 np::ndarray& data_cols_i,
-                                 perspective::t_dtype col_type);
-
-np::ndarray _get_as_numpy(perspective::t_data_table& tbl, const std::string& colname_i);
-}
-}
-
+/******************************************************************************
+ *
+ * Pybind includes
+ */
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
+#include <pybind11/numpy.h>
+#include <boost/optional.hpp>
 
 
 /******************************************************************************
  *
- * Boost Python binding
+ * Perspective includes
+ */
+#include <perspective/first.h>
+#include <perspective/raw_types.h>
+#include <perspective/base.h>
+#include <perspective/binding.h>
+#include <perspective/exports.h>
+#include <perspective/python/accessor.h>
+#include <perspective/python/base.h>
+#include <perspective/python/context.h>
+#include <perspective/python/fill.h>
+#include <perspective/python/serialization.h>
+#include <perspective/python/table.h>
+#include <perspective/python/utils.h>
+#include <perspective/python/view.h>
+
+
+namespace perspective {
+namespace binding {
+}
+}
+
+/******************************************************************************
+ *
+ * Python binding
  */
 using namespace perspective::binding;
 
-BOOST_PYTHON_MODULE(libbinding)
+PYBIND11_MODULE(libbinding, m)
 {
-    np::initialize(true);
-    _import_array();
+    /******************************************************************************
+     *
+     * Table
+     */
+    py::class_<Table, std::shared_ptr<Table>>(m, "Table")
+        .def(py::init<std::shared_ptr<t_pool>, std::vector<std::string>, std::vector<t_dtype>,
+        std::uint32_t, std::string>())
+        .def("size", &Table::size)
+        .def("get_schema", &Table::get_schema)
+        .def("unregister_gnode", &Table::unregister_gnode)
+        .def("reset_gnode", &Table::reset_gnode)
+        .def("get_id", &Table::get_id)
+        .def("get_pool", &Table::get_pool)
+        .def("get_gnode", &Table::get_gnode);
 
     /******************************************************************************
      *
-     * t_column
+     * View
      */
-    py::class_<perspective::t_column>("t_column", py::init<>())
-        // when multiple overloading methods, need to static_cast to specify
-        .def("pprint", static_cast<void (perspective::t_column::*)() const>(&perspective::t_column::pprint))
-        .def("set_scalar", &perspective::t_column::set_scalar)
-    ;
+    // Bind a View for each context type
+
+    py::class_<View<t_ctx0>, std::shared_ptr<View<t_ctx0>>>(m, "View_ctx0")
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx0>, std::string, std::string,
+            t_view_config>())
+        .def("sides", &View<t_ctx0>::sides)
+        .def("num_rows", &View<t_ctx0>::num_rows)
+        .def("num_columns", &View<t_ctx0>::num_columns)
+        .def("get_row_expanded", &View<t_ctx0>::get_row_expanded)
+        .def("schema", &View<t_ctx0>::schema)
+        .def("column_names", &View<t_ctx0>::column_names)
+        .def("_get_deltas_enabled", &View<t_ctx0>::_get_deltas_enabled)
+        .def("_set_deltas_enabled", &View<t_ctx0>::_set_deltas_enabled)
+        .def("get_context", &View<t_ctx0>::get_context)
+        .def("get_row_pivots", &View<t_ctx0>::get_row_pivots)
+        .def("get_column_pivots", &View<t_ctx0>::get_column_pivots)
+        .def("get_aggregates", &View<t_ctx0>::get_aggregates)
+        .def("get_filter", &View<t_ctx0>::get_filter)
+        .def("get_sort", &View<t_ctx0>::get_sort)
+        .def("get_step_delta", &View<t_ctx0>::get_step_delta)
+        .def("get_row_delta", &View<t_ctx0>::get_row_delta)
+        .def("get_column_dtype", &View<t_ctx0>::get_column_dtype)
+        .def("is_column_only", &View<t_ctx0>::is_column_only);
+
+    py::class_<View<t_ctx1>, std::shared_ptr<View<t_ctx1>>>(m, "View_ctx1")
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx1>, std::string, std::string,
+            t_view_config>())
+        .def("sides", &View<t_ctx1>::sides)
+        .def("num_rows", &View<t_ctx1>::num_rows)
+        .def("num_columns", &View<t_ctx1>::num_columns)
+        .def("get_row_expanded", &View<t_ctx1>::get_row_expanded)
+        .def("expand", &View<t_ctx1>::expand)
+        .def("collapse", &View<t_ctx1>::collapse)
+        .def("set_depth", &View<t_ctx1>::set_depth)
+        .def("schema", &View<t_ctx1>::schema)
+        .def("column_names", &View<t_ctx1>::column_names)
+        .def("_get_deltas_enabled", &View<t_ctx1>::_get_deltas_enabled)
+        .def("_set_deltas_enabled", &View<t_ctx1>::_set_deltas_enabled)
+        .def("get_context", &View<t_ctx1>::get_context)
+        .def("get_row_pivots", &View<t_ctx1>::get_row_pivots)
+        .def("get_column_pivots", &View<t_ctx1>::get_column_pivots)
+        .def("get_aggregates", &View<t_ctx1>::get_aggregates)
+        .def("get_filter", &View<t_ctx1>::get_filter)
+        .def("get_sort", &View<t_ctx1>::get_sort)
+        .def("get_step_delta", &View<t_ctx1>::get_step_delta)
+        .def("get_row_delta", &View<t_ctx1>::get_row_delta)
+        .def("get_column_dtype", &View<t_ctx1>::get_column_dtype)
+        .def("is_column_only", &View<t_ctx1>::is_column_only);
+
+    py::class_<View<t_ctx2>, std::shared_ptr<View<t_ctx2>>>(m, "View_ctx2")
+        .def(py::init<std::shared_ptr<Table>, std::shared_ptr<t_ctx2>, std::string, std::string,
+            t_view_config>())
+        .def("sides", &View<t_ctx2>::sides)
+        .def("num_rows", &View<t_ctx2>::num_rows)
+        .def("num_columns", &View<t_ctx2>::num_columns)
+        .def("get_row_expanded", &View<t_ctx2>::get_row_expanded)
+        .def("expand", &View<t_ctx2>::expand)
+        .def("collapse", &View<t_ctx2>::collapse)
+        .def("set_depth", &View<t_ctx2>::set_depth)
+        .def("schema", &View<t_ctx2>::schema)
+        .def("column_names", &View<t_ctx2>::column_names)
+        .def("_get_deltas_enabled", &View<t_ctx2>::_get_deltas_enabled)
+        .def("_set_deltas_enabled", &View<t_ctx2>::_set_deltas_enabled)
+        .def("get_context", &View<t_ctx2>::get_context)
+        .def("get_row_pivots", &View<t_ctx2>::get_row_pivots)
+        .def("get_column_pivots", &View<t_ctx2>::get_column_pivots)
+        .def("get_aggregates", &View<t_ctx2>::get_aggregates)
+        .def("get_filter", &View<t_ctx2>::get_filter)
+        .def("get_sort", &View<t_ctx2>::get_sort)
+        .def("get_row_path", &View<t_ctx2>::get_row_path)
+        .def("get_step_delta", &View<t_ctx2>::get_step_delta)
+        .def("get_row_delta", &View<t_ctx2>::get_row_delta)
+        .def("get_column_dtype", &View<t_ctx2>::get_column_dtype)
+        .def("is_column_only", &View<t_ctx2>::is_column_only);
+
+    /******************************************************************************
+     *
+     * t_view_config
+     */
+    py::class_<t_view_config>(m, "t_view_config")
+        .def(py::init<std::vector<std::string>, std::vector<std::string>,
+            tsl::ordered_map<std::string, std::string>, std::vector<std::string>,
+            std::vector<std::tuple<std::string, std::string, std::vector<t_tscalar>>>,
+            std::vector<std::vector<std::string>>, std::string, bool>())
+        .def("add_filter_term", &t_view_config::add_filter_term);
 
     /******************************************************************************
      *
      * t_data_table
      */
-    // need boost:noncopyable for PSP_NON_COPYABLE
-    py::class_<perspective::t_data_table, boost::noncopyable>("t_data_table", py::init<perspective::t_schema>())
-        .def("init", &perspective::t_data_table::init)
-        .def("clear", &perspective::t_data_table::clear)
-        .def("reset", &perspective::t_data_table::reset)
-        .def("size", &perspective::t_data_table::size)
-        .def("reserve", &perspective::t_data_table::reserve)
-        .def("extend", &perspective::t_data_table::extend)
-        .def("set_size", &perspective::t_data_table::set_size)
-
-        .def("num_columns", &perspective::t_data_table::num_columns)
-        .def("get_capacity", &perspective::t_data_table::get_capacity)
-
-        // when returning const, need return_value_policy<copy_const_reference>
-        .def("name", &perspective::t_data_table::name, py::return_value_policy<py::copy_const_reference>())
-        .def("get_schema", &perspective::t_data_table::get_schema, py::return_value_policy<py::copy_const_reference>())
-
-        // when multiple overloading methods, need to static_cast to specify
-        .def("num_rows", static_cast<perspective::t_uindex (perspective::t_data_table::*)() const> (&perspective::t_data_table::num_rows))
-        
-        .def("pprint", static_cast<void (perspective::t_data_table::*)() const>(&perspective::t_data_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_data_table::*)(perspective::t_uindex, std::ostream*) const>(&perspective::t_data_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_data_table::*)(const std::string&) const>(&perspective::t_data_table::pprint))
-        .def("pprint", static_cast<void (perspective::t_data_table::*)(const std::vector<perspective::t_uindex>&) const>(&perspective::t_data_table::pprint))
-
-
-        // custom add ins
-        // .def("load_column", _fill_data_single_column)
-        .def("load_column", static_cast<void (*)(perspective::t_data_table& tbl, const std::string& colname_i, py::list& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column))
-        .def("load_column", static_cast<void (*)(perspective::t_data_table& tbl, const std::string& colname_i, np::ndarray& data_cols_i, perspective::t_dtype col_type)>(_fill_data_single_column_np))
-        .def("get_column", _get_as_numpy)
-        .def("add_column", &perspective::t_data_table::add_column, py::return_value_policy<py::reference_existing_object>())
-    ;
+    py::class_<t_data_table>(m, "t_data_table")
+        .def("size", reinterpret_cast<unsigned long (t_data_table::*)() const>(&t_data_table::size));
 
     /******************************************************************************
      *
      * t_schema
      */
-    py::class_<perspective::t_schema>("t_schema",
-        py::init<std::vector<std::string>, std::vector<perspective::t_dtype> >())
+    py::class_<t_schema>(m, "t_schema")
         .def(py::init<>())
-        .def(py::init<perspective::t_schema_recipe>())
-
-        // custom constructor wrapper to make from python lists
-        .def("__init__", py::make_constructor(&t_schema_init))
-
-        // regular methods
-        .def("get_num_columns", &perspective::t_schema::get_num_columns)
-        .def("size", &perspective::t_schema::size)
-        .def("get_colidx", &perspective::t_schema::get_colidx)
-        .def("get_dtype", &perspective::t_schema::get_dtype)
-        .def("is_pkey", &perspective::t_schema::is_pkey)
-        .def("add_column", &perspective::t_schema::add_column)
-        .def("get_recipe", &perspective::t_schema::get_recipe)
-        .def("has_column", &perspective::t_schema::has_column)
-        .def("get_table_context", &perspective::t_schema::get_table_context)
-        .def("get_table_context", &perspective::t_schema::get_table_context)
-        .def("str", &perspective::t_schema::str)
-
-        // when returning const, need return_value_policy<copy_const_reference>
-        .def("columns", &perspective::t_schema::columns, py::return_value_policy<py::copy_const_reference>())
-        .def("types", &perspective::t_schema::types)
-    ;
+        .def("get_dtype", &t_schema::get_dtype)
+        .def("columns", &t_schema::columns)
+        .def("types", &t_schema::types);
 
     /******************************************************************************
      *
      * t_gnode
      */
-    py::class_<perspective::t_gnode>("t_gnode", py::init<perspective::t_schema, perspective::t_schema>())
-        .def(py::init<
-            perspective::t_gnode_processing_mode,
-            const perspective::t_schema&,
-            const std::vector<perspective::t_schema>&,
-            const std::vector<perspective::t_schema>&,
-            const std::vector<perspective::t_custom_column>
-            >())
-        .def("pprint", static_cast<void (perspective::t_gnode::*)() const>(&perspective::t_gnode::pprint))
-        .def("get_id", &perspective::t_gnode::get_id)
-        .def("get_tblschema", &perspective::t_gnode::get_id)
-        .def("get_table", &perspective::t_gnode::get_id)
-    ;
+    py::class_<t_gnode, std::shared_ptr<t_gnode>>(m, "t_gnode")
+        .def("get_id", reinterpret_cast<t_uindex (t_gnode::*)() const>(&t_gnode::get_id));
 
+    /******************************************************************************
+     *
+     * t_data_slice
+     */
+    py::class_<t_data_slice<t_ctx0>, std::shared_ptr<t_data_slice<t_ctx0>>>(m, "t_data_slice_ctx0")
+        .def("get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
+        .def("get_slice", &t_data_slice<t_ctx0>::get_slice)
+        .def("get_column_names", &t_data_slice<t_ctx0>::get_column_names);
+
+    py::class_<t_data_slice<t_ctx1>, std::shared_ptr<t_data_slice<t_ctx1>>>(m, "t_data_slice_ctx1")
+        .def("get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
+        .def("get_slice", &t_data_slice<t_ctx1>::get_slice)
+        .def("get_column_names", &t_data_slice<t_ctx1>::get_column_names)
+        .def("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
+
+    py::class_<t_data_slice<t_ctx2>, std::shared_ptr<t_data_slice<t_ctx2>>>(m, "t_data_slice_ctx2")
+        .def("get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
+        .def("get_slice", &t_data_slice<t_ctx2>::get_slice)
+        .def("get_column_names", &t_data_slice<t_ctx2>::get_column_names)
+        .def("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
 
     /******************************************************************************
      *
      * t_ctx0
      */
-    py::class_<perspective::t_ctx0>("t_ctx0", py::init<perspective::t_schema, perspective::t_config>())
-        .def("sidedness", &perspective::t_ctx0::sidedness)
-        .def("get_row_count", &perspective::t_ctx0::get_row_count)
-        .def("get_column_count", &perspective::t_ctx0::get_column_count)
-        .def("get_data", &perspective::t_ctxbase<perspective::t_ctx0>::get_data)
-        .def("get_step_delta", &perspective::t_ctx0::get_step_delta)
-        .def("get_cell_delta", &perspective::t_ctx0::get_cell_delta)
-        .def("get_column_names", &perspective::t_ctx0::get_column_names)
-        .def("unity_get_row_data", &perspective::t_ctx0::unity_get_row_data)
-        .def("unity_get_column_data", &perspective::t_ctx0::unity_get_column_data)
-        .def("unity_get_row_path", &perspective::t_ctx0::unity_get_row_path)
-        .def("unity_get_column_path", &perspective::t_ctx0::unity_get_column_path)
-        .def("unity_get_row_depth", &perspective::t_ctx0::unity_get_row_depth)
-        .def("unity_get_column_depth", &perspective::t_ctx0::unity_get_column_depth)
-        .def("unity_get_column_name", &perspective::t_ctx0::unity_get_column_name)
-        .def("unity_get_column_display_name", &perspective::t_ctx0::unity_get_column_display_name)
-        .def("unity_get_column_names", &perspective::t_ctx0::unity_get_column_names)
-        .def("unity_get_column_display_names", &perspective::t_ctx0::unity_get_column_display_names)
-        .def("unity_get_column_count", &perspective::t_ctx0::unity_get_column_count)
-        .def("unity_get_row_count", &perspective::t_ctx0::unity_get_row_count)
-        .def("unity_get_row_expanded", &perspective::t_ctx0::unity_get_row_expanded)
-        .def("unity_get_column_expanded", &perspective::t_ctx0::unity_get_column_expanded)
-        .def("unity_init_load_step_end", &perspective::t_ctx0::unity_init_load_step_end)
-    ;
+    py::class_<t_ctx0>(m, "t_ctx0");
 
     /******************************************************************************
      *
      * t_ctx1
      */
-    py::class_<perspective::t_ctx1>("t_ctx1", py::init<perspective::t_schema, perspective::t_config>())
-        .def("sidedness", &perspective::t_ctx1::sidedness)
-        .def("get_row_count", &perspective::t_ctx1::get_row_count)
-        .def("get_column_count", &perspective::t_ctx1::get_column_count)
-        .def("get_data", &perspective::t_ctxbase<perspective::t_ctx1>::get_data)
-        .def("get_step_delta", &perspective::t_ctx1::get_step_delta)
-        .def("get_cell_delta", &perspective::t_ctx1::get_cell_delta)
-        .def("set_depth", &perspective::t_ctx1::set_depth)
-        // .def("open", &perspective::t_ctx1::open)
-        // .def("close", &perspective::t_ctx1::close)
-        .def("get_trav_depth", &perspective::t_ctx1::get_trav_depth)
-        .def("get_column_names", &perspective::t_ctx1::get_aggregates)
-        .def("unity_get_row_data", &perspective::t_ctx1::unity_get_row_data)
-        .def("unity_get_column_data", &perspective::t_ctx1::unity_get_column_data)
-        .def("unity_get_row_path", &perspective::t_ctx1::unity_get_row_path)
-        .def("unity_get_column_path", &perspective::t_ctx1::unity_get_column_path)
-        .def("unity_get_row_depth", &perspective::t_ctx1::unity_get_row_depth)
-        .def("unity_get_column_depth", &perspective::t_ctx1::unity_get_column_depth)
-        .def("unity_get_column_name", &perspective::t_ctx1::unity_get_column_name)
-        .def("unity_get_column_display_name", &perspective::t_ctx1::unity_get_column_display_name)
-        .def("unity_get_column_names", &perspective::t_ctx1::unity_get_column_names)
-        .def("unity_get_column_display_names", &perspective::t_ctx1::unity_get_column_display_names)
-        .def("unity_get_column_count", &perspective::t_ctx1::unity_get_column_count)
-        .def("unity_get_row_count", &perspective::t_ctx1::unity_get_row_count)
-        .def("unity_get_row_expanded", &perspective::t_ctx1::unity_get_row_expanded)
-        .def("unity_get_column_expanded", &perspective::t_ctx1::unity_get_column_expanded)
-        .def("unity_init_load_step_end", &perspective::t_ctx1::unity_init_load_step_end)
-    ;
+    py::class_<t_ctx1>(m, "t_ctx1");
 
     /******************************************************************************
      *
      * t_ctx2
      */
-    py::class_<perspective::t_ctx2>("t_ctx2", py::init<perspective::t_schema, perspective::t_config>())
-        .def("sidedness", &perspective::t_ctx2::sidedness)
-        .def("get_row_count", &perspective::t_ctx2::get_row_count)
-        .def("get_column_count", &perspective::t_ctx2::get_column_count)
-        .def("get_data", &perspective::t_ctxbase<perspective::t_ctx2>::get_data)
-        .def("get_step_delta", &perspective::t_ctx2::get_step_delta)
-        .def("set_depth", &perspective::t_ctx2::set_depth)
-        // .def("open", &perspective::t_ctx2::open)
-        // .def("close", &perspective::t_ctx2::close)
-        .def("get_column_names", &perspective::t_ctx2::get_aggregates)
-        .def("unity_get_row_data", &perspective::t_ctx2::unity_get_row_data)
-        .def("unity_get_column_data", &perspective::t_ctx2::unity_get_column_data)
-        .def("unity_get_row_path", &perspective::t_ctx2::unity_get_row_path)
-        .def("unity_get_column_path", &perspective::t_ctx2::unity_get_column_path)
-        .def("unity_get_row_depth", &perspective::t_ctx2::unity_get_row_depth)
-        .def("unity_get_column_depth", &perspective::t_ctx2::unity_get_column_depth)
-        .def("unity_get_column_name", &perspective::t_ctx2::unity_get_column_name)
-        .def("unity_get_column_display_name", &perspective::t_ctx2::unity_get_column_display_name)
-        .def("unity_get_column_names", &perspective::t_ctx2::unity_get_column_names)
-        .def("unity_get_column_display_names", &perspective::t_ctx2::unity_get_column_display_names)
-        .def("unity_get_column_count", &perspective::t_ctx2::unity_get_column_count)
-        .def("unity_get_row_count", &perspective::t_ctx2::unity_get_row_count)
-        .def("unity_get_row_expanded", &perspective::t_ctx2::unity_get_row_expanded)
-        .def("unity_get_column_expanded", &perspective::t_ctx2::unity_get_column_expanded)
-        .def("unity_init_load_step_end", &perspective::t_ctx2::unity_init_load_step_end)
-        .def("get_totals", &perspective::t_ctx2::get_totals)
-        .def("get_column_path_userspace", &perspective::t_ctx2::get_column_path_userspace)
-    ;
+    py::class_<t_ctx2>(m, "t_ctx2");
 
 
     /******************************************************************************
      *
      * t_pool
      */
-    py::class_<perspective::t_pool, boost::noncopyable>("t_pool", py::no_init)
-        .def("register_gnode", &perspective::t_pool::register_gnode)
-        .def("process", &perspective::t_pool::_process)
-        .def("send", &perspective::t_pool::send)
-        .def("epoch", &perspective::t_pool::epoch)
-        .def("unregister_gnode", &perspective::t_pool::unregister_gnode)
-        // .def("set_update_delegate", &perspective::t_pool::set_update_delegate)
-        .def("register_context", &perspective::t_pool::register_context)
-        .def("unregister_context", &perspective::t_pool::unregister_context)
-        .def("get_contexts_last_updated", &perspective::t_pool::get_contexts_last_updated)
-        .def("get_gnodes_last_updated", &perspective::t_pool::get_gnodes_last_updated)
-        .def("get_gnode", &perspective::t_pool::get_gnode, py::return_value_policy<py::reference_existing_object>())
-    ;
-
-
-    /******************************************************************************
-     *
-     * t_aggspec
-     */
-    py::class_<perspective::t_aggspec>("t_aggspec", py::init<>())
-        .def("name", &perspective::t_aggspec::name)
-    ;
+    py::class_<t_pool, std::shared_ptr<t_pool>>(m, "t_pool")
+        .def(py::init<>())
+        .def("unregister_gnode", &t_pool::unregister_gnode)
+        .def("_process", &t_pool::_process);
 
     /******************************************************************************
      *
      * t_tscalar
      */
-    py::class_<perspective::t_tscalar>("t_tscalar", py::init<>())
-    ;
+    py::class_<t_tscalar>(m, "t_tscalar")
+        .def(py::init<>())
+        .def("to_string", &t_tscalar::to_string);
 
     /******************************************************************************
      *
      * t_updctx
      */
-    // TODO
-    // value_object<t_updctx>("t_updctx")
-    //     .field("gnode_id", &t_updctx::m_gnode_id)
-    //     .field("ctx_name", &t_updctx::m_ctx);
+    py::class_<t_updctx>(m, "t_updctx")
+        .def(py::init<>())
+        .def_readwrite("gnode_id", &t_updctx::m_gnode_id)
+        .def_readwrite("ctx_name", &t_updctx::m_ctx);
 
     /******************************************************************************
      *
      * t_cellupd
      */
-    // TODO
-    // value_object<t_cellupd>("t_cellupd")
-    //     .field("row", &t_cellupd::row)
-    //     .field("column", &t_cellupd::column)
-    //     .field("old_value", &t_cellupd::old_value)
-    //     .field("new_value", &t_cellupd::new_value);
+    py::class_<t_cellupd>(m, "t_cellupd")
+        .def(py::init<>())
+        .def_readwrite("row", &t_cellupd::row)
+        .def_readwrite("column", &t_cellupd::column)
+        .def_readwrite("old_value", &t_cellupd::old_value)
+        .def_readwrite("new_value", &t_cellupd::new_value);
 
     /******************************************************************************
      *
      * t_stepdelta
      */
-    // TODO
-    // value_object<t_stepdelta>("t_stepdelta")
-    //     .field("rows_changed", &t_stepdelta::rows_changed)
-    //     .field("columns_changed", &t_stepdelta::columns_changed)
-    //     .field("cells", &t_stepdelta::cells);
-
-    /******************************************************************************
-     *
-     * vector
-     */
-    // TODO
-    // register_vector<t_dtype>("std::vector<t_dtype>");
-    // register_vector<t_cellupd>("std::vector<t_cellupd>");
-    // register_vector<t_aggspec>("std::vector<t_aggspec>");
-    // register_vector<t_tscalar>("std::vector<t_tscalar>");
-    // register_vector<std::string>("std::vector<std::string>");
-    // register_vector<t_updctx>("std::vector<t_updctx>");
-    // register_vector<t_uindex>("std::vector<t_uindex>");
-
-    /******************************************************************************
-     *
-     * t_header
-     */
-    py::enum_<perspective::t_header>("t_header")
-        .value("HEADER_ROW", perspective::HEADER_ROW)
-        .value("HEADER_COLUMN", perspective::HEADER_COLUMN);
-
-    /******************************************************************************
-     *
-     * t_ctx_type
-     */
-    py::enum_<perspective::t_ctx_type>("t_ctx_type")
-        .value("ZERO_SIDED_CONTEXT", perspective::ZERO_SIDED_CONTEXT)
-        .value("ONE_SIDED_CONTEXT", perspective::ONE_SIDED_CONTEXT)
-        .value("TWO_SIDED_CONTEXT", perspective::TWO_SIDED_CONTEXT)
-        .value("GROUPED_ZERO_SIDED_CONTEXT", perspective::GROUPED_ZERO_SIDED_CONTEXT)
-        .value("GROUPED_PKEY_CONTEXT", perspective::GROUPED_PKEY_CONTEXT)
-        .value("GROUPED_COLUMNS_CONTEXT", perspective::GROUPED_COLUMNS_CONTEXT);
-
-    /******************************************************************************
-     *
-     * t_filter_op
-     */
-    py::enum_<perspective::t_filter_op>("t_filter_op")
-        .value("FILTER_OP_LT", perspective::FILTER_OP_LT)
-        .value("FILTER_OP_LTEQ", perspective::FILTER_OP_LTEQ)
-        .value("FILTER_OP_GT", perspective::FILTER_OP_GT)
-        .value("FILTER_OP_GTEQ", perspective::FILTER_OP_GTEQ)
-        .value("FILTER_OP_EQ", perspective::FILTER_OP_EQ)
-        .value("FILTER_OP_NE", perspective::FILTER_OP_NE)
-        .value("FILTER_OP_BEGINS_WITH", perspective::FILTER_OP_BEGINS_WITH)
-        .value("FILTER_OP_ENDS_WITH", perspective::FILTER_OP_ENDS_WITH)
-        .value("FILTER_OP_CONTAINS", perspective::FILTER_OP_CONTAINS)
-        .value("FILTER_OP_OR", perspective::FILTER_OP_OR)
-        .value("FILTER_OP_IN", perspective::FILTER_OP_IN)
-        .value("FILTER_OP_NOT_IN", perspective::FILTER_OP_NOT_IN)
-        .value("FILTER_OP_AND", perspective::FILTER_OP_AND)
-        .value("FILTER_OP_IS_NULL", perspective::FILTER_OP_IS_NULL)
-        .value("FILTER_OP_IS_NOT_NULL", perspective::FILTER_OP_IS_NOT_NULL)
-        .value("FILTER_OP_IS_VALID", perspective::FILTER_OP_IS_VALID)
-        .value("FILTER_OP_IS_NOT_VALID", perspective::FILTER_OP_IS_NOT_VALID);
+    py::class_<t_stepdelta>(m, "t_stepdelta")
+        .def(py::init<>())
+        .def_readwrite("rows_changed", &t_stepdelta::rows_changed)
+        .def_readwrite("columns_changed", &t_stepdelta::columns_changed)
+        .def_readwrite("cells", &t_stepdelta::cells);
 
     /******************************************************************************
      *
      * t_dtype
      */
-    py::enum_<perspective::t_dtype>("t_dtype")
-        .value("NONE", perspective::DTYPE_NONE)
-        .value("INT64", perspective::DTYPE_INT64)
-        .value("INT32", perspective::DTYPE_INT32)
-        .value("INT16", perspective::DTYPE_INT16)
-        .value("INT8", perspective::DTYPE_INT8)
-        .value("UINT64", perspective::DTYPE_UINT64)
-        .value("UINT32", perspective::DTYPE_UINT32)
-        .value("UINT16", perspective::DTYPE_UINT16)
-        .value("UINT8", perspective::DTYPE_UINT8)
-        .value("FLOAT64", perspective::DTYPE_FLOAT64)
-        .value("FLOAT32", perspective::DTYPE_FLOAT32)
-        .value("BOOL", perspective::DTYPE_BOOL)
-        .value("TIME", perspective::DTYPE_TIME)
-        .value("DATE", perspective::DTYPE_DATE)
-        .value("ENUM", perspective::DTYPE_ENUM)
-        .value("OID", perspective::DTYPE_OID)
-        .value("PTR", perspective::DTYPE_PTR)
-        .value("F64PAIR", perspective::DTYPE_F64PAIR)
-        .value("USER_FIXED", perspective::DTYPE_USER_FIXED)
-        .value("STR", perspective::DTYPE_STR)
-        .value("USER_VLEN", perspective::DTYPE_USER_VLEN)
-        .value("LAST_VLEN", perspective::DTYPE_LAST_VLEN)
-        .value("LAST", perspective::DTYPE_LAST)
-    ;
+    py::enum_<t_dtype>(m, "t_dtype")
+        .value("DTYPE_NONE", DTYPE_NONE)
+        .value("DTYPE_INT64", DTYPE_INT64)
+        .value("DTYPE_INT32", DTYPE_INT32)
+        .value("DTYPE_INT16", DTYPE_INT16)
+        .value("DTYPE_INT8", DTYPE_INT8)
+        .value("DTYPE_UINT64", DTYPE_UINT64)
+        .value("DTYPE_UINT32", DTYPE_UINT32)
+        .value("DTYPE_UINT16", DTYPE_UINT16)
+        .value("DTYPE_UINT8", DTYPE_UINT8)
+        .value("DTYPE_FLOAT64", DTYPE_FLOAT64)
+        .value("DTYPE_FLOAT32", DTYPE_FLOAT32)
+        .value("DTYPE_BOOL", DTYPE_BOOL)
+        .value("DTYPE_TIME", DTYPE_TIME)
+        .value("DTYPE_DATE", DTYPE_DATE)
+        .value("DTYPE_ENUM", DTYPE_ENUM)
+        .value("DTYPE_OID", DTYPE_OID)
+        .value("DTYPE_PTR", DTYPE_PTR)
+        .value("DTYPE_F64PAIR", DTYPE_F64PAIR)
+        .value("DTYPE_USER_FIXED", DTYPE_USER_FIXED)
+        .value("DTYPE_STR", DTYPE_STR)
+        .value("DTYPE_USER_VLEN", DTYPE_USER_VLEN)
+        .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
+        .value("DTYPE_LAST", DTYPE_LAST);
 
     /******************************************************************************
      *
-     * t_aggtype
+     * t_op
      */
-    py::enum_<perspective::t_aggtype>("t_aggtype")
-        .value("AGGTYPE_SUM", perspective::AGGTYPE_SUM)
-        .value("AGGTYPE_MUL", perspective::AGGTYPE_MUL)
-        .value("AGGTYPE_COUNT", perspective::AGGTYPE_COUNT)
-        .value("AGGTYPE_MEAN", perspective::AGGTYPE_MEAN)
-        .value("AGGTYPE_WEIGHTED_MEAN", perspective::AGGTYPE_WEIGHTED_MEAN)
-        .value("AGGTYPE_UNIQUE", perspective::AGGTYPE_UNIQUE)
-        .value("AGGTYPE_ANY", perspective::AGGTYPE_ANY)
-        .value("AGGTYPE_MEDIAN", perspective::AGGTYPE_MEDIAN)
-        .value("AGGTYPE_JOIN", perspective::AGGTYPE_JOIN)
-        .value("AGGTYPE_SCALED_DIV", perspective::AGGTYPE_SCALED_DIV)
-        .value("AGGTYPE_SCALED_ADD", perspective::AGGTYPE_SCALED_ADD)
-        .value("AGGTYPE_SCALED_MUL", perspective::AGGTYPE_SCALED_MUL)
-        .value("AGGTYPE_DOMINANT", perspective::AGGTYPE_DOMINANT)
-        .value("AGGTYPE_FIRST", perspective::AGGTYPE_FIRST)
-        .value("AGGTYPE_LAST", perspective::AGGTYPE_LAST)
-        .value("AGGTYPE_PY_AGG", perspective::AGGTYPE_PY_AGG)
-        .value("AGGTYPE_AND", perspective::AGGTYPE_AND)
-        .value("AGGTYPE_OR", perspective::AGGTYPE_OR)
-        .value("AGGTYPE_LAST_VALUE", perspective::AGGTYPE_LAST_VALUE)
-        .value("AGGTYPE_HIGH_WATER_MARK", perspective::AGGTYPE_HIGH_WATER_MARK)
-        .value("AGGTYPE_LOW_WATER_MARK", perspective::AGGTYPE_LOW_WATER_MARK)
-        .value("AGGTYPE_UDF_COMBINER", perspective::AGGTYPE_UDF_COMBINER)
-        .value("AGGTYPE_UDF_REDUCER", perspective::AGGTYPE_UDF_REDUCER)
-        .value("AGGTYPE_SUM_ABS", perspective::AGGTYPE_SUM_ABS)
-        .value("AGGTYPE_SUM_NOT_NULL", perspective::AGGTYPE_SUM_NOT_NULL)
-        .value("AGGTYPE_MEAN_BY_COUNT", perspective::AGGTYPE_MEAN_BY_COUNT)
-        .value("AGGTYPE_IDENTITY", perspective::AGGTYPE_IDENTITY)
-        .value("AGGTYPE_DISTINCT_COUNT", perspective::AGGTYPE_DISTINCT_COUNT)
-        .value("AGGTYPE_DISTINCT_LEAF", perspective::AGGTYPE_DISTINCT_LEAF)
-        .value("AGGTYPE_PCT_SUM_PARENT", perspective::AGGTYPE_PCT_SUM_PARENT)
-        .value("AGGTYPE_PCT_SUM_GRAND_TOTAL", perspective::AGGTYPE_PCT_SUM_GRAND_TOTAL);
+    py::enum_<t_op>(m, "t_op")
+        .value("OP_INSERT", OP_INSERT)
+        .value("OP_DELETE", OP_DELETE)
+        .value("OP_CLEAR", OP_CLEAR);
 
     /******************************************************************************
      *
-     * t_totals
+     * Perspective defs
      */
-    py::enum_<perspective::t_totals>("t_totals")
-        .value("TOTALS_BEFORE", perspective::TOTALS_BEFORE)
-        .value("TOTALS_HIDDEN", perspective::TOTALS_HIDDEN)
-        .value("TOTALS_AFTER", perspective::TOTALS_AFTER);
-
-    /******************************************************************************
-     *
-     * assorted functions
-     */
-    // py::def("sort", sort<py::object>);
-    py::def("make_table", make_table<py::object>);
-    py::def("make_gnode", make_gnode);
-    py::def("clone_gnode_table", clone_gnode_table<py::object>);
-    // py::def("make_context_zero", make_context_zero);
-    // py::def("make_context_one", make_context_one);
-    // py::def("make_context_two", make_context_two);
-    // py::def("scalar_to_val", scalar_to_val);
-    // py::def("scalar_vec_to_val", scalar_vec_to_val);
-    py::def("table_add_computed_column", table_add_computed_column<py::object>);
-    py::def("set_column_nth", set_column_nth<py::object>);
-    // py::def("get_data_zero", get_data<std::shared_ptr<perspective::t_ctx0>>);
-    // py::def("get_data_one", get_data<std::shared_ptr<perspective::t_ctx1>>);
-    // py::def("get_data_two", get_data<std::shared_ptr<perspective::t_ctx2>>);
-    // py::def("get_data_two_skip_headers", get_data_two_skip_headers<py::object>);
-    // py::def("col_to_js_typed_array_zero", col_to_js_typed_array<std::shared_ptr<t_ctx0>>);
-    // py::def("col_to_js_typed_array_one", col_to_js_typed_array<std::shared_ptr<t_ctx1>>);
-    // py::def("col_to_js_typed_array_two", col_to_js_typed_array<std::shared_ptr<t_ctx2>>);
-
-
-/******************************************************************************/
+    m.def("make_table", &make_table_py);
+    m.def("make_computed_table", &make_computed_table_py);
+    m.def("make_view_zero", &make_view_ctx0);
+    m.def("make_view_one", &make_view_ctx1);
+    m.def("make_view_two", &make_view_ctx2);
+    m.def("get_data_slice_zero", &get_data_slice_ctx0);
+    m.def("get_from_data_slice_zero", &get_from_data_slice_ctx0);
+    m.def("get_data_slice_one", &get_data_slice_ctx1);
+    m.def("get_from_data_slice_one", &get_from_data_slice_ctx1);
+    m.def("get_data_slice_two", &get_data_slice_ctx2);
+    m.def("get_from_data_slice_two", &get_from_data_slice_ctx2);
 }
-
 
 #endif

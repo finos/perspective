@@ -13,6 +13,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/exports.h>
 #include <boost/functional/hash.hpp>
+#include <chrono>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -86,6 +87,13 @@ public:
     friend std::ostream& operator<<(std::ostream& os, const t_time& t);
 
     bool as_tm(struct tm& out) const;
+
+    /**
+     * @brief Return the instance as an std::tm object.
+     * 
+     * @return std::tm 
+     */
+    std::tm get_tm() const;
 
     std::int32_t gmtime(struct tm& out, std::int64_t secs, std::int32_t offset) const;
 

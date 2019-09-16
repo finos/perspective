@@ -245,14 +245,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
+
+		find_package(pybind11)
+		if(NOT pybind11_FOUND)
+		    message("${Red}PyBind11 could not be located${ColorReset}")
+			psp_build_dep("pybind11" "../../cmake/Pybind.txt.in")
+		else()
+		    message("${Cyan}Found PyBind11 in ${pybind11_INCLUDE_DIRS}${ColorReset}")
+		endif()
+		include_directories( ${pybind11_INCLUDE_DIRS} )
+
 		find_package(NumPy)
-
-		find_package( Boost COMPONENTS python REQUIRED )
-		find_library( BOOST_PYTHON boost_python)
-		find_library( BOOST_NUMPY boost_numpy)
-		include_directories( ${Boost_INCLUDE_DIR} )
-
 		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
+
 		#####################
 	endif()
 endif()
@@ -350,6 +355,17 @@ set (SOURCE_FILES
 	src/cpp/vocab.cpp
 	)
 
+set (PYTHON_SOURCE_FILES
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/accessor.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/context.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/fill.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/python.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/serialization.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/table.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/utils.cpp
+	${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/view.cpp
+	)
+
 if (WIN32)
 	set(CMAKE_CXX_FLAGS " /EHsc")
 else()
@@ -376,22 +392,19 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		# Python extra targets #
 		########################
-		add_library(psp SHARED ${SOURCE_FILES} ${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/numpy.cpp ${HEADER_FILES})
+		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
-		target_link_libraries(psp ${BOOST_PYTHON})
-		target_link_libraries(psp ${BOOST_NUMPY})
-		target_link_libraries(psp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
-		add_library(binding SHARED ${CMAKE_SOURCE_DIR}/../../python/table/perspective/src/python.cpp)
+		add_library(binding SHARED ${PYTHON_SOURCE_FILES})
 
 		target_compile_definitions(binding PRIVATE PSP_ENABLE_PYTHON=1)
+		target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
-		target_link_libraries(binding ${BOOST_PYTHON})
-		target_link_libraries(binding ${BOOST_NUMPY})
-		target_link_libraries(binding ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+		target_link_libraries(binding ${PYTHON_LIBRARIES})
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})

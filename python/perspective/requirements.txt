@@ -1,0 +1,4 @@
+ipywidgets>=7.4.2
+pandas>=0.23.4
+six>=1.11.0
+traitlets>=4.3.2

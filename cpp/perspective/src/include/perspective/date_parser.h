@@ -9,8 +9,8 @@
 
 #pragma once
 #include <memory>
-#include <vector>
 #include <locale>
+#include <perspective/base.h>
 #include <perspective/first.h>
 #include <perspective/exports.h>
 

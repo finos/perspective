@@ -261,7 +261,7 @@ namespace binding {
     */
     template <typename T>
     std::tuple<std::string, std::string, std::vector<t_tscalar>> make_filter_term(
-        t_dtype column_type, T date_parser, const std::string column_name, const std::string& filter_op_str, T filter_term);
+        t_dtype column_type, T date_parser, const std::string& column_name, const std::string& filter_op_str, T filter_term);
     /**
      * @brief Create a `t_view_config` object from the binding language's `view_config` object.
      *

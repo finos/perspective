@@ -14,6 +14,7 @@
 #include <perspective/utils.h>
 #include <perspective/exports.h>
 #include <boost/functional/hash.hpp>
+#include <ctime>
 #include <sstream>
 #include <string>
 #include <algorithm>
@@ -64,6 +65,13 @@ public:
     //(Start point is unspecified, may not be stable and
     // only works for dates after 1900AD.)
     std::int32_t consecutive_day_idx() const;
+
+    /**
+     * @brief Return an `std::tm` object. `tm_hour`, `tm_min`, and `tm_sec` are set to 0.
+     * 
+     * @return std::tm 
+     */
+    std::tm get_tm() const;
 
     friend bool operator<(const t_date& a, const t_date& b);
     friend bool operator<=(const t_date& a, const t_date& b);

@@ -17,10 +17,6 @@
 #include <perspective/debug_helpers.h>
 #include <cmath>
 
-#ifdef PSP_ENABLE_PYTHON
-namespace py = boost::python;
-namespace np = boost::python::numpy;
-#endif
 
 /*
 TODO.
@@ -210,7 +206,7 @@ public:
 
 #ifdef PSP_ENABLE_PYTHON
     /* Python bits */
-    np::ndarray _as_numpy(t_dtype dtype);
+    py::array _as_numpy(t_dtype dtype);
 #endif
 
 protected:

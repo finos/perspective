@@ -1391,7 +1391,7 @@ namespace binding {
 
     template <>
     std::tuple<std::string, std::string, std::vector<t_tscalar>>
-    make_filter_term(t_dtype column_type, t_val date_parser, const std::string column_name, const std::string& filter_op_str, t_val filter_term) {
+    make_filter_term(t_dtype column_type, t_val date_parser, const std::string& column_name, const std::string& filter_op_str, t_val filter_term) {
         t_filter_op filter_op = str_to_filter_op(filter_op_str);
         std::vector<t_tscalar> terms;
 

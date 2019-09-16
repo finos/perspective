@@ -8,7 +8,7 @@ add_executable(psp_test ${TEST_FILES})
 
 if(PSP_PYTHON_BUILD)
     set_target_properties(psp_test PROPERTIES
-             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../tests/)
+             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/../tests/table)
 endif()
 
 if(WIN32)
