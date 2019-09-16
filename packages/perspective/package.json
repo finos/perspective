@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "0.3.8",
+    "version": "0.3.9",
     "description": "Perspective.js",
     "main": "dist/umd/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",

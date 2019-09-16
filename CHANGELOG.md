@@ -1,5 +1,21 @@
 # Changelog
 
+[0.3.9] - 2019-09-16
+### Added
+* [#698](https://github.com/jpmorganchase/perspective/pull/698) Support for updating-by & querying implicitly indexed `table`s via `"__INDEX__"`.
+* [#699](https://github.com/jpmorganchase/perspective/pull/699) Adds `leaves_only` option for `to_*` methods.
+* [#700](https://github.com/jpmorganchase/perspective/pull/700) Charts now display the first-N point on overflow, rather than only warn.
+* [#715](https://github.com/jpmorganchase/perspective/pull/715) Editing support via the `editable` attribute, for `@finos/perspective-viewer-hypergrid`.
+  
+### Fixes
+* [#691](https://github.com/jpmorganchase/perspective/pull/691) Fix for reading batched arrows.
+* [#702](https://github.com/jpmorganchase/perspective/pull/702) Fix compatibility with ipywidgets.
+* [#703](https://github.com/jpmorganchase/perspective/pull/703) Fix attribtue API to be less noisy.
+* [#718](https://github.com/jpmorganchase/perspective/pull/718) Updated ES6 compat to remove regenerator dependency.
+
+### Internal
+* [#725](https://github.com/jpmorganchase/perspective/pull/725) `yarn setup` task for dev.
+
 [0.3.8] - 2019-08-26
 ### Fixes
 * [#689](https://github.com/jpmorganchase/perspective/pull/689) Performance enchancements for `update()`.
