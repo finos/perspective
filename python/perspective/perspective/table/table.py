@@ -8,6 +8,7 @@
 from perspective.table.libbinding import make_table, t_op
 from .view import View
 from ._accessor import _PerspectiveAccessor
+from ._callback_cache import _PerspectiveCallBackCache
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
@@ -32,7 +33,21 @@ class Table(object):
         self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, False)
         self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
-        self._callbacks = []
+        self._callbacks = _PerspectiveCallBackCache()
+        self._views = []
+
+    def clear(self):
+        '''Removes all the rows in the Table, but preserves the schema and configuration.'''
+        self._table.reset_gnode(self._gnode_id)
+
+    def replace(self, data):
+        '''Replaces all rows in the Table with the new data.
+
+        Params:
+            data (dict|list|dataframe) the new data with which to fill the Table
+        '''
+        self._table.reset_gnode(self._gnode_id)
+        self.update(data)
 
     def size(self):
         '''Returns the row count of the Table.'''
@@ -133,10 +148,29 @@ class Table(object):
         config = config or {}
         if config.get("columns") is None:
             config["columns"] = self.columns()
-        return View(self, self._callbacks, config)
+        view = View(self, self._callbacks, config)
+        self._views.append(view._name)
+        return view
+
+    def on_delete(self, callback):
+        '''Register a callback with the table that will be invoked when the `delete()` method is called.'''
+        if not callable(callback):
+            raise ValueError("on_delete callback must be a callable function!")
+        self._delete_callback = callback
+
+    def delete(self):
+        '''Delete this table and clean up associated resources.'''
+        if len(self._views) > 0:
+            raise RuntimeError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+        self._table.unregister_gnode(self._gnode_id)
+        if hasattr(self, "_delete_callback"):
+            self._delete_callback()
 
     def _update_callback(self):
         cache = {}
-        for callback in self._callbacks:
-
+        for callback in self._callbacks.get_callbacks():
             callback["callback"](cache)
+
+    def __del__(self):
+        '''Before GC, clean up internal resources to C++ objects'''
+        self.delete()

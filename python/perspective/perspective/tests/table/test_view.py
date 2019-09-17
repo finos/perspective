@@ -404,3 +404,113 @@ class TestView(object):
         view.on_update(callback)
         tbl.update(data)
         assert sentinel == True
+
+    # on_delete
+
+    def test_view_on_delete(self):
+        sentinel = False
+
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_delete(callback)
+        view.delete()
+        assert sentinel == True
+
+    # delete
+
+    def test_view_delete(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.delete()
+        # don't segfault
+
+    def test_view_delete_multiple_callbacks(self):
+        # make sure that callbacks on views get filtered
+        sentinel = 0
+
+        def cb1():
+            nonlocal sentinel
+            sentinel += 1
+
+        def cb2():
+            nonlocal sentinel
+            sentinel += 2
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        v1 = tbl.view()
+        v2 = tbl.view()
+        v1.on_update(cb1)
+        v2.on_update(cb2)
+        v1.delete()
+        assert len(tbl._views) == 1
+        tbl.update(data)
+        assert sentinel == 2
+
+    def test_view_delete_full_cleanup(self):
+        sentinel = 0
+
+        def cb1():
+            nonlocal sentinel
+            sentinel += 1
+
+        def cb2():
+            nonlocal sentinel
+            sentinel += 2
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        v1 = tbl.view()
+        v2 = tbl.view()
+        v1.on_update(cb1)
+        v2.on_update(cb2)
+        v1.delete()
+        v2.delete()
+        tbl.update(data)
+        assert sentinel == 0
+
+    # remove_update
+
+    def test_view_remove_update(self):
+        sentinel = 0
+
+        def cb1():
+            nonlocal sentinel
+            sentinel += 1
+
+        def cb2():
+            nonlocal sentinel
+            sentinel += 2
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(cb1)
+        view.on_update(cb2)
+        view.remove_update(cb1)
+        tbl.update(data)
+        assert sentinel == 2
+
+    def test_view_remove_multiple_update(self):
+        sentinel = 0
+
+        def cb1():
+            nonlocal sentinel
+            sentinel += 1
+
+        def cb2():
+            nonlocal sentinel
+            sentinel += 2
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(cb1)
+        view.on_update(cb2)
+        view.on_update(cb1)
+        view.remove_update(cb1)
+        assert len(view._callbacks.get_callbacks()) == 1
+        tbl.update(data)
+        assert sentinel == 2

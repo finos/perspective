@@ -27,17 +27,18 @@ class View(object):
         View objects are immutable, and will remain in memory and actively process
         updates until its delete() method is called.
         '''
+        self._name = str(random())
         self._table = Table
         self._config = ViewConfig(config or {})
         self._sides = self.sides()
 
         date_validator = self._table._accessor._date_validator
         if self._sides == 0:
-            self._view = make_view_zero(self._table._table, str(random()), COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_zero(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
         elif self._sides == 1:
-            self._view = make_view_one(self._table._table, str(random()), COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_one(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
         else:
-            self._view = make_view_two(self._table._table, str(random()), COLUMN_SEPARATOR_STRING, self._config, date_validator)
+            self._view = make_view_two(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
 
         self._column_only = self._view.is_column_only()
         self._callbacks = callbacks
@@ -149,10 +150,38 @@ class View(object):
             else:
                 callback()
 
-        self._callbacks.append({
+        self._callbacks.add_callback({
+            "name": self._name,
             "orig_callback": callback,
             "callback": wrapped_callback
         })
+
+    def remove_update(self, callback):
+        '''Given a callback function, remove it from the list of callbacks.
+
+        Params:
+            callback (func) : a callback that needs to be removed from the list of callbacks
+        '''
+        if not callable(callback):
+            return ValueError("remove_update callback should be a callable function!")
+        self._callbacks.remove_callbacks(lambda cb: cb["orig_callback"] != callback)
+
+    def on_delete(self, callback):
+        '''Set a callback to be run when the `delete()` method is called on the View.
+
+        Params:
+            callback (func) : a callback to run after the delete operation has completed
+        '''
+        if not callable(callback):
+            return ValueError("on_delete callback must be a callable function!")
+        self._delete_callback = callback
+
+    def delete(self):
+        '''Delete the view and clean up associated resources and references.'''
+        self._table._views.pop(self._table._views.index(self._name))
+        self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
+        if hasattr(self, "_delete_callback"):
+            self._delete_callback()
 
     def to_records(self, options=None):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
@@ -281,3 +310,6 @@ class View(object):
             "leaves_only": options.get("leaves_only", False),
             "has_row_path": self._sides > 0 and (not self._column_only)
         }
+
+    def __del__(self):
+        self.delete()

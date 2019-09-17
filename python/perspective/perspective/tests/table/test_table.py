@@ -268,3 +268,55 @@ class TestTable(object):
         assert tbl.view().to_records() == [
             {"a": 3, "b": 4}
         ]
+
+    # clear
+
+    def test_table_clear(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.clear()
+        view = tbl.view()
+        assert view.to_records() == []
+
+    # replace
+
+    def test_table_replace(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        tbl.replace(data2)
+        assert tbl.view().to_records() == data2
+
+    # delete
+
+    def test_table_delete(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.delete()
+        # don't segfault
+
+    def test_table_delete_callback(self):
+        sentinel = False
+
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.on_delete(callback)
+        tbl.delete()
+        assert sentinel == True
+
+    def test_table_delete_with_view(self):
+        sentinel = False
+
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.on_delete(callback)
+        view = tbl.view()
+        view.delete()
+        tbl.delete()
+        assert sentinel == True
