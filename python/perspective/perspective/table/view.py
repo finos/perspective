@@ -15,7 +15,7 @@ from ._utils import _str_to_pythontype
 
 
 class View(object):
-    def __init__(self, Table, config=None):
+    def __init__(self, Table, callbacks, config=None):
         '''Private constructor for a View object - use the Table.view() method to create Views.
 
         A View object represents a specific transform (configuration or pivot,
@@ -39,6 +39,7 @@ class View(object):
             self._view = make_view_two(self._table._table, str(random()), COLUMN_SEPARATOR_STRING, self._config, date_validator)
 
         self._column_only = self._view.is_column_only()
+        self._callbacks = callbacks
 
     def sides(self):
         '''How many pivoted sides does this View have?'''
@@ -79,8 +80,39 @@ class View(object):
         '''
         if as_string:
             return {item[0]: item[1] for item in self._view.schema().items()}
-        else:
-            return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
+
+        return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
+
+    def on_update(self, callback, mode=None):
+        mode = mode or "none"
+
+        if not callable(callback):
+            raise ValueError('Invalid callback - must be a callable function')
+
+        if mode not in ["none", "cell", "row"]:
+            raise ValueError('Invalid update mode {} - valid on_update modes are "none", "cell", or "row"'.format(mode))
+
+        if mode == "cell" or mode == "row":
+            if not self._view.get_deltas_enabled():
+                self._view.set_deltas_enabled(True)
+
+        # get deltas back from the view, and then call the user-defined callback
+        def wrapped_callback(cache):
+            if mode == "cell":
+                if cache.get("step_delta") is None:
+                    raise NotImplementedError("not implemented get_step_delta")
+                callback(cache["step_delta"])
+            elif mode == "row":
+                if cache.get("row_delta") is None:
+                    raise NotImplementedError("not implemented get_row_delta")
+                callback(cache["row_delta"])
+            else:
+                callback()
+
+        self._callbacks.append({
+            "orig_callback": callback,
+            "callback": wrapped_callback
+        })
 
     def to_records(self, options=None):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.

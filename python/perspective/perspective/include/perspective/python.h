@@ -227,6 +227,7 @@ PYBIND11_MODULE(libbinding, m)
      */
     py::class_<t_pool, std::shared_ptr<t_pool>>(m, "t_pool")
         .def(py::init<>())
+        .def("set_update_delegate", &t_pool::set_update_delegate)
         .def("unregister_gnode", &t_pool::unregister_gnode)
         .def("_process", &t_pool::_process);
 

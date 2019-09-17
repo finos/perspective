@@ -30,6 +30,7 @@ class Table(object):
         self._limit = config.get("limit", 4294967295)
         self._index = config.get("index", "")
         self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, False)
+        self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = []
 
@@ -117,9 +118,9 @@ class Table(object):
         config = config or {}
         if config.get("columns") is None:
             config["columns"] = self.columns()
-        return View(self, config)
+        return View(self, self._callbacks, config)
 
     def _update_callback(self):
         cache = {}
         for callback in self._callbacks:
-            callback.callback(cache)
+            callback["callback"](cache)

@@ -327,3 +327,17 @@ class TestView(object):
        })
        assert view.to_records() == [{"__ROW_PATH__": [], "a": 4, "b": 6}, {"__ROW_PATH__": ["2", "1"], "a": 1, "b": 2}, {"__ROW_PATH__": ["4", "3"], "a": 3, "b": 4}]
        """
+
+    # on_update
+    def test_view_on_update(self):
+        sentinel = False
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(callback)
+        tbl.update(data)
+        assert sentinel == True

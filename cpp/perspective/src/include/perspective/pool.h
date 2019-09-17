@@ -15,9 +15,12 @@
 #include <mutex>
 #include <atomic>
 
-#ifdef PSP_ENABLE_WASM
-#include <emscripten/val.h>
-typedef emscripten::val t_val;
+#if defined PSP_ENABLE_WASM
+    #include <emscripten/val.h>
+    typedef emscripten::val t_val;
+#elif defined PSP_ENABLE_PYTHON
+    #include <pybind11/pybind11.h>
+    typedef py::object t_val;
 #endif
 
 namespace perspective {
@@ -39,16 +42,20 @@ class PERSPECTIVE_EXPORT t_pool {
 public:
     t_pool();
     t_uindex register_gnode(t_gnode* node);
-#ifdef PSP_ENABLE_WASM
+
+#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
     void set_update_delegate(t_val ud);
+#endif
+
+#ifdef PSP_ENABLE_WASM
     void register_context(
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr);
-    void py_notify_userspace();
 #else
     void register_context(
         t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr);
-    void py_notify_userspace();
 #endif
+
+    void notify_userspace();
     PSP_NON_COPYABLE(t_pool);
 
     ~t_pool();
@@ -94,14 +101,13 @@ private:
     std::mutex m_mtx;
     std::vector<t_gnode*> m_gnodes;
 
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
     t_val m_update_delegate;
 #endif
     std::atomic_flag m_run;
     std::atomic<bool> m_data_remaining;
     std::atomic<t_uindex> m_sleep;
     std::atomic<t_uindex> m_epoch;
-    bool m_has_python_dep;
 };
 
 } // end namespace perspective

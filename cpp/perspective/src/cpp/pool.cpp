@@ -24,7 +24,8 @@ t_updctx::t_updctx(t_uindex gnode_id, const std::string& ctx)
     : m_gnode_id(gnode_id)
     , m_ctx(ctx) {}
 
-#ifdef PSP_ENABLE_WASM
+#if defined PSP_ENABLE_WASM
+
 t_val
 empty_callback() {
     t_val callback = t_val::global("Object").new_();
@@ -34,17 +35,29 @@ empty_callback() {
 
 t_pool::t_pool()
     : m_sleep(0)
-    , m_update_delegate(empty_callback())
-    , m_has_python_dep(false) {
-    m_run.clear();
+    , m_update_delegate(empty_callback()) {
+        m_run.clear();
+    }
+
+#elif defined PSP_ENABLE_PYTHON
+
+t_val
+empty_callback() {
+    return py::none();
 }
-#else
 
 t_pool::t_pool()
     : m_sleep(0)
-    , m_has_python_dep(false) {
-    m_run.clear();
-}
+    , m_update_delegate(empty_callback()) {
+        m_run.clear();
+    }
+
+#else
+
+t_pool::t_pool()
+    : m_sleep(0) {
+        m_run.clear();
+    }
 
 #endif
 
@@ -155,13 +168,6 @@ t_pool::set_sleep(t_uindex ms) {
     }
 }
 
-void
-t_pool::py_notify_userspace() {
-#ifdef PSP_ENABLE_WASM
-    m_update_delegate.call<void>("_update_callback");
-#endif
-}
-
 std::vector<t_stree*>
 t_pool::get_trees() {
     std::vector<t_stree*> rval;
@@ -182,29 +188,15 @@ t_pool::get_trees() {
 
 #ifdef PSP_ENABLE_WASM
 void
-t_pool::set_update_delegate(t_val ud) {
-    m_update_delegate = ud;
-}
-#endif
-
-#ifdef PSP_ENABLE_WASM
-void
 t_pool::register_context(
     t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int32_t ptr) {
     std::lock_guard<std::mutex> lg(m_mtx);
     if (!validate_gnode_id(gnode_id))
         return;
     m_gnodes[gnode_id]->_register_context(name, type, ptr);
-
-    if (t_env::log_progress()) {
-        std::cout << repr() << " << t_pool.register_context: "
-                  << " gnode_id => " << gnode_id << " name => " << name << " type => " << type
-                  << " ptr => " << ptr << std::endl;
-    }
 }
 
 #else
-
 void
 t_pool::register_context(
     t_uindex gnode_id, const std::string& name, t_ctx_type type, std::int64_t ptr) {
@@ -212,14 +204,27 @@ t_pool::register_context(
     if (!validate_gnode_id(gnode_id))
         return;
     m_gnodes[gnode_id]->_register_context(name, type, ptr);
-
-    if (t_env::log_progress()) {
-        std::cout << repr() << " << t_pool.register_context: "
-                  << " gnode_id => " << gnode_id << " name => " << name << " type => " << type
-                  << " ptr => " << ptr << std::endl;
-    }
 }
 #endif
+
+#if defined PSP_ENABLE_WASM || defined PSP_ENABLE_PYTHON
+void
+t_pool::set_update_delegate(t_val ud) {
+    m_update_delegate = ud;
+}
+#endif
+
+void
+t_pool::notify_userspace() {
+    #if defined PSP_ENABLE_WASM
+        m_update_delegate.call<void>("_update_callback");
+    #elif PSP_ENABLE_PYTHON
+        if (!m_update_delegate.is_none()) {
+            m_update_delegate.attr("_update_callback")();
+        }
+    #endif
+}
+
 void
 t_pool::unregister_context(t_uindex gnode_id, const std::string& name) {
     std::lock_guard<std::mutex> lg(m_mtx);
