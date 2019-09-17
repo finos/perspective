@@ -56,6 +56,8 @@ view.prototype.to_columns = async_queue("to_columns");
 
 view.prototype.to_csv = async_queue("to_csv");
 
+view.prototype.is_valid_filter = async_queue("is_valid_filter");
+
 view.prototype.schema = async_queue("schema");
 
 view.prototype.num_columns = async_queue("num_columns");

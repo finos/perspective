@@ -6,8 +6,9 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from random import random
+from datetime import date, datetime
 from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two, \
-    get_data_slice_zero, get_data_slice_one, get_data_slice_two
+    get_data_slice_zero, get_data_slice_one, get_data_slice_two, t_filter_op, str_to_filter_op
 from .view_config import ViewConfig
 from ._data_formatter import _PerspectiveDataFormatter
 from ._constants import COLUMN_SEPARATOR_STRING
@@ -66,6 +67,45 @@ class View(object):
             int : number of columns
         '''
         return self._view.num_columns()
+
+    def get_row_expanded(self, idx):
+        '''Returns whether row at `idx` is expanded or collapsed.'''
+        return self._view.get_row_expanded(idx)
+
+    def expand(self, idx):
+        '''Expands the row at 'idx', i.e. displaying its leaf rows.'''
+        return self._view.expand(idx, len(self._config.get_row_pivots()))
+
+    def collapse(self, idx):
+        '''Collapses the row at 'idx', i.e. hiding its leaf rows'''
+        return self._view.collapse(idx)
+
+    def set_depth(self, depth):
+        '''Sets the expansion depth of the pivot tree.'''
+        return self._view.set_depth(depth, len(self._config.get_row_pivots()))
+
+    def is_valid_filter(self, filter):
+        '''Tests whether a given filter configuration is valid - that the filter term is not None or an unparsable date/datetime.'''
+        if isinstance(filter[1], str):
+            filter_op = str_to_filter_op(filter[1])
+        else:
+            filter_op = filter[1]
+
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
+            # null/not null operators don't need a comparison value
+            return True
+
+        value = filter[2]
+
+        if value is None:
+            return False
+
+        schema = self.schema()
+        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+            if isinstance(value, str):
+                value = self._table._accessor.date_validator().parse(value)
+
+        return value is not None
 
     def schema(self, as_string=False):
         '''The schema of this view, which is a key-value map that contains the column names and their Python data types.

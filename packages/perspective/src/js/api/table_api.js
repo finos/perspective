@@ -111,8 +111,6 @@ table.prototype.schema = async_queue("schema", "table_method");
 
 table.prototype.computed_schema = async_queue("computed_schema", "table_method");
 
-table.prototype.is_valid_filter = async_queue("is_valid_filter", "table_method");
-
 table.prototype.size = async_queue("size", "table_method");
 
 table.prototype.columns = async_queue("columns", "table_method");

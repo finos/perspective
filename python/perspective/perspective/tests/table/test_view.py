@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -328,9 +329,71 @@ class TestView(object):
        assert view.to_records() == [{"__ROW_PATH__": [], "a": 4, "b": 6}, {"__ROW_PATH__": ["2", "1"], "a": 1, "b": 2}, {"__ROW_PATH__": ["4", "3"], "a": 3, "b": 4}]
        """
 
+    # is_valid_filter
+    def test_view_is_valid_filter_str(self):
+        filter = ["a", "<", 1]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == True
+
+    def test_view_not_is_valid_filter_str(self):
+        filter = ["a", "<", None]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == False
+
+    def test_view_is_valid_filter_filter_op(self):
+        filter = ["a", t_filter_op.FILTER_OP_IS_NULL]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == True
+
+    def test_view_not_is_valid_filter_filter_op(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == False
+
+    def test_view_is_valid_filter_date(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, date.today()]
+        tbl = Table({
+            "a": date
+        })
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == True
+
+    def test_view_not_is_valid_filter_date(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        tbl = Table({
+            "a": date
+        })
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == False
+
+    def test_view_is_valid_filter_datetime(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, datetime.now()]
+        tbl = Table({
+            "a": datetime
+        })
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == True
+
+    def test_view_not_is_valid_filter_datetime(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        tbl = Table({
+            "a": datetime
+        })
+        view = tbl.view()
+        assert view.is_valid_filter(filter) == False
+
     # on_update
     def test_view_on_update(self):
         sentinel = False
+
         def callback():
             nonlocal sentinel
             sentinel = True

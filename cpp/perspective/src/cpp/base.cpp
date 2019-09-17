@@ -328,12 +328,6 @@ filter_op_to_str(t_filter_op op) {
         case FILTER_OP_IS_NOT_NULL: {
             return "is not null";
         } break;
-        case FILTER_OP_IS_VALID: {
-            return "is not None";
-        } break;
-        case FILTER_OP_IS_NOT_VALID: {
-            return "is None";
-        } break;
     }
     PSP_COMPLAIN_AND_ABORT("Reached end of function");
     return "";
@@ -367,14 +361,10 @@ str_to_filter_op(const std::string& str) {
         return t_filter_op::FILTER_OP_AND;
     } else if (str == "|" || str == "or") {
         return t_filter_op::FILTER_OP_OR;
-    } else if (str == "is null") {
+    } else if (str == "is null" || str == "is None") {
         return t_filter_op::FILTER_OP_IS_NULL;
-    } else if (str == "is not null") {
+    } else if (str == "is not null" || str == "is not None") {
         return t_filter_op::FILTER_OP_IS_NOT_NULL;
-    } else if (str == "is not None") {
-        return t_filter_op::FILTER_OP_IS_VALID;
-    } else if (str == "is None") {
-        return t_filter_op::FILTER_OP_IS_NOT_VALID;
     } else {
         PSP_COMPLAIN_AND_ABORT("Encountered unknown filter operation.");
         // use and as default

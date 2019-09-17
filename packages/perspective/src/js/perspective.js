@@ -341,6 +341,30 @@ export default function(Module) {
     };
 
     /**
+     * Determines whether a filter configuration is valid, i.e. that the comparison value is not undefined or null.
+     *
+     * @returns {boolean} true if valid, false otherwise.
+     */
+    view.prototype.is_valid_filter = function(filter) {
+        // isNull and isNotNull filter operators are always valid and apply to all schema types
+        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
+            return true;
+        }
+
+        let value = filter[2];
+        if (value === null) {
+            return false;
+        }
+
+        const schema = this.schema();
+        if (schema[filter[0]] === "datetime" || schema[filter[0]] == "date") {
+            value = this.date_parser.parse(value);
+        }
+
+        return typeof value !== "undefined" && value !== null;
+    };
+
+    /**
      * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
      * are the columns of this {@link module:perspective~view}, and the values are their string type names.
      * If this {@link module:perspective~view} is aggregated, theses will be the aggregated types;
@@ -1103,37 +1127,6 @@ export default function(Module) {
         }
 
         return computed_schema;
-    };
-
-    table.prototype._is_date_filter = function(schema) {
-        return key => schema[key] === "datetime" || schema[key] === "date";
-    };
-
-    table.prototype._is_valid_filter = function(filter) {
-        // isNull and isNotNull filter operators are always valid and apply to all schema types
-        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
-            return true;
-        }
-
-        if (filter[2] === null) {
-            return false;
-        }
-
-        const schema = this.schema();
-        const isDateFilter = this._is_date_filter(schema);
-        const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
-        return typeof value !== "undefined" && value !== null;
-    };
-
-    /**
-     * Determines whether a given filter is valid.
-     *
-     * @param {Array<string>} [filter] A filter configuration array to test
-     *
-     * @returns {Promise<boolean>} Whether the filter is valid
-     */
-    table.prototype.is_valid_filter = function(filter) {
-        return this._is_valid_filter(filter);
     };
 
     /**

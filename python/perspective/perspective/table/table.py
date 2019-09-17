@@ -62,8 +62,23 @@ class Table(object):
         return schema
 
     def columns(self, computed=False):
-        '''Returns the column names of this dataset.'''
+        '''Returns the column names of this dataset.
+
+        Params:
+            computed (bool) : whether to include computed columns in this array. Defaults to False.
+
+        Returns:
+            list : a list of string column names
+        '''
         return list(self.schema().keys())
+
+    def computed_schema(self):
+        '''Returns a schema of computed columns added by the user.
+
+        Returns:
+            dict[string:dict] : a key-value mapping of column names to computed columns. Each value is a dictionary that contains `column_name`, `column_type`, and `computation`.
+        '''
+        return {}
 
     def update(self, data):
         '''Update the Table with new data.
@@ -123,4 +138,5 @@ class Table(object):
     def _update_callback(self):
         cache = {}
         for callback in self._callbacks:
+
             callback["callback"](cache)

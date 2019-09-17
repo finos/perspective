@@ -298,6 +298,27 @@ PYBIND11_MODULE(libbinding, m)
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
         .value("DTYPE_LAST", DTYPE_LAST);
 
+     /******************************************************************************
+     *
+     * t_filter_op
+     */
+    py::enum_<t_filter_op>(m, "t_filter_op")
+        .value("FILTER_OP_LT", FILTER_OP_LT)
+        .value("FILTER_OP_LTEQ", FILTER_OP_LTEQ)
+        .value("FILTER_OP_GT", FILTER_OP_GT)
+        .value("FILTER_OP_GTEQ", FILTER_OP_GTEQ)
+        .value("FILTER_OP_EQ", FILTER_OP_EQ)
+        .value("FILTER_OP_NE", FILTER_OP_NE)
+        .value("FILTER_OP_BEGINS_WITH", FILTER_OP_BEGINS_WITH)
+        .value("FILTER_OP_ENDS_WITH", FILTER_OP_ENDS_WITH)
+        .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
+        .value("FILTER_OP_OR", FILTER_OP_OR)
+        .value("FILTER_OP_IN", FILTER_OP_IN)
+        .value("FILTER_OP_NOT_IN", FILTER_OP_NOT_IN)
+        .value("FILTER_OP_AND", FILTER_OP_AND)
+        .value("FILTER_OP_IS_NULL", FILTER_OP_IS_NULL)
+        .value("FILTER_OP_IS_NOT_NULL", FILTER_OP_IS_NOT_NULL);
+
     /******************************************************************************
      *
      * t_op
@@ -311,6 +332,7 @@ PYBIND11_MODULE(libbinding, m)
      *
      * Perspective defs
      */
+    m.def("str_to_filter_op", &str_to_filter_op);
     m.def("make_table", &make_table_py);
     m.def("make_computed_table", &make_computed_table_py);
     m.def("make_view_zero", &make_view_ctx0);
