@@ -15,7 +15,7 @@ from faker import Faker
 fake = Faker()
 
 
-def superstore(count=10):
+def superstore(count=50):
     data = []
     for id in range(count):
         dat = {}
