@@ -168,14 +168,43 @@ namespace binding {
      * @brief Change a value at a given index inside the column.
      */
     template <typename T>
-    void set_column_nth(t_column* col, t_uindex idx, T value);
+    void set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, T value);
 
     /**
-     * @brief Create a new computed column.
+     * @brief Create a computed column.
+     * 
+     * @tparam T 
+     * @param table 
+     * @param row_indices 
+     * @param computed_def 
      */
     template <typename T>
-    void table_add_computed_column(t_data_table& table, T computed_defs);
+    void add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, T computed_def);
 
+    /**
+     * @brief Given a list of computed column declarations in the binding language, convert them to C++ lambdas that allow
+     * access from deeper inside the engine without importing the semantics of t_val. 
+     * 
+     * @tparam T 
+     * @param computed 
+     * @return std::vector<t_computed_column_def> 
+     */
+    template <typename T>
+    std::vector<t_computed_column_def> make_computed_lambdas(std::vector<T> computed);
+
+    /**
+     * @brief Utility function for accessing columns and adding data.
+     * 
+     * @tparam T 
+     * @param accessor 
+     * @param tbl 
+     * @param col 
+     * @param name 
+     * @param cidx 
+     * @param type 
+     * @param is_arrow 
+     * @param is_update 
+     */
     template <typename T>
     void _fill_data_helper(T accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,

@@ -263,9 +263,7 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
 
 template <>
 void
-set_column_nth(t_column* col, t_uindex idx, t_val value) {
-
-    // Check if the value is a javascript null
+set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value) {
     if (value.is_none()) {
         col->unset(idx);
         return;
@@ -411,113 +409,17 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
     }
 }
 
-// TODO
-// template <>
-// void
-// table_add_computed_column(t_data_table& table, t_val computed_defs) {
-//     auto vcomputed_defs = vecFromArray<t_val, t_val>(computed_defs);
-//     for (auto i = 0; i < vcomputed_defs.size(); ++i) {
-//         t_val coldef = vcomputed_defs[i];
-//         std::string name = coldef["column"].cast<std::string>();
-//         t_val inputs = coldef["inputs"];
-//         t_val func = coldef["func"];
-//         t_val type = coldef["type"];
+/*
+void
+add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def) {
+    // TODO: implement
+}
 
-//         std::string stype;
-
-//         if (type.isUndefined()) {
-//             stype = "string";
-//         } else {
-//             stype = type.cast<std::string>();
-//         }
-
-//         t_dtype dtype;
-//         if (stype == "integer") {
-//             dtype = DTYPE_INT32;
-//         } else if (stype == "float") {
-//             dtype = DTYPE_FLOAT64;
-//         } else if (stype == "boolean") {
-//             dtype = DTYPE_BOOL;
-//         } else if (stype == "date") {
-//             dtype = DTYPE_DATE;
-//         } else if (stype == "datetime") {
-//             dtype = DTYPE_TIME;
-//         } else {
-//             dtype = DTYPE_STR;
-//         }
-
-//         // Get list of input column names
-//         auto icol_names = vecFromArray<t_val, std::string>(inputs);
-
-//         // Get t_column* for all input columns
-//         std::vector<const t_column*> icols;
-//         for (const auto& cc : icol_names) {
-//             icols.push_back(table._get_column(cc));
-//         }
-
-//         int arity = icols.size();
-
-//         // Add new column
-//         t_column* out = table.add_column(name, dtype, true);
-
-//         t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
-//               i4 = t_val::undefined();
-
-//         t_uindex size = table.size();
-//         for (t_uindex ridx = 0; ridx < size; ++ridx) {
-//             t_val value = t_val::undefined();
-
-//             switch (arity) {
-//                 case 0: {
-//                     value = func();
-//                     break;
-//                 }
-//                 case 1: {
-//                     i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-//                     if (!i1.isNull()) {
-//                         value = func(i1);
-//                     }
-//                     break;
-//                 }
-//                 case 2: {
-//                     i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-//                     i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-//                     if (!i1.isNull() && !i2.isNull()) {
-//                         value = func(i1, i2);
-//                     }
-//                     break;
-//                 }
-//                 case 3: {
-//                     i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-//                     i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-//                     i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-//                     if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
-//                         value = func(i1, i2, i3);
-//                     }
-//                     break;
-//                 }
-//                 case 4: {
-//                     i1 = scalar_to_val(icols[0]->get_scalar(ridx));
-//                     i2 = scalar_to_val(icols[1]->get_scalar(ridx));
-//                     i3 = scalar_to_val(icols[2]->get_scalar(ridx));
-//                     i4 = scalar_to_val(icols[3]->get_scalar(ridx));
-//                     if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
-//                         value = func(i1, i2, i3, i4);
-//                     }
-//                     break;
-//                 }
-//                 default: {
-//                     // Don't handle other arity values
-//                     break;
-//                 }
-//             }
-
-//             if (!value.isUndefined()) {
-//                 set_column_nth(out, ridx, value);
-//             }
-//         }
-//     }
-// }
+void
+make_computed_lambdas(std::vector<t_val> computed) {
+    // TODO: implement
+}
+*/
 
 void
 _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,

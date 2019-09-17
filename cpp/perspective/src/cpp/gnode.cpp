@@ -218,6 +218,12 @@ t_gnode::_send(t_uindex portid, const t_data_table& fragments) {
 }
 
 void
+t_gnode::_send(t_uindex portid, const t_data_table& fragments, const std::vector<t_computed_column_def>& computed_lambdas) { 
+    _send(portid, fragments);
+    append_computed_lambdas(computed_lambdas);
+}
+
+void
 t_gnode::_send_and_process(const t_data_table& fragments) {
     _send(0, fragments);
     _process();
@@ -328,9 +334,7 @@ t_gnode::clear_deltas() {
 
 std::shared_ptr<t_data_table>
 t_gnode::_process_table() {
-
     m_was_updated = false;
-    auto t1 = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<t_port>& iport = m_iports[0];
 
@@ -343,33 +347,26 @@ t_gnode::_process_table() {
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
-    psp_log_time(repr() + " _process.post_flatten");
-
-    if (t_env::log_data_gnode_flattened()) {
-        std::cout << repr() << "gnode_process_flattened" << std::endl;
-        flattened->pprint();
-    }
-
-    if (t_env::log_schema_gnode_flattened()) {
-        std::cout << repr() << "gnode_schema_flattened" << std::endl;
-        std::cout << flattened->get_schema();
-    }
-
     if (m_state->mapping_size() == 0) {
-        psp_log_time(repr() + " _process.init_path.post_fill_expr");
-
         m_state->update_history(flattened.get());
-        psp_log_time(repr() + " _process.init_path.post_update_history");
+
+        // update computed columns after history is updated but before contexts are updated
+        std::vector<t_uindex> updated_ridxs;
+        std::shared_ptr<t_column> flattened_pkey_col = flattened->get_column("psp_pkey");
+        t_uindex nrows = flattened->size();
+
+        for (t_uindex idx = 0; idx < nrows; ++idx) {
+            t_tscalar pkey = flattened_pkey_col->get_scalar(idx); 
+            auto lk = m_state->lookup(pkey);
+            updated_ridxs.push_back(lk.m_idx);
+        }
+
+        recompute_columns(get_table_sptr(), updated_ridxs);
         _update_contexts_from_state(*flattened);
-        psp_log_time(repr() + " _process.init_path.post_update_contexts_from_state");
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
-
         release_inputs();
-        psp_log_time(repr() + " _process.init_path.post_release_inputs");
-
         release_outputs();
-        psp_log_time(repr() + " _process.init_path.exit");
-
+        
 #ifdef PSP_GNODE_VERIFY
         auto stable = get_table();
         PSP_GNODE_VERIFY_TABLE(stable);
@@ -510,7 +507,6 @@ t_gnode::_process_table() {
     transitions->set_size(mask_count);
     existed->set_size(mask_count);
 
-    psp_log_time(repr() + " _process.noinit_path.post_rlkup_loop");
     if (!m_expr_icols.empty()) {
         populate_icols_in_flattened(lkup, flattened);
     }
@@ -595,9 +591,6 @@ t_gnode::_process_table() {
 #ifdef PSP_PARALLEL_FOR
     );
 #endif
-
-    psp_log_time(repr() + " _process.noinit_path.post_process_helper");
-
     std::shared_ptr<t_data_table> flattened_masked
         = mask.count() == flattened->size() ? flattened : flattened->clone(mask);
     PSP_GNODE_VERIFY_TABLE(flattened_masked);
@@ -615,49 +608,18 @@ t_gnode::_process_table() {
     }
 #endif
 
-    psp_log_time(repr() + " _process.noinit_path.post_update_history");
-
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
 
-    if (t_env::log_data_gnode_flattened()) {
-        std::cout << repr() << "gnode_process_flattened_mask" << std::endl;
-        flattened_masked->pprint();
+    // get updated row indices and update computed columns
+    std::vector<t_uindex> updated_ridxs;
+
+    for (t_uindex idx = 0; idx < fnrows; ++idx) {
+       t_tscalar pkey = pkey_col->get_scalar(idx); 
+       auto lk = m_state->lookup(pkey); // lookup after state has been updated
+       updated_ridxs.push_back(lk.m_idx);
     }
 
-    if (t_env::log_data_gnode_delta()) {
-        std::cout << repr() << "gnode_process_delta" << std::endl;
-        delta->pprint();
-    }
-
-    if (t_env::log_data_gnode_prev()) {
-        std::cout << repr() << "gnode_process_prev" << std::endl;
-        prev->pprint();
-    }
-
-    if (t_env::log_data_gnode_current()) {
-        std::cout << repr() << "gnode_process_current" << std::endl;
-        current->pprint();
-    }
-
-    if (t_env::log_data_gnode_transitions()) {
-        std::cout << repr() << "gnode_process_transitions" << std::endl;
-        transitions->pprint();
-    }
-
-    if (t_env::log_data_gnode_existed()) {
-        std::cout << repr() << "gnode_process_existed" << std::endl;
-        existed->pprint();
-    }
-
-    if (t_env::log_time_gnode_process()) {
-        auto t2 = std::chrono::high_resolution_clock::now();
-        std::cout << repr() << " gnode_process_time "
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
-                  << std::endl;
-        std::cout << repr() << "gnode_process_time since begin=> "
-                  << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - m_epoch).count()
-                  << std::endl;
-    }
+    recompute_columns(get_table_sptr(), updated_ridxs);
 
     return flattened_masked;
 }
@@ -1267,6 +1229,11 @@ t_gnode::_get_pkeyed_table() const {
     return m_state->_get_pkeyed_table();
 }
 
+std::shared_ptr<t_data_table>
+t_gnode::get_pkeyed_table_sptr() const {
+    return m_state->get_pkeyed_table();
+}
+
 std::vector<t_custom_column>
 t_gnode::get_custom_columns() const {
     return m_custom_columns;
@@ -1340,6 +1307,23 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx2> ctx) 
 void
 t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped_pkey> ctx) {
     _register_context(name, GROUPED_PKEY_CONTEXT, reinterpret_cast<std::int64_t>(ctx.get()));
+}
+
+void 
+t_gnode::recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs) {
+    for (auto l : m_computed_lambdas) {
+        l(flattened, updated_ridxs);
+    }
+}
+
+void 
+t_gnode::append_computed_lambdas(std::vector<t_computed_column_def> new_lambdas) {
+    m_computed_lambdas.insert(m_computed_lambdas.end(), new_lambdas.begin(), new_lambdas.end());
+}
+
+std::vector<t_computed_column_def> 
+t_gnode::get_computed_lambdas() const {
+    return m_computed_lambdas;
 }
 
 } // end namespace perspective

@@ -64,13 +64,24 @@ Table::get_schema() const {
 }
 
 void
-Table::replace_data_table(t_data_table* data_table) {
+Table::add_computed_columns(std::shared_ptr<t_data_table> data_table, std::vector<t_computed_column_def> computed_lambdas) {
     PSP_VERBOSE_ASSERT(m_init, "touching uninited object");
+    t_uindex prev_gnode_id = m_gnode->get_id();
+    
+    // transfer computed lambdas across to the new gnode and recalculate
+    auto lambdas = m_gnode->get_computed_lambdas();
+    lambdas.insert(lambdas.end(), computed_lambdas.begin(), computed_lambdas.end());
+
     auto new_gnode = make_gnode(data_table->get_schema());
     set_gnode(new_gnode);
+
     m_pool->register_gnode(m_gnode.get());
-    m_pool->send(m_gnode->get_id(), 0, *data_table);
+    m_pool->send(m_gnode->get_id(), 0, *data_table, lambdas);
     m_pool->_process();
+
+    unregister_gnode(prev_gnode_id);
+
+    // need to unregister contexts linked back to table
 }
 
 std::shared_ptr<t_gnode>

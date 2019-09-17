@@ -262,6 +262,24 @@ dtype_to_str(t_dtype dtype) {
     return str_dtype.str();
 }
 
+t_dtype
+str_to_dtype(const std::string& typestring) {
+    // returns most commonly used types in the JS/python public APIs.
+    if (typestring == "integer") {
+        return DTYPE_INT32;
+    } else if (typestring == "float") {
+        return DTYPE_FLOAT64;
+    } else if (typestring == "boolean") {
+        return DTYPE_BOOL;
+    } else if (typestring == "date") {
+        return DTYPE_DATE;
+    } else if (typestring == "datetime") {
+        return DTYPE_TIME;
+    } else {
+        return DTYPE_STR;
+    }
+}
+
 std::string
 filter_op_to_str(t_filter_op op) {
     switch (op) {

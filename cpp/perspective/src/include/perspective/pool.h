@@ -59,6 +59,8 @@ public:
 
     void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table);
 
+    void send(t_uindex gnode_id, t_uindex port_id, const t_data_table& table, const std::vector<t_computed_column_def>& computed_lambdas);
+
     void _process();
     void _process_helper();
     void init();
