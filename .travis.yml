@@ -21,18 +21,6 @@ matrix:
       cache: pip
       services: docker
 
-    - python: "3.6"
-      language: python
-      env: TEST=PYTHON_TABLE
-      cache: pip
-      services: docker
-
-    - python: "3.6"
-      language: python
-      env: TEST=PYTHON_NODE
-      cache: pip
-      services: docker
-
     - language: c++
       env: TEST=CPP_OSX
       os: osx
@@ -48,7 +36,7 @@ env:
 
 install:
   - if [ "$TEST" = "CPP_OSX" ]; then brew install yarn; fi
-  - if [ "$TEST" = "PYTHON_NODE"]; then curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get install npm; fi
+  - if [ "$TEST" = "PYTHON"]; then curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get install npm; fi
   - yarn
 
 script:
@@ -59,7 +47,5 @@ script:
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn build_cpp; fi
   - if [ "$TEST" = "CPP" ]; then PSP_DOCKER=1 yarn test_cpp; fi
   - if [ "$TEST" = "PYTHON" ]; then PSP_DOCKER=1 yarn ci_python; fi
-  - if [ "$TEST" = "PYTHON_TABLE" ]; then PSP_DOCKER=1 yarn ci_python:table; fi
-  - if [ "$TEST" = "PYTHON_NODE" ]; then PSP_DOCKER=1 yarn ci_python:node; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn build_cpp; fi
   - if [ "$TEST" = "CPP_OSX" ]; then yarn test_cpp; fi

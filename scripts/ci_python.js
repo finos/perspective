@@ -37,9 +37,8 @@ try {
     }
 
     let cmd;
-    let build_cmd =
-        "python3 -m pip install -r requirements.txt &&\
-        python3 -m pip install pytest pytest-cov flake8 codecov pylantern numpy scipy pandas matplotlib pytz faker sphinx sphinx_markdown_builder &&\
+     build_cmd =
+        "python3 -m pip install -r requirements-dev.txt &&\
         python3 setup.py build &&\
         python3 -m flake8 perspective && echo OK &&\
         python3 -m pytest -v perspective --cov=perspective &&\
