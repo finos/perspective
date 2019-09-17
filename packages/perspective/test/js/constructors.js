@@ -842,7 +842,7 @@ module.exports = perspective => {
                 table.delete();
             });
 
-            it("Computed column of arity 2 with updates on non-dependent columns", async function() {
+            it("Computed column of arity 2 with updates on non-dependent columns, construct from schema", async function() {
                 var meta = {
                     w: "float",
                     x: "float",

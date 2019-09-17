@@ -1076,31 +1076,18 @@ namespace binding {
         t_val type = computed_def["type"];
         t_val computed_func = computed_def["func"];
         
-        std::string stype;
+        std::string typestring;
 
         if (type.isUndefined()) {
-            stype = "string";
+            typestring = "string";
         } else {
-            stype = type.as<std::string>();
+            typestring = type.as<std::string>();
         }
 
-        // TODO: refactor into C++
-        t_dtype output_column_dtype;
-        if (stype == "integer") {
-            output_column_dtype = DTYPE_INT32;
-        } else if (stype == "float") {
-            output_column_dtype = DTYPE_FLOAT64;
-        } else if (stype == "boolean") {
-            output_column_dtype = DTYPE_BOOL;
-        } else if (stype == "date") {
-            output_column_dtype = DTYPE_DATE;
-        } else if (stype == "datetime") {
-            output_column_dtype = DTYPE_TIME;
-        } else {
-            output_column_dtype = DTYPE_STR;
-        }
+        t_dtype output_column_dtype = str_to_dtype(typestring);
 
         std::vector<std::shared_ptr<t_column>> input_columns;
+
         for (const auto& column_name : input_column_names) {
             input_columns.push_back(table->get_column(column_name));
         }
@@ -1182,9 +1169,9 @@ namespace binding {
     }
 
     template <>
-    std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>>
+    std::vector<t_computed_column_def>
     make_computed_lambdas(std::vector<t_val> computed) {
-        std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> converted;
+        std::vector<t_computed_column_def> converted;
         for (const auto& j_computed_def : computed) {
             converted.push_back(
                 [j_computed_def](std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices) {
@@ -1389,7 +1376,7 @@ namespace binding {
         for (const auto lambda : computed_lambdas) {
             lambda(pkeyed_table, {});
         }
-        table->replace_data_table(pkeyed_table, computed_lambdas);
+        table->add_computed_columns(pkeyed_table, computed_lambdas);
         return table;
     }
 

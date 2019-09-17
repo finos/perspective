@@ -750,6 +750,23 @@ module.exports = perspective => {
     });
 
     describe("computed updates", function() {
+        it("partial update on column from schema", async function() {
+            let table = perspective.table({x: "integer", y: "integer"});
+            let table2 = table.add_computed([
+                {
+                    column: "multiply",
+                    type: "integer",
+                    func: (a, b) => a * b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+            table2.update(computed_data);
+            table2.update([{__INDEX__: 0, x: 10}, {__INDEX__: 2, x: 10}]);
+            let view = table2.view();
+            let json = await view.to_json();
+            expect(json).toEqual([{x: 10, y: 2, multiply: 20}, {x: 2, y: 4, multiply: 8}, {x: 10, y: 6, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
+        });
+
         it("partial update on single computed source column", async function() {
             let table = perspective.table(computed_data);
             let table2 = table.add_computed([
@@ -760,10 +777,10 @@ module.exports = perspective => {
                     inputs: ["x", "y"]
                 }
             ]);
-            table2.update([{__INDEX__: 0, x: 10}, {__INDEX__: 2, x: 10}]);
+            table2.update([{__INDEX__: 0, x: 10}]);
             let view = table2.view();
             let json = await view.to_json();
-            expect(json).toEqual([{x: 10, y: 2, multiply: 20}, {x: 2, y: 4, multiply: 8}, {x: 10, y: 6, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
+            expect(json).toEqual([{x: 10, y: 2, multiply: 20}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 6, multiply: 18}, {x: 4, y: 8, multiply: 32}]);
         });
 
         it("partial update on non-contiguous computed source columns", async function() {
@@ -777,6 +794,22 @@ module.exports = perspective => {
                 }
             ]);
             table2.update([{__INDEX__: 0, x: 1, y: 10}, {__INDEX__: 2, x: 3, y: 20}]);
+            let view = table2.view();
+            let json = await view.to_json();
+            expect(json).toEqual([{x: 1, y: 10, multiply: 10}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 20, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
+        });
+
+        it("partial update on non-contiguous computed source columns, indexed table", async function() {
+            let table = perspective.table(computed_data, {index: "x"});
+            let table2 = table.add_computed([
+                {
+                    column: "multiply",
+                    type: "float",
+                    func: (a, b) => a * b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+            table2.update([{x: 1, y: 10}, {x: 3, y: 20}]);
             let view = table2.view();
             let json = await view.to_json();
             expect(json).toEqual([{x: 1, y: 10, multiply: 10}, {x: 2, y: 4, multiply: 8}, {x: 3, y: 20, multiply: 60}, {x: 4, y: 8, multiply: 32}]);
@@ -869,6 +902,95 @@ module.exports = perspective => {
 
             let json = await view.to_json();
             expect(json).toEqual([{add: 3, subtract: 1, multiply: 2}, {add: 6, subtract: 2, multiply: 8}, {add: 9, subtract: 3, multiply: 18}, {add: 12, subtract: 4, multiply: 32}]);
+        });
+
+        it("propagate updates to all computed columns", async function() {
+            let table = perspective.table(computed_data, {index: "x"});
+
+            let table2 = table.add_computed([
+                {
+                    column: "multiply",
+                    type: "float",
+                    func: (a, b) => a * b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+
+            let table3 = table2.add_computed([
+                {
+                    column: "add",
+                    type: "float",
+                    func: (a, b) => a + b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+
+            let table4 = table3.add_computed([
+                {
+                    column: "subtract",
+                    type: "float",
+                    func: (a, b) => a - b,
+                    inputs: ["y", "x"]
+                }
+            ]);
+
+            table4.update({x: [1, 2, 3, 4], y: [1, 2, 3, 4]});
+
+            let view = table4.view({
+                columns: ["add", "subtract", "multiply"]
+            });
+
+            let json = await view.to_json();
+            expect(json).toEqual([{add: 2, subtract: 0, multiply: 1}, {add: 4, subtract: 0, multiply: 4}, {add: 6, subtract: 0, multiply: 9}, {add: 8, subtract: 0, multiply: 16}]);
+        });
+
+        it("propagate appends to all computed columns", async function() {
+            let table = perspective.table(computed_data);
+
+            let table2 = table.add_computed([
+                {
+                    column: "multiply",
+                    type: "float",
+                    func: (a, b) => a * b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+
+            let table3 = table2.add_computed([
+                {
+                    column: "add",
+                    type: "float",
+                    func: (a, b) => a + b,
+                    inputs: ["x", "y"]
+                }
+            ]);
+
+            let table4 = table3.add_computed([
+                {
+                    column: "subtract",
+                    type: "float",
+                    func: (a, b) => a - b,
+                    inputs: ["y", "x"]
+                }
+            ]);
+
+            table4.update({x: [1, 2, 3, 4], y: [1, 2, 3, 4]});
+
+            let view = table4.view({
+                columns: ["add", "subtract", "multiply"]
+            });
+
+            let json = await view.to_json();
+            expect(json).toEqual([
+                {add: 3, subtract: 1, multiply: 2},
+                {add: 6, subtract: 2, multiply: 8},
+                {add: 9, subtract: 3, multiply: 18},
+                {add: 12, subtract: 4, multiply: 32},
+                {add: 2, subtract: 0, multiply: 1},
+                {add: 4, subtract: 0, multiply: 4},
+                {add: 6, subtract: 0, multiply: 9},
+                {add: 8, subtract: 0, multiply: 16}
+            ]);
         });
     });
 

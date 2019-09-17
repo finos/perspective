@@ -187,11 +187,24 @@ namespace binding {
      * 
      * @tparam T 
      * @param computed 
-     * @return std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> 
+     * @return std::vector<t_computed_column_def> 
      */
     template <typename T>
-    std::vector<std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)>> make_computed_lambdas(std::vector<T> computed);
+    std::vector<t_computed_column_def> make_computed_lambdas(std::vector<T> computed);
 
+    /**
+     * @brief Utility function for accessing columns and adding data.
+     * 
+     * @tparam T 
+     * @param accessor 
+     * @param tbl 
+     * @param col 
+     * @param name 
+     * @param cidx 
+     * @param type 
+     * @param is_arrow 
+     * @param is_update 
+     */
     template <typename T>
     void _fill_data_helper(T accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
