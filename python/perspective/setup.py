@@ -26,6 +26,9 @@ with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
 with open(os.path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     requires = f.read().split()
 
+with open(os.path.join(here, 'requirements-dev.txt'), encoding='utf-8') as f:
+    requires_test = f.read().split()
+
 
 def get_version(file, name='__version__'):
     """Get the version of the package from the given file by
@@ -166,7 +169,13 @@ setup(
     package_dir={'perspective.node': 'perspective/node'},
     include_package_data=True,
     zip_safe=False,
-    extras_require={'dev': requires + ['pytest', 'pytest-cov', 'pylint', 'flake8', 'mock']},
+    extras_require={
+        'test': [
+            'pytest',
+            'pytest-check-links',
+            'requests'
+        ],
+    },
     ext_modules=[PSPExtension('perspective')],
     cmdclass=dict(build_ext=PSPBuild),
 )

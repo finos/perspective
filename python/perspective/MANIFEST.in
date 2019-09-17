@@ -3,6 +3,7 @@ include README.md
 include CONTRIBUTING.md
 
 include requirements.txt
+include requirements-dev.txt
 include setup.cfg
 include pyproject.toml
 include .bumpversion.cfg
