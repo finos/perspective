@@ -17,8 +17,8 @@ class ViewConfig(object):
             dict : the configuration dictionary provided by the user
         '''
         self._config = config
-        self._row_pivots = self._config.get('row-pivots', [])
-        self._column_pivots = self._config.get('column-pivots', [])
+        self._row_pivots = self._config.get('row_pivots', [])
+        self._column_pivots = self._config.get('column_pivots', [])
         self._aggregates = self._config.get('aggregates', {})
         self._columns = self._config.get('columns', [])
         self._sort = self._config.get('sort', [])
@@ -91,3 +91,8 @@ class ViewConfig(object):
             string : the filter_op of the view
         '''
         return self._filter_op
+
+    def get_config(self):
+        '''Returns the original dictionary config passed by the user.'''
+        print(self._config)
+        return self._config

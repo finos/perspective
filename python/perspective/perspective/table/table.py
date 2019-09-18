@@ -142,12 +142,15 @@ class Table(object):
 
         Params:
             config (dict or None) : a dictionary containing any of the optional keys below:
-            - "row-pivots" (list[str]) : a list of column names to use as row pivots
-            - "column-pivots" (list[str]) : a list of column names to use as column pivots
+            - "row_pivots" (list[str]) : a list of column names to use as row pivots
+            - "column_pivots" (list[str]) : a list of column names to use as column pivots
+            - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
+            - "sort" (list(list[str]))
+            - "filter" (list(list[str]))
         '''
         config = config or {}
         if config.get("columns") is None:
-            config["columns"] = self.columns()
+            config["columns"] = self.columns()  # TODO: push into C++
         view = View(self, self._callbacks, config)
         self._views.append(view._name)
         return view

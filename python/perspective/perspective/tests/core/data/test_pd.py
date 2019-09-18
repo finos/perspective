@@ -54,16 +54,16 @@ def getName(n=1, name=3, exchange=2, columns=None, mode='abc'):
             st = []
             while base ** _n <= n:
                 _n += 1
-            for _ in range(_n-1, 0, -1):
+            for _ in range(_n - 1, 0, -1):
                 n_st = n // (base ** _)
                 st.append(n_st)
                 n = n - n_st * (base ** _)
-            st.append(n+1)
+            st.append(n + 1)
             return st
         st = _w(n, len(string.ascii_lowercase))
         _st = ''
         for _ in st:
-            _st += string.ascii_lowercase[_-1]
+            _st += string.ascii_lowercase[_ - 1]
         return _st
     columns = [get_abc(_) for _ in range(n)]
     return columns
@@ -79,20 +79,20 @@ def lines(n_traces=5, n=100, columns=None, dateIndex=True, mode=None):
 
 DF2 = df = pd.DataFrame([
     {
-       'int': 1,
-       'float': 1.5,
-       'string': '20150505',
-       'date': date.today(),
-       'datetime': datetime.now(),
-       'object': datetime,
+        'int': 1,
+        'float': 1.5,
+        'string': '20150505',
+        'date': date.today(),
+        'datetime': datetime.now(),
+        'object': datetime,
     },
     {
-       'int': 1,
-       'float': 1.5,
-       'string': '20150506',
-       'date': None,
-       'datetime': None,
-       'object': None,
+        'int': 1,
+        'float': 1.5,
+        'string': '20150506',
+        'date': None,
+        'datetime': None,
+        'object': None,
     },
 ])
 

@@ -22,6 +22,7 @@ class TestView(object):
             "a": int,
             "b": int
         }
+        assert view.to_records() == data
 
     def test_view_one(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -29,12 +30,17 @@ class TestView(object):
         view = tbl.view({
             "row_pivots": ["a"]
         })
-        assert view.num_rows() == 2
+        assert view.num_rows() == 3
         assert view.num_columns() == 2
         assert view.schema() == {
             "a": int,
             "b": int
         }
+        assert view.to_records() == [
+            {'__ROW_PATH__': [], 'a': 4, 'b': 6},
+            {'__ROW_PATH__': ['1'], 'a': 1, 'b': 2},
+            {'__ROW_PATH__': ['3'], 'a': 3, 'b': 4}
+        ]
 
     def test_view_two(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -43,12 +49,17 @@ class TestView(object):
             "row_pivots": ["a"],
             "column_pivots": ["b"]
         })
-        assert view.num_rows() == 2
-        assert view.num_columns() == 2
+        assert view.num_rows() == 3
+        assert view.num_columns() == 4
         assert view.schema() == {
             "a": int,
             "b": int
         }
+        assert view.to_records() == [
+            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+        ]
 
     def test_view_two_column_only(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
@@ -57,11 +68,15 @@ class TestView(object):
             "column_pivots": ["b"]
         })
         assert view.num_rows() == 2
-        assert view.num_columns() == 2
+        assert view.num_columns() == 4
         assert view.schema() == {
             "a": int,
             "b": int
         }
+        assert view.to_records() == [
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4}
+        ]
 
     # schema correctness
 
@@ -87,7 +102,7 @@ class TestView(object):
         data = [{"a": "abc", "b": 2}, {"a": "abc", "b": 4}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"],
+            "row_pivots": ["a"],
             "aggregates": {
                 "a": "distinct count"
             }
@@ -101,8 +116,8 @@ class TestView(object):
         data = [{"a": "abc", "b": "def"}, {"a": "abc", "b": "def"}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"],
-            "column-pivots": ["b"],
+            "row_pivots": ["a"],
+            "column_pivots": ["b"],
             "aggregates": {
                 "a": "count",
                 "b": "count"
@@ -142,7 +157,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view({
             "aggregates": {"a": "avg"},
-            "row-pivots": ["a"]
+            "row_pivots": ["a"]
         })
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2.0, "b": 6},
@@ -155,7 +170,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view({
             "aggregates": {"a": "count"},
-            "row-pivots": ["a"]
+            "row_pivots": ["a"]
         })
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2, "b": 6},
@@ -316,18 +331,6 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view({"filter": [["a", "is not null"]]})
         assert view.to_records() == [{"a": "abc", "b": 4}]
-
-    # pivot depth
-    """
-    def test_row_pivot_depth(self):
-       data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-       tbl = Table(data)
-       view = tbl.view({
-           "row-pivots": ["a", "b"],
-           "row_pivot_depth": 1
-       })
-       assert view.to_records() == [{"__ROW_PATH__": [], "a": 4, "b": 6}, {"__ROW_PATH__": ["2", "1"], "a": 1, "b": 2}, {"__ROW_PATH__": ["4", "3"], "a": 3, "b": 4}]
-       """
 
     # is_valid_filter
     def test_view_is_valid_filter_str(self):
@@ -514,3 +517,11 @@ class TestView(object):
         assert len(view._callbacks.get_callbacks()) == 1
         tbl.update(data)
         assert sentinel == 2
+
+    # hidden rows
+
+    def test_view_num_hidden_cols(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({"columns": ["a"], "sort": [["b", "desc"]]})
+        assert view._num_hidden_cols() == 1

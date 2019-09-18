@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from functools import wraps
 from random import random
 from datetime import date, datetime
 from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two, \
@@ -43,6 +44,10 @@ class View(object):
         self._column_only = self._view.is_column_only()
         self._callbacks = callbacks
 
+    def get_config(self):
+        '''Returns the original dictionary config passed in by the user.'''
+        return self._config.get_config()
+
     def sides(self):
         '''How many pivoted sides does this View have?'''
         if len(self._config.get_row_pivots()) > 0 or len(self._config.get_column_pivots()) > 0:
@@ -54,7 +59,7 @@ class View(object):
             return 0
 
     def num_rows(self):
-        '''The number of aggregated rows in the View. This is affected by the `row-pivots` that are applied to the View.
+        '''The number of aggregated rows in the View. This is affected by the `row_pivots` that are applied to the View.
 
         Returns:
             int : number of rows
@@ -62,7 +67,7 @@ class View(object):
         return self._view.num_rows()
 
     def num_columns(self):
-        '''The number of aggregated columns in the View. This is affected by the `column-pivots` that are applied to the View.
+        '''The number of aggregated columns in the View. This is affected by the `column_pivots` that are applied to the View.
 
         Returns:
             int : number of columns
@@ -224,6 +229,7 @@ class View(object):
             dict : a dictionary with string keys and list values, where key = column name and value = column values
         '''
         opts, column_names, data_slice = self._to_format_helper(options)
+        print(opts)
         return _PerspectiveDataFormatter.to_format(opts, self, column_names, data_slice, 'dict')
 
     def to_numpy(self, options=None):
@@ -273,6 +279,14 @@ class View(object):
         cols = self.to_numpy(options=options)
         return pandas.DataFrame(cols)
 
+    @wraps(to_records)
+    def to_json(self, options=None):
+        return self.to_records(options)
+
+    @wraps(to_dict)
+    def to_columns(self, options=None):
+        return self.to_dict(options)
+
     def _to_format_helper(self, options=None):
         '''Retrieves the data slice and column names in preparation for data serialization.'''
         options = options or {}
@@ -301,11 +315,12 @@ class View(object):
     def _parse_format_options(self, options):
         '''Given a user-provided options dictionary, extract the useful values.'''
         max_cols = self.num_columns() + (1 if self._sides > 0 else 0)
+        print("MAX", max_cols)
         return {
             "start_row": options.get("start_row", 0),
             "end_row": min(options.get("end_row", self.num_rows()), self.num_rows()),
             "start_col": options.get("start_col", 0),
-            "end_col": min(options.get("end_col", max_cols), max_cols * (self._num_hidden_cols() + 1)),
+            "end_col": min(options.get("end_col", max_cols) * (self._num_hidden_cols() + 1), max_cols),
             "index": options.get("index", False),
             "leaves_only": options.get("leaves_only", False),
             "has_row_path": self._sides > 0 and (not self._column_only)

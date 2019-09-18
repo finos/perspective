@@ -46,3 +46,37 @@ class TestUpdate(object):
         tbl = Table({"a": ["abc"], "b": [123]}, {"index": "a"})
         tbl.update({"a": ["abc"], "b": [456]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
+
+    # implicit index
+
+    def test_update_implicit_index(self):
+        data = [{"a": 1}, {"a": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+        tbl.update([{
+            "__INDEX__": 0,
+            "a": 3
+        }])
+        assert view.to_records() == [{"a": 3}, {"a": 2}]
+
+    def test_update_implicit_index_symmetric(self):
+        data = [{"a": 1}, {"a": 2}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({"index": True})
+        idx = records[0]["__INDEX__"][0]
+        tbl.update([{
+            "__INDEX__": idx,
+            "a": 3
+        }])
+        assert view.to_records() == [{"a": 3}, {"a": 2}]
+
+    def test_update_explicit_index(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "a": 1,
+            "b": 3
+        }])
+        assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]

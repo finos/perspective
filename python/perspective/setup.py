@@ -40,6 +40,7 @@ def get_version(file, name='__version__'):
         exec(f.read(), {}, version_ns)
     return version_ns[name]
 
+
 version = get_version(os.path.join(here, 'perspective', 'core', '_version.py'))
 
 
