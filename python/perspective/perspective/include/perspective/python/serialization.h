@@ -42,6 +42,13 @@ t_val get_from_data_slice_ctx0(std::shared_ptr<t_data_slice<t_ctx0>> data_slice,
 t_val get_from_data_slice_ctx1(std::shared_ptr<t_data_slice<t_ctx1>> data_slice, t_uindex ridx, t_uindex cidx);
 t_val get_from_data_slice_ctx2(std::shared_ptr<t_data_slice<t_ctx2>> data_slice, t_uindex ridx, t_uindex cidx);
 
+// wrap `get_pkeys` in order to convert t_scalar to t_val entirely within c++
+template <typename CTX_T>
+std::vector<t_val> get_pkeys_from_data_slice(std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx);
+std::vector<t_val> get_pkeys_from_data_slice_ctx0(std::shared_ptr<t_data_slice<t_ctx0>> data_slice, t_uindex ridx, t_uindex cidx);
+std::vector<t_val> get_pkeys_from_data_slice_ctx1(std::shared_ptr<t_data_slice<t_ctx1>> data_slice, t_uindex ridx, t_uindex cidx);
+std::vector<t_val> get_pkeys_from_data_slice_ctx2(std::shared_ptr<t_data_slice<t_ctx2>> data_slice, t_uindex ridx, t_uindex cidx);
+
 } // end namespace binding
 } // end namespace perspective
 

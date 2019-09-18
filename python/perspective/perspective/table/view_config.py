@@ -16,15 +16,16 @@ class ViewConfig(object):
         Params:
             dict : the configuration dictionary provided by the user
         '''
-        self._row_pivots = config.get('row-pivots', [])
-        self._column_pivots = config.get('column-pivots', [])
-        self._aggregates = config.get('aggregates', {})
-        self._columns = config.get('columns', [])
-        self._sort = config.get('sort', [])
-        self._filter = config.get('filter', [])
-        self._filter_op = config.get('filter_op', "and")
-        self.row_pivot_depth = config.get("row_pivot_depth", None)
-        self.column_pivot_depth = config.get("column_pivot_depth", None)
+        self._config = config
+        self._row_pivots = self._config.get('row-pivots', [])
+        self._column_pivots = self._config.get('column-pivots', [])
+        self._aggregates = self._config.get('aggregates', {})
+        self._columns = self._config.get('columns', [])
+        self._sort = self._config.get('sort', [])
+        self._filter = self._config.get('filter', [])
+        self._filter_op = self._config.get('filter_op', "and")
+        self.row_pivot_depth = self._config.get("row_pivot_depth", None)
+        self.column_pivot_depth = self._config.get("column_pivot_depth", None)
 
     def get_row_pivots(self):
         '''The columns used as [row pivots](https://en.wikipedia.org/wiki/Pivot_table#Row_labels)

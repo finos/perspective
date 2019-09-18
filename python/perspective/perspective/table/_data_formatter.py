@@ -6,7 +6,8 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
-from perspective.table.libbinding import get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two
+from perspective.table.libbinding import get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
+    get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING
 
 
@@ -58,6 +59,21 @@ class _PerspectiveDataFormatter(object):
                         data[ridx][name] = value
                     else:
                         data[name].append(value)
+
+            if options['index']:
+                if view._sides == 0:
+                    pkeys = get_pkeys_from_data_slice_zero(data_slice, ridx, 0)
+                elif view._sides == 1:
+                    pkeys = get_pkeys_from_data_slice_one(data_slice, ridx, 0)
+                else:
+                    pkeys = get_pkeys_from_data_slice_two(data_slice, ridx, 0)
+
+                if output_format == 'records':
+                    data[ridx]['__INDEX__'] = []
+                    for pkey in pkeys:
+                        data[ridx]['__INDEX__'].append(pkey)
+                elif output_format in ('dict', 'numpy'):
+                    data['__INDEX__'] = list(pkeys)
 
         if output_format in ('dict', 'numpy') and (not options["has_row_path"] and ("__ROW_PATH__" in data)):
             del data["__ROW_PATH__"]

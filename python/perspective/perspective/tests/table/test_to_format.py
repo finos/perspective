@@ -347,3 +347,79 @@ class TestToFormat(object):
         df2 = view.to_df()
         assert np.array_equal(df2.columns, df.columns)
         assert np.array_equal(df2["a"].values, df["a"].values)
+
+    # start_row/end_row
+
+    # start_col/end_col
+
+    # implicit index
+
+    def to_format_implicit_index_records(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_records({ "index": True }) == [
+            {"__INDEX__": 0, "a": 1.5, "b": 2.5},
+            {"__INDEX__": 1, "a": 3.5, "b": 4.5}
+        ]
+    
+    def to_format_implicit_index_dict(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_dict({ "index": True }) == {
+            "__INDEX__": [0, 1],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
+    def to_format_implicit_index_np(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        cols = view.to_numpy({ "index": True })
+        assert np.array_equal(cols["__INDEX__"], np.array([0, 1]))
+
+    def to_format_explicit_index_records(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, { "index": "a" })
+        view = tbl.view()
+        assert view.to_records({ "index": True }) == [
+            {"__INDEX__": 1.5, "a": 1.5, "b": 2.5},
+            {"__INDEX__": 3.5, "a": 3.5, "b": 4.5}
+        ]
+    
+    def to_format_explicit_index_dict(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, { "index": "a" })
+        view = tbl.view()
+        assert view.to_dict({ "index": True }) == {
+            "__INDEX__": [1.5, 3.5],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
+    def to_format_explicit_index_np(self): 
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, { "index": "a" })
+        view = tbl.view()
+        cols = view.to_numpy({ "index": True })
+        assert np.array_equal(cols["__INDEX__"], np.array([1.5, 3.5]))
+    
+    def to_format_explicit_index_str_records(self): 
+        data = [{"a": "a", "b": 2.5}, {"a": "b", "b": 4.5}]
+        tbl = Table(data, { "index": "a" })
+        view = tbl.view()
+        assert view.to_records({ "index": True }) == [
+            {"__INDEX__": "a", "a": "a", "b": 2.5},
+            {"__INDEX__": "b", "a": "b", "b": 4.5}
+        ]
+
+    def to_format_explicit_index_datetime_records(self): 
+        data = [{"a": datetime(2019, 7, 11, 9, 0), "b": 2.5}, {"a": datetime(2019, 7, 11, 9, 1), "b": 4.5}]
+        tbl = Table(data, { "index": "a" })
+        view = tbl.view()
+        assert view.to_records({ "index": True }) == [
+            {"__INDEX__": datetime(2019, 7, 11, 9, 0), "a": datetime(2019, 7, 11, 9, 0), "b": 2.5},
+            {"__INDEX__": datetime(2019, 7, 11, 9, 1), "a": datetime(2019, 7, 11, 9, 1), "b": 4.5}
+        ]
