@@ -10,6 +10,7 @@ from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_
 from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
+from ._exception import PerspectiveError
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
@@ -147,7 +148,7 @@ class Table(object):
                 print(index_pos, index_dtype)
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
-        print(self._accessor._names, self._accessor._types)
+
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
     def remove(self, pkeys):
@@ -200,7 +201,7 @@ class Table(object):
     def delete(self):
         '''Delete this table and clean up associated resources.'''
         if len(self._views) > 0:
-            raise RuntimeError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+            raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
         if hasattr(self, "_delete_callback"):
             self._delete_callback()

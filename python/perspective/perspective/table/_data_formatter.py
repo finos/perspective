@@ -12,18 +12,20 @@ from perspective.table.libbinding import get_data_slice_zero, get_data_slice_one
     get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING
 
+NaN = float('nan')
+
 
 def _mod(a, b):
     '''C-style modulo function'''
     if b == 0:
         # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
-        return -1
+        return NaN
     d = trunc(float(a) / b)
     return a - d * b
 
 
 def to_format(options, view, output_format):
-    [options, column_names, data_slice] = _to_format_helper(view, options)
+    options, column_names, data_slice = _to_format_helper(view, options)
 
     if output_format == 'records':
         data = []
@@ -118,7 +120,7 @@ def _to_format_helper(view, options=None):
 
     column_names = data_slice.get_column_names()
 
-    return [opts, column_names, data_slice]
+    return opts, column_names, data_slice
 
 
 def _parse_format_options(view, options):
