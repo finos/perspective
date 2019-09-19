@@ -9,7 +9,8 @@ import json
 from six import iteritems
 from traitlets import HasTraits, Unicode, List, Bool, Int, Dict, Any, Bytes, Union, validate
 from .data import type_detect
-from .validate import validate_view, validate_columns, validate_rowpivots, validate_columnpivots, validate_aggregates, validate_sort, validate_computedcolumns, validate_filters, validate_plugin_config
+from .validate import validate_plugin, validate_columns, validate_rowpivots, validate_columnpivots, \
+    validate_aggregates, validate_sort, validate_computedcolumns, validate_filters, validate_plugin_config
 from .schema import validate_schema
 
 
@@ -25,7 +26,7 @@ class PerspectiveBaseMixin(HasTraits):
     schema = Dict(default_value={}).tag(sync=True)
 
     # layout
-    view = Unicode('hypergrid').tag(sync=True)
+    plugin = Unicode('hypergrid').tag(sync=True)
     columns = List(default_value=[]).tag(sync=True)
     rowpivots = List(trait=Unicode(), default_value=[]).tag(sync=True, o=True)
     columnpivots = List(trait=Unicode(), default_value=[]).tag(sync=True)
@@ -73,8 +74,8 @@ class PerspectiveBaseMixin(HasTraits):
             if not self.columns and 'columns' not in data_object.kwargs:
                 columns = list(map(lambda x: str(x), data_object.columns))
 
-                # reasonable default, pivot by default in non-grid view
-                if not self.rowpivots and self.view != 'hypergrid':
+                # reasonable default, pivot by default in non-grid plugin
+                if not self.rowpivots and self.plugin != 'hypergrid':
                     if 'index' in columns:
                         self.rowpivots = ['index']
                         if 'index' in columns:
@@ -107,8 +108,8 @@ class PerspectiveBaseMixin(HasTraits):
     @validate('schema')
     def _validate_schema(self, proposal): return proposal.value  # validated elsewhere
 
-    @validate('view')
-    def _validate_view(self, proposal): return validate_view(proposal.value)
+    @validate('plugin')
+    def _validate_plugin(self, proposal): return validate_plugin(proposal.value)
 
     @validate('columns')
     def _validate_columns(self, proposal): return validate_columns(proposal.value)
@@ -148,7 +149,7 @@ class PerspectiveBaseMixin(HasTraits):
             ret['data'] = getattr(self, '_data')
         ret['datasrc'] = getattr(self, 'datasrc')
         ret['schema'] = getattr(self, 'schema')
-        ret['view'] = getattr(self, 'view')
+        ret['plugin'] = getattr(self, 'plugin')
         ret['columns'] = getattr(self, 'columns')
         ret['rowpivots'] = getattr(self, 'rowpivots')
         ret['columnpivots'] = getattr(self, 'columnpivots')
@@ -166,7 +167,7 @@ class PerspectiveBaseMixin(HasTraits):
 
     def setup(self,
               data,
-              view='hypergrid',
+              plugin='hypergrid',
               schema=None,
               columns=None,
               rowpivots=None,
@@ -191,8 +192,8 @@ class PerspectiveBaseMixin(HasTraits):
                 The static or live datasource
 
         Keyword Arguments:
-            view : str or View
-                what view to use. available in the enum View (default: {'hypergrid'})
+            plugin : str or Plugin
+                what plugin to use. available in the enum Plugin (default: {'hypergrid'})
             columns : list of str
                 what columns to display
             rowpivots : list of str
@@ -220,7 +221,7 @@ class PerspectiveBaseMixin(HasTraits):
 
         '''
         self.transfer_as_arrow = transfer_as_arrow
-        self.view = validate_view(view)
+        self.plugin = validate_plugin(plugin)
         self.schema = schema or {}
         self.sort = validate_sort(sort) or []
         self.index = index

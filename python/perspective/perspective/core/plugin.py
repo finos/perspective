@@ -8,7 +8,7 @@
 from enum import Enum
 
 
-class View(Enum):
+class Plugin(Enum):
     HYPERGRID = 'hypergrid'  # hypergrid
     GRID = 'hypergrid'  # hypergrid
 
@@ -40,4 +40,4 @@ class View(Enum):
 
     @staticmethod
     def options():
-        return list(map(lambda c: c.value, View))
+        return list(map(lambda c: c.value, Plugin))
