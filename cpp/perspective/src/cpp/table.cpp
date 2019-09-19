@@ -175,8 +175,6 @@ Table::set_data_types(const std::vector<t_dtype>& data_types) {
 
 void
 Table::validate_columns(const std::vector<std::string>& column_names) {
-    bool implicit_index =
-        std::find(column_names.begin(), column_names.end(), "__INDEX__") != column_names.end();
     if (m_index != "") {
         // Check if index is valid after getting column names
         bool explicit_index
@@ -184,10 +182,6 @@ Table::validate_columns(const std::vector<std::string>& column_names) {
         if (!explicit_index) {
             std::cout << "Specified index " << m_index << " does not exist in data." << std::endl;
             PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' does not exist in data.");
-        }
-        if (explicit_index && implicit_index) {
-            std::cout << "Specified index " << m_index << " twice - ignoring implicit __INDEX__" << std::endl;
-            PSP_COMPLAIN_AND_ABORT("Specified index '" + m_index + "' twice; ignoring implicit index.");
         }
     }
 }
