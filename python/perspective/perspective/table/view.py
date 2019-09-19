@@ -7,10 +7,9 @@
 #
 from functools import wraps
 from random import random
-from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two, \
-    get_data_slice_zero, get_data_slice_one, get_data_slice_two
+from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two
 from .view_config import ViewConfig
-from ._data_formatter import _PerspectiveDataFormatter
+from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 
@@ -182,8 +181,7 @@ class View(object):
         Returns:
             list : A list of dictionaries, where each dict represents a new row of the dataset
         '''
-        opts, column_names, data_slice = self._to_format_helper(options)
-        return _PerspectiveDataFormatter.to_format(opts, self, column_names, data_slice, 'records')
+        return to_format(options, self, 'records')
 
     def to_dict(self, options=None):
         '''Serialize the view's dataset into a `dict` of `str` keys and `list` values.
@@ -204,8 +202,7 @@ class View(object):
         Returns:
             dict : a dictionary with string keys and list values, where key = column name and value = column values
         '''
-        opts, column_names, data_slice = self._to_format_helper(options)
-        return _PerspectiveDataFormatter.to_format(opts, self, column_names, data_slice, 'dict')
+        return to_format(options, self, 'dict')
 
     def to_numpy(self, options=None):
         '''Serialize the view's dataset into a `dict` of `str` keys and `numpy.array` values.
@@ -226,8 +223,7 @@ class View(object):
         Returns:
             dict : a dictionary with string keys and numpy array values, where key = column name and value = column values
         '''
-        opts, column_names, data_slice = self._to_format_helper(options)
-        return _PerspectiveDataFormatter.to_format(opts, self, column_names, data_slice, 'numpy')
+        return to_format(options, self, 'numpy')
 
     def to_arrow(self, options=None):
         pass
@@ -262,22 +258,6 @@ class View(object):
     def to_columns(self, options=None):
         return self.to_dict(options)
 
-    def _to_format_helper(self, options=None):
-        '''Retrieves the data slice and column names in preparation for data serialization.'''
-        options = options or {}
-        opts = self._parse_format_options(options)
-
-        if self._sides == 0:
-            data_slice = get_data_slice_zero(self._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
-        elif self._sides == 1:
-            data_slice = get_data_slice_one(self._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
-        else:
-            data_slice = get_data_slice_two(self._view, opts["start_row"], opts["end_row"], opts["start_col"], opts["end_col"])
-
-        column_names = data_slice.get_column_names()
-
-        return [opts, column_names, data_slice]
-
     def _num_hidden_cols(self):
         '''Returns the number of columns that are sorted but not shown.'''
         hidden = 0
@@ -286,19 +266,6 @@ class View(object):
             if sort[0] not in columns:
                 hidden += 1
         return hidden
-
-    def _parse_format_options(self, options):
-        '''Given a user-provided options dictionary, extract the useful values.'''
-        max_cols = self.num_columns() + (1 if self._sides > 0 else 0)
-        return {
-            "start_row": options.get("start_row", 0),
-            "end_row": min(options.get("end_row", self.num_rows()), self.num_rows()),
-            "start_col": options.get("start_col", 0),
-            "end_col": min(options.get("end_col", max_cols) * (self._num_hidden_cols() + 1), max_cols),
-            "index": options.get("index", False),
-            "leaves_only": options.get("leaves_only", False),
-            "has_row_path": self._sides > 0 and (not self._column_only)
-        }
 
     def __del__(self):
         self.delete()
