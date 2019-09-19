@@ -93,25 +93,27 @@ class _PerspectiveAccessor(object):
     def row_count(self):
         return self._row_count
 
-    def get(self, cidx, ridx):
-        '''Get the element at the specified column and row index.
+    def get(self, column_name, ridx):
+        '''Get the element at the specified column name and row index.
 
         If the element does not exist, return None.
 
         Params:
-            cidx (int)
+            column_name (str)
             ridx (int)
 
         Returns:
             object or None
         '''
+        val = None
         try:
             if self._format == 0:
-                return self._data_or_schema[ridx][list(self._data_or_schema[0].keys())[cidx]]
+                return self._data_or_schema[ridx][column_name]
             elif self._format == 1:
-                return self._data_or_schema[list(self._data_or_schema.keys())[cidx]][ridx]
+                return self._data_or_schema[column_name][ridx]
             else:
                 raise NotImplementedError()
+            return val
         except (KeyError, IndexError):
             return None
 
@@ -128,7 +130,8 @@ class _PerspectiveAccessor(object):
         Returns:
             object or None
         '''
-        val = self.get(cidx, ridx)
+        column_name = self._names[cidx]
+        val = self.get(column_name, ridx)
 
         # parse string dates/datetimes into objects
         if isinstance(val, str) and type in (t_dtype.DTYPE_DATE, t_dtype.DTYPE_TIME):

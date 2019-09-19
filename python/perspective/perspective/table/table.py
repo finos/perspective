@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from datetime import date, datetime
-from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_op, t_op
+from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_op, t_op, t_dtype
 from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
@@ -133,9 +133,21 @@ class Table(object):
         Params:
             data (dict|list|dataframe) : the data with which to update the Table
         '''
+        columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
-        self._accessor._types = types[:len(self._accessor.names())]
+        self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
+        self._accessor._types = types[:len(columns)]
+
+        if "__INDEX__" in self._accessor._names:
+            if self._index != "":
+                index_pos = self._accessor._names.index(self._index)
+                index_dtype = self._accessor._types[index_pos]
+                self._accessor._types.append(index_dtype)
+                print(index_pos, index_dtype)
+            else:
+                self._accessor._types.append(t_dtype.DTYPE_INT32)
+        print(self._accessor._names, self._accessor._types)
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
     def remove(self, pkeys):

@@ -5,7 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-
+from pytest import mark
 from perspective.table import Table
 
 
@@ -50,17 +50,18 @@ class TestUpdate(object):
     # implicit index
 
     def test_update_implicit_index(self):
-        data = [{"a": 1}, {"a": 2}]
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data)
         view = tbl.view()
         tbl.update([{
             "__INDEX__": [0],
-            "a": 3
+            "a": 3,
+            "b": 15
         }])
-        assert view.to_records() == [{"a": 3}, {"a": 2}]
+        assert view.to_records() == [{"a": 3, "b": 15}, {"a": 2, "b": 3}]
 
     def test_update_implicit_index_symmetric(self):
-        data = [{"a": 1}, {"a": 2}]
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data)
         view = tbl.view()
         records = view.to_records({"index": True})
@@ -69,13 +70,37 @@ class TestUpdate(object):
             "__INDEX__": idx,
             "a": 3
         }])
-        assert view.to_records() == [{"a": 3}, {"a": 2}]
+        assert view.to_records() == [{"a": 3, "b": None}, {"a": 2, "b": 3}]
 
     def test_update_explicit_index(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data, {"index": "a"})
         view = tbl.view()
         tbl.update([{
+            "a": 1,
+            "b": 3
+        }])
+        assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]
+
+    @mark.skip
+    def test_update_implicit_index_with_explicit_unset(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "__INDEX__": [0],
+            "b": 3
+        }])
+        assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]
+
+    @mark.skip
+    def test_update_implicit_index_with_explicit_set(self):
+        # should abort()
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "__INDEX__": [0],
             "a": 1,
             "b": 3
         }])
