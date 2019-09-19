@@ -398,35 +398,27 @@ module.exports = perspective => {
         describe("is_valid_filter", function() {
             it("x == 2", async function() {
                 let table = perspective.table(data);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["x", "==", 2]);
+                let isValid = await table.is_valid_filter(["x", "==", 2]);
                 expect(isValid).toBeTruthy();
                 table.delete();
-                view.delete();
             });
             it("x < null", async function() {
                 let table = perspective.table(data);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["x", "<", null]);
+                let isValid = await table.is_valid_filter(["x", "<", null]);
                 expect(isValid).toBeFalsy();
                 table.delete();
-                view.delete();
             });
             it("x > undefined", async function() {
                 let table = perspective.table(data);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["x", ">", undefined]);
+                let isValid = await table.is_valid_filter(["x", ">", undefined]);
                 expect(isValid).toBeFalsy();
                 table.delete();
-                view.delete();
             });
             it('x == ""', async function() {
                 let table = perspective.table(data);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["x", "==", ""]);
+                let isValid = await table.is_valid_filter(["x", "==", ""]);
                 expect(isValid).toBeTruthy();
                 table.delete();
-                view.delete();
             });
             it("valid date", async function() {
                 const schema = {
@@ -434,11 +426,9 @@ module.exports = perspective => {
                     y: "date"
                 };
                 let table = perspective.table(schema);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["y", "==", "01-01-1970"]);
+                let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
-                view.delete();
             });
             it("invalid date", async function() {
                 const schema = {
@@ -446,11 +436,9 @@ module.exports = perspective => {
                     y: "date"
                 };
                 let table = perspective.table(schema);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["y", "<", "1234"]);
+                let isValid = await table.is_valid_filter(["y", "<", "1234"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
-                view.delete();
             });
             it("valid datetime", async function() {
                 const schema = {
@@ -458,11 +446,9 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["y", "==", "11:11:11.111"]);
+                let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
-                view.delete();
             });
             it("invalid datetime", async function() {
                 const schema = {
@@ -470,11 +456,9 @@ module.exports = perspective => {
                     y: "datetime"
                 };
                 let table = perspective.table(schema);
-                let view = table.view();
-                let isValid = await view.is_valid_filter(["y", ">", "11:11:11:111"]);
+                let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
-                view.delete();
             });
         });
     });
