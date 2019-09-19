@@ -315,7 +315,6 @@ class View(object):
     def _parse_format_options(self, options):
         '''Given a user-provided options dictionary, extract the useful values.'''
         max_cols = self.num_columns() + (1 if self._sides > 0 else 0)
-        print("MAX", max_cols)
         return {
             "start_row": options.get("start_row", 0),
             "end_row": min(options.get("end_row", self.num_rows()), self.num_rows()),

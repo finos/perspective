@@ -133,4 +133,7 @@ class _PerspectiveAccessor(object):
         # parse string dates/datetimes into objects
         if isinstance(val, str) and type in (t_dtype.DTYPE_DATE, t_dtype.DTYPE_TIME):
             val = self._date_validator.parse(val)
+        elif isinstance(val, list) and len(val) == 1:
+            # implicit index: strip out
+            val = val[0]
         return val

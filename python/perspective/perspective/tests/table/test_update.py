@@ -54,7 +54,7 @@ class TestUpdate(object):
         tbl = Table(data)
         view = tbl.view()
         tbl.update([{
-            "__INDEX__": 0,
+            "__INDEX__": [0],
             "a": 3
         }])
         assert view.to_records() == [{"a": 3}, {"a": 2}]
@@ -64,7 +64,7 @@ class TestUpdate(object):
         tbl = Table(data)
         view = tbl.view()
         records = view.to_records({"index": True})
-        idx = records[0]["__INDEX__"][0]
+        idx = records[0]["__INDEX__"]
         tbl.update([{
             "__INDEX__": idx,
             "a": 3
