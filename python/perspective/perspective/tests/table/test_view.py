@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
-from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -37,9 +36,9 @@ class TestView(object):
             "b": int
         }
         assert view.to_records() == [
-            {'__ROW_PATH__': [], 'a': 4, 'b': 6},
-            {'__ROW_PATH__': ['1'], 'a': 1, 'b': 2},
-            {'__ROW_PATH__': ['3'], 'a': 3, 'b': 4}
+            {"__ROW_PATH__": [], "a": 4, "b": 6},
+            {"__ROW_PATH__": ["1"], "a": 1, "b": 2},
+            {"__ROW_PATH__": ["3"], "a": 3, "b": 4}
         ]
 
     def test_view_two(self):
@@ -56,9 +55,9 @@ class TestView(object):
             "b": int
         }
         assert view.to_records() == [
-            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+            {"2|a": 1, "2|b": 2, "4|a": 3, "4|b": 4, "__ROW_PATH__": []},
+            {"2|a": 1, "2|b": 2, "4|a": None, "4|b": None, "__ROW_PATH__": ["1"]},
+            {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4, "__ROW_PATH__": ["3"]}
         ]
 
     def test_view_two_column_only(self):
@@ -74,8 +73,8 @@ class TestView(object):
             "b": int
         }
         assert view.to_records() == [
-            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None},
-            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4}
+            {"2|a": 1, "2|b": 2, "4|a": None, "4|b": None},
+            {"2|a": None, "2|b": None, "4|a": 3, "4|b": 4}
         ]
 
     # schema correctness
@@ -149,6 +148,65 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view({"columns": ["b", "a"]})
         assert view.to_records() == [{"b": 2, "a": 1}, {"b": 4, "a": 3}]
+
+    def test_view_aggregate_order(self):
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "aggregates": {"d": "avg", "c": "avg", "b": "last", "a": "last"}
+        })
+
+        order = ["__ROW_PATH__", "d", "c", "b", "a"]
+        records = view.to_records()
+
+        assert records == [
+            {"__ROW_PATH__": [], "d": 5.0, "c": 4.0, "b": 4, "a": 3},
+            {"__ROW_PATH__": ["1"], "d": 4.0, "c": 3.0, "b": 2, "a": 1},
+            {"__ROW_PATH__": ["3"], "d": 6.0, "c": 5.0, "b": 4, "a": 3}
+        ]
+
+        for record in records:
+            keys = list(record.keys())
+            for i in range(len(keys)):
+                assert keys[i] == order[i]
+
+    def test_view_aggregates_with_no_columns(self):
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "aggregates": {"c": "avg", "a": "last"},
+            "columns": []
+        })
+        assert view.to_records() == [
+            {"__ROW_PATH__": []},
+            {"__ROW_PATH__": ["1"]},
+            {"__ROW_PATH__": ["3"]}
+        ]
+
+    def test_view_aggregates_column_order(self):
+        data = [{"a": 1, "b": 2, "c": 3, "d": 4}, {"a": 3, "b": 4, "c": 5, "d": 6}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "aggregates": {"c": "avg", "a": "last"},
+            "columns": ["a", "c"]
+        })
+
+        order = ["__ROW_PATH__", "c", "a"]
+        records = view.to_records()
+
+        assert records == [
+            {"__ROW_PATH__": [], "c": 4.0, "a": 3},
+            {"__ROW_PATH__": ["1"], "c": 3.0, "a": 1},
+            {"__ROW_PATH__": ["3"], "c": 5.0, "a": 3}
+        ]
+
+        for record in records:
+            keys = list(record.keys())
+            for i in range(len(keys)):
+                assert keys[i] == order[i]
 
     # aggregate
 
@@ -332,67 +390,6 @@ class TestView(object):
         view = tbl.view({"filter": [["a", "is not null"]]})
         assert view.to_records() == [{"a": "abc", "b": 4}]
 
-    # is_valid_filter
-    def test_view_is_valid_filter_str(self):
-        filter = ["a", "<", 1]
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == True
-
-    def test_view_not_is_valid_filter_str(self):
-        filter = ["a", "<", None]
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == False
-
-    def test_view_is_valid_filter_filter_op(self):
-        filter = ["a", t_filter_op.FILTER_OP_IS_NULL]
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == True
-
-    def test_view_not_is_valid_filter_filter_op(self):
-        filter = ["a", t_filter_op.FILTER_OP_GT, None]
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == False
-
-    def test_view_is_valid_filter_date(self):
-        filter = ["a", t_filter_op.FILTER_OP_GT, date.today()]
-        tbl = Table({
-            "a": date
-        })
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == True
-
-    def test_view_not_is_valid_filter_date(self):
-        filter = ["a", t_filter_op.FILTER_OP_GT, None]
-        tbl = Table({
-            "a": date
-        })
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == False
-
-    def test_view_is_valid_filter_datetime(self):
-        filter = ["a", t_filter_op.FILTER_OP_GT, datetime.now()]
-        tbl = Table({
-            "a": datetime
-        })
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == True
-
-    def test_view_not_is_valid_filter_datetime(self):
-        filter = ["a", t_filter_op.FILTER_OP_GT, None]
-        tbl = Table({
-            "a": datetime
-        })
-        view = tbl.view()
-        assert view.is_valid_filter(filter) == False
-
     # on_update
     def test_view_on_update(self):
         sentinel = False
@@ -431,7 +428,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view()
         view.delete()
-        # don't segfault
+        # don"t segfault
 
     def test_view_delete_multiple_callbacks(self):
         # make sure that callbacks on views get filtered

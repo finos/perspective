@@ -106,15 +106,18 @@ t_view_config
 make_view_config(const t_schema& schema, t_val date_parser, t_val config) {
     auto row_pivots = config.attr("get_row_pivots")().cast<std::vector<std::string>>();
     auto column_pivots = config.attr("get_column_pivots")().cast<std::vector<std::string>>();
-    auto p_aggregates = config.attr("get_aggregates")().cast<std::map<std::string, std::string>>();
     auto columns = config.attr("get_columns")().cast<std::vector<std::string>>();
     auto sort = config.attr("get_sort")().cast<std::vector<std::vector<std::string>>>();
     auto filter_op = config.attr("get_filter_op")().cast<std::string>();
 
+    // to preserve order, do not cast to std::map - use keys and python 3.7's guarantee that dicts respect insertion order
+    auto p_aggregates = py::dict(config.attr("get_aggregates")());
+    auto aggregate_keys = py::list(p_aggregates.attr("keys")());
     tsl::ordered_map<std::string, std::string> aggregates;
 
-    for (const auto& agg : p_aggregates) {
-        aggregates[agg.first] = agg.second;
+    for (auto& key : aggregate_keys) {
+        const std::string key_str = key.cast<std::string>();
+        aggregates[key_str] = p_aggregates[key].cast<std::string>();
     };
 
     bool column_only = false;

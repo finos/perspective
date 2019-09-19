@@ -14,6 +14,9 @@ from ._constants import COLUMN_SEPARATOR_STRING
 
 def mod(a, b):
     '''C-style modulo function'''
+    if b == 0:
+        # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
+        return -1
     d = trunc(float(a) / b)
     return a - d * b
 

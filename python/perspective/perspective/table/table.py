@@ -5,7 +5,8 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from perspective.table.libbinding import make_table, t_op
+from datetime import date, datetime
+from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_op, t_op
 from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
@@ -94,6 +95,29 @@ class Table(object):
             dict[string:dict] : a key-value mapping of column names to computed columns. Each value is a dictionary that contains `column_name`, `column_type`, and `computation`.
         '''
         return {}
+
+    def is_valid_filter(self, filter):
+        '''Tests whether a given filter configuration is valid - that the filter term is not None or an unparsable date/datetime.'''
+        if isinstance(filter[1], str):
+            filter_op = str_to_filter_op(filter[1])
+        else:
+            filter_op = filter[1]
+
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
+            # null/not null operators don't need a comparison value
+            return True
+
+        value = filter[2]
+
+        if value is None:
+            return False
+
+        schema = self.schema()
+        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+            if isinstance(value, str):
+                value = self._accessor.date_validator().parse(value)
+
+        return value is not None
 
     def update(self, data):
         '''Update the Table with new data.

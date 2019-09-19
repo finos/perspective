@@ -94,5 +94,4 @@ class ViewConfig(object):
 
     def get_config(self):
         '''Returns the original dictionary config passed by the user.'''
-        print(self._config)
         return self._config

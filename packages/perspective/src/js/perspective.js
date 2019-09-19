@@ -341,30 +341,6 @@ export default function(Module) {
     };
 
     /**
-     * Determines whether a filter configuration is valid, i.e. that the comparison value is not undefined or null.
-     *
-     * @returns {boolean} true if valid, false otherwise.
-     */
-    view.prototype.is_valid_filter = function(filter) {
-        // isNull and isNotNull filter operators are always valid and apply to all schema types
-        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
-            return true;
-        }
-
-        let value = filter[2];
-        if (value === null) {
-            return false;
-        }
-
-        const schema = this.schema();
-        if (schema[filter[0]] === "datetime" || schema[filter[0]] == "date") {
-            value = this.date_parser.parse(value);
-        }
-
-        return typeof value !== "undefined" && value !== null;
-    };
-
-    /**
      * The schema of this {@link module:perspective~view}. A schema is an Object, the keys of which
      * are the columns of this {@link module:perspective~view}, and the values are their string type names.
      * If this {@link module:perspective~view} is aggregated, theses will be the aggregated types;
@@ -1127,6 +1103,30 @@ export default function(Module) {
         }
 
         return computed_schema;
+    };
+
+    /**
+     * Validates a filter configuration, i.e. that the value to filter by is not null or undefined.
+     *
+     * @param {Array<string>} [filter] a filter configuration to test.
+     */
+    table.prototype.is_valid_filter = function(filter) {
+        // isNull and isNotNull filter operators are always valid and apply to all schema types
+        if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
+            return true;
+        }
+
+        let value = filter[2];
+        if (value === null) {
+            return false;
+        }
+
+        const schema = this.schema();
+        if (schema[filter[0]] === "date" || schema[filter[0]] === "datetime") {
+            value = new DateParser().parse(value);
+        }
+
+        return typeof value !== "undefined" && value !== null;
     };
 
     /**

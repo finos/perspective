@@ -236,6 +236,36 @@ class TestToFormat(object):
             "2|b": [2, 2],
         }
 
+    def test_to_dict_one_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "columns": []
+        })
+        assert view.to_dict() == {"__ROW_PATH__": [[], ["1"]]}
+
+    def test_to_dict_two_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "column_pivots": ["b"],
+            "columns": []
+        })
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["1"]]
+        }
+
+    def test_to_dict_column_only_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "column_pivots": ["b"],
+            "columns": []
+        })
+        assert view.to_dict() == {}
+
     # to_numpy
 
     def test_to_numpy_int(self):

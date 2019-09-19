@@ -286,7 +286,7 @@ export class PerspectiveElement extends StateElement {
             const exclamation = node.shadowRoot.getElementById("row_exclamation");
             const {operator, operand} = JSON.parse(node.getAttribute("filter"));
             const filter = [node.getAttribute("name"), operator, operand];
-            if (await this._view.is_valid_filter(filter)) {
+            if (await this._table.is_valid_filter(filter)) {
                 filters.push(filter);
                 node.title = "";
                 operandNode.style.borderColor = "";
