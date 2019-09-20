@@ -47,6 +47,10 @@ _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {
@@ -88,6 +92,10 @@ _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {
@@ -135,6 +143,10 @@ _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {
@@ -202,6 +214,10 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {
@@ -234,6 +250,10 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
     } else {
         t_uindex nrows = col->size();
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {
@@ -356,6 +376,10 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
         // }
     } else {
         for (auto i = 0; i < nrows; ++i) {
+            if (!accessor.attr("has_column")(i, name).cast<bool>()) {
+                continue;
+            }
+
             t_val item = accessor.attr("marshal")(cidx, i, type);
 
             if (item.is_none()) {

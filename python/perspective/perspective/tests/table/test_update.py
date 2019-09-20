@@ -60,6 +60,29 @@ class TestUpdate(object):
         }])
         assert view.to_records() == [{"a": 3, "b": 15}, {"a": 2, "b": 3}]
 
+    def test_update_implicit_index_dict_should_unset(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
+        tbl = Table(data)
+        view = tbl.view()
+        tbl.update({
+            "__INDEX__": [0],
+            "a": [3]
+        })
+        assert view.to_records() == [{"a": 3, "b": None}, {"a": 2, "b": 3}]
+
+    def test_update_implicit_index_multi(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 4, "b": 5}]
+        tbl = Table(data)
+        view = tbl.view()
+        tbl.update([{
+            "__INDEX__": [0],
+            "a": 3,
+        }, {
+            "__INDEX__": [2],
+            "a": 5
+        }])
+        assert view.to_records() == [{"a": 3, "b": 2}, {"a": 2, "b": 3}, {"a": 5, "b": 5}]
+
     def test_update_implicit_index_symmetric(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data)
@@ -70,7 +93,7 @@ class TestUpdate(object):
             "__INDEX__": idx,
             "a": 3
         }])
-        assert view.to_records() == [{"a": 3, "b": None}, {"a": 2, "b": 3}]
+        assert view.to_records() == [{"a": 3, "b": 2}, {"a": 2, "b": 3}]
 
     def test_update_explicit_index(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
@@ -81,6 +104,44 @@ class TestUpdate(object):
             "b": 3
         }])
         assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]
+
+    def test_update_explicit_index_multi(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "a": 1,
+            "b": 3
+        }, {
+            "a": 3,
+            "b": 5
+        }])
+        assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}, {"a": 3, "b": 5}]
+
+    def test_update_explicit_index_multi_append(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "a": 1,
+            "b": 3
+        }, {
+            "a": 12,
+            "b": 5
+        }])
+        assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}, {"a": 3, "b": 4}, {"a": 12, "b": 5}]
+
+    def test_update_explicit_index_multi_append_noindex(self):
+        data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        tbl.update([{
+            "a": 1,
+            "b": 3
+        }, {
+            "b": 5
+        }])
+        assert view.to_records() == [{"a": None, "b": 5}, {"a": 1, "b": 3}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
 
     @mark.skip
     def test_update_implicit_index_with_explicit_unset(self):

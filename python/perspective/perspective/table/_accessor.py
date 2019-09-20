@@ -140,3 +140,23 @@ class _PerspectiveAccessor(object):
             # implicit index: strip out
             val = val[0]
         return val
+
+    def has_column(self, ridx, name):
+        '''Given a column name, validate that it is in the row.
+
+        This allows differentiation between value is None (unset) and value not in row (no-op).
+
+        Params:
+            ridx (int)
+            name (str)
+
+        Returns:
+            bool : True if column is in row, or if column belongs to pkey/op columns required by the engine. False otherwise.
+        '''
+        if name in ("psp_pkey", "psp_okey", "psp_op"):
+            return True
+        if self._format == 0:
+            return name in self._data_or_schema[ridx]
+        else:
+            # no partial updates available on schema or dict updates
+            return True
