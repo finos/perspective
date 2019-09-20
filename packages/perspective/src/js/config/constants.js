@@ -65,7 +65,6 @@ export const FILTER_OPERATORS = {
     lessThan: "<",
     greaterThan: ">",
     equals: "==",
-    doesNotEqual: "==",
     lessThanOrEquals: "<=",
     greaterThanOrEquals: ">=",
     doesNotEqual: "!=",
