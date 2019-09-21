@@ -19,6 +19,14 @@ RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
     && chown -R pptruser:pptruser /home/pptruser \
     && chown -R pptruser:pptruser /node_modules
 
+
+RUN git clone https://github.com/stefanhaustein/TerminalImageViewer.git \
+    && cd TerminalImageViewer/src/main/cpp \
+    && make \
+    && make install \
+    && cd ../../.. \
+    && rm -rf TerminalImageViewer
+
 USER pptruser
 
 CMD ["google-chrome-stable"]

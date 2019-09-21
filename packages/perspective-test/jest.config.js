@@ -8,5 +8,6 @@ module.exports = {
         ".html$": "html-loader-jest"
     },
     automock: false,
-    setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"]
+    setupFiles: ["@finos/perspective-test/src/js/beforeEachSpec.js"],
+    reporters: ["default", "@finos/perspective-test/src/js/reporter.js"]
 };
