@@ -392,6 +392,10 @@ export default function(Module) {
         const end_row = Math.min(max_rows, options.end_row || (viewport.height ? start_row + viewport.height : max_rows));
         const start_col = options.start_col || (viewport.left ? viewport.left : 0);
         const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
+        let date_format;
+        if (options.date_format) {
+            date_format = new Intl.DateTimeFormat(options.date_format);
+        }
 
         const get_pkeys = !!options.index;
         const leaves_only = !!options.leaves_only;
@@ -402,6 +406,7 @@ export default function(Module) {
         const slice = this.get_data_slice(start_row, end_row, start_col, end_col);
         const ns = slice.get_column_names();
         const col_names = extract_vector_scalar(ns).map(x => x.join(defaults.COLUMN_SEPARATOR_STRING));
+        const schema = this.schema();
 
         let data = formatter.initDataValue();
 
@@ -414,6 +419,7 @@ export default function(Module) {
             let row = formatter.initRowValue();
             for (let cidx = start_col; cidx < end_col; cidx++) {
                 const col_name = col_names[cidx];
+                const col_type = schema[col_name];
                 if ((cidx - (num_sides > 0 ? 1 : 0)) % (this.config.columns.length + hidden) >= this.config.columns.length) {
                     // Hidden columns are always at the end, so don't emit these.
                     continue;
@@ -426,7 +432,13 @@ export default function(Module) {
                         }
                     }
                 } else {
-                    const value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+                    let value = __MODULE__[`get_from_data_slice_${nidx}`](slice, ridx, cidx);
+                    if ((col_type === "datetime" || col_type === "date") && value !== undefined) {
+                        if (date_format) {
+                            value = new Date(value);
+                            value = date_format.format(value);
+                        }
+                    }
                     formatter.setColumnValue(data, row, col_name, value);
                 }
             }
