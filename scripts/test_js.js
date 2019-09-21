@@ -9,6 +9,7 @@
 
 require("dotenv").config({path: "./.perspectiverc"});
 
+const minimatch = require("minimatch");
 const execSync = require("child_process").execSync;
 const fs = require("fs");
 
@@ -53,7 +54,8 @@ function jest() {
 }
 
 function slow_jest() {
-    return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+    if (minimatch("perspective-phosphor", process.env.PACKAGE) || minimatch("perspective-jupyterlab", process.env.PACKAGE))
+        return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
 }
 
 function docker() {
