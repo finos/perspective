@@ -54,8 +54,11 @@ function jest() {
 }
 
 function slow_jest() {
-    if (minimatch("perspective-phosphor", process.env.PACKAGE) || minimatch("perspective-jupyterlab", process.env.PACKAGE))
+    if (!process.env.PACKAGE || minimatch("perspective-phosphor", process.env.PACKAGE) || minimatch("perspective-jupyterlab", process.env.PACKAGE)) {
         return (IS_WRITE ? "WRITE_TESTS=1 " : "") + 'TZ=UTC node_modules/.bin/lerna exec --scope="@finos/perspective-@(jupyterlab|phosphor)" --concurrency 1 --no-bail -- yarn --silent test:run';
+    } else {
+        return 'echo ""';
+    }
 }
 
 function docker() {

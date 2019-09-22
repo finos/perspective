@@ -47,12 +47,9 @@ module.exports = class ImageViewerReporter {
                 const ancestors = test.ancestorTitles.map(x => x.replace(".html", ""));
                 const desc = ancestors.join("/");
                 const name = test.title.replace(/ /g, "_").replace(/[\.']/g, "");
-                const filename = `screenshots/${desc}/${name}.diff.png`;
-                const alt_filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${desc}/${name}.diff.png`;
+                const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${desc}/${name}.diff.png`;
                 if (fs.existsSync(path.join(process.cwd(), filename))) {
                     this.write_img(test.title, ancestors, filename);
-                } else if (fs.existsSync(alt_filename)) {
-                    this.write_img(test.title, ancestors, alt_filename);
                 }
             }
         }
