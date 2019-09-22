@@ -15,7 +15,7 @@ def _or_default(name, _def):
 
 @wraps(PerspectiveWidget.__init__)
 def psp(data=None,
-        view='hypergrid',
+        plugin='hypergrid',
         schema=None,
         columns=None,
         rowpivots=None,
@@ -33,7 +33,7 @@ def psp(data=None,
         helper_config=None):
     data = [] if data is None else data
     return PerspectiveWidget(data=data,
-                             view=view,
+                             plugin=plugin,
                              schema=schema,
                              columns=columns,
                              rowpivots=rowpivots,

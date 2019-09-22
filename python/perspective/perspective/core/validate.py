@@ -8,21 +8,21 @@
 from six import iteritems, string_types
 from .computed import Functions
 from .exception import PSPException
-from .view import View
+from .plugin import Plugin
 from .aggregate import Aggregate
 from .sort import Sort
 from .filters import ALL_FILTERS
 
 
-def validate_view(view):
-    if isinstance(view, View):
-        return view.value
-    elif isinstance(view, string_types):
-        if view not in View.options():
-            raise PSPException('Unrecognized view: %s', view)
-        return view
+def validate_plugin(plugin):
+    if isinstance(plugin, Plugin):
+        return plugin.value
+    elif isinstance(plugin, string_types):
+        if plugin not in Plugin.options():
+            raise PSPException('Unrecognized plugin: %s', plugin)
+        return plugin
     else:
-        raise PSPException('Cannot parse view type: %s', str(type(view)))
+        raise PSPException('Cannot parse plugin type: %s', str(type(plugin)))
 
 
 def validate_columns(columns):

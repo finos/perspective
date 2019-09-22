@@ -32,7 +32,7 @@ class PerspectiveWidget(PerspectiveBaseMixin, Widget):
 
     def __init__(self,
                  data,
-                 view='hypergrid',
+                 plugin='hypergrid',
                  schema=None,
                  columns=None,
                  rowpivots=None,
@@ -57,8 +57,8 @@ class PerspectiveWidget(PerspectiveBaseMixin, Widget):
                 The static or live datasource
 
         Keyword Arguments:
-            view : str or View
-                what view to use. available in the enum View (default: {'hypergrid'})
+            plugin : str or Plugin
+                what plugin to use. available in the enum Plugin (default: {'hypergrid'})
             columns : list of str
                 what columns to display
             rowpivots : list of str
@@ -86,7 +86,7 @@ class PerspectiveWidget(PerspectiveBaseMixin, Widget):
 
         '''
         self.setup(data=data,
-                   view=view,
+                   plugin=plugin,
                    schema=schema,
                    columns=columns,
                    rowpivots=rowpivots,

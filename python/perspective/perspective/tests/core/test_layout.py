@@ -15,10 +15,10 @@ class TestLayout:
 
     def test_layout(self):
         import pandas as pd
-        from perspective import psp, View, PSPException
+        from perspective import psp, Plugin, PSPException
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            psp(df, View.YBAR)
+            psp(df, Plugin.YBAR)
             psp(df, 'y_line')
             try:
                 psp(df, 'test')
@@ -34,45 +34,45 @@ class TestLayout:
 
     def test_layout2(self):
         import pandas as pd
-        from perspective import psp, View, PSPException
+        from perspective import psp, Plugin, PSPException
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            psp(df, View.YBAR, None, '1')
-            psp(df, View.YBAR, None, ['1'])
+            psp(df, Plugin.YBAR, None, '1')
+            psp(df, Plugin.YBAR, None, ['1'])
             try:
-                psp(df, View.YBAR, None, 5)
+                psp(df, Plugin.YBAR, None, 5)
                 assert False
             except PSPException:
                 pass
 
     def test_layout3(self):
         import pandas as pd
-        from perspective import psp, View
+        from perspective import psp, Plugin
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            psp(df, View.YBAR, None, '1')
-            psp(df, View.YBAR, None, ['1'])
-            psp(df, View.YBAR, None, ['1'], '1')
-            psp(df, View.YBAR, None, ['1'], ['1'])
+            psp(df, Plugin.YBAR, None, '1')
+            psp(df, Plugin.YBAR, None, ['1'])
+            psp(df, Plugin.YBAR, None, ['1'], '1')
+            psp(df, Plugin.YBAR, None, ['1'], ['1'])
 
     def test_layout4(self):
         import pandas as pd
-        from perspective import psp, View
+        from perspective import psp, Plugin
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            psp(df, View.YBAR, None, ['1'])
-            psp(df, View.YBAR, None, ['1'], None, ['1'])
-            psp(df, View.YBAR, None, ['1'], None, '1')
+            psp(df, Plugin.YBAR, None, ['1'])
+            psp(df, Plugin.YBAR, None, ['1'], None, ['1'])
+            psp(df, Plugin.YBAR, None, ['1'], None, '1')
 
     def test_layout5(self):
         import pandas as pd
-        from perspective import psp, View, PSPException
+        from perspective import psp, Plugin, PSPException
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            psp(df, View.YBAR, None, ['1'])
-            psp(df, View.YBAR, None, ['1'], None, None, None, [['test', 'asc']])
+            psp(df, Plugin.YBAR, None, ['1'])
+            psp(df, Plugin.YBAR, None, ['1'], None, None, None, [['test', 'asc']])
             try:
-                psp(df, View.YBAR, None, ['1'], None, None, None, 5)
+                psp(df, Plugin.YBAR, None, ['1'], None, None, None, 5)
                 assert False
             except PSPException:
                 pass
