@@ -74,7 +74,6 @@ get_from_data_slice_ctx0(
     return get_from_data_slice<t_ctx0>(data_slice, ridx, cidx);
 }
 
-
 t_val
 get_from_data_slice_ctx1(
     std::shared_ptr<t_data_slice<t_ctx1>> data_slice, t_uindex ridx, t_uindex cidx) {
@@ -85,6 +84,32 @@ t_val
 get_from_data_slice_ctx2(
     std::shared_ptr<t_data_slice<t_ctx2>> data_slice, t_uindex ridx, t_uindex cidx) {
     return get_from_data_slice<t_ctx2>(data_slice, ridx, cidx);
+}
+
+template <typename CTX_T>
+std::vector<t_val>
+get_pkeys_from_data_slice(std::shared_ptr<t_data_slice<CTX_T>> data_slice, t_uindex ridx, t_uindex cidx) {
+    std::vector<t_val> rval;
+    std::vector<t_tscalar> pkeys = data_slice->get_pkeys(ridx, cidx);
+    for (const auto& pk : pkeys) {
+        rval.push_back(scalar_to_py(pk));
+    }
+    return rval;
+}
+
+std::vector<t_val>
+get_pkeys_from_data_slice_ctx0(std::shared_ptr<t_data_slice<t_ctx0>> data_slice, t_uindex ridx, t_uindex cidx) {
+    return get_pkeys_from_data_slice<t_ctx0>(data_slice, ridx, cidx);
+}
+
+std::vector<t_val>
+get_pkeys_from_data_slice_ctx1(std::shared_ptr<t_data_slice<t_ctx1>> data_slice, t_uindex ridx, t_uindex cidx) {
+    return get_pkeys_from_data_slice<t_ctx1>(data_slice, ridx, cidx);;
+}
+
+std::vector<t_val>
+get_pkeys_from_data_slice_ctx2(std::shared_ptr<t_data_slice<t_ctx2>> data_slice, t_uindex ridx, t_uindex cidx) {
+    return get_pkeys_from_data_slice<t_ctx2>(data_slice, ridx, cidx);
 }
 
 } // end namespace binding

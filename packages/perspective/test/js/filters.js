@@ -397,25 +397,25 @@ module.exports = perspective => {
 
         describe("is_valid_filter", function() {
             it("x == 2", async function() {
-                var table = perspective.table(data);
+                let table = perspective.table(data);
                 let isValid = await table.is_valid_filter(["x", "==", 2]);
                 expect(isValid).toBeTruthy();
                 table.delete();
             });
             it("x < null", async function() {
-                var table = perspective.table(data);
+                let table = perspective.table(data);
                 let isValid = await table.is_valid_filter(["x", "<", null]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
             it("x > undefined", async function() {
-                var table = perspective.table(data);
+                let table = perspective.table(data);
                 let isValid = await table.is_valid_filter(["x", ">", undefined]);
                 expect(isValid).toBeFalsy();
                 table.delete();
             });
             it('x == ""', async function() {
-                var table = perspective.table(data);
+                let table = perspective.table(data);
                 let isValid = await table.is_valid_filter(["x", "==", ""]);
                 expect(isValid).toBeTruthy();
                 table.delete();
@@ -425,7 +425,7 @@ module.exports = perspective => {
                     x: "string",
                     y: "date"
                 };
-                var table = perspective.table(schema);
+                let table = perspective.table(schema);
                 let isValid = await table.is_valid_filter(["y", "==", "01-01-1970"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
@@ -435,7 +435,7 @@ module.exports = perspective => {
                     x: "string",
                     y: "date"
                 };
-                var table = perspective.table(schema);
+                let table = perspective.table(schema);
                 let isValid = await table.is_valid_filter(["y", "<", "1234"]);
                 expect(isValid).toBeFalsy();
                 table.delete();
@@ -445,7 +445,7 @@ module.exports = perspective => {
                     x: "string",
                     y: "datetime"
                 };
-                var table = perspective.table(schema);
+                let table = perspective.table(schema);
                 let isValid = await table.is_valid_filter(["y", "==", "11:11:11.111"]);
                 expect(isValid).toBeTruthy();
                 table.delete();
@@ -455,7 +455,7 @@ module.exports = perspective => {
                     x: "string",
                     y: "datetime"
                 };
-                var table = perspective.table(schema);
+                let table = perspective.table(schema);
                 let isValid = await table.is_valid_filter(["y", ">", "11:11:11:111"]);
                 expect(isValid).toBeFalsy();
                 table.delete();

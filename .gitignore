@@ -141,3 +141,5 @@ docs/static/img
 
 docs/static/arrow/
 .perspectiverc
+
+python/perspective/perspective/tests/table/psp_test

@@ -310,10 +310,10 @@ namespace binding {
      *
      * Views are backed by an underlying `t_ctx_*` object, represented by the `CTX_T` template.
      *
-     * One-sided views have one or more `row-pivots` applied.
+     * One-sided views have one or more `row_pivots` applied.
      *
-     * Two sided views have one or more `row-pivots` and `column-pivots` applied, or they have
-     * one or more `column-pivots` applied without any row pivots, hence the term `column_only`.
+     * Two sided views have one or more `row_pivots` and `column_pivots` applied, or they have
+     * one or more `column_pivots` applied without any row pivots, hence the term `column_only`.
      *
      * @tparam T
      * @param table

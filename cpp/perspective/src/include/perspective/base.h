@@ -184,9 +184,7 @@ enum t_filter_op {
     FILTER_OP_NOT_IN,
     FILTER_OP_AND,
     FILTER_OP_IS_NULL,
-    FILTER_OP_IS_NOT_NULL,
-    FILTER_OP_IS_VALID,
-    FILTER_OP_IS_NOT_VALID
+    FILTER_OP_IS_NOT_NULL
 };
 
 PERSPECTIVE_EXPORT std::string filter_op_to_str(t_filter_op op);

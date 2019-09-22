@@ -188,19 +188,22 @@ PYBIND11_MODULE(libbinding, m)
     py::class_<t_data_slice<t_ctx0>, std::shared_ptr<t_data_slice<t_ctx0>>>(m, "t_data_slice_ctx0")
         .def("get_column_slice", &t_data_slice<t_ctx0>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx0>::get_slice)
-        .def("get_column_names", &t_data_slice<t_ctx0>::get_column_names);
+        .def("get_column_names", &t_data_slice<t_ctx0>::get_column_names)
+        .def("get_pkeys", &t_data_slice<t_ctx0>::get_pkeys);
 
     py::class_<t_data_slice<t_ctx1>, std::shared_ptr<t_data_slice<t_ctx1>>>(m, "t_data_slice_ctx1")
         .def("get_column_slice", &t_data_slice<t_ctx1>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx1>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctx1>::get_column_names)
-        .def("get_row_path", &t_data_slice<t_ctx1>::get_row_path);
+        .def("get_row_path", &t_data_slice<t_ctx1>::get_row_path)
+        .def("get_pkeys", &t_data_slice<t_ctx1>::get_pkeys);
 
     py::class_<t_data_slice<t_ctx2>, std::shared_ptr<t_data_slice<t_ctx2>>>(m, "t_data_slice_ctx2")
         .def("get_column_slice", &t_data_slice<t_ctx2>::get_column_slice)
         .def("get_slice", &t_data_slice<t_ctx2>::get_slice)
         .def("get_column_names", &t_data_slice<t_ctx2>::get_column_names)
-        .def("get_row_path", &t_data_slice<t_ctx2>::get_row_path);
+        .def("get_row_path", &t_data_slice<t_ctx2>::get_row_path)
+        .def("get_pkeys", &t_data_slice<t_ctx2>::get_pkeys);
 
     /******************************************************************************
      *
@@ -227,6 +230,7 @@ PYBIND11_MODULE(libbinding, m)
      */
     py::class_<t_pool, std::shared_ptr<t_pool>>(m, "t_pool")
         .def(py::init<>())
+        .def("set_update_delegate", &t_pool::set_update_delegate)
         .def("unregister_gnode", &t_pool::unregister_gnode)
         .def("_process", &t_pool::_process);
 
@@ -297,6 +301,27 @@ PYBIND11_MODULE(libbinding, m)
         .value("DTYPE_LAST_VLEN", DTYPE_LAST_VLEN)
         .value("DTYPE_LAST", DTYPE_LAST);
 
+     /******************************************************************************
+     *
+     * t_filter_op
+     */
+    py::enum_<t_filter_op>(m, "t_filter_op")
+        .value("FILTER_OP_LT", FILTER_OP_LT)
+        .value("FILTER_OP_LTEQ", FILTER_OP_LTEQ)
+        .value("FILTER_OP_GT", FILTER_OP_GT)
+        .value("FILTER_OP_GTEQ", FILTER_OP_GTEQ)
+        .value("FILTER_OP_EQ", FILTER_OP_EQ)
+        .value("FILTER_OP_NE", FILTER_OP_NE)
+        .value("FILTER_OP_BEGINS_WITH", FILTER_OP_BEGINS_WITH)
+        .value("FILTER_OP_ENDS_WITH", FILTER_OP_ENDS_WITH)
+        .value("FILTER_OP_CONTAINS", FILTER_OP_CONTAINS)
+        .value("FILTER_OP_OR", FILTER_OP_OR)
+        .value("FILTER_OP_IN", FILTER_OP_IN)
+        .value("FILTER_OP_NOT_IN", FILTER_OP_NOT_IN)
+        .value("FILTER_OP_AND", FILTER_OP_AND)
+        .value("FILTER_OP_IS_NULL", FILTER_OP_IS_NULL)
+        .value("FILTER_OP_IS_NOT_NULL", FILTER_OP_IS_NOT_NULL);
+
     /******************************************************************************
      *
      * t_op
@@ -310,6 +335,7 @@ PYBIND11_MODULE(libbinding, m)
      *
      * Perspective defs
      */
+    m.def("str_to_filter_op", &str_to_filter_op);
     m.def("make_table", &make_table_py);
     m.def("make_computed_table", &make_computed_table_py);
     m.def("make_view_zero", &make_view_ctx0);
@@ -317,10 +343,13 @@ PYBIND11_MODULE(libbinding, m)
     m.def("make_view_two", &make_view_ctx2);
     m.def("get_data_slice_zero", &get_data_slice_ctx0);
     m.def("get_from_data_slice_zero", &get_from_data_slice_ctx0);
+    m.def("get_pkeys_from_data_slice_zero", &get_pkeys_from_data_slice_ctx0);
     m.def("get_data_slice_one", &get_data_slice_ctx1);
     m.def("get_from_data_slice_one", &get_from_data_slice_ctx1);
+    m.def("get_pkeys_from_data_slice_one", &get_pkeys_from_data_slice_ctx1);
     m.def("get_data_slice_two", &get_data_slice_ctx2);
     m.def("get_from_data_slice_two", &get_from_data_slice_ctx2);
+    m.def("get_pkeys_from_data_slice_two", &get_pkeys_from_data_slice_ctx2);
 }
 
 #endif

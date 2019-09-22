@@ -38,7 +38,7 @@
             xhr.responseType = "arraybuffer"
             xhr.onload = function() {
                 var el = document.getElementsByTagName('perspective-viewer')[0];
-                el.load(xhr.response);
+                el.load(xhr.response, {index: "Row ID"});
                 el.toggleConfig();
             }
             xhr.send(null);

@@ -30,7 +30,7 @@ t_update_task::run() {
         }
         m_pool.m_data_remaining.store(false);
     }
-    m_pool.py_notify_userspace();
+    m_pool.notify_userspace();
     m_pool.inc_epoch();
 }
 
@@ -49,7 +49,7 @@ t_update_task::run(t_uindex gnode_id) {
         }
         m_pool.m_data_remaining.store(false);
     }
-    m_pool.py_notify_userspace();
+    m_pool.notify_userspace();
     m_pool.inc_epoch();
 }
 } // end namespace perspective

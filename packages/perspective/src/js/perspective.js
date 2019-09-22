@@ -1117,35 +1117,28 @@ export default function(Module) {
         return computed_schema;
     };
 
-    table.prototype._is_date_filter = function(schema) {
-        return key => schema[key] === "datetime" || schema[key] === "date";
-    };
-
-    table.prototype._is_valid_filter = function(filter) {
+    /**
+     * Validates a filter configuration, i.e. that the value to filter by is not null or undefined.
+     *
+     * @param {Array<string>} [filter] a filter configuration to test.
+     */
+    table.prototype.is_valid_filter = function(filter) {
         // isNull and isNotNull filter operators are always valid and apply to all schema types
         if (filter[1] === perspective.FILTER_OPERATORS.isNull || filter[1] === perspective.FILTER_OPERATORS.isNotNull) {
             return true;
         }
 
-        if (filter[2] === null) {
+        let value = filter[2];
+        if (value === null) {
             return false;
         }
 
         const schema = this.schema();
-        const isDateFilter = this._is_date_filter(schema);
-        const value = isDateFilter(filter[0]) ? new DateParser().parse(filter[2]) : filter[2];
-        return typeof value !== "undefined" && value !== null;
-    };
+        if (schema[filter[0]] === "date" || schema[filter[0]] === "datetime") {
+            value = new DateParser().parse(value);
+        }
 
-    /**
-     * Determines whether a given filter is valid.
-     *
-     * @param {Array<string>} [filter] A filter configuration array to test
-     *
-     * @returns {Promise<boolean>} Whether the filter is valid
-     */
-    table.prototype.is_valid_filter = function(filter) {
-        return this._is_valid_filter(filter);
+        return typeof value !== "undefined" && value !== null;
     };
 
     /**

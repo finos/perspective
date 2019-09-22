@@ -39,14 +39,11 @@
             // xhr.responseType = "arraybuffer"
             // xhr.onload = function() {
                 var el = document.getElementsByTagName('perspective-viewer')[0];
-                const table = perspective.shared_worker().table([{"a": "abc", "b": new Date(), "c": 3}], {index: "a"});
-                for (let i = 0; i < 100; i++) {
+                const d = {"x": [1, 2, 3], "y": ["a", "b", "c"]};
+                const table = perspective.shared_worker().table(d);
+                const v = table.view();
+                console.log(await v.to_columns({"index":true}))
 
-                table.update([{"a": "abc", "b": ""}])
-                }
-                //table.update([{"a": 3, "b": 1}])
-                const v = table.view()
-                console.log(await v.to_json())
             // }
             // xhr.send(null);
         });

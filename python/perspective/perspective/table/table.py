@@ -5,9 +5,12 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from perspective.table.libbinding import make_table, t_op
+from datetime import date, datetime
+from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_op, t_op, t_dtype
 from .view import View
 from ._accessor import _PerspectiveAccessor
+from ._callback_cache import _PerspectiveCallBackCache
+from ._exception import PerspectiveError
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
@@ -30,8 +33,23 @@ class Table(object):
         self._limit = config.get("limit", 4294967295)
         self._index = config.get("index", "")
         self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, False)
+        self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
-        self._callbacks = []
+        self._callbacks = _PerspectiveCallBackCache()
+        self._views = []
+
+    def clear(self):
+        '''Removes all the rows in the Table, but preserves the schema and configuration.'''
+        self._table.reset_gnode(self._gnode_id)
+
+    def replace(self, data):
+        '''Replaces all rows in the Table with the new data.
+
+        Params:
+            data (dict|list|dataframe) the new data with which to fill the Table
+        '''
+        self._table.reset_gnode(self._gnode_id)
+        self.update(data)
 
     def size(self):
         '''Returns the row count of the Table.'''
@@ -61,8 +79,46 @@ class Table(object):
         return schema
 
     def columns(self, computed=False):
-        '''Returns the column names of this dataset.'''
+        '''Returns the column names of this dataset.
+
+        Params:
+            computed (bool) : whether to include computed columns in this array. Defaults to False.
+
+        Returns:
+            list : a list of string column names
+        '''
         return list(self.schema().keys())
+
+    def computed_schema(self):
+        '''Returns a schema of computed columns added by the user.
+
+        Returns:
+            dict[string:dict] : a key-value mapping of column names to computed columns. Each value is a dictionary that contains `column_name`, `column_type`, and `computation`.
+        '''
+        return {}
+
+    def is_valid_filter(self, filter):
+        '''Tests whether a given filter configuration is valid - that the filter term is not None or an unparsable date/datetime.'''
+        if isinstance(filter[1], str):
+            filter_op = str_to_filter_op(filter[1])
+        else:
+            filter_op = filter[1]
+
+        if filter_op == t_filter_op.FILTER_OP_IS_NULL or filter_op == t_filter_op.FILTER_OP_IS_NOT_NULL:
+            # null/not null operators don't need a comparison value
+            return True
+
+        value = filter[2]
+
+        if value is None:
+            return False
+
+        schema = self.schema()
+        if (schema[filter[0]] == date or schema[filter[0]] == datetime):
+            if isinstance(value, str):
+                value = self._accessor.date_validator().parse(value)
+
+        return value is not None
 
     def update(self, data):
         '''Update the Table with new data.
@@ -78,9 +134,21 @@ class Table(object):
         Params:
             data (dict|list|dataframe) : the data with which to update the Table
         '''
+        columns = self.columns()
         types = self._table.get_schema().types()
         self._accessor = _PerspectiveAccessor(data)
-        self._accessor._types = types[:len(self._accessor.names())]
+        self._accessor._names = columns + [name for name in self._accessor._names if name == "__INDEX__"]
+        self._accessor._types = types[:len(columns)]
+
+        if "__INDEX__" in self._accessor._names:
+            if self._index != "":
+                index_pos = self._accessor._names.index(self._index)
+                index_dtype = self._accessor._types[index_pos]
+                self._accessor._types.append(index_dtype)
+                print(index_pos, index_dtype)
+            else:
+                self._accessor._types.append(t_dtype.DTYPE_INT32)
+
         self._table = make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, True, False)
 
     def remove(self, pkeys):
@@ -111,15 +179,38 @@ class Table(object):
 
         Params:
             config (dict or None) : a dictionary containing any of the optional keys below:
-            - "row-pivots" (list[str]) : a list of column names to use as row pivots
-            - "column-pivots" (list[str]) : a list of column names to use as column pivots
+            - "row_pivots" (list[str]) : a list of column names to use as row pivots
+            - "column_pivots" (list[str]) : a list of column names to use as column pivots
+            - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
+            - "sort" (list(list[str]))
+            - "filter" (list(list[str]))
         '''
         config = config or {}
         if config.get("columns") is None:
-            config["columns"] = self.columns()
-        return View(self, config)
+            config["columns"] = self.columns()  # TODO: push into C++
+        view = View(self, self._callbacks, config)
+        self._views.append(view._name)
+        return view
+
+    def on_delete(self, callback):
+        '''Register a callback with the table that will be invoked when the `delete()` method is called.'''
+        if not callable(callback):
+            raise ValueError("on_delete callback must be a callable function!")
+        self._delete_callback = callback
+
+    def delete(self):
+        '''Delete this table and clean up associated resources.'''
+        if len(self._views) > 0:
+            raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
+        self._table.unregister_gnode(self._gnode_id)
+        if hasattr(self, "_delete_callback"):
+            self._delete_callback()
 
     def _update_callback(self):
         cache = {}
-        for callback in self._callbacks:
-            callback.callback(cache)
+        for callback in self._callbacks.get_callbacks():
+            callback["callback"](cache)
+
+    def __del__(self):
+        '''Before GC, clean up internal resources to C++ objects'''
+        self.delete()

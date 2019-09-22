@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+from perspective.table.libbinding import t_filter_op
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -249,6 +250,74 @@ class TestTable(object):
 
         assert tbl2.schema(True) == schema
 
+    # is_valid_filter
+
+    def test_table_is_valid_filter_str(self):
+        filter = ["a", "<", 1]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) == True
+
+    def test_table_not_is_valid_filter_str(self):
+        filter = ["a", "<", None]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) == False
+
+    def test_table_is_valid_filter_filter_op(self):
+        filter = ["a", t_filter_op.FILTER_OP_IS_NULL]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) == True
+
+    def test_table_not_is_valid_filter_filter_op(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        assert tbl.is_valid_filter(filter) == False
+
+    def test_table_is_valid_filter_date(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, date.today()]
+        tbl = Table({
+            "a": date
+        })
+        assert tbl.is_valid_filter(filter) == True
+
+    def test_table_not_is_valid_filter_date(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        tbl = Table({
+            "a": date
+        })
+        assert tbl.is_valid_filter(filter) == False
+
+    def test_table_is_valid_filter_datetime(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, datetime.now()]
+        tbl = Table({
+            "a": datetime
+        })
+        assert tbl.is_valid_filter(filter) == True
+
+    def test_table_not_is_valid_filter_datetime(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        tbl = Table({
+            "a": datetime
+        })
+        assert tbl.is_valid_filter(filter) == False
+
+    def test_table_is_valid_filter_datetime_str(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, "7/11/2019 5:30PM"]
+        tbl = Table({
+            "a": datetime
+        })
+        assert tbl.is_valid_filter(filter) == True
+
+    def test_table_not_is_valid_filter_datetime_str(self):
+        filter = ["a", t_filter_op.FILTER_OP_GT, None]
+        tbl = Table({
+            "a": datetime
+        })
+        assert tbl.is_valid_filter(filter) == False
+
     # index
 
     def test_table_index(self):
@@ -268,3 +337,55 @@ class TestTable(object):
         assert tbl.view().to_records() == [
             {"a": 3, "b": 4}
         ]
+
+    # clear
+
+    def test_table_clear(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.clear()
+        view = tbl.view()
+        assert view.to_records() == []
+
+    # replace
+
+    def test_table_replace(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data2 = [{"a": 3, "b": 4}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        tbl.replace(data2)
+        assert tbl.view().to_records() == data2
+
+    # delete
+
+    def test_table_delete(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.delete()
+        # don't segfault
+
+    def test_table_delete_callback(self):
+        sentinel = False
+
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.on_delete(callback)
+        tbl.delete()
+        assert sentinel == True
+
+    def test_table_delete_with_view(self):
+        sentinel = False
+
+        def callback():
+            nonlocal sentinel
+            sentinel = True
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        tbl.on_delete(callback)
+        view = tbl.view()
+        view.delete()
+        tbl.delete()
+        assert sentinel == True

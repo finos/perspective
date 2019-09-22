@@ -103,7 +103,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"]
+            "row_pivots": ["a"]
         })
         assert view.to_records() == [
             {"__ROW_PATH__": [], "a": 2, "b": 2}, {"__ROW_PATH__": ["1"], "a": 2, "b": 2}
@@ -113,8 +113,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"],
-            "column-pivots": ["b"]
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
         })
         assert view.to_records() == [
             {"__ROW_PATH__": [], "string1|a": 1, "string1|b": 1, "string2|a": 1, "string2|b": 1},
@@ -125,7 +125,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": "string1"}, {"a": 1, "b": "string2"}]
         tbl = Table(data)
         view = tbl.view({
-            "column-pivots": ["b"]
+            "column_pivots": ["b"]
         })
         assert view.to_records() == [
             {"string1|a": 1, "string1|b": "string1", "string2|a": None, "string2|b": None},
@@ -204,7 +204,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"]
+            "row_pivots": ["a"]
         })
         assert view.to_dict() == {
             "__ROW_PATH__": [[], ["1"]],
@@ -216,8 +216,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"],
-            "column-pivots": ["b"]
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
         })
         assert view.to_dict() == {
             "__ROW_PATH__": [[], ["1"]],
@@ -229,12 +229,42 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "column-pivots": ["b"]
+            "column_pivots": ["b"]
         })
         assert view.to_dict() == {
             "2|a": [1, 1],
             "2|b": [2, 2],
         }
+
+    def test_to_dict_one_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "columns": []
+        })
+        assert view.to_dict() == {"__ROW_PATH__": [[], ["1"]]}
+
+    def test_to_dict_two_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "column_pivots": ["b"],
+            "columns": []
+        })
+        assert view.to_dict() == {
+            "__ROW_PATH__": [[], ["1"]]
+        }
+
+    def test_to_dict_column_only_no_columns(self):
+        data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
+        tbl = Table(data)
+        view = tbl.view({
+            "column_pivots": ["b"],
+            "columns": []
+        })
+        assert view.to_dict() == {}
 
     # to_numpy
 
@@ -299,7 +329,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"]
+            "row_pivots": ["a"]
         })
         v = view.to_numpy()
         assert np.array_equal(v["__ROW_PATH__"], [[], ["1"]])
@@ -310,8 +340,8 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "row-pivots": ["a"],
-            "column-pivots": ["b"]
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
         })
         v = view.to_numpy()
         assert np.array_equal(v["__ROW_PATH__"], [[], ["1"]])
@@ -322,7 +352,7 @@ class TestToFormat(object):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 2}]
         tbl = Table(data)
         view = tbl.view({
-            "column-pivots": ["b"]
+            "column_pivots": ["b"]
         })
         v = view.to_numpy()
         assert np.array_equal(v["2|a"], np.array([1, 1]))
@@ -347,3 +377,244 @@ class TestToFormat(object):
         df2 = view.to_df()
         assert np.array_equal(df2.columns, df.columns)
         assert np.array_equal(df2["a"].values, df["a"].values)
+
+    # start_row/end_row
+    def test_to_records_zero_over_max_row(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "end_row": 1000
+        })
+        assert records == data
+
+    def test_to_records_one_over_max_row(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"]
+        })
+        records = view.to_records({
+            "end_row": 1000
+        })
+        assert records == [
+            {'__ROW_PATH__': [], 'a': 5, 'b': 7},
+            {'__ROW_PATH__': ['1.5'], 'a': 1.5, 'b': 2.5},
+            {'__ROW_PATH__': ['3.5'], 'a': 3.5, 'b': 4.5}
+        ]
+
+    def test_to_records_two_over_max_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
+        })
+        records = view.to_records({
+            "end_row": 1000
+        })
+        assert records == [
+            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+        ]
+
+    def test_to_records_start_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "start_row": 1
+        })
+        assert records == [{"a": 3, "b": 4}]
+
+    def test_to_records_end_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "end_row": 1
+        })
+        assert records == [{"a": 1, "b": 2}]
+
+    def test_to_records_start_row_end_row(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}, {"a": 5, "b": 6}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "start_row": 1,
+            "end_row": 2
+        })
+        assert records == [{"a": 3, "b": 4}]
+
+    # start_col/end_col
+
+    def test_to_records_zero_over_max_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "end_col": 1000
+        })
+        assert records == data
+
+    def test_to_records_one_over_max_col(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"]
+        })
+        records = view.to_records({
+            "end_col": 1000
+        })
+        assert records == [
+            {'__ROW_PATH__': [], 'a': 5, 'b': 7},
+            {'__ROW_PATH__': ['1.5'], 'a': 1.5, 'b': 2.5},
+            {'__ROW_PATH__': ['3.5'], 'a': 3.5, 'b': 4.5}
+        ]
+
+    def test_to_records_two_over_max_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
+        })
+        records = view.to_records({
+            "end_col": 1000
+        })
+        assert records == [
+            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+        ]
+
+    def test_to_records_start_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "start_col": 1
+        })
+        assert records == [{"b": 2}, {"b": 4}]
+
+    def test_to_records_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "end_col": 1
+        })
+        assert records == [{"a": 1}, {"a": 3}]
+
+    def test_to_records_two_end_col(self):
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({
+            "row_pivots": ["a"],
+            "column_pivots": ["b"]
+        })
+        records = view.to_records({
+            "end_row": 12,
+            "end_col": 5
+        })
+        assert records == [
+            {'2|a': 1, '2|b': 2, '4|a': 3, '4|b': 4, '__ROW_PATH__': []},
+            {'2|a': 1, '2|b': 2, '4|a': None, '4|b': None, '__ROW_PATH__': ['1']},
+            {'2|a': None, '2|b': None, '4|a': 3, '4|b': 4, '__ROW_PATH__': ['3']}
+        ]
+
+    def test_to_records_start_col_end_col(self):
+        data = [{"a": 1, "b": 2, "c": 3}, {"a": 3, "b": 4, "c": 5}]
+        tbl = Table(data)
+        view = tbl.view()
+        records = view.to_records({
+            "start_col": 1,
+            "end_col": 2
+        })
+        assert records == [{"b": 2}, {"b": 4}]
+
+    # implicit index
+
+    def test_to_format_implicit_index_records(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_records({"index": True}) == [
+            {"__INDEX__": [0], "a": 1.5, "b": 2.5},
+            {"__INDEX__": [1], "a": 3.5, "b": 4.5}
+        ]
+
+    def test_to_format_implicit_index_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        assert view.to_dict({"index": True}) == {
+            "__INDEX__": [[0], [1]],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
+    def test_to_format_implicit_index_two_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view({"row_pivots": ["a"], "column_pivots": ["b"]})
+        assert view.to_dict({"index": True}) == {
+            '2.5|a': [1.5, 1.5, None],
+            '2.5|b': [2.5, 2.5, None],
+            '4.5|a': [3.5, None, 3.5],
+            '4.5|b': [4.5, None, 4.5],
+            '__INDEX__': [[], [], []],  # index needs to be the same length as each column
+            '__ROW_PATH__': [[], ['1.5'], ['3.5']]
+        }
+
+    def test_to_format_implicit_index_np(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data)
+        view = tbl.view()
+        cols = view.to_numpy({"index": True})
+        assert np.array_equal(cols["__INDEX__"], np.array([[0], [1]]))
+
+    def test_to_format_explicit_index_records(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        assert view.to_records({"index": True}) == [
+            {"__INDEX__": [1.5], "a": 1.5, "b": 2.5},
+            {"__INDEX__": [3.5], "a": 3.5, "b": 4.5}
+        ]
+
+    def test_to_format_explicit_index_dict(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        assert view.to_dict({"index": True}) == {
+            "__INDEX__": [[1.5], [3.5]],
+            "a": [1.5, 3.5],
+            "b": [2.5, 4.5]
+        }
+
+    def test_to_format_explicit_index_np(self):
+        data = [{"a": 1.5, "b": 2.5}, {"a": 3.5, "b": 4.5}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        cols = view.to_numpy({"index": True})
+        assert np.array_equal(cols["__INDEX__"], np.array([[1.5], [3.5]]))
+
+    def test_to_format_explicit_index_str_records(self):
+        data = [{"a": "a", "b": 2.5}, {"a": "b", "b": 4.5}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        assert view.to_records({"index": True}) == [
+            {"__INDEX__": ["a"], "a": "a", "b": 2.5},
+            {"__INDEX__": ["b"], "a": "b", "b": 4.5}
+        ]
+
+    def test_to_format_explicit_index_datetime_records(self):
+        data = [{"a": datetime(2019, 7, 11, 9, 0), "b": 2.5}, {"a": datetime(2019, 7, 11, 9, 1), "b": 4.5}]
+        tbl = Table(data, {"index": "a"})
+        view = tbl.view()
+        assert view.to_records({"index": True}) == [
+            {"__INDEX__": [datetime(2019, 7, 11, 9, 0)], "a": datetime(2019, 7, 11, 9, 0), "b": 2.5},
+            {"__INDEX__": [datetime(2019, 7, 11, 9, 1)], "a": datetime(2019, 7, 11, 9, 1), "b": 4.5}
+        ]
