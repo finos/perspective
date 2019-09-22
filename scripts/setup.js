@@ -91,7 +91,17 @@ function focus_package() {
                         value: "perspective-viewer-highcharts"
                     }
                 ]
-            },
+            }
+        ])
+        .then(new_config => {
+            CONFIG.add(new_config);
+            choose_docker();
+        });
+}
+
+function javascript_options() {
+    inquirer
+        .prompt([
             {
                 type: "confirm",
                 name: "PSP_DEBUG",
@@ -165,7 +175,7 @@ function choose_project() {
             if (CONFIG.PSP_PROJECT === "js") {
                 focus_package();
             } else {
-                CONFIG.write();
+                choose_docker();
             }
         });
 }
@@ -182,8 +192,12 @@ function choose_docker() {
         ])
         .then(answers => {
             CONFIG.add(answers);
-            choose_project();
+            if (CONFIG.PSP_PROJECT === "js") {
+                javascript_options();
+            } else {
+                CONFIG.write();
+            }
         });
 }
 
-choose_docker();
+choose_project();

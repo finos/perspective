@@ -12,12 +12,20 @@ RUN apt-get update && apt-get install -y wget --no-install-recommends \
     && apt-get purge --auto-remove -y curl \
     && rm -rf /src/*.deb
 
-RUN yarn add puppeteer
+RUN yarn add puppeteer@1.14.0
 
 RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
     && mkdir -p /home/pptruser/Downloads \
     && chown -R pptruser:pptruser /home/pptruser \
     && chown -R pptruser:pptruser /node_modules
+
+
+RUN git clone https://github.com/stefanhaustein/TerminalImageViewer.git \
+    && cd TerminalImageViewer/src/main/cpp \
+    && make \
+    && make install \
+    && cd ../../.. \
+    && rm -rf TerminalImageViewer
 
 USER pptruser
 

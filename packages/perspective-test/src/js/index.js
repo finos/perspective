@@ -315,8 +315,11 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 } else {
                     fs.writeFileSync(filename + ".failed.png", screenshot);
                     if (fs.existsSync(filename + ".png")) {
-                        cp.execSync(`composite ${filename}.png ${filename}.failed.png -compose difference ${filename}.diff.png`);
-                        cp.execSync(`convert ${filename}.diff.png -auto-level ${filename}.diff.png`);
+                        try {
+                            cp.execSync(`compare ${filename}.png ${filename}.failed.png  ${filename}.diff.png`);
+                        } catch (e) {
+                            // exits 1
+                        }
                     }
                 }
 

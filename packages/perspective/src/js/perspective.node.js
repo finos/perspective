@@ -129,9 +129,14 @@ function create_http_server(assets, host_psp) {
                     } catch (e) {}
                 }
             }
-            console.error(`404 ${url}`);
-            response.writeHead(404);
-            response.end("", "utf-8");
+            if (url.indexOf("favicon.ico") > -1) {
+                response.writeHead(200);
+                response.end("", "utf-8");
+            } else {
+                console.error(`404 ${url}`);
+                response.writeHead(404);
+                response.end("", "utf-8");
+            }
         } catch (error) {
             if (error.code !== "ENOENT") {
                 console.error(`500 ${url}`);
