@@ -19,18 +19,20 @@ import {get_type_config} from "@finos/perspective/dist/esm/config";
 import template from "../html/row.html";
 
 import style from "../less/row.less";
+import {html, render} from "lit-html";
+
+const SPAN = document.createElement("span");
+SPAN.style.visibility = "hidden";
+SPAN.style.fontFamily = "monospace";
+SPAN.style.fontSize = "12px";
+SPAN.style.position = "absolute";
 
 function get_text_width(text, max = 0) {
-    let span = document.createElement("span");
     // FIXME get these values form the stylesheet
-    span.style.visibility = "hidden";
-    span.style.fontFamily = "monospace";
-    span.style.fontSize = "12px";
-    span.style.position = "absolute";
-    span.innerHTML = text;
-    document.body.appendChild(span);
-    let width = `${Math.max(max, span.offsetWidth) + 20}px`;
-    document.body.removeChild(span);
+    SPAN.innerHTML = text;
+    document.body.appendChild(SPAN);
+    let width = `${Math.max(max, SPAN.offsetWidth) + 20}px`;
+    document.body.removeChild(SPAN);
     return width;
 }
 
@@ -41,6 +43,19 @@ class Row extends HTMLElement {
     set name(n) {
         let elem = this.shadowRoot.querySelector("#name");
         elem.innerHTML = this.getAttribute("name");
+    }
+
+    _option_template(agg) {
+        return html`
+            <option value="${agg}">${agg}</option>
+        `;
+    }
+
+    _select_template(category, type) {
+        const items = perspective[category][type] || [];
+        return html`
+            ${items.map(this._option_template)}
+        `;
     }
 
     set type(t) {
@@ -54,29 +69,10 @@ class Row extends HTMLElement {
         elem.classList.add(type);
         let agg_dropdown = this.shadowRoot.querySelector("#column_aggregate");
         let filter_dropdown = this.shadowRoot.querySelector("#filter_operator");
-        switch (type_config.type || type) {
-            case "float":
-            case "integer":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.float.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.float.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                break;
-            case "boolean":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.boolean.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.boolean.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                break;
-            case "date":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                break;
-            case "datetime":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.datetime.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                break;
-            case "string":
-                agg_dropdown.innerHTML = perspective.TYPE_AGGREGATES.string.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-                filter_dropdown.innerHTML = perspective.TYPE_FILTERS.string.map(agg => `<option value="${agg}">${agg}</option>`).join("");
-            default:
-        }
+
+        render(this._select_template("TYPE_AGGREGATES", type_config.type || type), agg_dropdown);
+        render(this._select_template("TYPE_FILTERS", type_config.type || type), filter_dropdown);
+
         if (!this.hasAttribute("aggregate")) {
             this.aggregate = type_config.aggregate;
         } else {

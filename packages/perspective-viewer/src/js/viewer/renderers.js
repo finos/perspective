@@ -7,9 +7,11 @@
  *
  */
 
+import {html, render} from "lit-html";
+
 const RENDERERS = {};
 
-export const renderers = new class {
+export const renderers = new (class {
     /**
      * Register a plugin with the <perspective-viewer> component.
      *
@@ -43,11 +45,16 @@ export const renderers = new class {
     getInstance() {
         return RENDERERS;
     }
-}();
+})();
 
 global.registerPlugin = renderers.registerPlugin;
 
 global.getPlugin = renderers.getPlugin;
+
+const template = csv =>
+    html`
+        <pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>
+    `;
 
 export function register_debug_plugin() {
     global.registerPlugin("debug", {
@@ -55,7 +62,7 @@ export function register_debug_plugin() {
         create: async function(div) {
             const csv = await this._view.to_csv({config: {delimiter: "|"}});
             const timer = this._render_time();
-            div.innerHTML = `<pre style="margin:0;overflow:scroll;position:absolute;width:100%;height:100%">${csv}</pre>`;
+            render(template(csv), div);
             timer();
         },
         selectMode: "toggle",

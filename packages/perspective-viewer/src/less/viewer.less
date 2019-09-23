@@ -184,7 +184,7 @@
     }
     #active_columns perspective-row {
         animation: expand 0.3s ease-out;
-        --column-selector--color: var(--active-column-selector--color, #999);
+        --column-selector--color: var(--active--color, #999);
         --is_visible--before: var(--active-column-selector--content, "\25CF");
     }
     #inactive_columns perspective-row {
@@ -362,7 +362,7 @@
         align-items: center;
         justify-content: center;
         &:hover {
-            color: var(--button-hover--color, inherit);
+            color: var(--active--color, inherit);
         }
     }
     .button {
@@ -391,6 +391,7 @@
         height: 24px;
         padding: var(--select--padding, 0px 0px 0px 6px);
         font-size: 12px;
+        font-family: inherit;
     }
     input {
         padding: 0 10px 0 10px;
@@ -438,7 +439,7 @@
         font-family: Arial;
         font-size: 12px;
         &:hover {
-            color: var(--button-hover--color, inherit);
+            color: var(--active--color, inherit);
         }
     }
 

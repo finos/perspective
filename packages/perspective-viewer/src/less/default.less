@@ -15,7 +15,7 @@
     border-width: 0;
     border-bottom-width: 1px;
     border-style: solid;
-    border-color: var(--column--border-color, @border-color);
+    border-color: var(--inactive--color, @border-color);
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -26,13 +26,13 @@
 :host(.dragging) .psp-text-field.dropping {
     border-bottom-width: 2px;
     border-style: solid;
-    border-color: var(--psp-text-field--border-color, @blue800);
+    border-color: var(--active--color, @blue800);
 }
 
 :host(.dragging) .psp-text-field {
     border-bottom-width: 1px;
     border-style: solid;
-    border-color: var(--psp-text-field--border-color, @blue800);
+    border-color: var(--active--color, @blue800);
 }
 
 .psp-text-field > .psp-text-field__input {
@@ -47,7 +47,7 @@
     height: var(--column--height, auto);
     line-height: 17px;
     box-sizing: border-box;
-    color: var(--column-drop-label--color, rgb(204, 204, 204));
+    color: var(--inactive--color, rgb(204, 204, 204));
     font-weight: 400;
     white-space: nowrap;
     padding: var(--column-drop-container--padding, 0px 0px 2px 10px);
@@ -83,14 +83,14 @@
 }
 
 .selected_indicator() {
-    font-family: var(--interface--font-family, @sans-serif-fonts);
+    //font-family: var(--interface--font-family, @sans-serif-fonts);
     font-weight: 500;
 }
 
 .bordered() {
     border-bottom-width: 1px;
     border-style: solid;
-    border-color: var(--column--border-color, #ccc);
+    border-color: var(--inactive--color, #ccc);
     border-top-width: 0px;
     border-left-width: 0px;
     border-right-width: 0px;
@@ -121,7 +121,7 @@
 }
 
 :host {
-    font-family: var(--interface--font-family, @sans-serif-fonts);
+    font-family: @sans-serif-fonts;
     background-color: #eee;
     color: #333;
 
@@ -164,13 +164,13 @@
     perspective-computed-column {
         --is_visible--before: var(--active-column-selector--content, "\25CF");
         --row_draggable-background-color: var(
-            --active-column--background,
+            --column--background,
             white
         );
-        --row_draggable-border-color: var(--column--border-color, #ccc);
+        --row_draggable-border-color: var(--inactive--color, #ccc);
         --row_draggable-border-width: 0 0 1px 0;
         --row_draggable-overflow: hidden;
-        --column-selector--color: var(--active-column-selector--color, #999);
+        --column-selector--color: var(--active--color, #999);
     }
 
     #side_panel perspective-row {
@@ -195,10 +195,10 @@
             perspective-row {
                 margin-bottom: 2px;
                 --row_draggable-background-color: var(
-                    --active-column--background,
+                    --column--background,
                     white
                 );
-                --row_draggable-border-color: var(--column--border-color, #ccc);
+                --row_draggable-border-color: var(--inactive--color, #ccc);
                 --row_draggable-border-width: 0 0 1px 0;
                 --row_draggable-overflow: hidden;
                 --row_draggable--justify-content: space-evenly;
@@ -250,10 +250,10 @@
             border: none;
             display: flex;
             flex-direction: row;
-            font-family: var(
-                --interface--font-family,
-                @sans-serif-fonts
-            ) !important;
+            // font-family: var(
+            //     --interface--font-family,
+            //     @sans-serif-fonts
+            // ) !important;
             font-size: 12px;
             padding-right: 10px;
             -webkit-appearance: none;
@@ -286,20 +286,20 @@
         /* Non-prefixed version, currently supported by Chrome and Opera */
     }
 
-    svg text {
-        font-family: var(
-            --interface--font-family,
-            @sans-serif-fonts
-        ) !important;
-    }
+    // svg text {
+    //     // font-family: var(
+    //     //     --interface--font-family,
+    //     //     @sans-serif-fonts
+    //     // ) !important;
+    // }
 
-    svg .highcharts-axis-title,
-    svg .highcharts-axis-title {
-        font-family: var(
-            --interface--font-family,
-            @sans-serif-fonts
-        ) !important;
-    }
+    // svg .highcharts-axis-title,
+    // svg .highcharts-axis-title {
+    //     font-family: var(
+    //         --interface--font-family,
+    //         @sans-serif-fonts
+    //     ) !important;
+    // }
 
     svg .highcharts-legend-box {
         fill: none;
@@ -413,20 +413,19 @@
     #copy_button {
         font-weight: normal;
         font-family: var(--button--font-family, Arial);
-        color: var(--button--color, inherit);
+        color: var(--inactive--color, #999);
         font-size: var(--button--font-size, 16px);
-        color: #999;
         transition: opacity 0.3s;
         overflow: hidden;
 
         &:hover {
-            color: var(--button-hover--color, inherit);
+            color: var(--active--color, inherit);
         }
     }
 
     #config_button:before {
         font-feature-settings: "liga";
-        content: var(--config_button--before, "\1f527");
+        content: var(--settings-button--content, "\1f527");
     }
 
     #reset_button:before {
@@ -481,7 +480,7 @@
     }
 
     input::placeholder {
-        color: var(--column-drop-label--color, #ccc);
+        color: var(--inactive--color, #ccc);
     }
 
     option[value=""] {

@@ -47,6 +47,7 @@ bindTemplate(TEMPLATE, style)(
                 this.grid.get_styles = () => get_styles(this);
 
                 const grid_properties = default_grid_properties();
+                grid_properties.renderer = ["SimpleCell", "Borders"];
                 this.grid.installPlugins([perspectivePlugin, [groupedHeaderPlugin, grid_properties.groupedHeader]]);
 
                 // Broken in fin-hypergrid-grouped-header 0.1.2

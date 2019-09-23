@@ -29,6 +29,12 @@ properties.add_styles({
     treeHeaderForegroundSelectionColor: `${title}-tree-header--color`,
     treeHeaderBackgroundSelectionColor: `${title}-tree-header--background`,
     foregroundSelectionColor: [`${title}--color`, `color`],
+    borderBottom: `${title}--border-bottom-color`,
+    borderRight: `${title}--border-right-color`,
+    borderBottomPositive: `${title}-positive--border-bottom-color`,
+    borderBottomNegative: `${title}-negative--border-bottom-color`,
+    borderRightPositive: `${title}-positive--border-right-color`,
+    borderRightNegative: `${title}-negative--border-right-color`,
     color: [`${title}--color`, `color`],
     columnHeaderBackgroundColor: `${title}-header--background`,
     columnHeaderSeparatorColor: `${title}-separator--color`,
@@ -40,6 +46,11 @@ properties.add_styles({
     columnBackgroundColorNumberNegative: `${title}-negative--background`,
     selectionRegionOverlayColor: `${title}-editor--background`,
     selectionRegionOutlineColor: `${title}-editor--border-color`,
+    gridLinesVColor: `${title}-gridline--color`,
+    gridLinesHColor: `${title}-gridline--color`,
+    lineColor: `${title}-gridline--color`,
+    fixedLinesVColor: `${title}-gridline--color`,
+    fixedLinesHColor: `${title}-gridline--color`,
     halign: `${title}--text-align`,
     columnHeaderHalign: `${title}--text-align`,
     hoverCellHighlight: {
@@ -152,7 +163,6 @@ const base_grid_properties = {
 const light_theme_overrides = {
     backgroundColor: "#ffffff",
     color: "#666",
-    lineColor: "#AAA",
     font: '12px "Open Sans", Helvetica, sans-serif',
     columnHeaderColor: "#666",
     columnHeaderHalign: "left", // except: group header labels always 'center'; numbers always 'right' per `setPSP`

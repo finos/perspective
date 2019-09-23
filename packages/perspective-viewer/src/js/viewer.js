@@ -66,6 +66,7 @@ class PerspectiveViewer extends ActionElement {
         this._register_debounce_instance();
         this._show_config = true;
         this._show_warnings = true;
+        this.__render_times = [];
         window.addEventListener("load", this._resize_handler);
         window.addEventListener("resize", this._resize_handler);
     }

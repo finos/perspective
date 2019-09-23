@@ -8,6 +8,7 @@
  */
 
 import _ from "lodash";
+import {html, render} from "lit-html";
 
 import perspective from "@finos/perspective";
 import {get_type_config} from "@finos/perspective/dist/esm/config";
@@ -87,6 +88,32 @@ function calculate_throttle_timeout(render_time) {
     const timeout = avg * view_count * 2;
     return Math.min(10000, Math.max(0, timeout));
 }
+
+const _total_template = args => {
+    if (args) {
+        const x = numberWithCommas(args[0]);
+        const y = numberWithCommas(args[1]);
+        const total = Math.floor((args[0] / args[1]) * 100);
+        return html`
+            <span title="${x} / ${y}" class="plugin_information--overflow-hint">&nbsp;<span class="plugin_information--overflow-hint-percent">${total}%</span>&nbsp;</span>
+        `;
+    }
+};
+
+const _nowrap_template = text => {
+    if (text !== "") {
+        return html`
+            <span style="white-space:nowrap">${text}</span>
+        `;
+    }
+};
+
+/**
+ * Render warning template tagged literal.
+ * @param {*} strings
+ * @param  {...[n, m]} args tuples of rationals to be formatted.
+ */
+const _warning = (strings, ...args) => strings.flatMap((str, idx) => [_nowrap_template(str), _total_template(args[idx])]).filter(x => x);
 
 /******************************************************************************
  *
@@ -212,34 +239,26 @@ export class PerspectiveElement extends StateElement {
     }
 
     async _warn_render_size_exceeded(max_cols, max_rows) {
-        const total = (n, m) =>
-            `<span title="${numberWithCommas(n)} / ~${numberWithCommas(m)}" class="plugin_information--overflow-hint">&nbsp;<span class="plugin_information--overflow-hint-percent">${Math.floor(
-                (n / m) * 100
-            )}%</span>&nbsp;</span>`;
         if (this._show_warnings && (max_cols || max_rows)) {
             const num_columns = await this._view.num_columns();
             const num_rows = await this._view.num_rows();
             const count = num_columns * num_rows;
-
             const columns_are_truncated = max_cols && max_cols < num_columns;
             const rows_are_truncated = max_rows && max_rows < num_rows;
             if (columns_are_truncated && rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns and </span>${total(
-                    num_columns * max_rows,
-                    count
-                )}<span style="white-space:nowrap"> of points.</span>`;
-                this._plugin_information_message.innerHTML = warning;
+                const warning = _warning`Rendering ${[max_cols, num_columns]} of columns and ${[num_columns * max_rows, count]} of points.`;
+                render(warning, this._plugin_information_message);
                 return true;
             } else if (columns_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const warning = `<span style="white-space:nowrap">Rendering </span>${total(max_cols, num_columns)}<span style="white-space:nowrap"> of columns.</span>`;
-                this._plugin_information_message.innerHTML = warning;
+                const warning = _warning`Rendering ${[max_cols, num_columns]} of columns.`;
+                render(warning, this._plugin_information_message);
                 return true;
             } else if (rows_are_truncated) {
                 this._plugin_information.classList.remove("hidden");
-                const warning = `<span style="white-space:nowrap">Rendering </span>${total(num_columns * max_rows, count)}<span style="white-space:nowrap"> of points.</span>`;
-                this._plugin_information_message.innerHTML = warning;
+                const warning = _warning`Rendering ${[num_columns * max_rows, count]} of points.`;
+                render(warning, this._plugin_information_message);
                 return true;
             } else {
                 this._plugin_information.classList.add("hidden");
