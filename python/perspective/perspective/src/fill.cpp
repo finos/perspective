@@ -62,7 +62,7 @@ _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
                 continue;
             }
 
-            col->set_nth(i, pythondatetime_to_ms(item));
+            col->set_nth(i, item.cast<std::int64_t>());
         }
     }
 }
@@ -229,7 +229,8 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
                 continue;
             }
 
-            std::wstring welem = item.cast<std::wstring>();
+            // convert to a python string first
+            std::wstring welem = py::str(item).cast<std::wstring>();
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);
@@ -266,7 +267,8 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
             }
 
             double fval = item.cast<double>();
-            if (isnan(fval)) {
+            bool is_numpy_nan = py::hasattr(item, "real") && py::str(item.attr("real")).cast<std::string>() == "nan";
+            if (isnan(fval) || is_numpy_nan) {
                 WARN("Promoting to string");
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
@@ -410,7 +412,7 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
                     } else if (isnan(fval)) {
-                        WARN("Promoting to string");
+                        WARN("Promoting column " + name  + " to string from int32");
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(
@@ -421,9 +423,30 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     }
                 } break;
                 case DTYPE_FLOAT32: {
+                    bool is_float = py::isinstance<py::float_>(item);
+                    bool is_numpy_nan = is_float && py::str(item).cast<std::string>() == "nan";
+                    if (!is_float || is_numpy_nan) {
+                        WARN("Promoting column " + name  + " to string from float32");
+                        tbl.promote_column(name, DTYPE_STR, i, false);
+                        col = tbl.get_column(name);
+                        _fill_col_string(
+                            accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
+                        return;
+                    }
                     col->set_nth(i, item.cast<float>());
                 } break;
                 case DTYPE_FLOAT64: {
+                    bool is_float = py::isinstance<py::float_>(item);
+                    bool is_numpy_nan = is_float && py::str(item).cast<std::string>() == "nan";
+
+                    if (!is_float || is_numpy_nan) {
+                        WARN("Promoting column " + name  + " to string from float64");
+                        tbl.promote_column(name, DTYPE_STR, i, false);
+                        col = tbl.get_column(name);
+                        _fill_col_string(
+                            accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
+                        return;
+                    }
                     col->set_nth(i, item.cast<double>());
                 } break;
                 default:

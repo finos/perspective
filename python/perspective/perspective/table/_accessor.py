@@ -5,12 +5,15 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from datetime import datetime
 from ._date_validator import _PerspectiveDateValidator
 from perspective.table.libbinding import t_dtype
 try:
     import pandas
+    import numpy
 except (ImportError, ModuleNotFoundError):
     pandas = None
+    numpy = None
 
 
 def _type_to_format(data_or_schema):
@@ -133,12 +136,26 @@ class _PerspectiveAccessor(object):
         column_name = self._names[cidx]
         val = self.get(column_name, ridx)
 
-        # parse string dates/datetimes into objects
-        if isinstance(val, str) and type in (t_dtype.DTYPE_DATE, t_dtype.DTYPE_TIME):
-            val = self._date_validator.parse(val)
+        # first, check for numpy nans without using numpy.isnan as it tries to cast values
+        if isinstance(val, float) and str(val.real) == "nan":
+            val = None
+        elif type in (t_dtype.DTYPE_DATE, t_dtype.DTYPE_TIME):
+            if isinstance(val, str):
+                val = self._date_validator.parse(val)
+            elif numpy is not None and isinstance(val, numpy.datetime64):
+                # parse datetime64 by returning a unix timestamp
+                if str(val) == "NaT":
+                    val = None
+                else:
+                    # numpy timestamps return in nanoseconds - reduce to milliseconds
+                    val = round(val.astype(datetime) / 1000000)
+            # get timestamps from datetimes
+            if isinstance(val, datetime) and type == t_dtype.DTYPE_TIME:
+                val = round(val.timestamp() * 1000)
         elif isinstance(val, list) and len(val) == 1:
             # implicit index: strip out
             val = val[0]
+
         return val
 
     def has_column(self, ridx, name):
