@@ -180,14 +180,7 @@ export class ActionElement extends DomElement {
         const new_sort_order = this._increment_sort(row.getAttribute("sort-order"), this._get_view_column_pivots().length > 0, abs_sorting);
         row.setAttribute("sort-order", new_sort_order);
 
-        let sort = JSON.parse(this.getAttribute("sort"));
-        let new_sort = this._get_view_sorts();
-        for (let s of sort) {
-            let updated_sort = new_sort.find(x => x[0] === s[0]);
-            if (updated_sort) {
-                s[1] = updated_sort[1];
-            }
-        }
+        const sort = this._get_view_sorts();
         this.setAttribute("sort", JSON.stringify(sort));
     }
 
