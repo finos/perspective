@@ -248,9 +248,13 @@ function cellStyle(gridCellConfig) {
                 if (gridCellConfig.value > 0) {
                     gridCellConfig.color = gridCellConfig.columnColorNumberPositive || "rgb(160,207,255)";
                     gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberPositive ? gridCellConfig.columnBackgroundColorNumberPositive : gridCellConfig.backgroundColor;
+                    gridCellConfig.borderBottom = gridCellConfig.borderBottomPositive ? gridCellConfig.borderBottomPositive : gridCellConfig.borderBottom;
+                    gridCellConfig.borderRight = gridCellConfig.borderRightPositive ? gridCellConfig.borderRightPositive : gridCellConfig.borderRight;
                 } else {
                     gridCellConfig.color = gridCellConfig.columnColorNumberNegative || "rgb(255,136,136)";
                     gridCellConfig.backgroundColor = gridCellConfig.columnBackgroundColorNumberNegative ? gridCellConfig.columnBackgroundColorNumberNegative : gridCellConfig.backgroundColor;
+                    gridCellConfig.borderBottom = gridCellConfig.borderBottomNegative ? gridCellConfig.borderBottomNegative : gridCellConfig.borderBottom;
+                    gridCellConfig.borderRight = gridCellConfig.borderRightNegative ? gridCellConfig.borderRightNegative : gridCellConfig.borderRight;
                 }
             }
         } else if (type === "boolean") {

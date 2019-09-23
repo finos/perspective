@@ -39,7 +39,7 @@ export function treeLineRendererPaint(gc, config) {
     gc.rect(x, y, width, height);
     gc.fillRect(x, y, width, height);
 
-    var fgColor = config.isSelected ? config.foregroundSelectionColor : config.color;
+    var fgColor = config.gridLinesHColor; //config.isSelected ? config.foregroundSelectionColor : config.lineColor;
     gc.cache.strokeStyle = fgColor;
     gc.cache.fillStyle = fgColor;
     var xOffset = x;
@@ -47,7 +47,7 @@ export function treeLineRendererPaint(gc, config) {
     var nodeRadius = 3;
 
     // Draw vertical line
-    gc.globalAlpha = 0.3;
+    gc.globalAlpha = 0.7;
     gc.strokeStyle = fgColor;
 
     gc.beginPath();
@@ -71,20 +71,20 @@ export function treeLineRendererPaint(gc, config) {
         gc.moveTo(xOffset + lineNodeSpace + nodeRadius, y + height / 2);
         gc.arc(xOffset + lineNodeSpace, y + height / 2, nodeRadius, 0, 2 * Math.PI);
         if (config.isCellHovered) {
-            gc.globalAlpha = 0.45;
+            gc.globalAlpha = 1.0;
             gc.fill();
-            gc.globalAlpha = 0.3;
+            gc.globalAlpha = 0.7;
         }
     } else {
         gc.lineTo(xOffset + lineNodeSpace + nodeRadius, y + height / 2);
     }
 
     if (parent && !leaf) {
-        gc.globalAlpha = 0.8;
+        gc.globalAlpha = 0.5;
         gc.fill();
         gc.moveTo(xOffset + lineNodeSpace, y + height / 2 + nodeRadius);
         gc.lineTo(xOffset + lineNodeSpace, y + height);
-        gc.globalAlpha = 0.3;
+        gc.globalAlpha = 0.7;
     }
 
     gc.stroke();
