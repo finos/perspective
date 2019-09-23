@@ -12,6 +12,21 @@ import {dragend} from "./dragdrop.js";
 import {renderers} from "./renderers.js";
 
 import {PerspectiveElement} from "./perspective_element.js";
+import {html, render} from "lit-html";
+
+/**
+ * Render `<option>` blocks
+ * @param {*} names name objects
+ */
+const options = vals => {
+    const opts = [];
+    for (name in vals) {
+        opts.push(html`
+            <option value="${name}">${vals[name].name || name}</option>
+        `);
+    }
+    return opts;
+};
 
 export class DomElement extends PerspectiveElement {
     _clear_columns() {
@@ -290,11 +305,7 @@ export class DomElement extends PerspectiveElement {
     // sets state, manipulates DOM
     _register_view_options() {
         let current_renderers = renderers.getInstance();
-        for (let name in current_renderers) {
-            const display_name = current_renderers[name].name || name;
-            const opt = `<option value="${name}">${display_name}</option>`;
-            this._vis_selector.innerHTML += opt;
-        }
+        render(options(current_renderers), this._vis_selector);
     }
 
     // sets state
