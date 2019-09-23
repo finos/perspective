@@ -59,7 +59,7 @@
         content: var(--row-sort-order--before, "-");
     }
     &:hover {
-        color: var(--button-hover--color, inherit);
+        color: var(--active--color, inherit);
     }
 }
 
@@ -71,7 +71,7 @@
         height: 19px;
         color: inherit;
         outline: none;
-        border-color: var(--column--border-color, #ccc);
+        border-color: var(--inactive--color, #ccc);
     }
 
     #filter_operator {
@@ -79,7 +79,7 @@
         display: var(--filter_operator-display, none);
         height: 17px;
         &:hover {
-            color: var(--button-hover--color, inherit);
+            color: var(--active--color, inherit);
         }
     }
 
@@ -114,7 +114,7 @@
 }
 
 :host(:hover) .is_visible {
-    color: var(--button-hover--color, --column-selector--color);
+    color: var(--active--color, --column-selector--color);
 }
 
 :host {
@@ -154,7 +154,7 @@
         font-family: Arial;
         font-size: 10px;
         &:hover {
-            color: var(--button-hover--color, inherit);
+            color: var(--active--color, inherit);
         }
     }
     #column_aggregate {
@@ -246,42 +246,42 @@
 :host([drop-target]) {
     .row_draggable {
         background-color: var(
-            --column-drop-target--background,
+            --active--background,
             rgb(240, 240, 255)
         ) !important;
         animation: var(
             --drop-target--animation,
             var(--row_draggable--animation, expand3 0.5s ease-out)
         );
-        border: 1px solid #1078d1 !important;
+        border: var(--active--border, solid #1078d1) !important;
     }
 }
 
 :host {
     .integer:before,
     .float:before {
-        content: "123";
-        color: var(--column_type-float--color, #016bc6);
+        content: var(--float--column-type--content, var(--column-type--content, "123"));
+        color: var(--float--column-type--color, var(--column-type--color, #016bc6));
     }
 
     .string:before {
-        content: "abc";
-        color: var(--column_type-string--color, #fe9292);
+        content: var(--string--column-type--content, var(--column-type--content, "abc"));
+        color: var(--string--column-type--color, var(--column-type--color, #fe9292));
     }
 
     .boolean:before {
-        content: "t/f";
-        color: var(--column_type-boolean--color, #999999);
+        content: var(--boolean--column-type--content, var(--column-type--content, "t/f"));
+        color: var(--boolean--column-type--color, var(--column-type--color, #999999));
     }
 
     .date:before {
-        content: "mdy";
-        color: var(--column_type-date--color, #999999);
+        content: var(--date--column-type--content, var(--column-type--content, "mdy"));
+        color: var(--date--column-type--color, var(--column-type--color,  #999999));
     }
 
     .datetime:before {
-        content: "mdy";
-        color: var(--column_type-datetime--color, #999999);
+        content: var(--datetime--column-type--content, var(--column-type--content, "mdy"));
+        color: var(--datetime--column-type--color, var(--column-type--color,  #999999));
     }
 }
 
