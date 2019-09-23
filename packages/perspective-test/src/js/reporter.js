@@ -9,7 +9,6 @@
 
 const cp = require("child_process");
 const fs = require("fs");
-const path = require("path");
 const termimg = require("term-img");
 
 module.exports = class ImageViewerReporter {
@@ -44,12 +43,15 @@ module.exports = class ImageViewerReporter {
     onTestResult(testRunConfig, testResults) {
         for (const test of testResults.testResults) {
             if (test.status === "failed") {
-                const ancestors = test.ancestorTitles.map(x => x.replace(".html", ""));
+                const ancestors = test.ancestorTitles.filter(x => x.indexOf(".html") > -1).map(x => x.replace(".html", "").replace(/ /g, "_"));
                 const desc = ancestors.join("/");
                 const name = test.title.replace(/ /g, "_").replace(/[\.']/g, "");
                 const filename = `${testRunConfig.path.split("/test")[0]}/screenshots/${desc}/${name}.diff.png`;
-                if (fs.existsSync(path.join(process.cwd(), filename))) {
+                const alt_filename = `screenshots/${desc}/${name}.diff.png`;
+                if (filename) {
                     this.write_img(test.title, ancestors, filename);
+                } else if (fs.existsSync(alt_filename)) {
+                    this.write_img(test.title, ancestors, alt_filename);
                 }
             }
         }
