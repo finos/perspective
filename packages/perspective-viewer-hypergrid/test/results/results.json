@@ -29,7 +29,7 @@
     "superstore.html/shows a sort indicator": "5f4aae968d2dac96781c954e05d34303",
     "superstore.html/shows multiple sort indicators": "b6f6bd22638f550ee07cadc46c1c37c0",
     "superstore.html/shows a sort indicator on column split": "245820611945c0c5c563e93053505bd6",
-    "__GIT_COMMIT__": "a4e2d8c1d19dec19541b46a932ffac6128ef5cf4",
+    "__GIT_COMMIT__": "85e51dae0d9fb6a4e799037d5816951f34425ab5",
     "superstore.html/should reinterpret metadata when only row pivots are changed": "09b6aaf7708d4363546c005abf203a9c",
     "empty.html/perspective-click is fired when an empty dataset is loaded first": "7e5b653226145e1ab9f82e2417d89d7b",
     "superstore.html/should not edit an immutable viewer": "8d99c2bc8bf7450a5f2cc4f5b1ca7412",
