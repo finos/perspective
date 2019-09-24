@@ -347,21 +347,21 @@ t_gnode::_process_table() {
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
+    const t_gstate& cstate = *(m_state.get());
+    t_uindex fnrows = flattened->num_rows();
+
     if (m_state->mapping_size() == 0) {
         m_state->update_history(flattened.get());
 
         // update computed columns after history is updated but before contexts are updated
-        std::vector<t_uindex> updated_ridxs;
-        std::shared_ptr<t_column> flattened_pkey_col = flattened->get_column("psp_pkey");
-        t_uindex nrows = flattened->size();
-
-        for (t_uindex idx = 0; idx < nrows; ++idx) {
-            t_tscalar pkey = flattened_pkey_col->get_scalar(idx); 
-            auto lk = m_state->lookup(pkey);
-            updated_ridxs.push_back(lk.m_idx);
+        std::vector<t_rlookup> lkup(fnrows);
+        t_column* pkey_col = flattened->get_column("psp_pkey").get();
+       
+        for (t_uindex idx = 0; idx < fnrows; ++idx) {
+            t_tscalar pkey = pkey_col->get_scalar(idx);
+            lkup[idx] = cstate.lookup(pkey);
         }
-
-        recompute_columns(get_table_sptr(), updated_ridxs);
+        recompute_columns(get_table_sptr(), lkup);
         _update_contexts_from_state(*flattened);
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
@@ -378,8 +378,6 @@ t_gnode::_process_table() {
     for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
         m_iports[idx]->release_or_clear();
     }
-
-    t_uindex fnrows = flattened->num_rows();
 
     std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     delta->clear();
@@ -451,7 +449,6 @@ t_gnode::_process_table() {
     t_tscalar prev_pkey;
     prev_pkey.clear();
 
-    const t_gstate& cstate = *(m_state.get());
 
     std::vector<t_tscalar> existing_insert_pkeys;
 
@@ -611,15 +608,7 @@ t_gnode::_process_table() {
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
 
     // get updated row indices and update computed columns
-    std::vector<t_uindex> updated_ridxs;
-
-    for (t_uindex idx = 0; idx < fnrows; ++idx) {
-       t_tscalar pkey = pkey_col->get_scalar(idx); 
-       auto lk = m_state->lookup(pkey); // lookup after state has been updated
-       updated_ridxs.push_back(lk.m_idx);
-    }
-
-    recompute_columns(get_table_sptr(), updated_ridxs);
+    recompute_columns(get_table_sptr(), lkup);
 
     return flattened_masked;
 }
@@ -1310,7 +1299,7 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped
 }
 
 void 
-t_gnode::recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs) {
+t_gnode::recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs) {
     for (auto l : m_computed_lambdas) {
         l(flattened, updated_ridxs);
     }

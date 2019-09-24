@@ -1063,7 +1063,7 @@ namespace binding {
 
     template <>
     void
-    add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def) {
+    add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_rlookup>& row_indices, t_val computed_def) {
         std::uint32_t end = row_indices.size();
         if (end == 0) {
             // iterate through all rows if no row indices are specified
@@ -1110,7 +1110,7 @@ namespace binding {
             // iterate through row indices OR through all rows
             t_uindex ridx;
             if (row_indices.size() > 0) {
-                ridx = row_indices[idx];
+                ridx = row_indices[idx].m_idx;
             } else {
                 ridx = idx;
             }
@@ -1174,9 +1174,10 @@ namespace binding {
         std::vector<t_computed_column_def> converted;
         for (const auto& j_computed_def : computed) {
             converted.push_back(
-                [j_computed_def](std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices) {
-                add_computed_column(table, row_indices, j_computed_def); 
-            });
+                [j_computed_def](std::shared_ptr<t_data_table> table, const std::vector<t_rlookup>& row_indices) {
+                    add_computed_column(table, row_indices, j_computed_def); 
+                }
+            );
         }
         return converted; 
     }

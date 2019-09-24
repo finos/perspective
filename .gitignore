@@ -143,3 +143,4 @@ docs/static/arrow/
 .perspectiverc
 
 python/perspective/perspective/tests/table/psp_test
+python/perspective/perspective/node/assets/zmq.node
