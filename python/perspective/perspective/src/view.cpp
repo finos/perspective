@@ -84,10 +84,12 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
                 case DTYPE_TIME: {
                     if (py::isinstance<py::str>(filter_term)) {
                         t_val parsed_date = date_parser.attr("parse")(filter_term);
-                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(parsed_date)));
+                        std::int64_t ts = date_parser.attr("to_timestamp")(parsed_date).cast<std::int64_t>();
+                        t_tscalar timestamp = mktscalar(t_time(ts));
                         terms.push_back(timestamp);
                     } else {
-                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(filter_term)));
+                        t_tscalar timestamp = mktscalar(
+                            t_time(date_parser.attr("to_timestamp")(filter_term).cast<std::int64_t>()));
                         terms.push_back(timestamp);
                     }
                 } break;

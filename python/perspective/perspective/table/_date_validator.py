@@ -5,8 +5,13 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from datetime import datetime
 from dateutil.parser import parse
 from perspective.table.libbinding import t_dtype
+try:
+    import numpy
+except (ImportError, ModuleNotFoundError):
+    numpy = None
 
 
 class _PerspectiveDateValidator(object):
@@ -26,6 +31,19 @@ class _PerspectiveDateValidator(object):
             return parse(str)
         except (ValueError, OverflowError):
             return None
+
+    def to_timestamp(self, d):
+        if d is None:
+            return None
+
+        if numpy is not None and isinstance(d, numpy.datetime64):
+            if str(d) == "NaT":
+                return None
+            # numpy timestamps return in nanoseconds - reduce to milliseconds
+            return round(d.astype(datetime) / 1000000)
+
+        # python datetime timestamp() returns in seconds - expand to milliseconds
+        return round(d.timestamp() * 1000)
 
     def format(self, str):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on the format of the parsed date.
