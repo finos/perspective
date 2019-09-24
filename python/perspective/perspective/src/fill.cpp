@@ -267,9 +267,8 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
             }
 
             double fval = item.cast<double>();
-            bool is_numpy_nan = py::hasattr(item, "real") && py::str(item.attr("real")).cast<std::string>() == "nan";
-            if (isnan(fval) || is_numpy_nan) {
-                WARN("Promoting to string");
+            if (isnan(fval)) {
+                WARN("Promoting " + name + " to string from int64");
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
