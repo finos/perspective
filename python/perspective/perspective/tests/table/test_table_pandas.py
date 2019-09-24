@@ -136,6 +136,19 @@ class TestTableNumpy(object):
             "datetime": [None, datetime(2019, 7, 11)]
         }
 
+    def test_table_read_nan_datetime_no_seconds(self):
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 11, 0)]})
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "str": str,
+            "datetime": datetime # can only promote to string or float
+        }
+        assert tbl.size() == 2
+        assert tbl.view().to_dict() == {
+            "str": ["abc", "def"],
+            "datetime": [None, datetime(2019, 7, 11, 11, 0)]
+        }
+
     def test_table_read_nan_datetime_milliseconds(self):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 10, 30, 55)]})
         tbl = Table(data)
@@ -188,6 +201,7 @@ class TestTableNumpy(object):
         df = superstore()
         df_pivoted = df.set_index(['Country', 'Region'])
         table = Table(df_pivoted)
+        assert table.size() == 10
 
     def test_pivottable(self):
         df = superstore()

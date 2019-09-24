@@ -26,6 +26,9 @@ class _PerspectiveDateValidator(object):
 
         Params:
             str (str) : the datestring to parse
+
+        Returns:
+            A datetime.date or datetime.datetime object if parse is successful, None otherwise
         '''
         try:
             return parse(str)
@@ -33,6 +36,10 @@ class _PerspectiveDateValidator(object):
             return None
 
     def to_timestamp(self, d):
+        '''Return an integer that corresponds to the Unix timestamp, i.e. number of milliseconds since epoch.
+
+        This method converts both datetime.datetime and numpy.datetime64 objects.
+        '''
         if d is None:
             return None
 

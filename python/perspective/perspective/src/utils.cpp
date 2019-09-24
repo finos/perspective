@@ -27,16 +27,6 @@ pythondate_to_t_date(t_val date) {
         date.attr("day").cast<std::int32_t>());
 }
 
-std::int64_t
-pythondatetime_to_ms(t_val datetime) {
-    /**
-     * Rounding the python timestamp to an int causes microsecond-level precision issues. This can be exposed by
-     * passing a datetime with the `microsecond` field set to a roundable value, i.e. 5500. On conversion, the 
-     * microsecond value becomes 6000 due to the rounding error.
-     */
-    return static_cast<std::int64_t>(datetime.attr("timestamp")().cast<double>() * 1000);
-}
-
 t_dtype type_string_to_t_dtype(std::string value, std::string name){
     auto type = t_dtype::DTYPE_STR;
 
