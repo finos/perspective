@@ -5,7 +5,6 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from pytest import mark
 from perspective.table import Table
 
 
@@ -143,26 +142,23 @@ class TestUpdate(object):
         }])
         assert view.to_records() == [{"a": None, "b": 5}, {"a": 1, "b": 3}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
 
-    @mark.skip
     def test_update_implicit_index_with_explicit_unset(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data, {"index": "a"})
         view = tbl.view()
         tbl.update([{
-            "__INDEX__": [0],
+            "__INDEX__": [1],
             "b": 3
         }])
         assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]
 
-    @mark.skip
     def test_update_implicit_index_with_explicit_set(self):
-        # should abort()
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data, {"index": "a"})
         view = tbl.view()
         tbl.update([{
-            "__INDEX__": [0],
-            "a": 1,
+            "__INDEX__": [1],
+            "a": 1, # should ignore re-specification of pkey
             "b": 3
         }])
         assert view.to_records() == [{"a": 1, "b": 3}, {"a": 2, "b": 3}]

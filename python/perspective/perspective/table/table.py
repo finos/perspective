@@ -145,7 +145,6 @@ class Table(object):
                 index_pos = self._accessor._names.index(self._index)
                 index_dtype = self._accessor._types[index_pos]
                 self._accessor._types.append(index_dtype)
-                print(index_pos, index_dtype)
             else:
                 self._accessor._types.append(t_dtype.DTYPE_INT32)
 
