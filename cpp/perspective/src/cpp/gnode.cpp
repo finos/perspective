@@ -344,24 +344,24 @@ t_gnode::_process_table() {
 
     m_was_updated = true;
     std::shared_ptr<t_data_table> flattened(iport->get_table()->flatten());
+
     PSP_GNODE_VERIFY_TABLE(flattened);
     PSP_GNODE_VERIFY_TABLE(get_table());
 
+    const t_gstate& cstate = *(m_state.get());
+    t_uindex fnrows = flattened->num_rows();
+
+    std::vector<t_rlookup> lkup(fnrows);
+    t_column* pkey_col = flattened->get_column("psp_pkey").get();
+    
+    for (t_uindex idx = 0; idx < fnrows; ++idx) {
+        t_tscalar pkey = pkey_col->get_scalar(idx);
+        lkup[idx] = cstate.lookup(pkey);
+    }
+    recompute_columns(get_table_sptr(), flattened, lkup);
+
     if (m_state->mapping_size() == 0) {
         m_state->update_history(flattened.get());
-
-        // update computed columns after history is updated but before contexts are updated
-        std::vector<t_uindex> updated_ridxs;
-        std::shared_ptr<t_column> flattened_pkey_col = flattened->get_column("psp_pkey");
-        t_uindex nrows = flattened->size();
-
-        for (t_uindex idx = 0; idx < nrows; ++idx) {
-            t_tscalar pkey = flattened_pkey_col->get_scalar(idx); 
-            auto lk = m_state->lookup(pkey);
-            updated_ridxs.push_back(lk.m_idx);
-        }
-
-        recompute_columns(get_table_sptr(), updated_ridxs);
         _update_contexts_from_state(*flattened);
         m_oports[PSP_PORT_FLATTENED]->set_table(flattened);
         release_inputs();
@@ -378,8 +378,6 @@ t_gnode::_process_table() {
     for (t_uindex idx = 0, loop_end = m_iports.size(); idx < loop_end; ++idx) {
         m_iports[idx]->release_or_clear();
     }
-
-    t_uindex fnrows = flattened->num_rows();
 
     std::shared_ptr<t_data_table> delta = m_oports[PSP_PORT_DELTA]->get_table();
     delta->clear();
@@ -404,10 +402,7 @@ t_gnode::_process_table() {
 
     const t_schema& fschema = flattened->get_schema();
 
-    std::shared_ptr<t_column> pkey_col_sptr = flattened->get_column("psp_pkey");
     std::shared_ptr<t_column> op_col_sptr = flattened->get_column("psp_op");
-
-    t_column* pkey_col = pkey_col_sptr.get();
     t_column* op_col = op_col_sptr.get();
     t_data_table* stable = get_table();
     PSP_GNODE_VERIFY_TABLE(stable);
@@ -451,7 +446,6 @@ t_gnode::_process_table() {
     t_tscalar prev_pkey;
     prev_pkey.clear();
 
-    const t_gstate& cstate = *(m_state.get());
 
     std::vector<t_tscalar> existing_insert_pkeys;
 
@@ -461,7 +455,6 @@ t_gnode::_process_table() {
 
     std::uint8_t* op_base = op_col->get_nth<std::uint8_t>(0);
     std::vector<t_uindex> added_offset(fnrows);
-    std::vector<t_rlookup> lkup(fnrows);
     std::vector<bool> prev_pkey_eq_vec(fnrows);
 
     for (t_uindex idx = 0; idx < fnrows; ++idx) {
@@ -469,7 +462,6 @@ t_gnode::_process_table() {
         std::uint8_t op_ = op_base[idx];
         t_op op = static_cast<t_op>(op_);
 
-        lkup[idx] = cstate.lookup(pkey);
         bool row_pre_existed = lkup[idx].m_exists;
         prev_pkey_eq_vec[idx] = pkey == prev_pkey;
 
@@ -609,17 +601,6 @@ t_gnode::_process_table() {
 #endif
 
     m_oports[PSP_PORT_FLATTENED]->set_table(flattened_masked);
-
-    // get updated row indices and update computed columns
-    std::vector<t_uindex> updated_ridxs;
-
-    for (t_uindex idx = 0; idx < fnrows; ++idx) {
-       t_tscalar pkey = pkey_col->get_scalar(idx); 
-       auto lk = m_state->lookup(pkey); // lookup after state has been updated
-       updated_ridxs.push_back(lk.m_idx);
-    }
-
-    recompute_columns(get_table_sptr(), updated_ridxs);
 
     return flattened_masked;
 }
@@ -1310,9 +1291,9 @@ t_gnode::register_context(const std::string& name, std::shared_ptr<t_ctx_grouped
 }
 
 void 
-t_gnode::recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs) {
+t_gnode::recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs) {
     for (auto l : m_computed_lambdas) {
-        l(flattened, updated_ridxs);
+        l(table, flattened, updated_ridxs);
     }
 }
 

@@ -28,7 +28,7 @@
 
 namespace perspective {
 
-typedef std::function<void(std::shared_ptr<t_data_table>, const std::vector<t_uindex>&)> t_computed_column_def;
+typedef std::function<void(std::shared_ptr<t_data_table>, std::shared_ptr<t_data_table>, const std::vector<t_rlookup>&)> t_computed_column_def;
 
 PERSPECTIVE_EXPORT t_tscalar calc_delta(
     t_value_transition trans, t_tscalar oval, t_tscalar nval);
@@ -152,7 +152,7 @@ public:
     std::vector<t_computed_column_def> get_computed_lambdas() const;
 
 protected:
-    void recompute_columns(std::shared_ptr<t_data_table> flattened, const std::vector<t_uindex>& updated_ridxs);
+    void recompute_columns(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& updated_ridxs);
     void append_computed_lambdas(std::vector<t_computed_column_def> new_lambdas);
 
     bool have_context(const std::string& name) const;
