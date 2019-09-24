@@ -1063,11 +1063,10 @@ namespace binding {
 
     template <>
     void
-    add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_rlookup>& row_indices, t_val computed_def) {
+    add_computed_column(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices, t_val computed_def) {
         std::uint32_t end = row_indices.size();
         if (end == 0) {
-            // iterate through all rows if no row indices are specified
-            end = table->size();
+            end = flattened->size();
         }
 
         t_val input_names = computed_def["inputs"];
@@ -1086,36 +1085,56 @@ namespace binding {
 
         t_dtype output_column_dtype = str_to_dtype(typestring);
 
-        std::vector<std::shared_ptr<t_column>> input_columns;
-
+        std::vector<std::shared_ptr<t_column>> table_columns;
+        std::vector<std::shared_ptr<t_column>> flattened_columns;
         for (const auto& column_name : input_column_names) {
-            input_columns.push_back(table->get_column(column_name));
+            table_columns.push_back(table->get_column(column_name));
+            flattened_columns.push_back(flattened->get_column(column_name));
         }
 
         // don't double create output column
-        auto schema = table->get_schema();
+        auto schema = flattened->get_schema();
         std::shared_ptr<t_column> output_column;
-
         if (schema.has_column(output_column_name)) {
-            output_column = table->get_column(output_column_name);
+            output_column = flattened->get_column(output_column_name);
         } else {
-            output_column = table->add_column_sptr(output_column_name, output_column_dtype, true);
+            output_column = flattened->add_column_sptr(output_column_name, output_column_dtype, true);
         }
 
         t_val i1 = t_val::undefined(), i2 = t_val::undefined(), i3 = t_val::undefined(),
                 i4 = t_val::undefined();
 
-        auto arity = input_columns.size();
+        auto arity = table_columns.size();
         for (t_uindex idx = 0; idx < end; ++idx) {
             // iterate through row indices OR through all rows
-            t_uindex ridx;
+            t_uindex ridx = idx;
             if (row_indices.size() > 0) {
+                // if (!row_indices[idx].m_exists) {
+                //     continue;
+                // }
                 ridx = row_indices[idx].m_idx;
-            } else {
-                ridx = idx;
+            }
+            t_val value = t_val::undefined();
+
+            // create args
+            std::vector<t_val> args;
+            for (t_uindex x = 0; x < arity; ++x) {
+                t_tscalar t = flattened_columns[x]->get_scalar(idx);
+                if (t.m_status != STATUS_VALID) {
+                    t = table_columns[x]->get_scalar(ridx);
+                    if (t.m_status != STATUS_VALID) {
+                        break;
+                    }
+                }
+                t_val i = scalar_to_val(t);
+                if (!i.isNull()) {
+                    args.push_back(i);
+                }
             }
 
-            t_val value = t_val::undefined();
+            if (args.size() != arity) {
+                continue;
+            }
 
             switch (arity) {
                 case 0: {
@@ -1123,47 +1142,30 @@ namespace binding {
                     break;
                 }
                 case 1: {
-                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
-                    if (!i1.isNull()) {
-                        value = computed_func(i1);
-                    }
+                    value = computed_func(args[0]);
                     break;
                 }
                 case 2: {
-                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
-                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
-                    if (!i1.isNull() && !i2.isNull()) {
-                        value = computed_func(i1, i2);
-                    }
+                    value = computed_func(args[0], args[1]);
                     break;
                 }
                 case 3: {
-                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
-                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
-                    i3 = scalar_to_val(input_columns[2]->get_scalar(ridx));
-                    if (!i1.isNull() && !i2.isNull() && !i3.isNull()) {
-                        value = computed_func(i1, i2, i3);
-                    }
+                    value = computed_func(args[0], args[1], args[2]);
                     break;
                 }
                 case 4: {
-                    i1 = scalar_to_val(input_columns[0]->get_scalar(ridx));
-                    i2 = scalar_to_val(input_columns[1]->get_scalar(ridx));
-                    i3 = scalar_to_val(input_columns[2]->get_scalar(ridx));
-                    i4 = scalar_to_val(input_columns[3]->get_scalar(ridx));
-                    if (!i1.isNull() && !i2.isNull() && !i3.isNull() && !i4.isNull()) {
-                        value = computed_func(i1, i2, i3, i4);
-                    }
+                    value = computed_func(args[0], args[1], args[2], args[3]);
                     break;
                 }
                 default: {
+                    PSP_COMPLAIN_AND_ABORT("Too many arguments");
                     // Don't handle other arity values
                     break;
                 }
             }
 
             if (!value.isUndefined()) {
-                set_column_nth(output_column, ridx, value);
+                set_column_nth(output_column, idx, value);
             }
         }
     }
@@ -1174,8 +1176,8 @@ namespace binding {
         std::vector<t_computed_column_def> converted;
         for (const auto& j_computed_def : computed) {
             converted.push_back(
-                [j_computed_def](std::shared_ptr<t_data_table> table, const std::vector<t_rlookup>& row_indices) {
-                    add_computed_column(table, row_indices, j_computed_def); 
+                [j_computed_def](std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices) {
+                    add_computed_column(table, flattened, row_indices, j_computed_def); 
                 }
             );
         }
@@ -1375,7 +1377,7 @@ namespace binding {
         auto computed_defs = vecFromArray<t_val, t_val>(computed);
         auto computed_lambdas = make_computed_lambdas(computed_defs);
         for (const auto lambda : computed_lambdas) {
-            lambda(pkeyed_table, {});
+            lambda(pkeyed_table, pkeyed_table, {});
         }
         table->add_computed_columns(pkeyed_table, computed_lambdas);
         return table;

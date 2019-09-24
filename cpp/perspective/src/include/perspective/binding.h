@@ -179,7 +179,7 @@ namespace binding {
      * @param computed_def 
      */
     template <typename T>
-    void add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_rlookup>& row_indices, T computed_def);
+    void add_computed_column(std::shared_ptr<t_data_table> table, std::shared_ptr<t_data_table> flattened, const std::vector<t_rlookup>& row_indices, T computed_def);
 
     /**
      * @brief Given a list of computed column declarations in the binding language, convert them to C++ lambdas that allow
