@@ -62,7 +62,7 @@ _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
                 continue;
             }
 
-            col->set_nth(i, pythondatetime_to_ms(item));
+            col->set_nth(i, item.cast<std::int64_t>());
         }
     }
 }
@@ -107,7 +107,10 @@ _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
                 continue;
             }
 
-            col->set_nth(i, pythondate_to_t_date(item));
+
+            auto date_components = item.cast<std::map<std::string, std::int32_t>>();
+            t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
+            col->set_nth(i, dt);
         }
     }
 }
@@ -229,6 +232,7 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
                 continue;
             }
 
+            // convert to a python string first
             std::wstring welem = item.cast<std::wstring>();
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
@@ -267,7 +271,7 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
 
             double fval = item.cast<double>();
             if (isnan(fval)) {
-                WARN("Promoting to string");
+                WARN("Promoting %s to string from int64", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
@@ -327,7 +331,10 @@ set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value) {
             break;
         }
         case DTYPE_DATE: {
-            col->set_nth<t_date>(idx, pythondate_to_t_date(value), STATUS_VALID);
+            t_date dt = t_date(value.attr("year").cast<std::int32_t>(), 
+                value.attr("month").cast<std::int32_t>(), 
+                value.attr("day").cast<std::int32_t>());
+            col->set_nth<t_date>(idx, dt, STATUS_VALID);
             break;
         }
         case DTYPE_TIME: {
@@ -404,13 +411,13 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     // inference checked the entire column/we could reset parsing.
                     double fval = item.cast<double>();
                     if (fval > 2147483647 || fval < -2147483648) {
-                        WARN("Promoting to float");
+                        WARN("Promoting %s to float from int32", name);
                         tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                         col = tbl.get_column(name);
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
                     } else if (isnan(fval)) {
-                        WARN("Promoting to string");
+                        WARN("Promoting column %s to string from int32", name);
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(
@@ -424,6 +431,16 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     col->set_nth(i, item.cast<float>());
                 } break;
                 case DTYPE_FLOAT64: {
+                    bool is_float = py::isinstance<py::float_>(item);
+                    bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+                    if (!is_float || is_numpy_nan) {
+                        WARN("Promoting column %s to string from float64", name);
+                        tbl.promote_column(name, DTYPE_STR, i, false);
+                        col = tbl.get_column(name);
+                        _fill_col_string(
+                            accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
+                        return;
+                    }
                     col->set_nth(i, item.cast<double>());
                 } break;
                 default:

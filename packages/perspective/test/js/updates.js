@@ -1054,7 +1054,7 @@ module.exports = perspective => {
             table.delete();
         });
 
-        it("should apply mulitple sequential updates using '__INDEX__' on a table with explicit index set", async function() {
+        it("should apply multiple sequential updates using '__INDEX__' on a table with explicit index set", async function() {
             let table = perspective.table(data, {index: "x"});
             table.update([
                 {

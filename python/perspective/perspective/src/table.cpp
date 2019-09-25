@@ -69,7 +69,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
             auto current_schema = current_data_table->get_schema();
             for (auto idx = 0; idx < current_schema.m_types.size(); ++idx) {
                 if (data_types[idx] == DTYPE_INT64) {
-                    WARN("Promoting int64 '" + column_names[idx] + "'");
+                    WARN("Promoting %s to int64", column_names[idx]);
                     current_gnode->promote_column(column_names[idx], DTYPE_INT64);
                 }
             }

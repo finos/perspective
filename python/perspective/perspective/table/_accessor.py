@@ -5,12 +5,10 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from math import isnan
 from ._date_validator import _PerspectiveDateValidator
 from perspective.table.libbinding import t_dtype
-try:
-    import pandas
-except (ImportError, ModuleNotFoundError):
-    pandas = None
+import pandas
 
 
 def _type_to_format(data_or_schema):
@@ -42,7 +40,7 @@ def _type_to_format(data_or_schema):
         # Can't process
         raise NotImplementedError("Dict values must be list or type!")
     else:
-        if pandas is None or not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
+        if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError("Must be dict or list!")
         else:
@@ -133,12 +131,40 @@ class _PerspectiveAccessor(object):
         column_name = self._names[cidx]
         val = self.get(column_name, ridx)
 
-        # parse string dates/datetimes into objects
-        if isinstance(val, str) and type in (t_dtype.DTYPE_DATE, t_dtype.DTYPE_TIME):
-            val = self._date_validator.parse(val)
+        if val is None:
+            return val
+
+        # first, check for numpy nans without using numpy.isnan as it tries to cast values
+        if isinstance(val, float) and isnan(val):
+            val = None
         elif isinstance(val, list) and len(val) == 1:
-            # implicit index: strip out
+            # strip out values encased lists
             val = val[0]
+        elif type == t_dtype.DTYPE_INT32 or type == t_dtype.DTYPE_INT64:
+            if not isinstance(val, bool) and isinstance(val, float):
+                # should be able to update int columns with either ints or floats
+                val = int(val)
+        elif type == t_dtype.DTYPE_FLOAT32 or type == t_dtype.DTYPE_FLOAT64:
+            if not isinstance(val, bool) and isinstance(val, int):
+                # should be able to update float columns with either ints or floats
+                val = float(val)
+        elif type == t_dtype.DTYPE_DATE:
+            # return datetime.date
+            if isinstance(val, str):
+                parsed = self._date_validator.parse(val)
+                val = self._date_validator.to_date_components(parsed)
+            else:
+                val = self._date_validator.to_date_components(val)
+        elif type == t_dtype.DTYPE_TIME:
+            # return unix timestamps for time
+            if isinstance(val, str):
+                parsed = self._date_validator.parse(val)
+                val = self._date_validator.to_timestamp(parsed)
+            else:
+                val = self._date_validator.to_timestamp(val)
+        elif type == t_dtype.DTYPE_STR:
+            val = str(val)
+
         return val
 
     def has_column(self, ridx, name):

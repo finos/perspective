@@ -8,7 +8,7 @@
  */
 #pragma once
 
-#ifdef(PSP_ENABLE_PYTHON)
+#ifdef PSP_ENABLE_PYTHON
 
 #include <perspective/base.h>
 

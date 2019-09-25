@@ -76,18 +76,26 @@ make_filter_term(t_dtype column_type, t_val date_parser, const std::string& colu
                 case DTYPE_DATE: {
                     if (py::isinstance<py::str>(filter_term)) {
                         t_val parsed_date = date_parser.attr("parse")(filter_term);
-                        terms.push_back(mktscalar(pythondate_to_t_date(parsed_date)));
+                        auto date_components = 
+                            date_parser.attr("to_date_components")(parsed_date).cast<std::map<std::string, std::int32_t>>();
+                        t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
+                        terms.push_back(mktscalar(dt));
                     } else {
-                        terms.push_back(mktscalar(pythondate_to_t_date(filter_term)));
+                        auto date_components = 
+                            date_parser.attr("to_date_components")(filter_term).cast<std::map<std::string, std::int32_t>>();
+                        t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
+                        terms.push_back(mktscalar(dt));
                     }
                 } break;
                 case DTYPE_TIME: {
                     if (py::isinstance<py::str>(filter_term)) {
                         t_val parsed_date = date_parser.attr("parse")(filter_term);
-                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(parsed_date)));
+                        std::int64_t ts = date_parser.attr("to_timestamp")(parsed_date).cast<std::int64_t>();
+                        t_tscalar timestamp = mktscalar(t_time(ts));
                         terms.push_back(timestamp);
                     } else {
-                        t_tscalar timestamp = mktscalar(t_time(pythondatetime_to_ms(filter_term)));
+                        t_tscalar timestamp = mktscalar(
+                            t_time(date_parser.attr("to_timestamp")(filter_term).cast<std::int64_t>()));
                         terms.push_back(timestamp);
                     }
                 } break;
