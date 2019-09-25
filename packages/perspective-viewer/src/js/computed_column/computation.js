@@ -8,7 +8,8 @@
  */
 
 export default class Computation {
-    constructor(name, input_type, return_type, func, num_params = 1) {
+    constructor(name, input_type, return_type, func, category, num_params = 1) {
+        this.category = category;
         this.name = name;
         this.input_type = input_type;
         this.return_type = return_type;
