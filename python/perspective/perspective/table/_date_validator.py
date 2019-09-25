@@ -5,13 +5,11 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import time
+import numpy
 from datetime import datetime
 from dateutil.parser import parse
 from perspective.table.libbinding import t_dtype
-try:
-    import numpy
-except (ImportError, ModuleNotFoundError):
-    numpy = None
 
 
 class _PerspectiveDateValidator(object):
@@ -35,22 +33,50 @@ class _PerspectiveDateValidator(object):
         except (ValueError, OverflowError):
             return None
 
+    def to_date_components(self, d):
+        '''Return a dictionary of string keys and integer values for `year`, `month`, and `day`.
+
+        This method converts both datetime.date and numpy.datetime64 objects that contain datetime.date.
+        '''
+        if d is None:
+            return d
+
+        if isinstance(d, numpy.datetime64):
+            if str(d) == "NaT":
+                return None
+            dt = d.astype(datetime)
+            return {
+                "year": dt.year,
+                "month": dt.month,
+                "day": dt.day
+            }
+
+        return {
+            "year": d.year,
+            "month": d.month,
+            "day": d.day
+        }
+
     def to_timestamp(self, d):
         '''Return an integer that corresponds to the Unix timestamp, i.e. number of milliseconds since epoch.
 
         This method converts both datetime.datetime and numpy.datetime64 objects.
         '''
         if d is None:
-            return None
+            return d
 
-        if numpy is not None and isinstance(d, numpy.datetime64):
+        if isinstance(d, numpy.datetime64):
             if str(d) == "NaT":
                 return None
-            # numpy timestamps return in nanoseconds - reduce to milliseconds
-            return round(d.astype(datetime) / 1000000)
 
-        # python datetime timestamp() returns in seconds - expand to milliseconds
-        return round(d.timestamp() * 1000)
+            d = d.astype(datetime)
+
+            if isinstance(d, int):
+                # sometimes `astype(datetime)` returns an int timestamp in nanoseconds - parse this.
+                return round(d / 1000000)
+
+        # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
+        return int((time.mktime(d.timetuple()) + d.microsecond / 1000000.0) * 1000)
 
     def format(self, str):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on the format of the parsed date.

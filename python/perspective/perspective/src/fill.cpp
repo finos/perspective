@@ -107,7 +107,10 @@ _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, std::str
                 continue;
             }
 
-            col->set_nth(i, pythondate_to_t_date(item));
+
+            auto date_components = item.cast<std::map<std::string, std::int32_t>>();
+            t_date dt = t_date(date_components["year"], date_components["month"], date_components["day"]);
+            col->set_nth(i, dt);
         }
     }
 }
@@ -328,7 +331,10 @@ set_column_nth(std::shared_ptr<t_column> col, t_uindex idx, t_val value) {
             break;
         }
         case DTYPE_DATE: {
-            col->set_nth<t_date>(idx, pythondate_to_t_date(value), STATUS_VALID);
+            t_date dt = t_date(value.attr("year").cast<std::int32_t>(), 
+                value.attr("month").cast<std::int32_t>(), 
+                value.attr("day").cast<std::int32_t>());
+            col->set_nth<t_date>(idx, dt, STATUS_VALID);
             break;
         }
         case DTYPE_TIME: {
@@ -423,8 +429,8 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                 } break;
                 case DTYPE_FLOAT32: {
                     bool is_float = py::isinstance<py::float_>(item);
-                    bool is_numpy_nan = is_float && py::str(item).cast<std::string>() == "nan";
-                    if (!is_float || is_numpy_nan) {
+                    bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+                    if (is_numpy_nan) {
                         WARN("Promoting column " + name  + " to string from float32");
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
@@ -436,9 +442,8 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                 } break;
                 case DTYPE_FLOAT64: {
                     bool is_float = py::isinstance<py::float_>(item);
-                    bool is_numpy_nan = is_float && py::str(item).cast<std::string>() == "nan";
-
-                    if (!is_float || is_numpy_nan) {
+                    bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
+                    if (is_numpy_nan) {
                         WARN("Promoting column " + name  + " to string from float64");
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);

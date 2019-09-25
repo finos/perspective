@@ -7,12 +7,7 @@
 #
 from ._date_validator import _PerspectiveDateValidator
 from perspective.table.libbinding import t_dtype
-try:
-    import pandas
-    import numpy
-except (ImportError, ModuleNotFoundError):
-    pandas = None
-    numpy = None
+import pandas
 
 
 def _type_to_format(data_or_schema):
@@ -138,9 +133,13 @@ class _PerspectiveAccessor(object):
         # first, check for numpy nans without using numpy.isnan as it tries to cast values
         if isinstance(val, float) and str(val.real) == "nan":
             val = None
-        elif isinstance(val, str) and type == t_dtype.DTYPE_DATE:
+        elif type == t_dtype.DTYPE_DATE:
             # return datetime.date
-            val = self._date_validator.parse(val)
+            if isinstance(val, str):
+                parsed = self._date_validator.parse(val)
+                val = self._date_validator.to_date_components(parsed)
+            else:
+                val = self._date_validator.to_date_components(val)
         elif type == t_dtype.DTYPE_TIME:
             # return unix timestamps for time
             if isinstance(val, str):

@@ -16,17 +16,6 @@
 namespace perspective {
 namespace binding {
 
-/******************************************************************************
- *
- * Date Parsing
- */
-t_date
-pythondate_to_t_date(t_val date) {
-    return t_date(date.attr("year").cast<std::int32_t>(),
-        date.attr("month").cast<std::int32_t>(),
-        date.attr("day").cast<std::int32_t>());
-}
-
 t_dtype type_string_to_t_dtype(std::string value, std::string name){
     auto type = t_dtype::DTYPE_STR;
 

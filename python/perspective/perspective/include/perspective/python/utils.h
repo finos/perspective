@@ -37,7 +37,6 @@ static auto IS_BYTES = [](auto type_instance) { return type_instance.is(py::modu
  *
  * Date Parsing
  */
-t_date pythondate_to_t_date(t_val date);
 
 t_dtype type_string_to_t_dtype(std::string type, std::string name = "");
 t_dtype type_string_to_t_dtype(py::str type, py::str name = "");

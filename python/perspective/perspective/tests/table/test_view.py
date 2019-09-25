@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 
+import numpy as np
 from perspective.table import Table
 from datetime import date, datetime
 
@@ -342,6 +343,18 @@ class TestView(object):
         view = tbl.view({"filter": [["a", "!=", date(2019, 7, 12)]]})
         assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
 
+    def test_view_filter_date_np_eq(self):
+        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({"filter": [["a", "==", np.datetime64(date(2019, 7, 12))]]})
+        assert view.to_records() == [{"a": datetime(2019, 7, 12), "b": 4}]
+
+    def test_view_filter_date_np_neq(self):
+        data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({"filter": [["a", "!=", np.datetime64(date(2019, 7, 12))]]})
+        assert view.to_records() == [{"a": datetime(2019, 7, 11), "b": 2}]
+
     def test_view_filter_date_str_eq(self):
         data = [{"a": date(2019, 7, 11), "b": 2}, {"a": date(2019, 7, 12), "b": 4}]
         tbl = Table(data)
@@ -364,6 +377,18 @@ class TestView(object):
         data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
         tbl = Table(data)
         view = tbl.view({"filter": [["a", "!=", datetime(2019, 7, 11, 8, 15)]]})
+        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+
+    def test_view_filter_datetime_np_eq(self):
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({"filter": [["a", "==", np.datetime64(datetime(2019, 7, 11, 8, 15))]]})
+        assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+
+    def test_view_filter_datetime_np_neq(self):
+        data = [{"a": datetime(2019, 7, 11, 8, 15), "b": 2}, {"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
+        tbl = Table(data)
+        view = tbl.view({"filter": [["a", "!=", np.datetime64(datetime(2019, 7, 11, 8, 15))]]})
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}]
 
     def test_view_filter_datetime_str_eq(self):
