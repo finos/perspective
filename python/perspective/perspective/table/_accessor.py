@@ -131,6 +131,9 @@ class _PerspectiveAccessor(object):
         column_name = self._names[cidx]
         val = self.get(column_name, ridx)
 
+        if val is None:
+            return val
+
         # first, check for numpy nans without using numpy.isnan as it tries to cast values
         if isinstance(val, float) and isnan(val):
             val = None
@@ -159,6 +162,8 @@ class _PerspectiveAccessor(object):
                 val = self._date_validator.to_timestamp(parsed)
             else:
                 val = self._date_validator.to_timestamp(val)
+        elif type == t_dtype.DTYPE_STR:
+            val = str(val)
 
         return val
 

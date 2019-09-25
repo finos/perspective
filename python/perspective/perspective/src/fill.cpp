@@ -233,7 +233,7 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
             }
 
             // convert to a python string first
-            std::wstring welem = py::str(item).cast<std::wstring>();
+            std::wstring welem = item.cast<std::wstring>();
             std::wstring_convert<utf16convert_type, wchar_t> converter;
             std::string elem = converter.to_bytes(welem);
             col->set_nth(i, elem);

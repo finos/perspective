@@ -56,7 +56,7 @@ class TestTableNumpy(object):
         assert tbl.size() == 2
 
     def test_table_read_nan_int_col(self):
-        data = pd.DataFrame({"str": ["abc", np.nan, "def"], "int": [np.nan, 1, 2]})
+        data = pd.DataFrame({"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
@@ -69,7 +69,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_float_col(self):
-        data = pd.DataFrame({"str": [np.nan, "abc", np.nan], "float": [np.nan, 1.5, 2.5]})
+        data = pd.DataFrame({"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
@@ -82,7 +82,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_bool_col(self):
-        data = pd.DataFrame({"bool": [np.nan, True, np.nan], "bool2": [False, np.nan, True]})
+        data = pd.DataFrame({"bool": [float("nan"), True, float("nan")], "bool2": [False, float("nan"), True]})
         tbl = Table(data)
         # if np.nan begins a column, it is inferred as float and then can be promoted. if np.nan is in the values (but not at start), the column type is whatever is inferred.
         assert tbl.schema() == {
@@ -97,7 +97,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_date_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "date": [np.nan, date(2019, 7, 11)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "date": [float("nan"), date(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
@@ -110,7 +110,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_datetime_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 11, 0)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
@@ -123,7 +123,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_datetime_as_date_col(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
@@ -136,7 +136,7 @@ class TestTableNumpy(object):
         }
 
     def test_table_read_nan_datetime_no_seconds(self):
-        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 11, 0)]})
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
