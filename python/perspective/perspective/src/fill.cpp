@@ -428,22 +428,12 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     }
                 } break;
                 case DTYPE_FLOAT32: {
-                    bool is_float = py::isinstance<py::float_>(item);
-                    bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
-                    if (is_numpy_nan) {
-                        WARN("Promoting column " + name  + " to string from float32");
-                        tbl.promote_column(name, DTYPE_STR, i, false);
-                        col = tbl.get_column(name);
-                        _fill_col_string(
-                            accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
-                        return;
-                    }
                     col->set_nth(i, item.cast<float>());
                 } break;
                 case DTYPE_FLOAT64: {
                     bool is_float = py::isinstance<py::float_>(item);
                     bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
-                    if (is_numpy_nan) {
+                    if (!is_float || is_numpy_nan) {
                         WARN("Promoting column " + name  + " to string from float64");
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);

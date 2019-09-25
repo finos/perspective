@@ -133,6 +133,17 @@ class _PerspectiveAccessor(object):
         # first, check for numpy nans without using numpy.isnan as it tries to cast values
         if isinstance(val, float) and str(val.real) == "nan":
             val = None
+        elif isinstance(val, list) and len(val) == 1:
+            # strip out values encased lists
+            val = val[0]
+        elif type == t_dtype.DTYPE_INT32 or type == t_dtype.DTYPE_INT64:
+            if not isinstance(val, bool) and isinstance(val, float):
+                # should be able to update int columns with either ints or floats
+                val = int(val)
+        elif type == t_dtype.DTYPE_FLOAT32 or type == t_dtype.DTYPE_FLOAT64:
+            if not isinstance(val, bool) and isinstance(val, int):
+                # should be able to update float columns with either ints or floats
+                val = float(val)
         elif type == t_dtype.DTYPE_DATE:
             # return datetime.date
             if isinstance(val, str):
@@ -147,9 +158,6 @@ class _PerspectiveAccessor(object):
                 val = self._date_validator.to_timestamp(parsed)
             else:
                 val = self._date_validator.to_timestamp(val)
-        elif isinstance(val, list) and len(val) == 1:
-            # strip out values encased lists
-            val = val[0]
 
         return val
 
