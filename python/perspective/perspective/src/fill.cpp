@@ -271,7 +271,7 @@ _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_c
 
             double fval = item.cast<double>();
             if (isnan(fval)) {
-                WARN("Promoting " + name + " to string from int64");
+                WARN("Promoting %s to string from int64", name);
                 tbl.promote_column(name, DTYPE_STR, i, false);
                 col = tbl.get_column(name);
                 _fill_col_string(
@@ -411,13 +411,13 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     // inference checked the entire column/we could reset parsing.
                     double fval = item.cast<double>();
                     if (fval > 2147483647 || fval < -2147483648) {
-                        WARN("Promoting to float");
+                        WARN("Promoting %s to float from int32", name);
                         tbl.promote_column(name, DTYPE_FLOAT64, i, true);
                         col = tbl.get_column(name);
                         type = DTYPE_FLOAT64;
                         col->set_nth(i, fval);
                     } else if (isnan(fval)) {
-                        WARN("Promoting column " + name  + " to string from int32");
+                        WARN("Promoting column %s to string from int32", name);
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(
@@ -434,7 +434,7 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     bool is_float = py::isinstance<py::float_>(item);
                     bool is_numpy_nan = is_float && npy_isnan(item.cast<double>());
                     if (!is_float || is_numpy_nan) {
-                        WARN("Promoting column " + name  + " to string from float64");
+                        WARN("Promoting column %s to string from float64", name);
                         tbl.promote_column(name, DTYPE_STR, i, false);
                         col = tbl.get_column(name);
                         _fill_col_string(

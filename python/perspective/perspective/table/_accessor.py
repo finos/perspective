@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from math import isnan
 from ._date_validator import _PerspectiveDateValidator
 from perspective.table.libbinding import t_dtype
 import pandas
@@ -131,7 +132,7 @@ class _PerspectiveAccessor(object):
         val = self.get(column_name, ridx)
 
         # first, check for numpy nans without using numpy.isnan as it tries to cast values
-        if isinstance(val, float) and str(val.real) == "nan":
+        if isinstance(val, float) and isnan(val):
             val = None
         elif isinstance(val, list) and len(val) == 1:
             # strip out values encased lists
