@@ -51,7 +51,6 @@ class TestTableNumpy(object):
         assert tbl.size() == 0
 
     def test_table_dataframe(self):
-        import pandas as pd
         data = pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
         tbl = Table(data)
         assert tbl.size() == 2

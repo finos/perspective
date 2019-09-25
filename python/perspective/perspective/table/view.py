@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import pandas
 from functools import wraps
 from random import random
 from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two
@@ -246,7 +247,6 @@ class View(object):
         Returns:
             pandas.DataFrame : a pandas dataframe containing the serialized data.
         '''
-        import pandas
         cols = self.to_numpy(options=options)
         return pandas.DataFrame(cols)
 

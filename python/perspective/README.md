@@ -76,7 +76,7 @@ To build `perspective-python:table` from source, you'll need the following C++ d
 On MacOS, you should be able to install Boost, PyBind11, and tbb from brew:
 
 ```shell
-brew install pybind11 tbb numpy
+brew install pybind11 tbb
 ```
 
 And then install Python dependencies using pip:

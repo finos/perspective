@@ -40,7 +40,7 @@ def _type_to_format(data_or_schema):
         # Can't process
         raise NotImplementedError("Dict values must be list or type!")
     else:
-        if pandas is None or not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
+        if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError("Must be dict or list!")
         else:
