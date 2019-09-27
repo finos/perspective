@@ -15,6 +15,7 @@ from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
 class Table(object):
+    # TODO: make config kwargs
     def __init__(self, data_or_schema, config=None):
         '''Construct a Table using the provided data or schema and optional configuration dictionary.
 
@@ -187,7 +188,7 @@ class Table(object):
         config = config or {}
         if config.get("columns") is None:
             config["columns"] = self.columns()  # TODO: push into C++
-        view = View(self, self._callbacks, config)
+        view = View(self, config)
         self._views.append(view._name)
         return view
 
@@ -208,7 +209,7 @@ class Table(object):
     def _update_callback(self):
         cache = {}
         for callback in self._callbacks.get_callbacks():
-            callback["callback"](cache)
+            callback["callback"](cache=cache)
 
     def __del__(self):
         '''Before GC, clean up internal resources to C++ objects'''

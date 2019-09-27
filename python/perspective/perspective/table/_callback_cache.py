@@ -26,3 +26,6 @@ class _PerspectiveCallBackCache(object):
 
     def get_callbacks(self):
         return self._callbacks
+
+    def __repr__(self):
+        return str(self._callbacks)
