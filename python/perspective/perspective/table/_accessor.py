@@ -5,10 +5,10 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from math import isnan
-from ._date_validator import _PerspectiveDateValidator
-from perspective.table.libbinding import t_dtype
 import pandas
+from math import isnan
+from perspective.table.libbinding import t_dtype
+from ._date_validator import _PerspectiveDateValidator
 
 
 def _type_to_format(data_or_schema):

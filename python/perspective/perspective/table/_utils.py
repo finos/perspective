@@ -5,8 +5,8 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from perspective.table.libbinding import t_dtype
 from datetime import date, datetime
+from perspective.table.libbinding import t_dtype
 
 
 def _extract_type(type, typemap):

@@ -30,47 +30,13 @@ or from source:
 
 [Example Notebooks](https://github.com/finos/perspective/tree/master/python/perspective/examples)
 
-![](https://github.com/finos/perspective/raw/master/python/perspective/docs/img/scatter.png)
-
-## Pandas Pivot integration
-
-### Index - Multiindex pivot
-
-![Index - Multi-index pivot support](https://github.com/finos/perspective/raw/master/python/perspective/docs/img/pandas1.png)
-
-### Column - Multiindex pivot
-
-![Column - Multi-index pivot support](https://github.com/finos/perspective/raw/master/python/perspective/docs/img/pandas2.png)
-
-## C++ Integration
-
-This package is primarily focused on integrating with the WebAssembly version of Perspective. To build the C++ side, install `perspective-python[table]`, from the [Perspective main library](https://github.com/finos/perspective/tree/master/python).
-
-## Webserver Integration
-
-`perspective-python` can be integrated with a webserver, giving you the ability to configure `perspective-viewers` in javascript from python. Right now this functionality is limited to `tornado` webservers and the `perspective-phosphor` frontend. It relies on the [phosphor-perspective-utils](https://github.com/timkpaine/phosphor-perspective-utils) javascript package.
-
-```python3
-import tornado.web
-from perspective import PerspectiveHTTPMixin
-
-
-class MyHandler(PerspectiveHTTPMixin, tornado.web.RequestHandler):
-    def get(self):
-        super(MyHandler, self).loadData(data=<data>, transfer_as_arrow=True)
-        self.write(super(MyHandler, self).getData())
-```
-
 ## Developing
-
-### `perspective-python:table`
-
-To build `perspective-python:table` from source, you'll need the following C++ dependencies:
+To build `perspective-python` from source, you'll need the following C++ dependencies:
 
 - Python 3.7
+- numpy
 - CMake
 - PyBind11
-- numpy
 - tbb
 
 On MacOS, you should be able to install Boost, PyBind11, and tbb from brew:

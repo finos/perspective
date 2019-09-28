@@ -62,11 +62,21 @@ class PerspectiveManager(object):
             if msg.get("subscribe", False) is True:
                 self._process_subscribe(msg, table_or_view, post_callback)
             else:
-                args = msg.get("args", [])
+                args = {}
                 if msg["method"] == "schema":
-                    args = [True]  # make sure schema returns string types
-                if msg["method"] != "delete":
+                    args["as_string"] = True  # make sure schema returns string types
+                elif msg["method"].startswith("to_"):
+                    # TODO
+                    for d in msg.get("args", []):
+                        args.update(d)
+                else:
+                    args = msg.get("args", [])
+
+                if msg["method"] == "update":
                     result = getattr(table_or_view, msg["method"])(*args)
+                    post_callback(self._make_message(msg["id"], result))
+                elif msg["method"] == "update":
+                    result = getattr(table_or_view, msg["method"])(**args)
                     post_callback(self._make_message(msg["id"], result))
                 else:
                     if msg["cmd"] == "view_method":

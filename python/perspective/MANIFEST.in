@@ -26,6 +26,8 @@ include tsconfig.json
 include tslint.json
 graft src
 graft style
+graft ../../cpp
+graft ../../cmake
 
 # Patterns to exclude from any directory
 global-exclude *~
