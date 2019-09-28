@@ -156,7 +156,7 @@ class View(object):
 
     def remove_delete(self):
         '''Remove the delete callback associated with this view.'''
-        delattr(self, "_delete_callback")
+        self._delete_callback = None
 
     def to_records(self, **options):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
