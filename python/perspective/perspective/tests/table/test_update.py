@@ -35,7 +35,7 @@ class TestUpdate(object):
         assert tbl.view().to_records() == [{"a": "abc", "b": 123}, {"a": "def", "b": 456}]
 
     def test_update_partial(self):
-        tbl = Table([{"a": "abc", "b": 123}], {"index": "a"})
+        tbl = Table([{"a": "abc", "b": 123}], index="a")
         tbl.update([{"a": "abc", "b": 456}])
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
@@ -45,7 +45,7 @@ class TestUpdate(object):
         assert tbl.view().to_records() == [{"a": "abc", "b": 123}, {"a": "def", "b": 456}]
 
     def test_update_columnar_partial(self):
-        tbl = Table({"a": ["abc"], "b": [123]}, {"index": "a"})
+        tbl = Table({"a": ["abc"], "b": [123]}, index="a")
         tbl.update({"a": ["abc"], "b": [456]})
         assert tbl.view().to_records() == [{"a": "abc", "b": 456}]
 
@@ -75,7 +75,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3, 4],
             "b": ["a", "b", "c", "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([5, 6, 7, 8]),
@@ -103,7 +103,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
             "b": [1]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([datetime(2019, 7, 12, 11, 0)], dtype=datetime),
@@ -119,7 +119,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3, 4],
             "b": ["a", "b", "c", "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([5, 6, 7]),
@@ -135,7 +135,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, np.nan, 3],
             "b": ["a", None, "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([4, 5]),
@@ -151,7 +151,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3],
             "b": ["a", "b", "c"]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([None, None]),
@@ -167,7 +167,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3],
             "b": ["a", "b", "c"]
-        }, {"index": "b"})
+        }, index="b")
 
         tbl.update({
             "a": np.array([None, None]),
@@ -210,7 +210,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3, 4],
             "b": ["a", "b", "c", "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [5, 6, 7, 8],
@@ -242,7 +242,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [np.datetime64(datetime(2019, 7, 11, 11, 0))],
             "b": [1]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [datetime(2019, 7, 12, 11, 0)],
@@ -260,7 +260,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3, 4],
             "b": ["a", "b", "c", "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [5, 6, 7],
@@ -278,7 +278,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, np.nan, 3],
             "b": ["a", None, "d"]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [4, 5],
@@ -296,7 +296,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3],
             "b": ["a", "b", "c"]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [None, None],
@@ -314,7 +314,7 @@ class TestUpdate(object):
         tbl = Table({
             "a": [1, 2, 3],
             "b": ["a", "b", "c"]
-        }, {"index": "b"})
+        }, index="b")
 
         update_data = pd.DataFrame({
             "a": [None, None],
@@ -372,27 +372,27 @@ class TestUpdate(object):
     # partial date & datetime updates
 
     def test_update_date_partial(self):
-        tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, {"index": "b"})
+        tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": date(2019, 7, 12), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0), "b": 1}]
 
     def test_update_date_np_partial(self):
-        tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, {"index": "b"})
+        tbl = Table({"a": [date(2019, 7, 11)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(date(2019, 7, 12)), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 0, 0), "b": 1}]
 
     def test_update_datetime_partial(self):
-        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, {"index": "b"})
+        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
         tbl.update([{"a": datetime(2019, 7, 12, 11, 0), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 11, 0), "b": 1}]
 
     def test_update_datetime_np_partial(self):
-        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, {"index": "b"})
+        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64(datetime(2019, 7, 12, 11, 0)), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 11, 0), "b": 1}]
 
     def test_update_datetime_np_ts_partial(self):
-        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, {"index": "b"})
+        tbl = Table({"a": [datetime(2019, 7, 11, 11, 0)], "b": [1]}, index="b")
         tbl.update([{"a": np.datetime64("2019-07-12T11:00"), "b": 1}])
         assert tbl.view().to_records() == [{"a": datetime(2019, 7, 12, 11, 0), "b": 1}]
 
@@ -463,7 +463,7 @@ class TestUpdate(object):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
         tbl = Table(data)
         view = tbl.view()
-        records = view.to_records({"index": True})
+        records = view.to_records(index=True)
         idx = records[0]["__INDEX__"]
         tbl.update([{
             "__INDEX__": idx,
@@ -473,7 +473,7 @@ class TestUpdate(object):
 
     def test_update_explicit_index(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "a": 1,
@@ -483,7 +483,7 @@ class TestUpdate(object):
 
     def test_update_explicit_index_multi(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "a": 1,
@@ -496,7 +496,7 @@ class TestUpdate(object):
 
     def test_update_explicit_index_multi_append(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "a": 1,
@@ -509,7 +509,7 @@ class TestUpdate(object):
 
     def test_update_explicit_index_multi_append_noindex(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}, {"a": 3, "b": 4}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "a": 1,
@@ -521,7 +521,7 @@ class TestUpdate(object):
 
     def test_update_implicit_index_with_explicit_unset(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "__INDEX__": [1],
@@ -531,7 +531,7 @@ class TestUpdate(object):
 
     def test_update_implicit_index_with_explicit_set(self):
         data = [{"a": 1, "b": 2}, {"a": 2, "b": 3}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         view = tbl.view()
         tbl.update([{
             "__INDEX__": [1],

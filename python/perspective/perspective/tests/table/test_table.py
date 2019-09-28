@@ -322,7 +322,7 @@ class TestTable(object):
 
     def test_table_index(self):
         data = [{"a": 1, "b": 2}, {"a": 1, "b": 4}]
-        tbl = Table(data, {"index": "a"})
+        tbl = Table(data, index="a")
         assert tbl.size() == 1
         assert tbl.view().to_records() == [
             {"a": 1, "b": 4}
@@ -332,7 +332,7 @@ class TestTable(object):
 
     def test_table_limit(self):
         data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data, {"limit": 1})
+        tbl = Table(data, limit=1)
         assert tbl.size() == 1
         assert tbl.view().to_records() == [
             {"a": 3, "b": 4}

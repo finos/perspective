@@ -15,8 +15,7 @@ from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 
 class Table(object):
-    # TODO: make config kwargs
-    def __init__(self, data_or_schema, config=None):
+    def __init__(self, data_or_schema, **config):
         '''Construct a Table using the provided data or schema and optional configuration dictionary.
 
         Tables are immutable - column names and data types cannot be changed after creation.
@@ -29,7 +28,6 @@ class Table(object):
                 - limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
                 - index (string) : a string column name to use as the Table's primary key.
         '''
-        config = config or {}
         self._accessor = _PerspectiveAccessor(data_or_schema)
         self._limit = config.get("limit", 4294967295)
         self._index = config.get("index", "")
@@ -38,6 +36,7 @@ class Table(object):
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
         self._views = []
+        self._delete_callback = None
 
     def clear(self):
         '''Removes all the rows in the Table, but preserves the schema and configuration.'''
@@ -171,7 +170,7 @@ class Table(object):
         self._accessor._types = types
         make_table(self._table, self._accessor, None, self._limit, self._index, t_op.OP_DELETE, True, False)
 
-    def view(self, config=None):
+    def view(self, **config):
         ''' Create a new View from this table with the configuration options in `config`.
 
         A View is an immutable set of transformations on the underlying Table, which allows
@@ -185,10 +184,9 @@ class Table(object):
             - "sort" (list(list[str]))
             - "filter" (list(list[str]))
         '''
-        config = config or {}
         if config.get("columns") is None:
             config["columns"] = self.columns()  # TODO: push into C++
-        view = View(self, config)
+        view = View(self, **config)
         self._views.append(view._name)
         return view
 
@@ -203,7 +201,7 @@ class Table(object):
         if len(self._views) > 0:
             raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
-        if hasattr(self, "_delete_callback"):
+        if self._delete_callback:
             self._delete_callback()
 
     def _update_callback(self):

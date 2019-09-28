@@ -12,14 +12,12 @@ from perspective.table.libbinding import get_data_slice_zero, get_data_slice_one
     get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING
 
-NaN = float('nan')
-
 
 def _mod(a, b):
     '''C-style modulo function'''
     if b == 0:
         # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
-        return NaN
+        return float('nan')
     d = trunc(float(a) / b)
     return a - d * b
 
