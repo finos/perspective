@@ -45,6 +45,7 @@ def superstore(count=10):
         data.append(dat)
     return pd.DataFrame(data)
 
+
 class TestTableNumpy(object):
     def test_empty_table(self):
         tbl = Table([])
@@ -60,7 +61,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "int": float # np.nan is float type - ints convert to floats when filled in
+            "int": float  # np.nan is float type - ints convert to floats when filled in
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -73,7 +74,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "float": float # can only promote to string or float
+            "float": float  # can only promote to string or float
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
@@ -101,7 +102,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "date": str # can only promote to string or float
+            "date": str  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -114,7 +115,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "datetime": datetime # can only promote to string or float
+            "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -127,7 +128,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "datetime": datetime # can only promote to string or float
+            "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -140,7 +141,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "datetime": datetime # can only promote to string or float
+            "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
@@ -153,7 +154,7 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.schema() == {
             "str": str,
-            "datetime": datetime # can only promote to string or float
+            "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {

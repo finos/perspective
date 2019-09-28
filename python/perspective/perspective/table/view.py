@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import pandas
-from functools import wraps
+from functools import partial, wraps
 from random import random
 from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two
 from .view_config import ViewConfig
@@ -16,7 +16,7 @@ from ._utils import _str_to_pythontype
 
 
 class View(object):
-    def __init__(self, Table, callbacks, config=None):
+    def __init__(self, Table, config=None):
         '''Private constructor for a View object - use the Table.view() method to create Views.
 
         A View object represents a specific transform (configuration or pivot,
@@ -27,7 +27,7 @@ class View(object):
         View objects are immutable, and will remain in memory and actively process
         updates until its delete() method is called.
         '''
-        self._name = str(random())
+        self._name = "py_" + str(random())
         self._table = Table
         self._config = ViewConfig(config or {})
         self._sides = self.sides()
@@ -41,7 +41,7 @@ class View(object):
             self._view = make_view_two(self._table._table, self._name, COLUMN_SEPARATOR_STRING, self._config, date_validator)
 
         self._column_only = self._view.is_column_only()
-        self._callbacks = callbacks
+        self._callbacks = self._table._callbacks
 
     def get_config(self):
         '''Returns the original dictionary config passed in by the user.'''
@@ -118,19 +118,7 @@ class View(object):
             if not self._view.get_deltas_enabled():
                 self._view.set_deltas_enabled(True)
 
-        # get deltas back from the view, and then call the user-defined callback
-        def wrapped_callback(cache):
-            if mode == "cell":
-                if cache.get("step_delta") is None:
-                    raise NotImplementedError("not implemented get_step_delta")
-                callback(cache["step_delta"])
-            elif mode == "row":
-                if cache.get("row_delta") is None:
-                    raise NotImplementedError("not implemented get_row_delta")
-                callback(cache["row_delta"])
-            else:
-                callback()
-
+        wrapped_callback = partial(self._wrapped_on_update_callback, mode=mode, callback=callback)
         self._callbacks.add_callback({
             "name": self._name,
             "orig_callback": callback,
@@ -160,9 +148,14 @@ class View(object):
     def delete(self):
         '''Delete the view and clean up associated resources and references.'''
         self._table._views.pop(self._table._views.index(self._name))
+        # remove the callbacks associated with this view
         self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
         if hasattr(self, "_delete_callback"):
             self._delete_callback()
+
+    def remove_delete(self):
+        '''Remove the delete callback associated with this view.'''
+        delattr(self, "_delete_callback")
 
     def to_records(self, options=None):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.
@@ -267,5 +260,23 @@ class View(object):
                 hidden += 1
         return hidden
 
+    def _wrapped_on_update_callback(self, **kwargs):
+        '''Provide the user-defined callback function with additional metadata from the view.'''
+        mode = kwargs["mode"]
+        cache = kwargs["cache"]
+        callback = kwargs["callback"]
+
+        if mode == "cell":
+            if cache.get("step_delta") is None:
+                raise NotImplementedError("not implemented get_step_delta")
+            callback(cache["step_delta"])
+        elif mode == "row":
+            if cache.get("row_delta") is None:
+                raise NotImplementedError("not implemented get_row_delta")
+            callback(cache["row_delta"])
+        else:
+            callback()
+
     def __del__(self):
+        '''Make sure callbacks are cleaned up when GC is called.'''
         self.delete()

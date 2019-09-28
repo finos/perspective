@@ -6,5 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from .table import Table
+from .manager import PerspectiveManager
 
-__all__ = ["Table"]
+__all__ = ["Table", "PerspectiveManager"]

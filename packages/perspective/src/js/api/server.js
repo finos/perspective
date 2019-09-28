@@ -180,7 +180,7 @@ export class Server {
             if (callback) {
                 obj[msg.method](callback, ...msg.args);
             } else {
-                console.error(`Callback not found for remote call "${msg}"`);
+                console.error(`Callback not found for remote call "${JSON.stringify(msg)}"`);
             }
         } catch (error) {
             this.process_error(msg, error);
