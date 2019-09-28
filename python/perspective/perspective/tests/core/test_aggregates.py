@@ -15,7 +15,7 @@ class TestAggregates:
 
     def test_aggregates(self):
         import pandas as pd
-        from perspective import psp, Plugin, Aggregate, PSPException
+        from perspective import psp, Plugin, Aggregate, PerspectiveError
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, Plugin.YBAR, None, ['1'], None, ['1'], {'1': Aggregate.ANY})
@@ -23,15 +23,15 @@ class TestAggregates:
             try:
                 psp(df, Plugin.YBAR, None, ['1'], None, ['1'], {'1': 'test'})
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass
             try:
                 psp(df, Plugin.YBAR, None, ['1'], None, ['1'], {'1': 5})
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass
             try:
                 psp(df, Plugin.YBAR, None, ['1'], None, ['1'], 5)
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass

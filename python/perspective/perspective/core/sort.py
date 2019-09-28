@@ -21,4 +21,4 @@ class Sort(Enum):
 
     @staticmethod
     def options():
-        return list(map(lambda c: c.value, Sort))
+        return list(c.value for c in Sort)

@@ -29,4 +29,4 @@ class Functions(Enum):
 
     @staticmethod
     def options():
-        return list(map(lambda c: c.value, Functions))
+        return list(c.value for c in Functions)

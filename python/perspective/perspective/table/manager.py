@@ -8,7 +8,7 @@
 import logging
 from functools import partial
 from .table import Table
-from ._exception import PerspectiveError
+from ..core.exception import PerspectiveError
 
 
 class PerspectiveManager(object):

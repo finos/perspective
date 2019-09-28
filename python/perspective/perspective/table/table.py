@@ -10,7 +10,7 @@ from perspective.table.libbinding import make_table, str_to_filter_op, t_filter_
 from .view import View
 from ._accessor import _PerspectiveAccessor
 from ._callback_cache import _PerspectiveCallBackCache
-from ._exception import PerspectiveError
+from ..core.exception import PerspectiveError
 from ._utils import _dtype_to_pythontype, _dtype_to_str
 
 

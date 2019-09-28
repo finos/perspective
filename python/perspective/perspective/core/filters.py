@@ -7,7 +7,7 @@
 #
 
 BOOLEAN_FILTERS = ["&", "|", "==", "!=", "or", "and"]
-NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is nan", "is not nan"]
+NUMBER_FILTERS = ["<", ">", "==", "<=", ">=", "!=", "is null", "is not null"]
 STRING_FILTERS = ["==", "contains", "!=", "in", "not in", "begins with", "ends with"]
 DATETIME_FILTERS = ["<", ">", "==", "<=", ">=", "!="]
 
