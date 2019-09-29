@@ -310,11 +310,15 @@ export
                 this.pspNode.load(this.schema as Schema, options as TableOptions);
             }
 
-            if (Array.isArray(data) && data.length > 0) {
-                if (this._wrap) {
-                    this.pspNode.update([data]);
+            if (Array.isArray(data)) {
+                if (data.length > 0) {
+                    if (this._wrap) {
+                        this.pspNode.update([data]);
+                    } else {
+                        this.pspNode.update(data);
+                    }
                 } else {
-                    this.pspNode.update(data);
+                    console.warn('Perspective received length 0 data');
                 }
             } else {
                 if(Object.keys(data)){
