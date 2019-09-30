@@ -259,6 +259,7 @@ export default function(Module) {
         this.callbacks = callbacks;
         this.name = name;
         this.overridden_types = overridden_types;
+        this._delete_callbacks = [];
         bindall(this);
     }
 
@@ -294,9 +295,7 @@ export default function(Module) {
             i++;
         }
         this.callbacks.length = j;
-        if (this._delete_callback) {
-            this._delete_callback();
-        }
+        this._delete_callbacks.forEach(cb => cb());
     };
 
     /**
@@ -864,16 +863,21 @@ export default function(Module) {
      * Register a callback with this {@link module:perspective~view}.  Whenever the {@link module:perspective~view}
      * is deleted, this callback will be invoked.
      *
-     * @param {function} callback A callback function invoked on update.  The
-     *     parameter to this callback shares a structure with the return type of
-     *     {@link module:perspective~view#to_json}.
+     * @param {function} callback A callback function invoked on delete.
      */
     view.prototype.on_delete = function(callback) {
-        this._delete_callback = callback;
+        this._delete_callbacks.push(callback);
     };
 
-    view.prototype.remove_delete = function() {
-        this._delete_callback = undefined;
+    /**
+     * Unregister a previously registered delete callback with this {@link module:perspective~view}.
+     *
+     * @param {function} callback A delete callback function to be removed
+     */
+    view.prototype.remove_delete = function(callback) {
+        const initial_length = this._delete_callbacks.length;
+        filterInPlace(this._delete_callbacks, cb => cb !== callback);
+        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
     };
 
     /**
@@ -975,6 +979,7 @@ export default function(Module) {
         this.views = [];
         this.limit = limit;
         this.overridden_types = overridden_types;
+        this._delete_callbacks = [];
         bindall(this);
     }
 
@@ -1024,21 +1029,30 @@ export default function(Module) {
         _reset_process(this.get_id());
         this._Table.unregister_gnode(this.gnode_id);
         this._Table.delete();
-        if (this._delete_callback) {
-            this._delete_callback();
-        }
+        this._delete_callbacks.forEach(callback => callback());
     };
 
     /**
-     * Register a callback with this {@link module:perspective~table}.  Whenever the {@link module:perspective~view}
+     * Register a callback with this {@link module:perspective~table}.  Whenever the {@link module:perspective~table}
      * is deleted, this callback will be invoked.
      *
-     * @param {function} callback A callback function invoked on update.  The
+     * @param {function} callback A callback function invoked on delete.  The
      *     parameter to this callback shares a structure with the return type of
      *     {@link module:perspective~table#to_json}.
      */
     table.prototype.on_delete = function(callback) {
-        this._delete_callback = callback;
+        this._delete_callbacks.push(callback);
+    };
+
+    /**
+     * Unregister a previously registered delete callback with this {@link module:perspective~table}.
+     *
+     * @param {function} callback A delete callback function to be removed
+     */
+    table.prototype.remove_delete = function(callback) {
+        const initial_length = this._delete_callbacks.length;
+        filterInPlace(this._delete_callbacks, cb => cb !== callback);
+        console.assert(initial_length > this._delete_callbacks.length, `"callback" does not match a registered delete callbacks`);
     };
 
     /**

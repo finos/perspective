@@ -35,6 +35,7 @@ class Table(object):
         self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
+        self._delete_callbacks = _PerspectiveCallBackCache()
         self._views = []
         self._delete_callback = None
 
@@ -211,7 +212,13 @@ class Table(object):
         '''
         if not callable(callback):
             raise ValueError("on_delete callback must be a callable function!")
-        self._delete_callback = callback
+        self._delete_callbacks.add_callback(callback)
+
+    def remove_delete(self, callback):
+        '''Remove the delete callback associated with this table.'''
+        if not callable(callback):
+            return ValueError("remove_delete callback should be a callable function!")
+        self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def delete(self):
         '''Delete this table and clean up associated resources in the core engine.
@@ -223,8 +230,7 @@ class Table(object):
         if len(self._views) > 0:
             raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
-        if self._delete_callback:
-            self._delete_callback()
+        [cb() for cb in self._delete_callbacks.get_callbacks()]
 
     def _update_callback(self):
         '''When the table is updated with new data, call each of the callbacks associated with the views.'''

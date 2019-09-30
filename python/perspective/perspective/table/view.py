@@ -13,6 +13,7 @@ from .view_config import ViewConfig
 from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
+from ._callback_cache import _PerspectiveCallBackCache
 
 
 class View(object):
@@ -42,7 +43,7 @@ class View(object):
 
         self._column_only = self._view.is_column_only()
         self._callbacks = self._table._callbacks
-        self._delete_callback = None
+        self._delete_callbacks = _PerspectiveCallBackCache()
 
     def get_config(self):
         '''Returns the original dictionary config passed in by the user.'''
@@ -172,7 +173,7 @@ class View(object):
         '''
         if not callable(callback):
             return ValueError("on_delete callback must be a callable function!")
-        self._delete_callback = callback
+        self._delete_callbacks.add_callback(callback)
 
     def delete(self):
         '''Delete the view and clean up all callbacks associated with the view.
@@ -182,12 +183,13 @@ class View(object):
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
         self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
-        if self._delete_callback:
-            self._delete_callback()
+        [cb() for cb in self._delete_callbacks.get_callbacks()]
 
-    def remove_delete(self):
+    def remove_delete(self, callback):
         '''Remove the delete callback associated with this view.'''
-        self._delete_callback = None
+        if not callable(callback):
+            return ValueError("remove_delete callback should be a callable function!")
+        self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
     def to_records(self, **options):
         '''Serialize the view's dataset into a `list` of `dict`s containing each individual row.

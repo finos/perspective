@@ -7,7 +7,7 @@
  *
  */
 
-import {subscribe, async_queue} from "./dispatch.js";
+import {unsubscribe, subscribe, async_queue} from "./dispatch.js";
 import {view} from "./view_api.js";
 import {bindall} from "../utils.js";
 
@@ -126,6 +126,8 @@ table.prototype.delete = async_queue("delete", "table_method");
 table.prototype.on_delete = subscribe("on_delete", "table_method", true);
 
 table.prototype.remove = async_queue("remove", "table_method");
+
+table.prototype.remove_delete = unsubscribe("remove_delete", "table_method", true);
 
 table.prototype.update = function(data) {
     return new Promise((resolve, reject) => {
