@@ -14,7 +14,7 @@ class ViewConfig(object):
         '''Receives a user-provided config dict and standardizes it for consumption by the python client and the core engine.
 
         Params:
-            config (dict): the configuration dictionary provided by the user
+            config (dict) : optional keyword args that configure the view.
         '''
         self._config = config
         self._row_pivots = self._config.get('row_pivots', [])

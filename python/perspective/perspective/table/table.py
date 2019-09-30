@@ -177,12 +177,21 @@ class Table(object):
         for querying, pivoting, aggregating, sorting, and filtering of data.
 
         Params:
-            config (dict or None) : a dictionary containing any of the optional keys below:
+            **config (dict) : optional keyword arguments that configure and transform the view:
             - "row_pivots" (list[str]) : a list of column names to use as row pivots
             - "column_pivots" (list[str]) : a list of column names to use as column pivots
             - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
             - "sort" (list(list[str]))
             - "filter" (list(list[str]))
+
+        Returns:
+            View : a new instance of the `View` class.
+
+        Examples:
+            >>> tbl = Table({"a": [1, 2, 3]})
+            >>> view = tbl.view(filter=[["a", "==", 1]]
+            >>> view.to_dict()
+            >>> {"a": [1]}
         '''
         if config.get("columns") is None:
             config["columns"] = self.columns()  # TODO: push into C++
@@ -191,13 +200,26 @@ class Table(object):
         return view
 
     def on_delete(self, callback):
-        '''Register a callback with the table that will be invoked when the `delete()` method is called.'''
+        '''Register a callback with the table that will be invoked when the `delete()` method is called on the Table.
+
+        Examples:
+            >>> def deleter():
+            >>>     print("Delete called!")
+            >>> table.on_delete(deleter)
+            >>> table.delete()
+            >>> Delete called!
+        '''
         if not callable(callback):
             raise ValueError("on_delete callback must be a callable function!")
         self._delete_callback = callback
 
     def delete(self):
-        '''Delete this table and clean up associated resources.'''
+        '''Delete this table and clean up associated resources in the core engine.
+
+        Tables with associated views cannot be deleted.
+
+        Called when `__del__` is called by GC.
+        '''
         if len(self._views) > 0:
             raise PerspectiveError("Cannot delete a Table with active views still linked to it - call delete() on each view, and try again.")
         self._table.unregister_gnode(self._gnode_id)
@@ -205,10 +227,11 @@ class Table(object):
             self._delete_callback()
 
     def _update_callback(self):
+        '''When the table is updated with new data, call each of the callbacks associated with the views.'''
         cache = {}
         for callback in self._callbacks.get_callbacks():
             callback["callback"](cache=cache)
 
     def __del__(self):
-        '''Before GC, clean up internal resources to C++ objects'''
+        '''Before GC, clean up internal resources to C++ objects through `delete()`.'''
         self.delete()

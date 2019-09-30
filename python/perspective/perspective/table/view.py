@@ -49,7 +49,15 @@ class View(object):
         return self._config.get_config()
 
     def sides(self):
-        '''How many pivoted sides does this View have?'''
+        '''Returns the number of pivoted sides of this View.
+
+        0-sided views have no pivots applied.
+        1-sided views have one or more `row_pivots` applied.
+        2-sided views have one or more `row_pivots` and `column_pivots` applied, or one or more `column_pivots` without `row_pivots`.
+
+        Returns:
+            int : 0, 1, or 2
+        '''
         if len(self._config.get_row_pivots()) > 0 or len(self._config.get_column_pivots()) > 0:
             if len(self._config.get_column_pivots()) > 0:
                 return 2
@@ -107,6 +115,19 @@ class View(object):
         return {item[0]: _str_to_pythontype(item[1]) for item in self._view.schema().items()}
 
     def on_update(self, callback, mode=None):
+        '''Add a callback to be fired when `Table.update()` is called on the underlying table.
+
+        Multiple callbacks can be set through calling `on_update` multiple times, and will be called in the order they are set.
+
+        Callback must be a callable function that takes no parameters.
+
+        Examples:
+            >>> def updater():
+            >>>     print("Update fired!")
+            >>> view.on_update(updater)
+            >>> table.update({"a": [1]})'
+            >>> Update fired!
+        '''
         mode = mode or "none"
 
         if not callable(callback):
@@ -130,7 +151,7 @@ class View(object):
         '''Given a callback function, remove it from the list of callbacks.
 
         Params:
-            callback (func) : a callback that needs to be removed from the list of callbacks
+            callback (func) : a function reference that will be removed.
         '''
         if not callable(callback):
             return ValueError("remove_update callback should be a callable function!")
@@ -140,14 +161,24 @@ class View(object):
         '''Set a callback to be run when the `delete()` method is called on the View.
 
         Params:
-            callback (func) : a callback to run after the delete operation has completed
+            callback (func) : a callback to run after `delete()` has been called.
+
+        Examples:
+            >>> def deleter():
+            >>>     print("Delete called!")
+            >>> view.on_delete(deleter)
+            >>> view.delete()
+            >>> Delete called!
         '''
         if not callable(callback):
             return ValueError("on_delete callback must be a callable function!")
         self._delete_callback = callback
 
     def delete(self):
-        '''Delete the view and clean up associated resources and references.'''
+        '''Delete the view and clean up all callbacks associated with the view.
+
+        Called when `__del__` is called by GC.
+        '''
         self._table._views.pop(self._table._views.index(self._name))
         # remove the callbacks associated with this view
         self._callbacks.remove_callbacks(lambda cb: cb["name"] != self._name)
