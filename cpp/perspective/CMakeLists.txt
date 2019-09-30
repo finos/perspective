@@ -155,6 +155,7 @@ if (PSP_WASM_BUILD)
 	set(CMAKE_EXECUTABLE_SUFFIX ".js")
 	list(APPEND CMAKE_PREFIX_PATH /usr/local)
 	include_directories("/usr/local/include")
+	include_directories("/usr/local/Homebrew/include")
 	include_directories("/boost_includes")
 
 	set(EXTENDED_FLAGS " \

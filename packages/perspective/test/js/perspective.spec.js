@@ -25,6 +25,7 @@ const sort_tests = require("./sort.js");
 const multiple_tests = require("./multiple.js");
 const pivot_nulls = require("./pivot_nulls.js");
 const computed = require("./computed.js");
+const delete_tests = require("./delete.js");
 
 describe("perspective.js", function() {
     Object.keys(RUNTIMES).forEach(function(mode) {
@@ -41,6 +42,7 @@ describe("perspective.js", function() {
             multiple_tests(RUNTIMES[mode], mode);
             pivot_nulls(RUNTIMES[mode], mode);
             computed(RUNTIMES[mode], mode);
+            delete_tests(RUNTIMES[mode], mode);
         });
     });
 });

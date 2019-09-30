@@ -356,36 +356,4 @@ class TestTable(object):
         tbl.replace(data2)
         assert tbl.view().to_records() == data2
 
-    # delete
-
-    def test_table_delete(self):
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        tbl.delete()
-        # don't segfault
-
-    def test_table_delete_callback(self):
-        sentinel = False
-
-        def callback():
-            nonlocal sentinel
-            sentinel = True
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        tbl.on_delete(callback)
-        tbl.delete()
-        assert sentinel == True
-
-    def test_table_delete_with_view(self):
-        sentinel = False
-
-        def callback():
-            nonlocal sentinel
-            sentinel = True
-        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
-        tbl = Table(data)
-        tbl.on_delete(callback)
-        view = tbl.view()
-        view.delete()
-        tbl.delete()
-        assert sentinel == True
+    
