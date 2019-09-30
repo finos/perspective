@@ -1,13 +1,16 @@
-from perspective import Table, PerspectiveManager
-from datetime import date, datetime
+import os
+import os.path
+import sys
 import json
+import logging
 import tornado.websocket
 import tornado.web
 import tornado.ioloop
 import pandas as pd
-import sys
-import os
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
+from datetime import datetime
+
+sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
+from perspective import Table, PerspectiveManager
 
 '''
 Import the Table and PerspectiveManager classes.
@@ -78,9 +81,9 @@ if __name__ == "__main__":
             * Numpy arrays can also be used in this format, i.e. {"a": numpy.arange(100)}
         - DataFrame (pandas.DataFrame): Perspective has full support for dataframe loading, updating, and editing.
 
-    For this example, we'll load a sample dataframe from a pickle, and provide it to the Table.
+    For this example, we'll load a sample dataframe from CSV, and provide it to the Table.
     '''
-    tbl = Table(pd.read_pickle("FTSE100.pkl"))
+    tbl = Table(pd.read_csv("superstore.csv"))
 
     '''Once the Table is created, pass it to the manager instance with a name.
 
@@ -93,5 +96,6 @@ if __name__ == "__main__":
     # start the Tornado server
     app = make_app()
     app.listen(8888)
+    logging.critical("Listending on http://localhost:8888")
     loop = tornado.ioloop.IOLoop.current()
     loop.start()

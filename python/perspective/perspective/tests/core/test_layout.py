@@ -15,7 +15,7 @@ class TestLayout:
 
     def test_layout(self):
         import pandas as pd
-        from perspective import psp, Plugin, PSPException
+        from perspective import psp, Plugin, PerspectiveError
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, Plugin.YBAR)
@@ -23,18 +23,18 @@ class TestLayout:
             try:
                 psp(df, 'test')
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass
 
             try:
                 psp(df, 5)
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass
 
     def test_layout2(self):
         import pandas as pd
-        from perspective import psp, Plugin, PSPException
+        from perspective import psp, Plugin, PerspectiveError
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, Plugin.YBAR, None, '1')
@@ -42,7 +42,7 @@ class TestLayout:
             try:
                 psp(df, Plugin.YBAR, None, 5)
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass
 
     def test_layout3(self):
@@ -66,7 +66,7 @@ class TestLayout:
 
     def test_layout5(self):
         import pandas as pd
-        from perspective import psp, Plugin, PSPException
+        from perspective import psp, Plugin, PerspectiveError
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
             psp(df, Plugin.YBAR, None, ['1'])
@@ -74,5 +74,5 @@ class TestLayout:
             try:
                 psp(df, Plugin.YBAR, None, ['1'], None, None, None, 5)
                 assert False
-            except PSPException:
+            except PerspectiveError:
                 pass

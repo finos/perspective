@@ -10,6 +10,5 @@ from .base import PerspectiveBaseMixin  # noqa: F401
 from .psp import psp  # noqa: F401
 from .plugin import Plugin  # noqa: F401
 from .aggregate import Aggregate  # noqa: F401
-from .exception import PSPException  # noqa: F401
+from .exception import PerspectiveError  # noqa: F401
 from .widget import PerspectiveWidget  # noqa: F401
-from .web import PerspectiveHTTPMixin  # noqa: F401

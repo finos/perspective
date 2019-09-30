@@ -5,21 +5,19 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from math import trunc
 import numpy as np
+from math import trunc
 from perspective.table.libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
     get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
     get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING
-
-NaN = float('nan')
 
 
 def _mod(a, b):
     '''C-style modulo function'''
     if b == 0:
         # Javascript returns NaN in cases of division by 0; return -1 because None would fail comparisons with other ints
-        return NaN
+        return float('nan')
     d = trunc(float(a) / b)
     return a - d * b
 

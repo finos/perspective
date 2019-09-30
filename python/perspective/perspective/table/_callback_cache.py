@@ -15,7 +15,7 @@ class _PerspectiveCallBackCache(object):
         self._callbacks.append(callback)
 
     def remove_callbacks(self, condition):
-        '''Remove callback functions that satisfy the given condition
+        '''Remove callback functions that satisfy the given condition.
 
         Params:
             condition (func) : a function that returns either True or False. If True is returned, filter the item out.

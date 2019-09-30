@@ -22,40 +22,40 @@ class TestWidget:
 
     def test_computedColumns2(self):
         from perspective.core.widget import PerspectiveWidget
-        from perspective import PSPException
+        from perspective import PerspectiveError
 
         try:
             PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2'], 'func': 'sdfgsdfgsdf'})
             assert False
-        except PSPException:
+        except PerspectiveError:
             pass
 
     def test_computedColumns4(self):
         from perspective.core.widget import PerspectiveWidget
-        from perspective import PSPException
+        from perspective import PerspectiveError
 
         try:
             PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2']})
             assert False
-        except PSPException:
+        except PerspectiveError:
             pass
 
     def test_computedColumns5(self):
         from perspective.core.widget import PerspectiveWidget
-        from perspective import PSPException
+        from perspective import PerspectiveError
 
         try:
             PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns=5)
             assert False
-        except PSPException:
+        except PerspectiveError:
             pass
 
     def test_computedColumns6(self):
         from perspective.core.widget import PerspectiveWidget
-        from perspective import PSPException
+        from perspective import PerspectiveError
 
         try:
             PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': {}, 'func': 'add'})
             assert False
-        except PSPException:
+        except PerspectiveError:
             pass

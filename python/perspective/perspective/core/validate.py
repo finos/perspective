@@ -7,7 +7,7 @@
 #
 from six import iteritems, string_types
 from .computed import Functions
-from .exception import PSPException
+from .exception import PerspectiveError
 from .plugin import Plugin
 from .aggregate import Aggregate
 from .sort import Sort
@@ -19,10 +19,10 @@ def validate_plugin(plugin):
         return plugin.value
     elif isinstance(plugin, string_types):
         if plugin not in Plugin.options():
-            raise PSPException('Unrecognized plugin: %s', plugin)
+            raise PerspectiveError('Unrecognized plugin: %s', plugin)
         return plugin
     else:
-        raise PSPException('Cannot parse plugin type: %s', str(type(plugin)))
+        raise PerspectiveError('Cannot parse plugin type: %s', str(type(plugin)))
 
 
 def validate_columns(columns):
@@ -34,7 +34,7 @@ def validate_columns(columns):
     if isinstance(columns, list):
         return columns
     else:
-        raise PSPException('Cannot parse columns type: %s', str(type(columns)))
+        raise PerspectiveError('Cannot parse columns type: %s', str(type(columns)))
 
 
 def _validate_pivots(pivots):
@@ -46,7 +46,7 @@ def _validate_pivots(pivots):
     if isinstance(pivots, list):
         return pivots
     else:
-        raise PSPException('Cannot parse rowpivots type: %s', str(type(pivots)))
+        raise PerspectiveError('Cannot parse rowpivots type: %s', str(type(pivots)))
 
 
 def validate_rowpivots(rowpivots):
@@ -66,12 +66,12 @@ def validate_aggregates(aggregates):
                 aggregates[k] = v.value
             elif isinstance(v, string_types):
                 if v not in Aggregate.options():
-                    raise PSPException('Unrecognized aggregate: %s', v)
+                    raise PerspectiveError('Unrecognized aggregate: %s', v)
             else:
-                raise PSPException('Cannot parse aggregation of type %s', str(type(v)))
+                raise PerspectiveError('Cannot parse aggregation of type %s', str(type(v)))
         return aggregates
     else:
-        raise PSPException('Cannot parse aggregates type: %s', str(type(aggregates)))
+        raise PerspectiveError('Cannot parse aggregates type: %s', str(type(aggregates)))
 
 
 def validate_sort(sort):
@@ -88,11 +88,11 @@ def validate_sort(sort):
             if isinstance(s, Sort):
                 s = s.value
             elif not isinstance(s, string_types) or s not in Sort.options():
-                raise PSPException('Unrecognized Sort: %s', s)
+                raise PerspectiveError('Unrecognized Sort: %s', s)
             ret.append([col, s])
         return ret
     else:
-        raise PSPException('Cannot parse sort type: %s', str(type(sort)))
+        raise PerspectiveError('Cannot parse sort type: %s', str(type(sort)))
 
 
 def validate_computedcolumns(computedcolumns, columns=None):
@@ -107,32 +107,32 @@ def validate_computedcolumns(computedcolumns, columns=None):
         ret = []
         for i, d in enumerate(computedcolumns):
             if not isinstance(d, dict):
-                raise PSPException('Cannot parse computedcolumns')
+                raise PerspectiveError('Cannot parse computedcolumns')
 
             if 'inputs' not in d or 'func' not in d:
-                raise PSPException('Cannot parse computedcolumns - inputs or func missing')
+                raise PerspectiveError('Cannot parse computedcolumns - inputs or func missing')
 
             if 'name' not in d:
                 d['name'] = 'Anon-{}'.format(i)
 
             inputs = d['inputs']
             if not isinstance(inputs, list):
-                raise PSPException('Cannot parse computedcolumns - inputs is not list')
+                raise PerspectiveError('Cannot parse computedcolumns - inputs is not list')
 
             for i, input in enumerate(inputs):
                 # FIXME check if column exists?
                 # if columns and (input not in columns):
-                #     raise PSPException('Cannot parse computedcolumns - unrecognized column {}'.format(input))
+                #     raise PerspectiveError('Cannot parse computedcolumns - unrecognized column {}'.format(input))
                 if not isinstance(input, string_types):
                     inputs[i] = str(input)
 
             if d['func'] not in Functions.options():
-                raise PSPException('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
+                raise PerspectiveError('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
             ret.append(d)
         return ret
 
     else:
-        raise PSPException('Cannot parse computedcolumns type: %s', str(type(computedcolumns)))
+        raise PerspectiveError('Cannot parse computedcolumns type: %s', str(type(computedcolumns)))
 
 
 def validate_filters(filters, columns=None):
@@ -148,23 +148,23 @@ def validate_filters(filters, columns=None):
         ret = []
         for i, d in enumerate(filters):
             if not isinstance(d, list):
-                raise PSPException('Cannot parse computedcolumns')
+                raise PerspectiveError('Cannot parse computedcolumns')
 
             if len(d) != 3:
-                raise PSPException('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
+                raise PerspectiveError('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
 
             for i, l in enumerate(d):
                 # FIXME check if column exists?
                 # if columns and (l not in columns):
-                #     raise PSPException('Cannot parse computedcolumns - unrecognized column {}'.format(input))
+                #     raise PerspectiveError('Cannot parse computedcolumns - unrecognized column {}'.format(input))
                 if i == 1:
                     if l not in ALL_FILTERS:
-                        raise PSPException('Unrecognized filter operator: {}'.format(l))
+                        raise PerspectiveError('Unrecognized filter operator: {}'.format(l))
                 pass
             ret.append(d)
         return ret
     else:
-        raise PSPException('Cannot parse filters type: %s', str(type(filters)))
+        raise PerspectiveError('Cannot parse filters type: %s', str(type(filters)))
 
 
 def validate_plugin_config(plugin_config):

@@ -40,4 +40,4 @@ class Plugin(Enum):
 
     @staticmethod
     def options():
-        return list(map(lambda c: c.value, Plugin))
+        return list(c.value for c in Plugin)
