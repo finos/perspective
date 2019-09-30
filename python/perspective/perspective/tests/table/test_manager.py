@@ -67,6 +67,24 @@ class TestPerspectiveManager(object):
             "b": ["str1", "str2", "str3"]
         }
 
+    def test_manager_create_indexed_table_and_remove(self):
+        message = {"id": 1, "name": "table1", "cmd": "table", "args": [data], "options": {"index": "a"}}
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        manager.process(message, self.post)
+        assert manager._tables["table1"].schema() == {
+            "a": int,
+            "b": str
+        }
+        assert manager._tables["table1"]._index == "a"
+        remove_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "remove", "args": [[1, 2]]}
+        manager.process(remove_message, self.post)
+        assert manager._tables["table1"].view().to_dict() == {
+            "a": [3],
+            "b": ["c"]
+        }
+
     def test_manager_create_view_zero(self):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
@@ -104,7 +122,11 @@ class TestPerspectiveManager(object):
         }
 
     def test_manager_to_dict(self):
+        sentinel = False
+
         def handle_to_dict(msg):
+            nonlocal sentinel
+            sentinel = True
             assert msg["data"] == data
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
@@ -113,6 +135,23 @@ class TestPerspectiveManager(object):
         manager.process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
         manager.process(to_dict_message, handle_to_dict)
+        assert sentinel is True
+
+    def test_manager_to_dict_with_options(self):
+        sentinel = False
+
+        def handle_to_dict(msg):
+            nonlocal sentinel
+            sentinel = True
+            assert msg["data"] == [{"a": 1, "b": "a"}]
+        message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        manager.process(message, self.post)
+        to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict", "args": [{"start_row": 0, "end_row": 1}]}
+        manager.process(to_dict_message, handle_to_dict)
+        assert sentinel is True
 
     def test_manager_create_view_and_update_table(self):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}

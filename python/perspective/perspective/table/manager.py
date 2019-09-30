@@ -30,7 +30,7 @@ class PerspectiveManager(object):
         '''
         if not isinstance(msg, dict):
             raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.dumps()`.")
-
+        print(msg)
         cmd = msg["cmd"]
 
         if cmd == "init":
@@ -72,15 +72,19 @@ class PerspectiveManager(object):
                 else:
                     args = msg.get("args", [])
 
-                if msg["method"] == "update":
-                    result = getattr(table_or_view, msg["method"])(*args)
-                    post_callback(self._make_message(msg["id"], result))
-                elif msg["method"] == "update":
+                if msg["method"] == "delete" and msg["cmd"] == "view_method":
+                    # views can be removed, but tables cannot
+                    self._views.pop(msg["name"], None)
+                    return
+
+                if msg["method"].startswith("to_"):
+                    # to_format takes dictionary of options
                     result = getattr(table_or_view, msg["method"])(**args)
-                    post_callback(self._make_message(msg["id"], result))
-                else:
-                    if msg["cmd"] == "view_method":
-                        self._views.pop(msg["name"], None)
+                elif msg["method"] != "delete":
+                    # otherwise parse args as list
+                    result = getattr(table_or_view, msg["method"])(*args)
+                # return the result to the client
+                post_callback(self._make_message(msg["id"], result))
         except Exception as error:
             logging.error(self._make_error_message(msg["id"], error))
 
