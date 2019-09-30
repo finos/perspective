@@ -30,7 +30,7 @@ class PerspectiveManager(object):
         '''
         if not isinstance(msg, dict):
             raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.dumps()`.")
-        print(msg)
+
         cmd = msg["cmd"]
 
         if cmd == "init":
