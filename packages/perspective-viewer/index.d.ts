@@ -1,8 +1,8 @@
-import {TableData, TableOptions, Schema, View, AggregateConfig} from '@finos/perspective';
+import {Table, TableData, TableOptions, Schema, View, ViewConfig} from '@finos/perspective';
 
 declare module '@finos/perspective-viewer' {
-    export type PerspectiveViewer = {
-        load(data: TableData): void;
+    export interface PerspectiveViewer extends PerspectiveViewerOptions, HTMLElement {
+        load(data: TableData | Table): void;
         load(schema: Schema, options: TableOptions): void;
         update(data: TableData): void;
         notifyResize(): void;
@@ -12,20 +12,15 @@ declare module '@finos/perspective-viewer' {
         save(): any;
         restore(x: any): Promise<void>;
         restyleElement(): void;
+    }
 
-        sort?: Array<string>;
-        columns?: Array<string>;
-        aggregates?: Array<AggregateConfig>;
-        filters?: Array<Array<string>>;
-        plugin?: string;
-        column_pivots?: Array<string>;
-        row_pivots?: Array<string>;
-
-        schema?: Schema;
-        index?: string;
-        limit?: number;
-
-    } & HTMLElement;
+    export interface PerspectiveViewerOptions extends ViewConfig {
+        plugin? : string;
+        plugin_config?: any;
+        filters? : Array<Array<string>>;
+        computed_columns? : { [column_name:string]: string}[];
+    }
+    
 
 }
 

@@ -7,10 +7,13 @@
  *
  */
 
-export * from './plugin';
-export * from './widget';
-export * from './version';
+export * from "./client";
+export * from "./model";
+export * from "./plugin";
+export * from "./version";
+export * from "./view";
+export * from "./widget";
 
 /* css */
-import '!!style-loader!css-loader!less-loader!../less/index.less';
+import "!!style-loader!css-loader!less-loader!../less/index.less";
 

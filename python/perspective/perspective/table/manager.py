@@ -29,7 +29,7 @@ class PerspectiveManager(object):
             post_callback (callable) : a function that returns data to the client
         '''
         if not isinstance(msg, dict):
-            raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.dumps()`.")
+            raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.loads()`.")
 
         cmd = msg["cmd"]
 

@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from six import iteritems, string_types
-from .computed import Functions
 from .exception import PerspectiveError
 from .plugin import Plugin
 from .aggregate import Aggregate
@@ -19,10 +18,10 @@ def validate_plugin(plugin):
         return plugin.value
     elif isinstance(plugin, string_types):
         if plugin not in Plugin.options():
-            raise PerspectiveError('Unrecognized plugin: %s', plugin)
+            raise PerspectiveError('Unrecognized `plugin`: %s', plugin)
         return plugin
     else:
-        raise PerspectiveError('Cannot parse plugin type: %s', str(type(plugin)))
+        raise PerspectiveError('Cannot parse `plugin` of type: %s', str(type(plugin)))
 
 
 def validate_columns(columns):
@@ -34,7 +33,7 @@ def validate_columns(columns):
     if isinstance(columns, list):
         return columns
     else:
-        raise PerspectiveError('Cannot parse columns type: %s', str(type(columns)))
+        raise PerspectiveError('Cannot parse `columns` of type: %s', str(type(columns)))
 
 
 def _validate_pivots(pivots):
@@ -46,20 +45,20 @@ def _validate_pivots(pivots):
     if isinstance(pivots, list):
         return pivots
     else:
-        raise PerspectiveError('Cannot parse rowpivots type: %s', str(type(pivots)))
+        raise PerspectiveError('Cannot parse pivots of type: %s', str(type(pivots)))
 
 
-def validate_rowpivots(rowpivots):
+def validate_row_pivots(rowpivots):
     return _validate_pivots(rowpivots)
 
 
-def validate_columnpivots(columnpivots):
+def validate_column_pivots(columnpivots):
     return _validate_pivots(columnpivots)
 
 
 def validate_aggregates(aggregates):
     if aggregates is None:
-        return []
+        return {}
     elif isinstance(aggregates, dict):
         for k, v in iteritems(aggregates):
             if isinstance(v, Aggregate):
@@ -95,46 +94,6 @@ def validate_sort(sort):
         raise PerspectiveError('Cannot parse sort type: %s', str(type(sort)))
 
 
-def validate_computedcolumns(computedcolumns, columns=None):
-    columns = columns or []
-    if computedcolumns is None:
-        return []
-
-    elif isinstance(computedcolumns, dict):
-        computedcolumns = [computedcolumns]
-
-    if isinstance(computedcolumns, list):
-        ret = []
-        for i, d in enumerate(computedcolumns):
-            if not isinstance(d, dict):
-                raise PerspectiveError('Cannot parse computedcolumns')
-
-            if 'inputs' not in d or 'func' not in d:
-                raise PerspectiveError('Cannot parse computedcolumns - inputs or func missing')
-
-            if 'name' not in d:
-                d['name'] = 'Anon-{}'.format(i)
-
-            inputs = d['inputs']
-            if not isinstance(inputs, list):
-                raise PerspectiveError('Cannot parse computedcolumns - inputs is not list')
-
-            for i, input in enumerate(inputs):
-                # FIXME check if column exists?
-                # if columns and (input not in columns):
-                #     raise PerspectiveError('Cannot parse computedcolumns - unrecognized column {}'.format(input))
-                if not isinstance(input, string_types):
-                    inputs[i] = str(input)
-
-            if d['func'] not in Functions.options():
-                raise PerspectiveError('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
-            ret.append(d)
-        return ret
-
-    else:
-        raise PerspectiveError('Cannot parse computedcolumns type: %s', str(type(computedcolumns)))
-
-
 def validate_filters(filters, columns=None):
     columns = columns or []
     if filters is None:
@@ -148,15 +107,15 @@ def validate_filters(filters, columns=None):
         ret = []
         for i, d in enumerate(filters):
             if not isinstance(d, list):
-                raise PerspectiveError('Cannot parse computedcolumns')
+                raise PerspectiveError('`filters` kwarg must be a list!')
 
             if len(d) != 3:
-                raise PerspectiveError('Cannot parse computedcolumns - unrecognized function {}'.format(d['func']))
+                raise PerspectiveError('Cannot parse filter - unrecognized function {}'.format(d['func']))
 
             for i, l in enumerate(d):
                 # FIXME check if column exists?
                 # if columns and (l not in columns):
-                #     raise PerspectiveError('Cannot parse computedcolumns - unrecognized column {}'.format(input))
+                #     raise PerspectiveError('Cannot parse computed_columns - unrecognized column {}'.format(input))
                 if i == 1:
                     if l not in ALL_FILTERS:
                         raise PerspectiveError('Unrecognized filter operator: {}'.format(l))
