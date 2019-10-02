@@ -8,7 +8,7 @@
  */
 
 module.exports = perspective => {
-    describe.only("Delete", function() {
+    describe("Delete", function() {
         it("calls all delete callbacks registered on table", async function() {
             const table = perspective.table([{x: 1}]);
 

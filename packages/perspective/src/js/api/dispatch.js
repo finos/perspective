@@ -57,7 +57,8 @@ export function subscribe(method, cmd) {
                 resolve = args.splice(i, 1)[0];
             }
         }
-        __CALLBACK_CACHE__.set(resolve, __CALLBACK_INDEX__++);
+        __CALLBACK_INDEX__++;
+        __CALLBACK_CACHE__.set(resolve, __CALLBACK_INDEX__);
         let msg = {
             cmd: cmd || "view_method",
             name: this._name,
