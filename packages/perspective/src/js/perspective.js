@@ -983,6 +983,10 @@ export default function(Module) {
         bindall(this);
     }
 
+    table.prototype.compute = function() {
+        return true;
+    };
+
     table.prototype.get_id = function() {
         return this._Table.get_id();
     };

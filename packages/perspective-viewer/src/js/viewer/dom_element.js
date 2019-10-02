@@ -212,8 +212,11 @@ export class DomElement extends PerspectiveElement {
         this.shadowRoot.querySelector("#psp_styles").innerHTML = style;
     }
 
-    _show_column_selectors() {
+    _show_column_container() {
         this.shadowRoot.querySelector("#columns_container").style.visibility = "visible";
+    }
+
+    _show_side_panel_actions() {
         this.shadowRoot.querySelector("#side_panel__actions").style.visibility = "visible";
     }
 

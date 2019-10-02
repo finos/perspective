@@ -39,6 +39,10 @@ class Table(object):
         self._views = []
         self._delete_callback = None
 
+    def compute(self):
+        '''Returns whether the computed column feature is enabled.'''
+        return False
+
     def clear(self):
         '''Removes all the rows in the Table, but preserves the schema and configuration.'''
         self._table.reset_gnode(self._gnode_id)

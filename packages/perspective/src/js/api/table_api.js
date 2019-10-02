@@ -107,6 +107,8 @@ table.prototype.view = function(config) {
 
 // Dispatch table methods that do not create new objects (getters, setters etc.) to the queue for processing.
 
+table.prototype.compute = async_queue("compute", "table_method");
+
 table.prototype.schema = async_queue("schema", "table_method");
 
 table.prototype.computed_schema = async_queue("computed_schema", "table_method");

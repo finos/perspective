@@ -208,7 +208,11 @@ export class PerspectiveElement extends StateElement {
             this._inactive_columns.parentElement.classList.remove("collapse");
         }
 
-        this._show_column_selectors();
+        this._show_column_container();
+
+        if ((await this._table.compute()) === true) {
+            this._show_side_panel_actions();
+        }
 
         // Filters need type information to populate e.g. the operator dropdown,
         // so reset them.
