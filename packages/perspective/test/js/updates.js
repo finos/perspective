@@ -1290,4 +1290,48 @@ module.exports = perspective => {
             table.delete();
         });
     });
+
+    describe("Remove update", function() {
+        it("Should remove a single update", function(done) {
+            const cb1 = jest.fn();
+            const cb2 = () => {
+                expect(cb1).toBeCalledTimes(0);
+                setTimeout(() => {
+                    view.delete();
+                    table.delete();
+                    done();
+                }, 0);
+            };
+            const table = perspective.table(meta);
+            const view = table.view();
+            view.on_update(cb1);
+            view.on_update(cb2);
+            view.remove_update(cb1);
+            table.update(data);
+        });
+
+        it("Should remove multiple updates", function(done) {
+            const cb1 = jest.fn();
+            const cb2 = jest.fn();
+            const cb3 = function() {
+                // cb2 should have been called
+                expect(cb1).toBeCalledTimes(0);
+                expect(cb2).toBeCalledTimes(0);
+                setTimeout(() => {
+                    view.delete();
+                    table.delete();
+                    done();
+                }, 0);
+            };
+
+            const table = perspective.table(meta);
+            const view = table.view();
+            view.on_update(cb1);
+            view.on_update(cb2);
+            view.on_update(cb3);
+            view.remove_update(cb1);
+            view.remove_update(cb2);
+            table.update(data);
+        });
+    });
 };

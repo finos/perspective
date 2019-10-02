@@ -1297,6 +1297,8 @@ export default function(Module) {
                 meter(pdata.map(x => x.row_count).reduce((x, y) => x + y));
             }
             is_arrow = true;
+            // make sure implicit index can be read for arrow updates
+            accessor.names = pdata[0].names;
         } else if (typeof data === "string") {
             if (data[0] === ",") {
                 data = "_" + data;
