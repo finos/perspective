@@ -8,6 +8,7 @@
 import time
 import numpy
 from datetime import datetime
+from re import search
 from dateutil.parser import parse
 from perspective.table.libbinding import t_dtype
 
@@ -83,14 +84,23 @@ class _PerspectiveDateValidator(object):
 
         If the parsed date is invalid, return t_dtype.DTYPE_STR to prevent further attempts at conversion.
 
+        Attempt to use heuristics about dates to minimize false positives, i.e. do not parse dates without separators.
+
         Params:
             str (str) : the datestring to parse
         '''
-        try:
-            parsed = parse(str)
-            if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
-                return t_dtype.DTYPE_DATE
-            else:
-                return t_dtype.DTYPE_TIME
-        except (ValueError, OverflowError):
-            return t_dtype.DTYPE_STR
+        has_separators = bool(search(r"[/. -]", str))  # match commonly-used date separators
+        dtype = t_dtype.DTYPE_STR
+
+        if has_separators:
+            try:
+                parsed = parse(str)
+                if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
+                    dtype = t_dtype.DTYPE_DATE
+                else:
+                    dtype = t_dtype.DTYPE_TIME
+            except (ValueError, OverflowError):
+                # unparsable dates should be coerced to string
+                dtype = t_dtype.DTYPE_STR
+
+        return dtype

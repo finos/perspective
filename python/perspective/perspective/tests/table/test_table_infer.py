@@ -112,3 +112,18 @@ class TestTableInfer(object):
         data = {"a": ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1']}
         tbl = Table(data)
         assert tbl.schema() == {"a": str}
+
+    def test_table_strict_date_infer(self):
+        data = {"a": ["2019 09 10"]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": date}
+
+    def test_table_strict_datetime_separator_infer(self):
+        data = {"a": ["2019-10-01 7:30"]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": datetime}
+
+    def test_table_datetime_infer_no_false_positive(self):
+        data = {"a": [" . - / but clearly not a date"]}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": str}
