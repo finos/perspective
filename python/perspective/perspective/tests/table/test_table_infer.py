@@ -107,3 +107,8 @@ class TestTableInfer(object):
         data = {"a": [None, None, None, None, None, "08/11/2019 13:14:15"]}
         tbl = Table(data)
         assert tbl.schema() == {"a": datetime}
+
+    def test_table_strict_datetime_infer(self):
+        data = {"a": ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1']}
+        tbl = Table(data)
+        assert tbl.schema() == {"a": str}

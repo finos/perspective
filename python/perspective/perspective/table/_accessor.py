@@ -44,7 +44,7 @@ def _type_to_format(data_or_schema):
             # if pandas not installed or is not a dataframe or series
             raise NotImplementedError("Must be dict or list!")
         else:
-            from perspective.core.data import deconstruct_pandas
+            from perspective.table.data.pandas import deconstruct_pandas
 
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)

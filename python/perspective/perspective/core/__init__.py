@@ -6,7 +6,6 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from ._version import __version__  # noqa: F401
-from .psp import psp  # noqa: F401
 from .plugin import Plugin  # noqa: F401
 from .aggregate import Aggregate  # noqa: F401
 from .exception import PerspectiveError  # noqa: F401
