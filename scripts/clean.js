@@ -7,45 +7,33 @@
  *
  */
 
-const execSync = require("child_process").execSync;
-const path = require("path");
-const fs = require("fs");
-const rimraf = require("rimraf");
+const {execute, clean, bash} = require("./script_utils.js");
+
 const minimatch = require("minimatch");
 const args = process.argv.slice(2);
 
 const IS_SCREENSHOTS = args.indexOf("--screenshots") !== -1;
 
-const execute = cmd => execSync(cmd, {stdio: "inherit"});
-function rimraf_err(e) {
-    if (e) {
-        console.error(e.message);
-        process.exit(1);
-    }
-}
-
-function clean(dir) {
-    if (fs.existsSync(dir)) {
-        rimraf(dir, rimraf_err);
-    }
-}
-
 function clean_screenshots() {
-    execute("lerna exec -- mkdirp screenshots");
-    execute(`lerna run clean:screenshots --ignore-missing ${process.env.PACKAGE ? `--scope=@finos/${process.env.PACKAGE}` : ""}`);
+    execute(bash`lerna exec -- mkdirp screenshots`);
+    execute(bash`lerna run clean:screenshots --ignore-missing --scope=@finos/${process.env.PACKAGE}`);
 }
 
 try {
+    if (process.env.PSP_PROJECT === "python") {
+        clean("cpp/perspective/obj", "cpp/perspective/cppbuild", "python/build");
+    }
     if (!IS_SCREENSHOTS && (!process.env.PACKAGE || minimatch("perspective", process.env.PACKAGE))) {
-        clean(path.join(".", "cpp", "perspective", "obj"));
-        clean(path.join(".", "cpp", "perspective", "cppbuild"));
-        clean(path.join(".", "python", "build"));
+        clean("cpp/perspective/cppbuild");
+        let files = ["CMakeFiles", "build", "cmake_install.cmake", "CMakeCache.txt", "compile_commands.json", "libpsp.a", "Makefile"];
+        clean(...files.map(x => `cpp/perspective/obj/${x}`));
+    }
+    if (!process.env.PSP_PROJECT) {
+        clean("cpp/perspective/obj");
     }
     if (!IS_SCREENSHOTS) {
-        execute("lerna run clean");
-        rimraf("docs/build", rimraf_err);
-        rimraf("docs/python", rimraf_err);
-        rimraf("docs/obj", rimraf_err);
+        execute(bash`lerna run clean --scope=@finos/${process.env.PACKAGE}`);
+        clean("docs/build", "docs/python", "docs/obj");
     }
     clean_screenshots();
 } catch (e) {
