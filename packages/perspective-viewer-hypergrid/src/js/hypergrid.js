@@ -155,7 +155,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     const window = {
         start_row: 0,
         end_row: Math.max(colPivots.length + 1, rowPivots.length + 1),
-        index: true
+        index: rowPivots.length === 0 && colPivots.length === 0
     };
 
     const [nrows, json, schema, tschema] = await Promise.all([view.num_rows(), view.to_columns(window), view.schema(), this._table.schema()]);
@@ -183,7 +183,7 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     dataModel.pspFetch = async range => {
         range.end_row += this.hasAttribute("settings") ? 8 : 2;
         range.end_col += rowPivots && rowPivots.length > 0 ? 1 : 0;
-        range.index = true;
+        range.index = rowPivots.length === 0 && colPivots.length === 0;
         let next_page = await dataModel._view.to_columns(range);
         if (columns.length === 0) {
             columns = Object.keys(await view.to_columns(window));
