@@ -48,7 +48,9 @@ function page2hypergrid(data, row_pivots, columns) {
             };
         }
 
-        dataRow["__INDEX__"] = data["__INDEX__"][ridx][0];
+        if (data.__INDEX__) {
+            dataRow["__INDEX__"] = data["__INDEX__"][ridx][0];
+        }
 
         rows.push(dataRow);
     }
