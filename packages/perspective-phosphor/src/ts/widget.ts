@@ -128,14 +128,9 @@ export
         super.onActivateRequest(msg);
     }
 
-    /**
-     * other non-phosphor resizes
-     *
-     */
     notifyResize(): void {
         if(this.isAttached && !this.displayed){
             this._displayed = true;
-            console.log("DISPLAYING", this);
         } else if (this.isAttached){
             this.viewer.notifyResize();
         }
@@ -146,7 +141,7 @@ export
      *
      * @param table a `perspective.table` object.
      */
-    load(table : Table | any) : void {
+    load(table : Table) : void {
         this.viewer.load(table);
     }
     
@@ -179,10 +174,11 @@ export
      * 
      * Defaults to "hypergrid" if not set by the user.
      */
-    get plugin() { return this._plugin; }
+    get plugin() { 
+        return this.viewer.getAttribute("plugin");
+    }
     set plugin(plugin: string) {
-        this._plugin = plugin;
-        this.viewer.setAttribute('plugin', this._plugin);
+        this.viewer.setAttribute('plugin', plugin);
     }
 
     /**
@@ -190,55 +186,62 @@ export
      * 
      * If a column in the dataset is not in this array, it is not shown but can be used for aggregates, sort, and filter.
      */
-    get columns() { return this._columns; }
+    get columns() { 
+        return JSON.parse(this.viewer.getAttribute("columns"));
+    }
     set columns(columns: Array<string>) {
-        this._columns = columns;
-        if (this._columns.length > 0) {
-            this.viewer.setAttribute('columns', JSON.stringify(this._columns));
+        if (columns.length > 0) {
+            this.viewer.setAttribute('columns', JSON.stringify(columns));
         } else {
             this.viewer.removeAttribute('columns');
         }
     }
 
-    get row_pivots() { return this._row_pivots; }
+    get row_pivots() {
+        return JSON.parse(this.viewer.getAttribute("row-pivots"));
+    }
     set row_pivots(row_pivots: Array<string>) {
-        this._row_pivots = row_pivots;
-        this.viewer.setAttribute('row-pivots', JSON.stringify(this._row_pivots));
+        this.viewer.setAttribute('row-pivots', JSON.stringify(row_pivots));
     }
 
-    get column_pivots() { return this._column_pivots; }
+    get column_pivots() {
+        return JSON.parse(this.viewer.getAttribute("column-pivots"));
+    }
     set column_pivots(column_pivots: Array<string>) {
-        this._column_pivots = column_pivots;
-        this.viewer.setAttribute('column-pivots', JSON.stringify(this._column_pivots));
+        this.viewer.setAttribute('column-pivots', JSON.stringify(column_pivots));
     }
 
-    get aggregates() { return this._aggregates; }
+    get aggregates() {
+        return JSON.parse(this.viewer.getAttribute("aggregates"));
+    }
     set aggregates(aggregates: { [colname: string]: string }) {
-        this._aggregates = aggregates;
-        this.viewer.setAttribute('aggregates', JSON.stringify(this._aggregates));
+        this.viewer.setAttribute('aggregates', JSON.stringify(aggregates));
     }
 
-    get sort() { return this._sort; }
+    get sort() {
+        return JSON.parse(this.viewer.getAttribute("sort"));
+    }
     set sort(sort: Array<Array<string>>) {
-        this._sort = sort;
-        this.viewer.setAttribute('sort', JSON.stringify(this._sort));
+        this.viewer.setAttribute('sort', JSON.stringify(sort));
     }
 
-    get computed_columns() { return this._computed_columns; }
+    get computed_columns() {
+        return JSON.parse(this.viewer.getAttribute("computed-columns"));
+    }
     set computed_columns(computed_columns: { [colname: string]: string }[]) {
-        this._computed_columns = computed_columns;
-        if (this._computed_columns.length > 0) {
-            this.viewer.setAttribute('computed-columns', JSON.stringify(this._computed_columns));
+        if (computed_columns.length > 0) {
+            this.viewer.setAttribute('computed-columns', JSON.stringify(computed_columns));
         } else {
             this.viewer.removeAttribute('computed-columns');
         }
     }
 
-    get filters() { return this._filters; }
+    get filters() {
+        return JSON.parse(this.viewer.getAttribute("filters"));
+    }
     set filters(filters: Array<Array<string>>) {
-        this._filters = filters;
-        if (this._filters.length > 0) {
-            this.viewer.setAttribute('filters', JSON.stringify(this._filters));
+        if (filters.length > 0) {
+            this.viewer.setAttribute('filters', JSON.stringify(filters));
         } else {
             this.viewer.removeAttribute('filters');
         }
@@ -273,18 +276,8 @@ export
     get displayed(){ return this._displayed; }
 
     private _viewer: PerspectiveViewer;
-    private _plugin: string;
-    private _columns: Array<string>;
-    private _row_pivots: Array<string>;
-    private _column_pivots: Array<string>;
-    private _aggregates: { [colname: string]: string };
-    private _sort: Array<Array<string>>;
-    private _computed_columns: { [column_name: string]: string }[];
-    private _filters: Array<Array<string>>;
     private _plugin_config: any;
-
     private _dark: boolean;
-
     private _displayed: boolean;
 }
 
@@ -321,9 +314,9 @@ namespace Private {
         if (!viewer.notifyResize) {
             console.warn('Warning: not bound to real element');
         } else {
-            let observer = new MutationObserver(viewer.notifyResize.bind(viewer));
-            observer.observe(node, { attributes: true });
+            viewer.notifyResize = viewer.notifyResize.bind(viewer);
         }
+
         return viewer;
     }
 }

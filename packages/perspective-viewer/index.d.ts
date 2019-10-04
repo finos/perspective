@@ -15,6 +15,7 @@ declare module '@finos/perspective-viewer' {
     }
 
     export interface PerspectiveViewerOptions extends ViewConfig {
+        editable? : boolean;
         plugin? : string;
         plugin_config?: any;
         filters? : Array<Array<string>>;

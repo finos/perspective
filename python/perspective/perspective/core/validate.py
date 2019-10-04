@@ -48,12 +48,12 @@ def _validate_pivots(pivots):
         raise PerspectiveError('Cannot parse pivots of type: %s', str(type(pivots)))
 
 
-def validate_row_pivots(rowpivots):
-    return _validate_pivots(rowpivots)
+def validate_row_pivots(row_pivots):
+    return _validate_pivots(row_pivots)
 
 
-def validate_column_pivots(columnpivots):
-    return _validate_pivots(columnpivots)
+def validate_column_pivots(column_pivots):
+    return _validate_pivots(column_pivots)
 
 
 def validate_aggregates(aggregates):

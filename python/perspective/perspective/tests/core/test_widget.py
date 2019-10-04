@@ -5,57 +5,38 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+from perspective import PerspectiveWidget, Table
 
 
+# TODO: finish
 class TestWidget:
-    def test_json(self):
-        from perspective.core.widget import PerspectiveWidget
-        pw = PerspectiveWidget([])
-        print(pw._as_json())
-        assert pw._as_json()
 
-    def test_computedColumns1(self):
-        from perspective.core.widget import PerspectiveWidget
+    def test_widget_load_table(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        widget.load(table)
+        assert widget.columns == ["a"]
 
-        PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2'], 'func': 'add'})
-        PerspectiveWidget([{'test': 1, 1: 2}], computedcolumns={'inputs': ['test', 1], 'func': 'add'})
+    def test_widget_load_data(self):
+        widget = PerspectiveWidget()
+        widget.load({"a": [1, 2, 3]})
+        assert widget.columns == ["a"]
 
-    def test_computedColumns2(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
+    def test_widget_load_table_with_options(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        # options should be disregarded when loading Table
+        widget.load(table, limit=1)
+        assert widget.columns == ["a"]
+        table_name = widget.manager._tables.keys()[0]
+        table = widget.manager._tables[table_name]
+        assert table.size() == 3
 
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2'], 'func': 'sdfgsdfgsdf'})
-            assert False
-        except PerspectiveError:
-            pass
-
-    def test_computedColumns4(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
-
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2']})
-            assert False
-        except PerspectiveError:
-            pass
-
-    def test_computedColumns5(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
-
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns=5)
-            assert False
-        except PerspectiveError:
-            pass
-
-    def test_computedColumns6(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
-
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': {}, 'func': 'add'})
-            assert False
-        except PerspectiveError:
-            pass
+    def test_widget_load_data_with_options(self):
+        widget = PerspectiveWidget()
+        # options should be forwarded to the Table constructor
+        widget.load({"a": [1, 2, 3]}, limit=1)
+        assert widget.columns == ["a"]
+        table_name = widget.manager._tables.keys()[0]
+        table = widget.manager._tables[table_name]
+        assert table.size() == 1

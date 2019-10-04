@@ -23,11 +23,8 @@ if (perspective) {
     console.warn('Perspective was undefined in jlab - wasm load errors may occur');
 }
 
-/**
- * TODO: document - what is `view`
- */
 export type PerspectiveJupyterWidgetOptions = {
-    view?: any;
+    view: DOMWidgetView;
 }
 
 /**
@@ -62,7 +59,13 @@ class PerspectiveJupyterWidget extends PerspectiveWidget {
         if (this.isDisposed) {
             return;
         }
+
         super.dispose();
+
+        if (this._view) {
+            this._view.remove();
+        }
+
         this._view = null;
     }
 

@@ -16,8 +16,8 @@ def deconstruct_pandas(data):
     if isinstance(data, pd.DataFrame) and isinstance(data.columns, pd.MultiIndex):
         data = pd.DataFrame(data.unstack())
         columns = list(x for x in data.index.names if x)
-        kwargs['columnpivots'] = list(x for x in data.index.names if x)
-        kwargs['rowpivots'] = []
+        kwargs['column_pivots'] = list(x for x in data.index.names if x)
+        kwargs['row_pivots'] = []
         orig_columns = [' ' for _ in data.columns.tolist()]
 
         # deal with indexes
@@ -25,10 +25,10 @@ def deconstruct_pandas(data):
             for i in range(len(data.index.names) - len(columns)):
                 if i == 0:
                     columns.append('index')
-                    kwargs['rowpivots'].append('index')
+                    kwargs['row_pivots'].append('index')
                 else:
                     columns.append('index-{}'.format(i))
-                    kwargs['rowpivots'].append('index-{}'.format(i))
+                    kwargs['row_pivots'].append('index-{}'.format(i))
 
         # all columns in index
         columns += orig_columns
@@ -39,7 +39,7 @@ def deconstruct_pandas(data):
         kwargs['columns'] = orig_columns
 
     if isinstance(data.index, pd.MultiIndex):
-        kwargs['rowpivots'] = list(data.index.names)
+        kwargs['row_pivots'] = list(data.index.names)
         kwargs['columns'] = data.columns.tolist()
 
     return data, kwargs

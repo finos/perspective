@@ -143,10 +143,11 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         '''
         name = str(random())
         if isinstance(table_or_data, Table):
-            self.manager.host_table(name, table_or_data)
+            table = table_or_data
         else:
             table = Table(table_or_data, **options)
-            self.manager.host_table(name, table)
+
+        self.manager.host_table(name, table)
 
         # Don't pass the table through to `PerspectiveJupyterClient`, as it needs a different set of operations.
         self.send({
@@ -154,7 +155,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
             "data": name
         })
 
-        # TODO: move the init to __init__()
+        # TODO: move the init to __init__() - right now it only works in load()
         self.post({'id': -1, 'data': None})
 
     def post(self, msg):

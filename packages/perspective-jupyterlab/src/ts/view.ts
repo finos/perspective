@@ -6,6 +6,7 @@
  * the Apache License 2.0.  The full license can be found in the LICENSE file.
  *
  */
+import { isEqual } from "underscore";
 import { DOMWidgetView } from "@jupyter-widgets/base";
 import { PerspectiveWidget } from '@finos/perspective-phosphor';
 import { PerspectiveJupyterWidget } from "./widget";
@@ -49,8 +50,37 @@ class PerspectiveView extends DOMWidgetView {
         this.el = this.pWidget.node;
      }
 
+
     /**
-     * 
+     * When state changes on the viewer DOM, apply it to the widget state.
+     *
+     * @param mutations 
+     */
+    _synchronize_state(mutations: any) {
+        for (let mutation of mutations) {
+            const name = mutation.attributeName.replace(/-/g, "_");
+            let new_value = this.pWidget.viewer.getAttribute(mutation.attributeName);
+            let current_value = this.model.get(name);
+
+            if (typeof(new_value) === "undefined") {
+                continue;
+            }
+
+            if (new_value && typeof(new_value) === "string" && name !== "plugin") {
+                new_value = JSON.parse(new_value);
+            }
+
+            if (!isEqual(new_value, current_value)) {
+                this.model.set(name, new_value);
+            }
+        }
+
+        // propagate changes back to Python
+        this.touch();
+    }
+
+    /**
+     * Attach event handlers, and watch the DOM for state changes in order to reflect them back to Python.
      */
     render() {
         super.render();
@@ -65,6 +95,13 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:filters', this.filters_changed, this);
         this.model.on('change:plugin_config', this.plugin_config_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
+
+        const observer = new MutationObserver(this._synchronize_state.bind(this));
+        observer.observe(this.pWidget.viewer, {
+             attributes: true,
+             attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters", "computed_column"],
+             subtree: false
+        });
 
         this.client.send({
             id: -1,
