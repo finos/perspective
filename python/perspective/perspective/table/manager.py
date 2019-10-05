@@ -136,3 +136,7 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
+
+    def get_table(self, name):
+        '''Return a table under management by name.'''
+        return self._tables.get(name, None)

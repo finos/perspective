@@ -95,6 +95,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
 
         # Create an instance of `PerspectiveManager`, which receives messages from the `PerspectiveJupyterClient` on the front-end.
         self.manager = PerspectiveManager()
+        self.table_name = None  # not a traitlet - only used in the python side of the widget
 
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
@@ -149,14 +150,35 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
 
         self.manager.host_table(name, table)
 
-        # Don't pass the table through to `PerspectiveJupyterClient`, as it needs a different set of operations.
+        '''
+        if columns are different between the tables, then remove viewer state.
+
+        sorting is expensive, but it prevents errors from applying pivots, etc. on columns that don't exist in the dataset.
+        '''
+        if self.table_name is not None:
+            old_columns = sorted(self.manager.get_table(self.table_name).columns())
+            new_columns = sorted(table.columns())
+
+            if str(new_columns) != str(old_columns):
+                self.columns = table.columns()
+                self.row_pivots = []
+                self.column_pivots = []
+                self.aggregates = {}
+                self.sort = []
+                self.filters = []
+
+        # If the user does not set columns to show, synchronize widget state with dataset.
+        if len(self.columns) == 0:
+            self.columns = table.columns()
+
+        # Pass the table name to the front-end.
         self.send({
+            "id": -2,
             "type": "table",
             "data": name
         })
 
-        # TODO: move the init to __init__() - right now it only works in load()
-        self.post({'id': -1, 'data': None})
+        self.table_name = name
 
     def post(self, msg):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.
@@ -183,4 +205,16 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         '''
         if content["type"] == "cmd":
             parsed = json.loads(content["data"])
-            self.manager.process(parsed, self.post)
+
+            if parsed["cmd"] == "init":
+                self.post({'id': -1, 'data': None})
+            elif parsed["cmd"] == "table" and self.table_name is not None:
+                # Only pass back the table if it's been loaded. If the table isn't loaded, the `load()` method will handle synchronizing the front-end.
+                self.send({
+                    "id": -2,
+                    "type": "table",
+                    "data": self.table_name
+                })
+            else:
+                # For all calls to Perspective, process it in the manager.
+                self.manager.process(parsed, self.post)

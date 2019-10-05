@@ -96,6 +96,7 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:plugin_config', this.plugin_config_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
 
+        // Watch the viewer DOM so that widget state is always synchronized with DOM attributes.
         const observer = new MutationObserver(this._synchronize_state.bind(this));
         observer.observe(this.pWidget.viewer, {
              attributes: true,
@@ -103,10 +104,15 @@ class PerspectiveView extends DOMWidgetView {
              subtree: false
         });
 
+        /**
+         * Request a table from the manager. If a table has been loaded, proxy it and kick off subsequent operations.
+         * 
+         * If a table hasn't been loaded, the viewer won't get a response back and simply waits until it receives a table name.
+         */
         this.client.send({
-            id: -1,
-            cmd: "init"
-        });
+            id: -2,
+            cmd: "table"
+        })
     }
 
     /**
@@ -118,11 +124,16 @@ class PerspectiveView extends DOMWidgetView {
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
         if (msg.type === "table") {
-            // TODO: load before render does not work
             const new_table = this.client.open_table(msg.data);
-            this.pWidget.load(new_table); 
+            this.pWidget.load(new_table);
+
+            // Only call `init` after the viewer has a table.
+            this.client.send({
+                id: -1,
+                cmd: "init"
+            });
         } else {
-            // conform message to format expected by the perspective client
+            // Conform message to format expected by the perspective client
             delete msg.type; 
             msg.data = JSON.parse(msg.data); 
             this.client._handle(msg);

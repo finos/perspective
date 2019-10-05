@@ -40,3 +40,12 @@ class TestWidget:
         table_name = widget.manager._tables.keys()[0]
         table = widget.manager._tables[table_name]
         assert table.size() == 1
+
+    def test_widget_load_clears_state(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget(dark=True, row_pivots=["a"])
+        widget.load(table)
+        assert widget.row_pivots == ["a"]
+        widget.load({"b": [1, 2, 3]})
+        assert widget.row_pivots == []
+        assert widget.dark is True  # should not break UI

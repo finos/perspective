@@ -54,20 +54,19 @@ class TestWidgetPandas:
         table = Table(DF)
         widget = PerspectiveWidget()
         widget.load(table)
-        print(widget.columns, widget)
         assert table.schema() == {'Country': str, 'Region': str, 'Category': str, 'City': str, 'Customer ID': str, 'Discount': float,
                                   'Order Date': date, 'Order ID': str, 'Postal Code': str, 'Product ID': str, 'Profit': float, 'Quantity': int,
                                   'Row ID': int, 'Sales': int, 'Segment': str, 'Ship Date': date, 'Ship Mode': str, 'State': str, 'Sub-Category': str}
 
-        assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
-                                                 'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
+        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
+                                                 'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
 
     def test_widget_load_data_df(self):
         widget = PerspectiveWidget()
         widget.load(DF)
-        assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
-                                                 'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
+        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
+                                                 'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
 
     def test_widget_load_row_pivots(self):
