@@ -9,4 +9,5 @@ from ._version import __version__  # noqa: F401
 from .plugin import Plugin  # noqa: F401
 from .aggregate import Aggregate  # noqa: F401
 from .exception import PerspectiveError  # noqa: F401
+from .start import start  # noqa: F401
 from .widget import PerspectiveWidget  # noqa: F401
