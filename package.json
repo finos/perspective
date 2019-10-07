@@ -26,7 +26,7 @@
         "clean-css-loader": "^1.1.0",
         "codemirror": "^5.30.0",
         "codemirror-javascript": "^0.2.0",
-        "core-js": "^2.5.7",
+        "core-js": "^2.6.9",
         "cpx": "^1.5.0",
         "css-loader": "^0.28.7",
         "dotenv": "^8.1.0",

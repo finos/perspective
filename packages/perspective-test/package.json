@@ -20,7 +20,8 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.3.9"
+        "@finos/perspective": "^0.3.9",
+        "core-js": "^2.6.9"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.8"
