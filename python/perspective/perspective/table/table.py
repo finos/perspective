@@ -28,10 +28,15 @@ class Table(object):
                 - limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
                 - index (string) : a string column name to use as the Table's primary key.
         '''
-        self._accessor = _PerspectiveAccessor(data_or_schema)
+        self._is_arrow = isinstance(data_or_schema, (bytes, bytearray))
+        if (self._is_arrow):
+            self._accessor = data_or_schema
+        else:
+            self._accessor = _PerspectiveAccessor(data_or_schema)
+
         self._limit = config.get("limit", 4294967295)
         self._index = config.get("index", "")
-        self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, False)
+        self._table = make_table(None, self._accessor, None, self._limit, self._index, t_op.OP_INSERT, False, self._is_arrow)
         self._table.get_pool().set_update_delegate(self)
         self._gnode_id = self._table.get_gnode().get_id()
         self._callbacks = _PerspectiveCallBackCache()
