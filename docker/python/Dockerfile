@@ -9,7 +9,7 @@
 FROM python:3.7
 
 RUN apt-get update
-RUN apt-get -y install apt-transport-https libtbb-dev cmake sudo
+RUN apt-get -y install apt-transport-https libtbb-dev rapidjson-dev cmake sudo
 RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
 RUN apt-get -y install npm
 RUN apt-get -y remove python3
@@ -27,7 +27,16 @@ RUN ln -s /usr/local/lib/libboost_python37.so /usr/local/lib/libboost_python.so
 RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
 
 RUN python3 -m pip install codecov nose2 mock flake8 pytest pytest-cov
-RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0'
+RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.14.1'
 
 RUN npm install --global yarn
 RUN yarn --version
+
+RUN mkdir -p /usr/local \
+    && cd /usr/local \
+    && git clone https://github.com/google/flatbuffers.git \
+    && cd flatbuffers \
+    && cmake -G "Unix Makefiles" \
+    && make \
+    && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
+    && chmod +x /usr/local/flatbuffers/flatc

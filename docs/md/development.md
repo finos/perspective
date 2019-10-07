@@ -68,11 +68,11 @@ Installing and activating the latest [emscripten SDK](https://github.com/kripken
 ./emsdk activate latest
 ```
 
-You'll also need Boost and CMake, which can be installed from Homebrew:
+You'll also need FlatBuffers and CMake, which can be installed from Homebrew:
 
 ```bash
 brew install cmake
-brew install boost
+brew install flatbuffers
 ```
 
 #### Windows 10 specific instructions
@@ -94,12 +94,20 @@ When installing Emscripten, make sure to follow [Linux specific instructions](ht
 
 On Ubuntu, cmake will mistakenly resolve the system headers in `/usr/include`
 rather than the emscripten supplied versions. You can resolve this by moving
-boost to somewhere other than `/use/include` - into perspective's own `src` dir,
-for example (as per [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
+`boost` and `flatbuffers` dependencies to somewhere other than `/use/include` - into 
+perspective's own `src` dir, for example (as per [here](http://vclf.blogspot.com/2014/08/emscripten-linking-to-boost-libraries.html)).
 
 ```bash
 apt-get install libboost-all-dev
 cp -r /usr/include/boost ./packages/perspective/src/include/
+
+cd ./packages/perspective/src/include/
+git clone https://github.com/google/flatbuffers.git
+cd flatbuffers
+cmake -G "Unix Makefiles"
+make
+ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc
+chmod +x /usr/local/flatbuffers/flatc
 ```
 
 ## Testing
