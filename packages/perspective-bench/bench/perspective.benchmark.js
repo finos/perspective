@@ -29,7 +29,7 @@ const COLUMN_TYPES = {Sales: "number", "Order Date": "datetime", State: "string"
 
 PerspectiveBench.setIterations(100);
 PerspectiveBench.setTimeout(2000);
-PerspectiveBench.setToss(0);
+PerspectiveBench.setToss(5);
 
 let worker, data;
 
@@ -38,7 +38,11 @@ beforeAll(async () => {
     window.perspective = window.perspective.default || window.perspective;
     worker = window.perspective.worker();
     await wait_for_perspective();
-    data = await get_data_browser(worker);
+    if (typeof module !== "undefined" && module.exports) {
+        data = await get_data_node(worker);
+    } else {
+        data = await get_data_browser(worker);
+    }
 });
 
 describe("Table", async () => {

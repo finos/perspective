@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.7.2)
 project (psp)
+
+set(CMAKE_BUILD_TYPE "Release")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules/" ${CMAKE_MODULE_PATH} )
@@ -180,6 +185,7 @@ if (PSP_WASM_BUILD)
 		-s MODULARIZE=1 \
 		-s EXPORT_NAME=\"load_perspective\" \
 		-s EXPORT_ES6=1 \
+		-s USE_ES6_IMPORT_META=0 \
 		-s EXPORTED_FUNCTIONS=\"['_main']\" \
 		")
 
@@ -188,7 +194,9 @@ if (PSP_WASM_BUILD)
 			-O0 \
 			-g4 \
 			--profiling \
-			-s SAFE_HEAP=1 \
+			-s WARN_UNALIGNED=1 \
+			-Wcast-align \
+			-Wover-aligned \
 			-s DISABLE_EXCEPTION_CATCHING=0 \
 			-s ASSERTIONS=2 \
 			-s DEMANGLE_SUPPORT=1 \
@@ -414,10 +422,12 @@ set (PYTHON_SOURCE_FILES
 if (WIN32)
 	set(CMAKE_CXX_FLAGS " /EHsc")
 else()
-	set(CMAKE_CXX_FLAGS " -std=c++0x ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
+	set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
 endif()
 
 if (PSP_WASM_BUILD)
+	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
+
 	add_library(psp ${SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
 	set_target_properties(psp PROPERTIES COMPILE_FLAGS "${ASYNC_MODE_FLAGS}")
@@ -442,6 +452,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(psp arrow)
+		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
+	
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
@@ -451,6 +463,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
+		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})
 		########################
 	else()
