@@ -38,6 +38,7 @@
         "@babel/runtime": "^7.3.4",
         "@finos/perspective": "^0.3.9",
         "@finos/perspective-viewer": "^0.3.9",
+        "core-js": "^2.6.9",
         "datasaur-local": "3.0.0",
         "fin-hypergrid": "3.2.0",
         "fin-hypergrid-grouped-header-plugin": "^1.2.4",
