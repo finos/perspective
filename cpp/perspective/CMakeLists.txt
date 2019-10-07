@@ -322,6 +322,7 @@ set (SOURCE_FILES
 	src/cpp/aggregate.cpp
 	src/cpp/aggspec.cpp
 	src/cpp/arg_sort.cpp
+	src/cpp/arrow.cpp
 	src/cpp/base.cpp
 	src/cpp/base_impl_linux.cpp
 	src/cpp/base_impl_osx.cpp

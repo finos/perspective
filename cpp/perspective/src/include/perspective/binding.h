@@ -81,7 +81,7 @@ namespace binding {
     T scalar_vec_to(const std::vector<t_tscalar>& scalars, std::uint32_t idx);
 
     /**
-     * @brief namespace `arrow` contains utilities for writing data in the Apache arrow format.
+     * @brief namespace `arraybuffer` contains utilities for writing data in the Apache arrow format.
      *
      * Implementations of these methods access underlying heap memory and create contiguous
      * blocks of data which conform to the arrow schema; these methods should not be used to
@@ -89,7 +89,7 @@ namespace binding {
      * parsing and manipulation should be implemented in the binding language, using appropriate
      * libraries.
      */
-    namespace arrow {
+    namespace arraybuffer {
 
         template <typename T>
         void vecFromTypedArray(const T& typedArray, void* data, std::int32_t length,
@@ -142,27 +142,27 @@ namespace binding {
      */
     template <typename T>
     void _fill_col_numeric(T accessor, t_data_table& tbl, std::shared_ptr<t_column> col,
-        const std::string& name, std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        const std::string& name, std::int32_t cidx, t_dtype type, bool is_update);
 
     template <typename T>
     void _fill_col_int64(T accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        std::int32_t cidx, t_dtype type, bool is_update);
 
     template <typename T>
     void _fill_col_time(T accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        std::int32_t cidx, t_dtype type, bool is_update);
 
     template <typename T>
     void _fill_col_date(T accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        std::int32_t cidx, t_dtype type, bool is_update);
 
     template <typename T>
     void _fill_col_bool(T accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        std::int32_t cidx, t_dtype type, bool is_update);
 
     template <typename T>
     void _fill_col_string(T accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update);
+        std::int32_t cidx, t_dtype type, bool is_update);
 
     /**
      * @brief Change a value at a given index inside the column.
@@ -208,7 +208,7 @@ namespace binding {
     template <typename T>
     void _fill_data_helper(T accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_arrow, bool is_update);
+        bool is_update);
 
     /**
      * @brief Given a table, iterate through each column and fill it with data.
@@ -221,7 +221,7 @@ namespace binding {
      * @param is_update
      */
     template <typename T>
-    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update);
+    void _fill_data(t_data_table& tbl, T accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_update);
 
     /**
      * @brief Create and populate a table.
