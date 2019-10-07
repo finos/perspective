@@ -81,7 +81,7 @@ class TestWidgetPandas:
 
     def test_widget_load_pivot_table(self):
         pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
-        widget = start(pivot_table) 
+        widget = start(pivot_table)
         assert widget.row_pivots == ['Country', 'Region']
         assert widget.column_pivots == []
         assert widget.columns == ['Financials', 'Industrials', 'Technology']

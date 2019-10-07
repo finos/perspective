@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # server setup
     app = make_app()
     app.listen(8888)
-    logging.critical("Listending on http://localhost:8888")
+    logging.critical("Listening on http://localhost:8888")
     loop = tornado.ioloop.IOLoop.current()
 
     # update with new data every 50ms

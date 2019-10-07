@@ -248,7 +248,7 @@ TEST(SCALAR, scalar_repr)
     EXPECT_EQ(mktscalar<float>(0).repr(), "f32:v:0");
     EXPECT_EQ(mktscalar<t_date>(t_date(0)).repr(), "date:v:0-00-00");
     EXPECT_EQ(
-        mktscalar<t_time>(t_time(0)).repr(), "time:v:1970-01-01 00:00:00.000");
+        mktscalar<t_time>(t_time(0)).repr(), "time:v:1970-01-01 00:00:00.000 UTC");
     EXPECT_EQ(mktscalar<const char*>("").repr(), "str:v:");
 
     EXPECT_EQ(mknull(DTYPE_NONE).repr(), "none:i:null");

@@ -13,7 +13,6 @@ import perspective.core.plugin
 import perspective.core.validate
 
 
-# TODO: finish
 class TestValidate:
 
     def test_validate_plugin_valid_instance(self):
