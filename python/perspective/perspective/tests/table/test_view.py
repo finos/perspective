@@ -196,6 +196,11 @@ class TestView(object):
             for i in range(len(keys)):
                 assert keys[i] == order[i]
 
+    def test_view_column_pivot_datetime_names(self):
+        data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        assert list(view.to_dict().keys()) == ["2019-07-11 12:30:00 UTC|a", "2019-07-11 12:30:00 UTC|b"]
     # aggregate
 
     def test_view_aggregate_int(self):
