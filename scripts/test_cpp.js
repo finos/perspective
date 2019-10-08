@@ -23,7 +23,7 @@ function docker(image = "emsdk") {
 
 try {
     if (process.env.PSP_DOCKER) {
-        execute(docker("cpp") + " ./test/psp_test");
+        execute(docker("python") + " ./test/psp_test");
     } else {
         execute("./cpp/perspective/cppbuild/test/psp_test");
     }

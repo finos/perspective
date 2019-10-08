@@ -36,7 +36,9 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     if (is_arrow) {
         py::bytes bytes = accessor.cast<py::bytes>();
         std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
-        loader.initialize(reinterpret_cast<uintptr_t>(bytes.cast<std::string>().c_str()), size);
+        void * ptr = malloc(size);
+        std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
+        loader.initialize((uintptr_t)ptr, size);
         column_names = loader.names();
         data_types = loader.types();
     } else if (is_update || is_delete) {

@@ -3,7 +3,7 @@ import os.path
 
 FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "..", "examples", "simple", "superstore.arrow")
 
-class TestTableNumpy(object):
+class TestTableArrow(object):
    
     def test_table_arrow(self):
         with open(FILE_PATH, mode='rb') as file: # b is important -> binary

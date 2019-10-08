@@ -27,6 +27,10 @@ matrix:
 
   allow_failures:
     - language: c++
+      env: TEST=CPP
+      services: docker
+
+    - language: c++
       env: TEST=CPP_OSX
       os: osx
 

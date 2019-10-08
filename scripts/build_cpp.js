@@ -44,8 +44,8 @@ try {
     }
 
     if (process.env.PSP_DOCKER) {
-        execute(docker("cpp") + cmd);
-        execute(docker("cpp") + " make -j${PSP_CPU_COUNT-8}");
+        execute(docker("python") + cmd);
+        execute(docker("python") + " make -j${PSP_CPU_COUNT-8}");
     } else {
         execute(cmd);
         execute("cd cpp/perspective/cppbuild && make -j${PSP_CPU_COUNT-8}");

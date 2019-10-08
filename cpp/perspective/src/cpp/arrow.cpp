@@ -85,7 +85,7 @@ namespace arrow {
         std::shared_ptr<Schema> schema = m_batches[0]->schema();
         std::vector<std::shared_ptr<Field>> fields = schema->fields();
 
-        for (auto cidx = 0; cidx < m_names.size(); ++cidx) {
+        for (long unsigned int cidx = 0; cidx < m_names.size(); ++cidx) {
             auto name = m_names[cidx];
             auto type = m_types[cidx];
             auto raw_type = fields[cidx]->type()->name();
@@ -128,7 +128,7 @@ namespace arrow {
         const uint32_t len) {
         std::shared_ptr<T> scol = std::static_pointer_cast<T>(src);
         const typename T::value_type* vals = scol->raw_values();
-        for (auto i = 0; i < len; i++) {
+        for (uint32_t i = 0; i < len; i++) {
             dest->set_nth<V>(i, static_cast<V>(vals[i]));
         }
     }
@@ -153,9 +153,6 @@ namespace arrow {
                     std::size_t es = offsets[i + 1] - bidx;
                     elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
                     t_uindex idx = vocab->get_interned(elem);
-
-                    // Make sure there are no duplicates in the arrow dictionary
-                    assert(idx == i);
                 }
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
@@ -183,7 +180,7 @@ namespace arrow {
 
                 std::string elem;
 
-                for (std::int32_t i = 0; i < len; ++i) {
+                for (std::uint32_t i = 0; i < len; ++i) {
                     std::int32_t bidx = offsets[i];
                     std::size_t es = offsets[i + 1] - bidx;
                     elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
@@ -217,19 +214,19 @@ namespace arrow {
                     } break;
                     case ::arrow::TimeUnit::NANO: {
                         const int64_t* vals = scol->raw_values();
-                        for (auto i = 0; i < len; i++) {
+                        for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(i, vals[i] / 1000000);
                         }
                     } break;
                     case ::arrow::TimeUnit::MICRO: {
                         const int64_t* vals = scol->raw_values();
-                        for (auto i = 0; i < len; i++) {
+                        for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(i, vals[i] / 1000);
                         }
                     } break;
                     case ::arrow::TimeUnit::SECOND: {
                         const int64_t* vals = scol->raw_values();
-                        for (auto i = 0; i < len; i++) {
+                        for (uint32_t i = 0; i < len; i++) {
                             dest->set_nth<int64_t>(i, vals[i] * 1000);
                         }
                     } break;
@@ -246,7 +243,7 @@ namespace arrow {
             case ::arrow::BooleanType::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::BooleanArray>(src);
                 const uint8_t* null_bitmap = scol->values()->data();
-                for (auto i = 0; i < len; ++i) {
+                for (uint32_t i = 0; i < len; ++i) {
                     std::uint8_t elem = null_bitmap[i / 8];
                     bool v = elem & (1 << (i % 8));
                     dest->set_nth<bool>(i, v);
@@ -274,7 +271,7 @@ namespace arrow {
             const uint8_t* null_bitmap = array->null_bitmap_data();
 
             // arrow packs bools into a bitmap
-            for (auto i = 0; i < len; ++i) {
+            for (uint32_t i = 0; i < len; ++i) {
                 std::uint8_t elem = null_bitmap[i / 8];
                 bool v = elem & (1 << (i % 8));
                 col->set_valid(i, v);

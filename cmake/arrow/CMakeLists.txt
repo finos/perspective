@@ -106,15 +106,21 @@ endforeach()
 
 include_directories(src)
 set(ARROW_BUILD_STATIC ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (PSP_WASM_BUILD)
+    set(CMAKE_POSITION_INDEPENDENT_CODE OFF)	
+elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)    
+endif()
+
 add_library(arrow STATIC ${ARROW_SRCS})
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
 
 target_link_libraries(arrow
     ${double-conversion_LIBRARIES}
-    ${BOOST_FILESYSTEM_LIBRARY}
-    ${BOOST_SYSTEM_LIBRARY}
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
 add_custom_target(arrow_fb_files

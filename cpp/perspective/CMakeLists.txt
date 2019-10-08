@@ -69,7 +69,6 @@ option(PSP_PYTHON_BUILD "Build the Python Bindings" OFF)
 option(PSP_CPP_BUILD_STRICT "Build the C++ with strict warnings" OFF)
 option(PSP_BUILD_DOCS "Build the Perspective documentation" OFF)
 
-
 if (NOT DEFINED PSP_WASM_BUILD)
 	set(PSP_WASM_BUILD ON)
 	set(PSP_CPP_BUILD OFF)
@@ -174,6 +173,7 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
 	include_directories("/usr/local/flatbuffers/include")
+	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
 		--bind \
@@ -297,8 +297,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
 
 		message("${Cyan}Building minimal Apache Arrow${ColorReset}")
-		# psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
-		# psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 
 		#####################
 	endif()
@@ -307,7 +305,6 @@ endif()
 psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
 psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
 psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
-# psp_build_dep("flatbuffers" "../../cmake/flatbuffers.txt.in")
 psp_build_dep("arrow" "../../cmake/arrow.txt.in")
 
 #####################
@@ -426,7 +423,6 @@ else()
 endif()
 
 if (PSP_WASM_BUILD)
-	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 
 	add_library(psp ${SOURCE_FILES})
 	target_compile_definitions(psp PRIVATE PSP_ENABLE_WASM=1)
@@ -468,6 +464,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
+		target_link_libraries(psp arrow)
+		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 	endif()
 
 	if(PSP_CPP_BUILD_STRICT AND NOT WIN32)
