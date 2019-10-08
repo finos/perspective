@@ -96,7 +96,7 @@ class _PerspectiveAccessor(object):
 
         If the element does not exist, return None.
 
-        Params:
+        Args:
             column_name (str)
             ridx (int)
 
@@ -120,7 +120,7 @@ class _PerspectiveAccessor(object):
 
         If DTYPE_DATE or DTYPE_TIME is specified for a string value, attempt to parse the string value or return `None`.
 
-        Params:
+        Args:
             cidx (int)
             ridx (int)
             type (perspective.table.libbinding.t_dtype)
@@ -172,7 +172,7 @@ class _PerspectiveAccessor(object):
 
         This allows differentiation between value is None (unset) and value not in row (no-op).
 
-        Params:
+        Args:
             ridx (int)
             name (str)
 

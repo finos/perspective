@@ -7,12 +7,10 @@
 #
 
 import pandas
-from functools import wraps
 from .data.pandas import deconstruct_pandas
 from .widget import PerspectiveWidget
 
 
-@wraps(PerspectiveWidget.__init__)
 def start(table_or_data,
           plugin="hypergrid",
           row_pivots=[],

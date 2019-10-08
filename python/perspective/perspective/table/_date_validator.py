@@ -23,7 +23,7 @@ class _PerspectiveDateValidator(object):
         as the core engine stores the timestamp as milliseconds since epoch. When a datetime is retrieved from the engine,
         it is constructed with the timestamp, thus any timezone set on the input data will not apply to the output data.
 
-        Params:
+        Args:
             str (str) : the datestring to parse
 
         Returns:
@@ -86,7 +86,7 @@ class _PerspectiveDateValidator(object):
 
         Attempt to use heuristics about dates to minimize false positives, i.e. do not parse dates without separators.
 
-        Params:
+        Args:
             str (str) : the datestring to parse
         '''
         has_separators = bool(search(r"[/. -]", str))  # match commonly-used date separators

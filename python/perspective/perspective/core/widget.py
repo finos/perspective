@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import json
+import logging
 from datetime import datetime
 from random import random
 from time import mktime
@@ -74,7 +75,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
 
         Do not pass a `Table` or data into the constructor—use the `load()` method to provide the widget with data.
 
-        Params:
+        Args:
             plugin (str) : the grid or visualization that will be displayed on render. Defaults to "hypergrid".
             columns (list[str]) : column names that will be actively displayed to the user. Columns not in this list will exist on the viewer sidebar
                 but not in the visualization. If not specified, all colummns present in the dataset will be shown.
@@ -133,7 +134,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         If data is passed in, a `perspective.Table` is automatically created by this function,
         and the options passed to `**config` are extended to the new Table.
 
-        Params:
+        Args:
             table_or_data (Table|dict|list|pandas.DataFrame) : a `perspective.Table` instance or a dataset to be displayed in the widget.
             **options : optional keyword arguments that will be parsed by the `perspective.Table` constructor if data is passed in.
                 - index (str) : the name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
@@ -166,7 +167,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
             new_columns = sorted(table.columns())
 
             if str(new_columns) != str(old_columns):
-                print("New dataset has different columns - resetting widget state.")
+                logging.warn("New dataset has different columns - resetting widget state.")
                 self.columns = table.columns()
                 self.row_pivots = []
                 self.column_pivots = []
@@ -202,7 +203,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
 
         The posted message should conform to the `PerspectiveJupyterMessage` interface as defined in `@finos/perspective-jupyterlab`.
 
-        Params:
+        Args:
             msg : a message from `PerspectiveManager` for the front-end viewer to process.
         '''
         self.send({

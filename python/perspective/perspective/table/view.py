@@ -104,7 +104,7 @@ class View(object):
 
         If the columns are aggregated, their aggregated types will be shown.
 
-        Params:
+        Args:
             as_string (bool) : returns data types as string representations, if True
 
         Returns:
@@ -151,7 +151,7 @@ class View(object):
     def remove_update(self, callback):
         '''Given a callback function, remove it from the list of callbacks.
 
-        Params:
+        Args:
             callback (func) : a function reference that will be removed.
         '''
         if not callable(callback):
@@ -161,7 +161,7 @@ class View(object):
     def on_delete(self, callback):
         '''Set a callback to be run when the `delete()` method is called on the View.
 
-        Params:
+        Args:
             callback (func) : a callback to run after `delete()` has been called.
 
         Examples:
@@ -196,7 +196,7 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Params:
+        Args:
             options (dict) :
                 user-provided options that specifies what data to return:
                 - start_row: defaults to 0
@@ -217,7 +217,7 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Params:
+        Args:
             options (dict) :
                 user-provided options that specifies what data to return:
                 - start_row: defaults to 0
@@ -238,7 +238,7 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Params:
+        Args:
             options (dict) :
                 user-provided options that specifies what data to return:
                 - start_row: defaults to 0
@@ -261,7 +261,7 @@ class View(object):
 
         If the view is aggregated, the aggregated dataset will be returned.
 
-        Params:
+        Args:
             options (dict) :
                 user-provided options that specifies what data to return:
                 - start_row: defaults to 0

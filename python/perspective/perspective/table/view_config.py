@@ -13,7 +13,7 @@ class ViewConfig(object):
     def __init__(self, **config):
         '''Receives a user-provided config dict and standardizes it for consumption by the python client and the core engine.
 
-        Params:
+        Args:
             config (dict) : optional keyword args that configure the view.
         '''
         self._config = config
