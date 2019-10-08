@@ -100,7 +100,7 @@ class PerspectiveView extends DOMWidgetView {
         const observer = new MutationObserver(this._synchronize_state.bind(this));
         observer.observe(this.pWidget.viewer, {
              attributes: true,
-             attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters", "computed_column"],
+             attributeFilter: ["plugin", "columns", "row-pivots", "column-pivots", "aggregates", "sort", "filters"],
              subtree: false
         });
 

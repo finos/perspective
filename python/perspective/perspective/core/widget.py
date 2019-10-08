@@ -8,11 +8,12 @@
 import json
 from datetime import datetime
 from random import random
+from time import mktime
 from ipywidgets import Widget
 from traitlets import observe, Unicode
-from .traitlets import PerspectiveTraitlets
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
+from .widget_traitlets import PerspectiveTraitlets
 from ..table import PerspectiveManager, Table
 
 
@@ -22,7 +23,7 @@ class DateTimeEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, datetime):
             # Convert to milliseconds - perspective.js expects millisecond timestamps, but python generates them in seconds.
-            return obj.timestamp() * 1000
+            return int((mktime(obj.timetuple()) + obj.microsecond / 1000000.0) * 1000)
         return super(DateTimeEncoder, self).default(obj)
 
 
@@ -117,6 +118,11 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         '''
         self.on_msg(self.handle_message)
 
+    @property
+    def table(self):
+        '''Returns the `perspective.Table` under management by the widget.'''
+        return self.manager.get_table(self.table_name)
+
     def load(self, table_or_data, **options):
         '''Given a `perspective.Table` or data that can be handled by `perspective.Table`, pass it to the widget.
 
@@ -160,6 +166,7 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
             new_columns = sorted(table.columns())
 
             if str(new_columns) != str(old_columns):
+                print("New dataset has different columns - resetting widget state.")
                 self.columns = table.columns()
                 self.row_pivots = []
                 self.column_pivots = []
@@ -179,6 +186,16 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         })
 
         self.table_name = name
+
+    def update(self, data):
+        '''Update the table under management by the widget with new data.
+
+        This function follows the semantics of `Table.update()`, and will be affected by whether an index is set on the underlying table.
+
+        Args:
+            data (dict|list|pandas.DataFrame) : the update data for the table.
+        '''
+        self.table.update(data)
 
     def post(self, msg):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.

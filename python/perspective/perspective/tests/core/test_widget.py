@@ -6,10 +6,17 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
+import pandas as pd
 from perspective import PerspectiveWidget, Table
 
 
 class TestWidget:
+
+    def test_widget_get_table(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        widget.load(table)
+        assert widget.table == table
 
     def test_widget_load_table(self):
         table = Table({"a": [1, 2, 3]})
@@ -55,3 +62,48 @@ class TestWidget:
         widget = PerspectiveWidget()
         widget.load(table)
         assert widget.columns == ["a"]
+
+    def test_widget_update_dict(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        widget.load(table)
+        widget.update({"a": [4, 5, 6]})
+        assert table.size() == 6
+        assert widget.table.size() == 6
+        assert widget.table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6]
+        }
+
+    def test_widget_update_list(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        widget.load(table)
+        widget.update([{"a": 4}, {"a": 5}, {"a": 6}])
+        assert table.size() == 6
+        assert widget.table.size() == 6
+        assert widget.table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6]
+        }
+
+    def test_widget_update_df(self):
+        table = Table({"a": [1, 2, 3]})
+        widget = PerspectiveWidget()
+        widget.load(table)
+        widget.update(pd.DataFrame({"a": [4, 5, 6]}))
+        assert table.size() == 6
+        assert widget.table.size() == 6
+        assert widget.table.view().to_dict() == {
+            "a": [1, 2, 3, 4, 5, 6]
+        }
+
+    def test_widget_update_dict_partial(self):
+        table = Table({"a": [1, 2, 3], "b": [5, 6, 7]}, index="a")
+        widget = PerspectiveWidget()
+        widget.load(table)
+        widget.update({"a": [1, 2, 3], "b": [8, 9, 10]})
+        assert table.size() == 3
+        assert widget.table.size() == 3
+        assert widget.table.view().to_dict() == {
+            "a": [1, 2, 3],
+            "b": [8, 9, 10]
+        }

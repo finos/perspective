@@ -8,7 +8,6 @@
 from datetime import date
 import pandas as pd
 import numpy as np
-from pytest import mark
 from perspective import PerspectiveWidget, Table, start
 from random import random, randint, choice
 from faker import Faker
@@ -49,9 +48,9 @@ def superstore(count=50):
 DF = superstore()
 
 
-class TestWidgetPandas:
+class TestStartPandas:
 
-    def test_widget_load_table_df(self):
+    def test_start_load_table_df(self):
         table = Table(DF)
         widget = PerspectiveWidget()
         widget.load(table)
@@ -63,14 +62,21 @@ class TestWidgetPandas:
                                                  'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
 
-    def test_widget_load_data_df(self):
+    def test_start_load_data_df(self):
         widget = PerspectiveWidget()
         widget.load(DF)
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
 
-    def test_widget_load_row_pivots(self):
+    def test_start_load_pivot_table(self):
+        pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
+        widget = start(pivot_table)
+        assert widget.row_pivots == ['Country', 'Region']
+        assert widget.column_pivots == []
+        assert widget.columns == ['Financials', 'Industrials', 'Technology']
+
+    def test_start_load_row_pivots(self):
         df_pivoted = DF.set_index(['Country', 'Region'])
         widget = start(df_pivoted)
         assert widget.row_pivots == ['Country', 'Region']
@@ -79,15 +85,7 @@ class TestWidgetPandas:
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
 
-    def test_widget_load_pivot_table(self):
-        pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
-        widget = start(pivot_table)
-        assert widget.row_pivots == ['Country', 'Region']
-        assert widget.column_pivots == []
-        assert widget.columns == ['Financials', 'Industrials', 'Technology']
-
-    @mark.skip
-    def test_widget_load_column_pivots(self):
+    def test_start_load_column_pivots(self):
         arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),
                   np.array(['one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two', 'one', 'one', 'two', 'two']),
                   np.array(['X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y', 'X', 'Y'])]

@@ -44,6 +44,9 @@ class MainHandler(tornado.web.RequestHandler):
 
 class SimpleWebSocket(tornado.websocket.WebSocketHandler):
 
+    def check_origin(self, origin):
+        return True
+
     def on_message(self, message):
         '''When the websocket receives a message, send it to the `process` method of the `PerspectiveManager` with a reference to the `post` callback.'''
         if message == "heartbeat":
