@@ -231,8 +231,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASYNC_MODE_FLAGS "")
 	set(ASMJS_MODE_FLAGS "")
 
-	include_directories("/usr/local/flatbuffers/include")
-
 	find_package(Boost COMPONENTS filesystem)
 	if(NOT Boost_FOUND)
 		message("${Red}Boost could not be located${ColorReset}")
