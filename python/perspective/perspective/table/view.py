@@ -310,7 +310,3 @@ class View(object):
             callback(cache["row_delta"])
         else:
             callback()
-
-    def __del__(self):
-        '''Make sure callbacks are cleaned up when GC is called.'''
-        self.delete()

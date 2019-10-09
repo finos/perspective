@@ -364,7 +364,7 @@ class TestToFormat(object):
         tbl = Table(df)
         view = tbl.view()
         df2 = view.to_df()
-        assert np.array_equal(df2.columns, df.columns)
+        assert np.array_equal(df2.columns, pd.Index(["index", "a", "b"], dtype=object))
         assert np.array_equal(df2["a"].values, df["a"].values)
         assert np.array_equal(df2["b"].values, df["b"].values)
 
@@ -375,7 +375,7 @@ class TestToFormat(object):
         tbl = Table(inp)
         view = tbl.view()
         df2 = view.to_df()
-        assert np.array_equal(df2.columns, df.columns)
+        assert np.array_equal(df2.columns, pd.Index(["index", "a"], dtype=object))
         assert np.array_equal(df2["a"].values, df["a"].values)
 
     # start_row/end_row

@@ -49,12 +49,7 @@ def _type_to_format(data_or_schema):
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
 
-            if isinstance(data_or_schema, pandas.DataFrame):
-                # Dataframe
-                return 1, {c: df[c].values for c in df.columns}
-
-            # Columns
-            return 1, {df.name: df.values}
+            return 1, {c: df[c].values for c in df.columns}
 
 
 class _PerspectiveAccessor(object):

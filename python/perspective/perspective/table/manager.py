@@ -74,6 +74,7 @@ class PerspectiveManager(object):
 
                 if msg["method"] == "delete" and msg["cmd"] == "view_method":
                     # views can be removed, but tables cannot
+                    self._views[msg["name"]].delete()
                     self._views.pop(msg["name"], None)
                     return
 

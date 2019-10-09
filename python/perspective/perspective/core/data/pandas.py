@@ -42,4 +42,15 @@ def deconstruct_pandas(data):
         kwargs['row_pivots'] = list(data.index.names)
         kwargs['columns'] = data.columns.tolist()
 
+    if isinstance(data, pd.Series) or 'index' not in map(lambda x: str(x).lower(), data.columns):
+        flattened = data.reset_index()
+
+        if isinstance(data, pd.Series):
+            # preserve name from series
+            flattened.name = data.name
+
+        # use explicit index column as primary key
+        kwargs["index"] = "index"
+        data = flattened
+
     return data, kwargs

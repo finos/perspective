@@ -8,7 +8,7 @@
 from datetime import date
 import pandas as pd
 import numpy as np
-from perspective import PerspectiveWidget, Table, start
+from perspective import Table, start
 from random import random, randint, choice
 from faker import Faker
 fake = Faker()
@@ -51,23 +51,36 @@ DF = superstore()
 class TestStartPandas:
 
     def test_start_load_table_df(self):
-        table = Table(DF)
-        widget = PerspectiveWidget()
-        widget.load(table)
-        assert table.schema() == {'Country': str, 'Region': str, 'Category': str, 'City': str, 'Customer ID': str, 'Discount': float,
-                                  'Order Date': date, 'Order ID': str, 'Postal Code': str, 'Product ID': str, 'Profit': float, 'Quantity': int,
-                                  'Row ID': int, 'Sales': int, 'Segment': str, 'Ship Date': date, 'Ship Mode': str, 'State': str, 'Sub-Category': str}
+        widget = start(DF)
+        assert widget.table.schema() == {'Country': str, 'index': int, 'Region': str, 'Category': str, 'City': str, 'Customer ID': str, 'Discount': float,
+                                         'Order Date': date, 'Order ID': str, 'Postal Code': str, 'Product ID': str, 'Profit': float, 'Quantity': int,
+                                         'Row ID': int, 'Sales': int, 'Segment': str, 'Ship Date': date, 'Ship Mode': str, 'State': str, 'Sub-Category': str}
 
-        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
+        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'index', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
+        view = widget.table.view()
+        assert view.num_rows() == len(DF)
+        assert view.num_columns() == len(DF.columns) + 1  # index column
 
     def test_start_load_data_df(self):
-        widget = PerspectiveWidget()
-        widget.load(DF)
-        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
+        widget = start(DF)
+        assert sorted(widget.columns) == sorted(['Category', 'City', 'Country', 'Customer ID', 'Discount', 'index', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Region', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
+        view = widget.table.view()
+        assert view.num_rows() == len(DF)
+        assert view.num_columns() == 20
+
+    def test_start_load_series(self):
+        series = pd.Series(DF["Profit"].values, name="profit")
+        widget = start(series)
+        assert widget.table.schema() == {'index': int, 'profit': float}
+
+        assert sorted(widget.columns) == sorted(["index", "profit"])
+        view = widget.table.view()
+        assert view.num_rows() == len(DF)
+        assert view.num_columns() == 2
 
     def test_start_load_pivot_table(self):
         pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
@@ -75,6 +88,21 @@ class TestStartPandas:
         assert widget.row_pivots == ['Country', 'Region']
         assert widget.column_pivots == []
         assert widget.columns == ['Financials', 'Industrials', 'Technology']
+        # table should host flattened data
+        view = widget.table.view()
+        assert view.num_rows() == 5
+        assert view.num_columns() == 6
+
+    def test_start_load_pivot_table_with_user_pivots(self):
+        pivot_table = pd.pivot_table(DF, values='Discount', index=['Country', 'Region'], columns='Category')
+        widget = start(pivot_table, row_pivots=["Category", "Segment"])
+        assert widget.row_pivots == ['Country', 'Region']
+        assert widget.column_pivots == []
+        assert widget.columns == ['Financials', 'Industrials', 'Technology']
+        # table should host flattened data
+        view = widget.table.view()
+        assert view.num_rows() == 5
+        assert view.num_columns() == 6
 
     def test_start_load_row_pivots(self):
         df_pivoted = DF.set_index(['Country', 'Region'])
@@ -84,6 +112,23 @@ class TestStartPandas:
         assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
                                                  'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
                                                  'Ship Mode', 'State', 'Sub-Category'])
+        assert widget.table.size() == 50
+        view = widget.table.view()
+        assert view.num_rows() == len(DF)
+        assert view.num_columns() == len(DF.columns) + 1  # index column
+
+    def test_start_load_row_pivots_with_user_pivots(self):
+        df_pivoted = DF.set_index(['Country', 'Region'])
+        widget = start(df_pivoted, row_pivots=["Category", "Segment"])
+        assert widget.row_pivots == ['Country', 'Region']  # dataframe pivots should overwrite user pivots
+        assert widget.column_pivots == []
+        assert sorted(widget.columns) == sorted(['Category', 'City', 'Customer ID', 'Discount', 'Order Date', 'Order ID', 'Postal Code',
+                                                 'Product ID', 'Profit', 'Quantity', 'Row ID', 'Sales', 'Segment', 'Ship Date',
+                                                 'Ship Mode', 'State', 'Sub-Category'])
+        assert widget.table.size() == 50
+        view = widget.table.view()
+        assert view.num_rows() == len(DF)
+        assert view.num_columns() == len(DF.columns) + 1  # index column
 
     def test_start_load_column_pivots(self):
         arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),

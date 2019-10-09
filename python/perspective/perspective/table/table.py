@@ -139,7 +139,10 @@ class Table(object):
         to locate the indexed row and write into it. If an index is not provided, the update is treated as an append.
 
         Example:
-            - to update the row with primary key "abc" on a Table with {"index": "a"}, `data` should be [{"a": "abc", "b": "new data"}]
+            >>> tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="a")
+            >>> tbl.update({"a": [2, 3], "b": ["a", "a"]})
+            >>> tbl.view().to_dict()
+            {"a": [1, 2, 3], "b": ["a", "a", "a"]}
 
         Args:
             data (dict|list|dataframe) : the data with which to update the Table
@@ -166,7 +169,10 @@ class Table(object):
         If the table does not have an index, `remove()` has no effect. Removes propagate to views derived from the table.
 
         Example:
-            - to remove rows with primary keys "abc" and "def", provide ["abc", "def"].
+            >>> tbl = Table({"a": [1, 2, 3]}, index="a")
+            >>> tbl.remove([2, 3])
+            >>> tbl.view().to_records()
+            [{"a": 1}]
 
         Args:
             pkeys (list) : a list of primary keys to indicate the rows that should be removed.
@@ -224,7 +230,15 @@ class Table(object):
         self._delete_callbacks.add_callback(callback)
 
     def remove_delete(self, callback):
-        '''Remove the delete callback associated with this table.'''
+        '''Remove the delete callback associated with this table.
+
+        Examples:
+            >>> def deleter():
+            >>>     print("Delete called!")
+            >>> table.on_delete(deleter)
+            >>> table.remove_delete(deleter)
+            >>> table.delete()
+        '''
         if not callable(callback):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
@@ -246,7 +260,3 @@ class Table(object):
         cache = {}
         for callback in self._callbacks.get_callbacks():
             callback["callback"](cache=cache)
-
-    def __del__(self):
-        '''Before GC, clean up internal resources to C++ objects through `delete()`.'''
-        self.delete()
