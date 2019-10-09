@@ -1,114 +1,109 @@
 set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 set(ARROW_SRCS
-    src/arrow/array.cc
-    src/arrow/builder.cc
-    src/arrow/array/builder_adaptive.cc
-    src/arrow/array/builder_base.cc
-    src/arrow/array/builder_binary.cc
-    src/arrow/array/builder_decimal.cc
-    src/arrow/array/builder_dict.cc
-    src/arrow/array/builder_nested.cc
-    src/arrow/array/builder_primitive.cc
-    src/arrow/array/builder_union.cc
-    src/arrow/array/concatenate.cc
-    src/arrow/buffer.cc
-    src/arrow/compare.cc
-    src/arrow/extension_type.cc
-    src/arrow/memory_pool.cc
-    src/arrow/pretty_print.cc
-    src/arrow/record_batch.cc
-    src/arrow/result.cc
-    src/arrow/scalar.cc
-    src/arrow/sparse_tensor.cc
-    src/arrow/status.cc
-    src/arrow/table.cc
-    src/arrow/table_builder.cc
-    src/arrow/tensor.cc
-    src/arrow/type.cc
-    src/arrow/visitor.cc
-    src/arrow/csv/converter.cc
-    src/arrow/csv/chunker.cc
-    src/arrow/csv/column-builder.cc
-    src/arrow/csv/options.cc
-    src/arrow/csv/parser.cc
-    src/arrow/csv/reader.cc
-    src/arrow/filesystem/filesystem.cc
-    src/arrow/filesystem/localfs.cc
-    src/arrow/filesystem/mockfs.cc
-    src/arrow/filesystem/path-util.cc
-    src/arrow/filesystem/util-internal.cc
-    src/arrow/json/options.cc
-    src/arrow/json/chunked-builder.cc
-    src/arrow/json/chunker.cc
-    src/arrow/json/converter.cc
-    src/arrow/json/parser.cc
-    src/arrow/json/reader.cc
-    src/arrow/io/buffered.cc
-    src/arrow/io/compressed.cc
-    src/arrow/io/file.cc
-    src/arrow/io/interfaces.cc
-    src/arrow/io/memory.cc
-    src/arrow/io/readahead.cc
-    src/arrow/testing/util.cc
-    src/arrow/util/basic_decimal.cc
-    src/arrow/util/bit-util.cc
-    src/arrow/util/compression.cc
-    src/arrow/util/cpu-info.cc
-    src/arrow/util/decimal.cc
-    src/arrow/util/int-util.cc
-    src/arrow/util/io-util.cc
-    src/arrow/util/logging.cc
-    src/arrow/util/key_value_metadata.cc
-    src/arrow/util/memory.cc
-    src/arrow/util/string_builder.cc
-    src/arrow/util/task-group.cc
-    src/arrow/util/thread-pool.cc
-    src/arrow/util/trie.cc
-    src/arrow/util/utf8.cc
-    src/arrow/vendored/datetime/tz.cpp
-    src/arrow/ipc/dictionary.cc
-    src/arrow/ipc/feather.cc
-    src/arrow/ipc/json-integration.cc
-    src/arrow/ipc/json-internal.cc
-    src/arrow/ipc/json-simple.cc
-    src/arrow/ipc/message.cc
-    src/arrow/ipc/metadata-internal.cc
-    src/arrow/ipc/reader.cc
-    src/arrow/ipc/writer.cc)
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_adaptive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_base.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_binary.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_decimal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_dict.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_nested.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_primitive.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_union.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/concatenate.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/buffer.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compare.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/extension_type.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/memory_pool.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/pretty_print.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/record_batch.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/result.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/scalar.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/sparse_tensor.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/status.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/table.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/table_builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/tensor.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/type.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/visitor.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/converter.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/chunker.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column-builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/options.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/filesystem.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/localfs.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/mockfs.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/path-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/util-internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/options.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunked-builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunker.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/converter.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/parser.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/reader.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/buffered.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/compressed.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/file.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/interfaces.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/memory.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/readahead.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/testing/util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu-info.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/int-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/io-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/logging.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string_builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task-group.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/thread-pool.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/trie.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/utf8.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/datetime/tz.cpp
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/dictionary.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-integration.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-simple.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/message.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata-internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc)
 
 set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
 
 # make clean will delete the generated file
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
 
 set(FBS_OUTPUT_FILES
-    "../arrow-src/cpp/src/arrow/ipc/Message_generated.h"
-    "../arrow-src/cpp/src/arrow/ipc/File_generated.h"
-    "../arrow-src/cpp/src/arrow/ipc/Schema_generated.h"
-    "../arrow-src/cpp/src/arrow/ipc/Tensor_generated.h"
-    "../arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h"
-    "../arrow-src/cpp/src/arrow/ipc/feather_generated.h")
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Message_generated.h
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/File_generated.h
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Schema_generated.h
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/Tensor_generated.h
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather_generated.h)
 
 set(FBS_SRC
-    ../format/Message.fbs
-    ../format/File.fbs
-    ../format/Schema.fbs
-    ../format/Tensor.fbs
-    ../format/SparseTensor.fbs
-    src/arrow/ipc/feather.fbs)
-
-foreach(FIL ${FBS_SRC})
-  get_filename_component(ABS_FIL ${FIL} ABSOLUTE)
-  list(APPEND ABS_FBS_SRC ${ABS_FIL})
-endforeach()
+    ${CMAKE_BINARY_DIR}/arrow-src/format/Message.fbs
+    ${CMAKE_BINARY_DIR}/arrow-src/format/File.fbs
+    ${CMAKE_BINARY_DIR}/arrow-src/format/Schema.fbs
+    ${CMAKE_BINARY_DIR}/arrow-src/format/Tensor.fbs
+    ${CMAKE_BINARY_DIR}/arrow-src/format/SparseTensor.fbs
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.fbs)
 
 include_directories(src)
 set(ARROW_BUILD_STATIC ON)
@@ -131,10 +126,10 @@ add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
                    COMMAND ${FLATBUFFERS_COMPILER}
                            -c
                            -o
-                           ../arrow-src/cpp/src/arrow/ipc/
-                           ${ABS_FBS_SRC}
+                           ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/
+                           ${FBS_SRC}
                    DEPENDS ${FLATBUFFERS_COMPILER}
-                   COMMENT "Running flatc compiler on ${ABS_FBS_SRC}"
+                   COMMENT "Running flatc compiler on ${FBS_SRC}"
                    VERBATIM)
 
 add_custom_target(arrow_fb_files DEPENDS ${FBS_OUTPUT_FILES})
