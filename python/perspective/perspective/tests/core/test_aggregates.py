@@ -17,6 +17,5 @@ class TestAggregates:
             "b": Aggregate.LAST
         }
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
-        widget = PerspectiveWidget(aggregates=aggs)
-        widget.load(data)
+        widget = PerspectiveWidget(data, aggregates=aggs)
         assert widget.aggregates == aggs

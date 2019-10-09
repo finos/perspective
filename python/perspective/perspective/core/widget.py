@@ -5,17 +5,16 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import pandas
 import json
-import logging
 from datetime import datetime
-from random import random
+from functools import wraps
 from time import mktime
 from ipywidgets import Widget
 from traitlets import observe, Unicode
-from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
-    validate_aggregates, validate_sort, validate_filters, validate_plugin_config
-from .widget_traitlets import PerspectiveTraitlets
-from ..table import PerspectiveManager, Table
+from .data.pandas import deconstruct_pandas
+from .exception import PerspectiveError
+from .viewer import PerspectiveViewer
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -28,7 +27,7 @@ class DateTimeEncoder(json.JSONEncoder):
         return super(DateTimeEncoder, self).default(obj)
 
 
-class PerspectiveWidget(Widget, PerspectiveTraitlets):
+class PerspectiveWidget(Widget, PerspectiveViewer):
     '''`PerspectiveWidget` allows for Perspective to be used in the form of a JupyterLab IPython widget.
 
     Using `perspective.Table`, you can create a widget that extends the full functionality of `perspective-viewer`.
@@ -39,164 +38,81 @@ class PerspectiveWidget(Widget, PerspectiveTraitlets):
         >>> from perspective import Table, PerspectiveWidget
         >>> data = {"a": [1, 2, 3], "b": ["2019/07/11 7:30PM", "2019/07/11 8:30PM", "2019/07/11 9:30PM"]}
         >>> tbl = Table(data, index="a")
-        >>> widget = PerspectiveWidget(row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
-        >>> widget.load(tbl) # or widget.load(data) - a Table will be created for you
+        >>> widget = PerspectiveWidget(tbl, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
         >>> widget
-        PerspectiveWidget(row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
+        PerspectiveWidget(tbl, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
         >>> widget.sort
         [["b", "desc"]]
         >>> widget.sort.append(["a", "asc"])
         >>> widget.sort
         [["b", "desc"], ["a", "asc"]]
-        >>> tbl.update({"a": [4, 5]}) # updates to the table reflect on the widget
+        >>> widget.update({"a": [4, 5]}) # updates to the table reflect on the widget
     '''
 
     # Required by ipywidgets for proper registration of the backend
     _model_name = Unicode('PerspectiveModel').tag(sync=True)
     _model_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
-    _model_module_version = Unicode('^0.3.0').tag(sync=True)
+    _model_module_version = Unicode('^0.3.9').tag(sync=True)
     _view_name = Unicode('PerspectiveView').tag(sync=True)
     _view_module = Unicode('@finos/perspective-jupyterlab').tag(sync=True)
-    _view_module_version = Unicode('^0.3.0').tag(sync=True)
+    _view_module_version = Unicode('^0.3.9').tag(sync=True)
 
+    @wraps(PerspectiveViewer.__init__)
     def __init__(self,
-                 plugin='hypergrid',
-                 columns=None,
-                 row_pivots=None,
-                 column_pivots=None,
-                 aggregates=None,
-                 sort=None,
-                 filters=None,
-                 plugin_config=None,
-                 dark=False,
-                 *args,
+                 table_or_data,
+                 index=None,
+                 limit=None,
                  **kwargs):
-        '''Initialize an instance of `PerspectiveWidget` with the given viewer configuration.
+        '''Initialize an instance of `PerspectiveWidget` with the given table/data and viewer configuration.
 
-        Do not pass a `Table` or data into the constructor—use the `load()` method to provide the widget with data.
+        If a pivoted DataFrame or MultiIndex table is passed in, the widget preserves pivots and applies them.
 
         Args:
-            plugin (str) : the grid or visualization that will be displayed on render. Defaults to "hypergrid".
-            columns (list[str]) : column names that will be actively displayed to the user. Columns not in this list will exist on the viewer sidebar
-                but not in the visualization. If not specified, all colummns present in the dataset will be shown.
-            row_pivots (list[str]) : columns that will be used to group data together by row.
-            column_pivots (list[str]) : columns that will be used to group data together by unique column value.
-            aggregates (dict{str:str}) : a mapping of column names to aggregate types, specifying how data should be aggregated when pivots are applied.
-            sort (list[list[str]]) : a list of sort specifications to apply to the view.
-                Sort specifications are lists of two elements: a string column name to sort by, and a string sort direction ("asc", "desc").
-            filters (list[list[str]]) : a list of filter configurations to apply to the view.
-                Filter configurations are lists of three elements: a string column name, a string filter operator ("<", ">", "==", "not null", etc.),
-                and a value to filter by. Make sure the type of the filter value is the same as the column type, i.e. a string column should not be filtered by integer.
-            plugin_config (dict) : an optional configuration containing the interaction state of a `perspective-viewer`.
-            dark (bool) : enables/disables dark mode on the viewer. Defaults to `False`.
+            table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
+            **kwargs : configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
 
         Example:
-            >>> widget = PerspectiveWidget(aggregates={"a": "avg"}, row_pivots=["a"], sort=[["b", "desc"]], filter=[["a", ">", 1]])
+            >>> widget = PerspectiveWidget(
+                    {"a": [1, 2, 3]},
+                    aggregates={"a": "avg"},
+                    row_pivots=["a"],
+                    sort=[["b", "desc"]],
+                    filter=[["a", ">", 1]])
         '''
-        super(PerspectiveWidget, self).__init__(*args, **kwargs)
-
-        # Create an instance of `PerspectiveManager`, which receives messages from the `PerspectiveJupyterClient` on the front-end.
-        self.manager = PerspectiveManager()
-        self.table_name = None  # not a traitlet - only used in the python side of the widget
-
-        # Viewer configuration
-        self.plugin = validate_plugin(plugin)
-        self.columns = validate_columns(columns) or []
-        self.row_pivots = validate_row_pivots(row_pivots) or []
-        self.column_pivots = validate_column_pivots(column_pivots) or []
-        self.aggregates = validate_aggregates(aggregates) or {}
-        self.sort = validate_sort(sort) or []
-        self.filters = validate_filters(filters) or []
-        self.plugin_config = validate_plugin_config(plugin_config) or {}
-        self.dark = dark
-
-        '''
-        Handle messages from the the front end `PerspectiveJupyterClient.send()`.
-
-        The "data" value of the message should be a JSON-serialized string.
-
-        Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
-        '''
+        # Handle messages from the the front end `PerspectiveJupyterClient.send()`.
+        # - The "data" value of the message should be a JSON-serialized string.
+        # - Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
         self.on_msg(self.handle_message)
 
-    @property
-    def table(self):
-        '''Returns the `perspective.Table` under management by the widget.'''
-        return self.manager.get_table(self.table_name)
+        # Parse the dataset we pass in - if it's Pandas, preserve pivots
+        if isinstance(table_or_data, pandas.DataFrame) or isinstance(table_or_data, pandas.Series):
+            data, pivots = deconstruct_pandas(table_or_data)
+            table_or_data = data
 
-    def load(self, table_or_data, **options):
-        '''Given a `perspective.Table` or data that can be handled by `perspective.Table`, pass it to the widget.
+            if pivots.get("row_pivots", None):
+                kwargs.update({"row_pivots": pivots["row_pivots"]})
 
-        `load()` resets the state of the viewer.
+            if pivots.get("column_pivots", None):
+                kwargs.update({"column_pivots": pivots["column_pivots"]})
 
-        If a `perspective.Table` is passed into `table_or_data`, `**options` is ignored as the options already set on the `Table` take precedence.
+            if pivots.get("columns", None):
+                kwargs.update({"columns": pivots["columns"]})
 
-        If data is passed in, a `perspective.Table` is automatically created by this function,
-        and the options passed to `**config` are extended to the new Table.
+        # Initialize the viewer
+        super(PerspectiveWidget, self).__init__(**kwargs)
 
-        Args:
-            table_or_data (Table|dict|list|pandas.DataFrame) : a `perspective.Table` instance or a dataset to be displayed in the widget.
-            **options : optional keyword arguments that will be parsed by the `perspective.Table` constructor if data is passed in.
-                - index (str) : the name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
-                - limit (int) : cannot be applied at the same time as `index` - the total number of rows that will be loaded into Perspective.
-                    If the table is updated and the number of rows is greater than `limit`, updates begin overwriting at row 0.
-
-        Examples:
-            >>> from perspective import Table, PerspectiveWidget
-            >>> data = {"a": [1, 2, 3]}
-            >>> tbl = Table(data)
-            >>> widget = PerspectiveWidget()
-            >>> widget.load(tbl)
-            >>> widget.load(data, index="a") # kwargs are forwarded to the `Table` constructor.
-        '''
-        name = str(random())
-        if isinstance(table_or_data, Table):
-            table = table_or_data
+        #  If an empty dataset is provided, don't call `load()`
+        if table_or_data is None:
+            if index is not None or limit is not None:
+                raise PerspectiveError("Cannot initialize PerspectiveWidget `index` or `limit` without a Table, data, or schema!")
         else:
-            table = Table(table_or_data, **options)
+            if index is not None:
+                kwargs.update({"index": index})
 
-        self.manager.host_table(name, table)
+            if limit is not None:
+                kwargs.update({"limit": limit})
 
-        '''
-        if columns are different between the tables, then remove viewer state.
-
-        sorting is expensive, but it prevents errors from applying pivots, etc. on columns that don't exist in the dataset.
-        '''
-        if self.table_name is not None:
-            old_columns = sorted(self.manager.get_table(self.table_name).columns())
-            new_columns = sorted(table.columns())
-
-            if str(new_columns) != str(old_columns):
-                logging.warn("New dataset has different columns - resetting widget state.")
-                self.columns = table.columns()
-                self.row_pivots = []
-                self.column_pivots = []
-                self.aggregates = {}
-                self.sort = []
-                self.filters = []
-
-        # If the user does not set columns to show, synchronize widget state with dataset.
-        if len(self.columns) == 0:
-            self.columns = table.columns()
-
-        # Pass the table name to the front-end.
-        self.send({
-            "id": -2,
-            "type": "table",
-            "data": name
-        })
-
-        self.table_name = name
-
-    def update(self, data):
-        '''Update the table under management by the widget with new data.
-
-        This function follows the semantics of `Table.update()`, and will be affected by whether an index is set on the underlying table.
-
-        Args:
-            data (dict|list|pandas.DataFrame) : the update data for the table.
-        '''
-        self.table.update(data)
+            self.load(table_or_data, **kwargs)
 
     def post(self, msg):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.

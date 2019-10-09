@@ -6,104 +6,53 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import numpy as np
-import pandas as pd
-from perspective import PerspectiveWidget, Table
+from pytest import raises
+from perspective import PerspectiveError, PerspectiveWidget, Table
 
 
 class TestWidget:
 
-    def test_widget_get_table(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        assert widget.table == table
+    def test_widget(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, plugin="x_bar")
+        assert widget.plugin == "x_bar"
+
+    def test_widget_no_data(self):
+        widget = PerspectiveWidget(None, plugin="x_bar", row_pivots=["a"])
+        assert widget.plugin == "x_bar"
+        assert widget.row_pivots == ["a"]
+
+    def test_widget_schema_with_index(self):
+        widget = PerspectiveWidget({"a": int}, index="a")
+        assert widget.table._index == "a"
+
+    def test_widget_schema_with_limit(self):
+        widget = PerspectiveWidget({"a": int}, limit=5)
+        assert widget.table._limit == 5
+
+    def test_widget_no_data_with_index(self):
+        # should fail
+        with raises(PerspectiveError):
+            PerspectiveWidget(None, index="a")
+
+    def test_widget_no_data_with_limit(self):
+        # should fail
+        with raises(PerspectiveError):
+            PerspectiveWidget(None, limit=5)
 
     def test_widget_load_table(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        assert widget.columns == ["a"]
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(table, plugin="x_bar")
+        assert widget.plugin == "x_bar"
 
-    def test_widget_load_data(self):
-        widget = PerspectiveWidget()
-        widget.load({"a": [1, 2, 3]})
-        assert widget.columns == ["a"]
-
-    def test_widget_load_table_with_options(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        # options should be disregarded when loading Table
-        widget.load(table, limit=1)
-        assert widget.columns == ["a"]
+    def test_widget_load_table_ignore_limit(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(table, limit=1)
         table_name = list(widget.manager._tables.keys())[0]
-        table = widget.manager._tables[table_name]
-        assert table.size() == 3
+        assert widget.manager.get_table(table_name).size() == 50
 
-    def test_widget_load_data_with_options(self):
-        widget = PerspectiveWidget()
-        # options should be forwarded to the Table constructor
-        widget.load({"a": [1, 2, 3]}, limit=1)
-        assert widget.columns == ["a"]
+    def test_widget_pass_options(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, limit=1)
         table_name = list(widget.manager._tables.keys())[0]
-        table = widget.manager._tables[table_name]
-        assert table.size() == 1
-
-    def test_widget_load_clears_state(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget(dark=True, row_pivots=["a"])
-        widget.load(table)
-        assert widget.row_pivots == ["a"]
-        widget.load({"b": [1, 2, 3]})
-        assert widget.row_pivots == []
-        assert widget.dark is True  # should not break UI
-
-    def test_widget_load_np(self):
-        table = Table({"a": np.arange(1, 100)})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        assert widget.columns == ["a"]
-
-    def test_widget_update_dict(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        widget.update({"a": [4, 5, 6]})
-        assert table.size() == 6
-        assert widget.table.size() == 6
-        assert widget.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
-
-    def test_widget_update_list(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        widget.update([{"a": 4}, {"a": 5}, {"a": 6}])
-        assert table.size() == 6
-        assert widget.table.size() == 6
-        assert widget.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
-
-    def test_widget_update_df(self):
-        table = Table({"a": [1, 2, 3]})
-        widget = PerspectiveWidget()
-        widget.load(table)
-        widget.update(pd.DataFrame({"a": [4, 5, 6]}))
-        assert table.size() == 6
-        assert widget.table.size() == 6
-        assert widget.table.view().to_dict() == {
-            "a": [1, 2, 3, 4, 5, 6]
-        }
-
-    def test_widget_update_dict_partial(self):
-        table = Table({"a": [1, 2, 3], "b": [5, 6, 7]}, index="a")
-        widget = PerspectiveWidget()
-        widget.load(table)
-        widget.update({"a": [1, 2, 3], "b": [8, 9, 10]})
-        assert table.size() == 3
-        assert widget.table.size() == 3
-        assert widget.table.view().to_dict() == {
-            "a": [1, 2, 3],
-            "b": [8, 9, 10]
-        }
+        assert widget.manager.get_table(table_name).size() == 1

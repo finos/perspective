@@ -7,7 +7,7 @@
 #
 import pandas as pd
 from mock import patch
-from perspective import start, Plugin, PerspectiveError
+from perspective import PerspectiveWidget, Plugin, PerspectiveError
 
 
 class TestLayout:
@@ -15,16 +15,16 @@ class TestLayout:
     def test_layout_invalid_plugin(self):
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            start(df, Plugin.YBAR)
-            start(df, plugin='y_line')
+            PerspectiveWidget(df, plugin=Plugin.YBAR)
+            PerspectiveWidget(df, plugin='y_line')
             try:
-                start(df, plugin='test')
+                PerspectiveWidget(df, plugin='test')
                 assert False
             except PerspectiveError:
                 pass
 
             try:
-                start(df, plugin=5)
+                PerspectiveWidget(df, plugin=5)
                 assert False
             except PerspectiveError:
                 pass
@@ -32,9 +32,9 @@ class TestLayout:
     def test_layout_invalid_columns(self):
         with patch('IPython.display.display'):
             df = pd.DataFrame([1, 2], columns=['1'])
-            start(df, plugin=Plugin.YBAR, columns=['1'])
+            PerspectiveWidget(df, plugin=Plugin.YBAR, columns=['1'])
             try:
-                start(df, plugin=Plugin.YBAR, columns=5)
+                PerspectiveWidget(df, plugin=Plugin.YBAR, columns=5)
                 assert False
             except PerspectiveError:
                 pass

@@ -13,6 +13,5 @@ class TestPlugin:
 
     def test_plugin_widget_load(self):
         data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
-        widget = PerspectiveWidget(plugin=Plugin.XBAR)
-        widget.load(data)
+        widget = PerspectiveWidget(data, plugin=Plugin.XBAR)
         assert widget.plugin == "x_bar"
