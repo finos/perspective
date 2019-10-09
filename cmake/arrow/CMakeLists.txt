@@ -122,6 +122,8 @@ target_link_libraries(arrow
     ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
+find_package(Flatbuffers)
+
 add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
                    COMMAND ${FLATBUFFERS_COMPILER}
                            -c

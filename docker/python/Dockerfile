@@ -39,5 +39,6 @@ RUN mkdir -p /usr/local \
     && cd flatbuffers \
     && cmake -G "Unix Makefiles" \
     && make \
+    && cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include \
     && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
     && chmod +x /usr/local/flatbuffers/flatc
