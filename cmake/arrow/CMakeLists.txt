@@ -81,15 +81,21 @@ set_property(SOURCE util/io_util.cc
            APPEND_STRING
            PROPERTY COMPILE_FLAGS " -Wno-unused-macros -stdlib=libc++")
 
-
 # make clean will delete the generated file
-set_source_files_properties(Message_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(feather_generated.h PROPERTIES GENERATED TRUE)
-set_source_files_properties(File_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Message_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/File_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Schema_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/Tensor_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h PROPERTIES GENERATED TRUE)
+set_source_files_properties(../arrow-src/cpp/src/arrow/ipc/feather_generated.h PROPERTIES GENERATED TRUE)
 
-set(FBS_OUTPUT_FILES "src/arrow/ipc/File_generated.h"
-                     "src/arrow/ipc/Message_generated.h"
-                     "src/arrow/ipc/feather_generated.h")
+set(FBS_OUTPUT_FILES
+    "../arrow-src/cpp/src/arrow/ipc/Message_generated.h"
+    "../arrow-src/cpp/src/arrow/ipc/File_generated.h"
+    "../arrow-src/cpp/src/arrow/ipc/Schema_generated.h"
+    "../arrow-src/cpp/src/arrow/ipc/Tensor_generated.h"
+    "../arrow-src/cpp/src/arrow/ipc/SparseTensor_generated.h"
+    "../arrow-src/cpp/src/arrow/ipc/feather_generated.h")
 
 set(FBS_SRC
     ../format/Message.fbs
@@ -106,13 +112,11 @@ endforeach()
 
 include_directories(src)
 set(ARROW_BUILD_STATIC ON)
-
 if (PSP_WASM_BUILD)
-    set(CMAKE_POSITION_INDEPENDENT_CODE OFF)	
+    set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
 elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)    
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
-
 add_library(arrow STATIC ${ARROW_SRCS})
 target_compile_definitions(arrow PUBLIC ARROW_NO_DEPRECATED_API)
 target_compile_definitions(arrow PUBLIC ARROW_STATIC)
@@ -123,14 +127,15 @@ target_link_libraries(arrow
     ${Boost_SYSTEM_LIBRARY}
     ${ARROW_TEST_LINK_TOOLCHAIN})
 
-add_custom_target(arrow_fb_files
-                  # COMMAND node $<TARGET_FILE:flatc>
-                  COMMAND /usr/local/bin/flatc
+add_custom_command(OUTPUT ${FBS_OUTPUT_FILES}
+                   COMMAND ${FLATBUFFERS_COMPILER}
                            -c
                            -o
                            ../arrow-src/cpp/src/arrow/ipc/
                            ${ABS_FBS_SRC}
+                   DEPENDS ${FLATBUFFERS_COMPILER}
                    COMMENT "Running flatc compiler on ${ABS_FBS_SRC}"
                    VERBATIM)
-# add_dependencies(arrow_fb_files flatc)
+
+add_custom_target(arrow_fb_files DEPENDS ${FBS_OUTPUT_FILES})
 add_dependencies(arrow arrow_fb_files)

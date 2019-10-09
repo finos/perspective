@@ -172,7 +172,6 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/Homebrew/include")
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
-	include_directories("/usr/local/flatbuffers/include")
 	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
@@ -313,8 +312,8 @@ find_package(Flatbuffers)
 if(NOT FLATBUFFERS_FOUND)
 	message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
 else()
-	message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIRS}${ColorReset}")
-	include_directories( ${FLATBUFFERS_INCLUDE_DIRS} )
+	message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
 endif()
 
 set(CMAKE_C_FLAGS " \
@@ -449,7 +448,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 		target_link_libraries(psp arrow)
 		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
-	
+
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
