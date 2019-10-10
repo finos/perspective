@@ -1,6 +1,6 @@
 max_jobs: 8
 
-image: 
+image:
   - Visual Studio 2015
   # - Visual Studio 2017
 
@@ -18,7 +18,7 @@ environment:
 matrix:
   allow_failures:
     - platform: x64
-      configuration: Debug
+      configuration: Release
 
 init:
   - set arch=

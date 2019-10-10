@@ -36,7 +36,11 @@ function docker() {
 }
 
 try {
-    execute(docker());
+    if (!process.env.PSP_LOCAL_PUPPETEER) {
+        execute(docker());
+    } else {
+        execute(`nice -n -20 node_modules/.bin/lerna exec --scope=@finos/perspective-bench -- yarn bench`);
+    }
 } catch (e) {
     process.exit(1);
 }

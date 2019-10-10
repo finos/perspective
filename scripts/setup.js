@@ -51,153 +51,132 @@ const CONFIG = new Proxy(
     }
 );
 
-function focus_package() {
-    inquirer
-        .prompt([
-            {
-                type: "expand",
-                name: "PACKAGE",
-                message: "Focus NPM package?",
-                default: CONFIG["PACKAGE"] || "h",
-                choices: [
-                    {
-                        key: "a",
-                        name: "(all)",
-                        value: ""
-                    },
-                    {
-                        key: "p",
-                        name: "perspective",
-                        value: "perspective"
-                    },
-                    {
-                        key: "v",
-                        name: "perspective-viewer",
-                        value: "perspective-viewer"
-                    },
-                    {
-                        key: "g",
-                        name: "perspective-viewer-hypergrid",
-                        value: "perspective-viewer-hypergrid"
-                    },
-                    {
-                        key: "d",
-                        name: "perspective-viewer-d3fc",
-                        value: "perspective-viewer-d3fc"
-                    },
-                    {
-                        key: "c",
-                        name: "perspective-viewer-highcharts",
-                        value: "perspective-viewer-highcharts"
-                    }
-                ]
-            }
-        ])
-        .then(new_config => {
-            CONFIG.add(new_config);
-            choose_docker();
-        });
+async function choose_docker() {
+    const answers = await inquirer.prompt([
+        {
+            type: "confirm",
+            name: "PSP_DOCKER",
+            message: "Use docker for build env?",
+            default: CONFIG["PSP_DOCKER"] || false
+        }
+    ]);
+    CONFIG.add(answers);
+    CONFIG.write();
 }
 
-function javascript_options() {
-    inquirer
-        .prompt([
-            {
-                type: "confirm",
-                name: "PSP_DEBUG",
-                message: "Run debug build?",
-                default: CONFIG["PSP_DEBUG"] || false
-            },
-            {
-                type: "expand",
-                name: "PSP_TOGGLE_PUPPETEER",
-                message: "Use (l)ocal or (d)ocker Puppeteer for testing?",
-                default: fs.existsSync("node_modules/puppeteer") ? "local" : "docker",
-                choices: [
-                    {
-                        key: "l",
-                        name: "local",
-                        value: "local"
-                    },
-                    {
-                        key: "d",
-                        name: "docker",
-                        value: "docker"
-                    }
-                ]
-            }
-        ])
-        .then(new_config => {
-            const puppeteer = fs.existsSync("node_modules/puppeteer") ? "local" : "docker";
-            if (new_config.PSP_TOGGLE_PUPPETEER !== puppeteer) {
-                require("./toggle_puppeteer");
-            }
-            CONFIG.add(new_config);
-            CONFIG.write();
-        });
+async function focus_package() {
+    const new_config = await inquirer.prompt([
+        {
+            type: "expand",
+            name: "PACKAGE",
+            message: "Focus NPM package?",
+            default: CONFIG["PACKAGE"] || "h",
+            choices: [
+                {
+                    key: "a",
+                    name: "(all)",
+                    value: ""
+                },
+                {
+                    key: "p",
+                    name: "perspective",
+                    value: "perspective"
+                },
+                {
+                    key: "v",
+                    name: "perspective-viewer",
+                    value: "perspective-viewer"
+                },
+                {
+                    key: "g",
+                    name: "perspective-viewer-hypergrid",
+                    value: "perspective-viewer-hypergrid"
+                },
+                {
+                    key: "d",
+                    name: "perspective-viewer-d3fc",
+                    value: "perspective-viewer-d3fc"
+                },
+                {
+                    key: "c",
+                    name: "perspective-viewer-highcharts",
+                    value: "perspective-viewer-highcharts"
+                }
+            ]
+        }
+    ]);
+    CONFIG.add(new_config);
+    await javascript_options();
 }
 
-function choose_project() {
-    inquirer
-        .prompt([
-            {
-                type: "expand",
-                name: "PSP_PROJECT",
-                message: "Focus (J)avascript, (P)ython, (C)++, (A)ll?",
-                default: CONFIG["PSP_PROJECT"] || "js",
-                choices: [
-                    {
-                        key: "j",
-                        name: "Javascript",
-                        value: "js"
-                    },
-                    {
-                        key: "p",
-                        name: "python",
-                        value: "python"
-                    },
-                    {
-                        key: "c",
-                        name: "C++",
-                        value: "cpp"
-                    },
-
-                    {
-                        key: "a",
-                        name: "(all)",
-                        value: ""
-                    }
-                ]
-            }
-        ])
-        .then(answers => {
-            CONFIG.add(answers);
-            if (CONFIG.PSP_PROJECT === "js") {
-                focus_package();
-            } else {
-                choose_docker();
-            }
-        });
+async function javascript_options() {
+    const new_config = await inquirer.prompt([
+        {
+            type: "confirm",
+            name: "PSP_DEBUG",
+            message: "Run debug build?",
+            default: CONFIG["PSP_DEBUG"] || false
+        },
+        {
+            type: "confirm",
+            name: "PSP_DOCKER",
+            message: "Use docker for build env?",
+            default: CONFIG["PSP_DOCKER"] || false
+        },
+        {
+            type: "confirm",
+            name: "PSP_DOCKER_PUPPETEER",
+            message: "Use docker for puppeteer tests?",
+            default: CONFIG["PSP_DOCKER_PUPPETEER"] || true
+        }
+    ]);
+    const local_puppeteer = !fs.existsSync("node_modules/puppeteer");
+    CONFIG.add(new_config);
+    CONFIG.write();
+    if (local_puppeteer !== new_config.PSP_DOCKER_PUPPETEER) {
+        require("./toggle_puppeteer");
+    }
 }
 
-function choose_docker() {
-    inquirer
-        .prompt([
-            {
-                type: "confirm",
-                name: "PSP_DOCKER",
-                message: "Use docker for build env?",
-                default: CONFIG["PSP_DOCKER"] || false
-            }
-        ])
-        .then(answers => {
-            CONFIG.add(answers);
-            if (CONFIG.PSP_PROJECT === "js") {
-                javascript_options();
-            } else {
-                CONFIG.write();
-            }
-        });
+async function choose_project() {
+    const answers = await inquirer.prompt([
+        {
+            type: "expand",
+            name: "PSP_PROJECT",
+            message: "Focus (J)avascript, (P)ython, (C)++, (A)ll?",
+            default: CONFIG["PSP_PROJECT"] || "js",
+            choices: [
+                {
+                    key: "j",
+                    name: "Javascript",
+                    value: "js"
+                },
+                {
+                    key: "p",
+                    name: "python",
+                    value: "python"
+                },
+                {
+                    key: "c",
+                    name: "C++",
+                    value: "cpp"
+                },
+
+                {
+                    key: "a",
+                    name: "(all)",
+                    value: ""
+                }
+            ]
+        }
+    ]);
+    CONFIG.add(answers);
+    CONFIG.write();
+    if (CONFIG.PSP_PROJECT === "js") {
+        await focus_package();
+    } else {
+        await choose_docker();
+    }
 }
 
 choose_project();

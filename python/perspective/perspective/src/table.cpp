@@ -8,6 +8,7 @@
  */
 #ifdef PSP_ENABLE_PYTHON
 
+#include <perspective/arrow.h>
 #include <perspective/base.h>
 #include <perspective/binding.h>
 #include <perspective/python/accessor.h>
@@ -28,10 +29,19 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
+    arrow::ArrowLoader loader;
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
-    if (is_arrow || (is_update || is_delete)) {
+    if (is_arrow) {
+        py::bytes bytes = accessor.cast<py::bytes>();
+        std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
+        void * ptr = malloc(size);
+        std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
+        loader.initialize((uintptr_t)ptr, size);
+        column_names = loader.names();
+        data_types = loader.types();
+    } else if (is_update || is_delete) {
         column_names = accessor.attr("names")().cast<std::vector<std::string>>();
         data_types = accessor.attr("types")().cast<std::vector<t_dtype>>();
     } else {
@@ -94,14 +104,19 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
 
     // Create output schema - contains only columns to be displayed to the user
     t_schema output_schema(column_names, data_types); // names + types might have been mutated at this point after implicit index removal
-
-    std::uint32_t row_count = accessor.attr("row_count")().cast<std::int32_t>();
     t_data_table data_table(output_schema);
     data_table.init();
-    data_table.extend(row_count);
+    std::uint32_t row_count;
 
-    // write data at the correct row
-    _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
+    if (is_arrow) {
+        row_count = loader.num_rows();
+        data_table.extend(loader.num_rows());
+        loader.fill_table(data_table, index, offset, limit, is_update);
+    } else {
+        row_count = accessor.attr("row_count")().cast<std::int32_t>();
+        data_table.extend(row_count);
+        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
+    }
 
      if (!computed.is_none()) {
         // TODO

@@ -25,8 +25,8 @@ FROM debian:stretch AS stage_build
 # -------------------------------- STAGE BUILD  --------------------------------
 # ------------------------------------------------------------------------------
 
-ARG EMSCRIPTEN_SDK=1.38.42-upstream
-ARG EMSDK_CHANGESET=master
+ENV EMSCRIPTEN_SDK 1.38.46-upstream
+ENV EMSDK_CHANGESET master
 
 # ------------------------------------------------------------------------------
 # Following variables are important to tell Emscripten to use pre-defined locations
@@ -214,7 +214,7 @@ RUN echo "## Pre-populate cache" \
         &&  printf '#include <iostream>\nint main(){std::cout << "HELLO FROM DOCKER C++"<<std::endl;return 0;}' > test.cpp \
         # &&  em++ --std=c++11 test.cpp -o test.js -s WASM=0 &&  node test.js \
         # &&  em++ --std=c++11 -g4 test.cpp -o test.js -s WASM=0 &&  node test.js \
-        &&  em++ --std=c++11 test.cpp -o test.js -s WASM=1 &&  node test.js \
+        &&  em++ --std=c++14 test.cpp -o test.js -s WASM=1 &&  node test.js \
     \
     &&  cd / \
     &&  rm -fr /tmp/emscripten_test \
@@ -390,10 +390,18 @@ git \
 ssh-client \
 ca-certificates \
 build-essential \
-libboost-all-dev \
+gnupg2 \
+dirmngr \
 make \
 ant \
 libidn11 
+
+RUN apt-get -qq update && apt-get install -q -y software-properties-common
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys BA9EF27F
+RUN add-apt-repository ppa:ubuntu-toolchain-r/test -y
+RUN apt-get -qq update && apt-get install -qy g++ gcc git wget
+RUN wget --quiet --max-redirect 3 https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.gz
+RUN mkdir -p /usr/include/boost && tar zxf boost_1_71_0.tar.gz -C /usr/include/boost --strip-components=1
 
 RUN mkdir -p /usr/share/man/man1
 RUN touch /usr/share/man/man1/rmid.1.gz.dpkg-tmp
@@ -420,15 +428,9 @@ RUN emcc --clear-cache --clear-ports
 
 RUN mkdir -p /tmp/emscripten_test
 RUN cd /tmp/emscripten_test
-RUN printf '#include <iostream>\n#include <emscripten.h>\n#include <emscripten/bind.h>\nint main(){std::cout<<"HELLO FROM DOCKER C++"<<std::endl;return 0;}' > test.cpp
+RUN printf '#include <iostream>\n#include <emscripten.h>\n#include <emscripten/bind.h>\n#include <sstream>\n#include <csignal>\n#include <iostream>\n#include <cstring>\n#include <cstdint>\n#include <memory>\n#include <functional>\n#include <algorithm>\n#include <iomanip>\n#include <chrono>\n#include <fstream>\nint main(){std::cout<<"HELLO FROM DOCKER C++"<<std::endl;return 0;}' > test.cpp
 
-RUN em++ --std=c++11 -O2 test.cpp -o test.js
-RUN node test.js
-
-RUN em++ --std=c++11 test.cpp -o test.js
-RUN node test.js
-
-RUN em++ --std=c++11 test.cpp -o test.js --closure 1
+RUN em++ --std=c++14 -O3 test.cpp -o test.js --closure 1
 RUN node test.js
 
 RUN embuilder.py build libc-extras
@@ -437,7 +439,7 @@ RUN cd /
 RUN rm -fr /tmp/emscripten_test
 
 RUN mkdir /boost_includes
-RUN cp -r /usr/include/boost /boost_includes/
+RUN cp -r /usr/include/boost/boost /boost_includes/
 
 RUN	apt-mark manual make openjdk-8-jre-headless wget gcc git
 RUN	apt-get -y remove openjdk-7-jre-headless
@@ -459,3 +461,13 @@ RUN npm install --global yarn
 RUN yarn --version
 
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/jre
+
+RUN mkdir -p /usr/local \
+    && cd /usr/local \
+    && git clone https://github.com/google/flatbuffers.git \
+    && cd flatbuffers \
+    && cmake -G "Unix Makefiles" \
+    && make \
+    && cp -r /usr/local/flatbuffers/include/flatbuffers /usr/local/include \
+    && ln -s /usr/local/flatbuffers/flatc /usr/local/bin/flatc \
+    && chmod +x /usr/local/flatbuffers/flatc

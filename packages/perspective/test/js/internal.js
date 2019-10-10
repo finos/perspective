@@ -39,7 +39,7 @@ module.exports = (perspective, mode) => {
                 for (let i = 0; i < stypes.size(); i++) {
                     types.push(stypes.get(i).value);
                 }
-                expect(arrow_psp_internal_schema).toEqual(types);
+                expect(types).toEqual(arrow_psp_internal_schema);
             } finally {
                 if (schema) {
                     schema.delete();

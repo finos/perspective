@@ -15,13 +15,11 @@ import {extract_map, fill_vector} from "./emscripten.js";
 import {bindall, get_column_type} from "./utils.js";
 import {Server} from "./api/server.js";
 
-import {Precision} from "@apache-arrow/es5-esm/enum";
 import {Table} from "@apache-arrow/es5-esm/table";
-import {Visitor} from "@apache-arrow/es5-esm/visitor";
 import {Data} from "@apache-arrow/es5-esm/data";
 import {Vector} from "@apache-arrow/es5-esm/vector";
 
-import {Utf8, Uint32, Float64, Int32, Bool, TimestampSecond, Dictionary} from "@apache-arrow/es5-esm/type";
+import {Utf8, Float64, Int32, Bool, TimestampMillisecond, Dictionary} from "@apache-arrow/es5-esm/type";
 
 import formatters from "./view_formatters";
 import papaparse from "papaparse";
@@ -86,13 +84,7 @@ export default function(Module) {
      * @returns {Table} An `std::shared_ptr<Table>` to a `Table` inside C++.
      */
     function make_table(accessor, _Table, computed, index, limit, op, is_update, is_arrow) {
-        if (is_arrow) {
-            for (let chunk of accessor) {
-                _Table = __MODULE__.make_table(_Table, chunk, computed, limit || 4294967295, index, op, is_update, is_arrow);
-            }
-        } else {
-            _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
-        }
+        _Table = __MODULE__.make_table(_Table, accessor, computed, limit || 4294967295, index, op, is_update, is_arrow);
 
         const pool = _Table.get_pool();
         const table_id = _Table.get_id();
@@ -104,115 +96,6 @@ export default function(Module) {
         }
 
         return _Table;
-    }
-
-    /**
-     * Converts arrow data into a canonical representation for
-     * interfacing with perspective.
-     *
-     * @private
-     * @param {object} data Array buffer
-     * @returns {Array<Object>} An array containing chunked data objects with five properties:
-     * row_count: the number of rows in the chunk
-     * is_arrow: internal flag for marking arrow data
-     * names: column names for the arrow data
-     * types: type mapping for each column
-     * cdata: the actual data we load
-     */
-    function load_arrow_buffer(data) {
-        // TODO Need to validate that the names/types passed in match those in the buffer
-        let arrow = Table.from([new Uint8Array(data)]);
-        let loader = arrow.schema.fields.reduce((loader, field, colIdx) => {
-            return loader.loadColumn(field, arrow.getColumnAt(colIdx));
-        }, new ArrowColumnLoader());
-        let nchunks = loader.cdata[0].chunks.length;
-        let chunks = [];
-        for (let x = 0; x < nchunks; x++) {
-            chunks.push({
-                row_count: loader.cdata[0].chunks[x].length,
-                is_arrow: true,
-                names: loader.names,
-                types: loader.types,
-                cdata: loader.cdata.map(y => y.chunks[x])
-            });
-        }
-        return chunks;
-    }
-
-    /**
-     *
-     * @private
-     */
-    class ArrowColumnLoader extends Visitor {
-        constructor(cdata, names, types) {
-            super();
-            this.cdata = cdata || [];
-            this.names = names || [];
-            this.types = types || [];
-        }
-        loadColumn(field /*: Arrow.type.Field*/, column /*: Arrow.Vector*/) {
-            if (this.visit(field.type)) {
-                this.cdata.push(column);
-                this.names.push(field.name);
-            }
-            return this;
-        }
-        // visitNull(type/*: Arrow.type.Null*/) {}
-        visitBool(/* type: Arrow.type.Bool */) {
-            this.types.push(__MODULE__.t_dtype.DTYPE_BOOL);
-            return true;
-        }
-        visitInt(type /* : Arrow.type.Int */) {
-            const bitWidth = type.bitWidth;
-            if (bitWidth === 64) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_INT64);
-            } else if (bitWidth === 32) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_INT32);
-            } else if (bitWidth === 16) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_INT16);
-            } else if (bitWidth === 8) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_INT8);
-            }
-            return true;
-        }
-        visitFloat(type /* : Arrow.type.Float */) {
-            const precision = type.precision;
-            if (precision === Precision.DOUBLE) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT64);
-            } else if (precision === Precision.SINGLE) {
-                this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT32);
-            }
-            // todo?
-            // else if (type.precision === Arrow.enum_.Precision.HALF) {
-            //     this.types.push(__MODULE__.t_dtype.DTYPE_FLOAT16);
-            // }
-            return true;
-        }
-        visitUtf8(/* type: Arrow.type.Utf8 */) {
-            this.types.push(__MODULE__.t_dtype.DTYPE_STR);
-            return true;
-        }
-        visitBinary(/* type: Arrow.type.Binary */) {
-            this.types.push(__MODULE__.t_dtype.DTYPE_STR);
-            return true;
-        }
-        // visitFixedSizeBinary(type/*: Arrow.type.FixedSizeBinary*/) {}
-        // visitDate(type/*: Arrow.type.Date_*/) {}
-        visitTimestamp(/* type: Arrow.type.Timestamp */) {
-            this.types.push(__MODULE__.t_dtype.DTYPE_TIME);
-            return true;
-        }
-        // visitTime(type/*: Arrow.type.Time*/) {}
-        // visitDecimal(type/*: Arrow.type.Decimal*/) {}
-        // visitList(type/*: Arrow.type.List*/) {}
-        // visitStruct(type/*: Arrow.type.Struct*/) {}
-        // visitUnion(type/*: Arrow.type.Union<any>*/) {}
-        visitDictionary(type /*: Arrow.type.Dictionary */) {
-            return this.visit(type.dictionary);
-        }
-        // visitInterval(type/*: Arrow.type.Interval*/) {}
-        // visitFixedSizeList(type/*: Arrow.type.FixedSizeList*/) {}
-        // visitMap(type/*: Arrow.type.Map_*/) {}
     }
 
     /******************************************************************************
@@ -663,11 +546,11 @@ export default function(Module) {
                 vectors.push(Vector.new(Data.Bool(new Bool(), 0, vals.length, nullCount, nullArray, vals)));
             } else if (type === "date" || type === "datetime") {
                 const [vals, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
-                vectors.push(Vector.new(Data.Timestamp(new TimestampSecond(), 0, vals.length, nullCount, nullArray, vals)));
+                vectors.push(Vector.new(Data.Timestamp(new TimestampMillisecond(), 0, vals.length / 2, nullCount, nullArray, vals)));
             } else if (type === "string") {
                 const [vals, offsets, indices, nullCount, nullArray] = this.col_to_js_typed_array(name, options);
                 const utf8Vector = Vector.new(Data.Utf8(new Utf8(), 0, offsets.length - 1, 0, null, offsets, vals));
-                const type = new Dictionary(utf8Vector.type, new Uint32(), null, null, utf8Vector);
+                const type = new Dictionary(utf8Vector.type, new Int32(), null, null, utf8Vector);
                 vectors.push(Vector.new(Data.Dictionary(type, 0, indices.length, nullCount, nullArray, indices)));
             } else {
                 throw new Error(`Type ${type} not supported`);
@@ -1292,13 +1175,8 @@ export default function(Module) {
         pdata = accessor;
 
         if (data instanceof ArrayBuffer) {
-            pdata = load_arrow_buffer(data, cols, types);
-            if (meter) {
-                meter(pdata.map(x => x.row_count).reduce((x, y) => x + y));
-            }
+            pdata = new Uint8Array(data);
             is_arrow = true;
-            // make sure implicit index can be read for arrow updates
-            accessor.names = pdata[0].names;
         } else if (typeof data === "string") {
             if (data[0] === ",") {
                 data = "_" + data;
@@ -1320,21 +1198,23 @@ export default function(Module) {
             }
         }
 
-        if (pdata.row_count === 0) {
-            console.warn("table.update called with no data - ignoring");
-            return;
-        }
+        if (!is_arrow) {
+            if (pdata.row_count === 0) {
+                console.warn("table.update called with no data - ignoring");
+                return;
+            }
 
-        // process implicit index column
-        const has_index = accessor.names.indexOf("__INDEX__");
-        if (has_index != -1) {
-            const explicit_index = !!this.index;
-            if (explicit_index) {
-                // find the type of the index column
-                accessor.types.push(accessor.types[accessor.names.indexOf(this.index)]);
-            } else {
-                // default index is an integer
-                accessor.types.push(__MODULE__.t_dtype.DTYPE_INT32);
+            // process implicit index column
+            const has_index = accessor.names.indexOf("__INDEX__");
+            if (has_index != -1) {
+                const explicit_index = !!this.index;
+                if (explicit_index) {
+                    // find the type of the index column
+                    accessor.types.push(accessor.types[accessor.names.indexOf(this.index)]);
+                } else {
+                    // default index is an integer
+                    accessor.types.push(__MODULE__.t_dtype.DTYPE_INT32);
+                }
             }
         }
 
@@ -1369,7 +1249,7 @@ export default function(Module) {
         data = data.map(idx => ({[this.index]: idx}));
 
         if (data instanceof ArrayBuffer) {
-            pdata = load_arrow_buffer(data, [this.index], types);
+            pdata = new Uint8Array(data);
             is_arrow = true;
         } else {
             accessor.init(data);
@@ -1497,7 +1377,7 @@ export default function(Module) {
             let overridden_types = {};
 
             if (data instanceof ArrayBuffer || (Buffer && data instanceof Buffer)) {
-                data_accessor = load_arrow_buffer(data);
+                data_accessor = new Uint8Array(data);
                 is_arrow = true;
             } else {
                 if (typeof data === "string") {

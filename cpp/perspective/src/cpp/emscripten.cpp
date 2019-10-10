@@ -8,12 +8,14 @@
  */
 
 #include <perspective/emscripten.h>
+#include <perspective/arrow.h>
 
 using namespace emscripten;
 using namespace perspective;
 
 namespace perspective {
 namespace binding {
+
     /******************************************************************************
      *
      * Utility
@@ -168,7 +170,7 @@ namespace binding {
      *
      * Write data in the Apache Arrow format
      */
-    namespace arrow {
+    namespace arraybuffer {
 
         template <>
         void
@@ -178,7 +180,7 @@ namespace binding {
             t_val memory = t_val::module_property("HEAP8")["buffer"];
             std::uintptr_t ptr = reinterpret_cast<std::uintptr_t>(data);
             t_val memoryView = constructor.new_(memory, ptr, length);
-            t_val slice = typedArray.call<t_val>("slice", 0, length);                
+            t_val slice = typedArray.call<t_val>("slice", 0, length);
             memoryView.call<void>("set", slice);
         }
 
@@ -230,7 +232,7 @@ namespace binding {
                 assert(idx == i);
             }
         }
-    } // namespace arrow
+    } // namespace arraybuffer
 
     namespace js_typed_array {
         t_val ArrayBuffer = t_val::global("ArrayBuffer");
@@ -381,10 +383,10 @@ namespace binding {
 
         int nullSize = ceil(data_size / 64.0) * 2;
         int nullCount = 0;
-        std::vector<std::uint32_t> validityMap; // = new std::uint32_t[nullSize];
+        std::vector<std::int32_t> validityMap; // = new std::uint32_t[nullSize];
         validityMap.resize(nullSize);
         t_val indexBuffer = js_typed_array::ArrayBuffer.new_(data_size * 4);
-        t_val indexArray = js_typed_array::UInt32Array.new_(indexBuffer);
+        t_val indexArray = js_typed_array::Int32Array.new_(indexBuffer);
 
         for (int idx = 0; idx < data_size; idx++) {
             t_tscalar scalar = data[idx];
@@ -398,10 +400,10 @@ namespace binding {
         }
         t_val dictBuffer = js_typed_array::ArrayBuffer.new_(
             vocab.get_vlendata()->size() - vocab.get_vlenidx());
-        t_val dictArray = js_typed_array::UInt8Array.new_(dictBuffer);
-        std::vector<std::uint32_t> offsets;
+        t_val dictArray = js_typed_array::Int8Array.new_(dictBuffer);
+        std::vector<std::int32_t> offsets;
         offsets.reserve(vocab.get_vlenidx() + 1);
-        std::uint32_t index = 0;
+        std::int32_t index = 0;
         for (auto i = 0; i < vocab.get_vlenidx(); i++) {
             const char* str = vocab.unintern_c(i);
             offsets.push_back(index);
@@ -415,7 +417,7 @@ namespace binding {
         t_val arr = t_val::global("Array").new_();
         arr.call<void>("push", dictArray);
         arr.call<void>(
-            "push", js_typed_array::UInt32Array.new_(vector_to_typed_array(offsets)["buffer"]));
+            "push", js_typed_array::Int32Array.new_(vector_to_typed_array(offsets)["buffer"]));
         arr.call<void>("push", indexArray);
         arr.call<void>("push", nullCount);
         arr.call<void>("push", vector_to_typed_array(validityMap));
@@ -659,338 +661,192 @@ namespace binding {
 
     void
     _fill_col_time(t_data_accessor accessor, std::shared_ptr<t_column> col, std::string name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            t_val data = accessor["values"];
-            // arrow packs 64 bit into two 32 bit ints
-            arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
+            if (item.isUndefined())
+                continue;
 
-            std::int8_t unit = accessor["type"]["unit"].as<std::int8_t>();
-            if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
-                // Slow path - need to convert each value
-                std::int64_t factor = 1;
-                if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
-                    factor = 1e6;
-                } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
-                    factor = 1e3;
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
                 }
-                for (auto i = 0; i < nrows; ++i) {
-                    col->set_nth<std::int64_t>(i, *(col->get_nth<std::int64_t>(i)) / factor);
-                }
+                continue;
             }
-        } else {
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                auto elem = static_cast<std::int64_t>(
-                    item.call<t_val>("getTime").as<double>()); // dcol[i].as<T>();
-                col->set_nth(i, elem);
-            }
+            auto elem = static_cast<std::int64_t>(
+                item.call<t_val>("getTime").as<double>()); // dcol[i].as<T>();
+            col->set_nth(i, elem);
         }
     }
 
     void
     _fill_col_date(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            // t_val data = dcol["values"];
-            // // arrow packs 64 bit into two 32 bit ints
-            // arrow::vecFromTypedArray(data, col->get_nth<t_time>(0), nrows * 2);
+            if (item.isUndefined())
+                continue;
 
-            // std::int8_t unit = dcol["type"]["unit"].as<std::int8_t>();
-            // if (unit != /* Arrow.enum_.TimeUnit.MILLISECOND */ 1) {
-            //     // Slow path - need to convert each value
-            //     std::int64_t factor = 1;
-            //     if (unit == /* Arrow.enum_.TimeUnit.NANOSECOND */ 3) {
-            //         factor = 1e6;
-            //     } else if (unit == /* Arrow.enum_.TimeUnit.MICROSECOND */ 2) {
-            //         factor = 1e3;
-            //     }
-            //     for (auto i = 0; i < nrows; ++i) {
-            //         col->set_nth<std::int32_t>(i, *(col->get_nth<std::int32_t>(i)) / factor);
-            //     }
-            // }
-        } else {
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
-
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
                 }
-
-                col->set_nth(i, jsdate_to_t_date(item));
+                continue;
             }
+
+            col->set_nth(i, jsdate_to_t_date(item));
         }
     }
 
     void
     _fill_col_bool(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            // bools are stored using a bit mask
-            t_val data = accessor["values"];
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = data[i / 8];
+            if (item.isUndefined())
+                continue;
 
-                if (item.isUndefined()) {
-                    continue;
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
                 }
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                std::uint8_t elem = item.as<std::uint8_t>();
-                bool v = elem & (1 << (i % 8));
-                col->set_nth(i, v);
+                continue;
             }
-        } else {
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                auto elem = item.as<bool>();
-                col->set_nth(i, elem);
-            }
+            auto elem = item.as<bool>();
+            col->set_nth(i, elem);
         }
     }
 
     void
     _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
-
+        std::int32_t cidx, t_dtype type, bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            if (accessor["constructor"]["name"].as<std::string>() == "DictionaryVector") {
+            if (item.isUndefined())
+                continue;
 
-                t_val dictvec = accessor["dictionary"];
-                arrow::fill_col_dict(dictvec, col);
-
-                // Now process index into dictionary
-
-                // Perspective stores string indices in a 32bit unsigned array
-                // Javascript's typed arrays handle copying from various bitwidth arrays
-                // properly
-                t_val vkeys = accessor["indices"]["values"];
-                arrow::vecFromTypedArray(
-                    vkeys, col->get_nth<t_uindex>(0), nrows, "Uint32Array");
-
-            } else if (accessor["constructor"]["name"].as<std::string>() == "Utf8Vector"
-                || accessor["constructor"]["name"].as<std::string>() == "BinaryVector") {
-
-                t_val vdata = accessor["values"];
-                std::int32_t vsize = vdata["length"].as<std::int32_t>();
-                std::vector<std::uint8_t> data;
-                data.reserve(vsize);
-                data.resize(vsize);
-                arrow::vecFromTypedArray(vdata, data.data(), vsize);
-
-                t_val voffsets = accessor["valueOffsets"];
-                std::int32_t osize = voffsets["length"].as<std::int32_t>();
-                std::vector<std::int32_t> offsets;
-                offsets.reserve(osize);
-                offsets.resize(osize);
-                arrow::vecFromTypedArray(voffsets, offsets.data(), osize);
-
-                std::string elem;
-
-                for (std::int32_t i = 0; i < nrows; ++i) {
-                    std::int32_t bidx = offsets[i];
-                    std::size_t es = offsets[i + 1] - bidx;
-                    elem.assign(reinterpret_cast<char*>(data.data()) + bidx, es);
-                    col->set_nth(i, elem);
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
                 }
+                continue;
             }
-        } else {
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                std::wstring welem = item.as<std::wstring>();
-                std::wstring_convert<utf16convert_type, wchar_t> converter;
-                std::string elem = converter.to_bytes(welem);
-                col->set_nth(i, elem);
-            }
+            std::wstring welem = item.as<std::wstring>();
+            std::wstring_convert<utf16convert_type, wchar_t> converter;
+            std::string elem = converter.to_bytes(welem);
+            col->set_nth(i, elem);
         }
     }
 
     void
     _fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, const std::string& name,
-        std::int32_t cidx, t_dtype type, bool is_arrow, bool is_update) {
+        std::int32_t cidx, t_dtype type, bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            t_val data = accessor["values"];
-            // arrow packs 64 bit into two 32 bit ints
-            arrow::vecFromTypedArray(data, col->get_nth<std::int64_t>(0), nrows * 2);
-        } else {
-            t_uindex nrows = col->size();
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
+            if (item.isUndefined())
+                continue;
 
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                double fval = item.as<double>();
-                if (isnan(fval)) {
-                    std::cout << "Promoting to string" << std::endl;
-                    tbl.promote_column(name, DTYPE_STR, i, false);
-                    col = tbl.get_column(name);
-                    _fill_col_string(
-                        accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
-                    return;
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
                 } else {
-                    col->set_nth(i, static_cast<std::int64_t>(fval));
+                    col->clear(i);
                 }
+                continue;
             }
-        }        
+
+            double fval = item.as<double>();
+            if (isnan(fval)) {
+                std::cout << "Promoting to string" << std::endl;
+                tbl.promote_column(name, DTYPE_STR, i, false);
+                col = tbl.get_column(name);
+                _fill_col_string(
+                    accessor, col, name, cidx, DTYPE_STR, is_update);
+                return;
+            } else {
+                col->set_nth(i, static_cast<std::int64_t>(fval));
+            }
+        }
     }
 
     void
     _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_arrow, bool is_update) {
+        bool is_update) {
         t_uindex nrows = col->size();
+        for (auto i = 0; i < nrows; ++i) {
+            t_val item = accessor.call<t_val>("marshal", cidx, i, type);
 
-        if (is_arrow) {
-            t_val data = accessor["values"];
+            if (item.isUndefined())
+                continue;
+
+            if (item.isNull()) {
+                if (is_update) {
+                    col->unset(i);
+                } else {
+                    col->clear(i);
+                }
+                continue;
+            }
 
             switch (type) {
                 case DTYPE_INT8: {
-                    arrow::vecFromTypedArray(data, col->get_nth<std::int8_t>(0), nrows);
+                    col->set_nth(i, item.as<std::int8_t>());
                 } break;
                 case DTYPE_INT16: {
-                    arrow::vecFromTypedArray(data, col->get_nth<std::int16_t>(0), nrows);
+                    col->set_nth(i, item.as<std::int16_t>());
                 } break;
                 case DTYPE_INT32: {
-                    arrow::vecFromTypedArray(data, col->get_nth<std::int32_t>(0), nrows);
+                    // This handles cases where a long sequence of e.g. 0 precedes a clearly
+                    // float value in an inferred column. Would not be needed if the type
+                    // inference checked the entire column/we could reset parsing.
+                    double fval = item.as<double>();
+                    if (fval > 2147483647 || fval < -2147483648) {
+                        std::cout << "Promoting to float" << std::endl;
+                        tbl.promote_column(name, DTYPE_FLOAT64, i, true);
+                        col = tbl.get_column(name);
+                        type = DTYPE_FLOAT64;
+                        col->set_nth(i, fval);
+                    } else if (isnan(fval)) {
+                        std::cout << "Promoting to string" << std::endl;
+                        tbl.promote_column(name, DTYPE_STR, i, false);
+                        col = tbl.get_column(name);
+                        _fill_col_string(
+                            accessor, col, name, cidx, DTYPE_STR, is_update);
+                        return;
+                    } else {
+                        col->set_nth(i, static_cast<std::int32_t>(fval));
+                    }
                 } break;
                 case DTYPE_FLOAT32: {
-                    arrow::vecFromTypedArray(data, col->get_nth<float>(0), nrows);
+                    col->set_nth(i, item.as<float>());
                 } break;
                 case DTYPE_FLOAT64: {
-                    arrow::vecFromTypedArray(data, col->get_nth<double>(0), nrows);
+                    col->set_nth(i, item.as<double>());
                 } break;
                 default:
                     break;
-            }
-        } else {
-            for (auto i = 0; i < nrows; ++i) {
-                t_val item = accessor.call<t_val>("marshal", cidx, i, type);
-
-                if (item.isUndefined())
-                    continue;
-
-                if (item.isNull()) {
-                    if (is_update) {
-                        col->unset(i);
-                    } else {
-                        col->clear(i);
-                    }
-                    continue;
-                }
-
-                switch (type) {
-                    case DTYPE_INT8: {
-                        col->set_nth(i, item.as<std::int8_t>());
-                    } break;
-                    case DTYPE_INT16: {
-                        col->set_nth(i, item.as<std::int16_t>());
-                    } break;
-                    case DTYPE_INT32: {
-                        // This handles cases where a long sequence of e.g. 0 precedes a clearly
-                        // float value in an inferred column. Would not be needed if the type
-                        // inference checked the entire column/we could reset parsing.
-                        double fval = item.as<double>();
-                        if (fval > 2147483647 || fval < -2147483648) {
-                            std::cout << "Promoting to float" << std::endl;
-                            tbl.promote_column(name, DTYPE_FLOAT64, i, true);
-                            col = tbl.get_column(name);
-                            type = DTYPE_FLOAT64;
-                            col->set_nth(i, fval);
-                        } else if (isnan(fval)) {
-                            std::cout << "Promoting to string" << std::endl;
-                            tbl.promote_column(name, DTYPE_STR, i, false);
-                            col = tbl.get_column(name);
-                            _fill_col_string(
-                                accessor, col, name, cidx, DTYPE_STR, is_arrow, is_update);
-                            return;
-                        } else {
-                            col->set_nth(i, static_cast<std::int32_t>(fval));
-                        }
-                    } break;
-                    case DTYPE_FLOAT32: {
-                        col->set_nth(i, item.as<float>());
-                    } break;
-                    case DTYPE_FLOAT64: {
-                        col->set_nth(i, item.as<double>());
-                    } break;
-                    default:
-                        break;
-                }
             }
         }
     }
@@ -1191,34 +1047,34 @@ namespace binding {
     void
     _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
         std::shared_ptr<t_column> col, const std::string& name, std::int32_t cidx, t_dtype type,
-        bool is_arrow, bool is_update) {
+        bool is_update) {
         switch (type) {
             case DTYPE_INT64: {
-                _fill_col_int64(accessor, tbl, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_int64(accessor, tbl, col, name, cidx, type, is_update);
             } break;
             case DTYPE_BOOL: {
-                _fill_col_bool(accessor, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_bool(accessor, col, name, cidx, type, is_update);
             } break;
             case DTYPE_DATE: {
-                _fill_col_date(accessor, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_date(accessor, col, name, cidx, type, is_update);
             } break;
             case DTYPE_TIME: {
-                _fill_col_time(accessor, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_time(accessor, col, name, cidx, type, is_update);
             } break;
             case DTYPE_STR: {
-                _fill_col_string(accessor, col, name, cidx, type, is_arrow, is_update);
+                _fill_col_string(accessor, col, name, cidx, type, is_update);
             } break;
             case DTYPE_NONE: {
                 break;
             }
             default:
                 _fill_col_numeric(
-                    accessor, tbl, col, name, cidx, type, is_arrow, is_update);
-        } 
+                    accessor, tbl, col, name, cidx, type, is_update);
+        }
     }
 
     void
-    _fill_data(t_data_table& tbl, t_data_accessor accessor, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_arrow, bool is_update) {
+    _fill_data(t_data_table& tbl, t_data_accessor dcol, const t_schema& input_schema, const std::string& index, std::uint32_t offset, std::uint32_t limit, bool is_update) {
         bool implicit_index = false;
         std::vector<std::string> col_names(input_schema.columns());
         std::vector<t_dtype> data_types(input_schema.types());
@@ -1226,37 +1082,17 @@ namespace binding {
         for (auto cidx = 0; cidx < col_names.size(); ++cidx) {
             auto name = col_names[cidx];
             auto type = data_types[cidx];
- 
-            t_val dcol = t_val::undefined();
-
-            if (is_arrow) {
-                dcol = accessor["cdata"][cidx];
-            } else {
-                dcol = accessor;
-            }
 
             if (name == "__INDEX__") {
                 implicit_index = true;
                 std::shared_ptr<t_column> pkey_col_sptr = tbl.add_column_sptr("psp_pkey", type, true);
-                _fill_data_helper(dcol, tbl, pkey_col_sptr, "psp_pkey", cidx, type, is_arrow, is_update);
+                _fill_data_helper(dcol, tbl, pkey_col_sptr, "psp_pkey", cidx, type, is_update);
                 tbl.clone_column("psp_pkey", "psp_okey");
                 continue;
             }
 
             auto col = tbl.get_column(name);
-            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_arrow, is_update);
-
-            if (is_arrow) {
-                // Fill validity bitmap
-                std::uint32_t null_count = dcol["nullCount"].as<std::uint32_t>();
-
-                if (null_count == 0) {
-                    col->valid_raw_fill();
-                } else {
-                    t_val validity = dcol["nullBitmap"];
-                    arrow::fill_col_valid(validity, col);
-                }
-            }
+            _fill_data_helper(dcol, tbl, col, name, cidx, type, is_update);
         }
 
         // Fill index column - recreated every time a `t_data_table` is created.
@@ -1270,7 +1106,7 @@ namespace binding {
                     key_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
                     okey_col->set_nth<std::int32_t>(ridx, (ridx + offset) % limit);
                 }
-            } else { 
+            } else {
                 tbl.clone_column(index, "psp_pkey");
                 tbl.clone_column(index, "psp_okey");
             }
@@ -1288,10 +1124,34 @@ namespace binding {
         std::uint32_t limit, const std::string& index, t_op op, bool is_update, bool is_arrow) {
         std::vector<std::string> column_names;
         std::vector<t_dtype> data_types;
+        arrow::ArrowLoader loader;
+        std::uintptr_t ptr;
 
         // Determine metadata
         bool is_delete = op == OP_DELETE;
-        if (is_arrow || (is_update || is_delete)) {
+        if (is_arrow) {
+
+            // Get details of the Typed Array from JS
+            t_val constructor = accessor["constructor"];
+            std::int32_t length = accessor["byteLength"].as<std::int32_t>();
+
+            // Allocate memory 
+            ptr = reinterpret_cast<std::uintptr_t>(malloc(length));
+            if (ptr == NULL) {
+                std::cout << "ERROR" << std::endl;
+                return nullptr;
+            }
+
+            // Write to the C++ heap where we allocated the space
+            t_val memory = t_val::module_property("HEAP8")["buffer"];
+            t_val memoryView = constructor.new_(memory, ptr, length);
+            memoryView.call<void>("set", accessor);
+            
+            // Dispatch to the core library
+            loader.initialize(ptr, length);
+            column_names = loader.names();
+            data_types = loader.types();
+        } else if (is_update || is_delete) {
             t_val names = accessor["names"];
             t_val types = accessor["types"];
             column_names = vecFromArray<t_val, std::string>(names);
@@ -1306,7 +1166,7 @@ namespace binding {
 
         bool table_initialized = has_value(table);
         std::shared_ptr<Table> tbl;
-        std::uint32_t offset; 
+        std::uint32_t offset;
 
         // If the Table has already been created, use it
         if (table_initialized) {
@@ -1314,7 +1174,7 @@ namespace binding {
             tbl = table.as<std::shared_ptr<Table>>();
             tbl->set_column_names(column_names);
             tbl->set_data_types(data_types);
-            offset = tbl->get_offset(); 
+            offset = tbl->get_offset();
 
             auto current_gnode = tbl->get_gnode();
 
@@ -1356,13 +1216,25 @@ namespace binding {
         // Create output schema - contains only columns to be displayed to the user
         t_schema output_schema(column_names, data_types); // names + types might have been mutated at this point after implicit index removal
 
-        std::uint32_t row_count = accessor["row_count"].as<std::int32_t>();
+        std::uint32_t row_count = 0;
+        if (is_arrow) {
+            row_count = loader.num_rows();
+        } else {
+            row_count = accessor["row_count"].as<std::int32_t>();
+        }
+
         t_data_table data_table(output_schema);
         data_table.init();
         data_table.extend(row_count);
-        
-        // write data at the correct row        
-        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
+        if (is_arrow) {
+            loader.fill_table(data_table, index, offset, limit, is_update);
+        } else {
+            _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
+        }
+
+        if (is_arrow) {
+            free((void *)ptr);
+        }
 
         // calculate offset, limit, and set the gnode
         tbl->init(data_table, row_count, op);
@@ -1490,8 +1362,8 @@ namespace binding {
             std::string column_name = f.at(0).as<std::string>();
             std::string filter_op_str = f.at(1).as<std::string>();
             t_dtype column_type = schema.get_dtype(column_name);
-            t_filter_op filter_operator = str_to_filter_op(filter_op_str); 
-            
+            t_filter_op filter_operator = str_to_filter_op(filter_op_str);
+
             // validate the filter before it goes into the core engine
             t_val filter_term = t_val::null();
             if (f.size() > 2) {
@@ -1688,7 +1560,19 @@ using namespace perspective::binding;
  */
 int
 main(int argc, char** argv) {
-    // clang-format off
+     // clang-format off
+//   std::vector<data_row> rows = {
+//       {1, 1.0, {1.0}}, {2, 2.0, {1.0, 2.0}}, {3, 3.0, {1.0, 2.0, 3.0}}};
+
+//   std::shared_ptr<::arraybuffer::Table> table;
+//   VectorToColumnarTable(rows, &table);
+
+//   std::vector<data_row> expected_rows;
+//   ColumnarTableToVector(table, &expected_rows);
+
+//   std::cout << rows.size() << " " << expected_rows.size() << std::endl;
+
+
 EM_ASM({
 
     if (typeof self !== "undefined") {

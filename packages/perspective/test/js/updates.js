@@ -445,7 +445,7 @@ module.exports = perspective => {
             var table = perspective.table(arrow.slice(), {index: "dict"});
             var view = table.view();
             let result = await view.to_json();
-            expect(arrow_indexed_result).toEqual(result);
+            expect(result).toEqual(arrow_indexed_result);
             view.delete();
             table.delete();
         });
