@@ -86,6 +86,7 @@ public:
     t_get_data_extents get_data_extents() const;
     t_uindex get_stride() const;
     bool is_column_only() const;
+    t_uindex num_rows() const;
 
 private:
     /**

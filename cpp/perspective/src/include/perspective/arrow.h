@@ -16,14 +16,60 @@
 #include <perspective/data_table.h>
 
 #include <arrow/api.h>
+#include <arrow/util/decimal.h>
 #include <arrow/io/memory.h>
 #include <arrow/ipc/reader.h>
+#include <arrow/ipc/writer.h>
 
 #include <chrono>
 #include <date/date.h>
 
 namespace perspective {
 namespace arrow {
+
+    /**
+     * @brief Retrieve and cast a `t_scalar` value.
+     *
+     * @tparam F
+     * @tparam F
+     * @param t
+     * @return T
+     */
+
+    template <typename F, typename T = F>
+    T get_scalar(t_tscalar& t);
+
+    template <typename T, typename A, typename F = T>
+    std::shared_ptr<::arrow::Array>
+    col_to_array(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        int data_size = data.size() / stride;
+        // std::vector<T> vals;
+        // vals.reserve(data.size());
+        ::arrow::TypedBufferBuilder<T> value_builder;
+
+        // Validity map must have a length that is a multiple of 64
+        int nullSize = ceil(data_size / 64.0) * 8;
+        int nullCount = 0;
+        std::vector<std::uint8_t> validityMap;
+        validityMap.resize(nullSize);
+
+        for (int idx = offset; idx < data_size; idx += stride) {
+            t_tscalar scalar = data[idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                value_builder.Append(get_scalar<F, T>(scalar));
+                // Mark the slot as non-null (valid)
+                validityMap[idx / 8] |= 1 << (idx % 8);
+            } else {
+                value_builder.Append({});
+                nullCount++;
+            }
+        }
+        std::shared_ptr<::arrow::Buffer> null_buf = std::make_shared<::arrow::Buffer>(&validityMap[0], validityMap.size());
+        std::shared_ptr<::arrow::Buffer> values;
+        value_builder.Finish(&values);
+        std::shared_ptr<A> arr = std::make_shared<A>(data_size, values, null_buf, nullCount);
+        return arr;
+    }
 
     class PERSPECTIVE_EXPORT ArrowLoader {
     public:

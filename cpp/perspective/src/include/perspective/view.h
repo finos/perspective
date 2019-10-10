@@ -126,6 +126,8 @@ public:
      */
     std::int32_t get_row_expanded(std::int32_t ridx) const;
 
+    std::string to_arrow(std::shared_ptr<t_data_slice<CTX_T>> data_slice, std::int32_t start_col, std::int32_t end_col) const;
+
     /**
      * @brief Expands the row at "ridx".
      *

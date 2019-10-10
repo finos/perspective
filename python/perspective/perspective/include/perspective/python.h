@@ -105,6 +105,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_step_delta", &View<t_ctx0>::get_step_delta)
         .def("get_row_delta", &View<t_ctx0>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx0>::get_column_dtype)
+        .def("to_arrow", &View<t_ctx0>::to_arrow)
         .def("is_column_only", &View<t_ctx0>::is_column_only);
 
     py::class_<View<t_ctx1>, std::shared_ptr<View<t_ctx1>>>(m, "View_ctx1")
@@ -131,6 +132,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_step_delta", &View<t_ctx1>::get_step_delta)
         .def("get_row_delta", &View<t_ctx1>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx1>::get_column_dtype)
+        .def("to_arrow", &View<t_ctx1>::to_arrow)
         .def("is_column_only", &View<t_ctx1>::is_column_only);
 
     py::class_<View<t_ctx2>, std::shared_ptr<View<t_ctx2>>>(m, "View_ctx2")
@@ -158,6 +160,7 @@ PYBIND11_MODULE(libbinding, m)
         .def("get_step_delta", &View<t_ctx2>::get_step_delta)
         .def("get_row_delta", &View<t_ctx2>::get_row_delta)
         .def("get_column_dtype", &View<t_ctx2>::get_column_dtype)
+        .def("to_arrow", &View<t_ctx2>::to_arrow)
         .def("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -365,6 +368,10 @@ PYBIND11_MODULE(libbinding, m)
     m.def("get_data_slice_two", &get_data_slice_ctx2);
     m.def("get_from_data_slice_two", &get_from_data_slice_ctx2);
     m.def("get_pkeys_from_data_slice_two", &get_pkeys_from_data_slice_ctx2);
+    m.def("to_arrow_zero", &to_arrow_zero);
+    m.def("to_arrow_one", &to_arrow_one);
+    m.def("to_arrow_two", &to_arrow_two);
+
 }
 
 #endif

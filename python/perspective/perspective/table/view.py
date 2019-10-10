@@ -11,14 +11,14 @@ from functools import partial, wraps
 from random import random
 
 from .view_config import ViewConfig
-from ._data_formatter import to_format
+from ._data_formatter import to_format, _to_format_helper
 from ._constants import COLUMN_SEPARATOR_STRING
 from ._utils import _str_to_pythontype
 from ._callback_cache import _PerspectiveCallBackCache
 from ._date_validator import _PerspectiveDateValidator
 
 try:
-    from .libbinding import make_view_zero, make_view_one, make_view_two
+    from .libbinding import make_view_zero, make_view_one, make_view_two, to_arrow_zero, to_arrow_one, to_arrow_ztwo
 except ImportError:
     pass
 
@@ -310,6 +310,17 @@ class View(object):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
 
+    def to_arrow(self, **options):
+        start_col = options.get("start_col", 0)
+        max_cols = self.num_columns() + (1 if self._sides > 0 else 0)
+        cols = options.get("end_col", max_cols) * (self._num_hidden_cols() + 1)
+        end_col = min(cols, max_cols)
+        if "_data_slice" in options:
+            return self._view.to_arrow(options["_data_slice"], start_col, end_col)
+        else:
+            _, _, data_slice = _to_format_helper(self, options)
+            return to_arrow_zero(self._view, data_slice, start_col, end_col)
+
     def to_records(self, **kwargs):
         '''Serialize the :class:`~perspective.View`'s dataset into a :obj:`list`
         of :obj:`dict` containing each row.
@@ -387,9 +398,6 @@ class View(object):
                 value = column values.
         '''
         return to_format(options, self, 'numpy')
-
-    def to_arrow(self, **options):
-        pass
 
     def to_df(self, **options):
         '''Serialize the view's dataset into a pandas dataframe.

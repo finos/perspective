@@ -9,10 +9,6 @@
 
 #include <perspective/arrow.h>
 
-#include <arrow/api.h>
-#include <arrow/util/decimal.h>
-#include <arrow/io/memory.h>
-#include <arrow/ipc/reader.h>
 
 using namespace perspective;
 using namespace ::arrow;
@@ -20,6 +16,58 @@ using namespace ::arrow;
 namespace perspective {
 namespace arrow {
 
+    template <>
+    double
+    get_scalar<double>(t_tscalar& t) {
+        return t.to_double();
+    }
+    template <>
+    float
+    get_scalar<float>(t_tscalar& t) {
+        return t.to_double();
+    }
+    template <>
+    std::uint8_t
+    get_scalar<std::uint8_t>(t_tscalar& t) {
+        return static_cast<std::uint8_t>(t.to_int64());
+    }
+    template <>
+    std::int8_t
+    get_scalar<std::int8_t>(t_tscalar& t) {
+        return static_cast<std::int8_t>(t.to_int64());
+    }
+    template <>
+    std::int16_t
+    get_scalar<std::int16_t>(t_tscalar& t) {
+        return static_cast<std::int16_t>(t.to_int64());
+    }
+    template <>
+    std::int32_t
+    get_scalar<std::int32_t>(t_tscalar& t) {
+        return static_cast<std::int32_t>(t.to_int64());
+    }
+    template <>
+    std::uint32_t
+    get_scalar<std::uint32_t>(t_tscalar& t) {
+        return static_cast<std::uint32_t>(t.to_int64());
+    }
+     template <>
+    std::int64_t
+    get_scalar<std::int64_t>(t_tscalar& t) {
+        return static_cast<std::int64_t>(t.to_int64());
+    }
+    template <>
+    std::uint64_t
+    get_scalar<std::uint64_t>(t_tscalar& t) {
+        return static_cast<std::uint64_t>(t.to_int64());
+    }
+    template <>
+    double
+    get_scalar<t_date, double>(t_tscalar& t) {
+        auto x = t.to_uint64();
+        return *reinterpret_cast<double*>(&x);
+    }
+    
     t_dtype
     convert_type(const std::string& src) {
         if (src == "dictionary" || src == "utf8" || src == "binary") {
@@ -48,6 +96,70 @@ namespace arrow {
         PSP_COMPLAIN_AND_ABORT(ss.str());
         return DTYPE_STR;
     }
+
+
+    
+    template <>
+    std::shared_ptr<::arrow::Array>
+    col_to_array<std::string, ::arrow::DictionaryArray, std::string>(const std::vector<t_tscalar>& data, std::uint32_t offset, std::uint32_t stride) {
+        int data_size = data.size() / stride;
+
+        t_vocab vocab;
+        vocab.init(false);
+
+        int nullSize = ceil(data_size / 64.0) * 2;
+        int nullCount = 0;
+        std::vector<std::int32_t> validityMap; // = new std::uint32_t[nullSize];
+        validityMap.resize(nullSize);
+        std::vector<std::int32_t> indexArray;
+        indexArray.reserve(data_size);
+
+        for (int idx = offset; idx < data_size; idx += stride) {
+            t_tscalar scalar = data[idx];
+            if (scalar.is_valid() && scalar.get_dtype() != DTYPE_NONE) {
+                auto adx = vocab.get_interned(scalar.to_string());
+                indexArray[idx] = adx;
+                validityMap[idx / 32] |= 1 << (idx % 32);
+            } else {
+                nullCount++;
+            }
+        }
+        std::vector<std::int8_t> dictArray;
+        dictArray.reserve(vocab.get_vlendata()->size() - vocab.get_vlenidx());
+        std::vector<std::int32_t> offsets;
+        offsets.reserve(vocab.get_vlenidx() + 1);
+        std::int32_t index = 0;
+        for (auto i = 0; i < vocab.get_vlenidx(); i++) {
+            const char* str = vocab.unintern_c(i);
+            offsets.push_back(index);
+            while (*str) {
+                dictArray[index] = (*str++);
+                index++;
+            }
+        }
+        offsets.push_back(index);
+
+        return nullptr;
+
+        // auto dict = ArrayFromJSON(utf8(), "[\"foo\", \"bar\", \"baz\"]");
+        // auto dict_type = dictionary(int16(), utf8());
+        // auto indices = ArrayFromJSON(int16(), "[1, 2, null, 0, 2, 0]");
+        // auto arr = std::make_shared<DictionaryArray>(dict_type, indices, dict);
+
+  // The indices array should not have dictionary data
+
+        // t_val arr = t_val::global("Array").new_();
+        // arr.call<void>("push", dictArray);
+        // arr.call<void>(
+        //     "push", js_typed_array::Int32Array.new_(vector_to_typed_array(offsets)["buffer"]));
+        // arr.call<void>("push", indexArray);
+        // arr.call<void>("push", nullCount);
+        // arr.call<void>("push", vector_to_typed_array(validityMap));
+        // return arr;
+    }
+
+
+
 
     ArrowLoader::ArrowLoader() {}
     ArrowLoader::~ArrowLoader() {}

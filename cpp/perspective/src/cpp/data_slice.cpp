@@ -117,6 +117,12 @@ t_data_slice<CTX_T>::get_row_path(t_uindex ridx) const {
     return m_ctx->unity_get_row_path(ridx);
 }
 
+template <typename CTX_T>
+t_uindex
+t_data_slice<CTX_T>::num_rows() const {
+    return m_end_row - m_start_row;
+}
+
 // Getters
 template <typename CTX_T>
 std::shared_ptr<CTX_T>

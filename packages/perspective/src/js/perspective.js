@@ -554,6 +554,37 @@ export default function(Module) {
         return column_to_format.call(this, col_name, options, format_function);
     };
 
+    view.prototype.to_arrow = function(options = {}) {
+        options = options || {};
+        const max_cols = this._View.num_columns() + (this.sides() === 0 ? 0 : 1);
+        const max_rows = this._View.num_rows();
+        const hidden = this._num_hidden();
+
+        const viewport = this.config.viewport ? this.config.viewport : {};
+        const start_row = options.start_row || (viewport.top ? viewport.top : 0);
+        const end_row = Math.min(max_rows, options.end_row || (viewport.height ? start_row + viewport.height : max_rows));
+        const start_col = options.start_col || (viewport.left ? viewport.left : 0);
+        const end_col = Math.min(max_cols, (options.end_col || (viewport.width ? start_col + viewport.width : max_cols)) * (hidden + 1));
+
+        // use a specified data slice, if provided
+        let slice, data_slice;
+
+        if (!options.data_slice) {
+            data_slice = this.get_data_slice(start_row, end_row, start_col, end_col);
+            slice = data_slice.get_slice();
+        } else {
+            slice = options.data_slice.get_slice();
+        }
+
+        const rst = __MODULE__.to_arraybuffer(this._View.to_arrow(slice));
+
+        slice.delete();
+        if (data_slice) {
+            data_slice.delete();
+        }
+        return rst;
+    };
+
     /**
      * Serializes a view to arrow.
      *
@@ -576,7 +607,7 @@ export default function(Module) {
      * @returns {Promise<ArrayBuffer>} A Table in the Apache Arrow format
      * containing data from the view.
      */
-    view.prototype.to_arrow = function(options = {}) {
+    view.prototype._to_arrow = function(options = {}) {
         const names = this._column_names();
         const schema = this.schema();
 

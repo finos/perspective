@@ -166,6 +166,15 @@ namespace binding {
             "slice", offset, offset + (sizeof(T) * xs.size()));
     }
 
+    t_val
+    to_arraybuffer(std::shared_ptr<std::vector<uint8_t>> xs) {
+        uint8_t* st = &(*xs)[0];
+        uintptr_t offset = reinterpret_cast<uintptr_t>(st);
+        return t_val::module_property("HEAPU8").call<t_val>(
+            "slice", offset, offset + (sizeof(uint8_t) * xs->size()));
+    }
+
+
     /******************************************************************************
      *
      * Write data in the Apache Arrow format
@@ -1596,18 +1605,6 @@ using namespace perspective::binding;
 int
 main(int argc, char** argv) {
      // clang-format off
-//   std::vector<data_row> rows = {
-//       {1, 1.0, {1.0}}, {2, 2.0, {1.0, 2.0}}, {3, 3.0, {1.0, 2.0, 3.0}}};
-
-//   std::shared_ptr<::arraybuffer::Table> table;
-//   VectorToColumnarTable(rows, &table);
-
-//   std::vector<data_row> expected_rows;
-//   ColumnarTableToVector(table, &expected_rows);
-
-//   std::cout << rows.size() << " " << expected_rows.size() << std::endl;
-
-
 EM_ASM({
 
     if (typeof self !== "undefined") {
@@ -1676,6 +1673,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_step_delta", &View<t_ctx0>::get_step_delta)
         .function("get_row_delta", &View<t_ctx0>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx0>::get_column_dtype)
+        .function("to_arrow", &View<t_ctx0>::to_arrow)
         .function("is_column_only", &View<t_ctx0>::is_column_only);
 
     class_<View<t_ctx1>>("View_ctx1")
@@ -1703,6 +1701,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_step_delta", &View<t_ctx1>::get_step_delta)
         .function("get_row_delta", &View<t_ctx1>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx1>::get_column_dtype)
+        .function("to_arrow", &View<t_ctx1>::to_arrow)
         .function("is_column_only", &View<t_ctx1>::is_column_only);
 
     class_<View<t_ctx2>>("View_ctx2")
@@ -1731,6 +1730,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
         .function("get_step_delta", &View<t_ctx2>::get_step_delta)
         .function("get_row_delta", &View<t_ctx2>::get_row_delta)
         .function("get_column_dtype", &View<t_ctx2>::get_column_dtype)
+        .function("to_arrow", &View<t_ctx2>::to_arrow)
         .function("is_column_only", &View<t_ctx2>::is_column_only);
 
     /******************************************************************************
@@ -1941,6 +1941,7 @@ EMSCRIPTEN_BINDINGS(perspective) {
      * Perspective functions
      */
     function("make_table", &make_table<t_val>);
+    function("to_arraybuffer", &to_arraybuffer);
     function("make_computed_table", &make_computed_table<t_val>);
     function("scalar_vec_to_val", &scalar_vec_to_val);
     function("scalar_vec_to_string", &scalar_vec_to_string);

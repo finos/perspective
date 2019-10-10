@@ -38,6 +38,25 @@ std::shared_ptr<View<t_ctx0>> make_view_ctx0(std::shared_ptr<Table> table, std::
 std::shared_ptr<View<t_ctx1>> make_view_ctx1(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
 std::shared_ptr<View<t_ctx2>> make_view_ctx2(std::shared_ptr<Table> table, std::string name, std::string separator, t_val view_config, t_val date_parser);
 
+py::bytes to_arrow_zero(
+    std::shared_ptr<View<t_ctx0>> view,
+    std::shared_ptr<t_data_slice<t_ctx0>> data_slice, 
+    std::int32_t start_col, 
+    std::int32_t end_col);
+
+py::bytes to_arrow_one(
+    std::shared_ptr<View<t_ctx1>> view,
+    std::shared_ptr<t_data_slice<t_ctx1>> data_slice, 
+    std::int32_t start_col, 
+    std::int32_t end_col);
+
+py::bytes to_arrow_two(
+    std::shared_ptr<View<t_ctx2>> view,
+    std::shared_ptr<t_data_slice<t_ctx2>> data_slice, 
+    std::int32_t start_col, 
+    std::int32_t end_col);
+
+
 } //namespace binding
 } //namespace perspective
 
