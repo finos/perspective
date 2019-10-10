@@ -78,7 +78,6 @@ std::tm
 t_time::get_tm() const {
     std::tm rval;
     gmtime(rval, microseconds(), 0);
-    std::cout << str(rval);
     return rval;
 }
 

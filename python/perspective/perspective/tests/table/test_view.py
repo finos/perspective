@@ -196,6 +196,12 @@ class TestView(object):
             for i in range(len(keys)):
                 assert keys[i] == order[i]
 
+    def test_view_column_pivot_datetime_names(self):
+        data = {"a": [datetime(2019, 7, 11, 12, 30)], "b": [1]}
+        tbl = Table(data)
+        view = tbl.view(column_pivots=["a"])
+        assert list(view.to_dict().keys()) == ["2019-07-11 12:30:00 UTC|a", "2019-07-11 12:30:00 UTC|b"]
+
     # aggregate
 
     def test_view_aggregate_int(self):
@@ -222,6 +228,18 @@ class TestView(object):
             {"__ROW_PATH__": [], "a": 2, "b": 6},
             {"__ROW_PATH__": ["abc"], "a": 1, "b": 2},
             {"__ROW_PATH__": ["def"], "a": 1, "b": 4}
+        ]
+
+    def test_view_aggregate_datetime(self):
+        data = [{"a": datetime(2019, 10, 1, 11, 30)}, {"a": datetime(2019, 10, 1, 11, 30)}]
+        tbl = Table(data)
+        view = tbl.view(
+            aggregates={"a": "distinct count"},
+            row_pivots=["a"]
+        )
+        assert view.to_records() == [
+            {"__ROW_PATH__": [], "a": 1},
+            {"__ROW_PATH__": ["2019-10-01 11:30:00 UTC"], "a": 1}
         ]
 
     # sort
@@ -255,6 +273,12 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view(sort=[["a", "desc"]])
         assert view.to_records() == [{"a": datetime(2019, 7, 11, 8, 16), "b": 4}, {"a": datetime(2019, 7, 11, 8, 15), "b": 2}]
+
+    def test_view_sort_hidden(self):
+        data = [{"a": 1.1, "b": 2}, {"a": 1.2, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view(sort=[["a", "desc"]], columns=["b"])
+        assert view.to_records() == [{"b": 4}, {"b": 2}]
 
     # filter
 
@@ -415,7 +439,26 @@ class TestView(object):
         view = tbl.view()
         view.on_update(callback)
         tbl.update(data)
-        assert sentinel == True
+        assert sentinel is True
+
+    def test_view_on_update_multiple_callback(self):
+        sentinel = 0
+
+        def callback():
+            nonlocal sentinel
+            sentinel += 1
+
+        def callback1():
+            nonlocal sentinel
+            sentinel -= 1
+
+        data = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        tbl = Table(data)
+        view = tbl.view()
+        view.on_update(callback)
+        view.on_update(callback1)
+        tbl.update(data)
+        assert sentinel == 0
 
     # on_delete
 
@@ -431,7 +474,7 @@ class TestView(object):
         view = tbl.view()
         view.on_delete(callback)
         view.delete()
-        assert sentinel == True
+        assert sentinel is True
 
     # delete
 
@@ -440,7 +483,7 @@ class TestView(object):
         tbl = Table(data)
         view = tbl.view()
         view.delete()
-        # don"t segfault
+        assert tbl._views == []
 
     def test_view_delete_multiple_callbacks(self):
         # make sure that callbacks on views get filtered

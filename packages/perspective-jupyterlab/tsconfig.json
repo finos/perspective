@@ -13,7 +13,7 @@
       "ES2015.Promise",
       "DOM"
     ],
-    "types": [
+    "types":[
       "@finos/perspective-phosphor",
       "node"
     ]

@@ -46,7 +46,7 @@ def superstore(count=10):
     return pd.DataFrame(data)
 
 
-class TestTableNumpy(object):
+class TestTablePandas(object):
     def test_empty_table(self):
         tbl = Table([])
         assert tbl.size() == 0
@@ -60,11 +60,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "int": float  # np.nan is float type - ints convert to floats when filled in
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
+            "index": [0, 1, 2],
             "str": ["abc", None, "def"],
             "int": [None, 1.0, 2.0]
         }
@@ -73,11 +75,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": [float("nan"), "abc", float("nan")], "float": [np.nan, 1.5, 2.5]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "float": float  # can only promote to string or float
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
+            "index": [0, 1, 2],
             "str": [None, "abc", None],
             "float": [None, 1.5, 2.5]
         }
@@ -87,12 +91,14 @@ class TestTableNumpy(object):
         tbl = Table(data)
         # if np.nan begins a column, it is inferred as float and then can be promoted. if np.nan is in the values (but not at start), the column type is whatever is inferred.
         assert tbl.schema() == {
+            "index": int,
             "bool": str,
             "bool2": bool
         }
         assert tbl.size() == 3
         # np.nans are always serialized as None
         assert tbl.view().to_dict() == {
+            "index": [0, 1, 2],
             "bool": [None, "True", None],
             "bool2": [False, None, True]
         }
@@ -101,11 +107,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", "def"], "date": [float("nan"), date(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "date": str  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
+            "index": [0, 1],
             "str": ["abc", "def"],
             "date": [None, '2019-07-11']
         }
@@ -114,11 +122,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
+            "index": [0, 1],
             "str": ["abc", "def"],
             "datetime": [None, datetime(2019, 7, 11, 11, 0)]
         }
@@ -127,11 +137,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11)]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
+            "index": [0, 1],
             "str": ["abc", "def"],
             "datetime": [None, datetime(2019, 7, 11)]
         }
@@ -140,11 +152,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
+            "index": [0, 1],
             "str": ["abc", "def"],
             "datetime": [None, datetime(2019, 7, 11, 11, 0)]
         }
@@ -153,11 +167,13 @@ class TestTableNumpy(object):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [np.nan, datetime(2019, 7, 11, 10, 30, 55)]})
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "datetime": datetime  # can only promote to string or float
         }
         assert tbl.size() == 2
         assert tbl.view().to_dict() == {
+            "index": [0, 1],
             "str": ["abc", "def"],
             "datetime": [None, datetime(2019, 7, 11, 10, 30, 55)]
         }
@@ -167,11 +183,13 @@ class TestTableNumpy(object):
         data = pd.read_csv(csv)
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "int": int
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
+            "index": [0, 1, 2],
             "str": [None, None, "abc"],
             "int": [1, 2, 3]
         }
@@ -181,11 +199,13 @@ class TestTableNumpy(object):
         data = pd.read_csv(csv)
         tbl = Table(data)
         assert tbl.schema() == {
+            "index": int,
             "str": str,
             "float": float
         }
         assert tbl.size() == 3
         assert tbl.view().to_dict() == {
+            "index": [0, 1, 2],
             "str": ["abc", None, "ghi"],
             "float": [None, 2, None]
         }
@@ -196,17 +216,32 @@ class TestTableNumpy(object):
         tbl = Table(data)
         assert tbl.size() == 3
 
+    def test_table_indexed_series(self):
+        import pandas as pd
+        data = pd.Series([1, 2, 3], index=["a", "b", "c"], name="a")
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "index": str,
+            "a": int
+        }
+        assert tbl.size() == 3
+
     def test_rowpivots(self):
-        # basic
         df = superstore()
         df_pivoted = df.set_index(['Country', 'Region'])
         table = Table(df_pivoted)
+        columns = table.columns()
         assert table.size() == 10
+        assert "Country" in columns
+        assert "Region" in columns
 
     def test_pivottable(self):
         df = superstore()
         pt = pd.pivot_table(df, values='Discount', index=['Country', 'Region'], columns='Category')
         table = Table(pt)
+        columns = table.columns()
+        assert "Country" in columns
+        assert "Region" in columns
 
     def test_colpivots(self):
         arrays = [np.array(['bar', 'bar', 'bar', 'bar', 'baz', 'baz', 'baz', 'baz', 'foo', 'foo', 'foo', 'foo', 'qux', 'qux', 'qux', 'qux']),
@@ -217,3 +252,4 @@ class TestTableNumpy(object):
 
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         table = Table(df_both)
+        assert table.size() == 48

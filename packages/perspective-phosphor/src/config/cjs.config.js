@@ -13,7 +13,7 @@ const webpack = require("webpack");
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: "./src/ts/index.ts",
-    devtool: "source-map",
+    devtool: "cheap-eval-source-map",
     resolve: {
         extensions: [".ts", ".js", ".json"]
     },

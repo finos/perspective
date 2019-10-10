@@ -1,0 +1,72 @@
+<!--
+   
+   Copyright (c) 2017, the Perspective Authors.
+   
+   This file is part of the Perspective library, distributed under the terms of
+   the Apache License 2.0.  The full license can be found in the LICENSE file.
+
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+
+    <script src="https://unpkg.com/@finos/perspective-viewer@0.3.9/dist/umd/perspective-viewer.js"></script>
+    <script src="https://unpkg.com/@finos/perspective-viewer-hypergrid@0.3.9/dist/umd/perspective-viewer-hypergrid.js"></script>
+    <script src="https://unpkg.com/@finos/perspective-viewer-d3fc@0.3.9/dist/umd/perspective-viewer-d3fc.js"></script>
+
+    <script src="https://unpkg.com/@finos/perspective@0.3.9/dist/umd/perspective.js"></script>
+
+    <link rel='stylesheet' href="https://unpkg.com/@finos/perspective-viewer/dist/umd/material.dark.css">
+
+    <style>
+        perspective-viewer{position:absolute;top:0;left:0;right:0;bottom:0;}
+    </style>
+
+</head>
+
+<body>
+
+    <perspective-viewer 
+        id="viewer",
+        plugin="d3_xy_scatter"
+        aggregates='{
+            "high": "avg",
+            "low": "avg"
+        }'
+        columns='["high", "low"]'
+        row-pivots='["client"]'
+        column-pivots='["name"]'>
+    
+    </perspective-viewer>
+
+    <script>
+
+        window.addEventListener('WebComponentsReady', async function() {
+            const viewer = document.getElementById('viewer');
+
+            // Create a client that expects a Perspective server to accept connections at the specified URL.
+            const websocket = perspective.websocket("ws://localhost:8888/websocket");
+
+            /* `table` is a proxy for the `Table` we created on the server.
+            
+            All operations that are possible through the Javascript API are possible on the Python API as well,
+            thus calling `view()`, `schema()`, `update()` etc on `const table` will pass those operations to the
+            Python `Table`, execute the commands, and return the result back to Javascript.
+            */
+            const table = websocket.open_table('data_source_one');
+            
+            // Load this in the `<perspective-viewer>`.
+            viewer.load(table);
+            viewer.toggleConfig();
+        });
+
+    </script>
+
+</body>
+
+</html>

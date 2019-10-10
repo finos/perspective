@@ -5,57 +5,54 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import numpy as np
+from pytest import raises
+from perspective import PerspectiveError, PerspectiveWidget, Table
 
 
 class TestWidget:
-    def test_json(self):
-        from perspective.core.widget import PerspectiveWidget
-        pw = PerspectiveWidget([])
-        print(pw._as_json())
-        assert pw._as_json()
 
-    def test_computedColumns1(self):
-        from perspective.core.widget import PerspectiveWidget
+    def test_widget(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, plugin="x_bar")
+        assert widget.plugin == "x_bar"
 
-        PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2'], 'func': 'add'})
-        PerspectiveWidget([{'test': 1, 1: 2}], computedcolumns={'inputs': ['test', 1], 'func': 'add'})
+    def test_widget_no_data(self):
+        widget = PerspectiveWidget(None, plugin="x_bar", row_pivots=["a"])
+        assert widget.plugin == "x_bar"
+        assert widget.row_pivots == ["a"]
 
-    def test_computedColumns2(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
+    def test_widget_schema_with_index(self):
+        widget = PerspectiveWidget({"a": int}, index="a")
+        assert widget.table._index == "a"
 
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2'], 'func': 'sdfgsdfgsdf'})
-            assert False
-        except PerspectiveError:
-            pass
+    def test_widget_schema_with_limit(self):
+        widget = PerspectiveWidget({"a": int}, limit=5)
+        assert widget.table._limit == 5
 
-    def test_computedColumns4(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
+    def test_widget_no_data_with_index(self):
+        # should fail
+        with raises(PerspectiveError):
+            PerspectiveWidget(None, index="a")
 
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': ['test', 'test2']})
-            assert False
-        except PerspectiveError:
-            pass
+    def test_widget_no_data_with_limit(self):
+        # should fail
+        with raises(PerspectiveError):
+            PerspectiveWidget(None, limit=5)
 
-    def test_computedColumns5(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
+    def test_widget_load_table(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(table, plugin="x_bar")
+        assert widget.plugin == "x_bar"
 
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns=5)
-            assert False
-        except PerspectiveError:
-            pass
+    def test_widget_load_table_ignore_limit(self):
+        table = Table({"a": np.arange(0, 50)})
+        widget = PerspectiveWidget(table, limit=1)
+        table_name = list(widget.manager._tables.keys())[0]
+        assert widget.manager.get_table(table_name).size() == 50
 
-    def test_computedColumns6(self):
-        from perspective.core.widget import PerspectiveWidget
-        from perspective import PerspectiveError
-
-        try:
-            PerspectiveWidget([{'test': 1, 'test2': 2}], computedcolumns={'inputs': {}, 'func': 'add'})
-            assert False
-        except PerspectiveError:
-            pass
+    def test_widget_pass_options(self):
+        data = {"a": np.arange(0, 50)}
+        widget = PerspectiveWidget(data, limit=1)
+        table_name = list(widget.manager._tables.keys())[0]
+        assert widget.manager.get_table(table_name).size() == 1

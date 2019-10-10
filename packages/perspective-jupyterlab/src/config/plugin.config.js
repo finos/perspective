@@ -14,6 +14,7 @@ const webpack = require("webpack");
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
     entry: "./src/ts/index.ts",
+    devtool: "cheap-eval-source-map",
     resolveLoader: {
         alias: {
             "file-worker-loader": "@finos/perspective-webpack-plugin/src/js/psp-worker-loader.js"

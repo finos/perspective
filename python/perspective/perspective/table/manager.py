@@ -24,12 +24,12 @@ class PerspectiveManager(object):
     def process(self, msg, post_callback):
         '''Given a message from the client, process it through the Perspective engine.
 
-        Params:
+        Args:
             msg (dict) : a message from the client with instructions that map to engine operations
             post_callback (callable) : a function that returns data to the client
         '''
         if not isinstance(msg, dict):
-            raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.dumps()`.")
+            raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.loads()`.")
 
         cmd = msg["cmd"]
 
@@ -74,6 +74,7 @@ class PerspectiveManager(object):
 
                 if msg["method"] == "delete" and msg["cmd"] == "view_method":
                     # views can be removed, but tables cannot
+                    self._views[msg["name"]].delete()
                     self._views.pop(msg["name"], None)
                     return
 
@@ -91,7 +92,7 @@ class PerspectiveManager(object):
     def _process_subscribe(self, msg, table_or_view, post_callback):
         '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
 
-        Params:
+        Args:
             msg (dict) : the message from the client
             table_or_view {Table|View} : the instance that the subscription will be called on
             post_callback (callable) : a method that notifies the client with new data
@@ -123,6 +124,10 @@ class PerspectiveManager(object):
         post_callback = kwargs.get("post_callback")
         post_callback(self._make_message(id, data))
 
+    def _clean_view(self, name):
+        if name in self._views:
+            del self._views.name
+
     def _make_message(self, id, result):
         '''Return a serializable message for a successful result.'''
         return {
@@ -136,3 +141,7 @@ class PerspectiveManager(object):
             "id": id,
             "error": error
         }
+
+    def get_table(self, name):
+        '''Return a table under management by name.'''
+        return self._tables.get(name, None)

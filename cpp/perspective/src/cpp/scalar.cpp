@@ -673,14 +673,11 @@ t_tscalar::to_string(bool for_expr) const {
             return ss.str();
         } break;
         case DTYPE_TIME: {
-            t_time value = get<t_time>();
-            struct tm t;
-            bool rcode = value.as_tm(t);
-            if (rcode) {
-                return value.str(t);
-            } else {
-                return std::string("Could not return datetime value.");
-            }
+            double timestamp = to_double() / 1000; // Unix timestamp in milliseconds
+            std::time_t temp = timestamp;
+            std::tm* t = std::gmtime(&temp);
+            ss << std::put_time(t, "%Y-%m-%d %H:%M:%S UTC");
+            return ss.str();
         } break;
         case DTYPE_STR: {
             if (for_expr) {

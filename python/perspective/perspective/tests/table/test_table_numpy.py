@@ -67,11 +67,33 @@ class TestTableNumpy(object):
         assert tbl.size() == 2
 
     def test_table_date(self):
-        str_data = {"a": np.array([date.today()]), "b": np.array([date.today()])}
-        tbl = Table(str_data)
+        data = {"a": np.array([date.today()]), "b": np.array([date.today()])}
+        tbl = Table(data)
         assert tbl.size() == 1
+        assert tbl.schema() == {
+            "a": date,
+            "b": date
+        }
 
     def test_table_datetime(self):
-        str_data = {"a": np.array([datetime.now()]), "b": np.array([datetime.now()])}
-        tbl = Table(str_data)
+        data = {"a": np.array([datetime.now()]), "b": np.array([datetime.now()])}
+        tbl = Table(data)
         assert tbl.size() == 1
+        assert tbl.schema() == {
+            "a": datetime,
+            "b": datetime
+        }
+
+    def test_table_np_mixed(self):
+        data = {
+            "a": np.arange(5),
+            "b": np.full(5, np.nan),
+            "c": ["a", "b", "c", "d", "e"]
+        }
+        tbl = Table(data)
+        assert tbl.size() == 5
+        assert tbl.schema() == {
+            "a": int,
+            "b": float,
+            "c": str
+        }

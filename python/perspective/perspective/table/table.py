@@ -22,7 +22,7 @@ class Table(object):
 
         If a schema is provided, the table will be empty. Subsequent updates MUST conform to the column names and data types provided in the schema.
 
-        Params:
+        Args:
             data_or_schema (dict/list/dataframe)
             config (dict) : optional configurations for the Table:
                 - limit (int) : the maximum number of rows the Table should have. Updates past the limit will begin writing at row 0.
@@ -55,7 +55,7 @@ class Table(object):
     def replace(self, data):
         '''Replaces all rows in the Table with the new data.
 
-        Params:
+        Args:
             data (dict|list|dataframe) the new data with which to fill the Table
         '''
         self._table.reset_gnode(self._gnode_id)
@@ -70,7 +70,7 @@ class Table(object):
 
         A schema provides the mapping of string column names to python data types.
 
-        Params:
+        Args:
             as_string (bool) : returns the data types as string representations, if True
 
         Returns:
@@ -91,7 +91,7 @@ class Table(object):
     def columns(self, computed=False):
         '''Returns the column names of this dataset.
 
-        Params:
+        Args:
             computed (bool) : whether to include computed columns in this array. Defaults to False.
 
         Returns:
@@ -139,9 +139,12 @@ class Table(object):
         to locate the indexed row and write into it. If an index is not provided, the update is treated as an append.
 
         Example:
-            - to update the row with primary key "abc" on a Table with {"index": "a"}, `data` should be [{"a": "abc", "b": "new data"}]
+            >>> tbl = Table({"a": [1, 2, 3], "b": ["a", "b", "c"]}, index="a")
+            >>> tbl.update({"a": [2, 3], "b": ["a", "a"]})
+            >>> tbl.view().to_dict()
+            {"a": [1, 2, 3], "b": ["a", "a", "a"]}
 
-        Params:
+        Args:
             data (dict|list|dataframe) : the data with which to update the Table
         '''
         columns = self.columns()
@@ -166,9 +169,12 @@ class Table(object):
         If the table does not have an index, `remove()` has no effect. Removes propagate to views derived from the table.
 
         Example:
-            - to remove rows with primary keys "abc" and "def", provide ["abc", "def"].
+            >>> tbl = Table({"a": [1, 2, 3]}, index="a")
+            >>> tbl.remove([2, 3])
+            >>> tbl.view().to_records()
+            [{"a": 1}]
 
-        Params:
+        Args:
             pkeys (list) : a list of primary keys to indicate the rows that should be removed.
         '''
         if self._index == "":
@@ -186,7 +192,7 @@ class Table(object):
         A View is an immutable set of transformations on the underlying Table, which allows
         for querying, pivoting, aggregating, sorting, and filtering of data.
 
-        Params:
+        Args:
             **config (dict) : optional keyword arguments that configure and transform the view:
             - "row_pivots" (list[str]) : a list of column names to use as row pivots
             - "column_pivots" (list[str]) : a list of column names to use as column pivots
@@ -224,7 +230,15 @@ class Table(object):
         self._delete_callbacks.add_callback(callback)
 
     def remove_delete(self, callback):
-        '''Remove the delete callback associated with this table.'''
+        '''Remove the delete callback associated with this table.
+
+        Examples:
+            >>> def deleter():
+            >>>     print("Delete called!")
+            >>> table.on_delete(deleter)
+            >>> table.remove_delete(deleter)
+            >>> table.delete()
+        '''
         if not callable(callback):
             return ValueError("remove_delete callback should be a callable function!")
         self._delete_callbacks.remove_callbacks(lambda cb: cb != callback)
@@ -246,7 +260,3 @@ class Table(object):
         cache = {}
         for callback in self._callbacks.get_callbacks():
             callback["callback"](cache=cache)
-
-    def __del__(self):
-        '''Before GC, clean up internal resources to C++ objects through `delete()`.'''
-        self.delete()

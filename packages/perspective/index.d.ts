@@ -1,3 +1,4 @@
+import { PerspectiveEvents } from "@finos/perspective";
 
 declare module '@finos/perspective' {
     /**** object types ****/
@@ -97,22 +98,17 @@ declare module '@finos/perspective' {
     export type TableData = string | Array<object> | { [key: string]: Array<object> } | { [key: string]: string }
 
     export type TableOptions = {
-        index: string,
+        index?: string,
         limit?: number
     }
 
-    export type AggregateConfig = {
-        column: string | Array<string>;
-        name?: string;
-        op: NUMBER_AGGREGATES | STRING_AGGREGATES | BOOLEAN_AGGREGATES;
-    };
-
     export type ViewConfig = {
+        columns?: Array<string>;
         row_pivots?: Array<string>;
         column_pivots?: Array<string>;
-        sort?: Array<string>;
+        aggregates?: { [column_name:string]: string; },
+        sort?: Array<Array<string>>;
         filter?: Array<Array<string>>;
-        aggregate: Array<AggregateConfig>;
     };
 
     export type Table = {
@@ -140,7 +136,7 @@ declare module '@finos/perspective' {
         TYPE_AGGREGATES: ValuesByType,
         TYPE_FILTERS: ValuesByType,
         SORT_ORDERS: SortOrders,
-        table(): Table,
+        table(data_or_schema : TableData | Schema, options: TableOptions): Table,
         worker(): PerspectiveWorker,
         shared_worker(): PerspectiveWorker,
         override: (x: any) => void
@@ -150,8 +146,6 @@ declare module '@finos/perspective' {
 
     export default impl;
 }
-
-
 
 declare module "@finos/perspective/build/psp.async.wasm" {
     const impl: ArrayBuffer;
