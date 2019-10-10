@@ -289,11 +289,18 @@ class View(object):
                 - end_col: defaults to the total columns in the view
                 - index: whether to return an implicit pkey for each row. Defaults to False
                 - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+                - date_format: how `date` and `datetime` objects should be formatted in the CSV. Must be a valid date formatting string.
 
         Returns:
             str : a CSV-formatted string containing the serialized data.
         '''
-        return self.to_df(**options).to_csv(date_format='%Y/%m/%d %H:%M:%S')
+        if options.get("date_format", None):
+            date_format = options["date_format"]
+            options.pop("date_format")
+        else:
+            date_format = '%Y/%m/%d %H:%M:%S'
+
+        return self.to_df(**options).to_csv(date_format=date_format)
 
     @wraps(to_records)
     def to_json(self, **options):
