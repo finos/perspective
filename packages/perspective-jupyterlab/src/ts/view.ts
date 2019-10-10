@@ -33,6 +33,7 @@ class PerspectiveView extends DOMWidgetView {
              plugin_config: this.model.get('plugin_config'),
              computed_columns: [],
              dark: this.model.get('dark'),
+             editable: this.model.get("editable"),
              bindto: this.el,
              view: this,
         });
@@ -95,6 +96,7 @@ class PerspectiveView extends DOMWidgetView {
         this.model.on('change:filters', this.filters_changed, this);
         this.model.on('change:plugin_config', this.plugin_config_changed, this);
         this.model.on('change:dark', this.dark_changed, this);
+        this.model.on('change:editable', this.editable_changed, this);
 
         // Watch the viewer DOM so that widget state is always synchronized with DOM attributes.
         const observer = new MutationObserver(this._synchronize_state.bind(this));
@@ -177,5 +179,9 @@ class PerspectiveView extends DOMWidgetView {
 
     dark_changed(){
         this.pWidget.dark = this.model.get('dark');
+    }
+
+    editable_changed() {
+        this.pWidget.editable = this.model.get("editable");
     }
 }

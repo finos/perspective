@@ -29,6 +29,16 @@ class TestViewer:
         viewer.load({"a": [1, 2, 3]})
         assert viewer.columns == ["a"]
 
+    def test_viewer_load_schema(self):
+        viewer = PerspectiveViewer()
+        viewer.load({
+            "a": str,
+            "b": int,
+            "c": bool,
+            "d": str
+        })
+        assert viewer.columns == ["a", "b", "c", "d"]
+
     def test_viewer_load_table_with_options(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer()

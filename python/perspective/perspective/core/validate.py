@@ -87,15 +87,14 @@ def validate_sort(sort):
             if isinstance(s, Sort):
                 s = s.value
             elif not isinstance(s, string_types) or s not in Sort.options():
-                raise PerspectiveError('Unrecognized Sort: %s', s)
+                raise PerspectiveError('Unrecognized sort direction: %s', s)
             ret.append([col, s])
         return ret
     else:
         raise PerspectiveError('Cannot parse sort type: %s', str(type(sort)))
 
 
-def validate_filters(filters, columns=None):
-    columns = columns or []
+def validate_filters(filters):
     if filters is None:
         return []
 
@@ -104,26 +103,20 @@ def validate_filters(filters, columns=None):
         filters = [filters]
 
     if isinstance(filters, list):
-        ret = []
-        for i, d in enumerate(filters):
-            if not isinstance(d, list):
+        for f in filters:
+            if not isinstance(f, list):
                 raise PerspectiveError('`filters` kwarg must be a list!')
 
-            if len(d) != 3:
-                raise PerspectiveError('Cannot parse filter - unrecognized function {}'.format(d['func']))
-
-            for i, l in enumerate(d):
-                # FIXME check if column exists?
-                # if columns and (l not in columns):
-                #     raise PerspectiveError('Cannot parse computed_columns - unrecognized column {}'.format(input))
+            for i, item in enumerate(f):
                 if i == 1:
-                    if l not in ALL_FILTERS:
-                        raise PerspectiveError('Unrecognized filter operator: {}'.format(l))
-                pass
-            ret.append(d)
-        return ret
+                    if item not in ALL_FILTERS:
+                        raise PerspectiveError('Unrecognized filter operator: {}'.format(item))
+                    elif item not in ("is null", "is not null"):
+                        if len(f) != 3:
+                            raise PerspectiveError('Cannot parse filter - {} operator must have a comparison value.'.format(item))
+        return filters
     else:
-        raise PerspectiveError('Cannot parse filters type: %s', str(type(filters)))
+        raise PerspectiveError('Cannot parse filters type: {}'.format(str(type(filters))))
 
 
 def validate_plugin_config(plugin_config):

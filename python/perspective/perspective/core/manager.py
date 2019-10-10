@@ -7,8 +7,8 @@
 #
 import logging
 from functools import partial
-from .table import Table
-from ..core.exception import PerspectiveError
+from ..table import Table
+from .exception import PerspectiveError
 
 
 class PerspectiveManager(object):
@@ -20,6 +20,10 @@ class PerspectiveManager(object):
     def host_table(self, name, table):
         '''Given a reference to a `Table`, manage it and allow operations on it to occur through the Manager.'''
         self._tables[name] = table
+
+    def host_view(self, name, view):
+        '''Given a reference to a `View`, add it to the manager's views container.'''
+        self._views[name] = view
 
     def process(self, msg, post_callback):
         '''Given a message from the client, process it through the Perspective engine.
@@ -145,3 +149,7 @@ class PerspectiveManager(object):
     def get_table(self, name):
         '''Return a table under management by name.'''
         return self._tables.get(name, None)
+
+    def get_view(self, name):
+        '''Return a view under management by name.'''
+        return self._views.get(name, None)

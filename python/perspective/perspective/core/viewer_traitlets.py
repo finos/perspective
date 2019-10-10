@@ -16,7 +16,7 @@ class PerspectiveTraitlets(HasTraits):
     Properties that are set here are synchronized between the front-end and back-end.
 
     Examples:
-        >>> widget = perspective.PerspectiveWidget(row_pivots=["a", "b", "c"])
+        >>> widget = perspective.PerspectiveWidget(data, row_pivots=["a", "b", "c"])
         PerspectiveWidget(row_pivots=["a", "b", "c"])
         >>> widget.column_pivots=["b"]
         >>> widget
@@ -33,6 +33,7 @@ class PerspectiveTraitlets(HasTraits):
     filters = List(default_value=[]).tag(sync=True)
     plugin_config = Dict(default_value={}).tag(sync=True)
     dark = Bool(False).tag(sync=True)
+    editable = Bool(False).tag(sync=True)
 
     @validate('plugin')
     def _validate_plugin(self, proposal): return validate_plugin(proposal.value)
@@ -53,7 +54,7 @@ class PerspectiveTraitlets(HasTraits):
     def _validate_sort(self, proposal): return validate_sort(proposal.value)
 
     @validate('filters')
-    def _validate_filters(self, proposal): return validate_filters(proposal.value, self.columns)
+    def _validate_filters(self, proposal): return validate_filters(proposal.value)
 
     @validate('plugin_config')
     def _validate_plugin_config(self, proposal): return validate_plugin_config(proposal.value)

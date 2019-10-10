@@ -194,6 +194,7 @@ class Table(object):
 
         Args:
             **config (dict) : optional keyword arguments that configure and transform the view:
+            - "columns" (list[str]) : a list of column names to be shown
             - "row_pivots" (list[str]) : a list of column names to use as row pivots
             - "column_pivots" (list[str]) : a list of column names to use as column pivots
             - "aggregates" (dict[str:str]) : a dictionary of column names to aggregate types to specify aggregates for individual columns
