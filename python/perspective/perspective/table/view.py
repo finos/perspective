@@ -294,13 +294,7 @@ class View(object):
         Returns:
             str : a CSV-formatted string containing the serialized data.
         '''
-        if options.get("date_format", None):
-            date_format = options["date_format"]
-            options.pop("date_format")
-        else:
-            date_format = '%Y/%m/%d %H:%M:%S'
-
-        return self.to_df(**options).to_csv(date_format=date_format)
+        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
 
     @wraps(to_records)
     def to_json(self, **options):
