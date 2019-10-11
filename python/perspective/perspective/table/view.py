@@ -277,6 +277,25 @@ class View(object):
         cols = self.to_numpy(**options)
         return pandas.DataFrame(cols)
 
+    def to_csv(self, **options):
+        '''Serialize the view's dataset into a CSV string.
+
+        Args:
+            options (dict) :
+                user-provided options that specifies what data to return:
+                - start_row: defaults to 0
+                - end_row: defaults to the number of total rows in the view
+                - start_col: defaults to 0
+                - end_col: defaults to the total columns in the view
+                - index: whether to return an implicit pkey for each row. Defaults to False
+                - leaves_only: whether to return only the data at the end of the tree. Defaults to False
+                - date_format: how `date` and `datetime` objects should be formatted in the CSV. Must be a valid date formatting string.
+
+        Returns:
+            str : a CSV-formatted string containing the serialized data.
+        '''
+        return self.to_df(**options).to_csv(date_format=options.pop("date_format", "%Y/%m/%d %H:%M:%S"))
+
     @wraps(to_records)
     def to_json(self, **options):
         return self.to_records(**options)
