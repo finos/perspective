@@ -14,7 +14,7 @@ from .manager import PerspectiveManager
 from ..table import Table
 
 
-class PerspectiveViewer(PerspectiveTraitlets):
+class PerspectiveViewer(PerspectiveTraitlets, object):
     '''PerspectiveViewer wraps the `perspective.Table` API and exposes an API around creating views, loading data, and updating data.'''
     def __init__(self,
                  plugin='hypergrid',
@@ -147,12 +147,13 @@ class PerspectiveViewer(PerspectiveTraitlets):
     def _new_view(self):
         '''Create a new View, and assign its name to the viewer.
 
-        There should only be one View associated with the Viewer at any given time - when a new View is created, the old one is destroyed.
+        Do not call this function - it will be called automatically when the state of the viewer changes.
 
-        # TODO: fully implement
+        There should only be one View associated with the Viewer at any given time - when a new View is created, the old one is destroyed.
         '''
         if not self.table_name:
             return
+
         name = str(random())
         table = self.manager.get_table(self.table_name)
         view = table.view(
@@ -163,5 +164,6 @@ class PerspectiveViewer(PerspectiveTraitlets):
             sort=self.sort,
             filter=self.filters
         )
+
         self.manager.host_view(name, view)
         self.view_name = name

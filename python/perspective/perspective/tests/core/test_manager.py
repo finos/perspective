@@ -85,6 +85,19 @@ class TestPerspectiveManager(object):
             "b": ["c"]
         }
 
+    def test_manager_host_view(self):
+        message = {"id": 1, "name": "view1", "cmd": "view_method", "method": "schema", "args": []}
+        manager = PerspectiveManager()
+        table = Table(data)
+        view = table.view()
+        manager.host_table("table1", table)
+        manager.host_view("view1", view)
+        manager.process(message, self.post)
+        assert manager.get_view("view1").schema() == {
+            "a": int,
+            "b": str
+        }
+
     def test_manager_create_view_zero(self):
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
