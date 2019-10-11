@@ -21,6 +21,10 @@ class DateTimeEncoder(json.JSONEncoder):
         return super(DateTimeEncoder, self).default(obj)
 
 
+# keep track of each client connection
+CLIENT_ID = 0
+
+
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     '''PerspectiveTornadoHandler is a drop-in implementation of Perspective.
 
@@ -44,6 +48,9 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
                 - viewer (PerspectiveViewer) : a `PerspectiveViewer` instance. Must be provided on initialization.
                 - check_origin (bool) : if True, all requests will be accepted regardless of origin. Defaults to False.
         '''
+        global CLIENT_ID
+        CLIENT_ID += 1
+        self.CLIENT_ID = CLIENT_ID
         self._viewer = kwargs.pop("viewer", None)
         self._check_origin = kwargs.pop("check_origin", False)
 
@@ -61,9 +68,13 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         if message == "heartbeat":
             return
         message = json.loads(message)
-        self._viewer.manager.process(message, self.post)
+        self._viewer.manager.process(message, self.post, client_id=self.CLIENT_ID)
 
     def post(self, message):
         '''When `post` is called by `PerspectiveManager`, serialize the data to JSON and send it to the client.'''
         message = json.dumps(message, cls=DateTimeEncoder)
         self.write_message(message)
+
+    def on_close(self):
+        '''Remove the views associated with the client when the websocket closes.'''
+        self._viewer.manager.clear_views(self.CLIENT_ID)

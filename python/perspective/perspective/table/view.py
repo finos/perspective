@@ -44,6 +44,7 @@ class View(object):
         self._column_only = self._view.is_column_only()
         self._callbacks = self._table._callbacks
         self._delete_callbacks = _PerspectiveCallBackCache()
+        self._client_id = None
 
     def get_config(self):
         '''Returns the original dictionary config passed in by the user.'''

@@ -5,7 +5,8 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
-from perspective import Table, PerspectiveManager
+from pytest import raises
+from perspective import Table, PerspectiveError, PerspectiveManager
 
 data = {"a": [1, 2, 3], "b": ["a", "b", "c"]}
 
@@ -133,6 +134,55 @@ class TestPerspectiveManager(object):
             "c|a": [3, None, None, 3],
             "c|b": [1, None, None, 1]
         }
+
+    # clear views
+
+    def test_manager_clear_view(self):
+        messages = [
+            {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"},
+            {"id": 2, "table_name": "table1", "view_name": "view2", "cmd": "view"},
+            {"id": 3, "table_name": "table1", "view_name": "view3", "cmd": "view"}
+        ]
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        for message in messages:
+            manager.process(message, self.post, client_id=1)
+        manager.clear_views(1)
+        assert manager._views == {}
+
+    def test_manager_clear_view_nonseq(self):
+        messages = [
+            {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"},
+            {"id": 2, "table_name": "table1", "view_name": "view2", "cmd": "view"},
+            {"id": 3, "table_name": "table1", "view_name": "view3", "cmd": "view"}
+        ]
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        for i, message in enumerate(messages, 1):
+            manager.process(message, self.post, client_id=i)
+        manager.clear_views(1)
+        manager.clear_views(3)
+        assert "view1" not in manager._views
+        assert "view3" not in manager._views
+        assert "view2" in manager._views
+
+    def test_manager_clear_view_no_client_id(self):
+        messages = [
+            {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"},
+            {"id": 2, "table_name": "table1", "view_name": "view2", "cmd": "view"},
+            {"id": 3, "table_name": "table1", "view_name": "view3", "cmd": "view"}
+        ]
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        for message in messages:
+            manager.process(message, self.post)
+        with raises(PerspectiveError):
+            manager.clear_views(None)
+
+    # serialization
 
     def test_manager_to_dict(self):
         sentinel = False

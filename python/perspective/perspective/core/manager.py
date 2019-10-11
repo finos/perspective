@@ -25,7 +25,7 @@ class PerspectiveManager(object):
         '''Given a reference to a `View`, add it to the manager's views container.'''
         self._views[name] = view
 
-    def process(self, msg, post_callback):
+    def process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective engine.
 
         Args:
@@ -48,8 +48,9 @@ class PerspectiveManager(object):
             except IndexError:
                 self._tables[msg["name"]] = []
         elif cmd == "view":
-            # create a new view and track it
+            # create a new view and track it with the assigned client_id.
             new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
+            new_view._client_id = client_id
             self._views[msg["view_name"]] = new_view
         elif cmd == "table_method" or cmd == "view_method":
             self._process_method_call(msg, post_callback)
@@ -128,9 +129,24 @@ class PerspectiveManager(object):
         post_callback = kwargs.get("post_callback")
         post_callback(self._make_message(id, data))
 
-    def _clean_view(self, name):
-        if name in self._views:
-            del self._views.name
+    def clear_views(self, client_id):
+        '''Garbage collect views that belong to closed connections.'''
+        count = 0
+        names = []
+
+        if not client_id:
+            raise PerspectiveError("Cannot garbage collect views that are not linked to a specific client ID!")
+
+        for name, view in self._views.items():
+            if view._client_id == client_id:
+                view.delete()
+                names.append(name)
+                count += 1
+
+        for name in names:
+            self._views.pop(name)
+
+        print("GC {} views in memory".format(count))
 
     def _make_message(self, id, result):
         '''Return a serializable message for a successful result.'''
