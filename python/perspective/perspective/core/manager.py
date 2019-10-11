@@ -9,9 +9,24 @@ import logging
 from functools import partial
 from ..table import Table
 from .exception import PerspectiveError
+from .session import PerspectiveSession
 
 
 class PerspectiveManager(object):
+    '''PerspectiveManager is an orchestrator for running Perspective on the server side.
+
+    The core functionality resides in `process()`, which receives JSON-serialized messages from a client (usually `perspective-viewer` in the browser),
+    executes the commands in the message, and returns the results of those commands back to the `post_callback`.
+
+    The manager cannot create tables or views - use `host_table` or `host_view` to pass Table/View instances to the manager.
+
+    Because Perspective is designed to be used in a shared context, i.e. multiple clients all accessing the same `Table`,
+    PerspectiveManager comes with the context of `sessions` - an encapsulation of the actions and resources used by a single
+    connection to Perspective.
+
+    - When a client connects, for example through a websocket, a new session should be spawned using `new_session()`.
+    - When the websocket closes, call `close()` on the session instance to clean up associated resources.
+    '''
     def __init__(self):
         self._tables = {}
         self._views = {}
@@ -24,6 +39,9 @@ class PerspectiveManager(object):
     def host_view(self, name, view):
         '''Given a reference to a `View`, add it to the manager's views container.'''
         self._views[name] = view
+
+    def new_session(self):
+        return PerspectiveSession(self)
 
     def process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective engine.

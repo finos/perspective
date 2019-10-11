@@ -8,7 +8,7 @@ import tornado.ioloop
 import pandas as pd
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import PerspectiveViewer, PerspectiveTornadoHandler
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -25,19 +25,18 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     '''Create and return a Tornado app.
 
-    For `PerspectiveTornadoHandler` to work, it must be passed an instance of `PerspectiveViewer`.
+    For `PerspectiveTornadoHandler` to work, it must be passed an instance of `PerspectiveManager`.
 
-    Inside this function, we create a PerspectiveViewer and load data into it using its `load` method.
-
-    By passing a name into `load`, we guarantee the existence of a table with the name "data_source_one". This allows us to reference the Table
-    from the front-end with its known name. Without the `name` kwarg, the front-end has no way of knowing how to look up the Table on the backend.
+    The data is loaded into a new `Table`, which is passed to the manager through `host_table`.
+    The front-end is able to look up the table using the name provided to `host_table`.
     '''
-    VIEWER = PerspectiveViewer()
-    VIEWER.load(pd.read_csv("superstore.csv"), name="data_source_one")
+    MANAGER = PerspectiveManager()
+    TABLE = Table(pd.read_csv("superstore.csv"))
+    MANAGER.host_table("data_source_one", TABLE)
     return tornado.web.Application([
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", PerspectiveTornadoHandler, {"viewer": VIEWER, "check_origin": True})
+        (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
     ])
 
 

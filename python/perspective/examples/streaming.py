@@ -9,7 +9,7 @@ import tornado.ioloop
 from datetime import datetime
 
 sys.path.insert(1, os.path.join(os.path.dirname(__file__), '..'))
-from perspective import PerspectiveViewer, PerspectiveTornadoHandler
+from perspective import Table, PerspectiveManager, PerspectiveTornadoHandler
 
 
 class MainHandler(tornado.web.RequestHandler):
@@ -45,8 +45,9 @@ CLIENTS = ["Homer", "Marge", "Bart", "Lisa", "Maggie", "Moe", "Lenny", "Carl", "
 
 
 def make_app():
-    VIEWER = PerspectiveViewer()
-    VIEWER.load({
+    # Create an instance of `PerspectiveManager` and a table.
+    MANAGER = PerspectiveManager()
+    TABLE = Table({
         "name": str,
         "client": str,
         "open": float,
@@ -54,11 +55,14 @@ def make_app():
         "low": float,
         "close": float,
         "lastUpdate": datetime,
-    }, name="data_source_one", limit=2500)
+    }, limit=2500)
+
+    # Track the table with the name "data_source_one", which will be used in the front-end to access the Table.
+    MANAGER.host_table("data_source_one", TABLE)
 
     # update with new data every 50ms
     def updater():
-        VIEWER.update(data_source())
+        TABLE.update(data_source())
 
     callback = tornado.ioloop.PeriodicCallback(callback=updater, callback_time=50)
     callback.start()
@@ -66,7 +70,7 @@ def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
         # create a websocket endpoint that the client Javascript can access
-        (r"/websocket", PerspectiveTornadoHandler, {"viewer": VIEWER, "check_origin": True})
+        (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
     ])
 
 

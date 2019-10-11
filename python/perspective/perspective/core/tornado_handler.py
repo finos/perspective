@@ -21,10 +21,6 @@ class DateTimeEncoder(json.JSONEncoder):
         return super(DateTimeEncoder, self).default(obj)
 
 
-# keep track of each client connection
-CLIENT_ID = 0
-
-
 class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     '''PerspectiveTornadoHandler is a drop-in implementation of Perspective.
 
@@ -32,30 +28,28 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
     the front-end `perspective-viewer`.
 
     Examples:
-        >>> VIEWER = PerspectiveViewer()
-        >>> VIEWER.load(pd.read_csv("superstore.csv"), name="data_source_one")
+        >>> MANAGER = PerspectiveViewer()
+        >>> MANAGER.host_table("data_source_one", Table(pd.read_csv("superstore.csv")))
         >>> app = tornado.web.Application([
                 (r"/", MainHandler),
-                (r"/websocket", PerspectiveTornadoHandler, {"viewer": VIEWER, "check_origin": True})
+                (r"/websocket", PerspectiveTornadoHandler, {"manager": MANAGER, "check_origin": True})
             ])
     '''
 
     def __init__(self, *args, **kwargs):
-        '''Create a new instance of the PerspectiveTornadoHandler with the given Viewer instance.
+        '''Create a new instance of the PerspectiveTornadoHandler with the given Manager instance.
 
         Args:
             **kwargs (dict) : keyword arguments for the Tornado handler.
-                - viewer (PerspectiveViewer) : a `PerspectiveViewer` instance. Must be provided on initialization.
+                - manager (PerspectiveViewer) : a `PerspectiveViewer` instance. Must be provided on initialization.
                 - check_origin (bool) : if True, all requests will be accepted regardless of origin. Defaults to False.
         '''
-        global CLIENT_ID
-        CLIENT_ID += 1
-        self.CLIENT_ID = CLIENT_ID
-        self._viewer = kwargs.pop("viewer", None)
+        self._manager = kwargs.pop("manager", None)
+        self._session = self._manager.new_session()
         self._check_origin = kwargs.pop("check_origin", False)
 
-        if self._viewer is None:
-            raise PerspectiveError("A `PerspectiveViewer` instance must be provided to the tornado handler!")
+        if self._manager is None:
+            raise PerspectiveError("A `PerspectiveManager` instance must be provided to the tornado handler!")
 
         super(PerspectiveTornadoHandler, self).__init__(*args, **kwargs)
 
@@ -68,7 +62,7 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
         if message == "heartbeat":
             return
         message = json.loads(message)
-        self._viewer.manager.process(message, self.post, client_id=self.CLIENT_ID)
+        self._session.process(message, self.post)
 
     def post(self, message):
         '''When `post` is called by `PerspectiveManager`, serialize the data to JSON and send it to the client.'''
@@ -77,4 +71,4 @@ class PerspectiveTornadoHandler(tornado.websocket.WebSocketHandler):
 
     def on_close(self):
         '''Remove the views associated with the client when the websocket closes.'''
-        self._viewer.manager.clear_views(self.CLIENT_ID)
+        self._session.close()

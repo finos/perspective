@@ -10,7 +10,7 @@ import numpy
 from datetime import datetime
 from re import search
 from dateutil.parser import parse
-from perspective.table.libbinding import t_dtype
+from .libbinding import t_dtype
 
 
 class _PerspectiveDateValidator(object):

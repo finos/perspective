@@ -105,7 +105,7 @@ class PerspectiveViewer(PerspectiveTraitlets, object):
             >>> viewer.load(tbl)
             >>> viewer.load(data, index="a") # kwargs are forwarded to the `Table` constructor.
         '''
-        name = options.pop("name", str(random()))  # TODO: is this too convoluted
+        name = options.pop("name", str(random()))
         if isinstance(table_or_data, Table):
             table = table_or_data
         else:

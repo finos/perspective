@@ -6,7 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from datetime import date, datetime
-from perspective.table.libbinding import t_dtype
+from .libbinding import t_dtype
 
 
 def _extract_type(type, typemap):

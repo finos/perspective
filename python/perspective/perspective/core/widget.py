@@ -12,7 +12,7 @@ from functools import wraps
 from time import mktime
 from ipywidgets import Widget
 from traitlets import observe, Unicode
-from .data.pandas import deconstruct_pandas
+from .data import deconstruct_pandas
 from .exception import PerspectiveError
 from .viewer import PerspectiveViewer
 

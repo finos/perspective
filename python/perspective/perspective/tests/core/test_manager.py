@@ -28,6 +28,13 @@ class TestPerspectiveManager(object):
             "b": str
         }
 
+    def test_manager_host_table_transitive(self):
+        manager = PerspectiveManager()
+        table = Table(data)
+        manager.host_table("table1", table)
+        table.update({"a": [4, 5, 6], "b": ["d", "e", "f"]})
+        assert manager.get_table("table1").size() == 6
+
     def test_manager_create_table(self):
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()

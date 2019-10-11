@@ -7,7 +7,7 @@
 #
 import numpy as np
 from math import trunc
-from perspective.table.libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
+from .libbinding import get_data_slice_zero, get_data_slice_one, get_data_slice_two, \
     get_from_data_slice_zero, get_from_data_slice_one, get_from_data_slice_two, \
     get_pkeys_from_data_slice_zero, get_pkeys_from_data_slice_one, get_pkeys_from_data_slice_two
 from ._constants import COLUMN_SEPARATOR_STRING
