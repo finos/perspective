@@ -16,7 +16,7 @@ const VALID_TARGETS = ["node", "table"];
 const HAS_TARGET = args.indexOf("--target") != -1;
 const VERBOSE = args.indexOf("--verbose") != -1;
 
-function docker(target = "perspective", image = "python") {
+function docker(target = "perspective", image = "emsdk") {
     console.log(`-- Creating ${image} docker image`);
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
@@ -27,15 +27,22 @@ function docker(target = "perspective", image = "python") {
 }
 
 try {
-    // dependencies need to be installed for test_python:table and test_python:node
+    // copy C++ assets
+    mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"),
+        resolve(__dirname, "..", "python", "perspective"));
+
+    fs.copySync(resolve(__dirname, "..", "cmake"),
+        resolve(__dirname, "..", "python", "perspective", "cmake"));
+
     let cmd;
 
     if (process.env.PSP_DOCKER) {
-        cmd = `cd python/perspective && python3 -m pytest ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
+        cmd = `cd python/perspective && python3 -m pip install . --no-clean`;
         execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
     } else {
         const python_path = resolve(__dirname, "..", "python", "perspective");
-        cmd = `cd ${python_path} && python3 -m pytest ${VERBOSE ? "-vv" : "-v"} perspective --cov=perspective`;
+        cmd = `cd ${python_path} && python3 -m pip install . --no-clean`;
         execute(cmd);
     }
 } catch (e) {

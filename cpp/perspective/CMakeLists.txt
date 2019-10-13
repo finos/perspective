@@ -7,7 +7,11 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/modules/" ${CMAKE_MODULE_PATH} )
+
+if(NOT DEFINED PSP_CMAKE_MODULE_PATH)
+	set(PSP_CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../../cmake/")
+endif()
+set(CMAKE_MODULE_PATH "${PSP_CMAKE_MODULE_PATH}/modules" ${CMAKE_MODULE_PATH})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(WIN32 ON)
@@ -36,8 +40,8 @@ function (psp_build_dep name cmake_file)
 	endif()
 
 	if(${name} STREQUAL arrow)
-		configure_file(${CMAKE_SOURCE_DIR}/../../cmake/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
-		configure_file(${CMAKE_SOURCE_DIR}/../../cmake/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
+		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/CMakeLists.txt ${CMAKE_BINARY_DIR}/arrow-src/cpp/ COPYONLY)
+		configure_file(${PSP_CMAKE_MODULE_PATH}/arrow/config.h ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/ COPYONLY)
 		add_subdirectory(${CMAKE_BINARY_DIR}/arrow-src/cpp/
 			${CMAKE_BINARY_DIR}/arrow-build
 			EXCLUDE_FROM_ALL)
@@ -114,12 +118,18 @@ else()
 endif()
 
 if(PSP_CPP_BUILD)
+	if(NOT DEFINED PSP_PYTHON_SRC)
+		set(PSP_CPP_SRC "${CMAKE_SOURCE_DIR}")
+	endif()
 	message(WARNING "${Cyan}Building C++ binding${ColorReset}")
 else()
 	message(WARNING "${Cyan}Skipping C++ binding${ColorReset}")
 endif()
 
 if (PSP_PYTHON_BUILD)
+	if(NOT DEFINED PSP_PYTHON_SRC)
+		set(PSP_PYTHON_SRC "${CMAKE_SOURCE_DIR}/../../python/perspective/perspective")
+	endif()
 	message(WARNING "${Cyan}Building Python binding${ColorReset}")
 else()
 	message(WARNING "${Cyan}Skipping Python binding${ColorReset}")
@@ -172,7 +182,6 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/Homebrew/include")
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
-	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 	
 	set(EXTENDED_FLAGS " \
 		--bind \
@@ -245,7 +254,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	find_package(TBB)
 	if(NOT TBB_FOUND)
 		message("${Red}TBB could not be located${ColorReset}")
-		psp_build_dep("tbb" "../../cmake/TBB.txt.in")
+		psp_build_dep("tbb" "${PSP_CMAKE_MODULE_PATH}/TBB.txt.in")
 	else()
 		message("${Cyan}Found tbb in ${TBB_INCLUDE_DIRS} ${TBB_LIBRARY_DIRS} ${ColorReset}")
 		include_directories( ${TBB_INCLUDE_DIRS} )
@@ -264,7 +273,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		# PYTHON BINDINGS BUILD #
 		#########################
 		include_directories("/usr/local/include/python3.7m")  # FIXME
-		include_directories("${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/include")
+		include_directories("${PSP_PYTHON_SRC}/perspective/include")
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
@@ -281,7 +290,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package(pybind11)
 		if(NOT pybind11_FOUND)
 		    message("${Red}PyBind11 could not be located${ColorReset}")
-			psp_build_dep("pybind11" "../../cmake/Pybind.txt.in")
+			psp_build_dep("pybind11" "${PSP_CMAKE_MODULE_PATH}/Pybind.txt.in")
 		else()
 		    message("${Cyan}Found PyBind11 in ${pybind11_INCLUDE_DIRS}${ColorReset}")
 		endif()
@@ -313,16 +322,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	endif()
 endif()
 
-psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
-psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
+psp_build_dep("hopscotch" "${PSP_CMAKE_MODULE_PATH}/hopscotch.txt.in")
+psp_build_dep("ordered-map" "${PSP_CMAKE_MODULE_PATH}/ordered-map.txt.in")
 
 # For all non-MacOS builds, or if building WASM/CPP, build minimal arrow from source
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
-	psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
-	psp_build_dep("arrow" "../../cmake/arrow.txt.in")
+	psp_build_dep("double-conversion" "${PSP_CMAKE_MODULE_PATH}/double-conversion.txt.in")
+	psp_build_dep("arrow" "${PSP_CMAKE_MODULE_PATH}/arrow.txt.in")
 
 	find_package(Flatbuffers)
 	if(NOT FLATBUFFERS_FOUND)
@@ -342,96 +351,96 @@ set(CMAKE_C_FLAGS " \
 	")
 
 set (SOURCE_FILES
-	src/cpp/aggregate.cpp
-	src/cpp/aggspec.cpp
-	src/cpp/arg_sort.cpp
-	src/cpp/arrow.cpp
-	src/cpp/base.cpp
-	src/cpp/base_impl_linux.cpp
-	src/cpp/base_impl_osx.cpp
-	src/cpp/base_impl_wasm.cpp
-	src/cpp/base_impl_win.cpp
-	src/cpp/binding.cpp
-	src/cpp/build_filter.cpp
-	#src/cpp/calc_agg_dtype.cpp
-	src/cpp/column.cpp
-	src/cpp/comparators.cpp
-	src/cpp/compat.cpp
-	src/cpp/compat_impl_linux.cpp
-	src/cpp/compat_impl_osx.cpp
-	src/cpp/compat_impl_win.cpp
-	src/cpp/config.cpp
-	src/cpp/context_base.cpp
-	src/cpp/context_grouped_pkey.cpp
-	src/cpp/context_handle.cpp
-	src/cpp/context_one.cpp
-	src/cpp/context_two.cpp
-	src/cpp/context_zero.cpp
-	src/cpp/custom_column.cpp
-	src/cpp/data.cpp
-	src/cpp/data_slice.cpp
-	src/cpp/data_table.cpp
-	src/cpp/date.cpp
-	src/cpp/dense_nodes.cpp
-	src/cpp/dense_tree_context.cpp
-	src/cpp/dense_tree.cpp
-	src/cpp/dependency.cpp
-	src/cpp/extract_aggregate.cpp
-	src/cpp/filter.cpp
-	src/cpp/flat_traversal.cpp
-	src/cpp/get_data_extents.cpp
-	src/cpp/gnode.cpp
-	src/cpp/gnode_state.cpp
-	src/cpp/histogram.cpp
-	src/cpp/logtime.cpp
-	src/cpp/mask.cpp
-	src/cpp/min_max.cpp
-	src/cpp/multi_sort.cpp
-	src/cpp/none.cpp
-	src/cpp/path.cpp
-	src/cpp/pivot.cpp
-	src/cpp/pool.cpp
-	src/cpp/port.cpp
-	src/cpp/raii.cpp
-	src/cpp/raii_impl_linux.cpp
-	src/cpp/raii_impl_osx.cpp
-	src/cpp/raii_impl_win.cpp
-	src/cpp/range.cpp
-	src/cpp/rlookup.cpp
-	src/cpp/scalar.cpp
-	src/cpp/schema_column.cpp
-	src/cpp/schema.cpp
-	src/cpp/slice.cpp
-	src/cpp/sort_specification.cpp
-	src/cpp/sparse_tree.cpp
-	src/cpp/sparse_tree_node.cpp
-	src/cpp/step_delta.cpp
-	src/cpp/storage.cpp
-	src/cpp/storage_impl_linux.cpp
-	src/cpp/storage_impl_osx.cpp
-	src/cpp/storage_impl_win.cpp
-	src/cpp/sym_table.cpp
-	src/cpp/table.cpp
-	src/cpp/time.cpp
-	src/cpp/traversal.cpp
-	src/cpp/traversal_nodes.cpp
-	src/cpp/tree_context_common.cpp
-	src/cpp/utils.cpp
-	src/cpp/update_task.cpp
-	src/cpp/view.cpp
-	src/cpp/view_config.cpp
-	src/cpp/vocab.cpp
+	${PSP_CPP_SRC}/src/cpp/aggregate.cpp
+	${PSP_CPP_SRC}/src/cpp/aggspec.cpp
+	${PSP_CPP_SRC}/src/cpp/arg_sort.cpp
+	${PSP_CPP_SRC}/src/cpp/arrow.cpp
+	${PSP_CPP_SRC}/src/cpp/base.cpp
+	${PSP_CPP_SRC}/src/cpp/base_impl_linux.cpp
+	${PSP_CPP_SRC}/src/cpp/base_impl_osx.cpp
+	${PSP_CPP_SRC}/src/cpp/base_impl_wasm.cpp
+	${PSP_CPP_SRC}/src/cpp/base_impl_win.cpp
+	${PSP_CPP_SRC}/src/cpp/binding.cpp
+	${PSP_CPP_SRC}/src/cpp/build_filter.cpp
+	#${PSP_CPP_SRC}/src/cpp/calc_agg_dtype.cpp
+	${PSP_CPP_SRC}/src/cpp/column.cpp
+	${PSP_CPP_SRC}/src/cpp/comparators.cpp
+	${PSP_CPP_SRC}/src/cpp/compat.cpp
+	${PSP_CPP_SRC}/src/cpp/compat_impl_linux.cpp
+	${PSP_CPP_SRC}/src/cpp/compat_impl_osx.cpp
+	${PSP_CPP_SRC}/src/cpp/compat_impl_win.cpp
+	${PSP_CPP_SRC}/src/cpp/config.cpp
+	${PSP_CPP_SRC}/src/cpp/context_base.cpp
+	${PSP_CPP_SRC}/src/cpp/context_grouped_pkey.cpp
+	${PSP_CPP_SRC}/src/cpp/context_handle.cpp
+	${PSP_CPP_SRC}/src/cpp/context_one.cpp
+	${PSP_CPP_SRC}/src/cpp/context_two.cpp
+	${PSP_CPP_SRC}/src/cpp/context_zero.cpp
+	${PSP_CPP_SRC}/src/cpp/custom_column.cpp
+	${PSP_CPP_SRC}/src/cpp/data.cpp
+	${PSP_CPP_SRC}/src/cpp/data_slice.cpp
+	${PSP_CPP_SRC}/src/cpp/data_table.cpp
+	${PSP_CPP_SRC}/src/cpp/date.cpp
+	${PSP_CPP_SRC}/src/cpp/dense_nodes.cpp
+	${PSP_CPP_SRC}/src/cpp/dense_tree_context.cpp
+	${PSP_CPP_SRC}/src/cpp/dense_tree.cpp
+	${PSP_CPP_SRC}/src/cpp/dependency.cpp
+	${PSP_CPP_SRC}/src/cpp/extract_aggregate.cpp
+	${PSP_CPP_SRC}/src/cpp/filter.cpp
+	${PSP_CPP_SRC}/src/cpp/flat_traversal.cpp
+	${PSP_CPP_SRC}/src/cpp/get_data_extents.cpp
+	${PSP_CPP_SRC}/src/cpp/gnode.cpp
+	${PSP_CPP_SRC}/src/cpp/gnode_state.cpp
+	${PSP_CPP_SRC}/src/cpp/histogram.cpp
+	${PSP_CPP_SRC}/src/cpp/logtime.cpp
+	${PSP_CPP_SRC}/src/cpp/mask.cpp
+	${PSP_CPP_SRC}/src/cpp/min_max.cpp
+	${PSP_CPP_SRC}/src/cpp/multi_sort.cpp
+	${PSP_CPP_SRC}/src/cpp/none.cpp
+	${PSP_CPP_SRC}/src/cpp/path.cpp
+	${PSP_CPP_SRC}/src/cpp/pivot.cpp
+	${PSP_CPP_SRC}/src/cpp/pool.cpp
+	${PSP_CPP_SRC}/src/cpp/port.cpp
+	${PSP_CPP_SRC}/src/cpp/raii.cpp
+	${PSP_CPP_SRC}/src/cpp/raii_impl_linux.cpp
+	${PSP_CPP_SRC}/src/cpp/raii_impl_osx.cpp
+	${PSP_CPP_SRC}/src/cpp/raii_impl_win.cpp
+	${PSP_CPP_SRC}/src/cpp/range.cpp
+	${PSP_CPP_SRC}/src/cpp/rlookup.cpp
+	${PSP_CPP_SRC}/src/cpp/scalar.cpp
+	${PSP_CPP_SRC}/src/cpp/schema_column.cpp
+	${PSP_CPP_SRC}/src/cpp/schema.cpp
+	${PSP_CPP_SRC}/src/cpp/slice.cpp
+	${PSP_CPP_SRC}/src/cpp/sort_specification.cpp
+	${PSP_CPP_SRC}/src/cpp/sparse_tree.cpp
+	${PSP_CPP_SRC}/src/cpp/sparse_tree_node.cpp
+	${PSP_CPP_SRC}/src/cpp/step_delta.cpp
+	${PSP_CPP_SRC}/src/cpp/storage.cpp
+	${PSP_CPP_SRC}/src/cpp/storage_impl_linux.cpp
+	${PSP_CPP_SRC}/src/cpp/storage_impl_osx.cpp
+	${PSP_CPP_SRC}/src/cpp/storage_impl_win.cpp
+	${PSP_CPP_SRC}/src/cpp/sym_table.cpp
+	${PSP_CPP_SRC}/src/cpp/table.cpp
+	${PSP_CPP_SRC}/src/cpp/time.cpp
+	${PSP_CPP_SRC}/src/cpp/traversal.cpp
+	${PSP_CPP_SRC}/src/cpp/traversal_nodes.cpp
+	${PSP_CPP_SRC}/src/cpp/tree_context_common.cpp
+	${PSP_CPP_SRC}/src/cpp/utils.cpp
+	${PSP_CPP_SRC}/src/cpp/update_task.cpp
+	${PSP_CPP_SRC}/src/cpp/view.cpp
+	${PSP_CPP_SRC}/src/cpp/view_config.cpp
+	${PSP_CPP_SRC}/src/cpp/vocab.cpp
 	)
 
 set (PYTHON_SOURCE_FILES
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/accessor.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/context.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/fill.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/python.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/serialization.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/table.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/utils.cpp
-	${CMAKE_SOURCE_DIR}/../../python/perspective/perspective/src/view.cpp
+	${PSP_PYTHON_SRC}/src/accessor.cpp
+	${PSP_PYTHON_SRC}/src/context.cpp
+	${PSP_PYTHON_SRC}/src/fill.cpp
+	${PSP_PYTHON_SRC}/src/python.cpp
+	${PSP_PYTHON_SRC}/src/serialization.cpp
+	${PSP_PYTHON_SRC}/src/table.cpp
+	${PSP_PYTHON_SRC}/src/utils.cpp
+	${PSP_PYTHON_SRC}/src/view.cpp
 	)
 
 if (WIN32)
@@ -468,6 +477,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		########################
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
+		include_directories(${PSP_PYTHON_SRC}/include)
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 
 		# On MacOS, link against libarrow 0.15.0 in pyarrow directory
@@ -531,7 +541,8 @@ if (PSP_CPP_BUILD_TESTS)
 	if (WIN32)
 	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 	endif()
-	psp_build_dep("googletest" "../../cmake/GTest.txt.in")
+	# don't need to build gtest as theres one in rapidjson
+	# psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
 
 	add_subdirectory(test)
 	add_custom_target(gcov

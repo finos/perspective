@@ -28,25 +28,16 @@ function docker(target = "perspective", image = "emsdk") {
 }
 
 try {
-    let target = "perspective";
-
-    if (HAS_TARGET) {
-        const new_target = args[args.indexOf("--target") + 1];
-        if (VALID_TARGETS.includes(new_target)) {
-            target = new_target;
-        }
-    }
-
     let cmd;
     let lint_cmd = `python3 -m flake8 perspective && echo "lint passed!"`;
     let fix_cmd = `autopep8 -v --in-place --aggressive --recursive --exclude build . &&\
         echo "autopep8 formatting complete!"`;
 
     if (process.env.PSP_DOCKER) {
-        cmd = `cd python/${target} && ${IS_FIX ? fix_cmd : lint_cmd}`;
-        execute(`${docker(target, "python")} bash -c "${cmd}"`);
+        cmd = `cd python/perspective && ${IS_FIX ? fix_cmd : lint_cmd}`;
+        execute(`${docker("perspective", "python")} bash -c "${cmd}"`);
     } else {
-        const python_path = resolve(__dirname, "..", "python", target);
+        const python_path = resolve(__dirname, "..", "python", "perspective");
         cmd = `cd ${python_path} && ${IS_FIX ? fix_cmd : lint_cmd}`;
         execute(cmd);
     }

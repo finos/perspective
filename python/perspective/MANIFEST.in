@@ -1,6 +1,5 @@
 include LICENSE
 include README.md
-include CONTRIBUTING.md
 
 include requirements.txt
 include requirements-dev.txt
@@ -11,6 +10,15 @@ include Makefile
 
 # Source files for perspective-python
 graft perspective
+include perspective/table/libbinding.so
+include perspective/table/libpsp.so
+include perspective/table/libbinding.dll
+include perspective/table/libpsp.dll
+include perspective/table/libbinding.dylib
+include perspective/table/libpsp.dylib
+
+
+graft perspective/tests
 
 # Documentation
 graft docs
@@ -23,10 +31,14 @@ prune docs/dist
 
 # Webapp files
 include package.json
-include tsconfig.json
-include tslint.json
 graft src
 graft style
+
+# C++ build
+graft cmake
+graft src
+graft test
+
 
 # Patterns to exclude from any directory
 global-exclude *~

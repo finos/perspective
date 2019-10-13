@@ -37,12 +37,13 @@ try {
     }
 
     let cmd;
-     build_cmd =
+    build_cmd =
         "python3 -m pip install -r requirements-dev.txt &&\
         python3 setup.py build &&\
         python3 -m flake8 perspective && echo OK &&\
         python3 -m pytest -v perspective --cov=perspective &&\
         make -C ./docs html &&\
+        python3 -m pip install . &&\
         codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957";
 
     if (process.env.PSP_DOCKER) {
