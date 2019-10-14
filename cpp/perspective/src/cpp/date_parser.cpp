@@ -7,11 +7,8 @@
  *
  */
 
-#include <sstream>
 #include <perspective/first.h>
 #include <perspective/date_parser.h>
-#include <locale>
-#include <iomanip>
 
 namespace perspective {
 
@@ -25,21 +22,13 @@ const std::string t_date_parser::VALID_FORMATS[12]
         "%m-%d-%Y",
         "%m/%d/%Y", "%m-%d-%Y", "%m %d %Y", "%m/%d/%Y", "%m/%d/%y", "%d %m %Y"};
 
-t_date_parser::t_date_parser() {}
+std::chrono::system_clock::time_point
+t_date_parser::parse(const std::string& datestring) {
+    return std::chrono::system_clock::now();
+}
 
-bool
-t_date_parser::is_valid(std::string const& datestring) {
-    for (const std::string& fmt : VALID_FORMATS) {
-        if (fmt != "") {
-            std::tm t = {};
-            std::stringstream ss(datestring);
-            ss.imbue(std::locale::classic());
-            ss >> std::get_time(&t, fmt.c_str());
-            if (!ss.fail()) {
-                return true;
-            }
-        }
-    }
-    return false;
+t_dtype
+t_date_parser::format(const std::string& datestring) {
+    return t_dtype::DTYPE_STR;
 }
 } // end namespace perspective

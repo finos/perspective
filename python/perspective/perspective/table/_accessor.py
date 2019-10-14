@@ -146,17 +146,13 @@ class _PerspectiveAccessor(object):
         elif type == t_dtype.DTYPE_DATE:
             # return datetime.date
             if isinstance(val, str):
-                parsed = self._date_validator.parse(val)
-                val = self._date_validator.to_date_components(parsed)
-            else:
-                val = self._date_validator.to_date_components(val)
+                val = self._date_validator.parse(val)
+            val = self._date_validator.to_date_components(val)
         elif type == t_dtype.DTYPE_TIME:
             # return unix timestamps for time
             if isinstance(val, str):
-                parsed = self._date_validator.parse(val)
-                val = self._date_validator.to_timestamp(parsed)
-            else:
-                val = self._date_validator.to_timestamp(val)
+                val = self._date_validator.parse(val)
+            val = self._date_validator.to_timestamp(val)
         elif type == t_dtype.DTYPE_STR:
             val = str(val)
 

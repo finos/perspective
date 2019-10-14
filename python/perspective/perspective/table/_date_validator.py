@@ -10,6 +10,7 @@ import numpy
 from datetime import datetime
 from re import search
 from dateutil.parser import parse
+from ciso8601 import parse_datetime
 from perspective.table.libbinding import t_dtype
 
 
@@ -30,9 +31,13 @@ class _PerspectiveDateValidator(object):
             A datetime.date or datetime.datetime object if parse is successful, None otherwise
         '''
         try:
-            return parse(str)
-        except (ValueError, OverflowError):
-            return None
+            # handle ISO 8601, otherwise fallback to lenient parser
+            return parse_datetime(str)
+        except (ValueError):
+            try:
+                return parse(str)
+            except (ValueError, OverflowError):
+                return None
 
     def to_date_components(self, d):
         '''Return a dictionary of string keys and integer values for `year`, `month`, and `day`.
@@ -93,14 +98,13 @@ class _PerspectiveDateValidator(object):
         dtype = t_dtype.DTYPE_STR
 
         if has_separators:
-            try:
-                parsed = parse(str)
-                if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
-                    dtype = t_dtype.DTYPE_DATE
-                else:
-                    dtype = t_dtype.DTYPE_TIME
-            except (ValueError, OverflowError):
+            parsed = self.parse(str)
+            if parsed is None:
                 # unparsable dates should be coerced to string
                 dtype = t_dtype.DTYPE_STR
+            elif (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
+                dtype = t_dtype.DTYPE_DATE
+            else:
+                dtype = t_dtype.DTYPE_TIME
 
         return dtype

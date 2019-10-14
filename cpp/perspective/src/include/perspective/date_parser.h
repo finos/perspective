@@ -8,21 +8,29 @@
  */
 
 #pragma once
-#include <memory>
-#include <locale>
+#include <chrono>
 #include <perspective/base.h>
 #include <perspective/first.h>
 #include <perspective/exports.h>
 
 namespace perspective {
 
-class PERSPECTIVE_EXPORT t_date_parser {
-public:
-    t_date_parser();
+struct PERSPECTIVE_EXPORT t_date_parser {
+    /**
+     * Given a string that is assumed to be a valid date/datetime,
+     * parse it and return a `std::chrono::system_clock::time_point` object 
+     * that represents number of milliseconds since epoch. 
+     */
+    static std::chrono::system_clock::time_point parse(const std::string& datestring);
 
-    bool is_valid(std::string const& datestring);
+    /**
+     * Given a string that is assumed to be a valid date/datetime,
+     * parse it and return `t_dtype::DTYPE_DATE` or `t_dtype::DTYPE_TIME`.
+     * 
+     * If the string is not a valid datetime, return `t_dtype::DTYPE_STR`.
+     */
+    static t_dtype format(const std::string& datestring);
 
-private:
     static const std::string VALID_FORMATS[12];
 };
 } // end namespace perspective
