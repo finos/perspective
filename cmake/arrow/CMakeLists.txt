@@ -3,6 +3,7 @@ set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/pretty_print.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_adaptive.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_base.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_binary.cc
@@ -12,6 +13,7 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_primitive.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/builder_union.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/concatenate.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/array/diff.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/buffer.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/compare.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/extension_type.cc
@@ -29,17 +31,17 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/visitor.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/converter.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/chunker.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column-builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/column_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/parser.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/csv/reader.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/filesystem.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/localfs.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/mockfs.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/path-util.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/util-internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/path_util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/filesystem/util_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/options.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunked-builder.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunked_builder.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/chunker.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/converter.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/json/parser.cc
@@ -52,29 +54,31 @@ set(ARROW_SRCS
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/io/readahead.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/testing/util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/basic_decimal.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/bit_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/compression.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu-info.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/cpu_info.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/decimal.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/int-util.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/io-util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/int_util.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/io_util.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/logging.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/key_value_metadata.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/memory.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/string_builder.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task-group.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/thread-pool.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/task_group.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/thread_pool.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/trie.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/util/utf8.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/vendored/datetime/tz.cpp
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/dictionary.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/feather.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-integration.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-internal.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json-simple.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json_integration.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json_internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/json_simple.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/message.cc
-    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata-internal.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/metadata_internal.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/reader.cc
+    ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/options.cc
     ${CMAKE_BINARY_DIR}/arrow-src/cpp/src/arrow/ipc/writer.cc)
 
 set_property(SOURCE util/io_util.cc

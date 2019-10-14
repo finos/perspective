@@ -47,6 +47,7 @@ find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
   HINTS "${__pyarrow_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
 
 set(PYTHON_PYARROW_LIBRARY_DIR ${__pyarrow_library_dirs})
+set(PYTHON_PYARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/libarrow.15.dylib)
 
 # DONT USE, could conflict on arrow lib
 # set(PYTHON_PYARROW_LIBRARIES ${__pyarrow_libraries})
