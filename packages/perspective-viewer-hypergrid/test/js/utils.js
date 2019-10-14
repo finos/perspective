@@ -26,14 +26,15 @@ exports.dblclick = async (page, x = 310, y = 300) => {
 exports.click_details = async (page, x = 310, y = 300) => {
     const viewer = await page.$("perspective-viewer");
 
-    const click_event = page.evaluate(element => {
-        return new Promise(resolve => {
-            element.addEventListener("perspective-click", e => {
-                resolve(e.detail);
-            });
-        });
-    }, viewer);
-
+    const click_event = page.evaluate(
+        element =>
+            new Promise(resolve => {
+                element.addEventListener("perspective-click", e => {
+                    resolve(e.detail);
+                });
+            }),
+        viewer
+    );
     await page.mouse.click(x, y);
     return await click_event;
 };
@@ -51,17 +52,4 @@ exports.capture_update = async function capture_update(page, viewer, body) {
         console.error("Missing 'test-updated' attribute");
     }
     await page.evaluate(element => element.removeAttribute("test-updated"), viewer);
-};
-
-exports.set_lazy = async function set_lazy(page) {
-    const viewer = await page.$("perspective-viewer");
-    await page.evaluate(element => {
-        element.hypergrid.properties.repaintIntervalRate = 1;
-        if (!element.hypergrid._lazy_load) {
-            Object.defineProperty(element.hypergrid, "_lazy_load", {
-                set: () => {},
-                get: () => true
-            });
-        }
-    }, viewer);
 };
