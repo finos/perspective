@@ -231,6 +231,12 @@ export class ActionElement extends DomElement {
         document.addEventListener("mouseup", stop);
     }
 
+    _vis_selector_changed() {
+        this._plugin_information.classList.add("hidden");
+        this.setAttribute("plugin", this._vis_selector.value);
+        this._debounce_update();
+    }
+
     // most of these are drag and drop handlers - how to clean up?
     _register_callbacks() {
         this._sort.addEventListener("drop", drop.bind(this));
@@ -272,11 +278,7 @@ export class ActionElement extends DomElement {
         this._resize_bar.addEventListener("mousedown", this._resize_sidepanel.bind(this));
         this._resize_bar.addEventListener("dblclick", this._reset_sidepanel.bind(this));
 
-        this._vis_selector.addEventListener("change", () => {
-            this._plugin_information.classList.add("hidden");
-            this.setAttribute("plugin", this._vis_selector.value);
-            this._debounce_update();
-        });
+        this._vis_selector.addEventListener("change", this._vis_selector_changed.bind(this));
 
         this._plugin_information_action.addEventListener("click", () => {
             this._debounce_update({ignore_size_check: true, limit_points: false});
