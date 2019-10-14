@@ -11,7 +11,6 @@ const utils = require("@finos/perspective-test");
 const path = require("path");
 
 const simple_tests = require("@finos/perspective-viewer/test/js/simple_tests.js");
-const {set_lazy} = require("./utils.js");
 
 utils.with_server({}, () => {
     describe.page(
@@ -95,25 +94,21 @@ utils.with_server({}, () => {
                 });
             });
 
-            describe("lazy render mode", () => {
-                test.capture("resets viewable area when the logical size expands.", async page => {
-                    await set_lazy(page);
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(element => element.setAttribute("row-pivots", '["City"]'), viewer);
-                });
+            test.capture("resets viewable area when the logical size expands.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => element.setAttribute("column-pivots", '["Category"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["City"]'), viewer);
+            });
 
-                test.capture("resets viewable area when the physical size expands.", async page => {
-                    await set_lazy(page);
-                    const viewer = await page.$("perspective-viewer");
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                    await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
-                    await page.waitForSelector("perspective-viewer:not([updating])");
-                    await page.evaluate(element => element.setAttribute("row-pivots", "[]"), viewer);
-                    await page.shadow_click("perspective-viewer", "#config_button");
-                });
+            test.capture("resets viewable area when the physical size expands.", async page => {
+                const viewer = await page.$("perspective-viewer");
+                await page.shadow_click("perspective-viewer", "#config_button");
+                await page.evaluate(element => element.setAttribute("row-pivots", '["Category"]'), viewer);
+                await page.waitForSelector("perspective-viewer:not([updating])");
+                await page.evaluate(element => element.setAttribute("row-pivots", "[]"), viewer);
+                await page.shadow_click("perspective-viewer", "#config_button");
             });
         },
         {reload_page: false, root: path.join(__dirname, "..", "..")}

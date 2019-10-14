@@ -377,22 +377,18 @@ export class PerspectiveElement extends StateElement {
         }
 
         if (this._view) {
-            this._view.delete();
             this._view.remove_update(this._view_updater);
-            this._view.remove_delete();
+            this._view.delete();
             this._view = undefined;
         }
 
-        {
-            // this must be atomic
+        try {
             this._view = this._table.view(config);
             this._view_updater = () => this._view_on_update(limit_points);
             this._view.on_update(this._view_updater);
-        }
-
-        const {max_cols, max_rows} = await this.get_maxes();
-        if (!ignore_size_check) {
-            await this._warn_render_size_exceeded(max_cols, max_rows);
+        } catch (e) {
+            this._view.delete();
+            throw e;
         }
 
         const timer = this._render_time();
@@ -404,6 +400,10 @@ export class PerspectiveElement extends StateElement {
         const task = (this._task = new CancelTask(() => this._render_count--, true));
 
         try {
+            const {max_cols, max_rows} = await this.get_maxes();
+            if (!ignore_size_check) {
+                await this._warn_render_size_exceeded(max_cols, max_rows);
+            }
             if (limit_points) {
                 await this._plugin.create.call(this, this._datavis, this._view, task, max_cols, max_rows, force_update);
             } else {

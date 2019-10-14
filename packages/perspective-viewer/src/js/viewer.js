@@ -317,7 +317,10 @@ class PerspectiveViewer extends ActionElement {
                     this.setAttribute("plugin", this._vis_selector.options[0].value);
                 }
             } else {
-                this._vis_selector.value = plugin;
+                if (this._vis_selector.value !== plugin) {
+                    this._vis_selector.value = plugin;
+                    this._vis_selector_changed();
+                }
                 this._set_row_styles();
                 this._set_column_defaults();
                 this.dispatchEvent(new Event("perspective-config-update"));
