@@ -28,13 +28,15 @@ module.exports = class ImageViewerReporter {
     }
 
     write_img(title, ancestors, filename) {
-        process.stdout.write(`\n    ${ancestors.join(" > ")} > ${title}\n\n    `);
-        termimg(filename, {
-            width: "320px",
-            height: "240px",
-            fallback: () => this.write_img_fallback(filename)
-        });
-        process.stdout.write("\n");
+        if (fs.existsSync(filename)) {
+            process.stdout.write(`\n    ${ancestors.join(" > ")} > ${title}\n\n    `);
+            termimg(filename, {
+                width: "320px",
+                height: "240px",
+                fallback: () => this.write_img_fallback(filename)
+            });
+            process.stdout.write("\n");
+        }
     }
 
     /**

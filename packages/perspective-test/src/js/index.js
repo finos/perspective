@@ -328,7 +328,7 @@ test.capture = function capture(name, body, {timeout = 60000, viewport = null, w
                 }
 
                 if (process.env.PSP_PAUSE_ON_FAILURE) {
-                    if (hash !== results[_url + "/" + name]) {
+                    if (hash !== results[_url + "/" + name] || errors.length > 0) {
                         private_console.error(`Failed ${name}, pausing`);
                         await new Promise(f => setTimeout(f, 1000000));
                     }
