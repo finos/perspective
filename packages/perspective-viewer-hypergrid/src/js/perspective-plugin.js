@@ -121,7 +121,6 @@ function setPSP(payload, force = false) {
         });
         this.grid.selectionModel.clear();
     }
-    this.grid.allowEvents(true);
     this._memoized_schema = new_schema;
     this._memoized_pivots = payload.rowPivots;
 }

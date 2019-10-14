@@ -62,6 +62,9 @@ export default require("datasaur-local").extend("PerspectiveDataModel", {
     },
 
     setDirty: function(nrows) {
+        if (!this._grid) {
+            return;
+        }
         if (nrows !== this._nrows) {
             this._grid.renderer.computeCellsBounds();
         }

@@ -76,24 +76,27 @@ bindTemplate(TEMPLATE, style)(
     }
 );
 
-const PRIVATE = Symbol("Hypergrid private");
+const HYPERGRID_INSTANCE = Symbol("Hypergrid private");
 
 async function grid_update(div, view, task) {
     const nrows = await view.num_rows();
-
     if (task.cancelled) {
         return;
     }
-    const dataModel = this.hypergrid.behavior.dataModel;
+    const hypergrid = get_hypergrid.call(this);
+    if (!hypergrid) {
+        return;
+    }
+    const dataModel = hypergrid.behavior.dataModel;
     dataModel.setDirty(nrows);
     dataModel._view = view;
     dataModel._table = this._table;
-    this.hypergrid.canvas.paintNow();
+    hypergrid.canvas.paintNow();
 }
 
 function style_element() {
-    if (this[PRIVATE]) {
-        const element = this[PRIVATE].grid;
+    if (this[HYPERGRID_INSTANCE]) {
+        const element = this[HYPERGRID_INSTANCE];
         clear_styles(element);
         const styles = get_styles(element);
         if (element.grid) {
@@ -103,6 +106,11 @@ function style_element() {
         element.grid.canvas.paintNow();
     }
 }
+
+function get_hypergrid() {
+    return this[HYPERGRID_INSTANCE] ? this[HYPERGRID_INSTANCE].grid : undefined;
+}
+
 /**
  * Create a new <perspective-hypergrid> web component, and attach it to the DOM.
  *
@@ -110,13 +118,9 @@ function style_element() {
  */
 async function getOrCreateHypergrid(div) {
     let perspectiveHypergridElement;
-    if (!this.hypergrid) {
-        perspectiveHypergridElement = this[PRIVATE].grid = document.createElement("perspective-hypergrid");
+    if (!get_hypergrid.call(this)) {
+        perspectiveHypergridElement = this[HYPERGRID_INSTANCE] = document.createElement("perspective-hypergrid");
         perspectiveHypergridElement.setAttribute("tabindex", 1);
-        Object.defineProperty(this, "hypergrid", {
-            configurable: true,
-            get: () => (this[PRIVATE].grid ? this[PRIVATE].grid.grid : undefined)
-        });
         perspectiveHypergridElement.addEventListener("blur", () => {
             if (perspectiveHypergridElement.grid && !perspectiveHypergridElement.grid._is_editing) {
                 perspectiveHypergridElement.grid.selectionModel.clear();
@@ -124,7 +128,7 @@ async function getOrCreateHypergrid(div) {
             }
         });
     } else {
-        perspectiveHypergridElement = this[PRIVATE].grid;
+        perspectiveHypergridElement = this[HYPERGRID_INSTANCE];
     }
 
     if (!perspectiveHypergridElement.isConnected) {
@@ -137,11 +141,11 @@ async function getOrCreateHypergrid(div) {
 }
 
 async function grid_create(div, view, task, max_rows, max_cols, force) {
-    this[PRIVATE] = this[PRIVATE] || {};
-    const hypergrid = this.hypergrid;
+    let hypergrid = get_hypergrid.call(this);
     if (hypergrid) {
         hypergrid.behavior.dataModel._view = undefined;
         hypergrid.behavior.dataModel._table = undefined;
+        hypergrid.allowEvents(false);
     }
 
     const config = await view.get_config();
@@ -165,13 +169,15 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     }
 
     let perspectiveHypergridElement = await getOrCreateHypergrid.call(this, div);
+    hypergrid = get_hypergrid.call(this);
 
     if (task.cancelled) {
         return;
     }
 
-    const dataModel = this.hypergrid.behavior.dataModel;
     let columns = Object.keys(json).filter(x => x !== "__INDEX__");
+    const dataModel = hypergrid.behavior.dataModel;
+    dataModel._grid = hypergrid;
 
     dataModel.setIsTree(rowPivots.length > 0);
     dataModel.setDirty(nrows);
@@ -196,10 +202,12 @@ async function grid_create(div, view, task, max_rows, max_cols, force) {
     };
 
     perspectiveHypergridElement.set_data(json, schema, tschema, rowPivots, columns, force);
-    this.hypergrid.renderer.computeCellsBounds(true);
-    await this.hypergrid.canvas.resize(true);
-    this.hypergrid.canvas.paintNow();
-    this.hypergrid.canvas.paintNow();
+    hypergrid.allowEvents(false);
+    hypergrid.renderer.computeCellsBounds(true);
+    await hypergrid.canvas.resize(true);
+    hypergrid.renderer.computeCellsBounds(true);
+    hypergrid.canvas.paintNow();
+    hypergrid.allowEvents(true);
 }
 
 global.registerPlugin("hypergrid", {
@@ -210,23 +218,25 @@ global.registerPlugin("hypergrid", {
     deselectMode: "pivots",
     styleElement: style_element,
     resize: async function() {
-        if (this.hypergrid) {
-            this.hypergrid.canvas.checksize();
-            this.hypergrid.canvas.paintNow();
+        const hypergrid = get_hypergrid.call(this);
+        if (hypergrid) {
+            hypergrid.canvas.checksize();
+            hypergrid.canvas.paintNow();
             let nrows = await this._view.num_rows();
-            this.hypergrid.behavior.dataModel.setDirty(nrows);
-            this.hypergrid.canvas.paintNow();
+            hypergrid.behavior.dataModel.setDirty(nrows);
+            hypergrid.canvas.paintNow();
         }
     },
     delete: function() {
-        if (this.hypergrid) {
-            this.hypergrid.terminate();
-            this.hypergrid.div = undefined;
-            this.hypergrid.canvas.div = undefined;
-            this.hypergrid.canvas.canvas = undefined;
-            this.hypergrid.sbVScroller = undefined;
-            this.hypergrid.sbHScroller = undefined;
-            delete this[PRIVATE]["grid"];
+        const hypergrid = get_hypergrid.call(this);
+        if (hypergrid) {
+            hypergrid.terminate();
+            hypergrid.div = undefined;
+            hypergrid.canvas.div = undefined;
+            hypergrid.canvas.canvas = undefined;
+            hypergrid.sbVScroller = undefined;
+            hypergrid.sbHScroller = undefined;
+            delete this[HYPERGRID_INSTANCE];
         }
     }
 });
