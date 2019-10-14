@@ -27,6 +27,7 @@ const add_computed_column = async page => {
     await page.evaluate(element => {
         let com = element.shadowRoot.querySelector("perspective-computed-column");
         const columns = [{name: "Order Date", type: "datetime"}];
+        com.state.func_name = "day_of_week";
         com._apply_state(columns, com.computations["day_of_week"], "new_cc");
     }, viewer);
     await page.evaluate(
@@ -87,6 +88,7 @@ utils.with_server({}, () => {
                         await page.evaluate(element => {
                             let com = element.shadowRoot.querySelector("perspective-computed-column");
                             const columns = [{name: "State", type: "string"}];
+                            com.state.func_name = "lowercase";
                             com._apply_state(columns, com.computations["lowercase"], "new_cc");
                         }, viewer);
                     });
@@ -100,6 +102,7 @@ utils.with_server({}, () => {
                         await page.evaluate(element => {
                             let com = element.shadowRoot.querySelector("perspective-computed-column");
                             const columns = [{name: "Quantity", type: "integer"}, {name: "Row ID", type: "integer"}];
+                            com.state.func_name = "add";
                             com._apply_state(columns, com.computations["add"], "new_cc");
                         }, viewer);
                     });
@@ -114,6 +117,7 @@ utils.with_server({}, () => {
                         await page.evaluate(element => {
                             let com = element.shadowRoot.querySelector("perspective-computed-column");
                             const columns = [{name: "State", type: "string"}];
+                            com.state.func_name = "lowercase";
                             com._apply_state(columns, com.computations["lowercase"], "new_cc");
                         }, viewer);
                         await page.evaluate(element => {
@@ -154,6 +158,7 @@ utils.with_server({}, () => {
                 await page.evaluate(element => {
                     let com = element.shadowRoot.querySelector("perspective-computed-column");
                     const columns = [{name: "Order Date", type: "datetime"}];
+                    com.state.func_name = "day_of_week";
                     com._apply_state(columns, com.computations["day_of_week"], "new_cc");
                 }, viewer);
                 await page.evaluate(

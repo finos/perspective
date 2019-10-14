@@ -9,7 +9,7 @@
 
 import {bindTemplate} from "./utils.js";
 import State from "./computed_column/state.js";
-import Computation from "./computed_column/computation.js";
+import {Computation, FORMATTER} from "./computed_column/computation.js";
 
 import template from "../html/computed_column.html";
 
@@ -90,26 +90,26 @@ const year_bucket = function(val) {
 };
 
 export const COMPUTATIONS = {
-    hour_of_day: new Computation("hour_of_day", "datetime", "integer", hour_of_day, ["Time"]),
-    day_of_week: new Computation("day_of_week", "datetime", "string", day_of_week, ["Time"]),
-    month_of_year: new Computation("month_of_year", "datetime", "string", month_of_year, ["Time"]),
-    second_bucket: new Computation("second_bucket", "datetime", "datetime", second_bucket, ["Time"]),
-    minute_bucket: new Computation("minute_bucket", "datetime", "datetime", minute_bucket, ["Time"]),
-    hour_bucket: new Computation("hour_bucket", "datetime", "datetime", hour_bucket, ["Time"]),
-    day_bucket: new Computation("day_bucket", "datetime", "date", day_bucket, ["Time"]),
-    week_bucket: new Computation("week_bucket", "datetime", "date", week_bucket, ["Time"]),
-    month_bucket: new Computation("month_bucket", "datetime", "date", month_bucket, ["Time"]),
-    year_bucket: new Computation("year_bucket", "datetime", "date", year_bucket, ["Time"]),
-    add: new Computation("add", "float", "float", (a, b) => a + b, ["Math"], 2),
-    subtract: new Computation("subtract", "float", "float", (a, b) => a - b, ["Math"], 2),
-    multiply: new Computation("multiply", "float", "float", (a, b) => a * b, ["Math"], 2),
-    divide: new Computation("divide", "float", "float", (a, b) => a / b, ["Math"], 2),
-    percent_a_of_b: new Computation("percent_a_of_b", "float", "float", (a, b) => (a / b) * 100, ["Math"], 2),
-    uppercase: new Computation("uppercase", "string", "string", x => x.toUpperCase(), ["Text"]),
-    lowercase: new Computation("lowercase", "string", "string", x => x.toLowerCase(), ["Text"]),
-    length: new Computation("length", "string", "integer", x => x.length, ["Text"]),
-    concat_space: new Computation("concat_space", "string", "string", (a, b) => a + " " + b, ["Text"], 2),
-    concat_comma: new Computation("concat_comma", "string", "string", (a, b) => a + ", " + b, ["Text"], 2)
+    hour_of_day: new Computation("Hour of Day", x => `hour_of_day(${x})`, "datetime", "integer", hour_of_day, ["Time"]),
+    day_of_week: new Computation("Day of Week", x => `day_of_week(${x})`, "datetime", "string", day_of_week, ["Time"]),
+    month_of_year: new Computation("Month of Year", x => `month_of_year(${x})`, "datetime", "string", month_of_year, ["Time"]),
+    second_bucket: new Computation("Bucket (s)", x => `second_bucket(${x})`, "datetime", "datetime", second_bucket, ["Time"]),
+    minute_bucket: new Computation("Bucket (m)", x => `minute_bucket(${x})`, "datetime", "datetime", minute_bucket, ["Time"]),
+    hour_bucket: new Computation("Bueckt (h)", x => `hour_bucket(${x})`, "datetime", "datetime", hour_bucket, ["Time"]),
+    day_bucket: new Computation("Bucket (D)", x => `day_bucket(${x})`, "datetime", "date", day_bucket, ["Time"]),
+    week_bucket: new Computation("Bucket (W)", x => `week_bucket(${x})`, "datetime", "date", week_bucket, ["Time"]),
+    month_bucket: new Computation("Bucket (M)", x => `month_bucket(${x})`, "datetime", "date", month_bucket, ["Time"]),
+    year_bucket: new Computation("Bucket (Y)", x => `year_bucket(${x})`, "datetime", "date", year_bucket, ["Time"]),
+    add: new Computation("+", (x, y) => `${x} + ${y}`, "float", "float", (a, b) => a + b, ["Math"], 2),
+    subtract: new Computation("-", (x, y) => `${x} - ${y}`, "float", "float", (a, b) => a - b, ["Math"], 2),
+    multiply: new Computation("*", (x, y) => `${x} * ${y}`, "float", "float", (a, b) => a * b, ["Math"], 2),
+    divide: new Computation("/", (x, y) => `${x} / ${y}`, "float", "float", (a, b) => a / b, ["Math"], 2),
+    percent_a_of_b: new Computation("%", (x, y) => `${x} %% ${y}`, "float", "float", (a, b) => (a / b) * 100, ["Math"], 2),
+    uppercase: new Computation("Uppercase", x => `uppercase(${x})`, "string", "string", x => x.toUpperCase(), ["Text"]),
+    lowercase: new Computation("Lowercase", x => `lowercase(${x})`, "string", "string", x => x.toLowerCase(), ["Text"]),
+    length: new Computation("length", x => `length(${x})`, "string", "integer", x => x.length, ["Text"]),
+    concat_space: new Computation("concat_space", x => `concat_space(${x})`, "string", "string", (a, b) => a + " " + b, ["Text"], 2),
+    concat_comma: new Computation("concat_comma", x => `concat_comma(${x})`, "string", "string", (a, b) => a + ", " + b, ["Text"], 2)
 };
 
 function _insert_tree(name, elem, tree) {
@@ -172,7 +172,7 @@ class ComputedColumn extends HTMLElement {
         for (const [category, comp] of Object.entries(tree)) {
             if (comp.name) {
                 yield html`
-                    <option value=${comp.name}>${category}</option>
+                    <option value=${category}>${comp.name}</option>
                 `;
             } else {
                 yield html`
@@ -311,7 +311,7 @@ class ComputedColumn extends HTMLElement {
 
     // When state changes are made manually, apply them to the UI
     _apply_state(columns, computation, name) {
-        this._update_computation(null, computation.name);
+        this._update_computation(null, this.state.func_name);
         this.state["input_columns"] = columns;
         const inputs = this._input_columns.children;
 
@@ -353,7 +353,11 @@ class ComputedColumn extends HTMLElement {
         if (this.state.input_columns.length > 0) {
             let names = [];
             for (let column of this.state.input_columns) names.push(column.name);
-            this._column_name_input.innerText = `${this.state.computation.name}(${names.join(", ")})`;
+            if (this.state.computation[FORMATTER]) {
+                this._column_name_input.innerText = this.state.computation[FORMATTER].apply(undefined, names);
+            } else {
+                this._column_name_input.innerText = `${this.state.computation.name}(${names.join(", ")})`;
+            }
         } else {
             this._column_name_input.innerText = "";
         }
@@ -454,6 +458,7 @@ class ComputedColumn extends HTMLElement {
         this._computation_type.innerHTML = `<span class="${return_type}">${this.type_markers[return_type]}</span>`;
 
         this.state["computation"] = computation;
+        this.state.func_name = computation_name;
 
         if (reset_inputs || event === null) {
             this._register_inputs();
@@ -501,7 +506,7 @@ class ComputedColumn extends HTMLElement {
                 detail: {
                     name: computed_column.column_name,
                     inputs: computed_column.input_columns.map(x => x.name),
-                    func: computed_column.computation.name
+                    func: computed_column.func_name
                 }
             });
             this.dispatchEvent(event);

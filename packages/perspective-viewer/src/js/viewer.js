@@ -552,7 +552,9 @@ class PerspectiveViewer extends ActionElement {
         for (let key = 0; key < this.attributes.length; key++) {
             let attr = this.attributes[key];
             if (cols.has(attr.name)) {
-                if (attr.name !== "plugin" && attr.value !== undefined && attr.value !== null) {
+                if (attr.value === "") {
+                    obj[attr.name] = true;
+                } else if (attr.name !== "plugin" && attr.value !== undefined && attr.value !== null) {
                     obj[attr.name] = JSON.parse(attr.value);
                 } else {
                     obj[attr.name] = attr.value;
@@ -581,10 +583,12 @@ class PerspectiveViewer extends ActionElement {
         if (typeof config === "string") {
             config = JSON.parse(config);
         }
-        for (const key in config) {
-            let val = config[key];
-            if (PERSISTENT_ATTRIBUTES.indexOf(val) !== -1) {
-                if (val !== undefined && val !== null) {
+        for (const key of PERSISTENT_ATTRIBUTES) {
+            if (config.hasOwnProperty(key)) {
+                let val = config[key];
+                if (val === true) {
+                    this.toggleAttribute(key, true);
+                } else if (val !== undefined && val !== null && val !== false) {
                     if (typeof val !== "string") {
                         val = JSON.stringify(val);
                     }
@@ -593,13 +597,6 @@ class PerspectiveViewer extends ActionElement {
                     this.removeAttribute(key);
                 }
             }
-        }
-        for (let key in config) {
-            let val = config[key];
-            if (typeof val !== "string") {
-                val = JSON.stringify(val);
-            }
-            this.setAttribute(key, val);
         }
 
         if (this._plugin.restore && config.plugin_config) {
