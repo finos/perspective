@@ -204,7 +204,6 @@ namespace binding {
      * @param name 
      * @param cidx 
      * @param type 
-     * @param is_arrow 
      * @param is_update 
      */
     template <typename T>
@@ -219,7 +218,6 @@ namespace binding {
      * @param tbl
      * @param accessor
      * @param input_schema 
-     * @param is_arrow
      * @param is_update
      */
     template <typename T>

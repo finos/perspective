@@ -29,7 +29,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         std::uint32_t limit, py::str index, t_op op, bool is_update, bool is_arrow) {
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
-    arrow::ArrowLoader loader;
+    arrow::ArrowLoader arrow_loader;
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
@@ -38,9 +38,9 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         std::int32_t size = bytes.attr("__len__")().cast<std::int32_t>();
         void * ptr = malloc(size);
         std::memcpy(ptr, bytes.cast<std::string>().c_str(), size);
-        loader.initialize((uintptr_t)ptr, size);
-        column_names = loader.names();
-        data_types = loader.types();
+        arrow_loader.initialize((uintptr_t)ptr, size);
+        column_names = arrow_loader.names();
+        data_types = arrow_loader.types();
     } else if (is_update || is_delete) {
         column_names = accessor.attr("names")().cast<std::vector<std::string>>();
         data_types = accessor.attr("types")().cast<std::vector<t_dtype>>();
@@ -109,13 +109,13 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     std::uint32_t row_count;
 
     if (is_arrow) {
-        row_count = loader.num_rows();
-        data_table.extend(loader.num_rows());
-        loader.fill_table(data_table, index, offset, limit, is_update);
+        row_count = arrow_loader.num_rows();
+        data_table.extend(arrow_loader.num_rows());
+        arrow_loader.fill_table(data_table, index, offset, limit, is_update);
     } else {
         row_count = accessor.attr("row_count")().cast<std::int32_t>();
         data_table.extend(row_count);
-        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_arrow, is_update);
+        _fill_data(data_table, accessor, input_schema, index, offset, limit, is_update);
     }
 
      if (!computed.is_none()) {

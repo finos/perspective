@@ -18,15 +18,23 @@ except ImportError:
 
 
 def _type_to_format(data_or_schema):
-    '''deconstruct data or schema into type and processed data
+    '''Deconstructs data passed in by the user into a standard format:
+
+    - A list of dicts, each of which represents a single row.
+    - A dict of lists, each of which represents a single column.
+
+    Schemas passed in by the user are preserved as-is.
+
+    Pandas DataFrames are flattened and returned as a columnar dataset.
+
+    Finally, an integer is assigned to represent the type of the dataset to the internal engine.
 
     Returns:
         int: type
-                - 0: records
-                - 1: columns
-                - 2: schema
-        {list, dict, pandas.DataFrame}: processed_data, either input data
-                                        or deconstructed dataframe
+                - 0: records (list[dict])
+                - 1: columns (dict[str:list])
+                - 2: schema (dist[str]/dict[type])
+        {list, dict}: processed data
     '''
     if isinstance(data_or_schema, list):
         # records
@@ -35,7 +43,7 @@ def _type_to_format(data_or_schema):
         # schema or columns
         for v in data_or_schema.values():
             if isinstance(v, type) or isinstance(v, str):
-                # schema maps name-> type
+                # schema maps name -> type
                 return 2, data_or_schema
             elif isinstance(v, list) or iter(v):
                 # if columns entries are iterable, type 1
@@ -178,7 +186,28 @@ class _PerspectiveAccessor(object):
 
         return val
 
-    def has_column(self, ridx, name):
+    def _is_numpy(self, name):
+        '''For columnar datasets, return whether the underlying data is a Numpy array.'''
+        if self._format == 1:
+            data = self._data_or_schema.get(name, None)
+            return isinstance(data, numpy.ndarray)
+        return False
+
+    def _get_column(self, name):
+        '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
+
+        Args:
+            name (str) : the column name to look up
+
+        Returns:
+            list/numpy.array/None : returns the column's data, or None if it cannot be found.
+        '''
+        if self._format == 1:
+            return self._data_or_schema.get(name, None)
+        else:
+            return None
+
+    def _has_column(self, ridx, name):
         '''Given a column name, validate that it is in the row.
 
         This allows differentiation between value is None (unset) and value not in row (no-op).
