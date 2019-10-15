@@ -284,7 +284,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 
-		find_package(PyArrow 0.15.0 EXACT)
+		find_package(PyArrow 0.15 REQUIRED)
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
@@ -294,18 +294,18 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
 		link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
 
-		message("${Cyan}Building minimal Apache Arrow${ColorReset}")
-
 		#####################
 	endif()
 endif()
 
 psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
 psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
-psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
 
 if (NOT PSP_PYTHON_BUILD)
-	# build flatbuffers and arrow from source for Emscripten and C++
+	# build arrow + dependencies from source for Emscripten and C++
+	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
+
+	psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
 	psp_build_dep("arrow" "../../cmake/arrow.txt.in")
 
 	find_package(Flatbuffers)
