@@ -18,16 +18,74 @@ class TestViewer:
         viewer.load(table)
         assert viewer.table == table
 
+    # server-side view creation
+
+    def test_viewer_make_view(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
+        viewer.load(table)
+        viewer._new_view()
+        assert viewer.view.to_dict() == {
+            "a": [2]
+        }
+
+    def test_viewer_make_view_none(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
+        viewer.load(table)
+        assert viewer.view_name is None
+        assert viewer.view is None
+
+    def test_viewer_make_view_replace(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer(filters=[["a", "==", 2]])
+        viewer.load(table)
+        viewer._new_view()
+        assert viewer.view.to_dict() == {
+            "a": [2]
+        }
+        viewer.filters = []
+        viewer._new_view()
+        assert viewer.view.to_dict() == {
+            "a": [1, 2, 3]
+        }
+
+    # loading
+
     def test_viewer_load_table(self):
         table = Table({"a": [1, 2, 3]})
         viewer = PerspectiveViewer()
         viewer.load(table)
         assert viewer.columns == ["a"]
 
+    def test_viewer_load_named_table(self):
+        table = Table({"a": [1, 2, 3]})
+        viewer = PerspectiveViewer()
+        viewer.load(table, name="data_1")
+        assert viewer.columns == ["a"]
+        assert viewer.table_name == "data_1"
+        assert viewer.table == table
+
     def test_viewer_load_data(self):
         viewer = PerspectiveViewer()
         viewer.load({"a": [1, 2, 3]})
         assert viewer.columns == ["a"]
+
+    def test_viewer_load_named_data(self):
+        viewer = PerspectiveViewer()
+        viewer.load({"a": [1, 2, 3]}, name="data_1")
+        assert viewer.columns == ["a"]
+        assert viewer.table_name == "data_1"
+
+    def test_viewer_load_schema(self):
+        viewer = PerspectiveViewer()
+        viewer.load({
+            "a": str,
+            "b": int,
+            "c": bool,
+            "d": str
+        })
+        assert viewer.columns == ["a", "b", "c", "d"]
 
     def test_viewer_load_table_with_options(self):
         table = Table({"a": [1, 2, 3]})
@@ -35,18 +93,14 @@ class TestViewer:
         # options should be disregarded when loading Table
         viewer.load(table, limit=1)
         assert viewer.columns == ["a"]
-        table_name = list(viewer.manager._tables.keys())[0]
-        table = viewer.manager._tables[table_name]
-        assert table.size() == 3
+        assert viewer.table.size() == 3
 
     def test_viewer_load_data_with_options(self):
         viewer = PerspectiveViewer()
         # options should be forwarded to the Table constructor
         viewer.load({"a": [1, 2, 3]}, limit=1)
         assert viewer.columns == ["a"]
-        table_name = list(viewer.manager._tables.keys())[0]
-        table = viewer.manager._tables[table_name]
-        assert table.size() == 1
+        assert viewer.table.size() == 1
 
     def test_viewer_load_clears_state(self):
         table = Table({"a": [1, 2, 3]})
@@ -62,6 +116,26 @@ class TestViewer:
         viewer = PerspectiveViewer()
         viewer.load(table)
         assert viewer.columns == ["a"]
+
+    def test_viewer_load_np_data(self):
+        viewer = PerspectiveViewer()
+        viewer.load({"a": np.arange(1, 100)})
+        assert viewer.columns == ["a"]
+        assert viewer.table.size() == 99
+
+    def test_viewer_load_df(self):
+        table = Table(pd.DataFrame({"a": np.arange(1, 100)}))
+        viewer = PerspectiveViewer()
+        viewer.load(table)
+        assert viewer.columns == ["index", "a"]
+        assert viewer.table.size() == 99
+
+    def test_viewer_load_df_data(self):
+        viewer = PerspectiveViewer()
+        viewer.load(pd.DataFrame({"a": np.arange(1, 100)}))
+        assert viewer.columns == ["index", "a"]
+
+    # update
 
     def test_viewer_update_dict(self):
         table = Table({"a": [1, 2, 3]})

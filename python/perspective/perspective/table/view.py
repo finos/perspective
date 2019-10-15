@@ -8,7 +8,7 @@
 import pandas
 from functools import partial, wraps
 from random import random
-from perspective.table.libbinding import make_view_zero, make_view_one, make_view_two
+from .libbinding import make_view_zero, make_view_one, make_view_two
 from .view_config import ViewConfig
 from ._data_formatter import to_format
 from ._constants import COLUMN_SEPARATOR_STRING
@@ -44,6 +44,7 @@ class View(object):
         self._column_only = self._view.is_column_only()
         self._callbacks = self._table._callbacks
         self._delete_callbacks = _PerspectiveCallBackCache()
+        self._client_id = None
 
     def get_config(self):
         '''Returns the original dictionary config passed in by the user.'''

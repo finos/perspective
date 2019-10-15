@@ -10,10 +10,11 @@ from random import random
 from .validate import validate_plugin, validate_columns, validate_row_pivots, validate_column_pivots, \
     validate_aggregates, validate_sort, validate_filters, validate_plugin_config
 from .viewer_traitlets import PerspectiveTraitlets
-from ..table import PerspectiveManager, Table
+from .manager import PerspectiveManager
+from ..table import Table
 
 
-class PerspectiveViewer(PerspectiveTraitlets):
+class PerspectiveViewer(PerspectiveTraitlets, object):
     '''PerspectiveViewer wraps the `perspective.Table` API and exposes an API around creating views, loading data, and updating data.'''
     def __init__(self,
                  plugin='hypergrid',
@@ -24,7 +25,8 @@ class PerspectiveViewer(PerspectiveTraitlets):
                  sort=None,
                  filters=None,
                  plugin_config=None,
-                 dark=False):
+                 dark=False,
+                 editable=False):
         '''Initialize an instance of `PerspectiveViewer` with the given viewer configuration.
 
         Do not pass a `Table` or data into the constructor — use the `load()` method to provide the viewer with data.
@@ -51,6 +53,7 @@ class PerspectiveViewer(PerspectiveTraitlets):
         # Create an instance of `PerspectiveManager`, which receives messages from the `PerspectiveJupyterClient` on the front-end.
         self.manager = PerspectiveManager()
         self.table_name = None  # not a traitlet - only used in the python side of the viewer
+        self.view_name = None
 
         # Viewer configuration
         self.plugin = validate_plugin(plugin)
@@ -62,11 +65,19 @@ class PerspectiveViewer(PerspectiveTraitlets):
         self.filters = validate_filters(filters) or []
         self.plugin_config = validate_plugin_config(plugin_config) or {}
         self.dark = dark
+        self.editable = editable
 
     @property
     def table(self):
         '''Returns the `perspective.Table` under management by the viewer.'''
         return self.manager.get_table(self.table_name)
+
+    @property
+    def view(self):
+        '''Returns the `perspective.View` currently shown by the viewer.
+
+        This property changes every time the viewer configuration changes.'''
+        return self.manager.get_view(self.view_name)
 
     def load(self, table_or_data, **options):
         '''Given a `perspective.Table` or data that can be handled by `perspective.Table`, pass it to the viewer.
@@ -81,6 +92,7 @@ class PerspectiveViewer(PerspectiveTraitlets):
         Args:
             table_or_data (Table|dict|list|pandas.DataFrame) : a `perspective.Table` instance or a dataset to be displayed in the viewer.
             **options : optional keyword arguments that will be parsed by the `perspective.Table` constructor if data is passed in.
+                - name (str) : an optional name to reference the table by so it can be accessed from the front-end.
                 - index (str) : the name of a column that will be the dataset's primary key. This sorts the dataset in ascending order based on primary key.
                 - limit (int) : cannot be applied at the same time as `index` - the total number of rows that will be loaded into Perspective.
                     If the table is updated and the number of rows is greater than `limit`, updates begin overwriting at row 0.
@@ -93,7 +105,7 @@ class PerspectiveViewer(PerspectiveTraitlets):
             >>> viewer.load(tbl)
             >>> viewer.load(data, index="a") # kwargs are forwarded to the `Table` constructor.
         '''
-        name = str(random())
+        name = options.pop("name", str(random()))
         if isinstance(table_or_data, Table):
             table = table_or_data
         else:
@@ -101,11 +113,8 @@ class PerspectiveViewer(PerspectiveTraitlets):
 
         self.manager.host_table(name, table)
 
-        '''
-        if columns are different between the tables, then remove viewer state.
-
-        sorting is expensive, but it prevents errors from applying pivots, etc. on columns that don't exist in the dataset.
-        '''
+        # If columns are different between the tables, then remove viewer state.
+        # - sorting is expensive, but it prevents errors from applying pivots, etc. on columns that don't exist in the dataset.
         if self.table_name is not None:
             old_columns = sorted(self.manager.get_table(self.table_name).columns())
             new_columns = sorted(table.columns())
@@ -134,3 +143,27 @@ class PerspectiveViewer(PerspectiveTraitlets):
             data (dict|list|pandas.DataFrame) : the update data for the table.
         '''
         self.table.update(data)
+
+    def _new_view(self):
+        '''Create a new View, and assign its name to the viewer.
+
+        Do not call this function - it will be called automatically when the state of the viewer changes.
+
+        There should only be one View associated with the Viewer at any given time - when a new View is created, the old one is destroyed.
+        '''
+        if not self.table_name:
+            return
+
+        name = str(random())
+        table = self.manager.get_table(self.table_name)
+        view = table.view(
+            row_pivots=self.row_pivots,
+            column_pivots=self.column_pivots,
+            columns=self.columns,
+            aggregates=self.aggregates,
+            sort=self.sort,
+            filter=self.filters
+        )
+
+        self.manager.host_view(name, view)
+        self.view_name = name

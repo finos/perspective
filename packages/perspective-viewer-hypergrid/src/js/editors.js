@@ -38,7 +38,7 @@ function setEditorValueDate(x) {
     if (x === null) {
         return;
     }
-    const now = +new Date(x);
+    const now = new Date(x);
     const day = ("0" + now.getDate()).slice(-2);
     const month = ("0" + (now.getMonth() + 1)).slice(-2);
     this.input.value = `${now.getFullYear()}-${month}-${day}`;

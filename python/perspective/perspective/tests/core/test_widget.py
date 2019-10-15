@@ -48,11 +48,9 @@ class TestWidget:
     def test_widget_load_table_ignore_limit(self):
         table = Table({"a": np.arange(0, 50)})
         widget = PerspectiveWidget(table, limit=1)
-        table_name = list(widget.manager._tables.keys())[0]
-        assert widget.manager.get_table(table_name).size() == 50
+        assert widget.table.size() == 50
 
     def test_widget_pass_options(self):
         data = {"a": np.arange(0, 50)}
         widget = PerspectiveWidget(data, limit=1)
-        table_name = list(widget.manager._tables.keys())[0]
-        assert widget.manager.get_table(table_name).size() == 1
+        assert widget.table.size() == 1

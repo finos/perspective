@@ -64,8 +64,10 @@ export
         let computed_columns: { [colname: string]: string }[] = options.computed_columns || [];
         let plugin_config: any = options.plugin_config || {};
         let dark: boolean = options.dark || false;
+        let editable: boolean = options.editable || false;
 
         this.dark = dark;
+        this.editable = editable;
         this.plugin = plugin;
         this.plugin_config = plugin_config;
         this.row_pivots = row_pivots;
@@ -273,11 +275,22 @@ export
         }
     }
 
+    get editable() { return this._editable }
+    set editable(editable: boolean) {
+        this._editable = editable;
+        if (this._editable) {
+            this.viewer.setAttribute("editable", "");
+        } else {
+            this.viewer.removeAttribute("editable");
+        }
+    }
+
     get displayed(){ return this._displayed; }
 
     private _viewer: PerspectiveViewer;
     private _plugin_config: any;
     private _dark: boolean;
+    private _editable: boolean;
     private _displayed: boolean;
 }
 

@@ -28,7 +28,7 @@ export type PerspectiveJupyterWidgetOptions = {
 }
 
 /**
- * TODO: document
+ * PerspectiveJupyterWidget is the ipywidgets front-end for the Perspective Jupyterlab plugin.
  */
 export
 class PerspectiveJupyterWidget extends PerspectiveWidget {
