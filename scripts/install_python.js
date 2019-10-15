@@ -9,6 +9,8 @@
 
 const args = process.argv.slice(2);
 const resolve = require("path").resolve;
+const mkdir = require("mkdirp");
+const fs = require("fs-extra");
 const execSync = require("child_process").execSync;
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
