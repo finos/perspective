@@ -182,7 +182,7 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/Homebrew/include")
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
-	
+
 	set(EXTENDED_FLAGS " \
 		--bind \
 		--source-map-base ./build/ \
@@ -493,6 +493,8 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
+		add_custom_command(TARGET psp POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:psp> ${PSP_PYTHON_SRC}/table/)
+
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
 
 		add_library(binding SHARED ${PYTHON_SOURCE_FILES})
@@ -511,6 +513,7 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})
+		add_custom_command(TARGET binding POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:binding> ${PSP_PYTHON_SRC}/table/)
 		########################
 	else()
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})

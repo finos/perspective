@@ -107,7 +107,7 @@ class PSPBuild(build_ext):
         cfg = 'Debug' if self.debug else 'Release'
 
         cmake_args = [
-            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + str(os.path.join(self.build_lib, 'perspective', 'table')),
+            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + os.path.abspath(os.path.join('perspective', 'table')),
             '-DCMAKE_BUILD_TYPE=' + cfg,
             '-DPSP_CPP_BUILD=1',
             '-DPSP_WASM_BUILD=0',

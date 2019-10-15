@@ -12,6 +12,7 @@ const resolve = require("path").resolve;
 const execSync = require("child_process").execSync;
 const fs = require("fs-extra");
 const mkdir = require("mkdirp");
+const rimraf = require("rimraf");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const IS_DOCKER = process.env.PSP_DOCKER;
@@ -30,10 +31,11 @@ function docker(target = "perspective", image = "python") {
 
 try {
     // copy C++ assets
-    mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
-    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"));
+    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"), resolve(__dirname, "..", "python", "perspective"), {overwrite: true});
 
-    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"));
+    mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
+    fs.copySync(resolve(__dirname, "..", "cmake"), resolve(__dirname, "..", "python", "perspective", "cmake"), {overwrite: true});
 
     let cmd;
     if (IS_DOCKER) {
