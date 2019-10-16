@@ -41,7 +41,13 @@ namespace arrow {
         } else if (src == "timestamp") {
             return DTYPE_TIME;
         }
+<<<<<<< HEAD
         std::cerr << "Unknown column type '" << src << "'" << std::endl;
+=======
+        std::stringstream ss;
+        ss << "No type valid type found for: " << src << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
+>>>>>>> refactor exception handling in C++ and python builds
         return DTYPE_STR;
     }
 
@@ -173,7 +179,7 @@ namespace arrow {
                     std::int32_t bidx = offsets[i];
                     std::size_t es = offsets[i + 1] - bidx;
                     elem.assign(reinterpret_cast<const char*>(values) + bidx, es);
-                    t_uindex idx = vocab->get_interned(elem);
+                    vocab->get_interned(elem);
                 }
                 auto indices = scol->indices();
                 switch (indices->type()->id()) {
@@ -189,7 +195,9 @@ namespace arrow {
                             (void*)sindices->raw_values(), len * 4);
                     } break;
                     default:
-                        PSP_COMPLAIN_AND_ABORT(indices->type());
+                        std::stringstream ss;
+                        ss << "Could not copy Arrow column of type '" << indices->type()->name() << "'" << std::endl;
+                        PSP_COMPLAIN_AND_ABORT(ss.str());
                 }
             } break;
             case ::arrow::BinaryType::type_id:
@@ -281,7 +289,7 @@ namespace arrow {
                 }
             } break;
             default: {
-                std::cerr << "Unknown column type '" << src->type()->name() << "'" << std::endl;
+                PSP_COMPLAIN_AND_ABORT("Could not copy Arrow column of unknown type.");
             }
         }
     }

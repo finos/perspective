@@ -23,6 +23,7 @@
 #include <perspective/none.h>
 #include <perspective/gnode.h>
 #include <perspective/sym_table.h>
+#include <perspective/exception.h>
 #include <gtest/gtest.h>
 #include <random>
 #include <limits>
@@ -44,9 +45,7 @@ TEST(GNODE, explicit_pkey)
     t_gnode_options options;
     options.m_gnode_type = GNODE_TYPE_PKEYED;
     options.m_port_schema = t_schema{{"x"}, {DTYPE_INT64}};
-#ifndef WIN32
-    EXPECT_EXIT(t_gnode::build(options), ::testing::KilledBySignal(SIGINT), "");
-#endif
+    ASSERT_THROW(t_gnode::build(options), PerspectiveException);
 }
 
 

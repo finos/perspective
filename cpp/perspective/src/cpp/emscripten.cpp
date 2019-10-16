@@ -635,8 +635,9 @@ namespace binding {
                 } else if (value == "date") {
                     type = t_dtype::DTYPE_DATE;
                 } else {
-                    PSP_COMPLAIN_AND_ABORT(
-                        "Unknown type '" + value + "' for key '" + name + "'");
+                    std::stringstream ss;
+                    ss << "Unknown type '" << value << "' for key '" << name << "'" << std::endl;
+                    PSP_COMPLAIN_AND_ABORT(ss.str());
                 }
 
                 types.push_back(type);
