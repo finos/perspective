@@ -57,7 +57,7 @@ PYBIND11_MODULE(libbinding, m)
      *
      * PerspectiveException
      */
-    py::register_exception<PerspectiveException>(m, "PerspectiveError");
+    py::register_exception<PerspectiveException>(m, "PerspectiveCppError");
 
     /******************************************************************************
      *
