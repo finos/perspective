@@ -6,8 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 from pytest import raises
-from perspective import Table
-from perspective.table.libbinding import PerspectiveCppError
+from perspective import Table, PerspectiveError, PerspectiveCppError
 
 
 class TestException(object):
@@ -19,8 +18,22 @@ class TestException(object):
             tbl.view(row_pivots=["b"])
             assert str(ex.value) == "Column b does not exist in schema."
 
-    def test_exception_from_core_catch_all(self):
+    def test_exception_from_core_catch_generic(self):
         tbl = Table({"a": [1, 2, 3]})
+        # `PerspectiveCppError` should inherit from `Exception`
         with raises(Exception) as ex:
+            tbl.view(row_pivots=["b"])
+            assert str(ex.value) == "Column b does not exist in schema."
+
+    def test_exception_from_core_correct_types(self):
+        tbl = Table({"a": [1, 2, 3]})
+
+        # `PerspectiveError` should be raised from the Python layer
+        with raises(PerspectiveError) as ex:
+            tbl.view()
+            tbl.delete()
+            assert str(ex.value) == "Cannot delete a Table with active views still linked to it - call delete() on each view, and try again."
+
+        with raises(PerspectiveCppError) as ex:
             tbl.view(row_pivots=["b"])
             assert str(ex.value) == "Column b does not exist in schema."

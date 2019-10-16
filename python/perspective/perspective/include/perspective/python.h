@@ -55,7 +55,11 @@ PYBIND11_MODULE(libbinding, m)
 {
     /******************************************************************************
      *
-     * PerspectiveException
+     * PerspectiveCppError
+     * 
+     * PerspectiveCppError is raised in Python when the C++ engine throws an exception.
+     * 
+     * To catch all exceptions from Perspective, catch `PerspectiveError` and `PerspectiveCppError`.
      */
     py::register_exception<PerspectiveException>(m, "PerspectiveCppError");
 
