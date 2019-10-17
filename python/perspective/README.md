@@ -10,6 +10,16 @@ Python APIs for [perspective](https://github.com/finos/perspective) front end
 
 ## Install
 
+### Dependencies
+
+You need to have [https://github.com/intel/tbb](TBB) installed as a system dependency:
+
+On MacOS:
+
+`brew install tbb`
+
+### Installation
+
 To install the base package from pip:
 
 `pip install perspective-python`
