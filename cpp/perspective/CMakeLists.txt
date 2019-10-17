@@ -231,13 +231,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASYNC_MODE_FLAGS "")
 	set(ASMJS_MODE_FLAGS "")
 
-	find_package(Boost COMPONENTS filesystem)
-	if(NOT Boost_FOUND)
-		message("${Red}Boost could not be located${ColorReset}")
-	else()
-		message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+	if(PSP_CPP_BUILD)
+		# filesystem not required for Python, as we link to prebuilt arrow shared library
+		find_package(Boost COMPONENTS filesystem)
+		if(NOT Boost_FOUND)
+			message("${Red}Boost could not be located${ColorReset}")
+		else()
+			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+		endif()
+		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
-	include_directories( ${Boost_INCLUDE_DIRS} )
 
 	find_package(TBB)
 	if(NOT TBB_FOUND)
@@ -265,6 +268,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( PythonInterp 3.7 REQUIRED )
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
+
+
+		find_package(Boost)
+		if(NOT Boost_FOUND)
+			message("${Red}Boost could not be located${ColorReset}")
+		else()
+			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+		endif()
+		include_directories( ${Boost_INCLUDE_DIRS} )
 
 		find_package(pybind11)
 		if(NOT pybind11_FOUND)
@@ -451,7 +463,6 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 
 		# Link against libarrow 0.15.0 in pyarrow directory
-		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
 		target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
