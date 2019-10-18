@@ -62,6 +62,7 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                  table_or_data,
                  index=None,
                  limit=None,
+                 client=False,
                  **kwargs):
         '''Initialize an instance of `PerspectiveWidget` with the given table/data and viewer configuration.
 
@@ -69,6 +70,9 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
         Args:
             table_or_data (perspective.Table|dict|list|pandas.DataFrame) : the table or data that will be viewed in the widget.
+            index (str) : a column name to be used as the primary key. Ignored if a `Table` is passed in.
+            limit (int) : a upper limit on the number of rows in the Table. Cannot be set at the same time as `index`, ignored if a `Table` is passed in.
+            client (bool) : If True, convert the dataset into an Apache Arrow binary and create the Table in Javascript using a copy of the data. Defaults to False.
             **kwargs : configuration options for the `PerspectiveViewer`, and `Table` constructor if `table_or_data` is a dataset.
 
         Example:
@@ -79,6 +83,10 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                     sort=[["b", "desc"]],
                     filter=[["a", ">", 1]])
         '''
+        # If `self.client` is True, the front-end `perspective-viewer` is given a copy of the data serialized to Arrow,
+        # and changes made in Python do not reflect to the front-end.
+        self.client = client
+
         # Handle messages from the the front end `PerspectiveJupyterClient.send()`.
         # - The "data" value of the message should be a JSON-serialized string.
         # - Both `on_msg` and `@observe("value")` must be specified on the handler for custom messages to be parsed by the Python widget.
