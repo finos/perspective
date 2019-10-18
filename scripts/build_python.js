@@ -16,7 +16,7 @@ const IS_DOCKER = process.env.PSP_DOCKER;
 const VALID_TARGETS = ["node", "table"];
 const HAS_TARGET = args.indexOf("--target") != -1;
 
-function docker(target = "perspective", image = "emsdk") {
+function docker(target = "perspective", image = "python") {
     console.log(`-- Creating ${image} docker image`);
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
@@ -38,12 +38,6 @@ try {
     }
 
     let cmd;
-    let pip_target = "";
-
-    if (IS_DOCKER) {
-        pip_target = " --target=`pwd`";
-    }
-
     let build_cmd = `python3 setup.py build`;
 
     if (IS_DOCKER) {

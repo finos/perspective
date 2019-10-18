@@ -47,7 +47,11 @@ find_path(PYTHON_PYARROW_INCLUDE_DIR arrow/python/api.h
   HINTS "${__pyarrow_path}" "${PYTHON_INCLUDE_PATH}" NO_DEFAULT_PATH)
 
 set(PYTHON_PYARROW_LIBRARY_DIR ${__pyarrow_library_dirs})
-set(PYTHON_PYARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.15${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  # Link against pre-built libarrow on MacOS
+  set(PYTHON_PYARROW_SHARED_LIBRARY ${__pyarrow_library_dirs}/${CMAKE_SHARED_LIBRARY_PREFIX}arrow.15${CMAKE_SHARED_LIBRARY_SUFFIX})
+endif()
 
 # DONT USE, could conflict on arrow lib
 # set(PYTHON_PYARROW_LIBRARIES ${__pyarrow_libraries})

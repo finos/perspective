@@ -297,11 +297,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 
 		find_package(PyArrow 0.15 REQUIRED)
+
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
 			message(WARNING "${Cyan}PyArrow found: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
-			message(WARNING "${Cyan}Using pre-built libarrow from: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
+			if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+				message(WARNING "${Cyan}Using pre-built libarrow from: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
+			endif()
 		endif()
 		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
 		link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
@@ -313,7 +316,8 @@ endif()
 psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
 psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
 
-if (NOT PSP_PYTHON_BUILD)
+# For all non-MacOS builds, or if building WASM/CPP, build minimal arrow from source
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR NOT PSP_PYTHON_BUILD)
 	# build arrow + dependencies from source for Emscripten and C++
 	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
@@ -462,8 +466,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
 
-		# Link against libarrow 0.15.0 in pyarrow directory
-		target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
+		# On MacOS, link against libarrow 0.15.0 in pyarrow directory
+		# This does not work for Linux or Windows - prebuilt binaries for Linux must be backward compatible with GCC 4.8,
+		# which means they use the old ABI: https://github.com/blue-yonder/turbodbc/issues/102#issuecomment-312222949
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
+		else()
+			target_link_libraries(psp arrow)
+			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
+		endif()
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
@@ -476,6 +487,11 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_link_libraries(binding tbb)
 
 		# Link again libarrow from pyarrow
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
+		else()
+			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
+		endif()
 		target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})
 		########################

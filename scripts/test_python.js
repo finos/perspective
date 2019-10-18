@@ -16,7 +16,7 @@ const VALID_TARGETS = ["node", "table"];
 const HAS_TARGET = args.indexOf("--target") != -1;
 const VERBOSE = args.indexOf("--verbose") != -1;
 
-function docker(target = "perspective", image = "emsdk") {
+function docker(target = "perspective", image = "python") {
     console.log(`-- Creating ${image} docker image`);
     let cmd = "docker run --rm -it";
     if (process.env.PSP_CPU_COUNT) {
