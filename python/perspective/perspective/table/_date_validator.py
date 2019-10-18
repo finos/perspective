@@ -79,7 +79,7 @@ class _PerspectiveDateValidator(object):
         # Convert `datetime.datetime` and `pandas.Timestamp` to millisecond timestamps
         return int((time.mktime(d.timetuple()) + d.microsecond / 1000000.0) * 1000)
 
-    def format(self, str):
+    def format(self, s):
         '''Return either t_dtype.DTYPE_DATE or t_dtype.DTYPE_TIME depending on the format of the parsed date.
 
         If the parsed date is invalid, return t_dtype.DTYPE_STR to prevent further attempts at conversion.
@@ -89,12 +89,15 @@ class _PerspectiveDateValidator(object):
         Args:
             str (str) : the datestring to parse
         '''
-        has_separators = bool(search(r"[/. -]", str))  # match commonly-used date separators
+        if isinstance(s, (bytes, bytearray)):
+            s = s.decode("utf-8")
+        has_separators = bool(search(r"[/. -]", s))  # match commonly-used date separators
+
         dtype = t_dtype.DTYPE_STR
 
         if has_separators:
             try:
-                parsed = parse(str)
+                parsed = parse(s)
                 if (parsed.hour, parsed.minute, parsed.second, parsed.microsecond) == (0, 0, 0, 0):
                     dtype = t_dtype.DTYPE_DATE
                 else:

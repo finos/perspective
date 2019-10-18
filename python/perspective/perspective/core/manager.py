@@ -6,10 +6,27 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import logging
+import json
+import random
+import string
+import datetime
 from functools import partial
 from ..table import Table
+from ..table.view import View
 from .exception import PerspectiveError
 from .session import PerspectiveSession
+
+
+def gen_name(size=10, chars=string.ascii_uppercase + string.digits):
+    return "".join(random.choice(chars) for x in range(size))
+
+
+class DateTimeEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.timestamp() * 1000
+        else:
+            return super(DateTimeEncoder, self).default(obj)
 
 
 class PerspectiveManager(object):
@@ -27,14 +44,26 @@ class PerspectiveManager(object):
     - When a client connects, for example through a websocket, a new session should be spawned using `new_session()`.
     - When the websocket closes, call `close()` on the session instance to clean up associated resources.
     '''
+
     def __init__(self):
         self._tables = {}
         self._views = {}
         self._callback_cache = {}
 
+    def host(self, data, name=None):
+        name = name or gen_name()
+        if isinstance(data, Table):
+            self._tables[name] = data
+        elif isinstance(data, View):
+            self._views[name] = data
+        else:
+            raise PerspectiveError("Only `Table()` and `View()` instances can be hosted.")
+
     def host_table(self, name, table):
         '''Given a reference to a `Table`, manage it and allow operations on it to occur through the Manager.'''
+        name = name or gen_name()
         self._tables[name] = table
+        return name
 
     def host_view(self, name, view):
         '''Given a reference to a `View`, add it to the manager's views container.'''
@@ -43,13 +72,18 @@ class PerspectiveManager(object):
     def new_session(self):
         return PerspectiveSession(self)
 
-    def process(self, msg, post_callback, client_id=None):
+    def _process(self, msg, post_callback, client_id=None):
         '''Given a message from the client, process it through the Perspective engine.
 
         Args:
             msg (dict) : a message from the client with instructions that map to engine operations
             post_callback (callable) : a function that returns data to the client
         '''
+        if isinstance(msg, str):
+            if msg == "heartbeat":   # TODO fix this
+                return
+            msg = json.loads(msg)
+
         if not isinstance(msg, dict):
             raise PerspectiveError("Message passed into `process()` should be a dict, i.e. JSON strings should have been deserialized using `json.loads()`.")
 
@@ -57,7 +91,7 @@ class PerspectiveManager(object):
 
         if cmd == "init":
             # return empty response
-            post_callback(self._make_message(msg["id"], None))
+            post_callback(json.dumps(self._make_message(msg["id"], None), cls=DateTimeEncoder))
         elif cmd == "table":
             try:
                 # create a new Table and track it
@@ -80,7 +114,7 @@ class PerspectiveManager(object):
         else:
             table_or_view = self._views.get(msg["name"], None)
             if table_or_view is None:
-                post_callback(self._make_error_message(msg["id"], "View is not initialized"))
+                post_callback(json.dumps(self._make_error_message(msg["id"], "View is not initialized"), cls=DateTimeEncoder))
         try:
             if msg.get("subscribe", False) is True:
                 self._process_subscribe(msg, table_or_view, post_callback)
@@ -108,7 +142,7 @@ class PerspectiveManager(object):
                     # otherwise parse args as list
                     result = getattr(table_or_view, msg["method"])(*args)
                 # return the result to the client
-                post_callback(self._make_message(msg["id"], result))
+                post_callback(json.dumps(self._make_message(msg["id"], result), cls=DateTimeEncoder))
         except Exception as error:
             logging.error(self._make_error_message(msg["id"], error))
 
@@ -145,7 +179,7 @@ class PerspectiveManager(object):
         id = kwargs.get("msg")["id"]
         data = kwargs.get("event", None)
         post_callback = kwargs.get("post_callback")
-        post_callback(self._make_message(id, data))
+        post_callback(json.dumps(self._make_message(id, data), cls=DateTimeEncoder))
 
     def clear_views(self, client_id):
         '''Garbage collect views that belong to closed connections.'''

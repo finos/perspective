@@ -21,7 +21,7 @@ class PerspectiveSession(object):
 
     def process(self, message, post_callback):
         '''Pass a message to the manager's `process` method, which passes the result to `post_callback`.'''
-        self.manager.process(message, post_callback, client_id=self.client_id)
+        self.manager._process(message, post_callback, client_id=self.client_id)
 
     def close(self):
         '''Remove the views created within this session when the session ends.'''

@@ -22,7 +22,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._tables["table1"].schema() == {
             "a": int,
             "b": str
@@ -38,7 +38,7 @@ class TestPerspectiveManager(object):
     def test_manager_create_table(self):
         message = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._tables["table1"].schema() == {
             "a": int,
             "b": str
@@ -49,7 +49,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._tables["table1"].schema() == {
             "a": int,
             "b": str
@@ -62,14 +62,14 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._tables["table1"].schema() == {
             "a": int,
             "b": str
         }
         assert manager._tables["table1"]._index == "a"
         update_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [1, 2, 3], "b": ["str1", "str2", "str3"]}]}
-        manager.process(update_message, self.post)
+        manager._process(update_message, self.post)
         assert manager._tables["table1"].view().to_dict() == {
             "a": [1, 2, 3],
             "b": ["str1", "str2", "str3"]
@@ -80,14 +80,14 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._tables["table1"].schema() == {
             "a": int,
             "b": str
         }
         assert manager._tables["table1"]._index == "a"
         remove_message = {"id": 2, "name": "table1", "cmd": "table_method", "method": "remove", "args": [[1, 2]]}
-        manager.process(remove_message, self.post)
+        manager._process(remove_message, self.post)
         assert manager._tables["table1"].view().to_dict() == {
             "a": [3],
             "b": ["c"]
@@ -100,7 +100,7 @@ class TestPerspectiveManager(object):
         view = table.view()
         manager.host_table("table1", table)
         manager.host_view("view1", view)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager.get_view("view1").schema() == {
             "a": int,
             "b": str
@@ -111,7 +111,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._views["view1"].num_rows() == 3
 
     def test_manager_create_view_one(self):
@@ -119,7 +119,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._views["view1"].to_dict() == {
             "__ROW_PATH__": [[], ["1"], ["2"], ["3"]],
             "a": [6, 1, 2, 3],
@@ -131,7 +131,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         assert manager._views["view1"].to_dict() == {
             "__ROW_PATH__": [[], ["1"], ["2"], ["3"]],
             "a|a": [1, 1, None, None],
@@ -154,7 +154,7 @@ class TestPerspectiveManager(object):
         table = Table(data)
         manager.host_table("table1", table)
         for message in messages:
-            manager.process(message, self.post, client_id=1)
+            manager._process(message, self.post, client_id=1)
         manager.clear_views(1)
         assert manager._views == {}
 
@@ -168,7 +168,7 @@ class TestPerspectiveManager(object):
         table = Table(data)
         manager.host_table("table1", table)
         for i, message in enumerate(messages, 1):
-            manager.process(message, self.post, client_id=i)
+            manager._process(message, self.post, client_id=i)
         manager.clear_views(1)
         manager.clear_views(3)
         assert "view1" not in manager._views
@@ -185,7 +185,7 @@ class TestPerspectiveManager(object):
         table = Table(data)
         manager.host_table("table1", table)
         for message in messages:
-            manager.process(message, self.post)
+            manager._process(message, self.post)
         with raises(PerspectiveError):
             manager.clear_views(None)
 
@@ -202,9 +202,9 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict"}
-        manager.process(to_dict_message, handle_to_dict)
+        manager._process(to_dict_message, handle_to_dict)
         assert sentinel is True
 
     def test_manager_to_dict_with_options(self):
@@ -218,9 +218,9 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         to_dict_message = {"id": 2, "name": "view1", "cmd": "view_method", "method": "to_dict", "args": [{"start_row": 0, "end_row": 1}]}
-        manager.process(to_dict_message, handle_to_dict)
+        manager._process(to_dict_message, handle_to_dict)
         assert sentinel is True
 
     def test_manager_create_view_and_update_table(self):
@@ -228,7 +228,7 @@ class TestPerspectiveManager(object):
         manager = PerspectiveManager()
         table = Table(data)
         manager.host_table("table1", table)
-        manager.process(message, self.post)
+        manager._process(message, self.post)
         table.update([{"a": 4, "b": "d"}])
         assert manager._views["view1"].num_rows() == 4
 
@@ -242,9 +242,9 @@ class TestPerspectiveManager(object):
         # create a table and view using manager
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()
-        manager.process(make_table, self.post)
+        manager._process(make_table, self.post)
         make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
-        manager.process(make_view, self.post)
+        manager._process(make_view, self.post)
 
         # hook into the created view and pass it the callback
         view = manager._views["view1"]
@@ -253,8 +253,8 @@ class TestPerspectiveManager(object):
         # call updates
         update1 = {"id": 3, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
         update2 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
-        manager.process(update1, self.post)
-        manager.process(update2, self.post)
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
         assert sentinel == 2
 
     def test_manager_remove_update(self):
@@ -267,9 +267,9 @@ class TestPerspectiveManager(object):
         # create a table and view using manager
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()
-        manager.process(make_table, self.post)
+        manager._process(make_table, self.post)
         make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
-        manager.process(make_view, self.post)
+        manager._process(make_view, self.post)
 
         # hook into the created view and pass it the callback
         view = manager._views["view1"]
@@ -279,16 +279,16 @@ class TestPerspectiveManager(object):
         # call updates
         update1 = {"id": 4, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [4], "b": ["d"]}]}
         update2 = {"id": 5, "name": "table1", "cmd": "table_method", "method": "update", "args": [{"a": [5], "b": ["e"]}]}
-        manager.process(update1, self.post)
-        manager.process(update2, self.post)
+        manager._process(update1, self.post)
+        manager._process(update2, self.post)
         assert sentinel == 0
 
     def test_manager_delete_view(self):
         make_table = {"id": 1, "name": "table1", "cmd": "table", "args": [data]}
         manager = PerspectiveManager()
-        manager.process(make_table, self.post)
+        manager._process(make_table, self.post)
         make_view = {"id": 2, "table_name": "table1", "view_name": "view1", "cmd": "view"}
-        manager.process(make_view, self.post)
+        manager._process(make_view, self.post)
         delete_view = {"id": 3, "name": "view1", "cmd": "view_method", "method": "delete"}
-        manager.process(delete_view, self.post)
+        manager._process(delete_view, self.post)
         assert len(manager._views) == 0
