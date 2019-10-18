@@ -151,4 +151,4 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 })
             else:
                 # For all calls to Perspective, process it in the manager.
-                self.manager.process(parsed, self.post)
+                self.manager._process(parsed, self.post)

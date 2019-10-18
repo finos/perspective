@@ -6,6 +6,7 @@
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
 import pandas
+import numpy
 from math import isnan
 from .libbinding import t_dtype
 from ._date_validator import _PerspectiveDateValidator
@@ -39,6 +40,9 @@ def _type_to_format(data_or_schema):
                 raise NotImplementedError("Dict values must be list or type!")
         # Can't process
         raise NotImplementedError("Dict values must be list or type!")
+    elif isinstance(data_or_schema, numpy.recarray):
+        columns = [data_or_schema[col] for col in data_or_schema.dtype.names]
+        return 1, dict(zip(data_or_schema.dtype.names, columns))
     else:
         if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
@@ -158,7 +162,10 @@ class _PerspectiveAccessor(object):
             else:
                 val = self._date_validator.to_timestamp(val)
         elif type == t_dtype.DTYPE_STR:
-            val = str(val)
+            if isinstance(val, (bytes, bytearray)):
+                val = val.decode("utf-8")
+            else:
+                val = str(val)
 
         return val
 
