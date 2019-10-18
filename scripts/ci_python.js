@@ -10,6 +10,9 @@
 const args = process.argv.slice(2);
 const resolve = require("path").resolve;
 const execSync = require("child_process").execSync;
+const fs = require("fs-extra");
+const mkdir = require("mkdirp");
+const rimraf = require("rimraf");
 const execute = cmd => execSync(cmd, {stdio: "inherit"});
 
 const VALID_TARGETS = ["node", "table"];
@@ -26,18 +29,20 @@ function docker(target = "perspective", image = "emsdk") {
 }
 
 try {
-    // install dependencies
-    let target = "perspective";
+    // copy C++ assets
+    rimraf.sync(resolve(__dirname, "..", "python", "perspective", "obj")); // unused obj folder
+    fs.copySync(resolve(__dirname, "..", "cpp", "perspective"),
+        resolve(__dirname, "..", "python", "perspective"),
+        {overwrite: true});
 
-    if (HAS_TARGET) {
-        const new_target = args[args.indexOf("--target") + 1];
-        if (VALID_TARGETS.includes(new_target)) {
-            target = new_target;
-        }
-    }
+    mkdir(resolve(__dirname, "..", "python", "perspective", "cmake"));
+    fs.copySync(resolve(__dirname, "..", "cmake"),
+        resolve(__dirname, "..", "python", "perspective", "cmake"),
+        {overwrite: true});
+
 
     let cmd;
-    build_cmd =
+    let build_cmd =
         "python3 -m pip install -r requirements-dev.txt &&\
         python3 setup.py build &&\
         python3 -m flake8 perspective && echo OK &&\
@@ -47,10 +52,10 @@ try {
         codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957";
 
     if (process.env.PSP_DOCKER) {
-        cmd = `cd python/${target} && ${build_cmd}`;
+        cmd = `cd python/perspective && ${build_cmd}`;
         execute(`${docker(target, "python")} bash -c "${cmd}"`);
     } else {
-        const python_path = resolve(__dirname, "..", "python", target);
+        const python_path = resolve(__dirname, "..", "python", "perspective");
         cmd = `cd ${python_path} && ${build_cmd}`;
         execute(cmd);
     }
