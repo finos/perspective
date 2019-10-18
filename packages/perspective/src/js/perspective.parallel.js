@@ -10,7 +10,6 @@
 import * as defaults from "./config/constants.js";
 import {get_config} from "./config";
 import {Client} from "./api/client.js";
-import {detect_iphone} from "./utils.js";
 
 import wasm_worker from "./perspective.wasm.js";
 import wasm from "./psp.async.wasm.js";
@@ -73,7 +72,7 @@ class WebWorkerClient extends Client {
     async register() {
         let _worker;
         const msg = {cmd: "init", config: get_config()};
-        if (typeof WebAssembly === "undefined" || detect_iphone()) {
+        if (typeof WebAssembly === "undefined") {
             throw new Error("WebAssembly not supported. Support for ASM.JS has been removed as of 0.3.1.");
         } else {
             [_worker, msg.buffer] = await Promise.all([override.worker(), override.wasm()]);
