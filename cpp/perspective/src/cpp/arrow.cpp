@@ -41,13 +41,9 @@ namespace arrow {
         } else if (src == "timestamp") {
             return DTYPE_TIME;
         }
-<<<<<<< HEAD
-        std::cerr << "Unknown column type '" << src << "'" << std::endl;
-=======
         std::stringstream ss;
         ss << "No type valid type found for: " << src << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
->>>>>>> refactor exception handling in C++ and python builds
         return DTYPE_STR;
     }
 

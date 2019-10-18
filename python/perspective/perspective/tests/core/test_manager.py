@@ -5,6 +5,7 @@
 # This file is part of the Perspective library, distributed under the terms of
 # the Apache License 2.0.  The full license can be found in the LICENSE file.
 #
+import json
 from pytest import raises
 from perspective import Table, PerspectiveError, PerspectiveManager
 
@@ -197,7 +198,8 @@ class TestPerspectiveManager(object):
         def handle_to_dict(msg):
             nonlocal sentinel
             sentinel = True
-            assert msg["data"] == data
+            message = json.loads(msg)
+            assert message["data"] == data
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
         table = Table(data)
@@ -213,7 +215,8 @@ class TestPerspectiveManager(object):
         def handle_to_dict(msg):
             nonlocal sentinel
             sentinel = True
-            assert msg["data"] == [{"a": 1, "b": "a"}]
+            message = json.loads(msg)
+            assert message["data"] == {"a": [1], "b": ["a"]}
         message = {"id": 1, "table_name": "table1", "view_name": "view1", "cmd": "view"}
         manager = PerspectiveManager()
         table = Table(data)
