@@ -8,8 +8,8 @@
 import pandas
 import json
 from datetime import datetime
-from functools import wraps
 from time import mktime
+from functools import partial, wraps
 from ipywidgets import Widget
 from traitlets import observe, Unicode
 from .data import deconstruct_pandas
@@ -122,18 +122,19 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
 
             self.load(table_or_data, **kwargs)
 
-    def post(self, msg):
+    def post(self, msg, id=None):
         '''Post a serialized message to the `PerspectiveJupyterClient` in the front end.
 
         The posted message should conform to the `PerspectiveJupyterMessage` interface as defined in `@finos/perspective-jupyterlab`.
 
         Args:
-            msg : a message from `PerspectiveManager` for the front-end viewer to process.
+            msg (dict) : a message from `PerspectiveManager` for the front-end viewer to process.
+            id (int) : an integer id that allows the client to process the message.
         '''
         self.send({
-            "id": msg["id"],
+            "id": id,
             "type": "cmd",
-            "data": json.dumps(msg, cls=DateTimeEncoder)
+            "data": msg
         })
 
     @observe("value")
@@ -159,4 +160,5 @@ class PerspectiveWidget(Widget, PerspectiveViewer):
                 })
             else:
                 # For all calls to Perspective, process it in the manager.
-                self.manager._process(parsed, self.post)
+                post_callback = partial(self.post, id=parsed["id"])
+                self.manager._process(parsed, post_callback)

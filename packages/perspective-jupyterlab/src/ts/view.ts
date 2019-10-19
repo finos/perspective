@@ -140,7 +140,6 @@ class PerspectiveView extends DOMWidgetView {
             // Conform message to format expected by the perspective client
             delete message.type;
             if (typeof message.data === "string") {
-                // Output views for the widget share the same comm, thus handle message is 
                 message.data = JSON.parse(message.data);
             } 
             this.client._handle(message);
