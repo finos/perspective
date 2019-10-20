@@ -80,16 +80,25 @@ declare module '@finos/perspective' {
         [ key: string ]: TypeNames ;
     }
 
+    export interface SerializeConfig {
+        start_row: number,
+        end_row: number,
+        start_col: number,
+        end_col: number,
+    }
+
     /**** View ****/
     export type View = {
         delete(): Promise<void>;
         num_columns(): Promise<number>;
         num_rows(): Promise<number>;
-        on_update(callback: UpdateCallback): void;
         on_delete(callback: Function): void;
+        on_update(callback: UpdateCallback): void;
         schema(): Promise<Schema>;
-        to_json(): Promise<Array<object>>;
-        to_csv(): Promise<string>;
+        to_arrow(options?: SerializeConfig & { data_slice: any }): Promise<ArrayBuffer>;
+        to_columns(options?: SerializeConfig): Promise<Array<object>>;
+        to_csv(options?: SerializeConfig & { config: object }): Promise<string>;
+        to_json(options?: SerializeConfig): Promise<Array<object>>;
     }
 
     /**** Table ****/
