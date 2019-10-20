@@ -85,11 +85,11 @@ declare module '@finos/perspective' {
         delete(): Promise<void>;
         num_columns(): Promise<number>;
         num_rows(): Promise<number>;
-        on_update(callback: UpdateCallback): void;
         on_delete(callback: Function): void;
+        on_update(callback: UpdateCallback): void;
         schema(): Promise<Schema>;
-        to_json(): Promise<Array<object>>;
         to_csv(): Promise<string>;
+        to_json(): Promise<Array<object>>;
     }
 
     /**** Table ****/
