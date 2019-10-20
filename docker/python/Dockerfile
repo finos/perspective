@@ -28,7 +28,7 @@ RUN ln -s /usr/local/lib/libboost_python37.so /usr/local/lib/libboost_python.so
 RUN ln -s /usr/local/lib/libboost_numpy37.so /usr/local/lib/libboost_numpy.so
 
 RUN python3 -m pip install codecov nose2 mock flake8 pytest pytest-cov traitlets ipywidgets faker psutil zerorpc
-RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.14.1'
+RUN python3 -m pip install 'numpy>=1.13.1' 'pandas>=0.22.0' 'pyarrow==0.15.0'
 
 RUN npm install --global yarn
 RUN yarn --version
