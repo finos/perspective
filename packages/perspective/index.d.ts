@@ -95,8 +95,8 @@ declare module '@finos/perspective' {
         on_delete(callback: Function): void;
         on_update(callback: UpdateCallback): void;
         schema(): Promise<Schema>;
-        to_csv(): Promise<string>;
-        to_json(): Promise<Array<object>>;
+        to_csv(options?: SerializeConfig & { config: object }): Promise<string>;
+        to_json(options?: SerializeConfig): Promise<Array<object>>;
     }
 
     /**** Table ****/
