@@ -32,7 +32,7 @@ namespace arrow {
             return DTYPE_INT16;
         } else if (src == "int32") {
             return DTYPE_INT32;
-        } else if (src == "int64") {
+        } else if (src == "decimal" || src == "decimal128" || src == "int64") {
             return DTYPE_INT64;
         } else if (src == "float") {
             return DTYPE_FLOAT32;
@@ -261,6 +261,16 @@ namespace arrow {
             case ::arrow::DoubleType::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::DoubleArray>(src);
                 std::memcpy(dest->get_nth<double>(offset), (void*)scol->raw_values(), len * 8);
+            } break;
+            case ::arrow::DecimalType::type_id: {
+                std::shared_ptr<::arrow::Decimal128Array> scol = std::static_pointer_cast<::arrow::DecimalArray>(src);
+                auto vals = (::arrow::Decimal128 *)scol->raw_values();
+                for (uint32_t i = 0; i < len; ++i) {
+                    ::arrow::Status status = vals[i].ToInteger(dest->get_nth<int64_t>(offset + i));
+                    if (!status.ok()) {
+                        PSP_COMPLAIN_AND_ABORT(status.message());
+                    };
+                }
             } break;
             case ::arrow::BooleanType::type_id: {
                 auto scol = std::static_pointer_cast<::arrow::BooleanArray>(src);
