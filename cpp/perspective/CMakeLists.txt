@@ -231,13 +231,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 	set(ASYNC_MODE_FLAGS "")
 	set(ASMJS_MODE_FLAGS "")
 
-	find_package(Boost COMPONENTS filesystem)
-	if(NOT Boost_FOUND)
-		message("${Red}Boost could not be located${ColorReset}")
-	else()
-		message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+	if(PSP_CPP_BUILD)
+		# filesystem not required for Python, as we link to prebuilt arrow shared library
+		find_package(Boost COMPONENTS filesystem)
+		if(NOT Boost_FOUND)
+			message("${Red}Boost could not be located${ColorReset}")
+		else()
+			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+		endif()
+		include_directories( ${Boost_INCLUDE_DIRS} )
 	endif()
-	include_directories( ${Boost_INCLUDE_DIRS} )
 
 	find_package(TBB)
 	if(NOT TBB_FOUND)
@@ -266,6 +269,15 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		find_package( PythonLibs 3.7 REQUIRED )
 		include_directories( ${PYTHON_INCLUDE_DIRS} )
 
+
+		find_package(Boost)
+		if(NOT Boost_FOUND)
+			message("${Red}Boost could not be located${ColorReset}")
+		else()
+			message("${Cyan}Found boost in ${Boost_INCLUDE_DIRS} ${Boost_LIBRARY_DIRS} ${ColorReset}")
+		endif()
+		include_directories( ${Boost_INCLUDE_DIRS} )
+
 		find_package(pybind11)
 		if(NOT pybind11_FOUND)
 		    message("${Red}PyBind11 could not be located${ColorReset}")
@@ -284,16 +296,18 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		endif()
 		include_directories( ${PYTHON_NUMPY_INCLUDE_DIR})
 
-		find_package(PyArrow 0.14.1 EXACT)
+		find_package(PyArrow 0.15 REQUIRED)
+
 		if(NOT PYTHON_PYARROW_FOUND)
 			message(FATAL_ERROR "${Red}PyArrow could not be located${ColorReset}")
 		else()
 			message(WARNING "${Cyan}PyArrow found: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
+			if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+				message(WARNING "${Cyan}Using pre-built libarrow from: ${PYTHON_PYARROW_INCLUDE_DIR}${ColorReset}")
+			endif()
 		endif()
 		include_directories(${PYTHON_PYARROW_INCLUDE_DIR})
 		link_directories(${PYTHON_PYARROW_LIBRARY_DIR})
-
-		message("${Cyan}Building minimal Apache Arrow${ColorReset}")
 
 		#####################
 	endif()
@@ -301,18 +315,25 @@ endif()
 
 psp_build_dep("hopscotch" "../../cmake/hopscotch.txt.in")
 psp_build_dep("ordered-map" "../../cmake/ordered-map.txt.in")
-psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
-psp_build_dep("arrow" "../../cmake/arrow.txt.in")
+
+# For all non-MacOS builds, or if building WASM/CPP, build minimal arrow from source
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" OR NOT PSP_PYTHON_BUILD)
+	# build arrow + dependencies from source for Emscripten and C++
+	message("${Cyan}Building minimal Apache Arrow${ColorReset}")
+
+	psp_build_dep("double-conversion" "../../cmake/double-conversion.txt.in")
+	psp_build_dep("arrow" "../../cmake/arrow.txt.in")
+
+	find_package(Flatbuffers)
+	if(NOT FLATBUFFERS_FOUND)
+		message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
+	else()
+		message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
+		include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
+	endif()
+endif()
 
 #####################
-
-find_package(Flatbuffers)
-if(NOT FLATBUFFERS_FOUND)
-	message(FATAL_ERROR"${Red}Flatbuffers could not be located${ColorReset}")
-else()
-	message("${Cyan}Found Flatbuffers in ${FLATBUFFERS_INCLUDE_DIR}${ColorReset}")
-	include_directories( ${FLATBUFFERS_INCLUDE_DIR} )
-endif()
 
 set(CMAKE_C_FLAGS " \
 	${CMAKE_C_FLAGS} \
@@ -444,8 +465,16 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		add_library(psp SHARED ${SOURCE_FILES} ${HEADER_FILES})
 
 		target_compile_definitions(psp PRIVATE PSP_ENABLE_PYTHON=1)
-		target_link_libraries(psp arrow)
-		target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
+
+		# On MacOS, link against libarrow 0.15.0 in pyarrow directory
+		# This does not work for Linux or Windows - prebuilt binaries for Linux must be backward compatible with GCC 4.8,
+		# which means they use the old ABI: https://github.com/blue-yonder/turbodbc/issues/102#issuecomment-312222949
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(psp ${PYTHON_PYARROW_SHARED_LIBRARY})
+		else()
+			target_link_libraries(psp arrow)
+			target_link_libraries(psp ${Boost_FILESYSTEM_LIBRARY})
+		endif()
 
 		target_link_libraries(psp ${PYTHON_LIBRARIES})
 		set(CMAKE_SHARED_LIBRARY_SUFFIX .so)
@@ -456,7 +485,14 @@ elseif(PSP_CPP_BUILD OR PSP_PYTHON_BUILD)
 		target_compile_options(binding PRIVATE -Wdeprecated-declarations)
 		target_link_libraries(binding psp)
 		target_link_libraries(binding tbb)
-		target_link_libraries(binding ${PYTHON_PYARROW_LIBRARIES})
+
+		# Link again libarrow from pyarrow
+		if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+			target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
+		else()
+			target_link_libraries(psp ${PYTHON_PYARROW_LIBRARIES})
+		endif()
+		target_link_libraries(binding ${PYTHON_PYARROW_SHARED_LIBRARY})
 		target_link_libraries(binding ${PYTHON_LIBRARIES})
 		########################
 	else()
