@@ -40,7 +40,7 @@ namespace arrow {
             const std::string& name, std::int32_t cidx, t_dtype type, std::string& raw_type,
             bool is_update);
 
-        std::vector<std::shared_ptr<::arrow::RecordBatch>> m_batches;
+        std::shared_ptr<::arrow::Table> m_table;
         std::vector<std::string> m_names;
         std::vector<t_dtype> m_types;
     };
