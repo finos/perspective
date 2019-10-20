@@ -80,6 +80,13 @@ declare module '@finos/perspective' {
         [ key: string ]: TypeNames ;
     }
 
+    export interface SerializeConfig {
+        start_row: number,
+        end_row: number,
+        start_col: number,
+        end_col: number,
+    }
+
     /**** View ****/
     export type View = {
         delete(): Promise<void>;
