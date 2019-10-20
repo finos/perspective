@@ -41,8 +41,7 @@ namespace arrow {
         } else if (src == "timestamp") {
             return DTYPE_TIME;
         }
-        std::cout << "No type valid type found for: " << src << std::endl;
-        PSP_COMPLAIN_AND_ABORT("No type valid type found");
+        std::cerr << "Unknown column type '" << src << "'" << std::endl;
         return DTYPE_STR;
     }
 
@@ -282,7 +281,7 @@ namespace arrow {
                 }
             } break;
             default: {
-                PSP_COMPLAIN_AND_ABORT(src->type()->name());
+                std::cerr << "Unknown column type '" << src->type()->name() << "'" << std::endl;
             }
         }
     }
