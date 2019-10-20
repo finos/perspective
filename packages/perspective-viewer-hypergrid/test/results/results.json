@@ -2,7 +2,7 @@
     "empty.html/empty grids do not explode": "6999d75dcc9bfe25600df6a222f63a31",
     "regressions.html/should not render an extra row for column_only views": "f1329bb260edc5f3f1a51e3a219a7776",
     "regressions.html/regular updates": "3468c10b7320365369bdae7b37f5a0f9",
-    "regressions.html/saving a computed column does not interrupt update rendering": "bf3e5e0aac2b100fa075bb3279130a86",
+    "regressions.html/saving a computed column does not interrupt update rendering": "a7ca6113fb1b94b5ed0f79552c2974ec",
     "superstore.html/shows a grid without any settings applied.": "13d3164f406bf6a7d053c21dd506a0d5",
     "superstore.html/pivots by a row.": "9c0eb24b441ceafbfd9c53d2cd90599a",
     "superstore.html/pivots by two rows.": "b4c51e892b8dced5a4e64caa788cc16f",
