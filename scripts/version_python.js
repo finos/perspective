@@ -50,4 +50,4 @@ const parse_version = function(version) {
 console.log(`Bumping \`perspective-python\` version to ${VERSION}`);
 const python_path = resolve(__dirname, "..", "python", "perspective");
 const version_path = resolve(__dirname, "..", "python", "perspective", "perspective", "core", "_version.py");
-execute(`cd ${python_path} && bumpversion --new-version "${parse_version(VERSION)}" ${version_path}`);
+execute(`cd ${python_path} && bumpversion --allow-dirty --new-version "${parse_version(VERSION)}" ${version_path}`);
