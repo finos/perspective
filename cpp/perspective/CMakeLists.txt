@@ -182,7 +182,7 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/Homebrew/include")
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
-	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
+	psp_build_dep("rapidjson" "${PSP_CMAKE_MODULE_PATH}/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
 		--bind \

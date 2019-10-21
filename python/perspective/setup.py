@@ -133,6 +133,7 @@ class PSPBuild(build_ext):
 
         env = os.environ.copy()
         env['PSP_ENABLE_PYTHON'] = '1'
+        env["PYTHONPATH"] = os.path.pathsep.join((os.path.join(os.path.dirname(os.__file__), 'site-packages'), os.path.dirname(os.__file__)))
 
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
@@ -142,16 +143,17 @@ class PSPBuild(build_ext):
             subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out = e.output.decode()
-            if "The current CMakeCache.txt directory" not in out:
+            print(out)
+
+            # if stale cmake build, or issues with python inside python, rerun with shell=true
+            if "The current CMakeCache.txt directory"in out:
+                # purge temporary folder
+                shutil.rmtree(self.build_temp)
+                os.makedirs(self.build_temp)
+                subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
+                subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
+            else:
                 raise
-
-            # purge temporary folder
-            shutil.rmtree(self.build_temp)
-            os.makedirs(self.build_temp)
-
-            subprocess.check_call([self.cmake_cmd, os.path.abspath(ext.sourcedir)] + cmake_args, cwd=self.build_temp, env=env, shell=True)
-            subprocess.check_call([self.cmake_cmd, '--build', '.'] + build_args, cwd=self.build_temp, env=env, shell=True)
-
         print()  # Add an empty line for cleaner output
 
 
