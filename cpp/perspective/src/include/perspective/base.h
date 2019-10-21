@@ -61,7 +61,7 @@ const t_index INVALID_INDEX = -1;
 #define CHAR_BIT 8
 #endif
 
-PERSPECTIVE_EXPORT void psp_abort();
+PERSPECTIVE_EXPORT void psp_abort(const std::string& message);
 
 //#define PSP_TRACE_SENTINEL() t_trace _psp_trace_sentinel;
 #define PSP_TRACE_SENTINEL()
@@ -77,7 +77,7 @@ PERSPECTIVE_EXPORT void psp_abort();
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
-            psp_abort();                                                                       \
+            psp_abort("Verbose assert failed!");                                                \
         }                                                                                      \
     }
 
@@ -88,7 +88,7 @@ PERSPECTIVE_EXPORT void psp_abort();
             ss << __FILE__ << ":" << __LINE__ << ": " << MSG << " : "                          \
                << perspective::get_error_str();                                                \
             perror(ss.str().c_str());                                                          \
-            psp_abort();                                                                       \
+            psp_abort("Verbose assert failed!");                                               \
         }                                                                                      \
     }
 
@@ -97,7 +97,7 @@ PERSPECTIVE_EXPORT void psp_abort();
         std::stringstream ss;                                                                  \
         ss << __FILE__ << ":" << __LINE__ << ": " << X;                                        \
         perror(ss.str().c_str());                                                              \
-        psp_abort();                                                                           \
+        psp_abort(X);                                                                          \
     }
 
 #define PSP_ASSERT_SIMPLE_TYPE(X)                                                              \
@@ -126,14 +126,14 @@ std::is_pod<X>::value && std::is_standard_layout<X>::value , \
 #define PSP_VERBOSE_ASSERT1(COND, MSG)                                                         \
     {                                                                                          \
         if (!(COND))                                                                           \
-            psp_abort();                                                                       \
+            psp_abort("Assertion failed!");                                                    \
     }
 #define PSP_VERBOSE_ASSERT2(EXPR, COND, MSG)                                                   \
     {                                                                                          \
         if (!(EXPR COND))                                                                      \
-            psp_abort();                                                                       \
+            psp_abort("Assertion failed!");                                                    \
     }
-#define PSP_COMPLAIN_AND_ABORT(X) psp_abort();
+#define PSP_COMPLAIN_AND_ABORT(X) psp_abort(X);
 #define PSP_ASSERT_SIMPLE_TYPE(X)
 #define LOG_CONSTRUCTOR(X)
 #define LOG_DESTRUCTOR(X)

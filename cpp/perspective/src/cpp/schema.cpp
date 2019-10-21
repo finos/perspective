@@ -65,8 +65,9 @@ t_uindex
 t_schema::get_colidx(const std::string& colname) const {
     auto iter = m_colidx_map.find(colname);
     if (iter == m_colidx_map.end()) {
-        std::cout << "Column " << colname << " does not exist in schema." << std::endl;
-        PSP_COMPLAIN_AND_ABORT("");
+        std::stringstream ss;
+        ss << "Column " << colname << " does not exist in schema." << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
     }
     return iter->second;
 }
@@ -75,8 +76,9 @@ t_dtype
 t_schema::get_dtype(const std::string& colname) const {
     auto iter = m_coldt_map.find(colname);
     if (iter == m_coldt_map.end()) {
-        std::cout << "Column " << colname << " does not exist in schema." << std::endl;
-        PSP_COMPLAIN_AND_ABORT("");
+        std::stringstream ss;
+        ss << "Column " << colname << " does not exist in schema." << std::endl;
+        PSP_COMPLAIN_AND_ABORT(ss.str());
     }
     return iter->second;
 }

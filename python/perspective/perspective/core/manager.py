@@ -11,7 +11,7 @@ import random
 import string
 import datetime
 from functools import partial
-from ..table import Table
+from ..table import Table, PerspectiveCppError
 from ..table.view import View
 from .exception import PerspectiveError
 from .session import PerspectiveSession
@@ -89,23 +89,27 @@ class PerspectiveManager(object):
 
         cmd = msg["cmd"]
 
-        if cmd == "init":
-            # return empty response
-            post_callback(json.dumps(self._make_message(msg["id"], None), cls=DateTimeEncoder))
-        elif cmd == "table":
-            try:
-                # create a new Table and track it
-                data_or_schema = msg["args"][0]
-                self._tables[msg["name"]] = Table(data_or_schema, **msg.get("options", {}))
-            except IndexError:
-                self._tables[msg["name"]] = []
-        elif cmd == "view":
-            # create a new view and track it with the assigned client_id.
-            new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
-            new_view._client_id = client_id
-            self._views[msg["view_name"]] = new_view
-        elif cmd == "table_method" or cmd == "view_method":
-            self._process_method_call(msg, post_callback)
+        try:
+            if cmd == "init":
+                # return empty response
+                post_callback(self._make_message(msg["id"], None))
+            elif cmd == "table":
+                try:
+                    # create a new Table and track it
+                    data_or_schema = msg["args"][0]
+                    self._tables[msg["name"]] = Table(data_or_schema, **msg.get("options", {}))
+                except IndexError:
+                    self._tables[msg["name"]] = []
+            elif cmd == "view":
+                # create a new view and track it with the assigned client_id.
+                new_view = self._tables[msg["table_name"]].view(**msg.get("config", {}))
+                new_view._client_id = client_id
+                self._views[msg["view_name"]] = new_view
+            elif cmd == "table_method" or cmd == "view_method":
+                self._process_method_call(msg, post_callback)
+        except(PerspectiveError, PerspectiveCppError) as e:
+            # Catch errors and return them to client
+            post_callback(self._make_error_message(msg["id"], str(e)))
 
     def _process_method_call(self, msg, post_callback):
         '''When the client calls a method, validate the instance it calls on and return the result.'''
@@ -144,7 +148,7 @@ class PerspectiveManager(object):
                 # return the result to the client
                 post_callback(json.dumps(self._make_message(msg["id"], result), cls=DateTimeEncoder))
         except Exception as error:
-            logging.error(self._make_error_message(msg["id"], error))
+            post_callback(self._make_error_message(msg["id"], str(error)))
 
     def _process_subscribe(self, msg, table_or_view, post_callback):
         '''When the client attempts to add or remove a subscription callback, validate and perform the requested operation.
@@ -172,7 +176,7 @@ class PerspectiveManager(object):
             else:
                 logging.info("callback not found for remote call {}".format(msg))
         except Exception as error:
-            logging.error(self._make_error_message(msg["id"], error))
+            post_callback(self._make_error_message(msg["id"], error))
 
     def callback(self, **kwargs):
         '''Return a message to the client using the `post_callback` method.'''

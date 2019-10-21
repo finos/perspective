@@ -13,19 +13,21 @@
 #include <limits>
 #ifdef PSP_ENABLE_WASM
 #include <emscripten.h>
+#else
+#include <perspective/exception.h>
 #endif
 
 namespace perspective {
 
 void
-psp_abort() {
-    std::cerr << "abort()" << std::endl;
+psp_abort(const std::string& message) {
 #ifdef PSP_ENABLE_WASM
+    std::cerr << "Abort(): " << message << std::endl;
     EM_ASM({
-        throw new Error("abort()");
+        throw new Error('abort()');
     });
 #else
-    std::raise(SIGINT);
+    throw PerspectiveException(message.c_str());
 #endif
 }
 

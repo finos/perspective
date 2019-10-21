@@ -105,3 +105,4 @@ ENV/
 .autoversion
 _depr
 docs/api
+/perspective/node/assets

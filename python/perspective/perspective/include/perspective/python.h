@@ -28,6 +28,7 @@
 #include <perspective/raw_types.h>
 #include <perspective/base.h>
 #include <perspective/binding.h>
+#include <perspective/exception.h>
 #include <perspective/exports.h>
 #include <perspective/python/accessor.h>
 #include <perspective/python/base.h>
@@ -52,6 +53,16 @@ using namespace perspective::binding;
 
 PYBIND11_MODULE(libbinding, m)
 {
+    /******************************************************************************
+     *
+     * PerspectiveCppError
+     * 
+     * PerspectiveCppError is raised in Python when the C++ engine throws an exception.
+     * 
+     * To catch all exceptions from Perspective, catch `PerspectiveError` and `PerspectiveCppError`.
+     */
+    py::register_exception<PerspectiveException>(m, "PerspectiveCppError");
+
     /******************************************************************************
      *
      * Table
