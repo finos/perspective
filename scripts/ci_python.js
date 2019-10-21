@@ -50,7 +50,7 @@ try {
         python3 -m pip install . &&\
         codecov --token 0f25973b-091f-42fe-a469-95d1c6f7a957 &&\
         python3 setup.py sdist &&\
-        cd dist/ && python3 -m pip install ./perspective*";
+        cd dist/ && python3 -m pip install -U ./perspective*";
 
     if (process.env.PSP_DOCKER) {
         cmd = `cd python/perspective && ${build_cmd}`;
