@@ -125,8 +125,10 @@ class PerspectiveView extends DOMWidgetView {
      * @param msg {PerspectiveJupyterMessage}
      */
     _handle_message(msg: PerspectiveJupyterMessage) {
-        if (msg.type === "table") {
-            const new_table = this.client.open_table(msg.data);
+        // Make a deep copy of each message - widget views share the same comm, so mutations on `msg` affect subsequent message handlers.
+        let message = JSON.parse(JSON.stringify(msg))
+        if (message.type === "table") {
+            const new_table = this.client.open_table(message.data);
             this.pWidget.load(new_table);
 
             // Only call `init` after the viewer has a table.
@@ -136,9 +138,11 @@ class PerspectiveView extends DOMWidgetView {
             });
         } else {
             // Conform message to format expected by the perspective client
-            delete msg.type; 
-            msg.data = JSON.parse(msg.data); 
-            this.client._handle(msg);
+            delete message.type;
+            if (typeof message.data === "string") {
+                message.data = JSON.parse(message.data);
+            } 
+            this.client._handle(message);
         }
     }
 
