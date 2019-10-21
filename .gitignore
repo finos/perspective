@@ -144,3 +144,7 @@ docs/static/arrow/
 
 python/perspective/perspective/tests/table/psp_test
 python/perspective/perspective/node/assets/*
+
+# sometimes created by mistake
+python/cmake
+python/cpp

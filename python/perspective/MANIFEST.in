@@ -31,6 +31,7 @@ prune docs/dist
 
 # Webapp files
 include package.json
+include webpack.config.js
 graft src
 graft style
 
