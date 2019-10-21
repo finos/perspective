@@ -182,6 +182,7 @@ if (PSP_WASM_BUILD)
 	include_directories("/usr/local/Homebrew/include")
 	include_directories("/usr/local/include" SYSTEM)
 	include_directories("/boost_includes")
+	psp_build_dep("rapidjson" "../../cmake/rapidjson.txt.in")
 
 	set(EXTENDED_FLAGS " \
 		--bind \
@@ -544,8 +545,11 @@ if (PSP_CPP_BUILD_TESTS)
 	if (WIN32)
 	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 	endif()
-	# don't need to build gtest as theres one in rapidjson
-	psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
+
+	if (NOT PSP_WASM_BUILD)
+		# don't need to build gtest as theres one in rapidjson
+		psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
+	endif()
 
 	add_subdirectory(test)
 	add_custom_target(gcov

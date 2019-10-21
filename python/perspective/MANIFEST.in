@@ -38,7 +38,7 @@ graft style
 graft cmake
 graft src
 graft test
-
+include CMakeLists.txt
 
 # Patterns to exclude from any directory
 global-exclude *~
