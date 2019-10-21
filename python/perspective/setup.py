@@ -10,7 +10,6 @@ from setuptools.command.build_ext import build_ext
 from distutils.version import LooseVersion
 from codecs import open
 import io
-import logging
 import os
 import os.path
 import re
@@ -90,21 +89,6 @@ class PSPBuild(build_ext):
 
         for ext in self.extensions:
             self.build_extension_cmake(ext)
-
-        # for MacOS, add the binary location as an rpath
-        if platform.system() == "Darwin":
-            install_name_tool = shutil.which("install_name_tool")
-            if install_name_tool:
-                logging.warning("Setting @rpath for shared libraries to @loader_path")
-                extdir = os.path.abspath(
-                    os.path.dirname(self.get_ext_fullpath("perspective")))
-                # shared library suffix always .so on Mac
-                subprocess.check_call([
-                    install_name_tool,
-                    "-change",
-                    "@rpath/libpsp.so",
-                    "@loader_path/libpsp.so",
-                    str(os.path.join(extdir, 'perspective', 'table', 'libbinding.so'))])
 
     def build_extension_node(self):
         env = os.environ.copy()
