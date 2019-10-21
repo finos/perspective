@@ -545,7 +545,7 @@ if (PSP_CPP_BUILD_TESTS)
 	  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 	endif()
 	# don't need to build gtest as theres one in rapidjson
-	# psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
+	psp_build_dep("googletest" "${PSP_CMAKE_MODULE_PATH}/GTest.txt.in")
 
 	add_subdirectory(test)
 	add_custom_target(gcov
