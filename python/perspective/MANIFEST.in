@@ -37,6 +37,8 @@ graft style
 # C++ build
 graft cmake
 graft src
+graft perspective/src
+graft perspective/include
 graft test
 include CMakeLists.txt
 
