@@ -34,6 +34,7 @@ include package.json
 include webpack.config.js
 graft src
 graft style
+graft js
 
 # C++ build
 graft cmake
