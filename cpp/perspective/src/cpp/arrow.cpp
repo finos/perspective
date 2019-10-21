@@ -42,7 +42,7 @@ namespace arrow {
             return DTYPE_TIME;
         }
         std::stringstream ss;
-        ss << "No type valid type found for: " << src << std::endl;
+        ss << "Could not convert arrow type: " << src << std::endl;
         PSP_COMPLAIN_AND_ABORT(ss.str());
         return DTYPE_STR;
     }
