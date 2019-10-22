@@ -9,7 +9,8 @@ include pyproject.toml
 include .bumpversion.cfg
 include Makefile
 
-graft perspective/tests
+# Source files for perspective-python
+graft perspective
 
 # Documentation
 graft docs
@@ -26,8 +27,6 @@ include tsconfig.json
 include tslint.json
 graft src
 graft style
-graft ../../cpp
-graft ../../cmake
 
 # Patterns to exclude from any directory
 global-exclude *~
