@@ -14,6 +14,7 @@
 #include <perspective/python/accessor.h>
 #include <perspective/python/base.h>
 #include <perspective/python/fill.h>
+#include <perspective/python/numpy.h>
 #include <perspective/python/table.h>
 #include <perspective/python/utils.h>
 
@@ -30,6 +31,7 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     std::vector<std::string> column_names;
     std::vector<t_dtype> data_types;
     arrow::ArrowLoader arrow_loader;
+    numpy::NumpyLoader numpy_loader(accessor);
 
     // Determine metadata
     bool is_delete = op == OP_DELETE;
@@ -112,6 +114,10 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         row_count = arrow_loader.num_rows();
         data_table.extend(arrow_loader.num_rows());
         arrow_loader.fill_table(data_table, index, offset, limit, is_update);
+    } else if(accessor.attr("_is_numpy").cast<bool>() == true) {
+        row_count = accessor.attr("row_count")().cast<std::int32_t>();
+        data_table.extend(row_count);
+        numpy_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
     } else {
         row_count = accessor.attr("row_count")().cast<std::int32_t>();
         data_table.extend(row_count);

@@ -12,7 +12,6 @@
 #include <perspective/binding.h>
 #include <perspective/python/base.h>
 #include <perspective/python/fill.h>
-#include <perspective/python/numpy.h>
 #include <perspective/python/utils.h>
 
 namespace perspective {
@@ -303,31 +302,6 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
     }
 }
 
-/**
- * Fill float64 columns with a numpy array.
- */
-void _fill_col_numpy(t_data_accessor accessor, t_data_table& tbl,
-    std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
-    t_val dcol = accessor.attr("_get_column")(name);
-    double *array = (double *)dcol.cast<py::array_t<double>>().request().ptr;
-
-    t_uindex nrows = col->size();
-
-    std::cout << "using numpy loader" << std::endl;
-    for (auto i = 0; i < nrows; ++i) {
-        double item = array[i];
-        if(npy_isnan(item)){
-            if (is_update) {
-                col->unset(i);
-            } else {
-                col->clear(i);
-            }
-            continue;
-        }
-        col->set_nth(i, item);
-    }
-}
-
 /*
 void
 add_computed_column(std::shared_ptr<t_data_table> table, const std::vector<t_uindex>& row_indices, t_val computed_def) {
@@ -343,7 +317,6 @@ make_computed_lambdas(std::vector<t_val> computed) {
 void
 _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
     std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
-    numpy::NumpyLoader numpy_loader;
     switch (type) {
         case DTYPE_INT64: {
             _fill_col_int64(accessor, tbl, col, name, cidx, type, is_update);
@@ -359,16 +332,6 @@ _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
         } break;
         case DTYPE_STR: {
             _fill_col_string(accessor, col, name, cidx, type, is_update);
-        } break;
-        case DTYPE_FLOAT64: {
-            if (accessor.attr("_is_numpy")(name).cast<bool>() == true) {
-                py::array_t<double> dcol = accessor.attr("_get_column")(name);
-                std::int64_t length = py::len(dcol);
-                double* array = (double *)dcol.request().ptr;
-                numpy_loader.fill_column(array, col, length, type, is_update);
-            } else {
-                _fill_col_numeric(accessor, tbl, col, name, cidx, type, is_update);
-            }
         } break;
         case DTYPE_NONE: {
             break;

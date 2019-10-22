@@ -260,3 +260,35 @@ class TestTablePandas(object):
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         table = Table(df_both)
         assert table.size() == 48
+
+    # Make sure numpy arrays within dataframes work in any configuration
+
+    def test_table_pandas_symmetric(self):
+        data = [None, 1, None, 2, None, 3, 4]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_tables_pandas_from_schema_int(self):
+        data = [None, 1, None, 2, None, 3, 4]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_tables_pandas_from_schema_bool(self):
+        data = [True, False, True, False]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": bool
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data

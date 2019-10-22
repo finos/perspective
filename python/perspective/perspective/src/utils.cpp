@@ -111,6 +111,7 @@ scalar_to_py(const t_tscalar& scalar, bool cast_double, bool cast_string) {
             } else if (cast_string) {
                 return py::cast(scalar.to_string(false)); // should reimplement
             } else {
+                // Stored timestamp should always be milliseconds
                 auto ms = std::chrono::milliseconds(scalar.to_int64());
                 auto time_point = std::chrono::time_point<std::chrono::system_clock>(ms);
                 return py::cast(time_point);

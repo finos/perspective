@@ -10,6 +10,7 @@ import pandas
 import numpy
 from math import isnan
 from ._date_validator import _PerspectiveDateValidator
+from ..core.data import deconstruct_numpy
 
 try:
     from .libbinding import t_dtype
@@ -38,16 +39,17 @@ def _type_to_format(data_or_schema):
     '''
     if isinstance(data_or_schema, list):
         # records
-        return 0, data_or_schema
+        return False, 0, data_or_schema
     elif isinstance(data_or_schema, dict):
         # schema or columns
         for v in data_or_schema.values():
             if isinstance(v, type) or isinstance(v, str):
                 # schema maps name -> type
-                return 2, data_or_schema
+                return False, 2, data_or_schema
             elif isinstance(v, list) or iter(v):
                 # if columns entries are iterable, type 1
-                return 1, data_or_schema
+                # TODO: parse dict of numpy arrays as numpy
+                return False, 1, data_or_schema
             else:
                 # Can't process
                 raise NotImplementedError("Dict values must be list or type!")
@@ -55,7 +57,7 @@ def _type_to_format(data_or_schema):
         raise NotImplementedError("Dict values must be list or type!")
     elif isinstance(data_or_schema, numpy.recarray):
         columns = [data_or_schema[col] for col in data_or_schema.dtype.names]
-        return 1, dict(zip(data_or_schema.dtype.names, columns))
+        return True, 1, dict(zip(data_or_schema.dtype.names, columns))
     else:
         if not (isinstance(data_or_schema, pandas.DataFrame) or isinstance(data_or_schema, pandas.Series)):
             # if pandas not installed or is not a dataframe or series
@@ -66,14 +68,14 @@ def _type_to_format(data_or_schema):
             # flatten column/index multiindex
             df, _ = deconstruct_pandas(data_or_schema)
 
-            return 1, {c: df[c].values for c in df.columns}
+            return True, 1, {c: df[c].values for c in df.columns}
 
 
 class _PerspectiveAccessor(object):
     '''A uniform accessor that wraps data/schemas of varying formats with a common `marshal` function.'''
 
     def __init__(self, data_or_schema):
-        self._format, self._data_or_schema = _type_to_format(data_or_schema)
+        self._is_numpy, self._format, self._data_or_schema = _type_to_format(data_or_schema)
         self._date_validator = _PerspectiveDateValidator()
         self._row_count = \
             len(self._data_or_schema) if self._format == 0 else \
@@ -186,14 +188,14 @@ class _PerspectiveAccessor(object):
 
         return val
 
-    def _is_numpy(self, name):
+    def _is_numpy_column(self, name):
         '''For columnar datasets, return whether the underlying data is a Numpy array.'''
         if self._format == 1:
             data = self._data_or_schema.get(name, None)
             return isinstance(data, numpy.ndarray)
         return False
 
-    def _get_column(self, name):
+    def _get_numpy_column(self, name):
         '''For columnar datasets, return the list/Numpy array that contains the data for a single column.
 
         Args:
@@ -202,8 +204,8 @@ class _PerspectiveAccessor(object):
         Returns:
             list/numpy.array/None : returns the column's data, or None if it cannot be found.
         '''
-        if self._format == 1:
-            return self._data_or_schema.get(name, None)
+        if self._is_numpy_column(name):
+            return deconstruct_numpy(self._data_or_schema.get(name, None))
         else:
             return None
 

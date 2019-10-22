@@ -9,9 +9,13 @@
 
 #ifdef PSP_ENABLE_PYTHON
 #pragma once
+#include <pybind11/numpy.h>
+#include <pybind11/pybind11.h>
 #include <perspective/first.h>
 #include <perspective/base.h>
+#include <perspective/exception.h>
 #include <perspective/column.h>
+#include <perspective/data_table.h>
 
 namespace perspective {
 namespace numpy {
@@ -21,14 +25,14 @@ namespace numpy {
      */
     class PERSPECTIVE_EXPORT NumpyLoader {
         public:
-            NumpyLoader();
+            NumpyLoader(py::object accessor);
             ~NumpyLoader();
 
             /**
              * Fill a `t_data_table` with numpy array-backed data.
              */
-            void fill_table(t_data_table& tbl, const std::string& index, std::uint32_t offset,
-                std::uint32_t limit, bool is_update)
+            void fill_table(t_data_table& tbl, const t_schema& input_schema, const std::string& index, 
+                std::uint32_t offset, std::uint32_t limit, bool is_update);
 
             /**
              * Fill a column with a Numpy array by copying it wholesale into the column without iteration.
@@ -39,37 +43,31 @@ namespace numpy {
              * @param type
              * @param is_update
              */
-            template <typename T>
-            void fill_column(T* array, std::shared_ptr<t_column> col, std::uint64_t length, t_dtype type, bool is_update);
+            void fill_column(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
 
+            std::vector<std::string> names() const;
+            std::vector<t_dtype> types() const;
+            std::uint32_t num_rows() const;
         private:
+            void fill_column_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_date_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_datetime_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_string_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+            void fill_bool_iter(std::shared_ptr<t_column> col, const std::string& name, t_dtype type, std::uint32_t cidx, bool is_update);
+
             /**
-             * Given a py::array_t, use instanceof to convert it into a valid Perspective dtype.
+             * Extract a numpy array from src and copy it into dest.
              */
-            t_dtype convert_type(t_val array);
+            void copy_array(py::object src, std::shared_ptr<t_column> dest, const std::uint64_t offset);
+
+            py::object m_accessor;
+            std::vector<std::string> m_names;
+            std::vector<t_dtype> m_types;
     };
 
-    /**
-     * Given a source and destination column pointer, copy the data from source to destination at `offset`.
-     * 
-     * @param source
-     * @param dest
-     * @param length - the length of the source array
-     * @param offset
-     */
     template <typename T>
-    void copy_array(T* source, std::shared_ptr<t_column> dest, const std::uint64_t length, const std::uint64_t offset) {
-        std::uint64_t size;
-        // TODO: only works for doubles
-        std::memcpy((void*) dest->get_nth<T>(offset), (void*) source, length * 8);
-        dest->valid_raw_fill();
-    }
+    void copy_array_helper(void* src, std::shared_ptr<t_column> dest, const std::uint64_t offset);
 
-    template <typename T>
-    void NumpyLoader::fill_column(T* source, std::shared_ptr<t_column> col, std::uint64_t length, t_dtype type, bool is_update) {
-        copy_array(source, col, length, 0);
-    }
-   
 } // namespace numpy
 } // numpy perspective
 #endif
