@@ -1,0 +1,362 @@
+@import "~@finos/perspective-viewer/src/less/variables.less";
+
+.p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon:before {
+    content: "\E14C";
+    font-family: "Material Icons";
+}
+
+.p-TabBar-tab.p-mod-maximize > .p-TabBar-tabMaximizeIcon {
+    display: none;
+}
+
+
+.bottom .p-TabBar-tab > .p-TabBar-tabMaximizeIcon {
+    display: none;
+}
+
+.p-TabBar-tab.p-mod-current.p-mod-maximize > .p-TabBar-tabMaximizeIcon {
+    display: block;
+}
+
+.p-TabBar-tab.p-mod-maximize > .p-TabBar-tabMaximizeIcon:before {
+    content: "\e5d0";
+    font-family: "Material Icons";
+}
+
+.p-TabBar-tab.p-mod-minimize > .p-TabBar-tabMaximizeIcon:before {
+    content: "\e5d1";
+    font-family: "Material Icons";
+}
+
+.p-TabBar-tab > .p-TabBar-tabConfigIcon {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.p-TabBar-tab.p-mod-current > .p-TabBar-tabConfigIcon {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.p-TabBar-tab > .p-TabBar-tabConfigIcon:before {
+    content: "expand_more";
+    font-family: "Material Icons";
+}
+
+.p-mod-current {
+    .p-TabBar-tabConfigIcon, .p-TabBar-tabMaximizeIcon, .p-TabBar-tabCloseIcon {
+        color: #999;
+    }
+}
+
+.p-BoxPanel {
+    margin: 24px 20px 16px 20px;
+    overflow: visible !important;
+}
+
+
+.p-TabBar,
+.p-TabBar-tab {
+    position: relative;
+
+    overflow: visible !important;
+}
+
+.p-TabBar-tabLabel:empty::after {
+    content: "[untitled]";
+    color: #aaa;
+}
+
+.p-mod-current .p-TabBar-tabLabel:empty::after {
+    color: #ddd;
+}
+
+.p-TabBar-tabLabel:empty::after {
+    content: "[untitled]";
+}
+
+
+.divider {
+    left: 24px;
+    bottom: 0;
+    position: absolute;
+    // background: #ccc;
+    right: 24px;
+    display: none;
+    transition: background-color 0.2s ease-out, width 0.2s ease-out;
+
+    height: 1px;
+    background-color: #eaeaea;
+    margin-bottom: 0px;
+}
+
+.p-TabBar-tab.p-mod-hidden {
+    display: flex !important;
+    opacity: 0.5;
+}
+
+.p-TabBar-tab.p-mod-hidden .divider {
+    display: none;
+}
+
+.p-TabBar-tab.p-mod-current .divider {
+    display: block;
+}
+
+.p-TabBar-tabLabel input {
+    height: 18px;
+    padding-right: 20px;
+}
+
+.p-TabBar {
+    min-height: 36px !important;
+}
+
+
+@border-color: 1px solid #eaeaea;
+@night-border-color: 1px solid #ddd;
+
+
+.pfm-button-base {
+    background: white !important;
+}
+
+.pfm-button-base:active {
+    background: #016bc6 !important;
+}
+
+.p-TabBar-content {
+    padding: 0px 5px;
+    overflow: hidden;
+    margin: 0px 0px -1px 0px;
+    border-bottom: 0px solid #fff !important;
+}
+
+.p-TabBar-tab.p-mod-current {
+    .shadow {
+        margin: -1px;
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+        position: absolute;
+        width: calc(~"100% + 2px");
+        height: 200%;
+        pointer-events: none;
+        left: 0px;
+    }
+
+    &.settings_open .shadow {
+        box-shadow: none;
+    }
+}
+
+.p-TabBar-tab {
+    border-color: #eaeaea;
+}
+
+.p-TabBar-tab.p-mod-current.settings_open > .p-TabBar-tabConfigIcon:before {
+    content: "expand_less";
+}
+
+ .p-TabBar-content > .p-TabBar-tab,
+ .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+    background-color: #eee;
+}
+
+ .condensed .p-TabBar-content {
+
+    & > .p-TabBar-tab .p-TabBar-tabConfigIcon {
+        display: none;
+    }
+
+    & > .p-TabBar-tab.p-mod-current .p-TabBar-tabConfigIcon {
+        display: block;
+    }
+
+    & > .p-TabBar-tab.p-mod-current.settings_open {
+        .p-TabBar-tabLabel {
+            margin-left: 0px;
+        }
+    }
+}
+
+
+ .p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+    border-width: 1px !important;
+    border-color: transparent;
+    .p-TabBar-tabLabel {
+        margin-left: 100px;
+        margin-right: 24px;
+    }
+    .p-TabBar-tabToolbar {
+        display: flex;
+    }
+    .divider {
+        height: 1px;
+        background-color: @blue800;
+        margin-bottom: 0px;
+        left: 18px;
+        right: 18px;
+    }
+    &:last-child:first-child .divider {
+       background: none;
+       transition: none;
+    }  
+}
+
+ .p-TabBar-content > .p-TabBar-tab {
+    .p-TabBar-tabLinkIcon:before {
+        display: none;
+    }
+}
+
+ .p-TabBar-content > .p-TabBar-tab.settings_open.p-mod-current {
+    .p-TabBar-tabLinkIcon:before {
+        display: block;
+    }
+}
+
+.p-TabBar-tab.p-mod-maximize > .p-TabBar-tabMaximizeIcon
+
+.p-TabBar.linked {
+    display: inline
+}
+
+.p-TabBar.linked > .p-TabBar-content > .p-TabBar-tab {
+    .p-TabBar-tabLinkIcon:before {
+        display: block;
+        content: "link";
+        font-family: "Material Icons";
+        transition: color 0.2s;
+        &:hover {
+            color: @blue800;
+        }
+    }
+    .p-TabBar-tabLinkIcon {
+        color: #999;
+    }
+}
+
+ .p-TabBar-content > .p-TabBar-tab.p-mod-current.perspective_updating {
+    .p-TabBar-tabConfigIcon {
+        display: none;
+    }
+
+    
+    .p-TabBar-tabLoadingIcon {
+        display: block;
+    }
+}
+
+.p-TabBar-content > .p-TabBar-tab.p-mod-current.settings_open {
+    background-color: transparent !important;
+}
+
+ .p-TabBar-content > .p-TabBar-tab {
+    max-width: 100000px !important;
+    flex: 0 1 100000px !important;
+    background: none;
+    color: #737373;
+    padding-top: 1px !important;
+    border-style: solid;
+    border-width: 1px;
+    border-color: transparent;
+    height: 36px !important;
+    max-height: 36px !important;
+    transform: none !important;
+    transition: color 0.2s ease-out;
+}
+
+ .p-TabBar-content > .p-TabBar-tab {
+    color: #ccc;
+}
+
+.p-TabBar-content > .p-TabBar-tab {
+    color: #666;
+}
+
+.p-TabBar-content > .p-TabBar-tab:hover {
+    color: #ccc;
+}
+
+ .p-TabBar-content > .p-TabBar-tab.p-mod-current {
+    color: #666;
+}
+
+ .p-TabBar-content > .p-TabBar-tab:hover {
+    color: #666;
+    transition: none;
+}
+
+ .p-TabBar-tab.p-mod-current .p-TabBar-tabLabel {
+    white-space: nowrap !important;
+}
+
+ .p-TabBar-tabLabel {
+    font-family: "Open Sans";
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 34px;
+    text-align: center;
+    white-space: normal !important;
+    word-break: break-all;
+}
+
+
+.p-TabBar-tabCloseIcon,
+.p-TabBar-tabConfigIcon {
+    cursor: pointer !important;
+    line-height: 34px !important;
+    padding-right: 17px !important;
+    padding-left: 4px;
+}
+
+.p-TabBar-tabConfigIcon {
+    padding-left: 16px;
+}
+
+.p-TabBar-tabLoadingIcon {
+    padding-left: 11px;
+    padding-right: 12px;
+}
+
+.p-TabBar-tabLinkIcon,
+.p-TabBar-tabMaximizeIcon {
+    cursor: pointer !important;
+    line-height: 34px !important;
+    padding-right: 5px;
+}
+
+.bottom .p-TabBar-tab {
+    flex-basis: 10000px !important;
+    max-width: 10000px !important;
+}
+
+ .p-TabBar-content > .p-TabBar-tab.p-mod-current {
+    background-color: white;
+    color: #666 !important;
+    border-right: @border-color;
+    border-left: @border-color;
+    border-top: @border-color;
+    height: 38px !important;
+    max-height: 38px !important;
+}
+
+.bottom .p-TabBar-tab.p-mod-current {
+    border: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+}
+
+.p-TabBar-tab.p-mod-drag-image {
+    display: none;
+}
+
+.p-DockPanel.context-menu-open > .p-TabBar.context-focus{
+    opacity: 1
+}
+
+.p-DockPanel.context-menu-open > .p-TabBar{
+    opacity: 0.2
+}
+

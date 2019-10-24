@@ -1,0 +1,36 @@
+
+.p-Widget.PSPContainer {
+  background-color: none;
+  border: @border-color;
+  border-width: 1px;
+  border-top-width: 0px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 4px;
+}
+
+.p-Widget.PSPContainer {
+    border: none;
+}
+
+
+@border-color: 1px solid #eaeaea;
+@night-border-color: 1px solid #ddd;
+
+.p-Widget.PSPContainer {
+    border: @border-color;
+    border-width: 0px !important;
+}
+
+.night .p-Widget.PSPContainer {
+    border: @night-border-color !important;
+    border-width: 0px !important;
+}
+
+.p-DockPanel.context-menu-open > .p-Widget.PSPContainer{
+    opacity: 0.2
+}
+
+.p-DockPanel.context-menu-open > .p-Widget.PSPContainer.context-focus{
+    opacity: 1
+}
