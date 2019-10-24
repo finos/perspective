@@ -38,6 +38,10 @@ def deconstruct_pandas(data):
         # use these columns
         kwargs['columns'] = orig_columns
 
+    # Decompose Period index to timestamps
+    if isinstance(data.index, pd.PeriodIndex):
+        data.index = data.index.to_timestamp()
+
     if isinstance(data.index, pd.MultiIndex):
         kwargs['row_pivots'] = list(data.index.names)
         kwargs['columns'] = data.columns.tolist()

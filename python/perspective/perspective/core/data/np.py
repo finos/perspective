@@ -17,10 +17,10 @@ def deconstruct_numpy(array):
         dict : `array` is the original array, and `mask` is an array of booleans where `True` represents a nan/None value.
     '''
     import numpy as np
+    import pandas as pd
 
     # use `isnull` or `isnan` depending on dtype
-    if array.dtype == object or array.dtype == str:
-        import pandas as pd
+    if pd.api.types.is_object_dtype(array.dtype):
         data = array
         mask = np.argwhere(pd.isnull(array)).flatten()
     else:
@@ -29,10 +29,10 @@ def deconstruct_numpy(array):
         mask = np.argwhere(masked.mask).flatten()
 
     if array.dtype == bool or array.dtype == "?":
-        # convert booleans to int
-        data = data.view(dtype="int64")
+        # bool => byte
+        data = data.view("b")
     elif np.issubdtype(array.dtype, np.datetime64):
-        # convert datetimes to milliseconds from nanoseconds
+        # datetime64[ns] => int timestamp in milliseconds
         data = data.view(dtype="datetime64[ns]").view("int64") / 1000000000
 
     return {

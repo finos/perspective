@@ -123,49 +123,9 @@ _fill_col_string(t_data_accessor accessor, std::shared_ptr<t_column> col, std::s
             continue;
         }
 
-        // convert to a python string first
-        std::wstring welem = item.cast<std::wstring>();
-        std::wstring_convert<utf16convert_type, wchar_t> converter;
-        std::string elem = converter.to_bytes(welem);
-        col->set_nth(i, elem);
+        col->set_nth(i, item.cast<std::string>());
     }
 }
-
-void
-_fill_col_int64(t_data_accessor accessor, t_data_table& tbl, std::shared_ptr<t_column> col, std::string name,
-    std::int32_t cidx, t_dtype type, bool is_update) {
-    t_uindex nrows = col->size();
-
-    for (auto i = 0; i < nrows; ++i) {
-        if (!accessor.attr("_has_column")(i, name).cast<bool>()) {
-            continue;
-        }
-
-        t_val item = accessor.attr("marshal")(cidx, i, type);
-
-        if (item.is_none()) {
-            if (is_update) {
-                col->unset(i);
-            } else {
-                col->clear(i);
-            }
-            continue;
-        }
-
-        double fval = item.cast<double>();
-        if (isnan(fval)) {
-            WARN("Promoting %s to string from int64", name);
-            tbl.promote_column(name, DTYPE_STR, i, false);
-            col = tbl.get_column(name);
-            _fill_col_string(
-                accessor, col, name, cidx, DTYPE_STR, is_update);
-            return;
-        } else {
-            col->set_nth(i, static_cast<std::int64_t>(fval));
-        }
-    }
-}
-
 
 template <>
 void
@@ -252,6 +212,18 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
         }
 
         switch (type) {
+            case DTYPE_UINT8: {
+                col->set_nth(i, item.cast<std::uint8_t>());
+            } break;
+            case DTYPE_UINT16: {
+                col->set_nth(i, item.cast<std::uint16_t>());
+            } break;
+            case DTYPE_UINT32: {
+                col->set_nth(i, item.cast<std::uint32_t>());
+            } break;
+            case DTYPE_UINT64: {
+                col->set_nth(i, item.cast<std::uint64_t>());
+            } break;
             case DTYPE_INT8: {
                 col->set_nth(i, item.cast<std::int8_t>());
             } break;
@@ -278,6 +250,19 @@ _fill_col_numeric(t_data_accessor accessor, t_data_table& tbl,
                     return;
                 } else {
                     col->set_nth(i, static_cast<std::int32_t>(fval));
+                }
+            } break;
+            case DTYPE_INT64: {
+                double fval = item.cast<double>();
+                if (isnan(fval)) {
+                    WARN("Promoting %s to string from int64", name);
+                    tbl.promote_column(name, DTYPE_STR, i, false);
+                    col = tbl.get_column(name);
+                    _fill_col_string(
+                        accessor, col, name, cidx, DTYPE_STR, is_update);
+                    return;
+                } else {
+                    col->set_nth(i, static_cast<std::int64_t>(fval));
                 }
             } break;
             case DTYPE_FLOAT32: {
@@ -318,9 +303,6 @@ void
 _fill_data_helper(t_data_accessor accessor, t_data_table& tbl,
     std::shared_ptr<t_column> col, std::string name, std::int32_t cidx, t_dtype type, bool is_update) {
     switch (type) {
-        case DTYPE_INT64: {
-            _fill_col_int64(accessor, tbl, col, name, cidx, type, is_update);
-        } break;
         case DTYPE_BOOL: {
             _fill_col_bool(accessor, col, name, cidx, type, is_update);
         } break;

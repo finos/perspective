@@ -9,6 +9,7 @@ import six
 from io import StringIO
 from datetime import date, datetime
 import numpy as np
+from pytest import mark
 from perspective.table import Table
 from random import random, randint, choice
 from faker import Faker
@@ -51,11 +52,180 @@ class TestTablePandas(object):
     def test_empty_table(self):
         tbl = Table([])
         assert tbl.size() == 0
+        assert tbl.schema() == {}
 
     def test_table_dataframe(self):
-        data = pd.DataFrame([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
+        d = [{"a": 1, "b": 2}, {"a": 3, "b": 4}]
+        data = pd.DataFrame(d)
         tbl = Table(data)
         assert tbl.size() == 2
+        assert tbl.schema() == {
+            "index": int,
+            "a": int,
+            "b": int
+        }
+        assert tbl.view().to_records() == [
+            {"a": 1, "b": 2, "index": 0},
+            {"a": 3, "b": 4, "index": 1}
+        ]
+
+    def test_table_pandas_from_schema_int(self):
+        data = [None, 1, None, 2, None, 3, 4]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": int
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_from_schema_bool(self):
+        data = [True, False, True, False]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": bool
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_from_schema_float(self):
+        data = [None, 1.5, None, 2.5, None, 3.5, 4.5]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": float
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_from_schema_date(self):
+        data = [date(2019, 8, 15), None, date(2019, 8, 16)]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": date
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == [datetime(2019, 8, 15, 0, 0), None, datetime(2019, 8, 16, 0, 0)]
+
+    def test_table_pandas_from_schema_datetime(self):
+        data = [datetime(2019, 7, 11, 12, 30, 5), None, datetime(2019, 7, 11, 13, 30, 5), None]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": datetime
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_from_schema_str(self):
+        data = ["a", None, "b", None, "c"]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table({
+            "a": str
+        })
+        table.update(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_none(self):
+        data = [None, None, None]
+        df = pd.DataFrame({
+            "a": data
+        })
+        table = Table(df)
+        assert table.view().to_dict()["a"] == data
+
+    def test_table_pandas_symmetric_table(self):
+        # make sure that updates are symmetric to table creation
+        df = pd.DataFrame({
+            "a": [1, 2, 3, 4],
+            "b": [1.5, 2.5, 3.5, 4.5]
+        })
+        t1 = Table(df)
+        t2 = Table({
+            "a": int,
+            "b": float
+        })
+        t2.update(df)
+        assert t1.view().to_dict() == {
+            "index": [0, 1, 2, 3],
+            "a": [1, 2, 3, 4],
+            "b": [1.5, 2.5, 3.5, 4.5]
+        }
+
+    def test_table_pandas_symmetric_stacked_updates(self):
+        # make sure that updates are symmetric to table creation
+        df = pd.DataFrame({
+            "a": [1, 2, 3, 4],
+            "b": [1.5, 2.5, 3.5, 4.5]
+        })
+
+        t1 = Table(df)
+        t1.update(df)
+
+        t2 = Table({
+            "a": int,
+            "b": float
+        })
+        t2.update(df)
+        t2.update(df)
+
+        assert t1.view().to_dict() == {
+            "index": [0, 1, 2, 3, 0, 1, 2, 3],
+            "a": [1, 2, 3, 4, 1, 2, 3, 4],
+            "b": [1.5, 2.5, 3.5, 4.5, 1.5, 2.5, 3.5, 4.5]
+        }
+    # Timeseries/Period index
+
+    def test_table_pandas_timeseries(self):
+        df = pd.DataFrame(pd.util.testing.getTimeSeriesData())
+        tbl = Table(df)
+        assert tbl.size() == 30
+        assert tbl.schema() == {
+            "index": datetime,
+            "A": float,
+            "B": float,
+            "C": float,
+            "D": float
+        }
+
+    def test_table_pandas_periodindex(self):
+        df = pd.DataFrame(pd.util.testing.getPeriodData())
+        tbl = Table(df)
+        assert tbl.size() == 30
+        assert tbl.schema() == {
+            "index": datetime,
+            "A": float,
+            "B": float,
+            "C": float,
+            "D": float
+        }
+
+    @mark.skip
+    def test_table_pandas_period(self):
+        df = pd.DataFrame({"a": [pd.Period("1Q2019"), pd.Period("2Q2019"), pd.Period("3Q2019"), pd.Period("4Q2019")]})
+        tbl = Table(df)
+        assert tbl.size() == 4
+        assert tbl.schema() == {
+            "index": int,
+            "a": datetime
+        }
+        assert tbl.view().to_dict()["a"] == [
+            datetime(2019, 1, 1, 0, 0),
+            datetime(2019, 4, 1, 0, 0),
+            datetime(2019, 7, 1, 0, 0),
+            datetime(2019, 10, 1, 0, 0),
+        ]
+
+    # NaN/NaT reading
 
     def test_table_read_nan_int_col(self):
         data = pd.DataFrame({"str": ["abc", float("nan"), "def"], "int": [np.nan, 1, 2]})
@@ -121,6 +291,21 @@ class TestTablePandas(object):
 
     def test_table_read_nan_datetime_col(self):
         data = pd.DataFrame({"str": ["abc", "def"], "datetime": [float("nan"), datetime(2019, 7, 11, 11, 0)]})
+        tbl = Table(data)
+        assert tbl.schema() == {
+            "index": int,
+            "str": str,
+            "datetime": datetime  # can only promote to string or float
+        }
+        assert tbl.size() == 2
+        assert tbl.view().to_dict() == {
+            "index": [0, 1],
+            "str": ["abc", "def"],
+            "datetime": [None, datetime(2019, 7, 11, 11, 0)]
+        }
+
+    def test_table_read_nat_datetime_col(self):
+        data = pd.DataFrame({"str": ["abc", "def"], "datetime": ["NaT", datetime(2019, 7, 11, 11, 0)]})
         tbl = Table(data)
         assert tbl.schema() == {
             "index": int,
@@ -260,35 +445,3 @@ class TestTablePandas(object):
         df_both = pd.DataFrame(np.random.randn(3, 16), index=['A', 'B', 'C'], columns=index)
         table = Table(df_both)
         assert table.size() == 48
-
-    # Make sure numpy arrays within dataframes work in any configuration
-
-    def test_table_pandas_symmetric(self):
-        data = [None, 1, None, 2, None, 3, 4]
-        df = pd.DataFrame({
-            "a": data
-        })
-        table = Table(df)
-        assert table.view().to_dict()["a"] == data
-
-    def test_tables_pandas_from_schema_int(self):
-        data = [None, 1, None, 2, None, 3, 4]
-        df = pd.DataFrame({
-            "a": data
-        })
-        table = Table({
-            "a": int
-        })
-        table.update(df)
-        assert table.view().to_dict()["a"] == data
-
-    def test_tables_pandas_from_schema_bool(self):
-        data = [True, False, True, False]
-        df = pd.DataFrame({
-            "a": data
-        })
-        table = Table({
-            "a": bool
-        })
-        table.update(df)
-        assert table.view().to_dict()["a"] == data

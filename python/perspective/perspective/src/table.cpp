@@ -33,6 +33,9 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     arrow::ArrowLoader arrow_loader;
     numpy::NumpyLoader numpy_loader(accessor);
 
+    // don't call `is_numpy` on an arrow binary
+    bool is_numpy = !is_arrow && accessor.attr("_is_numpy").cast<bool>();
+
     // Determine metadata
     bool is_delete = op == OP_DELETE;
     if (is_arrow) {
@@ -44,9 +47,28 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
         column_names = arrow_loader.names();
         data_types = arrow_loader.types();
     } else if (is_update || is_delete) {
+        /**
+         * Use the names and types of the python accessor when updating/deleting.
+         * 
+         * This prevents the Table from looking up new columns present in an update.
+         * 
+         * Example: updating a Table with a DataFrame attempts to write the "index" column, but if the table was
+         * not created from a DataFrame, the "index" column would not exist.
+         */
+        if (is_numpy) {
+            numpy_loader.init();
+        }
         column_names = accessor.attr("names")().cast<std::vector<std::string>>();
         data_types = accessor.attr("types")().cast<std::vector<t_dtype>>();
-    } else {
+    } else if (is_numpy) {
+        /**
+         * Numpy loading depends on both the `dtype` of the individual arrays as well as the inferred type from
+         * Perspective. Using `get_data_types` allows us to know the type of an array with `dtype=object`.
+         */
+        numpy_loader.init();
+        column_names = numpy_loader.names();
+        data_types = get_data_types(accessor.attr("data")(), 1, column_names, accessor.attr("date_validator")().cast<t_val>());
+    }  else {
         // Infer names and types
         t_val data = accessor.attr("data")();
         std::int32_t format = accessor.attr("format")().cast<std::int32_t>();
@@ -111,11 +133,11 @@ std::shared_ptr<Table> make_table_py(t_val table, t_data_accessor accessor, t_va
     std::uint32_t row_count;
 
     if (is_arrow) {
-        row_count = arrow_loader.num_rows();
-        data_table.extend(arrow_loader.num_rows());
+        row_count = arrow_loader.row_count();
+        data_table.extend(arrow_loader.row_count());
         arrow_loader.fill_table(data_table, index, offset, limit, is_update);
-    } else if(accessor.attr("_is_numpy").cast<bool>() == true) {
-        row_count = accessor.attr("row_count")().cast<std::int32_t>();
+    } else if (is_numpy) {
+        row_count = numpy_loader.row_count();
         data_table.extend(row_count);
         numpy_loader.fill_table(data_table, input_schema, index, offset, limit, is_update);
     } else {

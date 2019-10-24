@@ -75,6 +75,9 @@ t_dtype type_string_to_t_dtype(std::string value, std::string name){
     } else if (value == "Timestamp") {
         // Pandas timestamp
         type = t_dtype::DTYPE_TIME;
+    } else if (value == "Period") {
+        // Pandas period
+        type = t_dtype::DTYPE_TIME;
     } else if (value == "date") {
         // Python date
         // TODO inheritance

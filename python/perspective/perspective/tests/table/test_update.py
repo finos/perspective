@@ -194,6 +194,45 @@ class TestUpdate(object):
             "a": [1, 2, 3, 4, 5, 6, 7, 8]
         }
 
+    def test_update_df_i32_vs_i64(self):
+        tbl = Table({"a": int})
+
+        update_data = pd.DataFrame({
+            "a": np.array([5, 6, 7, 8], dtype="int64")
+        })
+
+        tbl.update(update_data)
+
+        assert tbl.view().to_dict() == {
+            "a": [5, 6, 7, 8]
+        }
+
+    def test_update_df_bool(self):
+        tbl = Table({"a": [True, False, True, False]})
+
+        update_data = pd.DataFrame({
+            "a": [True, False, True, False]
+        })
+
+        tbl.update(update_data)
+
+        assert tbl.view().to_dict() == {
+            "a": [True, False, True, False, True, False, True, False]
+        }
+
+    def test_update_df_str(self):
+        tbl = Table({"a": ["a", "b", "c", "d"]})
+
+        update_data = pd.DataFrame({
+            "a": ["a", "b", "c", "d"]
+        })
+
+        tbl.update(update_data)
+
+        assert tbl.view().to_dict() == {
+            "a": ["a", "b", "c", "d", "a", "b", "c", "d"]
+        }
+
     def test_update_df_datetime(self):
         tbl = Table({"a": [np.datetime64(datetime(2019, 7, 11, 11, 0))]})
 
