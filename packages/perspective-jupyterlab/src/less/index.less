@@ -1,3 +1,5 @@
+@import "~@finos/perspective-viewer/src/less/variables.less";
+
 div.PSPContainer,
 div.PSPContainer-dark {
     overflow: auto;
@@ -6,6 +8,14 @@ div.PSPContainer-dark {
     padding-bottom: 20px;
     height: 500px;
     flex: 1;
+}
+
+div.PSPContainer {
+    @import "~@finos/perspective-viewer/src/themes/material.less";
+}
+
+div.PSPContainer-dark {
+    @import "~@finos/perspective-viewer/src/themes/material.dark.less";
 }
 
 div.PSPContainer perspective-viewer,

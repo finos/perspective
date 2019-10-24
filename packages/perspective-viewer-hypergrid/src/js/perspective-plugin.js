@@ -112,6 +112,7 @@ function setPSP(payload, force = false) {
     ) {
         this.grid.sbVScroller.index = 0;
         this.grid.behavior.dataModel.data = payload.rows;
+        this.grid.behavior.dataModel._data_window = undefined;
     } else {
         this.grid.sbVScroller.index = 0;
         this.grid.sbHScroller.index = 0;
