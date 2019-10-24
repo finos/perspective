@@ -12,8 +12,8 @@ const webpack = require("webpack");
 
 module.exports = {
     mode: process.env.PSP_NO_MINIFY || process.env.PSP_DEBUG ? "development" : process.env.NODE_ENV || "production",
-    entry: "./src/ts/index.ts",
-    devtool: "cheap-eval-source-map",
+    entry: path.join(__dirname, "../dist/esm/index.js"),
+    devtool: "source-map",
     resolve: {
         extensions: [".ts", ".js", ".json"]
     },
@@ -23,15 +23,15 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.css$/,
-                use: [{loader: "css-loader"}]
+                test: /\.less$/,
+                use: [{loader: "css-loader"}, {loader: "less-loader"}]
             },
-            {test: /\.ts?$/, loader: "ts-loader"}
+            {test: /\.ts?$/, loader: "ts-loader", options: {configFile: "config/tsconfig.json"}}
         ]
     },
     output: {
         filename: "index.js",
-        libraryTarget: "umd",
-        path: path.resolve(__dirname, "../../dist/cjs")
+        libraryTarget: "commonjs",
+        path: path.resolve(__dirname, "dist/cjs")
     }
 };

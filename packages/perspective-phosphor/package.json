@@ -7,8 +7,8 @@
         "src/css/*.css",
         "babel.config.js"
     ],
-    "main": "dist/cjs/index.js",
-    "types": "dist/cjs/index.d.ts",
+    "main": "dist/esm/index.js",
+    "types": "dist/esm/index.d.ts",
     "license": "Apache-2.0",
     "publishConfig": {
         "access": "public"
@@ -17,30 +17,43 @@
         "bench": "npm-run-all bench:build bench:run",
         "bench:build": "echo \"No Benchmarks\"",
         "bench:run": "echo \"No Benchmarks\"",
-        "test": "npm-run-all test:run",
-        "test:run": "echo done",
-        "build": "webpack --color --config src/config/cjs.config.js",
-        "clean": "rimraf dist"
+        "build": "npm-run-all build:esm build:cjs build:styles",
+        "build:esm": "tsc --p ./config --outDir dist/esm",
+        "build:cjs": "webpack --color --config config/webpack.config.js",
+        "build:styles": "webpack --color --config config/webpack.theme.config.js",
+        "clean": "rimraf dist",
+        "test": "jest --silent --color 2>&1"
     },
     "dependencies": {
         "@finos/perspective": "^0.3.9",
         "@finos/perspective-viewer": "^0.3.9",
-        "@finos/perspective-viewer-d3fc": "^0.3.9",
-        "@finos/perspective-viewer-highcharts": "^0.3.9",
-        "@finos/perspective-viewer-hypergrid": "^0.3.9",
         "@phosphor/application": "^1.5.0",
-        "@phosphor/widgets": "^1.6.0"
+        "@phosphor/default-theme": "0.1.0",
+        "@phosphor/widgets": "^1.6.0",
+        "lodash.uniqby": "^4.7.0"
     },
     "devDependencies": {
         "@finos/perspective-webpack-plugin": "^0.3.8",
-        "@types/jest": "^23.3.9",
+        "@types/jest": "^24.0.19",
+        "@types/lodash.uniqby": "^4.7.6",
+        "document-register-element": "^1.14.3",
         "file-loader": "^0.11.1",
         "identity-obj-proxy": "^3.0.0",
         "isomorphic-fetch": "^2.2.1",
         "jest-transform-css": "^2.0.0",
+        "mini-css-extract-plugin": "^0.8.0",
+        "mutationobserver-shim": "^0.3.3",
         "rimraf": "^2.5.2",
         "source-map-support": "^0.5.9",
-        "ts-jest": "^23.10.4",
-        "typescript": "^3.2.4"
+        "typescript": "^3.6.0",
+        "webpack-fix-style-only-entries": "^0.4.0"
+    },
+    "jest": {
+        "transform": {
+            ".js$": "@finos/perspective-test/src/js/transform.js"
+        },
+        "setupFiles": [
+            "./test/setup-jest.js"
+        ]
     }
 }
