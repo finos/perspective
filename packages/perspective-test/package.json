@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-test",
-    "version": "0.3.9",
+    "version": "0.4.0-rc.1",
     "description": "Test utility based on perspective",
     "private": true,
     "main": "src/js/index.js",
@@ -20,10 +20,10 @@
     "license": "Apache-2.0",
     "dependencies": {
         "@babel/runtime": "^7.3.4",
-        "@finos/perspective": "^0.3.9",
+        "@finos/perspective": "^0.4.0-rc.1",
         "core-js": "^2.6.9"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.8"
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.1"
     }
 }

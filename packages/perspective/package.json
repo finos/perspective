@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective",
-    "version": "0.3.9",
+    "version": "0.4.0-rc.1",
     "description": "Perspective.js",
     "main": "dist/umd/perspective.node.js",
     "unpkg": "dist/umd/perspective.js",
@@ -68,6 +68,6 @@
         "bufferutil": "~4.0.1"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.8"
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.1"
     }
 }

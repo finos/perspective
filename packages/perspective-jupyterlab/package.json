@@ -1,6 +1,6 @@
 {
     "name": "@finos/perspective-jupyterlab",
-    "version": "0.3.9",
+    "version": "0.4.0-rc.1",
     "description": "Perspective.js",
     "files": [
         "dist/*.d.ts",
@@ -30,13 +30,13 @@
         "version": "yarn build"
     },
     "dependencies": {
-        "@finos/perspective-phosphor": "^0.3.9",
+        "@finos/perspective-phosphor": "^0.4.0-rc.1",
         "@jupyter-widgets/base": "^2.0.1",
         "@phosphor/application": "^1.5.0",
         "@phosphor/widgets": "^1.6.0"
     },
     "devDependencies": {
-        "@finos/perspective-webpack-plugin": "^0.3.8",
+        "@finos/perspective-webpack-plugin": "^0.4.0-rc.1",
         "@types/jest": "^23.3.9",
         "@types/node": "^11.11.0",
         "file-loader": "^0.11.1",
