@@ -8,8 +8,7 @@
  */
 
 import "@webcomponents/webcomponentsjs";
-
-import {polyfill} from "mobile-drag-drop";
+import "./polyfill.js";
 
 import {bindTemplate, json_attribute, array_attribute, copy_to_clipboard} from "./utils.js";
 import {renderers, register_debug_plugin} from "./viewer/renderers.js";
@@ -22,8 +21,6 @@ import view_style from "../less/viewer.less";
 import default_style from "../less/default.less";
 
 import {ActionElement} from "./viewer/action_element.js";
-
-polyfill({});
 
 /**
  * Module for `<perspective-viewer>` custom element.  There are no exports from
