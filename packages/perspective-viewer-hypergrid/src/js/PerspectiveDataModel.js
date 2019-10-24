@@ -7,7 +7,7 @@
  *
  */
 
-import Behavior from "fin-hypergrid/src/behaviors/Behavior";
+import Behavior from "faux-hypergrid/src/behaviors/Behavior";
 import {get_type_config} from "@finos/perspective/dist/esm/config/index.js";
 
 const {
