@@ -81,11 +81,7 @@
 <li><a href="#module_perspective..view+set_depth">.set_depth()</a></li>
 <li><a href="#module_perspective..view+on_update">.on_update(callback)</a></li>
 <li><a href="#module_perspective..view+on_delete">.on_delete(callback)</a></li>
-</ul></li>
-<li><a href="#module_perspective..view_config">~view_config</a>
-<ul>
-<li><a href="#new_module_perspective..view_config_new">new view_config(config)</a></li>
-<li><a href="#module_perspective..view_config+get_row_pivots">.get_row_pivots()</a></li>
+<li><a href="#module_perspective..view+remove_delete">.remove_delete(callback)</a></li>
 </ul></li>
 <li><a href="#module_perspective..table">~table</a>
 <ul>
@@ -94,10 +90,11 @@
 <li><a href="#module_perspective..table+replace">.replace()</a></li>
 <li><a href="#module_perspective..table+delete">.delete()</a></li>
 <li><a href="#module_perspective..table+on_delete">.on_delete(callback)</a></li>
+<li><a href="#module_perspective..table+remove_delete">.remove_delete(callback)</a></li>
 <li><a href="#module_perspective..table+size">.size()</a> ⇒ <code>Promise.&lt;number&gt;</code></li>
 <li><a href="#module_perspective..table+schema">.schema(computed)</a> ⇒ <code>Promise.&lt;Object&gt;</code></li>
 <li><a href="#module_perspective..table+computed_schema">.computed_schema()</a> ⇒ <code>Promise.&lt;Object&gt;</code></li>
-<li><a href="#module_perspective..table+is_valid_filter">.is_valid_filter([filter])</a> ⇒ <code>Promise.&lt;boolean&gt;</code></li>
+<li><a href="#module_perspective..table+is_valid_filter">.is_valid_filter([filter])</a></li>
 <li><a href="#module_perspective..table+view">.view([config])</a> ⇒ <code>view</code></li>
 <li><a href="#module_perspective..table+update">.update(data)</a></li>
 <li><a href="#module_perspective..table+remove">.remove(data)</a></li>
@@ -130,6 +127,7 @@
 <li><a href="#module_perspective..view+set_depth">.set_depth()</a></li>
 <li><a href="#module_perspective..view+on_update">.on_update(callback)</a></li>
 <li><a href="#module_perspective..view+on_delete">.on_delete(callback)</a></li>
+<li><a href="#module_perspective..view+remove_delete">.remove_delete(callback)</a></li>
 </ul></li>
 </ul>
 <hr>
@@ -195,6 +193,8 @@ to serialize.</li>
 to serialize.</li>
 <li>.end_col <code>number</code> - The ending column index from which
 to serialize.</li>
+<li>[.index] <code>boolean</code> <code> = false</code> - Should the index from the underlying
+<a href="#module_perspective..table">table</a> be in the output (as <code>&quot;__INDEX__&quot;</code>).</li>
 </ul></li>
 </ul>
 <hr>
@@ -359,41 +359,17 @@ is deleted, this callback will be invoked.</p>
 <p><strong>Kind</strong>: instance method of <a href="#module_perspective..view"><code>view</code></a>  <br>
 <strong>Params</strong></p>
 <ul>
-<li>callback <code>function</code> - A callback function invoked on update.  The
-parameter to this callback shares a structure with the return type of
-<a href="#module_perspective..view+to_json">to_json</a>.</li>
+<li>callback <code>function</code> - A callback function invoked on delete.</li>
 </ul>
 <hr>
-<p><a name="module_perspective..view_config"></a></p>
-<h3><a class="anchor" aria-hidden="true" id="perspective-view-_config"></a><a href="#perspective-view-_config" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspective~view_config</h3>
-<p><strong>Kind</strong>: inner class of <a href="#module_perspective"><code>perspective</code></a></p>
+<p><a name="module_perspective..view+remove_delete"></a></p>
+<h4><a class="anchor" aria-hidden="true" id="viewremove-_deletecallback"></a><a href="#viewremove-_deletecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>view.remove_delete(callback)</h4>
+<p>Unregister a previously registered delete callback with this <a href="#module_perspective..view">view</a>.</p>
+<p><strong>Kind</strong>: instance method of <a href="#module_perspective..view"><code>view</code></a>  <br>
+<strong>Params</strong></p>
 <ul>
-<li><a href="#module_perspective..view_config">~view_config</a>
-<ul>
-<li><a href="#new_module_perspective..view_config_new">new view_config(config)</a></li>
-<li><a href="#module_perspective..view_config+get_row_pivots">.get_row_pivots()</a></li>
-</ul></li>
+<li>callback <code>function</code> - A delete callback function to be removed</li>
 </ul>
-<hr>
-<p><a name="new_module_perspective..view_config_new"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="new-view-_configconfig"></a><a href="#new-view-_configconfig" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>new view_config(config)</h4>
-<p>A view config is a set of options that configures the underlying <a href="#module_perspective..view">view</a>, specifying
-its pivots, columns to show, aggregates, filters, and sorts.</p>
-<p>The view config receives an <code>Object</code> containing configuration options, and the <code>view_config</code> transforms it into a
-canonical format for interfacing with the core engine.</p>
-<p><strong>Note</strong> This constructor is not public - view config objects should be created using standard
-Javascript <code>Object</code>s in the <a href="#module_perspective..table+view">view</a> method, which has an <code>options</code> parameter.</p>
-<p><strong>Params</strong></p>
-<ul>
-<li>config <code>Object</code> - the configuration <code>Object</code> passed by the user to the <a href="#module_perspective..table+view">view</a> method.</li>
-</ul>
-<hr>
-<p><a name="module_perspective..view_config+get_row_pivots"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="view_configget-_row-_pivots"></a><a href="#view_configget-_row-_pivots" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>view_config.get_row_pivots()</h4>
-<p>Transform configuration items into <code>std::vector</code> objects for interface with C++.</p>
-<p><code>this.aggregates</code> is not transformed into a C++ map, as the use of <code>ordered_map</code> in the engine
-makes binding more difficult.</p>
-<p><strong>Kind</strong>: instance method of <a href="#module_perspective..view_config"><code>view_config</code></a></p>
 <hr>
 <p><a name="module_perspective..table"></a></p>
 <h3><a class="anchor" aria-hidden="true" id="perspective-table"></a><a href="#perspective-table" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspective~table</h3>
@@ -406,10 +382,11 @@ makes binding more difficult.</p>
 <li><a href="#module_perspective..table+replace">.replace()</a></li>
 <li><a href="#module_perspective..table+delete">.delete()</a></li>
 <li><a href="#module_perspective..table+on_delete">.on_delete(callback)</a></li>
+<li><a href="#module_perspective..table+remove_delete">.remove_delete(callback)</a></li>
 <li><a href="#module_perspective..table+size">.size()</a> ⇒ <code>Promise.&lt;number&gt;</code></li>
 <li><a href="#module_perspective..table+schema">.schema(computed)</a> ⇒ <code>Promise.&lt;Object&gt;</code></li>
 <li><a href="#module_perspective..table+computed_schema">.computed_schema()</a> ⇒ <code>Promise.&lt;Object&gt;</code></li>
-<li><a href="#module_perspective..table+is_valid_filter">.is_valid_filter([filter])</a> ⇒ <code>Promise.&lt;boolean&gt;</code></li>
+<li><a href="#module_perspective..table+is_valid_filter">.is_valid_filter([filter])</a></li>
 <li><a href="#module_perspective..table+view">.view([config])</a> ⇒ <code>view</code></li>
 <li><a href="#module_perspective..table+update">.update(data)</a></li>
 <li><a href="#module_perspective..table+remove">.remove(data)</a></li>
@@ -447,14 +424,23 @@ they are garbage collected - you must call this method to reclaim these.</p>
 <hr>
 <p><a name="module_perspective..table+on_delete"></a></p>
 <h4><a class="anchor" aria-hidden="true" id="tableon-_deletecallback"></a><a href="#tableon-_deletecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>table.on_delete(callback)</h4>
-<p>Register a callback with this <a href="#module_perspective..table">table</a>.  Whenever the <a href="#module_perspective..view">view</a>
+<p>Register a callback with this <a href="#module_perspective..table">table</a>.  Whenever the <a href="#module_perspective..table">table</a>
 is deleted, this callback will be invoked.</p>
 <p><strong>Kind</strong>: instance method of <a href="#module_perspective..table"><code>table</code></a>  <br>
 <strong>Params</strong></p>
 <ul>
-<li>callback <code>function</code> - A callback function invoked on update.  The
+<li>callback <code>function</code> - A callback function invoked on delete.  The
 parameter to this callback shares a structure with the return type of
 <a href="module:perspective~table#to_json">module:perspective~table#to_json</a>.</li>
+</ul>
+<hr>
+<p><a name="module_perspective..table+remove_delete"></a></p>
+<h4><a class="anchor" aria-hidden="true" id="tableremove-_deletecallback"></a><a href="#tableremove-_deletecallback" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>table.remove_delete(callback)</h4>
+<p>Unregister a previously registered delete callback with this <a href="#module_perspective..table">table</a>.</p>
+<p><strong>Kind</strong>: instance method of <a href="#module_perspective..table"><code>table</code></a>  <br>
+<strong>Params</strong></p>
+<ul>
+<li>callback <code>function</code> - A delete callback function to be removed</li>
 </ul>
 <hr>
 <p><a name="module_perspective..table+size"></a></p>
@@ -486,13 +472,12 @@ Object containing the associated column_name, column_type, and computation.</p>
 <strong>Returns</strong>: <code>Promise.&lt;Object&gt;</code> - A Promise of this <a href="#module_perspective..table">table</a>'s computed schema.</p>
 <hr>
 <p><a name="module_perspective..table+is_valid_filter"></a></p>
-<h4><a class="anchor" aria-hidden="true" id="tableis-_valid-_filter-filter-code-promise-lt-boolean-gt-code"></a><a href="#tableis-_valid-_filter-filter-code-promise-lt-boolean-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>table.is_valid_filter([filter]) ⇒ <code>Promise.&lt;boolean&gt;</code></h4>
-<p>Determines whether a given filter is valid.</p>
+<h4><a class="anchor" aria-hidden="true" id="tableis-_valid-_filter-filter"></a><a href="#tableis-_valid-_filter-filter" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>table.is_valid_filter([filter])</h4>
+<p>Validates a filter configuration, i.e. that the value to filter by is not null or undefined.</p>
 <p><strong>Kind</strong>: instance method of <a href="#module_perspective..table"><code>table</code></a>  <br>
-<strong>Returns</strong>: <code>Promise.&lt;boolean&gt;</code> - Whether the filter is valid<br>
 <strong>Params</strong></p>
 <ul>
-<li>[filter] <code>Array.&lt;string&gt;</code> - A filter configuration array to test</li>
+<li>[filter] <code>Array.&lt;string&gt;</code> - a filter configuration to test.</li>
 </ul>
 <hr>
 <p><a name="module_perspective..table+view"></a></p>
@@ -580,4 +565,4 @@ derived <a href="#module_perspective..view">view</a> objects.</p>
 (default false)</li>
 </ul>
 <hr>
-</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/md/development.html"><span class="arrow-prev">← </span><span>Developer Guide</span></a><a class="docs-next button" href="/docs/obj/perspective-viewer.html"><span>`perspective-viewer` API</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#perspective">perspective</a><ul class="toc-headings"><li><a href="#perspective-view">perspective~view</a></li><li><a href="#perspective-view-_config">perspective~view_config</a></li><li><a href="#perspective-table">perspective~table</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>
+</span></div></article></div><div class="docs-prevnext"><a class="docs-prev button" href="/docs/md/development.html"><span class="arrow-prev">← </span><span>Developer Guide</span></a><a class="docs-next button" href="/docs/obj/perspective-viewer.html"><span>`perspective-viewer` API</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#perspective">perspective</a><ul class="toc-headings"><li><a href="#perspective-view">perspective~view</a></li><li><a href="#perspective-table">perspective~table</a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/" class="nav-home"></a><div><h5>Docs</h5><a href="/docs/en/md/installation.html">Installation</a><a href="/docs/en/md/usage.html">Usage</a><a href="/docs/en/obj/perspective.html">Perspective API</a><a href="/docs/en/obj/perspective-viewer.html">Perspective Viewer API</a></div><div><h5>More</h5><a href="/blog">Blog</a><a href="https://github.com/finos/perspective/">GitHub</a><a class="github-button" data-icon="octicon-star" data-count-href="/facebook/docusaurus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2019 Perspective Authors</section></footer></div></body></html>

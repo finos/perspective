@@ -77,8 +77,8 @@ between multiple <code>&lt;perspective-viewer&gt;</code>s</p>
 which modules they need for their specific use case. The main modules are:</p>
 <ul>
 <li><p><code>@finos/perspective</code>  <br>
-The data engine library, as both a browser ES6 and Node.js module. Provides an
-asm.js, WebAssembly, WebWorker (browser) and Process (node.js)
+The data engine library, as both a browser ES6 and Node.js module. Provides a
+WebAssembly, WebWorker (browser) and Process (node.js)
 runtime.</p></li>
 <li><p><code>@finos/perspective-viewer</code>  <br>
 A user-configurable visualization widget, bundled as a <a href="https://www.webcomponents.org/introduction">Web Component</a>.
@@ -151,7 +151,7 @@ a bundler such as Webpack (and the <code>@finos/perspective-webpack-plugin</code
 </code></pre>
 <p>Once imported, you'll need to instance a <code>perspective</code> engine via the <code>worker()</code>
 method. This will create a new WebWorker (browser) or Process (node.js), and
-load the appropriate supported WebAssembly or asm.js binary; all calculation
+load the WebAssembly binary; all calculation
 and data accumulation will occur in this separate process.</p>
 <pre><code class="hljs css language-javascript"><span class="hljs-keyword">const</span> worker = perspective.worker();
 </code></pre>

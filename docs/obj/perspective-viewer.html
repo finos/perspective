@@ -73,6 +73,7 @@
 <li><a href="#module_perspective-viewer..PerspectiveViewer+plugin">.plugin</a> : <code>string</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+column-pivots">.column-pivots</a> : <code>Array.&lt;String&gt;</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+row-pivots">.row-pivots</a> : <code>array.&lt;string&gt;</code></li>
+<li><a href="#module_perspective-viewer..PerspectiveViewer+editable">.editable</a> : <code>boolean</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+worker">.worker</a></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+table">.table</a></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a></li>
@@ -110,6 +111,7 @@
 <li><a href="#module_perspective-viewer..PerspectiveViewer+plugin">.plugin</a> : <code>string</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+column-pivots">.column-pivots</a> : <code>Array.&lt;String&gt;</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+row-pivots">.row-pivots</a> : <code>array.&lt;string&gt;</code></li>
+<li><a href="#module_perspective-viewer..PerspectiveViewer+editable">.editable</a> : <code>boolean</code></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+worker">.worker</a></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+table">.table</a></li>
 <li><a href="#module_perspective-viewer..PerspectiveViewer+view">.view</a></li>
@@ -233,6 +235,12 @@ elem.setAttribute(<span class="hljs-string">'filters'</span>, <span class="hljs-
 <p><a name="module_perspective-viewer..PerspectiveViewer+row-pivots"></a></p>
 <h4><a class="anchor" aria-hidden="true" id="perspectiveviewerrow-pivots-code-array-lt-string-gt-code"></a><a href="#perspectiveviewerrow-pivots-code-array-lt-string-gt-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.row-pivots : <code>array.&lt;string&gt;</code></h4>
 <p>Sets this <code>perspective.table.view</code>'s <code>row_pivots</code> property.</p>
+<p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
+<strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code></p>
+<hr>
+<p><a name="module_perspective-viewer..PerspectiveViewer+editable"></a></p>
+<h4><a class="anchor" aria-hidden="true" id="perspectiveviewereditable-code-boolean-code"></a><a href="#perspectiveviewereditable-code-boolean-code" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>perspectiveViewer.editable : <code>boolean</code></h4>
+<p>Determines whether this viewer is editable or not (though it isultimately up to the plugin as to whether editing is implemented).</p>
 <p><strong>Kind</strong>: instance property of <a href="#module_perspective-viewer..PerspectiveViewer"><code>PerspectiveViewer</code></a>  <br>
 <strong>Emits</strong>: <code>PerspectiveViewer#event:perspective-config-update</code></p>
 <hr>
